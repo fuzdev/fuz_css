@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.42.0
+
+### Minor Changes
+
+- rename `gen_fuz_css` from `gen_moss_css` ([7562ced](https://github.com/fuzdev/fuz_css/commit/7562ced))
+
 ## 0.41.0
 
 ### Minor Changes
