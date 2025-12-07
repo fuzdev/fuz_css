@@ -1,4 +1,4 @@
-# Fuz CSS CSS framework
+# Fuz CSS framework
 
 ## Overview
 

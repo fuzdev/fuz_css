@@ -47,7 +47,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		// 	return null;
 		// },
 		generate: async ({filer, log, origin_path}) => {
-			log.info('generating Fuz CSS CSS classes...');
+			log.info('generating Fuz CSS classes...');
 
 			await filer.init();
 
