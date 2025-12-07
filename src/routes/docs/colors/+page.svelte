@@ -52,9 +52,9 @@
 		<p>
 			A color's subjective appearance depends on the context in which it's viewed, especially the
 			surrounding colors and values. Moss's semantic colors are designed to work across color
-			schemes, so each Moss color <TomeLink name="variables">variable</TomeLink> has two values, one
-			for light and one for dark mode. The exceptions are the lightest (1) and darkest (9) variants,
-			although this may change if it yields better results.
+			schemes, so each Moss color <TomeLink name="variables">variable</TomeLink> has two values, one for
+			light and one for dark mode. The exceptions are the lightest (1) and darkest (9) variants, although
+			this may change if it yields better results.
 		</p>
 		<h4>Custom themes</h4>
 		<p>

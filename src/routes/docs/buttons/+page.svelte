@@ -136,8 +136,7 @@
 		</section>
 		<section>
 			<p>
-				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when
-				selected:
+				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when selected:
 			</p>
 			<Code content={`<button class="selected deselectable">\n\t...\n</button>`} />
 		</section>

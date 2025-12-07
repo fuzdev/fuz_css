@@ -275,8 +275,8 @@ ${'<' as string}script>
 		/>
 		<p>
 			Respecting <code>.unstyled</code> isn't a straightforward choice in all cases. Help is
-			appreciated to refine the internals. For example, should <code>input</code> respect it? Maybe?
-			All styles or a subset?
+			appreciated to refine the internals. For example, should <code>input</code> respect it? Maybe? All
+			styles or a subset?
 		</p>
 		<aside>
 			<p class="row">
@@ -290,8 +290,8 @@ ${'<' as string}script>
 			/>
 			<p>
 				Moss uses this pattern in some places, and maybe more in the future. One nice aspect is that
-				<code>--list_padding_left</code> need not exist anywhere else but this declaration and maybe
-				your code, and in practice it's backwards compatible.
+				<code>--list_padding_left</code> need not exist anywhere else but this declaration and maybe your
+				code, and in practice it's backwards compatible.
 			</p>
 			<aside>
 				Note the <code>:where()</code> is used for Moss's default styles, so its specificity is as low

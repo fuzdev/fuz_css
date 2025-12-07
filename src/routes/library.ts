@@ -37,26 +37,26 @@ export const library_json: LibraryJson = {
 		},
 		devDependencies: {
 			'@changesets/changelog-git': '^0.2.1',
-			'@fuzdev/fuz_util': '^0.40.0',
+			'@fuzdev/fuz_code': '^0.37.0',
+			'@fuzdev/fuz_ui': '^0.169.0',
+			'@fuzdev/fuz_util': '^0.42.0',
 			'@ryanatkn/eslint-config': '^0.9.0',
-			'@fuzdev/fuz_ui': '^0.165.0',
-			'@fuzdev/fuz_code': '^0.36.0',
-			'@ryanatkn/gro': '^0.179.0',
+			'@ryanatkn/gro': '^0.181.0',
 			'@sveltejs/adapter-static': '^3.0.10',
-			'@sveltejs/kit': '^2.49.0',
-			'@sveltejs/package': '^2.5.6',
+			'@sveltejs/kit': '^2.49.1',
+			'@sveltejs/package': '^2.5.7',
 			'@sveltejs/vite-plugin-svelte': '^6.2.1',
 			'@types/node': '^24.10.1',
 			eslint: '^9.39.1',
-			'eslint-plugin-svelte': '^3.13.0',
-			prettier: '^3.6.2',
+			'eslint-plugin-svelte': '^3.13.1',
+			prettier: '^3.7.4',
 			'prettier-plugin-svelte': '^3.4.0',
-			svelte: '^5.44.0',
+			svelte: '^5.45.6',
 			'svelte-check': '^4.3.4',
 			tslib: '^2.8.1',
 			typescript: '^5.9.3',
-			'typescript-eslint': '^8.48.0',
-			vitest: '^4.0.14',
+			'typescript-eslint': '^8.48.1',
+			vitest: '^4.0.15',
 			zod: '^4.1.13',
 		},
 		prettier: {
@@ -153,13 +153,11 @@ export const library_json: LibraryJson = {
 							{
 								name: 'template',
 								type: 'ClassTemplateFn<T1, T2, T3>',
-								optional: false,
 								description: '- Function that generates CSS from values, can return null to skip',
 							},
 							{
 								name: 'values',
 								type: 'Iterable<T1>',
-								optional: false,
 								description: '- Primary iterable of values',
 							},
 							{
@@ -222,7 +220,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'str',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -236,7 +233,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'str',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -250,7 +246,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'property',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -266,7 +261,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'value',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -282,7 +276,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'value',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -299,13 +292,11 @@ export const library_json: LibraryJson = {
 							{
 								name: 'property',
 								type: 'string',
-								optional: false,
 								description: "- The CSS property name (e.g. 'display', 'gap')",
 							},
 							{
 								name: 'values',
 								type: 'Iterable<string>',
-								optional: false,
 								description: '- The values to generate classes for',
 							},
 							{
@@ -317,7 +308,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'prefix',
 								type: 'string',
-								optional: false,
 								description:
 									'- Optional class name prefix (defaults to property with dashes replaced by underscores)',
 								default_value: 'to_variable_name(property)',
@@ -337,13 +327,11 @@ export const library_json: LibraryJson = {
 							{
 								name: 'property',
 								type: 'string',
-								optional: false,
 								description: "- The base CSS property name (e.g. 'margin', 'padding')",
 							},
 							{
 								name: 'values',
 								type: 'Iterable<string>',
-								optional: false,
 								description: '- The values to generate classes for',
 							},
 							{
@@ -367,13 +355,11 @@ export const library_json: LibraryJson = {
 							{
 								name: 'property',
 								type: 'string',
-								optional: false,
 								description: "- The base CSS property name (e.g. 'overflow')",
 							},
 							{
 								name: 'values',
 								type: 'Iterable<string>',
-								optional: false,
 								description: '- The values to generate classes for',
 							},
 						],
@@ -391,7 +377,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'values',
 								type: 'Iterable<string>',
-								optional: false,
 								description: '- The values to generate classes for',
 							},
 							{
@@ -415,13 +400,11 @@ export const library_json: LibraryJson = {
 							{
 								name: 'sizes',
 								type: 'Iterable<string>',
-								optional: false,
 								description: '- The shadow size variants (xs, sm, md, lg, xl)',
 							},
 							{
 								name: 'alpha_mapping',
 								type: 'Record<string, string>',
-								optional: false,
 								description: '- Mapping of sizes to alpha numbers (1-5)',
 							},
 						],
@@ -462,12 +445,10 @@ export const library_json: LibraryJson = {
 							{
 								name: 'contents',
 								type: 'string',
-								optional: false,
 							},
 							{
 								name: 'extractors',
 								type: 'CssExtractor[]',
-								optional: false,
 								default_value: 'CSS_CLASS_EXTRACTORS',
 							},
 						],
@@ -490,7 +471,6 @@ export const library_json: LibraryJson = {
 									{
 										name: 'include_classes',
 										type: 'Set<string> | null',
-										optional: false,
 										default_value: 'null',
 									},
 								],
@@ -504,12 +484,10 @@ export const library_json: LibraryJson = {
 									{
 										name: 'id',
 										type: 'string',
-										optional: false,
 									},
 									{
 										name: 'classes',
 										type: 'Set<string>',
-										optional: false,
 									},
 								],
 							},
@@ -522,7 +500,6 @@ export const library_json: LibraryJson = {
 									{
 										name: 'id',
 										type: 'string',
-										optional: false,
 									},
 								],
 							},
@@ -612,17 +589,14 @@ export const library_json: LibraryJson = {
 							{
 								name: 'classes',
 								type: 'Iterable<string>',
-								optional: false,
 							},
 							{
 								name: 'classes_by_name',
 								type: 'Record<string, CssClassDeclaration | undefined>',
-								optional: false,
 							},
 							{
 								name: 'interpreters',
 								type: 'CssClassDeclarationInterpreter[]',
-								optional: false,
 							},
 							{
 								name: 'log',
@@ -743,7 +717,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'options',
 								type: 'GenMossCssOptions',
-								optional: false,
 								default_value: '{}',
 							},
 						],
@@ -831,12 +804,10 @@ export const library_json: LibraryJson = {
 							{
 								name: 'theme',
 								type: 'Theme',
-								optional: false,
 							},
 							{
 								name: 'options',
 								type: 'RenderThemeStyleOptions',
-								optional: false,
 								default_value: '{}',
 							},
 						],
@@ -851,18 +822,15 @@ export const library_json: LibraryJson = {
 							{
 								name: 'variable',
 								type: 'StyleVariable',
-								optional: false,
 							},
 							{
 								name: 'dark',
 								type: 'boolean',
-								optional: false,
 								default_value: 'false',
 							},
 							{
 								name: 'comments',
 								type: 'boolean',
-								optional: false,
 								default_value: 'true',
 							},
 						],
@@ -1357,7 +1325,6 @@ export const library_json: LibraryJson = {
 							{
 								name: 'name',
 								type: 'string',
-								optional: false,
 							},
 						],
 					},
@@ -3393,7 +3360,7 @@ export const library_json: LibraryJson = {
 	name: '@fuzdev/fuz_css',
 	repo_name: 'fuz_css',
 	repo_url: 'https://github.com/fuzdev/fuz_css',
-	owner_name: 'ryanatkn',
+	owner_name: 'fuzdev',
 	homepage_url: 'https://css.fuz.dev/',
 	logo_url: 'https://css.fuz.dev/logo.svg',
 	logo_alt: 'a fuzzy tuft of green moss',
