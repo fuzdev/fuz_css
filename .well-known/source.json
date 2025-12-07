@@ -1,0 +1,1892 @@
+{
+  "name": "@fuzdev/fuz_css",
+  "version": "0.41.0",
+  "modules": [
+    {
+      "path": "css_class_composites.ts",
+      "declarations": [
+        {
+          "name": "css_class_composites",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "css_class_generators.ts",
+      "declarations": [
+        {
+          "name": "ClassTemplateResult",
+          "kind": "type"
+        },
+        {
+          "name": "ClassTemplateFn",
+          "kind": "type"
+        },
+        {
+          "name": "generate_classes",
+          "kind": "function"
+        },
+        {
+          "name": "CSS_GLOBALS",
+          "kind": "variable"
+        },
+        {
+          "name": "CssGlobal",
+          "kind": "type"
+        },
+        {
+          "name": "CSS_DIRECTIONS",
+          "kind": "variable"
+        },
+        {
+          "name": "CssDirection",
+          "kind": "type"
+        },
+        {
+          "name": "COLOR_INTENSITIES",
+          "kind": "variable"
+        },
+        {
+          "name": "ColorIntensity",
+          "kind": "type"
+        },
+        {
+          "name": "to_kebab",
+          "kind": "function"
+        },
+        {
+          "name": "to_variable_name",
+          "kind": "function"
+        },
+        {
+          "name": "generate_global_classes",
+          "kind": "function"
+        },
+        {
+          "name": "format_spacing_value",
+          "kind": "function"
+        },
+        {
+          "name": "format_dimension_value",
+          "kind": "function"
+        },
+        {
+          "name": "generate_property_classes",
+          "kind": "function"
+        },
+        {
+          "name": "generate_directional_classes",
+          "kind": "function"
+        },
+        {
+          "name": "generate_property_with_axes",
+          "kind": "function"
+        },
+        {
+          "name": "generate_border_radius_corners",
+          "kind": "function"
+        },
+        {
+          "name": "generate_shadow_classes",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "css_class_helpers.ts",
+      "declarations": [
+        {
+          "name": "CssExtractor",
+          "kind": "type"
+        },
+        {
+          "name": "collect_css_classes",
+          "kind": "function"
+        },
+        {
+          "name": "CssClasses",
+          "kind": "class"
+        },
+        {
+          "name": "CssClassDeclaration",
+          "kind": "type"
+        },
+        {
+          "name": "CssClassDeclarationBase",
+          "kind": "type"
+        },
+        {
+          "name": "CssClassDeclarationItem",
+          "kind": "type"
+        },
+        {
+          "name": "CssClassDeclarationGroup",
+          "kind": "type"
+        },
+        {
+          "name": "CssClassDeclarationInterpreter",
+          "kind": "type"
+        },
+        {
+          "name": "generate_classes_css",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "css_class_interpreters.ts",
+      "declarations": [
+        {
+          "name": "opacity_interpreter",
+          "kind": "variable"
+        },
+        {
+          "name": "font_weight_interpreter",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_interpreter",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_corners_interpreter",
+          "kind": "variable"
+        },
+        {
+          "name": "z_index_interpreter",
+          "kind": "variable"
+        },
+        {
+          "name": "css_class_interpreters",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "css_classes.ts",
+      "declarations": [
+        {
+          "name": "css_classes_by_name",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "gen_moss_css.ts",
+      "declarations": [
+        {
+          "name": "GenMossCssOptions",
+          "kind": "type"
+        },
+        {
+          "name": "gen_moss_css",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "theme.gen.css.ts",
+      "declarations": [
+        {
+          "name": "gen",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "theme.ts",
+      "declarations": [
+        {
+          "name": "ColorScheme",
+          "kind": "type"
+        },
+        {
+          "name": "color_schemes",
+          "kind": "variable"
+        },
+        {
+          "name": "Theme",
+          "kind": "type"
+        },
+        {
+          "name": "RenderThemeStyleOptions",
+          "kind": "type"
+        },
+        {
+          "name": "render_theme_style",
+          "kind": "function"
+        },
+        {
+          "name": "render_theme_variable",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "themes.ts",
+      "declarations": [
+        {
+          "name": "DEFAULT_THEME",
+          "kind": "variable"
+        },
+        {
+          "name": "default_themes",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "variable_data.ts",
+      "declarations": [
+        {
+          "name": "SizeVariant",
+          "kind": "type"
+        },
+        {
+          "name": "font_size_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_names",
+          "kind": "variable"
+        },
+        {
+          "name": "FontFamilyVariant",
+          "kind": "type"
+        },
+        {
+          "name": "font_family_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "TextColorVariant",
+          "kind": "type"
+        },
+        {
+          "name": "text_color_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "SpaceVariant",
+          "kind": "type"
+        },
+        {
+          "name": "space_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "DistanceVariant",
+          "kind": "type"
+        },
+        {
+          "name": "distance_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "BorderRadiusVariant",
+          "kind": "type"
+        },
+        {
+          "name": "border_radius_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "LineHeightVariant",
+          "kind": "type"
+        },
+        {
+          "name": "line_height_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_names",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_variant_prefixes",
+          "kind": "variable"
+        },
+        {
+          "name": "ShadowSizeVariant",
+          "kind": "type"
+        },
+        {
+          "name": "shadow_font_size_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "ShadowAlphaVariant",
+          "kind": "type"
+        },
+        {
+          "name": "shadow_alpha_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "ShadowSemanticValue",
+          "kind": "type"
+        },
+        {
+          "name": "shadow_semantic_values",
+          "kind": "variable"
+        },
+        {
+          "name": "IconSizeVariant",
+          "kind": "type"
+        },
+        {
+          "name": "icon_size_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_sizes",
+          "kind": "variable"
+        },
+        {
+          "name": "ColorVariant",
+          "kind": "type"
+        },
+        {
+          "name": "color_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "BorderWidthVariant",
+          "kind": "type"
+        },
+        {
+          "name": "border_width_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "OutlineWidthVariant",
+          "kind": "type"
+        },
+        {
+          "name": "outline_width_variants",
+          "kind": "variable"
+        },
+        {
+          "name": "AlignmentValue",
+          "kind": "type"
+        },
+        {
+          "name": "alignment_values",
+          "kind": "variable"
+        },
+        {
+          "name": "JustifyValue",
+          "kind": "type"
+        },
+        {
+          "name": "justify_values",
+          "kind": "variable"
+        },
+        {
+          "name": "OverflowValue",
+          "kind": "type"
+        },
+        {
+          "name": "overflow_values",
+          "kind": "variable"
+        },
+        {
+          "name": "BorderStyleValue",
+          "kind": "type"
+        },
+        {
+          "name": "border_style_values",
+          "kind": "variable"
+        },
+        {
+          "name": "DisplayValue",
+          "kind": "type"
+        },
+        {
+          "name": "display_values",
+          "kind": "variable"
+        },
+        {
+          "name": "TextAlignValue",
+          "kind": "type"
+        },
+        {
+          "name": "text_align_values",
+          "kind": "variable"
+        },
+        {
+          "name": "VerticalAlignValue",
+          "kind": "type"
+        },
+        {
+          "name": "vertical_align_values",
+          "kind": "variable"
+        },
+        {
+          "name": "WordBreakValue",
+          "kind": "type"
+        },
+        {
+          "name": "word_break_values",
+          "kind": "variable"
+        },
+        {
+          "name": "PositionValue",
+          "kind": "type"
+        },
+        {
+          "name": "position_values",
+          "kind": "variable"
+        },
+        {
+          "name": "VisibilityValue",
+          "kind": "type"
+        },
+        {
+          "name": "visibility_values",
+          "kind": "variable"
+        },
+        {
+          "name": "FloatValue",
+          "kind": "type"
+        },
+        {
+          "name": "float_values",
+          "kind": "variable"
+        },
+        {
+          "name": "FlexWrapValue",
+          "kind": "type"
+        },
+        {
+          "name": "flex_wrap_values",
+          "kind": "variable"
+        },
+        {
+          "name": "FlexDirectionValue",
+          "kind": "type"
+        },
+        {
+          "name": "flex_direction_values",
+          "kind": "variable"
+        },
+        {
+          "name": "OverflowWrapValue",
+          "kind": "type"
+        },
+        {
+          "name": "overflow_wrap_values",
+          "kind": "variable"
+        },
+        {
+          "name": "ScrollbarWidthValue",
+          "kind": "type"
+        },
+        {
+          "name": "scrollbar_width_values",
+          "kind": "variable"
+        },
+        {
+          "name": "ScrollbarGutterValue",
+          "kind": "type"
+        },
+        {
+          "name": "scrollbar_gutter_values",
+          "kind": "variable"
+        },
+        {
+          "name": "Z_INDEX_MAX",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "variable.ts",
+      "declarations": [
+        {
+          "name": "StyleVariableName",
+          "kind": "type"
+        },
+        {
+          "name": "StyleVariable",
+          "kind": "type"
+        },
+        {
+          "name": "STYLE_VARIABLE_NAME_MATCHER",
+          "kind": "variable"
+        },
+        {
+          "name": "is_style_variable_name",
+          "kind": "function"
+        }
+      ]
+    },
+    {
+      "path": "variables.ts",
+      "declarations": [
+        {
+          "name": "hue_a",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_b",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_c",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_d",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_e",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_f",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_g",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_h",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_i",
+          "kind": "variable"
+        },
+        {
+          "name": "hue_j",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_a_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_b_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_c_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_d_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_e_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_f_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_g_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_h_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_i_9",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_1",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_2",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_3",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_4",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_5",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_6",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_7",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_8",
+          "kind": "variable"
+        },
+        {
+          "name": "color_j_9",
+          "kind": "variable"
+        },
+        {
+          "name": "tint_hue",
+          "kind": "variable"
+        },
+        {
+          "name": "tint_saturation",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_1",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_2",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_3",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_4",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_5",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_6",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_7",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_8",
+          "kind": "variable"
+        },
+        {
+          "name": "darken_9",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_1",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_2",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_3",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_4",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_5",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_6",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_7",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_8",
+          "kind": "variable"
+        },
+        {
+          "name": "lighten_9",
+          "kind": "variable"
+        },
+        {
+          "name": "bg",
+          "kind": "variable"
+        },
+        {
+          "name": "fg",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_0",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_1",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_2",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_3",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_4",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_5",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_6",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_7",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_8",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_9",
+          "kind": "variable"
+        },
+        {
+          "name": "bg_10",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_0",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_1",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_2",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_3",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_4",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_5",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_6",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_7",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_8",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_9",
+          "kind": "variable"
+        },
+        {
+          "name": "fg_10",
+          "kind": "variable"
+        },
+        {
+          "name": "fill",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_a",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_b",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_c",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_d",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_e",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_f",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_g",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_h",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_i",
+          "kind": "variable"
+        },
+        {
+          "name": "fill_j",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_0",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_1",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_2",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_3",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_4",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_5",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_6",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_7",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_8",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_9",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_10",
+          "kind": "variable"
+        },
+        {
+          "name": "text_color_disabled",
+          "kind": "variable"
+        },
+        {
+          "name": "text_active",
+          "kind": "variable"
+        },
+        {
+          "name": "font_family_sans",
+          "kind": "variable"
+        },
+        {
+          "name": "font_family_serif",
+          "kind": "variable"
+        },
+        {
+          "name": "font_family_mono",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_md",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl2",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl3",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl4",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl5",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl6",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl7",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl8",
+          "kind": "variable"
+        },
+        {
+          "name": "font_size_xl9",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_md",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "line_height_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "link_color",
+          "kind": "variable"
+        },
+        {
+          "name": "text_decoration",
+          "kind": "variable"
+        },
+        {
+          "name": "text_decoration_hover",
+          "kind": "variable"
+        },
+        {
+          "name": "text_decoration_selected",
+          "kind": "variable"
+        },
+        {
+          "name": "link_color_selected",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xs5",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xs4",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xs3",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xs2",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "space_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "space_md",
+          "kind": "variable"
+        },
+        {
+          "name": "space_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl2",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl3",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl4",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl5",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl6",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl7",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl8",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl9",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl10",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl11",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl12",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl13",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl14",
+          "kind": "variable"
+        },
+        {
+          "name": "space_xl15",
+          "kind": "variable"
+        },
+        {
+          "name": "distance_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "distance_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "distance_md",
+          "kind": "variable"
+        },
+        {
+          "name": "distance_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "distance_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color",
+          "kind": "variable"
+        },
+        {
+          "name": "border_style",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_1",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_2",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_3",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_4",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_5",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_a",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_b",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_c",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_d",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_e",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_f",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_g",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_h",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_i",
+          "kind": "variable"
+        },
+        {
+          "name": "border_color_j",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_1",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_2",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_3",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_4",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_5",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_6",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_7",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_8",
+          "kind": "variable"
+        },
+        {
+          "name": "border_width_9",
+          "kind": "variable"
+        },
+        {
+          "name": "outline_width",
+          "kind": "variable"
+        },
+        {
+          "name": "outline_width_focus",
+          "kind": "variable"
+        },
+        {
+          "name": "outline_width_active",
+          "kind": "variable"
+        },
+        {
+          "name": "outline_style",
+          "kind": "variable"
+        },
+        {
+          "name": "outline_color",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_xs3",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_xs2",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_md",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "border_radius_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "button_shadow",
+          "kind": "variable"
+        },
+        {
+          "name": "button_shadow_hover",
+          "kind": "variable"
+        },
+        {
+          "name": "button_shadow_active",
+          "kind": "variable"
+        },
+        {
+          "name": "input_fill",
+          "kind": "variable"
+        },
+        {
+          "name": "input_padding_y",
+          "kind": "variable"
+        },
+        {
+          "name": "input_padding_x",
+          "kind": "variable"
+        },
+        {
+          "name": "input_width_min",
+          "kind": "variable"
+        },
+        {
+          "name": "input_height",
+          "kind": "variable"
+        },
+        {
+          "name": "input_height_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "input_height_inner",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_top_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_bottom_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_top_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_bottom_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_top_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_bottom_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_top_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_bottom_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_top_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_bottom_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_top_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_bottom_md",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_top_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_bottom_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_top_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_bottom_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_top_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_bottom_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_top_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_inset_bottom_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_highlight",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_glow",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_shroud",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_a",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_b",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_c",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_d",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_e",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_f",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_g",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_h",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_i",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_color_j",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_alpha_1",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_alpha_2",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_alpha_3",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_alpha_4",
+          "kind": "variable"
+        },
+        {
+          "name": "shadow_alpha_5",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_xs",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_sm",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_md",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_lg",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_xl",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_xl2",
+          "kind": "variable"
+        },
+        {
+          "name": "icon_size_xl3",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_1",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_2",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_3",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_4",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_5",
+          "kind": "variable"
+        },
+        {
+          "name": "duration_6",
+          "kind": "variable"
+        },
+        {
+          "name": "disabled_opacity",
+          "kind": "variable"
+        },
+        {
+          "name": "default_variables",
+          "kind": "variable"
+        }
+      ]
+    },
+    {
+      "path": "style.css",
+      "declarations": [
+        {
+          "name": "default",
+          "kind": "css"
+        }
+      ]
+    },
+    {
+      "path": "theme.css",
+      "declarations": [
+        {
+          "name": "default",
+          "kind": "css"
+        }
+      ]
+    }
+  ]
+}
