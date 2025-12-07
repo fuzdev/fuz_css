@@ -1,6 +1,6 @@
 {
   "name": "@fuzdev/fuz_css",
-  "version": "0.41.0",
+  "version": "0.42.0",
   "modules": [
     {
       "path": "css_class_composites.ts",
@@ -172,14 +172,14 @@
       ]
     },
     {
-      "path": "gen_moss_css.ts",
+      "path": "gen_fuz_css.ts",
       "declarations": [
         {
-          "name": "GenMossCssOptions",
+          "name": "GenFuzCssOptions",
           "kind": "type"
         },
         {
-          "name": "gen_moss_css",
+          "name": "gen_fuz_css",
           "kind": "function"
         }
       ]
