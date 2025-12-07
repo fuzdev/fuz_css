@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import TomeLink from '@ryanatkn/fuz/TomeLink.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import {default_variables} from '$lib/variables.js';
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
@@ -44,7 +44,7 @@
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in
-				<a href="https://www.fuz.dev/">Fuz</a>
+				<a href="https://ui.fuz.dev/">Fuz UI</a>
 			</li>
 		</ul>
 		<p>

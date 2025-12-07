@@ -1,4 +1,4 @@
-import type {Logger} from '@ryanatkn/belt/log.js';
+import type {Logger} from '@fuzdev/fuz_util/log.js';
 
 // TODO maybe just use the Svelte (and Oxc?) parser instead of this regexp madness?
 

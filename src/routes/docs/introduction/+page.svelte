@@ -1,7 +1,7 @@
 <script lang="ts">
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import FileLink from '$routes/FileLink.svelte';
@@ -40,10 +40,10 @@
 				support light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
 			</li>
 			<li>
-				is agnostic to JS frameworks, for example usage see <a
-					href="https://www.fuz.dev/docs/Themed"><code>Themed</code></a
+				is agnostic to JS frameworks, for example usage see <a href="https://ui.fuz.dev/docs/Themed"
+					><code>Themed</code></a
 				>
-				in my Svelte UI library <a href="https://www.fuz.dev/">Fuz</a>
+				in my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
 			</li>
 		</ul>
 		<p>The stylesheets:</p>
@@ -76,8 +76,8 @@
 		<p>
 			In the docs, you'll see I'm writing asides using "⚠️" with open questions and other discussion
 			of uncertainties. Your input is appreciated in the GitHub
-			<a href="https://github.com/ryanatkn/moss/issues">issues</a> and
-			<a href="https://github.com/ryanatkn/moss/discussions">discussions</a>, or find me on
+			<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
+			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>, or find me on
 			<a href="https://bsky.app/profile/ryanatkn.com">Bluesky</a>. See
 			<FileLink path="contributing.md">contributing.md</FileLink> for more 🌿
 		</p>

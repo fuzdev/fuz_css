@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import {resolve} from '$app/paths';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import TomeLink from '@ryanatkn/fuz/TomeLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -23,7 +23,7 @@
 
 <TomeContent {tome}>
 	<UnfinishedImplementationWarning
-		>Element styles are incomplete. Any <a href="https://github.com/ryanatkn/moss">requests</a
+		>Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css">requests</a
 		>?</UnfinishedImplementationWarning
 	>
 	<blockquote>

@@ -1,8 +1,8 @@
 # Contributing to Moss
 
 Hey, thanks for your interest in contributing to
-[Moss](https://github.com/ryanatkn/moss)
-([moss.ryanatkn.com](https://moss.ryanatkn.com/)).
+[Moss](https://github.com/fuzdev/fuz_css)
+([css.fuz.dev](https://css.fuz.dev/)).
 The project is currently in early alpha and
 there will be many breaking changes ahead.
 
@@ -18,8 +18,8 @@ but a goal is to let both developers and end-users shape it for their needs.
 
 If this sounds interesting to you,
 I'm welcoming help to iterate on APIs to get Moss to 1.0 and beyond.
-See the [issues](https://github.com/ryanatkn/moss/issues)
-and [discussions](https://github.com/ryanatkn/moss/discussions)
+See the [issues](https://github.com/fuzdev/fuz_css/issues)
+and [discussions](https://github.com/fuzdev/fuz_css/discussions)
 or find me on [Bluesky](https://bsky.app/profile/ryanatkn.com).
 
 I've been growing Moss slowly over 5+ years

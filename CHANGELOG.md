@@ -1,4 +1,4 @@
-# @ryanatkn/moss
+# @fuzdev/fuz_css
 
 ## 0.40.0
 
