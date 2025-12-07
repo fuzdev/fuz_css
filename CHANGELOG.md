@@ -1,5 +1,15 @@
 # @fuzdev/fuz_css
 
+## 0.41.0
+
+### Minor Changes
+
+- migrate to fuzdev and rename to fuz_css from moss ([#70](https://github.com/fuzdev/fuz_css/pull/70))
+
+### Patch Changes
+
+- fix: add fuz_util as optional peer dep ([#70](https://github.com/fuzdev/fuz_css/pull/70))
+
 ## 0.40.0
 
 ### Minor Changes
