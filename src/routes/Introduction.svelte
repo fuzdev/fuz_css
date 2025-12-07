@@ -6,12 +6,12 @@
 </script>
 
 <p>
-	Moss is a CSS framework and design system that's built around <em>style variables</em>, which are
-	design tokens and <MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink> with particular capabilities
+	Fuz CSS is a CSS framework and design system that's built around <em>style variables</em>, which
+	are design tokens and <MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink> with particular capabilities
 	and conventions.
 </p>
 <p>
-	Moss can be used with any website and JS framework. It exports
+	Fuz CSS can be used with any website and JS framework. It exports
 	<ModuleLink path="style.css">one main stylesheet</ModuleLink>
 	and a replaceable <ModuleLink path="theme.css">theme stylesheet</ModuleLink>, and it also
 	<a href="https://css.fuz.dev/about">exports</a> the underlying CSS data, types, and helpers for more

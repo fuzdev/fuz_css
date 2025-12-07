@@ -39,7 +39,7 @@
 			into "shadows" and "shading" something.
 		</UnfinishedImplementationWarning>
 		<p>
-			Moss is designed around two simplistic models of light, one for dark mode and one for light
+			Fuz CSS is designed around two simplistic models of light, one for dark mode and one for light
 			mode, mapping to the web platform's <MdnLink path="Web/CSS/color-scheme" />. The goal is easy
 			authoring with simple and consistent rules for arbitrary compositions and states. Each <TomeLink
 				name="themes">theme</TomeLink
@@ -64,7 +64,8 @@
 			disappear completely against a black background.
 		</p>
 		<p>
-			Moss provides APIs that simplify or hide this complexity. For example, the <code>lighten</code
+			Fuz CSS provides APIs that simplify or hide this complexity. For example, the <code
+				>lighten</code
 			>
 			and <code>darken</code> variables are the same in light and dark modes, but
 			<code>fg</code>

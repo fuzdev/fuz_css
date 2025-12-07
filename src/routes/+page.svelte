@@ -3,7 +3,7 @@
 	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
 	import Card from '@fuzdev/fuz_ui/Card.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {moss_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {fuz_logo} from '@fuzdev/fuz_ui/logos.js';
 	import HiddenPersonalLinks from '@fuzdev/fuz_ui/HiddenPersonalLinks.svelte';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
@@ -18,7 +18,7 @@
 <main class="box mb_xl7">
 	<section class="box">
 		<h1 class="mb_sm" style:margin-top={MAIN_HEADER_MARGIN_TOP}>moss</h1>
-		<Svg data={moss_logo} size="var(--icon_size_xl2)" />
+		<Svg data={fuz_logo} size="var(--icon_size_xl2)" />
 		<div class="p_xl mt_lg border_radius_lg shadow_inset_bottom_xs">
 			<blockquote class="shadow_inset_top_xs">magical organic stylesheets 🌿</blockquote>
 		</div>
@@ -34,17 +34,17 @@
 	<section class="width_upto_sm p_sm border_radius_md shadow_xs">
 		<div class="panel p_lg bg shadow_sm">
 			<UnfinishedImplementationWarning>
-				Moss is in early alpha and will have many breaking changes to get to 1.0. Help is welcome,
-				see
+				Fuz CSS is in early alpha and will have many breaking changes to get to 1.0. Help is
+				welcome, see
 				<FileLink path="contributing.md">contributing.md</FileLink>.
 			</UnfinishedImplementationWarning>
 			<p>
-				See also my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a> that builds on Moss.
-				Feel free to take the ideas and
+				See also my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a> that builds on Fuz
+				CSS. Feel free to take the ideas and
 				<a href="https://github.com/fuzdev/fuz_css">code</a> for your own purposes.
 			</p>
 			<p>
-				Moss is being made to support <a href="https://www.zzz.software/">Zzz</a> and
+				Fuz CSS is being made to support <a href="https://www.zzz.software/">Zzz</a> and
 				<a href="https://www.ryanatkn.com/">my other projects</a>
 				that focus on end-users. It's grown slowly over 5 years, adding new features when I feel they're
 				sufficiently generalizable or merit experimentation, and in 2025 I'm excited to explore themes!

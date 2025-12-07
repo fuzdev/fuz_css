@@ -21,7 +21,7 @@
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
-	// TODO populates `moss.css` with all of the shadows. Could be improved.
+	// TODO populates `fuz.css` with all of the shadows. Could be improved.
 	// classes="shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl"
 	// classes="shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5"
 	// classes="shadow_color_a shadow_color_b shadow_color_c shadow_color_d shadow_color_e shadow_color_f shadow_color_g shadow_color_h shadow_color_i shadow_color_j"
@@ -35,7 +35,7 @@
 		the implementation.</UnfinishedImplementationWarning
 	>
 	<p>
-		Moss's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
+		Fuz CSS's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Shadow" />

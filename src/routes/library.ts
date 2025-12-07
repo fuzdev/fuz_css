@@ -614,7 +614,7 @@ export const library_json: LibraryJson = {
 						],
 					},
 				],
-				dependents: ['gen_moss_css.ts'],
+				dependents: ['gen_fuz_css.ts'],
 			},
 			{
 				path: 'css_class_interpreters.ts',
@@ -667,7 +667,7 @@ export const library_json: LibraryJson = {
 					},
 				],
 				dependencies: ['variable_data.ts'],
-				dependents: ['gen_moss_css.ts'],
+				dependents: ['gen_fuz_css.ts'],
 			},
 			{
 				path: 'css_classes.ts',
@@ -682,16 +682,16 @@ export const library_json: LibraryJson = {
 					},
 				],
 				dependencies: ['css_class_composites.ts', 'css_class_generators.ts', 'variable_data.ts'],
-				dependents: ['gen_moss_css.ts'],
+				dependents: ['gen_fuz_css.ts'],
 			},
 			{
-				path: 'gen_moss_css.ts',
+				path: 'gen_fuz_css.ts',
 				declarations: [
 					{
-						name: 'GenMossCssOptions',
+						name: 'GenFuzCssOptions',
 						kind: 'type',
 						source_line: 14,
-						type_signature: 'GenMossCssOptions',
+						type_signature: 'GenFuzCssOptions',
 						properties: [
 							{
 								name: 'filter_file',
@@ -716,15 +716,15 @@ export const library_json: LibraryJson = {
 						],
 					},
 					{
-						name: 'gen_moss_css',
+						name: 'gen_fuz_css',
 						kind: 'function',
 						source_line: 29,
-						type_signature: '(options?: GenMossCssOptions): Gen',
+						type_signature: '(options?: GenFuzCssOptions): Gen',
 						return_type: 'Gen',
 						parameters: [
 							{
 								name: 'options',
-								type: 'GenMossCssOptions',
+								type: 'GenFuzCssOptions',
 								default_value: '{}',
 							},
 						],

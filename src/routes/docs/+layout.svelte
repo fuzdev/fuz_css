@@ -3,7 +3,7 @@
 	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {moss_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {fuz_logo} from '@fuzdev/fuz_ui/logos.js';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {tomes} from '$routes/docs/tomes.js';
@@ -26,10 +26,10 @@
 	{#snippet breadcrumb_children(is_primary_nav)}
 		{#if is_primary_nav}
 			<div class="icon row">
-				<Svg data={moss_logo} size="var(--icon_size_sm)" /> <span class="ml_sm">moss</span>
+				<Svg data={fuz_logo} size="var(--icon_size_sm)" /> <span class="ml_sm">moss</span>
 			</div>
 		{:else}
-			<Svg data={moss_logo} size="var(--icon_size_sm)" />
+			<Svg data={fuz_logo} size="var(--icon_size_sm)" />
 		{/if}
 	{/snippet}
 	{@render children()}

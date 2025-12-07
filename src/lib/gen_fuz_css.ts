@@ -11,7 +11,7 @@ import {
 import {css_classes_by_name} from './css_classes.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 
-export interface GenMossCssOptions {
+export interface GenFuzCssOptions {
 	filter_file?: FileFilter | null;
 	include_stats?: boolean;
 	classes_by_name?: Record<string, CssClassDeclaration | undefined>;
@@ -26,7 +26,7 @@ const filter_file_default: FileFilter = (path) => {
 	return ext === '.svelte' || ext === '.ts' || ext === '.js';
 };
 
-export const gen_moss_css = (options: GenMossCssOptions = {}): Gen => {
+export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
@@ -47,7 +47,7 @@ export const gen_moss_css = (options: GenMossCssOptions = {}): Gen => {
 		// 	return null;
 		// },
 		generate: async ({filer, log, origin_path}) => {
-			log.info('generating Moss CSS classes...');
+			log.info('generating Fuz CSS CSS classes...');
 
 			await filer.init();
 

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import '$lib/style.css';
 	import '$lib/theme.css';
-	import '$routes/moss.css';
+	import '$routes/fuz.css';
 	import '@fuzdev/fuz_code/theme.css';
 
 	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Moss - magical organic stylesheets</title>
+	<title>Fuz CSS - magical organic stylesheets</title>
 </svelte:head>
 
 <Themed>

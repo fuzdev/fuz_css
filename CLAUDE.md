@@ -1,8 +1,8 @@
-# Moss CSS framework
+# Fuz CSS CSS framework
 
 ## Overview
 
-Moss is a CSS framework and design system built on **style variables** - design tokens implemented as CSS custom properties with specific conventions. It provides:
+Fuz CSS is a CSS framework and design system built on **style variables** - design tokens implemented as CSS custom properties with specific conventions. It provides:
 
 - Plain CSS with zero dependencies
 - Runtime theming with light/dark color-scheme support
@@ -36,8 +36,8 @@ Moss is a CSS framework and design system built on **style variables** - design 
 ### Utility classes
 
 - Optional utility classes generated from variables
-- Automatic optimization to include only used classes via `gen_moss_css.ts`
-- Generated reference implementation at `src/routes/moss.css` using
+- Automatic optimization to include only used classes via `gen_fuz_css.ts`
+- Generated reference implementation at `src/routes/fuz.css` using
   Gro's [`gen`](https://github.com/ryanatkn/gro/blob/main/src/docs/gen.md)
 
 ## File organization
@@ -51,15 +51,15 @@ Moss is a CSS framework and design system built on **style variables** - design 
 - `themes.ts` - Theme definitions
 - `style.css` - Main stylesheet and CSS reset
 - `theme.css` - Default theme stylesheet
-- `gen_moss_css.ts` - Utility class generation helpers
+- `gen_fuz_css.ts` - Utility class generation helpers
 - `css_classes.ts` - Utility class definitions
 - `css_class_helpers.ts` - CSS class extraction and generation
 
 ### Docs and examples (`src/routes/`)
 
 - `docs/` - Documentation pages for all features
-- `moss.css` - Generated optimized utility classes
-- `moss.gen.css.ts` - Generator for moss.css using `src/lib/gen_moss_css.ts`
+- `fuz.css` - Generated optimized utility classes
+- `fuz.gen.css.ts` - Generator for fuz.css using `src/lib/gen_fuz_css.ts`
 
 ## Code style guidelines
 
