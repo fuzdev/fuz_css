@@ -1,13 +1,13 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import ColorSchemeInput from '@ryanatkn/fuz/ColorSchemeInput.svelte';
-	import TomeLink from '@ryanatkn/fuz/TomeLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import {themer_context} from '@ryanatkn/fuz/themer.svelte.js';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {themer_context} from '@fuzdev/fuz_ui/themer.svelte.js';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';

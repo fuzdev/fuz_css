@@ -8,7 +8,7 @@
 	type Props = ComponentProps<typeof FileLink>;
 
 	const {
-		base_path = 'https://github.com/ryanatkn/moss/blob/main/src/lib/',
+		base_path = 'https://github.com/fuzdev/fuz_css/blob/main/src/lib/',
 		children = fallback_children,
 		...rest
 	}: Props = $props();
@@ -16,4 +16,4 @@
 
 <FileLink {...rest} {base_path} {children} />
 
-{#snippet fallback_children()}@ryanatkn/moss/{rest.path}{/snippet}
+{#snippet fallback_children()}@fuzdev/fuz_css/{rest.path}{/snippet}

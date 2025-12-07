@@ -1,4 +1,4 @@
-import type {Tome} from '@ryanatkn/fuz/tome.js';
+import type {Tome} from '@fuzdev/fuz_ui/tome.js';
 
 import introduction from '$routes/docs/introduction/+page.svelte';
 import api from '$routes/docs/api/+page.svelte';

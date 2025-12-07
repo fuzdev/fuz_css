@@ -1,11 +1,11 @@
 # Moss
 
-[<img src="/static/logo.svg" alt="a fuzzy tuft of green moss" align="right" width="192" height="192">](https://moss.ryanatkn.com/)
+[<img src="/static/logo.svg" alt="a fuzzy tuft of green moss" align="right" width="192" height="192">](https://css.fuz.dev/)
 
 > CSS framework and design system 🌿 magical organic stylesheets
 
-See the [docs](https://moss.ryanatkn.com/docs)
-at [**moss.ryanatkn.com**](https://moss.ryanatkn.com/)
+See the [docs](https://css.fuz.dev/docs)
+at [**css.fuz.dev**](https://css.fuz.dev/)
 
 also [contributing.md](contributing.md)
 

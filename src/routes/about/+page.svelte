@@ -1,11 +1,11 @@
 <script lang="ts">
-	import DocsFooter from '@ryanatkn/fuz/DocsFooter.svelte';
-	import LibraryDetail from '@ryanatkn/fuz/LibraryDetail.svelte';
-	import EcosystemLinksPanel from '@ryanatkn/fuz/EcosystemLinksPanel.svelte';
-	import Breadcrumb from '@ryanatkn/fuz/Breadcrumb.svelte';
-	import Svg from '@ryanatkn/fuz/Svg.svelte';
-	import {moss_logo} from '@ryanatkn/fuz/logos.js';
-	import {library_context} from '@ryanatkn/fuz/library.svelte.js';
+	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
+	import LibraryDetail from '@fuzdev/fuz_ui/LibraryDetail.svelte';
+	import EcosystemLinksPanel from '@fuzdev/fuz_ui/EcosystemLinksPanel.svelte';
+	import Breadcrumb from '@fuzdev/fuz_ui/Breadcrumb.svelte';
+	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
+	import {moss_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {MAIN_HEADER_MARGIN_TOP} from '$routes/constants.js';
 

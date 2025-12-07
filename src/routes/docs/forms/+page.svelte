@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import {fly} from 'svelte/transition';
-	import Alert from '@ryanatkn/fuz/Alert.svelte';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import Alert from '@fuzdev/fuz_ui/Alert.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 

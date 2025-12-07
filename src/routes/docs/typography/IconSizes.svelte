@@ -1,6 +1,6 @@
 <script lang="ts">
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {icon_sizes} from '$lib/variable_data.js';

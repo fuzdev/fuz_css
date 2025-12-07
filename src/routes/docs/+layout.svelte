@@ -1,10 +1,10 @@
 <script lang="ts">
 	import type {Snippet} from 'svelte';
-	import Docs from '@ryanatkn/fuz/Docs.svelte';
-	import Dialog from '@ryanatkn/fuz/Dialog.svelte';
-	import Svg from '@ryanatkn/fuz/Svg.svelte';
-	import {moss_logo} from '@ryanatkn/fuz/logos.js';
-	import {library_context} from '@ryanatkn/fuz/library.svelte.js';
+	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
+	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
+	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
+	import {moss_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {tomes} from '$routes/docs/tomes.js';
 	import {selected_variable_context} from '$routes/style_variable_helpers.svelte.js';

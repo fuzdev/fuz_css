@@ -2,12 +2,12 @@
 	import '$lib/style.css';
 	import '$lib/theme.css';
 	import '$routes/moss.css';
-	import '@ryanatkn/fuz_code/theme.css';
+	import '@fuzdev/fuz_code/theme.css';
 
-	import {Library, library_context} from '@ryanatkn/fuz/library.svelte.js';
+	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 	import type {Snippet} from 'svelte';
-	import Themed from '@ryanatkn/fuz/Themed.svelte';
-	import Spiders from '@ryanatkn/fuz/Spiders.svelte';
+	import Themed from '@fuzdev/fuz_ui/Themed.svelte';
+	import Spiders from '@fuzdev/fuz_ui/Spiders.svelte';
 
 	import {library_json} from '$routes/library.js';
 	// TODO re-enable this, see comment below

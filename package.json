@@ -1,5 +1,5 @@
 {
-  "name": "@ryanatkn/moss",
+  "name": "@fuzdev/fuz_css",
   "version": "0.39.0",
   "description": "CSS framework and design system",
   "motto": "magical organic stylesheets",
@@ -8,14 +8,14 @@
   "logo_alt": "a fuzzy tuft of green moss",
   "public": true,
   "license": "MIT",
-  "homepage": "https://moss.ryanatkn.com/",
-  "repository": "https://github.com/ryanatkn/moss",
+  "homepage": "https://css.fuz.dev/",
+  "repository": "https://github.com/fuzdev/fuz_css",
   "author": {
     "name": "Ryan Atkinson",
     "email": "mail@ryanatkn.com",
     "url": "https://www.ryanatkn.com/"
   },
-  "bugs": "https://github.com/ryanatkn/moss/issues",
+  "bugs": "https://github.com/fuzdev/fuz_css/issues",
   "funding": "https://www.ryanatkn.com/funding",
   "scripts": {
     "start": "gro dev",
@@ -32,10 +32,10 @@
   },
   "devDependencies": {
     "@changesets/changelog-git": "^0.2.1",
-    "@ryanatkn/belt": "^0.40.0",
+    "@fuzdev/fuz_util": "^0.40.0",
     "@ryanatkn/eslint-config": "^0.9.0",
-    "@ryanatkn/fuz": "^0.165.0",
-    "@ryanatkn/fuz_code": "^0.36.0",
+    "@fuzdev/fuz_ui": "^0.165.0",
+    "@fuzdev/fuz_code": "^0.36.0",
     "@ryanatkn/gro": "^0.179.0",
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.49.0",

@@ -1,8 +1,8 @@
 <script lang="ts">
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import {resolve} from '$app/paths';
 
 	import {space_variants, distance_variants} from '$lib/variable_data.js';

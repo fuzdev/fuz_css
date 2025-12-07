@@ -1,5 +1,5 @@
 <script lang="ts">
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {resolve} from '$app/paths';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
@@ -14,10 +14,10 @@
 	Moss can be used with any website and JS framework. It exports
 	<ModuleLink path="style.css">one main stylesheet</ModuleLink>
 	and a replaceable <ModuleLink path="theme.css">theme stylesheet</ModuleLink>, and it also
-	<a href="https://moss.ryanatkn.com/about">exports</a> the underlying CSS data, types, and helpers for
-	more complex usage.
+	<a href="https://css.fuz.dev/about">exports</a> the underlying CSS data, types, and helpers for more
+	complex usage.
 </p>
 <p>
 	See <a href={resolve('/docs')}>the docs</a>
-	and <a href="https://github.com/ryanatkn/moss#readme">readme</a>.
+	and <a href="https://github.com/fuzdev/fuz_css#readme">readme</a>.
 </p>

@@ -1,4 +1,4 @@
-import type {Flavored} from '@ryanatkn/belt/types.js';
+import type {Flavored} from '@fuzdev/fuz_util/types.js';
 
 // TODO maybe rename this module to `style_variable` for consistency? what about `variables`?
 

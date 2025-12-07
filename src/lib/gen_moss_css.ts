@@ -1,5 +1,5 @@
 import type {Gen} from '@ryanatkn/gro/gen.js';
-import type {FileFilter} from '@ryanatkn/belt/path.js';
+import type {FileFilter} from '@fuzdev/fuz_util/path.js';
 
 import {
 	collect_css_classes,

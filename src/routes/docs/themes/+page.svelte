@@ -1,13 +1,13 @@
 <script lang="ts">
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import Dialog from '@ryanatkn/fuz/Dialog.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import ColorSchemeInput from '@ryanatkn/fuz/ColorSchemeInput.svelte';
-	import TomeLink from '@ryanatkn/fuz/TomeLink.svelte';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
-	import ThemeInput from '@ryanatkn/fuz/ThemeInput.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import {default_themes} from '$lib/themes.js';
@@ -35,7 +35,7 @@
 		</p>
 		<p>
 			Moss works with any JS framework, but it provides only stylesheets, not integrations. This
-			website uses my Svelte UI library <a href="https://www.fuz.dev/">Fuz</a>
+			website uses my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
 			to provide the UI below to control the Moss color scheme and themes.
 		</p>
 	</section>
@@ -51,7 +51,7 @@
 			The Fuz integration detects the default with
 			<MdnLink path="Web/CSS/@media/prefers-color-scheme" />, and users can also set it directly
 			with a component like
-			<a href="https://github.com/ryanatkn/fuz/blob/main/src/lib/ColorSchemeInput.svelte"
+			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte"
 				>this one</a
 			>:
 		</p>
@@ -72,8 +72,8 @@
 		</p>
 		<p>
 			These docs are a work in progress, for now see <ModuleLink path="theme.ts"
-				><code>@ryanatkn/moss/theme.ts</code></ModuleLink
-			> and <ModuleLink path="themes.ts"><code>@ryanatkn/moss/themes.ts</code></ModuleLink>.
+				><code>@fuzdev/fuz_css/theme.ts</code></ModuleLink
+			> and <ModuleLink path="themes.ts"><code>@fuzdev/fuz_css/themes.ts</code></ModuleLink>.
 		</p>
 		<!-- TODO explain when exported <Code code={`<ThemeInput\n\t{themes}\n\t{selected_theme}\n/>`} /> -->
 		<div class="width_upto_xs mb_lg">

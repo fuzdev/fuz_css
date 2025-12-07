@@ -1,11 +1,11 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import {slide} from 'svelte/transition';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import ColorSchemeInput from '@ryanatkn/fuz/ColorSchemeInput.svelte';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import {color_variants} from '$lib/variable_data.js';
 

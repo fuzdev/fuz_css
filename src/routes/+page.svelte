@@ -1,11 +1,11 @@
 <script lang="ts">
 	import {resolve} from '$app/paths';
-	import DocsFooter from '@ryanatkn/fuz/DocsFooter.svelte';
-	import Card from '@ryanatkn/fuz/Card.svelte';
-	import Svg from '@ryanatkn/fuz/Svg.svelte';
-	import {moss_logo} from '@ryanatkn/fuz/logos.js';
-	import HiddenPersonalLinks from '@ryanatkn/fuz/HiddenPersonalLinks.svelte';
-	import {library_context} from '@ryanatkn/fuz/library.svelte.js';
+	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
+	import Card from '@fuzdev/fuz_ui/Card.svelte';
+	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
+	import {moss_logo} from '@fuzdev/fuz_ui/logos.js';
+	import HiddenPersonalLinks from '@fuzdev/fuz_ui/HiddenPersonalLinks.svelte';
+	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import Introduction from '$routes/Introduction.svelte';
 	import FileLink from '$routes/FileLink.svelte';
@@ -39,9 +39,9 @@
 				<FileLink path="contributing.md">contributing.md</FileLink>.
 			</UnfinishedImplementationWarning>
 			<p>
-				See also my Svelte UI library <a href="https://www.fuz.dev/">Fuz</a> that builds on Moss.
+				See also my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a> that builds on Moss.
 				Feel free to take the ideas and
-				<a href="https://github.com/ryanatkn/moss">code</a> for your own purposes.
+				<a href="https://github.com/fuzdev/fuz_css">code</a> for your own purposes.
 			</p>
 			<p>
 				Moss is being made to support <a href="https://www.zzz.software/">Zzz</a> and

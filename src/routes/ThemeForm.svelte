@@ -1,8 +1,8 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
-	import {swallow} from '@ryanatkn/belt/dom.js';
-	import CopyToClipboard from '@ryanatkn/fuz/CopyToClipboard.svelte';
-	import Dialog from '@ryanatkn/fuz/Dialog.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import {swallow} from '@fuzdev/fuz_util/dom.js';
+	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
+	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 
 	import {render_theme_style, type Theme} from '$lib/theme.js';
 	import type {StyleVariable} from '$lib/variable.js';

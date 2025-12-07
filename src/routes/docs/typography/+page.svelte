@@ -1,12 +1,12 @@
 <script lang="ts">
-	import Code from '@ryanatkn/fuz_code/Code.svelte';
-	import TomeContent from '@ryanatkn/fuz/TomeContent.svelte';
-	import MdnLink from '@ryanatkn/fuz/MdnLink.svelte';
-	import TomeLink from '@ryanatkn/fuz/TomeLink.svelte';
-	import {get_tome_by_name} from '@ryanatkn/fuz/tome.js';
-	import Details from '@ryanatkn/fuz/Details.svelte';
-	import TomeSectionHeader from '@ryanatkn/fuz/TomeSectionHeader.svelte';
-	import TomeSection from '@ryanatkn/fuz/TomeSection.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import Details from '@fuzdev/fuz_ui/Details.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import FontWeightControl from '$routes/FontWeightControl.svelte';
 	import FontSizeControl from '$routes/FontSizeControl.svelte';

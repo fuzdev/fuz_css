@@ -20,7 +20,7 @@
 	const {
 		path,
 		js = false,
-		base_path = 'https://github.com/ryanatkn/moss/blob/main/',
+		base_path = 'https://github.com/fuzdev/fuz_css/blob/main/',
 		unstyled = false,
 		attrs,
 		icon = '🗎', // TODO temporary, should be an svg
