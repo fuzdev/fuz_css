@@ -35,8 +35,8 @@
 	<section>
 		<UnfinishedImplementationWarning>
 			These concepts are still developing - some things are incomplete or inconsistent, and there
-			will be a lot of breaking changes. I'm thinking of splitting this "light and shadow" section
-			into "shadows" and "shading" something.
+			will be a lot of breaking changes. One thing I don't like is the performance cost of
+			transparency being used a lot, but the automatic stacking is nice.
 		</UnfinishedImplementationWarning>
 		<p>
 			Fuz CSS is designed around two simplistic models of light, one for dark mode and one for light
