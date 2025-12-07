@@ -1,5 +1,11 @@
 # @ryanatkn/moss
 
+## 0.40.0
+
+### Minor Changes
+
+- move to fuzdev and rename to fuz_css from moss ([29efeba](https://github.com/ryanatkn/moss/commit/29efeba))
+
 ## 0.39.0
 
 ### Minor Changes
