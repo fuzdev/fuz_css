@@ -4,7 +4,7 @@ import type {LibraryJson} from '@ryanatkn/belt/library_json.js';
 
 export const library_json: LibraryJson = {
 	package_json: {
-		name: '@ryanatkn/moss',
+		name: '@fuzdev/fuz_css',
 		version: '0.39.0',
 		description: 'CSS framework and design system',
 		motto: 'magical organic stylesheets',
@@ -92,7 +92,7 @@ export const library_json: LibraryJson = {
 		},
 	},
 	source_json: {
-		name: '@ryanatkn/moss',
+		name: '@fuzdev/fuz_css',
 		version: '0.39.0',
 		modules: [
 			{
@@ -3390,14 +3390,14 @@ export const library_json: LibraryJson = {
 			},
 		],
 	},
-	name: '@ryanatkn/moss',
-	repo_name: 'moss',
+	name: '@fuzdev/fuz_css',
+	repo_name: 'fuz_css',
 	repo_url: 'https://github.com/ryanatkn/moss',
 	owner_name: 'ryanatkn',
 	homepage_url: 'https://moss.ryanatkn.com/',
 	logo_url: 'https://moss.ryanatkn.com/logo.svg',
 	logo_alt: 'a fuzzy tuft of green moss',
-	npm_url: 'https://www.npmjs.com/package/@ryanatkn/moss',
+	npm_url: 'https://www.npmjs.com/package/@fuzdev/fuz_css',
 	changelog_url: 'https://github.com/ryanatkn/moss/blob/main/CHANGELOG.md',
 	published: true,
 };
