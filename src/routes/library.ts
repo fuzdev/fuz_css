@@ -35,6 +35,14 @@ export const library_json: LibraryJson = {
 		engines: {
 			node: '>=22.15',
 		},
+		peerDependencies: {
+			'@fuzdev/fuz_util': '>=0.42.0',
+		},
+		peerDependenciesMeta: {
+			'@fuzdev/fuz_util': {
+				optional: true,
+			},
+		},
 		devDependencies: {
 			'@changesets/changelog-git': '^0.2.1',
 			'@fuzdev/fuz_code': '^0.37.0',
