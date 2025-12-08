@@ -1,6 +1,6 @@
 {
   "name": "@fuzdev/fuz_css",
-  "version": "0.42.0",
+  "version": "0.42.1",
   "modules": [
     {
       "path": "css_class_composites.ts",
