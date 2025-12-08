@@ -15,16 +15,17 @@
 
 	// TODO add UI to change the tint hue/saturation
 
-	interface Props {
+	const {
+		theme = null,
+		onsave,
+	}: {
 		/**
 		 * `null` means creating
 		 */
 		theme?: Theme | null;
 		onsave?: (theme: Theme) => void;
 		// oncreate?: (theme: Theme) => void;
-	}
-
-	const {theme = null, onsave}: Props = $props();
+	} = $props();
 
 	let new_name = $state(theme ? theme.name : 'new theme');
 

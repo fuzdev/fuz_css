@@ -1,11 +1,11 @@
 <script lang="ts">
 	import type {StyleVariable} from '$lib/variable.js';
 
-	interface Props {
+	const {
+		variable,
+	}: {
 		variable: StyleVariable | null;
-	}
-
-	const {variable}: Props = $props();
+	} = $props();
 
 	// TODO @many add to $lib?
 

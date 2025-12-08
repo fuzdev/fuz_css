@@ -3,8 +3,7 @@
 	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
 	import Card from '@fuzdev/fuz_ui/Card.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {fuz_logo} from '@fuzdev/fuz_ui/logos.js';
-	import HiddenPersonalLinks from '@fuzdev/fuz_ui/HiddenPersonalLinks.svelte';
+	import {logo_fuz_css} from '@fuzdev/fuz_ui/logos.js';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import Introduction from '$routes/Introduction.svelte';
@@ -17,8 +16,8 @@
 
 <main class="box mb_xl7">
 	<section class="box">
-		<h1 class="mb_sm" style:margin-top={MAIN_HEADER_MARGIN_TOP}>moss</h1>
-		<Svg data={fuz_logo} size="var(--icon_size_xl2)" />
+		<h1 class="mb_sm" style:margin-top={MAIN_HEADER_MARGIN_TOP}>fuz_css</h1>
+		<Svg data={logo_fuz_css} size="var(--icon_size_xl2)" />
 		<div class="p_xl mt_lg border_radius_lg shadow_inset_bottom_xs">
 			<blockquote class="shadow_inset_top_xs">magical organic stylesheets 🌿</blockquote>
 		</div>
@@ -57,7 +56,6 @@
 			{#snippet logo_header()}
 				<a href={resolve('/about')} class="mb_xs">about</a>
 			{/snippet}
-			<HiddenPersonalLinks />
 		</DocsFooter>
 	</section>
 </main>

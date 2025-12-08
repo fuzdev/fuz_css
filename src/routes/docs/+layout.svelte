@@ -3,7 +3,7 @@
 	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {fuz_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {logo_fuz} from '@fuzdev/fuz_ui/logos.js';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {tomes} from '$routes/docs/tomes.js';
@@ -11,11 +11,11 @@
 	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
-	interface Props {
+	const {
+		children,
+	}: {
 		children: Snippet;
-	}
-
-	const {children}: Props = $props();
+	} = $props();
 
 	const selected_variable = selected_variable_context.set();
 
@@ -26,10 +26,10 @@
 	{#snippet breadcrumb_children(is_primary_nav)}
 		{#if is_primary_nav}
 			<div class="icon row">
-				<Svg data={fuz_logo} size="var(--icon_size_sm)" /> <span class="ml_sm">moss</span>
+				<Svg data={logo_fuz} size="var(--icon_size_sm)" /> <span class="ml_sm">fuz_css</span>
 			</div>
 		{:else}
-			<Svg data={fuz_logo} size="var(--icon_size_sm)" />
+			<Svg data={logo_fuz} size="var(--icon_size_sm)" />
 		{/if}
 	{/snippet}
 	{@render children()}

@@ -4,7 +4,15 @@
 
 	// TODO upstream?
 
-	interface Props {
+	const {
+		path,
+		js = false,
+		base_path = 'https://github.com/fuzdev/fuz_css/blob/main/',
+		unstyled = false,
+		attrs,
+		icon = '🗎', // TODO temporary, should be an svg
+		children,
+	}: {
 		path: string;
 		/**
 		 * Converts `.js` to `.ts` by default, pass `true` to keep `.js`.
@@ -15,17 +23,7 @@
 		attrs?: SvelteHTMLElements['a'];
 		icon?: Snippet | string;
 		children?: Snippet;
-	}
-
-	const {
-		path,
-		js = false,
-		base_path = 'https://github.com/fuzdev/fuz_css/blob/main/',
-		unstyled = false,
-		attrs,
-		icon = '🗎', // TODO temporary, should be an svg
-		children,
-	}: Props = $props();
+	} = $props();
 
 	const final_path = $derived(js ? path : path.replace(/\.js$/, '.ts'));
 

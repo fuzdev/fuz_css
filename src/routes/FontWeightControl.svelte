@@ -1,12 +1,13 @@
 <script lang="ts">
 	import type {Snippet} from 'svelte';
 
-	interface Props {
+	let {
+		selected_font_weight = $bindable(400),
+		children,
+	}: {
 		selected_font_weight?: number;
 		children?: Snippet;
-	}
-
-	let {selected_font_weight = $bindable(400), children}: Props = $props();
+	} = $props();
 
 	// TODO @many publish in $lib when ready, the 950 thing has me wack
 </script>

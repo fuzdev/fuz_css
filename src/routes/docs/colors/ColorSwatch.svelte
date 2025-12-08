@@ -1,12 +1,13 @@
 <script lang="ts">
 	import ColorSwatchItem from '$routes/docs/colors/ColorSwatchItem.svelte';
 
-	interface Props {
+	const {
+		color_name,
+		computed_styles,
+	}: {
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
-	}
-
-	const {color_name, computed_styles}: Props = $props();
+	} = $props();
 </script>
 
 <ul class="unstyled">
