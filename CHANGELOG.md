@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.42.1
+
+### Patch Changes
+
+- tweak teal to be slightly less green ([#71](https://github.com/fuzdev/fuz_css/pull/71))
+
 ## 0.42.0
 
 ### Minor Changes

@@ -5,7 +5,7 @@ import type {LibraryJson} from '@fuzdev/fuz_util/library_json.js';
 export const library_json: LibraryJson = {
 	package_json: {
 		name: '@fuzdev/fuz_css',
-		version: '0.42.0',
+		version: '0.42.1',
 		description: 'CSS framework and design system',
 		motto: 'magical organic stylesheets',
 		glyph: '🌿',
@@ -101,7 +101,7 @@ export const library_json: LibraryJson = {
 	},
 	source_json: {
 		name: '@fuzdev/fuz_css',
-		version: '0.42.0',
+		version: '0.42.1',
 		modules: [
 			{
 				path: 'css_class_composites.ts',
