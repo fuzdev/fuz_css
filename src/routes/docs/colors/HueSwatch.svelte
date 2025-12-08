@@ -1,15 +1,19 @@
 <script lang="ts">
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
-	interface Props {
+	const {
+		color_name,
+		computed_styles,
+		width = 48,
+		height = 48,
+		description,
+	}: {
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
 		width?: number;
 		height?: number;
 		description: string;
-	}
-
-	const {color_name, computed_styles, width = 48, height = 48, description}: Props = $props();
+	} = $props();
 
 	const get_color_hue_string = (name: string) => computed_styles?.getPropertyValue('--' + name);
 

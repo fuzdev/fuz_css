@@ -4,7 +4,6 @@
 	import Card from '@fuzdev/fuz_ui/Card.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
 	import {logo_fuz_css} from '@fuzdev/fuz_ui/logos.js';
-	import HiddenPersonalLinks from '@fuzdev/fuz_ui/HiddenPersonalLinks.svelte';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import Introduction from '$routes/Introduction.svelte';
@@ -57,7 +56,6 @@
 			{#snippet logo_header()}
 				<a href={resolve('/about')} class="mb_xs">about</a>
 			{/snippet}
-			<HiddenPersonalLinks />
 		</DocsFooter>
 	</section>
 </main>

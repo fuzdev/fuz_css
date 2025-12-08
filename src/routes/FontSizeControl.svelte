@@ -4,12 +4,13 @@
 	import {font_size_variants} from '$lib/variable_data.js';
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
-	interface Props {
+	let {
+		selected_size = $bindable(2),
+		children,
+	}: {
 		selected_size?: number; // TODO improve API, is index for `'md'`
 		children?: Snippet;
-	}
-
-	let {selected_size = $bindable(2), children}: Props = $props();
+	} = $props();
 
 	// TODO the API is strange
 

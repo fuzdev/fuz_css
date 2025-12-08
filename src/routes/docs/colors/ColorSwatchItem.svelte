@@ -4,13 +4,15 @@
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
-	interface Props {
+	const {
+		index,
+		color_name,
+		computed_styles,
+	}: {
 		index: number;
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
-	}
-
-	const {index, color_name, computed_styles}: Props = $props();
+	} = $props();
 
 	const themer = themer_context.get();
 

@@ -5,16 +5,21 @@
 	import {default_variables} from '$lib/variables.js';
 	import {selected_variable_context} from '$routes/style_variable_helpers.svelte.js';
 
-	interface Props {
+	const {
+		name,
+		classes,
+		inline = false,
+		plain = true,
+		attrs,
+		children,
+	}: {
 		name: string; // TODO type? generate from `tomes`? or keep extensible?
 		classes?: string;
 		inline?: boolean;
 		plain?: boolean;
 		attrs?: SvelteHTMLElements['button'];
 		children?: Snippet;
-	}
-
-	const {name, classes, inline = false, plain = true, attrs, children}: Props = $props();
+	} = $props();
 
 	// TODO @many add to $lib?
 

@@ -11,11 +11,11 @@
 	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
-	interface Props {
+	const {
+		children,
+	}: {
 		children: Snippet;
-	}
-
-	const {children}: Props = $props();
+	} = $props();
 
 	const selected_variable = selected_variable_context.set();
 

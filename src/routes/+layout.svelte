@@ -16,11 +16,11 @@
 	// import Settings from '$routes/Settings.svelte';
 	// import {contextmenu_attachment} from '$lib/contextmenu_helpers.svelte.js';
 
-	interface Props {
+	const {
+		children,
+	}: {
 		children: Snippet;
-	}
-
-	const {children}: Props = $props();
+	} = $props();
 
 	library_context.set(new Library(library_json));
 
