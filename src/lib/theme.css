@@ -11,7 +11,7 @@
 	--hue_g: 335; /* pink */
 	--hue_h: 17; /* orange */
 	--hue_i: 185; /* cyan */
-	--hue_j: 154; /* teal */
+	--hue_j: 155; /* teal */
 	--color_a_1: hsl(var(--hue_a) 65% 91%);
 	--color_a_2: hsl(var(--hue_a) 62% 84%);
 	--color_a_3: hsl(var(--hue_a) 60% 73%);

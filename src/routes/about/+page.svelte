@@ -4,7 +4,7 @@
 	import EcosystemLinksPanel from '@fuzdev/fuz_ui/EcosystemLinksPanel.svelte';
 	import Breadcrumb from '@fuzdev/fuz_ui/Breadcrumb.svelte';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {fuz_logo} from '@fuzdev/fuz_ui/logos.js';
+	import {logo_fuz} from '@fuzdev/fuz_ui/logos.js';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {MAIN_HEADER_MARGIN_TOP} from '$routes/constants.js';
@@ -21,7 +21,7 @@
 				{library.repo_name}
 			</h1>
 		</header>
-		<Breadcrumb><Svg data={fuz_logo} size="var(--icon_size_sm)" /></Breadcrumb>
+		<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
 	</section>
 	<EcosystemLinksPanel />
 	<section>
@@ -32,7 +32,7 @@
 	<section class="box mb_xl7">
 		<DocsFooter {library}>
 			<div class="mb_xl5">
-				<Breadcrumb><Svg data={fuz_logo} size="var(--icon_size_sm)" /></Breadcrumb>
+				<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
 			</div>
 		</DocsFooter>
 	</section>

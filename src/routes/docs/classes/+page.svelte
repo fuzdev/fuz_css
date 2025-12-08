@@ -184,10 +184,6 @@ ${'<' as string}script>
 			<ModuleLink path="gen_fuz_css.ts">gen_fuz_css.ts</ModuleLink>. I can add a Vite plugin if
 			there's demand.
 		</p>
-		<UnfinishedImplementationWarning>
-			Maybe <code>fuz.css</code> should default to <code>moss_utilities.css</code> or
-			<code>moss_utility_classes.css</code>? idk
-		</UnfinishedImplementationWarning>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Utility classes" />
