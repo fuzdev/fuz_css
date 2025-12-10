@@ -11,7 +11,7 @@
 
 	const LIBRARY_ITEM_NAME = 'classes';
 
-	const GLYPH_IDEA = '⌆'; // TODO from Belt, upstreamed from Zzz?
+	const GLYPH_IDEA = '⌆'; // TODO from fuz_util, upstreamed from Zzz?
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
