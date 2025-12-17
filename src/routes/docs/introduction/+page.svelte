@@ -68,18 +68,10 @@
 			</li>
 		</ul>
 		<p>
-			Fuz CSS is being made to support <a href="https://www.zzz.software/">Zzz</a> and
-			<a href="https://www.ryanatkn.com/">my other projects</a> that focus on end-users, so it'll grow
-			relatively slowly as I encounter more usecases. It's hobby-ready but expect a lot of breaking changes.
-			Feel free to take the code and ideas for your own purposes.
-		</p>
-		<p>
-			In the docs, you'll see I'm writing asides using "⚠️" with open questions and other discussion
-			of uncertainties. Your input is appreciated in the GitHub
+			In the docs, you'll see <code>⚠️ asides</code> with open questions and other uncertainties.
+			Your input is appreciated in the GitHub
 			<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
-			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>, or find me on
-			<a href="https://bsky.app/profile/ryanatkn.com">Bluesky</a>. See
-			<FileLink path="contributing.md">contributing.md</FileLink> for more 🌿
+			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> 🌿
 		</p>
 	</section>
 </TomeContent>

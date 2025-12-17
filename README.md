@@ -4,10 +4,13 @@
 
 > CSS framework and design system 🌿 magical organic stylesheets
 
-See the [docs](https://css.fuz.dev/docs)
-at [**css.fuz.dev**](https://css.fuz.dev/)
+Fuz CSS is a CSS framework that builds on CSS custom properties.
+It's in early alpha with breaking changes ahead.
 
-also [contributing.md](contributing.md)
+- view the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/)
+- help with feedback and design in the [issues](https://github.com/fuzdev/fuz_css/issues)
+  and [discussions](https://github.com/fuzdev/fuz_css/discussions)
+- more about the stack at [fuz.dev](https://www.fuz.dev/)
 
 ## License [🐦](https://wikipedia.org/wiki/Free_and_open-source_software)
 
