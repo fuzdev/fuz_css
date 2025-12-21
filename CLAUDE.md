@@ -1,79 +1,83 @@
 # Fuz CSS framework
 
-## Overview
+CSS framework and design system built on **style variables** - design tokens as CSS custom properties. Early alpha with breaking changes ahead.
 
-Fuz CSS is a CSS framework and design system built on **style variables** - design tokens implemented as CSS custom properties with specific conventions. It provides:
+For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
 
-- Plain CSS with zero dependencies
-- Runtime theming with light/dark color-scheme support
-- Exported stylesheets for immediate use
-- Underlying CSS data, types, and helpers for advanced usage
-- Framework-agnostic (works with any website or JS framework)
+## Design decisions
 
-## Core concepts
+### 3-layer architecture
 
-### Style variables
+1. [style.css](src/lib/style.css) - CSS reset with `:where()` for low specificity
+2. [theme.css](src/lib/theme.css) - Generated CSS variables from TypeScript definitions
+3. `fuz.css` - Utility classes (generated per-project, only includes used classes)
 
-- Design tokens defined as TypeScript objects in `src/lib/variables.ts`
+### Style variables as source of truth
+
+- TypeScript objects in [variables.ts](src/lib/variables.ts) define all design tokens
 - Each variable can have `light` and/or `dark` values
-- Variables are the single source of truth for all styling
-- Follow specific naming conventions for predictable behavior
+- Light/dark are color-schemes *within* a theme, not separate themes
+- [`render_theme_style()`](src/lib/theme.ts) generates CSS with specificity multiplier for reliable theme override
 
-### Themes
+### Smart utility class generation
 
-- Themes are groups of style variables (defined in `src/lib/themes.ts`)
-- The base theme provides default variables
-- Additional themes override specific variables while inheriting others
-- Light/dark modes are color-schemes within each theme, not separate themes
+[gen_fuz_css.ts](src/lib/gen_fuz_css.ts) scans source files with regex extractors, collects class names, and outputs only CSS for classes actually used. Dynamic [interpreters](src/lib/css_class_interpreters.ts) handle pattern-based classes like `opacity_50`, `font_weight_700`, `z_index_100`.
 
-### Color system
+## Variable naming
 
-- 10 base hues: `hue_a` through `hue_j` (blue, green, red, purple, yellow, brown, pink, orange, cyan, teal)
-- Each hue has numbered intensity variants (1-10)
-- Semantic color variables like `bg_*`, `fg_*`, `text_color_*`
-- Color-scheme-aware variables automatically adapt to light/dark mode
+See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src/lib/variable_data.ts) for size/color variants.
 
-### Utility classes
+**Colors:**
+- 10 hues with semantic roles: `a` (primary/blue), `b` (success/green), `c` (error/red), `d` (secondary/purple), `e` (tertiary/yellow), `f` (muted/brown), `g` (decorative/pink), `h` (caution/orange), `i` (info/cyan), `j` (flourish/teal)
+- Intensities 1-9: `color_a_1` (lightest) through `color_a_9` (darkest), with `_5` as the base
+- `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
+- `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
+- `text_color_*` - opaque text colors (alpha avoided for performance)
 
-- Optional utility classes generated from variables
-- Automatic optimization to include only used classes via `gen_fuz_css.ts`
-- Generated reference implementation at `src/routes/fuz.css` using
-  Gro's [`gen`](https://github.com/ryanatkn/gro/blob/main/src/docs/gen.md)
+**Size variants:** `xs5` → `xs` → `sm` → `md` → `lg` → `xl` → `xl15` (spacing, font sizes, etc.)
+
+## Usage
+
+Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base styles. Optionally generate project-specific `fuz.css` using [gen_fuz_css()](src/lib/gen_fuz_css.ts) in a Gro generator.
+
+## Docs
+
+[src/routes/docs/](src/routes/docs/) has pages for: colors, themes, variables, classes, typography, buttons, forms, elements, layout, borders, shadows, shading. See [tomes.ts](src/routes/docs/tomes.ts) for structure.
 
 ## File organization
 
-### Library (`src/lib/`)
+### Library - [src/lib/](src/lib/)
 
-- `variables.ts` - All style variable definitions
-- `variable.ts` - StyleVariable type and utilities
-- `variable_data.ts` - Size variants and naming patterns
-- `theme.ts` - Theme rendering and color-scheme utilities
-- `themes.ts` - Theme definitions
-- `style.css` - Main stylesheet and CSS reset
-- `theme.css` - Default theme stylesheet
-- `gen_fuz_css.ts` - Utility class generation helpers
-- `css_classes.ts` - Utility class definitions
-- `css_class_helpers.ts` - CSS class extraction and generation
+**Variables & themes:**
 
-### Docs and examples (`src/routes/`)
+- [variables.ts](src/lib/variables.ts) - All style variable definitions (~250+)
+- [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
+- [variable_data.ts](src/lib/variable_data.ts) - Size variants, color intensities, CSS data values
+- [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type, `render_theme_style()`
+- [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
 
-- `docs/` - Documentation pages for all features
-- `fuz.css` - Generated optimized utility classes
-- `fuz.gen.css.ts` - Generator for fuz.css using `src/lib/gen_fuz_css.ts`
+**CSS generation:**
 
-## Code style guidelines
+- [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Main generator API for Gro
+- [css_classes.ts](src/lib/css_classes.ts) - All static class definitions (~1000+)
+- [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions
+- [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`)
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Dynamic interpreters for opacity, font-weight, z-index, border-radius
+- [css_class_helpers.ts](src/lib/css_class_helpers.ts) - CSS class extraction, `CssClasses` collection, `generate_classes_css()`
 
-### TypeScript/JS
+**Stylesheets:**
 
-- tabs for indentation (not spaces)
-- snake_case and PascalCase naming for variables and types (e.g., `StyleVariable`, `bg_color_1`)
-- prefer `const fn = () =>` arrow functions instead of using the `function` keyword.
+- [style.css](src/lib/style.css) - CSS reset and element defaults (uses `.unstyled` class for opt-out)
+- [theme.css](src/lib/theme.css) - Generated base theme variables (`:root` selectors)
+- [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Generator for theme.css
 
-### CSS variables
+### Docs site - [src/routes/](src/routes/)
 
-- CSS variable names use lowercase and underscores: `--bg_1`, `--color_a_1`
-- semantic naming patterns:
-  - `bg_*` and `fg_*` - color-scheme-aware (swap in dark mode)
-  - `text_color_*` - text color variants
-  - `color_[a-j]_[1-10]` - hue-based color palette
-  - size variants: `xs5` through `xl15` for spacing/sizing
+- [docs/](src/routes/docs/) - Documentation pages organized by [tomes.ts](src/routes/docs/tomes.ts)
+- [fuz.css](src/routes/fuz.css) - Generated optimized utility classes for this site
+- [fuz.gen.css.ts](src/routes/fuz.gen.css.ts) - Generator using `gen_fuz_css()`
+
+### Tests - [src/test/](src/test/)
+
+- [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
+- [css_class_helpers.test.ts](src/test/css_class_helpers.test.ts) - CSS extraction from Svelte/JS patterns
