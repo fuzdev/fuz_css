@@ -92,9 +92,6 @@
 			"./*.css": {
 				"default": "./dist/*.css"
 			}
-		},
-		"dependencies": {
-			"@fuzdev/fuz_css": "^0.42.1"
 		}
 	},
 	"source_json": {
