@@ -1,22 +1,27 @@
-# Fuz CSS framework
+# Fuz CSS framework and design system
 
-CSS framework and design system built on **style variables** - design tokens as CSS custom properties. Early alpha with breaking changes ahead.
+CSS framework and design system built around **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
 
 For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
 
 ## Design decisions
 
+### Two core concepts
+
+1. **Semantic styles** - The reset stylesheet with semantic defaults styles HTML elements (buttons, inputs, links, headings, forms, tables) without adding classes. Uses low-specificity `:where()` selectors so your styles easily override the defaults. Uses `.unstyled` escape hatch.
+2. **Style variables** - Design tokens as CSS custom properties that enable customization and runtime theming. Each variable provides values for light and/or dark color-schemes.
+
 ### 3-layer architecture
 
-1. [style.css](src/lib/style.css) - CSS reset with `:where()` for low specificity
-2. [theme.css](src/lib/theme.css) - Generated CSS variables from TypeScript definitions
-3. `fuz.css` - Utility classes (generated per-project, only includes used classes)
+1. [style.css](src/lib/style.css) - Reset stylesheet with semantic defaults, styles HTML elements using variables
+2. [theme.css](src/lib/theme.css) - Style variables as CSS custom properties (~250+), generated from TypeScript definitions
+3. `fuz.css` - Utility classes (optional, generated per-project, only includes used classes)
 
 ### Style variables as source of truth
 
 - TypeScript objects in [variables.ts](src/lib/variables.ts) define all design tokens
 - Each variable can have `light` and/or `dark` values
-- Light/dark are color-schemes *within* a theme, not separate themes
+- Light/dark are color-schemes _within_ a theme, not separate themes
 - [`render_theme_style()`](src/lib/theme.ts) generates CSS with specificity multiplier for reliable theme override
 
 ### Smart utility class generation
@@ -28,6 +33,7 @@ For code style, see the `fuz-stack` skill. For UI components (themes, color sche
 See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src/lib/variable_data.ts) for size/color variants.
 
 **Colors:**
+
 - 10 hues with semantic roles: `a` (primary/blue), `b` (success/green), `c` (error/red), `d` (secondary/purple), `e` (tertiary/yellow), `f` (muted/brown), `g` (decorative/pink), `h` (caution/orange), `i` (info/cyan), `j` (flourish/teal)
 - Intensities 1-9: `color_a_1` (lightest) through `color_a_9` (darkest), with `_5` as the base
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)

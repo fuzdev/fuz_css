@@ -19,8 +19,14 @@
 		<ul>
 			<li>plain CSS</li>
 			<li>zero dependencies</li>
-			<li>exports one main stylesheet that doubles as a reset with basic HTML tag styles</li>
-			<li>exports a basic theme that can be replaced with your own</li>
+			<li>
+				exports a reset stylesheet (<ModuleLink path="style.css" />) with semantic defaults that
+				styles HTML elements
+			</li>
+			<li>
+				exports a basic theme stylesheet (<ModuleLink path="theme.css" />) that can be replaced with
+				your own
+			</li>
 			<li>
 				also exports the underlying CSS data, helpers, and types, which can be used in many ways,
 				including outputting an optimized utilities class file
@@ -49,7 +55,7 @@
 		<p>The stylesheets:</p>
 		<ul>
 			<li>
-				<ModuleLink path="style.css" /> - the main stylesheet and CSS reset
+				<ModuleLink path="style.css" /> - reset stylesheet with semantic defaults
 			</li>
 			<li>
 				<ModuleLink path="theme.css" /> - or bring your own

@@ -4,7 +4,7 @@
 
 > CSS framework and design system 🌿 magical organic stylesheets
 
-Fuz CSS is a CSS framework that builds on CSS custom properties.
+Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
 It's in early alpha with breaking changes ahead.
 
 - view the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/)
