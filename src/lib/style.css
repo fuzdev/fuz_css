@@ -13,6 +13,10 @@ Some notes:
 	to lower specificity so utility classes override them -
 	this also means the Fuz CSS stylesheet is is less likely to
 	interfere with the page's styles regardless of where it's imported
+- `.unstyled` class opts out of opinionated styling (colors, borders, decorative properties)
+	while keeping normalizations (font inheritance, border-collapse) -
+	applied to interactive elements (links, buttons, inputs, summary) and decorative containers,
+	but not structural elements where styling aids usability (tables) or is semantic (small)
 - needs more variables
 
 */
@@ -79,7 +83,7 @@ The `!important` makes this `hidden` behavior much higher specificity.
 	}
 }
 
-:where(a) {
+:where(a:not(.unstyled)) {
 	cursor: pointer;
 	/* TODO should the generic be --link_color or --color? */
 	--text_color: var(--link_color);
@@ -90,21 +94,21 @@ The `!important` makes this `hidden` behavior much higher specificity.
 	outline: var(--outline_width) var(--outline_style) var(--outline_color);
 }
 /* TODO should these be customizable with utility classes? */
-:where(a:hover) {
+:where(a:not(.unstyled):hover) {
 	text-decoration: var(--text_decoration_hover);
 }
-:where(a:focus) {
+:where(a:not(.unstyled):focus) {
 	--outline_width: var(--outline_width_focus);
 }
-:where(a:active) {
+:where(a:not(.unstyled):active) {
 	--outline_width: var(--outline_width_active);
 }
-:where(a.selected) {
+:where(a:not(.unstyled).selected) {
 	--text_color: var(--link_color_selected);
 	--outline_color: var(--border_color);
 	text-decoration: var(--text_decoration_selected);
 }
-:where(a.selected:active) {
+:where(a:not(.unstyled).selected:active) {
 	--outline_color: var(--border_color);
 }
 
@@ -115,7 +119,7 @@ The `!important` makes this `hidden` behavior much higher specificity.
 	list-style: none;
 }
 
-:where(h1, h2, h3, h4, h5, h6, .heading) {
+:where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) {
 	font-family: var(--font_family_serif);
 	font-size: var(--font_size, var(--font_size_md));
 	font-weight: var(--font_weight);
@@ -125,38 +129,38 @@ The `!important` makes this `hidden` behavior much higher specificity.
 	overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
 }
 
-:where(h1) {
+:where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
 	--font_weight: 300;
 	margin-bottom: var(--space_xl5);
 	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
 	/* margin-top: var(--space_xl7); */
 }
-:where(h2) {
+:where(h2:not(.unstyled)) {
 	--font_size: var(--font_size_xl2);
 	--font_weight: 400;
 	margin-bottom: var(--space_xl4);
 	margin-top: var(--space_xl6);
 }
-:where(h3) {
+:where(h3:not(.unstyled)) {
 	--font_size: var(--font_size_xl);
 	--font_weight: 500;
 	margin-bottom: var(--space_xl3);
 	margin-top: var(--space_xl5);
 }
-:where(h4) {
+:where(h4:not(.unstyled)) {
 	--font_size: var(--font_size_lg);
 	--font_weight: 700;
 	margin-bottom: var(--space_xl2);
 	margin-top: var(--space_xl4);
 }
-:where(h5) {
+:where(h5:not(.unstyled)) {
 	--font_size: var(--font_size_md);
 	--font_weight: 900;
 	margin-bottom: var(--space_xl);
 	margin-top: var(--space_xl3);
 }
-:where(h6) {
+:where(h6:not(.unstyled)) {
 	--font_size: var(--font_size_sm);
 	--font_weight: 600;
 	margin-bottom: var(--space_lg);
@@ -267,11 +271,13 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	margin-bottom: var(--space_lg);
 }
 
-/* TODO probably continue with the `.unstyled` pattern for more elements */
-
+/* normalization - keep font inheritance even for unstyled */
 :where(input, textarea, select) {
-	appearance: none;
 	font: inherit;
+}
+
+:where(:is(input, textarea, select):not(.unstyled)) {
+	appearance: none;
 	line-height: normal;
 	display: block;
 	color: var(--text_color);
@@ -288,7 +294,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	min-height: var(--input_height);
 }
 
-:where(textarea) {
+:where(textarea:not(.unstyled)) {
 	--input_padding_y: var(--space_sm);
 	height: 100px;
 }
@@ -302,7 +308,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	background-color: var(--bg);
 }
 
-:where(:is(input, textarea, select):hover) {
+:where(:is(input, textarea, select):not(.unstyled):hover) {
 	--border_color: var(--border_color_2);
 }
 
@@ -310,7 +316,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 because the active state only applies when the thumb is clicked directly,
 but not for the identical user action of clicking the track,
 so for consistent visuals we opt to include no active state */
-:where(input[type='checkbox']) {
+:where(input[type='checkbox']:not(.unstyled)) {
 	cursor: pointer;
 	width: var(--input_height_sm);
 	height: var(--input_height_sm);
@@ -320,10 +326,10 @@ so for consistent visuals we opt to include no active state */
 	--input_padding_x: 0;
 	--checkbox_content: var(--checkbox_content_empty, '');
 }
-:where(input[type='checkbox']:checked) {
+:where(input[type='checkbox']:not(.unstyled):checked) {
 	--checkbox_content: var(--checkbox_content_checked, '✓'); /* ✔✓ ✗ ✘ */
 }
-:where(input[type='checkbox'])::before {
+:where(input[type='checkbox']:not(.unstyled))::before {
 	content: var(--checkbox_content);
 	position: relative;
 	left: var(--left);
@@ -340,7 +346,7 @@ so for consistent visuals we opt to include no active state */
 	color: var(--text_color);
 }
 
-:where(input[type='radio']) {
+:where(input[type='radio']:not(.unstyled)) {
 	cursor: pointer;
 	width: var(--input_height_sm);
 	height: var(--input_height_sm);
@@ -349,7 +355,7 @@ so for consistent visuals we opt to include no active state */
 	min-height: var(--input_height_sm);
 	--input_padding_x: 0;
 }
-:where(input[type='radio']:checked)::before {
+:where(input[type='radio']:not(.unstyled):checked)::before {
 	content: '';
 	display: block;
 	position: relative;
@@ -362,18 +368,18 @@ so for consistent visuals we opt to include no active state */
 }
 
 /* TODO @many figure these variables out so they're easily customized (similar pattern in a lot of places) */
-:where(input[type='range']) {
+:where(input[type='range']:not(.unstyled)) {
 	--thumb_size: var(--space_xl);
 	--thumb_background_color: var(--text_color_3);
 	cursor: pointer;
 }
-:where(input[type='range']:hover:not(:disabled)) {
+:where(input[type='range']:not(.unstyled):hover:not(:disabled)) {
 	--thumb_background_color: var(--color_a_5);
 }
-:where(input[type='range']:disabled:active) {
+:where(input[type='range']:not(.unstyled):disabled:active) {
 	--thumb_background_color: var(--color_c_5);
 }
-:where(input[type='range'])::-webkit-slider-thumb {
+:where(input[type='range']:not(.unstyled))::-webkit-slider-thumb {
 	appearance: none;
 	height: var(--thumb_size);
 	width: var(--thumb_size);
@@ -390,7 +396,7 @@ so for consistent visuals we opt to include no active state */
 	*/
 	margin-top: calc(var(--thumb_size) / -2);
 }
-:where(input[type='range'])::-moz-range-thumb {
+:where(input[type='range']:not(.unstyled))::-moz-range-thumb {
 	appearance: none;
 	height: var(--thumb_size);
 	width: var(--thumb_size);
@@ -398,12 +404,12 @@ so for consistent visuals we opt to include no active state */
 	background-color: var(--thumb_background_color);
 	border: 0;
 }
-:where(input[type='range'])::-webkit-slider-runnable-track {
+:where(input[type='range']:not(.unstyled))::-webkit-slider-runnable-track {
 	width: 100%;
 	height: var(--border_width);
 	background-color: var(--thumb_background_color);
 }
-:where(input[type='range'])::-moz-range-track {
+:where(input[type='range']:not(.unstyled))::-moz-range-track {
 	width: 100%;
 	height: var(--border_width);
 	background-color: var(--thumb_background_color);
@@ -412,15 +418,15 @@ so for consistent visuals we opt to include no active state */
 /*  TODO :has selector? `button:has(input[type='checkbox']:checked)`
 see https://caniuse.com/css-has
  */
-:where(input:checked:not(:disabled)) {
+:where(input:not(.unstyled):checked:not(:disabled)) {
 	--text_color: var(--text_active);
 	--border_color: var(--color_a_5);
 }
-:where(input[type='radio']:checked) {
+:where(input[type='radio']:not(.unstyled):checked) {
 	cursor: default;
 }
 
-:where(:is(input, textarea, select).inline, p :is(input, textarea, select)) {
+:where(:is(input, textarea, select):not(.unstyled).inline, p :is(input, textarea, select):not(.unstyled)) {
 	display: inline-block;
 	margin-left: var(--space_lg);
 	/* TODO ideally `width` here would be set to a minimum and have an API to increase size --
@@ -429,7 +435,7 @@ see https://caniuse.com/css-has
 	width: var(--input_width_min);
 }
 
-:where(:is(input, textarea, select):disabled) {
+:where(:is(input, textarea, select):not(.unstyled):disabled) {
 	/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
 	--input_fill: transparent;
 	--border_style: solid dashed;
@@ -437,11 +443,11 @@ see https://caniuse.com/css-has
 	outline: none;
 }
 
-:where([contenteditable]:focus-visible) {
+:where([contenteditable]:not(.unstyled):focus-visible) {
 	--outline_width: var(--outline_width_focus);
 	outline: var(--outline_width) var(--outline_style) var(--outline_color);
 }
-:where(:is(input, textarea, select, [contenteditable]):active) {
+:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
 	--outline_width: var(--outline_width_active);
 }
 
@@ -467,7 +473,7 @@ for disabled colors without needing a wrapper .disabled class */
 	justify-content: flex-start;
 	align-items: center;
 }
-:where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio'])) {
+:where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio']):not(.unstyled)) {
 	margin-right: var(--space_md);
 }
 
@@ -481,7 +487,7 @@ TODO think through these patterns to get somewhere consistent
 - but these need to be resolved locally to get overrides, couldn't set `fill` for example - can you use a variable still though, just also locally declare it?
 
 */
-:where(button) {
+:where(button:not(.unstyled)) {
 	--min_height: var(--input_height);
 	--text_color: var(--text_color_3);
 	--button_text_color: var(--text_color);
@@ -514,7 +520,7 @@ TODO think through these patterns to get somewhere consistent
 	outline: var(--outline_width) var(--outline_style) var(--outline_color);
 }
 
-:where(:is(button, input, textarea, select):focus) {
+:where(:is(button, input, textarea, select):not(.unstyled):focus) {
 	--border_color: var(--color_a_5);
 	--outline_width: var(--outline_width_focus);
 }
@@ -522,61 +528,61 @@ TODO think through these patterns to get somewhere consistent
 /* TODO maybe gradients? or at least use a text_color */
 /* TODO hover variants with brighter borders? maybe use a colorless border for that? */
 
-:where(button.color_a) {
+:where(button:not(.unstyled).color_a) {
 	--text_color: var(--color_a_5);
 	--fill: var(--fill_a);
 	--border_color: var(--border_color_a);
 	--outline_color: var(--border_color_a);
 }
-:where(button.color_b) {
+:where(button:not(.unstyled).color_b) {
 	--text_color: var(--color_b_5);
 	--fill: var(--fill_b);
 	--border_color: var(--border_color_b);
 	--outline_color: var(--border_color_b);
 }
-:where(button.color_c) {
+:where(button:not(.unstyled).color_c) {
 	--text_color: var(--color_c_5);
 	--fill: var(--fill_c);
 	--border_color: var(--border_color_c);
 	--outline_color: var(--border_color_c);
 }
-:where(button.color_d) {
+:where(button:not(.unstyled).color_d) {
 	--text_color: var(--color_d_5);
 	--fill: var(--fill_d);
 	--border_color: var(--border_color_d);
 	--outline_color: var(--border_color_d);
 }
-:where(button.color_e) {
+:where(button:not(.unstyled).color_e) {
 	--text_color: var(--color_e_5);
 	--fill: var(--fill_e);
 	--border_color: var(--border_color_e);
 	--outline_color: var(--border_color_e);
 }
-:where(button.color_f) {
+:where(button:not(.unstyled).color_f) {
 	--text_color: var(--color_f_5);
 	--fill: var(--fill_f);
 	--border_color: var(--border_color_f);
 	--outline_color: var(--border_color_f);
 }
-:where(button.color_g) {
+:where(button:not(.unstyled).color_g) {
 	--text_color: var(--color_g_5);
 	--fill: var(--fill_g);
 	--border_color: var(--border_color_g);
 	--outline_color: var(--border_color_g);
 }
-:where(button.color_h) {
+:where(button:not(.unstyled).color_h) {
 	--text_color: var(--color_h_5);
 	--fill: var(--fill_h);
 	--border_color: var(--border_color_h);
 	--outline_color: var(--border_color_h);
 }
-:where(button.color_i) {
+:where(button:not(.unstyled).color_i) {
 	--text_color: var(--color_i_5);
 	--fill: var(--fill_i);
 	--border_color: var(--border_color_i);
 	--outline_color: var(--border_color_i);
 }
-:where(button.color_j) {
+:where(button:not(.unstyled).color_j) {
 	--text_color: var(--color_j_5);
 	--fill: var(--fill_j);
 	--border_color: var(--border_color_j);
@@ -584,7 +590,7 @@ TODO think through these patterns to get somewhere consistent
 }
 
 /* TODO try to rearrange some of this to go after the colored variants */
-:where(button:disabled) {
+:where(button:not(.unstyled):disabled) {
 	/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
 	--button_fill: transparent;
 	--border_style: solid dashed;
@@ -593,55 +599,55 @@ TODO think through these patterns to get somewhere consistent
 	opacity: var(--disabled_opacity);
 	outline: none;
 }
-:where(button.selected) {
+:where(button:not(.unstyled).selected) {
 	--button_text_color: var(--text_color_9);
 	--button_fill: var(--fill);
 	--button_fill_hover: var(--fill);
 	--button_fill_active: var(--fill);
 	--button_border_color: var(--border_color);
 }
-:where(button.selected:not(.deselectable)) {
+:where(button:not(.unstyled).selected:not(.deselectable)) {
 	--button_border_color_hover: var(--border_color);
 	--button_border_color_active: var(--border_color);
 	cursor: default;
 	box-shadow: none;
 }
-:where(button:not(:disabled):hover, button:focus) {
+:where(button:not(.unstyled):not(:disabled):hover, button:not(.unstyled):focus) {
 	--button_fill: var(--button_fill_hover);
 	--button_border_color: var(--button_border_color_hover);
 	--shadow: var(--button_shadow_hover);
 }
-:where(button:not(.selected):not(:disabled):hover) {
+:where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
 	/* TODO or set a hover var? make consistent with fill */
 	--button_border_color: var(--button_border_color_hover);
 	--button_text_color: color-mix(in hsl, var(--text_color) 90%, var(--fg_10));
 }
-:where(button.selected.deselectable:not(:disabled):hover) {
+:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
 	--button_text_color: var(--text_color_10);
 }
-:where(button:not(:disabled):active) {
+:where(button:not(.unstyled):not(:disabled):active) {
 	--button_fill: var(--button_fill_active);
 	--button_border_color: var(--button_border_color_active);
 	--outline_width: var(--outline_width_active);
 	--shadow: var(--button_shadow_active);
 }
-:where(:is(input, textarea, select, button):disabled:active, label.disabled:active) {
+:where(:is(input, textarea, select, button):not(.unstyled):disabled:active, label:not(.unstyled).disabled:active) {
 	--text_color: var(--color_c_5);
 	--border_color: var(--color_c_5);
 }
 /* TODO is there a cleaner way to override these through vars? */
-:where(button.selected:disabled:active) {
+:where(button:not(.unstyled).selected:disabled:active) {
 	--text_color: var(--text_color_9);
 	--fill: var(--fill_c);
 }
-:where(button:not(.selected):disabled:active) {
+:where(button:not(.unstyled):not(.selected):disabled:active) {
 	--fill: transparent;
 }
-:where(button.selected:not(.deselectable):active) {
+:where(button:not(.unstyled).selected:not(.deselectable):active) {
 	--outline_width: var(--outline_width_focus);
 }
 
-:where(button.inline, p button) {
+:where(button:not(.unstyled).inline, p button:not(.unstyled)) {
 	display: inline-block;
 	--min_height: var(--input_height_sm); /* TODO this increases paragraph line spacing */
 }
