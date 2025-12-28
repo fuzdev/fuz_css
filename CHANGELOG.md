@@ -1,5 +1,15 @@
 # @fuzdev/fuz_css
 
+## 0.43.0
+
+### Minor Changes
+
+- improve the reset styles ([7a46704](https://github.com/fuzdev/fuz_css/commit/7a46704))
+
+### Patch Changes
+
+- support `.unstyled` for more elements in `style.css` ([c543b0f](https://github.com/fuzdev/fuz_css/commit/c543b0f))
+
 ## 0.42.1
 
 ### Patch Changes
