@@ -22,14 +22,17 @@ Some notes:
 */
 
 *,
-*::before,
-*::after {
+::before,
+::after,
+::backdrop {
 	box-sizing: border-box;
+	border: 0 solid;
 	margin: 0;
 	padding: 0;
 }
 
-:root {
+:root,
+:host {
 	color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
 	background-color: var(--bg);
 	color: var(--text_color);
@@ -40,6 +43,7 @@ Some notes:
 	-moz-text-size-adjust: none;
 	-webkit-text-size-adjust: none;
 	text-size-adjust: none;
+	-webkit-tap-highlight-color: transparent;
 }
 :root.dark {
 	color-scheme: dark;
@@ -59,15 +63,26 @@ body {
 	background-color: hsl(var(--hue_a) 90% 80% / 40%);
 }
 
+::placeholder {
+	opacity: 1;
+	color: color-mix(in oklab, currentcolor 50%, transparent);
+}
+
+::file-selector-button {
+	font: inherit;
+	cursor: pointer;
+}
+
 /*
 
 Keep hidden behavior when `display` is set.
 The `!important` makes this `hidden` behavior much higher specificity.
+Respects `hidden="until-found"` for find-in-page support.
 
 @source https://github.com/jensimmons/cssremedy
 
 */
-[hidden] {
+[hidden]:where(:not([hidden='until-found'])) {
 	display: none !important;
 }
 
@@ -297,6 +312,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 :where(textarea:not(.unstyled)) {
 	--input_padding_y: var(--space_sm);
 	height: 100px;
+	resize: vertical;
 }
 
 :where(:is(select, option, input[type='color']):not(:disabled)) {
@@ -426,7 +442,10 @@ see https://caniuse.com/css-has
 	cursor: default;
 }
 
-:where(:is(input, textarea, select):not(.unstyled).inline, p :is(input, textarea, select):not(.unstyled)) {
+:where(
+	:is(input, textarea, select):not(.unstyled).inline,
+	p :is(input, textarea, select):not(.unstyled)
+) {
 	display: inline-block;
 	margin-left: var(--space_lg);
 	/* TODO ideally `width` here would be set to a minimum and have an API to increase size --
@@ -631,7 +650,10 @@ TODO think through these patterns to get somewhere consistent
 	--outline_width: var(--outline_width_active);
 	--shadow: var(--button_shadow_active);
 }
-:where(:is(input, textarea, select, button):not(.unstyled):disabled:active, label:not(.unstyled).disabled:active) {
+:where(
+	:is(input, textarea, select, button):not(.unstyled):disabled:active,
+	label:not(.unstyled).disabled:active
+) {
 	--text_color: var(--color_c_5);
 	--border_color: var(--color_c_5);
 }
@@ -698,4 +720,33 @@ TODO think through these patterns to get somewhere consistent
 }
 :where(tr:hover) {
 	background-color: var(--fg_1);
+}
+
+:where(abbr[title]) {
+	text-decoration: underline dotted;
+}
+
+:where(b, strong) {
+	font-weight: bolder;
+}
+
+:where(kbd, samp) {
+	font-family: var(--font_family_mono);
+}
+
+:where(sub, sup) {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+:where(sub) {
+	bottom: -0.25em;
+}
+:where(sup) {
+	top: -0.5em;
+}
+
+:where(progress) {
+	vertical-align: baseline;
 }
