@@ -27,9 +27,9 @@
 		// oncreate?: (theme: Theme) => void;
 	} = $props();
 
-	let new_name = $state(theme ? theme.name : 'new theme');
+	let new_name = $derived(theme ? theme.name : 'new theme');
 
-	let new_variables = $state(theme ? theme.variables : []); // TODO `updateVariables` to `StyleVariableDetail` ?
+	let new_variables = $derived(theme ? theme.variables : []); // TODO `updateVariables` to `StyleVariableDetail` ?
 
 	const new_theme: Theme = $derived({name: new_name, variables: new_variables});
 
