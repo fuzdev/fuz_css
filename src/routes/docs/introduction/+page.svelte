@@ -18,7 +18,10 @@
 		<p>Details:</p>
 		<ul>
 			<li>plain CSS</li>
-			<li>zero dependencies</li>
+			<li>
+				one optional dependency on <a href="https://util.fuz.dev/">fuz_util</a> (not needed if you only
+				use the stylesheets)
+			</li>
 			<li>
 				exports a reset stylesheet (<ModuleLink path="style.css" />) with semantic defaults that
 				styles HTML elements
