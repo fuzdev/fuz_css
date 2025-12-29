@@ -23,12 +23,12 @@
 		</header>
 		<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
 	</section>
-	<EcosystemLinksPanel />
 	<section>
 		<div class="panel p_md width_upto_md">
 			<LibraryDetail {library} />
 		</div>
 	</section>
+	<EcosystemLinksPanel />
 	<section class="box mb_xl7">
 		<DocsFooter {library}>
 			<div class="mb_xl5">

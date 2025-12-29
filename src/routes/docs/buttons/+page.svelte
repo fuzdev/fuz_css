@@ -28,6 +28,10 @@
 <TomeContent {tome}>
 	<section>
 		<p>
+			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
+			like <code>.selected</code> and <code>.plain</code> and <code>.color_a</code> modify the base style.
+		</p>
+		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
 			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
 			Instead of having two distinct styles of buttons with outlined and filled variants, Fuz CSS
@@ -53,6 +57,7 @@
 		<button type="button" class="selected deselectable" disabled class:mb_xs
 			>button.selected.deselectable:disabled</button
 		>
+		<button type="button" class="unstyled">with .unstyled</button>
 	</section>
 
 	<section>

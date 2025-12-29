@@ -9,6 +9,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import ModuleLink from '$routes/ModuleLink.svelte';
 
 	const LIBRARY_ITEM_NAME = 'elements';
 
@@ -22,40 +23,54 @@
 <!-- eslint-disable svelte/no-useless-mustaches -->
 
 <TomeContent {tome}>
+	<p>
+		Fuz CSS applies default styles to semantic HTML elements in its <ModuleLink path="style.css"
+			>reset stylesheet</ModuleLink
+		>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
+		user-friendly styling and theme integration automatically. The defaults are low specificity using
+		<code>:where</code>
+		so they're easy to override, and you can opt out by adding
+		<code>.unstyled</code> to an element.
+	</p>
 	<UnfinishedImplementationWarning
-		>Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css">requests</a
+		>Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css/issues"
+			>requests</a
 		>?</UnfinishedImplementationWarning
 	>
-	<blockquote>
-		Styles for plain <MdnLink path="Web/HTML/Element">HTML elements</MdnLink>. See also <TomeLink
-			name="typography"
-		/> and <TomeLink name="forms" />.
-	</blockquote>
 	<TomeSection>
-		<TomeSectionHeader text="blockquote">
-			<span class="font_size_xl3">👆</span>
-			<MdnLink path="Web/HTML/Element/blockquote" />
+		<TomeSectionHeader text="p">
+			<MdnLink path="Web/HTML/Element/p" />
 		</TomeSectionHeader>
-		<TomeSectionHeader text="hr">
-			<span class="font_size_xl3">👇</span>
-			<MdnLink path="Web/HTML/Element/hr" />
-		</TomeSectionHeader>
-		<hr />
+		<p>Paragraph elements are unstyled except for spacing. Divs are totally unstyled.</p>
+		<p>p</p>
+		<p>p</p>
+		<div>div</div>
+		<p>p</p>
+		<p>p</p>
+		<p>
+			This paragraph has no bottom margin because default spacing is omitted for the <code
+				>:last-child</code
+			>
+			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge cases
+			that can usually by solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
+			like this may be something we change, <a href="https://github.com/fuzdev/fuz_css">feedback</a> is
+			welcome.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="a">
 			<MdnLink path="Web/HTML/Element/a" />
 		</TomeSectionHeader>
-		<p><a href={resolve('/')}>a link</a> in a <code>p</code></p>
-		<div><a href={resolve('/')}>a link</a> in a <code>div</code></div>
-		<p><a class="selected" href={resolve('/')}>a link</a> with <code>.selected</code></p>
+		<p><a href={resolve('/docs')}>a link</a></p>
+		<p><a class="selected" href={resolve('/docs')}>a link</a> with <code>.selected</code></p>
+		<p><a class="unstyled" href={resolve('/docs')}>a link</a> with <code>.unstyled</code></p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="code">
 			<MdnLink path="Web/HTML/Element/code" />
 		</TomeSectionHeader>
-		<p><code>code</code> in a <code>p</code></p>
-		<div><code>code</code> in a <code>div</code></div>
+		<p><code>code</code></p>
+		<p><code class="unstyled">code</code> with <code>.unstyled</code></p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="pre">
@@ -85,6 +100,19 @@
 </details>`}
 			/>
 		</details>
+		<details class="unstyled">
+			<summary class="unstyled"
+				><code>details</code> and <code>summary</code> with <code>.unstyled</code></summary
+			>
+			unstyled details content
+		</details>
+	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="blockquote">
+			<MdnLink path="Web/HTML/Element/blockquote" />
+		</TomeSectionHeader>
+		<blockquote>blockquote</blockquote>
+		<blockquote class="unstyled">blockquote with <code>.unstyled</code></blockquote>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="aside">
@@ -107,6 +135,13 @@
 				</aside>
 			</aside>
 		</aside>
+		<aside class="unstyled">aside with <code>.unstyled</code></aside>
+	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="hr">
+			<MdnLink path="Web/HTML/Element/hr" />
+		</TomeSectionHeader>
+		<hr />
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="header">
@@ -127,6 +162,9 @@
 			<MdnLink path="Web/HTML/Element/section" />
 		</TomeSectionHeader>
 		<Code content={`<section>section</section>`} />
+		<p>Sections have a bottom margin, except for the last in the list.</p>
+		<section>section</section>
+		<section>section</section>
 		<section>section</section>
 	</TomeSection>
 	<TomeSection>
