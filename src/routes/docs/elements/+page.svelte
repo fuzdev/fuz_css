@@ -47,6 +47,15 @@
 		<div>div</div>
 		<p>p</p>
 		<p>p</p>
+		<p>
+			This paragraph has no bottom margin because default spacing is omitted for the <code
+				>:last-child</code
+			>
+			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge cases
+			that can usually by solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
+			like this may be something we change, <a href="https://github.com/fuzdev/fuz_css">feedback</a> is
+			welcome.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="a">
@@ -91,6 +100,12 @@
 </details>`}
 			/>
 		</details>
+		<details class="unstyled">
+			<summary class="unstyled"
+				><code>details</code> and <code>summary</code> with <code>.unstyled</code></summary
+			>
+			unstyled details content
+		</details>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="blockquote">
@@ -120,6 +135,7 @@
 				</aside>
 			</aside>
 		</aside>
+		<aside class="unstyled">aside with <code>.unstyled</code></aside>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="hr">
@@ -146,6 +162,9 @@
 			<MdnLink path="Web/HTML/Element/section" />
 		</TomeSectionHeader>
 		<Code content={`<section>section</section>`} />
+		<p>Sections have a bottom margin, except for the last in the list.</p>
+		<section>section</section>
+		<section>section</section>
 		<section>section</section>
 	</TomeSection>
 	<TomeSection>
