@@ -28,6 +28,10 @@
 <TomeContent {tome}>
 	<section>
 		<p>
+			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
+			like <code>.selected</code> and <code>.plain</code> modify the base style.
+		</p>
+		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
 			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
 			Instead of having two distinct styles of buttons with outlined and filled variants, Fuz CSS

@@ -36,6 +36,9 @@
 
 <TomeContent {tome}>
 	<UnfinishedImplementationWarning>Forms need more work.</UnfinishedImplementationWarning>
+	<p>
+		Form elements have basic default styles that can be omitted with <code>.unstyled</code>.
+	</p>
 
 	<TomeSection>
 		<TomeSectionHeader text="form with a fieldset">
@@ -159,8 +162,11 @@
 			</fieldset>
 		</form>
 		<aside>
-			The above are wrapped with: <Code content={`<label class="row">`} />
-			with <code>.disabled</code> as needed: <Code content={`<label class="row disabled">`} />
+			The above are wrapped with: <Code content={`<label class="row">`} inline />
+			with <code>.disabled</code> as needed: <Code
+				content={`<label class="row disabled">`}
+				inline
+			/>
 		</aside>
 	</TomeSection>
 

@@ -20,7 +20,7 @@
 			<blockquote class="shadow_inset_top_xs">magical organic stylesheets 🌿</blockquote>
 		</div>
 	</section>
-	<section class="width_upto_sm p_sm border_radius_md shadow_xs">
+	<section class="width_upto_md p_sm border_radius_md shadow_xs">
 		<div class="panel p_lg bg shadow_sm">
 			<Introduction />
 		</div>
