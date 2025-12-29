@@ -57,6 +57,7 @@
 		<button type="button" class="selected deselectable" disabled class:mb_xs
 			>button.selected.deselectable:disabled</button
 		>
+		<button type="button" class="unstyled">with .unstyled</button>
 	</section>
 
 	<section>
