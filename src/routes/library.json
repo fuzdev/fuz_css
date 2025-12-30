@@ -1,4 +1,14 @@
 {
+	"name": "@fuzdev/fuz_css",
+	"repo_name": "fuz_css",
+	"repo_url": "https://github.com/fuzdev/fuz_css",
+	"owner_name": "fuzdev",
+	"homepage_url": "https://css.fuz.dev/",
+	"logo_url": "https://css.fuz.dev/logo.svg",
+	"logo_alt": "a fuzzy tuft of green moss",
+	"npm_url": "https://www.npmjs.com/package/@fuzdev/fuz_css",
+	"changelog_url": "https://github.com/fuzdev/fuz_css/blob/main/CHANGELOG.md",
+	"published": true,
 	"package_json": {
 		"name": "@fuzdev/fuz_css",
 		"version": "0.43.0",
@@ -41,8 +51,8 @@
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/fuz_code": "^0.38.0",
-			"@fuzdev/fuz_ui": "^0.174.0",
-			"@fuzdev/fuz_util": "^0.45.0",
+			"@fuzdev/fuz_ui": "^0.175.0",
+			"@fuzdev/fuz_util": "^0.45.1",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@ryanatkn/gro": "^0.184.0",
 			"@sveltejs/adapter-static": "^3.0.10",
@@ -3319,15 +3329,5 @@
 				"dependents": ["theme.ts"]
 			}
 		]
-	},
-	"name": "@fuzdev/fuz_css",
-	"repo_name": "fuz_css",
-	"repo_url": "https://github.com/fuzdev/fuz_css",
-	"owner_name": "fuzdev",
-	"homepage_url": "https://css.fuz.dev/",
-	"logo_url": "https://css.fuz.dev/logo.svg",
-	"logo_alt": "a fuzzy tuft of green moss",
-	"npm_url": "https://www.npmjs.com/package/@fuzdev/fuz_css",
-	"changelog_url": "https://github.com/fuzdev/fuz_css/blob/main/CHANGELOG.md",
-	"published": true
+	}
 }
