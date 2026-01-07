@@ -1,14 +1,16 @@
 <script lang="ts">
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {resolve} from '$app/paths';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 </script>
 
 <p>
-	Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
-	Semantic styles mean HTML elements are styled by default, with <code>.unstyled</code>
+	Fuz CSS is a CSS framework and design system built around <TomeLink name="semantic" /> styles and <TomeLink
+		name="variables">style variables</TomeLink
+	>. Semantic styles mean HTML elements are styled by default, with <code>.unstyled</code>
 	to opt out when needed. Style variables are design tokens and <MdnLink path="Web/CSS/--*"
 		>CSS custom properties</MdnLink
 	> with particular capabilities and conventions that integrate with the semantic styles and other features

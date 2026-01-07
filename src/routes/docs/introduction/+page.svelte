@@ -24,8 +24,8 @@
 				use the stylesheets)
 			</li>
 			<li>
-				exports a reset stylesheet (<ModuleLink path="style.css" />) with semantic defaults that
-				styles HTML elements
+				exports a reset stylesheet with <TomeLink name="semantic" /> defaults that styles HTML elements,
+				see <ModuleLink path="style.css" />
 			</li>
 			<li>
 				exports a basic theme stylesheet (<ModuleLink path="theme.css" />) that can be replaced with
