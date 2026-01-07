@@ -24,25 +24,24 @@
 	// TODO demo `border_style_values` from the data
 
 	const border_radius_classes = [
-		'border_radius_0',
-		'border_radius_14',
-		'border_radius_32',
-		'border_radius_100',
+		'border-radius:0',
+		'border-radius:14%',
+		'border-radius:32%',
+		'border-radius:100%',
 	];
 
 	const border_radius_corner_classes = [
-		'border_top_left_radius_26',
-		'border_top_right_radius_100 border_bottom_left_radius_100',
-		'border_bottom_right_radius_77',
+		'border-top-left-radius:26%',
+		'border-top-right-radius:100% border-bottom-left-radius:100%',
+		'border-bottom-right-radius:77%',
 	];
 
 	const border_radius_corner_size_classes = [
 		'border_top_left_radius_lg border_top_right_radius_sm',
 		'border_bottom_left_radius_md border_bottom_right_radius_xl',
 	];
-	// TODO improve class detection
-	// classes="border_top_right_radius_100 border_bottom_left_radius_100 border_top_left_radius_lg border_top_right_radius_sm border_bottom_left_radius_md border_bottom_right_radius_xl"
-	// classes="outline_width_focus outline_width_active"
+
+	// @fuz-classes outline_width_focus outline_width_active
 </script>
 
 <TomeContent {tome}>

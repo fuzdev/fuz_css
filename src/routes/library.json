@@ -136,6 +136,93 @@
 				"dependents": ["css_classes.ts"]
 			},
 			{
+				"path": "css_class_extractor.ts",
+				"declarations": [
+					{
+						"name": "ExtractionResult",
+						"kind": "type",
+						"doc_comment": "Extraction result with classes and tracked variables.",
+						"source_line": 66,
+						"type_signature": "ExtractionResult",
+						"properties": [
+							{
+								"name": "classes",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "All extracted class names"
+							},
+							{
+								"name": "tracked_vars",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "Variables that were used in class contexts (for diagnostics)"
+							}
+						]
+					},
+					{
+						"name": "extract_from_svelte",
+						"kind": "function",
+						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
+						"source_line": 93,
+						"type_signature": "(source: string): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Extraction result with classes and tracked variables",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The Svelte file source code"
+							}
+						]
+					},
+					{
+						"name": "extract_from_ts",
+						"kind": "function",
+						"doc_comment": "Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.",
+						"source_line": 144,
+						"type_signature": "(source: string, _filename?: string | undefined): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Extraction result with classes and tracked variables",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The TS/JS file source code"
+							},
+							{
+								"name": "_filename",
+								"type": "string | undefined",
+								"optional": true
+							}
+						]
+					},
+					{
+						"name": "extract_css_classes",
+						"kind": "function",
+						"doc_comment": "Unified extraction function that auto-detects file type.",
+						"source_line": 188,
+						"type_signature": "(source: string, filename?: string | undefined): Set<string>",
+						"return_type": "Set<string>",
+						"return_description": "Extraction result with classes",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The file source code"
+							},
+							{
+								"name": "filename",
+								"type": "string | undefined",
+								"optional": true,
+								"description": "- The filename (for determining file type)"
+							}
+						]
+					}
+				],
+				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
+				"dependents": ["css_class_helpers.ts"]
+			},
+			{
 				"path": "css_class_generators.ts",
 				"declarations": [
 					{
@@ -446,29 +533,25 @@
 						]
 					},
 					{
-						"name": "CssExtractor",
+						"name": "CollectCssClassesOptions",
 						"kind": "type",
 						"source_line": 18,
-						"type_signature": "CssExtractor",
+						"type_signature": "CollectCssClassesOptions",
 						"properties": [
 							{
-								"name": "matcher",
+								"name": "filename",
 								"kind": "variable",
-								"type_signature": "RegExp"
-							},
-							{
-								"name": "mapper",
-								"kind": "variable",
-								"type_signature": "(matched: RegExpExecArray) => Array<string>"
+								"type_signature": "string",
+								"doc_comment": "File path used to determine extraction method (Svelte vs TS)."
 							}
 						]
 					},
 					{
 						"name": "collect_css_classes",
 						"kind": "function",
-						"doc_comment": "Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.\nHandles class attributes, directives, and various forms of CSS class declarations.",
-						"source_line": 83,
-						"type_signature": "(contents: string, extractors?: CssExtractor[]): Set<string>",
+						"doc_comment": "Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.\nUses AST parsing for accurate extraction of:\n- `class=\"...\"` string attributes\n- `class={{...}}` object attributes (Svelte 5.16+)\n- `class={[...]}` array attributes (Svelte 5.16+)\n- `class:name` directives\n- `clsx()`, `cn()`, `classNames()` calls\n- Variables with class-like names",
+						"source_line": 35,
+						"type_signature": "(contents: string, options?: CollectCssClassesOptions): Set<string>",
 						"return_type": "Set<string>",
 						"parameters": [
 							{
@@ -476,16 +559,16 @@
 								"type": "string"
 							},
 							{
-								"name": "extractors",
-								"type": "CssExtractor[]",
-								"default_value": "CSS_CLASS_EXTRACTORS"
+								"name": "options",
+								"type": "CollectCssClassesOptions",
+								"default_value": "{}"
 							}
 						]
 					},
 					{
 						"name": "CssClasses",
 						"kind": "class",
-						"source_line": 109,
+						"source_line": 42,
 						"members": [
 							{
 								"name": "include_classes",
@@ -544,13 +627,13 @@
 					{
 						"name": "CssClassDeclaration",
 						"kind": "type",
-						"source_line": 155,
+						"source_line": 88,
 						"type_signature": "CssClassDeclaration"
 					},
 					{
 						"name": "CssClassDeclarationBase",
 						"kind": "type",
-						"source_line": 160,
+						"source_line": 93,
 						"type_signature": "CssClassDeclarationBase",
 						"properties": [
 							{
@@ -563,7 +646,7 @@
 					{
 						"name": "CssClassDeclarationItem",
 						"kind": "type",
-						"source_line": 164,
+						"source_line": 97,
 						"type_signature": "CssClassDeclarationItem",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -577,7 +660,7 @@
 					{
 						"name": "CssClassDeclarationGroup",
 						"kind": "type",
-						"source_line": 167,
+						"source_line": 100,
 						"type_signature": "CssClassDeclarationGroup",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -592,7 +675,7 @@
 						"name": "CssClassDiagnostic",
 						"kind": "type",
 						"doc_comment": "Diagnostic from CSS class interpretation.",
-						"source_line": 173,
+						"source_line": 106,
 						"type_signature": "CssClassDiagnostic",
 						"properties": [
 							{
@@ -620,7 +703,7 @@
 					{
 						"name": "CssClassDeclarationInterpreter",
 						"kind": "type",
-						"source_line": 180,
+						"source_line": 113,
 						"type_signature": "CssClassDeclarationInterpreter",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -640,7 +723,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 192,
+						"source_line": 125,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -658,7 +741,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 197,
+						"source_line": 130,
 						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDeclaration | undefined>, interpreters: CssClassDeclarationInterpreter[], log?: Logger | undefined): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
@@ -682,62 +765,28 @@
 						]
 					}
 				],
+				"dependencies": ["css_class_extractor.ts"],
 				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_interpreters.ts",
 				"declarations": [
 					{
-						"name": "opacity_interpreter",
-						"kind": "variable",
-						"doc_comment": "Interpreter for opacity classes (opacity_0 through opacity_100).",
-						"source_line": 12,
-						"type_signature": "CssClassDeclarationInterpreter"
-					},
-					{
-						"name": "font_weight_interpreter",
-						"kind": "variable",
-						"doc_comment": "Interpreter for font-weight classes,\n`font_weight_1` through `font_weight_1000` following the CSS spec.",
-						"source_line": 29,
-						"type_signature": "CssClassDeclarationInterpreter"
-					},
-					{
-						"name": "border_radius_interpreter",
-						"kind": "variable",
-						"doc_comment": "Interpreter for border-radius percentage classes,\n`border_radius_0` through `border_radius_100`.",
-						"source_line": 45,
-						"type_signature": "CssClassDeclarationInterpreter"
-					},
-					{
-						"name": "border_radius_corners_interpreter",
-						"kind": "variable",
-						"doc_comment": "Interpreter for border radius corner percentage classes,\nhandles all four corners: top-left, top-right, bottom-left, bottom-right.\nExamples: `border_top_left_radius_50`, `border_bottom_right_radius_100`.",
-						"source_line": 62,
-						"type_signature": "CssClassDeclarationInterpreter"
-					},
-					{
-						"name": "z_index_interpreter",
-						"kind": "variable",
-						"doc_comment": "Interpreter for z-index classes,\n`z_index_0` through `z_index_${Z_INDEX_MAX}` (max CSS z-index).",
-						"source_line": 82,
-						"type_signature": "CssClassDeclarationInterpreter"
-					},
-					{
 						"name": "css_literal_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
-						"source_line": 98,
+						"source_line": 12,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
-						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nCSS-literal interpreter is last as a catch-all for property:value patterns.",
-						"source_line": 127,
+						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.",
+						"source_line": 40,
 						"type_signature": "CssClassDeclarationInterpreter[]"
 					}
 				],
-				"dependencies": ["css_class_helpers.ts", "css_literal.ts", "variable_data.ts"],
+				"dependencies": ["css_class_helpers.ts", "css_literal.ts"],
 				"dependents": ["gen_fuz_css.ts"]
 			},
 			{
@@ -1105,6 +1154,18 @@
 								"kind": "variable",
 								"type_signature": "'log' | 'throw'",
 								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log' (default): Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+							},
+							{
+								"name": "include_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to always include in the output, regardless of whether they're detected in source files.\nUseful for dynamically generated class names that can't be statically extracted."
+							},
+							{
+								"name": "exclude_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to exclude from the output, even if they're detected in source files.\nUseful for filtering out false positives from extraction."
 							}
 						]
 					},
@@ -1112,7 +1173,7 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 31,
+						"source_line": 41,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
@@ -1137,7 +1198,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 54,
+						"source_line": 64,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -1850,7 +1911,7 @@
 						"type_signature": "2147483647"
 					}
 				],
-				"dependents": ["css_class_interpreters.ts", "css_classes.ts", "variables.ts"]
+				"dependents": ["css_classes.ts", "variables.ts"]
 			},
 			{
 				"path": "variable.ts",

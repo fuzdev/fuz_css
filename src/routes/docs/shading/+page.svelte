@@ -22,12 +22,12 @@
 	};
 
 	const opacity_classes = [
-		'opacity_0',
-		'opacity_17',
-		'opacity_38',
-		'opacity_51',
-		'opacity_79',
-		'opacity_100',
+		'opacity:0',
+		'opacity:17%',
+		'opacity:38%',
+		'opacity:51%',
+		'opacity:79%',
+		'opacity:100%',
 	];
 </script>
 

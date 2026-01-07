@@ -1,6 +1,6 @@
 import type {Logger} from '@fuzdev/fuz_util/log.js';
 
-// TODO maybe just use the Svelte (and Oxc?) parser instead of this regexp madness?
+import {extract_css_classes} from './css_class_extractor.js';
 
 /**
  * Escapes special characters in a CSS class name for use in a selector.
@@ -15,95 +15,28 @@ export const escape_css_selector = (name: string): string => {
 	return name.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
 };
 
-export interface CssExtractor {
-	matcher: RegExp;
-	mapper: (matched: RegExpExecArray) => Array<string>;
+export interface CollectCssClassesOptions {
+	/**
+	 * File path used to determine extraction method (Svelte vs TS).
+	 */
+	filename?: string;
 }
-
-const CSS_CLASS_EXTRACTORS: Array<CssExtractor> = [
-	// `class:a`
-	{
-		matcher: /(?<!['"`])class:([^\s=>]+)/gi,
-		mapper: (matched) => [matched[1]!],
-	}, // initial capture group is fake just because the second regexp uses a capture group for its back reference
-
-	// `class="a"`, `classes="a"`, `classes = 'a b'`, `classes: 'a b'` with any whitespace around the `=`/`:`
-	{
-		matcher: /(?<!['"`])class(?:es)?\s*[=:]\s*(["'`])([\s\S]+?)\1/gi, // omit leading quotes in case it's obviously a string, like in tests (even though tests are separately filtered by default in the plugin)
-		mapper: (matched) =>
-			matched[2]!
-				.replace(
-					// omit all expressions with best-effort - it's not perfect especially
-					// around double quote strings in JS in Svelte expressions, but using single quotes is better imo
-					/\S*{(?:[^{}]|\{(?:[^{}]|\{[^{}]*\})*\})*}\S*/g,
-					// same failures:
-					// /\S*{(?:[^{}]*|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.|\$\{(?:[^{}]*|{[^{}]*})*\})*`|{(?:[^{}]*|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.|\$\{(?:[^{}]*|{[^{}]*})*\})*`)*})*}\S*/g,
-					// 3 failures:
-					// /\S*{(?:[^{}`'"]*|[`'"]((?:[^\\`'"]|\\.|\$\{[^}]*\})*)[`'"]|{[^{}]*})*}\S*/g,
-					'',
-				)
-				.split(/\s+/)
-				.filter(Boolean),
-	},
-	// arrays like `class: ['a', 'b']`, `classes = ['a', 'b']`, `classes={['a', 'b']`
-	{
-		matcher: /(?<!['"`])class(?:es)?\s*[=:]\{?\s*\[([\s\S]*?)\]/g,
-		mapper: (matched: RegExpExecArray): Array<string> => {
-			const content = matched[1]!;
-			if (content.includes('[')) return []; // TODO @many ideally fix instead of bailing, but maybe we need a real JS parser?
-			const items = content.split(',').map((item) => item.trim());
-
-			return items
-				.reduce((classes: Array<string>, item: string) => {
-					// Match string literals within each item
-					const string_literals = item.match(/(['"`])((?:(?!\1)[^\\]|\\.)*?)\1/g);
-					if (!string_literals) return classes;
-
-					// Check if the item contains concatenation
-					const has_concatenation = /\s*\+\s*/.test(item);
-
-					if (!has_concatenation && string_literals.length === 1) {
-						const content = string_literals[0].slice(1, -1); // remove quotes
-						if (!content.includes('${')) {
-							classes.push(content.replace(/\\(['"`])/g, '$1').trim());
-						}
-					}
-
-					return classes;
-				}, [])
-				.filter(Boolean); // Filter out empty strings
-		},
-	},
-];
 
 /**
  * Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.
- * Handles class attributes, directives, and various forms of CSS class declarations.
+ * Uses AST parsing for accurate extraction of:
+ * - `class="..."` string attributes
+ * - `class={{...}}` object attributes (Svelte 5.16+)
+ * - `class={[...]}` array attributes (Svelte 5.16+)
+ * - `class:name` directives
+ * - `clsx()`, `cn()`, `classNames()` calls
+ * - Variables with class-like names
  */
 export const collect_css_classes = (
 	contents: string,
-	extractors: Array<CssExtractor> = CSS_CLASS_EXTRACTORS,
+	options: CollectCssClassesOptions = {},
 ): Set<string> => {
-	const all_classes: Set<string> = new Set();
-
-	for (const extractor of extractors) {
-		for (const c of extract_classes(contents, extractor)) {
-			all_classes.add(c);
-		}
-	}
-
-	return all_classes;
-};
-
-const extract_classes = (contents: string, {matcher, mapper}: CssExtractor): Set<string> => {
-	const classes: Set<string> = new Set();
-	let matched: RegExpExecArray | null;
-	while ((matched = matcher.exec(contents)) !== null) {
-		for (const c of mapper(matched)) {
-			classes.add(c);
-		}
-	}
-	return classes;
+	return extract_css_classes(contents, options.filename);
 };
 
 export class CssClasses {

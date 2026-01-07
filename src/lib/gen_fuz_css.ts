@@ -23,6 +23,16 @@ export interface GenFuzCssOptions {
 	 * - 'throw': Throw on first error, fail the build
 	 */
 	on_error?: 'log' | 'throw';
+	/**
+	 * Classes to always include in the output, regardless of whether they're detected in source files.
+	 * Useful for dynamically generated class names that can't be statically extracted.
+	 */
+	include_classes?: Iterable<string>;
+	/**
+	 * Classes to exclude from the output, even if they're detected in source files.
+	 * Useful for filtering out false positives from extraction.
+	 */
+	exclude_classes?: Iterable<string>;
 }
 
 /**
@@ -58,7 +68,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		classes_by_name = css_classes_by_name,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
+		include_classes,
+		exclude_classes,
 	} = options;
+
+	// Convert to Sets for efficient lookup
+	const include_set = include_classes ? new Set(include_classes) : null;
+	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
 	return {
 		dependencies: 'all',
@@ -77,7 +93,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 			await filer.init();
 
-			const css_classes = new CssClasses();
+			const css_classes = new CssClasses(include_set);
 
 			const stats = {
 				total_files: filer.files.size,
@@ -103,7 +119,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 				if (disknode.contents !== null) {
 					stats.files_with_content++;
-					const classes = collect_css_classes(disknode.contents);
+					const classes = collect_css_classes(disknode.contents, {filename: disknode.id});
 					if (classes.size > 0) {
 						css_classes.add(disknode.id, classes);
 						stats.files_with_classes++;
@@ -111,11 +127,16 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				}
 			}
 
-			const unique_classes = new Set();
-			for (const file_classes of css_classes.get().values()) {
-				for (const class_name of file_classes) {
-					unique_classes.add(class_name);
+			// Get all classes and apply exclude filter
+			let all_classes = css_classes.get();
+			if (exclude_set) {
+				const filtered: Set<string> = new Set();
+				for (const cls of all_classes) {
+					if (!exclude_set.has(cls)) {
+						filtered.add(cls);
+					}
 				}
+				all_classes = filtered;
 			}
 
 			if (include_stats) {
@@ -126,15 +147,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Files processed (passed filter): ${stats.processed_files}`);
 				log.info(`    With content: ${stats.files_with_content}`);
 				log.info(`    With CSS classes: ${stats.files_with_classes}`);
-				log.info(`  Unique CSS classes found: ${unique_classes.size}`);
+				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			const result = generate_classes_css(
-				css_classes.get(),
-				classes_by_name,
-				class_interpreters,
-				log,
-			);
+			const result = generate_classes_css(all_classes, classes_by_name, class_interpreters, log);
 
 			// Check for errors and handle based on on_error setting
 			const errors = result.diagnostics.filter((d) => d.level === 'error');
@@ -160,7 +176,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
  * - Internal project files: ${stats.internal_files}
  * - Files processed (passed filter): ${stats.processed_files}
  * - Files with CSS classes: ${stats.files_with_classes}
- * - Unique classes found: ${unique_classes.size}
+ * - Unique classes found: ${all_classes.size}
  */`;
 				content_parts.push(performance_note);
 			}
