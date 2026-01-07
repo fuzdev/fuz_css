@@ -112,6 +112,7 @@
 			<p>Multi-property shortcuts for repeated patterns. Define your own in a composites file:</p>
 			<Code
 				lang="typescript"
+				class="mb_lg"
 				content={`// src/lib/composites.ts
 export const my_composites = {
 	'flex-center': {declaration: 'display: flex; align-items: center; justify-content: center;'},
@@ -160,16 +161,17 @@ export const my_composites = {
 				</li>
 			</ul>
 			<Code
-				content={`<!-- Basic syntax: property:value -->
+				class="mb_lg"
+				content={`<!-- basic syntax: property:value -->
 <div class="display:flex justify-content:center gap:var(--space_md)">
 
-<!-- Multi-value properties use ~ for spaces -->
+<!-- multi-value properties use ~ for spaces -->
 <div class="margin:0~auto padding:var(--space_sm)~var(--space_lg)">
 
-<!-- Numeric values -->
+<!-- numeric values -->
 <div class="opacity:50% font-weight:700 z-index:100 border-radius:8px">
 
-<!-- Arbitrary CSS values work natively -->
+<!-- arbitrary CSS values work natively -->
 <div class="width:calc(100%~-~20px) aspect-ratio:16/9">`}
 			/>
 			<p>
@@ -265,6 +267,7 @@ export const my_composites = {
 			</tbody>
 		</table>
 		<Code
+			class="mb_lg"
 			content={`<!-- Stack on mobile, row on medium screens and up -->
 <div class="display:flex flex-direction:column md:flex-direction:row">
 
@@ -280,6 +283,7 @@ export const my_composites = {
 		<h4>State modifiers</h4>
 		<p>Pseudo-class modifiers for interaction and form states:</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- Hover and focus effects -->
 <button class="hover:background-color:var(--color_a_6) focus:outline:2px~solid~var(--color_a_5)">
 
@@ -292,17 +296,17 @@ export const my_composites = {
 		<p>Available state modifiers include:</p>
 		<ul>
 			<li>
-				<strong>Interaction:</strong> <code>hover:</code>, <code>focus:</code>,
+				<strong>interaction:</strong> <code>hover:</code>, <code>focus:</code>,
 				<code>focus-visible:</code>, <code>focus-within:</code>, <code>active:</code>,
 				<code>visited:</code>
 			</li>
 			<li>
-				<strong>Form:</strong> <code>disabled:</code>, <code>checked:</code>,
+				<strong>form:</strong> <code>disabled:</code>, <code>checked:</code>,
 				<code>required:</code>, <code>valid:</code>, <code>invalid:</code>,
 				<code>placeholder-shown:</code>
 			</li>
 			<li>
-				<strong>Structural:</strong> <code>first:</code>, <code>last:</code>, <code>only:</code>,
+				<strong>structural:</strong> <code>first:</code>, <code>last:</code>, <code>only:</code>,
 				<code>odd:</code>, <code>even:</code>, <code>empty:</code>, <code>nth-child(N):</code>
 			</li>
 		</ul>
@@ -310,6 +314,7 @@ export const my_composites = {
 		<h4>Color-scheme modifiers</h4>
 		<p>Apply styles in dark or light mode:</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- Reduce shadow intensity in dark mode -->
 <div class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
 
@@ -325,6 +330,7 @@ export const my_composites = {
 		<h4>Pseudo-element modifiers</h4>
 		<p>Style generated content and element parts:</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- Decorative element (explicit content required) -->
 <div class="before:content:'' before:display:block before:width:2rem before:height:2rem before:background:var(--color_a_5)">
 
@@ -345,6 +351,7 @@ export const my_composites = {
 		<h4>Media feature modifiers</h4>
 		<p>Accessibility and context-aware styles:</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- Respect motion preferences -->
 <div class="motion-safe:transition:transform~0.3s~ease-out motion-reduce:transition:none">
 
@@ -365,6 +372,7 @@ export const my_composites = {
 			<code>[media]:[ancestor]:[state...]:[pseudo-element]:property:value</code>
 		</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- Media + color-scheme + state -->
 <div class="md:dark:hover:opacity:80%">
 
@@ -432,6 +440,7 @@ export const my_composites = {
 		<TomeSectionHeader text="Setup" />
 		<p>Fuz CSS has three CSS files, two of which are required:</p>
 		<Code
+			class="mb_lg"
 			content={`<!-- +layout.svelte -->
 ${'<' as string}script>
 	import '@fuzdev/fuz_css/style.css'; // required
@@ -456,6 +465,7 @@ ${'<' as string}script>
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<Code
+			class="mb_lg"
 			content={`<ul>
 	<li>1</li>
 	<li>2</li>
@@ -466,6 +476,7 @@ ${'<' as string}script>
 			<li>b</li>
 		</ul>
 		<Code
+			class="mb_lg"
 			content={`<ul class="unstyled">
 	<li>a</li>
 	<li>b</li>
