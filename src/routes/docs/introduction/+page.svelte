@@ -2,6 +2,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import FileLink from '$routes/FileLink.svelte';
@@ -32,7 +33,7 @@
 			</li>
 			<li>
 				also exports the underlying CSS data, helpers, and types, which can be used in many ways,
-				including outputting an optimized utilities class file
+				including outputting an optimized utility class file
 			</li>
 			<li>
 				uses its own concept of style variables, a specialization of CSS custom properties and
@@ -47,6 +48,16 @@
 			<li>
 				dark mode is a first-class concept in the system, not a theme, instead each theme can
 				support light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
+			</li>
+			<li>
+				supports three types of utility classes: token classes (that use <TomeLink name="variables"
+					>style variables</TomeLink
+				>, like <code>.p_md</code>
+				and <code>.color_a_5</code>), composite classes (custom behavior and semantics, like
+				<code>.box</code> and <code>.row</code>), and CSS-literal classes (like
+				<code>.display:flex</code>
+				and
+				<code>.hover:opacity:80%</code>) with responsive/state/color-scheme modifiers
 			</li>
 			<li>
 				is agnostic to JS frameworks, for example usage see <a href="https://ui.fuz.dev/docs/Themed"

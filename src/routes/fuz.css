@@ -196,9 +196,6 @@ a.chip {
 .display_flex {
 	display: flex;
 }
-.overflow_wrap_break_word {
-	overflow-wrap: break-word;
-}
 .flex_1 {
 	flex: 1;
 }
