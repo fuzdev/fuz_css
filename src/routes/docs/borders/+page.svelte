@@ -21,8 +21,6 @@
 	const computed_styles =
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
-	// TODO demo `border_style_values` from the data
-
 	const border_radius_classes = [
 		'border-radius:0',
 		'border-radius:14%',
@@ -134,13 +132,13 @@
 		<p>
 			Each border utility class has a corresponding outline variant using the same border variables
 			(like <code>outline_color_b</code>, <code>outline_width_4</code>, and
-			<code>outline_style_solid</code>), and there are also two special outline variables:
+			<code>outline-style:solid</code>), and there are also two special outline variables:
 		</p>
 		<div class="border_examples outline_widths">
 			{#each outline_width_variants as outline_width_variant (outline_width_variant)}
 				{@const name = 'outline_width_' + outline_width_variant}
 				<div class="row">
-					<div class="border_example {name} outline_style_solid outline_color_3">
+					<div class="border_example {name} outline-style:solid outline_color_3">
 						<StyleVariableButton {name} />
 					</div>
 					<span class="pl_sm pr_sm">=</span><code

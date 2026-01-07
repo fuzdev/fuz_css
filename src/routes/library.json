@@ -288,76 +288,38 @@
 						]
 					},
 					{
-						"name": "CSS_GLOBALS",
-						"kind": "variable",
-						"source_line": 74,
-						"type_signature": "readonly [\"inherit\", \"initial\", \"revert\", \"revert_layer\", \"unset\"]"
-					},
-					{
-						"name": "CssGlobal",
-						"kind": "type",
-						"source_line": 75,
-						"type_signature": "\"inherit\" | \"initial\" | \"revert\" | \"revert_layer\" | \"unset\""
-					},
-					{
 						"name": "CSS_DIRECTIONS",
 						"kind": "variable",
-						"source_line": 77,
+						"source_line": 73,
 						"type_signature": "readonly [\"top\", \"right\", \"bottom\", \"left\"]"
 					},
 					{
 						"name": "CssDirection",
 						"kind": "type",
-						"source_line": 78,
+						"source_line": 74,
 						"type_signature": "\"top\" | \"right\" | \"bottom\" | \"left\""
 					},
 					{
 						"name": "COLOR_INTENSITIES",
 						"kind": "variable",
-						"source_line": 81,
+						"source_line": 77,
 						"type_signature": "readonly [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]"
 					},
 					{
 						"name": "ColorIntensity",
 						"kind": "type",
-						"source_line": 82,
+						"source_line": 78,
 						"type_signature": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\""
-					},
-					{
-						"name": "to_kebab",
-						"kind": "function",
-						"source_line": 85,
-						"type_signature": "(str: string): string",
-						"return_type": "string",
-						"parameters": [
-							{
-								"name": "str",
-								"type": "string"
-							}
-						]
 					},
 					{
 						"name": "to_variable_name",
 						"kind": "function",
-						"source_line": 88,
+						"source_line": 81,
 						"type_signature": "(str: string): string",
 						"return_type": "string",
 						"parameters": [
 							{
 								"name": "str",
-								"type": "string"
-							}
-						]
-					},
-					{
-						"name": "generate_global_classes",
-						"kind": "function",
-						"source_line": 91,
-						"type_signature": "(property: string): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "property",
 								"type": "string"
 							}
 						]
@@ -366,7 +328,7 @@
 						"name": "format_spacing_value",
 						"kind": "function",
 						"doc_comment": "Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).\nUsed by margin, padding, gap, inset, top/right/bottom/left, etc.",
-						"source_line": 105,
+						"source_line": 87,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -380,7 +342,7 @@
 						"name": "format_dimension_value",
 						"kind": "function",
 						"doc_comment": "Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).\nUsed by width and height properties.",
-						"source_line": 117,
+						"source_line": 99,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -393,15 +355,15 @@
 					{
 						"name": "generate_property_classes",
 						"kind": "function",
-						"doc_comment": "Generate classes for a single CSS property with various values.\nThis is the most common pattern, used by display, visibility, float, etc.",
-						"source_line": 142,
+						"doc_comment": "Generate classes for a single CSS property with various values.",
+						"source_line": 123,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((value: string) => string) | undefined, prefix?: string): Record<string, CssClassDeclaration>",
 						"return_type": "Record<string, CssClassDeclaration>",
 						"parameters": [
 							{
 								"name": "property",
 								"type": "string",
-								"description": "- The CSS property name (e.g. 'display', 'gap')"
+								"description": "- The CSS property name (e.g. 'font-size', 'gap')"
 							},
 							{
 								"name": "values",
@@ -426,7 +388,7 @@
 						"name": "generate_directional_classes",
 						"kind": "function",
 						"doc_comment": "Generate directional classes for properties like margin and padding.\nCreates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).",
-						"source_line": 165,
+						"source_line": 146,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((v: string) => string) | undefined): Record<string, CssClassDeclaration>",
 						"return_type": "Record<string, CssClassDeclaration>",
 						"parameters": [
@@ -449,30 +411,10 @@
 						]
 					},
 					{
-						"name": "generate_property_with_axes",
-						"kind": "function",
-						"doc_comment": "Generate classes for properties with axis variants (e.g. overflow, overflow-x, overflow-y).",
-						"source_line": 209,
-						"type_signature": "(property: string, values: Iterable<string>): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "property",
-								"type": "string",
-								"description": "- The base CSS property name (e.g. 'overflow')"
-							},
-							{
-								"name": "values",
-								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
-							}
-						]
-					},
-					{
 						"name": "generate_border_radius_corners",
 						"kind": "function",
 						"doc_comment": "Generate border radius corner classes for all four corners.\nCreates classes for top-left, top-right, bottom-left, bottom-right corners.",
-						"source_line": 234,
+						"source_line": 191,
 						"type_signature": "(values: Iterable<string>, formatter?: ((value: string) => string) | undefined): Record<string, CssClassDeclaration>",
 						"return_type": "Record<string, CssClassDeclaration>",
 						"parameters": [
@@ -493,7 +435,7 @@
 						"name": "generate_shadow_classes",
 						"kind": "function",
 						"doc_comment": "Generate shadow classes for various shadow types and sizes.\nCreates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.\nEach shadow uses color-mix with alpha values for transparency.",
-						"source_line": 263,
+						"source_line": 220,
 						"type_signature": "(sizes: Iterable<string>, alpha_mapping: Record<string, string>): Record<string, CssClassDeclaration>",
 						"return_type": "Record<string, CssClassDeclaration>",
 						"parameters": [
@@ -795,9 +737,9 @@
 					{
 						"name": "css_classes_by_name",
 						"kind": "variable",
-						"doc_comment": "",
+						"doc_comment": "Token classes that map to CSS variables (design tokens).\nFor other CSS properties, use CSS-literal syntax like `display:flex` or `position:absolute`.",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 54,
+						"source_line": 36,
 						"type_signature": "Record<string, CssClassDeclaration | undefined>"
 					}
 				],
@@ -1553,7 +1495,7 @@
 						"name": "TextColorVariant",
 						"kind": "type",
 						"source_line": 29,
-						"type_signature": "0 | 5 | 4 | 9 | 3 | 1 | 2 | 6 | 7 | 8 | 10"
+						"type_signature": "0 | 4 | 9 | 3 | 1 | 2 | 5 | 6 | 7 | 8 | 10"
 					},
 					{
 						"name": "text_color_variants",
@@ -1637,7 +1579,7 @@
 						"name": "ShadowAlphaVariant",
 						"kind": "type",
 						"source_line": 82,
-						"type_signature": "5 | 4 | 3 | 1 | 2"
+						"type_signature": "4 | 3 | 1 | 2 | 5"
 					},
 					{
 						"name": "shadow_alpha_variants",
@@ -1691,7 +1633,7 @@
 						"name": "BorderWidthVariant",
 						"kind": "type",
 						"source_line": 105,
-						"type_signature": "5 | 4 | 9 | 3 | 1 | 2 | 6 | 7 | 8"
+						"type_signature": "4 | 9 | 3 | 1 | 2 | 5 | 6 | 7 | 8"
 					},
 					{
 						"name": "border_width_variants",
@@ -1712,202 +1654,10 @@
 						"type_signature": "readonly [\"focus\", \"active\"]"
 					},
 					{
-						"name": "AlignmentValue",
-						"kind": "type",
-						"source_line": 111,
-						"type_signature": "\"center\" | \"start\" | \"end\" | \"baseline\" | \"stretch\""
-					},
-					{
-						"name": "alignment_values",
-						"kind": "variable",
-						"source_line": 112,
-						"type_signature": "readonly [\"center\", \"start\", \"end\", \"baseline\", \"stretch\"]"
-					},
-					{
-						"name": "JustifyValue",
-						"kind": "type",
-						"source_line": 114,
-						"type_signature": "\"right\" | \"left\" | \"center\" | \"start\" | \"end\" | \"stretch\" | \"space-between\" | \"space-around\" | \"space-evenly\""
-					},
-					{
-						"name": "justify_values",
-						"kind": "variable",
-						"source_line": 115,
-						"type_signature": "readonly [\"center\", \"start\", \"end\", \"left\", \"right\", \"space-between\", \"space-around\", \"space-evenly\", \"stretch\"]"
-					},
-					{
-						"name": "OverflowValue",
-						"kind": "type",
-						"source_line": 127,
-						"type_signature": "\"auto\" | \"hidden\" | \"scroll\" | \"clip\" | \"visible\""
-					},
-					{
-						"name": "overflow_values",
-						"kind": "variable",
-						"source_line": 128,
-						"type_signature": "readonly [\"auto\", \"hidden\", \"scroll\", \"clip\", \"visible\"]"
-					},
-					{
-						"name": "BorderStyleValue",
-						"kind": "type",
-						"source_line": 130,
-						"type_signature": "\"hidden\" | \"none\" | \"dotted\" | \"dashed\" | \"solid\" | \"double\" | \"groove\" | \"ridge\" | \"inset\" | \"outset\""
-					},
-					{
-						"name": "border_style_values",
-						"kind": "variable",
-						"source_line": 131,
-						"type_signature": "readonly [\"none\", \"hidden\", \"dotted\", \"dashed\", \"solid\", \"double\", \"groove\", \"ridge\", \"inset\", \"outset\"]"
-					},
-					{
-						"name": "DisplayValue",
-						"kind": "type",
-						"source_line": 144,
-						"type_signature": "\"none\" | \"contents\" | \"block\" | \"flow-root\" | \"inline\" | \"inline-block\" | \"run-in\" | \"list-item\" | \"inline list-item\" | \"flex\" | \"inline-flex\" | \"grid\" | \"inline-grid\" | \"ruby\" | \"block ruby\" | \"table\" | \"inline-table\""
-					},
-					{
-						"name": "display_values",
-						"kind": "variable",
-						"source_line": 145,
-						"type_signature": "readonly [\"none\", \"contents\", \"block\", \"flow-root\", \"inline\", \"inline-block\", \"run-in\", \"list-item\", \"inline list-item\", \"flex\", \"inline-flex\", \"grid\", \"inline-grid\", \"ruby\", \"block ruby\", \"table\", \"inline-table\"]"
-					},
-					{
-						"name": "TextAlignValue",
-						"kind": "type",
-						"source_line": 165,
-						"type_signature": "\"right\" | \"left\" | \"center\" | \"start\" | \"end\" | \"justify\" | \"justify-all\" | \"match-parent\""
-					},
-					{
-						"name": "text_align_values",
-						"kind": "variable",
-						"source_line": 166,
-						"type_signature": "readonly [\"start\", \"end\", \"left\", \"right\", \"center\", \"justify\", \"justify-all\", \"match-parent\"]"
-					},
-					{
-						"name": "VerticalAlignValue",
-						"kind": "type",
-						"source_line": 177,
-						"type_signature": "\"top\" | \"bottom\" | \"baseline\" | \"sub\" | \"super\" | \"text-top\" | \"text-bottom\" | \"middle\""
-					},
-					{
-						"name": "vertical_align_values",
-						"kind": "variable",
-						"source_line": 178,
-						"type_signature": "readonly [\"baseline\", \"sub\", \"super\", \"text-top\", \"text-bottom\", \"middle\", \"top\", \"bottom\"]"
-					},
-					{
-						"name": "WordBreakValue",
-						"kind": "type",
-						"source_line": 189,
-						"type_signature": "\"normal\" | \"break-all\" | \"keep-all\""
-					},
-					{
-						"name": "word_break_values",
-						"kind": "variable",
-						"source_line": 190,
-						"type_signature": "readonly [\"normal\", \"break-all\", \"keep-all\"]"
-					},
-					{
-						"name": "PositionValue",
-						"kind": "type",
-						"source_line": 192,
-						"type_signature": "\"static\" | \"relative\" | \"absolute\" | \"fixed\" | \"sticky\""
-					},
-					{
-						"name": "position_values",
-						"kind": "variable",
-						"source_line": 193,
-						"type_signature": "readonly [\"static\", \"relative\", \"absolute\", \"fixed\", \"sticky\"]"
-					},
-					{
-						"name": "VisibilityValue",
-						"kind": "type",
-						"source_line": 195,
-						"type_signature": "\"hidden\" | \"visible\" | \"collapse\""
-					},
-					{
-						"name": "visibility_values",
-						"kind": "variable",
-						"source_line": 196,
-						"type_signature": "readonly [\"visible\", \"hidden\", \"collapse\"]"
-					},
-					{
-						"name": "FloatValue",
-						"kind": "type",
-						"source_line": 198,
-						"type_signature": "\"right\" | \"left\" | \"none\" | \"inline-start\""
-					},
-					{
-						"name": "float_values",
-						"kind": "variable",
-						"source_line": 199,
-						"type_signature": "readonly [\"none\", \"left\", \"right\", \"inline-start\"]"
-					},
-					{
-						"name": "FlexWrapValue",
-						"kind": "type",
-						"source_line": 201,
-						"type_signature": "\"nowrap\" | \"wrap\" | \"wrap-reverse\""
-					},
-					{
-						"name": "flex_wrap_values",
-						"kind": "variable",
-						"source_line": 202,
-						"type_signature": "readonly [\"nowrap\", \"wrap\", \"wrap-reverse\"]"
-					},
-					{
-						"name": "FlexDirectionValue",
-						"kind": "type",
-						"source_line": 204,
-						"type_signature": "\"row\" | \"row-reverse\" | \"column\" | \"column-reverse\""
-					},
-					{
-						"name": "flex_direction_values",
-						"kind": "variable",
-						"source_line": 205,
-						"type_signature": "readonly [\"row\", \"row-reverse\", \"column\", \"column-reverse\"]"
-					},
-					{
-						"name": "OverflowWrapValue",
-						"kind": "type",
-						"source_line": 207,
-						"type_signature": "\"normal\" | \"anywhere\" | \"break-word\""
-					},
-					{
-						"name": "overflow_wrap_values",
-						"kind": "variable",
-						"source_line": 208,
-						"type_signature": "readonly [\"normal\", \"anywhere\", \"break-word\"]"
-					},
-					{
-						"name": "ScrollbarWidthValue",
-						"kind": "type",
-						"source_line": 210,
-						"type_signature": "\"auto\" | \"none\" | \"thin\""
-					},
-					{
-						"name": "scrollbar_width_values",
-						"kind": "variable",
-						"source_line": 211,
-						"type_signature": "readonly [\"auto\", \"thin\", \"none\"]"
-					},
-					{
-						"name": "ScrollbarGutterValue",
-						"kind": "type",
-						"source_line": 213,
-						"type_signature": "\"auto\" | \"stable\" | \"stable both-edges\""
-					},
-					{
-						"name": "scrollbar_gutter_values",
-						"kind": "variable",
-						"source_line": 214,
-						"type_signature": "readonly [\"auto\", \"stable\", \"stable both-edges\"]"
-					},
-					{
 						"name": "Z_INDEX_MAX",
 						"kind": "variable",
 						"doc_comment": "Maximum value for CSS z-index property (32-bit signed integer max).",
-						"source_line": 219,
+						"source_line": 114,
 						"type_signature": "2147483647"
 					}
 				],

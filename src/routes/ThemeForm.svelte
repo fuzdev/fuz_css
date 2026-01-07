@@ -65,7 +65,7 @@
 </script>
 
 <div class="theme_form">
-	<h2 class="text_align_center">
+	<h2 class="text-align:center">
 		{#if editing}edit{:else}create{/if} theme
 	</h2>
 	<aside>

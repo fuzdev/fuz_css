@@ -55,7 +55,7 @@
 				>this one</a
 			>:
 		</p>
-		<div class="display_flex mb_lg">
+		<div class="display:flex mb_lg">
 			<ColorSchemeInput />
 		</div>
 		<p>

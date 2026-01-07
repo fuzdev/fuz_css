@@ -13,14 +13,14 @@
 </script>
 
 <label
-	><div class="title row width_100 flex_wrap_wrap">
+	><div class="title row width_100 flex-wrap:wrap">
 		{#if children}
 			{@render children()}
 		{:else}
 			font-weight
 		{/if} =
 		<input
-			class="display_inline flex_1"
+			class="display:inline flex:1"
 			type="number"
 			bind:value={selected_font_weight}
 			min={100}

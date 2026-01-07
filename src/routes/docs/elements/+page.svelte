@@ -76,7 +76,7 @@
 		<TomeSectionHeader text="pre">
 			<MdnLink path="Web/HTML/Element/pre" />
 		</TomeSectionHeader>
-		<pre>a <code class="display_inline">pre</code> is
+		<pre>a <code class="display:inline">pre</code> is
   preformatted
 					text</pre>
 	</TomeSection>

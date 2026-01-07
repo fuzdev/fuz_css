@@ -193,8 +193,8 @@
 		<div>
 			{#each opacity_classes as opacity_class (opacity_class)}
 				<div class="opacity_example font_family_mono relative">
-					<div class="position_absolute inset_0 bg_a_7 {opacity_class}"></div>
-					<div class="position_relative">.{opacity_class}</div>
+					<div class="position:absolute inset_0 bg_a_7 {opacity_class}"></div>
+					<div class="position:relative">.{opacity_class}</div>
 				</div>
 			{/each}
 		</div>

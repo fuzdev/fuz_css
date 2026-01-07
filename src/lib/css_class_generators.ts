@@ -70,10 +70,6 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	return result;
 };
 
-// TODO refactor with `src/lib/variable_data.ts`, we may want `css_data.ts` or something
-export const CSS_GLOBALS = ['inherit', 'initial', 'revert', 'revert_layer', 'unset'] as const;
-export type CssGlobal = (typeof CSS_GLOBALS)[number];
-
 export const CSS_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
 export type CssDirection = (typeof CSS_DIRECTIONS)[number];
 
@@ -81,22 +77,8 @@ export type CssDirection = (typeof CSS_DIRECTIONS)[number];
 export const COLOR_INTENSITIES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
 export type ColorIntensity = (typeof COLOR_INTENSITIES)[number];
 
-// Helper to convert snake_case to kebab-case for CSS property values
-export const to_kebab = (str: string): string => str.replace(/_/g, '-');
-
 // Helper to convert any string to a valid CSS variable name (snake_case)
 export const to_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
-
-// Helper to generate global value classes for any CSS property
-export const generate_global_classes = (property: string): Record<string, CssClassDeclaration> => {
-	return generate_classes(
-		(global: (typeof CSS_GLOBALS)[number]) => ({
-			name: `${to_variable_name(property)}_${global}`,
-			css: `${property}: ${to_kebab(global)};`,
-		}),
-		CSS_GLOBALS,
-	);
-};
 
 /**
  * Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).
@@ -132,9 +114,8 @@ export const format_dimension_value = (value: string): string => {
 
 /**
  * Generate classes for a single CSS property with various values.
- * This is the most common pattern, used by display, visibility, float, etc.
  *
- * @param property - The CSS property name (e.g. 'display', 'gap')
+ * @param property - The CSS property name (e.g. 'font-size', 'gap')
  * @param values - The values to generate classes for
  * @param formatter - Optional function to format values (e.g. v => `var(--space_${v})`)
  * @param prefix - Optional class name prefix (defaults to property with dashes replaced by underscores)
@@ -196,30 +177,6 @@ export const generate_directional_classes = (
 			return configs[variant] || null;
 		},
 		['', 't', 'r', 'b', 'l', 'x', 'y'],
-		values,
-	);
-};
-
-/**
- * Generate classes for properties with axis variants (e.g. overflow, overflow-x, overflow-y).
- *
- * @param property - The base CSS property name (e.g. 'overflow')
- * @param values - The values to generate classes for
- */
-export const generate_property_with_axes = (
-	property: string,
-	values: Iterable<string>,
-): Record<string, CssClassDeclaration> => {
-	return generate_classes(
-		(axis: string, value: string) => {
-			const prop = axis === '' ? property : `${property}-${axis}`;
-			const prefix = axis === '' ? property : `${property}_${axis}`;
-			return {
-				name: `${to_variable_name(prefix)}_${to_variable_name(value)}`,
-				css: `${prop}: ${value};`,
-			};
-		},
-		['', 'x', 'y'],
 		values,
 	);
 };
