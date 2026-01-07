@@ -112,7 +112,6 @@
 			<p>Multi-property shortcuts for repeated patterns. Define your own in a composites file:</p>
 			<Code
 				lang="typescript"
-				class="mb_lg"
 				content={`// src/lib/composites.ts
 export const my_composites = {
 	'flex-center': {declaration: 'display: flex; align-items: center; justify-content: center;'},
@@ -161,7 +160,6 @@ export const my_composites = {
 				</li>
 			</ul>
 			<Code
-				class="mb_lg"
 				content={`<!-- basic syntax: property:value -->
 <div class="display:flex justify-content:center gap:var(--space_md)">
 
@@ -267,7 +265,6 @@ export const my_composites = {
 			</tbody>
 		</table>
 		<Code
-			class="mb_lg"
 			content={`<!-- Stack on mobile, row on medium screens and up -->
 <div class="display:flex flex-direction:column md:flex-direction:row">
 
@@ -283,7 +280,6 @@ export const my_composites = {
 		<h4>State modifiers</h4>
 		<p>Pseudo-class modifiers for interaction and form states:</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- Hover and focus effects -->
 <button class="hover:background-color:var(--color_a_6) focus:outline:2px~solid~var(--color_a_5)">
 
@@ -314,7 +310,6 @@ export const my_composites = {
 		<h4>Color-scheme modifiers</h4>
 		<p>Apply styles in dark or light mode:</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- Reduce shadow intensity in dark mode -->
 <div class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
 
@@ -330,7 +325,6 @@ export const my_composites = {
 		<h4>Pseudo-element modifiers</h4>
 		<p>Style generated content and element parts:</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- Decorative element (explicit content required) -->
 <div class="before:content:'' before:display:block before:width:2rem before:height:2rem before:background:var(--color_a_5)">
 
@@ -351,7 +345,6 @@ export const my_composites = {
 		<h4>Media feature modifiers</h4>
 		<p>Accessibility and context-aware styles:</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- Respect motion preferences -->
 <div class="motion-safe:transition:transform~0.3s~ease-out motion-reduce:transition:none">
 
@@ -372,7 +365,6 @@ export const my_composites = {
 			<code>[media]:[ancestor]:[state...]:[pseudo-element]:property:value</code>
 		</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- Media + color-scheme + state -->
 <div class="md:dark:hover:opacity:80%">
 
@@ -440,7 +432,6 @@ export const my_composites = {
 		<TomeSectionHeader text="Setup" />
 		<p>Fuz CSS has three CSS files, two of which are required:</p>
 		<Code
-			class="mb_lg"
 			content={`<!-- +layout.svelte -->
 ${'<' as string}script>
 	import '@fuzdev/fuz_css/style.css'; // required
@@ -465,7 +456,6 @@ ${'<' as string}script>
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<Code
-			class="mb_lg"
 			content={`<ul>
 	<li>1</li>
 	<li>2</li>
@@ -476,7 +466,6 @@ ${'<' as string}script>
 			<li>b</li>
 		</ul>
 		<Code
-			class="mb_lg"
 			content={`<ul class="unstyled">
 	<li>a</li>
 	<li>b</li>
