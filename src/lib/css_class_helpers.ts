@@ -203,9 +203,17 @@ export const generate_classes_css = (
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
 				if (matched) {
-					const declaration = interpreter.interpret(matched, log);
-					if (declaration) {
-						v = {declaration, comment: interpreter.comment};
+					const result = interpreter.interpret(matched, log);
+					if (result) {
+						// Check if the result is a full ruleset (contains braces)
+						// or just a declaration
+						if (result.includes('{')) {
+							// Full ruleset - use as-is
+							v = {ruleset: result, comment: interpreter.comment};
+						} else {
+							// Simple declaration
+							v = {declaration: result, comment: interpreter.comment};
+						}
 						break;
 					}
 				}

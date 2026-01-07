@@ -1,6 +1,10 @@
 import {test, assert} from 'vitest';
 
-import {collect_css_classes, escape_css_selector, generate_classes_css} from '$lib/css_class_helpers.js';
+import {
+	collect_css_classes,
+	escape_css_selector,
+	generate_classes_css,
+} from '$lib/css_class_helpers.js';
 
 const values: Array<[contents: string, expected: Array<string>]> = [
 	// `class=` attribute

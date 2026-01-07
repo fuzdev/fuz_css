@@ -429,9 +429,26 @@
 				"path": "css_class_helpers.ts",
 				"declarations": [
 					{
+						"name": "escape_css_selector",
+						"kind": "function",
+						"doc_comment": "Escapes special characters in a CSS class name for use in a selector.\nCSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.",
+						"examples": [
+							"escape_css_selector('display:flex') // 'display\\\\:flex'\nescape_css_selector('opacity:80%') // 'opacity\\\\:80\\\\%'\nescape_css_selector('nth-child(2n)') // 'nth-child\\\\(2n\\\\)'"
+						],
+						"source_line": 14,
+						"type_signature": "(name: string): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "name",
+								"type": "string"
+							}
+						]
+					},
+					{
 						"name": "CssExtractor",
 						"kind": "type",
-						"source_line": 5,
+						"source_line": 18,
 						"type_signature": "CssExtractor",
 						"properties": [
 							{
@@ -450,7 +467,7 @@
 						"name": "collect_css_classes",
 						"kind": "function",
 						"doc_comment": "Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.\nHandles class attributes, directives, and various forms of CSS class declarations.",
-						"source_line": 70,
+						"source_line": 83,
 						"type_signature": "(contents: string, extractors?: CssExtractor[]): Set<string>",
 						"return_type": "Set<string>",
 						"parameters": [
@@ -468,7 +485,7 @@
 					{
 						"name": "CssClasses",
 						"kind": "class",
-						"source_line": 96,
+						"source_line": 109,
 						"members": [
 							{
 								"name": "include_classes",
@@ -527,13 +544,13 @@
 					{
 						"name": "CssClassDeclaration",
 						"kind": "type",
-						"source_line": 142,
+						"source_line": 155,
 						"type_signature": "CssClassDeclaration"
 					},
 					{
 						"name": "CssClassDeclarationBase",
 						"kind": "type",
-						"source_line": 147,
+						"source_line": 160,
 						"type_signature": "CssClassDeclarationBase",
 						"properties": [
 							{
@@ -546,7 +563,7 @@
 					{
 						"name": "CssClassDeclarationItem",
 						"kind": "type",
-						"source_line": 151,
+						"source_line": 164,
 						"type_signature": "CssClassDeclarationItem",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -560,7 +577,7 @@
 					{
 						"name": "CssClassDeclarationGroup",
 						"kind": "type",
-						"source_line": 154,
+						"source_line": 167,
 						"type_signature": "CssClassDeclarationGroup",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -574,7 +591,7 @@
 					{
 						"name": "CssClassDeclarationInterpreter",
 						"kind": "type",
-						"source_line": 157,
+						"source_line": 170,
 						"type_signature": "CssClassDeclarationInterpreter",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -593,7 +610,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 162,
+						"source_line": 175,
 						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDeclaration | undefined>, interpreters: CssClassDeclarationInterpreter[], log?: Logger | undefined): string",
 						"return_type": "string",
 						"parameters": [
@@ -617,7 +634,7 @@
 						]
 					}
 				],
-				"dependents": ["gen_fuz_css.ts"]
+				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_interpreters.ts",
@@ -626,46 +643,53 @@
 						"name": "opacity_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for opacity classes (opacity_0 through opacity_100).",
-						"source_line": 7,
+						"source_line": 12,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "font_weight_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for font-weight classes,\n`font_weight_1` through `font_weight_1000` following the CSS spec.",
-						"source_line": 24,
+						"source_line": 29,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "border_radius_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for border-radius percentage classes,\n`border_radius_0` through `border_radius_100`.",
-						"source_line": 40,
+						"source_line": 45,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "border_radius_corners_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for border radius corner percentage classes,\nhandles all four corners: top-left, top-right, bottom-left, bottom-right.\nExamples: `border_top_left_radius_50`, `border_bottom_right_radius_100`.",
-						"source_line": 57,
+						"source_line": 62,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "z_index_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for z-index classes,\n`z_index_0` through `z_index_${Z_INDEX_MAX}` (max CSS z-index).",
-						"source_line": 77,
+						"source_line": 82,
+						"type_signature": "CssClassDeclarationInterpreter"
+					},
+					{
+						"name": "css_literal_interpreter",
+						"kind": "variable",
+						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
+						"source_line": 98,
 						"type_signature": "CssClassDeclarationInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
-						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.",
-						"source_line": 92,
+						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nCSS-literal interpreter is last as a catch-all for property:value patterns.",
+						"source_line": 127,
 						"type_signature": "CssClassDeclarationInterpreter[]"
 					}
 				],
-				"dependencies": ["variable_data.ts"],
+				"dependencies": ["css_class_helpers.ts", "css_literal.ts", "variable_data.ts"],
 				"dependents": ["gen_fuz_css.ts"]
 			},
 			{
@@ -682,6 +706,357 @@
 				],
 				"dependencies": ["css_class_composites.ts", "css_class_generators.ts", "variable_data.ts"],
 				"dependents": ["gen_fuz_css.ts"]
+			},
+			{
+				"path": "css_literal.ts",
+				"declarations": [
+					{
+						"name": "ParsedCssLiteral",
+						"kind": "type",
+						"doc_comment": "Parsed CSS-literal class with all components extracted.",
+						"source_line": 22,
+						"type_signature": "ParsedCssLiteral",
+						"properties": [
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Original class name"
+							},
+							{
+								"name": "media",
+								"kind": "variable",
+								"type_signature": "ModifierDefinition | null",
+								"doc_comment": "Media modifier (breakpoint or feature query)"
+							},
+							{
+								"name": "ancestor",
+								"kind": "variable",
+								"type_signature": "ModifierDefinition | null",
+								"doc_comment": "Ancestor modifier (dark/light)"
+							},
+							{
+								"name": "states",
+								"kind": "variable",
+								"type_signature": "Array<ModifierDefinition>",
+								"doc_comment": "State modifiers in alphabetical order (can have multiple)"
+							},
+							{
+								"name": "pseudo_element",
+								"kind": "variable",
+								"type_signature": "ModifierDefinition | null",
+								"doc_comment": "Pseudo-element modifier (before, after, etc.)"
+							},
+							{
+								"name": "property",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "CSS property name"
+							},
+							{
+								"name": "value",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "CSS value (with ~ replaced by spaces)"
+							}
+						]
+					},
+					{
+						"name": "CssLiteralDiagnostic",
+						"kind": "type",
+						"doc_comment": "Diagnostic message for CSS-literal parsing/validation.",
+						"source_line": 42,
+						"type_signature": "CssLiteralDiagnostic",
+						"properties": [
+							{
+								"name": "level",
+								"kind": "variable",
+								"type_signature": "'error' | 'warning'"
+							},
+							{
+								"name": "message",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "suggestion",
+								"kind": "variable",
+								"type_signature": "string"
+							}
+						]
+					},
+					{
+						"name": "ParseResult",
+						"kind": "type",
+						"doc_comment": "Result of parsing a CSS-literal class name.",
+						"source_line": 52,
+						"type_signature": "ParseResult"
+					},
+					{
+						"name": "load_css_properties",
+						"kind": "function",
+						"doc_comment": "Loads CSS properties from",
+						"source_line": 69,
+						"type_signature": "(): Promise<Set<string>>",
+						"return_type": "Promise<Set<string>>",
+						"parameters": []
+					},
+					{
+						"name": "is_valid_css_property",
+						"kind": "function",
+						"doc_comment": "Checks if a property name is a valid CSS property.\nCustom properties (--*) always return true.",
+						"source_line": 91,
+						"type_signature": "(property: string): boolean",
+						"return_type": "boolean",
+						"return_description": "True if valid CSS property or custom property",
+						"parameters": [
+							{
+								"name": "property",
+								"type": "string",
+								"description": "- The CSS property name to validate"
+							}
+						]
+					},
+					{
+						"name": "suggest_css_property",
+						"kind": "function",
+						"doc_comment": "Suggests a correct property name for a typo using Levenshtein distance.",
+						"source_line": 107,
+						"type_signature": "(typo: string): string | null",
+						"return_type": "string | null",
+						"return_description": "The suggested property or null if no close match",
+						"parameters": [
+							{
+								"name": "typo",
+								"type": "string",
+								"description": "- The mistyped property name"
+							}
+						]
+					},
+					{
+						"name": "suggest_modifier",
+						"kind": "function",
+						"doc_comment": "Suggests a correct modifier name for a typo.",
+						"source_line": 161,
+						"type_signature": "(typo: string): string | null",
+						"return_type": "string | null",
+						"parameters": [
+							{
+								"name": "typo",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "format_css_value",
+						"kind": "function",
+						"doc_comment": "Formats a CSS-literal value for CSS output.\n- Replaces `~` with space\n- Ensures space before `!important`",
+						"source_line": 187,
+						"type_signature": "(value: string): string",
+						"return_type": "string",
+						"return_description": "Formatted CSS value",
+						"parameters": [
+							{
+								"name": "value",
+								"type": "string",
+								"description": "- Raw value from class name"
+							}
+						]
+					},
+					{
+						"name": "check_calc_expression",
+						"kind": "function",
+						"doc_comment": "Checks if a value contains a possibly invalid calc expression.",
+						"source_line": 205,
+						"type_signature": "(value: string): string | null",
+						"return_type": "string | null",
+						"return_description": "Warning message if suspicious, null otherwise",
+						"parameters": [
+							{
+								"name": "value",
+								"type": "string",
+								"description": "- The formatted CSS value"
+							}
+						]
+					},
+					{
+						"name": "is_possible_css_literal",
+						"kind": "function",
+						"doc_comment": "Checks if a class name could be a CSS-literal class.\nQuick check before attempting full parse.",
+						"source_line": 221,
+						"type_signature": "(class_name: string): boolean",
+						"return_type": "boolean",
+						"return_description": "True if it could be CSS-literal syntax",
+						"parameters": [
+							{
+								"name": "class_name",
+								"type": "string",
+								"description": "- The class name to check"
+							}
+						]
+					},
+					{
+						"name": "extract_segments",
+						"kind": "function",
+						"doc_comment": "Extracts colon-separated segments from a class name, handling parentheses.\nParenthesized content (like function arguments) is kept intact.",
+						"examples": [
+							"extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']\nextract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']\nextract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']"
+						],
+						"source_line": 250,
+						"type_signature": "(class_name: string): string[]",
+						"return_type": "string[]",
+						"parameters": [
+							{
+								"name": "class_name",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "parse_css_literal",
+						"kind": "function",
+						"doc_comment": "Parses a CSS-literal class name into its components.",
+						"source_line": 285,
+						"type_signature": "(class_name: string): ParseResult",
+						"return_type": "ParseResult",
+						"return_description": "ParseResult with parsed data or error",
+						"parameters": [
+							{
+								"name": "class_name",
+								"type": "string",
+								"description": "- The class name to parse"
+							}
+						]
+					},
+					{
+						"name": "generate_selector",
+						"kind": "function",
+						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
+						"source_line": 514,
+						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "escaped_class_name",
+								"type": "string"
+							},
+							{
+								"name": "parsed",
+								"type": "ParsedCssLiteral"
+							}
+						]
+					},
+					{
+						"name": "generate_declaration",
+						"kind": "function",
+						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
+						"source_line": 533,
+						"type_signature": "(parsed: ParsedCssLiteral): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "parsed",
+								"type": "ParsedCssLiteral"
+							}
+						]
+					},
+					{
+						"name": "CssLiteralOutput",
+						"kind": "type",
+						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
+						"source_line": 540,
+						"type_signature": "CssLiteralOutput",
+						"properties": [
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "The original class name"
+							},
+							{
+								"name": "declaration",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "CSS declaration (property: value;)"
+							},
+							{
+								"name": "selector",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Full CSS selector including pseudo-classes/elements"
+							},
+							{
+								"name": "media_wrapper",
+								"kind": "variable",
+								"type_signature": "string | null",
+								"doc_comment": "Media query wrapper if any"
+							},
+							{
+								"name": "ancestor_wrapper",
+								"kind": "variable",
+								"type_signature": "string | null",
+								"doc_comment": "Ancestor wrapper if any"
+							},
+							{
+								"name": "diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<CssLiteralDiagnostic>",
+								"doc_comment": "Any diagnostics generated during parsing"
+							}
+						]
+					},
+					{
+						"name": "interpret_css_literal",
+						"kind": "function",
+						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.",
+						"source_line": 563,
+						"type_signature": "(class_name: string, escaped_class_name: string, log?: Logger | undefined): CssLiteralOutput | null",
+						"return_type": "CssLiteralOutput | null",
+						"return_description": "CssLiteralOutput or null if not a valid CSS-literal",
+						"parameters": [
+							{
+								"name": "class_name",
+								"type": "string",
+								"description": "- The class name to interpret"
+							},
+							{
+								"name": "escaped_class_name",
+								"type": "string",
+								"description": "- The CSS-escaped version of the class name"
+							},
+							{
+								"name": "log",
+								"type": "Logger | undefined",
+								"optional": true,
+								"description": "- Optional logger for warnings"
+							}
+						]
+					},
+					{
+						"name": "generate_css_literal_simple",
+						"kind": "function",
+						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
+						"source_line": 611,
+						"type_signature": "(output: CssLiteralOutput): string",
+						"return_type": "string",
+						"return_description": "CSS string for this class",
+						"parameters": [
+							{
+								"name": "output",
+								"type": "CssLiteralOutput",
+								"description": "- The CSS-literal output info"
+							}
+						]
+					}
+				],
+				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
+				"dependencies": ["modifiers.ts"],
+				"dependents": ["css_class_interpreters.ts"]
 			},
 			{
 				"path": "gen_fuz_css.ts",
@@ -730,6 +1105,177 @@
 					}
 				],
 				"dependencies": ["css_class_helpers.ts", "css_class_interpreters.ts", "css_classes.ts"]
+			},
+			{
+				"path": "modifiers.ts",
+				"declarations": [
+					{
+						"name": "ModifierType",
+						"kind": "type",
+						"doc_comment": "Type of modifier determining its position in the class name and CSS output.\n\nOrder in class names: `[media]:[ancestor]:[state...]:[pseudo-element]:property:value`",
+						"source_line": 19,
+						"type_signature": "ModifierType"
+					},
+					{
+						"name": "ModifierDefinition",
+						"kind": "type",
+						"doc_comment": "Definition for a single modifier.",
+						"source_line": 24,
+						"type_signature": "ModifierDefinition",
+						"properties": [
+							{
+								"name": "name",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "The prefix used in class names (e.g., 'hover', 'md', 'dark')"
+							},
+							{
+								"name": "type",
+								"kind": "variable",
+								"type_signature": "ModifierType",
+								"doc_comment": "Type determines position in modifier order and CSS output behavior"
+							},
+							{
+								"name": "css",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "The CSS output - wrapper for media/ancestor, suffix for state/pseudo-element"
+							},
+							{
+								"name": "order",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Optional ordering within type (for breakpoints, sorted by this value)"
+							}
+						]
+					},
+					{
+						"name": "MODIFIERS",
+						"kind": "variable",
+						"doc_comment": "All modifier definitions in a single declarative structure.\nAdding a new modifier requires only adding to this array.",
+						"source_line": 39,
+						"type_signature": "ModifierDefinition[]"
+					},
+					{
+						"name": "MEDIA_MODIFIERS",
+						"kind": "variable",
+						"doc_comment": "Map of media modifier names to their CSS output",
+						"source_line": 122,
+						"type_signature": "Map<string, ModifierDefinition>"
+					},
+					{
+						"name": "ANCESTOR_MODIFIERS",
+						"kind": "variable",
+						"doc_comment": "Map of ancestor modifier names to their CSS output",
+						"source_line": 127,
+						"type_signature": "Map<string, ModifierDefinition>"
+					},
+					{
+						"name": "STATE_MODIFIERS",
+						"kind": "variable",
+						"doc_comment": "Map of state modifier names to their CSS output",
+						"source_line": 132,
+						"type_signature": "Map<string, ModifierDefinition>"
+					},
+					{
+						"name": "PSEUDO_ELEMENT_MODIFIERS",
+						"kind": "variable",
+						"doc_comment": "Map of pseudo-element modifier names to their CSS output",
+						"source_line": 137,
+						"type_signature": "Map<string, ModifierDefinition>"
+					},
+					{
+						"name": "ALL_MODIFIER_NAMES",
+						"kind": "variable",
+						"doc_comment": "All modifier names for quick lookup",
+						"source_line": 142,
+						"type_signature": "Set<string>"
+					},
+					{
+						"name": "ARBITRARY_MIN_WIDTH_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for arbitrary min-width breakpoints: `min-width(800px):`",
+						"source_line": 147,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "ARBITRARY_MAX_WIDTH_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for arbitrary max-width breakpoints: `max-width(600px):`",
+						"source_line": 152,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "NTH_CHILD_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for parameterized nth-child: `nth-child(2n+1):`",
+						"source_line": 157,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "NTH_OF_TYPE_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for parameterized nth-of-type: `nth-of-type(2n):`",
+						"source_line": 162,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "parse_arbitrary_breakpoint",
+						"kind": "function",
+						"doc_comment": "Parses an arbitrary breakpoint modifier.",
+						"source_line": 169,
+						"type_signature": "(segment: string): string | null",
+						"return_type": "string | null",
+						"return_description": "The CSS media query or null if not an arbitrary breakpoint",
+						"parameters": [
+							{
+								"name": "segment",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "parse_parameterized_state",
+						"kind": "function",
+						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-of-type).",
+						"source_line": 188,
+						"type_signature": "(segment: string): { name: string; css: string; type: \"state\"; } | null",
+						"return_type": "{ name: string; css: string; type: \"state\"; } | null",
+						"return_description": "Object with name (including parameter) and CSS, or null if not parameterized",
+						"parameters": [
+							{
+								"name": "segment",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "get_modifier",
+						"kind": "function",
+						"doc_comment": "Gets the modifier definition for a segment.\nHandles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).",
+						"source_line": 218,
+						"type_signature": "(segment: string): (ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
+						"return_type": "(ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
+						"return_description": "The modifier definition or null if not a known modifier",
+						"parameters": [
+							{
+								"name": "segment",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "get_all_modifier_names",
+						"kind": "function",
+						"doc_comment": "Gets all modifier names for error message suggestions.",
+						"source_line": 260,
+						"type_signature": "(): string[]",
+						"return_type": "string[]",
+						"parameters": []
+					}
+				],
+				"module_comment": "Declarative modifier definitions for CSS-literal syntax.\n\nModifiers enable responsive, state-based, and contextual styling:\n- Media modifiers: `md:`, `print:`, `motion-safe:`\n- Ancestor modifiers: `dark:`, `light:`\n- State modifiers: `hover:`, `focus:`, `disabled:`\n- Pseudo-element modifiers: `before:`, `after:`\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
+				"dependents": ["css_literal.ts"]
 			},
 			{
 				"path": "theme.gen.css.ts",
