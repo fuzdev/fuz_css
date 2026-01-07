@@ -12,6 +12,7 @@
 
 import type {Logger} from '@fuzdev/fuz_util/log.js';
 
+import {type CssClassDiagnostic} from './css_class_helpers.js';
 import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.js';
 
 // Types
@@ -37,21 +38,11 @@ export interface ParsedCssLiteral {
 }
 
 /**
- * Diagnostic message for CSS-literal parsing/validation.
- */
-export interface CssLiteralDiagnostic {
-	level: 'error' | 'warning';
-	message: string;
-	class_name: string;
-	suggestion?: string;
-}
-
-/**
  * Result of parsing a CSS-literal class name.
  */
 export type ParseResult =
-	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssLiteralDiagnostic>}
-	| {ok: false; error: CssLiteralDiagnostic};
+	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>}
+	| {ok: false; error: CssClassDiagnostic};
 
 // CSS Property Validation
 
@@ -307,7 +298,7 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 	const property = segments[segments.length - 2]!;
 	const modifier_segments = segments.slice(0, -2);
 
-	const diagnostics: Array<CssLiteralDiagnostic> = [];
+	const diagnostics: Array<CssClassDiagnostic> = [];
 
 	// Parse modifiers in order
 	for (const segment of modifier_segments) {
@@ -538,8 +529,6 @@ export const generate_declaration = (parsed: ParsedCssLiteral): string => {
  * Information needed to generate CSS output for a CSS-literal class.
  */
 export interface CssLiteralOutput {
-	/** The original class name */
-	class_name: string;
 	/** CSS declaration (property: value;) */
 	declaration: string;
 	/** Full CSS selector including pseudo-classes/elements */
@@ -548,8 +537,6 @@ export interface CssLiteralOutput {
 	media_wrapper: string | null;
 	/** Ancestor wrapper if any */
 	ancestor_wrapper: string | null;
-	/** Any diagnostics generated during parsing */
-	diagnostics: Array<CssLiteralDiagnostic>;
 }
 
 /**
@@ -558,12 +545,14 @@ export interface CssLiteralOutput {
  * @param class_name - The class name to interpret
  * @param escaped_class_name - The CSS-escaped version of the class name
  * @param log - Optional logger for warnings
+ * @param collect_diagnostics - Optional array to collect diagnostics for later processing
  * @returns CssLiteralOutput or null if not a valid CSS-literal
  */
 export const interpret_css_literal = (
 	class_name: string,
 	escaped_class_name: string,
 	log?: Logger,
+	collect_diagnostics?: Array<CssClassDiagnostic>,
 ): CssLiteralOutput | null => {
 	if (!is_possible_css_literal(class_name)) {
 		return null;
@@ -576,12 +565,14 @@ export const interpret_css_literal = (
 		if (result.error.suggestion) {
 			log?.error(`  ${result.error.suggestion}`);
 		}
+		// Collect the error for later processing
+		collect_diagnostics?.push(result.error);
 		return null;
 	}
 
 	const {parsed, diagnostics} = result;
 
-	// Log warnings
+	// Log and collect warnings
 	for (const diagnostic of diagnostics) {
 		if (diagnostic.level === 'warning') {
 			log?.warn(`CSS-literal warning in "${class_name}": ${diagnostic.message}`);
@@ -589,15 +580,14 @@ export const interpret_css_literal = (
 				log?.warn(`  ${diagnostic.suggestion}`);
 			}
 		}
+		collect_diagnostics?.push(diagnostic);
 	}
 
 	return {
-		class_name,
 		declaration: generate_declaration(parsed),
 		selector: generate_selector(escaped_class_name, parsed),
 		media_wrapper: parsed.media?.css ?? null,
 		ancestor_wrapper: parsed.ancestor?.css ?? null,
-		diagnostics,
 	};
 };
 

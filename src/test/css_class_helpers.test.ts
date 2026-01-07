@@ -381,13 +381,13 @@ test('generate_classes_css escapes class names with special characters', () => {
 		'opacity:80%': {declaration: 'opacity: 80%;'},
 	};
 
-	const css = generate_classes_css(classes, classes_by_name, []);
+	const result = generate_classes_css(classes, classes_by_name, []);
 
-	assert.include(css, '.display\\:flex { display: flex; }');
-	assert.include(css, '.opacity\\:80\\% { opacity: 80%; }');
+	assert.include(result.css, '.display\\:flex { display: flex; }');
+	assert.include(result.css, '.opacity\\:80\\% { opacity: 80%; }');
 	// Should NOT contain unescaped versions
-	assert.notInclude(css, '.display:flex {');
-	assert.notInclude(css, '.opacity:80% {');
+	assert.notInclude(result.css, '.display:flex {');
+	assert.notInclude(result.css, '.opacity:80% {');
 });
 
 test('generate_classes_css escapes complex CSS-literal class names', () => {
@@ -397,8 +397,8 @@ test('generate_classes_css escapes complex CSS-literal class names', () => {
 		'nth-child(2n):color:red': {declaration: 'color: red;'},
 	};
 
-	const css = generate_classes_css(classes, classes_by_name, []);
+	const result = generate_classes_css(classes, classes_by_name, []);
 
-	assert.include(css, '.hover\\:opacity\\:80\\%');
-	assert.include(css, '.nth-child\\(2n\\)\\:color\\:red');
+	assert.include(result.css, '.hover\\:opacity\\:80\\%');
+	assert.include(result.css, '.nth-child\\(2n\\)\\:color\\:red');
 });

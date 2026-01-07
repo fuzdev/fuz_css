@@ -167,9 +167,31 @@ export interface CssClassDeclarationItem extends CssClassDeclarationBase {
 export interface CssClassDeclarationGroup extends CssClassDeclarationBase {
 	ruleset: string;
 }
+/**
+ * Diagnostic from CSS class interpretation.
+ */
+export interface CssClassDiagnostic {
+	level: 'error' | 'warning';
+	message: string;
+	class_name: string;
+	suggestion?: string;
+}
+
 export interface CssClassDeclarationInterpreter extends CssClassDeclarationBase {
 	pattern: RegExp;
-	interpret: (matched: RegExpMatchArray, log?: Logger) => string | null;
+	interpret: (
+		matched: RegExpMatchArray,
+		log?: Logger,
+		diagnostics?: Array<CssClassDiagnostic>,
+	) => string | null;
+}
+
+/**
+ * Result from CSS class generation.
+ */
+export interface GenerateClassesCssResult {
+	css: string;
+	diagnostics: Array<CssClassDiagnostic>;
 }
 
 export const generate_classes_css = (
@@ -177,7 +199,8 @@ export const generate_classes_css = (
 	classes_by_name: Record<string, CssClassDeclaration | undefined>,
 	interpreters: Array<CssClassDeclarationInterpreter>,
 	log?: Logger,
-): string => {
+): GenerateClassesCssResult => {
+	const diagnostics: Array<CssClassDiagnostic> = [];
 	// TODO when the API is redesigned this kind of thing should be cached
 	// Create a map that has the index of each class name as the key
 	const indexes: Map<string, number> = new Map();
@@ -203,7 +226,7 @@ export const generate_classes_css = (
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
 				if (matched) {
-					const result = interpreter.interpret(matched, log);
+					const result = interpreter.interpret(matched, log, diagnostics);
 					if (result) {
 						// Check if the result is a full ruleset (contains braces)
 						// or just a declaration
@@ -242,5 +265,5 @@ export const generate_classes_css = (
 		// Note: Interpreted types are converted to declaration above, so no else clause needed
 	}
 
-	return css;
+	return {css, diagnostics};
 };

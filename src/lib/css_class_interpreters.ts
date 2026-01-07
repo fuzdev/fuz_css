@@ -97,7 +97,7 @@ export const z_index_interpreter: CssClassDeclarationInterpreter = {
  */
 export const css_literal_interpreter: CssClassDeclarationInterpreter = {
 	pattern: /^.+:.+$/,
-	interpret: (matched, log) => {
+	interpret: (matched, log, diagnostics) => {
 		const class_name = matched[0];
 
 		if (!is_possible_css_literal(class_name)) {
@@ -105,7 +105,7 @@ export const css_literal_interpreter: CssClassDeclarationInterpreter = {
 		}
 
 		const escaped_class_name = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped_class_name, log);
+		const output = interpret_css_literal(class_name, escaped_class_name, log, diagnostics);
 
 		if (!output) {
 			return null;

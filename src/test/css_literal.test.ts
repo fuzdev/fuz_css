@@ -11,9 +11,8 @@ import {
 	interpret_css_literal,
 	generate_css_literal_simple,
 	type ParsedCssLiteral,
-	type CssLiteralDiagnostic,
 } from '$lib/css_literal.js';
-import {escape_css_selector} from '$lib/css_class_helpers.js';
+import {escape_css_selector, type CssClassDiagnostic} from '$lib/css_class_helpers.js';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,
@@ -28,17 +27,17 @@ beforeAll(async () => {
 // Helper to assert result is ok and return parsed value
 const assert_ok = (
 	result: ReturnType<typeof parse_css_literal>,
-): {parsed: ParsedCssLiteral; diagnostics: Array<CssLiteralDiagnostic>} => {
+): {parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>} => {
 	assert.isTrue(result.ok, 'Expected parse result to be ok');
-	return result as {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssLiteralDiagnostic>};
+	return result as {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>};
 };
 
 // Helper to assert result is error
 const assert_error = (
 	result: ReturnType<typeof parse_css_literal>,
-): {error: CssLiteralDiagnostic} => {
+): {error: CssClassDiagnostic} => {
 	assert.isFalse(result.ok, 'Expected parse result to be error');
-	return result as {ok: false; error: CssLiteralDiagnostic};
+	return result as {ok: false; error: CssClassDiagnostic};
 };
 
 describe('is_possible_css_literal', () => {
