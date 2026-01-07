@@ -2,6 +2,19 @@ import type {Logger} from '@fuzdev/fuz_util/log.js';
 
 // TODO maybe just use the Svelte (and Oxc?) parser instead of this regexp madness?
 
+/**
+ * Escapes special characters in a CSS class name for use in a selector.
+ * CSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.
+ *
+ * @example
+ * escape_css_selector('display:flex') // 'display\\:flex'
+ * escape_css_selector('opacity:80%') // 'opacity\\:80\\%'
+ * escape_css_selector('nth-child(2n)') // 'nth-child\\(2n\\)'
+ */
+export const escape_css_selector = (name: string): string => {
+	return name.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+};
+
 export interface CssExtractor {
 	matcher: RegExp;
 	mapper: (matched: RegExpExecArray) => Array<string>;
@@ -214,7 +227,7 @@ export const generate_classes_css = (
 		}
 
 		if ('declaration' in v) {
-			css += `.${c} { ${v.declaration} }\n`;
+			css += `.${escape_css_selector(c)} { ${v.declaration} }\n`;
 		} else if ('ruleset' in v) {
 			css += v.ruleset + '\n';
 		}
