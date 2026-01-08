@@ -445,6 +445,21 @@ ${'<' as string}script>
 			uses. It requires <a href="https://github.com/ryanatkn/gro">Gro</a> to generate, using the
 			helpers in <ModuleLink path="gen_fuz_css.ts">gen_fuz_css.ts</ModuleLink>.
 		</p>
+		<h4>Dynamic class hints</h4>
+		<p>
+			The generator extracts classes from <code>class</code> attributes, <code>class:</code>
+			directives, and <code>clsx</code>/<code>cn</code> calls. For dynamically constructed classes
+			that can't be statically analyzed, use the <code>@fuz-classes</code> comment:
+		</p>
+		<Code
+			lang="typescript"
+			content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
+const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);`}
+		/>
+		<p>
+			This tells the generator to include these classes even though they're built dynamically. Works
+			in both Svelte and TypeScript files.
+		</p>
 	</TomeSection>
 
 	<TomeSection>

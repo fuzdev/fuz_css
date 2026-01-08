@@ -57,7 +57,8 @@
 				<code>.box</code> and <code>.row</code>), and CSS-literal classes (like
 				<code>.display:flex</code>
 				and
-				<code>.hover:opacity:80%</code>) with responsive/state/color-scheme modifiers
+				<code>.hover:opacity:80%</code>) with responsive/state/color-scheme modifiers - see
+				<TomeLink name="classes" /> for the full syntax reference
 			</li>
 			<li>
 				is agnostic to JS frameworks, for example usage see <a href="https://ui.fuz.dev/docs/Themed"
