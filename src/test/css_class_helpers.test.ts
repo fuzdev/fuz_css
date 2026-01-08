@@ -331,7 +331,8 @@ test('generate_classes_css uses interpreter for unknown classes', () => {
 test('generate_classes_css interpreter can return full ruleset', () => {
 	const interpreter: CssClassDeclarationInterpreter = {
 		pattern: /^media-(\w+)$/,
-		interpret: (matched) => `@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`,
+		interpret: (matched) =>
+			`@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`,
 	};
 
 	const result = generate_classes_css(['media-flex'], {}, [interpreter]);
