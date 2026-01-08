@@ -403,10 +403,6 @@ export const generate_classes_css = (
 		}
 
 		if (!v) {
-			// diagnostic
-			// if (!/^[a-z_0-9]+$/.test(c)) {
-			// 	console.error('invalid class detected, fix the regexps', c);
-			// }
 			continue;
 		}
 

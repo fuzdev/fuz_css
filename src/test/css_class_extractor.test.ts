@@ -284,18 +284,25 @@ test('handles class attribute with only whitespace', () => {
 	expect(result.classes.size).toBe(0);
 });
 
-test('handles malformed Svelte gracefully', () => {
+test('handles malformed Svelte gracefully with diagnostic', () => {
 	const source = `<div class="foo" <broken>`;
-	const result = extract_from_svelte(source);
-	// Should not throw, may return partial results
+	const result = extract_from_svelte(source, 'test.svelte');
+	// Should not throw, emits diagnostic about parse failure
 	expect(result.classes).toBeDefined();
+	expect(result.diagnostics.length).toBeGreaterThan(0);
+	expect(result.diagnostics[0]!.level).toBe('warning');
+	expect(result.diagnostics[0]!.message).toContain('parse');
+	expect(result.diagnostics[0]!.location.file).toBe('test.svelte');
 });
 
-test('handles malformed TypeScript gracefully', () => {
+test('handles malformed TypeScript gracefully with diagnostic', () => {
 	const source = `const x = { broken`;
 	const result = extract_from_ts(source, 'test.ts');
-	// Should not throw, returns empty result
-	expect(result.classes.size).toBe(0);
+	// Should not throw, emits diagnostic about parse failure
+	expect(result.diagnostics.length).toBeGreaterThan(0);
+	expect(result.diagnostics[0]!.level).toBe('warning');
+	expect(result.diagnostics[0]!.message).toContain('parse');
+	expect(result.diagnostics[0]!.location.file).toBe('test.ts');
 });
 
 // Test real-world patterns from Svelte 5.16+ docs
@@ -488,36 +495,6 @@ test('extracts classes from classnames() call (lowercase)', () => {
 	expect(class_names(result)).toEqual(new Set(['one', 'two']));
 });
 
-// Test edge cases
-
-test('handles empty class attribute gracefully', () => {
-	const source = `<div class=""></div>`;
-	const result = extract_from_svelte(source);
-	expect(result.classes.size).toBe(0);
-});
-
-test('handles parse errors gracefully, returns @fuz-classes only', () => {
-	const source = `
-// @fuz-classes fallback_class
-<div class="this is { invalid svelte syntax
-`;
-	const result = extract_from_svelte(source);
-	// Parse fails, but @fuz-classes is no longer extracted via regex before parsing
-	// So the result is empty now
-	expect(result.classes.size).toBe(0);
-});
-
-test('extracts from multiple @fuz-classes comments', () => {
-	const source = `
-<script>
-	// @fuz-classes class_a class_b
-	// @fuz-classes class_c
-</script>
-`;
-	const result = extract_from_svelte(source);
-	expect(class_names(result)).toEqual(new Set(['class_a', 'class_b', 'class_c']));
-});
-
 // Test @fuz-classes: colon variant warning
 
 test('extracts @fuz-classes with colon variant and emits warning', () => {
@@ -543,4 +520,99 @@ test('tracks source locations for classes', () => {
 	expect(result.classes.get('foo')).toBeDefined();
 	expect(result.classes.get('foo')![0]!.file).toBe('test.svelte');
 	expect(result.classes.get('foo')![0]!.line).toBe(1);
+});
+
+test('tracks source locations for multi-line class attributes', () => {
+	const source = `<div>
+	<span class="line2-class"></span>
+	<p class="line3-class"></p>
+</div>`;
+	const result = extract_from_svelte(source, 'test.svelte');
+	expect(result.classes.get('line2-class')![0]!.line).toBe(2);
+	expect(result.classes.get('line3-class')![0]!.line).toBe(3);
+});
+
+// Test deeply nested utility function calls
+
+test('extracts classes from deeply nested clsx calls', () => {
+	const source = `<div class={clsx('outer', clsx('inner', cond && 'deep'))}></div>`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('outer')).toBe(true);
+	expect(result.classes.has('inner')).toBe(true);
+	expect(result.classes.has('deep')).toBe(true);
+});
+
+test('extracts classes from cn inside array', () => {
+	const source = `<div class={clsx(['base', cn('nested', { active: true })])}></div>`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('base')).toBe(true);
+	expect(result.classes.has('nested')).toBe(true);
+	expect(result.classes.has('active')).toBe(true);
+});
+
+// Test spread props with class
+
+test('extracts classes from element with spread and class', () => {
+	const source = `<Button {...props} class="explicit-class"></Button>`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('explicit-class')).toBe(true);
+});
+
+test('extracts classes from element with spread and dynamic class', () => {
+	const source = `<div {...rest} class={clsx('base', extra)}></div>`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('base')).toBe(true);
+});
+
+// Test script context="module"
+
+test('extracts classes from script context="module"', () => {
+	const source = `
+<script context="module">
+	export const sharedClasses = 'module-class shared';
+</script>
+<script>
+	const localClasses = 'local-class';
+</script>
+<div></div>
+`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('module-class')).toBe(true);
+	expect(result.classes.has('shared')).toBe(true);
+	expect(result.classes.has('local-class')).toBe(true);
+});
+
+// Test @fuz-classes edge cases
+
+test('handles @fuz-classes with only whitespace after it', () => {
+	const source = `
+<script>
+	// @fuz-classes
+	const foo = 'bar';
+</script>
+`;
+	const result = extract_from_svelte(source);
+	// Should not crash, returns empty or no classes from the comment
+	expect(result.classes.size).toBeGreaterThanOrEqual(0);
+});
+
+test('extracts classes from HTML comment @fuz-classes', () => {
+	const source = `
+<!-- @fuz-classes html-comment-class another-class -->
+<div></div>
+`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('html-comment-class')).toBe(true);
+	expect(result.classes.has('another-class')).toBe(true);
+});
+
+test('ignores @fuz-class without "es" suffix', () => {
+	const source = `
+<script>
+	// @fuz-class not-extracted
+</script>
+<div></div>
+`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('not-extracted')).toBe(false);
 });

@@ -544,3 +544,157 @@ describe('suggest_css_property', () => {
 		assert.isNull(suggestion);
 	});
 });
+
+describe('parse_css_literal - max breakpoints', () => {
+	test('max-sm:display:none', () => {
+		const {parsed} = assert_ok(parse_css_literal('max-sm:display:none'));
+		if (!parsed.media) throw new Error('Expected media');
+		assert.equal(parsed.media.name, 'max-sm');
+		assert.include(parsed.media.css, 'width <');
+		assert.equal(parsed.property, 'display');
+		assert.equal(parsed.value, 'none');
+	});
+
+	test('max-md:flex-direction:column', () => {
+		const {parsed} = assert_ok(parse_css_literal('max-md:flex-direction:column'));
+		if (!parsed.media) throw new Error('Expected media');
+		assert.equal(parsed.media.name, 'max-md');
+		assert.include(parsed.media.css, '48rem');
+	});
+
+	test('max-lg:padding:1rem', () => {
+		const {parsed} = assert_ok(parse_css_literal('max-lg:padding:1rem'));
+		if (!parsed.media) throw new Error('Expected media');
+		assert.equal(parsed.media.name, 'max-lg');
+	});
+
+	test('max-xl:gap:0', () => {
+		const {parsed} = assert_ok(parse_css_literal('max-xl:gap:0'));
+		if (!parsed.media) throw new Error('Expected media');
+		assert.equal(parsed.media.name, 'max-xl');
+	});
+
+	test('max-2xl:margin:auto', () => {
+		const {parsed} = assert_ok(parse_css_literal('max-2xl:margin:auto'));
+		if (!parsed.media) throw new Error('Expected media');
+		assert.equal(parsed.media.name, 'max-2xl');
+	});
+});
+
+describe('generate_css_literal_simple - max breakpoints', () => {
+	test('max-sm generates correct media query', () => {
+		const class_name = 'max-sm:display:none';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, '@media (width < 40rem)');
+		assert.include(css, 'display: none;');
+	});
+
+	test('max-lg generates correct media query', () => {
+		const class_name = 'max-lg:opacity:50%';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, '@media (width < 64rem)');
+	});
+});
+
+describe('parse_css_literal - !important with modifiers', () => {
+	test('display:flex!important', () => {
+		const {parsed} = assert_ok(parse_css_literal('display:flex!important'));
+		assert.equal(parsed.property, 'display');
+		assert.equal(parsed.value, 'flex !important');
+	});
+
+	test('hover:opacity:100%!important', () => {
+		const {parsed} = assert_ok(parse_css_literal('hover:opacity:100%!important'));
+		assert.lengthOf(parsed.states, 1);
+		assert.equal(parsed.states[0]!.name, 'hover');
+		assert.equal(parsed.property, 'opacity');
+		assert.equal(parsed.value, '100% !important');
+	});
+
+	test('md:dark:display:block!important', () => {
+		const {parsed} = assert_ok(parse_css_literal('md:dark:display:block!important'));
+		if (!parsed.media) throw new Error('Expected media');
+		if (!parsed.ancestor) throw new Error('Expected ancestor');
+		assert.equal(parsed.value, 'block !important');
+	});
+
+	test('margin:0~auto!important', () => {
+		const {parsed} = assert_ok(parse_css_literal('margin:0~auto!important'));
+		assert.equal(parsed.value, '0 auto !important');
+	});
+});
+
+describe('generate_css_literal_simple - !important', () => {
+	test('renders !important correctly', () => {
+		const class_name = 'display:flex!important';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, 'display: flex !important;');
+	});
+
+	test('hover:color:red!important renders correctly', () => {
+		const class_name = 'hover:color:red!important';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, ':hover');
+		assert.include(css, 'color: red !important;');
+	});
+});
+
+describe('parse_css_literal - Unicode values', () => {
+	test('content with Unicode arrow', () => {
+		const {parsed} = assert_ok(parse_css_literal('content:"→"'));
+		assert.equal(parsed.property, 'content');
+		assert.equal(parsed.value, '"→"');
+	});
+
+	test('content with emoji', () => {
+		const {parsed} = assert_ok(parse_css_literal('content:"✓"'));
+		assert.equal(parsed.property, 'content');
+		assert.equal(parsed.value, '"✓"');
+	});
+
+	test('before:content with Unicode', () => {
+		const {parsed} = assert_ok(parse_css_literal('before:content:"«"'));
+		if (!parsed.pseudo_element) throw new Error('Expected pseudo_element');
+		assert.equal(parsed.pseudo_element.name, 'before');
+		assert.equal(parsed.value, '"«"');
+	});
+
+	test('list-style-type with Unicode', () => {
+		const {parsed} = assert_ok(parse_css_literal('list-style-type:"•"'));
+		assert.equal(parsed.property, 'list-style-type');
+		assert.equal(parsed.value, '"•"');
+	});
+});
+
+describe('generate_css_literal_simple - Unicode', () => {
+	test('renders Unicode content correctly', () => {
+		const class_name = 'content:"→"';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, 'content: "→";');
+	});
+
+	test('before:content:"✓" renders correctly', () => {
+		const class_name = 'before:content:"✓"';
+		const escaped = escape_css_selector(class_name);
+		const output = interpret_css_literal(class_name, escaped);
+		if (!output) throw new Error('Expected output');
+		const css = generate_css_literal_simple(output);
+		assert.include(css, '::before');
+		assert.include(css, 'content: "✓";');
+	});
+});

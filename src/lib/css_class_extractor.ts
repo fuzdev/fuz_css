@@ -93,8 +93,15 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 	let ast: AST.Root;
 	try {
 		ast = parse_svelte(source, {modern: true});
-	} catch {
-		// If parsing fails, return empty result
+	} catch (err) {
+		// Emit diagnostic about parse failure
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
+			suggestion: 'Check for syntax errors in the file',
+			location: {file, line: 1, column: 1},
+		});
 		return {classes, tracked_vars, diagnostics};
 	}
 
@@ -285,8 +292,15 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 				}
 			},
 		});
-	} catch {
-		// If parsing fails, return empty result
+	} catch (err) {
+		// Emit diagnostic about parse failure
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: `Failed to parse TypeScript/JavaScript file: ${err instanceof Error ? err.message : 'unknown error'}`,
+			suggestion: 'Check for syntax errors in the file',
+			location: {file, line: 1, column: 1},
+		});
 		return {classes, tracked_vars, diagnostics};
 	}
 
