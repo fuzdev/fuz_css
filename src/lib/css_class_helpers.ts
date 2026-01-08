@@ -350,7 +350,6 @@ export const generate_classes_css = (
 ): GenerateClassesCssResult => {
 	const interpreter_diagnostics: Array<CssClassDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
-	// TODO when the API is redesigned this kind of thing should be cached
 	// Create a map that has the index of each class name as the key
 	const indexes: Map<string, number> = new Map();
 	const keys = Object.keys(classes_by_name);
