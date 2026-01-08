@@ -1,6 +1,124 @@
 import type {Logger} from '@fuzdev/fuz_util/log.js';
 
-import {extract_css_classes} from './css_class_extractor.js';
+import {extract_css_classes, extract_css_classes_with_locations} from './css_class_extractor.js';
+
+// Unified Diagnostics System
+
+/**
+ * Source location for IDE/LSP integration.
+ */
+export interface SourceLocation {
+	file: string;
+	/** 1-based line number */
+	line: number;
+	/** 1-based column number */
+	column: number;
+}
+
+/**
+ * Base diagnostic with common fields.
+ */
+export interface BaseDiagnostic {
+	level: 'error' | 'warning';
+	message: string;
+	suggestion: string | null;
+}
+
+/**
+ * Diagnostic from the extraction phase.
+ */
+export interface ExtractionDiagnostic extends BaseDiagnostic {
+	phase: 'extraction';
+	location: SourceLocation;
+}
+
+/**
+ * Diagnostic from the generation phase.
+ */
+export interface GenerationDiagnostic extends BaseDiagnostic {
+	phase: 'generation';
+	class_name: string;
+	/** Source locations where this class was used, or null if from include_classes */
+	locations: Array<SourceLocation> | null;
+}
+
+/**
+ * Union of all diagnostic types.
+ */
+export type Diagnostic = ExtractionDiagnostic | GenerationDiagnostic;
+
+/**
+ * Helper class for converting character offsets to line/column positions.
+ * Svelte template nodes (Comment, Text, ExpressionTag) only have char offsets,
+ * so this class enables efficient conversion.
+ *
+ * Build: O(n) where n = source length
+ * Lookup: O(log m) where m = number of lines (binary search)
+ */
+export class SourceIndex {
+	private line_starts: Array<number>;
+
+	constructor(source: string) {
+		this.line_starts = [0];
+		for (let i = 0; i < source.length; i++) {
+			if (source[i] === '\n') this.line_starts.push(i + 1);
+		}
+	}
+
+	/**
+	 * Converts a character offset to a source location.
+	 *
+	 * @param offset - 0-based character offset in the source
+	 * @param file - File path for the location
+	 * @returns SourceLocation with 1-based line and column
+	 */
+	get_location(offset: number, file: string): SourceLocation {
+		// Binary search for line
+		let low = 0;
+		let high = this.line_starts.length - 1;
+		while (low < high) {
+			const mid = Math.ceil((low + high) / 2);
+			if (this.line_starts[mid]! <= offset) low = mid;
+			else high = mid - 1;
+		}
+		return {file, line: low + 1, column: offset - this.line_starts[low]! + 1};
+	}
+}
+
+/**
+ * Extraction result with classes mapped to their source locations.
+ */
+export interface ExtractionResult {
+	/**
+	 * Map from class name to locations where it was used.
+	 * Keys = unique classes, values = locations for diagnostics/IDE integration.
+	 */
+	classes: Map<string, Array<SourceLocation>>;
+	/** Variables that were used in class contexts (for diagnostics) */
+	tracked_vars: Set<string>;
+	/** Diagnostics from the extraction phase */
+	diagnostics: Array<ExtractionDiagnostic>;
+}
+
+/**
+ * Adds a class with its location to the extraction result.
+ *
+ * @param classes - Map of classes to locations
+ * @param class_name - Class name to add
+ * @param location - Source location where the class was found
+ */
+export const add_class_with_location = (
+	classes: Map<string, Array<SourceLocation>>,
+	class_name: string,
+	location: SourceLocation,
+): void => {
+	const existing = classes.get(class_name);
+	if (existing) {
+		existing.push(location);
+	} else {
+		classes.set(class_name, [location]);
+	}
+};
 
 /**
  * Escapes special characters in a CSS class name for use in a selector.
@@ -39,12 +157,27 @@ export const collect_css_classes = (
 	return extract_css_classes(contents, options.filename);
 };
 
+/**
+ * Returns full extraction result with class locations and diagnostics.
+ * Uses AST parsing for accurate extraction.
+ */
+export const collect_css_classes_with_locations = (
+	contents: string,
+	options: CollectCssClassesOptions = {},
+): ExtractionResult => {
+	return extract_css_classes_with_locations(contents, options.filename);
+};
+
 export class CssClasses {
 	include_classes: Set<string> | null;
 
 	#all: Set<string> = new Set();
 
-	#by_id: Map<string, Set<string>> = new Map();
+	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
+
+	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
+
+	#diagnostics: Array<ExtractionDiagnostic> = [];
 
 	#dirty = true;
 
@@ -52,9 +185,23 @@ export class CssClasses {
 		this.include_classes = include_classes;
 	}
 
-	add(id: string, classes: Set<string>): void {
+	/**
+	 * Adds extraction results for a file.
+	 *
+	 * @param id - File identifier
+	 * @param classes - Map of class names to their source locations
+	 * @param diagnostics - Extraction diagnostics from this file
+	 */
+	add(
+		id: string,
+		classes: Map<string, Array<SourceLocation>>,
+		diagnostics?: Array<ExtractionDiagnostic>,
+	): void {
 		this.#dirty = true;
 		this.#by_id.set(id, classes);
+		if (diagnostics) {
+			this.#diagnostics.push(...diagnostics);
+		}
 	}
 
 	delete(id: string): void {
@@ -62,6 +209,10 @@ export class CssClasses {
 		this.#by_id.delete(id);
 	}
 
+	/**
+	 * Gets all unique class names as a Set.
+	 * For backward compatibility.
+	 */
 	get(): Set<string> {
 		if (this.#dirty) {
 			this.#dirty = false;
@@ -70,16 +221,60 @@ export class CssClasses {
 		return this.#all;
 	}
 
+	/**
+	 * Gets all classes with their source locations.
+	 * Locations from include_classes are null.
+	 */
+	get_with_locations(): Map<string, Array<SourceLocation> | null> {
+		if (this.#dirty) {
+			this.#dirty = false;
+			this.#recalculate();
+		}
+		const result: Map<string, Array<SourceLocation> | null> = new Map();
+		// Add include_classes with null locations
+		if (this.include_classes) {
+			for (const c of this.include_classes) {
+				result.set(c, null);
+			}
+		}
+		// Add extracted classes with their locations
+		for (const [cls, locations] of this.#all_with_locations) {
+			const existing = result.get(cls);
+			if (existing === null) {
+				// Was in include_classes, keep null to indicate it
+				continue;
+			}
+			result.set(cls, locations);
+		}
+		return result;
+	}
+
+	/**
+	 * Gets all extraction diagnostics.
+	 */
+	get_diagnostics(): Array<ExtractionDiagnostic> {
+		return this.#diagnostics;
+	}
+
 	#recalculate(): void {
 		this.#all.clear();
+		this.#all_with_locations.clear();
+
 		if (this.include_classes) {
 			for (const c of this.include_classes) {
 				this.#all.add(c);
 			}
 		}
+
 		for (const classes of this.#by_id.values()) {
-			for (const c of classes) {
-				this.#all.add(c);
+			for (const [cls, locations] of classes) {
+				this.#all.add(cls);
+				const existing = this.#all_with_locations.get(cls);
+				if (existing) {
+					existing.push(...locations);
+				} else {
+					this.#all_with_locations.set(cls, [...locations]);
+				}
 			}
 		}
 	}
@@ -102,6 +297,7 @@ export interface CssClassDeclarationGroup extends CssClassDeclarationBase {
 }
 /**
  * Diagnostic from CSS class interpretation.
+ * Used internally by interpreters; converted to GenerationDiagnostic with locations.
  */
 export interface CssClassDiagnostic {
 	level: 'error' | 'warning';
@@ -109,6 +305,24 @@ export interface CssClassDiagnostic {
 	class_name: string;
 	suggestion?: string;
 }
+
+/**
+ * Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.
+ *
+ * @param diagnostic - Interpreter diagnostic to convert
+ * @param locations - Source locations where the class was used
+ */
+export const to_generation_diagnostic = (
+	diagnostic: CssClassDiagnostic,
+	locations: Array<SourceLocation> | null,
+): GenerationDiagnostic => ({
+	phase: 'generation',
+	level: diagnostic.level,
+	message: diagnostic.message,
+	class_name: diagnostic.class_name,
+	suggestion: diagnostic.suggestion ?? null,
+	locations,
+});
 
 export interface CssClassDeclarationInterpreter extends CssClassDeclarationBase {
 	pattern: RegExp;
@@ -124,7 +338,7 @@ export interface CssClassDeclarationInterpreter extends CssClassDeclarationBase 
  */
 export interface GenerateClassesCssResult {
 	css: string;
-	diagnostics: Array<CssClassDiagnostic>;
+	diagnostics: Array<GenerationDiagnostic>;
 }
 
 export const generate_classes_css = (
@@ -132,8 +346,10 @@ export const generate_classes_css = (
 	classes_by_name: Record<string, CssClassDeclaration | undefined>,
 	interpreters: Array<CssClassDeclarationInterpreter>,
 	log?: Logger,
+	class_locations?: Map<string, Array<SourceLocation> | null>,
 ): GenerateClassesCssResult => {
-	const diagnostics: Array<CssClassDiagnostic> = [];
+	const interpreter_diagnostics: Array<CssClassDiagnostic> = [];
+	const diagnostics: Array<GenerationDiagnostic> = [];
 	// TODO when the API is redesigned this kind of thing should be cached
 	// Create a map that has the index of each class name as the key
 	const indexes: Map<string, number> = new Map();
@@ -154,12 +370,15 @@ export const generate_classes_css = (
 	for (const c of sorted_classes) {
 		let v = classes_by_name[c];
 
+		// Track diagnostics count before this class
+		const diag_count_before = interpreter_diagnostics.length;
+
 		// If not found statically, try interpreters
 		if (!v) {
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
 				if (matched) {
-					const result = interpreter.interpret(matched, log, diagnostics);
+					const result = interpreter.interpret(matched, log, interpreter_diagnostics);
 					if (result) {
 						// Check if the result is a full ruleset (contains braces)
 						// or just a declaration
@@ -174,6 +393,13 @@ export const generate_classes_css = (
 					}
 				}
 			}
+		}
+
+		// Convert any new interpreter diagnostics to GenerationDiagnostic with locations
+		for (let i = diag_count_before; i < interpreter_diagnostics.length; i++) {
+			const diag = interpreter_diagnostics[i]!;
+			const locations = class_locations?.get(diag.class_name) ?? null;
+			diagnostics.push(to_generation_diagnostic(diag, locations));
 		}
 
 		if (!v) {

@@ -18,6 +18,14 @@ import {walk, type Visitors} from 'zimmerframe';
 import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
 
+import {
+	SourceIndex,
+	type SourceLocation,
+	type ExtractionDiagnostic,
+	type ExtractionResult,
+	add_class_with_location,
+} from './css_class_helpers.js';
+
 // Known class utility function names
 const CLASS_UTILITY_FUNCTIONS = new Set([
 	'clsx', // clsx package
@@ -31,81 +39,63 @@ const CLASS_UTILITY_FUNCTIONS = new Set([
 const CLASS_NAME_PATTERN = /(class|classes|classname|classnames)$/i;
 
 /**
- * Pattern to match @fuz-classes comments.
- * Supports both single-line and multi-line comment syntax:
- * - `// @fuz-classes class1 class2`
- * - Block comments: @fuz-classes class1 class2
- */
-const FUZ_CLASSES_COMMENT_PATTERN = /(?:\/\/|\/\*)\s*@fuz-classes\s+([^*\n]+?)(?:\*\/|\n|$)/g;
-
-/**
- * Extracts class names from @fuz-classes comments in source code.
- * This provides a way to hint dynamic class names that can't be statically extracted.
- *
- * @example
- * // @fuz-classes outline_width_focus outline_width_active
- * // @fuz-classes dynamic_class_1 dynamic_class_2
- */
-const extract_from_fuz_comments = (source: string): Set<string> => {
-	const classes: Set<string> = new Set();
-	let match;
-
-	while ((match = FUZ_CLASSES_COMMENT_PATTERN.exec(source)) !== null) {
-		const class_list = match[1]!.trim();
-		for (const cls of class_list.split(/\s+/).filter(Boolean)) {
-			classes.add(cls);
-		}
-	}
-
-	return classes;
-};
-
-/**
- * Extraction result with classes and tracked variables.
- */
-export interface ExtractionResult {
-	/** All extracted class names */
-	classes: Set<string>;
-	/** Variables that were used in class contexts (for diagnostics) */
-	tracked_vars: Set<string>;
-}
-
-/**
  * State maintained during AST walking.
  */
 interface WalkState {
-	/** Collected class names */
-	classes: Set<string>;
+	/** Map from class name to locations */
+	classes: Map<string, Array<SourceLocation>>;
 	/** Variables used in class contexts */
 	tracked_vars: Set<string>;
 	/** Variables with class-like names, mapped to their initializers */
 	class_name_vars: Map<string, unknown>;
 	/** Whether we're in a class context (for tracking variable usage) */
 	in_class_context: boolean;
+	/** File path for creating locations */
+	file: string;
+	/** Source index for char offset → line/column conversion (template only) */
+	source_index: SourceIndex | null;
+	/** Diagnostics collected during extraction */
+	diagnostics: Array<ExtractionDiagnostic>;
 }
+
+/**
+ * Adds a class to the state with a location.
+ */
+const add_class = (state: WalkState, class_name: string, location: SourceLocation): void => {
+	add_class_with_location(state.classes, class_name, location);
+};
+
+/**
+ * Creates a location from a character offset using the source index.
+ */
+const location_from_offset = (state: WalkState, offset: number): SourceLocation => {
+	if (state.source_index) {
+		return state.source_index.get_location(offset, state.file);
+	}
+	// Fallback for script context (should have line/column from AST)
+	return {file: state.file, line: 1, column: 1};
+};
 
 /**
  * Extracts CSS classes from a Svelte file using AST parsing.
  *
  * @param source - The Svelte file source code
- * @returns Extraction result with classes and tracked variables
+ * @param file - File path for location tracking
+ * @returns Extraction result with classes, tracked variables, and diagnostics
  */
-export const extract_from_svelte = (source: string): ExtractionResult => {
-	const classes: Set<string> = new Set();
+export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
+	const classes: Map<string, Array<SourceLocation>> = new Map();
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
-
-	// Extract from @fuz-classes comments first (works even if parsing fails)
-	for (const cls of extract_from_fuz_comments(source)) {
-		classes.add(cls);
-	}
+	const diagnostics: Array<ExtractionDiagnostic> = [];
+	const source_index = new SourceIndex(source);
 
 	let ast: AST.Root;
 	try {
 		ast = parse_svelte(source, {modern: true});
 	} catch {
-		// If parsing fails, return what we got from comments
-		return {classes, tracked_vars};
+		// If parsing fails, return empty result
+		return {classes, tracked_vars, diagnostics};
 	}
 
 	const state: WalkState = {
@@ -113,16 +103,24 @@ export const extract_from_svelte = (source: string): ExtractionResult => {
 		tracked_vars,
 		class_name_vars,
 		in_class_context: false,
+		file,
+		source_index,
+		diagnostics,
 	};
+
+	// Extract from @fuz-classes comments via AST (Svelte Comment nodes)
+	extract_fuz_classes_from_svelte_comments(ast, state);
 
 	// Walk the template AST
 	walk_template(ast.fragment, state);
 
-	// Walk the script AST (module and instance)
+	// Walk the script AST (module and instance) including @fuz-classes comments
 	if (ast.instance) {
+		extract_fuz_classes_from_script(ast.instance, source, state);
 		walk_script(ast.instance.content, state);
 	}
 	if (ast.module) {
+		extract_fuz_classes_from_script(ast.module, source, state);
 		walk_script(ast.module.content, state);
 	}
 
@@ -131,25 +129,140 @@ export const extract_from_svelte = (source: string): ExtractionResult => {
 		extract_from_tracked_vars(ast, state);
 	}
 
-	return {classes, tracked_vars};
+	return {classes, tracked_vars, diagnostics};
+};
+
+/**
+ * Parses @fuz-classes content from a comment, handling the colon variant.
+ * Returns the list of class names or null if not a @fuz-classes comment.
+ */
+const FUZ_CLASSES_PATTERN = /^\s*@fuz-classes(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_classes_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	// Match @fuz-classes with optional colon
+	const match = FUZ_CLASSES_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const class_list = match[2]!;
+
+	// Emit warning if colon was used
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-classes: (with colon) is deprecated, use @fuz-classes (without colon)',
+			suggestion: 'Remove the colon after @fuz-classes',
+			location,
+		});
+	}
+
+	return class_list.split(/\s+/).filter(Boolean);
+};
+
+/**
+ * Extracts @fuz-classes from Svelte HTML Comment nodes.
+ */
+const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkState): void => {
+	// Walk the fragment looking for Comment nodes
+	const visitors: Visitors<AST.SvelteNode, WalkState> = {
+		Comment(node, {state}) {
+			const location = location_from_offset(state, node.start);
+			const classes = parse_fuz_classes_comment(node.data, location, state.diagnostics);
+			if (classes) {
+				for (const cls of classes) {
+					add_class(state, cls, location);
+				}
+			}
+		},
+	};
+
+	walk(ast.fragment as AST.SvelteNode, state, visitors);
+};
+
+/**
+ * Extracts @fuz-classes from script blocks by re-parsing with acorn.
+ * Svelte's parser doesn't expose JavaScript comments, so we parse the
+ * script source separately to get comments via acorn's onComment callback.
+ */
+const extract_fuz_classes_from_script = (
+	script: AST.Script,
+	source: string,
+	state: WalkState,
+): void => {
+	// Extract the script source using start/end positions
+	// Svelte AST nodes have start/end but the TypeScript types don't include them
+	const content = script.content as unknown as {start: number; end: number};
+	const script_source = source.slice(content.start, content.end);
+
+	// Calculate the line offset for proper location reporting
+	// Count newlines before the script content starts
+	let line_offset = 0;
+	for (let i = 0; i < content.start; i++) {
+		if (source[i] === '\n') line_offset++;
+	}
+
+	// Collect comments via acorn's onComment callback
+	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
+
+	try {
+		const parser = Parser.extend(tsPlugin());
+		parser.parse(script_source, {
+			ecmaVersion: 'latest',
+			sourceType: 'module',
+			locations: true,
+			onComment: (
+				_block: boolean,
+				text: string,
+				_start: number,
+				_end: number,
+				startLoc?: {line: number; column: number},
+			) => {
+				if (startLoc) {
+					comments.push({value: text, loc: {start: startLoc}});
+				}
+			},
+		});
+	} catch {
+		// If parsing fails, we can't extract comments
+		return;
+	}
+
+	// Process @fuz-classes comments
+	for (const comment of comments) {
+		const location: SourceLocation = {
+			file: state.file,
+			line: comment.loc.start.line + line_offset,
+			column: comment.loc.start.column + 1,
+		};
+		const class_list = parse_fuz_classes_comment(comment.value, location, state.diagnostics);
+		if (class_list) {
+			for (const cls of class_list) {
+				add_class(state, cls, location);
+			}
+		}
+	}
 };
 
 /**
  * Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.
  *
  * @param source - The TS/JS file source code
- * @param filename - The filename (for determining parser options)
- * @returns Extraction result with classes and tracked variables
+ * @param file - File path for location tracking
+ * @returns Extraction result with classes, tracked variables, and diagnostics
  */
-export const extract_from_ts = (source: string, _filename?: string): ExtractionResult => {
-	const classes: Set<string> = new Set();
+export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionResult => {
+	const classes: Map<string, Array<SourceLocation>> = new Map();
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
+	const diagnostics: Array<ExtractionDiagnostic> = [];
 
-	// Extract from @fuz-classes comments first (works even if parsing fails)
-	for (const cls of extract_from_fuz_comments(source)) {
-		classes.add(cls);
-	}
+	// Collect comments via acorn's onComment callback
+	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
 
 	let ast: Node;
 	try {
@@ -160,10 +273,36 @@ export const extract_from_ts = (source: string, _filename?: string): ExtractionR
 			ecmaVersion: 'latest',
 			sourceType: 'module',
 			locations: true,
+			onComment: (
+				_block: boolean,
+				text: string,
+				_start: number,
+				_end: number,
+				startLoc?: {line: number; column: number},
+			) => {
+				if (startLoc) {
+					comments.push({value: text, loc: {start: startLoc}});
+				}
+			},
 		});
 	} catch {
-		// If parsing fails, return what we got from comments
-		return {classes, tracked_vars};
+		// If parsing fails, return empty result
+		return {classes, tracked_vars, diagnostics};
+	}
+
+	// Process @fuz-classes comments
+	for (const comment of comments) {
+		const location: SourceLocation = {
+			file,
+			line: comment.loc.start.line,
+			column: comment.loc.start.column + 1,
+		};
+		const class_list = parse_fuz_classes_comment(comment.value, location, diagnostics);
+		if (class_list) {
+			for (const cls of class_list) {
+				add_class_with_location(classes, cls, location);
+			}
+		}
 	}
 
 	const state: WalkState = {
@@ -171,35 +310,56 @@ export const extract_from_ts = (source: string, _filename?: string): ExtractionR
 		tracked_vars,
 		class_name_vars,
 		in_class_context: false,
+		file,
+		source_index: null, // Not needed for TS files - acorn provides locations
+		diagnostics,
 	};
 
 	walk_script(ast, state);
 
-	return {classes, tracked_vars};
+	return {classes, tracked_vars, diagnostics};
 };
 
 /**
  * Unified extraction function that auto-detects file type.
+ * Returns just the class names as a Set for backward compatibility.
  *
  * @param source - The file source code
  * @param filename - The filename (for determining file type)
- * @returns Extraction result with classes
+ * @returns Set of class names
  */
 export const extract_css_classes = (source: string, filename?: string): Set<string> => {
+	const result = extract_css_classes_with_locations(source, filename);
+	return new Set(result.classes.keys());
+};
+
+/**
+ * Unified extraction function that auto-detects file type.
+ * Returns full extraction result with locations and diagnostics.
+ *
+ * @param source - The file source code
+ * @param filename - The filename (for determining file type and location tracking)
+ * @returns Full extraction result with classes, tracked variables, and diagnostics
+ */
+export const extract_css_classes_with_locations = (
+	source: string,
+	filename?: string,
+): ExtractionResult => {
 	const ext = filename ? filename.slice(filename.lastIndexOf('.')) : '';
+	const file = filename ?? '<unknown>';
 
 	if (ext === '.svelte') {
-		return extract_from_svelte(source).classes;
+		return extract_from_svelte(source, file);
 	} else if (ext === '.ts' || ext === '.js' || ext === '.tsx' || ext === '.jsx') {
-		return extract_from_ts(source, filename).classes;
+		return extract_from_ts(source, file);
 	}
 
 	// Default to Svelte-style extraction (handles both)
-	const svelte_result = extract_from_svelte(source);
+	const svelte_result = extract_from_svelte(source, file);
 	if (svelte_result.classes.size > 0) {
-		return svelte_result.classes;
+		return svelte_result;
 	}
-	return extract_from_ts(source, filename).classes;
+	return extract_from_ts(source, file);
 };
 
 // Template AST walking
@@ -250,7 +410,7 @@ const process_element_attributes = (
 
 		// Handle class: directive
 		if (attr.type === 'ClassDirective') {
-			state.classes.add(attr.name);
+			add_class(state, attr.name, location_from_offset(state, attr.start));
 		}
 	}
 };
@@ -270,8 +430,9 @@ const extract_from_attribute_value = (value: AST.Attribute['value'], state: Walk
 		for (const part of value) {
 			if (part.type === 'Text') {
 				// Static text: split on whitespace
+				const location = location_from_offset(state, part.start);
 				for (const cls of part.data.split(/\s+/).filter(Boolean)) {
-					state.classes.add(cls);
+					add_class(state, cls, location);
 				}
 			} else {
 				// ExpressionTag: extract from the expression
@@ -295,13 +456,26 @@ const extract_from_attribute_value = (value: AST.Attribute['value'], state: Walk
  * Handles strings, arrays, objects, conditionals, and function calls.
  */
 const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void => {
+	// Get location from the expression's start offset
+	const get_location = (): SourceLocation => {
+		const node = expr as unknown as {start?: number; loc?: {start: {line: number; column: number}}};
+		if (node.loc) {
+			return {file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1};
+		}
+		if (node.start !== undefined) {
+			return location_from_offset(state, node.start);
+		}
+		return {file: state.file, line: 1, column: 1};
+	};
+
 	switch (expr.type) {
 		case 'Literal': {
 			// String literal
 			const node = expr as unknown as {value: unknown};
 			if (typeof node.value === 'string') {
+				const location = get_location();
 				for (const cls of node.value.split(/\s+/).filter(Boolean)) {
-					state.classes.add(cls);
+					add_class(state, cls, location);
 				}
 			}
 			break;
@@ -310,13 +484,22 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		case 'TemplateLiteral': {
 			// Template literal - extract static parts
 			const node = expr as unknown as {
-				quasis: Array<{value: {raw: string}}>;
+				quasis: Array<{
+					value: {raw: string};
+					start?: number;
+					loc?: {start: {line: number; column: number}};
+				}>;
 				expressions: Array<unknown>;
 			};
 			for (const quasi of node.quasis) {
 				if (quasi.value.raw) {
+					const location = quasi.loc
+						? {file: state.file, line: quasi.loc.start.line, column: quasi.loc.start.column + 1}
+						: quasi.start !== undefined
+							? location_from_offset(state, quasi.start)
+							: get_location();
 					for (const cls of quasi.value.raw.split(/\s+/).filter(Boolean)) {
-						state.classes.add(cls);
+						add_class(state, cls, location);
 					}
 				}
 			}
@@ -341,18 +524,29 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		case 'ObjectExpression': {
 			// Object: extract keys (values are conditions)
 			const node = expr as unknown as {
-				properties: Array<{type: string; key: unknown; computed: boolean}>;
+				properties: Array<{
+					type: string;
+					key: unknown;
+					computed: boolean;
+					start?: number;
+					loc?: {start: {line: number; column: number}};
+				}>;
 			};
 			for (const prop of node.properties) {
 				if (prop.type === 'Property' && !prop.computed) {
 					// Non-computed key - extract the key as a class name
 					const key = prop.key as {type: string; name?: string; value?: string};
+					const location = prop.loc
+						? {file: state.file, line: prop.loc.start.line, column: prop.loc.start.column + 1}
+						: prop.start !== undefined
+							? location_from_offset(state, prop.start)
+							: get_location();
 					if (key.type === 'Identifier') {
-						state.classes.add(key.name!);
+						add_class(state, key.name!, location);
 					} else if (key.type === 'Literal' && typeof key.value === 'string') {
 						// Handle string keys like { 'display:flex': condition }
 						for (const cls of key.value.split(/\s+/).filter(Boolean)) {
-							state.classes.add(cls);
+							add_class(state, cls, location);
 						}
 					}
 				}

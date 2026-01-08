@@ -139,39 +139,24 @@
 				"path": "css_class_extractor.ts",
 				"declarations": [
 					{
-						"name": "ExtractionResult",
-						"kind": "type",
-						"doc_comment": "Extraction result with classes and tracked variables.",
-						"source_line": 66,
-						"type_signature": "ExtractionResult",
-						"properties": [
-							{
-								"name": "classes",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "All extracted class names"
-							},
-							{
-								"name": "tracked_vars",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "Variables that were used in class contexts (for diagnostics)"
-							}
-						]
-					},
-					{
 						"name": "extract_from_svelte",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 93,
-						"type_signature": "(source: string): ExtractionResult",
+						"source_line": 86,
+						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
-						"return_description": "Extraction result with classes and tracked variables",
+						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
 						"parameters": [
 							{
 								"name": "source",
 								"type": "string",
 								"description": "- The Svelte file source code"
+							},
+							{
+								"name": "file",
+								"type": "string",
+								"description": "- File path for location tracking",
+								"default_value": "'<unknown>'"
 							}
 						]
 					},
@@ -179,10 +164,10 @@
 						"name": "extract_from_ts",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.",
-						"source_line": 144,
-						"type_signature": "(source: string, _filename?: string | undefined): ExtractionResult",
+						"source_line": 258,
+						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
-						"return_description": "Extraction result with classes and tracked variables",
+						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
 						"parameters": [
 							{
 								"name": "source",
@@ -190,20 +175,21 @@
 								"description": "- The TS/JS file source code"
 							},
 							{
-								"name": "_filename",
-								"type": "string | undefined",
-								"optional": true
+								"name": "file",
+								"type": "string",
+								"description": "- File path for location tracking",
+								"default_value": "'<unknown>'"
 							}
 						]
 					},
 					{
 						"name": "extract_css_classes",
 						"kind": "function",
-						"doc_comment": "Unified extraction function that auto-detects file type.",
-						"source_line": 188,
+						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set for backward compatibility.",
+						"source_line": 331,
 						"type_signature": "(source: string, filename?: string | undefined): Set<string>",
 						"return_type": "Set<string>",
-						"return_description": "Extraction result with classes",
+						"return_description": "Set of class names",
 						"parameters": [
 							{
 								"name": "source",
@@ -217,9 +203,32 @@
 								"description": "- The filename (for determining file type)"
 							}
 						]
+					},
+					{
+						"name": "extract_css_classes_with_locations",
+						"kind": "function",
+						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
+						"source_line": 344,
+						"type_signature": "(source: string, filename?: string | undefined): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The file source code"
+							},
+							{
+								"name": "filename",
+								"type": "string | undefined",
+								"optional": true,
+								"description": "- The filename (for determining file type and location tracking)"
+							}
+						]
 					}
 				],
 				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
+				"dependencies": ["css_class_helpers.ts"],
 				"dependents": ["css_class_helpers.ts"]
 			},
 			{
@@ -458,13 +467,213 @@
 				"path": "css_class_helpers.ts",
 				"declarations": [
 					{
+						"name": "SourceLocation",
+						"kind": "type",
+						"doc_comment": "Source location for IDE/LSP integration.",
+						"source_line": 10,
+						"type_signature": "SourceLocation",
+						"properties": [
+							{
+								"name": "file",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "line",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "1-based line number"
+							},
+							{
+								"name": "column",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "1-based column number"
+							}
+						]
+					},
+					{
+						"name": "BaseDiagnostic",
+						"kind": "type",
+						"doc_comment": "Base diagnostic with common fields.",
+						"source_line": 21,
+						"type_signature": "BaseDiagnostic",
+						"properties": [
+							{
+								"name": "level",
+								"kind": "variable",
+								"type_signature": "'error' | 'warning'"
+							},
+							{
+								"name": "message",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "suggestion",
+								"kind": "variable",
+								"type_signature": "string | null"
+							}
+						]
+					},
+					{
+						"name": "ExtractionDiagnostic",
+						"kind": "type",
+						"doc_comment": "Diagnostic from the extraction phase.",
+						"source_line": 30,
+						"type_signature": "ExtractionDiagnostic",
+						"extends": ["BaseDiagnostic"],
+						"properties": [
+							{
+								"name": "phase",
+								"kind": "variable",
+								"type_signature": "'extraction'"
+							},
+							{
+								"name": "location",
+								"kind": "variable",
+								"type_signature": "SourceLocation"
+							}
+						]
+					},
+					{
+						"name": "GenerationDiagnostic",
+						"kind": "type",
+						"doc_comment": "Diagnostic from the generation phase.",
+						"source_line": 38,
+						"type_signature": "GenerationDiagnostic",
+						"extends": ["BaseDiagnostic"],
+						"properties": [
+							{
+								"name": "phase",
+								"kind": "variable",
+								"type_signature": "'generation'"
+							},
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "locations",
+								"kind": "variable",
+								"type_signature": "Array<SourceLocation> | null",
+								"doc_comment": "Source locations where this class was used, or null if from include_classes"
+							}
+						]
+					},
+					{
+						"name": "Diagnostic",
+						"kind": "type",
+						"doc_comment": "Union of all diagnostic types.",
+						"source_line": 48,
+						"type_signature": "Diagnostic"
+					},
+					{
+						"name": "SourceIndex",
+						"kind": "class",
+						"doc_comment": "Helper class for converting character offsets to line/column positions.\nSvelte template nodes (Comment, Text, ExpressionTag) only have char offsets,\nso this class enables efficient conversion.\n\nBuild: O(n) where n = source length\nLookup: O(log m) where m = number of lines (binary search)",
+						"source_line": 58,
+						"members": [
+							{
+								"name": "line_starts",
+								"kind": "variable",
+								"modifiers": ["private"],
+								"type_signature": "Array<number>"
+							},
+							{
+								"name": "constructor",
+								"kind": "constructor",
+								"type_signature": "(source: string): SourceIndex",
+								"parameters": [
+									{
+										"name": "source",
+										"type": "string"
+									}
+								]
+							},
+							{
+								"name": "get_location",
+								"kind": "function",
+								"doc_comment": "Converts a character offset to a source location.",
+								"type_signature": "(offset: number, file: string): SourceLocation",
+								"return_type": "SourceLocation",
+								"return_description": "SourceLocation with 1-based line and column",
+								"parameters": [
+									{
+										"name": "offset",
+										"type": "number",
+										"description": "- 0-based character offset in the source"
+									},
+									{
+										"name": "file",
+										"type": "string",
+										"description": "- File path for the location"
+									}
+								]
+							}
+						]
+					},
+					{
+						"name": "ExtractionResult",
+						"kind": "type",
+						"doc_comment": "Extraction result with classes mapped to their source locations.",
+						"source_line": 91,
+						"type_signature": "ExtractionResult",
+						"properties": [
+							{
+								"name": "classes",
+								"kind": "variable",
+								"type_signature": "Map<string, Array<SourceLocation>>",
+								"doc_comment": "Map from class name to locations where it was used.\nKeys = unique classes, values = locations for diagnostics/IDE integration."
+							},
+							{
+								"name": "tracked_vars",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "Variables that were used in class contexts (for diagnostics)"
+							},
+							{
+								"name": "diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<ExtractionDiagnostic>",
+								"doc_comment": "Diagnostics from the extraction phase"
+							}
+						]
+					},
+					{
+						"name": "add_class_with_location",
+						"kind": "function",
+						"doc_comment": "Adds a class with its location to the extraction result.",
+						"source_line": 110,
+						"type_signature": "(classes: Map<string, SourceLocation[]>, class_name: string, location: SourceLocation): void",
+						"return_type": "void",
+						"parameters": [
+							{
+								"name": "classes",
+								"type": "Map<string, SourceLocation[]>",
+								"description": "- Map of classes to locations"
+							},
+							{
+								"name": "class_name",
+								"type": "string",
+								"description": "- Class name to add"
+							},
+							{
+								"name": "location",
+								"type": "SourceLocation",
+								"description": "- Source location where the class was found"
+							}
+						]
+					},
+					{
 						"name": "escape_css_selector",
 						"kind": "function",
 						"doc_comment": "Escapes special characters in a CSS class name for use in a selector.\nCSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.",
 						"examples": [
 							"escape_css_selector('display:flex') // 'display\\\\:flex'\nescape_css_selector('opacity:80%') // 'opacity\\\\:80\\\\%'\nescape_css_selector('nth-child(2n)') // 'nth-child\\\\(2n\\\\)'"
 						],
-						"source_line": 14,
+						"source_line": 132,
 						"type_signature": "(name: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -477,7 +686,7 @@
 					{
 						"name": "CollectCssClassesOptions",
 						"kind": "type",
-						"source_line": 18,
+						"source_line": 136,
 						"type_signature": "CollectCssClassesOptions",
 						"properties": [
 							{
@@ -492,7 +701,7 @@
 						"name": "collect_css_classes",
 						"kind": "function",
 						"doc_comment": "Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.\nUses AST parsing for accurate extraction of:\n- `class=\"...\"` string attributes\n- `class={{...}}` object attributes (Svelte 5.16+)\n- `class={[...]}` array attributes (Svelte 5.16+)\n- `class:name` directives\n- `clsx()`, `cn()`, `classNames()` calls\n- Variables with class-like names",
-						"source_line": 35,
+						"source_line": 153,
 						"type_signature": "(contents: string, options?: CollectCssClassesOptions): Set<string>",
 						"return_type": "Set<string>",
 						"parameters": [
@@ -508,9 +717,28 @@
 						]
 					},
 					{
+						"name": "collect_css_classes_with_locations",
+						"kind": "function",
+						"doc_comment": "Returns full extraction result with class locations and diagnostics.\nUses AST parsing for accurate extraction.",
+						"source_line": 164,
+						"type_signature": "(contents: string, options?: CollectCssClassesOptions): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"parameters": [
+							{
+								"name": "contents",
+								"type": "string"
+							},
+							{
+								"name": "options",
+								"type": "CollectCssClassesOptions",
+								"default_value": "{}"
+							}
+						]
+					},
+					{
 						"name": "CssClasses",
 						"kind": "class",
-						"source_line": 42,
+						"source_line": 171,
 						"members": [
 							{
 								"name": "include_classes",
@@ -532,16 +760,25 @@
 							{
 								"name": "add",
 								"kind": "function",
-								"type_signature": "(id: string, classes: Set<string>): void",
+								"doc_comment": "Adds extraction results for a file.",
+								"type_signature": "(id: string, classes: Map<string, SourceLocation[]>, diagnostics?: ExtractionDiagnostic[] | undefined): void",
 								"return_type": "void",
 								"parameters": [
 									{
 										"name": "id",
-										"type": "string"
+										"type": "string",
+										"description": "- File identifier"
 									},
 									{
 										"name": "classes",
-										"type": "Set<string>"
+										"type": "Map<string, SourceLocation[]>",
+										"description": "- Map of class names to their source locations"
+									},
+									{
+										"name": "diagnostics",
+										"type": "ExtractionDiagnostic[] | undefined",
+										"optional": true,
+										"description": "- Extraction diagnostics from this file"
 									}
 								]
 							},
@@ -560,8 +797,25 @@
 							{
 								"name": "get",
 								"kind": "function",
+								"doc_comment": "Gets all unique class names as a Set.\nFor backward compatibility.",
 								"type_signature": "(): Set<string>",
 								"return_type": "Set<string>",
+								"parameters": []
+							},
+							{
+								"name": "get_with_locations",
+								"kind": "function",
+								"doc_comment": "Gets all classes with their source locations.\nLocations from include_classes are null.",
+								"type_signature": "(): Map<string, SourceLocation[] | null>",
+								"return_type": "Map<string, SourceLocation[] | null>",
+								"parameters": []
+							},
+							{
+								"name": "get_diagnostics",
+								"kind": "function",
+								"doc_comment": "Gets all extraction diagnostics.",
+								"type_signature": "(): ExtractionDiagnostic[]",
+								"return_type": "ExtractionDiagnostic[]",
 								"parameters": []
 							}
 						]
@@ -569,13 +823,13 @@
 					{
 						"name": "CssClassDeclaration",
 						"kind": "type",
-						"source_line": 88,
+						"source_line": 283,
 						"type_signature": "CssClassDeclaration"
 					},
 					{
 						"name": "CssClassDeclarationBase",
 						"kind": "type",
-						"source_line": 93,
+						"source_line": 288,
 						"type_signature": "CssClassDeclarationBase",
 						"properties": [
 							{
@@ -588,7 +842,7 @@
 					{
 						"name": "CssClassDeclarationItem",
 						"kind": "type",
-						"source_line": 97,
+						"source_line": 292,
 						"type_signature": "CssClassDeclarationItem",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -602,7 +856,7 @@
 					{
 						"name": "CssClassDeclarationGroup",
 						"kind": "type",
-						"source_line": 100,
+						"source_line": 295,
 						"type_signature": "CssClassDeclarationGroup",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -616,8 +870,8 @@
 					{
 						"name": "CssClassDiagnostic",
 						"kind": "type",
-						"doc_comment": "Diagnostic from CSS class interpretation.",
-						"source_line": 106,
+						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to GenerationDiagnostic with locations.",
+						"source_line": 302,
 						"type_signature": "CssClassDiagnostic",
 						"properties": [
 							{
@@ -643,9 +897,29 @@
 						]
 					},
 					{
+						"name": "to_generation_diagnostic",
+						"kind": "function",
+						"doc_comment": "Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.",
+						"source_line": 315,
+						"type_signature": "(diagnostic: CssClassDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
+						"return_type": "GenerationDiagnostic",
+						"parameters": [
+							{
+								"name": "diagnostic",
+								"type": "CssClassDiagnostic",
+								"description": "- Interpreter diagnostic to convert"
+							},
+							{
+								"name": "locations",
+								"type": "SourceLocation[] | null",
+								"description": "- Source locations where the class was used"
+							}
+						]
+					},
+					{
 						"name": "CssClassDeclarationInterpreter",
 						"kind": "type",
-						"source_line": 113,
+						"source_line": 327,
 						"type_signature": "CssClassDeclarationInterpreter",
 						"extends": ["CssClassDeclarationBase"],
 						"properties": [
@@ -665,7 +939,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 125,
+						"source_line": 339,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -676,15 +950,15 @@
 							{
 								"name": "diagnostics",
 								"kind": "variable",
-								"type_signature": "Array<CssClassDiagnostic>"
+								"type_signature": "Array<GenerationDiagnostic>"
 							}
 						]
 					},
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 130,
-						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDeclaration | undefined>, interpreters: CssClassDeclarationInterpreter[], log?: Logger | undefined): GenerateClassesCssResult",
+						"source_line": 344,
+						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDeclaration | undefined>, interpreters: CssClassDeclarationInterpreter[], log?: Logger | undefined, class_locations?: Map<...> | undefined): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
 							{
@@ -703,12 +977,17 @@
 								"name": "log",
 								"type": "Logger | undefined",
 								"optional": true
+							},
+							{
+								"name": "class_locations",
+								"type": "Map<string, SourceLocation[] | null> | undefined",
+								"optional": true
 							}
 						]
 					}
 				],
 				"dependencies": ["css_class_extractor.ts"],
-				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
+				"dependents": ["css_class_extractor.ts", "css_class_interpreters.ts", "gen_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_interpreters.ts",
@@ -1068,7 +1347,7 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 15,
+						"source_line": 16,
 						"type_signature": "GenFuzCssOptions",
 						"properties": [
 							{
@@ -1115,23 +1394,23 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 41,
+						"source_line": 55,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
 							{
 								"name": "diagnostics",
 								"kind": "variable",
-								"type_signature": "Array<CssClassDiagnostic>"
+								"type_signature": "Array<Diagnostic>"
 							},
 							{
 								"name": "constructor",
 								"kind": "constructor",
-								"type_signature": "(diagnostics: CssClassDiagnostic[]): CssGenerationError",
+								"type_signature": "(diagnostics: Diagnostic[]): CssGenerationError",
 								"parameters": [
 									{
 										"name": "diagnostics",
-										"type": "CssClassDiagnostic[]"
+										"type": "Diagnostic[]"
 									}
 								]
 							}
@@ -1140,7 +1419,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 64,
+						"source_line": 78,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [

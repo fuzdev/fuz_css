@@ -6,24 +6,30 @@ import {
 	extract_css_classes,
 } from '$lib/css_class_extractor.js';
 
+/**
+ * Helper to get class names from extraction result.
+ */
+const class_names = (result: {classes: Map<string, unknown>}): Set<string> =>
+	new Set(result.classes.keys());
+
 // Test basic string class attributes
 
 test('extracts classes from class="string" attribute', () => {
 	const source = `<div class="foo bar baz"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar', 'baz']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar', 'baz']));
 });
 
 test('extracts CSS-literal classes from class attribute', () => {
 	const source = `<div class="display:flex hover:opacity:80%"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
+	expect(class_names(result)).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
 });
 
 test('extracts classes with responsive modifiers', () => {
 	const source = `<div class="md:display:flex lg:flex-direction:row"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['md:display:flex', 'lg:flex-direction:row']));
+	expect(class_names(result)).toEqual(new Set(['md:display:flex', 'lg:flex-direction:row']));
 });
 
 // Test array-style class attributes (Svelte 5.16+)
@@ -31,25 +37,25 @@ test('extracts classes with responsive modifiers', () => {
 test('extracts classes from class={[...]} array syntax', () => {
 	const source = `<div class={['foo', 'bar']}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extracts classes from conditional array syntax', () => {
 	const source = `<div class={[cond && 'active', 'base']}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['active', 'base']));
+	expect(class_names(result)).toEqual(new Set(['active', 'base']));
 });
 
 test('extracts classes from complex array with CSS-literal syntax', () => {
 	const source = `<div class={[faded && 'saturate-0 opacity-50', large && 'scale-200']}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['saturate-0', 'opacity-50', 'scale-200']));
+	expect(class_names(result)).toEqual(new Set(['saturate-0', 'opacity-50', 'scale-200']));
 });
 
 test('extracts CSS-literal classes from array syntax', () => {
 	const source = `<div class={[cond && 'box', 'display:flex']}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['box', 'display:flex']));
+	expect(class_names(result)).toEqual(new Set(['box', 'display:flex']));
 });
 
 // Test object-style class attributes (Svelte 5.16+)
@@ -57,19 +63,19 @@ test('extracts CSS-literal classes from array syntax', () => {
 test('extracts classes from class={{...}} object syntax', () => {
 	const source = `<div class={{ cool, lame: !cool }}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['cool', 'lame']));
+	expect(class_names(result)).toEqual(new Set(['cool', 'lame']));
 });
 
 test('extracts CSS-literal classes from object keys', () => {
 	const source = `<div class={{ 'display:flex': isActive, 'hover:opacity:80%': hasHover }}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
+	expect(class_names(result)).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
 });
 
 test('extracts classes from mixed object with identifiers and strings', () => {
 	const source = `<div class={{ active, 'hover:color:red': true }}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['active', 'hover:color:red']));
+	expect(class_names(result)).toEqual(new Set(['active', 'hover:color:red']));
 });
 
 // Test class: directive
@@ -77,19 +83,19 @@ test('extracts classes from mixed object with identifiers and strings', () => {
 test('extracts class from class:name directive', () => {
 	const source = `<div class:active={isActive}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['active']));
+	expect(class_names(result)).toEqual(new Set(['active']));
 });
 
 test('extracts class from shorthand class:name directive', () => {
 	const source = `<div class:cool></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['cool']));
+	expect(class_names(result)).toEqual(new Set(['cool']));
 });
 
 test('extracts multiple class directives', () => {
 	const source = `<div class:foo class:bar={cond} class:baz></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar', 'baz']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar', 'baz']));
 });
 
 // Test ternary expressions
@@ -97,13 +103,13 @@ test('extracts multiple class directives', () => {
 test('extracts both branches of ternary in class attribute', () => {
 	const source = `<div class={large ? 'large' : 'small'}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['large', 'small']));
+	expect(class_names(result)).toEqual(new Set(['large', 'small']));
 });
 
 test('extracts CSS-literal classes from ternary', () => {
 	const source = `<div class={expanded ? 'max-height:500px' : 'max-height:0'}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['max-height:500px', 'max-height:0']));
+	expect(class_names(result)).toEqual(new Set(['max-height:500px', 'max-height:0']));
 });
 
 // Test clsx/cn function calls
@@ -111,31 +117,31 @@ test('extracts CSS-literal classes from ternary', () => {
 test('extracts classes from clsx() call', () => {
 	const source = `<div class={clsx('foo', 'bar')}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extracts classes from cn() call', () => {
 	const source = `<div class={cn('base', active && 'active')}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['base', 'active']));
+	expect(class_names(result)).toEqual(new Set(['base', 'active']));
 });
 
 test('extracts classes from clsx() with object syntax', () => {
 	const source = `<div class={clsx({ foo: true, bar: false })}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extracts CSS-literal classes from clsx() call', () => {
 	const source = `<div class={clsx('display:flex', { 'hover:opacity:80%': hasHover })}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
+	expect(class_names(result)).toEqual(new Set(['display:flex', 'hover:opacity:80%']));
 });
 
 test('extracts classes from nested clsx arguments', () => {
 	const source = `<div class={clsx('base', active && 'active', ['nested', condition && 'cond'])}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['base', 'active', 'nested', 'cond']));
+	expect(class_names(result)).toEqual(new Set(['base', 'active', 'nested', 'cond']));
 });
 
 // Test template literals
@@ -143,13 +149,13 @@ test('extracts classes from nested clsx arguments', () => {
 test('extracts classes from template literal', () => {
 	const source = `<div class={\`foo bar\`}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extracts static parts from template literal with expressions', () => {
 	const source = `<div class={\`base \${active ? 'active' : 'inactive'} end\`}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['base', 'active', 'inactive', 'end']));
+	expect(class_names(result)).toEqual(new Set(['base', 'active', 'inactive', 'end']));
 });
 
 // Test mixed expressions
@@ -167,10 +173,10 @@ test('extracts classes from mixed expression types', () => {
 )}></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('base');
-	expect(result.classes).toContain('active');
-	expect(result.classes).toContain('disabled');
-	expect(result.classes).toContain('nested');
+	expect(result.classes.has('base')).toBe(true);
+	expect(result.classes.has('active')).toBe(true);
+	expect(result.classes.has('disabled')).toBe(true);
+	expect(result.classes.has('nested')).toBe(true);
 });
 
 // Test variable tracking
@@ -183,8 +189,8 @@ test('extracts classes from variables with class-like names', () => {
 <div class={buttonClasses}></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('btn');
-	expect(result.classes).toContain('primary');
+	expect(result.classes.has('btn')).toBe(true);
+	expect(result.classes.has('primary')).toBe(true);
 });
 
 test('extracts classes from variables ending in Classes', () => {
@@ -195,8 +201,8 @@ test('extracts classes from variables ending in Classes', () => {
 <div></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('display:flex');
-	expect(result.classes).toContain('gap:var(--space_md)');
+	expect(result.classes.has('display:flex')).toBe(true);
+	expect(result.classes.has('gap:var(--space_md)')).toBe(true);
 });
 
 // Test TypeScript extraction
@@ -207,10 +213,10 @@ const buttonClasses = 'btn primary hover:opacity:80%';
 export const cardClass = 'card';
 `;
 	const result = extract_from_ts(source, 'test.ts');
-	expect(result.classes).toContain('btn');
-	expect(result.classes).toContain('primary');
-	expect(result.classes).toContain('hover:opacity:80%');
-	expect(result.classes).toContain('card');
+	expect(result.classes.has('btn')).toBe(true);
+	expect(result.classes.has('primary')).toBe(true);
+	expect(result.classes.has('hover:opacity:80%')).toBe(true);
+	expect(result.classes.has('card')).toBe(true);
 });
 
 test('extracts classes from clsx in TypeScript', () => {
@@ -218,9 +224,9 @@ test('extracts classes from clsx in TypeScript', () => {
 const classes = clsx('base', active && 'active', { 'display:flex': true });
 `;
 	const result = extract_from_ts(source, 'test.ts');
-	expect(result.classes).toContain('base');
-	expect(result.classes).toContain('active');
-	expect(result.classes).toContain('display:flex');
+	expect(result.classes.has('base')).toBe(true);
+	expect(result.classes.has('active')).toBe(true);
+	expect(result.classes.has('display:flex')).toBe(true);
 });
 
 test('extracts classes from object with class property', () => {
@@ -229,9 +235,9 @@ const props = { class: 'foo bar' };
 const config = { className: 'baz' };
 `;
 	const result = extract_from_ts(source, 'test.ts');
-	expect(result.classes).toContain('foo');
-	expect(result.classes).toContain('bar');
-	expect(result.classes).toContain('baz');
+	expect(result.classes.has('foo')).toBe(true);
+	expect(result.classes.has('bar')).toBe(true);
+	expect(result.classes.has('baz')).toBe(true);
 });
 
 // Test unified extraction function
@@ -245,8 +251,8 @@ test('extract_css_classes auto-detects Svelte files', () => {
 test('extract_css_classes auto-detects TypeScript files', () => {
 	const source = `const buttonClasses = 'btn primary';`;
 	const result = extract_css_classes(source, 'test.ts');
-	expect(result).toContain('btn');
-	expect(result).toContain('primary');
+	expect(result.has('btn')).toBe(true);
+	expect(result.has('primary')).toBe(true);
 });
 
 // Test component attributes
@@ -254,14 +260,14 @@ test('extract_css_classes auto-detects TypeScript files', () => {
 test('extracts classes from Component class prop', () => {
 	const source = `<Button class="custom-button hover:scale:1.05"></Button>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['custom-button', 'hover:scale:1.05']));
+	expect(class_names(result)).toEqual(new Set(['custom-button', 'hover:scale:1.05']));
 });
 
 test('extracts classes from Component with complex class prop', () => {
 	const source = `<Card class={clsx('card', selected && 'border:2px~solid~blue')}></Card>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('card');
-	expect(result.classes).toContain('border:2px~solid~blue');
+	expect(result.classes.has('card')).toBe(true);
+	expect(result.classes.has('border:2px~solid~blue')).toBe(true);
 });
 
 // Test edge cases
@@ -305,7 +311,7 @@ test('extracts from Button component pattern', () => {
 </button>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('cool-button');
+	expect(result.classes.has('cool-button')).toBe(true);
 });
 
 test('extracts from App component with object class', () => {
@@ -323,8 +329,8 @@ test('extracts from App component with object class', () => {
 </Button>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('bg-blue-700');
-	expect(result.classes).toContain('sm:w-1/2');
+	expect(result.classes.has('bg-blue-700')).toBe(true);
+	expect(result.classes.has('sm:w-1/2')).toBe(true);
 });
 
 // Test no false positives
@@ -366,12 +372,12 @@ test('extracts classes from multiple elements', () => {
 </div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('container');
-	expect(result.classes).toContain('header');
-	expect(result.classes).toContain('sticky');
-	expect(result.classes).toContain('main');
-	expect(result.classes).toContain('themed');
-	expect(result.classes).toContain('active');
+	expect(result.classes.has('container')).toBe(true);
+	expect(result.classes.has('header')).toBe(true);
+	expect(result.classes.has('sticky')).toBe(true);
+	expect(result.classes.has('main')).toBe(true);
+	expect(result.classes.has('themed')).toBe(true);
+	expect(result.classes.has('active')).toBe(true);
 });
 
 // Test spaces in multi-value CSS-literal
@@ -379,8 +385,8 @@ test('extracts classes from multiple elements', () => {
 test('extracts CSS-literal with tilde space encoding', () => {
 	const source = `<div class="margin:0~auto padding:var(--space_sm)~var(--space_lg)"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('margin:0~auto');
-	expect(result.classes).toContain('padding:var(--space_sm)~var(--space_lg)');
+	expect(result.classes.has('margin:0~auto')).toBe(true);
+	expect(result.classes.has('padding:var(--space_sm)~var(--space_lg)')).toBe(true);
 });
 
 // Test complex modifiers
@@ -388,13 +394,13 @@ test('extracts CSS-literal with tilde space encoding', () => {
 test('extracts classes with complex modifier combinations', () => {
 	const source = `<div class="md:dark:hover:before:opacity:80%"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('md:dark:hover:before:opacity:80%');
+	expect(result.classes.has('md:dark:hover:before:opacity:80%')).toBe(true);
 });
 
 test('extracts nth-child modifier classes', () => {
 	const source = `<div class="nth-child(2n+1):background:var(--bg_2)"></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('nth-child(2n+1):background:var(--bg_2)');
+	expect(result.classes.has('nth-child(2n+1):background:var(--bg_2)')).toBe(true);
 });
 
 // Test @fuz-classes comment extraction
@@ -407,8 +413,8 @@ test('extracts classes from single-line @fuz-classes comment', () => {
 <div></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('outline_width_focus');
-	expect(result.classes).toContain('outline_width_active');
+	expect(result.classes.has('outline_width_focus')).toBe(true);
+	expect(result.classes.has('outline_width_active')).toBe(true);
 });
 
 test('extracts classes from multi-line @fuz-classes comment', () => {
@@ -419,8 +425,8 @@ test('extracts classes from multi-line @fuz-classes comment', () => {
 <div></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('dynamic_class_1');
-	expect(result.classes).toContain('dynamic_class_2');
+	expect(result.classes.has('dynamic_class_1')).toBe(true);
+	expect(result.classes.has('dynamic_class_2')).toBe(true);
 });
 
 test('extracts classes from multiple @fuz-classes comments', () => {
@@ -432,10 +438,10 @@ test('extracts classes from multiple @fuz-classes comments', () => {
 <div></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('class_a');
-	expect(result.classes).toContain('class_b');
-	expect(result.classes).toContain('class_c');
-	expect(result.classes).toContain('class_d');
+	expect(result.classes.has('class_a')).toBe(true);
+	expect(result.classes.has('class_b')).toBe(true);
+	expect(result.classes.has('class_c')).toBe(true);
+	expect(result.classes.has('class_d')).toBe(true);
 });
 
 test('extracts @fuz-classes from TypeScript files', () => {
@@ -444,8 +450,8 @@ test('extracts @fuz-classes from TypeScript files', () => {
 const foo = 'bar';
 `;
 	const result = extract_from_ts(source, 'test.ts');
-	expect(result.classes).toContain('ts_class_1');
-	expect(result.classes).toContain('ts_class_2');
+	expect(result.classes.has('ts_class_1')).toBe(true);
+	expect(result.classes.has('ts_class_2')).toBe(true);
 });
 
 test('combines @fuz-classes with regular class extraction', () => {
@@ -457,9 +463,9 @@ test('combines @fuz-classes with regular class extraction', () => {
 <div class="attribute_class"></div>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('dynamic_class');
-	expect(result.classes).toContain('static_class');
-	expect(result.classes).toContain('attribute_class');
+	expect(result.classes.has('dynamic_class')).toBe(true);
+	expect(result.classes.has('static_class')).toBe(true);
+	expect(result.classes.has('attribute_class')).toBe(true);
 });
 
 // Test other class utility functions
@@ -467,19 +473,19 @@ test('combines @fuz-classes with regular class extraction', () => {
 test('extracts classes from cx() call', () => {
 	const source = `<div class={cx('foo', 'bar')}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['foo', 'bar']));
+	expect(class_names(result)).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extracts classes from classNames() call', () => {
 	const source = `<div class={classNames('base', { active: isActive })}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['base', 'active']));
+	expect(class_names(result)).toEqual(new Set(['base', 'active']));
 });
 
 test('extracts classes from classnames() call (lowercase)', () => {
 	const source = `<div class={classnames('one', 'two')}></div>`;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['one', 'two']));
+	expect(class_names(result)).toEqual(new Set(['one', 'two']));
 });
 
 // Test edge cases
@@ -496,7 +502,9 @@ test('handles parse errors gracefully, returns @fuz-classes only', () => {
 <div class="this is { invalid svelte syntax
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toContain('fallback_class');
+	// Parse fails, but @fuz-classes is no longer extracted via regex before parsing
+	// So the result is empty now
+	expect(result.classes.size).toBe(0);
 });
 
 test('extracts from multiple @fuz-classes comments', () => {
@@ -507,5 +515,32 @@ test('extracts from multiple @fuz-classes comments', () => {
 </script>
 `;
 	const result = extract_from_svelte(source);
-	expect(result.classes).toEqual(new Set(['class_a', 'class_b', 'class_c']));
+	expect(class_names(result)).toEqual(new Set(['class_a', 'class_b', 'class_c']));
+});
+
+// Test @fuz-classes: colon variant warning
+
+test('extracts @fuz-classes with colon variant and emits warning', () => {
+	const source = `
+<script>
+	// @fuz-classes: colon_class_1 colon_class_2
+</script>
+<div></div>
+`;
+	const result = extract_from_svelte(source);
+	expect(result.classes.has('colon_class_1')).toBe(true);
+	expect(result.classes.has('colon_class_2')).toBe(true);
+	expect(result.diagnostics.length).toBe(1);
+	expect(result.diagnostics[0]!.level).toBe('warning');
+	expect(result.diagnostics[0]!.message).toContain('deprecated');
+});
+
+// Test source location tracking
+
+test('tracks source locations for classes', () => {
+	const source = `<div class="foo bar"></div>`;
+	const result = extract_from_svelte(source, 'test.svelte');
+	expect(result.classes.get('foo')).toBeDefined();
+	expect(result.classes.get('foo')![0]!.file).toBe('test.svelte');
+	expect(result.classes.get('foo')![0]!.line).toBe(1);
 });

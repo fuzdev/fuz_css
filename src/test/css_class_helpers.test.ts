@@ -1,6 +1,6 @@
-import {test, assert} from 'vitest';
+import {test, assert, expect} from 'vitest';
 
-import {escape_css_selector, generate_classes_css} from '$lib/css_class_helpers.js';
+import {escape_css_selector, generate_classes_css, SourceIndex} from '$lib/css_class_helpers.js';
 
 // CSS selector escaping tests
 const escape_values: Array<[input: string, expected: string]> = [
@@ -105,4 +105,78 @@ test('generate_classes_css escapes complex CSS-literal class names', () => {
 
 	assert.include(result.css, '.hover\\:opacity\\:80\\%');
 	assert.include(result.css, '.nth-child\\(2n\\)\\:color\\:red');
+});
+
+// SourceIndex tests
+
+test('SourceIndex converts offset 0 to line 1, column 1', () => {
+	const source = 'abc\ndef\nghi';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(0, 'test.ts');
+	expect(loc.line).toBe(1);
+	expect(loc.column).toBe(1);
+	expect(loc.file).toBe('test.ts');
+});
+
+test('SourceIndex converts offset within first line', () => {
+	const source = 'abc\ndef\nghi';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(2, 'test.ts');
+	expect(loc.line).toBe(1);
+	expect(loc.column).toBe(3);
+});
+
+test('SourceIndex converts offset at start of second line', () => {
+	const source = 'abc\ndef\nghi';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(4, 'test.ts');
+	expect(loc.line).toBe(2);
+	expect(loc.column).toBe(1);
+});
+
+test('SourceIndex converts offset within second line', () => {
+	const source = 'abc\ndef\nghi';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(6, 'test.ts');
+	expect(loc.line).toBe(2);
+	expect(loc.column).toBe(3);
+});
+
+test('SourceIndex converts offset at start of third line', () => {
+	const source = 'abc\ndef\nghi';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(8, 'test.ts');
+	expect(loc.line).toBe(3);
+	expect(loc.column).toBe(1);
+});
+
+test('SourceIndex handles empty lines', () => {
+	const source = 'abc\n\ndef';
+	const index = new SourceIndex(source);
+
+	// First line
+	expect(index.get_location(0, 'f').line).toBe(1);
+
+	// Empty second line (offset 4 is the start of the empty line)
+	expect(index.get_location(4, 'f').line).toBe(2);
+	expect(index.get_location(4, 'f').column).toBe(1);
+
+	// Third line
+	expect(index.get_location(5, 'f').line).toBe(3);
+});
+
+test('SourceIndex handles single line source', () => {
+	const source = 'hello world';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(6, 'f');
+	expect(loc.line).toBe(1);
+	expect(loc.column).toBe(7);
+});
+
+test('SourceIndex handles empty source', () => {
+	const source = '';
+	const index = new SourceIndex(source);
+	const loc = index.get_location(0, 'f');
+	expect(loc.line).toBe(1);
+	expect(loc.column).toBe(1);
 });
