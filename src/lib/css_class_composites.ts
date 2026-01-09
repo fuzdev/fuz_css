@@ -9,6 +9,9 @@ export const css_class_composites: Record<string, CssClassDeclaration | undefine
 			image-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */
 		`,
 	},
+	circular: {
+		declaration: 'border-radius: 50%;',
+	},
 	box: {
 		ruleset: `
 			.box {
