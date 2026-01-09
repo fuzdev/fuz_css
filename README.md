@@ -7,18 +7,22 @@
 Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
 It's in early alpha with breaking changes ahead.
 
-**Core features:**
+Features:
 
 - semantic reset stylesheet with sensible element defaults
 - style variables (design tokens as CSS custom properties)
-- three class types: token classes (`p_md`, `color_a_5`), composite classes (`box`, `row`), and CSS-literal classes (`display:flex`, `hover:opacity:80%`)
-- CSS-literal modifiers for responsive (`md:`), state (`hover:`), color-scheme (`dark:`), and pseudo-elements (`before:`)
+- three class types: token classes (`p_md`, `color_a_5`), composite classes (`box`, `row`),
+  and CSS-literal classes (`display:flex`, `hover:opacity:80%`),
+  with modifiers for responsive (`md:`), state (`hover:`), color-scheme (`dark:`),
+  and pseudo-elements (`before:`)
 - smart utility class generation - only includes classes your code actually uses
 
-- view the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/)
-- help with feedback and design in the [issues](https://github.com/fuzdev/fuz_css/issues)
-  and [discussions](https://github.com/fuzdev/fuz_css/discussions)
-- more about the stack at [fuz.dev](https://www.fuz.dev/)
+View the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/).
+More about the stack at [fuz.dev](https://www.fuz.dev/)
+
+Interested in helping? We welcome feedback and design input in
+the [issues](https://github.com/fuzdev/fuz_css/issues)
+and [discussions](https://github.com/fuzdev/fuz_css/discussions).
 
 ## License [🐦](https://wikipedia.org/wiki/Free_and_open-source_software)
 
