@@ -47,15 +47,15 @@
 				support light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
 			</li>
 			<li>
-				supports three types of utility classes: token classes (that use <TomeLink name="variables"
-					>style variables</TomeLink
-				>, like <code>.p_md</code>
-				and <code>.color_a_5</code>), composite classes (custom behavior and semantics, like
-				<code>.box</code> and <code>.row</code>), and CSS-literal classes (like
-				<code>.display:flex</code>
-				and
-				<code>.hover:opacity:80%</code>) with responsive/state/color-scheme modifiers - see
-				<TomeLink name="classes" /> for the full syntax reference
+				supports three types of utility classes: token classes (<code>.p_md</code>,
+				<code>.color_a_5</code>), composite classes (<code>.box</code>, <code>.row</code>), and
+				CSS-literal classes (<code>.display:flex</code>)
+			</li>
+			<li>
+				all class types support modifiers for responsive (<code>md:</code>), state (<code
+					>hover:</code
+				>), color-scheme (<code>dark:</code>), and pseudo-elements (<code>before:</code>) - see
+				<TomeLink name="classes" /> for the full reference
 			</li>
 			<li>
 				is agnostic to JS frameworks, for example usage see <a href="https://ui.fuz.dev/docs/Themed"

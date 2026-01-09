@@ -222,8 +222,9 @@ export const my_composites = {
 	<TomeSection>
 		<TomeSectionHeader text="Modifiers" />
 		<p>
-			Modifiers wrap CSS in conditions. This is what makes utility classes more powerful than inline
-			styles - you can apply styles based on viewport, state, or color scheme.
+			Modifiers prefix any class type - token, composite, or literal - to apply styles conditionally
+			based on viewport, state, or color scheme. This is what makes utility classes more powerful
+			than inline styles.
 		</p>
 
 		<h4>Responsive modifiers</h4>

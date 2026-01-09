@@ -28,6 +28,14 @@ For code style, see the `fuz-stack` skill. For UI components (themes, color sche
 
 [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) scans source files with AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)), collects class names, and outputs only CSS for classes actually used. Supports Svelte 5.16+ class syntax (`class={[...]}`, `class={{...}}`), clsx/cn calls, and `// @fuz-classes` comment hints.
 
+### Three class types
+
+- **Token classes** - Map to style variables: `p_md`, `color_a_5`, `gap_lg`
+- **Composite classes** - Multi-property shortcuts: `box`, `row`, `ellipsis`
+- **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
+
+All class types support modifiers: responsive (`md:`), state (`hover:`), color-scheme (`dark:`), pseudo-element (`before:`).
+
 ### CSS-literal syntax
 
 Literal classes use `property:value` syntax that maps 1:1 to CSS:
@@ -35,7 +43,7 @@ Literal classes use `property:value` syntax that maps 1:1 to CSS:
 - `hover:opacity:80%` → `:hover { opacity: 80%; }`
 - `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers
 
-Modifiers: responsive (`md:`, `min-width(800px):`), state (`hover:`, `focus:`), color-scheme (`dark:`, `light:`), pseudo-element (`before:`, `after:`). Space encoding uses `~` for multi-value properties (`margin:0~auto`).
+Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary breakpoints via `min-width(800px):` and `max-width(600px):`.
 
 ## Variable naming
 
