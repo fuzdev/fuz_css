@@ -45,6 +45,28 @@ export type ParseResult =
 	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>}
 	| {ok: false; error: CssClassDiagnostic};
 
+/**
+ * Extracted modifiers from a class name.
+ * Used by both CSS-literal parsing and modified class interpretation.
+ */
+export interface ExtractedModifiers {
+	/** Media modifier (breakpoint or feature query) */
+	media: ModifierDefinition | null;
+	/** Ancestor modifier (dark/light) */
+	ancestor: ModifierDefinition | null;
+	/** State modifiers in alphabetical order (can have multiple) */
+	states: Array<ModifierDefinition>;
+	/** Pseudo-element modifier (before, after, etc.) */
+	pseudo_element: ModifierDefinition | null;
+}
+
+/**
+ * Result of extracting modifiers from segments.
+ */
+export type ExtractModifiersResult =
+	| {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>}
+	| {ok: false; error: CssClassDiagnostic};
+
 // CSS Property Validation
 
 /**
@@ -235,53 +257,32 @@ export const extract_segments = (class_name: string): Array<string> => {
 };
 
 /**
- * Parses a CSS-literal class name into its components.
+ * Extracts and validates modifiers from the beginning of a segments array.
+ * Modifiers are consumed from the front until a non-modifier segment is found.
  *
- * @param class_name - The class name to parse
- * @returns ParseResult with parsed data or error
+ * Used by both CSS-literal parsing and modified class interpretation.
+ *
+ * @param segments - Array of colon-separated segments
+ * @param class_name - Original class name for error messages
+ * @returns ExtractModifiersResult with modifiers and remaining segments, or error
  */
-export const parse_css_literal = (class_name: string): ParseResult => {
-	const segments = extract_segments(class_name);
-
-	if (segments.length < 2) {
-		return {
-			ok: false,
-			error: {
-				level: 'error',
-				message: `Invalid CSS-literal syntax: expected "property:value" format`,
-				class_name,
-			},
-		};
-	}
-
+export const extract_and_validate_modifiers = (
+	segments: Array<string>,
+	class_name: string,
+): ExtractModifiersResult => {
 	let media: ModifierDefinition | null = null;
 	let ancestor: ModifierDefinition | null = null;
 	const states: Array<ModifierDefinition> = [];
 	let pseudo_element: ModifierDefinition | null = null;
 
-	// Work backwards from end to find property:value
-	// Everything before that is modifiers
-	const value = segments[segments.length - 1]!;
-	const property = segments[segments.length - 2]!;
-	const modifier_segments = segments.slice(0, -2);
-
-	const diagnostics: Array<CssClassDiagnostic> = [];
-
-	// Parse modifiers in order
-	for (const segment of modifier_segments) {
+	let i = 0;
+	for (; i < segments.length; i++) {
+		const segment = segments[i]!;
 		const modifier = get_modifier(segment);
 
+		// If not a modifier, stop - remaining segments are the base class/property:value
 		if (!modifier) {
-			const suggestion = suggest_modifier(segment);
-			return {
-				ok: false,
-				error: {
-					level: 'error',
-					message: `Unknown modifier "${segment}"`,
-					class_name,
-					suggestion: suggestion ? `Did you mean "${suggestion}"?` : undefined,
-				},
-			};
+			break;
 		}
 
 		// Validate order based on modifier type
@@ -342,7 +343,6 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 							level: 'error',
 							message: `Modifiers "${ancestor.name}" and "${segment}" are mutually exclusive`,
 							class_name,
-							suggestion: `Use one or the other: "${ancestor.name}:${property}:${value}" or "${segment}:${property}:${value}"`,
 						},
 					};
 				}
@@ -392,9 +392,9 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 							ok: false,
 							error: {
 								level: 'error',
-								message: `State modifiers must be in alphabetical order`,
+								message: `State modifiers must be in alphabetical order: "${prev.name}:${segment}" should be "${segment}:${prev.name}"`,
 								class_name,
-								suggestion: `"${segment}" should come before "${prev.name}". Try: "${segment}:${prev.name}:..."`,
+								suggestion: `Reorder to: ...${segment}:${prev.name}:...`,
 							},
 						};
 					}
@@ -419,6 +419,66 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 			}
 		}
 	}
+
+	return {
+		ok: true,
+		modifiers: {media, ancestor, states, pseudo_element},
+		remaining: segments.slice(i),
+	};
+};
+
+/**
+ * Parses a CSS-literal class name into its components.
+ *
+ * @param class_name - The class name to parse
+ * @returns ParseResult with parsed data or error
+ */
+export const parse_css_literal = (class_name: string): ParseResult => {
+	const segments = extract_segments(class_name);
+
+	if (segments.length < 2) {
+		return {
+			ok: false,
+			error: {
+				level: 'error',
+				message: `Invalid CSS-literal syntax: expected "property:value" format`,
+				class_name,
+			},
+		};
+	}
+
+	// Work backwards from end to find property:value
+	// Everything before that is modifiers
+	const value = segments[segments.length - 1]!;
+	const property = segments[segments.length - 2]!;
+	const modifier_segments = segments.slice(0, -2);
+
+	const diagnostics: Array<CssClassDiagnostic> = [];
+
+	// Validate modifiers using shared validation logic
+	const modifier_result = extract_and_validate_modifiers(modifier_segments, class_name);
+
+	if (!modifier_result.ok) {
+		return {ok: false, error: modifier_result.error};
+	}
+
+	// All segments should have been consumed as modifiers
+	// If any remain, they're unknown modifiers (since we already separated property:value)
+	if (modifier_result.remaining.length > 0) {
+		const unknown = modifier_result.remaining[0]!;
+		const suggestion = suggest_modifier(unknown);
+		return {
+			ok: false,
+			error: {
+				level: 'error',
+				message: `Unknown modifier "${unknown}"`,
+				class_name,
+				suggestion: suggestion ? `Did you mean "${suggestion}"?` : undefined,
+			},
+		};
+	}
+
+	const {media, ancestor, states, pseudo_element} = modifier_result.modifiers;
 
 	// Validate property
 	if (!is_valid_css_property(property)) {

@@ -1,8 +1,18 @@
 # Fuz CSS framework and design system
 
-CSS framework and design system built around **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
+CSS framework and design system built on **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
 
 For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
+
+## Gro commands
+
+```bash
+gro check     # typecheck, test, lint, format check (run before committing)
+gro typecheck # typecheck only (faster iteration)
+gro test      # run tests with vitest
+gro gen       # regenerate theme.css and other .gen files
+gro build     # build the package for production
+```
 
 ## Design decisions
 

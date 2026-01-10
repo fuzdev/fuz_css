@@ -2,81 +2,45 @@
 	"pixelated": {
 		"declaration": "\n\t\t\timage-rendering: -webkit-optimize-contrast; /* Safari */\n\t\t\timage-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */\n\t\t\timage-rendering: pixelated; /* in case crisp-edges isn't supported */\n\t\t\timage-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */\n\t\t"
 	},
+	"circular": {"declaration": "border-radius: 50%;"},
 	"box": {
-		"ruleset": "\n\t\t\t.box {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t\talign-items: center;\n\t\t\t\tjustify-content: center;\n\t\t\t}\n\t\t"
+		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\talign-items: center;\n\t\t\tjustify-content: center;\n\t\t"
 	},
 	"column": {
-		"ruleset": "\n\t\t\t/* like `.box` but uncentered */\n\t\t\t.column {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: column;\n\t\t\t}\n\t\t"
+		"comment": "like `.box` but uncentered",
+		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t"
 	},
 	"row": {
-		"ruleset": "\n\t\t\t/* can be used to override the direction of a `.box` */\n\t\t\t.row {\n\t\t\t\tdisplay: flex;\n\t\t\t\tflex-direction: row;\n\t\t\t\talign-items: center;\n\t\t\t}\n\t\t"
+		"comment": "can be used to override the direction of a `.box`",
+		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: row;\n\t\t\talign-items: center;\n\t\t"
 	},
 	"formatted": {
-		"ruleset": "\n\t\t\t/* Formats content to wrap long strings and preserve displayed whitespace. */\n\t\t\t.formatted {\n\t\t\t\toverflow: hidden;\n\t\t\t\twhite-space: break-spaces;\n\t\t\t}\n\t\t"
+		"comment": "Formats content to wrap long strings and preserve displayed whitespace.",
+		"declaration": "\n\t\t\toverflow: hidden;\n\t\t\twhite-space: break-spaces;\n\t\t"
 	},
 	"ellipsis": {
-		"declaration": "display: block;\twhite-space: nowrap;\toverflow: hidden;\ttext-overflow: ellipsis;"
+		"declaration": "\n\t\t\tdisplay: block;\n\t\t\twhite-space: nowrap;\n\t\t\toverflow: hidden;\n\t\t\ttext-overflow: ellipsis;\n\t\t"
 	},
-	"width_upto_xs": {
-		"ruleset": "\n\t\t\t.width_upto_xs {\n\t\t\t\twidth: 100%;\n\t\t\t\tmax-width: var(--distance_xs);\n\t\t\t}\n\t\t"
-	},
-	"width_upto_sm": {
-		"ruleset": "\n\t\t\t.width_upto_sm {\n\t\t\t\twidth: 100%;\n\t\t\t\tmax-width: var(--distance_sm);\n\t\t\t}\n\t\t"
-	},
-	"width_upto_md": {
-		"ruleset": "\n\t\t\t.width_upto_md {\n\t\t\t\twidth: 100%;\n\t\t\t\tmax-width: var(--distance_md);\n\t\t\t}\n\t\t"
-	},
-	"width_upto_lg": {
-		"ruleset": "\n\t\t\t.width_upto_lg {\n\t\t\t\twidth: 100%;\n\t\t\t\tmax-width: var(--distance_lg);\n\t\t\t}\n\t\t"
-	},
-	"width_upto_xl": {
-		"ruleset": "\n\t\t\t.width_upto_xl {\n\t\t\t\twidth: 100%;\n\t\t\t\tmax-width: var(--distance_xl);\n\t\t\t}\n\t\t"
-	},
-	"width_atleast_xs": {
-		"ruleset": "\n\t\t\t.width_atleast_xs {\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-width: var(--distance_xs);\n\t\t\t}\n\t\t"
-	},
-	"width_atleast_sm": {
-		"ruleset": "\n\t\t\t.width_atleast_sm {\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-width: var(--distance_sm);\n\t\t\t}\n\t\t"
-	},
-	"width_atleast_md": {
-		"ruleset": "\n\t\t\t.width_atleast_md {\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-width: var(--distance_md);\n\t\t\t}\n\t\t"
-	},
-	"width_atleast_lg": {
-		"ruleset": "\n\t\t\t.width_atleast_lg {\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-width: var(--distance_lg);\n\t\t\t}\n\t\t"
-	},
-	"width_atleast_xl": {
-		"ruleset": "\n\t\t\t.width_atleast_xl {\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-width: var(--distance_xl);\n\t\t\t}\n\t\t"
-	},
-	"height_upto_xs": {
-		"ruleset": "\n\t\t\t.height_upto_xs {\n\t\t\t\theight: 100%;\n\t\t\t\tmax-height: var(--distance_xs);\n\t\t\t}\n\t\t"
-	},
-	"height_upto_sm": {
-		"ruleset": "\n\t\t\t.height_upto_sm {\n\t\t\t\theight: 100%;\n\t\t\t\tmax-height: var(--distance_sm);\n\t\t\t}\n\t\t"
-	},
-	"height_upto_md": {
-		"ruleset": "\n\t\t\t.height_upto_md {\n\t\t\t\theight: 100%;\n\t\t\t\tmax-height: var(--distance_md);\n\t\t\t}\n\t\t"
-	},
-	"height_upto_lg": {
-		"ruleset": "\n\t\t\t.height_upto_lg {\n\t\t\t\theight: 100%;\n\t\t\t\tmax-height: var(--distance_lg);\n\t\t\t}\n\t\t"
-	},
-	"height_upto_xl": {
-		"ruleset": "\n\t\t\t.height_upto_xl {\n\t\t\t\theight: 100%;\n\t\t\t\tmax-height: var(--distance_xl);\n\t\t\t}\n\t\t"
-	},
-	"height_atleast_xs": {
-		"ruleset": "\n\t\t\t.height_atleast_xs {\n\t\t\t\theight: 100%;\n\t\t\t\tmin-height: var(--distance_xs);\n\t\t\t}\n\t\t"
-	},
-	"height_atleast_sm": {
-		"ruleset": "\n\t\t\t.height_atleast_sm {\n\t\t\t\theight: 100%;\n\t\t\t\tmin-height: var(--distance_sm);\n\t\t\t}\n\t\t"
-	},
-	"height_atleast_md": {
-		"ruleset": "\n\t\t\t.height_atleast_md {\n\t\t\t\theight: 100%;\n\t\t\t\tmin-height: var(--distance_md);\n\t\t\t}\n\t\t"
-	},
-	"height_atleast_lg": {
-		"ruleset": "\n\t\t\t.height_atleast_lg {\n\t\t\t\theight: 100%;\n\t\t\t\tmin-height: var(--distance_lg);\n\t\t\t}\n\t\t"
-	},
-	"height_atleast_xl": {
-		"ruleset": "\n\t\t\t.height_atleast_xl {\n\t\t\t\theight: 100%;\n\t\t\t\tmin-height: var(--distance_xl);\n\t\t\t}\n\t\t"
-	},
+	"width_upto_xs": {"declaration": "width: 100%; max-width: var(--distance_xs);"},
+	"width_upto_sm": {"declaration": "width: 100%; max-width: var(--distance_sm);"},
+	"width_upto_md": {"declaration": "width: 100%; max-width: var(--distance_md);"},
+	"width_upto_lg": {"declaration": "width: 100%; max-width: var(--distance_lg);"},
+	"width_upto_xl": {"declaration": "width: 100%; max-width: var(--distance_xl);"},
+	"width_atleast_xs": {"declaration": "width: 100%; min-width: var(--distance_xs);"},
+	"width_atleast_sm": {"declaration": "width: 100%; min-width: var(--distance_sm);"},
+	"width_atleast_md": {"declaration": "width: 100%; min-width: var(--distance_md);"},
+	"width_atleast_lg": {"declaration": "width: 100%; min-width: var(--distance_lg);"},
+	"width_atleast_xl": {"declaration": "width: 100%; min-width: var(--distance_xl);"},
+	"height_upto_xs": {"declaration": "height: 100%; max-height: var(--distance_xs);"},
+	"height_upto_sm": {"declaration": "height: 100%; max-height: var(--distance_sm);"},
+	"height_upto_md": {"declaration": "height: 100%; max-height: var(--distance_md);"},
+	"height_upto_lg": {"declaration": "height: 100%; max-height: var(--distance_lg);"},
+	"height_upto_xl": {"declaration": "height: 100%; max-height: var(--distance_xl);"},
+	"height_atleast_xs": {"declaration": "height: 100%; min-height: var(--distance_xs);"},
+	"height_atleast_sm": {"declaration": "height: 100%; min-height: var(--distance_sm);"},
+	"height_atleast_md": {"declaration": "height: 100%; min-height: var(--distance_md);"},
+	"height_atleast_lg": {"declaration": "height: 100%; min-height: var(--distance_lg);"},
+	"height_atleast_xl": {"declaration": "height: 100%; min-height: var(--distance_xl);"},
 	"selectable": {
 		"ruleset": "\n\t\t\t.selectable {\n\t\t\t\t--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);\n\t\t\t\t--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);\n\t\t\t\t--button_fill_active: color-mix(in hsl, var(--fill) 24%, transparent);\n\t\t\t\tcursor: pointer;\n\t\t\t\tbackground-color: var(--button_fill);\n\t\t\t\tborder-color: var(--border_color_3);\n\t\t\t\tborder-style: var(--border_style);\n\t\t\t\tborder-width: var(--border_width);\n\t\t\t}\n\t\t\t.selectable:hover {\n\t\t\t\tbackground-color: var(--button_fill_hover);\n\t\t\t\tborder-color: var(--border_color_2);\n\t\t\t}\n\t\t\t.selectable.selected,\n\t\t\t.selectable:active {\n\t\t\t\tbackground-color: var(--button_fill_active);\n\t\t\t\tborder-color: var(--color_a_5);\n\t\t\t}\n\t\t\t.selectable.selected {\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.selectable.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t"
 	},
@@ -84,16 +48,20 @@
 		"ruleset": "\n\t\t\t.clickable {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransform: var(--clickable_transform, scale3d(1, 1, 1));\n\t\t\t\ttransform-origin: var(--clickable_transform_origin);\n\t\t\t\ttransition-duration: var(--clickable_transition_duration); /* default to instant, chunky/lofi */\n\t\t\t}\n\t\t\t.clickable:focus {\n\t\t\t\ttransform: var(--clickable_transform_focus, scale3d(1.07, 1.07, 1.07));\n\t\t\t}\n\t\t\t.clickable:hover {\n\t\t\t\ttransform: var(--clickable_transform_hover, scale3d(1.1, 1.1, 1.1));\n\t\t\t}\n\t\t\t.clickable:active,\n\t\t\t.clickable.active {\n\t\t\t\ttransform: var(--clickable_transform_active, scale3d(1.2, 1.2, 1.2));\n\t\t\t}\n\t\t"
 	},
 	"pane": {
-		"ruleset": "\n\t\t\t/* A pane is a box floating over the page, like for dialogs.\n\t\t\tBy default it's opaque, resetting the background to the initial depth. */\n\t\t\t.pane {\n\t\t\t\tbackground-color: var(--pane_bg, var(--bg));\n\t\t\t\tbox-shadow: var(\n\t\t\t\t\t--pane_shadow,\n\t\t\t\t\t/* TODO this is terrible, maybe add all the variables? should be culled anyway? */\n\t\t\t\t\t\tvar(--shadow_bottom_md)\n\t\t\t\t\t\tcolor-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent)\n\t\t\t\t);\n\t\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\t}\n\t\t"
+		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
+		"declaration": "\n\t\t\tbackground-color: var(--pane_bg, var(--bg));\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
 	},
 	"panel": {
-		"ruleset": "\n\t\t\t/* A panel is a box embedded into the page, useful for visually isolating content. */\n\t\t\t.panel {\n\t\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\t\tbackground-color: var(--panel_bg, var(--fg_1));\n\t\t\t}\n\t\t"
+		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
+		"declaration": "\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\tbackground-color: var(--panel_bg, var(--fg_1));\n\t\t"
 	},
 	"icon_button": {
-		"ruleset": "\n\t\t\t/* TODO other button variants? */\n\t\t\t/* TODO this is slightly strange that it doesn't use --icon_size */\n\t\t\t/* These are used as modifiers to buttons, and so they use `:where` so they cascade. */\n\t\t\t.icon_button {\n\t\t\t\twidth: var(--input_height);\n\t\t\t\theight: var(--input_height);\n\t\t\t\tmin-width: var(--input_height);\n\t\t\t\tmin-height: var(--input_height);\n\t\t\t\tflex-shrink: 0;\n\t\t\t\tline-height: 1;\n\t\t\t\tfont-weight: 900;\n\t\t\t\tpadding: 0;\n\t\t\t}\n\t\t"
+		"comment": "\n\t\t\tTODO other button variants?\n\t\t\tTODO this is slightly strange that it doesn't use --icon_size.\n\t\t\tThese are used as modifiers to buttons.\n\t\t",
+		"declaration": "\n\t\t\twidth: var(--input_height);\n\t\t\theight: var(--input_height);\n\t\t\tmin-width: var(--input_height);\n\t\t\tmin-height: var(--input_height);\n\t\t\tflex-shrink: 0;\n\t\t\tline-height: 1;\n\t\t\tfont-weight: 900;\n\t\t\tpadding: 0;\n\t\t"
 	},
 	"plain": {
-		"ruleset": "\n\t\t\t/* TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here? */\n\t\t\t.plain:not(:hover) {\n\t\t\t\t--border_color: transparent;\n\t\t\t\tbox-shadow: none;\n\t\t\t\t--button_fill: transparent;\n\t\t\t}\n\t\t\t.plain:hover, .plain:active {\n\t\t\t\t--border_color: transparent;\n\t\t\t}\n\t\t"
+		"comment": "TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?",
+		"ruleset": "\n\t\t\t.plain:not(:hover) {\n\t\t\t\t--border_color: transparent;\n\t\t\t\tbox-shadow: none;\n\t\t\t\t--button_fill: transparent;\n\t\t\t}\n\t\t\t.plain:hover, .plain:active {\n\t\t\t\t--border_color: transparent;\n\t\t\t}\n\t\t"
 	},
 	"menu_item": {
 		"ruleset": "\n\t\t\t.menu_item {\n\t\t\t\t--border_radius: 0;\n\t\t\t\t--border_color: var(--border_color_3);\n\t\t\t\tposition: relative;\n\t\t\t\tz-index: 2;\n\t\t\t\tcursor: pointer;\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-height: var(--min_height, var(--icon_size_sm));\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: space-between;\n\t\t\t\talign-items: center;\n\t\t\t\tpadding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));\n\t\t\t}\n\t\t\t.menu_item.selected {\n\t\t\t\t/* TODO different patterns for border and bg? */\n\t\t\t\t--border_color: var(--color_a_5);\n\t\t\t\tbackground-color: var(--fg_1);\n\t\t\t\tz-index: 1;\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.menu_item.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t\t.menu_item:hover {\n\t\t\t\t--border_color: var(--border_color_3);\n\t\t\t\tbackground-color: var(--fg_0);\n\t\t\t}\n\t\t\t.menu_item:active,\n\t\t\t.menu_item.selected:hover {\n\t\t\t\t--border_color: var(--border_color_3);\n\t\t\t\tbackground-color: var(--fg_2);\n\t\t\t}\n\t\t\t.menu_item.plain {\n\t\t\t\tborder: none;\n\t\t\t}\n\t\t\t.menu_item .content {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tflex: 1;\n\t\t\t\t/* allows the flex children to shrink */\n\t\t\t\tmin-width: 0;\n\t\t\t}\n\t\t\t.menu_item .icon {\n\t\t\t\twidth: var(--icon_size, var(--icon_size_md));\n\t\t\t\tmargin-right: var(--space_sm);\n\t\t\t\tflex-shrink: 0;\n\t\t\t\ttext-align: center;\n\t\t\t\tfont-weight: 900;\n\t\t\t}\n\t\t\t.menu_item .title {\n\t\t\t\tmargin-right: var(--space_lg);\n\t\t\t\tflex-shrink: 1;\n\t\t\t\toverflow: hidden;\n\t\t\t\twhite-space: nowrap;\n\t\t\t\ttext-overflow: ellipsis;\n\t\t\t\tline-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */\n\t\t\t}\n\t\t"

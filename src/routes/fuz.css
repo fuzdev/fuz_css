@@ -6,36 +6,30 @@
 	align-items: center;
 	justify-content: center;
 }
-
 /* can be used to override the direction of a `.box` */
 .row {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 }
-
 .ellipsis {
 	display: block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
 .width_upto_xs {
 	width: 100%;
 	max-width: var(--distance_xs);
 }
-
 .width_upto_sm {
 	width: 100%;
 	max-width: var(--distance_sm);
 }
-
 .width_upto_md {
 	width: 100%;
 	max-width: var(--distance_md);
 }
-
 .selectable {
 	--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);
 	--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);
@@ -61,29 +55,26 @@
 .selectable.selected.deselectable:not(:disabled) {
 	cursor: pointer;
 }
-
-/* A pane is a box floating over the page, like for dialogs.
-			By default it's opaque, resetting the background to the initial depth. */
+/* A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth. */
 .pane {
 	background-color: var(--pane_bg, var(--bg));
 	box-shadow: var(
 		--pane_shadow,
-		/* TODO this is terrible, maybe add all the variables? should be culled anyway? */
 		var(--shadow_bottom_md)
 			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent)
 	);
 	border-radius: var(--border_radius_xs);
 }
-
 /* A panel is a box embedded into the page, useful for visually isolating content. */
 .panel {
 	border-radius: var(--border_radius_xs);
 	background-color: var(--panel_bg, var(--fg_1));
 }
-
-/* TODO other button variants? */
-/* TODO this is slightly strange that it doesn't use --icon_size */
-/* These are used as modifiers to buttons, and so they use `:where` so they cascade. */
+/*
+ * TODO other button variants?
+ * TODO this is slightly strange that it doesn't use --icon_size.
+ * These are used as modifiers to buttons.
+ */
 .icon_button {
 	width: var(--input_height);
 	height: var(--input_height);
@@ -94,7 +85,6 @@
 	font-weight: 900;
 	padding: 0;
 }
-
 /* TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here? */
 .plain:not(:hover) {
 	--border_color: transparent;
@@ -105,7 +95,6 @@
 .plain:active {
 	--border_color: transparent;
 }
-
 .menu_item {
 	--border_radius: 0;
 	--border_color: var(--border_color_3);
@@ -163,7 +152,6 @@
 	text-overflow: ellipsis;
 	line-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */
 }
-
 .chip {
 	font-weight: 500;
 	padding-left: var(--space_xs);
@@ -174,7 +162,6 @@
 a.chip {
 	font-weight: 600;
 }
-
 .font_family_sans {
 	font-family: var(--font_family_sans);
 }

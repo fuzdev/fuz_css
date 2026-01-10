@@ -1,6 +1,7 @@
 import type {Logger} from '@fuzdev/fuz_util/log.js';
 
 import {extract_css_classes, extract_css_classes_with_locations} from './css_class_extractor.js';
+import {parse_ruleset, is_single_selector_ruleset} from './css_ruleset_parser.js';
 
 // Unified Diagnostics System
 
@@ -177,7 +178,8 @@ export class CssClasses {
 
 	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
 
-	#diagnostics: Array<ExtractionDiagnostic> = [];
+	/** Diagnostics stored per-file so they're replaced when a file is updated */
+	#diagnostics_by_id: Map<string, Array<ExtractionDiagnostic>> = new Map();
 
 	#dirty = true;
 
@@ -187,6 +189,7 @@ export class CssClasses {
 
 	/**
 	 * Adds extraction results for a file.
+	 * Replaces any previous classes and diagnostics for this file.
 	 *
 	 * @param id - File identifier
 	 * @param classes - Map of class names to their source locations
@@ -199,14 +202,18 @@ export class CssClasses {
 	): void {
 		this.#dirty = true;
 		this.#by_id.set(id, classes);
-		if (diagnostics) {
-			this.#diagnostics.push(...diagnostics);
+		if (diagnostics && diagnostics.length > 0) {
+			this.#diagnostics_by_id.set(id, diagnostics);
+		} else {
+			// Clear any old diagnostics for this file
+			this.#diagnostics_by_id.delete(id);
 		}
 	}
 
 	delete(id: string): void {
 		this.#dirty = true;
 		this.#by_id.delete(id);
+		this.#diagnostics_by_id.delete(id);
 	}
 
 	/**
@@ -250,10 +257,14 @@ export class CssClasses {
 	}
 
 	/**
-	 * Gets all extraction diagnostics.
+	 * Gets all extraction diagnostics from all files.
 	 */
 	get_diagnostics(): Array<ExtractionDiagnostic> {
-		return this.#diagnostics;
+		const result: Array<ExtractionDiagnostic> = [];
+		for (const diagnostics of this.#diagnostics_by_id.values()) {
+			result.push(...diagnostics);
+		}
+		return result;
 	}
 
 	#recalculate(): void {
@@ -324,13 +335,22 @@ export const to_generation_diagnostic = (
 	locations,
 });
 
+/**
+ * Context passed to CSS class interpreters.
+ * Provides access to logging, diagnostics collection, and the class registry.
+ */
+export interface InterpreterContext {
+	/** Optional logger for warnings/errors */
+	log?: Logger;
+	/** Diagnostics array to collect warnings and errors */
+	diagnostics: Array<CssClassDiagnostic>;
+	/** All known CSS class declarations (token + composite classes) */
+	classes: Record<string, CssClassDeclaration | undefined>;
+}
+
 export interface CssClassDeclarationInterpreter extends CssClassDeclarationBase {
 	pattern: RegExp;
-	interpret: (
-		matched: RegExpMatchArray,
-		log?: Logger,
-		diagnostics?: Array<CssClassDiagnostic>,
-	) => string | null;
+	interpret: (matched: RegExpMatchArray, ctx: InterpreterContext) => string | null;
 }
 
 /**
@@ -350,6 +370,14 @@ export const generate_classes_css = (
 ): GenerateClassesCssResult => {
 	const interpreter_diagnostics: Array<CssClassDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
+
+	// Create interpreter context with access to all classes
+	const ctx: InterpreterContext = {
+		log,
+		diagnostics: interpreter_diagnostics,
+		classes: classes_by_name,
+	};
+
 	// Create a map that has the index of each class name as the key
 	const indexes: Map<string, number> = new Map();
 	const keys = Object.keys(classes_by_name);
@@ -377,7 +405,7 @@ export const generate_classes_css = (
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
 				if (matched) {
-					const result = interpreter.interpret(matched, log, interpreter_diagnostics);
+					const result = interpreter.interpret(matched, ctx);
 					if (result) {
 						// Check if the result is a full ruleset (contains braces)
 						// or just a declaration
@@ -408,13 +436,46 @@ export const generate_classes_css = (
 		const {comment} = v;
 
 		if (comment) {
-			css += comment.includes('\n') ? `/*\n${comment}\n*/\n` : `/** ${comment} */\n`;
+			const trimmed = comment.trim();
+			if (trimmed.includes('\n')) {
+				// Multi-line CSS comment
+				const lines = trimmed.split('\n').map((line) => ` * ${line.trim()}`);
+				css += `/*\n${lines.join('\n')}\n */\n`;
+			} else {
+				css += `/* ${trimmed} */\n`;
+			}
 		}
 
 		if ('declaration' in v) {
 			css += `.${escape_css_selector(c)} { ${v.declaration} }\n`;
 		} else if ('ruleset' in v) {
-			css += v.ruleset + '\n';
+			css += v.ruleset.trim() + '\n';
+
+			// Warn if this ruleset could be converted to declaration format
+			try {
+				const parsed = parse_ruleset(v.ruleset);
+				if (is_single_selector_ruleset(parsed.rules, c)) {
+					diagnostics.push({
+						phase: 'generation',
+						level: 'warning',
+						message: `Ruleset "${c}" has a single selector and could be converted to declaration format for modifier support`,
+						class_name: c,
+						suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations.replace(/\s+/g, ' ').trim()}' }`,
+						locations: class_locations?.get(c) ?? null,
+					});
+				}
+			} catch (e) {
+				// Warn about parse errors so users can investigate
+				const error_message = e instanceof Error ? e.message : String(e);
+				diagnostics.push({
+					phase: 'generation',
+					level: 'warning',
+					message: `Failed to parse ruleset for "${c}": ${error_message}`,
+					class_name: c,
+					suggestion: 'Check for CSS syntax errors in the ruleset',
+					locations: class_locations?.get(c) ?? null,
+				});
+			}
 		}
 		// Note: Interpreted types are converted to declaration above, so no else clause needed
 	}
