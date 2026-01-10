@@ -384,7 +384,7 @@ test('generate_classes_css renders multi-line comment as block', () => {
 
 	const result = generate_classes_css(['test-class'], classes_by_name, []);
 
-	expect(result.css).toContain('/*\n * Line 1\n * Line 2\n */');
+	expect(result.css).toContain('/*\nLine 1\nLine 2\n*/');
 });
 
 // generate_classes_css sorting

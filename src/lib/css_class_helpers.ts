@@ -439,8 +439,8 @@ export const generate_classes_css = (
 			const trimmed = comment.trim();
 			if (trimmed.includes('\n')) {
 				// Multi-line CSS comment
-				const lines = trimmed.split('\n').map((line) => ` * ${line.trim()}`);
-				css += `/*\n${lines.join('\n')}\n */\n`;
+				const lines = trimmed.split('\n').map((line) => line.trim());
+				css += `/*\n${lines.join('\n')}\n*/\n`;
 			} else {
 				css += `/* ${trimmed} */\n`;
 			}
