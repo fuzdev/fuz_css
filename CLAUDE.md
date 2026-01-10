@@ -95,10 +95,11 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [css_classes.ts](src/lib/css_classes.ts) - Token class definitions (spacing, sizing, colors, typography, borders, shadows)
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`)
-- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - CSS-literal interpreter for `property:value` classes
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
 - [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS files
-- [css_class_helpers.ts](src/lib/css_class_helpers.ts) - `CssClasses` collection, `generate_classes_css()`, CSS escaping
-- [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, property checking
+- [css_class_helpers.ts](src/lib/css_class_helpers.ts) - `CssClasses` collection, `generate_classes_css()`, `InterpreterContext`, CSS escaping
+- [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
+- [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
 - [modifiers.ts](src/lib/modifiers.ts) - Declarative modifier definitions (breakpoints, states, pseudo-elements)
 
 **Stylesheets:**
@@ -116,6 +117,7 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 ### Tests - [src/test/](src/test/)
 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
-- [css_class_helpers.test.ts](src/test/css_class_helpers.test.ts) - CSS escaping, generation, SourceIndex
+- [css_class_helpers.test.ts](src/test/css_class_helpers.test.ts) - CSS escaping, generation, interpreters, SourceIndex
 - [css_class_extractor.test.ts](src/test/css_class_extractor.test.ts) - AST extraction, location tracking
 - [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
+- [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification
