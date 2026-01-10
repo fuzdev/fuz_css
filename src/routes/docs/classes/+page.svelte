@@ -390,7 +390,7 @@ export const my_composites = {
 		<p>The primary use case -- passing styles across component boundaries:</p>
 		<Code
 			content={`<!-- Parent controls hover behavior -->
-<div class="hover:box-shadow:var(--shadow_lg) hover:transform:translateY(-2px)">
+<div class="hover:shadow_lg hover:transform:translateY(-2px)">
 
 <!-- Responsive layout on child -->
 <div class="display:flex flex-direction:column md:flex-direction:row">`}
@@ -407,16 +407,16 @@ export const my_composites = {
 			content={`<span class={[
 	'p_md',
 	active && 'border:2px~solid~var(--color_a_5)',
-	variant === 'elevated' && 'box-shadow:var(--shadow_lg)'
+	variant === 'elevated' && 'shadow_lg'
 ]} />`}
 		/>
 
 		<h4>Dark mode adaptations</h4>
 		<Code
-			content={`<!-- Shadows look harsh in dark mode -->
-<div class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
+			content={`<!-- tone down shadows in dark mode -->
+<div class="shadow_lg dark:shadow_sm">
 
-<!-- Image brightness -->
+<!-- image brightness -->
 <img class="dark:filter:brightness(0.9)" alt="Hero">`}
 		/>
 	</TomeSection>
