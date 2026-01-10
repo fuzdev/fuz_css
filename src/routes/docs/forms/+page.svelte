@@ -92,7 +92,7 @@
 					>
 					<label class:disabled={created_account}>
 						<div class="title">select</div>
-						<select class="text_align_center font_size_xl5" disabled={created_account}>
+						<select class="text-align:center font_size_xl5" disabled={created_account}>
 							{#each faces as face (face)}
 								<option value={face}>{face}</option>
 							{/each}

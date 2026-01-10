@@ -136,8 +136,7 @@ Respects `hidden="until-found"` for find-in-page support.
 
 :where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) {
 	font-family: var(--font_family_serif);
-	font-size: var(--font_size, var(--font_size_md));
-	font-weight: var(--font_weight);
+	font-size: var(--font_size, inherit);
 	line-height: var(--line_height_sm);
 	text-wrap: balance; /* @see https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap#balance */
 	/* TODO use this pattern elsewhere? provides API to components like `MdnLogo` */
@@ -146,38 +145,38 @@ Respects `hidden="until-found"` for find-in-page support.
 
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
-	--font_weight: 300;
+	font-weight: 300;
 	margin-bottom: var(--space_xl5);
 	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
 	/* margin-top: var(--space_xl7); */
 }
 :where(h2:not(.unstyled)) {
 	--font_size: var(--font_size_xl2);
-	--font_weight: 400;
+	font-weight: 400;
 	margin-bottom: var(--space_xl4);
 	margin-top: var(--space_xl6);
 }
 :where(h3:not(.unstyled)) {
 	--font_size: var(--font_size_xl);
-	--font_weight: 500;
+	font-weight: 500;
 	margin-bottom: var(--space_xl3);
 	margin-top: var(--space_xl5);
 }
 :where(h4:not(.unstyled)) {
 	--font_size: var(--font_size_lg);
-	--font_weight: 700;
+	font-weight: 700;
 	margin-bottom: var(--space_xl2);
 	margin-top: var(--space_xl4);
 }
 :where(h5:not(.unstyled)) {
 	--font_size: var(--font_size_md);
-	--font_weight: 900;
+	font-weight: 900;
 	margin-bottom: var(--space_xl);
 	margin-top: var(--space_xl3);
 }
 :where(h6:not(.unstyled)) {
 	--font_size: var(--font_size_sm);
-	--font_weight: 600;
+	font-weight: 600;
 	margin-bottom: var(--space_lg);
 	margin-top: var(--space_xl2);
 	text-transform: uppercase;

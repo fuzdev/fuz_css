@@ -1,8 +1,18 @@
 # Fuz CSS framework and design system
 
-CSS framework and design system built around **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
+CSS framework and design system built on **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
 
 For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
+
+## Gro commands
+
+```bash
+gro check     # typecheck, test, lint, format check (run before committing)
+gro typecheck # typecheck only (faster iteration)
+gro test      # run tests with vitest
+gro gen       # regenerate theme.css and other .gen files
+gro build     # build the package for production
+```
 
 ## Design decisions
 
@@ -26,7 +36,24 @@ For code style, see the `fuz-stack` skill. For UI components (themes, color sche
 
 ### Smart utility class generation
 
-[gen_fuz_css.ts](src/lib/gen_fuz_css.ts) scans source files with regex extractors, collects class names, and outputs only CSS for classes actually used. Dynamic [interpreters](src/lib/css_class_interpreters.ts) handle pattern-based classes like `opacity_50`, `font_weight_700`, `z_index_100`.
+[gen_fuz_css.ts](src/lib/gen_fuz_css.ts) scans source files with AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)), collects class names, and outputs only CSS for classes actually used. Supports Svelte 5.16+ class syntax (`class={[...]}`, `class={{...}}`), clsx/cn calls, and `// @fuz-classes` comment hints.
+
+### Three class types
+
+- **Token classes** - Map to style variables: `p_md`, `color_a_5`, `gap_lg`
+- **Composite classes** - Multi-property shortcuts: `box`, `row`, `ellipsis`
+- **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
+
+All class types support modifiers: responsive (`md:`), state (`hover:`), color-scheme (`dark:`), pseudo-element (`before:`).
+
+### CSS-literal syntax
+
+Literal classes use `property:value` syntax that maps 1:1 to CSS:
+- `display:flex` → `display: flex;`
+- `hover:opacity:80%` → `:hover { opacity: 80%; }`
+- `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers
+
+Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary breakpoints via `min-width(800px):` and `max-width(600px):`.
 
 ## Variable naming
 
@@ -62,14 +89,21 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type, `render_theme_style()`
 - [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
 
+**CSS extraction:**
+
+- [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS files, `SourceLocation`, `ExtractionResult`
+
 **CSS generation:**
 
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Main generator API for Gro
-- [css_classes.ts](src/lib/css_classes.ts) - All static class definitions (~1000+)
+- [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClasses` collection, `generate_classes_css()`, `CssClassInterpreterContext`, CSS escaping
+- [css_classes.ts](src/lib/css_classes.ts) - Token class definitions (spacing, sizing, colors, typography, borders, shadows)
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`)
-- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Dynamic interpreters for opacity, font-weight, z-index, border-radius
-- [css_class_helpers.ts](src/lib/css_class_helpers.ts) - CSS class extraction, `CssClasses` collection, `generate_classes_css()`
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
+- [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
+- [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
+- [modifiers.ts](src/lib/modifiers.ts) - Declarative modifier definitions (breakpoints, states, pseudo-elements)
 
 **Stylesheets:**
 
@@ -86,4 +120,7 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 ### Tests - [src/test/](src/test/)
 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
-- [css_class_helpers.test.ts](src/test/css_class_helpers.test.ts) - CSS extraction from Svelte/JS patterns
+- [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters, CssClasses
+- [css_class_extractor.test.ts](src/test/css_class_extractor.test.ts) - AST extraction, location tracking
+- [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
+- [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification
