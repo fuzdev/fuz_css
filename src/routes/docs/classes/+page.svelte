@@ -414,9 +414,9 @@ export const my_composites = {
 		<h4>Dark mode adaptations</h4>
 		<Code
 			content={`<!-- tone down shadows in dark mode -->
-<div class="shadow_lg dark:shadow_sm">
+<div class="shadow_lg dark:shadow_md">
 
-<!-- image brightness -->
+<!-- reduce image brightness in dark mode -->
 <img class="dark:filter:brightness(0.9)" alt="Hero">`}
 		/>
 	</TomeSection>
@@ -439,6 +439,14 @@ ${'<' as string}script>
 			now it must be manually called, the only integration uses
 			<a href="https://github.com/ryanatkn/gro">Gro</a>. A Vite plugin is planned.
 		</p>
+		<p>To use with Gro, create <code>src/routes/fuz.gen.css.ts</code>:</p>
+		<Code
+			lang="ts"
+			content={`import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+
+export const gen = gen_fuz_css();
+`}
+		/>
 		<h4>Dynamic class hints</h4>
 		<p>
 			The generator extracts classes from <code>class</code> attributes, <code>class:</code>
