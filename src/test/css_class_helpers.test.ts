@@ -352,6 +352,7 @@ test('generate_classes_css collects interpreter diagnostics', () => {
 				level: 'warning',
 				message: 'test warning',
 				class_name: matched[0],
+				suggestion: null,
 			});
 			return `color: ${matched[1]};`;
 		},

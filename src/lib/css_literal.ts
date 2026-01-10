@@ -295,6 +295,7 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Multiple media modifiers not allowed`,
 							class_name,
+							suggestion: null,
 						},
 					};
 				}
@@ -343,6 +344,7 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Modifiers "${ancestor.name}" and "${segment}" are mutually exclusive`,
 							class_name,
+							suggestion: null,
 						},
 					};
 				}
@@ -411,6 +413,7 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Multiple pseudo-element modifiers not allowed`,
 							class_name,
+							suggestion: null,
 						},
 					};
 				}
@@ -443,6 +446,7 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 				level: 'error',
 				message: `Invalid CSS-literal syntax: expected "property:value" format`,
 				class_name,
+				suggestion: null,
 			},
 		};
 	}
@@ -473,7 +477,7 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 				level: 'error',
 				message: `Unknown modifier "${unknown}"`,
 				class_name,
-				suggestion: suggestion ? `Did you mean "${suggestion}"?` : undefined,
+				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
 			},
 		};
 	}
@@ -489,7 +493,7 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 				level: 'error',
 				message: `Unknown CSS property "${property}"`,
 				class_name,
-				suggestion: suggestion ? `Did you mean "${suggestion}"?` : undefined,
+				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
 			},
 		};
 	}

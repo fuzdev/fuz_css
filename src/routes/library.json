@@ -892,7 +892,7 @@
 							{
 								"name": "suggestion",
 								"kind": "variable",
-								"type_signature": "string"
+								"type_signature": "string | null"
 							}
 						]
 					},
@@ -1305,7 +1305,7 @@
 						"name": "parse_css_literal",
 						"kind": "function",
 						"doc_comment": "Parses a CSS-literal class name into its components.",
-						"source_line": 436,
+						"source_line": 439,
 						"type_signature": "(class_name: string): ParseResult",
 						"return_type": "ParseResult",
 						"return_description": "ParseResult with parsed data or error",
@@ -1321,7 +1321,7 @@
 						"name": "generate_selector",
 						"kind": "function",
 						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
-						"source_line": 532,
+						"source_line": 536,
 						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1339,7 +1339,7 @@
 						"name": "generate_declaration",
 						"kind": "function",
 						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
-						"source_line": 551,
+						"source_line": 555,
 						"type_signature": "(parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1353,7 +1353,7 @@
 						"name": "CssLiteralOutput",
 						"kind": "type",
 						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
-						"source_line": 558,
+						"source_line": 562,
 						"type_signature": "CssLiteralOutput",
 						"properties": [
 							{
@@ -1386,7 +1386,7 @@
 						"name": "interpret_css_literal",
 						"kind": "function",
 						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.",
-						"source_line": 578,
+						"source_line": 582,
 						"type_signature": "(class_name: string, escaped_class_name: string, log?: Logger | undefined, collect_diagnostics?: CssClassDiagnostic[] | undefined): CssLiteralOutput | null",
 						"return_type": "CssLiteralOutput | null",
 						"return_description": "CssLiteralOutput or null if not a valid CSS-literal",
@@ -1419,7 +1419,7 @@
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 628,
+						"source_line": 632,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",

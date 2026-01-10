@@ -314,7 +314,7 @@ export interface CssClassDiagnostic {
 	level: 'error' | 'warning';
 	message: string;
 	class_name: string;
-	suggestion?: string;
+	suggestion: string | null;
 }
 
 /**
