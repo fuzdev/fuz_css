@@ -130,7 +130,7 @@
 						"name": "css_class_composites",
 						"kind": "variable",
 						"source_line": 3,
-						"type_signature": "Record<string, CssClassDeclaration | undefined>"
+						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
 				"dependents": ["css_classes.ts", "gen_fuz_css.ts"]
@@ -139,338 +139,10 @@
 				"path": "css_class_extractor.ts",
 				"declarations": [
 					{
-						"name": "extract_from_svelte",
-						"kind": "function",
-						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 86,
-						"type_signature": "(source: string, file?: string): ExtractionResult",
-						"return_type": "ExtractionResult",
-						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
-						"parameters": [
-							{
-								"name": "source",
-								"type": "string",
-								"description": "- The Svelte file source code"
-							},
-							{
-								"name": "file",
-								"type": "string",
-								"description": "- File path for location tracking",
-								"default_value": "'<unknown>'"
-							}
-						]
-					},
-					{
-						"name": "extract_from_ts",
-						"kind": "function",
-						"doc_comment": "Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.",
-						"source_line": 265,
-						"type_signature": "(source: string, file?: string): ExtractionResult",
-						"return_type": "ExtractionResult",
-						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
-						"parameters": [
-							{
-								"name": "source",
-								"type": "string",
-								"description": "- The TS/JS file source code"
-							},
-							{
-								"name": "file",
-								"type": "string",
-								"description": "- File path for location tracking",
-								"default_value": "'<unknown>'"
-							}
-						]
-					},
-					{
-						"name": "extract_css_classes",
-						"kind": "function",
-						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set for backward compatibility.",
-						"source_line": 345,
-						"type_signature": "(source: string, filename?: string | undefined): Set<string>",
-						"return_type": "Set<string>",
-						"return_description": "Set of class names",
-						"parameters": [
-							{
-								"name": "source",
-								"type": "string",
-								"description": "- The file source code"
-							},
-							{
-								"name": "filename",
-								"type": "string | undefined",
-								"optional": true,
-								"description": "- The filename (for determining file type)"
-							}
-						]
-					},
-					{
-						"name": "extract_css_classes_with_locations",
-						"kind": "function",
-						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
-						"source_line": 358,
-						"type_signature": "(source: string, filename?: string | undefined): ExtractionResult",
-						"return_type": "ExtractionResult",
-						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
-						"parameters": [
-							{
-								"name": "source",
-								"type": "string",
-								"description": "- The file source code"
-							},
-							{
-								"name": "filename",
-								"type": "string | undefined",
-								"optional": true,
-								"description": "- The filename (for determining file type and location tracking)"
-							}
-						]
-					}
-				],
-				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
-				"dependencies": ["css_class_helpers.ts"],
-				"dependents": ["css_class_helpers.ts"]
-			},
-			{
-				"path": "css_class_generators.ts",
-				"declarations": [
-					{
-						"name": "ClassTemplateResult",
-						"kind": "type",
-						"source_line": 3,
-						"type_signature": "ClassTemplateResult"
-					},
-					{
-						"name": "ClassTemplateFn",
-						"kind": "type",
-						"source_line": 8,
-						"type_signature": "ClassTemplateFn<T1, T2, T3>",
-						"generic_params": [
-							{
-								"name": "T1",
-								"default_type": "string"
-							},
-							{
-								"name": "T2",
-								"default_type": "string"
-							},
-							{
-								"name": "T3",
-								"default_type": "string"
-							}
-						]
-					},
-					{
-						"name": "generate_classes",
-						"kind": "function",
-						"doc_comment": "Generates CSS class declarations from templates.\nSupports up to 3 dimensions of multiplicative combinations.",
-						"examples": [
-							"// Simple list\ngenerate_classes(\n  v => ({ name: `position_${v}`, css: `position: ${v};` }),\n  ['static', 'relative', 'absolute']\n)",
-							"// Two dimensions (multiplicative)\ngenerate_classes(\n  (dir, size) => ({ name: `m${dir}_${size}`, css: `margin-${dir}: ${size};` }),\n  ['top', 'bottom'],\n  ['0', '1px', '2px']\n)"
-						],
-						"source_line": 37,
-						"type_signature": "<T1 = string, T2 = string, T3 = string>(template: ClassTemplateFn<T1, T2, T3>, values: Iterable<T1>, secondary?: Iterable<T2> | undefined, tertiary?: Iterable<...> | undefined): Record<...>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "template",
-								"type": "ClassTemplateFn<T1, T2, T3>",
-								"description": "- Function that generates CSS from values, can return null to skip"
-							},
-							{
-								"name": "values",
-								"type": "Iterable<T1>",
-								"description": "- Primary iterable of values"
-							},
-							{
-								"name": "secondary",
-								"type": "Iterable<T2> | undefined",
-								"optional": true,
-								"description": "- Optional second dimension (makes it multiplicative)"
-							},
-							{
-								"name": "tertiary",
-								"type": "Iterable<T3> | undefined",
-								"optional": true,
-								"description": "- Optional third dimension for even more combinations"
-							}
-						]
-					},
-					{
-						"name": "CSS_DIRECTIONS",
-						"kind": "variable",
-						"source_line": 73,
-						"type_signature": "readonly [\"top\", \"right\", \"bottom\", \"left\"]"
-					},
-					{
-						"name": "CssDirection",
-						"kind": "type",
-						"source_line": 74,
-						"type_signature": "\"top\" | \"right\" | \"bottom\" | \"left\""
-					},
-					{
-						"name": "COLOR_INTENSITIES",
-						"kind": "variable",
-						"source_line": 77,
-						"type_signature": "readonly [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]"
-					},
-					{
-						"name": "ColorIntensity",
-						"kind": "type",
-						"source_line": 78,
-						"type_signature": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\""
-					},
-					{
-						"name": "to_variable_name",
-						"kind": "function",
-						"source_line": 81,
-						"type_signature": "(str: string): string",
-						"return_type": "string",
-						"parameters": [
-							{
-								"name": "str",
-								"type": "string"
-							}
-						]
-					},
-					{
-						"name": "format_spacing_value",
-						"kind": "function",
-						"doc_comment": "Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).\nUsed by margin, padding, gap, inset, top/right/bottom/left, etc.",
-						"source_line": 87,
-						"type_signature": "(value: string): string",
-						"return_type": "string",
-						"parameters": [
-							{
-								"name": "value",
-								"type": "string"
-							}
-						]
-					},
-					{
-						"name": "format_dimension_value",
-						"kind": "function",
-						"doc_comment": "Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).\nUsed by width and height properties.",
-						"source_line": 99,
-						"type_signature": "(value: string): string",
-						"return_type": "string",
-						"parameters": [
-							{
-								"name": "value",
-								"type": "string"
-							}
-						]
-					},
-					{
-						"name": "generate_property_classes",
-						"kind": "function",
-						"doc_comment": "Generate classes for a single CSS property with various values.",
-						"source_line": 123,
-						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((value: string) => string) | undefined, prefix?: string): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "property",
-								"type": "string",
-								"description": "- The CSS property name (e.g. 'font-size', 'gap')"
-							},
-							{
-								"name": "values",
-								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
-							},
-							{
-								"name": "formatter",
-								"type": "((value: string) => string) | undefined",
-								"optional": true,
-								"description": "- Optional function to format values (e.g. v => `var(--space_${v})`)"
-							},
-							{
-								"name": "prefix",
-								"type": "string",
-								"description": "- Optional class name prefix (defaults to property with dashes replaced by underscores)",
-								"default_value": "to_variable_name(property)"
-							}
-						]
-					},
-					{
-						"name": "generate_directional_classes",
-						"kind": "function",
-						"doc_comment": "Generate directional classes for properties like margin and padding.\nCreates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).",
-						"source_line": 146,
-						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((v: string) => string) | undefined): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "property",
-								"type": "string",
-								"description": "- The base CSS property name (e.g. 'margin', 'padding')"
-							},
-							{
-								"name": "values",
-								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
-							},
-							{
-								"name": "formatter",
-								"type": "((v: string) => string) | undefined",
-								"optional": true,
-								"description": "- Optional function to format values (defaults to identity)"
-							}
-						]
-					},
-					{
-						"name": "generate_border_radius_corners",
-						"kind": "function",
-						"doc_comment": "Generate border radius corner classes for all four corners.\nCreates classes for top-left, top-right, bottom-left, bottom-right corners.",
-						"source_line": 191,
-						"type_signature": "(values: Iterable<string>, formatter?: ((value: string) => string) | undefined): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "values",
-								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
-							},
-							{
-								"name": "formatter",
-								"type": "((value: string) => string) | undefined",
-								"optional": true,
-								"description": "- Optional function to format values"
-							}
-						]
-					},
-					{
-						"name": "generate_shadow_classes",
-						"kind": "function",
-						"doc_comment": "Generate shadow classes for various shadow types and sizes.\nCreates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.\nEach shadow uses color-mix with alpha values for transparency.",
-						"source_line": 220,
-						"type_signature": "(sizes: Iterable<string>, alpha_mapping: Record<string, string>): Record<string, CssClassDeclaration>",
-						"return_type": "Record<string, CssClassDeclaration>",
-						"parameters": [
-							{
-								"name": "sizes",
-								"type": "Iterable<string>",
-								"description": "- The shadow size variants (xs, sm, md, lg, xl)"
-							},
-							{
-								"name": "alpha_mapping",
-								"type": "Record<string, string>",
-								"description": "- Mapping of sizes to alpha numbers (1-5)"
-							}
-						]
-					}
-				],
-				"dependents": ["css_classes.ts"]
-			},
-			{
-				"path": "css_class_helpers.ts",
-				"declarations": [
-					{
 						"name": "SourceLocation",
 						"kind": "type",
 						"doc_comment": "Source location for IDE/LSP integration.",
-						"source_line": 11,
+						"source_line": 28,
 						"type_signature": "SourceLocation",
 						"properties": [
 							{
@@ -496,7 +168,7 @@
 						"name": "BaseDiagnostic",
 						"kind": "type",
 						"doc_comment": "Base diagnostic with common fields.",
-						"source_line": 22,
+						"source_line": 39,
 						"type_signature": "BaseDiagnostic",
 						"properties": [
 							{
@@ -520,7 +192,7 @@
 						"name": "ExtractionDiagnostic",
 						"kind": "type",
 						"doc_comment": "Diagnostic from the extraction phase.",
-						"source_line": 31,
+						"source_line": 48,
 						"type_signature": "ExtractionDiagnostic",
 						"extends": ["BaseDiagnostic"],
 						"properties": [
@@ -537,43 +209,52 @@
 						]
 					},
 					{
-						"name": "GenerationDiagnostic",
+						"name": "ExtractionResult",
 						"kind": "type",
-						"doc_comment": "Diagnostic from the generation phase.",
-						"source_line": 39,
-						"type_signature": "GenerationDiagnostic",
-						"extends": ["BaseDiagnostic"],
+						"doc_comment": "Extraction result with classes mapped to their source locations.",
+						"source_line": 56,
+						"type_signature": "ExtractionResult",
 						"properties": [
 							{
-								"name": "phase",
+								"name": "classes",
 								"kind": "variable",
-								"type_signature": "'generation'"
+								"type_signature": "Map<string, Array<SourceLocation>>",
+								"doc_comment": "Map from class name to locations where it was used.\nKeys = unique classes, values = locations for diagnostics/IDE integration."
 							},
 							{
-								"name": "class_name",
+								"name": "tracked_vars",
 								"kind": "variable",
-								"type_signature": "string"
+								"type_signature": "Set<string>",
+								"doc_comment": "Variables that were used in class contexts (for diagnostics)"
 							},
 							{
-								"name": "locations",
+								"name": "diagnostics",
 								"kind": "variable",
-								"type_signature": "Array<SourceLocation> | null",
-								"doc_comment": "Source locations where this class was used, or null if from include_classes"
+								"type_signature": "Array<ExtractionDiagnostic>",
+								"doc_comment": "Diagnostics from the extraction phase"
 							}
 						]
 					},
 					{
-						"name": "Diagnostic",
+						"name": "ExtractCssClassesOptions",
 						"kind": "type",
-						"doc_comment": "Union of all diagnostic types.",
-						"source_line": 49,
-						"type_signature": "Diagnostic"
+						"doc_comment": "Options for CSS class extraction.",
+						"source_line": 71,
+						"type_signature": "ExtractCssClassesOptions",
+						"properties": [
+							{
+								"name": "filename",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "File path used to determine extraction method (Svelte vs TS)\nand for location tracking in diagnostics."
+							}
+						]
 					},
 					{
 						"name": "SourceIndex",
 						"kind": "class",
 						"doc_comment": "Helper class for converting character offsets to line/column positions.\nSvelte template nodes (Comment, Text, ExpressionTag) only have char offsets,\nso this class enables efficient conversion.\n\nBuild: O(n) where n = source length\nLookup: O(log m) where m = number of lines (binary search)",
-						"source_line": 59,
+						"source_line": 91,
 						"members": [
 							{
 								"name": "line_starts",
@@ -615,37 +296,10 @@
 						]
 					},
 					{
-						"name": "ExtractionResult",
-						"kind": "type",
-						"doc_comment": "Extraction result with classes mapped to their source locations.",
-						"source_line": 92,
-						"type_signature": "ExtractionResult",
-						"properties": [
-							{
-								"name": "classes",
-								"kind": "variable",
-								"type_signature": "Map<string, Array<SourceLocation>>",
-								"doc_comment": "Map from class name to locations where it was used.\nKeys = unique classes, values = locations for diagnostics/IDE integration."
-							},
-							{
-								"name": "tracked_vars",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "Variables that were used in class contexts (for diagnostics)"
-							},
-							{
-								"name": "diagnostics",
-								"kind": "variable",
-								"type_signature": "Array<ExtractionDiagnostic>",
-								"doc_comment": "Diagnostics from the extraction phase"
-							}
-						]
-					},
-					{
 						"name": "add_class_with_location",
 						"kind": "function",
 						"doc_comment": "Adds a class with its location to the extraction result.",
-						"source_line": 111,
+						"source_line": 128,
 						"type_signature": "(classes: Map<string, SourceLocation[]>, class_name: string, location: SourceLocation): void",
 						"return_type": "void",
 						"parameters": [
@@ -667,13 +321,204 @@
 						]
 					},
 					{
+						"name": "extract_from_svelte",
+						"kind": "function",
+						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
+						"source_line": 198,
+						"type_signature": "(source: string, file?: string): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The Svelte file source code"
+							},
+							{
+								"name": "file",
+								"type": "string",
+								"description": "- File path for location tracking",
+								"default_value": "'<unknown>'"
+							}
+						]
+					},
+					{
+						"name": "extract_from_ts",
+						"kind": "function",
+						"doc_comment": "Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.",
+						"source_line": 377,
+						"type_signature": "(source: string, file?: string): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The TS/JS file source code"
+							},
+							{
+								"name": "file",
+								"type": "string",
+								"description": "- File path for location tracking",
+								"default_value": "'<unknown>'"
+							}
+						]
+					},
+					{
+						"name": "extract_css_classes",
+						"kind": "function",
+						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set.",
+						"source_line": 457,
+						"type_signature": "(source: string, options?: ExtractCssClassesOptions): Set<string>",
+						"return_type": "Set<string>",
+						"return_description": "Set of class names",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The file source code"
+							},
+							{
+								"name": "options",
+								"type": "ExtractCssClassesOptions",
+								"description": "- Extraction options",
+								"default_value": "{}"
+							}
+						]
+					},
+					{
+						"name": "extract_css_classes_with_locations",
+						"kind": "function",
+						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
+						"source_line": 473,
+						"type_signature": "(source: string, options?: ExtractCssClassesOptions): ExtractionResult",
+						"return_type": "ExtractionResult",
+						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
+						"parameters": [
+							{
+								"name": "source",
+								"type": "string",
+								"description": "- The file source code"
+							},
+							{
+								"name": "options",
+								"type": "ExtractCssClassesOptions",
+								"description": "- Extraction options",
+								"default_value": "{}"
+							}
+						]
+					}
+				],
+				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
+				"dependents": ["gen_fuz_css.ts"]
+			},
+			{
+				"path": "css_class_generation.ts",
+				"declarations": [
+					{
+						"name": "GenerationDiagnostic",
+						"kind": "type",
+						"doc_comment": "Diagnostic from the generation phase.",
+						"source_line": 22,
+						"type_signature": "GenerationDiagnostic",
+						"properties": [
+							{
+								"name": "phase",
+								"kind": "variable",
+								"type_signature": "'generation'"
+							},
+							{
+								"name": "level",
+								"kind": "variable",
+								"type_signature": "'error' | 'warning'"
+							},
+							{
+								"name": "message",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "suggestion",
+								"kind": "variable",
+								"type_signature": "string | null"
+							},
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "locations",
+								"kind": "variable",
+								"type_signature": "Array<SourceLocation> | null",
+								"doc_comment": "Source locations where this class was used, or null if from include_classes"
+							}
+						]
+					},
+					{
+						"name": "Diagnostic",
+						"kind": "type",
+						"doc_comment": "Union of all diagnostic types.",
+						"source_line": 35,
+						"type_signature": "Diagnostic"
+					},
+					{
+						"name": "CssClassDiagnostic",
+						"kind": "type",
+						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to GenerationDiagnostic with locations.",
+						"source_line": 41,
+						"type_signature": "CssClassDiagnostic",
+						"properties": [
+							{
+								"name": "level",
+								"kind": "variable",
+								"type_signature": "'error' | 'warning'"
+							},
+							{
+								"name": "message",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "class_name",
+								"kind": "variable",
+								"type_signature": "string"
+							},
+							{
+								"name": "suggestion",
+								"kind": "variable",
+								"type_signature": "string | null"
+							}
+						]
+					},
+					{
+						"name": "create_generation_diagnostic",
+						"kind": "function",
+						"doc_comment": "Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.",
+						"source_line": 54,
+						"type_signature": "(diagnostic: CssClassDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
+						"return_type": "GenerationDiagnostic",
+						"parameters": [
+							{
+								"name": "diagnostic",
+								"type": "CssClassDiagnostic",
+								"description": "- Interpreter diagnostic to convert"
+							},
+							{
+								"name": "locations",
+								"type": "SourceLocation[] | null",
+								"description": "- Source locations where the class was used"
+							}
+						]
+					},
+					{
 						"name": "escape_css_selector",
 						"kind": "function",
 						"doc_comment": "Escapes special characters in a CSS class name for use in a selector.\nCSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.",
 						"examples": [
 							"escape_css_selector('display:flex') // 'display\\\\:flex'\nescape_css_selector('opacity:80%') // 'opacity\\\\:80\\\\%'\nescape_css_selector('nth-child(2n)') // 'nth-child\\\\(2n\\\\)'"
 						],
-						"source_line": 133,
+						"source_line": 79,
 						"type_signature": "(name: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -684,61 +529,10 @@
 						]
 					},
 					{
-						"name": "CollectCssClassesOptions",
-						"kind": "type",
-						"source_line": 137,
-						"type_signature": "CollectCssClassesOptions",
-						"properties": [
-							{
-								"name": "filename",
-								"kind": "variable",
-								"type_signature": "string",
-								"doc_comment": "File path used to determine extraction method (Svelte vs TS)."
-							}
-						]
-					},
-					{
-						"name": "collect_css_classes",
-						"kind": "function",
-						"doc_comment": "Returns a Set of CSS classes from a string of HTML/Svelte/JS/TS content.\nUses AST parsing for accurate extraction of:\n- `class=\"...\"` string attributes\n- `class={{...}}` object attributes (Svelte 5.16+)\n- `class={[...]}` array attributes (Svelte 5.16+)\n- `class:name` directives\n- `clsx()`, `cn()`, `classNames()` calls\n- Variables with class-like names",
-						"source_line": 154,
-						"type_signature": "(contents: string, options?: CollectCssClassesOptions): Set<string>",
-						"return_type": "Set<string>",
-						"parameters": [
-							{
-								"name": "contents",
-								"type": "string"
-							},
-							{
-								"name": "options",
-								"type": "CollectCssClassesOptions",
-								"default_value": "{}"
-							}
-						]
-					},
-					{
-						"name": "collect_css_classes_with_locations",
-						"kind": "function",
-						"doc_comment": "Returns full extraction result with class locations and diagnostics.\nUses AST parsing for accurate extraction.",
-						"source_line": 165,
-						"type_signature": "(contents: string, options?: CollectCssClassesOptions): ExtractionResult",
-						"return_type": "ExtractionResult",
-						"parameters": [
-							{
-								"name": "contents",
-								"type": "string"
-							},
-							{
-								"name": "options",
-								"type": "CollectCssClassesOptions",
-								"default_value": "{}"
-							}
-						]
-					},
-					{
 						"name": "CssClasses",
 						"kind": "class",
-						"source_line": 172,
+						"doc_comment": "Collection of CSS classes extracted from source files.\nTracks classes per-file for efficient incremental updates.",
+						"source_line": 91,
 						"members": [
 							{
 								"name": "include_classes",
@@ -821,16 +615,16 @@
 						]
 					},
 					{
-						"name": "CssClassDeclaration",
+						"name": "CssClassDefinition",
 						"kind": "type",
-						"source_line": 294,
-						"type_signature": "CssClassDeclaration"
+						"source_line": 217,
+						"type_signature": "CssClassDefinition"
 					},
 					{
-						"name": "CssClassDeclarationBase",
+						"name": "CssClassDefinitionBase",
 						"kind": "type",
-						"source_line": 299,
-						"type_signature": "CssClassDeclarationBase",
+						"source_line": 222,
+						"type_signature": "CssClassDefinitionBase",
 						"properties": [
 							{
 								"name": "comment",
@@ -840,11 +634,11 @@
 						]
 					},
 					{
-						"name": "CssClassDeclarationItem",
+						"name": "CssClassDefinitionItem",
 						"kind": "type",
-						"source_line": 303,
-						"type_signature": "CssClassDeclarationItem",
-						"extends": ["CssClassDeclarationBase"],
+						"source_line": 226,
+						"type_signature": "CssClassDefinitionItem",
+						"extends": ["CssClassDefinitionBase"],
 						"properties": [
 							{
 								"name": "declaration",
@@ -854,11 +648,11 @@
 						]
 					},
 					{
-						"name": "CssClassDeclarationGroup",
+						"name": "CssClassDefinitionGroup",
 						"kind": "type",
-						"source_line": 306,
-						"type_signature": "CssClassDeclarationGroup",
-						"extends": ["CssClassDeclarationBase"],
+						"source_line": 230,
+						"type_signature": "CssClassDefinitionGroup",
+						"extends": ["CssClassDefinitionBase"],
 						"properties": [
 							{
 								"name": "ruleset",
@@ -868,60 +662,11 @@
 						]
 					},
 					{
-						"name": "CssClassDiagnostic",
-						"kind": "type",
-						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to GenerationDiagnostic with locations.",
-						"source_line": 313,
-						"type_signature": "CssClassDiagnostic",
-						"properties": [
-							{
-								"name": "level",
-								"kind": "variable",
-								"type_signature": "'error' | 'warning'"
-							},
-							{
-								"name": "message",
-								"kind": "variable",
-								"type_signature": "string"
-							},
-							{
-								"name": "class_name",
-								"kind": "variable",
-								"type_signature": "string"
-							},
-							{
-								"name": "suggestion",
-								"kind": "variable",
-								"type_signature": "string | null"
-							}
-						]
-					},
-					{
-						"name": "to_generation_diagnostic",
-						"kind": "function",
-						"doc_comment": "Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.",
-						"source_line": 326,
-						"type_signature": "(diagnostic: CssClassDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
-						"return_type": "GenerationDiagnostic",
-						"parameters": [
-							{
-								"name": "diagnostic",
-								"type": "CssClassDiagnostic",
-								"description": "- Interpreter diagnostic to convert"
-							},
-							{
-								"name": "locations",
-								"type": "SourceLocation[] | null",
-								"description": "- Source locations where the class was used"
-							}
-						]
-					},
-					{
-						"name": "InterpreterContext",
+						"name": "CssClassInterpreterContext",
 						"kind": "type",
 						"doc_comment": "Context passed to CSS class interpreters.\nProvides access to logging, diagnostics collection, and the class registry.",
-						"source_line": 342,
-						"type_signature": "InterpreterContext",
+						"source_line": 238,
+						"type_signature": "CssClassInterpreterContext",
 						"properties": [
 							{
 								"name": "log",
@@ -938,17 +683,17 @@
 							{
 								"name": "classes",
 								"kind": "variable",
-								"type_signature": "Record<string, CssClassDeclaration | undefined>",
+								"type_signature": "Record<string, CssClassDefinition | undefined>",
 								"doc_comment": "All known CSS class declarations (token + composite classes)"
 							}
 						]
 					},
 					{
-						"name": "CssClassDeclarationInterpreter",
+						"name": "CssClassDefinitionInterpreter",
 						"kind": "type",
-						"source_line": 351,
-						"type_signature": "CssClassDeclarationInterpreter",
-						"extends": ["CssClassDeclarationBase"],
+						"source_line": 247,
+						"type_signature": "CssClassDefinitionInterpreter",
+						"extends": ["CssClassDefinitionBase"],
 						"properties": [
 							{
 								"name": "pattern",
@@ -958,7 +703,7 @@
 							{
 								"name": "interpret",
 								"kind": "variable",
-								"type_signature": "(matched: RegExpMatchArray, ctx: InterpreterContext) => string | null"
+								"type_signature": "(matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null"
 							}
 						]
 					},
@@ -966,7 +711,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 359,
+						"source_line": 259,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -984,8 +729,8 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 364,
-						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDeclaration | undefined>, interpreters: CssClassDeclarationInterpreter[], log?: Logger | undefined, class_locations?: Map<...> | undefined): GenerateClassesCssResult",
+						"source_line": 264,
+						"type_signature": "(classes: Iterable<string>, classes_by_name: Record<string, CssClassDefinition | undefined>, interpreters: CssClassDefinitionInterpreter[], log?: Logger | undefined, class_locations?: Map<...> | undefined): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
 							{
@@ -994,11 +739,11 @@
 							},
 							{
 								"name": "classes_by_name",
-								"type": "Record<string, CssClassDeclaration | undefined>"
+								"type": "Record<string, CssClassDefinition | undefined>"
 							},
 							{
 								"name": "interpreters",
-								"type": "CssClassDeclarationInterpreter[]"
+								"type": "CssClassDefinitionInterpreter[]"
 							},
 							{
 								"name": "log",
@@ -1013,8 +758,241 @@
 						]
 					}
 				],
-				"dependencies": ["css_class_extractor.ts", "css_ruleset_parser.ts"],
-				"dependents": ["css_class_extractor.ts", "css_class_interpreters.ts", "gen_fuz_css.ts"]
+				"module_comment": "CSS class generation utilities.\n\nProduces CSS output from class definitions, handles interpretation of\ndynamic classes, and provides collection management for extracted classes.",
+				"dependencies": ["css_ruleset_parser.ts"],
+				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
+			},
+			{
+				"path": "css_class_generators.ts",
+				"declarations": [
+					{
+						"name": "GeneratedClassResult",
+						"kind": "type",
+						"source_line": 3,
+						"type_signature": "GeneratedClassResult"
+					},
+					{
+						"name": "ClassTemplateFn",
+						"kind": "type",
+						"source_line": 8,
+						"type_signature": "ClassTemplateFn<T1, T2, T3>",
+						"generic_params": [
+							{
+								"name": "T1",
+								"default_type": "string"
+							},
+							{
+								"name": "T2",
+								"default_type": "string"
+							},
+							{
+								"name": "T3",
+								"default_type": "string"
+							}
+						]
+					},
+					{
+						"name": "generate_classes",
+						"kind": "function",
+						"doc_comment": "Generates CSS class declarations from templates.\nSupports up to 3 dimensions of multiplicative combinations.",
+						"examples": [
+							"// Simple list\ngenerate_classes(\n  v => ({ name: `position_${v}`, css: `position: ${v};` }),\n  ['static', 'relative', 'absolute']\n)",
+							"// Two dimensions (multiplicative)\ngenerate_classes(\n  (dir, size) => ({ name: `m${dir}_${size}`, css: `margin-${dir}: ${size};` }),\n  ['top', 'bottom'],\n  ['0', '1px', '2px']\n)"
+						],
+						"source_line": 37,
+						"type_signature": "<T1 = string, T2 = string, T3 = string>(template: ClassTemplateFn<T1, T2, T3>, values: Iterable<T1>, secondary?: Iterable<T2> | undefined, tertiary?: Iterable<...> | undefined): Record<...>",
+						"return_type": "Record<string, CssClassDefinition>",
+						"parameters": [
+							{
+								"name": "template",
+								"type": "ClassTemplateFn<T1, T2, T3>",
+								"description": "- Function that generates CSS from values, can return null to skip"
+							},
+							{
+								"name": "values",
+								"type": "Iterable<T1>",
+								"description": "- Primary iterable of values"
+							},
+							{
+								"name": "secondary",
+								"type": "Iterable<T2> | undefined",
+								"optional": true,
+								"description": "- Optional second dimension (makes it multiplicative)"
+							},
+							{
+								"name": "tertiary",
+								"type": "Iterable<T3> | undefined",
+								"optional": true,
+								"description": "- Optional third dimension for even more combinations"
+							}
+						]
+					},
+					{
+						"name": "CSS_DIRECTIONS",
+						"kind": "variable",
+						"source_line": 73,
+						"type_signature": "readonly [\"top\", \"right\", \"bottom\", \"left\"]"
+					},
+					{
+						"name": "CssDirection",
+						"kind": "type",
+						"source_line": 74,
+						"type_signature": "\"top\" | \"right\" | \"bottom\" | \"left\""
+					},
+					{
+						"name": "COLOR_INTENSITIES",
+						"kind": "variable",
+						"source_line": 77,
+						"type_signature": "readonly [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]"
+					},
+					{
+						"name": "ColorIntensity",
+						"kind": "type",
+						"source_line": 78,
+						"type_signature": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\""
+					},
+					{
+						"name": "format_variable_name",
+						"kind": "function",
+						"source_line": 81,
+						"type_signature": "(str: string): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "str",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "format_spacing_value",
+						"kind": "function",
+						"doc_comment": "Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).\nUsed by margin, padding, gap, inset, top/right/bottom/left, etc.",
+						"source_line": 87,
+						"type_signature": "(value: string): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "value",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "format_dimension_value",
+						"kind": "function",
+						"doc_comment": "Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).\nUsed by width and height properties.",
+						"source_line": 99,
+						"type_signature": "(value: string): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "value",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "generate_property_classes",
+						"kind": "function",
+						"doc_comment": "Generate classes for a single CSS property with various values.",
+						"source_line": 123,
+						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((value: string) => string) | undefined, prefix?: string): Record<string, CssClassDefinition>",
+						"return_type": "Record<string, CssClassDefinition>",
+						"parameters": [
+							{
+								"name": "property",
+								"type": "string",
+								"description": "- The CSS property name (e.g. 'font-size', 'gap')"
+							},
+							{
+								"name": "values",
+								"type": "Iterable<string>",
+								"description": "- The values to generate classes for"
+							},
+							{
+								"name": "formatter",
+								"type": "((value: string) => string) | undefined",
+								"optional": true,
+								"description": "- Optional function to format values (e.g. v => `var(--space_${v})`)"
+							},
+							{
+								"name": "prefix",
+								"type": "string",
+								"description": "- Optional class name prefix (defaults to property with dashes replaced by underscores)",
+								"default_value": "format_variable_name(property)"
+							}
+						]
+					},
+					{
+						"name": "generate_directional_classes",
+						"kind": "function",
+						"doc_comment": "Generate directional classes for properties like margin and padding.\nCreates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).",
+						"source_line": 146,
+						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((v: string) => string) | undefined): Record<string, CssClassDefinition>",
+						"return_type": "Record<string, CssClassDefinition>",
+						"parameters": [
+							{
+								"name": "property",
+								"type": "string",
+								"description": "- The base CSS property name (e.g. 'margin', 'padding')"
+							},
+							{
+								"name": "values",
+								"type": "Iterable<string>",
+								"description": "- The values to generate classes for"
+							},
+							{
+								"name": "formatter",
+								"type": "((v: string) => string) | undefined",
+								"optional": true,
+								"description": "- Optional function to format values (defaults to identity)"
+							}
+						]
+					},
+					{
+						"name": "generate_border_radius_corners",
+						"kind": "function",
+						"doc_comment": "Generate border radius corner classes for all four corners.\nCreates classes for top-left, top-right, bottom-left, bottom-right corners.",
+						"source_line": 200,
+						"type_signature": "(values: Iterable<string>, formatter?: ((value: string) => string) | undefined): Record<string, CssClassDefinition>",
+						"return_type": "Record<string, CssClassDefinition>",
+						"parameters": [
+							{
+								"name": "values",
+								"type": "Iterable<string>",
+								"description": "- The values to generate classes for"
+							},
+							{
+								"name": "formatter",
+								"type": "((value: string) => string) | undefined",
+								"optional": true,
+								"description": "- Optional function to format values"
+							}
+						]
+					},
+					{
+						"name": "generate_shadow_classes",
+						"kind": "function",
+						"doc_comment": "Generate shadow classes for various shadow types and sizes.\nCreates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.\nEach shadow uses color-mix with alpha values for transparency.",
+						"source_line": 229,
+						"type_signature": "(sizes: Iterable<string>, alpha_mapping: Record<string, string>): Record<string, CssClassDefinition>",
+						"return_type": "Record<string, CssClassDefinition>",
+						"parameters": [
+							{
+								"name": "sizes",
+								"type": "Iterable<string>",
+								"description": "- The shadow size variants (xs, sm, md, lg, xl)"
+							},
+							{
+								"name": "alpha_mapping",
+								"type": "Record<string, string>",
+								"description": "- Mapping of sizes to alpha numbers (1-5)"
+							}
+						]
+					}
+				],
+				"dependents": ["css_classes.ts"]
 			},
 			{
 				"path": "css_class_interpreters.ts",
@@ -1024,36 +1002,36 @@
 						"kind": "variable",
 						"doc_comment": "Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).\nApplies modifiers to existing declaration-based or ruleset-based classes.\n\nThis interpreter must run BEFORE css_literal_interpreter to handle cases like `hover:box`\nwhere `box` is a known class (not a CSS property).",
 						"source_line": 19,
-						"type_signature": "CssClassDeclarationInterpreter"
+						"type_signature": "CssClassDefinitionInterpreter"
 					},
 					{
 						"name": "css_literal_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
 						"source_line": 128,
-						"type_signature": "CssClassDeclarationInterpreter"
+						"type_signature": "CssClassDefinitionInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
 						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: modified_class_interpreter runs first to handle `hover:box` before\ncss_literal_interpreter tries to interpret it as `hover:box` (property:value).",
 						"source_line": 157,
-						"type_signature": "CssClassDeclarationInterpreter[]"
+						"type_signature": "CssClassDefinitionInterpreter[]"
 					}
 				],
-				"dependencies": ["css_class_helpers.ts", "css_literal.ts", "css_ruleset_parser.ts"],
+				"dependencies": ["css_class_generation.ts", "css_literal.ts", "css_ruleset_parser.ts"],
 				"dependents": ["gen_fuz_css.ts"]
 			},
 			{
 				"path": "css_classes.ts",
 				"declarations": [
 					{
-						"name": "css_classes_by_name",
+						"name": "token_classes",
 						"kind": "variable",
 						"doc_comment": "Token classes that map to CSS variables (design tokens).\nFor other CSS properties, use CSS-literal syntax like `display:flex` or `position:absolute`.",
 						"see_also": ["`generate_classes_css`"],
 						"source_line": 36,
-						"type_signature": "Record<string, CssClassDeclaration | undefined>"
+						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
 				"dependencies": ["css_class_composites.ts", "css_class_generators.ts", "variable_data.ts"],
@@ -1066,7 +1044,7 @@
 						"name": "ParsedCssLiteral",
 						"kind": "type",
 						"doc_comment": "Parsed CSS-literal class with all components extracted.",
-						"source_line": 24,
+						"source_line": 27,
 						"type_signature": "ParsedCssLiteral",
 						"properties": [
 							{
@@ -1114,17 +1092,17 @@
 						]
 					},
 					{
-						"name": "ParseResult",
+						"name": "CssLiteralParseResult",
 						"kind": "type",
 						"doc_comment": "Result of parsing a CSS-literal class name.",
-						"source_line": 44,
-						"type_signature": "ParseResult"
+						"source_line": 47,
+						"type_signature": "CssLiteralParseResult"
 					},
 					{
 						"name": "ExtractedModifiers",
 						"kind": "type",
 						"doc_comment": "Extracted modifiers from a class name.\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 52,
+						"source_line": 55,
 						"type_signature": "ExtractedModifiers",
 						"properties": [
 							{
@@ -1154,17 +1132,17 @@
 						]
 					},
 					{
-						"name": "ExtractModifiersResult",
+						"name": "ModifierExtractionResult",
 						"kind": "type",
 						"doc_comment": "Result of extracting modifiers from segments.",
-						"source_line": 66,
-						"type_signature": "ExtractModifiersResult"
+						"source_line": 69,
+						"type_signature": "ModifierExtractionResult"
 					},
 					{
 						"name": "load_css_properties",
 						"kind": "function",
 						"doc_comment": "Loads CSS properties from",
-						"source_line": 83,
+						"source_line": 88,
 						"type_signature": "(): Promise<Set<string>>",
 						"return_type": "Promise<Set<string>>",
 						"parameters": []
@@ -1173,7 +1151,7 @@
 						"name": "is_valid_css_property",
 						"kind": "function",
 						"doc_comment": "Checks if a property name is a valid CSS property.\nCustom properties (--*) always return true.",
-						"source_line": 105,
+						"source_line": 110,
 						"type_signature": "(property: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if valid CSS property or custom property",
@@ -1189,7 +1167,7 @@
 						"name": "suggest_css_property",
 						"kind": "function",
 						"doc_comment": "Suggests a correct property name for a typo using Levenshtein distance.",
-						"source_line": 121,
+						"source_line": 126,
 						"type_signature": "(typo: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The suggested property or null if no close match",
@@ -1205,7 +1183,7 @@
 						"name": "suggest_modifier",
 						"kind": "function",
 						"doc_comment": "Suggests a correct modifier name for a typo.",
-						"source_line": 141,
+						"source_line": 146,
 						"type_signature": "(typo: string): string | null",
 						"return_type": "string | null",
 						"parameters": [
@@ -1219,7 +1197,7 @@
 						"name": "format_css_value",
 						"kind": "function",
 						"doc_comment": "Formats a CSS-literal value for CSS output.\n- Replaces `~` with space\n- Ensures space before `!important`",
-						"source_line": 167,
+						"source_line": 174,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"return_description": "Formatted CSS value",
@@ -1235,7 +1213,7 @@
 						"name": "check_calc_expression",
 						"kind": "function",
 						"doc_comment": "Checks if a value contains a possibly invalid calc expression.",
-						"source_line": 185,
+						"source_line": 192,
 						"type_signature": "(value: string): string | null",
 						"return_type": "string | null",
 						"return_description": "Warning message if suspicious, null otherwise",
@@ -1251,7 +1229,7 @@
 						"name": "is_possible_css_literal",
 						"kind": "function",
 						"doc_comment": "Checks if a class name could be a CSS-literal class.\nQuick check before attempting full parse.",
-						"source_line": 201,
+						"source_line": 210,
 						"type_signature": "(class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if it could be CSS-literal syntax",
@@ -1270,7 +1248,7 @@
 						"examples": [
 							"extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']\nextract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']\nextract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']"
 						],
-						"source_line": 230,
+						"source_line": 239,
 						"type_signature": "(class_name: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1284,10 +1262,10 @@
 						"name": "extract_and_validate_modifiers",
 						"kind": "function",
 						"doc_comment": "Extracts and validates modifiers from the beginning of a segments array.\nModifiers are consumed from the front until a non-modifier segment is found.\n\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 269,
-						"type_signature": "(segments: string[], class_name: string): ExtractModifiersResult",
-						"return_type": "ExtractModifiersResult",
-						"return_description": "ExtractModifiersResult with modifiers and remaining segments, or error",
+						"source_line": 278,
+						"type_signature": "(segments: string[], class_name: string): ModifierExtractionResult",
+						"return_type": "ModifierExtractionResult",
+						"return_description": "ModifierExtractionResult with modifiers and remaining segments, or error",
 						"parameters": [
 							{
 								"name": "segments",
@@ -1305,10 +1283,10 @@
 						"name": "parse_css_literal",
 						"kind": "function",
 						"doc_comment": "Parses a CSS-literal class name into its components.",
-						"source_line": 439,
-						"type_signature": "(class_name: string): ParseResult",
-						"return_type": "ParseResult",
-						"return_description": "ParseResult with parsed data or error",
+						"source_line": 448,
+						"type_signature": "(class_name: string): CssLiteralParseResult",
+						"return_type": "CssLiteralParseResult",
+						"return_description": "CssLiteralParseResult with parsed data or error",
 						"parameters": [
 							{
 								"name": "class_name",
@@ -1321,7 +1299,7 @@
 						"name": "generate_selector",
 						"kind": "function",
 						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
-						"source_line": 536,
+						"source_line": 547,
 						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1339,7 +1317,7 @@
 						"name": "generate_declaration",
 						"kind": "function",
 						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
-						"source_line": 555,
+						"source_line": 566,
 						"type_signature": "(parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1353,7 +1331,7 @@
 						"name": "CssLiteralOutput",
 						"kind": "type",
 						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
-						"source_line": 562,
+						"source_line": 573,
 						"type_signature": "CssLiteralOutput",
 						"properties": [
 							{
@@ -1386,7 +1364,7 @@
 						"name": "interpret_css_literal",
 						"kind": "function",
 						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.",
-						"source_line": 582,
+						"source_line": 593,
 						"type_signature": "(class_name: string, escaped_class_name: string, log?: Logger | undefined, collect_diagnostics?: CssClassDiagnostic[] | undefined): CssLiteralOutput | null",
 						"return_type": "CssLiteralOutput | null",
 						"return_description": "CssLiteralOutput or null if not a valid CSS-literal",
@@ -1419,7 +1397,7 @@
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 632,
+						"source_line": 643,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",
@@ -1432,7 +1410,7 @@
 						]
 					}
 				],
-				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
+				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
 				"dependencies": ["modifiers.ts"],
 				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
 			},
@@ -1443,7 +1421,7 @@
 						"name": "ParsedRule",
 						"kind": "type",
 						"doc_comment": "A parsed CSS rule with its components and positions.",
-						"source_line": 22,
+						"source_line": 26,
 						"type_signature": "ParsedRule",
 						"properties": [
 							{
@@ -1488,7 +1466,7 @@
 						"name": "ParsedRuleset",
 						"kind": "type",
 						"doc_comment": "Result of parsing a CSS ruleset.",
-						"source_line": 40,
+						"source_line": 44,
 						"type_signature": "ParsedRuleset",
 						"properties": [
 							{
@@ -1509,7 +1487,7 @@
 						"name": "parse_ruleset",
 						"kind": "function",
 						"doc_comment": "Parses a CSS ruleset string using Svelte's CSS parser.",
-						"source_line": 56,
+						"source_line": 60,
 						"type_signature": "(css: string): ParsedRuleset",
 						"return_type": "ParsedRuleset",
 						"return_description": "ParsedRuleset with structured rule data and positions",
@@ -1525,7 +1503,7 @@
 						"name": "is_single_selector_ruleset",
 						"kind": "function",
 						"doc_comment": "Checks if a ruleset has only a single simple selector (just the class name).\nUsed to detect rulesets that could be converted to declaration format.",
-						"source_line": 137,
+						"source_line": 141,
 						"type_signature": "(rules: ParsedRule[], expected_class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if there's exactly one rule with selector \".class_name\"",
@@ -1546,7 +1524,7 @@
 						"name": "extract_css_comment",
 						"kind": "function",
 						"doc_comment": "Extracts the CSS comment from a ruleset (if any).\nLooks for comments before the first rule.",
-						"source_line": 160,
+						"source_line": 164,
 						"type_signature": "(css: string, rules: ParsedRule[]): string | null",
 						"return_type": "string | null",
 						"return_description": "Comment text without delimiters, or null if no comment",
@@ -1567,7 +1545,7 @@
 						"name": "SkippedModifierInfo",
 						"kind": "type",
 						"doc_comment": "Information about a modifier that was skipped for a selector during ruleset modification.\nThe selector is still included in output, just without the conflicting modifier applied.",
-						"source_line": 182,
+						"source_line": 188,
 						"type_signature": "SkippedModifierInfo",
 						"properties": [
 							{
@@ -1594,7 +1572,7 @@
 						"name": "ModifiedSelectorGroupResult",
 						"kind": "type",
 						"doc_comment": "Result from modifying a selector group with conflict detection.",
-						"source_line": 194,
+						"source_line": 200,
 						"type_signature": "ModifiedSelectorGroupResult",
 						"properties": [
 							{
@@ -1615,7 +1593,7 @@
 						"name": "ModifiedRulesetResult",
 						"kind": "type",
 						"doc_comment": "Result from generating a modified ruleset.",
-						"source_line": 204,
+						"source_line": 210,
 						"type_signature": "ModifiedRulesetResult",
 						"properties": [
 							{
@@ -1639,7 +1617,7 @@
 						"examples": [
 							"split_selector_list('.a, .b') → ['.a', '.b']\nsplit_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']"
 						],
-						"source_line": 253,
+						"source_line": 259,
 						"type_signature": "(selector_group: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1653,7 +1631,7 @@
 						"name": "find_compound_end",
 						"kind": "function",
 						"doc_comment": "Finds the end position of the compound selector containing the class at class_pos.\nA compound selector is a sequence of simple selectors without combinators.",
-						"source_line": 288,
+						"source_line": 294,
 						"type_signature": "(selector: string, class_pos: number): number",
 						"return_type": "number",
 						"return_description": "Position where state modifiers should be inserted (before any pseudo-element)",
@@ -1677,7 +1655,7 @@
 						"examples": [
 							"modify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'"
 						],
-						"source_line": 354,
+						"source_line": 360,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
 						"return_type": "string",
 						"return_description": "Modified selector",
@@ -1713,7 +1691,7 @@
 						"name": "modify_selector_group",
 						"kind": "function",
 						"doc_comment": "Modifies a selector list (comma-separated selectors) to add modifiers.\nHandles conflicts per-selector: if one selector in a list has a conflict,\nonly that selector skips the modifier; other selectors still get it.",
-						"source_line": 394,
+						"source_line": 400,
 						"type_signature": "(selector_group: string, original_class: string, new_class_escaped: string, states_to_add: string[], pseudo_element_css: string): ModifiedSelectorGroupResult",
 						"return_type": "ModifiedSelectorGroupResult",
 						"return_description": "Result with modified selector list and information about skipped modifiers",
@@ -1749,7 +1727,7 @@
 						"name": "generate_modified_ruleset",
 						"kind": "function",
 						"doc_comment": "Generates CSS for a modified ruleset with applied modifiers.\n\nConflict handling is per-selector within selector lists:\n- For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips\n  the `:hover` addition; `.plain:active` still gets `:hover` appended.\n- For multiple states like `:hover:focus`, each is checked individually; conflicting\n  states are skipped while non-conflicting ones are still applied.",
-						"source_line": 473,
+						"source_line": 479,
 						"type_signature": "(original_ruleset: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string, media_wrapper: string | null, ancestor_wrapper: string | null): ModifiedRulesetResult",
 						"return_type": "ModifiedRulesetResult",
 						"return_description": "Result with generated CSS and information about skipped modifiers",
@@ -1793,7 +1771,7 @@
 					}
 				],
 				"module_comment": "CSS ruleset parser using Svelte's CSS parser.\n\nParses CSS rulesets to extract selectors and declarations with position information.\nUsed for:\n- Phase 0a: Detecting single-selector rulesets that could be converted to declaration format\n- Phase 2: Modifying selectors for modifier support on composite classes\n\nNOTE: We wrap CSS in a `<style>` tag for Svelte's parser. This adds an offset to positions.\nLine numbers in parser errors will be offset by 1. This is acceptable - Fuz will have\nits own CSS parser in the future.",
-				"dependents": ["css_class_helpers.ts", "css_class_interpreters.ts"]
+				"dependents": ["css_class_generation.ts", "css_class_interpreters.ts"]
 			},
 			{
 				"path": "gen_fuz_css.ts",
@@ -1801,7 +1779,7 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 18,
+						"source_line": 17,
 						"type_signature": "GenFuzCssOptions",
 						"properties": [
 							{
@@ -1817,12 +1795,12 @@
 							{
 								"name": "classes_by_name",
 								"kind": "variable",
-								"type_signature": "Record<string, CssClassDeclaration | undefined>"
+								"type_signature": "Record<string, CssClassDefinition | undefined>"
 							},
 							{
 								"name": "class_interpreters",
 								"kind": "variable",
-								"type_signature": "Array<CssClassDeclarationInterpreter>"
+								"type_signature": "Array<CssClassDefinitionInterpreter>"
 							},
 							{
 								"name": "on_error",
@@ -1848,7 +1826,7 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 57,
+						"source_line": 56,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
@@ -1873,7 +1851,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 80,
+						"source_line": 79,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -1887,7 +1865,8 @@
 				],
 				"dependencies": [
 					"css_class_composites.ts",
-					"css_class_helpers.ts",
+					"css_class_extractor.ts",
+					"css_class_generation.ts",
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts"

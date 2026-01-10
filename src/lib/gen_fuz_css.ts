@@ -1,16 +1,15 @@
 import type {Gen} from '@ryanatkn/gro/gen.js';
 import type {FileFilter} from '@fuzdev/fuz_util/path.js';
 
+import {extract_css_classes_with_locations, type SourceLocation} from './css_class_extractor.js';
 import {
-	collect_css_classes_with_locations,
 	CssClasses,
 	generate_classes_css,
-	type CssClassDeclaration,
-	type CssClassDeclarationInterpreter,
+	type CssClassDefinition,
+	type CssClassDefinitionInterpreter,
 	type Diagnostic,
-	type SourceLocation,
-} from './css_class_helpers.js';
-import {css_classes_by_name} from './css_classes.js';
+} from './css_class_generation.js';
+import {token_classes} from './css_classes.js';
 import {css_class_composites} from './css_class_composites.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
@@ -18,8 +17,8 @@ import {load_css_properties} from './css_literal.js';
 export interface GenFuzCssOptions {
 	filter_file?: FileFilter | null;
 	include_stats?: boolean;
-	classes_by_name?: Record<string, CssClassDeclaration | undefined>;
-	class_interpreters?: Array<CssClassDeclarationInterpreter>;
+	classes_by_name?: Record<string, CssClassDefinition | undefined>;
+	class_interpreters?: Array<CssClassDefinitionInterpreter>;
 	/**
 	 * How to handle CSS-literal errors during generation.
 	 * - 'log' (default): Log errors, skip invalid classes, continue
@@ -81,7 +80,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
-		classes_by_name = css_classes_by_name,
+		classes_by_name = token_classes,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
 		include_classes,
@@ -94,12 +93,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 	return {
 		dependencies: 'all',
-		// TODO optimize, do we need to handle deleted files or removed classes though?
-		// This isn't as much a problem in watch mode but isn't clean.
+		// TODO incremental regeneration - need to handle deleted files and removed classes
 		// dependencies: ({changed_file_id, filer}) => {
 		// 	if (!changed_file_id) return 'all';
 		// 	const disknode = filer.get_by_id(changed_file_id);
-		// 	if (disknode?.contents && collect_css_classes(disknode.contents).size) {
+		// 	if (disknode?.contents && extract_css_classes(disknode.contents).size) {
 		// 		return 'all';
 		// 	}
 		// 	return null;
@@ -138,7 +136,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 				if (disknode.contents !== null) {
 					stats.files_with_content++;
-					const extraction = collect_css_classes_with_locations(disknode.contents, {
+					const extraction = extract_css_classes_with_locations(disknode.contents, {
 						filename: disknode.id,
 					});
 					if (extraction.classes.size > 0) {

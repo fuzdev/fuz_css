@@ -244,13 +244,13 @@ const config = { className: 'baz' };
 
 test('extract_css_classes auto-detects Svelte files', () => {
 	const source = `<div class="foo bar"></div>`;
-	const result = extract_css_classes(source, 'test.svelte');
+	const result = extract_css_classes(source, {filename: 'test.svelte'});
 	expect(result).toEqual(new Set(['foo', 'bar']));
 });
 
 test('extract_css_classes auto-detects TypeScript files', () => {
 	const source = `const buttonClasses = 'btn primary';`;
-	const result = extract_css_classes(source, 'test.ts');
+	const result = extract_css_classes(source, {filename: 'test.ts'});
 	expect(result.has('btn')).toBe(true);
 	expect(result.has('primary')).toBe(true);
 });

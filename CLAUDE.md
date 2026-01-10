@@ -89,15 +89,18 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type, `render_theme_style()`
 - [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
 
+**CSS extraction:**
+
+- [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS files, `SourceLocation`, `ExtractionResult`
+
 **CSS generation:**
 
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Main generator API for Gro
+- [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClasses` collection, `generate_classes_css()`, `CssClassInterpreterContext`, CSS escaping
 - [css_classes.ts](src/lib/css_classes.ts) - Token class definitions (spacing, sizing, colors, typography, borders, shadows)
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`)
 - [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
-- [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS files
-- [css_class_helpers.ts](src/lib/css_class_helpers.ts) - `CssClasses` collection, `generate_classes_css()`, `InterpreterContext`, CSS escaping
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
 - [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
 - [modifiers.ts](src/lib/modifiers.ts) - Declarative modifier definitions (breakpoints, states, pseudo-elements)
@@ -117,7 +120,7 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 ### Tests - [src/test/](src/test/)
 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
-- [css_class_helpers.test.ts](src/test/css_class_helpers.test.ts) - CSS escaping, generation, interpreters, SourceIndex
+- [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters, CssClasses
 - [css_class_extractor.test.ts](src/test/css_class_extractor.test.ts) - AST extraction, location tracking
 - [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
 - [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification

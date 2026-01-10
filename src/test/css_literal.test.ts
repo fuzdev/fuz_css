@@ -12,7 +12,7 @@ import {
 	generate_css_literal_simple,
 	type ParsedCssLiteral,
 } from '$lib/css_literal.js';
-import {escape_css_selector, type CssClassDiagnostic} from '$lib/css_class_helpers.js';
+import {escape_css_selector, type CssClassDiagnostic} from '$lib/css_class_generation.js';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,

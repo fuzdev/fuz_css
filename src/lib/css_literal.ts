@@ -14,10 +14,12 @@
 import type {Logger} from '@fuzdev/fuz_util/log.js';
 import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
 
-import {type CssClassDiagnostic} from './css_class_helpers.js';
+import {type CssClassDiagnostic} from './css_class_generation.js';
 import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.js';
 
+//
 // Types
+//
 
 /**
  * Parsed CSS-literal class with all components extracted.
@@ -42,7 +44,7 @@ export interface ParsedCssLiteral {
 /**
  * Result of parsing a CSS-literal class name.
  */
-export type ParseResult =
+export type CssLiteralParseResult =
 	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>}
 	| {ok: false; error: CssClassDiagnostic};
 
@@ -64,11 +66,13 @@ export interface ExtractedModifiers {
 /**
  * Result of extracting modifiers from segments.
  */
-export type ExtractModifiersResult =
+export type ModifierExtractionResult =
 	| {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>}
 	| {ok: false; error: CssClassDiagnostic};
 
+//
 // CSS Property Validation
+//
 
 /**
  * Set of valid CSS property names, populated from @webref/css.
@@ -155,7 +159,9 @@ export const suggest_modifier = (typo: string): string | null => {
 	return best_match;
 };
 
+//
 // Value Formatting
+//
 
 /**
  * Formats a CSS-literal value for CSS output.
@@ -190,7 +196,9 @@ export const check_calc_expression = (value: string): string | null => {
 	return null;
 };
 
+//
 // Parsing
+//
 
 /**
  * Checks if a class name could be a CSS-literal class.
@@ -265,12 +273,12 @@ export const extract_segments = (class_name: string): Array<string> => {
  *
  * @param segments - Array of colon-separated segments
  * @param class_name - Original class name for error messages
- * @returns ExtractModifiersResult with modifiers and remaining segments, or error
+ * @returns ModifierExtractionResult with modifiers and remaining segments, or error
  */
 export const extract_and_validate_modifiers = (
 	segments: Array<string>,
 	class_name: string,
-): ExtractModifiersResult => {
+): ModifierExtractionResult => {
 	let media: ModifierDefinition | null = null;
 	let ancestor: ModifierDefinition | null = null;
 	const states: Array<ModifierDefinition> = [];
@@ -435,9 +443,9 @@ export const extract_and_validate_modifiers = (
  * Parses a CSS-literal class name into its components.
  *
  * @param class_name - The class name to parse
- * @returns ParseResult with parsed data or error
+ * @returns CssLiteralParseResult with parsed data or error
  */
-export const parse_css_literal = (class_name: string): ParseResult => {
+export const parse_css_literal = (class_name: string): CssLiteralParseResult => {
 	const segments = extract_segments(class_name);
 
 	if (segments.length < 2) {
@@ -528,7 +536,9 @@ export const parse_css_literal = (class_name: string): ParseResult => {
 	};
 };
 
+//
 // CSS Generation
+//
 
 /**
  * Generates the CSS selector for a parsed CSS-literal class.

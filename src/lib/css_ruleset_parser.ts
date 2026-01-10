@@ -16,6 +16,10 @@
 import {escape_regexp} from '@fuzdev/fuz_util/regexp.js';
 import {parse, type AST} from 'svelte/compiler';
 
+//
+// Parsing
+//
+
 /**
  * A parsed CSS rule with its components and positions.
  */
@@ -173,7 +177,9 @@ export const extract_css_comment = (css: string, rules: Array<ParsedRule>): stri
 	return null;
 };
 
-// Selector modification for modifier support
+//
+// Selector Modification
+//
 
 /**
  * Information about a modifier that was skipped for a selector during ruleset modification.

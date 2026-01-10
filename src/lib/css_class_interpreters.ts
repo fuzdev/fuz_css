@@ -1,4 +1,4 @@
-import {escape_css_selector, type CssClassDeclarationInterpreter} from './css_class_helpers.js';
+import {escape_css_selector, type CssClassDefinitionInterpreter} from './css_class_generation.js';
 import {
 	is_possible_css_literal,
 	interpret_css_literal,
@@ -16,7 +16,7 @@ import {generate_modified_ruleset} from './css_ruleset_parser.js';
  * This interpreter must run BEFORE css_literal_interpreter to handle cases like `hover:box`
  * where `box` is a known class (not a CSS property).
  */
-export const modified_class_interpreter: CssClassDeclarationInterpreter = {
+export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 	pattern: /^.+:.+$/,
 	interpret: (matched, ctx) => {
 		const class_name = matched[0];
@@ -125,7 +125,7 @@ export const modified_class_interpreter: CssClassDeclarationInterpreter = {
  * Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).
  * Generates full CSS rulesets including any modifier wrappers.
  */
-export const css_literal_interpreter: CssClassDeclarationInterpreter = {
+export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 	pattern: /^.+:.+$/,
 	interpret: (matched, ctx) => {
 		const class_name = matched[0];
@@ -154,7 +154,7 @@ export const css_literal_interpreter: CssClassDeclarationInterpreter = {
  * Order matters: modified_class_interpreter runs first to handle `hover:box` before
  * css_literal_interpreter tries to interpret it as `hover:box` (property:value).
  */
-export const css_class_interpreters: Array<CssClassDeclarationInterpreter> = [
+export const css_class_interpreters: Array<CssClassDefinitionInterpreter> = [
 	modified_class_interpreter,
 	css_literal_interpreter,
 ];

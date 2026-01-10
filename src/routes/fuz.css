@@ -199,11 +199,20 @@ a.chip {
 .bg {
 	background-color: var(--bg);
 }
+.fg {
+	background-color: var(--fg);
+}
 .fg_1 {
 	background-color: var(--fg_1);
 }
 .fg_3 {
 	background-color: var(--fg_3);
+}
+.color_bg {
+	color: var(--bg);
+}
+.color_fg {
+	color: var(--fg);
 }
 .color_a_5 {
 	color: var(--color_a_5);

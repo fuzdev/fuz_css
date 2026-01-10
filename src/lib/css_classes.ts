@@ -1,4 +1,4 @@
-import type {CssClassDeclaration} from './css_class_helpers.js';
+import type {CssClassDefinition} from './css_class_generation.js';
 import {
 	generate_classes,
 	COLOR_INTENSITIES,
@@ -23,7 +23,7 @@ import {
 } from './variable_data.js';
 import {css_class_composites} from './css_class_composites.js';
 
-// TODO add animation support, either as a separate thing or rename `css_classes_by_name` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
+// TODO add animation support, either as a separate thing or rename `token_classes` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 
 // TODO think about variable support (much harder problem, need dependency graph)
 
@@ -33,7 +33,7 @@ import {css_class_composites} from './css_class_composites.js';
  *
  * @see `generate_classes_css`
  */
-export const css_classes_by_name: Record<string, CssClassDeclaration | undefined> = {
+export const token_classes: Record<string, CssClassDefinition | undefined> = {
 	// Composite classes go first, so they can be overridden by the more specific classes.
 	...css_class_composites,
 

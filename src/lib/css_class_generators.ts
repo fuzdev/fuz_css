@@ -1,14 +1,14 @@
-import type {CssClassDeclaration} from './css_class_helpers.js';
+import type {CssClassDefinition} from './css_class_generation.js';
 
-export type ClassTemplateResult = {
+export type GeneratedClassResult = {
 	name: string;
 	css: string;
 } | null;
 
 export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
-	| ((v1: T1) => ClassTemplateResult)
-	| ((v1: T1, v2: T2) => ClassTemplateResult)
-	| ((v1: T1, v2: T2, v3: T3) => ClassTemplateResult);
+	| ((v1: T1) => GeneratedClassResult)
+	| ((v1: T1, v2: T2) => GeneratedClassResult)
+	| ((v1: T1, v2: T2, v3: T3) => GeneratedClassResult);
 
 /**
  * Generates CSS class declarations from templates.
@@ -39,8 +39,8 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	values: Iterable<T1>,
 	secondary?: Iterable<T2>,
 	tertiary?: Iterable<T3>,
-): Record<string, CssClassDeclaration> => {
-	const result: Record<string, CssClassDeclaration> = {};
+): Record<string, CssClassDefinition> => {
+	const result: Record<string, CssClassDefinition> = {};
 
 	for (const v1 of values) {
 		if (secondary) {
@@ -78,7 +78,7 @@ export const COLOR_INTENSITIES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] a
 export type ColorIntensity = (typeof COLOR_INTENSITIES)[number];
 
 // Helper to convert any string to a valid CSS variable name (snake_case)
-export const to_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
+export const format_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
 
 /**
  * Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).
@@ -124,11 +124,11 @@ export const generate_property_classes = (
 	property: string,
 	values: Iterable<string>,
 	formatter?: (value: string) => string,
-	prefix: string = to_variable_name(property),
-): Record<string, CssClassDeclaration> => {
+	prefix: string = format_variable_name(property),
+): Record<string, CssClassDefinition> => {
 	return generate_classes(
 		(value: string) => ({
-			name: `${prefix}_${to_variable_name(value)}`,
+			name: `${prefix}_${format_variable_name(value)}`,
 			css: `${property}: ${formatter?.(value) ?? value};`,
 		}),
 		values,
@@ -147,7 +147,7 @@ export const generate_directional_classes = (
 	property: string,
 	values: Iterable<string>,
 	formatter?: (v: string) => string,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const prefix = property[0]; // 'm' for margin, 'p' for padding
 
 	return generate_classes(
@@ -156,20 +156,29 @@ export const generate_directional_classes = (
 
 			// Map variants to their configurations
 			const configs: Record<string, {name: string; css: string} | undefined> = {
-				'': {name: `${prefix}_${to_variable_name(value)}`, css: `${property}: ${formatted};`},
-				t: {name: `${prefix}t_${to_variable_name(value)}`, css: `${property}-top: ${formatted};`},
-				r: {name: `${prefix}r_${to_variable_name(value)}`, css: `${property}-right: ${formatted};`},
+				'': {name: `${prefix}_${format_variable_name(value)}`, css: `${property}: ${formatted};`},
+				t: {
+					name: `${prefix}t_${format_variable_name(value)}`,
+					css: `${property}-top: ${formatted};`,
+				},
+				r: {
+					name: `${prefix}r_${format_variable_name(value)}`,
+					css: `${property}-right: ${formatted};`,
+				},
 				b: {
-					name: `${prefix}b_${to_variable_name(value)}`,
+					name: `${prefix}b_${format_variable_name(value)}`,
 					css: `${property}-bottom: ${formatted};`,
 				},
-				l: {name: `${prefix}l_${to_variable_name(value)}`, css: `${property}-left: ${formatted};`},
+				l: {
+					name: `${prefix}l_${format_variable_name(value)}`,
+					css: `${property}-left: ${formatted};`,
+				},
 				x: {
-					name: `${prefix}x_${to_variable_name(value)}`,
+					name: `${prefix}x_${format_variable_name(value)}`,
 					css: `${property}-left: ${formatted};\t${property}-right: ${formatted};`,
 				},
 				y: {
-					name: `${prefix}y_${to_variable_name(value)}`,
+					name: `${prefix}y_${format_variable_name(value)}`,
 					css: `${property}-top: ${formatted};\t${property}-bottom: ${formatted};`,
 				},
 			};
@@ -191,7 +200,7 @@ export const generate_directional_classes = (
 export const generate_border_radius_corners = (
 	values: Iterable<string>,
 	formatter?: (value: string) => string,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const corners = [
 		{prop: 'border-top-left-radius', name: 'border_top_left_radius'},
 		{prop: 'border-top-right-radius', name: 'border_top_right_radius'},
@@ -201,7 +210,7 @@ export const generate_border_radius_corners = (
 
 	return generate_classes(
 		(corner: (typeof corners)[0], value: string) => ({
-			name: `${corner.name}_${to_variable_name(value)}`,
+			name: `${corner.name}_${format_variable_name(value)}`,
 			css: `${corner.prop}: ${formatter?.(value) ?? value};`,
 		}),
 		corners,
@@ -220,7 +229,7 @@ export const generate_border_radius_corners = (
 export const generate_shadow_classes = (
 	sizes: Iterable<string>,
 	alpha_mapping: Record<string, string>,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const shadow_types = [
 		{prefix: 'shadow', var_prefix: 'shadow'},
 		{prefix: 'shadow_top', var_prefix: 'shadow_top'},

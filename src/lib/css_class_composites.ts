@@ -1,6 +1,6 @@
-import type {CssClassDeclaration} from './css_class_helpers.js';
+import type {CssClassDefinition} from './css_class_generation.js';
 
-export const css_class_composites: Record<string, CssClassDeclaration | undefined> = {
+export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
 		declaration: `
 			image-rendering: -webkit-optimize-contrast; /* Safari */

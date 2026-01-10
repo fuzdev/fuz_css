@@ -1,16 +1,18 @@
 import {test, assert, expect} from 'vitest';
 
 import {
-	escape_css_selector,
-	generate_classes_css,
 	SourceIndex,
-	CssClasses,
-	type CssClassDeclarationInterpreter,
 	type ExtractionDiagnostic,
 	type SourceLocation,
-} from '$lib/css_class_helpers.js';
+} from '$lib/css_class_extractor.js';
+import {
+	escape_css_selector,
+	generate_classes_css,
+	CssClasses,
+	type CssClassDefinitionInterpreter,
+} from '$lib/css_class_generation.js';
 import {modified_class_interpreter} from '$lib/css_class_interpreters.js';
-import {css_classes_by_name} from '$lib/css_classes.js';
+import {token_classes} from '$lib/css_classes.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
 
 // CSS selector escaping tests
@@ -320,7 +322,7 @@ test('CssClasses dirty flag triggers recalculation', () => {
 // generate_classes_css with interpreters
 
 test('generate_classes_css uses interpreter for unknown classes', () => {
-	const interpreter: CssClassDeclarationInterpreter = {
+	const interpreter: CssClassDefinitionInterpreter = {
 		pattern: /^test-(\w+)$/,
 		interpret: (matched) => `test-prop: ${matched[1]};`,
 	};
@@ -332,7 +334,7 @@ test('generate_classes_css uses interpreter for unknown classes', () => {
 });
 
 test('generate_classes_css interpreter can return full ruleset', () => {
-	const interpreter: CssClassDeclarationInterpreter = {
+	const interpreter: CssClassDefinitionInterpreter = {
 		pattern: /^media-(\w+)$/,
 		interpret: (matched) =>
 			`@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`,
@@ -345,7 +347,7 @@ test('generate_classes_css interpreter can return full ruleset', () => {
 });
 
 test('generate_classes_css collects interpreter diagnostics', () => {
-	const interpreter: CssClassDeclarationInterpreter = {
+	const interpreter: CssClassDefinitionInterpreter = {
 		pattern: /^warn-(.+)$/,
 		interpret: (matched, ctx) => {
 			ctx.diagnostics.push({
@@ -429,7 +431,7 @@ test('generate_classes_css sorts unknown classes alphabetically at end', () => {
 });
 
 test('generate_classes_css sorts interpreted classes alphabetically', () => {
-	const interpreter: CssClassDeclarationInterpreter = {
+	const interpreter: CssClassDefinitionInterpreter = {
 		pattern: /^int-(\w+)$/,
 		interpret: (matched) => `prop: ${matched[1]};`,
 	};
@@ -487,9 +489,7 @@ test('modified_class_interpreter handles multiple modifiers md:dark:hover:box', 
 });
 
 test('modified_class_interpreter handles token class with modifiers hover:p_md', () => {
-	const result = generate_classes_css(['hover:p_md'], css_classes_by_name, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css(['hover:p_md'], token_classes, [modified_class_interpreter]);
 
 	expect(result.css).toContain('.hover\\:p_md:hover');
 	expect(result.css).toContain('padding');

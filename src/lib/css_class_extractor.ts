@@ -18,13 +18,125 @@ import {walk, type Visitors} from 'zimmerframe';
 import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
 
-import {
-	SourceIndex,
-	type SourceLocation,
-	type ExtractionDiagnostic,
-	type ExtractionResult,
-	add_class_with_location,
-} from './css_class_helpers.js';
+//
+// Types
+//
+
+/**
+ * Source location for IDE/LSP integration.
+ */
+export interface SourceLocation {
+	file: string;
+	/** 1-based line number */
+	line: number;
+	/** 1-based column number */
+	column: number;
+}
+
+/**
+ * Base diagnostic with common fields.
+ */
+export interface BaseDiagnostic {
+	level: 'error' | 'warning';
+	message: string;
+	suggestion: string | null;
+}
+
+/**
+ * Diagnostic from the extraction phase.
+ */
+export interface ExtractionDiagnostic extends BaseDiagnostic {
+	phase: 'extraction';
+	location: SourceLocation;
+}
+
+/**
+ * Extraction result with classes mapped to their source locations.
+ */
+export interface ExtractionResult {
+	/**
+	 * Map from class name to locations where it was used.
+	 * Keys = unique classes, values = locations for diagnostics/IDE integration.
+	 */
+	classes: Map<string, Array<SourceLocation>>;
+	/** Variables that were used in class contexts (for diagnostics) */
+	tracked_vars: Set<string>;
+	/** Diagnostics from the extraction phase */
+	diagnostics: Array<ExtractionDiagnostic>;
+}
+
+/**
+ * Options for CSS class extraction.
+ */
+export interface ExtractCssClassesOptions {
+	/**
+	 * File path used to determine extraction method (Svelte vs TS)
+	 * and for location tracking in diagnostics.
+	 */
+	filename?: string;
+}
+
+//
+// Utilities
+//
+
+/**
+ * Helper class for converting character offsets to line/column positions.
+ * Svelte template nodes (Comment, Text, ExpressionTag) only have char offsets,
+ * so this class enables efficient conversion.
+ *
+ * Build: O(n) where n = source length
+ * Lookup: O(log m) where m = number of lines (binary search)
+ */
+export class SourceIndex {
+	private line_starts: Array<number>;
+
+	constructor(source: string) {
+		this.line_starts = [0];
+		for (let i = 0; i < source.length; i++) {
+			if (source[i] === '\n') this.line_starts.push(i + 1);
+		}
+	}
+
+	/**
+	 * Converts a character offset to a source location.
+	 *
+	 * @param offset - 0-based character offset in the source
+	 * @param file - File path for the location
+	 * @returns SourceLocation with 1-based line and column
+	 */
+	get_location(offset: number, file: string): SourceLocation {
+		// Binary search for line
+		let low = 0;
+		let high = this.line_starts.length - 1;
+		while (low < high) {
+			const mid = Math.ceil((low + high) / 2);
+			if (this.line_starts[mid]! <= offset) low = mid;
+			else high = mid - 1;
+		}
+		return {file, line: low + 1, column: offset - this.line_starts[low]! + 1};
+	}
+}
+
+/**
+ * Adds a class with its location to the extraction result.
+ *
+ * @param classes - Map of classes to locations
+ * @param class_name - Class name to add
+ * @param location - Source location where the class was found
+ */
+export const add_class_with_location = (
+	classes: Map<string, Array<SourceLocation>>,
+	class_name: string,
+	location: SourceLocation,
+): void => {
+	const existing = classes.get(class_name);
+	if (existing) {
+		existing.push(location);
+	} else {
+		classes.set(class_name, [location]);
+	}
+};
 
 // Known class utility function names
 const CLASS_UTILITY_FUNCTIONS = new Set([
@@ -336,14 +448,17 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 
 /**
  * Unified extraction function that auto-detects file type.
- * Returns just the class names as a Set for backward compatibility.
+ * Returns just the class names as a Set.
  *
  * @param source - The file source code
- * @param filename - The filename (for determining file type)
+ * @param options - Extraction options
  * @returns Set of class names
  */
-export const extract_css_classes = (source: string, filename?: string): Set<string> => {
-	const result = extract_css_classes_with_locations(source, filename);
+export const extract_css_classes = (
+	source: string,
+	options: ExtractCssClassesOptions = {},
+): Set<string> => {
+	const result = extract_css_classes_with_locations(source, options);
 	return new Set(result.classes.keys());
 };
 
@@ -352,13 +467,14 @@ export const extract_css_classes = (source: string, filename?: string): Set<stri
  * Returns full extraction result with locations and diagnostics.
  *
  * @param source - The file source code
- * @param filename - The filename (for determining file type and location tracking)
+ * @param options - Extraction options
  * @returns Full extraction result with classes, tracked variables, and diagnostics
  */
 export const extract_css_classes_with_locations = (
 	source: string,
-	filename?: string,
+	options: ExtractCssClassesOptions = {},
 ): ExtractionResult => {
+	const {filename} = options;
 	const ext = filename ? filename.slice(filename.lastIndexOf('.')) : '';
 	const file = filename ?? '<unknown>';
 
