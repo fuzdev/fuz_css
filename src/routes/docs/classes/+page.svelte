@@ -7,10 +7,9 @@
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
+	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'classes';
-
-	const GLYPH_IDEA = '⌆';
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 </script>
@@ -22,33 +21,33 @@
 		<table>
 			<thead>
 				<tr>
-					<th>Type</th>
-					<th>Example</th>
-					<th>Purpose</th>
+					<th>class type</th>
+					<th>purpose</th>
+					<th>examples</th>
 				</tr>
 			</thead>
 			<tbody>
 				<tr>
 					<td><strong>token classes</strong></td>
-					<td><code>.p_md</code>, <code>.color_a_5</code>, <code>.gap_lg</code></td>
 					<td>map to style variables (CSS custom properties)</td>
+					<td><code>.p_md</code>, <code>.color_a_5</code>, <code>.gap_lg</code></td>
 				</tr>
 				<tr>
 					<td><strong>composite classes</strong></td>
+					<td>multi-property groupings</td>
 					<td><code>.box</code>, <code>.row</code>, <code>.ellipsis</code></td>
-					<td>multi-property shortcuts</td>
 				</tr>
 				<tr>
 					<td><strong>literal classes</strong></td>
-					<td><code>.display:flex</code>, <code>.hover:opacity:80%</code></td>
 					<td>arbitrary CSS property:value pairs</td>
+					<td><code>.display:flex</code>, <code>.hover:opacity:80%</code></td>
 				</tr>
 			</tbody>
 		</table>
 		<p>
-			<strong>Token classes</strong> are the primary choice for spacing, colors, and sizes - they
+			<strong>Token classes</strong> are the primary choice for spacing, colors, and sizes -- they
 			ensure consistency with the design system. <strong>Composite classes</strong> provide
-			shortcuts for repeated patterns. <strong>Literal classes</strong> are an escape hatch for arbitrary
+			groupings for repeated patterns. <strong>Literal classes</strong> are an escape hatch for arbitrary
 			CSS, especially useful for cross-component styling and responsive/state modifiers.
 		</p>
 
@@ -109,7 +108,7 @@
 
 		<TomeSection>
 			<TomeSectionHeader text="Composite classes" tag="h3" />
-			<p>Multi-property shortcuts for repeated patterns. Define your own in a composites file:</p>
+			<p>Multi-property groups for repeated patterns. Define your own in a composites file:</p>
 			<Code
 				lang="typescript"
 				content={`// src/lib/composites.ts
@@ -122,6 +121,7 @@ export const my_composites = {
 	\`},
 };`}
 			/>
+			<UnfinishedImplementationWarning>These docs are unfinished.</UnfinishedImplementationWarning>
 			<p>Built-in composites:</p>
 			<ul>
 				<li><code>.box</code> - centered flex container</li>
@@ -176,23 +176,17 @@ export const my_composites = {
 				The <code>~</code> character represents a space in class names (since CSS classes can't
 				contain spaces). Use it for multi-value properties like <code>margin:0~auto</code>.
 			</p>
-			<aside>
-				<p>
-					{GLYPH_IDEA} <strong>When to use <code>~</code> vs CSS:</strong> If you need more than 2-3
-					<code>~</code> characters, consider using a <code>&lt;style&gt;</code> block instead.
-				</p>
-			</aside>
 
 			<h4>Common patterns</h4>
 			<p>Layout and display:</p>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled mb_lg token_classes">
 				<li><code>.display:none|block|flex|grid|inline|inline-block|contents</code></li>
 				<li><code>.position:static|relative|absolute|fixed|sticky</code></li>
 				<li><code>.visibility:visible|hidden|collapse</code></li>
 				<li><code>.overflow:auto|hidden|scroll|clip|visible</code></li>
 			</ul>
 			<p>Flexbox and grid:</p>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled mb_lg token_classes">
 				<li><code>.flex-direction:row|column|row-reverse|column-reverse</code></li>
 				<li><code>.flex-wrap:wrap|nowrap|wrap-reverse</code></li>
 				<li><code>.align-items:center|start|end|baseline|stretch</code></li>
@@ -202,7 +196,7 @@ export const my_composites = {
 				<li><code>.flex:1</code>, <code>.flex-grow:1|0</code>, <code>.flex-shrink:1|0</code></li>
 			</ul>
 			<p>Typography:</p>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled mb_lg token_classes">
 				<li><code>.text-align:left|center|right|justify</code></li>
 				<li><code>.white-space:normal|nowrap|pre|pre-wrap|pre-line</code></li>
 				<li><code>.word-break:normal|break-all|keep-all</code></li>
@@ -210,7 +204,7 @@ export const my_composites = {
 				<li><code>.user-select:none|auto|text|all</code></li>
 			</ul>
 			<p>Borders and effects:</p>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled mb_lg token_classes">
 				<li><code>.border-style:none|solid|dashed|dotted</code></li>
 				<li><code>.float:left|right|none</code></li>
 				<li><code>.cursor:pointer|default|grab|text|not-allowed</code></li>
@@ -222,9 +216,9 @@ export const my_composites = {
 	<TomeSection>
 		<TomeSectionHeader text="Modifiers" />
 		<p>
-			Modifiers prefix any class type - token, composite, or literal - to apply styles conditionally
-			based on viewport, state, or color scheme. This is what makes utility classes more powerful
-			than inline styles.
+			Modifiers prefix any class type -- token, composite, or literal -- to apply styles
+			conditionally based on viewport, state, or color scheme. This is what makes utility classes
+			more powerful than inline styles.
 		</p>
 
 		<h4>Responsive modifiers</h4>
@@ -312,7 +306,7 @@ export const my_composites = {
 		<p>Apply styles in dark or light mode:</p>
 		<Code
 			content={`<!-- Reduce shadow intensity in dark mode -->
-<div class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
+<div class="shadow_lg dark:shadow_sm">
 
 <!-- Different border in light mode -->
 <div class="border:1px~solid~var(--fg_2) light:border:1px~solid~var(--fg_5)">`}
@@ -382,9 +376,9 @@ export const my_composites = {
 		</p>
 		<aside>
 			<p>
-				{GLYPH_IDEA} <strong>State order:</strong> Multiple state modifiers must be alphabetical.
-				Write <code>focus:hover:</code> not <code>hover:focus:</code> - they generate the same CSS, so
-				canonical ordering prevents duplicates.
+				<strong>State order:</strong> Multiple state modifiers must be alphabetical. Write
+				<code>focus:hover:</code>
+				not <code>hover:focus:</code> -- they generate the same CSS, so canonical ordering prevents duplicates.
 			</p>
 		</aside>
 	</TomeSection>
@@ -393,36 +387,34 @@ export const my_composites = {
 		<TomeSectionHeader text="Practical patterns" />
 
 		<h4>Child component styling</h4>
-		<p>The primary use case - passing styles across component boundaries:</p>
+		<p>The primary use case -- passing styles across component boundaries:</p>
 		<Code
 			content={`<!-- Parent controls hover behavior -->
-<Card class="hover:box-shadow:var(--shadow_lg) hover:transform:translateY(-2px)">
+<div class="hover:box-shadow:var(--shadow_lg) hover:transform:translateY(-2px)">
 
 <!-- Responsive layout on child -->
-<ButtonGroup class="display:flex flex-direction:column md:flex-direction:row">`}
+<div class="display:flex flex-direction:column md:flex-direction:row">`}
 		/>
 
-		<h4>Conditional classes with clsx</h4>
+		<h4>Conditional classes</h4>
+		<p>
+			Svelte <a href="https://svelte.dev/docs/svelte/class">supports</a> object and array patterns to
+			define classes, and Fuz CSS inspects the AST to collect the ones you use:
+		</p>
 		<!-- eslint-disable-next-line no-useless-concat -->
 		<Code
 			lang="svelte"
-			content={'<' +
-				`script>
-	import {clsx} from 'clsx';
-	let active = $state(false);
-</script>
-
-<Card class={clsx(
+			content={`<span class={[
 	'p_md',
 	active && 'border:2px~solid~var(--color_a_5)',
 	variant === 'elevated' && 'box-shadow:var(--shadow_lg)'
-)} />`}
+]} />`}
 		/>
 
 		<h4>Dark mode adaptations</h4>
 		<Code
 			content={`<!-- Shadows look harsh in dark mode -->
-<Card class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
+<div class="box-shadow:var(--shadow_lg) dark:box-shadow:var(--shadow_sm)">
 
 <!-- Image brightness -->
 <img class="dark:filter:brightness(0.9)" alt="Hero">`}
@@ -443,8 +435,9 @@ ${'<' as string}script>
 		/>
 		<p>
 			The <code>fuz.css</code> file is generated on demand with only the utility classes your code
-			uses. It requires <a href="https://github.com/ryanatkn/gro">Gro</a> to generate, using the
-			helpers in <ModuleLink path="gen_fuz_css.ts">gen_fuz_css.ts</ModuleLink>.
+			uses. The main helper is in <ModuleLink path="gen_fuz_css.ts">gen_fuz_css.ts</ModuleLink> -- for
+			now it must be manually called, the only integration uses
+			<a href="https://github.com/ryanatkn/gro">Gro</a>. A Vite plugin is planned.
 		</p>
 		<h4>Dynamic class hints</h4>
 		<p>
@@ -502,9 +495,7 @@ const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);`}
 }`}
 		/>
 		<aside>
-			<p class="row">
-				{GLYPH_IDEA} This strategy supports semantic hooks for theming:
-			</p>
+			<p class="row">This strategy supports semantic hooks for theming:</p>
 			<Code
 				lang="css"
 				content={`:where(:is(ul, ol, menu):not(.unstyled)) {
@@ -515,25 +506,6 @@ const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);`}
 				The <code>:where()</code> selector keeps specificity as low as possible to minimize interference
 				with your styles.
 			</aside>
-		</aside>
-	</TomeSection>
-
-	<TomeSection>
-		<TomeSectionHeader text="Classes vs styles" />
-		<p>
-			<strong>Use <code>&lt;style&gt;</code> tags</strong> for styling elements within your own component
-			- you get IDE autocomplete and can use complex selectors.
-		</p>
-		<p>
-			<strong>Use utility classes</strong> when you need to style child components (where scoped CSS can't
-			reach) or when you need hover/responsive/dark-mode modifiers on children.
-		</p>
-		<p>
-			<strong>Use inline styles</strong> for runtime dynamic values that come from JavaScript.
-		</p>
-		<aside>
-			This is guidance, not a rule. Some developers prefer literal classes everywhere, and that's
-			fine. Literal classes are especially useful when crossing component boundaries.
 		</aside>
 	</TomeSection>
 </TomeContent>

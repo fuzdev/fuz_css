@@ -2,6 +2,7 @@
  * CSS-literal syntax parser, validator, and interpreter.
  *
  * Enables writing utility classes using actual CSS syntax:
+ *
  * - `display:flex` → `.display\:flex { display: flex; }`
  * - `hover:opacity:80%` → `.hover\:opacity\:80\%:hover { opacity: 80%; }`
  * - `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element

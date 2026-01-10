@@ -1,34 +1,28 @@
 <script lang="ts">
-	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {resolve} from '$app/paths';
-	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 </script>
 
 <p>
-	Fuz CSS is a CSS framework and design system built around <TomeLink name="semantic" /> styles and <TomeLink
-		name="variables">style variables</TomeLink
-	>. Semantic styles mean HTML elements are styled by default, with <code>.unstyled</code>
-	to opt out when needed. Style variables are design tokens and <MdnLink path="Web/CSS/--*"
-		>CSS custom properties</MdnLink
-	> with particular capabilities and conventions that integrate with the semantic styles and other features
-	like utility classes.
+	Fuz CSS is a framework and design system built on semantic styles and style variables. It styles
+	HTML elements by default and integrates custom properties, themes, and utility classes. It's
+	designed for Svelte but fits with any JS framework and plain HTML. See <a
+		href="https://ui.fuz.dev/">Fuz UI</a
+	> for the companion Svelte integration.
 </p>
 <p>
 	The only required parts are a
 	<ModuleLink path="style.css">reset stylesheet</ModuleLink> with the semantic defaults and a replaceable
 	<ModuleLink path="theme.css">theme stylesheet</ModuleLink> containing the variables used in the reset.
 	There's also a <a href={resolve('/docs/classes')}>utility class system</a> for convenience and
-	composition, and it <a href="https://css.fuz.dev/docs/api">exports</a> the underlying data, types,
-	and helpers for more complex usage. It works with any website and JS framework, and
-	<a href="https://ui.fuz.dev/">Fuz UI</a>
-	integrates it with Svelte.
+	composition, and it <a href="https://css.fuz.dev/docs/api">exports</a> the underlying data, types, and
+	helpers for more complex usage.
 </p>
 <p>
-	See <a href={resolve('/docs')}>the docs</a>
-	and <a href="https://github.com/fuzdev/fuz_css#readme">readme</a>.
+	More at <a href={resolve('/docs')}>the docs</a>
+	and <a href="https://github.com/fuzdev/fuz_css">repo</a>.
 </p>
 
 <UnfinishedImplementationWarning>

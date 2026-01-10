@@ -18,8 +18,7 @@
 	<p>
 		Fuz CSS styles HTML elements in its <ModuleLink path="style.css">reset stylesheet</ModuleLink>,
 		so semantic markup gets themed and color-scheme-aware styling automatically -- utility classes
-		optional. The goal is to be accessible and attractive out of the box, while minimal and
-		extensible.
+		optional. The goal is to be accessible and attractive out of the box, minimal yet extensible.
 	</p>
 
 	<TomeSection>
@@ -30,7 +29,8 @@
 		</p>
 		<Code
 			lang="css"
-			content={`:where(a:not(.unstyled)) {
+			content={`/* any styles you apply will override these */
+:where(a:not(.unstyled)) {
   color: var(--link_color);
   font-weight: 700;
 }
@@ -51,15 +51,17 @@
 		<Code
 			lang="svelte"
 			content={`<a href="/home">styled link</a>
-<a href="/home" class="unstyled">unstyled link</a>
-
-<button>styled button</button>
-<button class="unstyled">unstyled button</button>`}
+<a href="/home" class="unstyled">unstyled link</a>`}
 		/>
 		<p>
 			<a href={resolve('/')}>styled link</a> vs
 			<a href={resolve('/')} class="unstyled">unstyled link</a>
 		</p>
+		<Code
+			lang="svelte"
+			content={`<button>styled button</button>
+<button class="unstyled">unstyled button</button>`}
+		/>
 		<p>
 			<button type="button">styled button</button>
 			<button type="button" class="unstyled">unstyled button</button>
@@ -75,7 +77,7 @@
 		<Code
 			lang="css"
 			content={`:where(
-  :is(p, ul, ol, form, table, pre, blockquote, aside, nav)
+  :is(p, ul, ...[many others])
     :not(:last-child):not(.unstyled)
 ) {
   margin-bottom: var(--space_lg);
@@ -87,10 +89,10 @@
 			> or similar utility classes.
 		</p>
 		<aside>
-			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to style,
-			including usage with Svelte's component-level CSS variables, because it adds a wrapper div. Perhaps
-			the better global optimum is to omit the last child exception? This would add unwanted margin in
-			many cases, but perhaps that's better overall.
+			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to
+			style, including usage with Svelte's component-level CSS variables, because it adds a wrapper
+			div. Perhaps the better global optimum is to omit the last child exception? This would add
+			unwanted margin in many cases, but perhaps that's better overall; <code>mb_0</code> removes it.
 		</aside>
 	</TomeSection>
 

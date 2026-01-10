@@ -65,6 +65,9 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Builtin themes" />
+		<UnfinishedImplementationWarning
+			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
+		>
 		<p>
 			A theme is a simple JSON collection of <TomeLink name="variables" /> that can be transformed into
 			CSS that set custom properties. Each variable can have values for light and/or dark color schemes.
@@ -82,9 +85,6 @@
 		<!-- <button class="mb_lg" onclick={() => (show_create_theme_dialog = true)} disabled
 				>create a new theme (todo)</button
 			> -->
-		<UnfinishedImplementationWarning
-			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
-		>
 	</TomeSection>
 </TomeContent>
 
