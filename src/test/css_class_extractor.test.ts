@@ -241,6 +241,56 @@ const config = { className: 'baz' };
 	expect(result.classes?.has('baz')).toBe(true);
 });
 
+test('extracts classes from object with double-quoted string literal keys', () => {
+	const source = `
+const config = {
+	"class": "dq-class",
+	"className": "dq-classname",
+	"buttonClasses": "dq-btn primary",
+	"foo-classes": "dq-foo"
+};
+`;
+	const result = extract_from_ts(source, 'test.ts');
+	expect(result.classes?.has('dq-class')).toBe(true);
+	expect(result.classes?.has('dq-classname')).toBe(true);
+	expect(result.classes?.has('dq-btn')).toBe(true);
+	expect(result.classes?.has('primary')).toBe(true);
+	expect(result.classes?.has('dq-foo')).toBe(true);
+});
+
+test('extracts classes from object with single-quoted string literal keys', () => {
+	const source = `
+const config = {
+	'class': 'sq-class',
+	'className': 'sq-classname',
+	'buttonClasses': 'sq-btn secondary',
+	'bar-classes': 'sq-bar'
+};
+`;
+	const result = extract_from_ts(source, 'test.ts');
+	expect(result.classes?.has('sq-class')).toBe(true);
+	expect(result.classes?.has('sq-classname')).toBe(true);
+	expect(result.classes?.has('sq-btn')).toBe(true);
+	expect(result.classes?.has('secondary')).toBe(true);
+	expect(result.classes?.has('sq-bar')).toBe(true);
+});
+
+test('extracts classes from mixed identifier and string literal keys', () => {
+	const source = `
+const config = {
+	class: "id-class",
+	"className": "str-classname",
+	containerClasses: "id-container",
+	"wrapper-classes": "str-wrapper"
+};
+`;
+	const result = extract_from_ts(source, 'test.ts');
+	expect(result.classes?.has('id-class')).toBe(true);
+	expect(result.classes?.has('str-classname')).toBe(true);
+	expect(result.classes?.has('id-container')).toBe(true);
+	expect(result.classes?.has('str-wrapper')).toBe(true);
+});
+
 // Test unified extraction function
 
 test('extract_css_classes auto-detects Svelte files', () => {

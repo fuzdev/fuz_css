@@ -776,9 +776,18 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 				value: unknown;
 				computed: boolean;
 			};
-			if (!prop.computed && prop.key.type === 'Identifier') {
-				const key_name = prop.key.name!;
-				if (key_name === 'class' || key_name === 'className' || CLASS_NAME_PATTERN.test(key_name)) {
+			if (!prop.computed) {
+				// Extract key name from identifier or string literal
+				let key_name: string | undefined;
+				if (prop.key.type === 'Identifier') {
+					key_name = prop.key.name;
+				} else if (prop.key.type === 'Literal' && typeof prop.key.value === 'string') {
+					key_name = prop.key.value;
+				}
+				if (
+					key_name &&
+					(key_name === 'class' || key_name === 'className' || CLASS_NAME_PATTERN.test(key_name))
+				) {
 					extract_from_expression(prop.value as AST.SvelteNode, state);
 				}
 			}

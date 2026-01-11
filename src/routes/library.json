@@ -1419,7 +1419,7 @@
 						]
 					}
 				],
-				"module_comment": "CSS-literal syntax parser, validator, and interpreter.d\n\nEnables writing utility classes using actual CSS syntax:\n\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
+				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
 				"dependencies": ["modifiers.ts"],
 				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
 			},
