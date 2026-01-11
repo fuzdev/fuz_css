@@ -75,29 +75,13 @@ export type ModifierExtractionResult =
 //
 
 /**
- * Set of valid CSS property names, populated from @webref/css.
- * Loaded asynchronously on first use.
- */
-let css_properties: Set<string> | null = null;
-let css_properties_loading: Promise<Set<string>> | null = null;
-
-/**
  * Loads CSS properties from @webref/css.
- * Properties are cached after first load.
+ * Returns a fresh Set each time - callers should cache the result if needed.
  */
 export const load_css_properties = async (): Promise<Set<string>> => {
-	if (css_properties) return css_properties;
-
-	if (css_properties_loading) return css_properties_loading;
-
-	css_properties_loading = (async () => {
-		const webref = await import('@webref/css');
-		const indexed = await webref.default.index();
-		css_properties = new Set(Object.keys(indexed.properties));
-		return css_properties;
-	})();
-
-	return css_properties_loading;
+	const webref = await import('@webref/css');
+	const indexed = await webref.default.index();
+	return new Set(Object.keys(indexed.properties));
 };
 
 /**
