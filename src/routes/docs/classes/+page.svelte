@@ -561,6 +561,26 @@ export const gen = gen_fuz_css({
 			with your styles.
 		</aside>
 		<p>See the specific docs sections for more about <code>.unstyled</code>.</p>
+
+		<h4>Other builtin classes</h4>
+		<ul>
+			<li><code>.selected</code> - see <TomeLink name="buttons" />, <TomeLink name="forms" /></li>
+			<li><code>.disabled</code> - see <TomeLink name="forms" /></li>
+			<li><code>.deselectable</code> - see <TomeLink name="buttons" /></li>
+			<li><code>.inline</code> - see <TomeLink name="buttons" />, <TomeLink name="forms" /></li>
+			<li><code>.heading</code> - see <TomeLink name="typography" /></li>
+			<li><code>.title</code> - see <TomeLink name="forms" /></li>
+			<li><code>.row</code> - see <TomeLink name="layout" />, <TomeLink name="forms" /></li>
+			<li>
+				<code>.color_a</code> through <code>.color_j</code> - see <TomeLink name="buttons" />,
+				<TomeLink name="colors" />
+			</li>
+			<li>
+				<code>.dark</code>, <code>.light</code> on <code>:root</code> - see <TomeLink
+					name="themes"
+				/>
+			</li>
+		</ul>
 	</TomeSection>
 </TomeContent>
 

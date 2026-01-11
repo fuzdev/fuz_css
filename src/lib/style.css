@@ -489,7 +489,6 @@ for disabled colors without needing a wrapper .disabled class */
 }
 :where(label.row:not(.unstyled)) {
 	justify-content: flex-start;
-	align-items: center;
 }
 :where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio']):not(.unstyled)) {
 	margin-right: var(--space_md);
