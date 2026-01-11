@@ -105,31 +105,41 @@ export const load_css_properties = async (): Promise<Set<string>> => {
  * Custom properties (--*) always return true.
  *
  * @param property - The CSS property name to validate
+ * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ *                     Pass `null` to skip validation.
  * @returns True if valid CSS property or custom property
  */
-export const is_valid_css_property = (property: string): boolean => {
+export const is_valid_css_property = (
+	property: string,
+	properties: Set<string> | null,
+): boolean => {
 	// Custom properties are always valid
 	if (property.startsWith('--')) return true;
 
-	// If properties haven't loaded yet, allow all (validation happens async)
-	if (!css_properties) return true;
+	// If no properties provided, skip validation
+	if (!properties) return true;
 
-	return css_properties.has(property);
+	return properties.has(property);
 };
 
 /**
  * Suggests a correct property name for a typo using Levenshtein distance.
  *
  * @param typo - The mistyped property name
- * @returns The suggested property or null if no close match
+ * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ *                     Pass `null` to skip suggestions.
+ * @returns The suggested property or null if no close match (Levenshtein distance > 2)
  */
-export const suggest_css_property = (typo: string): string | null => {
-	if (!css_properties) return null;
+export const suggest_css_property = (
+	typo: string,
+	properties: Set<string> | null,
+): string | null => {
+	if (!properties) return null;
 
 	let best_match: string | null = null;
 	let best_distance = 3; // Only suggest if distance <= 2
 
-	for (const prop of css_properties) {
+	for (const prop of properties) {
 		const distance = levenshtein_distance(typo, prop);
 		if (distance < best_distance) {
 			best_distance = distance;
@@ -443,9 +453,14 @@ export const extract_and_validate_modifiers = (
  * Parses a CSS-literal class name into its components.
  *
  * @param class_name - The class name to parse
+ * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ *                         Pass `null` to skip property validation.
  * @returns CssLiteralParseResult with parsed data or error
  */
-export const parse_css_literal = (class_name: string): CssLiteralParseResult => {
+export const parse_css_literal = (
+	class_name: string,
+	css_properties: Set<string> | null,
+): CssLiteralParseResult => {
 	const segments = extract_segments(class_name);
 
 	if (segments.length < 2) {
@@ -494,8 +509,8 @@ export const parse_css_literal = (class_name: string): CssLiteralParseResult => 
 	const {media, ancestor, states, pseudo_element} = modifier_result.modifiers;
 
 	// Validate property
-	if (!is_valid_css_property(property)) {
-		const suggestion = suggest_css_property(property);
+	if (!is_valid_css_property(property, css_properties)) {
+		const suggestion = suggest_css_property(property, css_properties);
 		return {
 			ok: false,
 			error: {
@@ -586,6 +601,8 @@ export interface CssLiteralOutput {
  *
  * @param class_name - The class name to interpret
  * @param escaped_class_name - The CSS-escaped version of the class name
+ * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ *                         Pass `null` to skip property validation.
  * @param log - Optional logger for warnings
  * @param collect_diagnostics - Optional array to collect diagnostics for later processing
  * @returns CssLiteralOutput or null if not a valid CSS-literal
@@ -593,6 +610,7 @@ export interface CssLiteralOutput {
 export const interpret_css_literal = (
 	class_name: string,
 	escaped_class_name: string,
+	css_properties: Set<string> | null,
 	log?: Logger,
 	collect_diagnostics?: Array<CssClassDiagnostic>,
 ): CssLiteralOutput | null => {
@@ -600,7 +618,7 @@ export const interpret_css_literal = (
 		return null;
 	}
 
-	const result = parse_css_literal(class_name);
+	const result = parse_css_literal(class_name, css_properties);
 
 	if (!result.ok) {
 		log?.error(`CSS-literal error: ${result.error.message}`);

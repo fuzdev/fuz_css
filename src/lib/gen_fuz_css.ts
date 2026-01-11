@@ -67,7 +67,7 @@ interface FileExtraction {
 export interface GenFuzCssOptions {
 	filter_file?: FileFilter | null;
 	include_stats?: boolean;
-	classes_by_name?: Record<string, CssClassDefinition | undefined>;
+	class_definitions?: Record<string, CssClassDefinition | undefined>;
 	class_interpreters?: Array<CssClassDefinitionInterpreter>;
 	/**
 	 * How to handle CSS-literal errors during generation.
@@ -156,7 +156,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
-		classes_by_name = token_classes,
+		class_definitions = token_classes,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
 		include_classes,
@@ -188,7 +188,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			log.info('generating Fuz CSS classes...');
 
 			// Load CSS properties for validation before generation
-			await load_css_properties();
+			const css_properties = await load_css_properties();
 
 			await filer.init();
 
@@ -357,15 +357,16 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			}
 
 			// Merge token classes with composites for interpreter access
-			const all_class_definitions = {...classes_by_name, ...css_class_composites};
+			const all_class_definitions = {...class_definitions, ...css_class_composites};
 
-			const result = generate_classes_css(
-				all_classes,
-				all_class_definitions,
-				class_interpreters,
+			const result = generate_classes_css({
+				class_names: all_classes,
+				class_definitions: all_class_definitions,
+				interpreters: class_interpreters,
+				css_properties,
 				log,
-				all_classes_with_locations,
-			);
+				class_locations: all_classes_with_locations,
+			});
 
 			// Collect all diagnostics: extraction + generation
 			const all_diagnostics: Array<Diagnostic> = [

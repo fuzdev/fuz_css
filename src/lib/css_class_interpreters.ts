@@ -40,7 +40,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		const base_class_name = remaining[0]!;
 
 		// Check if the base class is known
-		const base_class = ctx.classes[base_class_name];
+		const base_class = ctx.class_definitions[base_class_name];
 		if (!base_class) {
 			return null;
 		}
@@ -135,7 +135,13 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 		}
 
 		const escaped_class_name = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped_class_name, ctx.log, ctx.diagnostics);
+		const output = interpret_css_literal(
+			class_name,
+			escaped_class_name,
+			ctx.css_properties,
+			ctx.log,
+			ctx.diagnostics,
+		);
 
 		if (!output) {
 			return null;

@@ -92,13 +92,18 @@ for (const [input, expected] of escape_values) {
 
 // Test that generate_classes_css uses escaping
 test('generate_classes_css escapes class names with special characters', () => {
-	const classes = ['display:flex', 'opacity:80%'];
-	const classes_by_name: Record<string, {declaration: string}> = {
+	const class_names = ['display:flex', 'opacity:80%'];
+	const class_definitions: Record<string, {declaration: string}> = {
 		'display:flex': {declaration: 'display: flex;'},
 		'opacity:80%': {declaration: 'opacity: 80%;'},
 	};
 
-	const result = generate_classes_css(classes, classes_by_name, []);
+	const result = generate_classes_css({
+		class_names,
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	assert.include(result.css, '.display\\:flex { display: flex; }');
 	assert.include(result.css, '.opacity\\:80\\% { opacity: 80%; }');
@@ -108,13 +113,18 @@ test('generate_classes_css escapes class names with special characters', () => {
 });
 
 test('generate_classes_css escapes complex CSS-literal class names', () => {
-	const classes = ['hover:opacity:80%', 'nth-child(2n):color:red'];
-	const classes_by_name: Record<string, {declaration: string}> = {
+	const class_names = ['hover:opacity:80%', 'nth-child(2n):color:red'];
+	const class_definitions: Record<string, {declaration: string}> = {
 		'hover:opacity:80%': {declaration: 'opacity: 80%;'},
 		'nth-child(2n):color:red': {declaration: 'color: red;'},
 	};
 
-	const result = generate_classes_css(classes, classes_by_name, []);
+	const result = generate_classes_css({
+		class_names,
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	assert.include(result.css, '.hover\\:opacity\\:80\\%');
 	assert.include(result.css, '.nth-child\\(2n\\)\\:color\\:red');
@@ -327,7 +337,12 @@ test('generate_classes_css uses interpreter for unknown classes', () => {
 		interpret: (matched) => `test-prop: ${matched[1]};`,
 	};
 
-	const result = generate_classes_css(['test-value'], {}, [interpreter]);
+	const result = generate_classes_css({
+		class_names: ['test-value'],
+		class_definitions: {},
+		interpreters: [interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.test-value');
 	expect(result.css).toContain('test-prop: value;');
@@ -340,7 +355,12 @@ test('generate_classes_css interpreter can return full ruleset', () => {
 			`@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`,
 	};
 
-	const result = generate_classes_css(['media-flex'], {}, [interpreter]);
+	const result = generate_classes_css({
+		class_names: ['media-flex'],
+		class_definitions: {},
+		interpreters: [interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (min-width: 800px)');
 	expect(result.css).toContain('display: flex;');
@@ -360,7 +380,12 @@ test('generate_classes_css collects interpreter diagnostics', () => {
 		},
 	};
 
-	const result = generate_classes_css(['warn-red'], {}, [interpreter]);
+	const result = generate_classes_css({
+		class_names: ['warn-red'],
+		class_definitions: {},
+		interpreters: [interpreter],
+		css_properties: null,
+	});
 
 	expect(result.diagnostics).toHaveLength(1);
 	expect(result.diagnostics[0]!.message).toBe('test warning');
@@ -370,21 +395,31 @@ test('generate_classes_css collects interpreter diagnostics', () => {
 // generate_classes_css comment rendering
 
 test('generate_classes_css renders single-line comment', () => {
-	const classes_by_name = {
+	const class_definitions = {
 		'test-class': {declaration: 'color: red;', comment: 'Single line comment'},
 	};
 
-	const result = generate_classes_css(['test-class'], classes_by_name, []);
+	const result = generate_classes_css({
+		class_names: ['test-class'],
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('/* Single line comment */');
 });
 
 test('generate_classes_css renders multi-line comment as block', () => {
-	const classes_by_name = {
+	const class_definitions = {
 		'test-class': {declaration: 'color: red;', comment: 'Line 1\nLine 2'},
 	};
 
-	const result = generate_classes_css(['test-class'], classes_by_name, []);
+	const result = generate_classes_css({
+		class_names: ['test-class'],
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('/*\nLine 1\nLine 2\n*/');
 });
@@ -392,14 +427,19 @@ test('generate_classes_css renders multi-line comment as block', () => {
 // generate_classes_css sorting
 
 test('generate_classes_css maintains definition order for known classes', () => {
-	const classes_by_name = {
+	const class_definitions = {
 		aaa: {declaration: 'a: a;'},
 		zzz: {declaration: 'z: z;'},
 		mmm: {declaration: 'm: m;'},
 	};
 
 	// Request in different order than defined
-	const result = generate_classes_css(['mmm', 'aaa', 'zzz'], classes_by_name, []);
+	const result = generate_classes_css({
+		class_names: ['mmm', 'aaa', 'zzz'],
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	// Should be in definition order (aaa, zzz, mmm)
 	const aaa_idx = result.css.indexOf('.aaa');
@@ -411,11 +451,16 @@ test('generate_classes_css maintains definition order for known classes', () => 
 });
 
 test('generate_classes_css sorts unknown classes alphabetically at end', () => {
-	const classes_by_name = {
+	const class_definitions = {
 		known: {declaration: 'k: k;'},
 	};
 
-	const result = generate_classes_css(['unknown-b', 'known', 'unknown-a'], classes_by_name, []);
+	const result = generate_classes_css({
+		class_names: ['unknown-b', 'known', 'unknown-a'],
+		class_definitions,
+		interpreters: [],
+		css_properties: null,
+	});
 
 	// known should come first, then unknown sorted alphabetically
 	const known_idx = result.css.indexOf('.known');
@@ -436,7 +481,12 @@ test('generate_classes_css sorts interpreted classes alphabetically', () => {
 		interpret: (matched) => `prop: ${matched[1]};`,
 	};
 
-	const result = generate_classes_css(['int-ccc', 'int-aaa', 'int-bbb'], {}, [interpreter]);
+	const result = generate_classes_css({
+		class_names: ['int-ccc', 'int-aaa', 'int-bbb'],
+		class_definitions: {},
+		interpreters: [interpreter],
+		css_properties: null,
+	});
 
 	const aaa_idx = result.css.indexOf('.int-aaa');
 	const bbb_idx = result.css.indexOf('.int-bbb');
@@ -449,9 +499,12 @@ test('generate_classes_css sorts interpreted classes alphabetically', () => {
 // modified_class_interpreter tests
 
 test('modified_class_interpreter generates CSS for hover:box', () => {
-	const result = generate_classes_css(['hover:box'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:box'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:box:hover');
 	expect(result.css).toContain('display: flex');
@@ -459,9 +512,12 @@ test('modified_class_interpreter generates CSS for hover:box', () => {
 });
 
 test('modified_class_interpreter generates CSS for md:box with media query', () => {
-	const result = generate_classes_css(['md:box'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['md:box'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (width >= 48rem)');
 	expect(result.css).toContain('.md\\:box');
@@ -469,9 +525,12 @@ test('modified_class_interpreter generates CSS for md:box with media query', () 
 });
 
 test('modified_class_interpreter generates CSS for dark:panel with ancestor wrapper', () => {
-	const result = generate_classes_css(['dark:panel'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['dark:panel'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain(':root.dark');
 	expect(result.css).toContain('.dark\\:panel');
@@ -479,9 +538,12 @@ test('modified_class_interpreter generates CSS for dark:panel with ancestor wrap
 });
 
 test('modified_class_interpreter handles multiple modifiers md:dark:hover:box', () => {
-	const result = generate_classes_css(['md:dark:hover:box'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['md:dark:hover:box'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (width >= 48rem)');
 	expect(result.css).toContain(':root.dark');
@@ -489,14 +551,24 @@ test('modified_class_interpreter handles multiple modifiers md:dark:hover:box', 
 });
 
 test('modified_class_interpreter handles token class with modifiers hover:p_md', () => {
-	const result = generate_classes_css(['hover:p_md'], token_classes, [modified_class_interpreter]);
+	const result = generate_classes_css({
+		class_names: ['hover:p_md'],
+		class_definitions: token_classes,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:p_md:hover');
 	expect(result.css).toContain('padding');
 });
 
 test('modified_class_interpreter returns null for unknown base class', () => {
-	const result = generate_classes_css(['hover:unknown_class'], {}, [modified_class_interpreter]);
+	const result = generate_classes_css({
+		class_names: ['hover:unknown_class'],
+		class_definitions: {},
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Should produce no output for unknown class
 	expect(result.css).not.toContain('hover:unknown_class');
@@ -505,25 +577,36 @@ test('modified_class_interpreter returns null for unknown base class', () => {
 test('modified_class_interpreter returns null for class without modifiers', () => {
 	// 'box' without modifiers should not be handled by modified_class_interpreter
 	// (it should be handled as a regular known class)
-	const result = generate_classes_css(['box'], {}, [modified_class_interpreter]);
+	const result = generate_classes_css({
+		class_names: ['box'],
+		class_definitions: {},
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// No output from interpreter (box has no modifiers)
 	expect(result.css).not.toContain('.box');
 });
 
 test('modified_class_interpreter handles before pseudo-element', () => {
-	const result = generate_classes_css(['before:box'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['before:box'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.before\\:box::before');
 	expect(result.css).toContain('display: flex');
 });
 
 test('modified_class_interpreter handles combined state and pseudo-element', () => {
-	const result = generate_classes_css(['hover:before:ellipsis'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:before:ellipsis'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:before\\:ellipsis:hover::before');
 });
@@ -531,9 +614,12 @@ test('modified_class_interpreter handles combined state and pseudo-element', () 
 test('modified_class_interpreter prioritizes known classes over css-literal', () => {
 	// 'hover:row' should be interpreted as modifier + known class
 	// not as css-literal property:value
-	const result = generate_classes_css(['hover:row'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:row'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:row:hover');
 	expect(result.css).toContain('display: flex');
@@ -543,9 +629,12 @@ test('modified_class_interpreter prioritizes known classes over css-literal', ()
 // Phase 2: Ruleset modifier support tests
 
 test('modified_class_interpreter handles ruleset class with hover: selectable', () => {
-	const result = generate_classes_css(['hover:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Should contain modified selectors with :hover appended
 	expect(result.css).toContain('.hover\\:selectable:hover');
@@ -555,9 +644,12 @@ test('modified_class_interpreter handles ruleset class with hover: selectable', 
 });
 
 test('modified_class_interpreter handles ruleset class with media: md:selectable', () => {
-	const result = generate_classes_css(['md:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['md:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (width >= 48rem)');
 	expect(result.css).toContain('.md\\:selectable');
@@ -566,9 +658,12 @@ test('modified_class_interpreter handles ruleset class with media: md:selectable
 });
 
 test('modified_class_interpreter handles ruleset with descendant selectors: hover:menu_item', () => {
-	const result = generate_classes_css(['hover:menu_item'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:menu_item'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// State should be applied to the first compound block
 	expect(result.css).toContain('.hover\\:menu_item:hover');
@@ -578,9 +673,12 @@ test('modified_class_interpreter handles ruleset with descendant selectors: hove
 });
 
 test('modified_class_interpreter handles ruleset with pseudo-element: hover:chevron', () => {
-	const result = generate_classes_css(['hover:chevron'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:chevron'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:chevron:hover');
 	// State should come BEFORE existing pseudo-element
@@ -588,9 +686,12 @@ test('modified_class_interpreter handles ruleset with pseudo-element: hover:chev
 });
 
 test('modified_class_interpreter handles ruleset with element.class: hover:chip', () => {
-	const result = generate_classes_css(['hover:chip'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:chip'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('.hover\\:chip:hover');
 	expect(result.css).toContain('a.hover\\:chip:hover');
@@ -599,9 +700,12 @@ test('modified_class_interpreter handles ruleset with element.class: hover:chip'
 });
 
 test('modified_class_interpreter handles md:dark:hover:selectable', () => {
-	const result = generate_classes_css(['md:dark:hover:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['md:dark:hover:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (width >= 48rem)');
 	expect(result.css).toContain(':root.dark');
@@ -609,9 +713,12 @@ test('modified_class_interpreter handles md:dark:hover:selectable', () => {
 });
 
 test('modified_class_interpreter handles plain ruleset with :not()', () => {
-	const result = generate_classes_css(['focus:plain'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['focus:plain'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Should add :focus after the :not(:hover) pseudo-class
 	expect(result.css).toContain('.focus\\:plain:not(:hover):focus');
@@ -620,9 +727,12 @@ test('modified_class_interpreter handles plain ruleset with :not()', () => {
 });
 
 test('modified_class_interpreter handles clickable ruleset', () => {
-	const result = generate_classes_css(['md:clickable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['md:clickable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	expect(result.css).toContain('@media (width >= 48rem)');
 	expect(result.css).toContain('.md\\:clickable');
@@ -632,9 +742,12 @@ test('modified_class_interpreter handles clickable ruleset', () => {
 });
 
 test('modified_class_interpreter includes pseudo-element rules without extra modifier: before:chevron', () => {
-	const result = generate_classes_css(['before:chevron'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['before:chevron'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// .chevron rule gets ::before added
 	expect(result.css).toContain('.before\\:chevron::before');
@@ -646,9 +759,12 @@ test('modified_class_interpreter includes pseudo-element rules without extra mod
 });
 
 test('modified_class_interpreter applies pseudo-element to simple ruleset: before:chip', () => {
-	const result = generate_classes_css(['before:chip'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['before:chip'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Both rules get ::before added (neither has existing pseudo-element)
 	expect(result.css).toContain('.before\\:chip::before');
@@ -660,9 +776,12 @@ test('modified_class_interpreter applies pseudo-element to simple ruleset: befor
 // State conflict skipping tests
 
 test('hover:selectable skips .selectable:hover rule but keeps others', () => {
-	const result = generate_classes_css(['hover:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Base .selectable rule gets :hover added
 	expect(result.css).toContain('.hover\\:selectable:hover');
@@ -676,18 +795,24 @@ test('hover:selectable skips .selectable:hover rule but keeps others', () => {
 });
 
 test('hover:selectable keeps .selectable:active rule (different state)', () => {
-	const result = generate_classes_css(['hover:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// .selectable:active rule gets :hover added → :active:hover
 	expect(result.css).toContain(':active:hover');
 });
 
 test('focus:clickable skips .clickable:focus rule', () => {
-	const result = generate_classes_css(['focus:clickable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['focus:clickable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Base .clickable rule gets :focus added
 	expect(result.css).toContain('.focus\\:clickable:focus');
@@ -701,9 +826,12 @@ test('focus:clickable skips .clickable:focus rule', () => {
 });
 
 test('active:clickable skips .clickable:active rule', () => {
-	const result = generate_classes_css(['active:clickable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['active:clickable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// No :active:active anywhere
 	expect(result.css).not.toContain(':active:active');
@@ -714,9 +842,12 @@ test('active:clickable skips .clickable:active rule', () => {
 });
 
 test('hover:plain includes all rules, skipping redundant :hover additions', () => {
-	const result = generate_classes_css(['hover:plain'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:plain'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Rules are included with class renamed, but :hover not added where it already exists
 	expect(result.css).toContain('.hover\\:plain');
@@ -739,9 +870,12 @@ test('hover:plain includes all rules, skipping redundant :hover additions', () =
 // Skip warning tests
 
 test('before:chevron emits warning for skipped pseudo-element rule', () => {
-	const result = generate_classes_css(['before:chevron'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['before:chevron'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Should have a warning about the skipped ::before rule
 	expect(result.diagnostics.length).toBeGreaterThan(0);
@@ -755,9 +889,12 @@ test('before:chevron emits warning for skipped pseudo-element rule', () => {
 });
 
 test('hover:selectable emits warnings for skipped :hover rules', () => {
-	const result = generate_classes_css(['hover:selectable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['hover:selectable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	// Should have warnings about skipped :hover rules
 	const hover_warnings = result.diagnostics.filter(
@@ -773,9 +910,12 @@ test('hover:selectable emits warnings for skipped :hover rules', () => {
 });
 
 test('focus:clickable emits warning for skipped :focus rule', () => {
-	const result = generate_classes_css(['focus:clickable'], css_class_composites, [
-		modified_class_interpreter,
-	]);
+	const result = generate_classes_css({
+		class_names: ['focus:clickable'],
+		class_definitions: css_class_composites,
+		interpreters: [modified_class_interpreter],
+		css_properties: null,
+	});
 
 	const focus_warning = result.diagnostics.find(
 		(d) => d.class_name === 'focus:clickable' && d.message.includes(':focus'),

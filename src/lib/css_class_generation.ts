@@ -277,8 +277,10 @@ export interface CssClassInterpreterContext {
 	log?: Logger;
 	/** Diagnostics array to collect warnings and errors */
 	diagnostics: Array<CssClassDiagnostic>;
-	/** All known CSS class declarations (token + composite classes) */
-	classes: Record<string, CssClassDefinition | undefined>;
+	/** All known CSS class definitions (token + composite classes) */
+	class_definitions: Record<string, CssClassDefinition | undefined>;
+	/** Valid CSS properties for literal validation, or null to skip validation */
+	css_properties: Set<string> | null;
 }
 
 export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
@@ -298,41 +300,52 @@ export interface GenerateClassesCssResult {
 	diagnostics: Array<GenerationDiagnostic>;
 }
 
+export interface GenerateClassesCssOptions {
+	class_names: Iterable<string>;
+	class_definitions: Record<string, CssClassDefinition | undefined>;
+	interpreters: Array<CssClassDefinitionInterpreter>;
+	/** Valid CSS properties for literal validation, or null to skip validation */
+	css_properties: Set<string> | null;
+	log?: Logger;
+	class_locations?: Map<string, Array<SourceLocation> | null>;
+}
+
 export const generate_classes_css = (
-	classes: Iterable<string>,
-	classes_by_name: Record<string, CssClassDefinition | undefined>,
-	interpreters: Array<CssClassDefinitionInterpreter>,
-	log?: Logger,
-	class_locations?: Map<string, Array<SourceLocation> | null>,
+	options: GenerateClassesCssOptions,
 ): GenerateClassesCssResult => {
+	const {class_names, class_definitions, interpreters, css_properties, log, class_locations} =
+		options;
 	const interpreter_diagnostics: Array<CssClassDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
 
-	// Create interpreter context with access to all classes
+	// Create interpreter context with access to all class definitions
 	const ctx: CssClassInterpreterContext = {
 		log,
 		diagnostics: interpreter_diagnostics,
-		classes: classes_by_name,
+		class_definitions,
+		css_properties,
 	};
 
 	// Create a map that has the index of each class name as the key
 	const indexes: Map<string, number> = new Map();
-	const keys = Object.keys(classes_by_name);
+	const keys = Object.keys(class_definitions);
 	for (let i = 0; i < keys.length; i++) {
 		indexes.set(keys[i]!, i);
 	}
 
 	// If any classes are unknown, just put them at the end
-	const sorted_classes = (Array.isArray(classes) ? classes : Array.from(classes)).sort((a, b) => {
-		const index_a = indexes.get(a) ?? Number.MAX_VALUE;
-		const index_b = indexes.get(b) ?? Number.MAX_VALUE;
-		if (index_a !== index_b) return index_a - index_b;
-		return a.localeCompare(b); // alphabetic tiebreaker for stable sort
-	});
+	const sorted_classes = (Array.isArray(class_names) ? class_names : Array.from(class_names)).sort(
+		(a, b) => {
+			const index_a = indexes.get(a) ?? Number.MAX_VALUE;
+			const index_b = indexes.get(b) ?? Number.MAX_VALUE;
+			if (index_a !== index_b) return index_a - index_b;
+			return a.localeCompare(b); // alphabetic tiebreaker for stable sort
+		},
+	);
 
 	let css = '';
 	for (const c of sorted_classes) {
-		let v = classes_by_name[c];
+		let v = class_definitions[c];
 
 		// Track diagnostics count before this class
 		const diag_count_before = interpreter_diagnostics.length;
