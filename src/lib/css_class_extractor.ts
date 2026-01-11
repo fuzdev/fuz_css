@@ -52,17 +52,18 @@ export interface ExtractionDiagnostic extends BaseDiagnostic {
 
 /**
  * Extraction result with classes mapped to their source locations.
+ * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 export interface ExtractionResult {
 	/**
-	 * Map from class name to locations where it was used.
+	 * Map from class name to locations where it was used, or null if none.
 	 * Keys = unique classes, values = locations for diagnostics/IDE integration.
 	 */
-	classes: Map<string, Array<SourceLocation>>;
-	/** Variables that were used in class contexts (for diagnostics) */
-	tracked_vars: Set<string>;
-	/** Diagnostics from the extraction phase */
-	diagnostics: Array<ExtractionDiagnostic>;
+	classes: Map<string, Array<SourceLocation>> | null;
+	/** Variables that were used in class contexts, or null if none */
+	tracked_vars: Set<string> | null;
+	/** Diagnostics from the extraction phase, or null if none */
+	diagnostics: Array<ExtractionDiagnostic> | null;
 }
 
 /**
@@ -214,7 +215,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 			suggestion: 'Check for syntax errors in the file',
 			location: {file, line: 1, column: 1},
 		});
-		return {classes, tracked_vars, diagnostics};
+		// Return with diagnostics (classes/tracked_vars empty, so null)
+		return {classes: null, tracked_vars: null, diagnostics};
 	}
 
 	const state: WalkState = {
@@ -248,7 +250,12 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		extract_from_tracked_vars(ast, state);
 	}
 
-	return {classes, tracked_vars, diagnostics};
+	// Convert empty to null
+	return {
+		classes: classes.size > 0 ? classes : null,
+		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
+		diagnostics: diagnostics.length > 0 ? diagnostics : null,
+	};
 };
 
 /**
@@ -413,7 +420,8 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 			suggestion: 'Check for syntax errors in the file',
 			location: {file, line: 1, column: 1},
 		});
-		return {classes, tracked_vars, diagnostics};
+		// Return with diagnostics (classes/tracked_vars empty, so null)
+		return {classes: null, tracked_vars: null, diagnostics};
 	}
 
 	// Process @fuz-classes comments
@@ -443,7 +451,12 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 
 	walk_script(ast, state);
 
-	return {classes, tracked_vars, diagnostics};
+	// Convert empty to null
+	return {
+		classes: classes.size > 0 ? classes : null,
+		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
+		diagnostics: diagnostics.length > 0 ? diagnostics : null,
+	};
 };
 
 /**
@@ -459,7 +472,7 @@ export const extract_css_classes = (
 	options: ExtractCssClassesOptions = {},
 ): Set<string> => {
 	const result = extract_css_classes_with_locations(source, options);
-	return new Set(result.classes.keys());
+	return result.classes ? new Set(result.classes.keys()) : new Set();
 };
 
 /**
@@ -486,7 +499,7 @@ export const extract_css_classes_with_locations = (
 
 	// Default to Svelte-style extraction (handles both)
 	const svelte_result = extract_from_svelte(source, file);
-	if (svelte_result.classes.size > 0) {
+	if (svelte_result.classes) {
 		return svelte_result;
 	}
 	return extract_from_ts(source, file);

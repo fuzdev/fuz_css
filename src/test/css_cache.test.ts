@@ -43,13 +43,14 @@ test('save and load cached extraction round-trips', async () => {
 	const cache_path = join(CACHE_DIR, 'test.json');
 	const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 
-	await save_cached_extraction(cache_path, 'abc123', classes, []);
+	await save_cached_extraction(cache_path, 'abc123', classes, null);
 	const loaded = await load_cached_extraction(cache_path);
 
 	expect(loaded).not.toBeNull();
 	expect(loaded!.content_hash).toBe('abc123');
 	expect(loaded!.classes).toEqual([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
-	expect(loaded!.diagnostics).toEqual([]);
+	// Empty diagnostics are stored as null
+	expect(loaded!.diagnostics).toBeNull();
 });
 
 test('save and load preserves multiple classes with multiple locations', async () => {
@@ -66,19 +67,20 @@ test('save and load preserves multiple classes with multiple locations', async (
 		['p_md', [{file: 'test.ts', line: 5, column: 8}]],
 	]);
 
-	await save_cached_extraction(cache_path, 'hash123', classes, []);
+	await save_cached_extraction(cache_path, 'hash123', classes, null);
 	const loaded = await load_cached_extraction(cache_path);
 
 	expect(loaded).not.toBeNull();
 	const result = from_cached_extraction(loaded!);
-	expect(result.classes.size).toBe(2);
-	expect(result.classes.get('box')?.length).toBe(2);
-	expect(result.classes.get('p_md')?.length).toBe(1);
+	expect(result.classes?.size).toBe(2);
+	expect(result.classes?.get('box')?.length).toBe(2);
+	expect(result.classes?.get('p_md')?.length).toBe(1);
 });
 
 test('save and load preserves diagnostics', async () => {
 	await setup();
 	const cache_path = join(CACHE_DIR, 'diag.json');
+	// Empty classes Map is stored as null
 	const classes: Map<string, Array<{file: string; line: number; column: number}>> = new Map();
 	const diagnostics = [
 		{
@@ -94,6 +96,8 @@ test('save and load preserves diagnostics', async () => {
 	const loaded = await load_cached_extraction(cache_path);
 
 	expect(loaded).not.toBeNull();
+	// Empty classes are stored as null
+	expect(loaded!.classes).toBeNull();
 	expect(loaded!.diagnostics).toEqual(diagnostics);
 });
 
@@ -153,28 +157,29 @@ test('delete_cached_extraction succeeds for nonexistent file', async () => {
 
 test('from_cached_extraction converts tuples to Map', () => {
 	const cached: CachedExtraction = {
-		v: 1,
+		v: 2,
 		content_hash: 'abc',
 		classes: [['box', [{file: 'f.ts', line: 1, column: 1}]]],
-		diagnostics: [],
+		diagnostics: null,
 	};
 
 	const result = from_cached_extraction(cached);
 	expect(result.classes).toBeInstanceOf(Map);
-	expect(result.classes.get('box')).toEqual([{file: 'f.ts', line: 1, column: 1}]);
-	expect(result.diagnostics).toEqual([]);
+	expect(result.classes?.get('box')).toEqual([{file: 'f.ts', line: 1, column: 1}]);
+	expect(result.diagnostics).toBeNull();
 });
 
-test('from_cached_extraction handles empty classes', () => {
+test('from_cached_extraction handles null classes', () => {
 	const cached: CachedExtraction = {
-		v: 1,
+		v: 2,
 		content_hash: 'abc',
-		classes: [],
-		diagnostics: [],
+		classes: null,
+		diagnostics: null,
 	};
 
 	const result = from_cached_extraction(cached);
-	expect(result.classes.size).toBe(0);
+	expect(result.classes).toBeNull();
+	expect(result.diagnostics).toBeNull();
 });
 
 test('save_cached_extraction creates nested directories', async () => {
@@ -182,9 +187,22 @@ test('save_cached_extraction creates nested directories', async () => {
 	const cache_path = join(CACHE_DIR, 'deep/nested/path/file.json');
 	const classes = new Map([['test', [{file: 'x.ts', line: 1, column: 1}]]]);
 
-	await save_cached_extraction(cache_path, 'hash', classes, []);
+	await save_cached_extraction(cache_path, 'hash', classes, null);
 	const loaded = await load_cached_extraction(cache_path);
 
 	expect(loaded).not.toBeNull();
 	expect(loaded!.content_hash).toBe('hash');
+});
+
+test('save_cached_extraction stores empty classes as null', async () => {
+	await setup();
+	const cache_path = join(CACHE_DIR, 'empty.json');
+	const classes: Map<string, Array<{file: string; line: number; column: number}>> = new Map();
+
+	await save_cached_extraction(cache_path, 'hash', classes, null);
+	const loaded = await load_cached_extraction(cache_path);
+
+	expect(loaded).not.toBeNull();
+	expect(loaded!.classes).toBeNull();
+	expect(loaded!.diagnostics).toBeNull();
 });

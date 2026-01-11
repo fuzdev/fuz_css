@@ -87,6 +87,7 @@ export const escape_css_selector = (name: string): string => {
 /**
  * Collection of CSS classes extracted from source files.
  * Tracks classes per-file for efficient incremental updates.
+ * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 export class CssClasses {
 	include_classes: Set<string> | null;
@@ -95,6 +96,7 @@ export class CssClasses {
 
 	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
 
+	/** Classes by file id (files with no classes are not stored) */
 	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
 
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
@@ -111,17 +113,21 @@ export class CssClasses {
 	 * Replaces any previous classes and diagnostics for this file.
 	 *
 	 * @param id - File identifier
-	 * @param classes - Map of class names to their source locations
-	 * @param diagnostics - Extraction diagnostics from this file
+	 * @param classes - Map of class names to their source locations, or null if none
+	 * @param diagnostics - Extraction diagnostics from this file, or null if none
 	 */
 	add(
 		id: string,
-		classes: Map<string, Array<SourceLocation>>,
-		diagnostics?: Array<ExtractionDiagnostic>,
+		classes: Map<string, Array<SourceLocation>> | null,
+		diagnostics?: Array<ExtractionDiagnostic> | null,
 	): void {
 		this.#dirty = true;
-		this.#by_id.set(id, classes);
-		if (diagnostics && diagnostics.length > 0) {
+		if (classes) {
+			this.#by_id.set(id, classes);
+		} else {
+			this.#by_id.delete(id);
+		}
+		if (diagnostics) {
 			this.#diagnostics_by_id.set(id, diagnostics);
 		} else {
 			// Clear any old diagnostics for this file

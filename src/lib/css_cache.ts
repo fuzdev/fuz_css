@@ -17,21 +17,24 @@ import type {SourceLocation, ExtractionDiagnostic} from './css_class_extractor.j
  * - `CachedExtraction` schema
  * - `extract_css_classes_with_locations()` logic or output
  * - `ExtractionDiagnostic` or `SourceLocation` structure
+ *
+ * v2: Use null instead of empty arrays for classes/diagnostics
  */
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 
 /**
  * Cached extraction result for a single file.
+ * Uses `null` instead of empty arrays to avoid allocation overhead.
  */
 export interface CachedExtraction {
 	/** Cache version - invalidates cache when bumped */
 	v: number;
 	/** SHA-256 hash of the source file contents */
 	content_hash: string;
-	/** Classes as [name, locations] tuples (Map serialized for JSON) */
-	classes: Array<[string, Array<SourceLocation>]>;
-	/** Extraction diagnostics */
-	diagnostics: Array<ExtractionDiagnostic>;
+	/** Classes as [name, locations] tuples, or null if none */
+	classes: Array<[string, Array<SourceLocation>]> | null;
+	/** Extraction diagnostics, or null if none */
+	diagnostics: Array<ExtractionDiagnostic> | null;
 }
 
 /**
@@ -84,23 +87,28 @@ export const load_cached_extraction = async (
 /**
  * Saves an extraction result to the cache.
  * Uses atomic write (temp file + rename) for crash safety.
+ * Converts empty arrays to null to avoid allocation overhead on load.
  *
  * @param cache_path - Absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
- * @param classes - Extracted classes with their locations
- * @param diagnostics - Extraction diagnostics
+ * @param classes - Extracted classes with their locations, or null if none
+ * @param diagnostics - Extraction diagnostics, or null if none
  */
 export const save_cached_extraction = async (
 	cache_path: string,
 	content_hash: string,
-	classes: Map<string, Array<SourceLocation>>,
-	diagnostics: Array<ExtractionDiagnostic>,
+	classes: Map<string, Array<SourceLocation>> | null,
+	diagnostics: Array<ExtractionDiagnostic> | null,
 ): Promise<void> => {
+	// Convert to null if empty to save allocation on load
+	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
+	const diagnostics_array = diagnostics && diagnostics.length > 0 ? diagnostics : null;
+
 	const data: CachedExtraction = {
 		v: CACHE_VERSION,
 		content_hash,
-		classes: Array.from(classes.entries()),
-		diagnostics,
+		classes: classes_array,
+		diagnostics: diagnostics_array,
 	};
 
 	// Atomic write: temp file + rename
@@ -125,12 +133,16 @@ export const delete_cached_extraction = async (cache_path: string): Promise<void
 
 /**
  * Converts a cached extraction back to the runtime format.
+ * Preserves null semantics (null = empty).
  *
  * @param cached - Cached extraction data
  */
 export const from_cached_extraction = (
 	cached: CachedExtraction,
-): {classes: Map<string, Array<SourceLocation>>; diagnostics: Array<ExtractionDiagnostic>} => ({
-	classes: new Map(cached.classes),
+): {
+	classes: Map<string, Array<SourceLocation>> | null;
+	diagnostics: Array<ExtractionDiagnostic> | null;
+} => ({
+	classes: cached.classes ? new Map(cached.classes) : null,
 	diagnostics: cached.diagnostics,
 });

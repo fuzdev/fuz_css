@@ -51,11 +51,14 @@ const DEFAULT_CACHE_IO_CONCURRENCY = 20;
 /**
  * Result from extracting CSS classes from a single file.
  * Used internally during parallel extraction with caching.
+ * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 interface FileExtraction {
 	id: string;
-	classes: Map<string, Array<SourceLocation>>;
-	diagnostics: Array<ExtractionDiagnostic>;
+	/** Extracted classes, or null if none */
+	classes: Map<string, Array<SourceLocation>> | null;
+	/** Extraction diagnostics, or null if none */
+	diagnostics: Array<ExtractionDiagnostic> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -279,11 +282,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				concurrency,
 			);
 
-			// Add to CssClasses
+			// Add to CssClasses (null = empty, so use truthiness check)
 			for (const {id, classes, diagnostics} of extractions) {
-				if (classes.size > 0 || diagnostics.length > 0) {
+				if (classes || diagnostics) {
 					css_classes.add(id, classes, diagnostics);
-					if (classes.size > 0) {
+					if (classes) {
 						stats.files_with_classes++;
 					}
 				}
