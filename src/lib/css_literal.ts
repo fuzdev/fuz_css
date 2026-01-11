@@ -42,6 +42,11 @@ export interface ParsedCssLiteral {
 
 /**
  * Result of parsing a CSS-literal class name.
+ *
+ * Uses a discriminated union (Result type) because parsing a single class
+ * is binary: it either succeeds or fails entirely. This differs from
+ * {@link ExtractionResult} which uses embedded diagnostics because file
+ * extraction can partially succeed (some classes extracted, others have errors).
  */
 export type CssLiteralParseResult =
 	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>}

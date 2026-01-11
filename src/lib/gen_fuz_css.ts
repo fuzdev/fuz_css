@@ -42,11 +42,22 @@ import {
  */
 const is_ci = !!process.env.CI;
 
-/** Default concurrency for main loop: cache read + extract (CPU-bound) */
+/**
+ * Default concurrency for main loop: cache read + extract.
+ * This is NOT true CPU parallelism - Node.js JS is single-threaded.
+ * The value controls I/O interleaving (overlapping cache reads with parsing)
+ * and memory budget for in-flight operations. Higher values offer diminishing
+ * returns since AST parsing is synchronous on the main thread.
+ */
 const DEFAULT_CONCURRENCY = 8;
 
-/** Default concurrency for cache writes/deletes (I/O-bound) */
-const DEFAULT_CACHE_IO_CONCURRENCY = 20;
+/**
+ * Default concurrency for cache writes/deletes (I/O-bound).
+ * Safe to set high since Node's libuv thread pool (default 4 threads)
+ * limits actual parallel I/O operations. Memory pressure from buffered
+ * writes is the main constraint, but cache entries are small JSON files.
+ */
+const DEFAULT_CACHE_IO_CONCURRENCY = 50;
 
 /**
  * Result from extracting CSS classes from a single file.
