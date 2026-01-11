@@ -55,7 +55,7 @@
     "@fuzdev/fuz_ui": "^0.177.0",
     "@fuzdev/fuz_util": "^0.45.3",
     "@ryanatkn/eslint-config": "^0.9.0",
-    "@ryanatkn/gro": "^0.184.0",
+    "@ryanatkn/gro": "^0.185.0",
     "@sveltejs/acorn-typescript": "^1.0.8",
     "@sveltejs/adapter-static": "^3.0.10",
     "@sveltejs/kit": "^2.49.1",
