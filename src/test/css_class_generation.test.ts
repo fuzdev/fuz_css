@@ -1,18 +1,15 @@
 import {test, assert, expect} from 'vitest';
 
-import {
-	SourceIndex,
-	type ExtractionDiagnostic,
-	type SourceLocation,
-} from '$lib/css_class_extractor.js';
+import {SourceIndex} from '$lib/css_class_extractor.js';
+import {type ExtractionDiagnostic, type SourceLocation} from '$lib/diagnostics.js';
+import {CssClasses} from '$lib/css_classes.js';
 import {
 	escape_css_selector,
 	generate_classes_css,
-	CssClasses,
 	type CssClassDefinitionInterpreter,
 } from '$lib/css_class_generation.js';
 import {modified_class_interpreter} from '$lib/css_class_interpreters.js';
-import {token_classes} from '$lib/css_classes.js';
+import {css_class_definitions} from '$lib/css_class_definitions.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
 
 // CSS selector escaping tests
@@ -553,7 +550,7 @@ test('modified_class_interpreter handles multiple modifiers md:dark:hover:box', 
 test('modified_class_interpreter handles token class with modifiers hover:p_md', () => {
 	const result = generate_classes_css({
 		class_names: ['hover:p_md'],
-		class_definitions: token_classes,
+		class_definitions: css_class_definitions,
 		interpreters: [modified_class_interpreter],
 		css_properties: null,
 	});

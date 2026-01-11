@@ -12,19 +12,15 @@ import type {Gen} from '@ryanatkn/gro/gen.js';
 import type {FileFilter} from '@fuzdev/fuz_util/path.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
+import {extract_css_classes_with_locations} from './css_class_extractor.js';
+import {type SourceLocation, type ExtractionDiagnostic, type Diagnostic} from './diagnostics.js';
+import {CssClasses} from './css_classes.js';
 import {
-	extract_css_classes_with_locations,
-	type SourceLocation,
-	type ExtractionDiagnostic,
-} from './css_class_extractor.js';
-import {
-	CssClasses,
 	generate_classes_css,
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter,
-	type Diagnostic,
 } from './css_class_generation.js';
-import {token_classes} from './css_classes.js';
+import {css_class_definitions} from './css_class_definitions.js';
 import {css_class_composites} from './css_class_composites.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
@@ -162,7 +158,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
-		class_definitions = token_classes,
+		class_definitions = css_class_definitions,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
 		include_classes,

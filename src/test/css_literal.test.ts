@@ -14,7 +14,8 @@ import {
 	type InterpretCssLiteralResult,
 	type CssLiteralOutput,
 } from '$lib/css_literal.js';
-import {escape_css_selector, type CssClassDiagnostic} from '$lib/css_class_generation.js';
+import {escape_css_selector} from '$lib/css_class_generation.js';
+import {type CssClassDiagnostic} from '$lib/diagnostics.js';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,

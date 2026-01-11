@@ -13,7 +13,7 @@
 
 import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
 
-import {type CssClassDiagnostic} from './css_class_generation.js';
+import {type CssClassDiagnostic} from './diagnostics.js';
 import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.js';
 
 //

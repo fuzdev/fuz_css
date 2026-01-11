@@ -10,7 +10,7 @@
 import {mkdir, readFile, writeFile, unlink, rename} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
 
-import type {SourceLocation, ExtractionDiagnostic} from './css_class_extractor.js';
+import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 
 /**
  * Cache version. Bump when any of these change:

@@ -18,37 +18,11 @@ import {walk, type Visitors} from 'zimmerframe';
 import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
 
+import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
+
 //
 // Types
 //
-
-/**
- * Source location for IDE/LSP integration.
- */
-export interface SourceLocation {
-	file: string;
-	/** 1-based line number */
-	line: number;
-	/** 1-based column number */
-	column: number;
-}
-
-/**
- * Base diagnostic with common fields.
- */
-export interface BaseDiagnostic {
-	level: 'error' | 'warning';
-	message: string;
-	suggestion: string | null;
-}
-
-/**
- * Diagnostic from the extraction phase.
- */
-export interface ExtractionDiagnostic extends BaseDiagnostic {
-	phase: 'extraction';
-	location: SourceLocation;
-}
 
 /**
  * Extraction result with classes mapped to their source locations.
