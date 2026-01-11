@@ -291,7 +291,7 @@ const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkStat
 
 /**
  * Extracts @fuz-classes from script blocks by re-parsing with acorn.
- * Svelte's parser doesn't expose JavaScript comments, so we parse the
+ * Svelte's parser doesn't expose JS comments, so we parse the
  * script source separately to get comments via acorn's onComment callback.
  */
 const extract_fuz_classes_from_script = (
@@ -574,7 +574,7 @@ const extract_from_attribute_value = (value: AST.Attribute['value'], state: Walk
 };
 
 /**
- * Extracts classes from a JavaScript expression.
+ * Extracts classes from a TS expression.
  * Handles strings, arrays, objects, conditionals, and function calls.
  */
 const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void => {
