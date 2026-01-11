@@ -515,7 +515,8 @@ export const gen = gen_fuz_css({
 		<p>
 			Fuz CSS's <ModuleLink path="style.css">main stylesheet</ModuleLink> provides styles for base HTML
 			elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern CSS
-			reset. It includes CSS classes that provide common generic functionality.
+			reset. It includes CSS classes that provide common generic functionality -- these are called
+			builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<Code
@@ -548,19 +549,18 @@ export const gen = gen_fuz_css({
 	padding-left: var(--space_xl4);
 }`}
 		/>
-		<aside>
-			<p class="row">This strategy supports semantic hooks for theming:</p>
-			<Code
-				lang="css"
-				content={`:where(:is(ul, ol, menu):not(.unstyled)) {
+		<p>This strategy supports semantic hooks for theming:</p>
+		<Code
+			lang="css"
+			content={`:where(:is(ul, ol, menu):not(.unstyled)) {
 	padding-left: var(--list_padding_left, var(--space_xl4));
 }`}
-			/>
-			<aside>
-				The <code>:where()</code> selector keeps specificity as low as possible to minimize interference
-				with your styles.
-			</aside>
+		/>
+		<aside>
+			The <code>:where()</code> selector keeps specificity as low as possible to minimize interference
+			with your styles.
 		</aside>
+		<p>See the specific docs sections for more about <code>.unstyled</code>.</p>
 	</TomeSection>
 </TomeContent>
 
