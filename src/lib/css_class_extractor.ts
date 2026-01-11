@@ -354,7 +354,7 @@ const extract_fuz_classes_from_script = (
 };
 
 /**
- * Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.
+ * Extracts CSS classes from a TypeScript/JS file using AST parsing.
  *
  * @param source - The TS/JS file source code
  * @param file - File path for location tracking
@@ -395,7 +395,7 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 		diagnostics.push({
 			phase: 'extraction',
 			level: 'warning',
-			message: `Failed to parse TypeScript/JavaScript file: ${err instanceof Error ? err.message : 'unknown error'}`,
+			message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
 			suggestion: 'Check for syntax errors in the file',
 			location: {file, line: 1, column: 1},
 		});
@@ -731,7 +731,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 // Script AST walking
 
 /**
- * Walks a JavaScript/TypeScript AST to extract class names.
+ * Walks a TypeScript/JS AST to extract class names.
  */
 const walk_script = (ast: unknown, state: WalkState): void => {
 	const visitors: Visitors<Node, WalkState> = {

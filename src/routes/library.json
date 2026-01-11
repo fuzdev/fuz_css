@@ -406,7 +406,7 @@
 					{
 						"name": "extract_from_ts",
 						"kind": "function",
-						"doc_comment": "Extracts CSS classes from a TypeScript/JavaScript file using AST parsing.",
+						"doc_comment": "Extracts CSS classes from a TypeScript/JS file using AST parsing.",
 						"source_line": 363,
 						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",

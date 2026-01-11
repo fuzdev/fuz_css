@@ -509,7 +509,7 @@ test('extracts classes from multiple @fuz-classes comments', () => {
 	expect(result.classes?.has('class_d')).toBe(true);
 });
 
-test('extracts @fuz-classes from TypeScript files', () => {
+test('extracts @fuz-classes from TypeScript files with single-line comment', () => {
 	const source = `
 // @fuz-classes ts_class_1 ts_class_2
 const foo = 'bar';
@@ -517,6 +517,16 @@ const foo = 'bar';
 	const result = extract_from_ts(source, 'test.ts');
 	expect(result.classes?.has('ts_class_1')).toBe(true);
 	expect(result.classes?.has('ts_class_2')).toBe(true);
+});
+
+test('extracts @fuz-classes from TypeScript files with multi-line comment', () => {
+	const source = `
+/* @fuz-classes ts_multi_1 ts_multi_2 */
+const foo = 'bar';
+`;
+	const result = extract_from_ts(source, 'test.ts');
+	expect(result.classes?.has('ts_multi_1')).toBe(true);
+	expect(result.classes?.has('ts_multi_2')).toBe(true);
 });
 
 test('combines @fuz-classes with regular class extraction', () => {
