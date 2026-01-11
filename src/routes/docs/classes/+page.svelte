@@ -5,6 +5,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
 
 	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
@@ -397,10 +398,9 @@ ${'<' as string}script>
 		/>
 		<p>
 			The <code>fuz.css</code> file is generated on demand with only the utility classes your code
-			uses. The main helper is in <ModuleLink path="gen_fuz_css.ts">gen_fuz_css.ts</ModuleLink> -- for
-			now it must be manually called unless you use the
-			<a href="https://github.com/ryanatkn/gro">Gro</a> integration. A Vite plugin is planned (feel free
-			to open an issue to expedite!).
+			uses. The main helper is <DeclarationLink name="gen_fuz_css" /> -- for now it must be manually called
+			unless you use the <a href="https://github.com/ryanatkn/gro">Gro</a> integration. A Vite plugin
+			is planned (feel free to open an issue to expedite!).
 		</p>
 		<p>To use with Gro, create <code>src/routes/fuz.gen.css.ts</code>:</p>
 		<Code
@@ -457,10 +457,18 @@ const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 /* @fuz-classes color_a_5 color_b_5 color_c_5 */
 const color = get_dynamic_color();`}
 		/>
+		<p>
+			Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
+				>include_classes</DeclarationLink
+			> option in your generator config:
+		</p>
 		<Code
-			lang="svelte"
-			content={`<!-- @fuz-classes animation:spin animation:pulse -->
-<div class={get_animation_class()}></div>`}
+			lang="ts"
+			content={`import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+
+export const gen = gen_fuz_css({
+	include_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
+});`}
 		/>
 	</TomeSection>
 
