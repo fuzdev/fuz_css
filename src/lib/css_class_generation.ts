@@ -96,6 +96,9 @@ export class CssClasses {
 
 	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
 
+	/** Combined map with include_classes (null locations) and extracted classes (actual locations) */
+	#all_with_locations_including_includes: Map<string, Array<SourceLocation> | null> = new Map();
+
 	/** Classes by file id (files with no classes are not stored) */
 	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
 
@@ -162,23 +165,7 @@ export class CssClasses {
 			this.#dirty = false;
 			this.#recalculate();
 		}
-		const result: Map<string, Array<SourceLocation> | null> = new Map();
-		// Add include_classes with null locations
-		if (this.include_classes) {
-			for (const c of this.include_classes) {
-				result.set(c, null);
-			}
-		}
-		// Add extracted classes with their locations
-		for (const [cls, locations] of this.#all_with_locations) {
-			const existing = result.get(cls);
-			if (existing === null) {
-				// Was in include_classes, keep null to indicate it
-				continue;
-			}
-			result.set(cls, locations);
-		}
-		return result;
+		return this.#all_with_locations_including_includes;
 	}
 
 	/**
@@ -194,21 +181,9 @@ export class CssClasses {
 			this.#dirty = false;
 			this.#recalculate();
 		}
-		// Build locations map with include_classes having null locations
-		const all_classes_with_locations: Map<string, Array<SourceLocation> | null> = new Map();
-		if (this.include_classes) {
-			for (const c of this.include_classes) {
-				all_classes_with_locations.set(c, null);
-			}
-		}
-		for (const [cls, locations] of this.#all_with_locations) {
-			if (!all_classes_with_locations.has(cls)) {
-				all_classes_with_locations.set(cls, locations);
-			}
-		}
 		return {
 			all_classes: this.#all,
-			all_classes_with_locations,
+			all_classes_with_locations: this.#all_with_locations_including_includes,
 		};
 	}
 
@@ -226,10 +201,12 @@ export class CssClasses {
 	#recalculate(): void {
 		this.#all.clear();
 		this.#all_with_locations.clear();
+		this.#all_with_locations_including_includes.clear();
 
 		if (this.include_classes) {
 			for (const c of this.include_classes) {
 				this.#all.add(c);
+				this.#all_with_locations_including_includes.set(c, null);
 			}
 		}
 
@@ -241,6 +218,10 @@ export class CssClasses {
 					existing.push(...locations);
 				} else {
 					this.#all_with_locations.set(cls, [...locations]);
+				}
+				// Add to combined map only if not already from include_classes
+				if (!this.#all_with_locations_including_includes.has(cls)) {
+					this.#all_with_locations_including_includes.set(cls, this.#all_with_locations.get(cls)!);
 				}
 			}
 		}
