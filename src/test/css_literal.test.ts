@@ -11,6 +11,8 @@ import {
 	interpret_css_literal,
 	generate_css_literal_simple,
 	type ParsedCssLiteral,
+	type InterpretCssLiteralResult,
+	type CssLiteralOutput,
 } from '$lib/css_literal.js';
 import {escape_css_selector, type CssClassDiagnostic} from '$lib/css_class_generation.js';
 import {
@@ -40,6 +42,12 @@ const assert_error = (
 ): {error: CssClassDiagnostic} => {
 	assert.isFalse(result.ok, 'Expected parse result to be error');
 	return result as {ok: false; error: CssClassDiagnostic};
+};
+
+// Helper to assert interpret result is ok and return output
+const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput => {
+	assert.isTrue(result.ok, 'Expected interpret result to be ok');
+	return (result as {ok: true; output: CssLiteralOutput}).output;
 };
 
 describe('is_possible_css_literal', () => {
@@ -419,8 +427,8 @@ describe('parse_css_literal - warnings', () => {
 
 describe('interpret_css_literal', () => {
 	test('display:flex generates correct output', () => {
-		const output = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
+		const output = assert_interpret_ok(result);
 		assert.equal(output.declaration, 'display: flex;');
 		assert.equal(output.selector, '.display\\:flex');
 		assert.isNull(output.media_wrapper);
@@ -430,8 +438,8 @@ describe('interpret_css_literal', () => {
 	test('hover:opacity:80% includes pseudo-class in selector', () => {
 		const class_name = 'hover:opacity:80%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		assert.equal(output.declaration, 'opacity: 80%;');
 		assert.include(output.selector, ':hover');
 	});
@@ -439,8 +447,8 @@ describe('interpret_css_literal', () => {
 	test('md:display:flex has media wrapper', () => {
 		const class_name = 'md:display:flex';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
 		assert.include(output.media_wrapper, '@media');
 		assert.include(output.media_wrapper, '48rem');
@@ -449,24 +457,24 @@ describe('interpret_css_literal', () => {
 	test('dark:opacity:60% has ancestor wrapper', () => {
 		const class_name = 'dark:opacity:60%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		assert.equal(output.ancestor_wrapper, ':root.dark');
 	});
 
 	test('before:content:"" includes pseudo-element in selector', () => {
 		const class_name = 'before:content:""';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		assert.include(output.selector, '::before');
 	});
 
 	test('md:dark:hover:before:opacity:80% has all components', () => {
 		const class_name = 'md:dark:hover:before:opacity:80%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
 		if (!output.ancestor_wrapper) throw new Error('Expected ancestor_wrapper');
 		assert.include(output.selector, ':hover');
@@ -476,8 +484,8 @@ describe('interpret_css_literal', () => {
 
 describe('generate_css_literal_simple', () => {
 	test('simple property:value', () => {
-		const output = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '.display\\:flex');
 		assert.include(css, 'display: flex;');
@@ -489,8 +497,8 @@ describe('generate_css_literal_simple', () => {
 	test('hover:opacity:80%', () => {
 		const class_name = 'hover:opacity:80%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, ':hover');
 		assert.include(css, 'opacity: 80%;');
@@ -499,8 +507,8 @@ describe('generate_css_literal_simple', () => {
 	test('md:display:flex has media wrapper', () => {
 		const class_name = 'md:display:flex';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '@media (width >= 48rem)');
 		assert.include(css, 'display: flex;');
@@ -509,8 +517,8 @@ describe('generate_css_literal_simple', () => {
 	test('dark:opacity:60% has ancestor wrapper', () => {
 		const class_name = 'dark:opacity:60%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, ':root.dark');
 		assert.include(css, 'opacity: 60%;');
@@ -519,8 +527,8 @@ describe('generate_css_literal_simple', () => {
 	test('md:dark:hover:opacity:80% has nested structure', () => {
 		const class_name = 'md:dark:hover:opacity:80%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '@media (width >= 48rem)');
 		assert.include(css, ':root.dark');
@@ -591,8 +599,8 @@ describe('generate_css_literal_simple - max breakpoints', () => {
 	test('max-sm generates correct media query', () => {
 		const class_name = 'max-sm:display:none';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '@media (width < 40rem)');
 		assert.include(css, 'display: none;');
@@ -601,8 +609,8 @@ describe('generate_css_literal_simple - max breakpoints', () => {
 	test('max-lg generates correct media query', () => {
 		const class_name = 'max-lg:opacity:50%';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '@media (width < 64rem)');
 	});
@@ -642,8 +650,8 @@ describe('generate_css_literal_simple - !important', () => {
 	test('renders !important correctly', () => {
 		const class_name = 'display:flex!important';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, 'display: flex !important;');
 	});
@@ -651,8 +659,8 @@ describe('generate_css_literal_simple - !important', () => {
 	test('hover:color:red!important renders correctly', () => {
 		const class_name = 'hover:color:red!important';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, ':hover');
 		assert.include(css, 'color: red !important;');
@@ -690,8 +698,8 @@ describe('generate_css_literal_simple - Unicode', () => {
 	test('renders Unicode content correctly', () => {
 		const class_name = 'content:"→"';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, 'content: "→";');
 	});
@@ -699,8 +707,8 @@ describe('generate_css_literal_simple - Unicode', () => {
 	test('before:content:"✓" renders correctly', () => {
 		const class_name = 'before:content:"✓"';
 		const escaped = escape_css_selector(class_name);
-		const output = interpret_css_literal(class_name, escaped, css_properties);
-		if (!output) throw new Error('Expected output');
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '::before');
 		assert.include(css, 'content: "✓";');

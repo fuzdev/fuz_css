@@ -135,20 +135,20 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 		}
 
 		const escaped_class_name = escape_css_selector(class_name);
-		const output = interpret_css_literal(
-			class_name,
-			escaped_class_name,
-			ctx.css_properties,
-			ctx.log,
-			ctx.diagnostics,
-		);
+		const result = interpret_css_literal(class_name, escaped_class_name, ctx.css_properties);
 
-		if (!output) {
+		if (!result.ok) {
+			ctx.diagnostics.push(result.error);
 			return null;
 		}
 
+		// Collect warnings for upstream handling
+		for (const warning of result.warnings) {
+			ctx.diagnostics.push(warning);
+		}
+
 		// Generate the full CSS including any wrappers
-		const css = generate_css_literal_simple(output);
+		const css = generate_css_literal_simple(result.output);
 
 		// Return the CSS but strip trailing newline for consistency
 		return css.trimEnd();

@@ -11,7 +11,6 @@
  * @module
  */
 
-import type {Logger} from '@fuzdev/fuz_util/log.js';
 import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
 
 import {type CssClassDiagnostic} from './css_class_generation.js';
@@ -68,6 +67,13 @@ export interface ExtractedModifiers {
  */
 export type ModifierExtractionResult =
 	| {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>}
+	| {ok: false; error: CssClassDiagnostic};
+
+/**
+ * Result of interpreting a CSS-literal class.
+ */
+export type InterpretCssLiteralResult =
+	| {ok: true; output: CssLiteralOutput; warnings: Array<CssClassDiagnostic>}
 	| {ok: false; error: CssClassDiagnostic};
 
 //
@@ -583,55 +589,36 @@ export interface CssLiteralOutput {
 /**
  * Interprets a CSS-literal class and returns CSS generation info.
  *
+ * Callers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.
+ *
  * @param class_name - The class name to interpret
  * @param escaped_class_name - The CSS-escaped version of the class name
  * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
  *                         Pass `null` to skip property validation.
- * @param log - Optional logger for warnings
- * @param collect_diagnostics - Optional array to collect diagnostics for later processing
- * @returns CssLiteralOutput or null if not a valid CSS-literal
+ * @returns Result with output and warnings on success, or error on failure
  */
 export const interpret_css_literal = (
 	class_name: string,
 	escaped_class_name: string,
 	css_properties: Set<string> | null,
-	log?: Logger,
-	collect_diagnostics?: Array<CssClassDiagnostic>,
-): CssLiteralOutput | null => {
-	if (!is_possible_css_literal(class_name)) {
-		return null;
-	}
-
+): InterpretCssLiteralResult => {
 	const result = parse_css_literal(class_name, css_properties);
 
 	if (!result.ok) {
-		log?.error(`CSS-literal error: ${result.error.message}`);
-		if (result.error.suggestion) {
-			log?.error(`  ${result.error.suggestion}`);
-		}
-		// Collect the error for later processing
-		collect_diagnostics?.push(result.error);
-		return null;
+		return {ok: false, error: result.error};
 	}
 
 	const {parsed, diagnostics} = result;
 
-	// Log and collect warnings
-	for (const diagnostic of diagnostics) {
-		if (diagnostic.level === 'warning') {
-			log?.warn(`CSS-literal warning in "${class_name}": ${diagnostic.message}`);
-			if (diagnostic.suggestion) {
-				log?.warn(`  ${diagnostic.suggestion}`);
-			}
-		}
-		collect_diagnostics?.push(diagnostic);
-	}
-
 	return {
-		declaration: generate_declaration(parsed),
-		selector: generate_selector(escaped_class_name, parsed),
-		media_wrapper: parsed.media?.css ?? null,
-		ancestor_wrapper: parsed.ancestor?.css ?? null,
+		ok: true,
+		output: {
+			declaration: generate_declaration(parsed),
+			selector: generate_selector(escaped_class_name, parsed),
+			media_wrapper: parsed.media?.css ?? null,
+			ancestor_wrapper: parsed.ancestor?.css ?? null,
+		},
+		warnings: diagnostics,
 	};
 };
 

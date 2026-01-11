@@ -1219,7 +1219,7 @@
 						"name": "ParsedCssLiteral",
 						"kind": "type",
 						"doc_comment": "Parsed CSS-literal class with all components extracted.",
-						"source_line": 27,
+						"source_line": 26,
 						"type_signature": "ParsedCssLiteral",
 						"properties": [
 							{
@@ -1270,14 +1270,14 @@
 						"name": "CssLiteralParseResult",
 						"kind": "type",
 						"doc_comment": "Result of parsing a CSS-literal class name.",
-						"source_line": 47,
+						"source_line": 46,
 						"type_signature": "CssLiteralParseResult"
 					},
 					{
 						"name": "ExtractedModifiers",
 						"kind": "type",
 						"doc_comment": "Extracted modifiers from a class name.\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 55,
+						"source_line": 54,
 						"type_signature": "ExtractedModifiers",
 						"properties": [
 							{
@@ -1310,14 +1310,21 @@
 						"name": "ModifierExtractionResult",
 						"kind": "type",
 						"doc_comment": "Result of extracting modifiers from segments.",
-						"source_line": 69,
+						"source_line": 68,
 						"type_signature": "ModifierExtractionResult"
+					},
+					{
+						"name": "InterpretCssLiteralResult",
+						"kind": "type",
+						"doc_comment": "Result of interpreting a CSS-literal class.",
+						"source_line": 75,
+						"type_signature": "InterpretCssLiteralResult"
 					},
 					{
 						"name": "load_css_properties",
 						"kind": "function",
 						"doc_comment": "Loads CSS properties from",
-						"source_line": 81,
+						"source_line": 87,
 						"type_signature": "(): Promise<Set<string>>",
 						"return_type": "Promise<Set<string>>",
 						"parameters": []
@@ -1326,7 +1333,7 @@
 						"name": "is_valid_css_property",
 						"kind": "function",
 						"doc_comment": "Checks if a property name is a valid CSS property.\nCustom properties (--*) always return true.",
-						"source_line": 96,
+						"source_line": 102,
 						"type_signature": "(property: string, properties: Set<string> | null): boolean",
 						"return_type": "boolean",
 						"return_description": "True if valid CSS property or custom property",
@@ -1347,7 +1354,7 @@
 						"name": "suggest_css_property",
 						"kind": "function",
 						"doc_comment": "Suggests a correct property name for a typo using Levenshtein distance.",
-						"source_line": 117,
+						"source_line": 123,
 						"type_signature": "(typo: string, properties: Set<string> | null): string | null",
 						"return_type": "string | null",
 						"return_description": "The suggested property or null if no close match (Levenshtein distance > 2)",
@@ -1368,7 +1375,7 @@
 						"name": "suggest_modifier",
 						"kind": "function",
 						"doc_comment": "Suggests a correct modifier name for a typo.",
-						"source_line": 140,
+						"source_line": 146,
 						"type_signature": "(typo: string): string | null",
 						"return_type": "string | null",
 						"parameters": [
@@ -1382,7 +1389,7 @@
 						"name": "format_css_value",
 						"kind": "function",
 						"doc_comment": "Formats a CSS-literal value for CSS output.\n- Replaces `~` with space\n- Ensures space before `!important`",
-						"source_line": 168,
+						"source_line": 174,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"return_description": "Formatted CSS value",
@@ -1398,7 +1405,7 @@
 						"name": "check_calc_expression",
 						"kind": "function",
 						"doc_comment": "Checks if a value contains a possibly invalid calc expression.",
-						"source_line": 186,
+						"source_line": 192,
 						"type_signature": "(value: string): string | null",
 						"return_type": "string | null",
 						"return_description": "Warning message if suspicious, null otherwise",
@@ -1414,7 +1421,7 @@
 						"name": "is_possible_css_literal",
 						"kind": "function",
 						"doc_comment": "Checks if a class name could be a CSS-literal class.\nQuick check before attempting full parse.",
-						"source_line": 204,
+						"source_line": 210,
 						"type_signature": "(class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if it could be CSS-literal syntax",
@@ -1433,7 +1440,7 @@
 						"examples": [
 							"extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']\nextract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']\nextract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']"
 						],
-						"source_line": 233,
+						"source_line": 239,
 						"type_signature": "(class_name: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1447,7 +1454,7 @@
 						"name": "extract_and_validate_modifiers",
 						"kind": "function",
 						"doc_comment": "Extracts and validates modifiers from the beginning of a segments array.\nModifiers are consumed from the front until a non-modifier segment is found.\n\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 272,
+						"source_line": 278,
 						"type_signature": "(segments: string[], class_name: string): ModifierExtractionResult",
 						"return_type": "ModifierExtractionResult",
 						"return_description": "ModifierExtractionResult with modifiers and remaining segments, or error",
@@ -1468,7 +1475,7 @@
 						"name": "parse_css_literal",
 						"kind": "function",
 						"doc_comment": "Parses a CSS-literal class name into its components.",
-						"source_line": 444,
+						"source_line": 450,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null): CssLiteralParseResult",
 						"return_type": "CssLiteralParseResult",
 						"return_description": "CssLiteralParseResult with parsed data or error",
@@ -1489,7 +1496,7 @@
 						"name": "generate_selector",
 						"kind": "function",
 						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
-						"source_line": 546,
+						"source_line": 552,
 						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1507,7 +1514,7 @@
 						"name": "generate_declaration",
 						"kind": "function",
 						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
-						"source_line": 565,
+						"source_line": 571,
 						"type_signature": "(parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1521,7 +1528,7 @@
 						"name": "CssLiteralOutput",
 						"kind": "type",
 						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
-						"source_line": 572,
+						"source_line": 578,
 						"type_signature": "CssLiteralOutput",
 						"properties": [
 							{
@@ -1553,11 +1560,11 @@
 					{
 						"name": "interpret_css_literal",
 						"kind": "function",
-						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.",
-						"source_line": 594,
-						"type_signature": "(class_name: string, escaped_class_name: string, css_properties: Set<string> | null, log?: Logger | undefined, collect_diagnostics?: CssClassDiagnostic[] | undefined): CssLiteralOutput | null",
-						"return_type": "CssLiteralOutput | null",
-						"return_description": "CssLiteralOutput or null if not a valid CSS-literal",
+						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.\n\nCallers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.",
+						"source_line": 600,
+						"type_signature": "(class_name: string, escaped_class_name: string, css_properties: Set<string> | null): InterpretCssLiteralResult",
+						"return_type": "InterpretCssLiteralResult",
+						"return_description": "Result with output and warnings on success, or error on failure",
 						"parameters": [
 							{
 								"name": "class_name",
@@ -1573,18 +1580,6 @@
 								"name": "css_properties",
 								"type": "Set<string> | null",
 								"description": "- Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
-							},
-							{
-								"name": "log",
-								"type": "Logger | undefined",
-								"optional": true,
-								"description": "- Optional logger for warnings"
-							},
-							{
-								"name": "collect_diagnostics",
-								"type": "CssClassDiagnostic[] | undefined",
-								"optional": true,
-								"description": "- Optional array to collect diagnostics for later processing"
 							}
 						]
 					},
@@ -1592,7 +1587,7 @@
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 645,
+						"source_line": 632,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",
