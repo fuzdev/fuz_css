@@ -2028,12 +2028,6 @@
 								"doc_comment": "Project root directory. Source paths must be under this directory."
 							},
 							{
-								"name": "previous_paths",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "State for tracking previous file paths (for watch mode cleanup).\nPass a shared Set to share state between multiple generators."
-							},
-							{
 								"name": "concurrency",
 								"kind": "variable",
 								"type_signature": "number",
@@ -2051,7 +2045,7 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 132,
+						"source_line": 127,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
@@ -2076,7 +2070,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 155,
+						"source_line": 150,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [

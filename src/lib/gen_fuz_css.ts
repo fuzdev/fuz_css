@@ -96,11 +96,6 @@ export interface GenFuzCssOptions {
 	 */
 	project_root?: string;
 	/**
-	 * State for tracking previous file paths (for watch mode cleanup).
-	 * Pass a shared Set to share state between multiple generators.
-	 */
-	previous_paths?: Set<string>;
-	/**
 	 * Max concurrent file processing (cache read + extract).
 	 * Bottlenecked by CPU-bound AST parsing.
 	 * @default 8
@@ -163,7 +158,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		exclude_classes,
 		cache_dir = '.fuz/cache/css',
 		project_root: project_root_option,
-		previous_paths: previous_paths_option,
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 	} = options;
@@ -172,8 +166,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const include_set = include_classes ? new Set(include_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
-	// Instance-level state for watch mode cleanup (not module-level)
-	let previous_paths: Set<string> | null = previous_paths_option ?? null;
+	// Instance-level state for watch mode cleanup
+	let previous_paths: Set<string> | null = null;
 
 	return {
 		// Filter dependencies to skip non-extractable files.
