@@ -176,6 +176,37 @@ export class CssClasses {
 	}
 
 	/**
+	 * Gets all classes and their locations in a single call.
+	 * More efficient than calling `get()` and `get_with_locations()` separately
+	 * when both are needed (avoids potential double recalculation).
+	 */
+	get_all(): {
+		all_classes: Set<string>;
+		all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
+	} {
+		if (this.#dirty) {
+			this.#dirty = false;
+			this.#recalculate();
+		}
+		// Build locations map with include_classes having null locations
+		const all_classes_with_locations: Map<string, Array<SourceLocation> | null> = new Map();
+		if (this.include_classes) {
+			for (const c of this.include_classes) {
+				all_classes_with_locations.set(c, null);
+			}
+		}
+		for (const [cls, locations] of this.#all_with_locations) {
+			if (!all_classes_with_locations.has(cls)) {
+				all_classes_with_locations.set(cls, locations);
+			}
+		}
+		return {
+			all_classes: this.#all,
+			all_classes_with_locations,
+		};
+	}
+
+	/**
 	 * Gets all extraction diagnostics from all files.
 	 */
 	get_diagnostics(): Array<ExtractionDiagnostic> {
