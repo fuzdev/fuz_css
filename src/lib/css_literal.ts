@@ -141,7 +141,10 @@ export const suggest_css_property = (
 };
 
 /**
- * Suggests a correct modifier name for a typo.
+ * Suggests a correct modifier name for a typo using Levenshtein distance.
+ *
+ * @param typo - The mistyped modifier name
+ * @returns The suggested modifier or null if no close match (Levenshtein distance > 2)
  */
 export const suggest_modifier = (typo: string): string | null => {
 	const all_names = get_all_modifier_names();

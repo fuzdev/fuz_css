@@ -126,7 +126,7 @@ export class SourceIndex {
  * @param class_name - Class name to add
  * @param location - Source location where the class was found
  */
-export const add_class_with_location = (
+const add_class_with_location = (
 	classes: Map<string, Array<SourceLocation>>,
 	class_name: string,
 	location: SourceLocation,
