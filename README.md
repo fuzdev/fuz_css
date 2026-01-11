@@ -2,7 +2,7 @@
 
 [<img src="/static/logo.svg" alt="a fuzzy tuft of green moss" align="right" width="192" height="192">](https://css.fuz.dev/)
 
-> CSS framework and design system 🌿 magical organic stylesheets
+> CSS framework and design system 🌿 CSS with more utility
 
 Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
 It's in early alpha with breaking changes ahead.
