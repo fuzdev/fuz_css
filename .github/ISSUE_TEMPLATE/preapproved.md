@@ -1,3 +1,9 @@
+---
+name: For Maintainers Only
+about: |-
+  Only for approved topics from the GitHub discussions.
+---
+
 **WAIT STOP!!** Read below:
 
 fuz.dev uses discussions instead of issues for its GitHub repos.
