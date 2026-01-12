@@ -16,6 +16,10 @@
 </script>
 
 <TomeContent {tome}>
+	<p>
+		Fuz CSS has two categories of CSS classes: utilities and builtins. Builtins are baked into the
+		main stylesheet; utilities are optional and require build tool integration.
+	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
 		<p>
@@ -667,8 +671,8 @@ export const gen = gen_fuz_css({
 		<TomeSection>
 			<TomeSectionHeader text="Svelte-first" tag="h3" />
 			<p>
-				The extractor uses AST parsing to understand <a href="https://svelte.dev/docs/svelte/class"
-					>Svelte's class syntax</a
+				The extractor parses and analyzes the AST to understand <a
+					href="https://svelte.dev/docs/svelte/class">Svelte's class syntax</a
 				>. Supported constructs:
 			</p>
 			<ul>
@@ -677,16 +681,16 @@ export const gen = gen_fuz_css({
 					<code>{'class={{...}}'}</code>, <code>class:name</code>
 				</li>
 				<li>
-					<strong>expressions:</strong> ternaries (<code>? :</code>), logical (<code>&&</code>,
-					<code>||</code>, <code>??</code>), template literals (complete tokens only)
-				</li>
-				<li>
-					<strong>utility calls:</strong> <code>clsx()</code>, <code>cn()</code>, <code>cx()</code>,
-					<code>classNames()</code> with nested arguments
+					<strong>expressions:</strong> logical (<code>&&</code>,
+					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only)
 				</li>
 				<li>
 					<strong>Svelte 5 runes:</strong> <code>$derived()</code> and <code>$derived.by()</code> for
 					class variables
+				</li>
+				<li>
+					<strong>utility calls:</strong> <code>clsx()</code>, <code>cn()</code>, <code>cx()</code>,
+					<code>classNames()</code> with nested arguments
 				</li>
 				<li>
 					<strong>control flow:</strong> classes inside <code>{'{#each}'}</code>,
