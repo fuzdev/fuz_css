@@ -1,13 +1,17 @@
 ---
 name: For Maintainers Only
+title: wait stop, read the text below
 about: |-
-  Only for approved topics from the GitHub discussions.
+  Do note use. Only for approved topics from the GitHub discussions.
 ---
 
 **WAIT STOP!!** Read below:
 
 fuz.dev uses discussions instead of issues for its GitHub repos.
-Go to https://github.com/fuzdev/fuz_css/discussions/new/choose and close this.
+Go to https://github.com/fuzdev/fuz_css/discussions/new/choose
+or https://github.com/fuzdev/fuz_css/discussions
+and close this.
+
 This keeps all issues actionable for maintainers,
 and discussions offer more affordances like voting, polls, Q&A, etc.
 
