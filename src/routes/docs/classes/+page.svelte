@@ -6,8 +6,8 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'classes';
@@ -49,13 +49,19 @@
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
-				Token classes map to <TomeLink name="variables">style variables</TomeLink>. They use
-				underscore syntax because they're shorthand for design tokens, so they have consistent
-				casing in both JS and CSS:
+				Token classes map to <TomeLink name="variables">style variables</TomeLink>:
 			</p>
 			<Code content="<div class=&quot;p_md gap_lg color_a_5 bg_1&quot;>" />
+			<p>
+				Token classes use <code>snake_case</code> because style variables are designed for optional
+				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing when
+				ignored), so the name is consistent across both JS and CSS, instead of converting between
+				<code>kebab-case</code>
+				and <code>camelCase</code>. This also makes token classes visually distinct from
+				<a href="#Literal-classes">literal classes</a>; we find this improves readability.
+			</p>
 			<h4>Spacing</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.p|pt|pr|pb|pl|px|py_xs5-xl15</code></li>
 				<li><code>.m|mt|mr|mb|ml|mx|my_xs5-xl15</code></li>
 				<li><code>.gap|column_gap|row_gap_xs5-xl15</code></li>
@@ -63,13 +69,13 @@
 				<li><code>.inset_xs5-xl15</code></li>
 			</ul>
 			<h4>Sizing</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.width|height_xs5-xl15</code></li>
 				<li><code>.width_upto|atleast_xs-xl</code></li>
 				<li><code>.height_upto|atleast_xs-xl</code></li>
 			</ul>
 			<h4>Colors</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.color_a-j_1-9</code></li>
 				<li><code>.bg|fg_1-9</code></li>
 				<li><code>.bg_a-j_1-9</code></li>
@@ -78,14 +84,14 @@
 				<li><code>.hue_a-j</code></li>
 			</ul>
 			<h4>Typography</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.font_family_sans|serif|mono</code></li>
 				<li><code>.font_size_xs-xl9</code></li>
 				<li><code>.line_height_xs-xl</code></li>
 				<li><code>.icon_size_xs-xl3</code></li>
 			</ul>
 			<h4>Borders</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.border_color_1-5</code></li>
 				<li><code>.border_color_a-j</code></li>
 				<li><code>.border_width_0-9</code></li>
@@ -93,7 +99,7 @@
 				<li><code>.outline_width_0|focused|active</code></li>
 			</ul>
 			<h4>Shadows</h4>
-			<ul class="unstyled token_classes">
+			<ul class="unstyled">
 				<li><code>.shadow_xs-xl</code></li>
 				<li><code>.shadow_inset_xs-xl</code></li>
 				<li><code>.shadow_color_a-j</code></li>
@@ -169,15 +175,15 @@ export const my_composites = {
 			</p>
 
 			<h4>Common patterns</h4>
-			<p>Layout and display:</p>
-			<ul class="unstyled mb_lg token_classes">
+			<h5>Layout and display:</h5>
+			<ul class="unstyled">
 				<li><code>.display:none|block|flex|grid|inline|inline-block|contents</code></li>
 				<li><code>.position:static|relative|absolute|fixed|sticky</code></li>
 				<li><code>.visibility:visible|hidden|collapse</code></li>
 				<li><code>.overflow:auto|hidden|scroll|clip|visible</code></li>
 			</ul>
-			<p>Flexbox and grid:</p>
-			<ul class="unstyled mb_lg token_classes">
+			<h5>Flexbox and grid:</h5>
+			<ul class="unstyled">
 				<li><code>.flex-direction:row|column|row-reverse|column-reverse</code></li>
 				<li><code>.flex-wrap:wrap|nowrap|wrap-reverse</code></li>
 				<li><code>.align-items:center|start|end|baseline|stretch</code></li>
@@ -186,16 +192,16 @@ export const my_composites = {
 				</li>
 				<li><code>.flex:1</code>, <code>.flex-grow:1|0</code>, <code>.flex-shrink:1|0</code></li>
 			</ul>
-			<p>Typography:</p>
-			<ul class="unstyled mb_lg token_classes">
+			<h5>Typography:</h5>
+			<ul class="unstyled">
 				<li><code>.text-align:left|center|right|justify</code></li>
 				<li><code>.white-space:normal|nowrap|pre|pre-wrap|pre-line</code></li>
 				<li><code>.word-break:normal|break-all|keep-all</code></li>
 				<li><code>.text-wrap:wrap|nowrap|balance|pretty</code></li>
 				<li><code>.user-select:none|auto|text|all</code></li>
 			</ul>
-			<p>Borders and effects:</p>
-			<ul class="unstyled mb_lg token_classes">
+			<h5>Borders and effects:</h5>
+			<ul class="unstyled">
 				<li><code>.border-style:none|solid|dashed|dotted</code></li>
 				<li><code>.float:left|right|none</code></li>
 				<li><code>.cursor:pointer|default|grab|text|not-allowed</code></li>
@@ -432,10 +438,11 @@ export const gen = gen_fuz_css();
 			</p>
 			<Code
 				lang="typescript"
-				content={`// Extracted because of naming convention
+				content={`// extracted because of naming convention
 const buttonClasses = 'btn primary';
 const cardClass = active ? 'card-active' : 'card';
-const button_class_name = 'btn-snake';`}
+const foo_class = 'foo';
+const bar_class_name = 'bar';`}
 			/>
 
 			<h4>3. Usage tracking</h4>
@@ -448,8 +455,8 @@ const button_class_name = 'btn-snake';`}
 				lang="svelte"
 				content={'<' +
 					`script>
-const styles = 'custom-style'; // traced from class={styles}
-const variant = 'primary';     // traced from clsx()
+	const styles = 'custom-style'; // traced from class={styles}
+	const variant = 'primary';     // traced from clsx()
 </script>
 
 <div class={styles}></div>
@@ -754,15 +761,3 @@ const Component = () => <div className={styles} />;`}
 		</TomeSection>
 	</TomeSection>
 </TomeContent>
-
-<style>
-	.token_classes {
-		font-family: var(--font_family_mono);
-	}
-	.token_classes li {
-		padding: var(--space_xs3);
-	}
-	.token_classes li:nth-child(odd) {
-		background-color: var(--fg_1);
-	}
-</style>
