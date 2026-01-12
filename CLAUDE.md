@@ -97,10 +97,11 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Main generator API for Gro, includes per-file caching with content hash validation
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure for incremental extraction (`.fuz/cache/css/`)
-- [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClasses` collection, `generate_classes_css()`, `CssClassInterpreterContext`, CSS escaping
-- [css_classes.ts](src/lib/css_classes.ts) - Token class definitions (spacing, sizing, colors, typography, borders, shadows)
-- [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions
-- [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`)
+- [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection class for tracking extracted classes per-file
+- [css_class_generation.ts](src/lib/css_class_generation.ts) - Type definitions (`CssClassDefinition`, `CssClassInterpreterContext`), `generate_classes_css()`, CSS escaping
+- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class definitions, the main class registry
+- [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions for token classes
+- [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`, `.pane`, `.panel`)
 - [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
 - [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
