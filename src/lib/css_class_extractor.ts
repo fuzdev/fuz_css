@@ -454,6 +454,12 @@ export const extract_from_ts = (
 
 	walk_script(ast, state);
 
+	// Second pass: extract from tracked variables that weren't already processed
+	// This handles JSX patterns where className={foo} is encountered after const foo = '...'
+	if (tracked_vars.size > 0) {
+		extract_from_tracked_vars_in_script(ast, state);
+	}
+
 	// Convert empty to null
 	return {
 		classes: classes.size > 0 ? classes : null,
@@ -853,8 +859,9 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 // Script AST walking
 
 /**
- * Extracts classes from a JSX attribute value (React className).
+ * Extracts classes from a JSX attribute value (React className, Preact/Solid class, Solid classList).
  * Handles string literals and expression containers.
+ * Sets in_class_context to enable variable tracking.
  */
 const extract_from_jsx_attribute_value = (value: unknown, state: WalkState): void => {
 	const node = value as {
@@ -873,8 +880,11 @@ const extract_from_jsx_attribute_value = (value: unknown, state: WalkState): voi
 			add_class(state, cls, location);
 		}
 	} else if (node.type === 'JSXExpressionContainer' && node.expression) {
-		// Dynamic className={expr}
+		// Dynamic className={expr} - enable variable tracking
+		const prev_context = state.in_class_context;
+		state.in_class_context = true;
 		extract_from_expression(node.expression as AST.SvelteNode, state);
+		state.in_class_context = prev_context;
 	}
 };
 
@@ -975,26 +985,34 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 };
 
 /**
- * Second pass to extract from tracked variables.
+ * Second pass to extract from tracked variables in Svelte scripts.
  */
 const extract_from_tracked_vars = (ast: AST.Root, state: WalkState): void => {
 	const scripts = [ast.instance?.content, ast.module?.content].filter(Boolean);
 
 	for (const script of scripts) {
-		const find_visitors: Visitors<Node, WalkState> = {
-			VariableDeclarator(node, {state}) {
-				const declarator = node as unknown as {id: {type: string; name: string}; init: unknown};
-				if (
-					declarator.id.type === 'Identifier' &&
-					state.tracked_vars.has(declarator.id.name) &&
-					!state.class_name_vars.has(declarator.id.name) &&
-					declarator.init
-				) {
-					extract_from_expression(declarator.init as AST.SvelteNode, state);
-				}
-			},
-		};
-
-		walk(script as unknown as Node, state, find_visitors);
+		extract_from_tracked_vars_in_script(script as unknown as Node, state);
 	}
+};
+
+/**
+ * Second pass to extract from tracked variables in a standalone script AST.
+ * Used for both Svelte scripts and standalone TS/JS files (including JSX).
+ */
+const extract_from_tracked_vars_in_script = (ast: Node, state: WalkState): void => {
+	const find_visitors: Visitors<Node, WalkState> = {
+		VariableDeclarator(node, {state}) {
+			const declarator = node as unknown as {id: {type: string; name: string}; init: unknown};
+			if (
+				declarator.id.type === 'Identifier' &&
+				state.tracked_vars.has(declarator.id.name) &&
+				!state.class_name_vars.has(declarator.id.name) &&
+				declarator.init
+			) {
+				extract_from_expression(declarator.init as AST.SvelteNode, state);
+			}
+		},
+	};
+
+	walk(ast, state, find_visitors);
 };

@@ -311,6 +311,173 @@ describe('variable tracking', () => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, ['on', 'off']);
 	});
+
+	test('extracts from arbitrarily-named variable used in class context', () => {
+		const source = `
+<script>
+	const styles = 'tracked-class another';
+</script>
+<div class={styles}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['tracked-class', 'another']);
+	});
+
+	test('extracts from variable with non-class name used in class array', () => {
+		const source = `
+<script>
+	const base = 'base-style';
+	const extra = 'extra-style';
+</script>
+<div class={[base, extra, 'literal']}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['literal', 'base-style', 'extra-style']);
+	});
+
+	test('extracts from variable used in clsx call within class attribute', () => {
+		const source = `
+<script>
+	const variant = 'primary';
+</script>
+<div class={clsx('btn', variant)}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['btn', 'primary']);
+	});
+
+	test('extracts from variable used in ternary class expression', () => {
+		const source = `
+<script>
+	const onStyle = 'state-on';
+	const offStyle = 'state-off';
+</script>
+<div class={active ? onStyle : offStyle}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['state-on', 'state-off']);
+	});
+
+	test('extracts from variable used in logical AND class expression', () => {
+		const source = `
+<script>
+	const conditional = 'shown-when-true';
+</script>
+<div class={isVisible && conditional}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['shown-when-true']);
+	});
+
+	test('extracts from variable used multiple times in different class contexts', () => {
+		const source = `
+<script>
+	const shared = 'shared-style';
+</script>
+<div class={shared}></div>
+<span class={[shared, 'other']}></span>
+<p class={clsx(shared, 'more')}></p>
+`;
+		const result = extract_from_svelte(source);
+		// shared-style appears once (deduped), plus the literals
+		class_names_equal(result, ['other', 'more', 'shared-style']);
+	});
+
+	test('extracts from variable with array value used in class context', () => {
+		const source = `
+<script>
+	const items = ['item-a', 'item-b'];
+</script>
+<div class={items}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['item-a', 'item-b']);
+	});
+
+	test('extracts from variable with ternary value used in class context', () => {
+		const source = `
+<script>
+	const dynamic = condition ? 'when-true' : 'when-false';
+</script>
+<div class={dynamic}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['when-true', 'when-false']);
+	});
+
+	test('does not extract from variable not used in class context', () => {
+		const source = `
+<script>
+	const notUsed = 'should-not-extract';
+	const alsoNotUsed = 'also-ignored';
+</script>
+<div data-value={notUsed}></div>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.classes).toBeNull();
+	});
+
+	test('extracts only from variables actually used in class contexts', () => {
+		const source = `
+<script>
+	const styles = 'extracted';
+	const other = 'not-extracted';
+</script>
+<div class={styles} data-other={other}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['extracted']);
+	});
+
+	test('extracts from variable passed to component class prop', () => {
+		const source = `
+<script>
+	const componentStyle = 'component-class';
+</script>
+<Button class={componentStyle}></Button>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['component-class']);
+	});
+
+	test('extracts from variable in nested clsx array within class attribute', () => {
+		const source = `
+<script>
+	const nested = 'deep-class';
+</script>
+<div class={clsx(['outer', nested])}></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['outer', 'deep-class']);
+	});
+
+	test('does not track variables in standalone clsx calls outside class attributes', () => {
+		const source = `
+<script>
+	const variant = 'primary';
+	const result = clsx('btn', variant);
+</script>
+<div></div>
+`;
+		const result = extract_from_svelte(source);
+		// Only 'btn' is extracted (literal in clsx), not 'primary' (variant not tracked)
+		class_names_equal(result, ['btn']);
+	});
+
+	test('does not support transitive variable tracking', () => {
+		const source = `
+<script>
+	const original = 'original-class';
+	const alias = original;
+</script>
+<div class={alias}></div>
+`;
+		const result = extract_from_svelte(source);
+		// 'alias' is tracked, but its value is another identifier, not a string literal
+		// Transitive tracking is not supported, so no classes are extracted
+		expect(result.classes).toBeNull();
+		expect(result.tracked_vars?.has('alias')).toBe(true);
+	});
 });
 
 describe('TypeScript extraction', () => {
@@ -1145,7 +1312,7 @@ const Button = ({ variant }) => (
 		class_names_equal(result, ['active', 'btn-primary']);
 	});
 
-	test('Solid: does not extract computed keys from classList', async () => {
+	test('Solid: does not extract computed keys from classList (parameter)', async () => {
 		const jsx = (await import('acorn-jsx')).default;
 		const source = `
 const Dynamic = ({ className }) => (
@@ -1153,8 +1320,20 @@ const Dynamic = ({ className }) => (
 );
 `;
 		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
-		// Computed keys can't be statically analyzed, only static keys extracted
+		// Function parameters can't be statically analyzed
 		class_names_equal(result, ['static-class']);
+	});
+
+	test('Solid: extracts from variable in computed key via naming convention', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const dynamicClass = 'extracted-via-naming';
+const Component = () => <div classList={{ [dynamicClass]: true, static: true }} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		// dynamicClass matches *Class naming convention, so it's extracted
+		// Note: computed keys don't trigger usage tracking, only naming convention works here
+		class_names_equal(result, ['extracted-via-naming', 'static']);
 	});
 });
 
@@ -1178,5 +1357,88 @@ const Component = ({ opacity }) => (
 		expect(result.classes).toBeNull();
 		expect(result.diagnostics).not.toBeNull();
 		expect(result.diagnostics?.[0]?.level).toBe('warning');
+	});
+});
+
+describe('JSX variable tracking', () => {
+	test('tracks variable in className={foo}', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const foo = 'my-class';
+const Component = () => <div className={foo} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['my-class']);
+		expect(result.tracked_vars?.has('foo')).toBe(true);
+	});
+
+	test('tracks variable in class={foo} (Preact style)', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const foo = 'my-class';
+const Component = () => <div class={foo} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['my-class']);
+		expect(result.tracked_vars?.has('foo')).toBe(true);
+	});
+
+	test('tracks multiple variables in className={clsx(foo, bar)}', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const foo = 'foo-class';
+const bar = 'bar-class';
+const Component = () => <div className={clsx(foo, bar)} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['foo-class', 'bar-class']);
+		expect(result.tracked_vars?.has('foo')).toBe(true);
+		expect(result.tracked_vars?.has('bar')).toBe(true);
+	});
+
+	test('tracks variables in ternary className={cond ? foo : bar}', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const foo = 'foo-class';
+const bar = 'bar-class';
+const Component = () => <div className={cond ? foo : bar} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['foo-class', 'bar-class']);
+		expect(result.tracked_vars?.has('foo')).toBe(true);
+		expect(result.tracked_vars?.has('bar')).toBe(true);
+	});
+
+	test('tracks variable in logical AND className={cond && foo}', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const foo = 'conditional-class';
+const Component = () => <div className={isActive && foo} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['conditional-class']);
+		expect(result.tracked_vars?.has('foo')).toBe(true);
+	});
+
+	test('tracks variable with array value in className', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const classes = ['class-a', 'class-b'];
+const Component = () => <div className={clsx(classes)} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['class-a', 'class-b']);
+	});
+
+	test('extracts from variable in classList computed key via naming convention (Solid)', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const activeClass = 'is-active';
+const Component = () => <div classList={{ [activeClass]: isActive, base: true }} />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		// activeClass is extracted via naming convention (*Class pattern), not usage tracking
+		// 'base' is extracted as a static key
+		class_names_equal(result, ['is-active', 'base']);
 	});
 });

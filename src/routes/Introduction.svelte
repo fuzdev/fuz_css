@@ -9,7 +9,9 @@
 	Fuz CSS is a framework and design system built on semantic styles and style variables. It styles
 	HTML elements by default and integrates custom properties, themes, and utility classes into a
 	coherent system. It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and
-	other JSX frameworks. See <a href="https://ui.fuz.dev/">Fuz UI</a> for the companion Svelte integration.
+	other JSX frameworks. See <a href="https://ui.fuz.dev/">Fuz UI</a> for the companion Svelte
+	components and the
+	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support docs</a>.
 </p>
 <p>
 	The only required parts are a

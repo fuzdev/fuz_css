@@ -402,9 +402,11 @@ export const gen = gen_fuz_css();
 			<p>
 				The generator scans <code>.svelte</code>, <code>.html</code>, <code>.ts</code>,
 				<code>.js</code>, <code>.tsx</code>, and <code>.jsx</code> files in your project (excluding test
-				and generated files) and extracts class names from these patterns:
+				and generated files) and extracts class names using three complementary mechanisms:
 			</p>
-			<p>Svelte and HTML files:</p>
+
+			<h4>1. Direct extraction from class attributes</h4>
+			<p>String literals and expressions in class contexts are extracted directly:</p>
 			<ul>
 				<li><code>class="..."</code> — static strings</li>
 				<li><code>{'class={[...]}'}</code> — array syntax (Svelte 5.16+)</li>
@@ -417,23 +419,38 @@ export const gen = gen_fuz_css();
 					function calls
 				</li>
 			</ul>
+
+			<h4>2. Naming convention</h4>
 			<p>
-				TypeScript/JS files and <code>&lt;script&gt;</code> tags in Svelte:
+				Variables ending with <code>class</code>, <code>classes</code>, <code>className</code>, or
+				<code>classNames</code> (case-insensitive) are always extracted, regardless of where they're used:
 			</p>
-			<ul>
-				<li>
-					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
-					function calls
-				</li>
-				<li>
-					Variables named <code>*class</code>, <code>*classes</code>, <code>*className</code>,
-					<code>*classNames</code>
-				</li>
-				<li>
-					Object properties with <code>class</code>, <code>className</code>, or
-					<code>*classes</code> keys
-				</li>
-			</ul>
+			<Code
+				lang="typescript"
+				content={`// Extracted because of naming convention
+const buttonClasses = 'btn primary';
+const cardClass = active ? 'card-active' : 'card';`}
+			/>
+
+			<h4>3. Usage tracking</h4>
+			<p>
+				Variables used in class attributes are traced back to their definitions, even if they don't
+				follow the naming convention:
+			</p>
+			<Code
+				lang="svelte"
+				content={'<!-- In your script -->\n' +
+					"const styles = 'custom-style'; // traced from class={styles}\n" +
+					"const variant = 'primary';     // traced from clsx()\n\n" +
+					'<!-- In your template -->\n' +
+					'<div class={styles}></div>\n' +
+					"<button class={clsx('btn', variant)}></button>"}
+			/>
+			<p>
+				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
+				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls outside
+				class attributes don't trigger tracking — use the naming convention for those cases.
+			</p>
 		</TomeSection>
 
 		<TomeSection>
@@ -471,7 +488,7 @@ export const gen = gen_fuz_css({
 		<TomeSectionHeader text="Practical patterns" />
 
 		<h4>Child component styling</h4>
-		<p>The primary use case -- passing styles across component boundaries:</p>
+		<p>The primary motivating use case is passing styles across component boundaries:</p>
 		<Code
 			content={`<!-- Parent controls hover behavior -->
 <div class="hover:shadow_lg hover:transform:translateY(-2px)">
@@ -482,8 +499,9 @@ export const gen = gen_fuz_css({
 
 		<h4>Conditional classes</h4>
 		<p>
-			Svelte <a href="https://svelte.dev/docs/svelte/class">supports</a> object and array patterns to
-			define classes, and Fuz CSS inspects the AST to collect the ones you use:
+			Svelte <a href="https://svelte.dev/docs/svelte/class">supports</a> object and array patterns
+			to define classes with <a href="https://github.com/lukeed/clsx">clsx</a>, and Fuz CSS inspects
+			the AST to collect the ones you use:
 		</p>
 		<!-- eslint-disable-next-line no-useless-concat -->
 		<Code
@@ -583,14 +601,14 @@ export const gen = gen_fuz_css({
 		<p>
 			Fuz CSS is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
 			work with any framework or plain HTML. The utility class generator has varying
-			<a href="#class-detection">detection</a> support:
+			<a href="#Class-detection">detection</a> support:
 		</p>
 		<table>
 			<thead>
 				<tr>
-					<th>Framework</th>
-					<th>Detection</th>
-					<th>Notes</th>
+					<th>framework</th>
+					<th>detection</th>
+					<th>notes</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -639,7 +657,7 @@ export const gen = gen_fuz_css({
 			</tbody>
 		</table>
 		<p>
-			All frameworks support <a href="#dynamic-class-hints"><code>@fuz-classes</code></a> comment
+			All frameworks support <a href="#Dynamic-class-hints"><code>@fuz-classes</code></a> comment
 			hints and the
 			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
 			that can't be statically detected. Other acorn plugins can be added via
@@ -651,7 +669,7 @@ export const gen = gen_fuz_css({
 			<p>
 				The extractor uses AST parsing to understand <a href="https://svelte.dev/docs/svelte/class"
 					>Svelte's class syntax</a
-				> deeply. Supported constructs:
+				>. Supported constructs:
 			</p>
 			<ul>
 				<li>
@@ -671,20 +689,14 @@ export const gen = gen_fuz_css({
 					class variables
 				</li>
 				<li>
-					<strong>control flow:</strong> Classes inside <code>{'{#each}'}</code>,
+					<strong>control flow:</strong> classes inside <code>{'{#each}'}</code>,
 					<code>{'{#if}'}</code>, <code>{'{#snippet}'}</code>, <code>{'{#await}'}</code>
 				</li>
 				<li>
-					<strong>scripts:</strong> Both <code>&lt;script&gt;</code> and
-					<code>&lt;script module&gt;</code>, variables matching <code>*class</code>/<code
-						>*Classes</code
-					>
+					<strong>scripts:</strong> both <code>&lt;script&gt;</code> and
+					<code>&lt;script module&gt;</code>, with naming convention and usage tracking
 				</li>
 			</ul>
-			<p>
-				Template literals with expressions extract only complete whitespace-bounded tokens —
-				<code>{`\`icon-\${size}\``}</code> won't extract the fragment <code>icon-</code>.
-			</p>
 		</TomeSection>
 
 		<TomeSection>
@@ -704,11 +716,32 @@ export const gen = gen_fuz_css({
 	acorn_plugins: [jsx()],
 });`}
 			/>
-			<p>
-				This enables extraction from <code>.tsx</code> and <code>.jsx</code> files, including static
-				<code>className="..."</code>
-				and dynamic <code>{'className={clsx(...)}'}</code> patterns.
-			</p>
+			<p>Supported JSX patterns:</p>
+			<ul>
+				<li>
+					<code>className="..."</code> and <code>class="..."</code> — static strings
+				</li>
+				<li>
+					<code>{'className={clsx(...)}'}</code> — utility function calls
+				</li>
+				<li>
+					<code>{'className={cond ? "a" : "b"}'}</code> — ternary and logical expressions
+				</li>
+				<li>
+					<code>{'classList={{active: cond}}'}</code> — Solid's classList (static keys)
+				</li>
+				<li>
+					<strong>usage tracking:</strong> variables in <code>className</code>, <code>class</code>,
+					and
+					<code>classList</code> are traced back to their definitions
+				</li>
+			</ul>
+			<Code
+				lang="tsx"
+				content={`// Variable tracking works in JSX too
+const styles = 'card hover:shadow_lg';
+const Component = () => <div className={styles} />;`}
+			/>
 		</TomeSection>
 	</TomeSection>
 </TomeContent>
