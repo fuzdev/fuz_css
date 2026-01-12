@@ -426,14 +426,16 @@ export const gen = gen_fuz_css();
 
 			<h4>2. Naming convention</h4>
 			<p>
-				Variables ending with <code>class</code>, <code>classes</code>, <code>className</code>, or
-				<code>classNames</code> (case-insensitive) are always extracted, regardless of where they're used:
+				Variables ending with <code>class</code>, <code>classes</code>, <code>className</code>,
+				<code>classNames</code>, <code>class_name</code>, or <code>class_names</code> (case-insensitive)
+				are always extracted, regardless of where they're used:
 			</p>
 			<Code
 				lang="typescript"
 				content={`// Extracted because of naming convention
 const buttonClasses = 'btn primary';
-const cardClass = active ? 'card-active' : 'card';`}
+const cardClass = active ? 'card-active' : 'card';
+const button_class_name = 'btn-snake';`}
 			/>
 
 			<h4>3. Usage tracking</h4>
@@ -441,14 +443,17 @@ const cardClass = active ? 'card-active' : 'card';`}
 				Variables used in class attributes are traced back to their definitions, even if they don't
 				follow the naming convention:
 			</p>
+			<!-- eslint-disable-next-line no-useless-concat -->
 			<Code
 				lang="svelte"
-				content={'<!-- In your script -->\n' +
-					"const styles = 'custom-style'; // traced from class={styles}\n" +
-					"const variant = 'primary';     // traced from clsx()\n\n" +
-					'<!-- In your template -->\n' +
-					'<div class={styles}></div>\n' +
-					"<button class={clsx('btn', variant)}></button>"}
+				content={'<' +
+					`script>
+const styles = 'custom-style'; // traced from class={styles}
+const variant = 'primary';     // traced from clsx()
+</script>
+
+<div class={styles}></div>
+<button class={clsx('btn', variant)}></button>`}
 			/>
 			<p>
 				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
@@ -507,7 +512,6 @@ export const gen = gen_fuz_css({
 			to define classes with <a href="https://github.com/lukeed/clsx">clsx</a>, and Fuz CSS inspects
 			the AST to collect the ones you use:
 		</p>
-		<!-- eslint-disable-next-line no-useless-concat -->
 		<Code
 			lang="svelte"
 			content={`<span class={[
@@ -678,7 +682,8 @@ export const gen = gen_fuz_css({
 			<ul>
 				<li>
 					<strong>attributes:</strong> <code>class="..."</code>, <code>{'class={[...]}'}</code>,
-					<code>{'class={{...}}'}</code>, <code>class:name</code>
+					<code>{'class={{...}}'}</code> (identifier and string-literal keys),
+					<code>class:name</code>
 				</li>
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
@@ -690,7 +695,7 @@ export const gen = gen_fuz_css({
 				</li>
 				<li>
 					<strong>utility calls:</strong> <code>clsx()</code>, <code>cn()</code>, <code>cx()</code>,
-					<code>classNames()</code> with nested arguments
+					<code>classNames()</code> with nested arrays, objects, and utility calls
 				</li>
 				<li>
 					<strong>control flow:</strong> classes inside <code>{'{#each}'}</code>,

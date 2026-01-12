@@ -147,7 +147,7 @@ const CLASS_UTILITY_FUNCTIONS = new Set([
 const SVELTE_RUNES = new Set(['$derived', '$state']);
 
 // Pattern for variables with class-related names
-const CLASS_NAME_PATTERN = /(class|classes|classname|classnames)$/i;
+const CLASS_NAME_PATTERN = /(class|classes|class_?names?)$/i;
 
 /**
  * State maintained during AST walking.
