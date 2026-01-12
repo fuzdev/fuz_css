@@ -134,6 +134,17 @@ export const my_composites = {
 	},
 };`}
 			/>
+			<p>Register custom composites with the generator:</p>
+			<Code
+				lang="typescript"
+				content={`// fuz.gen.css.ts
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+import {my_composites} from '$lib/composites.js';
+
+export const gen = gen_fuz_css({
+	class_definitions: my_composites,
+});`}
+			/>
 			<p>
 				The <code>classes</code> property resolves referenced classes and combines their
 				declarations. When both <code>classes</code> and <code>declaration</code> are present, the explicit
@@ -174,6 +185,33 @@ export const my_composites = {
 				multi-selector CSS can't be inlined into a single rule. Use <code>declaration</code> for custom
 				CSS or apply ruleset classes separately in your markup.
 			</p>
+			<aside>
+				<p>
+					If you reference a ruleset class in <code>classes</code>, you'll see:
+					<code>Cannot reference ruleset class "clickable"</code>. Apply the class directly in your
+					markup instead.
+				</p>
+				<p>
+					Circular references produce: <code>Circular reference detected in class "card"</code>.
+				</p>
+			</aside>
+
+			<h4>Generated output</h4>
+			<p>Given these definitions:</p>
+			<Code
+				lang="typescript"
+				content={`card_base: {classes: ['p_lg', 'shadow_md']},
+card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_color);'},`}
+			/>
+			<p>The generated CSS for <code>.card</code>:</p>
+			<Code
+				lang="css"
+				content={`.card {
+  padding: var(--space_lg);
+  box-shadow: var(--shadow_md);
+  border: 1px solid var(--border_color);
+}`}
+			/>
 
 			<h4>Modifiers</h4>
 			<p>
@@ -186,18 +224,33 @@ export const my_composites = {
 			/>
 
 			<h4>Builtin composites</h4>
+			<p>
+				<strong>Composable</strong> (can be used in <code>classes</code> arrays):
+			</p>
 			<ul>
 				<li><code>.box</code> - centered flex container</li>
 				<li><code>.row</code> - horizontal flex row</li>
 				<li><code>.column</code> - vertical flex column</li>
 				<li><code>.formatted</code> - formatted text block</li>
 				<li><code>.ellipsis</code> - text overflow ellipsis</li>
-				<li><code>.selected</code> - selected state styling</li>
-				<li><code>.selectable</code> - selectable element styling</li>
-				<li><code>.clickable</code> - clickable element styling</li>
 				<li><code>.pane</code> - pane container</li>
 				<li><code>.panel</code> - panel container</li>
 				<li><code>.icon_button</code> - icon button styling</li>
+				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
+				<li><code>.circular</code> - 50% border-radius</li>
+				<li>
+					<code>.width_upto_xs-xl</code> / <code>.width_atleast_xs-xl</code> - width constraints
+				</li>
+				<li>
+					<code>.height_upto_xs-xl</code> / <code>.height_atleast_xs-xl</code> - height constraints
+				</li>
+			</ul>
+			<p>
+				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):
+			</p>
+			<ul>
+				<li><code>.selectable</code> - selectable element styling</li>
+				<li><code>.clickable</code> - clickable element styling</li>
 				<li><code>.plain</code> - plain/reset styling</li>
 				<li><code>.menu_item</code> - menu item styling</li>
 				<li><code>.chevron</code> - chevron indicator</li>
@@ -557,6 +610,16 @@ const color = get_dynamic_color();`}
 
 export const gen = gen_fuz_css({
 	include_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
+});`}
+			/>
+			<p>
+				Use <DeclarationLink name="GenFuzCssOptions">exclude_classes</DeclarationLink> to filter out false
+				positives from extraction:
+			</p>
+			<Code
+				lang="ts"
+				content={`export const gen = gen_fuz_css({
+	exclude_classes: ['some:false:positive'],
 });`}
 			/>
 		</TomeSection>
