@@ -17,40 +17,28 @@
 
 <TomeContent {tome}>
 	<TomeSection>
-		<TomeSectionHeader text="Class types" />
-		<p>Fuz CSS provides three types of classes:</p>
-		<table>
-			<thead>
-				<tr>
-					<th>class type</th>
-					<th>purpose</th>
-					<th>examples</th>
-				</tr>
-			</thead>
-			<tbody>
-				<tr>
-					<td><strong>token classes</strong></td>
-					<td>map to style variables (CSS custom properties)</td>
-					<td><code>.p_md</code>, <code>.color_a_5</code>, <code>.gap_lg</code></td>
-				</tr>
-				<tr>
-					<td><strong>composite classes</strong></td>
-					<td>multi-property groupings</td>
-					<td><code>.box</code>, <code>.row</code>, <code>.ellipsis</code></td>
-				</tr>
-				<tr>
-					<td><strong>literal classes</strong></td>
-					<td>arbitrary CSS property:value pairs</td>
-					<td><code>.display:flex</code>, <code>.hover:opacity:80%</code></td>
-				</tr>
-			</tbody>
-		</table>
+		<TomeSectionHeader text="Utility class types" />
 		<p>
-			<strong>Token classes</strong> are the primary choice for spacing, colors, and sizes -- they
-			ensure consistency with the design system. <strong>Composite classes</strong> provide
-			groupings for repeated patterns. <strong>Literal classes</strong> are an escape hatch for arbitrary
-			CSS, especially useful for cross-component styling and responsive/state modifiers.
+			Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
+			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
+			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag for whatever
+			reason. They're generated on-demand to include only what you use. Compared to Tailwind, Fuz CSS
+			utility classes follow the grain of semantic HTML with custom properties rather than having primacy,
+			leading to different design choices.
 		</p>
+
+		<p>Compared to inline <code>style</code> attributes, classes:</p>
+		<ul>
+			<li>
+				are more powerful with modifiers for responsive widths, hover/active/etc, and dark mode, and
+			</li>
+			<li>provide more control over specificity</li>
+			<li>
+				are more ergonomic to compose with Svelte's <a href="https://svelte.dev/docs/svelte/class"
+					>clsx support</a
+				>
+			</li>
+		</ul>
 
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
@@ -146,7 +134,7 @@ export const my_composites = {
 		<TomeSection>
 			<TomeSectionHeader text="Literal classes" tag="h3" />
 			<p>
-				Fuz supports CSS-literal syntax: <code>property:value</code>.
+				Fuz supports an open-ended CSS-literal syntax: <code>property:value</code>.
 			</p>
 			<ul>
 				<li>
@@ -154,11 +142,7 @@ export const my_composites = {
 						>&lt;style&gt;</code
 					> tags
 				</li>
-				<li>enables composition across component boundaries</li>
-				<li>
-					more power than inline <code>style</code> attributes (modifiers for hover, responsive, dark
-					mode)
-				</li>
+				<li>enables arbitrary composition across component boundaries</li>
 			</ul>
 			<Code
 				content={`<!-- basic syntax: property:value -->
