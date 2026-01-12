@@ -274,13 +274,13 @@ const parse_fuz_classes_comment = (
 	const has_colon = match[1] === ':';
 	const class_list = match[2]!;
 
-	// Emit warning if colon was used
+	// Emit warning if colon was used (unnecessary but supported)
 	if (has_colon) {
 		diagnostics.push({
 			phase: 'extraction',
 			level: 'warning',
-			message: '@fuz-classes: (with colon) is deprecated, use @fuz-classes (without colon)',
-			suggestion: 'Remove the colon after @fuz-classes',
+			message: '@fuz-classes: colon is unnecessary',
+			suggestion: 'Use @fuz-classes without the colon',
 			location,
 		});
 	}

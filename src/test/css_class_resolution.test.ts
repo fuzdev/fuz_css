@@ -1,7 +1,7 @@
 import {test, expect, describe} from 'vitest';
 
 import {resolve_classes, resolve_class_definition} from '$lib/css_class_resolution.js';
-import type {CssClassDefinition, CssClassDefinitionItem} from '$lib/css_class_generation.js';
+import type {CssClassDefinition, CssClassDefinitionStatic} from '$lib/css_class_generation.js';
 
 describe('resolve_classes', () => {
 	describe('simple token class references', () => {
@@ -683,7 +683,7 @@ describe('resolve_classes', () => {
 describe('resolve_class_definition', () => {
 	describe('declaration-only definitions', () => {
 		test('returns declaration directly', () => {
-			const def: CssClassDefinitionItem = {declaration: 'color: red;'};
+			const def: CssClassDefinitionStatic = {declaration: 'color: red;'};
 			const definitions: Record<string, CssClassDefinition> = {};
 
 			const result = resolve_class_definition(def, 'test', definitions);
@@ -696,7 +696,7 @@ describe('resolve_class_definition', () => {
 		});
 
 		test('trims declaration whitespace', () => {
-			const def: CssClassDefinitionItem = {declaration: '  color: red;  '};
+			const def: CssClassDefinitionStatic = {declaration: '  color: red;  '};
 			const definitions: Record<string, CssClassDefinition> = {};
 
 			const result = resolve_class_definition(def, 'test', definitions);
@@ -708,7 +708,7 @@ describe('resolve_class_definition', () => {
 		});
 
 		test('warns about empty declaration', () => {
-			const def: CssClassDefinitionItem = {declaration: ''};
+			const def: CssClassDefinitionStatic = {declaration: ''};
 			const definitions: Record<string, CssClassDefinition> = {};
 
 			const result = resolve_class_definition(def, 'test', definitions);
@@ -727,7 +727,7 @@ describe('resolve_class_definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
-			const def: CssClassDefinitionItem = {classes: ['p_lg']};
+			const def: CssClassDefinitionStatic = {classes: ['p_lg']};
 
 			const result = resolve_class_definition(def, 'test', definitions);
 
@@ -743,7 +743,7 @@ describe('resolve_class_definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
-			const def: CssClassDefinitionItem = {
+			const def: CssClassDefinitionStatic = {
 				classes: ['p_lg'],
 				declaration: 'margin: 10px;',
 			};
@@ -760,7 +760,7 @@ describe('resolve_class_definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
-			const def: CssClassDefinitionItem = {
+			const def: CssClassDefinitionStatic = {
 				classes: ['p_lg'],
 				declaration: '  margin: 10px;  ',
 			};
@@ -777,7 +777,7 @@ describe('resolve_class_definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
-			const def: CssClassDefinitionItem = {
+			const def: CssClassDefinitionStatic = {
 				classes: ['p_lg'],
 				declaration: '',
 			};
@@ -795,7 +795,7 @@ describe('resolve_class_definition', () => {
 
 	describe('ruleset definitions', () => {
 		test('returns empty declaration for ruleset', () => {
-			const def: CssClassDefinitionItem = {ruleset: '.test { color: red; }'};
+			const def: CssClassDefinitionStatic = {ruleset: '.test { color: red; }'};
 			const definitions: Record<string, CssClassDefinition> = {};
 
 			const result = resolve_class_definition(def, 'test', definitions);
@@ -812,7 +812,7 @@ describe('resolve_class_definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				self_ref: {classes: ['self_ref']},
 			};
-			const def: CssClassDefinitionItem = {classes: ['self_ref']};
+			const def: CssClassDefinitionStatic = {classes: ['self_ref']};
 
 			// Note: resolve_class_definition adds the class name to the stack
 			const result = resolve_class_definition(def, 'self_ref', definitions);
@@ -827,7 +827,7 @@ describe('resolve_class_definition', () => {
 	describe('error propagation', () => {
 		test('propagates unknown class error', () => {
 			const definitions: Record<string, CssClassDefinition> = {};
-			const def: CssClassDefinitionItem = {classes: ['nonexistent']};
+			const def: CssClassDefinitionStatic = {classes: ['nonexistent']};
 
 			const result = resolve_class_definition(def, 'test', definitions);
 

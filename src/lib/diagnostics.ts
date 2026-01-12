@@ -66,7 +66,7 @@ export type Diagnostic = ExtractionDiagnostic | GenerationDiagnostic;
  * Diagnostic from CSS class interpretation.
  * Used internally by interpreters; converted to GenerationDiagnostic with locations.
  */
-export interface CssClassDiagnostic {
+export interface InterpreterDiagnostic {
 	level: 'error' | 'warning';
 	message: string;
 	class_name: string;
@@ -78,13 +78,13 @@ export interface CssClassDiagnostic {
 //
 
 /**
- * Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.
+ * Converts a InterpreterDiagnostic to a GenerationDiagnostic with locations.
  *
  * @param diagnostic - Interpreter diagnostic to convert
  * @param locations - Source locations where the class was used
  */
 export const create_generation_diagnostic = (
-	diagnostic: CssClassDiagnostic,
+	diagnostic: InterpreterDiagnostic,
 	locations: Array<SourceLocation> | null,
 ): GenerationDiagnostic => ({
 	phase: 'generation',

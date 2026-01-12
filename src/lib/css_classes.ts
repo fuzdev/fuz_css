@@ -71,7 +71,6 @@ export class CssClasses {
 
 	/**
 	 * Gets all unique class names as a Set.
-	 * For backward compatibility.
 	 */
 	get(): Set<string> {
 		if (this.#dirty) {

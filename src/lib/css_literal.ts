@@ -13,7 +13,7 @@
 
 import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
 
-import {type CssClassDiagnostic} from './diagnostics.js';
+import {type InterpreterDiagnostic} from './diagnostics.js';
 import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.js';
 
 //
@@ -52,8 +52,8 @@ export interface ParsedCssLiteral {
  * Callers should use a guard pattern: `if (result.diagnostics) { ... }`
  */
 export type CssLiteralParseResult =
-	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic> | null}
-	| {ok: false; error: CssClassDiagnostic};
+	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null}
+	| {ok: false; error: InterpreterDiagnostic};
 
 /**
  * Extracted modifiers from a class name.
@@ -75,7 +75,7 @@ export interface ExtractedModifiers {
  */
 export type ModifierExtractionResult =
 	| {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>}
-	| {ok: false; error: CssClassDiagnostic};
+	| {ok: false; error: InterpreterDiagnostic};
 
 /**
  * Result of interpreting a CSS-literal class.
@@ -84,8 +84,8 @@ export type ModifierExtractionResult =
  * Callers should use a guard pattern: `if (result.warnings) { ... }`
  */
 export type InterpretCssLiteralResult =
-	| {ok: true; output: CssLiteralOutput; warnings: Array<CssClassDiagnostic> | null}
-	| {ok: false; error: CssClassDiagnostic};
+	| {ok: true; output: CssLiteralOutput; warnings: Array<InterpreterDiagnostic> | null}
+	| {ok: false; error: InterpreterDiagnostic};
 
 //
 // CSS Property Validation
@@ -485,7 +485,7 @@ export const parse_css_literal = (
 	const property = segments[segments.length - 2]!;
 	const modifier_segments = segments.slice(0, -2);
 
-	let diagnostics: Array<CssClassDiagnostic> | null = null;
+	let diagnostics: Array<InterpreterDiagnostic> | null = null;
 
 	// Validate modifiers using shared validation logic
 	const modifier_result = extract_and_validate_modifiers(modifier_segments, class_name);

@@ -7,15 +7,15 @@
  * @module
  */
 
-import type {CssClassDiagnostic} from './diagnostics.js';
-import type {CssClassDefinition, CssClassDefinitionItem} from './css_class_generation.js';
+import type {InterpreterDiagnostic} from './diagnostics.js';
+import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.js';
 
 /**
  * Result from resolving a `classes` array to combined declarations.
  */
 export type ResolveClassesResult =
-	| {ok: true; declaration: string; warnings: Array<CssClassDiagnostic> | null}
-	| {ok: false; error: CssClassDiagnostic};
+	| {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null}
+	| {ok: false; error: InterpreterDiagnostic};
 
 /**
  * Resolves a class definition's declaration, handling `classes` composition.
@@ -30,11 +30,11 @@ export type ResolveClassesResult =
  * @returns Combined declaration or an error
  */
 export const resolve_class_definition = (
-	def: CssClassDefinitionItem,
+	def: CssClassDefinitionStatic,
 	class_name: string,
 	definitions: Record<string, CssClassDefinition | undefined>,
 ): ResolveClassesResult => {
-	let warnings: Array<CssClassDiagnostic> | null = null;
+	let warnings: Array<InterpreterDiagnostic> | null = null;
 
 	// Handle classes-based definitions
 	if ('classes' in def && def.classes) {
@@ -115,7 +115,7 @@ export const resolve_classes = (
 	original_class_name: string,
 ): ResolveClassesResult => {
 	const declarations: Array<string> = [];
-	let warnings: Array<CssClassDiagnostic> | null = null;
+	let warnings: Array<InterpreterDiagnostic> | null = null;
 
 	// Snapshot of visited at start - classes added during this array's processing are redundant
 	const visited_at_start: ReadonlySet<string> = new Set(visited);

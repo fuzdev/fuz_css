@@ -278,7 +278,7 @@
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
-				"dependents": ["css_class_definitions.ts", "gen_fuz_css.ts"]
+				"dependents": ["css_class_definitions.ts"]
 			},
 			{
 				"path": "css_class_definitions.ts",
@@ -531,11 +531,11 @@
 						]
 					},
 					{
-						"name": "CssClassDefinitionClasses",
+						"name": "CssClassDefinitionComposition",
 						"kind": "type",
 						"doc_comment": "Pure utility composition (classes only).",
 						"source_line": 47,
-						"type_signature": "CssClassDefinitionClasses",
+						"type_signature": "CssClassDefinitionComposition",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
 							{
@@ -606,11 +606,11 @@
 						]
 					},
 					{
-						"name": "CssClassDefinitionItem",
+						"name": "CssClassDefinitionStatic",
 						"kind": "type",
 						"doc_comment": "Static definitions (not interpreter-based).",
 						"source_line": 68,
-						"type_signature": "CssClassDefinitionItem"
+						"type_signature": "CssClassDefinitionStatic"
 					},
 					{
 						"name": "CssClassDefinition",
@@ -635,7 +635,7 @@
 							{
 								"name": "diagnostics",
 								"kind": "variable",
-								"type_signature": "Array<CssClassDiagnostic>",
+								"type_signature": "Array<InterpreterDiagnostic>",
 								"doc_comment": "Diagnostics array to collect warnings and errors"
 							},
 							{
@@ -1027,13 +1027,13 @@
 						"kind": "function",
 						"doc_comment": "Resolves a class definition's declaration, handling `classes` composition.\n\nIf the definition has a `classes` property, resolves those classes recursively\nand combines with any explicit `declaration`. If no `classes`, returns the\nexplicit `declaration` directly.",
 						"source_line": 32,
-						"type_signature": "(def: CssClassDefinitionItem, class_name: string, definitions: Record<string, CssClassDefinition | undefined>): ResolveClassesResult",
+						"type_signature": "(def: CssClassDefinitionStatic, class_name: string, definitions: Record<string, CssClassDefinition | undefined>): ResolveClassesResult",
 						"return_type": "ResolveClassesResult",
 						"return_description": "Combined declaration or an error",
 						"parameters": [
 							{
 								"name": "def",
-								"type": "CssClassDefinitionItem",
+								"type": "CssClassDefinitionStatic",
 								"description": "- The class definition to resolve"
 							},
 							{
@@ -1154,7 +1154,7 @@
 							{
 								"name": "get",
 								"kind": "function",
-								"doc_comment": "Gets all unique class names as a Set.\nFor backward compatibility.",
+								"doc_comment": "Gets all unique class names as a Set.",
 								"type_signature": "(): Set<string>",
 								"return_type": "Set<string>",
 								"parameters": []
@@ -2063,11 +2063,11 @@
 						"type_signature": "Diagnostic"
 					},
 					{
-						"name": "CssClassDiagnostic",
+						"name": "InterpreterDiagnostic",
 						"kind": "type",
 						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to GenerationDiagnostic with locations.",
 						"source_line": 69,
-						"type_signature": "CssClassDiagnostic",
+						"type_signature": "InterpreterDiagnostic",
 						"properties": [
 							{
 								"name": "level",
@@ -2094,14 +2094,14 @@
 					{
 						"name": "create_generation_diagnostic",
 						"kind": "function",
-						"doc_comment": "Converts a CssClassDiagnostic to a GenerationDiagnostic with locations.",
+						"doc_comment": "Converts a InterpreterDiagnostic to a GenerationDiagnostic with locations.",
 						"source_line": 86,
-						"type_signature": "(diagnostic: CssClassDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
+						"type_signature": "(diagnostic: InterpreterDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
 						"return_type": "GenerationDiagnostic",
 						"parameters": [
 							{
 								"name": "diagnostic",
-								"type": "CssClassDiagnostic",
+								"type": "InterpreterDiagnostic",
 								"description": "- Interpreter diagnostic to convert"
 							},
 							{
@@ -2121,7 +2121,7 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 74,
+						"source_line": 73,
 						"type_signature": "GenFuzCssOptions",
 						"properties": [
 							{
@@ -2137,12 +2137,14 @@
 							{
 								"name": "class_definitions",
 								"kind": "variable",
-								"type_signature": "Record<string, CssClassDefinition | undefined>"
+								"type_signature": "Record<string, CssClassDefinition | undefined>",
+								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name."
 							},
 							{
 								"name": "class_interpreters",
 								"kind": "variable",
-								"type_signature": "Array<CssClassDefinitionInterpreter>"
+								"type_signature": "Array<CssClassDefinitionInterpreter>",
+								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
 							},
 							{
 								"name": "on_error",
@@ -2198,7 +2200,7 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 147,
+						"source_line": 154,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
@@ -2223,7 +2225,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 182,
+						"source_line": 189,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -2238,7 +2240,6 @@
 				"module_comment": "Gro generator for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
 				"dependencies": [
 					"css_cache.ts",
-					"css_class_composites.ts",
 					"css_class_definitions.ts",
 					"css_class_extractor.ts",
 					"css_class_generation.ts",

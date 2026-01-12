@@ -21,7 +21,6 @@ import {
 	type CssClassDefinitionInterpreter,
 } from './css_class_generation.js';
 import {css_class_definitions} from './css_class_definitions.js';
-import {css_class_composites} from './css_class_composites.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
@@ -74,7 +73,15 @@ interface FileExtraction {
 export interface GenFuzCssOptions {
 	filter_file?: FileFilter | null;
 	include_stats?: boolean;
+	/**
+	 * Additional class definitions to merge with builtins.
+	 * User definitions take precedence over builtins with the same name.
+	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
+	/**
+	 * Custom interpreters for dynamic class generation.
+	 * Replaces the builtin interpreters entirely if provided.
+	 */
 	class_interpreters?: Array<CssClassDefinitionInterpreter>;
 	/**
 	 * How to handle CSS-literal errors during generation.
@@ -384,8 +391,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			// Merge token classes with composites for interpreter access
-			const all_class_definitions = {...class_definitions, ...css_class_composites};
+			// Merge builtins with user definitions (user definitions take precedence)
+			const all_class_definitions = {...css_class_definitions, ...class_definitions};
 
 			const result = generate_classes_css({
 				class_names: all_classes,

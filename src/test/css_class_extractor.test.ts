@@ -938,7 +938,7 @@ const foo = 'bar';
 		class_names_equal(result, ['colon_class_1', 'colon_class_2']);
 		expect(result.diagnostics?.length).toBe(1);
 		expect(result.diagnostics?.[0]!.level).toBe('warning');
-		expect(result.diagnostics?.[0]!.message).toContain('deprecated');
+		expect(result.diagnostics?.[0]!.message).toContain('unnecessary');
 	});
 
 	test('handles @fuz-classes with only whitespace after it', () => {

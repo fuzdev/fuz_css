@@ -11,7 +11,7 @@ import type {Logger} from '@fuzdev/fuz_util/log.js';
 
 import {
 	type SourceLocation,
-	type CssClassDiagnostic,
+	type InterpreterDiagnostic,
 	type GenerationDiagnostic,
 	create_generation_diagnostic,
 } from './diagnostics.js';
@@ -44,7 +44,7 @@ export interface CssClassDefinitionBase {
 }
 
 /** Pure utility composition (classes only). */
-export interface CssClassDefinitionClasses extends CssClassDefinitionBase {
+export interface CssClassDefinitionComposition extends CssClassDefinitionBase {
 	classes: Array<string>;
 	declaration?: never;
 	ruleset?: never;
@@ -65,13 +65,13 @@ export interface CssClassDefinitionRuleset extends CssClassDefinitionBase {
 }
 
 /** Static definitions (not interpreter-based). */
-export type CssClassDefinitionItem =
-	| CssClassDefinitionClasses
+export type CssClassDefinitionStatic =
+	| CssClassDefinitionComposition
 	| CssClassDefinitionDeclaration
 	| CssClassDefinitionRuleset;
 
 /** Full union including interpreters. */
-export type CssClassDefinition = CssClassDefinitionItem | CssClassDefinitionInterpreter;
+export type CssClassDefinition = CssClassDefinitionStatic | CssClassDefinitionInterpreter;
 
 /**
  * Context passed to CSS class interpreters.
@@ -81,7 +81,7 @@ export interface CssClassInterpreterContext {
 	/** Optional logger for warnings/errors */
 	log?: Logger;
 	/** Diagnostics array to collect warnings and errors */
-	diagnostics: Array<CssClassDiagnostic>;
+	diagnostics: Array<InterpreterDiagnostic>;
 	/** All known CSS class definitions (token + composite classes) */
 	class_definitions: Record<string, CssClassDefinition | undefined>;
 	/** Valid CSS properties for literal validation, or null to skip validation */
@@ -120,7 +120,7 @@ export const generate_classes_css = (
 ): GenerateClassesCssResult => {
 	const {class_names, class_definitions, interpreters, css_properties, log, class_locations} =
 		options;
-	const interpreter_diagnostics: Array<CssClassDiagnostic> = [];
+	const interpreter_diagnostics: Array<InterpreterDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
 
 	// Create interpreter context with access to all class definitions
