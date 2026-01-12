@@ -1094,5 +1094,3 @@ describe('module scripts', () => {
 		class_names_equal(result, ['instance-class', 'exported-one', 'exported-two']);
 	});
 });
-
-

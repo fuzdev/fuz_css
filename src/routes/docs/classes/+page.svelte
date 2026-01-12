@@ -541,10 +541,10 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Builtin classes" />
 		<p>
-			Fuz CSS's <ModuleLink path="style.css">main stylesheet</ModuleLink> provides styles for base HTML
-			elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern CSS
-			reset. It includes CSS classes that provide common generic functionality -- these are called
-			builtin classes.
+			Fuz CSS's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
+			HTML elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern
+			CSS reset. It includes CSS classes that provide common generic functionality -- these are
+			called builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<Code

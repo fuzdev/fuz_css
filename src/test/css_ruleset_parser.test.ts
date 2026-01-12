@@ -432,7 +432,7 @@ test('modify_selector_group handles grouped selectors', () => {
 	expect(result.selector).toBe(
 		'.hover\\:selectable.selected:hover,\n.hover\\:selectable:active:hover',
 	);
-	expect(result.skipped_modifiers).toHaveLength(0);
+	expect(result.skipped_modifiers).toBeNull();
 });
 
 test('modify_selector_group handles functional pseudo-classes in group', () => {
@@ -444,7 +444,7 @@ test('modify_selector_group handles functional pseudo-classes in group', () => {
 		'',
 	);
 	expect(result.selector).toBe('.focus\\:plain:not(:hover):focus,\n.focus\\:plain:active:focus');
-	expect(result.skipped_modifiers).toHaveLength(0);
+	expect(result.skipped_modifiers).toBeNull();
 });
 
 // Per-selector conflict detection tests
@@ -460,10 +460,11 @@ test('modify_selector_group applies state only to selectors without conflict', (
 	);
 	// .plain:hover should NOT get another :hover, .plain:active SHOULD get :hover
 	expect(result.selector).toBe('.hover\\:plain:hover,\n.hover\\:plain:active:hover');
+	expect(result.skipped_modifiers).not.toBeNull();
 	expect(result.skipped_modifiers).toHaveLength(1);
-	expect(result.skipped_modifiers[0]!.selector).toBe('.plain:hover');
-	expect(result.skipped_modifiers[0]!.reason).toBe('state_conflict');
-	expect(result.skipped_modifiers[0]!.conflicting_modifier).toBe(':hover');
+	expect(result.skipped_modifiers![0]!.selector).toBe('.plain:hover');
+	expect(result.skipped_modifiers![0]!.reason).toBe('state_conflict');
+	expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
 });
 
 test('modify_selector_group applies non-conflicting states when some conflict', () => {
@@ -477,8 +478,9 @@ test('modify_selector_group applies non-conflicting states when some conflict', 
 	);
 	// Should skip :hover (already exists) but add :focus
 	expect(result.selector).toBe('.hover\\:focus\\:selectable:hover:focus');
+	expect(result.skipped_modifiers).not.toBeNull();
 	expect(result.skipped_modifiers).toHaveLength(1);
-	expect(result.skipped_modifiers[0]!.conflicting_modifier).toBe(':hover');
+	expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
 });
 
 test('modify_selector_group handles pseudo-element conflict per-selector', () => {
@@ -492,9 +494,10 @@ test('modify_selector_group handles pseudo-element conflict per-selector', () =>
 	);
 	// First selector gets ::before, second doesn't (already has pseudo-element)
 	expect(result.selector).toBe('.before\\:chevron::before,\n.before\\:chevron::before');
+	expect(result.skipped_modifiers).not.toBeNull();
 	expect(result.skipped_modifiers).toHaveLength(1);
-	expect(result.skipped_modifiers[0]!.selector).toBe('.chevron::before');
-	expect(result.skipped_modifiers[0]!.reason).toBe('pseudo_element_conflict');
+	expect(result.skipped_modifiers![0]!.selector).toBe('.chevron::before');
+	expect(result.skipped_modifiers![0]!.reason).toBe('pseudo_element_conflict');
 });
 
 // generate_modified_ruleset tests
@@ -760,8 +763,9 @@ test('generate_modified_ruleset skips rules with pseudo-element when adding pseu
 	// Should NOT have ::before::before (invalid)
 	expect(result.css).not.toContain('::before::before');
 	// Should have skipped modifier info
-	expect(result.skipped_modifiers.length).toBe(1);
-	expect(result.skipped_modifiers[0]!.reason).toBe('pseudo_element_conflict');
+	expect(result.skipped_modifiers).not.toBeNull();
+	expect(result.skipped_modifiers!.length).toBe(1);
+	expect(result.skipped_modifiers![0]!.reason).toBe('pseudo_element_conflict');
 });
 
 test('generate_modified_ruleset skips ::after rules when adding ::before modifier', () => {
@@ -788,7 +792,8 @@ test('generate_modified_ruleset skips ::after rules when adding ::before modifie
 	expect(result.css).not.toContain('::after::before');
 	expect(result.css).not.toContain('::before::after');
 	// Should have skipped modifier info
-	expect(result.skipped_modifiers.length).toBe(1);
+	expect(result.skipped_modifiers).not.toBeNull();
+	expect(result.skipped_modifiers!.length).toBe(1);
 });
 
 test('generate_modified_ruleset keeps all rules when adding state modifier (no pseudo-element conflict)', () => {
@@ -812,7 +817,7 @@ test('generate_modified_ruleset keeps all rules when adding state modifier (no p
 	expect(result.css).toContain('position: relative');
 	expect(result.css).toContain("content: ''");
 	// No skipped modifiers
-	expect(result.skipped_modifiers.length).toBe(0);
+	expect(result.skipped_modifiers).toBeNull();
 });
 
 // Per-selector conflict detection in generate_modified_ruleset
@@ -837,8 +842,9 @@ test('generate_modified_ruleset handles selector list with partial state conflic
 	// Verify it's NOT :hover:hover on the first selector
 	expect(result.css).not.toContain(':hover:hover');
 	// Should report one skipped modifier for the specific selector
-	expect(result.skipped_modifiers.length).toBe(1);
-	expect(result.skipped_modifiers[0]!.selector).toBe('.plain:hover');
+	expect(result.skipped_modifiers).not.toBeNull();
+	expect(result.skipped_modifiers!.length).toBe(1);
+	expect(result.skipped_modifiers![0]!.selector).toBe('.plain:hover');
 });
 
 test('generate_modified_ruleset applies non-conflicting states with multiple states', () => {
@@ -859,8 +865,9 @@ test('generate_modified_ruleset applies non-conflicting states with multiple sta
 	// Should NOT have :hover:hover
 	expect(result.css).not.toContain(':hover:hover');
 	// Should report :hover was skipped
-	expect(result.skipped_modifiers.length).toBe(1);
-	expect(result.skipped_modifiers[0]!.conflicting_modifier).toBe(':hover');
+	expect(result.skipped_modifiers).not.toBeNull();
+	expect(result.skipped_modifiers!.length).toBe(1);
+	expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
 });
 
 test('generate_modified_ruleset handles complex selector list with mixed conflicts', () => {
@@ -883,5 +890,6 @@ test('generate_modified_ruleset handles complex selector list with mixed conflic
 	expect(result.css).toContain('.hover\\:focus\\:btn:focus:hover');
 	expect(result.css).toContain('.hover\\:focus\\:btn:active:hover:focus');
 	// Should have 2 skip reports (one :hover, one :focus)
-	expect(result.skipped_modifiers.length).toBe(2);
+	expect(result.skipped_modifiers).not.toBeNull();
+	expect(result.skipped_modifiers!.length).toBe(2);
 });

@@ -196,22 +196,28 @@ export interface SkippedModifierInfo {
 
 /**
  * Result from modifying a selector group with conflict detection.
+ *
+ * Uses `| null` for skipped_modifiers to avoid allocating empty arrays.
+ * Callers should use a guard pattern: `if (result.skipped_modifiers) { ... }`
  */
 export interface ModifiedSelectorGroupResult {
 	/** The modified selector list as a string */
 	selector: string;
-	/** Information about modifiers skipped for specific selectors */
-	skipped_modifiers: Array<SkippedModifierInfo>;
+	/** Information about modifiers skipped for specific selectors, or null if none */
+	skipped_modifiers: Array<SkippedModifierInfo> | null;
 }
 
 /**
  * Result from generating a modified ruleset.
+ *
+ * Uses `| null` for skipped_modifiers to avoid allocating empty arrays.
+ * Callers should use a guard pattern: `if (result.skipped_modifiers) { ... }`
  */
 export interface ModifiedRulesetResult {
 	/** The generated CSS */
 	css: string;
-	/** Information about modifiers that were skipped for certain rules */
-	skipped_modifiers: Array<SkippedModifierInfo>;
+	/** Information about modifiers that were skipped for certain rules, or null if none */
+	skipped_modifiers: Array<SkippedModifierInfo> | null;
 }
 
 /**
@@ -405,7 +411,7 @@ export const modify_selector_group = (
 	pseudo_element_css: string,
 ): ModifiedSelectorGroupResult => {
 	const selectors = split_selector_list(selector_group);
-	const skipped_modifiers: Array<SkippedModifierInfo> = [];
+	let skipped_modifiers: Array<SkippedModifierInfo> | null = null;
 	const adding_pseudo_element = pseudo_element_css !== '';
 
 	const modified_selectors = selectors.map((selector) => {
@@ -420,7 +426,7 @@ export const modify_selector_group = (
 		for (const state of states_to_add) {
 			if (selector_has_state(trimmed, state)) {
 				// Record the skip for this specific selector
-				skipped_modifiers.push({
+				(skipped_modifiers ??= []).push({
 					selector: trimmed,
 					reason: 'state_conflict',
 					conflicting_modifier: state,
@@ -432,7 +438,7 @@ export const modify_selector_group = (
 
 		// Record pseudo-element skip for this specific selector
 		if (has_pseudo_element_conflict) {
-			skipped_modifiers.push({
+			(skipped_modifiers ??= []).push({
 				selector: trimmed,
 				reason: 'pseudo_element_conflict',
 				conflicting_modifier: pseudo_element_css,
@@ -486,7 +492,7 @@ export const generate_modified_ruleset = (
 	ancestor_wrapper: string | null,
 ): ModifiedRulesetResult => {
 	const parsed = parse_ruleset(original_ruleset);
-	const skipped_modifiers: Array<SkippedModifierInfo> = [];
+	let skipped_modifiers: Array<SkippedModifierInfo> | null = null;
 
 	// Extract individual states for per-selector conflict detection (e.g., ":hover:focus" → [":hover", ":focus"])
 	const states_to_add = state_css.match(/:[a-z-]+/g) ?? [];
@@ -517,7 +523,9 @@ export const generate_modified_ruleset = (
 		);
 
 		// Collect skip info from per-selector conflict detection
-		skipped_modifiers.push(...result.skipped_modifiers);
+		if (result.skipped_modifiers) {
+			(skipped_modifiers ??= []).push(...result.skipped_modifiers);
+		}
 
 		css += `${indent}${result.selector} { ${rule.declarations} }\n`;
 	}

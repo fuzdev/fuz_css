@@ -938,14 +938,14 @@
 						"name": "css_literal_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
-						"source_line": 128,
+						"source_line": 130,
 						"type_signature": "CssClassDefinitionInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
 						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: modified_class_interpreter runs first to handle `hover:box` before\ncss_literal_interpreter tries to interpret it as `hover:box` (property:value).",
-						"source_line": 163,
+						"source_line": 167,
 						"type_signature": "CssClassDefinitionInterpreter[]"
 					}
 				],
@@ -1110,15 +1110,15 @@
 					{
 						"name": "CssLiteralParseResult",
 						"kind": "type",
-						"doc_comment": "Result of parsing a CSS-literal class name.\n\nUses a discriminated union (Result type) because parsing a single class\nis binary: it either succeeds or fails entirely. This differs from\n which uses embedded diagnostics because file\nextraction can partially succeed (some classes extracted, others have errors).",
-						"source_line": 51,
+						"doc_comment": "Result of parsing a CSS-literal class name.\n\nUses a discriminated union (Result type) because parsing a single class\nis binary: it either succeeds or fails entirely. This differs from\n which uses embedded diagnostics because file\nextraction can partially succeed (some classes extracted, others have errors).\n\nUses `| null` for diagnostics to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.diagnostics) { ... }`",
+						"source_line": 54,
 						"type_signature": "CssLiteralParseResult"
 					},
 					{
 						"name": "ExtractedModifiers",
 						"kind": "type",
 						"doc_comment": "Extracted modifiers from a class name.\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 59,
+						"source_line": 62,
 						"type_signature": "ExtractedModifiers",
 						"properties": [
 							{
@@ -1151,21 +1151,21 @@
 						"name": "ModifierExtractionResult",
 						"kind": "type",
 						"doc_comment": "Result of extracting modifiers from segments.",
-						"source_line": 73,
+						"source_line": 76,
 						"type_signature": "ModifierExtractionResult"
 					},
 					{
 						"name": "InterpretCssLiteralResult",
 						"kind": "type",
-						"doc_comment": "Result of interpreting a CSS-literal class.",
-						"source_line": 80,
+						"doc_comment": "Result of interpreting a CSS-literal class.\n\nUses `| null` for warnings to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.warnings) { ... }`",
+						"source_line": 86,
 						"type_signature": "InterpretCssLiteralResult"
 					},
 					{
 						"name": "load_css_properties",
 						"kind": "function",
 						"doc_comment": "Loads CSS properties from",
-						"source_line": 92,
+						"source_line": 98,
 						"type_signature": "(): Promise<Set<string>>",
 						"return_type": "Promise<Set<string>>",
 						"parameters": []
@@ -1174,7 +1174,7 @@
 						"name": "is_valid_css_property",
 						"kind": "function",
 						"doc_comment": "Checks if a property name is a valid CSS property.\nCustom properties (--*) always return true.",
-						"source_line": 107,
+						"source_line": 113,
 						"type_signature": "(property: string, properties: Set<string> | null): boolean",
 						"return_type": "boolean",
 						"return_description": "True if valid CSS property or custom property",
@@ -1195,7 +1195,7 @@
 						"name": "suggest_css_property",
 						"kind": "function",
 						"doc_comment": "Suggests a correct property name for a typo using Levenshtein distance.",
-						"source_line": 128,
+						"source_line": 134,
 						"type_signature": "(typo: string, properties: Set<string> | null): string | null",
 						"return_type": "string | null",
 						"return_description": "The suggested property or null if no close match (Levenshtein distance > 2)",
@@ -1216,7 +1216,7 @@
 						"name": "suggest_modifier",
 						"kind": "function",
 						"doc_comment": "Suggests a correct modifier name for a typo using Levenshtein distance.",
-						"source_line": 154,
+						"source_line": 160,
 						"type_signature": "(typo: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The suggested modifier or null if no close match (Levenshtein distance > 2)",
@@ -1232,7 +1232,7 @@
 						"name": "format_css_value",
 						"kind": "function",
 						"doc_comment": "Formats a CSS-literal value for CSS output.\n- Replaces `~` with space\n- Ensures space before `!important`",
-						"source_line": 182,
+						"source_line": 188,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"return_description": "Formatted CSS value",
@@ -1248,7 +1248,7 @@
 						"name": "check_calc_expression",
 						"kind": "function",
 						"doc_comment": "Checks if a value contains a possibly invalid calc expression.",
-						"source_line": 200,
+						"source_line": 206,
 						"type_signature": "(value: string): string | null",
 						"return_type": "string | null",
 						"return_description": "Warning message if suspicious, null otherwise",
@@ -1264,7 +1264,7 @@
 						"name": "is_possible_css_literal",
 						"kind": "function",
 						"doc_comment": "Checks if a class name could be a CSS-literal class.\nQuick check before attempting full parse.",
-						"source_line": 218,
+						"source_line": 224,
 						"type_signature": "(class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if it could be CSS-literal syntax",
@@ -1283,7 +1283,7 @@
 						"examples": [
 							"extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']\nextract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']\nextract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']"
 						],
-						"source_line": 247,
+						"source_line": 253,
 						"type_signature": "(class_name: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1297,7 +1297,7 @@
 						"name": "extract_and_validate_modifiers",
 						"kind": "function",
 						"doc_comment": "Extracts and validates modifiers from the beginning of a segments array.\nModifiers are consumed from the front until a non-modifier segment is found.\n\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 286,
+						"source_line": 292,
 						"type_signature": "(segments: string[], class_name: string): ModifierExtractionResult",
 						"return_type": "ModifierExtractionResult",
 						"return_description": "ModifierExtractionResult with modifiers and remaining segments, or error",
@@ -1318,7 +1318,7 @@
 						"name": "parse_css_literal",
 						"kind": "function",
 						"doc_comment": "Parses a CSS-literal class name into its components.",
-						"source_line": 458,
+						"source_line": 464,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null): CssLiteralParseResult",
 						"return_type": "CssLiteralParseResult",
 						"return_description": "CssLiteralParseResult with parsed data or error",
@@ -1339,7 +1339,7 @@
 						"name": "generate_selector",
 						"kind": "function",
 						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
-						"source_line": 560,
+						"source_line": 566,
 						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1357,7 +1357,7 @@
 						"name": "generate_declaration",
 						"kind": "function",
 						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
-						"source_line": 579,
+						"source_line": 585,
 						"type_signature": "(parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -1371,7 +1371,7 @@
 						"name": "CssLiteralOutput",
 						"kind": "type",
 						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
-						"source_line": 586,
+						"source_line": 592,
 						"type_signature": "CssLiteralOutput",
 						"properties": [
 							{
@@ -1404,7 +1404,7 @@
 						"name": "interpret_css_literal",
 						"kind": "function",
 						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.\n\nCallers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.",
-						"source_line": 608,
+						"source_line": 614,
 						"type_signature": "(class_name: string, escaped_class_name: string, css_properties: Set<string> | null): InterpretCssLiteralResult",
 						"return_type": "InterpretCssLiteralResult",
 						"return_description": "Result with output and warnings on success, or error on failure",
@@ -1430,7 +1430,7 @@
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 640,
+						"source_line": 646,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",
@@ -1604,8 +1604,8 @@
 					{
 						"name": "ModifiedSelectorGroupResult",
 						"kind": "type",
-						"doc_comment": "Result from modifying a selector group with conflict detection.",
-						"source_line": 200,
+						"doc_comment": "Result from modifying a selector group with conflict detection.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
+						"source_line": 203,
 						"type_signature": "ModifiedSelectorGroupResult",
 						"properties": [
 							{
@@ -1617,16 +1617,16 @@
 							{
 								"name": "skipped_modifiers",
 								"kind": "variable",
-								"type_signature": "Array<SkippedModifierInfo>",
-								"doc_comment": "Information about modifiers skipped for specific selectors"
+								"type_signature": "Array<SkippedModifierInfo> | null",
+								"doc_comment": "Information about modifiers skipped for specific selectors, or null if none"
 							}
 						]
 					},
 					{
 						"name": "ModifiedRulesetResult",
 						"kind": "type",
-						"doc_comment": "Result from generating a modified ruleset.",
-						"source_line": 210,
+						"doc_comment": "Result from generating a modified ruleset.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
+						"source_line": 216,
 						"type_signature": "ModifiedRulesetResult",
 						"properties": [
 							{
@@ -1638,8 +1638,8 @@
 							{
 								"name": "skipped_modifiers",
 								"kind": "variable",
-								"type_signature": "Array<SkippedModifierInfo>",
-								"doc_comment": "Information about modifiers that were skipped for certain rules"
+								"type_signature": "Array<SkippedModifierInfo> | null",
+								"doc_comment": "Information about modifiers that were skipped for certain rules, or null if none"
 							}
 						]
 					},
@@ -1650,7 +1650,7 @@
 						"examples": [
 							"split_selector_list('.a, .b') → ['.a', '.b']\nsplit_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']"
 						],
-						"source_line": 259,
+						"source_line": 265,
 						"type_signature": "(selector_group: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1664,7 +1664,7 @@
 						"name": "find_compound_end",
 						"kind": "function",
 						"doc_comment": "Finds the end position of the compound selector containing the class at class_pos.\nA compound selector is a sequence of simple selectors without combinators.",
-						"source_line": 294,
+						"source_line": 300,
 						"type_signature": "(selector: string, class_pos: number): number",
 						"return_type": "number",
 						"return_description": "Position where state modifiers should be inserted (before any pseudo-element)",
@@ -1688,7 +1688,7 @@
 						"examples": [
 							"modify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'"
 						],
-						"source_line": 360,
+						"source_line": 366,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
 						"return_type": "string",
 						"return_description": "Modified selector",
@@ -1724,7 +1724,7 @@
 						"name": "modify_selector_group",
 						"kind": "function",
 						"doc_comment": "Modifies a selector list (comma-separated selectors) to add modifiers.\nHandles conflicts per-selector: if one selector in a list has a conflict,\nonly that selector skips the modifier; other selectors still get it.",
-						"source_line": 400,
+						"source_line": 406,
 						"type_signature": "(selector_group: string, original_class: string, new_class_escaped: string, states_to_add: string[], pseudo_element_css: string): ModifiedSelectorGroupResult",
 						"return_type": "ModifiedSelectorGroupResult",
 						"return_description": "Result with modified selector list and information about skipped modifiers",
@@ -1760,7 +1760,7 @@
 						"name": "generate_modified_ruleset",
 						"kind": "function",
 						"doc_comment": "Generates CSS for a modified ruleset with applied modifiers.\n\nConflict handling is per-selector within selector lists:\n- For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips\n  the `:hover` addition; `.plain:active` still gets `:hover` appended.\n- For multiple states like `:hover:focus`, each is checked individually; conflicting\n  states are skipped while non-conflicting ones are still applied.",
-						"source_line": 479,
+						"source_line": 485,
 						"type_signature": "(original_ruleset: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string, media_wrapper: string | null, ancestor_wrapper: string | null): ModifiedRulesetResult",
 						"return_type": "ModifiedRulesetResult",
 						"return_description": "Result with generated CSS and information about skipped modifiers",

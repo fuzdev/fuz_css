@@ -96,21 +96,23 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 			);
 
 			// Emit warnings for skipped modifiers
-			for (const skipped of result.skipped_modifiers) {
-				if (skipped.reason === 'pseudo_element_conflict') {
-					ctx.diagnostics.push({
-						level: 'warning',
-						class_name,
-						message: `Rule "${skipped.selector}" already contains a pseudo-element; "${skipped.conflicting_modifier}" modifier was not applied`,
-						suggestion: `The rule is included with just the class renamed`,
-					});
-				} else {
-					ctx.diagnostics.push({
-						level: 'warning',
-						class_name,
-						message: `Rule "${skipped.selector}" already contains "${skipped.conflicting_modifier}"; modifier was not applied to avoid redundancy`,
-						suggestion: `The rule is included with just the class renamed`,
-					});
+			if (result.skipped_modifiers) {
+				for (const skipped of result.skipped_modifiers) {
+					if (skipped.reason === 'pseudo_element_conflict') {
+						ctx.diagnostics.push({
+							level: 'warning',
+							class_name,
+							message: `Rule "${skipped.selector}" already contains a pseudo-element; "${skipped.conflicting_modifier}" modifier was not applied`,
+							suggestion: `The rule is included with just the class renamed`,
+						});
+					} else {
+						ctx.diagnostics.push({
+							level: 'warning',
+							class_name,
+							message: `Rule "${skipped.selector}" already contains "${skipped.conflicting_modifier}"; modifier was not applied to avoid redundancy`,
+							suggestion: `The rule is included with just the class renamed`,
+						});
+					}
 				}
 			}
 
@@ -143,8 +145,10 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 		}
 
 		// Collect warnings for upstream handling
-		for (const warning of result.warnings) {
-			ctx.diagnostics.push(warning);
+		if (result.warnings) {
+			for (const warning of result.warnings) {
+				ctx.diagnostics.push(warning);
+			}
 		}
 
 		// Generate the full CSS including any wrappers

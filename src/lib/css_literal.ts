@@ -47,9 +47,12 @@ export interface ParsedCssLiteral {
  * is binary: it either succeeds or fails entirely. This differs from
  * {@link ExtractionResult} which uses embedded diagnostics because file
  * extraction can partially succeed (some classes extracted, others have errors).
+ *
+ * Uses `| null` for diagnostics to avoid allocating empty arrays.
+ * Callers should use a guard pattern: `if (result.diagnostics) { ... }`
  */
 export type CssLiteralParseResult =
-	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>}
+	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic> | null}
 	| {ok: false; error: CssClassDiagnostic};
 
 /**
@@ -76,9 +79,12 @@ export type ModifierExtractionResult =
 
 /**
  * Result of interpreting a CSS-literal class.
+ *
+ * Uses `| null` for warnings to avoid allocating empty arrays.
+ * Callers should use a guard pattern: `if (result.warnings) { ... }`
  */
 export type InterpretCssLiteralResult =
-	| {ok: true; output: CssLiteralOutput; warnings: Array<CssClassDiagnostic>}
+	| {ok: true; output: CssLiteralOutput; warnings: Array<CssClassDiagnostic> | null}
 	| {ok: false; error: CssClassDiagnostic};
 
 //
@@ -479,7 +485,7 @@ export const parse_css_literal = (
 	const property = segments[segments.length - 2]!;
 	const modifier_segments = segments.slice(0, -2);
 
-	const diagnostics: Array<CssClassDiagnostic> = [];
+	let diagnostics: Array<CssClassDiagnostic> | null = null;
 
 	// Validate modifiers using shared validation logic
 	const modifier_result = extract_and_validate_modifiers(modifier_segments, class_name);
@@ -526,7 +532,7 @@ export const parse_css_literal = (
 	// Check for calc warnings
 	const calc_warning = check_calc_expression(formatted_value);
 	if (calc_warning) {
-		diagnostics.push({
+		(diagnostics ??= []).push({
 			level: 'warning',
 			message: calc_warning,
 			class_name,

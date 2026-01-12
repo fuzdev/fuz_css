@@ -32,9 +32,13 @@ beforeAll(async () => {
 // Helper to assert result is ok and return parsed value
 const assert_ok = (
 	result: ReturnType<typeof parse_css_literal>,
-): {parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>} => {
+): {parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic> | null} => {
 	assert.isTrue(result.ok, 'Expected parse result to be ok');
-	return result as {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<CssClassDiagnostic>};
+	return result as {
+		ok: true;
+		parsed: ParsedCssLiteral;
+		diagnostics: Array<CssClassDiagnostic> | null;
+	};
 };
 
 // Helper to assert result is error
@@ -421,8 +425,9 @@ describe('parse_css_literal - error cases', () => {
 describe('parse_css_literal - warnings', () => {
 	test('width:calc(100%-20px) generates warning', () => {
 		const {diagnostics} = assert_ok(parse_css_literal('width:calc(100%-20px)', css_properties));
-		assert.isTrue(diagnostics.length > 0);
-		assert.equal(diagnostics[0]?.level, 'warning');
+		assert.isNotNull(diagnostics);
+		assert.isTrue(diagnostics!.length > 0);
+		assert.equal(diagnostics![0]?.level, 'warning');
 	});
 });
 
