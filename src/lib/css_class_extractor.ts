@@ -46,6 +46,11 @@ export interface ExtractionResult {
 }
 
 /**
+ * Acorn plugin type - a function that extends the Parser class.
+ */
+export type AcornPlugin = (BaseParser: typeof Parser) => typeof Parser;
+
+/**
  * Options for CSS class extraction.
  */
 export interface ExtractCssClassesOptions {
@@ -54,6 +59,17 @@ export interface ExtractCssClassesOptions {
 	 * and for location tracking in diagnostics.
 	 */
 	filename?: string;
+	/**
+	 * Additional acorn plugins to use when parsing TS/JS files.
+	 * Useful for adding JSX support via `acorn-jsx` for React projects.
+	 *
+	 * @example
+	 * ```ts
+	 * import jsx from 'acorn-jsx';
+	 * extract_css_classes(source, { acorn_plugins: [jsx()] });
+	 * ```
+	 */
+	acorn_plugins?: Array<AcornPlugin>;
 }
 
 //
@@ -126,6 +142,9 @@ const CLASS_UTILITY_FUNCTIONS = new Set([
 	'classnames', // lowercase variant
 	'cx', // emotion and other libs
 ]);
+
+// Svelte 5 runes that wrap expressions we should extract from
+const SVELTE_RUNES = new Set(['$derived', '$state']);
 
 // Pattern for variables with class-related names
 const CLASS_NAME_PATTERN = /(class|classes|classname|classnames)$/i;
@@ -358,9 +377,14 @@ const extract_fuz_classes_from_script = (
  *
  * @param source - The TS/JS file source code
  * @param file - File path for location tracking
+ * @param acorn_plugins - Additional acorn plugins (e.g., acorn-jsx for React)
  * @returns Extraction result with classes, tracked variables, and diagnostics
  */
-export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionResult => {
+export const extract_from_ts = (
+	source: string,
+	file = '<unknown>',
+	acorn_plugins?: Array<AcornPlugin>,
+): ExtractionResult => {
 	const classes: Map<string, Array<SourceLocation>> = new Map();
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
@@ -371,9 +395,9 @@ export const extract_from_ts = (source: string, file = '<unknown>'): ExtractionR
 
 	let ast: Node;
 	try {
-		// Use acorn with TypeScript plugin for both TS and JS
-		// The plugin handles both gracefully
-		const parser = Parser.extend(tsPlugin());
+		// Use acorn with TypeScript plugin, plus any additional plugins (e.g., jsx)
+		const plugins: Array<AcornPlugin> = [tsPlugin(), ...(acorn_plugins ?? [])];
+		const parser = plugins.reduce((p, plugin) => plugin(p), Parser);
 		ast = parser.parse(source, {
 			ecmaVersion: 'latest',
 			sourceType: 'module',
@@ -466,14 +490,14 @@ export const extract_css_classes_with_locations = (
 	source: string,
 	options: ExtractCssClassesOptions = {},
 ): ExtractionResult => {
-	const {filename} = options;
+	const {filename, acorn_plugins} = options;
 	const ext = filename ? filename.slice(filename.lastIndexOf('.')) : '';
 	const file = filename ?? '<unknown>';
 
-	if (ext === '.svelte') {
+	if (ext === '.svelte' || ext === '.html') {
 		return extract_from_svelte(source, file);
 	} else if (ext === '.ts' || ext === '.js' || ext === '.tsx' || ext === '.jsx') {
-		return extract_from_ts(source, file);
+		return extract_from_ts(source, file, acorn_plugins);
 	}
 
 	// Default to Svelte-style extraction (handles both)
@@ -481,7 +505,7 @@ export const extract_css_classes_with_locations = (
 	if (svelte_result.classes) {
 		return svelte_result;
 	}
-	return extract_from_ts(source, file);
+	return extract_from_ts(source, file, acorn_plugins);
 };
 
 // Template AST walking
@@ -604,7 +628,8 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		}
 
 		case 'TemplateLiteral': {
-			// Template literal - extract static parts
+			// Template literal - extract static parts that are complete tokens
+			// Only extract tokens that are whitespace-bounded (not fragments like `icon-` from `icon-${size}`)
 			const node = expr as unknown as {
 				quasis: Array<{
 					value: {raw: string};
@@ -613,19 +638,64 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 				}>;
 				expressions: Array<unknown>;
 			};
-			for (const quasi of node.quasis) {
-				if (quasi.value.raw) {
-					const location = quasi.loc
-						? {file: state.file, line: quasi.loc.start.line, column: quasi.loc.start.column + 1}
-						: quasi.start !== undefined
-							? location_from_offset(state, quasi.start)
-							: get_location();
-					for (const cls of quasi.value.raw.split(/\s+/).filter(Boolean)) {
+
+			const has_expressions = node.expressions.length > 0;
+
+			for (let i = 0; i < node.quasis.length; i++) {
+				const quasi = node.quasis[i]!;
+				if (!quasi.value.raw) continue;
+
+				const location = quasi.loc
+					? {file: state.file, line: quasi.loc.start.line, column: quasi.loc.start.column + 1}
+					: quasi.start !== undefined
+						? location_from_offset(state, quasi.start)
+						: get_location();
+
+				const raw = quasi.value.raw;
+
+				if (!has_expressions) {
+					// No expressions - extract all tokens (pure static template literal)
+					for (const cls of raw.split(/\s+/).filter(Boolean)) {
 						add_class(state, cls, location);
+					}
+				} else {
+					// Has expressions - only extract complete tokens
+					// A token is complete if bounded by whitespace/string-boundary on both sides
+					const is_first = i === 0;
+					const is_last = i === node.quasis.length - 1;
+					const has_expr_before = !is_first;
+					const has_expr_after = !is_last;
+
+					// Split preserving info about boundaries
+					const tokens = raw.split(/\s+/);
+					const starts_with_ws = /^\s/.test(raw);
+					const ends_with_ws = /\s$/.test(raw);
+
+					for (let j = 0; j < tokens.length; j++) {
+						const token = tokens[j];
+						if (!token) continue;
+
+						const is_first_token = j === 0;
+						const is_last_token = j === tokens.length - 1;
+
+						// Token is bounded on the left if:
+						// - It's the first token AND (is_first quasi OR starts_with_ws)
+						// - OR it's not the first token (preceded by whitespace from split)
+						const bounded_left = !is_first_token || is_first || (has_expr_before && starts_with_ws);
+
+						// Token is bounded on the right if:
+						// - It's the last token AND (is_last quasi OR ends_with_ws)
+						// - OR it's not the last token (followed by whitespace from split)
+						const bounded_right = !is_last_token || is_last || (has_expr_after && ends_with_ws);
+
+						if (bounded_left && bounded_right) {
+							add_class(state, token, location);
+						}
 					}
 				}
 			}
-			// Also extract from expressions
+
+			// Also extract from expressions (e.g., ternaries inside the template)
 			for (const subexpr of node.expressions) {
 				extract_from_expression(subexpr as AST.SvelteNode, state);
 			}
@@ -693,13 +763,27 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		}
 
 		case 'CallExpression': {
-			// Function call: check if it's a class utility function
+			// Function call: check if it's a class utility function or Svelte rune
 			const node = expr as unknown as {
-				callee: {type: string; name?: string};
+				callee: {type: string; name?: string; object?: {name?: string}; property?: {name?: string}};
 				arguments: Array<unknown>;
 			};
-			if (node.callee.type === 'Identifier' && CLASS_UTILITY_FUNCTIONS.has(node.callee.name!)) {
-				// It's clsx/cn/etc - extract from arguments
+
+			let should_extract = false;
+
+			if (node.callee.type === 'Identifier') {
+				// Direct call: clsx(), cn(), $derived(), etc.
+				should_extract =
+					CLASS_UTILITY_FUNCTIONS.has(node.callee.name!) || SVELTE_RUNES.has(node.callee.name!);
+			} else if (node.callee.type === 'MemberExpression') {
+				// Member call: $derived.by(), etc.
+				const obj = node.callee.object;
+				if (obj?.name && SVELTE_RUNES.has(obj.name)) {
+					should_extract = true;
+				}
+			}
+
+			if (should_extract) {
 				for (const arg of node.arguments) {
 					extract_from_expression(arg as AST.SvelteNode, state);
 				}
@@ -722,6 +806,44 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 			break;
 		}
 
+		case 'TaggedTemplateExpression': {
+			// Tagged template literal like css`class-name` - extract from the template
+			const node = expr as unknown as {quasi: unknown};
+			if (node.quasi) {
+				extract_from_expression(node.quasi as AST.SvelteNode, state);
+			}
+			break;
+		}
+
+		case 'ArrowFunctionExpression':
+		case 'FunctionExpression': {
+			// Function expression: extract from the body
+			// Handles $derived.by(() => cond ? 'a' : 'b')
+			const node = expr as unknown as {body: unknown};
+			if (node.body) {
+				extract_from_expression(node.body as AST.SvelteNode, state);
+			}
+			break;
+		}
+
+		case 'BlockStatement': {
+			// Block statement: walk all statements looking for return statements
+			const node = expr as unknown as {body: Array<unknown>};
+			for (const stmt of node.body) {
+				extract_from_expression(stmt as AST.SvelteNode, state);
+			}
+			break;
+		}
+
+		case 'ReturnStatement': {
+			// Return statement: extract from the argument
+			const node = expr as unknown as {argument: unknown};
+			if (node.argument) {
+				extract_from_expression(node.argument as AST.SvelteNode, state);
+			}
+			break;
+		}
+
 		default:
 			// Other expression types we don't handle
 			break;
@@ -729,6 +851,32 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 };
 
 // Script AST walking
+
+/**
+ * Extracts classes from a JSX attribute value (React className).
+ * Handles string literals and expression containers.
+ */
+const extract_from_jsx_attribute_value = (value: unknown, state: WalkState): void => {
+	const node = value as {
+		type: string;
+		value?: string;
+		expression?: unknown;
+		loc?: {start: {line: number; column: number}};
+	};
+
+	if (node.type === 'Literal' && typeof node.value === 'string') {
+		// Static className="foo bar"
+		const location: SourceLocation = node.loc
+			? {file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1}
+			: {file: state.file, line: 1, column: 1};
+		for (const cls of node.value.split(/\s+/).filter(Boolean)) {
+			add_class(state, cls, location);
+		}
+	} else if (node.type === 'JSXExpressionContainer' && node.expression) {
+		// Dynamic className={expr}
+		extract_from_expression(node.expression as AST.SvelteNode, state);
+	}
+};
 
 /**
  * Walks a TypeScript/JS AST to extract class names.
@@ -789,6 +937,34 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 					(key_name === 'class' || key_name === 'className' || CLASS_NAME_PATTERN.test(key_name))
 				) {
 					extract_from_expression(prop.value as AST.SvelteNode, state);
+				}
+			}
+			next();
+		},
+
+		// JSX elements (React/Preact/Solid) - extract class-related attributes
+		// These are only present when acorn-jsx plugin is used
+		JSXElement(node, {state, next}) {
+			const element = node as unknown as {
+				openingElement: {
+					attributes: Array<{
+						type: string;
+						name?: {type: string; name?: string};
+						value?: unknown;
+					}>;
+				};
+			};
+			for (const attr of element.openingElement.attributes) {
+				if (attr.type === 'JSXAttribute' && attr.value) {
+					const attr_name = attr.name?.name;
+					// className (React), class (Preact/Solid)
+					if (attr_name === 'className' || attr_name === 'class') {
+						extract_from_jsx_attribute_value(attr.value, state);
+					}
+					// classList (Solid) - object syntax like classList={{ active: isActive }}
+					else if (attr_name === 'classList') {
+						extract_from_jsx_attribute_value(attr.value, state);
+					}
 				}
 			}
 			next();

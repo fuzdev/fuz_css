@@ -397,65 +397,74 @@ export const gen = gen_fuz_css();
 `}
 		/>
 
-		<h4>Class detection</h4>
-		<p>The generator scans source files and extracts class names from these patterns:</p>
-		<p>Svelte files:</p>
-		<ul>
-			<li><code>class="..."</code> — static strings</li>
-			<li><code>{'class={[...]}'}</code> — array syntax (Svelte 5.16+)</li>
-			<li><code>{'class={{...}}'}</code> — object syntax (Svelte 5.16+)</li>
-			<li><code>class:name</code> — class directives</li>
-			<li><code>{'class={cond ? "a" : "b"}'}</code> — ternary expressions</li>
-			<li><code>{'class={cond && "name"}'}</code> — logical expressions</li>
-			<li>
-				<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
-				function calls
-			</li>
-		</ul>
-		<p>
-			TypeScript/JS files and <code>&lt;script&gt;</code> tags in Svelte:
-		</p>
-		<ul>
-			<li>
-				<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
-				function calls
-			</li>
-			<li>
-				Variables named <code>*class</code>, <code>*classes</code>, <code>*className</code>,
-				<code>*classNames</code>
-			</li>
-			<li>
-				Object properties with <code>class</code>, <code>className</code>, or <code>*classes</code> keys
-			</li>
-		</ul>
+		<TomeSection>
+			<TomeSectionHeader text="Class detection" tag="h3" />
+			<p>
+				The generator scans <code>.svelte</code>, <code>.html</code>, <code>.ts</code>,
+				<code>.js</code>, <code>.tsx</code>, and <code>.jsx</code> files in your project (excluding test
+				and generated files) and extracts class names from these patterns:
+			</p>
+			<p>Svelte and HTML files:</p>
+			<ul>
+				<li><code>class="..."</code> — static strings</li>
+				<li><code>{'class={[...]}'}</code> — array syntax (Svelte 5.16+)</li>
+				<li><code>{'class={{...}}'}</code> — object syntax (Svelte 5.16+)</li>
+				<li><code>class:name</code> — class directives</li>
+				<li><code>{'class={cond ? "a" : "b"}'}</code> — ternary expressions</li>
+				<li><code>{'class={cond && "name"}'}</code> — logical expressions</li>
+				<li>
+					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
+					function calls
+				</li>
+			</ul>
+			<p>
+				TypeScript/JS files and <code>&lt;script&gt;</code> tags in Svelte:
+			</p>
+			<ul>
+				<li>
+					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
+					function calls
+				</li>
+				<li>
+					Variables named <code>*class</code>, <code>*classes</code>, <code>*className</code>,
+					<code>*classNames</code>
+				</li>
+				<li>
+					Object properties with <code>class</code>, <code>className</code>, or
+					<code>*classes</code> keys
+				</li>
+			</ul>
+		</TomeSection>
 
-		<h4>Dynamic class hints</h4>
-		<p>
-			For dynamically constructed classes that can't be statically analyzed, use the <code
-				>@fuz-classes</code
-			> comment:
-		</p>
-		<Code
-			lang="typescript"
-			content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
+		<TomeSection>
+			<TomeSectionHeader text="Dynamic class hints" tag="h3" />
+			<p>
+				For dynamically constructed classes that can't be statically analyzed, use the <code
+					>@fuz-classes</code
+				> comment:
+			</p>
+			<Code
+				lang="typescript"
+				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
 const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 
 /* @fuz-classes color_a_5 color_b_5 color_c_5 */
 const color = get_dynamic_color();`}
-		/>
-		<p>
-			Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
-				>include_classes</DeclarationLink
-			> option in your generator config:
-		</p>
-		<Code
-			lang="ts"
-			content={`import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+			/>
+			<p>
+				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
+					>include_classes</DeclarationLink
+				> option in your generator config:
+			</p>
+			<Code
+				lang="ts"
+				content={`import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
 
 export const gen = gen_fuz_css({
 	include_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
 });`}
-		/>
+			/>
+		</TomeSection>
 	</TomeSection>
 
 	<TomeSection>
@@ -567,6 +576,140 @@ export const gen = gen_fuz_css({
 				/>
 			</li>
 		</ul>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="Framework support" />
+		<p>
+			Fuz CSS is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
+			work with any framework or plain HTML. The utility class generator has varying
+			<a href="#class-detection">detection</a> support:
+		</p>
+		<table>
+			<thead>
+				<tr>
+					<th>Framework</th>
+					<th>Detection</th>
+					<th>Notes</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>Svelte</td>
+					<td>full</td>
+					<td>all patterns including <code>class:</code> directives and array/object syntax</td>
+				</tr>
+				<tr>
+					<td>Plain HTML</td>
+					<td>full</td>
+					<td>static <code>class="..."</code> attributes</td>
+				</tr>
+				<tr>
+					<td>React / JSX</td>
+					<td>full</td>
+					<td>with <code>acorn-jsx</code> plugin — <code>className</code></td>
+				</tr>
+				<tr>
+					<td>Preact</td>
+					<td>full</td>
+					<td>with <code>acorn-jsx</code> plugin — <code>class</code></td>
+				</tr>
+				<tr>
+					<td>Solid</td>
+					<td>full</td>
+					<td>with <code>acorn-jsx</code> plugin — <code>class</code>, <code>classList</code></td>
+				</tr>
+				<tr>
+					<td>Vue JSX</td>
+					<td>full</td>
+					<td>with <code>acorn-jsx</code> plugin — <code>class</code></td>
+				</tr>
+				<tr>
+					<td>Vue SFC</td>
+					<td>partial</td>
+					<td><code>:class</code> bindings not parsed; use <code>clsx</code> in script</td>
+				</tr>
+				<tr>
+					<td>Angular, etc.</td>
+					<td>partial</td>
+					<td
+						>via <code>clsx</code>/<code>cn</code> patterns in <code>.ts</code>/<code>.js</code></td
+					>
+				</tr>
+			</tbody>
+		</table>
+		<p>
+			All frameworks support <a href="#dynamic-class-hints"><code>@fuz-classes</code></a> comment
+			hints and the
+			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
+			that can't be statically detected. Other acorn plugins can be added via
+			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support.
+		</p>
+
+		<TomeSection>
+			<TomeSectionHeader text="Svelte-first" tag="h3" />
+			<p>
+				The extractor uses AST parsing to understand <a href="https://svelte.dev/docs/svelte/class"
+					>Svelte's class syntax</a
+				> deeply. Supported constructs:
+			</p>
+			<ul>
+				<li>
+					<strong>attributes:</strong> <code>class="..."</code>, <code>{'class={[...]}'}</code>,
+					<code>{'class={{...}}'}</code>, <code>class:name</code>
+				</li>
+				<li>
+					<strong>expressions:</strong> ternaries (<code>? :</code>), logical (<code>&&</code>,
+					<code>||</code>, <code>??</code>), template literals (complete tokens only)
+				</li>
+				<li>
+					<strong>utility calls:</strong> <code>clsx()</code>, <code>cn()</code>, <code>cx()</code>,
+					<code>classNames()</code> with nested arguments
+				</li>
+				<li>
+					<strong>Svelte 5 runes:</strong> <code>$derived()</code> and <code>$derived.by()</code> for
+					class variables
+				</li>
+				<li>
+					<strong>control flow:</strong> Classes inside <code>{'{#each}'}</code>,
+					<code>{'{#if}'}</code>, <code>{'{#snippet}'}</code>, <code>{'{#await}'}</code>
+				</li>
+				<li>
+					<strong>scripts:</strong> Both <code>&lt;script&gt;</code> and
+					<code>&lt;script module&gt;</code>, variables matching <code>*class</code>/<code
+						>*Classes</code
+					>
+				</li>
+			</ul>
+			<p>
+				Template literals with expressions extract only complete whitespace-bounded tokens —
+				<code>{`\`icon-\${size}\``}</code> won't extract the fragment <code>icon-</code>.
+			</p>
+		</TomeSection>
+
+		<TomeSection>
+			<TomeSectionHeader text="React and JSX" tag="h3" />
+			<p>
+				To enable JSX support for React/Preact/Solid/etc, install <code>acorn-jsx</code> and pass it to
+				the generator:
+			</p>
+			<Code lang="bash" content="npm i -D acorn-jsx" />
+			<Code
+				lang="ts"
+				content={`// fuz.gen.css.ts
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+import jsx from 'acorn-jsx';
+
+export const gen = gen_fuz_css({
+	acorn_plugins: [jsx()],
+});`}
+			/>
+			<p>
+				This enables extraction from <code>.tsx</code> and <code>.jsx</code> files, including static
+				<code>className="..."</code>
+				and dynamic <code>{'className={clsx(...)}'}</code> patterns.
+			</p>
+		</TomeSection>
 	</TomeSection>
 </TomeContent>
 

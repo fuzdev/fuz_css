@@ -12,7 +12,7 @@ import type {Gen} from '@ryanatkn/gro/gen.js';
 import type {FileFilter} from '@fuzdev/fuz_util/path.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
-import {extract_css_classes_with_locations} from './css_class_extractor.js';
+import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
 import {type SourceLocation, type ExtractionDiagnostic, type Diagnostic} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
 import {
@@ -113,6 +113,19 @@ export interface GenFuzCssOptions {
 	 * @default 20
 	 */
 	cache_io_concurrency?: number;
+	/**
+	 * Additional acorn plugins to use when parsing TS/JS files.
+	 * Useful for adding JSX support via `acorn-jsx` for React projects.
+	 *
+	 * @example
+	 * ```ts
+	 * import jsx from 'acorn-jsx';
+	 * export const gen = gen_fuz_css({
+	 *   acorn_plugins: [jsx()],
+	 * });
+	 * ```
+	 */
+	acorn_plugins?: Array<AcornPlugin>;
 }
 
 /**
@@ -147,11 +160,23 @@ export class CssGenerationError extends Error {
 }
 
 const filter_file_default: FileFilter = (path) => {
-	if (path.includes('.test.') || path.includes('/test/') || path.includes('.gen.')) {
+	if (
+		path.includes('.test.') ||
+		path.includes('/test/') ||
+		path.includes('/tests/') ||
+		path.includes('.gen.')
+	) {
 		return false;
 	}
 	const ext = path.slice(path.lastIndexOf('.'));
-	return ext === '.svelte' || ext === '.ts' || ext === '.js';
+	return (
+		ext === '.svelte' ||
+		ext === '.html' ||
+		ext === '.ts' ||
+		ext === '.js' ||
+		ext === '.tsx' ||
+		ext === '.jsx'
+	);
 };
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
@@ -167,6 +192,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		project_root: project_root_option,
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
+		acorn_plugins,
 	} = options;
 
 	// Convert to Sets for efficient lookup
@@ -270,6 +296,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					stats.cache_misses++;
 					const result = extract_css_classes_with_locations(node.contents, {
 						filename: node.id,
+						acorn_plugins,
 					});
 
 					return {
