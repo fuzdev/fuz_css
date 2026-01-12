@@ -1,0 +1,5 @@
+blank_issues_enabled: false
+contact_links:
+  - name: Bug reports, feature requests, questions
+    url: https://github.com/fuzdev/fuz_css/discussions/new/choose
+    about: Start here!
