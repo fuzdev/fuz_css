@@ -425,9 +425,9 @@ describe('parse_css_literal - error cases', () => {
 describe('parse_css_literal - warnings', () => {
 	test('width:calc(100%-20px) generates warning', () => {
 		const {diagnostics} = assert_ok(parse_css_literal('width:calc(100%-20px)', css_properties));
-		assert.isNotNull(diagnostics);
-		assert.isTrue(diagnostics!.length > 0);
-		assert.equal(diagnostics![0]?.level, 'warning');
+		assert.ok(diagnostics);
+		assert.lengthOf(diagnostics, 1);
+		assert.equal(diagnostics[0]?.level, 'warning');
 	});
 });
 

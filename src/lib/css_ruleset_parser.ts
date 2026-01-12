@@ -88,9 +88,29 @@ const walk_css_children = (
 	for (const child of children) {
 		if (child.type === 'Rule') {
 			extract_rule(child, original_css, wrapper_offset, rules);
-		} else if ('children' in child) {
-			// Recurse into at-rules (like @media)
-			walk_css_children(child, original_css, wrapper_offset, rules);
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
+		} else if (child.type === 'Atrule' && child.block) {
+			// Recurse into at-rules (like @media) - rules are in block.children
+			walk_css_block(child.block, original_css, wrapper_offset, rules);
+		}
+	}
+};
+
+/**
+ * Walks a CSS block (from an at-rule) to extract rules.
+ */
+const walk_css_block = (
+	block: AST.CSS.Block,
+	original_css: string,
+	wrapper_offset: number,
+	rules: Array<ParsedRule>,
+): void => {
+	for (const child of block.children) {
+		if (child.type === 'Rule') {
+			extract_rule(child, original_css, wrapper_offset, rules);
+		} else if (child.type === 'Atrule' && child.block) {
+			// Handle nested at-rules
+			walk_css_block(child.block, original_css, wrapper_offset, rules);
 		}
 	}
 };
@@ -234,10 +254,17 @@ const skip_identifier = (selector: string, start: number): number => {
 };
 
 /**
+ * CSS2 pseudo-elements that use single-colon syntax.
+ * CSS3 uses double-colon (::before) but CSS2 syntax (:before) is still valid.
+ */
+const CSS2_PSEUDO_ELEMENTS = /:(before|after|first-letter|first-line)(?![\w-])/;
+
+/**
  * Checks if a selector contains a pseudo-element (::before, ::after, etc.).
+ * Also detects CSS2 single-colon syntax (:before, :after, :first-letter, :first-line).
  */
 const selector_has_pseudo_element = (selector: string): boolean => {
-	return selector.includes('::');
+	return selector.includes('::') || CSS2_PSEUDO_ELEMENTS.test(selector);
 };
 
 /**
@@ -256,25 +283,48 @@ const selector_has_state = (selector: string, state: string): boolean => {
 };
 
 /**
- * Splits a selector list by commas, respecting parentheses.
+ * Splits a selector list by commas, respecting parentheses, brackets, and quoted strings.
  *
  * @example
  * split_selector_list('.a, .b') → ['.a', '.b']
  * split_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']
+ * split_selector_list('.a[data-x="a,b"], .c') → ['.a[data-x="a,b"]', '.c']
  */
 export const split_selector_list = (selector_group: string): Array<string> => {
 	const selectors: Array<string> = [];
 	let current = '';
 	let paren_depth = 0;
+	let bracket_depth = 0;
+	let in_string: '"' | "'" | null = null;
 
-	for (const char of selector_group) {
-		if (char === '(') {
+	for (let i = 0; i < selector_group.length; i++) {
+		const char = selector_group[i]!;
+		const prev_char = i > 0 ? selector_group[i - 1] : '';
+
+		// Handle string boundaries (but not escaped quotes)
+		if ((char === '"' || char === "'") && prev_char !== '\\') {
+			if (in_string === null) {
+				in_string = char;
+			} else if (in_string === char) {
+				in_string = null;
+			}
+			current += char;
+		} else if (in_string !== null) {
+			// Inside a string - just accumulate
+			current += char;
+		} else if (char === '(') {
 			paren_depth++;
 			current += char;
 		} else if (char === ')') {
 			paren_depth--;
 			current += char;
-		} else if (char === ',' && paren_depth === 0) {
+		} else if (char === '[') {
+			bracket_depth++;
+			current += char;
+		} else if (char === ']') {
+			bracket_depth--;
+			current += char;
+		} else if (char === ',' && paren_depth === 0 && bracket_depth === 0) {
 			selectors.push(current.trim());
 			current = '';
 		} else {
@@ -309,16 +359,39 @@ export const find_compound_end = (selector: string, class_pos: number): number =
 			// Another class - skip it
 			pos++;
 			pos = skip_identifier(selector, pos);
+		} else if (char === '#') {
+			// ID selector - skip it
+			pos++;
+			pos = skip_identifier(selector, pos);
 		} else if (char === '[') {
-			// Attribute selector - find matching ]
-			while (pos < selector.length && selector[pos] !== ']') {
+			// Attribute selector - find matching ], respecting quoted strings
+			pos++; // Skip [
+			let in_string: '"' | "'" | null = null;
+			while (pos < selector.length) {
+				const c = selector[pos]!;
+				const prev = pos > 0 ? selector[pos - 1] : '';
+				if ((c === '"' || c === "'") && prev !== '\\') {
+					if (in_string === null) {
+						in_string = c;
+					} else if (in_string === c) {
+						in_string = null;
+					}
+				} else if (c === ']' && in_string === null) {
+					pos++; // Skip ]
+					break;
+				}
 				pos++;
 			}
-			if (pos < selector.length) pos++; // Skip ]
 		} else if (char === ':') {
 			// Pseudo-class or pseudo-element
 			if (selector[pos + 1] === ':') {
-				// Pseudo-element - stop here (state comes before pseudo-element)
+				// CSS3 pseudo-element (::before) - stop here (state comes before pseudo-element)
+				break;
+			}
+			// Check for CSS2 pseudo-elements (:before, :after, :first-letter, :first-line)
+			const rest = selector.slice(pos);
+			if (CSS2_PSEUDO_ELEMENTS.test(rest)) {
+				// CSS2 pseudo-element - stop here
 				break;
 			}
 			// Pseudo-class - skip it (including functional ones like :not())

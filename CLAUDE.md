@@ -102,6 +102,7 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class definitions, the main class registry
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions for token classes
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`, `.pane`, `.panel`)
+- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - `resolve_classes()` helper for composing class definitions via `classes` property
 - [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
 - [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
@@ -124,6 +125,7 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
 - [css_cache.test.ts](src/test/css_cache.test.ts) - Cache save/load, version invalidation, atomic writes
 - [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters, CssClasses
+- [css_class_resolution.test.ts](src/test/css_class_resolution.test.ts) - Class resolution, cycle detection, error handling
 - [css_class_extractor.test.ts](src/test/css_class_extractor.test.ts) - AST extraction, location tracking
 - [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
 - [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification

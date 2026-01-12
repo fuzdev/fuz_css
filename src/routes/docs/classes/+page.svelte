@@ -8,8 +8,6 @@
 	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-
 	const LIBRARY_ITEM_NAME = 'classes';
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
@@ -109,21 +107,85 @@
 
 		<TomeSection>
 			<TomeSectionHeader text="Composite classes" tag="h3" />
-			<p>Multi-property groups for repeated patterns. Define your own in a composites file:</p>
+			<p>
+				Multi-property groups for repeated patterns. Composites can define custom CSS, compose
+				existing classes, or both.
+			</p>
+
+			<h4>Three definition forms</h4>
 			<Code
 				lang="typescript"
 				content={`// src/lib/composites.ts
 export const my_composites = {
-	'flex-center': {declaration: 'display: flex; align-items: center; justify-content: center;'},
-	card: {declaration: \`
-		padding: var(--space_lg);
-		border-radius: var(--radius_md);
-		background: var(--bg_1);
-	\`},
+	// 1. declaration only - custom CSS properties
+	'flex-center': {
+		declaration: 'display: flex; align-items: center; justify-content: center;',
+	},
+
+	// 2. classes only - compose existing token/composite classes
+	card_base: {
+		classes: ['p_lg', 'border_radius_md', 'shadow_md'],
+	},
+
+	// 3. classes + declaration - compose then extend
+	card: {
+		classes: ['card_base', 'bg_1'],
+		declaration: '--card-hover-shadow: var(--shadow_lg);',
+	},
 };`}
 			/>
-			<UnfinishedImplementationWarning>These docs are unfinished.</UnfinishedImplementationWarning>
-			<p>Built-in composites:</p>
+			<p>
+				The <code>classes</code> property resolves referenced classes and combines their
+				declarations. When both <code>classes</code> and <code>declaration</code> are present, the explicit
+				declaration comes last (winning in the cascade for duplicate properties).
+			</p>
+
+			<h4>Nesting</h4>
+			<p>Composites can reference other composites, enabling layered abstractions:</p>
+			<Code
+				lang="typescript"
+				content={`const composites = {
+	spacing: {classes: ['p_lg', 'gap_md']},
+	surface: {classes: ['bg_1', 'border_radius_md', 'shadow_sm']},
+	panel: {classes: ['spacing', 'surface']}, // combines both
+};`}
+			/>
+			<p>
+				Resolution is depth-first: nested classes are fully resolved before the parent's
+				<code>declaration</code> is appended. Circular references are detected and produce an error.
+			</p>
+
+			<h4>What <code>classes</code> can reference</h4>
+			<ul>
+				<li>
+					<strong>Token classes</strong> (<code>p_lg</code>, <code>color_a_5</code>) — resolved to
+					their declarations
+				</li>
+				<li>
+					<strong>Composites with <code>declaration</code></strong> — the declaration is included
+				</li>
+				<li>
+					<strong>Composites with <code>classes</code></strong> — recursively resolved
+				</li>
+			</ul>
+			<p>
+				<strong>Not allowed:</strong> Ruleset-based composites (those with multiple selectors like
+				<code>.clickable</code>) cannot be referenced in <code>classes</code> because their
+				multi-selector CSS can't be inlined into a single rule. Use <code>declaration</code> for custom
+				CSS or apply ruleset classes separately in your markup.
+			</p>
+
+			<h4>Modifiers</h4>
+			<p>
+				Composites with <code>classes</code> or <code>declaration</code> support all modifiers. The resolved
+				declarations are combined and wrapped:
+			</p>
+			<Code
+				content={`<!-- hover:card resolves card's classes, applies :hover -->
+<div class="hover:card md:dark:card">`}
+			/>
+
+			<h4>Builtin composites</h4>
 			<ul>
 				<li><code>.box</code> - centered flex container</li>
 				<li><code>.row</code> - horizontal flex row</li>

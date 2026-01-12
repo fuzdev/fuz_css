@@ -4,6 +4,7 @@ import {
 	extract_from_svelte,
 	extract_from_ts,
 	extract_css_classes,
+	SourceIndex,
 } from '$lib/css_class_extractor.js';
 
 import {class_names_equal, class_set_equal} from './css_class_extractor_test_helpers.js';
@@ -1092,5 +1093,92 @@ describe('module scripts', () => {
 `;
 		const result = extract_from_svelte(source);
 		class_names_equal(result, ['instance-class', 'exported-one', 'exported-two']);
+	});
+});
+
+describe('SourceIndex', () => {
+	test('converts offset 0 to line 1, column 1', () => {
+		const source = 'abc\ndef\nghi';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(0, 'test.ts');
+		expect(loc.line).toBe(1);
+		expect(loc.column).toBe(1);
+		expect(loc.file).toBe('test.ts');
+	});
+
+	test('converts offset within first line', () => {
+		const source = 'abc\ndef\nghi';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(2, 'test.ts');
+		expect(loc.line).toBe(1);
+		expect(loc.column).toBe(3);
+	});
+
+	test('converts offset at start of second line', () => {
+		const source = 'abc\ndef\nghi';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(4, 'test.ts');
+		expect(loc.line).toBe(2);
+		expect(loc.column).toBe(1);
+	});
+
+	test('converts offset within second line', () => {
+		const source = 'abc\ndef\nghi';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(6, 'test.ts');
+		expect(loc.line).toBe(2);
+		expect(loc.column).toBe(3);
+	});
+
+	test('converts offset at start of third line', () => {
+		const source = 'abc\ndef\nghi';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(8, 'test.ts');
+		expect(loc.line).toBe(3);
+		expect(loc.column).toBe(1);
+	});
+
+	test('handles empty lines', () => {
+		const source = 'abc\n\ndef';
+		const index = new SourceIndex(source);
+
+		// First line
+		expect(index.get_location(0, 'f').line).toBe(1);
+
+		// Empty second line (offset 4 is the start of the empty line)
+		expect(index.get_location(4, 'f').line).toBe(2);
+		expect(index.get_location(4, 'f').column).toBe(1);
+
+		// Third line
+		expect(index.get_location(5, 'f').line).toBe(3);
+	});
+
+	test('handles single line source', () => {
+		const source = 'hello world';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(6, 'f');
+		expect(loc.line).toBe(1);
+		expect(loc.column).toBe(7);
+	});
+
+	test('handles empty source', () => {
+		const source = '';
+		const index = new SourceIndex(source);
+		const loc = index.get_location(0, 'f');
+		expect(loc.line).toBe(1);
+		expect(loc.column).toBe(1);
+	});
+
+	test('handles CRLF line endings', () => {
+		const source = 'abc\r\ndef\r\nghi';
+		const index = new SourceIndex(source);
+		// Line 1: 'abc\r' (4 chars, newline at position 4)
+		expect(index.get_location(0, 'f').line).toBe(1);
+		expect(index.get_location(3, 'f').line).toBe(1); // 'c'
+		// After \r\n we're at line 2
+		expect(index.get_location(5, 'f').line).toBe(2); // 'd'
+		expect(index.get_location(8, 'f').line).toBe(2); // 'f'
+		// Line 3
+		expect(index.get_location(10, 'f').line).toBe(3); // 'g'
 	});
 });

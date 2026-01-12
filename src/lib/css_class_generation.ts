@@ -16,6 +16,7 @@ import {
 	create_generation_diagnostic,
 } from './diagnostics.js';
 import {parse_ruleset, is_single_selector_ruleset} from './css_ruleset_parser.js';
+import {resolve_class_definition} from './css_class_resolution.js';
 
 //
 // CSS Utilities
@@ -38,22 +39,39 @@ export const escape_css_selector = (name: string): string => {
 // Class Definitions
 //
 
-export type CssClassDefinition =
-	| CssClassDefinitionItem
-	| CssClassDefinitionGroup
-	| CssClassDefinitionInterpreter;
-
 export interface CssClassDefinitionBase {
 	comment?: string;
 }
 
-export interface CssClassDefinitionItem extends CssClassDefinitionBase {
-	declaration: string;
+/** Pure utility composition (classes only). */
+export interface CssClassDefinitionClasses extends CssClassDefinitionBase {
+	classes: Array<string>;
+	declaration?: never;
+	ruleset?: never;
 }
 
-export interface CssClassDefinitionGroup extends CssClassDefinitionBase {
-	ruleset: string;
+/** Custom CSS declaration (optionally seeded with classes). */
+export interface CssClassDefinitionDeclaration extends CssClassDefinitionBase {
+	declaration: string;
+	classes?: Array<string>;
+	ruleset?: never;
 }
+
+/** Full ruleset with selectors. */
+export interface CssClassDefinitionRuleset extends CssClassDefinitionBase {
+	ruleset: string;
+	classes?: never;
+	declaration?: never;
+}
+
+/** Static definitions (not interpreter-based). */
+export type CssClassDefinitionItem =
+	| CssClassDefinitionClasses
+	| CssClassDefinitionDeclaration
+	| CssClassDefinitionRuleset;
+
+/** Full union including interpreters. */
+export type CssClassDefinition = CssClassDefinitionItem | CssClassDefinitionInterpreter;
 
 /**
  * Context passed to CSS class interpreters.
@@ -183,9 +201,31 @@ export const generate_classes_css = (
 			}
 		}
 
-		if ('declaration' in v) {
-			css += `.${escape_css_selector(c)} { ${v.declaration} }\n`;
-		} else if ('ruleset' in v) {
+		// Handle classes-based or declaration-based definitions
+		if ('classes' in v || 'declaration' in v) {
+			const resolution_result = resolve_class_definition(v, c, class_definitions);
+			if (!resolution_result.ok) {
+				// Add error diagnostic and skip this class
+				diagnostics.push({
+					phase: 'generation',
+					level: 'error',
+					message: resolution_result.error.message,
+					class_name: c,
+					suggestion: resolution_result.error.suggestion,
+					locations: class_locations?.get(c) ?? null,
+				});
+				continue;
+			}
+			// Add warnings if any
+			if (resolution_result.warnings) {
+				for (const warning of resolution_result.warnings) {
+					diagnostics.push(create_generation_diagnostic(warning, class_locations?.get(c) ?? null));
+				}
+			}
+			if (resolution_result.declaration) {
+				css += `.${escape_css_selector(c)} { ${resolution_result.declaration} }\n`;
+			}
+		} else if ('ruleset' in v && v.ruleset) {
 			css += v.ruleset.trim() + '\n';
 
 			// Warn if this ruleset could be converted to declaration format

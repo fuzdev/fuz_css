@@ -8,6 +8,7 @@ import {
 	type CssLiteralOutput,
 } from './css_literal.js';
 import {generate_modified_ruleset} from './css_ruleset_parser.js';
+import {resolve_class_definition} from './css_class_resolution.js';
 
 /**
  * Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).
@@ -64,8 +65,27 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		}
 		const pseudo_element_css = modifiers.pseudo_element?.css ?? '';
 
-		// Handle declaration-based classes
-		if ('declaration' in base_class) {
+		// Handle classes-based or declaration-based definitions
+		if ('classes' in base_class || 'declaration' in base_class) {
+			const resolution_result = resolve_class_definition(
+				base_class,
+				base_class_name,
+				ctx.class_definitions,
+			);
+			if (!resolution_result.ok) {
+				ctx.diagnostics.push(resolution_result.error);
+				return null;
+			}
+			// Add warnings if any
+			if (resolution_result.warnings) {
+				for (const warning of resolution_result.warnings) {
+					ctx.diagnostics.push(warning);
+				}
+			}
+			if (!resolution_result.declaration) {
+				return null;
+			}
+
 			// Build the selector
 			let selector = `.${escaped_class_name}`;
 			selector += state_css;
@@ -73,7 +93,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 
 			// Create output compatible with generate_css_literal_simple
 			const output: CssLiteralOutput = {
-				declaration: base_class.declaration,
+				declaration: resolution_result.declaration,
 				selector,
 				media_wrapper: modifiers.media?.css ?? null,
 				ancestor_wrapper: modifiers.ancestor?.css ?? null,
@@ -84,7 +104,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		}
 
 		// Handle ruleset-based classes
-		if ('ruleset' in base_class) {
+		if ('ruleset' in base_class && base_class.ruleset) {
 			const result = generate_modified_ruleset(
 				base_class.ruleset,
 				base_class_name,
