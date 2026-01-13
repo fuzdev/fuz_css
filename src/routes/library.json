@@ -288,7 +288,7 @@
 						"kind": "variable",
 						"doc_comment": "All built-in CSS class definitions (token classes + composites).",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 44,
+						"source_line": 43,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
@@ -2256,7 +2256,7 @@
 					{
 						"name": "ModifierType",
 						"kind": "type",
-						"doc_comment": "Type of modifier determining its position in the class name and CSS output.\n\nOrder in class names: `[media]:[ancestor]:[state...]:[pseudo-element]:property:value`",
+						"doc_comment": "Type of modifier determining its position in the class name and CSS output.\n\nOrder in class names: `[media:][ancestor:][state...:][pseudo-element:]property:value`",
 						"source_line": 19,
 						"type_signature": "ModifierType"
 					},

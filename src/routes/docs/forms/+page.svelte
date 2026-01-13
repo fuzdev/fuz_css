@@ -109,7 +109,7 @@
 					out:fly={{y: 100, duration: ANIMATION_DURATION_FAST}}
 				>
 					<Alert status="error">cannot create account because the docs are fake</Alert>
-					<button type="button" class="width_100" onclick={() => (created_account = false)}>
+					<button type="button" class="width:100%" onclick={() => (created_account = false)}>
 						undo undo!
 					</button>
 				</form>

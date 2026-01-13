@@ -136,7 +136,7 @@
 			{/each}
 		</ul>
 	</TomeSection>
-	<div class="box width_100 mb_lg">
+	<div class="box width:100% mb_lg">
 		<ColorSchemeInput />
 	</div>
 </TomeContent>

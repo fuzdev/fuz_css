@@ -13,7 +13,7 @@
 </script>
 
 <label
-	><div class="title row width_100 flex-wrap:wrap">
+	><div class="title row width:100% flex-wrap:wrap">
 		{#if children}
 			{@render children()}
 		{:else}

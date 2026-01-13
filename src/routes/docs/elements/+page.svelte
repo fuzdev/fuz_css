@@ -244,8 +244,8 @@
 				<tr><td>td</td><td>td</td><td>td</td></tr>
 			</tbody>
 		</table>
-		<Code content={`<table class="width_100">\n\t...\n</table>`} />
-		<table class="width_100">
+		<Code content={`<table class="width:100%">\n\t...\n</table>`} />
+		<table class="width:100%">
 			<thead>
 				<tr>
 					<th>th</th>
