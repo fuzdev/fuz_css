@@ -403,7 +403,7 @@
 						"name": "extract_from_svelte",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 197,
+						"source_line": 198,
 						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
@@ -425,7 +425,7 @@
 						"name": "extract_from_ts",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a TypeScript/JS file using AST parsing.",
-						"source_line": 383,
+						"source_line": 384,
 						"type_signature": "(source: string, file?: string, acorn_plugins?: AcornPlugin[] | undefined): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, and diagnostics",
@@ -453,7 +453,7 @@
 						"name": "extract_css_classes",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set.",
-						"source_line": 479,
+						"source_line": 480,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of class names",
@@ -475,7 +475,7 @@
 						"name": "extract_css_classes_with_locations",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
-						"source_line": 495,
+						"source_line": 496,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
@@ -655,7 +655,8 @@
 					{
 						"name": "CssClassDefinitionInterpreter",
 						"kind": "type",
-						"source_line": 91,
+						"doc_comment": "Interpreter for dynamic CSS class generation based on pattern matching.",
+						"source_line": 92,
 						"type_signature": "CssClassDefinitionInterpreter",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -667,7 +668,8 @@
 							{
 								"name": "interpret",
 								"kind": "variable",
-								"type_signature": "(matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null"
+								"type_signature": "(matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null",
+								"doc_comment": ""
 							}
 						]
 					},
@@ -675,7 +677,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 103,
+						"source_line": 107,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -693,7 +695,7 @@
 					{
 						"name": "GenerateClassesCssOptions",
 						"kind": "type",
-						"source_line": 108,
+						"source_line": 112,
 						"type_signature": "GenerateClassesCssOptions",
 						"properties": [
 							{
@@ -732,7 +734,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 118,
+						"source_line": 122,
 						"type_signature": "(options: GenerateClassesCssOptions): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
@@ -1052,7 +1054,7 @@
 						"name": "resolve_classes",
 						"kind": "function",
 						"doc_comment": "Resolves an array of class names to their combined CSS declarations.\n\nRecursively resolves nested `classes` arrays and combines all declarations.\nValidates that referenced classes exist and are resolvable (not rulesets or interpreters).\n\nDeduplication behavior:\n- Diamond dependencies (class reached via different composition branches) are silently skipped\n- Redundant listings (class already included by an earlier sibling in this array) emit a warning",
-						"source_line": 110,
+						"source_line": 112,
 						"type_signature": "(class_names: string[], definitions: Record<string, CssClassDefinition | undefined>, resolution_stack: Set<string>, visited: Set<string>, original_class_name: string): ResolveClassesResult",
 						"return_type": "ResolveClassesResult",
 						"return_description": "Combined declarations or an error",
@@ -1672,7 +1674,7 @@
 						"name": "is_single_selector_ruleset",
 						"kind": "function",
 						"doc_comment": "Checks if a ruleset has only a single simple selector (just the class name).\nUsed to detect rulesets that could be converted to declaration format.",
-						"source_line": 161,
+						"source_line": 164,
 						"type_signature": "(rules: ParsedRule[], expected_class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if there's exactly one rule with selector \".class_name\"",
@@ -1693,7 +1695,7 @@
 						"name": "extract_css_comment",
 						"kind": "function",
 						"doc_comment": "Extracts the CSS comment from a ruleset (if any).\nLooks for comments before the first rule.",
-						"source_line": 184,
+						"source_line": 187,
 						"type_signature": "(css: string, rules: ParsedRule[]): string | null",
 						"return_type": "string | null",
 						"return_description": "Comment text without delimiters, or null if no comment",
@@ -1714,7 +1716,7 @@
 						"name": "SkippedModifierInfo",
 						"kind": "type",
 						"doc_comment": "Information about a modifier that was skipped for a selector during ruleset modification.\nThe selector is still included in output, just without the conflicting modifier applied.",
-						"source_line": 208,
+						"source_line": 211,
 						"type_signature": "SkippedModifierInfo",
 						"properties": [
 							{
@@ -1741,7 +1743,7 @@
 						"name": "ModifiedSelectorGroupResult",
 						"kind": "type",
 						"doc_comment": "Result from modifying a selector group with conflict detection.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
-						"source_line": 223,
+						"source_line": 226,
 						"type_signature": "ModifiedSelectorGroupResult",
 						"properties": [
 							{
@@ -1762,7 +1764,7 @@
 						"name": "ModifiedRulesetResult",
 						"kind": "type",
 						"doc_comment": "Result from generating a modified ruleset.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
-						"source_line": 236,
+						"source_line": 239,
 						"type_signature": "ModifiedRulesetResult",
 						"properties": [
 							{
@@ -1786,7 +1788,7 @@
 						"examples": [
 							"split_selector_list('.a, .b') → ['.a', '.b']\nsplit_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']\nsplit_selector_list('.a[data-x=\"a,b\"], .c') → ['.a[data-x=\"a,b\"]', '.c']"
 						],
-						"source_line": 293,
+						"source_line": 296,
 						"type_signature": "(selector_group: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -1800,7 +1802,7 @@
 						"name": "find_compound_end",
 						"kind": "function",
 						"doc_comment": "Finds the end position of the compound selector containing the class at class_pos.\nA compound selector is a sequence of simple selectors without combinators.",
-						"source_line": 350,
+						"source_line": 353,
 						"type_signature": "(selector: string, class_pos: number): number",
 						"return_type": "number",
 						"return_description": "Position where state modifiers should be inserted (before any pseudo-element)",
@@ -1824,7 +1826,7 @@
 						"examples": [
 							"modify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'"
 						],
-						"source_line": 439,
+						"source_line": 442,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
 						"return_type": "string",
 						"return_description": "Modified selector",
@@ -1860,7 +1862,7 @@
 						"name": "modify_selector_group",
 						"kind": "function",
 						"doc_comment": "Modifies a selector list (comma-separated selectors) to add modifiers.\nHandles conflicts per-selector: if one selector in a list has a conflict,\nonly that selector skips the modifier; other selectors still get it.",
-						"source_line": 479,
+						"source_line": 482,
 						"type_signature": "(selector_group: string, original_class: string, new_class_escaped: string, states_to_add: string[], pseudo_element_css: string): ModifiedSelectorGroupResult",
 						"return_type": "ModifiedSelectorGroupResult",
 						"return_description": "Result with modified selector list and information about skipped modifiers",
@@ -1896,7 +1898,7 @@
 						"name": "generate_modified_ruleset",
 						"kind": "function",
 						"doc_comment": "Generates CSS for a modified ruleset with applied modifiers.\n\nConflict handling is per-selector within selector lists:\n- For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips\n  the `:hover` addition; `.plain:active` still gets `:hover` appended.\n- For multiple states like `:hover:focus`, each is checked individually; conflicting\n  states are skipped while non-conflicting ones are still applied.",
-						"source_line": 558,
+						"source_line": 561,
 						"type_signature": "(original_ruleset: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string, media_wrapper: string | null, ancestor_wrapper: string | null): ModifiedRulesetResult",
 						"return_type": "ModifiedRulesetResult",
 						"return_description": "Result with generated CSS and information about skipped modifiers",

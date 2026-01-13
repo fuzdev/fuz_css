@@ -120,6 +120,7 @@ export class SourceIndex {
  * @param classes - Map of classes to locations
  * @param class_name - Class name to add
  * @param location - Source location where the class was found
+ * @mutates classes - Adds or appends to the map entry
  */
 const add_class_with_location = (
 	classes: Map<string, Array<SourceLocation>>,

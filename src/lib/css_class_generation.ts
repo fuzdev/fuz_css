@@ -88,8 +88,12 @@ export interface CssClassInterpreterContext {
 	css_properties: Set<string> | null;
 }
 
+/** Interpreter for dynamic CSS class generation based on pattern matching. */
 export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
 	pattern: RegExp;
+	/**
+	 * @mutates ctx.diagnostics - Implementations push errors/warnings to the diagnostics array
+	 */
 	interpret: (matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null;
 }
 

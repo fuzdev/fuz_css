@@ -106,6 +106,8 @@ export const resolve_class_definition = (
  * @param visited - Set of all class names already resolved (for deduplication)
  * @param original_class_name - The class name being defined (for error messages)
  * @returns Combined declarations or an error
+ * @mutates resolution_stack - Temporarily adds/removes names during recursion
+ * @mutates visited - Adds resolved class names for deduplication
  */
 export const resolve_classes = (
 	class_names: Array<string>,
