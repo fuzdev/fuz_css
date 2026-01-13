@@ -14,7 +14,7 @@
 /**
  * Type of modifier determining its position in the class name and CSS output.
  *
- * Order in class names: `[media]:[ancestor]:[state...]:[pseudo-element]:property:value`
+ * Order in class names: `[media:][ancestor:][state...:][pseudo-element:]property:value`
  */
 export type ModifierType = 'media' | 'ancestor' | 'state' | 'pseudo-element';
 

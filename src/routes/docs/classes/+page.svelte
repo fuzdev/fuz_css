@@ -463,7 +463,7 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<TomeSectionHeader text="Combining modifiers" />
 		<p>
 			Modifiers can be combined in a specific order:
-			<code>[media]:[ancestor]:[state...]:[pseudo-element]:property:value</code>
+			<code>[media:][ancestor:][state...:][pseudo-element:]property:value</code>
 		</p>
 		<Code
 			content={`<!-- Media + color-scheme + state -->
