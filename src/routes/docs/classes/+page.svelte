@@ -25,8 +25,8 @@
 			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
 			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag for
 			whatever reason. Compared to TailwindCSS, fuz_css utility classes follow the grain of semantic
-			HTML with custom properties rather than having primacy, leading to different design choices.
-			See below for a <a href="#Compared-to-alternatives">comparison</a> to TailwindCSS and UnoCSS.
+			HTML with custom properties rather than being foundational to the design. See below for a
+			<a href="#Compared-to-alternatives">comparison</a> to TailwindCSS and UnoCSS.
 		</p>
 		<p>Compared to inline <code>style</code> attributes, classes:</p>
 		<ul>
