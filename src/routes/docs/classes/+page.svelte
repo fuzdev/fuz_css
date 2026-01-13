@@ -23,9 +23,10 @@
 		<p>
 			Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
 			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
-			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag for whatever
-			reason. Compared to Tailwind, Fuz CSS utility classes follow the grain of semantic HTML with custom
-			properties rather than having primacy, leading to different design choices.
+			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag for
+			whatever reason. Compared to TailwindCSS, Fuz CSS utility classes follow the grain of semantic
+			HTML with custom properties rather than having primacy, leading to different design choices.
+			See below for a <a href="#Compared-to-alternatives">comparison</a> to TailwindCSS and UnoCSS.
 		</p>
 		<p>Compared to inline <code>style</code> attributes, classes:</p>
 		<ul>
@@ -265,7 +266,7 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 			</p>
 			<ul>
 				<li>
-					similar to Tailwind but more verbose, nudging you toward Svelte's <code
+					similar to TailwindCSS and UnoCSS but more verbose, nudging you toward Svelte's <code
 						>&lt;style&gt;</code
 					> tags
 				</li>
@@ -884,5 +885,58 @@ const styles = 'card hover:shadow_lg';
 const Component = () => <div className={styles} />;`}
 			/>
 		</TomeSection>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="Compared to alternatives" />
+		<p>
+			TailwindCSS and UnoCSS are utility-first frameworks where classes have primacy. Fuz CSS is
+			semantic-first: utilities complement HTML defaults rather than being the primary styling
+			mechanism.
+		</p>
+		<table>
+			<thead>
+				<tr>
+					<th></th>
+					<th>TailwindCSS</th>
+					<th>UnoCSS</th>
+					<th>Fuz CSS</th>
+				</tr>
+			</thead>
+			<tbody>
+				<tr>
+					<td>primary syntax</td>
+					<td>DSL-first</td>
+					<td>config-first</td>
+					<td>token DSL + CSS literals</td>
+				</tr>
+				<tr>
+					<td>multi-property</td>
+					<td><code>@apply</code>, plugins</td>
+					<td>shortcuts</td>
+					<td>composites</td>
+				</tr>
+				<tr>
+					<td>interactive states</td>
+					<td>external CSS</td>
+					<td>external CSS</td>
+					<td>ruleset composites</td>
+				</tr>
+				<tr>
+					<td>detection</td>
+					<td>regex</td>
+					<td>regex</td>
+					<td>AST (more capable, slower)</td>
+				</tr>
+			</tbody>
+		</table>
+		<p>
+			The literal class syntax (<code>display:flex</code>) is more verbose than TailwindCSS's
+			shorthands and UnoCSS's typical conventions, which nudges you toward Svelte's
+			<code>&lt;style&gt;</code> tag. Like UnoCSS, composites offer a high level of customization, including
+			the ability to replicate much of TailwindCSS's DSL, but ruleset composites go further with full
+			CSS including multi-selector patterns. Fuz CSS does not (yet?) make presets a first-class concept
+			like UnoCSS -- it's normal configuration.
+		</p>
 	</TomeSection>
 </TomeContent>
