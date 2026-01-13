@@ -28,21 +28,21 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			Fuz CSS supports both the browser's
+			fuz_css supports both the browser's
 			<MdnLink path="Web/CSS/color-scheme" />
 			and custom themes based on <TomeLink name="variables" />, which use
 			<MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink>.
 		</p>
 		<p>
-			Fuz CSS works with any JS framework, but it provides only stylesheets, not integrations. This
+			fuz_css works with any JS framework, but it provides only stylesheets, not integrations. This
 			website uses my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
-			to provide the UI below to control the Fuz CSS color scheme and themes.
+			to provide the UI below to control the fuz_css color scheme and themes.
 		</p>
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Color scheme" />
 		<p>
-			Fuz CSS supports
+			fuz_css supports
 			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes. To apply dark mode manually,
 			add the <code>dark</code> class to the root <code>html</code>
 			element.

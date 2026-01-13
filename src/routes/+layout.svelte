@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Fuz CSS - CSS with more utility</title>
+	<title>fuz_css - CSS with more utility</title>
 </svelte:head>
 
 <Themed>

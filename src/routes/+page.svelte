@@ -29,7 +29,7 @@
 		<Card href={resolve('/docs')}>docs{#snippet icon()}🌿{/snippet}</Card>
 	</section>
 	<section class="width_upto_sm p_sm border_radius_md shadow_xs text-align:center">
-		Fuz CSS is part of the Fuz stack, <br /> see
+		fuz_css is part of the Fuz stack, <br /> see
 		<a href="https://www.fuz.dev/">fuz.dev</a>
 		and
 		<a href="https://github.com/fuzdev" rel="noopener">github.com/fuzdev</a>

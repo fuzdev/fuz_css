@@ -1,4 +1,4 @@
-# Fuz CSS framework and design system
+# fuz_css framework and design system
 
 CSS framework and design system built on **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
 
@@ -49,6 +49,7 @@ All class types support modifiers: responsive (`md:`), state (`hover:`), color-s
 ### CSS-literal syntax
 
 Literal classes use `property:value` syntax that maps 1:1 to CSS:
+
 - `display:flex` → `display: flex;`
 - `hover:opacity:80%` → `:hover { opacity: 80%; }`
 - `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers

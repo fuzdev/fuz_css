@@ -24,7 +24,7 @@
 
 <TomeContent {tome}>
 	<p>
-		Fuz CSS applies default styles to semantic HTML elements in its <ModuleLink path="style.css"
+		fuz_css applies default styles to semantic HTML elements in its <ModuleLink path="style.css"
 			>reset stylesheet</ModuleLink
 		>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
 		user-friendly styling and theme integration automatically. The defaults are low specificity using

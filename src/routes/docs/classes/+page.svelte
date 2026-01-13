@@ -15,7 +15,7 @@
 
 <TomeContent {tome}>
 	<p>
-		Fuz CSS has two categories of CSS classes: utilities and builtins. Builtins are baked into the
+		fuz_css has two categories of CSS classes: utilities and builtins. Builtins are baked into the
 		main stylesheet; utilities are optional and require build tool integration.
 	</p>
 	<TomeSection>
@@ -24,7 +24,7 @@
 			Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
 			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
 			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag for
-			whatever reason. Compared to TailwindCSS, Fuz CSS utility classes follow the grain of semantic
+			whatever reason. Compared to TailwindCSS, fuz_css utility classes follow the grain of semantic
 			HTML with custom properties rather than having primacy, leading to different design choices.
 			See below for a <a href="#Compared-to-alternatives">comparison</a> to TailwindCSS and UnoCSS.
 		</p>
@@ -420,7 +420,7 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<p>
 			<code>dark:</code> and <code>light:</code> use <code>:root.dark</code> and
 			<code>:root.light</code>
-			selectors, matching Fuz CSS's color scheme mechanism.
+			selectors, matching fuz_css's color scheme mechanism.
 		</p>
 
 		<h4>Pseudo-element modifiers</h4>
@@ -491,7 +491,7 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 
 	<TomeSection>
 		<TomeSectionHeader text="Usage" />
-		<p>Fuz CSS has three CSS files, two of which are required:</p>
+		<p>fuz_css has three CSS files, two of which are required:</p>
 		<Code
 			content={`<!-- +layout.svelte -->
 ${'<' as string}script>
@@ -635,7 +635,7 @@ export const gen = gen_fuz_css({
 		<h4>Conditional classes</h4>
 		<p>
 			Svelte <a href="https://svelte.dev/docs/svelte/class">supports</a> object and array patterns
-			to define classes with <a href="https://github.com/lukeed/clsx">clsx</a>, and Fuz CSS inspects
+			to define classes with <a href="https://github.com/lukeed/clsx">clsx</a>, and fuz_css inspects
 			the AST to collect the ones you use:
 		</p>
 		<Code
@@ -660,7 +660,7 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Builtin classes" />
 		<p>
-			Fuz CSS's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
+			fuz_css's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
 			HTML elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern
 			CSS reset. It includes CSS classes that provide common generic functionality -- these are
 			called builtin classes.
@@ -687,7 +687,7 @@ export const gen = gen_fuz_css({
 			<li>2</li>
 		</ul>
 		<p>
-			The <code>.unstyled</code> class lets Fuz CSS provide solid default element styles with a simple
+			The <code>.unstyled</code> class lets fuz_css provide solid default element styles with a simple
 			opt-out:
 		</p>
 		<Code
@@ -733,7 +733,7 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Framework support" />
 		<p>
-			Fuz CSS is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
+			fuz_css is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
 			work with any framework or plain HTML. The utility class generator has varying
 			<a href="#Class-detection">detection</a> support:
 		</p>
@@ -883,7 +883,7 @@ const Component = () => <div className={styles} />;`}
 	<TomeSection>
 		<TomeSectionHeader text="Compared to alternatives" />
 		<p>
-			TailwindCSS and UnoCSS are utility-first frameworks where classes have primacy. Fuz CSS is
+			TailwindCSS and UnoCSS are utility-first frameworks where classes have primacy. fuz_css is
 			semantic-first: utilities complement HTML defaults rather than being the primary styling
 			mechanism.
 		</p>
@@ -893,7 +893,7 @@ const Component = () => <div className={styles} />;`}
 					<th></th>
 					<th>TailwindCSS</th>
 					<th>UnoCSS</th>
-					<th>Fuz CSS</th>
+					<th>fuz_css</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -929,7 +929,7 @@ const Component = () => <div className={styles} />;`}
 			multi-selector patterns -- something neither <code>@apply</code> nor shortcuts can express.
 		</p>
 		<p>
-			Fuz CSS fits best when you prefer semantic HTML with styled defaults, want design tokens as
+			fuz_css fits best when you prefer semantic HTML with styled defaults, want design tokens as
 			TypeScript-defined style variables, or are building Svelte-first. The tradeoff is a more
 			verbose literal syntax, which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate,
 			or composites for repeated patterns.

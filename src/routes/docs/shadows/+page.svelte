@@ -34,7 +34,7 @@
 		the implementation.</UnfinishedImplementationWarning
 	>
 	<p>
-		Fuz CSS's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
+		fuz_css's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Shadow" />

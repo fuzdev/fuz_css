@@ -219,7 +219,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		},
 
 		generate: async ({filer, log, origin_path}) => {
-			log.info('generating Fuz CSS classes...');
+			log.info('generating fuz_css classes...');
 
 			// Load CSS properties for validation before generation
 			const css_properties = await load_css_properties();

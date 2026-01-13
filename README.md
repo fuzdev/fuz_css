@@ -1,10 +1,10 @@
-# Fuz CSS
+# fuz_css
 
 [<img src="/static/logo.svg" alt="a fuzzy tuft of green moss" align="right" width="192" height="192">](https://css.fuz.dev/)
 
 > CSS framework and design system 🌿 CSS with more utility
 
-Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
+fuz_css is a CSS framework and design system built around semantic styles and style variables.
 It's in early alpha with breaking changes ahead.
 
 View the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/).

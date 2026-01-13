@@ -34,7 +34,7 @@
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
 			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
-			Instead of having two distinct styles of buttons with outlined and filled variants, Fuz CSS
+			Instead of having two distinct styles of buttons with outlined and filled variants, fuz_css
 			makes outlined buttons the default, and selected buttons are filled. There's also the
 			<code>.deselectable</code> modifier class for buttons that remain clickable when selected. Themes
 			can customize this behavior.

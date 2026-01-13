@@ -6,7 +6,7 @@
 </script>
 
 <p>
-	Fuz CSS is a framework and design system built on semantic styles and style variables. It styles
+	fuz_css is a framework and design system built on semantic styles and style variables. It styles
 	HTML elements by default and integrates custom properties, themes, and utility classes into a
 	coherent system. It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and
 	other JSX frameworks. See the
@@ -28,7 +28,7 @@
 </p>
 
 <UnfinishedImplementationWarning>
-	Fuz CSS is in early alpha with breaking changes ahead. Input and feedback is appreciated in the
+	fuz_css is in early alpha with breaking changes ahead. Input and feedback is appreciated in the
 	GitHub
 	<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
 	<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.

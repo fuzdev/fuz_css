@@ -86,11 +86,11 @@
 			</li>
 			<li>
 				<FileLink path="src/routes/fuz.css">src/routes/fuz.css</FileLink> -- the generated file for this
-				docs website, using Fuz CSS's helpers that includes only the utility classes your code uses, generated
+				docs website, using fuz_css's helpers that includes only the utility classes your code uses, generated
 				by
 				<a href="https://github.com/ryanatkn/gro">Gro</a> with <FileLink
 					path="src/routes/fuz.gen.css.ts">src/routes/fuz.gen.css.ts</FileLink
-				> using the Fuz CSS helpers in
+				> using the fuz_css helpers in
 				<ModuleLink path="gen_fuz_css.js" />. I can add a Vite plugin if there's demand.
 			</li>
 			<li>
@@ -103,7 +103,7 @@
 		</ul>
 		<p>
 			In the docs, you'll see <code>⚠️ asides</code> with open questions and other uncertainties as
-			Fuz CSS evolves towards v1. Your input is appreciated in the GitHub
+			fuz_css evolves towards v1. Your input is appreciated in the GitHub
 			<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
 			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> 🌿
 		</p>

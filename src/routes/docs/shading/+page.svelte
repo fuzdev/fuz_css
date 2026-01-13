@@ -39,7 +39,7 @@
 			transparency being used a lot, but the automatic stacking is nice.
 		</UnfinishedImplementationWarning>
 		<p>
-			Fuz CSS is designed around two simplistic models of light, one for dark mode and one for light
+			fuz_css is designed around two simplistic models of light, one for dark mode and one for light
 			mode, mapping to the web platform's <MdnLink path="Web/CSS/color-scheme" />. The goal is easy
 			authoring with simple and consistent rules for arbitrary compositions and states. Each <TomeLink
 				name="themes">theme</TomeLink
@@ -64,7 +64,7 @@
 			disappear completely against a black background.
 		</p>
 		<p>
-			Fuz CSS provides APIs that simplify or hide this complexity. For example, the <code
+			fuz_css provides APIs that simplify or hide this complexity. For example, the <code
 				>lighten</code
 			>
 			and <code>darken</code> variables are the same in light and dark modes, but

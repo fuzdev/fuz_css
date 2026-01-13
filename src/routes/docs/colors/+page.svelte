@@ -41,7 +41,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Color semantics" />
 		<p>
-			Fuz CSS provides a palette of color and hue <TomeLink name="variables" /> designed to support concise
+			fuz_css provides a palette of color and hue <TomeLink name="variables" /> designed to support concise
 			authoring in light and dark modes, as well as straightforward <TomeLink name="themes"
 				>theming</TomeLink
 			> by both developers and end-users at runtime. The colors have more semantics than just plain values,
@@ -51,8 +51,8 @@
 		<h4>Adapting colors to dark mode</h4>
 		<p>
 			A color's subjective appearance depends on the context in which it's viewed, especially the
-			surrounding colors and values. Fuz CSS's semantic colors are designed to work across color
-			schemes, so each Fuz CSS color <TomeLink name="variables">variable</TomeLink> has two values, one
+			surrounding colors and values. fuz_css's semantic colors are designed to work across color
+			schemes, so each fuz_css color <TomeLink name="variables">variable</TomeLink> has two values, one
 			for light and one for dark mode. The exceptions are the lightest (1) and darkest (9) variants, although
 			this may change if it yields better results.
 		</p>
@@ -67,15 +67,15 @@
 		<p>
 			A downside of this approach is that changing a color like the primary "a" affects the many
 			places it's used. Sometimes you may want to change the color of a specific element or state,
-			not all the things. In those cases, use plain CSS and optionally Fuz CSS variables. Compared
-			to most libraries, Fuz CSS provides fewer handles for granular color customizations, but the
+			not all the things. In those cases, use plain CSS and optionally fuz_css variables. Compared
+			to most libraries, fuz_css provides fewer handles for granular color customizations, but the
 			benefits include consistency, efficiency, DRY authoring, and ease of app-wide theming.
 		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Caveats" />
 		<p>
-			For performance reasons, Fuz CSS does not currently have an extensive set of variants, like
+			For performance reasons, fuz_css does not currently have an extensive set of variants, like
 			specialized states for elements or color values like "blue". Each of the 7 hues has 9 HSL
 			color values (e.g. <code>hsl(120 55% 36%)</code>) and 9 HSL component values (e.g.
 			<code>120 55% 36%</code>, useful to efficiently apply custom alpha), handling most cases, and
@@ -84,7 +84,7 @@
 			/> CSS function.
 		</p>
 		<p>
-			Variants will be expanded when Fuz CSS includes a Vite plugin or other build tooling for
+			Variants will be expanded when fuz_css includes a Vite plugin or other build tooling for
 			optimization. A downside of removing unused styles is that they won't be available to your
 			end-users at runtime. We'll probably end up with an interpreted language like Tailwind's
 			just-in-time compiler.
@@ -93,7 +93,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<UnfinishedImplementationWarning>
-			Colors are unfinished. I'm thinking of adding orange and cyan for a total of 9 hues. Fuz CSS
+			Colors are unfinished. I'm thinking of adding orange and cyan for a total of 9 hues. fuz_css
 			may also change from HSL to <MdnLink
 				path="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch"
 			/>.
@@ -109,7 +109,7 @@
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the color variables.
-			For example, Fuz CSS's base stylesheet uses <code>hue_a</code> for the semi-transparent
+			For example, fuz_css's base stylesheet uses <code>hue_a</code> for the semi-transparent
 			<code>::selection</code>. (try selecting some text -
 			<span class="color_a_5">same hue!</span>)
 		</p>

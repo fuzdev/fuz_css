@@ -1,6 +1,6 @@
 /*
 
-A CSS Fuz CSS theme file like `@fuzdev/fuz_css/theme.css`
+A CSS fuz_css theme file like `@fuzdev/fuz_css/theme.css`
 is expected to be imported alongside this one
 containing the base variable declarations.
 By default that's the `'base'` theme's variables,
@@ -11,7 +11,7 @@ Some notes:
 - acts as a CSS reset and also sets minimal defaults for elements with themable variables
 - uses `:where` on all selectors with more specificity than a single tag/class
 	to lower specificity so utility classes override them -
-	this also means the Fuz CSS stylesheet is is less likely to
+	this also means the fuz_css stylesheet is is less likely to
 	interfere with the page's styles regardless of where it's imported
 - `.unstyled` class opts out of opinionated styling (colors, borders, decorative properties)
 	while keeping normalizations (font inheritance, border-collapse) -
