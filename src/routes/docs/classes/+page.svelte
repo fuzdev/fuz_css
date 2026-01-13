@@ -48,7 +48,8 @@
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
-				Token classes map to <TomeLink name="variables">style variables</TomeLink>:
+				Token classes map to <TomeLink name="variables">style variables</TomeLink> (design tokens). For
+				raw CSS values, use <a href="#Literal-classes">literal classes</a> instead.
 			</p>
 			<Code content="<div class=&quot;p_md gap_lg color_a_5 bg_1&quot;>" />
 			<p>
@@ -61,12 +62,17 @@
 			</p>
 			<h4>Spacing</h4>
 			<ul class="unstyled">
-				<li><code>.p|pt|pr|pb|pl|px|py_xs5-xl15</code></li>
-				<li><code>.m|mt|mr|mb|ml|mx|my_xs5-xl15</code></li>
+				<li><code>.p|pt|pr|pb|pl|px|py_xs5-xl15|0</code></li>
+				<li><code>.m|mt|mr|mb|ml|mx|my_xs5-xl15|0|auto</code></li>
 				<li><code>.gap|column_gap|row_gap_xs5-xl15</code></li>
 				<li><code>.top|bottom|left|right_xs5-xl15</code></li>
 				<li><code>.inset_xs5-xl15</code></li>
 			</ul>
+			<aside>
+				Padding and margin shorthands include <code>_0</code> (and <code>_auto</code> for margin)
+				because of ergonomic benefit: <code>px_0</code> is much shorter than
+				<code>padding-inline:0</code>. Other properties use literals for raw values.
+			</aside>
 			<h4>Sizing</h4>
 			<ul class="unstyled">
 				<li><code>.width|height_xs5-xl15</code></li>
@@ -93,9 +99,9 @@
 			<ul class="unstyled">
 				<li><code>.border_color_1-5</code></li>
 				<li><code>.border_color_a-j</code></li>
-				<li><code>.border_width_0-9</code></li>
+				<li><code>.border_width_1-9</code></li>
 				<li><code>.border_radius_xs3-xl</code></li>
-				<li><code>.outline_width_0|focused|active</code></li>
+				<li><code>.outline_width_1-9|focus|active</code></li>
 			</ul>
 			<h4>Shadows</h4>
 			<ul class="unstyled">
@@ -119,7 +125,7 @@
 				content={`// src/lib/composites.ts
 export const my_composites = {
 	// 1. declaration only - custom CSS properties
-	'flex-center': {
+	box: {
 		declaration: 'display: flex; align-items: center; justify-content: center;',
 	},
 
@@ -131,7 +137,7 @@ export const my_composites = {
 	// 3. classes + declaration - compose then extend
 	card: {
 		classes: ['card_base', 'bg_1'],
-		declaration: '--card-hover-shadow: var(--shadow_lg);',
+		declaration: '--card_hover_shadow: var(--shadow_lg);',
 	},
 };`}
 			/>
@@ -395,16 +401,24 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 			<li>
 				<strong>interaction:</strong> <code>hover:</code>, <code>focus:</code>,
 				<code>focus-visible:</code>, <code>focus-within:</code>, <code>active:</code>,
-				<code>visited:</code>
+				<code>visited:</code>, <code>target:</code>
 			</li>
 			<li>
-				<strong>form:</strong> <code>disabled:</code>, <code>checked:</code>,
-				<code>required:</code>, <code>valid:</code>, <code>invalid:</code>,
-				<code>placeholder-shown:</code>
+				<strong>form:</strong> <code>disabled:</code>, <code>enabled:</code>, <code>checked:</code>,
+				<code>indeterminate:</code>, <code>required:</code>, <code>optional:</code>,
+				<code>valid:</code>, <code>invalid:</code>, <code>user-valid:</code>,
+				<code>user-invalid:</code>, <code>in-range:</code>, <code>out-of-range:</code>,
+				<code>placeholder-shown:</code>, <code>read-only:</code>, <code>read-write:</code>,
+				<code>default:</code>
 			</li>
 			<li>
 				<strong>structural:</strong> <code>first:</code>, <code>last:</code>, <code>only:</code>,
-				<code>odd:</code>, <code>even:</code>, <code>empty:</code>, <code>nth-child(N):</code>
+				<code>odd:</code>, <code>even:</code>, <code>empty:</code>, <code>nth-child(N):</code>,
+				<code>nth-of-type(N):</code>
+			</li>
+			<li>
+				<strong>UI states:</strong> <code>fullscreen:</code>, <code>modal:</code>,
+				<code>popover-open:</code>
 			</li>
 		</ul>
 

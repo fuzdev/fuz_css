@@ -16,7 +16,6 @@ import {
 	generate_border_radius_corners,
 	generate_shadow_classes,
 	format_spacing_value,
-	format_dimension_value,
 } from './css_class_generators.js';
 import {
 	space_variants,
@@ -54,8 +53,10 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	font_family_serif: {declaration: 'font-family: var(--font_family_serif);'},
 	font_family_mono: {declaration: 'font-family: var(--font_family_mono);'},
 
-	...generate_property_classes('line-height', ['0', '1', ...line_height_variants], (v) =>
-		v === '0' || v === '1' ? v : `var(--line_height_${v})`,
+	...generate_property_classes(
+		'line-height',
+		line_height_variants,
+		(v) => `var(--line_height_${v})`,
 	),
 	...generate_property_classes(
 		'font-size',
@@ -174,11 +175,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	...generate_property_classes('outline-color', color_variants, (v) => `var(--border_color_${v})`),
 
-	...generate_property_classes('border-width', ['0', ...border_width_variants.map(String)], (v) =>
-		v === '0' ? '0' : `var(--border_width_${v})`,
+	...generate_property_classes(
+		'border-width',
+		border_width_variants.map(String),
+		(v) => `var(--border_width_${v})`,
 	),
-	...generate_property_classes('outline-width', ['0', ...border_width_variants.map(String)], (v) =>
-		v === '0' ? '0' : `var(--border_width_${v})`,
+	...generate_property_classes(
+		'outline-width',
+		border_width_variants.map(String),
+		(v) => `var(--border_width_${v})`,
 	),
 	outline_width_focus: {declaration: 'outline-width: var(--outline_width_focus);'},
 	outline_width_active: {declaration: 'outline-width: var(--outline_width_active);'},
@@ -229,78 +234,17 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	layout
 
 	*/
-	...generate_property_classes(
-		'width',
-		[
-			'0',
-			'100',
-			'1px',
-			'2px',
-			'3px',
-			'auto',
-			'max-content',
-			'min-content',
-			'fit-content',
-			'stretch',
-			...space_variants,
-		],
-		format_dimension_value,
-	),
-	...generate_property_classes(
-		'height',
-		[
-			'0',
-			'100',
-			'1px',
-			'2px',
-			'3px',
-			'auto',
-			'max-content',
-			'min-content',
-			'fit-content',
-			'stretch',
-			...space_variants,
-		],
-		format_dimension_value,
-	),
+	...generate_property_classes('width', space_variants, (v) => `var(--space_${v})`),
+	...generate_property_classes('height', space_variants, (v) => `var(--space_${v})`),
 
-	...generate_property_classes(
-		'top',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
-	...generate_property_classes(
-		'right',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
-	...generate_property_classes(
-		'bottom',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
-	...generate_property_classes(
-		'left',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
+	...generate_property_classes('top', space_variants, format_spacing_value),
+	...generate_property_classes('right', space_variants, format_spacing_value),
+	...generate_property_classes('bottom', space_variants, format_spacing_value),
+	...generate_property_classes('left', space_variants, format_spacing_value),
+	...generate_property_classes('inset', space_variants, format_spacing_value),
 
-	...generate_property_classes(
-		'inset',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
-
-	...generate_directional_classes(
-		'padding',
-		['0', '100', '1px', '2px', '3px', ...space_variants],
-		format_spacing_value,
-	),
-	...generate_directional_classes(
-		'margin',
-		['0', '100', '1px', '2px', '3px', 'auto', ...space_variants],
-		format_spacing_value,
-	),
+	...generate_directional_classes('padding', ['0', ...space_variants], format_spacing_value),
+	...generate_directional_classes('margin', ['0', 'auto', ...space_variants], format_spacing_value),
 	...generate_property_classes('gap', space_variants, format_spacing_value),
 	...generate_property_classes('column-gap', space_variants, format_spacing_value),
 	...generate_property_classes('row-gap', space_variants, format_spacing_value),
