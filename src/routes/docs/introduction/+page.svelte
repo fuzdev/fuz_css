@@ -73,7 +73,7 @@
 				is agnostic to JS frameworks, for example usage see <a href="https://ui.fuz.dev/docs/Themed"
 					><code>Themed</code></a
 				>
-				in my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
+				in the companion Svelte UI library <a href="https://ui.fuz.dev/">fuz_ui</a>
 			</li>
 		</ul>
 		<p>The stylesheets:</p>

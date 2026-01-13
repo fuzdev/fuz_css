@@ -35,7 +35,7 @@
 		</p>
 		<p>
 			fuz_css works with any JS framework, but it provides only stylesheets, not integrations. This
-			website uses my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
+			website uses the companion Svelte UI library <a href="https://ui.fuz.dev/">fuz_ui</a>
 			to provide the UI below to control the fuz_css color scheme and themes.
 		</p>
 	</section>

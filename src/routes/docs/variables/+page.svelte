@@ -44,7 +44,7 @@
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in
-				<a href="https://ui.fuz.dev/">Fuz UI</a>
+				<a href="https://ui.fuz.dev/">fuz_ui</a>
 			</li>
 		</ul>
 		<p>

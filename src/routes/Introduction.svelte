@@ -11,7 +11,7 @@
 	coherent system. It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and
 	other JSX frameworks. See the
 	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support docs</a> and
-	<a href="https://ui.fuz.dev/">Fuz UI</a> for the companion Svelte components.
+	<a href="https://ui.fuz.dev/">fuz_ui</a> for the companion Svelte components.
 </p>
 <p>
 	The only required parts are a
