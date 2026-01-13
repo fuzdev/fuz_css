@@ -262,16 +262,9 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<TomeSection>
 			<TomeSectionHeader text="Literal classes" tag="h3" />
 			<p>
-				Fuz supports an open-ended CSS-literal syntax: <code>property:value</code>.
+				Fuz supports an open-ended CSS-literal syntax: <code>property:value</code>. Any CSS property
+				and value works, offering an escape hatch without a DSL.
 			</p>
-			<ul>
-				<li>
-					similar to TailwindCSS and UnoCSS but more verbose, nudging you toward Svelte's <code
-						>&lt;style&gt;</code
-					> tags
-				</li>
-				<li>enables arbitrary composition across component boundaries</li>
-			</ul>
 			<Code
 				content={`<!-- basic syntax: property:value -->
 <div class="display:flex justify-content:center gap:var(--space_md)">
@@ -931,12 +924,15 @@ const Component = () => <div className={styles} />;`}
 			</tbody>
 		</table>
 		<p>
-			The literal class syntax (<code>display:flex</code>) is more verbose than TailwindCSS's
-			shorthands and UnoCSS's typical conventions, which nudges you toward Svelte's
-			<code>&lt;style&gt;</code> tag. Like UnoCSS, composites offer a high level of customization, including
-			the ability to replicate much of TailwindCSS's DSL, but ruleset composites go further with full
-			CSS including multi-selector patterns. Fuz CSS does not (yet?) make presets a first-class concept
-			like UnoCSS -- it's normal configuration.
+			Like UnoCSS, composites offer a high level of customization, including the ability to
+			replicate much of TailwindCSS's DSL. Ruleset composites go further with full CSS including
+			multi-selector patterns -- something neither <code>@apply</code> nor shortcuts can express.
+		</p>
+		<p>
+			Fuz CSS fits best when you prefer semantic HTML with styled defaults, want design tokens as
+			TypeScript-defined style variables, or are building Svelte-first. The tradeoff is a more
+			verbose literal syntax, which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate,
+			or composites for repeated patterns.
 		</p>
 	</TomeSection>
 </TomeContent>
