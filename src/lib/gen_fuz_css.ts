@@ -9,9 +9,9 @@
 
 import {join} from 'node:path';
 import type {Gen} from '@ryanatkn/gro/gen.js';
-import type {FileFilter} from '@fuzdev/fuz_util/path.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
+import {type FileFilter, filter_file_default} from './file_filter.js';
 import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
 import {type SourceLocation, type ExtractionDiagnostic, type Diagnostic} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
@@ -165,26 +165,6 @@ export class CssGenerationError extends Error {
 		this.diagnostics = diagnostics;
 	}
 }
-
-const filter_file_default: FileFilter = (path) => {
-	if (
-		path.includes('.test.') ||
-		path.includes('/test/') ||
-		path.includes('/tests/') ||
-		path.includes('.gen.')
-	) {
-		return false;
-	}
-	const ext = path.slice(path.lastIndexOf('.'));
-	return (
-		ext === '.svelte' ||
-		ext === '.html' ||
-		ext === '.ts' ||
-		ext === '.js' ||
-		ext === '.tsx' ||
-		ext === '.jsx'
-	);
-};
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {

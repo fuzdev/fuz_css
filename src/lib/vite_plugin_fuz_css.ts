@@ -1,0 +1,500 @@
+/**
+ * Vite plugin for fuz_css utility class generation.
+ *
+ * Uses Vite's transform hook to extract CSS classes from source files
+ * as they're processed, including node_modules dependencies.
+ * Generates CSS on-demand via virtual module with HMR support.
+ *
+ * @example
+ * ```ts
+ * // vite.config.ts
+ * import {defineConfig} from 'vite';
+ * import jsx from 'acorn-jsx';
+ * import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+ *
+ * export default defineConfig({
+ *   plugins: [
+ *     vite_plugin_fuz_css({
+ *       acorn_plugins: [jsx()],
+ *     }),
+ *   ],
+ * });
+ * ```
+ *
+ * @module
+ */
+
+import type {Plugin, ViteDevServer} from 'vite';
+import {join} from 'node:path';
+
+import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
+import {type SourceLocation, type GenerationDiagnostic} from './diagnostics.js';
+import {
+	generate_classes_css,
+	type CssClassDefinition,
+	type CssClassDefinitionInterpreter,
+} from './css_class_generation.js';
+import {css_class_definitions} from './css_class_definitions.js';
+import {css_class_interpreters} from './css_class_interpreters.js';
+import {load_css_properties} from './css_literal.js';
+import {
+	get_cache_path,
+	load_cached_extraction,
+	save_cached_extraction,
+	delete_cached_extraction,
+	from_cached_extraction,
+} from './css_cache.js';
+import {type FileFilter, filter_file_default} from './file_filter.js';
+
+/* eslint-disable no-console */
+
+const VIRTUAL_ID = 'virtual:fuz.css';
+const RESOLVED_VIRTUAL_ID = '\0virtual:fuz.css';
+
+/**
+ * Skip cache on CI (no point writing cache that won't be reused).
+ */
+const is_ci = !!process.env.CI;
+
+/**
+ * Computes SHA-256 hash of content using Web Crypto API.
+ * Matches Gro's hashing approach for cache compatibility.
+ */
+const compute_hash = async (content: string): Promise<string> => {
+	const encoder = new TextEncoder();
+	const buffer = encoder.encode(content);
+	const digested = await crypto.subtle.digest('SHA-256', buffer);
+	const bytes = Array.from(new Uint8Array(digested));
+	let hex = '';
+	for (const h of bytes) {
+		hex += h.toString(16).padStart(2, '0');
+	}
+	return hex;
+};
+
+/**
+ * Options for the fuz_css Vite plugin.
+ */
+export interface VitePluginFuzCssOptions {
+	/**
+	 * Filter function to determine which files to extract classes from.
+	 * By default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,
+	 * excluding test files and .gen files.
+	 */
+	filter_file?: FileFilter;
+	/**
+	 * Additional class definitions to merge with builtins.
+	 * User definitions take precedence over builtins with the same name.
+	 */
+	class_definitions?: Record<string, CssClassDefinition | undefined>;
+	/**
+	 * Custom interpreters for dynamic class generation.
+	 * Replaces the builtin interpreters entirely if provided.
+	 */
+	class_interpreters?: Array<CssClassDefinitionInterpreter>;
+	/**
+	 * Classes to always include in the output, regardless of detection.
+	 */
+	include_classes?: Iterable<string>;
+	/**
+	 * Classes to exclude from the output, even if detected.
+	 */
+	exclude_classes?: Iterable<string>;
+	/**
+	 * Additional acorn plugins for parsing.
+	 * Use `acorn-jsx` for React/Preact/Solid projects.
+	 */
+	acorn_plugins?: Array<AcornPlugin>;
+	/**
+	 * How to handle CSS-literal errors during generation.
+	 * - 'log' (default): Log errors, skip invalid classes, continue
+	 * - 'throw': Throw on first error, fail the build
+	 */
+	on_error?: 'log' | 'throw';
+	/**
+	 * Cache directory relative to project root.
+	 * @default '.fuz/cache/css'
+	 */
+	cache_dir?: string;
+}
+
+/**
+ * Class registry for tracking extracted classes across files.
+ */
+interface ClassRegistry {
+	/** file path → extracted classes with locations */
+	files: Map<string, Map<string, Array<SourceLocation>>>;
+	/** file path → content hash for caching */
+	hashes: Map<string, string>;
+	/** aggregated classes, null = dirty, needs recompute */
+	all_classes: Set<string> | null;
+	/** aggregated class locations (null entry = include_class), null = dirty */
+	all_locations: Map<string, Array<SourceLocation> | null> | null;
+}
+
+/**
+ * Creates the fuz_css Vite plugin.
+ *
+ * Extracts CSS classes from source files during Vite's transform phase
+ * and generates optimized CSS via the `virtual:fuz.css` virtual module.
+ */
+export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plugin => {
+	const {
+		filter_file = filter_file_default,
+		class_definitions: user_class_definitions,
+		class_interpreters = css_class_interpreters,
+		include_classes,
+		exclude_classes,
+		acorn_plugins,
+		on_error = 'log',
+		cache_dir = '.fuz/cache/css',
+	} = options;
+
+	// Merge class definitions
+	const all_class_definitions = user_class_definitions
+		? {...css_class_definitions, ...user_class_definitions}
+		: css_class_definitions;
+
+	// Convert to Sets for efficient lookup
+	const include_set = include_classes ? new Set(include_classes) : null;
+	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
+
+	// Plugin state
+	const registry: ClassRegistry = {
+		files: new Map(),
+		hashes: new Map(),
+		all_classes: null,
+		all_locations: null,
+	};
+	let virtual_module_loaded = false;
+	let server: ViteDevServer | null = null;
+	let css_properties: Set<string> | null = null;
+	let resolved_cache_dir: string | null = null;
+	let project_root: string | null = null;
+	let hmr_timeout: ReturnType<typeof setTimeout> | null = null;
+
+	/** Logs a warning message (works in both dev and build) */
+	const log_warn = (msg: string): void => {
+		if (server) {
+			server.config.logger.warn(msg);
+		} else {
+			console.warn(msg);
+		}
+	};
+
+	/** Logs an error message (works in both dev and build) */
+	const log_error = (msg: string): void => {
+		if (server) {
+			server.config.logger.error(msg);
+		} else {
+			console.error(msg);
+		}
+	};
+
+	/**
+	 * Computes cache path for a file.
+	 * Internal files use relative paths, external files use hashed absolute paths.
+	 */
+	const get_file_cache_path = async (file_id: string): Promise<string> => {
+		const is_internal = file_id.startsWith(project_root!);
+		return is_internal
+			? get_cache_path(file_id, resolved_cache_dir!, project_root!)
+			: join(
+					resolved_cache_dir!,
+					'_external',
+					(await compute_hash(file_id)).slice(0, 16) + '.json',
+				);
+	};
+
+	/**
+	 * Recomputes aggregated classes from all files.
+	 * Returns locations map with null values for include_classes (no source location).
+	 */
+	const get_all_classes = (): {
+		classes: Set<string>;
+		locations: Map<string, Array<SourceLocation> | null>;
+	} => {
+		if (registry.all_classes && registry.all_locations) {
+			return {classes: registry.all_classes, locations: registry.all_locations};
+		}
+
+		const classes: Set<string> = new Set();
+		const locations: Map<string, Array<SourceLocation> | null> = new Map();
+
+		// Add include_classes first (with null locations - no source)
+		if (include_set) {
+			for (const c of include_set) {
+				classes.add(c);
+				locations.set(c, null);
+			}
+		}
+
+		// Aggregate from all files
+		for (const file_classes of registry.files.values()) {
+			for (const [name, locs] of file_classes) {
+				classes.add(name);
+				const existing = locations.get(name);
+				// Don't overwrite null from include_classes
+				if (existing === undefined) {
+					locations.set(name, [...locs]);
+				} else if (existing !== null) {
+					existing.push(...locs);
+				}
+			}
+		}
+
+		// Apply excludes
+		if (exclude_set) {
+			for (const c of exclude_set) {
+				classes.delete(c);
+				locations.delete(c);
+			}
+		}
+
+		registry.all_classes = classes;
+		registry.all_locations = locations;
+		return {classes, locations};
+	};
+
+	/**
+	 * Generates CSS from the current class registry.
+	 */
+	const generate_css = (): string => {
+		const {classes, locations} = get_all_classes();
+
+		const result = generate_classes_css({
+			class_names: classes,
+			class_definitions: all_class_definitions,
+			interpreters: class_interpreters,
+			css_properties,
+			class_locations: locations,
+		});
+
+		// Handle diagnostics
+		const errors = result.diagnostics.filter((d: GenerationDiagnostic) => d.level === 'error');
+		if (errors.length > 0 && on_error === 'throw') {
+			throw new Error(
+				`CSS generation failed with ${errors.length} error(s):\n` +
+					errors.map((d: GenerationDiagnostic) => `  - ${d.class_name}: ${d.message}`).join('\n'),
+			);
+		}
+
+		// Log warnings/errors
+		for (const d of result.diagnostics) {
+			const msg = `[fuz_css] ${d.class_name}: ${d.message}`;
+			if (d.level === 'error') {
+				log_error(msg);
+			} else {
+				log_warn(msg);
+			}
+		}
+
+		return `/* generated by vite_plugin_fuz_css */\n\n${result.css}\n\n/* generated by vite_plugin_fuz_css */`;
+	};
+
+	/**
+	 * Invalidates the virtual module and triggers HMR.
+	 * Debounced to avoid spamming updates when multiple files change rapidly.
+	 */
+	const invalidate_virtual_module = (): void => {
+		if (!server) return;
+
+		// Debounce: wait 10ms for more changes before triggering HMR
+		if (hmr_timeout) {
+			clearTimeout(hmr_timeout);
+		}
+		hmr_timeout = setTimeout(() => {
+			hmr_timeout = null;
+			const mod = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+			if (mod) {
+				server!.moduleGraph.invalidateModule(mod);
+				server!.ws.send({
+					type: 'update',
+					updates: [
+						{
+							type: 'css-update',
+							path: VIRTUAL_ID,
+							acceptedPath: VIRTUAL_ID,
+							timestamp: Date.now(),
+						},
+					],
+				});
+			}
+		}, 10);
+	};
+
+	return {
+		name: 'vite-plugin-fuz-css',
+		// Run before other plugins (like Svelte) to see original source files
+		enforce: 'pre',
+
+		configResolved(resolved_config) {
+			const root = resolved_config.root;
+			project_root = root.endsWith('/') ? root : root + '/';
+			resolved_cache_dir = join(root, cache_dir);
+		},
+
+		configureServer(dev_server) {
+			server = dev_server;
+
+			// Handle file deletion - watcher 'unlink' event
+			dev_server.watcher.on('unlink', (file) => {
+				if (registry.files.has(file)) {
+					registry.files.delete(file);
+					registry.hashes.delete(file);
+					registry.all_classes = null;
+					registry.all_locations = null;
+
+					// Delete cache file (fire and forget)
+					if (!is_ci && resolved_cache_dir && project_root) {
+						get_file_cache_path(file)
+							.then((cache_path) => delete_cached_extraction(cache_path))
+							.catch(() => {
+								// Ignore cache deletion errors
+							});
+					}
+
+					if (virtual_module_loaded) {
+						invalidate_virtual_module();
+					}
+				}
+			});
+		},
+
+		async buildStart() {
+			// Load CSS properties for validation
+			css_properties = await load_css_properties();
+		},
+
+		resolveId(id) {
+			if (id === VIRTUAL_ID) {
+				return RESOLVED_VIRTUAL_ID;
+			}
+			return undefined;
+		},
+
+		load(id) {
+			if (id === RESOLVED_VIRTUAL_ID) {
+				virtual_module_loaded = true;
+				// In dev mode, generate CSS immediately for HMR
+				// In build mode, return minimal CSS - full CSS appended in generateBundle after all transforms
+				if (server) {
+					return generate_css();
+				}
+				// Return empty CSS for build - generateBundle will append the complete CSS
+				return '/* fuz_css placeholder */';
+			}
+			return undefined;
+		},
+
+		generateBundle(_options, bundle) {
+			// Regenerate CSS with all extracted classes and append to the CSS asset
+			// This runs after all transforms are complete, so all classes are available
+			const generated_css = generate_css();
+
+			// Find the main CSS asset and append our generated CSS
+			// Vite combines all CSS into one or more asset files
+			for (const chunk of Object.values(bundle)) {
+				if (
+					chunk.type === 'asset' &&
+					typeof chunk.source === 'string' &&
+					chunk.fileName.endsWith('.css')
+				) {
+					// Append the complete generated CSS to the end
+					chunk.source = chunk.source + '\n' + generated_css;
+					break; // Only append to first CSS asset
+				}
+			}
+		},
+
+		async transform(code, id) {
+			// Skip non-matching files
+			if (!filter_file(id)) {
+				return null;
+			}
+
+			// Compute content hash
+			const hash = await compute_hash(code);
+			const existing_hash = registry.hashes.get(id);
+
+			// Check if unchanged
+			if (existing_hash === hash) {
+				return null;
+			}
+
+			// Try cache (if not CI and we have cache dir)
+			if (!is_ci && resolved_cache_dir && project_root) {
+				const cache_path = await get_file_cache_path(id);
+				const cached = await load_cached_extraction(cache_path);
+
+				if (cached?.content_hash === hash) {
+					// Cache hit
+					const {classes} = from_cached_extraction(cached);
+					if (classes) {
+						registry.files.set(id, classes);
+					} else {
+						registry.files.delete(id);
+					}
+					registry.hashes.set(id, hash);
+					registry.all_classes = null;
+					registry.all_locations = null;
+
+					if (virtual_module_loaded) {
+						invalidate_virtual_module();
+					}
+					return null;
+				}
+			}
+
+			// Extract classes
+			const result = extract_css_classes_with_locations(code, {
+				filename: id,
+				acorn_plugins,
+			});
+
+			// Log extraction diagnostics
+			if (result.diagnostics) {
+				for (const d of result.diagnostics) {
+					const loc = `${d.location.file}:${d.location.line}:${d.location.column}`;
+					const msg = `[fuz_css] ${loc}: ${d.message}`;
+					if (d.level === 'error') {
+						log_error(msg);
+					} else {
+						log_warn(msg);
+					}
+				}
+			}
+
+			// Update registry
+			if (result.classes) {
+				registry.files.set(id, result.classes);
+			} else {
+				registry.files.delete(id);
+			}
+			registry.hashes.set(id, hash);
+			registry.all_classes = null;
+			registry.all_locations = null;
+
+			// Save to cache (fire and forget - don't block transform)
+			if (!is_ci && resolved_cache_dir && project_root) {
+				get_file_cache_path(id)
+					.then((cache_path) =>
+						save_cached_extraction(cache_path, hash, result.classes, result.diagnostics),
+					)
+					.catch(() => {
+						// Ignore cache errors
+					});
+			}
+
+			// Trigger HMR if virtual module already loaded
+			if (virtual_module_loaded) {
+				invalidate_virtual_module();
+			}
+
+			return null;
+		},
+
+		// Note: handleHotUpdate not needed - transform hook handles file changes,
+		// and configureServer's watcher.on('unlink') handles file deletion
+	};
+};

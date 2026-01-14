@@ -91,7 +91,9 @@
 				<a href="https://github.com/ryanatkn/gro">Gro</a> with <FileLink
 					path="src/routes/fuz.gen.css.ts">src/routes/fuz.gen.css.ts</FileLink
 				> using the fuz_css helpers in
-				<ModuleLink path="gen_fuz_css.js" />. I can add a Vite plugin if there's demand.
+				<ModuleLink path="gen_fuz_css.js" />. There's also a <ModuleLink
+					path="vite_plugin_fuz_css.js"
+				/> for non-SvelteKit projects -- see the <TomeLink name="examples" /> page.
 			</li>
 			<li>
 				There are not yet tools for optimizing away unused variables or main stylesheet rulesets, so <code

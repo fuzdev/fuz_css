@@ -9,7 +9,7 @@ For code style, see the `fuz-stack` skill. For UI components (themes, color sche
 ```bash
 gro check     # typecheck, test, lint, format check (run before committing)
 gro typecheck # typecheck only (faster iteration)
-gro test      # run tests with vitest
+gro test      # run tests (SKIP_EXAMPLE_TESTS=1 to skip slow integration tests)
 gro gen       # regenerate theme.css and other .gen files
 gro build     # build the package for production
 ```
@@ -36,7 +36,12 @@ gro build     # build the package for production
 
 ### Smart utility class generation
 
-[gen_fuz_css.ts](src/lib/gen_fuz_css.ts) scans source files with AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)), collects class names, and outputs only CSS for classes actually used. Supports Svelte 5.16+ class syntax (`class={[...]}`, `class={{...}}`), clsx/cn calls, and `// @fuz-classes` comment hints.
+Two generators available:
+
+1. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) for SvelteKit projects using Gro
+2. **Vite plugin** - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) for Svelte/React/Preact/Solid via `virtual:fuz.css`
+
+Both use AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)) and output only CSS for classes actually used. Supports Svelte 5.16+ class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
 
 ### Three class types
 
@@ -72,7 +77,26 @@ See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src
 
 ## Usage
 
-Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base styles. Optionally generate project-specific `fuz.css` using [gen_fuz_css()](src/lib/gen_fuz_css.ts) in a Gro generator.
+Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base styles. Generate utility classes via:
+
+**SvelteKit (Gro):** Use [gen_fuz_css()](src/lib/gen_fuz_css.ts) in a `.gen.css.ts` file.
+
+**Vite (Svelte/React/Preact/Solid):**
+
+```ts
+// vite.config.ts
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+import jsx from 'acorn-jsx'; // only needed for JSX frameworks
+
+export default defineConfig({
+  plugins: [vite_plugin_fuz_css({acorn_plugins: [jsx()]})]
+});
+
+// main.ts
+import '@fuzdev/fuz_css/style.css';
+import '@fuzdev/fuz_css/theme.css';
+import 'virtual:fuz.css';
+```
 
 ## Docs
 
@@ -92,22 +116,29 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 
 **CSS extraction:**
 
-- [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS files, `SourceLocation`, `ExtractionResult`
+- [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class extraction from Svelte/TS/JSX files
+- [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type and `filter_file_default` for filtering extractable files
+- [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`, `ExtractionDiagnostic`, `GenerationDiagnostic` types
 
 **CSS generation:**
 
-- [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Main generator API for Gro, includes per-file caching with content hash validation
-- [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure for incremental extraction (`.fuz/cache/css/`)
-- [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection class for tracking extracted classes per-file
-- [css_class_generation.ts](src/lib/css_class_generation.ts) - Type definitions (`CssClassDefinition`, `CssClassInterpreterContext`), `generate_classes_css()`, CSS escaping
-- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class definitions, the main class registry
-- [css_class_generators.ts](src/lib/css_class_generators.ts) - Class template generation functions for token classes
+- [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator API with per-file caching
+- [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin for Svelte/React/Preact/Solid, `virtual:fuz.css` virtual module with HMR
+- [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure (`.fuz/cache/css/`)
+- [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection for tracking classes per-file
+- [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClassDefinition` types, `generate_classes_css()`
+- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class registry
+- [css_class_generators.ts](src/lib/css_class_generators.ts) - Token class template generators
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`, `.pane`, `.panel`)
-- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - `resolve_classes()` helper for composing class definitions via `classes` property
-- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Two interpreters: `modified_class_interpreter` (handles `hover:box`, `md:p_lg`) and `css_literal_interpreter` (handles `display:flex`)
-- [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser, validator, `extract_and_validate_modifiers()`
-- [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing via Svelte's parser, selector modification for modifiers
-- [modifiers.ts](src/lib/modifiers.ts) - Declarative modifier definitions (breakpoints, states, pseudo-elements)
+- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - `resolve_classes()` for composing definitions
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - `modified_class_interpreter` and `css_literal_interpreter`
+- [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
+- [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing, selector modification
+- [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints, states, pseudo-elements)
+
+**Example utilities:**
+
+- [example_class_utilities.ts](src/lib/example_class_utilities.ts) - Demo exports for testing node_modules extraction
 
 **Stylesheets:**
 
@@ -121,12 +152,25 @@ Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base 
 - [fuz.css](src/routes/fuz.css) - Generated optimized utility classes for this site
 - [fuz.gen.css.ts](src/routes/fuz.gen.css.ts) - Generator using `gen_fuz_css()`
 
+### Examples - [examples/](examples/)
+
+Vite plugin examples:
+
+- [vite-svelte/](examples/vite-svelte/) - Svelte 5 example
+- [vite-react/](examples/vite-react/) - React 19 example
+- [vite-preact/](examples/vite-preact/) - Preact example
+- [vite-solid/](examples/vite-solid/) - Solid example
+
+Each demonstrates token, composite, and literal classes with responsive/hover/dark modifiers. Uses classes from [example_class_utilities.ts](src/lib/example_class_utilities.ts) to verify node_modules extraction.
+
 ### Tests - [src/test/](src/test/)
 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
 - [css_cache.test.ts](src/test/css_cache.test.ts) - Cache save/load, version invalidation, atomic writes
-- [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters, CssClasses
-- [css_class_resolution.test.ts](src/test/css_class_resolution.test.ts) - Class resolution, cycle detection, error handling
+- [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters
+- [css_class_resolution.test.ts](src/test/css_class_resolution.test.ts) - Class resolution, cycle detection
 - [css_class_extractor.test.ts](src/test/css_class_extractor.test.ts) - AST extraction, location tracking
+- [css_class_extractor.jsx.test.ts](src/test/css_class_extractor.jsx.test.ts) - JSX-specific extraction
 - [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
 - [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification
+- [vite_plugin_examples.test.ts](src/test/vite_plugin_examples.test.ts) - Integration tests building examples (skip with `SKIP_EXAMPLE_TESTS=1`)

@@ -266,7 +266,7 @@
 					}
 				],
 				"module_comment": "Cache infrastructure for incremental CSS class extraction.\n\nProvides per-file caching with content hash validation to avoid\nre-extracting classes from unchanged files.",
-				"dependents": ["gen_fuz_css.ts"]
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_composites.ts",
@@ -294,7 +294,7 @@
 				],
 				"module_comment": "Built-in CSS class definitions combining token classes and composites.\n\nToken classes map to CSS variables (design tokens).\nFor other CSS properties, use CSS-literal syntax like `display:flex` or `position:absolute`.",
 				"dependencies": ["css_class_composites.ts", "css_class_generators.ts", "variable_data.ts"],
-				"dependents": ["gen_fuz_css.ts"]
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_extractor.ts",
@@ -495,7 +495,7 @@
 					}
 				],
 				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
-				"dependents": ["gen_fuz_css.ts"]
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_generation.ts",
@@ -747,7 +747,7 @@
 				],
 				"module_comment": "CSS class generation utilities.\n\nProduces CSS output from class definitions, handles interpretation of\ndynamic classes, and provides collection management for extracted classes.",
 				"dependencies": ["css_class_resolution.ts", "css_ruleset_parser.ts", "diagnostics.ts"],
-				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
+				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_generators.ts",
@@ -1012,7 +1012,7 @@
 					"css_literal.ts",
 					"css_ruleset_parser.ts"
 				],
-				"dependents": ["gen_fuz_css.ts"]
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_resolution.ts",
@@ -1583,7 +1583,7 @@
 				],
 				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
 				"dependencies": ["modifiers.ts"],
-				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts"]
+				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_ruleset_parser.ts",
@@ -2118,6 +2118,166 @@
 				"dependents": ["css_class_generation.ts"]
 			},
 			{
+				"path": "example_class_utilities.ts",
+				"declarations": [
+					{
+						"name": "demo_padding_class",
+						"kind": "variable",
+						"doc_comment": "Padding token - large spacing (snake_case)",
+						"source_line": 31,
+						"type_signature": "\"p_lg\""
+					},
+					{
+						"name": "demoShadowClass",
+						"kind": "variable",
+						"doc_comment": "Shadow token - small elevation (camelCase)",
+						"source_line": 34,
+						"type_signature": "\"shadow_sm\""
+					},
+					{
+						"name": "demo_color_class",
+						"kind": "variable",
+						"doc_comment": "Color token - primary hue intensity 5 (snake_case)",
+						"source_line": 37,
+						"type_signature": "\"color_a_5\""
+					},
+					{
+						"name": "demoBoxClass",
+						"kind": "variable",
+						"doc_comment": "Layout composite - centered flex container (camelCase)",
+						"source_line": 44,
+						"type_signature": "\"box\""
+					},
+					{
+						"name": "demo_row_class",
+						"kind": "variable",
+						"doc_comment": "Layout composite - horizontal flex row (snake_case)",
+						"source_line": 47,
+						"type_signature": "\"row\""
+					},
+					{
+						"name": "demoEllipsisClass",
+						"kind": "variable",
+						"doc_comment": "Text composite - truncate with ellipsis (camelCase)",
+						"source_line": 50,
+						"type_signature": "\"ellipsis\""
+					},
+					{
+						"name": "demo_display_class",
+						"kind": "variable",
+						"doc_comment": "Display literal - flex layout (snake_case)",
+						"source_line": 57,
+						"type_signature": "\"display:flex\""
+					},
+					{
+						"name": "demoAlignClass",
+						"kind": "variable",
+						"doc_comment": "Alignment literal - center items (camelCase)",
+						"source_line": 60,
+						"type_signature": "\"align-items:center\""
+					},
+					{
+						"name": "demo_gap_class",
+						"kind": "variable",
+						"doc_comment": "Spacing literal - gap between children (snake_case)",
+						"source_line": 63,
+						"type_signature": "\"gap:1rem\""
+					},
+					{
+						"name": "demoClassName",
+						"kind": "variable",
+						"doc_comment": "camelCase naming - triggers naming-based extraction",
+						"source_line": 70,
+						"type_signature": "\"column\""
+					},
+					{
+						"name": "DEMO_CONSTANT_CLASS",
+						"kind": "variable",
+						"doc_comment": "SCREAMING_SNAKE_CASE naming",
+						"source_line": 73,
+						"type_signature": "\"p_md\""
+					},
+					{
+						"name": "card_class",
+						"kind": "variable",
+						"doc_comment": "Suffix convention (_class) - triggers naming-based extraction",
+						"source_line": 76,
+						"type_signature": "\"pane\""
+					},
+					{
+						"name": "demo_ternary_class",
+						"kind": "variable",
+						"doc_comment": "Ternary expression - both branches should be extracted",
+						"source_line": 79,
+						"type_signature": "\"bg_d_3\" | \"bg_3\""
+					},
+					{
+						"name": "demo_logical_class",
+						"kind": "variable",
+						"doc_comment": "Logical AND - truthy value should be extracted",
+						"source_line": 82,
+						"type_signature": "\"opacity:60%\""
+					},
+					{
+						"name": "demoArrayClasses",
+						"kind": "variable",
+						"doc_comment": "Array - all elements should be extracted",
+						"source_line": 85,
+						"type_signature": "string[]"
+					},
+					{
+						"name": "from_comment",
+						"kind": "variable",
+						"doc_comment": "Comment hint - extracted via",
+						"source_line": 96,
+						"type_signature": "\"shadow_lg\""
+					},
+					{
+						"name": "unknown_extracted",
+						"kind": "variable",
+						"doc_comment": "Unknown class - extracted via",
+						"source_line": 103,
+						"type_signature": "\"unknown_not_included\""
+					},
+					{
+						"name": "arbitrary_literal",
+						"kind": "variable",
+						"doc_comment": "Invalid literal - extracted via",
+						"source_line": 111,
+						"type_signature": "\"not-real:extracted-but-excluded\""
+					}
+				],
+				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. Each export uses a unique class value\nto verify extraction is working correctly.\n\n**Important:** Variable names must end with `class`, `classes`, or `className`\nfor the extractor to detect them (see `CLASS_NAME_PATTERN` in css_class_extractor.ts).\n\n**Class types demonstrated:**\n- Token classes: Map to style variables (`p_lg`, `shadow_sm`)\n- Composite classes: Multi-property shortcuts (`box`, `row`)\n- Literal classes: CSS property:value syntax (`display:flex`)\n\n**Variable patterns demonstrated:**\n- Simple assignment, ternary expressions, logical AND, arrays\n- Various naming conventions (camelCase, snake_case, SCREAMING_SNAKE)\n- Comment hints via `@fuz-classes`"
+			},
+			{
+				"path": "file_filter.ts",
+				"declarations": [
+					{
+						"name": "FileFilter",
+						"kind": "type",
+						"doc_comment": "Filter function to determine which files to process for CSS class extraction.",
+						"source_line": 10,
+						"type_signature": "FileFilter"
+					},
+					{
+						"name": "filter_file_default",
+						"kind": "function",
+						"doc_comment": "Default file filter for CSS class extraction.\nIncludes .svelte, .html, .ts, .js, .tsx, .jsx files.\nExcludes test files and generated files.",
+						"source_line": 17,
+						"type_signature": "(path: string): boolean",
+						"return_type": "boolean",
+						"parameters": [
+							{
+								"name": "path",
+								"type": "string"
+							}
+						]
+					}
+				],
+				"module_comment": "File filtering utilities for CSS class extraction.",
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+			},
+			{
 				"path": "gen_fuz_css.ts",
 				"declarations": [
 					{
@@ -2227,7 +2387,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 189,
+						"source_line": 169,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -2247,7 +2407,8 @@
 					"css_class_generation.ts",
 					"css_class_interpreters.ts",
 					"css_classes.ts",
-					"css_literal.ts"
+					"css_literal.ts",
+					"file_filter.ts"
 				]
 			},
 			{
@@ -4840,6 +5001,93 @@
 				],
 				"dependencies": ["variable_data.ts"],
 				"dependents": ["theme.ts"]
+			},
+			{
+				"path": "vite_plugin_fuz_css.ts",
+				"declarations": [
+					{
+						"name": "VitePluginFuzCssOptions",
+						"kind": "type",
+						"doc_comment": "Options for the fuz_css Vite plugin.",
+						"source_line": 78,
+						"type_signature": "VitePluginFuzCssOptions",
+						"properties": [
+							{
+								"name": "filter_file",
+								"kind": "variable",
+								"type_signature": "FileFilter",
+								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
+							},
+							{
+								"name": "class_definitions",
+								"kind": "variable",
+								"type_signature": "Record<string, CssClassDefinition | undefined>",
+								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name."
+							},
+							{
+								"name": "class_interpreters",
+								"kind": "variable",
+								"type_signature": "Array<CssClassDefinitionInterpreter>",
+								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
+							},
+							{
+								"name": "include_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to always include in the output, regardless of detection."
+							},
+							{
+								"name": "exclude_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to exclude from the output, even if detected."
+							},
+							{
+								"name": "acorn_plugins",
+								"kind": "variable",
+								"type_signature": "Array<AcornPlugin>",
+								"doc_comment": "Additional acorn plugins for parsing.\nUse `acorn-jsx` for React/Preact/Solid projects."
+							},
+							{
+								"name": "on_error",
+								"kind": "variable",
+								"type_signature": "'log' | 'throw'",
+								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log' (default): Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+							},
+							{
+								"name": "cache_dir",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Cache directory relative to project root."
+							}
+						]
+					},
+					{
+						"name": "vite_plugin_fuz_css",
+						"kind": "function",
+						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
+						"source_line": 141,
+						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
+						"return_type": "Plugin$1<any>",
+						"parameters": [
+							{
+								"name": "options",
+								"type": "VitePluginFuzCssOptions",
+								"default_value": "{}"
+							}
+						]
+					}
+				],
+				"module_comment": "Vite plugin for fuz_css utility class generation.\n\nUses Vite's transform hook to extract CSS classes from source files\nas they're processed, including node_modules dependencies.\nGenerates CSS on-demand via virtual module with HMR support.\n\n@example\n```ts\n// vite.config.ts\nimport {defineConfig} from 'vite';\nimport jsx from 'acorn-jsx';\nimport {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';\n\nexport default defineConfig({\n  plugins: [\n    vite_plugin_fuz_css({\n      acorn_plugins: [jsx()],\n    }),\n  ],\n});\n```",
+				"dependencies": [
+					"css_cache.ts",
+					"css_class_definitions.ts",
+					"css_class_extractor.ts",
+					"css_class_generation.ts",
+					"css_class_interpreters.ts",
+					"css_literal.ts",
+					"file_filter.ts"
+				]
 			}
 		]
 	}
