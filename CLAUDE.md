@@ -163,6 +163,8 @@ Vite plugin examples:
 
 Each demonstrates token, composite, and literal classes with responsive/hover/dark modifiers. Uses classes from [example_class_utilities.ts](src/lib/example_class_utilities.ts) to verify node_modules extraction.
 
+**Important:** All 4 example App files must be kept in sync. When updating one, update all others with equivalent changes (accounting for framework differences like React's `className` vs others' `class`). The [vite_plugin_examples.test.ts](src/test/vite_plugin_examples.test.ts) verifies all examples produce the same CSS classes.
+
 ### Tests - [src/test/](src/test/)
 
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)

@@ -65,14 +65,14 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{name: 'dark', type: 'ancestor', css: ':root.dark'},
 	{name: 'light', type: 'ancestor', css: ':root.light'},
 
-	// State modifiers - interaction
-	{name: 'hover', type: 'state', css: ':hover'},
-	{name: 'focus', type: 'state', css: ':focus'},
-	{name: 'focus-visible', type: 'state', css: ':focus-visible'},
-	{name: 'focus-within', type: 'state', css: ':focus-within'},
-	{name: 'active', type: 'state', css: ':active'},
-	{name: 'visited', type: 'state', css: ':visited'},
-	{name: 'target', type: 'state', css: ':target'},
+	// State modifiers - interaction (ordered for proper cascade: LVFHA)
+	{name: 'visited', type: 'state', css: ':visited', order: 1},
+	{name: 'focus-within', type: 'state', css: ':focus-within', order: 2},
+	{name: 'focus', type: 'state', css: ':focus', order: 3},
+	{name: 'focus-visible', type: 'state', css: ':focus-visible', order: 4},
+	{name: 'hover', type: 'state', css: ':hover', order: 5},
+	{name: 'active', type: 'state', css: ':active', order: 6},
+	{name: 'target', type: 'state', css: ':target', order: 7},
 
 	// State modifiers - form states
 	{name: 'disabled', type: 'state', css: ':disabled'},

@@ -17,6 +17,7 @@ import {
 } from './diagnostics.js';
 import {parse_ruleset, is_single_selector_ruleset} from './css_ruleset_parser.js';
 import {resolve_class_definition} from './css_class_resolution.js';
+import {get_modifier} from './modifiers.js';
 
 //
 // CSS Utilities
@@ -142,12 +143,31 @@ export const generate_classes_css = (
 		indexes.set(keys[i]!, i);
 	}
 
-	// If any classes are unknown, just put them at the end
+	// Helper to get the maximum state modifier order from a class name
+	// This ensures proper cascade: hover (5) comes before active (6)
+	const get_state_modifier_order = (class_name: string): number => {
+		const parts = class_name.split(':');
+		let max_order = 0;
+		for (const part of parts.slice(0, -1)) {
+			// Check each potential modifier prefix
+			const modifier = get_modifier(part);
+			if (modifier?.type === 'state' && modifier.order !== undefined) {
+				max_order = Math.max(max_order, modifier.order);
+			}
+		}
+		return max_order;
+	};
+
+	// Sort classes: first by definition index, then by state modifier order, then alphabetically
 	const sorted_classes = (Array.isArray(class_names) ? class_names : Array.from(class_names)).sort(
 		(a, b) => {
 			const index_a = indexes.get(a) ?? Number.MAX_VALUE;
 			const index_b = indexes.get(b) ?? Number.MAX_VALUE;
 			if (index_a !== index_b) return index_a - index_b;
+			// For classes with modifiers, sort by state modifier order (for proper cascade)
+			const order_a = get_state_modifier_order(a);
+			const order_b = get_state_modifier_order(b);
+			if (order_a !== order_b) return order_a - order_b;
 			return a.localeCompare(b); // alphabetic tiebreaker for stable sort
 		},
 	);

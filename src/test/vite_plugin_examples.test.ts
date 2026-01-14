@@ -35,32 +35,36 @@ if (!SKIP) {
  * Sorted alphabetically for consistent comparison.
  */
 const EXPECTED_CLASSES = [
-	// From example_class_utilities.ts - Token classes
+	// From App - Class Types section
 	'color_a_5',
-	'p_lg',
+	'p_xl5',
 	'shadow_sm',
-	// From example_class_utilities.ts - Composite classes
 	'box',
 	'ellipsis',
-	'row',
-	// From example_class_utilities.ts - Literal classes
+	'display:flex',
 	'gap:1rem',
 	'justify-content:space-between',
 	'text-transform:uppercase',
-	// From example_class_utilities.ts - Naming patterns (mb_* incrementing)
+	// From example_class_utilities.ts - Naming patterns (mb_* + ml_* for plurals)
 	'mb_xs5', // demoClass
 	'mb_xs4', // demo_class
-	'mb_xs3', // demoClasses
-	'mb_xs2', // demo_classes
+	'mb_xs3', // demoClasses (+ ml_xs)
+	'mb_xs2', // demo_classes (+ ml_sm)
 	'mb_xs', // demoClassName
 	'mb_sm', // demo_class_name
-	'mb_md', // demoClassNames
-	'mb_lg', // demo_class_names
+	'mb_md', // demoClassNames (+ ml_md)
+	'mb_lg', // demo_class_names (+ ml_lg)
 	'mb_xl', // demoClassList
 	'mb_xl2', // demo_class_list
-	'mb_xl3', // demoClassLists
-	'mb_xl4', // demo_class_lists
+	'mb_xl3', // demoClassLists (+ ml_xl)
+	'mb_xl4', // demo_class_lists (+ ml_xl2)
 	'mb_xl5', // DEMO_CLASS
+	'ml_xs', // demoClasses (plural)
+	'ml_sm', // demo_classes (plural)
+	'ml_md', // demoClassNames (plural)
+	'ml_lg', // demo_class_names (plural)
+	'ml_xl', // demoClassLists (plural)
+	'ml_xl2', // demo_class_lists (plural)
 	// From example_class_utilities.ts - Expression patterns (mt_* incrementing)
 	'mt_xs', // ternaryClass (true branch)
 	'mt_sm', // ternaryClass (false branch)
@@ -72,49 +76,35 @@ const EXPECTED_CLASSES = [
 	// from CSS output because 'not-real' fails @webref/css property validation
 	'shadow_lg', // fromComment via @fuz-classes
 	// From App - Layout
+	'column',
 	'gap_lg',
 	'gap_md',
-	'max-width:600px',
-	'min-height:100vh',
+	'gap_sm',
+	'max-width:800px',
 	'p_xl',
 	'text-align:center',
 	'width:100%',
-	// From App - Typography
-	'font_size_lg',
-	'font_size_sm',
-	'font_size_xl3',
-	'text_color_5',
-	'text_color_6',
 	// From App - Responsive
+	'flex:1',
 	'md:gap_lg',
 	'md:row',
-	// From App - Interactive
-	'border_radius_sm',
-	'gap_sm',
-	'hover:bg_a_5',
-	'hover:bg_b_5',
-	'hover:color:white',
-	'px_lg',
-	// From App - Dark mode
+	// From App - Interactive (hover/active state modifiers)
+	'hover:border_color_b',
+	'hover:outline_color_b',
+	'active:border_color_d',
+	'active:outline_color_d',
+	'hover:border_color_e',
+	'hover:outline_color_e',
+	'active:border_color_h',
+	'active:outline_color_h',
+	// From App - Design Tokens (bg_${hue}_5 where hue is a, b, c, d, e)
 	'bg_a_5',
 	'bg_b_5',
-	'color:white',
-	'dark:bg_a_3',
-	'dark:bg_b_3',
-	// From App - Other
-	'bg_1',
-	'bg_2',
-	'border_radius_md',
-	'border_radius_xs',
-	'flex-wrap:wrap',
-	'flex:1',
-	'gap_xs',
-	'justify-content:center',
-	// From App - Dynamic hue loop (bg_${hue}_5 where hue is a, b, c, d, e)
-	// Note: bg_a_5 and bg_b_5 are already listed above
 	'bg_c_5',
 	'bg_d_5',
 	'bg_e_5',
+	'color:white',
+	'p_md',
 ].sort();
 
 /**

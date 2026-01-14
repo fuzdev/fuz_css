@@ -2,22 +2,20 @@
  * Example CSS class exports demonstrating node_modules extraction.
  *
  * This module exists to verify that the Vite plugin extracts classes from
- * dependencies in node_modules. Each export uses a unique class value
- * to verify extraction is working correctly.
+ * dependencies in node_modules. The exports test specific extraction patterns
+ * that require being in a separate module.
  *
  * **Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.
  * Supported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`
  * (also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).
  *
- * **Class types demonstrated:**
- * - Token classes: Map to style variables (`p_lg`, `shadow_sm`)
- * - Composite classes: Multi-property shortcuts (`box`, `row`)
- * - Literal classes: CSS property:value syntax (`justify-content:space-between`)
+ * **Patterns demonstrated:**
+ * - Naming patterns: All CLASS_NAME_PATTERN suffix variants
+ * - Expression patterns: Ternary, logical AND, arrays
+ * - Comment hints: `@fuz-classes` directive
  *
- * **Variable patterns demonstrated:**
- * - Simple assignment, ternary expressions, logical AND, arrays
- * - Various naming conventions (camelCase, snake_case, SCREAMING_SNAKE)
- * - Comment hints via `@fuz-classes`
+ * Token, composite, and literal classes are demonstrated inline in the examples
+ * since they don't require special extraction testing.
  *
  * @module
  */
@@ -25,46 +23,7 @@
 /* eslint-disable no-constant-condition, @typescript-eslint/no-unnecessary-condition, no-constant-binary-expression */
 
 //
-// Token classes - map to style variables
-//
-
-/** Padding token - large spacing */
-export const demoPaddingClass = 'p_lg';
-
-/** Shadow token - small elevation */
-export const demoShadowClass = 'shadow_sm';
-
-/** Color token - primary hue intensity 5 */
-export const demoColorClass = 'color_a_5';
-
-//
-// Composite classes - multi-property shortcuts
-//
-
-/** Layout composite - centered flex container */
-export const demoBoxClass = 'box';
-
-/** Layout composite - horizontal flex row */
-export const demoRowClass = 'row';
-
-/** Text composite - truncate with ellipsis */
-export const demoEllipsisClass = 'ellipsis';
-
-//
-// Literal classes - CSS property:value syntax
-//
-
-/** Justify literal - space-between distribution */
-export const demoJustifyClass = 'justify-content:space-between';
-
-/** Text literal - uppercase transform */
-export const demoTextTransformClass = 'text-transform:uppercase';
-
-/** Spacing literal - gap between children */
-export const demoGapClass = 'gap:1rem';
-
-//
-// Naming patterns - all CLASS_NAME_PATTERN suffix variants (mb_* incrementing)
+// Naming patterns - all CLASS_NAME_PATTERN suffix variants (mb_* + ml_* for plurals)
 //
 
 /** `*Class` suffix (camelCase) */
@@ -73,11 +32,11 @@ export const demoClass = 'mb_xs5';
 /** `*_class` suffix (snake_case) */
 export const demo_class = 'mb_xs4';
 
-/** `*Classes` suffix (camelCase) */
-export const demoClasses = 'mb_xs3';
+/** `*Classes` suffix (camelCase) - plural, multiple classes */
+export const demoClasses = 'mb_xs3 ml_xs';
 
-/** `*_classes` suffix (snake_case) */
-export const demo_classes = 'mb_xs2';
+/** `*_classes` suffix (snake_case) - plural, multiple classes */
+export const demo_classes = 'mb_xs2 ml_sm';
 
 /** `*ClassName` suffix (camelCase) */
 export const demoClassName = 'mb_xs';
@@ -85,11 +44,11 @@ export const demoClassName = 'mb_xs';
 /** `*class_name` suffix (snake_case) */
 export const demo_class_name = 'mb_sm';
 
-/** `*ClassNames` suffix (camelCase) */
-export const demoClassNames = 'mb_md';
+/** `*ClassNames` suffix (camelCase) - plural, multiple classes */
+export const demoClassNames = 'mb_md ml_md';
 
-/** `*class_names` suffix (snake_case) */
-export const demo_class_names = 'mb_lg';
+/** `*class_names` suffix (snake_case) - plural, multiple classes */
+export const demo_class_names = 'mb_lg ml_lg';
 
 /** `*ClassList` suffix (camelCase) */
 export const demoClassList = 'mb_xl';
@@ -97,11 +56,11 @@ export const demoClassList = 'mb_xl';
 /** `*class_list` suffix (snake_case) */
 export const demo_class_list = 'mb_xl2';
 
-/** `*ClassLists` suffix (camelCase) */
-export const demoClassLists = 'mb_xl3';
+/** `*ClassLists` suffix (camelCase) - plural, multiple classes */
+export const demoClassLists = 'mb_xl3 ml_xl';
 
-/** `*class_lists` suffix (snake_case) */
-export const demo_class_lists = 'mb_xl4';
+/** `*class_lists` suffix (snake_case) - plural, multiple classes */
+export const demo_class_lists = 'mb_xl4 ml_xl2';
 
 /** `SCREAMING_SNAKE_CASE` naming */
 export const DEMO_CLASS = 'mb_xl5';

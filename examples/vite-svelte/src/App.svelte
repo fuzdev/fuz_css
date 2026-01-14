@@ -1,18 +1,6 @@
 <script lang="ts">
 	// Import from node_modules to verify extraction works for dependencies
 	import {
-		// Token classes
-		demoPaddingClass,
-		demoShadowClass,
-		demoColorClass,
-		// Composite classes
-		demoBoxClass,
-		demoRowClass,
-		demoEllipsisClass,
-		// Literal classes
-		demoJustifyClass,
-		demoTextTransformClass,
-		demoGapClass,
 		// Naming patterns (all CLASS_NAME_PATTERN suffix variants)
 		demoClass,
 		demo_class,
@@ -33,137 +21,135 @@
 		arrayClasses,
 		// Comment hint examples
 		fromComment,
+		unknownExtracted,
 		arbitraryLiteral,
 	} from '@fuzdev/fuz_css/example_class_utilities.js';
 
 	let count = $state(0);
 </script>
 
-<main class="box p_xl min-height:100vh">
-	<div class="column gap_lg width:100% max-width:600px">
-		<header class="column gap_md text-align:center">
-			<h1 class="font_size_xl3">fuz_css + Svelte</h1>
-			<p class="text_color_5">
-				Utility classes generated on-demand via Vite plugin
-			</p>
+<main class="p_xl width:100% max-width:800px">
+	<div class="column gap_lg">
+		<header class="text-align:center">
+			<h1>fuz_css + Svelte</h1>
+			<p>Utility classes generated on-demand via Vite plugin</p>
 		</header>
 
 		<!-- Responsive layout: column on mobile, row on desktop -->
-		<section class="column gap_md md:row md:gap_lg p_lg bg_1 border_radius_md">
-			<div class="flex:1 column gap_sm">
-				<h2 class="font_size_lg">Responsive</h2>
-				<p class="text_color_6">
-					This layout stacks on mobile and becomes a row on medium screens.
-				</p>
+		<section class="display:flex gap_md md:flex-direction:row md:gap_lg">
+			<div class="flex:1">
+				<h2>Responsive</h2>
+				<p>.display:flex .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
 			</div>
-			<div class="flex:1 column gap_sm">
-				<h2 class="font_size_lg">On-demand</h2>
-				<p class="text_color_6">
-					Only the classes you use are included in the bundle.
-				</p>
+			<div class="flex:1">
+				<h2>On-demand</h2>
+				<p>Only classes used are bundled</p>
 			</div>
 		</section>
 
 		<!-- Interactive button with hover states -->
-		<section class="column gap_md p_lg bg_1 border_radius_md">
-			<h2 class="font_size_lg">Interactive</h2>
-			<div class="row gap_md justify-content:center">
-				<button
-					class="p_md px_lg hover:bg_a_5 hover:color:white border_radius_sm"
-					onclick={() => count++}
-				>
-					Count: {count}
-				</button>
-				<button
-					class="p_md px_lg hover:bg_b_5 hover:color:white border_radius_sm"
-					onclick={() => count = 0}
-				>
-					Reset
-				</button>
-			</div>
-		</section>
-
-		<!-- Dark mode demo -->
-		<section class="column gap_md p_lg bg_1 border_radius_md">
-			<h2 class="font_size_lg">Color Scheme</h2>
-			<div class="row gap_md flex-wrap:wrap">
-				<div class="p_md bg_a_5 dark:bg_a_3 color:white border_radius_sm">
-					Adapts to dark mode
-				</div>
-				<div class="p_md bg_b_5 dark:bg_b_3 color:white border_radius_sm">
-					Different in each scheme
-				</div>
-			</div>
+		<section>
+			<h2>Interactive</h2>
+			<p>Hover modifiers like .hover:border_color_b change styles on hover</p>
+			<button class="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onclick={() => count++}>
+				Count: {count}
+			</button>
+			<button class="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onclick={() => count = 0}>
+				Reset
+			</button>
 		</section>
 
 		<!-- Token classes showcase -->
-		<section class="column gap_md p_lg bg_1 border_radius_md">
-			<h2 class="font_size_lg">Design Tokens</h2>
-			<div class="row gap_sm flex-wrap:wrap">
+		<section>
+			<h2>Design tokens</h2>
+			<p>.p_md for padding, .color_bg_5 for text color</p>
+			<div class="row gap_sm">
 				{#each ['a', 'b', 'c', 'd', 'e'] as hue}
-					<div class={`p_md bg_${hue}_5 color:white border_radius_sm font_size_sm`}>
-						{hue.toUpperCase()}
+					<div class={`p_md bg_${hue}_5 color_bg_5`}>
+						.bg_{hue}_5
 					</div>
 				{/each}
 			</div>
 		</section>
 
-		<!-- Classes from node_modules dependency - all unique, verifies extraction -->
-		<section class="column gap_md p_lg bg_1 border_radius_md">
-			<h2 class="font_size_lg">From Dependencies</h2>
-			<p class="text_color_6">
-				Classes imported from <code>@fuzdev/fuz_css/example_class_utilities</code>:
-			</p>
+		<!-- Class types -->
+		<section>
+			<h2>Class types</h2>
 
-			<!-- Token classes -->
-			<div class="{demoRowClass} {demoGapClass} flex-wrap:wrap">
-				<div class="{demoBoxClass} {demoPaddingClass} {demoShadowClass} bg_1">
-					{demoPaddingClass} + {demoShadowClass}
-				</div>
-				<div class="{demoBoxClass} {demoColorClass} color:white">
-					{demoColorClass}
-				</div>
+			<div>
+				<h3>Token classes</h3>
+				<div class="pl_xl5 font_size_lg">.pl_xl5 .font_size_lg</div>
+				<div class="shadow_sm">.shadow_sm</div>
+				<div class="color_a_5 color:white">.color_a_5</div>
 			</div>
 
-			<!-- Composite + Literal classes -->
-			<div class="{demoJustifyClass} {demoTextTransformClass} {demoGapClass}">
-				<div class="{demoBoxClass} {demoPaddingClass}">
-					<span class={demoEllipsisClass} style:max-width="80px">
-						{demoEllipsisClass} truncates long text
-					</span>
+			<div>
+				<h3>Composite classes</h3>
+				<div class="box">.box</div>
+				<div class="ellipsis" style:max-width="365px">
+					.ellipsis — this text truncates with ellipsis when it overflows
 				</div>
 			</div>
 
-			<!-- Naming patterns - all CLASS_NAME_PATTERN suffix variants -->
-			<div class="column gap_xs">
-				<div class="{demoClass} bg_2 border_radius_xs">demoClass: {demoClass}</div>
-				<div class="{demo_class} bg_2 border_radius_xs">demo_class: {demo_class}</div>
-				<div class="{demoClasses} bg_2 border_radius_xs">demoClasses: {demoClasses}</div>
-				<div class="{demo_classes} bg_2 border_radius_xs">demo_classes: {demo_classes}</div>
-				<div class="{demoClassName} bg_2 border_radius_xs">demoClassName: {demoClassName}</div>
-				<div class="{demo_class_name} bg_2 border_radius_xs">demo_class_name: {demo_class_name}</div>
-				<div class="{demoClassNames} bg_2 border_radius_xs">demoClassNames: {demoClassNames}</div>
-				<div class="{demo_class_names} bg_2 border_radius_xs">demo_class_names: {demo_class_names}</div>
-				<div class="{demoClassList} bg_2 border_radius_xs">demoClassList: {demoClassList}</div>
-				<div class="{demo_class_list} bg_2 border_radius_xs">demo_class_list: {demo_class_list}</div>
-				<div class="{demoClassLists} bg_2 border_radius_xs">demoClassLists: {demoClassLists}</div>
-				<div class="{demo_class_lists} bg_2 border_radius_xs">demo_class_lists: {demo_class_lists}</div>
-				<div class="{DEMO_CLASS} bg_2 border_radius_xs">DEMO_CLASS: {DEMO_CLASS}</div>
+			<div>
+				<h3>Literal classes</h3>
+				<div class="opacity:60%">.opacity:60%</div>
+				<div class="color:var(--color_j_5)">.color:var(--color_j_5)</div>
+				<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
+				<div class="display:flex justify-content:space-between gap:1rem">
+					<span>left</span>
+					<span>.display:flex .justify-content:space-between</span>
+					<span>right</span>
+				</div>
+			</div>
+		</section>
+
+		<!-- Classes from node_modules dependency - verifies extraction -->
+		<section>
+			<h2>From dependencies</h2>
+			<p>Classes imported from <code>@fuzdev/fuz_css/example_class_utilities.js</code></p>
+
+			<div>
+				<h3>Naming patterns</h3>
+				<div class={demoClass}>demoClass: .{demoClass}</div>
+				<div class={demo_class}>demo_class: .{demo_class}</div>
+				<div class={demoClasses}>demoClasses: .mb_xs3 .ml_xs</div>
+				<div class={demo_classes}>demo_classes: .mb_xs2 .ml_sm</div>
+				<div class={demoClassName}>demoClassName: .{demoClassName}</div>
+				<div class={demo_class_name}>demo_class_name: .{demo_class_name}</div>
+				<div class={demoClassNames}>demoClassNames: .mb_md .ml_md</div>
+				<div class={demo_class_names}>demo_class_names: .mb_lg .ml_lg</div>
+				<div class={demoClassList}>demoClassList: .{demoClassList}</div>
+				<div class={demo_class_list}>demo_class_list: .{demo_class_list}</div>
+				<div class={demoClassLists}>demoClassLists: .mb_xl3 .ml_xl</div>
+				<div class={demo_class_lists}>demo_class_lists: .mb_xl4 .ml_xl2</div>
+				<div class={DEMO_CLASS}>DEMO_CLASS: .{DEMO_CLASS}</div>
 			</div>
 
-			<!-- Expression patterns -->
-			<div class="column gap_xs">
-				<div class="{ternaryClass} bg_2 border_radius_xs">ternaryClass: {ternaryClass}</div>
-				<div class="{logicalClass} bg_2 border_radius_xs">logicalClass: {logicalClass}</div>
-				<div class="{arrayClasses[0]} {arrayClasses[1]} bg_2 border_radius_xs">
-					arrayClasses: [{arrayClasses.join(', ')}]
+			<div>
+				<h3>Expression patterns</h3>
+				<div class={ternaryClass}>
+					<code>{"true ? 'mt_xs' : 'mt_sm'"}</code> → .{ternaryClass} (both branches extracted)
+				</div>
+				<div class={logicalClass}>
+					<code>{"true && 'mt_md'"}</code> → .{logicalClass}
+				</div>
+				<div class="{arrayClasses[0]} {arrayClasses[1]}">
+					<code>{"['mt_lg', 'mt_xl']"}</code> → .{arrayClasses.join(', .')}
 				</div>
 			</div>
 
-			<!-- Comment hints -->
-			<div class="column gap_xs">
-				<div class="{fromComment} bg_2 border_radius_xs">fromComment: {fromComment}</div>
-				<div class="{arbitraryLiteral} bg_2 border_radius_xs">arbitraryLiteral: {arbitraryLiteral}</div>
+			<div>
+				<h3>Comment hints</h3>
+				<div class={fromComment}>
+					<code>// @fuz-classes {fromComment}</code> → .{fromComment}
+				</div>
+				<div>
+					<code>// @fuz-classes {unknownExtracted}</code> → extracted but excluded (no matching definition)
+				</div>
+				<div>
+					<code>// @fuz-classes {arbitraryLiteral}</code> → extracted but excluded (invalid property, not in @webref/css)
+				</div>
 			</div>
 		</section>
 	</div>

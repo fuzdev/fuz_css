@@ -1197,6 +1197,73 @@ describe('modified_class_interpreter', () => {
 		});
 	});
 
+	describe('state modifier ordering for cascade', () => {
+		test('hover classes come before active classes in output (LVFHA order)', () => {
+			const result = generate_classes_css({
+				class_names: ['active:border_color_a', 'hover:border_color_b'],
+				class_definitions: css_class_definitions,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			// Find positions of hover and active classes in the output
+			const hover_pos = result.css.indexOf('.hover\\:border_color_b');
+			const active_pos = result.css.indexOf('.active\\:border_color_a');
+
+			expect(hover_pos).toBeGreaterThan(-1);
+			expect(active_pos).toBeGreaterThan(-1);
+			// Hover should come BEFORE active for proper cascade (active overrides hover)
+			expect(hover_pos).toBeLessThan(active_pos);
+		});
+
+		test('visited < focus < hover < active ordering', () => {
+			const result = generate_classes_css({
+				class_names: [
+					'active:p_xl',
+					'hover:p_lg',
+					'focus:p_md',
+					'visited:p_sm',
+				],
+				class_definitions: css_class_definitions,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			const visited_pos = result.css.indexOf('.visited\\:p_sm');
+			const focus_pos = result.css.indexOf('.focus\\:p_md');
+			const hover_pos = result.css.indexOf('.hover\\:p_lg');
+			const active_pos = result.css.indexOf('.active\\:p_xl');
+
+			// All should be present
+			expect(visited_pos).toBeGreaterThan(-1);
+			expect(focus_pos).toBeGreaterThan(-1);
+			expect(hover_pos).toBeGreaterThan(-1);
+			expect(active_pos).toBeGreaterThan(-1);
+
+			// Order should be: visited < focus < hover < active
+			expect(visited_pos).toBeLessThan(focus_pos);
+			expect(focus_pos).toBeLessThan(hover_pos);
+			expect(hover_pos).toBeLessThan(active_pos);
+		});
+
+		test('non-interaction states use alphabetical order', () => {
+			const result = generate_classes_css({
+				class_names: ['odd:p_md', 'even:p_lg', 'first:p_sm'],
+				class_definitions: css_class_definitions,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			const even_pos = result.css.indexOf('.even\\:p_lg');
+			const first_pos = result.css.indexOf('.first\\:p_sm');
+			const odd_pos = result.css.indexOf('.odd\\:p_md');
+
+			// Alphabetical: even < first < odd
+			expect(even_pos).toBeLessThan(first_pos);
+			expect(first_pos).toBeLessThan(odd_pos);
+		});
+	});
+
 	describe('skip warnings', () => {
 		test('before:chevron emits warning for skipped pseudo-element rule', () => {
 			const result = generate_classes_css({
