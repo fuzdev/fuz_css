@@ -38,6 +38,7 @@ import {css_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
+	DEFAULT_CACHE_DIR,
 	get_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
@@ -116,7 +117,7 @@ export interface VitePluginFuzCssOptions {
 	on_error?: 'log' | 'throw';
 	/**
 	 * Cache directory relative to project root.
-	 * @default '.fuz/cache/css'
+	 * @default DEFAULT_CACHE_DIR
 	 */
 	cache_dir?: string;
 }
@@ -150,7 +151,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		exclude_classes,
 		acorn_plugins,
 		on_error = 'log',
-		cache_dir = '.fuz/cache/css',
+		cache_dir = DEFAULT_CACHE_DIR,
 	} = options;
 
 	// Merge class definitions

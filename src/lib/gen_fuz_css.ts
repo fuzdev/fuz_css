@@ -24,6 +24,7 @@ import {css_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
+	DEFAULT_CACHE_DIR,
 	get_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
@@ -101,7 +102,7 @@ export interface GenFuzCssOptions {
 	exclude_classes?: Iterable<string>;
 	/**
 	 * Cache directory relative to project_root.
-	 * @default '.fuz/cache/css'
+	 * @default DEFAULT_CACHE_DIR
 	 */
 	cache_dir?: string;
 	/**
@@ -175,7 +176,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		on_error = 'log',
 		include_classes,
 		exclude_classes,
-		cache_dir = '.fuz/cache/css',
+		cache_dir = DEFAULT_CACHE_DIR,
 		project_root: project_root_option,
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,

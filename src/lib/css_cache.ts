@@ -13,6 +13,11 @@ import {dirname, join} from 'node:path';
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 
 /**
+ * Default cache directory relative to project root.
+ */
+export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
+
+/**
  * Cache version. Bump when any of these change:
  * - `CachedExtraction` schema
  * - `extract_css_classes_with_locations()` logic or output
