@@ -84,7 +84,11 @@ const EXPECTED_CLASSES = [
 	// from CSS output because 'not-real' fails @webref/css property validation
 	'shadow_lg', // fromComment via @fuz-classes
 	// From App - Layout
-	'md:p_xl',
+	'max-width:1000px',
+	'mx_auto',
+	'px_md',
+	'md:px_xl',
+	'py_xl7',
 	'column',
 	'gap_lg',
 	'text-align:center',
@@ -92,6 +96,7 @@ const EXPECTED_CLASSES = [
 	'gap_md',
 	'md:flex-direction:row',
 	'md:gap_lg',
+	'min-width(543px):font_size_lg',
 	'flex:1',
 	// From App - Interactive (hover/active state modifiers)
 	'row',
@@ -237,10 +242,9 @@ describe.skipIf(SKIP)('cross-example consistency', () => {
 
 		for (const example of examples.slice(1)) {
 			const classes = example_results.get(example)!;
-			expect(
-				classes,
-				`${example} should produce same classes as ${first_example}`,
-			).toEqual(first_classes);
+			expect(classes, `${example} should produce same classes as ${first_example}`).toEqual(
+				first_classes,
+			);
 		}
 	});
 });

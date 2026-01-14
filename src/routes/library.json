@@ -132,10 +132,31 @@
 				"path": "css_cache.ts",
 				"declarations": [
 					{
+						"name": "compute_hash",
+						"kind": "function",
+						"doc_comment": "Computes SHA-256 hash of content using Web Crypto API.",
+						"source_line": 18,
+						"type_signature": "(content: string): Promise<string>",
+						"return_type": "Promise<string>",
+						"parameters": [
+							{
+								"name": "content",
+								"type": "string"
+							}
+						]
+					},
+					{
+						"name": "DEFAULT_CACHE_DIR",
+						"kind": "variable",
+						"doc_comment": "Default cache directory relative to project root.",
+						"source_line": 33,
+						"type_signature": "\".fuz/cache/css\""
+					},
+					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 29,
+						"source_line": 49,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -168,7 +189,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 48,
+						"source_line": 68,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -193,7 +214,7 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 67,
+						"source_line": 87,
 						"type_signature": "(cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -208,7 +229,7 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
-						"source_line": 97,
+						"source_line": 117,
 						"type_signature": "(cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, diagnostics: ExtractionDiagnostic[] | null): Promise<...>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -238,7 +259,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 128,
+						"source_line": 148,
 						"type_signature": "(cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -253,7 +274,7 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 140,
+						"source_line": 160,
 						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; diagnostics: ExtractionDiagnostic[] | null; }",
 						"return_type": "{ classes: Map<string, SourceLocation[]> | null; diagnostics: ExtractionDiagnostic[] | null; }",
 						"parameters": [
@@ -2117,10 +2138,50 @@
 								"description": "- Source locations where the class was used"
 							}
 						]
+					},
+					{
+						"name": "format_diagnostic",
+						"kind": "function",
+						"doc_comment": "Formats a diagnostic for display.",
+						"source_line": 101,
+						"type_signature": "(d: Diagnostic): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "d",
+								"type": "Diagnostic"
+							}
+						]
+					},
+					{
+						"name": "CssGenerationError",
+						"kind": "class",
+						"doc_comment": "Error thrown when CSS generation encounters errors and `on_error: 'throw'` is set.\nContains the full diagnostics array for programmatic access.",
+						"source_line": 115,
+						"extends": ["Error"],
+						"implements": [],
+						"members": [
+							{
+								"name": "diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<Diagnostic>"
+							},
+							{
+								"name": "constructor",
+								"kind": "constructor",
+								"type_signature": "(diagnostics: Diagnostic[]): CssGenerationError",
+								"parameters": [
+									{
+										"name": "diagnostics",
+										"type": "Diagnostic[]"
+									}
+								]
+							}
+						]
 					}
 				],
 				"module_comment": "Diagnostic types for CSS class extraction and generation.\n\nProvides a unified diagnostic system across all phases:\n- Extraction: Parsing source files to find class names\n- Generation: Producing CSS output from class definitions",
-				"dependents": ["css_class_generation.ts"]
+				"dependents": ["css_class_generation.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "example_class_utilities.ts",
@@ -2238,24 +2299,31 @@
 						"type_signature": "string[]"
 					},
 					{
+						"name": "objectClasses",
+						"kind": "variable",
+						"doc_comment": "Object - keys extracted as class names",
+						"source_line": 82,
+						"type_signature": "{ mt_xl2: string; mt_xl3: string; }"
+					},
+					{
 						"name": "fromComment",
 						"kind": "variable",
 						"doc_comment": "Comment hint - extracted via",
-						"source_line": 90,
+						"source_line": 93,
 						"type_signature": "\"shadow_lg\""
 					},
 					{
 						"name": "unknownExtracted",
 						"kind": "variable",
 						"doc_comment": "Unknown class - extracted via",
-						"source_line": 97,
+						"source_line": 100,
 						"type_signature": "\"unknown_not_included\""
 					},
 					{
 						"name": "arbitraryLiteral",
 						"kind": "variable",
 						"doc_comment": "Invalid literal - extracted via",
-						"source_line": 105,
+						"source_line": 108,
 						"type_signature": "\"not-real:extracted-but-excluded\""
 					}
 				],
@@ -2295,7 +2363,7 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 73,
+						"source_line": 97,
 						"type_signature": "GenFuzCssOptions",
 						"properties": [
 							{
@@ -2371,35 +2439,9 @@
 						]
 					},
 					{
-						"name": "CssGenerationError",
-						"kind": "class",
-						"doc_comment": "Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.",
-						"source_line": 154,
-						"extends": ["Error"],
-						"implements": [],
-						"members": [
-							{
-								"name": "diagnostics",
-								"kind": "variable",
-								"type_signature": "Array<Diagnostic>"
-							},
-							{
-								"name": "constructor",
-								"kind": "constructor",
-								"type_signature": "(diagnostics: Diagnostic[]): CssGenerationError",
-								"parameters": [
-									{
-										"name": "diagnostics",
-										"type": "Diagnostic[]"
-									}
-								]
-							}
-						]
-					},
-					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 169,
+						"source_line": 162,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -2420,6 +2462,7 @@
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts",
+					"diagnostics.ts",
 					"file_filter.ts"
 				]
 			},
@@ -5018,10 +5061,17 @@
 				"path": "vite_plugin_fuz_css.ts",
 				"declarations": [
 					{
+						"name": "FUZ_CSS_MARKER",
+						"kind": "variable",
+						"doc_comment": "Marker comment used to delimit generated CSS in the output.",
+						"source_line": 59,
+						"type_signature": "\"/* generated by vite_plugin_fuz_css */\""
+					},
+					{
 						"name": "VitePluginFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the fuz_css Vite plugin.",
-						"source_line": 78,
+						"source_line": 72,
 						"type_signature": "VitePluginFuzCssOptions",
 						"properties": [
 							{
@@ -5078,7 +5128,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 141,
+						"source_line": 137,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [
@@ -5098,6 +5148,7 @@
 					"css_class_generation.ts",
 					"css_class_interpreters.ts",
 					"css_literal.ts",
+					"diagnostics.ts",
 					"file_filter.ts"
 				]
 			}

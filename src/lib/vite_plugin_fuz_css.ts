@@ -28,7 +28,12 @@ import type {Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
 
 import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
-import {type SourceLocation, type GenerationDiagnostic} from './diagnostics.js';
+import {
+	type SourceLocation,
+	type ExtractionDiagnostic,
+	type Diagnostic,
+	CssGenerationError,
+} from './diagnostics.js';
 import {
 	generate_classes_css,
 	type CssClassDefinition,
@@ -44,6 +49,7 @@ import {
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
+	compute_hash,
 } from './css_cache.js';
 import {type FileFilter, filter_file_default} from './file_filter.js';
 
@@ -59,22 +65,6 @@ const RESOLVED_VIRTUAL_ID = '\0virtual:fuz.css';
  * Skip cache on CI (no point writing cache that won't be reused).
  */
 const is_ci = !!process.env.CI;
-
-/**
- * Computes SHA-256 hash of content using Web Crypto API.
- * Matches Gro's hashing approach for cache compatibility.
- */
-const compute_hash = async (content: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const buffer = encoder.encode(content);
-	const digested = await crypto.subtle.digest('SHA-256', buffer);
-	const bytes = Array.from(new Uint8Array(digested));
-	let hex = '';
-	for (const h of bytes) {
-		hex += h.toString(16).padStart(2, '0');
-	}
-	return hex;
-};
 
 /**
  * Options for the fuz_css Vite plugin.
@@ -128,6 +118,8 @@ export interface VitePluginFuzCssOptions {
 interface ClassRegistry {
 	/** file path → extracted classes with locations */
 	files: Map<string, Map<string, Array<SourceLocation>>>;
+	/** file path → extraction diagnostics */
+	diagnostics: Map<string, Array<ExtractionDiagnostic>>;
 	/** file path → content hash for caching */
 	hashes: Map<string, string>;
 	/** aggregated classes, null = dirty, needs recompute */
@@ -166,6 +158,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	// Plugin state
 	const registry: ClassRegistry = {
 		files: new Map(),
+		diagnostics: new Map(),
 		hashes: new Map(),
 		all_classes: null,
 		all_locations: null,
@@ -274,16 +267,19 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			class_locations: locations,
 		});
 
-		// Handle diagnostics
-		const errors = result.diagnostics.filter((d: GenerationDiagnostic) => d.level === 'error');
+		// Collect all diagnostics: extraction + generation
+		const all_diagnostics: Array<Diagnostic> = [
+			...Array.from(registry.diagnostics.values()).flat(),
+			...result.diagnostics,
+		];
+
+		// Handle errors
+		const errors = all_diagnostics.filter((d) => d.level === 'error');
 		if (errors.length > 0 && on_error === 'throw') {
-			throw new Error(
-				`CSS generation failed with ${errors.length} error(s):\n` +
-					errors.map((d: GenerationDiagnostic) => `  - ${d.class_name}: ${d.message}`).join('\n'),
-			);
+			throw new CssGenerationError(all_diagnostics);
 		}
 
-		// Log warnings/errors
+		// Log generation warnings/errors (extraction diagnostics already logged in transform)
 		for (const d of result.diagnostics) {
 			const msg = `[fuz_css] ${d.class_name}: ${d.message}`;
 			if (d.level === 'error') {
@@ -345,6 +341,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			dev_server.watcher.on('unlink', (file) => {
 				if (registry.files.has(file)) {
 					registry.files.delete(file);
+					registry.diagnostics.delete(file);
 					registry.hashes.delete(file);
 					registry.all_classes = null;
 					registry.all_locations = null;
@@ -433,11 +430,16 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {classes} = from_cached_extraction(cached);
+					const {classes, diagnostics} = from_cached_extraction(cached);
 					if (classes) {
 						registry.files.set(id, classes);
 					} else {
 						registry.files.delete(id);
+					}
+					if (diagnostics && diagnostics.length > 0) {
+						registry.diagnostics.set(id, diagnostics);
+					} else {
+						registry.diagnostics.delete(id);
 					}
 					registry.hashes.set(id, hash);
 					registry.all_classes = null;
@@ -474,6 +476,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				registry.files.set(id, result.classes);
 			} else {
 				registry.files.delete(id);
+			}
+			if (result.diagnostics && result.diagnostics.length > 0) {
+				registry.diagnostics.set(id, result.diagnostics);
+			} else {
+				registry.diagnostics.delete(id);
 			}
 			registry.hashes.set(id, hash);
 			registry.all_classes = null;

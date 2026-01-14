@@ -36,12 +36,38 @@ gro build     # build the package for production
 
 ### Smart utility class generation
 
-Two generators available:
+Two generators available, both using AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)) and per-file caching with content hash validation:
 
 1. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) for SvelteKit projects using Gro
 2. **Vite plugin** - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) for Svelte/React/Preact/Solid via `virtual:fuz.css`
 
-Both use AST-based extraction ([css_class_extractor.ts](src/lib/css_class_extractor.ts)) and output only CSS for classes actually used. Supports Svelte 5.16+ class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
+Both output only CSS for classes actually used. Supports Svelte 5.16+ class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
+
+**Shared options (both generators):**
+
+- `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`, excluding tests/gen files)
+- `class_definitions` - Additional definitions to merge with builtins (user takes precedence)
+- `class_interpreters` - Custom interpreters (replaces builtins if provided)
+- `include_classes` - Classes to always include (for dynamic class names)
+- `exclude_classes` - Classes to exclude (filter false positives)
+- `acorn_plugins` - Additional acorn plugins (use `acorn-jsx` for React/Preact/Solid)
+- `on_error` - `'log'` (default) or `'throw'` for CSS-literal errors
+- `cache_dir` - Cache directory (default: `.fuz/cache/css`)
+
+**Gro-only options:**
+
+- `include_stats` - Include file statistics in output
+- `project_root` - Project root directory (default: `process.cwd()`)
+- `concurrency` - Max concurrent file processing (default: 8)
+- `cache_io_concurrency` - Max concurrent cache I/O (default: 50)
+
+**Key implementation differences:**
+
+- **HMR**: Vite plugin has HMR with 10ms debouncing; Gro regenerates on file change
+- **Cache writes**: Vite uses fire-and-forget; Gro awaits with concurrency control
+- **External files**: Both use hashed paths in `_external/` subdirectory for files outside project root (e.g., symlinked deps with pnpm)
+- **Error types**: Both throw `CssGenerationError` with `diagnostics` property for programmatic error access
+- **CI behavior**: Both skip cache writes on CI
 
 ### Three class types
 

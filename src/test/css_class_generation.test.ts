@@ -1218,12 +1218,7 @@ describe('modified_class_interpreter', () => {
 
 		test('visited < focus < hover < active ordering', () => {
 			const result = generate_classes_css({
-				class_names: [
-					'active:p_xl',
-					'hover:p_lg',
-					'focus:p_md',
-					'visited:p_sm',
-				],
+				class_names: ['active:p_xl', 'hover:p_lg', 'focus:p_md', 'visited:p_sm'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,

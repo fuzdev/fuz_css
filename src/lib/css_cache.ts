@@ -13,6 +13,21 @@ import {dirname, join} from 'node:path';
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 
 /**
+ * Computes SHA-256 hash of content using Web Crypto API.
+ */
+export const compute_hash = async (content: string): Promise<string> => {
+	const encoder = new TextEncoder();
+	const buffer = encoder.encode(content);
+	const digested = await crypto.subtle.digest('SHA-256', buffer);
+	const bytes = Array.from(new Uint8Array(digested));
+	let hex = '';
+	for (const h of bytes) {
+		hex += h.toString(16).padStart(2, '0');
+	}
+	return hex;
+};
+
+/**
  * Default cache directory relative to project root.
  */
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';

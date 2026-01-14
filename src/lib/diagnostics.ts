@@ -94,3 +94,35 @@ export const create_generation_diagnostic = (
 	suggestion: diagnostic.suggestion ?? null,
 	locations,
 });
+
+/**
+ * Formats a diagnostic for display.
+ */
+export const format_diagnostic = (d: Diagnostic): string => {
+	const suggestion = d.suggestion ? ` (${d.suggestion})` : '';
+	if (d.phase === 'extraction') {
+		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: ${d.message}${suggestion}`;
+	}
+	const loc = d.locations?.[0];
+	const location_str = loc ? `${loc.file}:${loc.line}:${loc.column}: ` : '';
+	return `  - ${location_str}${d.class_name}: ${d.message}${suggestion}`;
+};
+
+/**
+ * Error thrown when CSS generation encounters errors and `on_error: 'throw'` is set.
+ * Contains the full diagnostics array for programmatic access.
+ */
+export class CssGenerationError extends Error {
+	diagnostics: Array<Diagnostic>;
+
+	constructor(diagnostics: Array<Diagnostic>) {
+		const error_count = diagnostics.filter((d) => d.level === 'error').length;
+		const message = `CSS generation failed with ${error_count} error${error_count === 1 ? '' : 's'}:\n${diagnostics
+			.filter((d) => d.level === 'error')
+			.map(format_diagnostic)
+			.join('\n')}`;
+		super(message);
+		this.name = 'CssGenerationError';
+		this.diagnostics = diagnostics;
+	}
+}

@@ -31,41 +31,12 @@ export const App = () => {
 	const [count, setCount] = useState(0);
 
 	return (
-		<main className="p_md md:p_xl">
+		<main className="mx_auto max-width:1000px px_md py_xl7 md:px_xl">
 			<div className="column gap_lg">
 				<header className="text-align:center">
 					<h1>fuz_css + React</h1>
-					<p>Utility classes generated on-demand via Vite plugin</p>
+					<p>Utility classes generated on-demand via Vite plugin (<a href="https://css.fuz.dev/docs/classes">docs</a>, <a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-react">source</a>)</p>
 				</header>
-
-				{/* Responsive layout: column on mobile, row on desktop */}
-				<section className="column gap_md md:flex-direction:row md:gap_lg">
-					<div className="flex:1">
-						<h2>Responsive</h2>
-						<p>.column .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
-					</div>
-					<div className="flex:1">
-						<h2>Try it</h2>
-						<p>Resize the window to see the layout switch from column to row</p>
-					</div>
-				</section>
-
-				{/* Interactive button with hover states */}
-				<section>
-					<h2>Interactive</h2>
-					<div className="row gap_md mb_lg">
-						<button className="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onClick={() => setCount((c) => c + 1)}>
-							count: {count}
-						</button>
-						<span>.hover:border_color_b .hover:outline_color_b .active:border_color_d .active:outline_color_d</span>
-					</div>
-					<div className="row gap_md mb_lg">
-						<button className="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onClick={() => setCount(0)}>
-							reset
-						</button>
-						<span>.hover:border_color_g .hover:outline_color_g .active:border_color_h .active:outline_color_h</span>
-					</div>
-				</section>
 
 				{/* Class types */}
 				<section>
@@ -94,10 +65,44 @@ export const App = () => {
 					</div>
 				</section>
 
-				{/* Classes from node_modules dependency - verifies extraction */}
+				{/* Modifiers */}
 				<section>
-					<h2>From dependencies</h2>
-					<p>Classes imported from <code>@fuzdev/fuz_css/example_class_utilities.js</code></p>
+					<h2>Modifiers</h2>
+
+					<div>
+						<h3>Responsive</h3>
+						<div className="mb_xl3 column gap_md md:flex-direction:row md:gap_lg">
+							<div className="flex:1">
+								<p>.column .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
+							</div>
+							<div className="flex:1">
+								<p>Resize the window to see the layout switch from column to row</p>
+							</div>
+						</div>
+						<p className="min-width(543px):font_size_lg">.min-width(543px):font_size_lg — arbitrary breakpoint</p>
+					</div>
+
+					<div>
+						<h3>Interactive</h3>
+						<div className="row gap_md mb_lg">
+							<button className="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onClick={() => setCount((c) => c + 1)}>
+								count: {count}
+							</button>
+							<span>.hover:border_color_b .hover:outline_color_b .active:border_color_d .active:outline_color_d</span>
+						</div>
+						<div className="row gap_md mb_lg">
+							<button className="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onClick={() => setCount(0)}>
+								reset
+							</button>
+							<span>.hover:border_color_g .hover:outline_color_g .active:border_color_h .active:outline_color_h</span>
+						</div>
+					</div>
+				</section>
+
+				{/* Extraction */}
+				<section>
+					<h2>Extraction</h2>
+					<p>Classes detected via naming conventions, expressions, and comments (examples imported from <code>node_modules</code> to verify dependency scanning)</p>
 
 					<div>
 						<h3>Naming patterns</h3>
@@ -145,6 +150,10 @@ export const App = () => {
 						</div>
 					</div>
 				</section>
+
+				<footer className="text-align:center">
+					<p>This demos a subset of features.<br />See the <a href="https://css.fuz.dev/docs/classes">docs</a> and <a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-react">source code</a> for more.</p>
+				</footer>
 			</div>
 		</main>
 	);

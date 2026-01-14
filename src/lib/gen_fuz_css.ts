@@ -13,7 +13,13 @@ import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
 import {type FileFilter, filter_file_default} from './file_filter.js';
 import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
-import {type SourceLocation, type ExtractionDiagnostic, type Diagnostic} from './diagnostics.js';
+import {
+	type SourceLocation,
+	type ExtractionDiagnostic,
+	type Diagnostic,
+	format_diagnostic,
+	CssGenerationError,
+} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
 import {
 	generate_classes_css,
@@ -30,6 +36,7 @@ import {
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
+	compute_hash,
 } from './css_cache.js';
 
 /**
@@ -54,6 +61,22 @@ const DEFAULT_CONCURRENCY = 8;
  * writes is the main constraint, but cache entries are small JSON files.
  */
 const DEFAULT_CACHE_IO_CONCURRENCY = 50;
+
+/**
+ * Computes cache path for a file.
+ * Internal files use relative paths mirroring source tree.
+ * External files (outside project root) use hashed absolute paths in `_external/`.
+ */
+const get_file_cache_path = async (
+	file_id: string,
+	cache_dir: string,
+	project_root: string,
+): Promise<string> => {
+	const is_internal = file_id.startsWith(project_root);
+	return is_internal
+		? get_cache_path(file_id, cache_dir, project_root)
+		: join(cache_dir, '_external', (await compute_hash(file_id)).slice(0, 16) + '.json');
+};
 
 /**
  * Result from extracting CSS classes from a single file.
@@ -118,7 +141,7 @@ export interface GenFuzCssOptions {
 	concurrency?: number;
 	/**
 	 * Max concurrent cache writes and deletes (I/O-bound).
-	 * @default 20
+	 * @default 50
 	 */
 	cache_io_concurrency?: number;
 	/**
@@ -136,42 +159,11 @@ export interface GenFuzCssOptions {
 	acorn_plugins?: Array<AcornPlugin>;
 }
 
-/**
- * Formats a diagnostic for display.
- */
-const format_diagnostic = (d: Diagnostic): string => {
-	const suggestion = d.suggestion ? ` (${d.suggestion})` : '';
-	if (d.phase === 'extraction') {
-		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: ${d.message}${suggestion}`;
-	}
-	const loc = d.locations?.[0];
-	const location_str = loc ? `${loc.file}:${loc.line}:${loc.column}: ` : '';
-	return `  - ${location_str}${d.class_name}: ${d.message}${suggestion}`;
-};
-
-/**
- * Error thrown when CSS-literal generation encounters errors and `on_error: 'throw'` is set.
- */
-export class CssGenerationError extends Error {
-	diagnostics: Array<Diagnostic>;
-
-	constructor(diagnostics: Array<Diagnostic>) {
-		const error_count = diagnostics.filter((d) => d.level === 'error').length;
-		const message = `CSS generation failed with ${error_count} error${error_count === 1 ? '' : 's'}:\n${diagnostics
-			.filter((d) => d.level === 'error')
-			.map(format_diagnostic)
-			.join('\n')}`;
-		super(message);
-		this.name = 'CssGenerationError';
-		this.diagnostics = diagnostics;
-	}
-}
-
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
-		class_definitions = css_class_definitions,
+		class_definitions: user_class_definitions,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
 		include_classes,
@@ -263,7 +255,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				nodes,
 				async (node): Promise<FileExtraction> => {
 					current_paths.add(node.id);
-					const cache_path = get_cache_path(node.id, resolved_cache_dir, project_root);
+					const cache_path = await get_file_cache_path(node.id, resolved_cache_dir, project_root);
 
 					// Try cache (skip on CI)
 					if (!is_ci) {
@@ -332,7 +324,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					await each_concurrent(
 						paths_to_delete,
 						async (path) => {
-							const cache_path = get_cache_path(path, resolved_cache_dir, project_root);
+							const cache_path = await get_file_cache_path(path, resolved_cache_dir, project_root);
 							await delete_cached_extraction(cache_path);
 						},
 						cache_io_concurrency,
@@ -372,8 +364,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			// Merge builtins with user definitions (user definitions take precedence)
-			const all_class_definitions = {...css_class_definitions, ...class_definitions};
+			// Merge class definitions (user definitions take precedence)
+			const all_class_definitions = user_class_definitions
+				? {...css_class_definitions, ...user_class_definitions}
+				: css_class_definitions;
 
 			const result = generate_classes_css({
 				class_names: all_classes,
