@@ -9,9 +9,6 @@ export default defineConfig({
 		preact(),
 		vite_plugin_fuz_css({
 			acorn_plugins: [jsx()],
-			// Include dynamically constructed classes that can't be statically extracted
-			// The example uses `bg_${hue}_5` in a .map() which produces these at runtime
-			include_classes: ['bg_a_5', 'bg_b_5', 'bg_c_5', 'bg_d_5', 'bg_e_5'],
 		}),
 	],
 });
