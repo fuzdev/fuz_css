@@ -204,9 +204,6 @@ a.chip {
 .bg {
 	background-color: var(--bg);
 }
-.bg_3 {
-	background-color: var(--bg_3);
-}
 .fg_1 {
 	background-color: var(--fg_1);
 }
@@ -239,9 +236,6 @@ a.chip {
 }
 .bg_a_7 {
 	background-color: var(--color_a_7);
-}
-.bg_d_3 {
-	background-color: var(--color_d_3);
 }
 .outline_color_3 {
 	outline-color: var(--border_color_3);
@@ -502,14 +496,23 @@ a.chip {
 	padding-top: var(--space_xs);
 	padding-bottom: var(--space_xs);
 }
-.m_xl5 {
-	margin: var(--space_xl5);
-}
 .mt_0 {
 	margin-top: 0;
 }
+.mt_xs {
+	margin-top: var(--space_xs);
+}
+.mt_sm {
+	margin-top: var(--space_sm);
+}
+.mt_md {
+	margin-top: var(--space_md);
+}
 .mt_lg {
 	margin-top: var(--space_lg);
+}
+.mt_xl {
+	margin-top: var(--space_xl);
 }
 .mt_xl2 {
 	margin-top: var(--space_xl2);
@@ -523,6 +526,18 @@ a.chip {
 .mb_0 {
 	margin-bottom: 0;
 }
+.mb_xs5 {
+	margin-bottom: var(--space_xs5);
+}
+.mb_xs4 {
+	margin-bottom: var(--space_xs4);
+}
+.mb_xs3 {
+	margin-bottom: var(--space_xs3);
+}
+.mb_xs2 {
+	margin-bottom: var(--space_xs2);
+}
 .mb_xs {
 	margin-bottom: var(--space_xs);
 }
@@ -535,11 +550,17 @@ a.chip {
 .mb_lg {
 	margin-bottom: var(--space_lg);
 }
+.mb_xl {
+	margin-bottom: var(--space_xl);
+}
 .mb_xl2 {
 	margin-bottom: var(--space_xl2);
 }
 .mb_xl3 {
 	margin-bottom: var(--space_xl3);
+}
+.mb_xl4 {
+	margin-bottom: var(--space_xl4);
 }
 .mb_xl5 {
 	margin-bottom: var(--space_xl5);
@@ -672,9 +693,6 @@ a.chip {
 }
 .opacity\:51\% {
 	opacity: 51%;
-}
-.opacity\:60\% {
-	opacity: 60%;
 }
 .opacity\:79\% {
 	opacity: 79%;

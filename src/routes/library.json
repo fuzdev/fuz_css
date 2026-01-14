@@ -2124,130 +2124,200 @@
 						"name": "demoPaddingClass",
 						"kind": "variable",
 						"doc_comment": "Padding token - large spacing",
-						"source_line": 31,
+						"source_line": 32,
 						"type_signature": "\"p_lg\""
 					},
 					{
 						"name": "demoShadowClass",
 						"kind": "variable",
 						"doc_comment": "Shadow token - small elevation",
-						"source_line": 34,
+						"source_line": 35,
 						"type_signature": "\"shadow_sm\""
 					},
 					{
 						"name": "demoColorClass",
 						"kind": "variable",
 						"doc_comment": "Color token - primary hue intensity 5",
-						"source_line": 37,
+						"source_line": 38,
 						"type_signature": "\"color_a_5\""
 					},
 					{
 						"name": "demoBoxClass",
 						"kind": "variable",
 						"doc_comment": "Layout composite - centered flex container",
-						"source_line": 44,
+						"source_line": 45,
 						"type_signature": "\"box\""
 					},
 					{
 						"name": "demoRowClass",
 						"kind": "variable",
 						"doc_comment": "Layout composite - horizontal flex row",
-						"source_line": 47,
+						"source_line": 48,
 						"type_signature": "\"row\""
 					},
 					{
 						"name": "demoEllipsisClass",
 						"kind": "variable",
 						"doc_comment": "Text composite - truncate with ellipsis",
-						"source_line": 50,
+						"source_line": 51,
 						"type_signature": "\"ellipsis\""
 					},
 					{
 						"name": "demoJustifyClass",
 						"kind": "variable",
 						"doc_comment": "Justify literal - space-between distribution",
-						"source_line": 57,
+						"source_line": 58,
 						"type_signature": "\"justify-content:space-between\""
 					},
 					{
 						"name": "demoTextTransformClass",
 						"kind": "variable",
 						"doc_comment": "Text literal - uppercase transform",
-						"source_line": 60,
+						"source_line": 61,
 						"type_signature": "\"text-transform:uppercase\""
 					},
 					{
 						"name": "demoGapClass",
 						"kind": "variable",
 						"doc_comment": "Spacing literal - gap between children",
-						"source_line": 63,
+						"source_line": 64,
 						"type_signature": "\"gap:1rem\""
+					},
+					{
+						"name": "demoClass",
+						"kind": "variable",
+						"doc_comment": "`*Class` suffix (camelCase)",
+						"source_line": 71,
+						"type_signature": "\"mb_xs5\""
+					},
+					{
+						"name": "demo_class",
+						"kind": "variable",
+						"doc_comment": "`*_class` suffix (snake_case)",
+						"source_line": 74,
+						"type_signature": "\"mb_xs4\""
+					},
+					{
+						"name": "demoClasses",
+						"kind": "variable",
+						"doc_comment": "`*Classes` suffix (camelCase)",
+						"source_line": 77,
+						"type_signature": "\"mb_xs3\""
+					},
+					{
+						"name": "demo_classes",
+						"kind": "variable",
+						"doc_comment": "`*_classes` suffix (snake_case)",
+						"source_line": 80,
+						"type_signature": "\"mb_xs2\""
 					},
 					{
 						"name": "demoClassName",
 						"kind": "variable",
-						"doc_comment": "camelCase naming - triggers naming-based extraction",
-						"source_line": 70,
-						"type_signature": "\"column\""
+						"doc_comment": "`*ClassName` suffix (camelCase)",
+						"source_line": 83,
+						"type_signature": "\"mb_xs\""
 					},
 					{
-						"name": "DEMO_CONSTANT_CLASS",
+						"name": "demo_class_name",
 						"kind": "variable",
-						"doc_comment": "SCREAMING_SNAKE_CASE naming",
-						"source_line": 73,
-						"type_signature": "\"p_md\""
+						"doc_comment": "`*class_name` suffix (snake_case)",
+						"source_line": 86,
+						"type_signature": "\"mb_sm\""
 					},
 					{
-						"name": "card_class",
+						"name": "demoClassNames",
 						"kind": "variable",
-						"doc_comment": "Suffix convention (_class) - triggers naming-based extraction",
-						"source_line": 76,
-						"type_signature": "\"pane\""
+						"doc_comment": "`*ClassNames` suffix (camelCase)",
+						"source_line": 89,
+						"type_signature": "\"mb_md\""
 					},
 					{
-						"name": "demo_ternary_class",
+						"name": "demo_class_names",
 						"kind": "variable",
-						"doc_comment": "Ternary expression - both branches should be extracted",
-						"source_line": 79,
-						"type_signature": "\"bg_d_3\" | \"bg_3\""
+						"doc_comment": "`*class_names` suffix (snake_case)",
+						"source_line": 92,
+						"type_signature": "\"mb_lg\""
 					},
 					{
-						"name": "demo_logical_class",
+						"name": "demoClassList",
 						"kind": "variable",
-						"doc_comment": "Logical AND - truthy value should be extracted",
-						"source_line": 82,
-						"type_signature": "\"opacity:60%\""
+						"doc_comment": "`*ClassList` suffix (camelCase)",
+						"source_line": 95,
+						"type_signature": "\"mb_xl\""
 					},
 					{
-						"name": "demoArrayClasses",
+						"name": "demo_class_list",
 						"kind": "variable",
-						"doc_comment": "Array - all elements should be extracted",
-						"source_line": 85,
+						"doc_comment": "`*class_list` suffix (snake_case)",
+						"source_line": 98,
+						"type_signature": "\"mb_xl2\""
+					},
+					{
+						"name": "demoClassLists",
+						"kind": "variable",
+						"doc_comment": "`*ClassLists` suffix (camelCase)",
+						"source_line": 101,
+						"type_signature": "\"mb_xl3\""
+					},
+					{
+						"name": "demo_class_lists",
+						"kind": "variable",
+						"doc_comment": "`*class_lists` suffix (snake_case)",
+						"source_line": 104,
+						"type_signature": "\"mb_xl4\""
+					},
+					{
+						"name": "DEMO_CLASS",
+						"kind": "variable",
+						"doc_comment": "`SCREAMING_SNAKE_CASE` naming",
+						"source_line": 107,
+						"type_signature": "\"mb_xl5\""
+					},
+					{
+						"name": "ternaryClass",
+						"kind": "variable",
+						"doc_comment": "Ternary expression - both branches extracted",
+						"source_line": 114,
+						"type_signature": "\"mt_xs\" | \"mt_sm\""
+					},
+					{
+						"name": "logicalClass",
+						"kind": "variable",
+						"doc_comment": "Logical AND - truthy value extracted",
+						"source_line": 117,
+						"type_signature": "\"mt_md\""
+					},
+					{
+						"name": "arrayClasses",
+						"kind": "variable",
+						"doc_comment": "Array - all elements extracted",
+						"source_line": 120,
 						"type_signature": "string[]"
 					},
 					{
 						"name": "fromComment",
 						"kind": "variable",
 						"doc_comment": "Comment hint - extracted via",
-						"source_line": 96,
+						"source_line": 131,
 						"type_signature": "\"shadow_lg\""
 					},
 					{
 						"name": "unknownExtracted",
 						"kind": "variable",
 						"doc_comment": "Unknown class - extracted via",
-						"source_line": 103,
+						"source_line": 138,
 						"type_signature": "\"unknown_not_included\""
 					},
 					{
 						"name": "arbitraryLiteral",
 						"kind": "variable",
 						"doc_comment": "Invalid literal - extracted via",
-						"source_line": 111,
+						"source_line": 146,
 						"type_signature": "\"not-real:extracted-but-excluded\""
 					}
 				],
-				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. Each export uses a unique class value\nto verify extraction is working correctly.\n\n**Important:** Variable names must end with `class`, `classes`, or `className`\nfor the extractor to detect them (see `CLASS_NAME_PATTERN` in css_class_extractor.ts).\n\n**Class types demonstrated:**\n- Token classes: Map to style variables (`p_lg`, `shadow_sm`)\n- Composite classes: Multi-property shortcuts (`box`, `row`)\n- Literal classes: CSS property:value syntax (`justify-content:space-between`)\n\n**Variable patterns demonstrated:**\n- Simple assignment, ternary expressions, logical AND, arrays\n- Various naming conventions (camelCase, snake_case, SCREAMING_SNAKE)\n- Comment hints via `@fuz-classes`"
+				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. Each export uses a unique class value\nto verify extraction is working correctly.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Class types demonstrated:**\n- Token classes: Map to style variables (`p_lg`, `shadow_sm`)\n- Composite classes: Multi-property shortcuts (`box`, `row`)\n- Literal classes: CSS property:value syntax (`justify-content:space-between`)\n\n**Variable patterns demonstrated:**\n- Simple assignment, ternary expressions, logical AND, arrays\n- Various naming conventions (camelCase, snake_case, SCREAMING_SNAKE)\n- Comment hints via `@fuz-classes`"
 			},
 			{
 				"path": "file_filter.ts",
