@@ -283,6 +283,30 @@ describe('variable tracking', () => {
 		class_names_equal(result, ['btn-snake', 'card-a', 'card-b']);
 	});
 
+	test('extracts classes from variables ending in classList or class_list', () => {
+		const source = `
+<script>
+	const buttonClassList = 'btn-list';
+	const card_class_list = 'card-list-a card-list-b';
+</script>
+<div></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['btn-list', 'card-list-a', 'card-list-b']);
+	});
+
+	test('extracts classes from variables ending in classLists or class_lists', () => {
+		const source = `
+<script>
+	const buttonClassLists = ['btn-lists-a', 'btn-lists-b'];
+	const card_class_lists = 'card-lists';
+</script>
+<div></div>
+`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['btn-lists-a', 'btn-lists-b', 'card-lists']);
+	});
+
 	test('extracts classes from $derived rune', () => {
 		const source = `
 <script>

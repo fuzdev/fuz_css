@@ -2,18 +2,18 @@ import {useState} from 'react';
 
 // Import from node_modules to verify extraction works for dependencies
 import {
-	// Token classes (mix of camelCase and snake_case)
-	demo_padding_class,
+	// Token classes
+	demoPaddingClass,
 	demoShadowClass,
-	demo_color_class,
+	demoColorClass,
 	// Composite classes
 	demoBoxClass,
-	demo_row_class,
+	demoRowClass,
 	demoEllipsisClass,
 	// Literal classes
-	demo_display_class,
-	demoAlignClass,
-	demo_gap_class,
+	demoJustifyClass,
+	demoTextTransformClass,
+	demoGapClass,
 	// Variable patterns
 	demoClassName,
 	DEMO_CONSTANT_CLASS,
@@ -22,8 +22,8 @@ import {
 	demo_logical_class,
 	demoArrayClasses,
 	// Comment hint examples
-	from_comment,
-	arbitrary_literal,
+	fromComment,
+	arbitraryLiteral,
 } from '@fuzdev/fuz_css/example_class_utilities.js';
 
 export const App = () => {
@@ -110,21 +110,21 @@ export const App = () => {
 					</p>
 
 					{/* Token classes */}
-					<div className={`${demo_row_class} ${demo_gap_class} flex-wrap:wrap`}>
-						<div className={`${demoBoxClass} ${demo_padding_class} ${demoShadowClass} bg_1`}>
-							{demo_padding_class} + {demoShadowClass}
+					<div className={`${demoRowClass} ${demoGapClass} flex-wrap:wrap`}>
+						<div className={`${demoBoxClass} ${demoPaddingClass} ${demoShadowClass} bg_1`}>
+							{demoPaddingClass} + {demoShadowClass}
 						</div>
-						<div className={`${demoBoxClass} ${demo_color_class} color:white`}>
-							{demo_color_class}
+						<div className={`${demoBoxClass} ${demoColorClass} color:white`}>
+							{demoColorClass}
 						</div>
 					</div>
 
 					{/* Composite classes */}
-					<div className={`${demo_display_class} ${demoAlignClass} ${demo_gap_class}`}>
-						<div className={`${card_class} ${demo_padding_class}`}>
+					<div className={`${demoJustifyClass} ${demoTextTransformClass} ${demoGapClass}`}>
+						<div className={`${card_class} ${demoPaddingClass}`}>
 							{card_class}
 						</div>
-						<div className={`${demoBoxClass} ${demo_padding_class}`}>
+						<div className={`${demoBoxClass} ${demoPaddingClass}`}>
 							<span className={demoEllipsisClass} style={{maxWidth: '80px'}}>
 								{demoEllipsisClass} truncates long text
 							</span>
@@ -145,11 +145,11 @@ export const App = () => {
 						<div className={`${demoArrayClasses[0]} ${demoArrayClasses[1]} bg_2`}>
 							demoArrayClasses: [{demoArrayClasses.join(', ')}]
 						</div>
-						<div className={`${from_comment} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							from_comment (via @fuz-classes): {from_comment}
+						<div className={`${fromComment} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
+							fromComment (via @fuz-classes): {fromComment}
 						</div>
-						<div className={`${arbitrary_literal} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							arbitrary_literal: {arbitrary_literal}
+						<div className={`${arbitraryLiteral} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
+							arbitraryLiteral: {arbitraryLiteral}
 						</div>
 					</div>
 				</section>

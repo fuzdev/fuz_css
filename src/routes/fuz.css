@@ -502,8 +502,8 @@ a.chip {
 	padding-top: var(--space_xs);
 	padding-bottom: var(--space_xs);
 }
-.m_xs {
-	margin: var(--space_xs);
+.m_xl5 {
+	margin: var(--space_xl5);
 }
 .mt_0 {
 	margin-top: 0;
@@ -570,9 +570,6 @@ a.chip {
 }
 .gap_lg {
 	gap: var(--space_lg);
-}
-.align-items\:center {
-	align-items: center;
 }
 .border-bottom-left-radius\:100\% {
 	border-bottom-left-radius: 100%;
@@ -658,6 +655,9 @@ a.chip {
 .inset\:0 {
 	inset: 0;
 }
+.justify-content\:space-between {
+	justify-content: space-between;
+}
 .opacity\:0 {
 	opacity: 0;
 }
@@ -690,6 +690,9 @@ a.chip {
 }
 .text-align\:center {
 	text-align: center;
+}
+.text-transform\:uppercase {
+	text-transform: uppercase;
 }
 .white-space\:nowrap {
 	white-space: nowrap;

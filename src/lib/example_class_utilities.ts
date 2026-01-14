@@ -5,13 +5,14 @@
  * dependencies in node_modules. Each export uses a unique class value
  * to verify extraction is working correctly.
  *
- * **Important:** Variable names must end with `class`, `classes`, or `className`
- * for the extractor to detect them (see `CLASS_NAME_PATTERN` in css_class_extractor.ts).
+ * **Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.
+ * Supported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`
+ * (also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).
  *
  * **Class types demonstrated:**
  * - Token classes: Map to style variables (`p_lg`, `shadow_sm`)
  * - Composite classes: Multi-property shortcuts (`box`, `row`)
- * - Literal classes: CSS property:value syntax (`display:flex`)
+ * - Literal classes: CSS property:value syntax (`justify-content:space-between`)
  *
  * **Variable patterns demonstrated:**
  * - Simple assignment, ternary expressions, logical AND, arrays
@@ -27,46 +28,46 @@
 // Token classes - map to style variables
 //
 
-/** Padding token - large spacing (snake_case) */
-export const demo_padding_class = 'p_lg';
+/** Padding token - large spacing */
+export const demoPaddingClass = 'p_lg';
 
-/** Shadow token - small elevation (camelCase) */
+/** Shadow token - small elevation */
 export const demoShadowClass = 'shadow_sm';
 
-/** Color token - primary hue intensity 5 (snake_case) */
-export const demo_color_class = 'color_a_5';
+/** Color token - primary hue intensity 5 */
+export const demoColorClass = 'color_a_5';
 
 //
 // Composite classes - multi-property shortcuts
 //
 
-/** Layout composite - centered flex container (camelCase) */
+/** Layout composite - centered flex container */
 export const demoBoxClass = 'box';
 
-/** Layout composite - horizontal flex row (snake_case) */
-export const demo_row_class = 'row';
+/** Layout composite - horizontal flex row */
+export const demoRowClass = 'row';
 
-/** Text composite - truncate with ellipsis (camelCase) */
+/** Text composite - truncate with ellipsis */
 export const demoEllipsisClass = 'ellipsis';
 
 //
 // Literal classes - CSS property:value syntax
 //
 
-/** Display literal - flex layout (snake_case) */
-export const demo_display_class = 'display:flex';
+/** Justify literal - space-between distribution */
+export const demoJustifyClass = 'justify-content:space-between';
 
-/** Alignment literal - center items (camelCase) */
-export const demoAlignClass = 'align-items:center';
+/** Text literal - uppercase transform */
+export const demoTextTransformClass = 'text-transform:uppercase';
 
-/** Spacing literal - gap between children (snake_case) */
-export const demo_gap_class = 'gap:1rem';
+/** Spacing literal - gap between children */
+export const demoGapClass = 'gap:1rem';
 
 //
 // Variable patterns and naming conventions
 //
 
-/** camelCase naming - triggers naming-based extraction */
+/** className suffix pattern - triggers naming-based extraction */
 export const demoClassName = 'column';
 
 /** SCREAMING_SNAKE_CASE naming */
@@ -82,7 +83,7 @@ export const demo_ternary_class = true ? 'bg_d_3' : 'bg_3';
 export const demo_logical_class = true && 'opacity:60%';
 
 /** Array - all elements should be extracted */
-export const demoArrayClasses = ['m_xs', 'shadow_xs'];
+export const demoArrayClasses = ['m_xl5', 'shadow_xs'];
 
 //
 // Comment hint examples - @fuz-classes directive
@@ -91,16 +92,16 @@ export const demoArrayClasses = ['m_xs', 'shadow_xs'];
 // @fuz-classes shadow_lg
 /**
  * Comment hint - extracted via @fuz-classes, NOT via variable name pattern.
- * Variable name `from_comment` doesn't end in class/classes/className.
+ * Variable name `fromComment` doesn't end in class/classes/className.
  */
-export const from_comment = 'shadow_lg';
+export const fromComment = 'shadow_lg';
 
 // @fuz-classes unknown_not_included
 /**
  * Unknown class - extracted via @fuz-classes but has no CSS definition.
  * This class will be extracted but NOT included in output (no matching token/composite/literal).
  */
-export const unknown_extracted = 'unknown_not_included';
+export const unknownExtracted = 'unknown_not_included';
 
 // @fuz-classes not-real:extracted-but-excluded
 /**
@@ -108,4 +109,4 @@ export const unknown_extracted = 'unknown_not_included';
  * Properties are validated against `@webref/css` data, so `not-real` fails validation.
  * This demonstrates that extraction and generation are separate steps.
  */
-export const arbitrary_literal = 'not-real:extracted-but-excluded';
+export const arbitraryLiteral = 'not-real:extracted-but-excluded';

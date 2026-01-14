@@ -250,6 +250,28 @@ const Component = () => <div classList={{ [dynamicClass]: true, static: true }} 
 		// Note: computed keys don't trigger usage tracking, only naming convention works here
 		class_names_equal(result, ['extracted-via-naming', 'static']);
 	});
+
+	test('extracts from variables ending in classList or class_list', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const buttonClassList = 'btn-list';
+const card_class_list = 'card-list-a card-list-b';
+const Component = () => <div className="static" />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['btn-list', 'card-list-a', 'card-list-b', 'static']);
+	});
+
+	test('extracts from variables ending in classLists or class_lists', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const buttonClassLists = ['btn-lists-a', 'btn-lists-b'];
+const card_class_lists = 'card-lists';
+const Component = () => <div className="static" />;
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		class_names_equal(result, ['btn-lists-a', 'btn-lists-b', 'card-lists', 'static']);
+	});
 });
 
 describe('JSX general', () => {

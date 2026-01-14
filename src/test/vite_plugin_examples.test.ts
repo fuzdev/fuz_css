@@ -22,6 +22,13 @@ const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
 
 const EXAMPLES_DIR = join(process.cwd(), 'examples');
 
+// Build the package before running example tests so examples get fresh dist/
+if (!SKIP) {
+	beforeAll(() => {
+		execSync('npx svelte-package', {cwd: process.cwd(), stdio: 'pipe'});
+	}, 60_000); // 1 minute timeout for package build
+}
+
 /**
  * All CSS classes that should be extracted from the examples.
  * This is the single source of truth - all examples should produce this exact set.
@@ -40,14 +47,14 @@ const EXPECTED_CLASSES = [
 	'pane', // card_class
 	'row',
 	// From example_class_utilities.ts - Literal classes
-	'align-items:center',
-	'display:flex',
 	'gap:1rem',
+	'justify-content:space-between',
+	'text-transform:uppercase',
 	'opacity:60%', // demo_logical
 	// From example_class_utilities.ts - Variable patterns
 	'bg_3', // demo_ternary (false branch)
 	'bg_d_3', // demo_ternary (true branch)
-	'm_xs', // demoArrayClasses[0]
+	'm_xl5', // demoArrayClasses[0]
 	// Note: 'not-real:but-still-included' is extracted via @fuz-classes but excluded
 	// from CSS output because 'not-real' fails @webref/css property validation
 	'shadow_lg', // from_comment via @fuz-classes
