@@ -64,26 +64,60 @@ export const demoTextTransformClass = 'text-transform:uppercase';
 export const demoGapClass = 'gap:1rem';
 
 //
-// Variable patterns and naming conventions
+// Naming patterns - all CLASS_NAME_PATTERN suffix variants (mb_* incrementing)
 //
 
-/** className suffix pattern - triggers naming-based extraction */
-export const demoClassName = 'column';
+/** `*Class` suffix (camelCase) */
+export const demoClass = 'mb_xs5';
 
-/** SCREAMING_SNAKE_CASE naming */
-export const DEMO_CONSTANT_CLASS = 'p_md';
+/** `*_class` suffix (snake_case) */
+export const demo_class = 'mb_xs4';
 
-/** Suffix convention (_class) - triggers naming-based extraction */
-export const card_class = 'pane';
+/** `*Classes` suffix (camelCase) */
+export const demoClasses = 'mb_xs3';
 
-/** Ternary expression - both branches should be extracted */
-export const demo_ternary_class = true ? 'bg_d_3' : 'bg_3';
+/** `*_classes` suffix (snake_case) */
+export const demo_classes = 'mb_xs2';
 
-/** Logical AND - truthy value should be extracted */
-export const demo_logical_class = true && 'opacity:60%';
+/** `*ClassName` suffix (camelCase) */
+export const demoClassName = 'mb_xs';
 
-/** Array - all elements should be extracted */
-export const demoArrayClasses = ['m_xl5', 'shadow_xs'];
+/** `*class_name` suffix (snake_case) */
+export const demo_class_name = 'mb_sm';
+
+/** `*ClassNames` suffix (camelCase) */
+export const demoClassNames = 'mb_md';
+
+/** `*class_names` suffix (snake_case) */
+export const demo_class_names = 'mb_lg';
+
+/** `*ClassList` suffix (camelCase) */
+export const demoClassList = 'mb_xl';
+
+/** `*class_list` suffix (snake_case) */
+export const demo_class_list = 'mb_xl2';
+
+/** `*ClassLists` suffix (camelCase) */
+export const demoClassLists = 'mb_xl3';
+
+/** `*class_lists` suffix (snake_case) */
+export const demo_class_lists = 'mb_xl4';
+
+/** `SCREAMING_SNAKE_CASE` naming */
+export const DEMO_CLASS = 'mb_xl5';
+
+//
+// Expression patterns - ternary, logical AND, array (mt_* incrementing)
+//
+
+/** Ternary expression - both branches extracted */
+export const ternaryClass = true ? 'mt_xs' : 'mt_sm';
+
+/** Logical AND - truthy value extracted */
+export const logicalClass = true && 'mt_md';
+
+/** Array - all elements extracted */
+export const arrayClasses = ['mt_lg', 'mt_xl'];
 
 //
 // Comment hint examples - @fuz-classes directive

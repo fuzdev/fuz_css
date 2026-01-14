@@ -14,13 +14,24 @@ import {
 	demoJustifyClass,
 	demoTextTransformClass,
 	demoGapClass,
-	// Variable patterns
+	// Naming patterns (all CLASS_NAME_PATTERN suffix variants)
+	demoClass,
+	demo_class,
+	demoClasses,
+	demo_classes,
 	demoClassName,
-	DEMO_CONSTANT_CLASS,
-	card_class,
-	demo_ternary_class,
-	demo_logical_class,
-	demoArrayClasses,
+	demo_class_name,
+	demoClassNames,
+	demo_class_names,
+	demoClassList,
+	demo_class_list,
+	demoClassLists,
+	demo_class_lists,
+	DEMO_CLASS,
+	// Expression patterns
+	ternaryClass,
+	logicalClass,
+	arrayClasses,
 	// Comment hint examples
 	fromComment,
 	arbitraryLiteral,
@@ -119,11 +130,8 @@ export const App = () => {
 						</div>
 					</div>
 
-					{/* Composite classes */}
+					{/* Composite + Literal classes */}
 					<div class={`${demoJustifyClass} ${demoTextTransformClass} ${demoGapClass}`}>
-						<div class={`${card_class} ${demoPaddingClass}`}>
-							{card_class}
-						</div>
 						<div class={`${demoBoxClass} ${demoPaddingClass}`}>
 							<span class={demoEllipsisClass} style={{maxWidth: '80px'}}>
 								{demoEllipsisClass} truncates long text
@@ -131,26 +139,36 @@ export const App = () => {
 						</div>
 					</div>
 
-					{/* Variable patterns - each uses a unique class */}
-					<div class={`${demoClassName} gap_xs`}>
-						<div class={`${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							DEMO_CONSTANT_CLASS: {DEMO_CONSTANT_CLASS}
+					{/* Naming patterns - all CLASS_NAME_PATTERN suffix variants */}
+					<div class="column gap_xs">
+						<div class={`${demoClass} bg_2 border_radius_xs`}>demoClass: {demoClass}</div>
+						<div class={`${demo_class} bg_2 border_radius_xs`}>demo_class: {demo_class}</div>
+						<div class={`${demoClasses} bg_2 border_radius_xs`}>demoClasses: {demoClasses}</div>
+						<div class={`${demo_classes} bg_2 border_radius_xs`}>demo_classes: {demo_classes}</div>
+						<div class={`${demoClassName} bg_2 border_radius_xs`}>demoClassName: {demoClassName}</div>
+						<div class={`${demo_class_name} bg_2 border_radius_xs`}>demo_class_name: {demo_class_name}</div>
+						<div class={`${demoClassNames} bg_2 border_radius_xs`}>demoClassNames: {demoClassNames}</div>
+						<div class={`${demo_class_names} bg_2 border_radius_xs`}>demo_class_names: {demo_class_names}</div>
+						<div class={`${demoClassList} bg_2 border_radius_xs`}>demoClassList: {demoClassList}</div>
+						<div class={`${demo_class_list} bg_2 border_radius_xs`}>demo_class_list: {demo_class_list}</div>
+						<div class={`${demoClassLists} bg_2 border_radius_xs`}>demoClassLists: {demoClassLists}</div>
+						<div class={`${demo_class_lists} bg_2 border_radius_xs`}>demo_class_lists: {demo_class_lists}</div>
+						<div class={`${DEMO_CLASS} bg_2 border_radius_xs`}>DEMO_CLASS: {DEMO_CLASS}</div>
+					</div>
+
+					{/* Expression patterns */}
+					<div class="column gap_xs">
+						<div class={`${ternaryClass} bg_2 border_radius_xs`}>ternaryClass: {ternaryClass}</div>
+						<div class={`${logicalClass} bg_2 border_radius_xs`}>logicalClass: {logicalClass}</div>
+						<div class={`${arrayClasses[0]} ${arrayClasses[1]} bg_2 border_radius_xs`}>
+							arrayClasses: [{arrayClasses.join(', ')}]
 						</div>
-						<div class={`${demo_ternary_class} ${DEMO_CONSTANT_CLASS} color:white border_radius_xs`}>
-							demo_ternary_class: {demo_ternary_class}
-						</div>
-						<div class={`${demo_logical_class} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							demo_logical_class: {demo_logical_class}
-						</div>
-						<div class={`${demoArrayClasses[0]} ${demoArrayClasses[1]} bg_2`}>
-							demoArrayClasses: [{demoArrayClasses.join(', ')}]
-						</div>
-						<div class={`${fromComment} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							fromComment (via @fuz-classes): {fromComment}
-						</div>
-						<div class={`${arbitraryLiteral} ${DEMO_CONSTANT_CLASS} bg_2 border_radius_xs`}>
-							arbitraryLiteral: {arbitraryLiteral}
-						</div>
+					</div>
+
+					{/* Comment hints */}
+					<div class="column gap_xs">
+						<div class={`${fromComment} bg_2 border_radius_xs`}>fromComment: {fromComment}</div>
+						<div class={`${arbitraryLiteral} bg_2 border_radius_xs`}>arbitraryLiteral: {arbitraryLiteral}</div>
 					</div>
 				</section>
 			</div>

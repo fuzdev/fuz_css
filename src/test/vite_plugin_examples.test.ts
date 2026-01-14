@@ -38,27 +38,39 @@ const EXPECTED_CLASSES = [
 	// From example_class_utilities.ts - Token classes
 	'color_a_5',
 	'p_lg',
-	'p_md', // DEMO_CONSTANT
 	'shadow_sm',
 	// From example_class_utilities.ts - Composite classes
 	'box',
-	'column', // demoClassName
 	'ellipsis',
-	'pane', // card_class
 	'row',
 	// From example_class_utilities.ts - Literal classes
 	'gap:1rem',
 	'justify-content:space-between',
 	'text-transform:uppercase',
-	'opacity:60%', // demo_logical
-	// From example_class_utilities.ts - Variable patterns
-	'bg_3', // demo_ternary (false branch)
-	'bg_d_3', // demo_ternary (true branch)
-	'm_xl5', // demoArrayClasses[0]
-	// Note: 'not-real:but-still-included' is extracted via @fuz-classes but excluded
+	// From example_class_utilities.ts - Naming patterns (mb_* incrementing)
+	'mb_xs5', // demoClass
+	'mb_xs4', // demo_class
+	'mb_xs3', // demoClasses
+	'mb_xs2', // demo_classes
+	'mb_xs', // demoClassName
+	'mb_sm', // demo_class_name
+	'mb_md', // demoClassNames
+	'mb_lg', // demo_class_names
+	'mb_xl', // demoClassList
+	'mb_xl2', // demo_class_list
+	'mb_xl3', // demoClassLists
+	'mb_xl4', // demo_class_lists
+	'mb_xl5', // DEMO_CLASS
+	// From example_class_utilities.ts - Expression patterns (mt_* incrementing)
+	'mt_xs', // ternaryClass (true branch)
+	'mt_sm', // ternaryClass (false branch)
+	'mt_md', // logicalClass
+	'mt_lg', // arrayClasses[0]
+	'mt_xl', // arrayClasses[1]
+	// From example_class_utilities.ts - Comment hints
+	// Note: 'not-real:extracted-but-excluded' is extracted via @fuz-classes but excluded
 	// from CSS output because 'not-real' fails @webref/css property validation
-	'shadow_lg', // from_comment via @fuz-classes
-	'shadow_xs', // demoArrayClasses[1]
+	'shadow_lg', // fromComment via @fuz-classes
 	// From App - Layout
 	'gap_lg',
 	'gap_md',
