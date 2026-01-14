@@ -571,8 +571,23 @@ a.chip {
 .mb_xl9 {
 	margin-bottom: var(--space_xl9);
 }
+.ml_xs {
+	margin-left: var(--space_xs);
+}
 .ml_sm {
 	margin-left: var(--space_sm);
+}
+.ml_md {
+	margin-left: var(--space_md);
+}
+.ml_lg {
+	margin-left: var(--space_lg);
+}
+.ml_xl {
+	margin-left: var(--space_xl);
+}
+.ml_xl2 {
+	margin-left: var(--space_xl2);
 }
 .mx_auto {
 	margin-left: auto;
@@ -670,14 +685,8 @@ a.chip {
 .font-weight\:950 {
 	font-weight: 950;
 }
-.gap\:1rem {
-	gap: 1rem;
-}
 .inset\:0 {
 	inset: 0;
-}
-.justify-content\:space-between {
-	justify-content: space-between;
 }
 .opacity\:0 {
 	opacity: 0;
@@ -708,9 +717,6 @@ a.chip {
 }
 .text-align\:center {
 	text-align: center;
-}
-.text-transform\:uppercase {
-	text-transform: uppercase;
 }
 .white-space\:nowrap {
 	white-space: nowrap;

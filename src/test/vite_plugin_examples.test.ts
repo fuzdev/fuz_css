@@ -35,30 +35,33 @@ if (!SKIP) {
  * Sorted alphabetically for consistent comparison.
  */
 const EXPECTED_CLASSES = [
-	// From App - Class Types section
-	'color_a_5',
-	'p_xl5',
+	// From App - Class Types section (Token classes)
+	'p_md', // also used in main wrapper
+	'bg_d_2',
+	'pl_xl5',
+	'font_size_lg',
 	'shadow_sm',
+	// From App - Class Types section (Composite classes)
 	'box',
 	'ellipsis',
-	'display:flex',
-	'gap:1rem',
-	'justify-content:space-between',
-	'text-transform:uppercase',
+	// From App - Class Types section (Literal classes)
+	'opacity:60%',
+	'color:var(--color_j_5)',
+	'box-shadow:0~4px~8px~rgb(0,0,0,0.2)',
 	// From example_class_utilities.ts - Naming patterns (mb_* + ml_* for plurals)
 	'mb_xs5', // demoClass
 	'mb_xs4', // demo_class
-	'mb_xs3', // demoClasses (+ ml_xs)
-	'mb_xs2', // demo_classes (+ ml_sm)
-	'mb_xs', // demoClassName
-	'mb_sm', // demo_class_name
-	'mb_md', // demoClassNames (+ ml_md)
-	'mb_lg', // demo_class_names (+ ml_lg)
-	'mb_xl', // demoClassList
-	'mb_xl2', // demo_class_list
-	'mb_xl3', // demoClassLists (+ ml_xl)
-	'mb_xl4', // demo_class_lists (+ ml_xl2)
-	'mb_xl5', // DEMO_CLASS
+	'mb_xs3', // DEMO_CLASS
+	'mb_xs2', // demoClasses (+ ml_xs)
+	'mb_xs', // demo_classes (+ ml_sm)
+	'mb_sm', // demoClassName
+	'mb_md', // demo_class_name
+	'mb_lg', // demoClassNames (+ ml_md)
+	'mb_xl', // demo_class_names (+ ml_lg)
+	'mb_xl2', // demoClassList
+	'mb_xl3', // demo_class_list
+	'mb_xl4', // demoClassLists (+ ml_xl)
+	'mb_xl5', // demo_class_lists (+ ml_xl2)
 	'ml_xs', // demoClasses (plural)
 	'ml_sm', // demo_classes (plural)
 	'ml_md', // demoClassNames (plural)
@@ -71,40 +74,32 @@ const EXPECTED_CLASSES = [
 	'mt_md', // logicalClass
 	'mt_lg', // arrayClasses[0]
 	'mt_xl', // arrayClasses[1]
+	'mt_xl2', // objectClasses key
+	'mt_xl3', // objectClasses key
 	// From example_class_utilities.ts - Comment hints
 	// Note: 'not-real:extracted-but-excluded' is extracted via @fuz-classes but excluded
 	// from CSS output because 'not-real' fails @webref/css property validation
 	'shadow_lg', // fromComment via @fuz-classes
 	// From App - Layout
+	'md:p_xl',
 	'column',
 	'gap_lg',
-	'gap_md',
-	'gap_sm',
-	'max-width:800px',
-	'p_xl',
 	'text-align:center',
-	'width:100%',
 	// From App - Responsive
-	'flex:1',
+	'gap_md',
+	'md:flex-direction:row',
 	'md:gap_lg',
-	'md:row',
+	'flex:1',
 	// From App - Interactive (hover/active state modifiers)
+	'row',
 	'hover:border_color_b',
 	'hover:outline_color_b',
 	'active:border_color_d',
 	'active:outline_color_d',
-	'hover:border_color_e',
-	'hover:outline_color_e',
+	'hover:border_color_g',
+	'hover:outline_color_g',
 	'active:border_color_h',
 	'active:outline_color_h',
-	// From App - Design Tokens (bg_${hue}_5 where hue is a, b, c, d, e)
-	'bg_a_5',
-	'bg_b_5',
-	'bg_c_5',
-	'bg_d_5',
-	'bg_e_5',
-	'color:white',
-	'p_md',
 ].sort();
 
 /**
@@ -158,17 +153,17 @@ const extract_fuz_css = (css: string): string | null => {
 
 /**
  * Extracts class names from CSS content.
- * Handles escaped characters in class names (colons, percent signs).
+ * Handles escaped characters in class names (colons, percent signs, parens, tildes, commas, dots).
  */
 const extract_class_names = (css: string): Array<string> => {
 	const classes: Set<string> = new Set();
-	// Match class selectors: .classname followed by space, comma, colon, or brace
-	// Class names can contain escaped characters like \: and \%
-	const pattern = /\.([a-zA-Z_][a-zA-Z0-9_-]*(?:\\[:%][a-zA-Z0-9_%-]*)*)/g;
+	// Match class selectors: .classname
+	// Class names can contain escaped characters like \: \% \( \) \~ \, \.
+	const pattern = /\.([a-zA-Z_][a-zA-Z0-9_-]*(?:\\[:%()~,.][-a-zA-Z0-9_(),%~.]*)*)/g;
 	let match;
 	while ((match = pattern.exec(css)) !== null) {
-		// Unescape CSS escape sequences: \: -> :, \% -> %
-		const class_name = match[1]!.replace(/\\([:%])/g, '$1');
+		// Unescape CSS escape sequences: \: -> :, \% -> %, \( -> (, etc.
+		const class_name = match[1]!.replace(/\\([:%()~,.])/g, '$1');
 		classes.add(class_name);
 	}
 	return [...classes].sort();

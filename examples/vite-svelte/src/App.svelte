@@ -19,6 +19,7 @@
 		ternaryClass,
 		logicalClass,
 		arrayClasses,
+		objectClasses,
 		// Comment hint examples
 		fromComment,
 		unknownExtracted,
@@ -28,7 +29,7 @@
 	let count = $state(0);
 </script>
 
-<main class="p_xl width:100% max-width:800px">
+<main class="p_md md:p_xl">
 	<div class="column gap_lg">
 		<header class="text-align:center">
 			<h1>fuz_css + Svelte</h1>
@@ -36,39 +37,31 @@
 		</header>
 
 		<!-- Responsive layout: column on mobile, row on desktop -->
-		<section class="display:flex gap_md md:flex-direction:row md:gap_lg">
+		<section class="column gap_md md:flex-direction:row md:gap_lg">
 			<div class="flex:1">
 				<h2>Responsive</h2>
-				<p>.display:flex .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
+				<p>.column .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
 			</div>
 			<div class="flex:1">
-				<h2>On-demand</h2>
-				<p>Only classes used are bundled</p>
+				<h2>Try it</h2>
+				<p>Resize the window to see the layout switch from column to row</p>
 			</div>
 		</section>
 
 		<!-- Interactive button with hover states -->
 		<section>
 			<h2>Interactive</h2>
-			<p>Hover modifiers like .hover:border_color_b change styles on hover</p>
-			<button class="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onclick={() => count++}>
-				Count: {count}
-			</button>
-			<button class="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onclick={() => count = 0}>
-				Reset
-			</button>
-		</section>
-
-		<!-- Token classes showcase -->
-		<section>
-			<h2>Design tokens</h2>
-			<p>.p_md for padding, .color_bg_5 for text color</p>
-			<div class="row gap_sm">
-				{#each ['a', 'b', 'c', 'd', 'e'] as hue}
-					<div class={`p_md bg_${hue}_5 color_bg_5`}>
-						.bg_{hue}_5
-					</div>
-				{/each}
+			<div class="row gap_md mb_lg">
+				<button class="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onclick={() => count++}>
+					count: {count}
+				</button>
+				<span>.hover:border_color_b .hover:outline_color_b .active:border_color_d .active:outline_color_d</span>
+			</div>
+			<div class="row gap_md mb_lg">
+				<button class="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onclick={() => count = 0}>
+					reset
+				</button>
+				<span>.hover:border_color_g .hover:outline_color_g .active:border_color_h .active:outline_color_h</span>
 			</div>
 		</section>
 
@@ -78,9 +71,9 @@
 
 			<div>
 				<h3>Token classes</h3>
+				<div class="p_md bg_d_2">.p_md .bg_d_2</div>
 				<div class="pl_xl5 font_size_lg">.pl_xl5 .font_size_lg</div>
 				<div class="shadow_sm">.shadow_sm</div>
-				<div class="color_a_5 color:white">.color_a_5</div>
 			</div>
 
 			<div>
@@ -96,11 +89,6 @@
 				<div class="opacity:60%">.opacity:60%</div>
 				<div class="color:var(--color_j_5)">.color:var(--color_j_5)</div>
 				<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
-				<div class="display:flex justify-content:space-between gap:1rem">
-					<span>left</span>
-					<span>.display:flex .justify-content:space-between</span>
-					<span>right</span>
-				</div>
 			</div>
 		</section>
 
@@ -113,17 +101,17 @@
 				<h3>Naming patterns</h3>
 				<div class={demoClass}>demoClass: .{demoClass}</div>
 				<div class={demo_class}>demo_class: .{demo_class}</div>
-				<div class={demoClasses}>demoClasses: .mb_xs3 .ml_xs</div>
-				<div class={demo_classes}>demo_classes: .mb_xs2 .ml_sm</div>
+				<div class={DEMO_CLASS}>DEMO_CLASS: .{DEMO_CLASS}</div>
+				<div class={demoClasses}>demoClasses: .mb_xs2 .ml_xs</div>
+				<div class={demo_classes}>demo_classes: .mb_xs .ml_sm</div>
 				<div class={demoClassName}>demoClassName: .{demoClassName}</div>
 				<div class={demo_class_name}>demo_class_name: .{demo_class_name}</div>
-				<div class={demoClassNames}>demoClassNames: .mb_md .ml_md</div>
-				<div class={demo_class_names}>demo_class_names: .mb_lg .ml_lg</div>
+				<div class={demoClassNames}>demoClassNames: .mb_lg .ml_md</div>
+				<div class={demo_class_names}>demo_class_names: .mb_xl .ml_lg</div>
 				<div class={demoClassList}>demoClassList: .{demoClassList}</div>
 				<div class={demo_class_list}>demo_class_list: .{demo_class_list}</div>
-				<div class={demoClassLists}>demoClassLists: .mb_xl3 .ml_xl</div>
-				<div class={demo_class_lists}>demo_class_lists: .mb_xl4 .ml_xl2</div>
-				<div class={DEMO_CLASS}>DEMO_CLASS: .{DEMO_CLASS}</div>
+				<div class={demoClassLists}>demoClassLists: .mb_xl4 .ml_xl</div>
+				<div class={demo_class_lists}>demo_class_lists: .mb_xl5 .ml_xl2</div>
 			</div>
 
 			<div>
@@ -136,6 +124,9 @@
 				</div>
 				<div class="{arrayClasses[0]} {arrayClasses[1]}">
 					<code>{"['mt_lg', 'mt_xl']"}</code> → .{arrayClasses.join(', .')}
+				</div>
+				<div class={objectClasses.mt_xl2}>
+					<code>{`{ mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3' }`}</code> → keys extracted from object
 				</div>
 			</div>
 

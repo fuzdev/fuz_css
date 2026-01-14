@@ -507,7 +507,7 @@
 						"examples": [
 							"escape_css_selector('display:flex') // 'display\\\\:flex'\nescape_css_selector('opacity:80%') // 'opacity\\\\:80\\\\%'\nescape_css_selector('nth-child(2n)') // 'nth-child\\\\(2n\\\\)'"
 						],
-						"source_line": 34,
+						"source_line": 35,
 						"type_signature": "(name: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -520,7 +520,7 @@
 					{
 						"name": "CssClassDefinitionBase",
 						"kind": "type",
-						"source_line": 42,
+						"source_line": 43,
 						"type_signature": "CssClassDefinitionBase",
 						"properties": [
 							{
@@ -534,7 +534,7 @@
 						"name": "CssClassDefinitionComposition",
 						"kind": "type",
 						"doc_comment": "Pure utility composition (classes only).",
-						"source_line": 47,
+						"source_line": 48,
 						"type_signature": "CssClassDefinitionComposition",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -559,7 +559,7 @@
 						"name": "CssClassDefinitionDeclaration",
 						"kind": "type",
 						"doc_comment": "Custom CSS declaration (optionally seeded with classes).",
-						"source_line": 54,
+						"source_line": 55,
 						"type_signature": "CssClassDefinitionDeclaration",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -584,7 +584,7 @@
 						"name": "CssClassDefinitionRuleset",
 						"kind": "type",
 						"doc_comment": "Full ruleset with selectors.",
-						"source_line": 61,
+						"source_line": 62,
 						"type_signature": "CssClassDefinitionRuleset",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -609,21 +609,21 @@
 						"name": "CssClassDefinitionStatic",
 						"kind": "type",
 						"doc_comment": "Static definitions (not interpreter-based).",
-						"source_line": 68,
+						"source_line": 69,
 						"type_signature": "CssClassDefinitionStatic"
 					},
 					{
 						"name": "CssClassDefinition",
 						"kind": "type",
 						"doc_comment": "Full union including interpreters.",
-						"source_line": 74,
+						"source_line": 75,
 						"type_signature": "CssClassDefinition"
 					},
 					{
 						"name": "CssClassInterpreterContext",
 						"kind": "type",
 						"doc_comment": "Context passed to CSS class interpreters.\nProvides access to logging, diagnostics collection, and the class registry.",
-						"source_line": 80,
+						"source_line": 81,
 						"type_signature": "CssClassInterpreterContext",
 						"properties": [
 							{
@@ -656,7 +656,7 @@
 						"name": "CssClassDefinitionInterpreter",
 						"kind": "type",
 						"doc_comment": "Interpreter for dynamic CSS class generation based on pattern matching.",
-						"source_line": 92,
+						"source_line": 93,
 						"type_signature": "CssClassDefinitionInterpreter",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -677,7 +677,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 107,
+						"source_line": 108,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -695,7 +695,7 @@
 					{
 						"name": "GenerateClassesCssOptions",
 						"kind": "type",
-						"source_line": 112,
+						"source_line": 113,
 						"type_signature": "GenerateClassesCssOptions",
 						"properties": [
 							{
@@ -734,7 +734,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 122,
+						"source_line": 123,
 						"type_signature": "(options: GenerateClassesCssOptions): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
@@ -746,7 +746,12 @@
 					}
 				],
 				"module_comment": "CSS class generation utilities.\n\nProduces CSS output from class definitions, handles interpretation of\ndynamic classes, and provides collection management for extracted classes.",
-				"dependencies": ["css_class_resolution.ts", "css_ruleset_parser.ts", "diagnostics.ts"],
+				"dependencies": [
+					"css_class_resolution.ts",
+					"css_ruleset_parser.ts",
+					"diagnostics.ts",
+					"modifiers.ts"
+				],
 				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
@@ -2121,203 +2126,140 @@
 				"path": "example_class_utilities.ts",
 				"declarations": [
 					{
-						"name": "demoPaddingClass",
-						"kind": "variable",
-						"doc_comment": "Padding token - large spacing",
-						"source_line": 32,
-						"type_signature": "\"p_lg\""
-					},
-					{
-						"name": "demoShadowClass",
-						"kind": "variable",
-						"doc_comment": "Shadow token - small elevation",
-						"source_line": 35,
-						"type_signature": "\"shadow_sm\""
-					},
-					{
-						"name": "demoColorClass",
-						"kind": "variable",
-						"doc_comment": "Color token - primary hue intensity 5",
-						"source_line": 38,
-						"type_signature": "\"color_a_5\""
-					},
-					{
-						"name": "demoBoxClass",
-						"kind": "variable",
-						"doc_comment": "Layout composite - centered flex container",
-						"source_line": 45,
-						"type_signature": "\"box\""
-					},
-					{
-						"name": "demoRowClass",
-						"kind": "variable",
-						"doc_comment": "Layout composite - horizontal flex row",
-						"source_line": 48,
-						"type_signature": "\"row\""
-					},
-					{
-						"name": "demoEllipsisClass",
-						"kind": "variable",
-						"doc_comment": "Text composite - truncate with ellipsis",
-						"source_line": 51,
-						"type_signature": "\"ellipsis\""
-					},
-					{
-						"name": "demoJustifyClass",
-						"kind": "variable",
-						"doc_comment": "Justify literal - space-between distribution",
-						"source_line": 58,
-						"type_signature": "\"justify-content:space-between\""
-					},
-					{
-						"name": "demoTextTransformClass",
-						"kind": "variable",
-						"doc_comment": "Text literal - uppercase transform",
-						"source_line": 61,
-						"type_signature": "\"text-transform:uppercase\""
-					},
-					{
-						"name": "demoGapClass",
-						"kind": "variable",
-						"doc_comment": "Spacing literal - gap between children",
-						"source_line": 64,
-						"type_signature": "\"gap:1rem\""
-					},
-					{
 						"name": "demoClass",
 						"kind": "variable",
 						"doc_comment": "`*Class` suffix (camelCase)",
-						"source_line": 71,
+						"source_line": 30,
 						"type_signature": "\"mb_xs5\""
 					},
 					{
 						"name": "demo_class",
 						"kind": "variable",
 						"doc_comment": "`*_class` suffix (snake_case)",
-						"source_line": 74,
+						"source_line": 33,
 						"type_signature": "\"mb_xs4\""
-					},
-					{
-						"name": "demoClasses",
-						"kind": "variable",
-						"doc_comment": "`*Classes` suffix (camelCase)",
-						"source_line": 77,
-						"type_signature": "\"mb_xs3\""
-					},
-					{
-						"name": "demo_classes",
-						"kind": "variable",
-						"doc_comment": "`*_classes` suffix (snake_case)",
-						"source_line": 80,
-						"type_signature": "\"mb_xs2\""
-					},
-					{
-						"name": "demoClassName",
-						"kind": "variable",
-						"doc_comment": "`*ClassName` suffix (camelCase)",
-						"source_line": 83,
-						"type_signature": "\"mb_xs\""
-					},
-					{
-						"name": "demo_class_name",
-						"kind": "variable",
-						"doc_comment": "`*class_name` suffix (snake_case)",
-						"source_line": 86,
-						"type_signature": "\"mb_sm\""
-					},
-					{
-						"name": "demoClassNames",
-						"kind": "variable",
-						"doc_comment": "`*ClassNames` suffix (camelCase)",
-						"source_line": 89,
-						"type_signature": "\"mb_md\""
-					},
-					{
-						"name": "demo_class_names",
-						"kind": "variable",
-						"doc_comment": "`*class_names` suffix (snake_case)",
-						"source_line": 92,
-						"type_signature": "\"mb_lg\""
-					},
-					{
-						"name": "demoClassList",
-						"kind": "variable",
-						"doc_comment": "`*ClassList` suffix (camelCase)",
-						"source_line": 95,
-						"type_signature": "\"mb_xl\""
-					},
-					{
-						"name": "demo_class_list",
-						"kind": "variable",
-						"doc_comment": "`*class_list` suffix (snake_case)",
-						"source_line": 98,
-						"type_signature": "\"mb_xl2\""
-					},
-					{
-						"name": "demoClassLists",
-						"kind": "variable",
-						"doc_comment": "`*ClassLists` suffix (camelCase)",
-						"source_line": 101,
-						"type_signature": "\"mb_xl3\""
-					},
-					{
-						"name": "demo_class_lists",
-						"kind": "variable",
-						"doc_comment": "`*class_lists` suffix (snake_case)",
-						"source_line": 104,
-						"type_signature": "\"mb_xl4\""
 					},
 					{
 						"name": "DEMO_CLASS",
 						"kind": "variable",
 						"doc_comment": "`SCREAMING_SNAKE_CASE` naming",
-						"source_line": 107,
-						"type_signature": "\"mb_xl5\""
+						"source_line": 36,
+						"type_signature": "\"mb_xs3\""
+					},
+					{
+						"name": "demoClasses",
+						"kind": "variable",
+						"doc_comment": "`*Classes` suffix (camelCase) - plural, multiple classes",
+						"source_line": 39,
+						"type_signature": "\"mb_xs2 ml_xs\""
+					},
+					{
+						"name": "demo_classes",
+						"kind": "variable",
+						"doc_comment": "`*_classes` suffix (snake_case) - plural, multiple classes",
+						"source_line": 42,
+						"type_signature": "\"mb_xs ml_sm\""
+					},
+					{
+						"name": "demoClassName",
+						"kind": "variable",
+						"doc_comment": "`*ClassName` suffix (camelCase)",
+						"source_line": 45,
+						"type_signature": "\"mb_sm\""
+					},
+					{
+						"name": "demo_class_name",
+						"kind": "variable",
+						"doc_comment": "`*class_name` suffix (snake_case)",
+						"source_line": 48,
+						"type_signature": "\"mb_md\""
+					},
+					{
+						"name": "demoClassNames",
+						"kind": "variable",
+						"doc_comment": "`*ClassNames` suffix (camelCase) - plural, multiple classes",
+						"source_line": 51,
+						"type_signature": "\"mb_lg ml_md\""
+					},
+					{
+						"name": "demo_class_names",
+						"kind": "variable",
+						"doc_comment": "`*class_names` suffix (snake_case) - plural, multiple classes",
+						"source_line": 54,
+						"type_signature": "\"mb_xl ml_lg\""
+					},
+					{
+						"name": "demoClassList",
+						"kind": "variable",
+						"doc_comment": "`*ClassList` suffix (camelCase)",
+						"source_line": 57,
+						"type_signature": "\"mb_xl2\""
+					},
+					{
+						"name": "demo_class_list",
+						"kind": "variable",
+						"doc_comment": "`*class_list` suffix (snake_case)",
+						"source_line": 60,
+						"type_signature": "\"mb_xl3\""
+					},
+					{
+						"name": "demoClassLists",
+						"kind": "variable",
+						"doc_comment": "`*ClassLists` suffix (camelCase) - plural, multiple classes",
+						"source_line": 63,
+						"type_signature": "\"mb_xl4 ml_xl\""
+					},
+					{
+						"name": "demo_class_lists",
+						"kind": "variable",
+						"doc_comment": "`*class_lists` suffix (snake_case) - plural, multiple classes",
+						"source_line": 66,
+						"type_signature": "\"mb_xl5 ml_xl2\""
 					},
 					{
 						"name": "ternaryClass",
 						"kind": "variable",
 						"doc_comment": "Ternary expression - both branches extracted",
-						"source_line": 114,
+						"source_line": 73,
 						"type_signature": "\"mt_xs\" | \"mt_sm\""
 					},
 					{
 						"name": "logicalClass",
 						"kind": "variable",
 						"doc_comment": "Logical AND - truthy value extracted",
-						"source_line": 117,
+						"source_line": 76,
 						"type_signature": "\"mt_md\""
 					},
 					{
 						"name": "arrayClasses",
 						"kind": "variable",
 						"doc_comment": "Array - all elements extracted",
-						"source_line": 120,
+						"source_line": 79,
 						"type_signature": "string[]"
 					},
 					{
 						"name": "fromComment",
 						"kind": "variable",
 						"doc_comment": "Comment hint - extracted via",
-						"source_line": 131,
+						"source_line": 90,
 						"type_signature": "\"shadow_lg\""
 					},
 					{
 						"name": "unknownExtracted",
 						"kind": "variable",
 						"doc_comment": "Unknown class - extracted via",
-						"source_line": 138,
+						"source_line": 97,
 						"type_signature": "\"unknown_not_included\""
 					},
 					{
 						"name": "arbitraryLiteral",
 						"kind": "variable",
 						"doc_comment": "Invalid literal - extracted via",
-						"source_line": 146,
+						"source_line": 105,
 						"type_signature": "\"not-real:extracted-but-excluded\""
 					}
 				],
-				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. Each export uses a unique class value\nto verify extraction is working correctly.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Class types demonstrated:**\n- Token classes: Map to style variables (`p_lg`, `shadow_sm`)\n- Composite classes: Multi-property shortcuts (`box`, `row`)\n- Literal classes: CSS property:value syntax (`justify-content:space-between`)\n\n**Variable patterns demonstrated:**\n- Simple assignment, ternary expressions, logical AND, arrays\n- Various naming conventions (camelCase, snake_case, SCREAMING_SNAKE)\n- Comment hints via `@fuz-classes`"
+				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. The exports test specific extraction patterns\nthat require being in a separate module.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Patterns demonstrated:**\n- Naming patterns: All CLASS_NAME_PATTERN suffix variants\n- Expression patterns: Ternary, logical AND, arrays\n- Comment hints: `@fuz-classes` directive\n\nToken, composite, and literal classes are demonstrated inline in the examples\nsince they don't require special extraction testing."
 			},
 			{
 				"path": "file_filter.ts",
@@ -2650,7 +2592,7 @@
 					}
 				],
 				"module_comment": "Declarative modifier definitions for CSS-literal syntax.\n\nModifiers enable responsive, state-based, and contextual styling:\n- Media modifiers: `md:`, `print:`, `motion-safe:`\n- Ancestor modifiers: `dark:`, `light:`\n- State modifiers: `hover:`, `focus:`, `disabled:`\n- Pseudo-element modifiers: `before:`, `after:`\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
-				"dependents": ["css_literal.ts"]
+				"dependents": ["css_class_generation.ts", "css_literal.ts"]
 			},
 			{
 				"path": "theme.gen.css.ts",

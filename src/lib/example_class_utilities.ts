@@ -32,38 +32,38 @@ export const demoClass = 'mb_xs5';
 /** `*_class` suffix (snake_case) */
 export const demo_class = 'mb_xs4';
 
+/** `SCREAMING_SNAKE_CASE` naming */
+export const DEMO_CLASS = 'mb_xs3';
+
 /** `*Classes` suffix (camelCase) - plural, multiple classes */
-export const demoClasses = 'mb_xs3 ml_xs';
+export const demoClasses = 'mb_xs2 ml_xs';
 
 /** `*_classes` suffix (snake_case) - plural, multiple classes */
-export const demo_classes = 'mb_xs2 ml_sm';
+export const demo_classes = 'mb_xs ml_sm';
 
 /** `*ClassName` suffix (camelCase) */
-export const demoClassName = 'mb_xs';
+export const demoClassName = 'mb_sm';
 
 /** `*class_name` suffix (snake_case) */
-export const demo_class_name = 'mb_sm';
+export const demo_class_name = 'mb_md';
 
 /** `*ClassNames` suffix (camelCase) - plural, multiple classes */
-export const demoClassNames = 'mb_md ml_md';
+export const demoClassNames = 'mb_lg ml_md';
 
 /** `*class_names` suffix (snake_case) - plural, multiple classes */
-export const demo_class_names = 'mb_lg ml_lg';
+export const demo_class_names = 'mb_xl ml_lg';
 
 /** `*ClassList` suffix (camelCase) */
-export const demoClassList = 'mb_xl';
+export const demoClassList = 'mb_xl2';
 
 /** `*class_list` suffix (snake_case) */
-export const demo_class_list = 'mb_xl2';
+export const demo_class_list = 'mb_xl3';
 
 /** `*ClassLists` suffix (camelCase) - plural, multiple classes */
-export const demoClassLists = 'mb_xl3 ml_xl';
+export const demoClassLists = 'mb_xl4 ml_xl';
 
 /** `*class_lists` suffix (snake_case) - plural, multiple classes */
-export const demo_class_lists = 'mb_xl4 ml_xl2';
-
-/** `SCREAMING_SNAKE_CASE` naming */
-export const DEMO_CLASS = 'mb_xl5';
+export const demo_class_lists = 'mb_xl5 ml_xl2';
 
 //
 // Expression patterns - ternary, logical AND, array (mt_* incrementing)
@@ -77,6 +77,9 @@ export const logicalClass = true && 'mt_md';
 
 /** Array - all elements extracted */
 export const arrayClasses = ['mt_lg', 'mt_xl'];
+
+/** Object - keys extracted as class names */
+export const objectClasses = {mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3'};
 
 //
 // Comment hint examples - @fuz-classes directive
