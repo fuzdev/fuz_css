@@ -98,8 +98,15 @@ export interface GenFuzCssOptions {
 	filter_file?: FileFilter | null;
 	include_stats?: boolean;
 	/**
+	 * Whether to include builtin class definitions (token and composite classes).
+	 * When `false`, `class_definitions` is required.
+	 * @default true
+	 */
+	include_builtin_definitions?: boolean;
+	/**
 	 * Additional class definitions to merge with builtins.
 	 * User definitions take precedence over builtins with the same name.
+	 * Required when `include_builtin_definitions` is `false`.
 	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
 	/**
@@ -163,6 +170,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
+		include_builtin_definitions = true,
 		class_definitions: user_class_definitions,
 		class_interpreters = css_class_interpreters,
 		on_error = 'log',
@@ -365,9 +373,16 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			}
 
 			// Merge class definitions (user definitions take precedence)
-			const all_class_definitions = user_class_definitions
-				? {...css_class_definitions, ...user_class_definitions}
-				: css_class_definitions;
+			if (!include_builtin_definitions && !user_class_definitions) {
+				throw new Error(
+					'class_definitions is required when include_builtin_definitions is false',
+				);
+			}
+			const all_class_definitions = include_builtin_definitions
+				? user_class_definitions
+					? {...css_class_definitions, ...user_class_definitions}
+					: css_class_definitions
+				: user_class_definitions!;
 
 			const result = generate_classes_css({
 				class_names: all_classes,

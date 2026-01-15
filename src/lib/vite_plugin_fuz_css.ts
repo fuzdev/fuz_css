@@ -77,8 +77,15 @@ export interface VitePluginFuzCssOptions {
 	 */
 	filter_file?: FileFilter;
 	/**
+	 * Whether to include builtin class definitions (token and composite classes).
+	 * When `false`, `class_definitions` is required.
+	 * @default true
+	 */
+	include_builtin_definitions?: boolean;
+	/**
 	 * Additional class definitions to merge with builtins.
 	 * User definitions take precedence over builtins with the same name.
+	 * Required when `include_builtin_definitions` is `false`.
 	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
 	/**
@@ -137,6 +144,7 @@ interface ClassRegistry {
 export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plugin => {
 	const {
 		filter_file = filter_file_default,
+		include_builtin_definitions = true,
 		class_definitions: user_class_definitions,
 		class_interpreters = css_class_interpreters,
 		include_classes,
@@ -146,10 +154,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		cache_dir = DEFAULT_CACHE_DIR,
 	} = options;
 
-	// Merge class definitions
-	const all_class_definitions = user_class_definitions
-		? {...css_class_definitions, ...user_class_definitions}
-		: css_class_definitions;
+	// Merge class definitions (user definitions take precedence)
+	if (!include_builtin_definitions && !user_class_definitions) {
+		throw new Error('class_definitions is required when include_builtin_definitions is false');
+	}
+	const all_class_definitions = include_builtin_definitions
+		? user_class_definitions
+			? {...css_class_definitions, ...user_class_definitions}
+			: css_class_definitions
+		: user_class_definitions!;
 
 	// Convert to Sets for efficient lookup
 	const include_set = include_classes ? new Set(include_classes) : null;
