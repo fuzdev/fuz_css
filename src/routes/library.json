@@ -2369,7 +2369,7 @@
 							{
 								"name": "filter_file",
 								"kind": "variable",
-								"type_signature": "FileFilter | null"
+								"type_signature": "FileFilter"
 							},
 							{
 								"name": "include_stats",
@@ -2377,10 +2377,16 @@
 								"type_signature": "boolean"
 							},
 							{
+								"name": "include_builtin_definitions",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include builtin class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
+							},
+							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name."
+								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name.\nRequired when `include_builtin_definitions` is `false`."
 							},
 							{
 								"name": "class_interpreters",
@@ -2441,7 +2447,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 162,
+						"source_line": 169,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -5081,10 +5087,16 @@
 								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
 							},
 							{
+								"name": "include_builtin_definitions",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include builtin class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
+							},
+							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name."
+								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name.\nRequired when `include_builtin_definitions` is `false`."
 							},
 							{
 								"name": "class_interpreters",
@@ -5128,7 +5140,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 137,
+						"source_line": 144,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [

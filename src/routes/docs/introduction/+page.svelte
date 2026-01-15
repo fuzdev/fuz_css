@@ -21,7 +21,7 @@
 		<Introduction />
 		<TomeSection>
 			<TomeSectionHeader text="Usage" />
-			<Code lang={null} content="npm i @fuzdev/fuz_css" />
+			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>Import the two required stylesheets:</p>
 			<Code
 				lang="ts"
