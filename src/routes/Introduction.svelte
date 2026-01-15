@@ -19,8 +19,9 @@
 	<ModuleLink path="theme.css">theme stylesheet</ModuleLink> containing the variables used in the reset
 	-- these require no additional dependencies. There's also a
 	<a href={resolve('/docs/classes')}>utility class system</a>
-	for composition and convenience, and it <a href="https://css.fuz.dev/docs/api">exports</a> the underlying
-	data, types, and helpers for more complex usage.
+	for composition and convenience with a Vite plugin, and it
+	<a href="https://css.fuz.dev/docs/api">exports</a> the underlying data, types, and helpers for more
+	complex usage.
 </p>
 <p>
 	More at <a href={resolve('/docs')}>the docs</a>

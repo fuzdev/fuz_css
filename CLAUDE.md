@@ -115,12 +115,12 @@ import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
 import jsx from 'acorn-jsx'; // only needed for JSX frameworks
 
 export default defineConfig({
-  plugins: [vite_plugin_fuz_css({acorn_plugins: [jsx()]})]
+	plugins: [vite_plugin_fuz_css({acorn_plugins: [jsx()]})],
 });
 
 // main.ts
 import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css';
+import '@fuzdev/fuz_css/theme.css'; // or bring your own
 import 'virtual:fuz.css';
 ```
 
