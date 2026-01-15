@@ -891,16 +891,9 @@ export const gen = gen_fuz_css({
 					<td>with <code>acorn-jsx</code> plugin - <code>class</code></td>
 				</tr>
 				<tr>
-					<td>Vue SFC</td>
-					<td>partial</td>
-					<td><code>:class</code> bindings not parsed; use <code>clsx</code> in script</td>
-				</tr>
-				<tr>
-					<td>Angular, etc.</td>
-					<td>partial</td>
-					<td
-						>via <code>clsx</code>/<code>cn</code> patterns in <code>.ts</code>/<code>.js</code></td
-					>
+					<td>Vue SFC, Angular, etc.</td>
+					<td>none</td>
+					<td>template syntax not parsed; use <code>clsx</code>/<code>cn</code> in JS/TS</td>
 				</tr>
 			</tbody>
 		</table>
@@ -908,8 +901,14 @@ export const gen = gen_fuz_css({
 			All frameworks support <a href="#Dynamic-class-hints"><code>@fuz-classes</code></a> comment
 			hints and the
 			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
-			that can't be statically detected. Other acorn plugins can be added via
+			that can't be statically detected (and this could be used as an escape hatch for unsupported languages/frameworks).
+			Other acorn plugins can be added via
 			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support.
+		</p>
+		<p>
+			Class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not supported; Vue
+			JSX is supported but the recommended SFC format is not. We could revisit this if there's
+			demand.
 		</p>
 
 		<TomeSection>
@@ -951,8 +950,8 @@ export const gen = gen_fuz_css({
 		<TomeSection>
 			<TomeSectionHeader text="React and JSX" tag="h3" />
 			<p>
-				To enable JSX support for React/Preact/Solid/etc, install <code>acorn-jsx</code> and pass it to
-				the generator:
+				To enable JSX support for React, Preact, Solid, etc, install <code>acorn-jsx</code> and pass it
+				to the generator:
 			</p>
 			<Code lang={null} content="npm i -D acorn-jsx" />
 			<Code
