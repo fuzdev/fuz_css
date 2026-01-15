@@ -901,9 +901,10 @@ export const gen = gen_fuz_css({
 			All frameworks support <a href="#Dynamic-class-hints"><code>@fuz-classes</code></a> comment
 			hints and the
 			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
-			that can't be statically detected (and this could be used as an escape hatch for unsupported languages/frameworks).
-			Other acorn plugins can be added via
-			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support.
+			that can't be statically detected -- these can be used as escape hatches for unsupported languages/frameworks.
+			Other acorn plugins can be added via <DeclarationLink name="GenFuzCssOptions"
+				>acorn_plugins</DeclarationLink
+			> for additional syntax support like <a href="#React-and-JSX">JSX</a>.
 		</p>
 		<p>
 			Class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not supported; Vue
@@ -976,12 +977,11 @@ export const gen = gen_fuz_css({
 					<code>{'className={cond ? "a" : "b"}'}</code> - ternary and logical expressions
 				</li>
 				<li>
-					<code>{'classList={{active: cond}}'}</code> - Solid's classList (static keys)
+					<code>{'classList={{active: cond}}'}</code> - Solid's classList
 				</li>
 				<li>
-					<strong>usage tracking:</strong> variables in <code>className</code>, <code>class</code>,
-					and
-					<code>classList</code> are tracked back to their definitions
+					usage tracking: variables in <code>className</code>, <code>class</code>, and
+					<code>classList</code> are tracked back to their definitions (has limitations, room for improvement)
 				</li>
 			</ul>
 			<Code
@@ -990,6 +990,10 @@ export const gen = gen_fuz_css({
 const styles = 'card hover:shadow_lg';
 const Component = () => <div className={styles} />;`}
 			/>
+			<p>
+				The <DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> option accepts any
+				Acorn-compatible plugin, so other syntax extensions can be supported the same way.
+			</p>
 		</TomeSection>
 	</TomeSection>
 
