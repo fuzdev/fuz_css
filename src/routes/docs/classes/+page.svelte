@@ -31,7 +31,7 @@
 		<p>Compared to inline <code>style</code> attributes, classes:</p>
 		<ul>
 			<li>
-				are more powerful with modifiers for responsive widths, hover/active/etc, and dark mode, and
+				are more powerful with modifiers for responsive widths, hover/active/etc, and dark mode
 			</li>
 			<li>provide more control over specificity</li>
 			<li>
@@ -122,34 +122,50 @@
 			<h4>Three definition forms</h4>
 			<Code
 				lang="typescript"
-				content={`// src/lib/composites.ts
-export const my_composites = {
+				content={`// Three alternative ways to define a \`centered\` class:
+export const custom_composites = {
 	// 1. declaration only - custom CSS properties
-	box: {
-		declaration: 'display: flex; align-items: center; justify-content: center;',
+	centered: {
+		declaration: \`
+			display: flex;
+			align-items: center;
+			justify-content: center;
+			text-align: center;
+		\`,
 	},
 
 	// 2. classes only - compose existing token/composite classes
-	card_base: {
-		classes: ['p_lg', 'border_radius_md', 'shadow_md'],
+	centered: {
+		classes: ['box', 'text-align:center'],
 	},
 
 	// 3. classes + declaration - compose then extend
-	card: {
-		classes: ['card_base', 'bg_1'],
-		declaration: '--card_hover_shadow: var(--shadow_lg);',
+	centered: {
+		classes: ['box'],
+		declaration: 'text-align: center;',
 	},
 };`}
 			/>
-			<p>Register custom composites with the generator:</p>
+			<p>Register custom composites with the plugin or generator:</p>
+			<h4>Vite plugin</h4>
+			<Code
+				lang="typescript"
+				content={`// vite.config.ts
+import {custom_composites} from './src/lib/composites.js';
+
+vite_plugin_fuz_css({
+	class_definitions: custom_composites,
+}),`}
+			/>
+			<h4>Gro generator</h4>
 			<Code
 				lang="typescript"
 				content={`// fuz.gen.css.ts
 import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
-import {my_composites} from '$lib/composites.js';
+import {custom_composites} from '$lib/composites.js';
 
 export const gen = gen_fuz_css({
-	class_definitions: my_composites,
+	class_definitions: custom_composites,
 });`}
 			/>
 			<p>
@@ -451,7 +467,7 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 			<code>marker:</code>, <code>file:</code>, <code>backdrop:</code>
 		</p>
 		<aside>
-			<strong>Note:</strong> <code>before:</code> and <code>after:</code> require explicit
+			Note: <code>before:</code> and <code>after:</code> require explicit
 			<code>content</code>
 			- there's no auto-injection. This maintains the 1:1 CSS mapping principle.
 		</aside>
@@ -529,7 +545,8 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 			<TomeSectionHeader text="Vite plugin" tag="h3" />
 			<p>
 				The Vite plugin uses transform-based extraction to generate CSS on-demand. It works with
-				Svelte, React, Preact, Solid, Vue, and any other Vite-based framework.
+				Svelte and plain HTML/TS/JS out of the box, plus JSX frameworks (React, Preact, Solid, Vue
+				JSX) via the <code>acorn-jsx</code> plugin.
 			</p>
 			<Code lang={null} content="npm i -D acorn-jsx" />
 			<Code
@@ -780,25 +797,27 @@ export const gen = gen_fuz_css({
 			called builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
+		<p>Default list (styled):</p>
 		<Code
 			content={`<ul>
 	<li>1</li>
 	<li>2</li>
 </ul>`}
 		/>
-		<ul class="unstyled mb_lg">
-			<li>a</li>
-			<li>b</li>
+		<ul>
+			<li>1</li>
+			<li>2</li>
 		</ul>
+		<p>With <code>.unstyled</code>:</p>
 		<Code
 			content={`<ul class="unstyled">
 	<li>a</li>
 	<li>b</li>
 </ul>`}
 		/>
-		<ul>
-			<li>1</li>
-			<li>2</li>
+		<ul class="unstyled">
+			<li>a</li>
+			<li>b</li>
 		</ul>
 		<p>
 			The <code>.unstyled</code> class lets fuz_css provide solid default element styles with a simple
@@ -900,8 +919,8 @@ export const gen = gen_fuz_css({
 			</tbody>
 		</table>
 		<p>
-			All frameworks support <a href="#Dynamic-class-hints"><code>@fuz-classes</code></a> comment
-			hints and the
+			All frameworks support <a href="#Manual-hints"><code>@fuz-classes</code></a> comment hints and
+			the
 			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
 			that can't be statically detected -- these can be used as escape hatches for unsupported languages/frameworks.
 			Other acorn plugins can be added via <DeclarationLink name="GenFuzCssOptions"
@@ -909,9 +928,9 @@ export const gen = gen_fuz_css({
 			> for additional syntax support like <a href="#React-and-JSX">JSX</a>.
 		</p>
 		<p>
-			Class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not supported; Vue
-			JSX is supported but the recommended SFC format is not. We could revisit this if there's
-			demand.
+			In summary, class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not
+			supported; Vue JSX is supported but the recommended SFC format is not. We could revisit this
+			if there's demand.
 		</p>
 
 		<TomeSection>
