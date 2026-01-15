@@ -893,7 +893,9 @@ export const gen = gen_fuz_css({
 				<tr>
 					<td>Vue SFC, Angular, etc.</td>
 					<td>none</td>
-					<td>template syntax not parsed; use <code>clsx</code>/<code>cn</code> in JS/TS</td>
+					<td
+						>template syntax not parsed; use <code>clsx</code>/<code>cx</code>/<code>cn</code> in JS/TS</td
+					>
 				</tr>
 			</tbody>
 		</table>
@@ -952,9 +954,26 @@ export const gen = gen_fuz_css({
 			<TomeSectionHeader text="React and JSX" tag="h3" />
 			<p>
 				To enable JSX support for React, Preact, Solid, etc, install <code>acorn-jsx</code> and pass it
-				to the generator:
+				to the plugin or generator:
 			</p>
 			<Code lang={null} content="npm i -D acorn-jsx" />
+			<h4>Vite plugin</h4>
+			<Code
+				lang="ts"
+				content={`// vite.config.ts
+import {defineConfig} from 'vite';
+import jsx from 'acorn-jsx';
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+
+export default defineConfig({
+  plugins: [
+    vite_plugin_fuz_css({
+      acorn_plugins: [jsx()],
+    }),
+  ],
+});`}
+			/>
+			<h4>Gro generator</h4>
 			<Code
 				lang="ts"
 				content={`// fuz.gen.css.ts
@@ -986,8 +1005,8 @@ export const gen = gen_fuz_css({
 			</ul>
 			<Code
 				lang="ts"
-				content={`// Variable tracking works in JSX too
-const styles = 'card hover:shadow_lg';
+				content={`// variable tracking works in JSX too
+const styles = 'box hover:shadow_lg';
 const Component = () => <div className={styles} />;`}
 			/>
 			<p>
