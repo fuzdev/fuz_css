@@ -95,7 +95,7 @@ interface FileExtraction {
 }
 
 export interface GenFuzCssOptions {
-	filter_file?: FileFilter | null;
+	filter_file?: FileFilter;
 	include_stats?: boolean;
 	/**
 	 * Whether to include builtin class definitions (token and composite classes).
@@ -195,7 +195,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		// Returns 'all' when an extractable file changes, null otherwise.
 		dependencies: ({changed_file_id}) => {
 			if (!changed_file_id) return 'all';
-			if (!filter_file || filter_file(changed_file_id)) return 'all';
+			if (filter_file(changed_file_id)) return 'all';
 			return null; // Ignore .json, .md, etc.
 		},
 
@@ -242,7 +242,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					stats.internal_files++;
 				}
 
-				if (filter_file && !filter_file(disknode.id)) {
+				if (!filter_file(disknode.id)) {
 					continue;
 				}
 
