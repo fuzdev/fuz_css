@@ -68,7 +68,7 @@
 				<li><code>.top|bottom|left|right_xs5-xl15</code></li>
 				<li><code>.inset_xs5-xl15</code></li>
 			</ul>
-			<aside>
+			<aside class="mt_lg">
 				Padding and margin shorthands include <code>_0</code> (and <code>_auto</code> for margin)
 				because of ergonomic benefit: <code>px_0</code> is much shorter than
 				<code>padding-inline:0</code>. Other properties use literals for raw values.
@@ -372,10 +372,10 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 			</tbody>
 		</table>
 		<Code
-			content={`<!-- Stack on mobile, row on medium screens and up -->
+			content={`<!-- stack on mobile, row on medium screens and up -->
 <div class="display:flex flex-direction:column md:flex-direction:row">
 
-<!-- Hide on mobile -->
+<!-- hide on mobile -->
 <nav class="display:none md:display:flex">`}
 		/>
 		<p>
@@ -387,13 +387,13 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<h4>State modifiers</h4>
 		<p>Pseudo-class modifiers for interaction and form states:</p>
 		<Code
-			content={`<!-- Hover and focus effects -->
+			content={`<!-- hover and focus effects -->
 <button class="hover:background-color:var(--color_a_6) focus:outline:2px~solid~var(--color_a_5)">
 
-<!-- Form validation states -->
+<!-- form validation states -->
 <input class="invalid:border-color:var(--color_c_5) disabled:opacity:50%">
 
-<!-- Structural selectors -->
+<!-- structural selectors -->
 <li class="first:border-top:none last:border-bottom:none odd:background-color:var(--fg_1)">`}
 		/>
 		<p>Available state modifiers include:</p>
@@ -425,10 +425,10 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<h4>Color-scheme modifiers</h4>
 		<p>Apply styles in dark or light mode:</p>
 		<Code
-			content={`<!-- Reduce shadow intensity in dark mode -->
+			content={`<!-- reduce shadow intensity in dark mode -->
 <div class="shadow_lg dark:shadow_sm">
 
-<!-- Different border in light mode -->
+<!-- different border in light mode -->
 <div class="border:1px~solid~var(--fg_2) light:border:1px~solid~var(--fg_5)">`}
 		/>
 		<p>
@@ -440,10 +440,10 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<h4>Pseudo-element modifiers</h4>
 		<p>Style generated content and element parts:</p>
 		<Code
-			content={`<!-- Decorative element (explicit content required) -->
+			content={`<!-- decorative element (explicit content required) -->
 <div class="before:content:'' before:display:block before:width:2rem before:height:2rem before:background:var(--color_a_5)">
 
-<!-- Placeholder styling -->
+<!-- placeholder styling -->
 <input class="placeholder:color:var(--text_color_3) placeholder:font-style:italic">`}
 		/>
 		<p>
@@ -460,10 +460,10 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 		<h4>Media feature modifiers</h4>
 		<p>Accessibility and context-aware styles:</p>
 		<Code
-			content={`<!-- Respect motion preferences -->
+			content={`<!-- respect motion preferences -->
 <div class="motion-safe:transition:transform~0.3s~ease-out motion-reduce:transition:none">
 
-<!-- Print-specific styles -->
+<!-- print-specific styles -->
 <nav class="print:display:none">`}
 		/>
 		<p>
@@ -471,36 +471,44 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 			<code>contrast-more:</code>, <code>contrast-less:</code>, <code>portrait:</code>,
 			<code>landscape:</code>, <code>forced-colors:</code>
 		</p>
-	</TomeSection>
 
-	<TomeSection>
-		<TomeSectionHeader text="Combining modifiers" />
-		<p>
-			Modifiers can be combined in a specific order:
-			<code>[media:][ancestor:][state...:][pseudo-element:]property:value</code>
-		</p>
-		<Code
-			content={`<!-- Media + color-scheme + state -->
+		<TomeSection>
+			<TomeSectionHeader text="Combining modifiers" tag="h3" />
+			<p>
+				Combined modifiers follow a canonical order enforced with errors that guide you. Multiple
+				states must be alphabetical (<code>focus:hover:</code> not <code>hover:focus:</code>)
+				because both generate equivalent CSS -- canonical ordering prevents duplicates.
+			</p>
+			<Code content="[media:][ancestor:][...state:][pseudo-element:]class" />
+			<ol>
+				<li>
+					<strong>Media</strong> (one) - <code>md:</code>, <code>lg:</code>, <code>print:</code>,
+					etc.
+				</li>
+				<li>
+					<strong>Ancestor</strong> (one) - <code>dark:</code>, <code>light:</code> (likely
+					<code>rtl:</code>/<code>ltr:</code> in the future)
+				</li>
+				<li>
+					<strong>State</strong> (many, alphabetical) - <code>hover:</code>, <code>focus:</code>,
+					<code>disabled:</code>, etc.
+				</li>
+				<li>
+					<strong>Pseudo-element</strong> (one) - <code>before:</code>, <code>after:</code>,
+					<code>placeholder:</code>, etc.
+				</li>
+			</ol>
+			<Code
+				content={`<!-- media + ancestor + state -->
 <div class="md:dark:hover:opacity:80%">
 
-<!-- Media + state + pseudo-element -->
+<!-- media + state + pseudo-element -->
 <div class="md:hover:before:opacity:100%">
 
-<!-- Multiple states (must be alphabetical) -->
+<!-- multiple states must be alphabetical -->
 <button class="focus:hover:outline:2px~solid~blue">`}
-		/>
-		<p>
-			The canonical order is enforced: media modifiers come first, then ancestor (<code>dark:</code
-			>/<code>light:</code>, likely <code>rtl:</code>/<code>ltr:</code> in the future), then state modifiers
-			(alphabetically), then pseudo-elements. Errors will guide you to the correct order.
-		</p>
-		<aside>
-			<p>
-				<strong>State order:</strong> Multiple state modifiers must be alphabetical. Write
-				<code>focus:hover:</code>
-				not <code>hover:focus:</code> -- they generate the same CSS, so canonical ordering prevents duplicates.
-			</p>
-		</aside>
+			/>
+		</TomeSection>
 	</TomeSection>
 
 	<TomeSection>
@@ -665,7 +673,7 @@ const turtle_class_name = 'turtle';`}
 
 			<h4>3. Usage tracking</h4>
 			<p>
-				Variables used in class attributes are traced back to their definitions, even if they don't
+				Variables used in class attributes are tracked back to their definitions, even if they don't
 				follow the naming convention:
 			</p>
 			<!-- eslint-disable-next-line no-useless-concat -->
@@ -673,8 +681,8 @@ const turtle_class_name = 'turtle';`}
 				lang="svelte"
 				content={'<' +
 					`script>
-	const styles = 'some-class'; // traced from class={styles}
-	const variant = 'other-class';     // traced from clsx()
+	const styles = 'some-class';   // tracked from class={styles}
+	const variant = 'other-class'; // tracked from clsx()
 </script>
 
 <div class={styles}></div>
@@ -977,7 +985,7 @@ export const gen = gen_fuz_css({
 				<li>
 					<strong>usage tracking:</strong> variables in <code>className</code>, <code>class</code>,
 					and
-					<code>classList</code> are traced back to their definitions
+					<code>classList</code> are tracked back to their definitions
 				</li>
 			</ul>
 			<Code
