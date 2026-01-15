@@ -76,16 +76,16 @@
 			<h4>Sizing</h4>
 			<ul class="unstyled">
 				<li><code>.width|height_xs5-xl15</code></li>
-				<li><code>.width_upto|atleast_xs-xl</code></li>
-				<li><code>.height_upto|atleast_xs-xl</code></li>
 			</ul>
 			<h4>Colors</h4>
 			<ul class="unstyled">
 				<li><code>.color_a-j_1-9</code></li>
-				<li><code>.bg|fg_1-9</code></li>
+				<li><code>.bg</code>, <code>.fg</code>, <code>.bg|fg_1-9</code></li>
 				<li><code>.bg_a-j_1-9</code></li>
 				<li><code>.text_color_0-10</code></li>
-				<li><code>.darken|lighten_1-9</code></li>
+				<li><code>.color_bg|fg_1-9</code> - text color using bg/fg</li>
+				<li><code>.darken|lighten_1-9</code> - background shading</li>
+				<li><code>.color_darken|lighten_1-9</code> - text shading</li>
 				<li><code>.hue_a-j</code></li>
 			</ul>
 			<h4>Typography</h4>
@@ -101,13 +101,19 @@
 				<li><code>.border_color_a-j</code></li>
 				<li><code>.border_width_1-9</code></li>
 				<li><code>.border_radius_xs3-xl</code></li>
+				<li><code>.border_top|bottom_left|right_radius_xs3-xl</code></li>
 				<li><code>.outline_width_1-9|focus|active</code></li>
+				<li><code>.outline_color_1-5</code></li>
+				<li><code>.outline_color_a-j</code></li>
 			</ul>
 			<h4>Shadows</h4>
 			<ul class="unstyled">
 				<li><code>.shadow_xs-xl</code></li>
+				<li><code>.shadow_top|bottom_xs-xl</code></li>
 				<li><code>.shadow_inset_xs-xl</code></li>
+				<li><code>.shadow_inset_top|bottom_xs-xl</code></li>
 				<li><code>.shadow_color_a-j</code></li>
+				<li><code>.shadow_color_highlight|glow|shroud</code></li>
 				<li><code>.shadow_alpha_1-5</code></li>
 			</ul>
 		</TomeSection>
