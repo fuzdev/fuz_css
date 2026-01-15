@@ -176,14 +176,14 @@ export const gen = gen_fuz_css({
 			<h4>What <code>classes</code> can reference</h4>
 			<ul>
 				<li>
-					<strong>Token classes</strong> (<code>p_lg</code>, <code>color_a_5</code>) — resolved to
+					<strong>Token classes</strong> (<code>p_lg</code>, <code>color_a_5</code>) - resolved to
 					their declarations
 				</li>
 				<li>
-					<strong>Composites with <code>declaration</code></strong> — the declaration is included
+					<strong>Composites with <code>declaration</code></strong> - the declaration is included
 				</li>
 				<li>
-					<strong>Composites with <code>classes</code></strong> — recursively resolved
+					<strong>Composites with <code>classes</code></strong> - recursively resolved
 				</li>
 			</ul>
 			<p>
@@ -490,9 +490,9 @@ card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_colo
 <button class="focus:hover:outline:2px~solid~blue">`}
 		/>
 		<p>
-			<strong>Order matters:</strong> Media modifiers come first, then ancestor (<code>dark:</code
-			>/<code>light:</code>), then state modifiers (alphabetically), then pseudo-elements. Errors
-			will guide you to the correct order.
+			The canonical order is enforced: media modifiers come first, then ancestor (<code>dark:</code
+			>/<code>light:</code>, likely <code>rtl:</code>/<code>ltr:</code> in the future), then state modifiers
+			(alphabetically), then pseudo-elements. Errors will guide you to the correct order.
 		</p>
 		<aside>
 			<p>
@@ -527,7 +527,7 @@ ${'<' as string}script>
 				The Vite plugin uses transform-based extraction to generate CSS on-demand. It works with
 				React, Preact, Solid, Vue, and any other Vite-based framework.
 			</p>
-			<Code lang="bash" content="npm i -D acorn-jsx" />
+			<Code lang={null} content="npm i -D acorn-jsx" />
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
@@ -547,7 +547,7 @@ export default defineConfig({
 			/>
 			<p>Then import the virtual module in your entry file:</p>
 			<Code
-				lang="tsx"
+				lang="ts"
 				content={`// main.tsx
 import '@fuzdev/fuz_css/style.css';
 import '@fuzdev/fuz_css/theme.css';
@@ -560,32 +560,32 @@ createRoot(document.getElementById('root')!).render(<App />);`}
 			/>
 			<p>
 				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR — changes to classes trigger automatic
+				<code>node_modules</code> dependencies. It supports HMR -- changes to classes trigger automatic
 				CSS updates.
 			</p>
 			<h4>Plugin options</h4>
 			<ul>
 				<li>
-					<code>acorn_plugins</code> — Required for JSX frameworks. Use <code>acorn-jsx</code>.
+					<code>acorn_plugins</code> - required for JSX frameworks. Use <code>acorn-jsx</code>.
 				</li>
 				<li>
-					<code>include_classes</code> — Classes to always include (for dynamic patterns that can't be
+					<code>include_classes</code> - classes to always include (for dynamic patterns that can't be
 					statically extracted)
 				</li>
 				<li>
-					<code>exclude_classes</code> — Classes to exclude from output
+					<code>exclude_classes</code> - classes to exclude from output
 				</li>
 				<li>
-					<code>class_definitions</code> — Custom composite class definitions
+					<code>class_definitions</code> - custom composite class definitions
 				</li>
 				<li>
-					<code>filter_file</code> — Custom filter for which files to process
+					<code>filter_file</code> - custom filter for which files to process
 				</li>
 				<li>
-					<code>on_error</code> — <code>'log'</code> (default) or <code>'throw'</code>
+					<code>on_error</code> - <code>'log'</code> (default) or <code>'throw'</code>
 				</li>
 				<li>
-					<code>cache_dir</code> — Cache location (default: <code>.fuz/cache/css</code>)
+					<code>cache_dir</code> - cache location (default: <code>.fuz/cache/css</code>)
 				</li>
 			</ul>
 			<h4>TypeScript setup</h4>
@@ -636,14 +636,14 @@ ${'<' as string}script>
 			<h4>1. Direct extraction from class attributes</h4>
 			<p>String literals and expressions in class contexts are extracted directly:</p>
 			<ul>
-				<li><code>class="..."</code> — static strings</li>
-				<li><code>{'class={[...]}'}</code> — array syntax (Svelte 5.16+)</li>
-				<li><code>{'class={{...}}'}</code> — object syntax (Svelte 5.16+)</li>
-				<li><code>class:name</code> — class directives</li>
-				<li><code>{'class={cond ? "a" : "b"}'}</code> — ternary expressions</li>
-				<li><code>{'class={cond && "name"}'}</code> — logical expressions</li>
+				<li><code>class="..."</code> - static strings</li>
+				<li><code>{'class={[...]}'}</code> - array syntax (Svelte 5.16+)</li>
+				<li><code>{'class={{...}}'}</code> - object syntax (Svelte 5.16+)</li>
+				<li><code>class:name</code> - class directives</li>
+				<li><code>{'class={cond ? "a" : "b"}'}</code> - ternary expressions</li>
+				<li><code>{'class={cond && "name"}'}</code> - logical expressions</li>
 				<li>
-					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> — utility
+					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> - utility
 					function calls
 				</li>
 			</ul>
@@ -657,10 +657,10 @@ ${'<' as string}script>
 			<Code
 				lang="typescript"
 				content={`// extracted because of naming convention
-const buttonClasses = 'btn primary';
-const cardClass = active ? 'card-active' : 'card';
-const foo_class = 'foo';
-const bar_class_name = 'bar';`}
+const buttonClasses = 'color_d font_size_lg';
+const buttonClass = active ? 'active' : null;
+const snake_class = 'snake';
+const turtle_class_name = 'turtle';`}
 			/>
 
 			<h4>3. Usage tracking</h4>
@@ -673,17 +673,17 @@ const bar_class_name = 'bar';`}
 				lang="svelte"
 				content={'<' +
 					`script>
-	const styles = 'custom-style'; // traced from class={styles}
-	const variant = 'primary';     // traced from clsx()
+	const styles = 'some-class'; // traced from class={styles}
+	const variant = 'other-class';     // traced from clsx()
 </script>
 
 <div class={styles}></div>
-<button class={clsx('btn', variant)}></button>`}
+<button class={clsx('color_d', variant)}></button>`}
 			/>
 			<p>
 				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
 				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls outside
-				class attributes don't trigger tracking — use the naming convention for those cases.
+				class attributes don't trigger tracking - use the naming convention for those cases.
 			</p>
 		</TomeSection>
 
@@ -868,22 +868,22 @@ export const gen = gen_fuz_css({
 				<tr>
 					<td>React / JSX</td>
 					<td>full</td>
-					<td>with <code>acorn-jsx</code> plugin — <code>className</code></td>
+					<td>with <code>acorn-jsx</code> plugin - <code>className</code></td>
 				</tr>
 				<tr>
 					<td>Preact</td>
 					<td>full</td>
-					<td>with <code>acorn-jsx</code> plugin — <code>class</code></td>
+					<td>with <code>acorn-jsx</code> plugin - <code>class</code></td>
 				</tr>
 				<tr>
 					<td>Solid</td>
 					<td>full</td>
-					<td>with <code>acorn-jsx</code> plugin — <code>class</code>, <code>classList</code></td>
+					<td>with <code>acorn-jsx</code> plugin - <code>class</code>, <code>classList</code></td>
 				</tr>
 				<tr>
 					<td>Vue JSX</td>
 					<td>full</td>
-					<td>with <code>acorn-jsx</code> plugin — <code>class</code></td>
+					<td>with <code>acorn-jsx</code> plugin - <code>class</code></td>
 				</tr>
 				<tr>
 					<td>Vue SFC</td>
@@ -949,7 +949,7 @@ export const gen = gen_fuz_css({
 				To enable JSX support for React/Preact/Solid/etc, install <code>acorn-jsx</code> and pass it to
 				the generator:
 			</p>
-			<Code lang="bash" content="npm i -D acorn-jsx" />
+			<Code lang={null} content="npm i -D acorn-jsx" />
 			<Code
 				lang="ts"
 				content={`// fuz.gen.css.ts
@@ -963,16 +963,16 @@ export const gen = gen_fuz_css({
 			<p>Supported JSX patterns:</p>
 			<ul>
 				<li>
-					<code>className="..."</code> and <code>class="..."</code> — static strings
+					<code>className="..."</code> and <code>class="..."</code> - static strings
 				</li>
 				<li>
-					<code>{'className={clsx(...)}'}</code> — utility function calls
+					<code>{'className={clsx(...)}'}</code> - utility function calls
 				</li>
 				<li>
-					<code>{'className={cond ? "a" : "b"}'}</code> — ternary and logical expressions
+					<code>{'className={cond ? "a" : "b"}'}</code> - ternary and logical expressions
 				</li>
 				<li>
-					<code>{'classList={{active: cond}}'}</code> — Solid's classList (static keys)
+					<code>{'classList={{active: cond}}'}</code> - Solid's classList (static keys)
 				</li>
 				<li>
 					<strong>usage tracking:</strong> variables in <code>className</code>, <code>class</code>,
@@ -981,7 +981,7 @@ export const gen = gen_fuz_css({
 				</li>
 			</ul>
 			<Code
-				lang="tsx"
+				lang="ts"
 				content={`// Variable tracking works in JSX too
 const styles = 'card hover:shadow_lg';
 const Component = () => <div className={styles} />;`}
