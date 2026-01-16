@@ -39,8 +39,7 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 				<li>minimal dependencies, all optional -- none needed if you only use the stylesheets</li>
 				<li>
 					exports a reset stylesheet with <TomeLink name="semantic" /> defaults that styles HTML elements,
-					see <SourceFileLink path="style.css" />, and also exports the underlying data, helpers, and
-					types for open-ended usage
+					and also exports the underlying data, helpers, and types for open-ended usage
 				</li>
 				<li>
 					supports <TomeLink name="themes" /> with a basic theme stylesheet, <SourceFileLink
@@ -56,15 +55,16 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 				</li>
 				<li>
 					uses its own concept of style <TomeLink name="variables" />, a specialization of CSS
-					custom properties and design tokens that integrate with the other systems (e.g. themes are
-					groups of variables, and token classes use variables)
+					custom properties and design tokens that integrate with the other systems (e.g. the reset
+					stylesheet and token classes use variables, and themes are groups of variables)
 				</li>
 				<li>
 					the stylesheets work with any framework and plain HTML; utility class generation supports
-					Svelte, JSX, and TypeScript/JS -- see
-					<TomeLink name="classes" hash="Framework-support">framework support</TomeLink> and
+					Svelte, JSX, and TypeScript/JS -- see the utility class
+					<TomeLink name="classes" hash="Framework-support">framework support</TomeLink>, and for
+					the companion Svelte integration see
 					<a href="https://ui.fuz.dev/docs/Themed"><code>Themed</code></a> in
-					<a href="https://ui.fuz.dev/">fuz_ui</a> for Svelte integration
+					<a href="https://ui.fuz.dev/">fuz_ui</a>
 				</li>
 				<li>
 					see the <TomeLink name="classes" hash="Compared-to-alternatives"
