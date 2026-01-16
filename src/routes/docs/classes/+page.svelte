@@ -16,7 +16,7 @@
 <TomeContent {tome}>
 	<p>
 		fuz_css has two categories of CSS classes: utilities and builtins. Builtins are baked into the
-		main stylesheet; utilities are optional and require build tool integration.
+		main stylesheet; utility classes have 3 types, are optional, and require build tool integration.
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
