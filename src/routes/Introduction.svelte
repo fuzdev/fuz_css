@@ -9,9 +9,9 @@
 	fuz_css is a framework and design system built on semantic styles and style variables. It styles
 	HTML elements by default and integrates custom properties, themes, and utility classes into a
 	coherent system. It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and
-	other JSX frameworks. See the
-	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support docs</a> and
-	<a href="https://ui.fuz.dev/">fuz_ui</a> for the companion Svelte components.
+	other JSX frameworks. For more see the
+	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support</a> docs, and for
+	the companion Svelte components, see <a href="https://ui.fuz.dev/">fuz_ui</a>.
 </p>
 <p>
 	The only required parts are a
@@ -29,8 +29,6 @@
 </p>
 
 <UnfinishedImplementationWarning>
-	fuz_css is in early alpha with breaking changes ahead. Input and feedback is appreciated in the
-	GitHub
-	<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
-	<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
+	fuz_css is in early alpha with breaking changes ahead. Your input and feedback is appreciated in
+	the GitHub <a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
 </UnfinishedImplementationWarning>
