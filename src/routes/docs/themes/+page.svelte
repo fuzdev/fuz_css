@@ -8,8 +8,8 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
 	import {default_themes} from '$lib/themes.js';
 	import type {Theme} from '$lib/theme.js';
 	import ThemeForm from '$routes/ThemeForm.svelte';
@@ -74,9 +74,9 @@
 			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>
 		<p>
-			These docs are a work in progress, for now see <ModuleLink path="theme.ts"
-				><code>@fuzdev/fuz_css/theme.ts</code></ModuleLink
-			> and <ModuleLink path="themes.ts"><code>@fuzdev/fuz_css/themes.ts</code></ModuleLink>.
+			These docs are a work in progress, for now see <ModuleLink module_path="theme.ts" /> and <ModuleLink
+				module_path="themes.ts"
+			/>.
 		</p>
 		<!-- TODO explain when exported <Code code={`<ThemeInput\n\t{themes}\n\t{selected_theme}\n/>`} /> -->
 		<div class="width_upto_xs mb_lg">

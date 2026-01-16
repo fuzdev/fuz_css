@@ -7,7 +7,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
+	import SourceFileLink from '$routes/SourceFileLink.svelte';
 
 	const LIBRARY_ITEM_NAME = 'semantic';
 
@@ -16,7 +16,7 @@
 
 <TomeContent {tome}>
 	<p>
-		fuz_css styles HTML elements in its <ModuleLink path="style.css">reset stylesheet</ModuleLink>,
+		fuz_css styles HTML elements in its <SourceFileLink path="style.css">reset stylesheet</SourceFileLink>,
 		so semantic markup gets themed and color-scheme-aware styling automatically -- utility classes
 		optional. The goal is to be accessible and attractive out of the box, minimal yet extensible.
 	</p>

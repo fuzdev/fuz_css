@@ -9,7 +9,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import ModuleLink from '$routes/ModuleLink.svelte';
+	import SourceFileLink from '$routes/SourceFileLink.svelte';
 
 	const LIBRARY_ITEM_NAME = 'elements';
 
@@ -24,8 +24,8 @@
 
 <TomeContent {tome}>
 	<p>
-		fuz_css applies default styles to semantic HTML elements in its <ModuleLink path="style.css"
-			>reset stylesheet</ModuleLink
+		fuz_css applies default styles to semantic HTML elements in its <SourceFileLink path="style.css"
+			>reset stylesheet</SourceFileLink
 		>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
 		user-friendly styling and theme integration automatically. The defaults are low specificity using
 		<code>:where</code>

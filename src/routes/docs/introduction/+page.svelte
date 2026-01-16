@@ -7,7 +7,7 @@
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
+	import SourceFileLink from '$routes/SourceFileLink.svelte';
 	import Introduction from '$routes/Introduction.svelte';
 
 	const LIBRARY_ITEM_NAME = 'introduction';
@@ -39,11 +39,11 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 				<li>minimal dependencies, all optional -- none needed if you only use the stylesheets</li>
 				<li>
 					exports a reset stylesheet with <TomeLink name="semantic" /> defaults that styles HTML elements,
-					see <ModuleLink path="style.css" />, and also exports the underlying data, helpers, and
+					see <SourceFileLink path="style.css" />, and also exports the underlying data, helpers, and
 					types for open-ended usage
 				</li>
 				<li>
-					supports <TomeLink name="themes" /> with a basic theme stylesheet, <ModuleLink
+					supports <TomeLink name="themes" /> with a basic theme stylesheet, <SourceFileLink
 						path="theme.css"
 					/>, that can be replaced with your own -- dark mode is a first-class concept, not a theme;
 					instead, each theme can support light and/or dark <MdnLink path="Web/CSS/color-scheme"
