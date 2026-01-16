@@ -925,13 +925,11 @@ export const gen = gen_fuz_css({
 			</tbody>
 		</table>
 		<p>
-			All frameworks support <a href="#Manual-hints"><code>@fuz-classes</code></a> comment hints and
-			the
-			<DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> config option for classes
-			that can't be statically detected -- these can be used as escape hatches for unsupported languages/frameworks.
-			Other acorn plugins can be added via <DeclarationLink name="GenFuzCssOptions"
-				>acorn_plugins</DeclarationLink
-			> for additional syntax support like <a href="#React-and-JSX">JSX</a>.
+			The <DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> plugin config option
+			is an escape hatch for classes that can't be statically detected. Other acorn plugins can be added
+			via
+			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support
+			like <a href="#React-and-JSX">JSX</a>.
 		</p>
 		<p>
 			In summary, class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not

@@ -43,16 +43,14 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 					see <ModuleLink path="style.css" />
 				</li>
 				<li>
-					exports a basic theme stylesheet, <ModuleLink path="theme.css" />, that can be replaced
-					with your own
+					supports <TomeLink name="themes" /> a basic theme stylesheet, <ModuleLink
+						path="theme.css"
+					/>, that can be replaced with your own
 				</li>
+				<li>also exports the underlying CSS data, helpers, and types for open-ended usage</li>
 				<li>
-					also exports the underlying CSS data, helpers, and types, which can be used in many ways,
-					including outputting an optimized utility class file
-				</li>
-				<li>
-					uses its own concept of style variables, a specialization of CSS custom properties and
-					design tokens
+					uses its own concept of style <TomeLink name="variables" />, a specialization of CSS
+					custom properties and design tokens
 					<ul>
 						<li>variables are the main source of truth and are used in the main stylesheet</li>
 						<li>each variable provides values to light and/or dark mode</li>
@@ -65,33 +63,20 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 					support light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
 				</li>
 				<li>
-					supports three types of utility classes
-					<ul>
-						<li>
-							token classes: using variables, like <code>.p_md</code> and
-							<code>.color_a_5</code>
-						</li>
-						<li>
-							composite classes: arbitrary groups of rules, like <code>.box</code> and
-							<code>.selectable</code>
-						</li>
-						<li>
-							CSS-literal classes: arbitrary styles, like <code>.display:flex</code> and
-							<code>.opacity:55%</code>
-						</li>
-					</ul>
+					supports optional <TomeLink name="classes">utility classes</TomeLink> with three types (token,
+					composite, CSS-literal) and modifiers for responsive, state, color-scheme, and pseudo-elements
 				</li>
 				<li>
-					all class types support modifiers for responsive (<code>md:</code>), state (<code
-						>hover:</code
-					>), color-scheme (<code>dark:</code>), and pseudo-elements (<code>before:</code>) -- see
-					<TomeLink name="classes" /> for the full reference
+					the stylesheets work with any framework and plain HTML; utility class generation supports
+					Svelte, JSX, and TypeScript/JS -- see
+					<TomeLink name="classes" hash="Framework-support">framework support</TomeLink> and
+					<a href="https://ui.fuz.dev/docs/Themed"><code>Themed</code></a> in
+					<a href="https://ui.fuz.dev/">fuz_ui</a> for Svelte integration
 				</li>
 				<li>
-					is agnostic to JS frameworks, for example usage see <a
-						href="https://ui.fuz.dev/docs/Themed"><code>Themed</code></a
-					>
-					in the companion Svelte UI library <a href="https://ui.fuz.dev/">fuz_ui</a>
+					see the <TomeLink name="classes" hash="Compared-to-alternatives"
+						>comparison to alternatives</TomeLink
+					> to understand fuz_css relative to TailwindCSS and UnoCSS
 				</li>
 			</ul>
 			<p>The stylesheets:</p>

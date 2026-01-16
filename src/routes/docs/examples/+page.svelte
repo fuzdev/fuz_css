@@ -1,5 +1,6 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 
 	const tome = get_tome_by_name('examples');
@@ -10,8 +11,9 @@
 <TomeContent {tome}>
 	<section class="column gap_md">
 		<p>
-			Example projects using the <a
-				href="https://github.com/fuzdev/fuz_css/blob/main/src/lib/vite_plugin_fuz_css.ts"
+			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the <TomeLink name="classes" /> system
+			using the
+			<a href="https://github.com/fuzdev/fuz_css/blob/main/src/lib/vite_plugin_fuz_css.ts"
 				>Vite plugin</a
 			>:
 		</p>
@@ -21,9 +23,5 @@
 			<li><a href="{GITHUB_EXAMPLES}/vite-preact">vite-preact</a> - Preact</li>
 			<li><a href="{GITHUB_EXAMPLES}/vite-solid">vite-solid</a> - Solid</li>
 		</ul>
-		<p>
-			Each example demonstrates token, composite, and literal classes with responsive, hover, and
-			dark mode modifiers.
-		</p>
 	</section>
 </TomeContent>
