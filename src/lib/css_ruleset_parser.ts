@@ -158,22 +158,39 @@ const extract_rule = (
  * Used to detect rulesets that could be converted to declaration format.
  *
  * @param rules - Parsed rules from the ruleset
- * @param expected_class_name - The class name we expect (e.g., "box")
+ * @param escaped_class_name - The CSS-escaped class name (e.g., "box" or "hover\\:card")
  * @returns True if there's exactly one rule with selector ".class_name"
  */
 export const is_single_selector_ruleset = (
 	rules: Array<ParsedRule>,
-	expected_class_name: string,
+	escaped_class_name: string,
 ): boolean => {
 	if (rules.length !== 1) return false;
 
 	const rule = rules[0]!;
-	const expected_selector = `.${expected_class_name}`;
+	const expected_selector = `.${escaped_class_name}`;
 
 	// Normalize whitespace in selector for comparison
 	const normalized_selector = rule.selector.trim();
 
 	return normalized_selector === expected_selector;
+};
+
+/**
+ * Checks if any selector in the ruleset contains the expected class name.
+ * Used to validate that ruleset definitions match their key.
+ *
+ * @param rules - Parsed rules from the ruleset
+ * @param escaped_class_name - The CSS-escaped class name (e.g., "clickable" or "hover\\:card")
+ * @returns True if at least one selector contains ".class_name"
+ */
+export const ruleset_contains_class = (
+	rules: Array<ParsedRule>,
+	escaped_class_name: string,
+): boolean => {
+	// Match .class_name but not as part of another class (e.g., .class_name_foo)
+	const pattern = new RegExp(`\\.${escape_regexp(escaped_class_name)}(?![\\w-])`);
+	return rules.some((rule) => pattern.test(rule.selector));
 };
 
 /**

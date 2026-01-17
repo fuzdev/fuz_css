@@ -16,9 +16,11 @@
 
 <TomeContent {tome}>
 	<p>
-		fuz_css styles HTML elements in its <SourceFileLink path="style.css">reset stylesheet</SourceFileLink>,
-		so semantic markup gets themed and color-scheme-aware styling automatically -- utility classes
-		optional. The goal is to be accessible and attractive out of the box, minimal yet extensible.
+		fuz_css styles HTML elements in its <SourceFileLink path="style.css"
+			>reset stylesheet</SourceFileLink
+		>, so semantic markup gets themed and color-scheme-aware styling automatically -- utility
+		classes optional. The goal is to be accessible and attractive out of the box, minimal yet
+		extensible.
 	</p>
 
 	<TomeSection>

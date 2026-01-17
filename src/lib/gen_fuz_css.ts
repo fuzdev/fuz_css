@@ -374,9 +374,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 			// Merge class definitions (user definitions take precedence)
 			if (!include_builtin_definitions && !user_class_definitions) {
-				throw new Error(
-					'class_definitions is required when include_builtin_definitions is false',
-				);
+				throw new Error('class_definitions is required when include_builtin_definitions is false');
 			}
 			const all_class_definitions = include_builtin_definitions
 				? user_class_definitions

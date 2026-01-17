@@ -281,6 +281,259 @@ describe('generate_classes_css', () => {
 			const warnings = result.diagnostics.filter((d) => d.message.includes('could be converted'));
 			expect(warnings).toHaveLength(0);
 		});
+
+		test('warns when ruleset selectors do not contain expected class', () => {
+			const definitions = {
+				clickable: {
+					ruleset: `.foobar { cursor: pointer; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['clickable'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// CSS is still emitted (user may know what they're doing)
+			expect(result.css).toContain('.foobar { cursor: pointer; }');
+			// Should have warning about mismatched class
+			expect(result.diagnostics).toHaveLength(1);
+			expect(result.diagnostics[0]!.level).toBe('warning');
+			expect(result.diagnostics[0]!.message).toContain('no selectors containing ".clickable"');
+			expect(result.diagnostics[0]!.suggestion).toContain('.clickable');
+		});
+
+		test('does not warn when ruleset contains expected class', () => {
+			const definitions = {
+				clickable: {
+					ruleset: `.clickable { cursor: pointer; }
+.clickable:hover { opacity: 0.8; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['clickable'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// No warning about missing class
+			const missing_warnings = result.diagnostics.filter((d) =>
+				d.message.includes('no selectors containing'),
+			);
+			expect(missing_warnings).toHaveLength(0);
+		});
+
+		test('does not warn for partial class name match', () => {
+			// .clickable_foo should not satisfy the check for "clickable"
+			const definitions = {
+				clickable: {
+					ruleset: `.clickable_extended { cursor: pointer; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['clickable'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should warn - .clickable_extended is not .clickable
+			expect(result.diagnostics.some((d) => d.message.includes('no selectors containing'))).toBe(
+				true,
+			);
+		});
+
+		test('warns for completely unrelated selectors', () => {
+			const definitions = {
+				myclass: {
+					ruleset: `
+						.other { color: red; }
+						.another:hover { color: blue; }
+					`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['myclass'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.diagnostics.some((d) => d.message.includes('no selectors containing'))).toBe(
+				true,
+			);
+		});
+
+		test('matches class followed by attribute selector', () => {
+			const definitions = {
+				btn: {
+					ruleset: `.btn[disabled] { opacity: 0.5; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['btn'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should NOT warn - .btn is present (followed by [disabled])
+			const missing_warnings = result.diagnostics.filter((d) =>
+				d.message.includes('no selectors containing'),
+			);
+			expect(missing_warnings).toHaveLength(0);
+		});
+
+		test('skips single-selector warning for ruleset with comment before at-rule', () => {
+			const definitions = {
+				responsive: {
+					ruleset: `/* responsive wrapper */ @media (width >= 48rem) { .responsive { display: flex; } }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['responsive'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should NOT warn about "could be converted to declaration" - has @media wrapper
+			const convert_warnings = result.diagnostics.filter((d) =>
+				d.message.includes('could be converted'),
+			);
+			expect(convert_warnings).toHaveLength(0);
+		});
+
+		test('skips single-selector warning for nested at-rules', () => {
+			const definitions = {
+				fancy: {
+					ruleset: `@supports (display: grid) { @media (width >= 48rem) { .fancy { display: grid; } } }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['fancy'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			const convert_warnings = result.diagnostics.filter((d) =>
+				d.message.includes('could be converted'),
+			);
+			expect(convert_warnings).toHaveLength(0);
+		});
+
+		test('warns for empty ruleset', () => {
+			const definitions = {
+				empty: {
+					ruleset: '',
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['empty'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Empty ruleset emits warning
+			expect(result.css).toBe('');
+			expect(result.diagnostics).toHaveLength(1);
+			expect(result.diagnostics[0]!.message).toContain('is empty');
+		});
+
+		test('warns for whitespace-only ruleset', () => {
+			const definitions = {
+				whitespace: {
+					ruleset: '   \n\t   ',
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['whitespace'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Whitespace-only ruleset is treated as empty
+			expect(result.css).toBe('');
+			expect(result.diagnostics).toHaveLength(1);
+			expect(result.diagnostics[0]!.message).toContain('is empty');
+		});
+
+		test('handles comment-only ruleset', () => {
+			const definitions = {
+				commented: {
+					ruleset: '/* this ruleset is empty */',
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['commented'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Comment-only ruleset is truthy but has no selectors, warns about missing class
+			expect(result.diagnostics.some((d) => d.message.includes('no selectors containing'))).toBe(
+				true,
+			);
+		});
+
+		test('warns for static ruleset with special chars in class name', () => {
+			// User-defined class with colon (unusual but possible)
+			const definitions = {
+				'my:custom': {
+					ruleset: `.other { color: red; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['my:custom'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should warn - .other doesn't match .my\:custom
+			expect(result.diagnostics.some((d) => d.message.includes('no selectors containing'))).toBe(
+				true,
+			);
+		});
+
+		test('no warning for static ruleset with special chars when selector matches', () => {
+			// User-defined class with colon, correctly escaped in selector
+			const definitions = {
+				'my:custom': {
+					ruleset: `.my\\:custom { color: red; }`,
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['my:custom'],
+				class_definitions: definitions,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should NOT warn - selector matches escaped class name
+			const missing_warnings = result.diagnostics.filter((d) =>
+				d.message.includes('no selectors containing'),
+			);
+			expect(missing_warnings).toHaveLength(0);
+		});
 	});
 
 	describe('sorting', () => {

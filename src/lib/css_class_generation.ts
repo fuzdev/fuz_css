@@ -15,7 +15,11 @@ import {
 	type GenerationDiagnostic,
 	create_generation_diagnostic,
 } from './diagnostics.js';
-import {parse_ruleset, is_single_selector_ruleset} from './css_ruleset_parser.js';
+import {
+	parse_ruleset,
+	is_single_selector_ruleset,
+	ruleset_contains_class,
+} from './css_ruleset_parser.js';
 import {resolve_class_definition} from './css_class_resolution.js';
 import {get_modifier} from './modifiers.js';
 
@@ -180,6 +184,7 @@ export const generate_classes_css = (
 		const diag_count_before = interpreter_diagnostics.length;
 
 		// If not found statically, try interpreters
+		let from_interpreter = false;
 		if (!v) {
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
@@ -195,6 +200,7 @@ export const generate_classes_css = (
 							// Simple declaration
 							v = {declaration: result, comment: interpreter.comment};
 						}
+						from_interpreter = true;
 						break;
 					}
 				}
@@ -249,13 +255,52 @@ export const generate_classes_css = (
 			if (resolution_result.declaration) {
 				css += `.${escape_css_selector(c)} { ${resolution_result.declaration} }\n`;
 			}
-		} else if ('ruleset' in v && v.ruleset) {
+		} else if ('ruleset' in v) {
+			// Check for empty ruleset
+			// eslint-disable-next-line @typescript-eslint/prefer-optional-chain
+			if (!v.ruleset || !v.ruleset.trim()) {
+				diagnostics.push({
+					phase: 'generation',
+					level: 'warning',
+					message: `Ruleset "${c}" is empty`,
+					class_name: c,
+					suggestion: `Add CSS rules or remove the empty ruleset definition`,
+					locations: class_locations?.get(c) ?? null,
+				});
+				continue;
+			}
+
 			css += v.ruleset.trim() + '\n';
 
-			// Warn if this ruleset could be converted to declaration format
+			// Validate ruleset and emit warnings
 			try {
 				const parsed = parse_ruleset(v.ruleset);
-				if (is_single_selector_ruleset(parsed.rules, c)) {
+				// Use CSS-escaped class name for matching (handles special chars like colons)
+				const escaped_class = escape_css_selector(c);
+
+				// Warn if no selector contains the expected class name
+				if (!ruleset_contains_class(parsed.rules, escaped_class)) {
+					diagnostics.push({
+						phase: 'generation',
+						level: 'warning',
+						message: `Ruleset "${c}" has no selectors containing ".${c}"`,
+						class_name: c,
+						suggestion: `Ensure at least one selector uses ".${c}" so the class works when applied`,
+						locations: class_locations?.get(c) ?? null,
+					});
+				}
+
+				// Warn if this ruleset could be converted to declaration format
+				// Skip for interpreter-generated rulesets (e.g., CSS literals) - they intentionally use rulesets
+				// Skip if ruleset has at-rules (e.g., @media) - these need the wrapper
+				// Strip comments before checking (/* ... */ can precede @media)
+				const ruleset_without_comments = v.ruleset.replace(/\/\*[\s\S]*?\*\//g, '').trim();
+				const has_at_rules = ruleset_without_comments.startsWith('@');
+				if (
+					!from_interpreter &&
+					!has_at_rules &&
+					is_single_selector_ruleset(parsed.rules, escaped_class)
+				) {
 					diagnostics.push({
 						phase: 'generation',
 						level: 'warning',
