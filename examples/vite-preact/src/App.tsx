@@ -53,7 +53,7 @@ export const App = () => {
 						<h3>Composite classes</h3>
 						<div class="box">.box</div>
 						<div class="ellipsis" style={{maxWidth: '365px'}}>
-							.ellipsis — this text truncates with ellipsis when it overflows
+							.ellipsis -- this text truncates with ellipsis when it overflows
 						</div>
 					</div>
 
@@ -79,7 +79,7 @@ export const App = () => {
 								<p>Resize the window to see the layout switch from column to row</p>
 							</div>
 						</div>
-						<p class="min-width(543px):font_size_lg">.min-width(543px):font_size_lg — arbitrary breakpoint</p>
+						<p class="min-width(543px):font_size_lg">.min-width(543px):font_size_lg -- arbitrary breakpoint</p>
 					</div>
 
 					<div>

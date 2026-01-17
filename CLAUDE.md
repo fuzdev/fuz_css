@@ -1,6 +1,6 @@
 # fuz_css framework and design system
 
-CSS framework and design system for semantic HTML for semantic HTML.
+CSS framework and design system for semantic HTML.
 It styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system.
 Early alpha with breaking changes ahead.
@@ -129,7 +129,7 @@ import 'virtual:fuz.css';
 
 ## Docs
 
-[src/routes/docs/](src/routes/docs/) has pages for: colors, themes, variables, classes, typography, buttons, forms, elements, layout, borders, shadows, shading. See [tomes.ts](src/routes/docs/tomes.ts) for structure.
+[src/routes/docs/](src/routes/docs/) has pages for: introduction, api, examples, semantic, themes, variables, classes, colors, buttons, elements, forms, typography, borders, shading, shadows, layout. See [tomes.ts](src/routes/docs/tomes.ts) for structure.
 
 ## File organization
 
@@ -139,7 +139,7 @@ import 'virtual:fuz.css';
 
 - [variables.ts](src/lib/variables.ts) - All style variable definitions (~250+)
 - [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
-- [variable_data.ts](src/lib/variable_data.ts) - Size variants, color intensities, CSS data values
+- [variable_data.ts](src/lib/variable_data.ts) - Size, color, and border variant definitions
 - [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type, `render_theme_style()`
 - [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
 
@@ -196,7 +196,10 @@ Each demonstrates token, composite, and literal classes with responsive/hover/da
 
 ### Tests - [src/test/](src/test/)
 
+- [variable.test.ts](src/test/variable.test.ts) - StyleVariable type validation
 - [variables.test.ts](src/test/variables.test.ts) - Variable consistency (no duplicates, valid names)
+- [styles.test.ts](src/test/styles.test.ts) - Style output tests
+- [css_classes.test.ts](src/test/css_classes.test.ts) - CssClasses collection tests
 - [css_cache.test.ts](src/test/css_cache.test.ts) - Cache save/load, version invalidation, atomic writes
 - [css_class_generation.test.ts](src/test/css_class_generation.test.ts) - CSS escaping, generation, interpreters
 - [css_class_resolution.test.ts](src/test/css_class_resolution.test.ts) - Class resolution, cycle detection
@@ -204,4 +207,5 @@ Each demonstrates token, composite, and literal classes with responsive/hover/da
 - [css_class_extractor.jsx.test.ts](src/test/css_class_extractor.jsx.test.ts) - JSX-specific extraction
 - [css_literal.test.ts](src/test/css_literal.test.ts) - CSS-literal parsing, validation, modifiers
 - [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification
+- [diagnostics.test.ts](src/test/diagnostics.test.ts) - Diagnostic formatting tests
 - [vite_plugin_examples.test.ts](src/test/vite_plugin_examples.test.ts) - Integration tests building examples (skip with `SKIP_EXAMPLE_TESTS=1`)

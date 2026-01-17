@@ -55,7 +55,7 @@
 				<h3>Composite classes</h3>
 				<div class="box">.box</div>
 				<div class="ellipsis" style:max-width="365px">
-					.ellipsis — this text truncates with ellipsis when it overflows
+					.ellipsis -- this text truncates with ellipsis when it overflows
 				</div>
 			</div>
 
@@ -84,7 +84,7 @@
 					</div>
 				</div>
 				<p class="min-width(543px):font_size_lg">
-					.min-width(543px):font_size_lg — arbitrary breakpoint
+					.min-width(543px):font_size_lg -- arbitrary breakpoint
 				</p>
 			</div>
 

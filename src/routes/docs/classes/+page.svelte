@@ -153,8 +153,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 		declaration: 'text-align: center;',
 	},
 
-	// 4. ruleset - full CSS with multiple selectors
-	// (cannot be composed with \`classes\` due to complex edge cases)
+	// 4. ruleset - full CSS with multiple selectors (not composable)
 	centered: {
 		ruleset: \`
 			.centered {
@@ -228,18 +227,19 @@ export const gen = gen_fuz_css({
 			<p>
 				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
 				<code>classes</code> because they define their own selectors. The <code>classes</code>
-				property merges declarations into a single rule, but edge cases like
-				<code>.clickable:hover {'{ ... }'}</code> can't be flattened that way. Apply ruleset classes directly
-				in markup alongside other classes.
+				property merges declarations into a single rule, but multi-selector patterns like
+				<code>.clickable:hover {'{ ... }'}</code> cannot be inlined. Apply ruleset classes directly in
+				markup alongside other classes.
 			</p>
 			<aside>
 				<p>
 					If you reference a ruleset class in <code>classes</code>, you'll see:
-					<code>Cannot reference ruleset class "clickable"</code>. Apply the class directly in your
-					markup instead.
+					<code>Cannot reference ruleset class "clickable" in classes array</code>. Apply the class
+					directly in your markup instead -- the ruleset already contains all the selectors it
+					needs.
 				</p>
 				<p>
-					Circular references produce: <code>Circular reference detected in class "card"</code>.
+					Circular references produce: <code>Circular reference detected: card → panel → card</code>.
 				</p>
 			</aside>
 
@@ -267,12 +267,13 @@ export const gen = gen_fuz_css({
 
 			<h4>Modifiers</h4>
 			<p>
-				Composites with <code>classes</code> or <code>declaration</code> support all modifiers. The resolved
-				declarations are combined and wrapped:
+				All composite forms support modifiers. For <code>classes</code> and <code>declaration</code>
+				composites, declarations are combined and wrapped. For <code>ruleset</code> composites,
+				modifiers are applied to each selector (with smart conflict detection):
 			</p>
 			<Code
 				content={`<!-- hover:card resolves card's classes, applies :hover -->
-<div class="hover:card md:dark:card">`}
+<div class="hover:card md:dark:card md:clickable">`}
 			/>
 
 			<h4>Builtin composites</h4>
