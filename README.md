@@ -2,17 +2,19 @@
 
 [<img src="/static/logo.svg" alt="a fuzzy tuft of green moss" align="right" width="192" height="192">](https://css.fuz.dev/)
 
-> CSS framework and design system 🌿 CSS with more utility
+> CSS with more utility 🪴
 
-fuz_css is a CSS framework and design system built around semantic styles and style variables.
+fuz_css is a CSS framework and design system for semantic HTML.
+It styles elements by default and
+integrates custom properties, themes, and utility classes into a complete system.
+It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and other JSX frameworks.
+
 It's in early alpha with breaking changes ahead.
+Feedback and design input in
+the [discussions](https://github.com/fuzdev/fuz_css/discussions).
 
 View the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/).
 More about the stack at [fuz.dev](https://www.fuz.dev/)
-
-Interested in helping? We welcome feedback and design input in
-the [issues](https://github.com/fuzdev/fuz_css/issues)
-and [discussions](https://github.com/fuzdev/fuz_css/discussions).
 
 ## License [🐦](https://wikipedia.org/wiki/Free_and_open-source_software)
 

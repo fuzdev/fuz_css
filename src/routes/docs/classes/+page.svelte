@@ -121,15 +121,17 @@
 		<TomeSection>
 			<TomeSectionHeader text="Composite classes" tag="h3" />
 			<p>
-				Multi-property groups for repeated patterns. Composites can define custom CSS, compose
-				existing classes, or both.
+				Composites bundle multiple CSS declarations into a single class name. They have four forms:
+				raw CSS declarations, composition of other classes, a combination of both, or full rulesets
+				as an escape hatch for multi-selector patterns (hover states, child selectors, etc.).
 			</p>
 
-			<h4>Three definition forms</h4>
+			<h4>Four definition forms</h4>
 			<Code
 				lang="typescript"
-				content={`// Three alternative ways to define a \`centered\` class:
-export const custom_composites = {
+				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.js';
+
+export const custom_composites: Record<string, CssClassDefinition> = {
 	// 1. declaration only - custom CSS properties
 	centered: {
 		declaration: \`
@@ -149,6 +151,22 @@ export const custom_composites = {
 	centered: {
 		classes: ['box'],
 		declaration: 'text-align: center;',
+	},
+
+	// 4. ruleset - full CSS with multiple selectors
+	// (cannot be composed with \`classes\` due to complex edge cases)
+	centered: {
+		ruleset: \`
+			.centered {
+				display: flex;
+				align-items: center;
+				justify-content: center;
+			}
+			/* any selector: .centered > *, .centered:hover .foo, etc */
+			.centered:focus-within {
+				outline: 2px solid var(--color_a_5);
+			}
+		\`,
 	},
 };`}
 			/>
@@ -184,7 +202,7 @@ export const gen = gen_fuz_css({
 			<p>Composites can reference other composites, enabling layered abstractions:</p>
 			<Code
 				lang="typescript"
-				content={`const composites = {
+				content={`const composites: Record<string, CssClassDefinition> = {
 	spacing: {classes: ['p_lg', 'gap_md']},
 	surface: {classes: ['bg_1', 'border_radius_md', 'shadow_sm']},
 	panel: {classes: ['spacing', 'surface']}, // combines both
@@ -208,10 +226,11 @@ export const gen = gen_fuz_css({
 				</li>
 			</ul>
 			<p>
-				<strong>Not allowed:</strong> Ruleset-based composites (those with multiple selectors like
-				<code>.clickable</code>) cannot be referenced in <code>classes</code> because their
-				multi-selector CSS can't be inlined into a single rule. Use <code>declaration</code> for custom
-				CSS or apply ruleset classes separately in your markup.
+				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
+				<code>classes</code> because they define their own selectors. The <code>classes</code>
+				property merges declarations into a single rule, but edge cases like
+				<code>.clickable:hover {'{ ... }'}</code> can't be flattened that way. Apply ruleset classes directly
+				in markup alongside other classes.
 			</p>
 			<aside>
 				<p>
@@ -228,8 +247,13 @@ export const gen = gen_fuz_css({
 			<p>Given these definitions:</p>
 			<Code
 				lang="typescript"
-				content={`card_base: {classes: ['p_lg', 'shadow_md']},
-card: {classes: ['card_base'], declaration: 'border: 1px solid var(--border_color);'},`}
+				content={`const composites: Record<string, CssClassDefinition> = {
+	card_base: {classes: ['p_lg', 'shadow_md']},
+	card: {
+		classes: ['card_base'],
+		declaration: 'border: 1px solid var(--border_color);'
+	},
+};`}
 			/>
 			<p>The generated CSS for <code>.card</code>:</p>
 			<Code

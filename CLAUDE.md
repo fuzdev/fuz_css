@@ -1,6 +1,9 @@
 # fuz_css framework and design system
 
-CSS framework and design system built on **semantic styles** and **style variables** (design tokens as CSS custom properties). Early alpha with breaking changes ahead.
+CSS framework and design system for semantic HTML for semantic HTML.
+It styles HTML elements by default and integrates
+custom properties, themes, and utility classes into a complete system.
+Early alpha with breaking changes ahead.
 
 For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
 

@@ -1,9 +1,9 @@
 {
   "name": "@fuzdev/fuz_css",
   "version": "0.43.0",
-  "description": "CSS framework and design system",
+  "description": "CSS framework and design system for semantic HTML",
   "motto": "CSS with more utility",
-  "glyph": "🌿",
+  "glyph": "🪴",
   "logo": "logo.svg",
   "logo_alt": "a fuzzy tuft of green moss",
   "license": "MIT",
