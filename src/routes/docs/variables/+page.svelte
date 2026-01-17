@@ -6,10 +6,10 @@
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
 	import {default_variables} from '$lib/variables.js';
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
-	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
@@ -24,7 +24,7 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			Style variables, or just "variables" in Fuz CSS, are <MdnLink
+			Style variables, or just "variables" in fuz_css, are <MdnLink
 				path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*">CSS custom properties</MdnLink
 			> that can be grouped into a <TomeLink name="themes">theme</TomeLink>. Each variable can have
 			values for light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>.
@@ -44,7 +44,7 @@
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in
-				<a href="https://ui.fuz.dev/">Fuz UI</a>
+				<a href="https://ui.fuz.dev/">fuz_ui</a>
 			</li>
 		</ul>
 		<p>
@@ -58,7 +58,7 @@
 	</section>
 	<section>
 		<div class="mb_md">
-			<ModuleLink path="theme.js" />
+			<ModuleLink module_path="theme.ts" />
 		</div>
 		<Code
 			lang="ts"

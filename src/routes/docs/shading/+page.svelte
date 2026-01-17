@@ -22,12 +22,12 @@
 	};
 
 	const opacity_classes = [
-		'opacity_0',
-		'opacity_17',
-		'opacity_38',
-		'opacity_51',
-		'opacity_79',
-		'opacity_100',
+		'opacity:0',
+		'opacity:17%',
+		'opacity:38%',
+		'opacity:51%',
+		'opacity:79%',
+		'opacity:100%',
 	];
 </script>
 
@@ -39,7 +39,7 @@
 			transparency being used a lot, but the automatic stacking is nice.
 		</UnfinishedImplementationWarning>
 		<p>
-			Fuz CSS is designed around two simplistic models of light, one for dark mode and one for light
+			fuz_css is designed around two simplistic models of light, one for dark mode and one for light
 			mode, mapping to the web platform's <MdnLink path="Web/CSS/color-scheme" />. The goal is easy
 			authoring with simple and consistent rules for arbitrary compositions and states. Each <TomeLink
 				name="themes">theme</TomeLink
@@ -64,7 +64,7 @@
 			disappear completely against a black background.
 		</p>
 		<p>
-			Fuz CSS provides APIs that simplify or hide this complexity. For example, the <code
+			fuz_css provides APIs that simplify or hide this complexity. For example, the <code
 				>lighten</code
 			>
 			and <code>darken</code> variables are the same in light and dark modes, but
@@ -193,8 +193,8 @@
 		<div>
 			{#each opacity_classes as opacity_class (opacity_class)}
 				<div class="opacity_example font_family_mono relative">
-					<div class="position_absolute inset_0 bg_a_7 {opacity_class}"></div>
-					<div class="position_relative">.{opacity_class}</div>
+					<div class="position:absolute inset:0 bg_a_7 {opacity_class}"></div>
+					<div class="position:relative">.{opacity_class}</div>
 				</div>
 			{/each}
 		</div>

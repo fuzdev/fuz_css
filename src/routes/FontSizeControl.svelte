@@ -23,14 +23,14 @@
 </script>
 
 <label
-	><div class="title row width_100 flex_wrap_wrap">
+	><div class="title row width:100% flex-wrap:wrap">
 		{#if children}
 			{@render children()}
 		{:else}
 			font-size
 		{/if} =
 		<input
-			class="display_inline"
+			class="display:inline"
 			type="number"
 			style:width="var(--space_xl7)"
 			style:min-width="var(--space_xl7)"

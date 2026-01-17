@@ -65,7 +65,7 @@
 </script>
 
 <div class="theme_form">
-	<h2 class="text_align_center">
+	<h2 class="text-align:center">
 		{#if editing}edit{:else}create{/if} theme
 	</h2>
 	<aside>
@@ -75,7 +75,8 @@
 	<header>
 		<div class="variables_header">
 			<p>variables: {light_count} light, {dark_count} dark</p>
-			<button type="button" class="width_100" onclick={add_variable} disabled>add a variable</button
+			<button type="button" class="width:100%" onclick={add_variable} disabled
+				>add a variable</button
 			>
 		</div>
 		<form>

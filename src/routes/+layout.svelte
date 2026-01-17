@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Fuz CSS - magical organic stylesheets</title>
+	<title>fuz_css - CSS with more utility</title>
 </svelte:head>
 
 <Themed>

@@ -71,7 +71,6 @@ const known_without_variables = new Set([
 	'border_radius',
 	'min_height',
 	'menu_item_padding',
-	'font_weight',
 	'checkbox_content',
 	'checkbox_content_empty',
 	'checkbox_content_checked',
