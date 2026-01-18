@@ -27,6 +27,11 @@
 			<code>style</code> attribute. They're generated on-demand to include only what you use, and they're
 			totally optional.
 		</p>
+		<p>
+			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
+			rather than being foundational to the design -- see the
+			<a href="#Compared-to-alternatives">comparison</a> below.
+		</p>
 		<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
 		<ul>
 			<li>
@@ -34,33 +39,26 @@
 				<code>padding: var(--space_lg)</code>)
 			</li>
 			<li>
-				compose across component boundaries, avoiding fragile <code>:global()</code> hacks
+				compose across component boundaries, avoiding fragile <code>:global()</code> selectors
 			</li>
 			<li>avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code></li>
 		</ul>
 		<p>Compared to the <code>style</code> attribute, classes:</p>
 		<ul>
 			<li>
-				support powerful modifiers for responsive widths, interaction states (e.g. hover), and dark
+				support powerful modifiers for responsive widths, interaction states (like hover), and dark
 				mode
 			</li>
 			<li>provide more control over specificity</li>
 			<li>
-				compose ergonomically with Svelte's <a href="https://svelte.dev/docs/svelte/class"
-					>clsx support</a
-				>
+				compose ergonomically with libraries like <a href="https://github.com/lukeed/clsx">clsx</a>,
+				which Svelte supports <a href="https://svelte.dev/docs/svelte/class">natively</a>
 			</li>
 		</ul>
 		<p>
-			For cases that don't benefit from these features, <code>style</code> and
+			For cases where classes lack clear advantages, <code>style</code> and
 			<code>&lt;style&gt;</code>
-			are simpler and avoid generating class definitions, which can bloat your CSS when overused. Use
-			with discretion!
-		</p>
-		<p>
-			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
-			rather than being foundational to the design -- see the
-			<a href="#Compared-to-alternatives">comparison</a> below.
+			are simpler and avoid generating class definitions, which can bloat your builds when overused.
 		</p>
 
 		<TomeSection>
@@ -1163,10 +1161,10 @@ const Component = () => <div className={styles} />;`}
 					<td>composites</td>
 				</tr>
 				<tr>
-					<td>interactive states</td>
-					<td>external CSS</td>
-					<td>external CSS</td>
-					<td>ruleset composites</td>
+					<td>arbitrary values</td>
+					<td>DSL (<code>bg-[#fff]</code>)</td>
+					<td>any (presets)</td>
+					<td>CSS syntax (<code>background:#fff</code>)</td>
 				</tr>
 				<tr>
 					<td>detection</td>
@@ -1177,13 +1175,11 @@ const Component = () => <div className={styles} />;`}
 			</tbody>
 		</table>
 		<p>
-			Like UnoCSS, composites offer a high level of customization, including the ability to
-			replicate much of TailwindCSS's DSL. Ruleset composites go further with full CSS including
-			multi-selector patterns -- something neither <code>@apply</code> nor shortcuts can express.
+			Composites offer a high level of customization, including the ability to replicate much of
+			TailwindCSS's DSL like UnoCSS.
 		</p>
 		<p>
-			fuz_css fits best when you prefer semantic HTML with styled defaults, want design tokens as
-			TypeScript-defined style variables, or are building Svelte-first. The tradeoff is a more
+			fuz_css fits best when you prefer semantic HTML with styled defaults. The tradeoff is a more
 			verbose literal syntax, which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate,
 			or composites for repeated patterns.
 		</p>
