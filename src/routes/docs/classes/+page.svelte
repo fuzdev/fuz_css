@@ -36,7 +36,7 @@
 			<li>
 				compose across component boundaries, avoiding fragile <code>:global()</code> hacks
 			</li>
-			<li>avoid one-off class names like <code>foo-wrapper</code> and <code>bar-inner</code></li>
+			<li>avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code></li>
 		</ul>
 		<p>Compared to the <code>style</code> attribute, classes:</p>
 		<ul>
@@ -52,13 +52,15 @@
 			</li>
 		</ul>
 		<p>
-			For values that don't need these features, <code>style</code> and <code>&lt;style&gt;</code>
-			are simpler and avoid generating class definitions, which can bloat your CSS when overused.
+			For cases that don't benefit from these features, <code>style</code> and
+			<code>&lt;style&gt;</code>
+			are simpler and avoid generating class definitions, which can bloat your CSS when overused. Use
+			with discretion!
 		</p>
 		<p>
-			Compared to TailwindCSS, fuz_css utility classes follow the grain of semantic HTML rather than
-			being foundational to the design. See below for a
-			<a href="#Compared-to-alternatives">comparison</a> to TailwindCSS and UnoCSS.
+			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
+			rather than being foundational to the design -- see the
+			<a href="#Compared-to-alternatives">comparison</a> below.
 		</p>
 
 		<TomeSection>
