@@ -256,18 +256,16 @@ export const gen = gen_fuz_css({
 			</p>
 			<aside>
 				<p>
-					The system provides helpful error messages with suggestions. Typos like
-					<code>hovr:box</code> or <code>md:hovr:box</code> suggest the correction. Unknown classes and
-					invalid CSS properties offer relevant hints.
+					Property typos like <code>disply:flex</code> suggest <code>display</code>. Modifier typos
+					like <code>hovr:box</code> suggest <code>hover:box</code>.
 				</p>
 				<p>
-					If you reference a ruleset class in <code>composes</code>, you'll see:
-					<code>Cannot reference ruleset class "clickable" in composes array</code>. Apply the class
-					directly in your markup instead.
+					Ruleset classes produce:
+					<code>Cannot reference ruleset class "clickable" in composes array</code>.
 				</p>
 				<p>
-					Circular references produce: <code>Circular reference detected: card → panel → card</code
-					>.
+					Circular references produce:
+					<code>Circular reference detected: card → panel → card</code>.
 				</p>
 			</aside>
 
