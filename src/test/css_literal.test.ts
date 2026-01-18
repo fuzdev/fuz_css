@@ -10,9 +10,16 @@ import {
 	load_css_properties,
 	interpret_css_literal,
 	generate_css_literal_simple,
+	has_modifiers,
+	has_extracted_modifiers,
+	try_resolve_literal,
+	extract_and_validate_modifiers,
 	type ParsedCssLiteral,
 	type InterpretCssLiteralResult,
 	type CssLiteralOutput,
+	type LiteralResolutionResult,
+	type ExtractedModifiers,
+	type ModifierExtractionResult,
 } from '$lib/css_literal.js';
 import {escape_css_selector} from '$lib/css_class_generation.js';
 import {type InterpreterDiagnostic} from '$lib/diagnostics.js';
@@ -718,5 +725,148 @@ describe('generate_css_literal_simple - Unicode', () => {
 		const css = generate_css_literal_simple(output);
 		assert.include(css, '::before');
 		assert.include(css, 'content: "✓";');
+	});
+});
+
+//
+// Composition Support Tests
+//
+
+// Helper to assert modifier extraction result is ok
+const assert_mod_ok = (
+	result: ModifierExtractionResult,
+): {modifiers: ExtractedModifiers; remaining: Array<string>} => {
+	assert.isTrue(result.ok, 'Expected modifier extraction to be ok');
+	return result as {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>};
+};
+
+// Helper to assert literal resolution result is ok
+const assert_literal_ok = (
+	result: LiteralResolutionResult,
+): {declaration: string; warnings: Array<InterpreterDiagnostic> | null} => {
+	assert.isTrue(result.ok, 'Expected literal resolution to be ok');
+	return result as {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null};
+};
+
+// Helper to assert literal resolution result is not a literal (error with null)
+const assert_literal_not_literal = (result: LiteralResolutionResult): void => {
+	assert.isFalse(result.ok, 'Expected literal resolution to fail');
+	// After assert.isFalse, TypeScript narrows result.ok to false
+	assert.isNull(
+		(result as {ok: false; error: InterpreterDiagnostic | null}).error,
+		'Expected error to be null (not a literal)',
+	);
+};
+
+// Helper to assert literal resolution result is error with non-null error
+const assert_literal_has_error = (result: LiteralResolutionResult): InterpreterDiagnostic => {
+	assert.isFalse(result.ok, 'Expected literal resolution to fail');
+	// After assert.isFalse, TypeScript narrows result.ok to false
+	const error_result = result as {ok: false; error: InterpreterDiagnostic | null};
+	assert.isNotNull(error_result.error, 'Expected non-null error');
+	return error_result.error;
+};
+
+describe('has_modifiers', () => {
+	test('returns false for unmodified literal', () => {
+		const {parsed} = assert_ok(parse_css_literal('display:flex', null));
+		assert.isFalse(has_modifiers(parsed));
+	});
+
+	test('returns true for media modifier', () => {
+		const {parsed} = assert_ok(parse_css_literal('md:display:flex', null));
+		assert.isTrue(has_modifiers(parsed));
+	});
+
+	test('returns true for state modifier', () => {
+		const {parsed} = assert_ok(parse_css_literal('hover:opacity:80%', null));
+		assert.isTrue(has_modifiers(parsed));
+	});
+
+	test('returns true for ancestor modifier', () => {
+		const {parsed} = assert_ok(parse_css_literal('dark:color:white', null));
+		assert.isTrue(has_modifiers(parsed));
+	});
+
+	test('returns true for pseudo-element modifier', () => {
+		const {parsed} = assert_ok(parse_css_literal('before:content:""', null));
+		assert.isTrue(has_modifiers(parsed));
+	});
+});
+
+describe('has_extracted_modifiers', () => {
+	test('returns false for empty modifiers', () => {
+		const segments = extract_segments('box');
+		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'box'));
+		assert.isFalse(has_extracted_modifiers(modifiers));
+	});
+
+	test('returns true for media modifier', () => {
+		const segments = extract_segments('md:box');
+		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'md:box'));
+		assert.isTrue(has_extracted_modifiers(modifiers));
+	});
+
+	test('returns true for multiple state modifiers', () => {
+		const segments = extract_segments('focus:hover:box');
+		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'focus:hover:box'));
+		assert.isTrue(has_extracted_modifiers(modifiers));
+		assert.lengthOf(modifiers.states, 2);
+	});
+});
+
+describe('try_resolve_literal', () => {
+	test('resolves unmodified literal', () => {
+		const {declaration} = assert_literal_ok(
+			try_resolve_literal('text-align:center', css_properties, 'test'),
+		);
+		assert.equal(declaration, 'text-align: center;');
+	});
+
+	test('resolves literal with ~ space encoding', () => {
+		const {declaration} = assert_literal_ok(
+			try_resolve_literal('margin:0~auto', css_properties, 'test'),
+		);
+		assert.equal(declaration, 'margin: 0 auto;');
+	});
+
+	test('resolves custom property', () => {
+		const {declaration} = assert_literal_ok(
+			try_resolve_literal('--my-color:blue', css_properties, 'test'),
+		);
+		assert.equal(declaration, '--my-color: blue;');
+	});
+
+	test('returns null error for non-literal class names', () => {
+		assert_literal_not_literal(try_resolve_literal('p_lg', css_properties, 'test'));
+	});
+
+	test('returns error for modified literal', () => {
+		const error = assert_literal_has_error(
+			try_resolve_literal('hover:opacity:80%', css_properties, 'test'),
+		);
+		assert.include(error.message, 'cannot be used in composes array');
+	});
+
+	test('returns error for invalid property with suggestion', () => {
+		const error = assert_literal_has_error(
+			try_resolve_literal('disply:flex', css_properties, 'test'),
+		);
+		assert.include(error.message, 'Unknown CSS property');
+		assert.isNotNull(error.suggestion);
+		assert.include(error.suggestion, 'display');
+	});
+
+	test('modifier:token pattern returns property error (detection in resolve_composes)', () => {
+		// hover:shadow_lg parses as property:value, fails property validation
+		// The "modified class" detection happens earlier in resolve_composes
+		const error = assert_literal_has_error(
+			try_resolve_literal('hover:shadow_lg', css_properties, 'card'),
+		);
+		assert.include(error.message, 'Unknown CSS property');
+	});
+
+	test('returns null error for token class without colon', () => {
+		assert_literal_not_literal(try_resolve_literal('box', css_properties, 'test'));
 	});
 });

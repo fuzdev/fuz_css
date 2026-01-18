@@ -71,6 +71,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 				base_class,
 				base_class_name,
 				ctx.class_definitions,
+				ctx.css_properties,
 			);
 			if (!resolution_result.ok) {
 				ctx.diagnostics.push(resolution_result.error);

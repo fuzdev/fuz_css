@@ -636,6 +636,100 @@ export const interpret_css_literal = (
 	};
 };
 
+//
+// Composition Support
+//
+
+/**
+ * Result of attempting to resolve a CSS literal for composition.
+ */
+export type LiteralResolutionResult =
+	| {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null}
+	| {ok: false; error: InterpreterDiagnostic | null};
+
+/**
+ * Checks if a parsed CSS literal has any modifiers.
+ */
+export const has_modifiers = (parsed: ParsedCssLiteral): boolean => {
+	return !!(parsed.media || parsed.ancestor || parsed.states.length > 0 || parsed.pseudo_element);
+};
+
+/**
+ * Checks if extracted modifiers contain any modifier.
+ * Useful for tooling that needs to detect modified classes.
+ */
+export const has_extracted_modifiers = (modifiers: ExtractedModifiers): boolean => {
+	return !!(
+		modifiers.media ||
+		modifiers.ancestor ||
+		modifiers.states.length > 0 ||
+		modifiers.pseudo_element
+	);
+};
+
+/**
+ * Attempts to resolve a class name as an unmodified CSS literal for composition.
+ *
+ * Used by `resolve_composes` to support literals in `composes` arrays.
+ * Returns the declaration if successful, null if not a literal, or an error
+ * if it's a literal with issues (modifiers, invalid property, etc.).
+ *
+ * @param class_name - The class name to try resolving
+ * @param css_properties - Set of valid CSS properties, or null to skip validation
+ * @param context_class_name - The class being defined (for error messages)
+ * @returns Resolution result with declaration, or error, or null if not a literal
+ */
+export const try_resolve_literal = (
+	class_name: string,
+	css_properties: Set<string> | null,
+	context_class_name: string,
+): LiteralResolutionResult => {
+	// Quick check - must look like a CSS literal
+	if (!is_possible_css_literal(class_name)) {
+		return {ok: false, error: null};
+	}
+
+	// Parse the literal
+	const result = parse_css_literal(class_name, css_properties);
+
+	if (!result.ok) {
+		return {ok: false, error: contextualize_error(result.error, context_class_name)};
+	}
+
+	const {parsed, diagnostics} = result;
+
+	// Check for modifiers - modified literals cannot be composed
+	if (has_modifiers(parsed)) {
+		return {
+			ok: false,
+			error: {
+				level: 'error',
+				class_name: context_class_name,
+				message: `Modified class "${class_name}" cannot be used in composes array`,
+				suggestion: 'Apply modified classes directly in markup, not in composes arrays',
+			},
+		};
+	}
+
+	// Success - return the declaration
+	return {
+		ok: true,
+		declaration: generate_declaration(parsed),
+		warnings: diagnostics,
+	};
+};
+
+/**
+ * Updates error to use the context class name (the class being defined).
+ */
+const contextualize_error = (
+	error: InterpreterDiagnostic,
+	context_class_name: string,
+): InterpreterDiagnostic => ({
+	...error,
+	class_name: context_class_name,
+});
+
 /**
  * Generates simple CSS for a CSS-literal class (without grouping).
  * Used by the interpreter for basic output.

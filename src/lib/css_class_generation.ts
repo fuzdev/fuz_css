@@ -233,7 +233,7 @@ export const generate_classes_css = (
 
 		// Handle composes-based or declaration-based definitions
 		if ('composes' in v || 'declaration' in v) {
-			const resolution_result = resolve_class_definition(v, c, class_definitions);
+			const resolution_result = resolve_class_definition(v, c, class_definitions, css_properties);
 			if (!resolution_result.ok) {
 				// Add error diagnostic and skip this class
 				diagnostics.push({

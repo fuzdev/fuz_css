@@ -241,13 +241,18 @@ export const gen = gen_fuz_css({
 				<li>
 					composites with <code>composes</code> - recursively resolved
 				</li>
+				<li>
+					unmodified CSS literals (<code>text-align:center</code>, <code>margin:0~auto</code>,
+					<code>--my-var:value</code>) - parsed and included as declarations
+				</li>
 			</ul>
 			<p>
 				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
-				<code>composes</code> because they define their own selectors. The <code>composes</code>
-				property merges declarations into a single rule, but multi-selector patterns like
-				<code>.clickable:hover {'{ ... }'}</code> cannot be inlined. Apply ruleset classes directly in
-				markup alongside other classes.
+				<code>composes</code> because they define their own selectors. Modified classes (like
+				<code>hover:opacity:80%</code> or <code>md:p_lg</code>) cannot be used in
+				<code>composes</code> arrays because they require wrapper selectors - apply them directly in
+				markup instead. The <code>composes</code> property merges declarations into a single rule,
+				but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be inlined.
 			</p>
 			<aside>
 				<p>

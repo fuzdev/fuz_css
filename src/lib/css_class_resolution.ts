@@ -9,6 +9,12 @@
 
 import type {InterpreterDiagnostic} from './diagnostics.js';
 import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.js';
+import {
+	try_resolve_literal,
+	extract_segments,
+	extract_and_validate_modifiers,
+	has_extracted_modifiers,
+} from './css_literal.js';
 
 /**
  * Result from resolving a `composes` array to combined declarations.
@@ -27,12 +33,14 @@ export type ResolveComposesResult =
  * @param def - The class definition to resolve
  * @param class_name - The name of the class being resolved (for error messages)
  * @param definitions - Record of all known class definitions
+ * @param css_properties - Set of valid CSS properties for literal validation, or null to skip
  * @returns Combined declaration or an error
  */
 export const resolve_class_definition = (
 	def: CssClassDefinitionStatic,
 	class_name: string,
 	definitions: Record<string, CssClassDefinition | undefined>,
+	css_properties: Set<string> | null = null,
 ): ResolveComposesResult => {
 	let warnings: Array<InterpreterDiagnostic> | null = null;
 
@@ -44,6 +52,7 @@ export const resolve_class_definition = (
 			new Set([class_name]),
 			new Set(),
 			class_name,
+			css_properties,
 		);
 		if (!result.ok) return result;
 
@@ -95,6 +104,7 @@ export const resolve_class_definition = (
  *
  * Recursively resolves nested `composes` arrays and combines all declarations.
  * Validates that referenced classes exist and are resolvable (not rulesets or interpreters).
+ * Supports unmodified CSS literals (e.g., `text-align:center`) in the composes array.
  *
  * Deduplication behavior:
  * - Diamond dependencies (class reached via different composition branches) are silently skipped
@@ -105,6 +115,7 @@ export const resolve_class_definition = (
  * @param resolution_stack - Set of class names currently being resolved (for cycle detection)
  * @param visited - Set of all class names already resolved (for deduplication)
  * @param original_class_name - The class name being defined (for error messages)
+ * @param css_properties - Set of valid CSS properties for literal validation, or null to skip
  * @returns Combined declarations or an error
  * @mutates resolution_stack - Temporarily adds/removes names during recursion
  * @mutates visited - Adds resolved class names for deduplication
@@ -115,6 +126,7 @@ export const resolve_composes = (
 	resolution_stack: Set<string>,
 	visited: Set<string>,
 	original_class_name: string,
+	css_properties: Set<string> | null = null,
 ): ResolveComposesResult => {
 	const declarations: Array<string> = [];
 	let warnings: Array<InterpreterDiagnostic> | null = null;
@@ -132,7 +144,7 @@ export const resolve_composes = (
 					level: 'error',
 					class_name: original_class_name,
 					message: `Circular reference detected: ${cycle_path}`,
-					suggestion: null,
+					suggestion: 'Remove the circular dependency from composes arrays',
 				},
 			};
 		}
@@ -154,6 +166,59 @@ export const resolve_composes = (
 
 		const def = definitions[name];
 		if (!def) {
+			// Check if this looks like a modified class (hover:box, md:p_lg)
+			const segments = extract_segments(name);
+			if (segments.length >= 2) {
+				const mod_result = extract_and_validate_modifiers(segments, name);
+				if (
+					mod_result.ok &&
+					mod_result.remaining.length === 1 &&
+					has_extracted_modifiers(mod_result.modifiers)
+				) {
+					const base_name = mod_result.remaining[0]!;
+					const base_def = definitions[base_name];
+					if (base_def) {
+						// Modified existing class - can't compose
+						return {
+							ok: false,
+							error: {
+								level: 'error',
+								class_name: original_class_name,
+								message: `Modified class "${name}" cannot be used in composes array`,
+								suggestion: 'Apply modified classes directly in markup, not in composes arrays',
+							},
+						};
+					} else {
+						// Looks like modifier:unknown - report the unknown base
+						return {
+							ok: false,
+							error: {
+								level: 'error',
+								class_name: original_class_name,
+								message: `Unknown class "${base_name}" in composes array`,
+								suggestion: `Check that "${base_name}" is defined in class_definitions`,
+							},
+						};
+					}
+				}
+			}
+
+			// Try parsing as CSS literal
+			const literal_result = try_resolve_literal(name, css_properties, original_class_name);
+			if (literal_result.ok) {
+				visited.add(name);
+				declarations.push(literal_result.declaration);
+				if (literal_result.warnings) {
+					warnings ??= [];
+					warnings.push(...literal_result.warnings);
+				}
+				continue;
+			}
+			// If literal parsing returned an error, use it
+			if (literal_result.error) {
+				return {ok: false, error: literal_result.error};
+			}
+			// Not a literal - fall through to original "unknown class" error
 			return {
 				ok: false,
 				error: {
@@ -203,6 +268,7 @@ export const resolve_composes = (
 				resolution_stack,
 				visited,
 				original_class_name,
+				css_properties,
 			);
 			resolution_stack.delete(name);
 			if (!nested.ok) return nested; // Propagate error

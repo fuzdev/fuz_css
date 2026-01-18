@@ -1021,14 +1021,14 @@
 						"name": "css_literal_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
-						"source_line": 150,
+						"source_line": 151,
 						"type_signature": "CssClassDefinitionInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
 						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: modified_class_interpreter runs first to handle `hover:box` before\ncss_literal_interpreter tries to interpret it as `hover:box` (property:value).",
-						"source_line": 187,
+						"source_line": 188,
 						"type_signature": "CssClassDefinitionInterpreter[]"
 					}
 				],
@@ -1047,15 +1047,15 @@
 						"name": "ResolveComposesResult",
 						"kind": "type",
 						"doc_comment": "Result from resolving a `composes` array to combined declarations.",
-						"source_line": 16,
+						"source_line": 22,
 						"type_signature": "ResolveComposesResult"
 					},
 					{
 						"name": "resolve_class_definition",
 						"kind": "function",
 						"doc_comment": "Resolves a class definition's declaration, handling `composes` composition.\n\nIf the definition has a `composes` property, resolves those classes recursively\nand combines with any explicit `declaration`. If no `composes`, returns the\nexplicit `declaration` directly.",
-						"source_line": 32,
-						"type_signature": "(def: CssClassDefinitionStatic, class_name: string, definitions: Record<string, CssClassDefinition | undefined>): ResolveComposesResult",
+						"source_line": 39,
+						"type_signature": "(def: CssClassDefinitionStatic, class_name: string, definitions: Record<string, CssClassDefinition | undefined>, css_properties?: Set<...> | null): ResolveComposesResult",
 						"return_type": "ResolveComposesResult",
 						"return_description": "Combined declaration or an error",
 						"parameters": [
@@ -1073,15 +1073,21 @@
 								"name": "definitions",
 								"type": "Record<string, CssClassDefinition | undefined>",
 								"description": "- Record of all known class definitions"
+							},
+							{
+								"name": "css_properties",
+								"type": "Set<string> | null",
+								"description": "- Set of valid CSS properties for literal validation, or null to skip",
+								"default_value": "null"
 							}
 						]
 					},
 					{
 						"name": "resolve_composes",
 						"kind": "function",
-						"doc_comment": "Resolves an array of class names to their combined CSS declarations.\n\nRecursively resolves nested `composes` arrays and combines all declarations.\nValidates that referenced classes exist and are resolvable (not rulesets or interpreters).\n\nDeduplication behavior:\n- Diamond dependencies (class reached via different composition branches) are silently skipped\n- Redundant listings (class already included by an earlier sibling in this array) emit a warning",
-						"source_line": 112,
-						"type_signature": "(class_names: string[], definitions: Record<string, CssClassDefinition | undefined>, resolution_stack: Set<string>, visited: Set<string>, original_class_name: string): ResolveComposesResult",
+						"doc_comment": "Resolves an array of class names to their combined CSS declarations.\n\nRecursively resolves nested `composes` arrays and combines all declarations.\nValidates that referenced classes exist and are resolvable (not rulesets or interpreters).\nSupports unmodified CSS literals (e.g., `text-align:center`) in the composes array.\n\nDeduplication behavior:\n- Diamond dependencies (class reached via different composition branches) are silently skipped\n- Redundant listings (class already included by an earlier sibling in this array) emit a warning",
+						"source_line": 123,
+						"type_signature": "(class_names: string[], definitions: Record<string, CssClassDefinition | undefined>, resolution_stack: Set<string>, visited: Set<string>, original_class_name: string, css_properties?: Set<...> | null): ResolveComposesResult",
 						"return_type": "ResolveComposesResult",
 						"return_description": "Combined declarations or an error",
 						"parameters": [
@@ -1109,11 +1115,18 @@
 								"name": "original_class_name",
 								"type": "string",
 								"description": "- The class name being defined (for error messages)"
+							},
+							{
+								"name": "css_properties",
+								"type": "Set<string> | null",
+								"description": "- Set of valid CSS properties for literal validation, or null to skip",
+								"default_value": "null"
 							}
 						]
 					}
 				],
 				"module_comment": "CSS class resolution utilities for composing class definitions.\n\nProvides the `resolve_composes` helper to recursively resolve class names\nto their combined CSS declarations.",
+				"dependencies": ["css_literal.ts"],
 				"dependents": ["css_class_generation.ts", "css_class_interpreters.ts"]
 			},
 			{
@@ -1591,10 +1604,71 @@
 						]
 					},
 					{
+						"name": "LiteralResolutionResult",
+						"kind": "type",
+						"doc_comment": "Result of attempting to resolve a CSS literal for composition.",
+						"source_line": 646,
+						"type_signature": "LiteralResolutionResult"
+					},
+					{
+						"name": "has_modifiers",
+						"kind": "function",
+						"doc_comment": "Checks if a parsed CSS literal has any modifiers.",
+						"source_line": 653,
+						"type_signature": "(parsed: ParsedCssLiteral): boolean",
+						"return_type": "boolean",
+						"parameters": [
+							{
+								"name": "parsed",
+								"type": "ParsedCssLiteral"
+							}
+						]
+					},
+					{
+						"name": "has_extracted_modifiers",
+						"kind": "function",
+						"doc_comment": "Checks if extracted modifiers contain any modifier.\nUseful for tooling that needs to detect modified classes.",
+						"source_line": 661,
+						"type_signature": "(modifiers: ExtractedModifiers): boolean",
+						"return_type": "boolean",
+						"parameters": [
+							{
+								"name": "modifiers",
+								"type": "ExtractedModifiers"
+							}
+						]
+					},
+					{
+						"name": "try_resolve_literal",
+						"kind": "function",
+						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc.).",
+						"source_line": 682,
+						"type_signature": "(class_name: string, css_properties: Set<string> | null, context_class_name: string): LiteralResolutionResult",
+						"return_type": "LiteralResolutionResult",
+						"return_description": "Resolution result with declaration, or error, or null if not a literal",
+						"parameters": [
+							{
+								"name": "class_name",
+								"type": "string",
+								"description": "- The class name to try resolving"
+							},
+							{
+								"name": "css_properties",
+								"type": "Set<string> | null",
+								"description": "- Set of valid CSS properties, or null to skip validation"
+							},
+							{
+								"name": "context_class_name",
+								"type": "string",
+								"description": "- The class being defined (for error messages)"
+							}
+						]
+					},
+					{
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 646,
+						"source_line": 740,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",
@@ -1609,7 +1683,12 @@
 				],
 				"module_comment": "CSS-literal syntax parser, validator, and interpreter.\n\nEnables writing utility classes using actual CSS syntax:\n\n- `display:flex` → `.display\\:flex { display: flex; }`\n- `hover:opacity:80%` → `.hover\\:opacity\\:80\\%:hover { opacity: 80%; }`\n- `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element\n\n@see {@link https://github.com/fuzdev/fuz_css} for documentation",
 				"dependencies": ["modifiers.ts"],
-				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": [
+					"css_class_interpreters.ts",
+					"css_class_resolution.ts",
+					"gen_fuz_css.ts",
+					"vite_plugin_fuz_css.ts"
+				]
 			},
 			{
 				"path": "css_ruleset_parser.ts",
