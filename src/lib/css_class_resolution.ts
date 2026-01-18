@@ -7,6 +7,8 @@
  * @module
  */
 
+import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
+
 import type {InterpreterDiagnostic} from './diagnostics.js';
 import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.js';
 import {
@@ -14,6 +16,7 @@ import {
 	extract_segments,
 	extract_and_validate_modifiers,
 	has_extracted_modifiers,
+	suggest_modifier,
 } from './css_literal.js';
 
 /**
@@ -214,8 +217,35 @@ export const resolve_composes = (
 				}
 				continue;
 			}
-			// If literal parsing returned an error, use it
+			// If literal parsing returned an error, check for modifier typo pattern
 			if (literal_result.error) {
+				// Check for typo'd modifier where last segment is a known class
+				// Handles: hovr:box, md:hovr:box, etc.
+				const prop_match = /Unknown CSS property "([^"]+)"/.exec(literal_result.error.message);
+				if (prop_match) {
+					const failed_prop = prop_match[1]!;
+					const suggested = suggest_modifier(failed_prop);
+					// Only suggest if it's a close typo (edit distance 1)
+					if (suggested && levenshtein_distance(failed_prop, suggested) === 1) {
+						// Check if the last segment is a known class
+						const last_colon = name.lastIndexOf(':');
+						const potential_class = name.slice(last_colon + 1);
+						if (definitions[potential_class]) {
+							// Reconstruct the corrected class name
+							const corrected =
+								name.slice(0, name.lastIndexOf(failed_prop)) + suggested + ':' + potential_class;
+							return {
+								ok: false,
+								error: {
+									level: 'error',
+									class_name: original_class_name,
+									message: `Unknown modifier "${failed_prop}" with class "${potential_class}"`,
+									suggestion: `Did you mean "${corrected}"? Note: modified classes cannot be used in composes`,
+								},
+							};
+						}
+					}
+				}
 				return {ok: false, error: literal_result.error};
 			}
 			// Not a literal - fall through to original "unknown class" error

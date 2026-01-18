@@ -1007,6 +1007,63 @@ describe('resolve_composes with CSS literals', () => {
 		}
 	});
 
+	test('modifier typo with known class suggests correction', () => {
+		const definitions: Record<string, CssClassDefinition> = {
+			box: {declaration: 'display: flex;'},
+		};
+		const result = resolve_composes(
+			['hovr:box'], // typo: hovr → hover
+			definitions,
+			new Set(),
+			new Set(),
+			'card',
+			css_properties,
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.message).toContain('Unknown modifier "hovr"');
+			expect(result.error.suggestion).toContain('hover:box');
+			expect(result.error.suggestion).toContain('cannot be used in composes');
+		}
+	});
+
+	test('modifier typo in middle of chain suggests correction', () => {
+		const definitions: Record<string, CssClassDefinition> = {
+			box: {declaration: 'display: flex;'},
+		};
+		const result = resolve_composes(
+			['md:hovr:box'], // typo in middle: md:hovr:box → md:hover:box
+			definitions,
+			new Set(),
+			new Set(),
+			'card',
+			css_properties,
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.message).toContain('Unknown modifier "hovr"');
+			expect(result.error.suggestion).toContain('md:hover:box');
+		}
+	});
+
+	test('non-typo unknown prefix falls back to property error', () => {
+		const definitions: Record<string, CssClassDefinition> = {
+			box: {declaration: 'display: flex;'},
+		};
+		const result = resolve_composes(
+			['xyz:box'], // not a modifier typo
+			definitions,
+			new Set(),
+			new Set(),
+			'card',
+			css_properties,
+		);
+		expect(result.ok).toBe(false);
+		if (!result.ok) {
+			expect(result.error.message).toContain('Unknown CSS property "xyz"');
+		}
+	});
+
 	test('custom property literal resolves', () => {
 		const result = resolve_composes(
 			['--card-bg:blue'],
