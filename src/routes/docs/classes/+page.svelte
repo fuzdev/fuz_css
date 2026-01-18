@@ -247,18 +247,21 @@ export const gen = gen_fuz_css({
 				These limitations may be revisited in the future.
 			</p>
 			<aside>
-				<p>
-					Property typos like <code>disply:flex</code> suggest <code>display</code>. Modifier typos
-					like <code>hovr:box</code> suggest <code>hover:box</code>.
-				</p>
-				<p>
-					Ruleset classes in <code>composes</code> produce:
-					<code>Cannot reference ruleset class "clickable" in composes array</code>.
-				</p>
-				<p>
-					Circular references produce:
-					<code>Circular reference detected: a → b → a</code>.
-				</p>
+				<p>The system tries to give helpful errors:</p>
+				<ul>
+					<li>
+						property typos like <code>disply:flex</code> suggest <code>display</code>
+					</li>
+					<li>modifier typos like <code>hovr:box</code> suggest <code>hover:box</code></li>
+					<li>
+						ruleset classes in <code>composes</code> produce:
+						<code>Cannot reference ruleset class "clickable" in composes array</code>
+					</li>
+					<li>
+						circular references produce:
+						<code>Circular reference detected: a → b → a</code>
+					</li>
+				</ul>
 			</aside>
 
 			<h4>Generated output</h4>
@@ -285,7 +288,8 @@ export const gen = gen_fuz_css({
 
 			<h4>Modifiers</h4>
 			<p>
-				All composite forms support modifiers. For <code>composes</code> and
+				Composites support <a href="#Modifiers">modifiers</a> like any other class. For
+				<code>composes</code> and
 				<code>declaration</code>
 				composites, declarations are combined and wrapped. For <code>ruleset</code> composites, modifiers
 				are applied to each selector (with smart conflict detection):
@@ -1185,4 +1189,11 @@ const Component = () => <div className={styles} />;`}
 			or composites for repeated patterns.
 		</p>
 	</TomeSection>
+	<hr />
+	<section>
+		<p>
+			<code>fuz_css</code> is still early in development. Your input is welcome in the
+			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>!
+		</p>
+	</section>
 </TomeContent>
