@@ -251,6 +251,7 @@ export const gen = gen_fuz_css({
 				<code>composes</code> arrays because they require wrapper selectors - apply them directly in
 				markup instead. The <code>composes</code> property merges declarations into a single rule,
 				but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be inlined.
+				This limitation may be revisited in the future.
 			</p>
 			<aside>
 				<p>
@@ -1162,9 +1163,9 @@ const Component = () => <div className={styles} />;`}
 				</tr>
 				<tr>
 					<td>arbitrary values</td>
-					<td>DSL (<code>bg-[#fff]</code>)</td>
+					<td>DSL (<code>bg-[#abc]</code>)</td>
 					<td>any (presets)</td>
-					<td>CSS syntax (<code>background:#fff</code>)</td>
+					<td>CSS syntax (<code>background:#abc</code>)</td>
 				</tr>
 				<tr>
 					<td>detection</td>
