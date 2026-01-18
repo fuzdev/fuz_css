@@ -109,18 +109,29 @@ export const format_diagnostic = (d: Diagnostic): string => {
 };
 
 /**
- * Error thrown when CSS generation encounters errors and `on_error: 'throw'` is set.
+ * Error thrown when CSS generation encounters errors or warnings
+ * (depending on `on_error` and `on_warning` settings).
  * Contains the full diagnostics array for programmatic access.
  */
 export class CssGenerationError extends Error {
 	diagnostics: Array<Diagnostic>;
 
 	constructor(diagnostics: Array<Diagnostic>) {
-		const error_count = diagnostics.filter((d) => d.level === 'error').length;
-		const message = `CSS generation failed with ${error_count} error${error_count === 1 ? '' : 's'}:\n${diagnostics
-			.filter((d) => d.level === 'error')
-			.map(format_diagnostic)
-			.join('\n')}`;
+		const errors = diagnostics.filter((d) => d.level === 'error');
+		const warnings = diagnostics.filter((d) => d.level === 'warning');
+
+		const parts: Array<string> = [];
+		if (errors.length > 0) {
+			parts.push(`${errors.length} error${errors.length === 1 ? '' : 's'}`);
+		}
+		if (warnings.length > 0) {
+			parts.push(`${warnings.length} warning${warnings.length === 1 ? '' : 's'}`);
+		}
+
+		const summary = parts.length > 0 ? parts.join(' and ') : '0 issues';
+		const formatted = diagnostics.map(format_diagnostic).join('\n');
+		const message = `CSS generation failed with ${summary}:\n${formatted}`;
+
 		super(message);
 		this.name = 'CssGenerationError';
 		this.diagnostics = diagnostics;

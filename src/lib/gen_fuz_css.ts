@@ -116,10 +116,19 @@ export interface GenFuzCssOptions {
 	class_interpreters?: Array<CssClassDefinitionInterpreter>;
 	/**
 	 * How to handle CSS-literal errors during generation.
-	 * - 'log' (default): Log errors, skip invalid classes, continue
+	 * - 'log': Log errors, skip invalid classes, continue
 	 * - 'throw': Throw on first error, fail the build
+	 * @default 'throw' in CI, 'log' otherwise
 	 */
 	on_error?: 'log' | 'throw';
+	/**
+	 * How to handle warnings during generation.
+	 * - 'log': Log warnings, continue
+	 * - 'throw': Throw on first warning, fail the build
+	 * - 'ignore': Suppress warnings entirely
+	 * @default 'log'
+	 */
+	on_warning?: 'log' | 'throw' | 'ignore';
 	/**
 	 * Classes to always include in the output, regardless of whether they're detected in source files.
 	 * Useful for dynamically generated class names that can't be statically extracted.
@@ -173,7 +182,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		include_builtin_definitions = true,
 		class_definitions: user_class_definitions,
 		class_interpreters = css_class_interpreters,
-		on_error = 'log',
+		on_error = is_ci ? 'throw' : 'log',
+		on_warning = 'log',
 		include_classes,
 		exclude_classes,
 		cache_dir = DEFAULT_CACHE_DIR,
@@ -401,15 +411,22 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			const errors = all_diagnostics.filter((d) => d.level === 'error');
 			const warnings = all_diagnostics.filter((d) => d.level === 'warning');
 
-			// Log all warnings using consistent format
-			for (const warning of warnings) {
-				log.warn(format_diagnostic(warning));
+			// Handle warnings based on on_warning setting
+			if (warnings.length > 0) {
+				if (on_warning === 'throw') {
+					throw new CssGenerationError(warnings);
+				} else if (on_warning === 'log') {
+					for (const warning of warnings) {
+						log.warn(format_diagnostic(warning));
+					}
+				}
+				// 'ignore' - do nothing
 			}
 
 			// Handle errors based on on_error setting
 			if (errors.length > 0) {
 				if (on_error === 'throw') {
-					throw new CssGenerationError(all_diagnostics);
+					throw new CssGenerationError(errors);
 				}
 				// 'log' mode - errors are already logged by interpret_css_literal
 				log.warn(

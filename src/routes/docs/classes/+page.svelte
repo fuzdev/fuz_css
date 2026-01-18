@@ -239,7 +239,8 @@ export const gen = gen_fuz_css({
 					needs.
 				</p>
 				<p>
-					Circular references produce: <code>Circular reference detected: card → panel → card</code>.
+					Circular references produce: <code>Circular reference detected: card → panel → card</code
+					>.
 				</p>
 			</aside>
 
@@ -268,8 +269,8 @@ export const gen = gen_fuz_css({
 			<h4>Modifiers</h4>
 			<p>
 				All composite forms support modifiers. For <code>classes</code> and <code>declaration</code>
-				composites, declarations are combined and wrapped. For <code>ruleset</code> composites,
-				modifiers are applied to each selector (with smart conflict detection):
+				composites, declarations are combined and wrapped. For <code>ruleset</code> composites, modifiers
+				are applied to each selector (with smart conflict detection):
 			</p>
 			<Code
 				content={`<!-- hover:card resolves card's classes, applies :hover -->
@@ -546,13 +547,22 @@ export const gen = gen_fuz_css({
 			</ol>
 			<Code
 				content={`<!-- media + ancestor + state -->
-<div class="md:dark:hover:opacity:80%">
+<div class="md:dark:hover:opacity:83%">
 
 <!-- media + state + pseudo-element -->
 <div class="md:hover:before:opacity:100%">
 
 <!-- multiple states must be alphabetical -->
 <button class="focus:hover:outline:2px~solid~blue">`}
+			/>
+			<p>Generated CSS for <code>md:dark:hover:opacity:83%</code>:</p>
+			<Code
+				lang="css"
+				content={`@media (width >= 48rem) {
+  :root.dark .md\\:dark\\:hover\\:opacity\\:83\\%:hover {
+    opacity: 83%;
+  }
+}`}
 			/>
 		</TomeSection>
 	</TomeSection>
@@ -628,13 +638,33 @@ createRoot(document.getElementById('root')!).render(<App />);`}
 					<code>exclude_classes</code> - classes to exclude from output
 				</li>
 				<li>
-					<code>class_definitions</code> - custom composite class definitions
+					<code>class_definitions</code> - custom class definitions to merge with builtins; can
+					define new classes or override existing ones (see
+					<a href="#Composite-classes">composite classes</a>)
 				</li>
 				<li>
-					<code>filter_file</code> - custom filter for which files to process
+					<code>class_interpreters</code> - custom interpreters for dynamic class generation. Replaces
+					builtins entirely if provided; most users don't need this.
 				</li>
 				<li>
-					<code>on_error</code> - <code>'log'</code> (default) or <code>'throw'</code>
+					<code>include_builtin_definitions</code> - set to <code>false</code> to use only your own
+					<code>class_definitions</code>, excluding all builtin token and composite classes
+				</li>
+				<li>
+					<code>filter_file</code> - custom filter for which files to process. Receives
+					<code>(id: string)</code> and returns <code>boolean</code>:
+					<Code
+						lang="ts"
+						content="filter_file: (id) => id.endsWith('.svelte') && !id.includes('/legacy/'),"
+					/>
+				</li>
+				<li>
+					<code>on_error</code> - <code>'log'</code> or <code>'throw'</code>. Defaults to
+					<code>'throw'</code> in CI, <code>'log'</code> otherwise.
+				</li>
+				<li>
+					<code>on_warning</code> - <code>'log'</code>, <code>'throw'</code>, or
+					<code>'ignore'</code>. Defaults to <code>'log'</code>.
 				</li>
 				<li>
 					<code>cache_dir</code> - cache location (default: <code>.fuz/cache/css</code>)
@@ -977,7 +1007,11 @@ export const gen = gen_fuz_css({
 				</li>
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
-					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only)
+					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
+					<code>`color_a_5 $&#123;base&#125;`</code> extracts <code>color_a_5</code>, but
+					<code>`color_$&#123;hue&#125;_5`</code> cannot be extracted; use <code>@fuz-classes</code>
+					or
+					<code>include_classes</code>)
 				</li>
 				<li>
 					<strong>Svelte 5 runes:</strong> <code>$derived()</code> and <code>$derived.by()</code> for

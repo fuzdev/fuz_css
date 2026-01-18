@@ -108,10 +108,19 @@ export interface VitePluginFuzCssOptions {
 	acorn_plugins?: Array<AcornPlugin>;
 	/**
 	 * How to handle CSS-literal errors during generation.
-	 * - 'log' (default): Log errors, skip invalid classes, continue
+	 * - 'log': Log errors, skip invalid classes, continue
 	 * - 'throw': Throw on first error, fail the build
+	 * @default 'throw' in CI, 'log' otherwise
 	 */
 	on_error?: 'log' | 'throw';
+	/**
+	 * How to handle warnings during generation.
+	 * - 'log': Log warnings, continue
+	 * - 'throw': Throw on first warning, fail the build
+	 * - 'ignore': Suppress warnings entirely
+	 * @default 'log'
+	 */
+	on_warning?: 'log' | 'throw' | 'ignore';
 	/**
 	 * Cache directory relative to project root.
 	 * @default DEFAULT_CACHE_DIR
@@ -150,7 +159,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		include_classes,
 		exclude_classes,
 		acorn_plugins,
-		on_error = 'log',
+		on_error = is_ci ? 'throw' : 'log',
+		on_warning = 'log',
 		cache_dir = DEFAULT_CACHE_DIR,
 	} = options;
 
@@ -286,19 +296,30 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			...result.diagnostics,
 		];
 
-		// Handle errors
+		// Separate errors and warnings
 		const errors = all_diagnostics.filter((d) => d.level === 'error');
-		if (errors.length > 0 && on_error === 'throw') {
-			throw new CssGenerationError(all_diagnostics);
+		const warnings = all_diagnostics.filter((d) => d.level === 'warning');
+
+		// Handle warnings based on on_warning setting
+		if (warnings.length > 0) {
+			if (on_warning === 'throw') {
+				throw new CssGenerationError(warnings);
+			} else if (on_warning === 'log') {
+				for (const d of result.diagnostics.filter((d) => d.level === 'warning')) {
+					log_warn(`[fuz_css] ${d.class_name}: ${d.message}`);
+				}
+			}
+			// 'ignore' - do nothing
 		}
 
-		// Log generation warnings/errors (extraction diagnostics already logged in transform)
-		for (const d of result.diagnostics) {
-			const msg = `[fuz_css] ${d.class_name}: ${d.message}`;
-			if (d.level === 'error') {
-				log_error(msg);
-			} else {
-				log_warn(msg);
+		// Handle errors based on on_error setting
+		if (errors.length > 0) {
+			if (on_error === 'throw') {
+				throw new CssGenerationError(errors);
+			}
+			// Log errors (extraction diagnostics already logged in transform)
+			for (const d of result.diagnostics.filter((d) => d.level === 'error')) {
+				log_error(`[fuz_css] ${d.class_name}: ${d.message}`);
 			}
 		}
 
@@ -478,9 +499,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					const msg = `[fuz_css] ${loc}: ${d.message}`;
 					if (d.level === 'error') {
 						log_error(msg);
-					} else {
+					} else if (on_warning === 'log') {
 						log_warn(msg);
 					}
+					// 'ignore' and 'throw' (handled at generation time) - don't log here
 				}
 			}
 

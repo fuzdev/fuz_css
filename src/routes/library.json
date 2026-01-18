@@ -2177,8 +2177,8 @@
 					{
 						"name": "CssGenerationError",
 						"kind": "class",
-						"doc_comment": "Error thrown when CSS generation encounters errors and `on_error: 'throw'` is set.\nContains the full diagnostics array for programmatic access.",
-						"source_line": 115,
+						"doc_comment": "Error thrown when CSS generation encounters errors or warnings\n(depending on `on_error` and `on_warning` settings).\nContains the full diagnostics array for programmatic access.",
+						"source_line": 116,
 						"extends": ["Error"],
 						"implements": [],
 						"members": [
@@ -2419,7 +2419,13 @@
 								"name": "on_error",
 								"kind": "variable",
 								"type_signature": "'log' | 'throw'",
-								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log' (default): Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log': Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+							},
+							{
+								"name": "on_warning",
+								"kind": "variable",
+								"type_signature": "'log' | 'throw' | 'ignore'",
+								"doc_comment": "How to handle warnings during generation.\n- 'log': Log warnings, continue\n- 'throw': Throw on first warning, fail the build\n- 'ignore': Suppress warnings entirely"
 							},
 							{
 								"name": "include_classes",
@@ -2468,7 +2474,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 169,
+						"source_line": 178,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -5147,7 +5153,13 @@
 								"name": "on_error",
 								"kind": "variable",
 								"type_signature": "'log' | 'throw'",
-								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log' (default): Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log': Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+							},
+							{
+								"name": "on_warning",
+								"kind": "variable",
+								"type_signature": "'log' | 'throw' | 'ignore'",
+								"doc_comment": "How to handle warnings during generation.\n- 'log': Log warnings, continue\n- 'throw': Throw on first warning, fail the build\n- 'ignore': Suppress warnings entirely"
 							},
 							{
 								"name": "cache_dir",
@@ -5161,7 +5173,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 144,
+						"source_line": 153,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [

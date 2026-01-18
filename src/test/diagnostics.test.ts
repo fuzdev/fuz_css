@@ -139,7 +139,7 @@ describe('CssGenerationError', () => {
 		expect(error.message).toContain('class_b');
 	});
 
-	test('excludes warnings from error message', () => {
+	test('includes both errors and warnings in message', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
@@ -162,9 +162,9 @@ describe('CssGenerationError', () => {
 		const error = new CssGenerationError(diagnostics);
 
 		expect(error.message).toContain('1 error');
+		expect(error.message).toContain('1 warning');
 		expect(error.message).toContain('error_class');
-		expect(error.message).not.toContain('warning_class');
-		// But diagnostics array still contains both
+		expect(error.message).toContain('warning_class');
 		expect(error.diagnostics).toHaveLength(2);
 	});
 
@@ -200,7 +200,7 @@ describe('CssGenerationError', () => {
 		expect(error).toBeInstanceOf(CssGenerationError);
 	});
 
-	test('handles zero errors gracefully', () => {
+	test('handles warnings-only (for on_warning throw)', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
@@ -214,7 +214,16 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.message).toContain('0 errors');
+		expect(error.message).toContain('1 warning');
+		expect(error.message).not.toContain('error');
+		expect(error.message).toContain('warn_class');
 		expect(error.diagnostics).toHaveLength(1);
+	});
+
+	test('handles empty diagnostics', () => {
+		const error = new CssGenerationError([]);
+
+		expect(error.message).toContain('0 issues');
+		expect(error.diagnostics).toHaveLength(0);
 	});
 });
