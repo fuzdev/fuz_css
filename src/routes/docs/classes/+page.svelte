@@ -70,8 +70,9 @@
 			<Code content="<div class=&quot;p_md gap_lg color_a_5 bg_1&quot;>" />
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
-				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing when
-				ignored), so the name is consistent across both JS and CSS, instead of converting between
+				use in JS -- imported from <ModuleLink module_path="variables.ts" />, but costing nothing
+				otherwise -- so each name is consistent across both JS and CSS, instead of converting
+				between
 				<code>kebab-case</code>
 				and <code>camelCase</code>. This also makes token classes visually distinct from
 				<a href="#Literal-classes">literal classes</a>; we find this improves readability.
@@ -86,7 +87,7 @@
 			</ul>
 			<aside class="mt_lg">
 				Padding and margin shorthands include <code>_0</code> (and <code>_auto</code> for margin)
-				because of ergonomic benefit: <code>px_0</code> is much shorter than
+				for ergonomics: <code>px_0</code> is much shorter than
 				<code>padding-inline:0</code>. Other properties use literals for raw values.
 			</aside>
 			<h4>Sizing</h4>
@@ -214,17 +215,9 @@ export const gen = gen_fuz_css({
 			</p>
 
 			<h4>Nesting</h4>
-			<p>Composites can reference other composites, enabling layered abstractions:</p>
-			<Code
-				lang="typescript"
-				content={`const composites: Record<string, CssClassDefinition> = {
-	spacing: {composes: ['p_lg', 'gap_md']},
-	surface: {composes: ['bg_1', 'border_radius_md', 'shadow_sm']},
-	panel: {composes: ['spacing', 'surface']}, // combines both
-};`}
-			/>
 			<p>
-				Resolution is depth-first: nested composes are fully resolved before the parent's
+				Composites can compose other composites, enabling layered abstractions. Resolution is
+				depth-first: nested composes are fully resolved before the parent's
 				<code>declaration</code> is appended. Circular references are detected and produce an error.
 			</p>
 
@@ -251,7 +244,7 @@ export const gen = gen_fuz_css({
 				<code>composes</code> arrays because they require wrapper selectors - apply them directly in
 				markup instead. The <code>composes</code> property merges declarations into a single rule,
 				but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be inlined.
-				This limitation may be revisited in the future.
+				These limitations may be revisited in the future.
 			</p>
 			<aside>
 				<p>
@@ -259,12 +252,12 @@ export const gen = gen_fuz_css({
 					like <code>hovr:box</code> suggest <code>hover:box</code>.
 				</p>
 				<p>
-					Ruleset classes produce:
+					Ruleset classes in <code>composes</code> produce:
 					<code>Cannot reference ruleset class "clickable" in composes array</code>.
 				</p>
 				<p>
 					Circular references produce:
-					<code>Circular reference detected: card → panel → card</code>.
+					<code>Circular reference detected: a → b → a</code>.
 				</p>
 			</aside>
 
