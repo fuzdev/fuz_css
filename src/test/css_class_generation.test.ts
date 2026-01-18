@@ -222,10 +222,10 @@ describe('generate_classes_css', () => {
 			expect(result.css).toContain('/*\nLine 1\nLine 2\n*/');
 		});
 
-		test('renders comment on classes-based composite', () => {
+		test('renders comment on composes-based composite', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
-				card: {classes: ['p_lg'], comment: 'Card component'},
+				card: {composes: ['p_lg'], comment: 'Card component'},
 			};
 
 			const result = generate_classes_css({
@@ -608,12 +608,12 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('classes property', () => {
-		test('classes-only composite', () => {
+	describe('composes property', () => {
+		test('composes-only composite', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {classes: ['p_lg', 'rounded']},
+				card: {composes: ['p_lg', 'rounded']},
 			};
 
 			const result = generate_classes_css({
@@ -629,11 +629,11 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('classes + declaration composite', () => {
+		test('composes + declaration composite', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {classes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
 			};
 
 			const result = generate_classes_css({
@@ -650,11 +650,11 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('modifier on classes-based composite', () => {
+		test('modifier on composes-based composite', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {classes: ['p_lg', 'rounded']},
+				card: {composes: ['p_lg', 'rounded']},
 			};
 
 			const result = generate_classes_css({
@@ -670,11 +670,11 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('modifier on classes + declaration composite', () => {
+		test('modifier on composes + declaration composite', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {classes: ['p_lg', 'rounded'], declaration: '--card-bg: blue;'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: blue;'},
 			};
 
 			const result = generate_classes_css({
@@ -691,13 +691,13 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('nested classes composition', () => {
+		test('nested composes composition', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
 				shadow_md: {declaration: 'box-shadow: var(--shadow_md);'},
-				panel_base: {classes: ['p_lg', 'rounded']},
-				panel: {classes: ['panel_base', 'shadow_md']},
+				panel_base: {composes: ['p_lg', 'rounded']},
+				panel: {composes: ['panel_base', 'shadow_md']},
 			};
 
 			const result = generate_classes_css({
@@ -714,11 +714,11 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('modifier on nested classes composition', () => {
+		test('modifier on nested composes composition', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				panel_base: {classes: ['p_lg', 'rounded']},
+				panel_base: {composes: ['p_lg', 'rounded']},
 			};
 
 			const result = generate_classes_css({
@@ -735,10 +735,10 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('unknown class in classes array produces error', () => {
+		test('unknown class in composes array produces error', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
-				card: {classes: ['p_lg', 'unknown_class']},
+				card: {composes: ['p_lg', 'unknown_class']},
 			};
 
 			const result = generate_classes_css({
@@ -753,13 +753,15 @@ describe('generate_classes_css', () => {
 			// Should have an error diagnostic
 			expect(result.diagnostics).toHaveLength(1);
 			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('Unknown class "unknown_class"');
+			expect(result.diagnostics[0]!.message).toContain(
+				'Unknown class "unknown_class" in composes array',
+			);
 		});
 
-		test('circular reference in classes produces error', () => {
+		test('circular reference in composes produces error', () => {
 			const definitions = {
-				a: {classes: ['b']},
-				b: {classes: ['a']},
+				a: {composes: ['b']},
+				b: {composes: ['a']},
 			};
 
 			const result = generate_classes_css({
@@ -775,13 +777,13 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics[0]!.message).toContain('Circular reference');
 		});
 
-		test('ruleset class in classes array produces error', () => {
+		test('ruleset class in composes array produces error', () => {
 			const definitions = {
 				clickable: {
 					ruleset: `.clickable { cursor: pointer; }
 .clickable:hover { opacity: 0.8; }`,
 				},
-				card: {classes: ['clickable']},
+				card: {composes: ['clickable']},
 			};
 
 			const result = generate_classes_css({
@@ -799,7 +801,7 @@ describe('generate_classes_css', () => {
 
 		test('self-referencing class produces error', () => {
 			const definitions = {
-				self_ref: {classes: ['self_ref']},
+				self_ref: {composes: ['self_ref']},
 			};
 
 			const result = generate_classes_css({
@@ -815,9 +817,9 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics[0]!.message).toContain('Circular reference');
 		});
 
-		test('empty classes array produces no CSS output', () => {
+		test('empty composes array produces no CSS output', () => {
 			const definitions = {
-				empty_card: {classes: []},
+				empty_card: {composes: []},
 			};
 
 			const result = generate_classes_css({
@@ -836,9 +838,9 @@ describe('generate_classes_css', () => {
 			// Both branches reference the same base class
 			const definitions = {
 				base: {declaration: 'color: red;'},
-				branch_a: {classes: ['base'], declaration: 'font-size: 1rem;'},
-				branch_b: {classes: ['base'], declaration: 'font-weight: bold;'},
-				diamond: {classes: ['branch_a', 'branch_b']},
+				branch_a: {composes: ['base'], declaration: 'font-size: 1rem;'},
+				branch_b: {composes: ['base'], declaration: 'font-weight: bold;'},
+				diamond: {composes: ['branch_a', 'branch_b']},
 			};
 
 			const result = generate_classes_css({
@@ -861,9 +863,9 @@ describe('generate_classes_css', () => {
 			// hover:diamond should also deduplicate correctly
 			const definitions = {
 				base: {declaration: 'color: red;'},
-				branch_a: {classes: ['base'], declaration: 'font-size: 1rem;'},
-				branch_b: {classes: ['base'], declaration: 'font-weight: bold;'},
-				diamond: {classes: ['branch_a', 'branch_b']},
+				branch_a: {composes: ['base'], declaration: 'font-size: 1rem;'},
+				branch_b: {composes: ['base'], declaration: 'font-weight: bold;'},
+				diamond: {composes: ['branch_a', 'branch_b']},
 			};
 
 			const result = generate_classes_css({
@@ -886,9 +888,9 @@ describe('generate_classes_css', () => {
 
 		test('longer cycle (a → b → c → a) produces error', () => {
 			const definitions = {
-				a: {classes: ['b']},
-				b: {classes: ['c']},
-				c: {classes: ['a']},
+				a: {composes: ['b']},
+				b: {composes: ['c']},
+				c: {composes: ['a']},
 			};
 
 			const result = generate_classes_css({
@@ -910,7 +912,7 @@ describe('generate_classes_css', () => {
 		test('diagnostics include locations when provided', () => {
 			const loc: SourceLocation = {file: 'test.svelte', line: 10, column: 5};
 			const definitions = {
-				card: {classes: ['unknown']},
+				card: {composes: ['unknown']},
 			};
 
 			const result = generate_classes_css({
@@ -927,7 +929,7 @@ describe('generate_classes_css', () => {
 
 		test('diagnostics have null locations when not provided', () => {
 			const definitions = {
-				card: {classes: ['unknown']},
+				card: {composes: ['unknown']},
 			};
 
 			const result = generate_classes_css({
@@ -1393,9 +1395,9 @@ describe('modified_class_interpreter', () => {
 	});
 
 	describe('error propagation', () => {
-		test('modifier on class with unknown classes array produces error', () => {
+		test('modifier on class with unknown composes array produces error', () => {
 			const definitions = {
-				card: {classes: ['unknown_class']},
+				card: {composes: ['unknown_class']},
 			};
 
 			const result = generate_classes_css({
@@ -1410,13 +1412,15 @@ describe('modified_class_interpreter', () => {
 			// Should have error diagnostic
 			expect(result.diagnostics).toHaveLength(1);
 			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('Unknown class "unknown_class"');
+			expect(result.diagnostics[0]!.message).toContain(
+				'Unknown class "unknown_class" in composes array',
+			);
 		});
 
 		test('modifier on class with circular reference produces error', () => {
 			const definitions = {
-				a: {classes: ['b']},
-				b: {classes: ['a']},
+				a: {composes: ['b']},
+				b: {composes: ['a']},
 			};
 
 			const result = generate_classes_css({
@@ -1432,9 +1436,9 @@ describe('modified_class_interpreter', () => {
 			expect(result.diagnostics[0]!.message).toContain('Circular reference');
 		});
 
-		test('modifier on empty classes array produces no output', () => {
+		test('modifier on empty composes array produces no output', () => {
 			const definitions = {
-				empty: {classes: []},
+				empty: {composes: []},
 			};
 
 			const result = generate_classes_css({

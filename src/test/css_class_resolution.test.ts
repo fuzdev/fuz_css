@@ -1,16 +1,16 @@
 import {test, expect, describe} from 'vitest';
 
-import {resolve_classes, resolve_class_definition} from '$lib/css_class_resolution.js';
+import {resolve_composes, resolve_class_definition} from '$lib/css_class_resolution.js';
 import type {CssClassDefinition, CssClassDefinitionStatic} from '$lib/css_class_generation.js';
 
-describe('resolve_classes', () => {
+describe('resolve_composes', () => {
 	describe('simple token class references', () => {
 		test('resolves a single token class', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
 
-			const result = resolve_classes(['p_lg'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['p_lg'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -26,7 +26,7 @@ describe('resolve_classes', () => {
 				gap_sm: {declaration: 'gap: var(--space_sm);'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['p_lg', 'm_md', 'gap_sm'],
 				definitions,
 				new Set(),
@@ -50,7 +50,7 @@ describe('resolve_classes', () => {
 				box: {declaration: 'display: flex; flex-direction: column;'},
 			};
 
-			const result = resolve_classes(['box'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['box'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -59,15 +59,15 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('nested classes resolution', () => {
-		test('resolves nested classes', () => {
+	describe('nested composes resolution', () => {
+		test('resolves nested composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				panel_base: {classes: ['p_lg', 'rounded']},
+				panel_base: {composes: ['p_lg', 'rounded']},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['panel_base'],
 				definitions,
 				new Set(),
@@ -83,16 +83,16 @@ describe('resolve_classes', () => {
 			}
 		});
 
-		test('resolves deeply nested classes', () => {
+		test('resolves deeply nested composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
 				shadow_md: {declaration: 'box-shadow: var(--shadow_md);'},
-				panel_base: {classes: ['p_lg', 'rounded']},
-				panel: {classes: ['panel_base', 'shadow_md']},
+				panel_base: {composes: ['p_lg', 'rounded']},
+				panel: {composes: ['panel_base', 'shadow_md']},
 			};
 
-			const result = resolve_classes(['panel'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['panel'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -103,19 +103,19 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('classes + declaration combination', () => {
-		test('resolves classes with additional declaration', () => {
+	describe('composes + declaration combination', () => {
+		test('resolves composes with additional declaration', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {classes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
 			};
 
-			const result = resolve_classes(['card'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['card'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
-				// Note: The resolved classes come first, then the declaration
+				// Note: The resolved composes come first, then the declaration
 				expect(result.declaration).toBe(
 					'padding: var(--space_lg); border-radius: var(--border_radius_md); --card-bg: var(--bg_1);',
 				);
@@ -126,11 +126,11 @@ describe('resolve_classes', () => {
 	describe('cycle detection', () => {
 		test('detects direct cycle', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				a: {classes: ['b']},
-				b: {classes: ['a']},
+				a: {composes: ['b']},
+				b: {composes: ['a']},
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -142,10 +142,16 @@ describe('resolve_classes', () => {
 
 		test('detects self-reference cycle', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				self_ref: {classes: ['self_ref']},
+				self_ref: {composes: ['self_ref']},
 			};
 
-			const result = resolve_classes(['self_ref'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(
+				['self_ref'],
+				definitions,
+				new Set(),
+				new Set(),
+				'test_class',
+			);
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -156,12 +162,12 @@ describe('resolve_classes', () => {
 
 		test('detects longer cycle', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				a: {classes: ['b']},
-				b: {classes: ['c']},
-				c: {classes: ['a']},
+				a: {composes: ['b']},
+				b: {composes: ['c']},
+				c: {composes: ['a']},
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -172,13 +178,13 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('unknown class error', () => {
+	describe('unknown class in composes error', () => {
 		test('returns error for unknown class', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['p_lg', 'unknown_class'],
 				definitions,
 				new Set(),
@@ -189,27 +195,27 @@ describe('resolve_classes', () => {
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
 				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain('Unknown class "unknown_class"');
+				expect(result.error.message).toContain('Unknown class "unknown_class" in composes array');
 				expect(result.error.class_name).toBe('test_class');
 			}
 		});
 
-		test('returns error for unknown nested class', () => {
+		test('returns error for unknown nested composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				wrapper: {classes: ['nonexistent']},
+				wrapper: {composes: ['nonexistent']},
 			};
 
-			const result = resolve_classes(['wrapper'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['wrapper'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
 				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain('Unknown class "nonexistent"');
+				expect(result.error.message).toContain('Unknown class "nonexistent" in composes array');
 			}
 		});
 	});
 
-	describe('ruleset class error', () => {
+	describe('ruleset class in composes error', () => {
 		test('returns error for ruleset class', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				clickable: {
@@ -218,7 +224,7 @@ describe('resolve_classes', () => {
 				},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['clickable'],
 				definitions,
 				new Set(),
@@ -229,13 +235,15 @@ describe('resolve_classes', () => {
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
 				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain('Cannot reference ruleset class "clickable"');
+				expect(result.error.message).toContain(
+					'Cannot reference ruleset class "clickable" in composes array',
+				);
 				expect(result.error.suggestion).toContain('multiple selectors');
 			}
 		});
 	});
 
-	describe('interpreter pattern error', () => {
+	describe('interpreter pattern in composes error', () => {
 		test('returns error for interpreter pattern', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				'hover:*': {
@@ -244,7 +252,7 @@ describe('resolve_classes', () => {
 				},
 			};
 
-			const result = resolve_classes(['hover:*'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['hover:*'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
@@ -254,11 +262,11 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('empty classes array', () => {
-		test('handles empty classes array', () => {
+	describe('empty composes array', () => {
+		test('handles empty composes array', () => {
 			const definitions: Record<string, CssClassDefinition> = {};
 
-			const result = resolve_classes([], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes([], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -268,14 +276,14 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('classes-only definition', () => {
-		test('resolves classes-only definition', () => {
+	describe('composes-only definition', () => {
+		test('resolves composes-only definition', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
-				flex_center: {classes: ['p_lg']}, // No declaration, just classes
+				flex_center: {composes: ['p_lg']}, // No declaration, just composes
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['flex_center'],
 				definitions,
 				new Set(),
@@ -295,12 +303,12 @@ describe('resolve_classes', () => {
 			// A → B, A → C, B → D, C → D (D reached twice via different paths)
 			const definitions: Record<string, CssClassDefinition> = {
 				d: {declaration: 'color: red;'},
-				b: {classes: ['d'], declaration: 'padding: 10px;'},
-				c: {classes: ['d'], declaration: 'margin: 10px;'},
-				a: {classes: ['b', 'c']},
+				b: {composes: ['d'], declaration: 'padding: 10px;'},
+				c: {composes: ['d'], declaration: 'margin: 10px;'},
+				a: {composes: ['b', 'c']},
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -315,12 +323,12 @@ describe('resolve_classes', () => {
 			// E at bottom, D and F both depend on E, C depends on D and F
 			const definitions: Record<string, CssClassDefinition> = {
 				e: {declaration: 'font-size: 16px;'},
-				d: {classes: ['e'], declaration: 'color: blue;'},
-				f: {classes: ['e'], declaration: 'color: green;'},
-				c: {classes: ['d', 'f']},
+				d: {composes: ['e'], declaration: 'color: blue;'},
+				f: {composes: ['e'], declaration: 'color: green;'},
+				c: {composes: ['d', 'f']},
 			};
 
-			const result = resolve_classes(['c'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['c'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -335,11 +343,11 @@ describe('resolve_classes', () => {
 			// b depends on d, so listing d after b is redundant
 			const definitions: Record<string, CssClassDefinition> = {
 				d: {declaration: 'color: red;'},
-				b: {classes: ['d'], declaration: 'padding: 10px;'},
-				a: {classes: ['b', 'd']}, // d is redundant - already included by b
+				b: {composes: ['d'], declaration: 'padding: 10px;'},
+				a: {composes: ['b', 'd']}, // d is redundant - already included by b
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -357,11 +365,11 @@ describe('resolve_classes', () => {
 			// b depends on d, then a references b, d (redundant), and b again (redundant)
 			const definitions: Record<string, CssClassDefinition> = {
 				d: {declaration: 'color: red;'},
-				b: {classes: ['d'], declaration: 'padding: 10px;'},
-				a: {classes: ['b', 'd', 'b']}, // both d and second b are redundant
+				b: {composes: ['d'], declaration: 'padding: 10px;'},
+				a: {composes: ['b', 'd', 'b']}, // both d and second b are redundant
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -373,13 +381,13 @@ describe('resolve_classes', () => {
 			}
 		});
 
-		test('warns on explicit duplicate in classes array', () => {
+		test('warns on explicit duplicate in composes array', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
-				dup: {classes: ['p_lg', 'p_lg']}, // Explicit duplicate
+				dup: {composes: ['p_lg', 'p_lg']}, // Explicit duplicate
 			};
 
-			const result = resolve_classes(['dup'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['dup'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -395,12 +403,12 @@ describe('resolve_classes', () => {
 			// Both b and c include d (diamond), then d is explicitly listed (redundant)
 			const definitions: Record<string, CssClassDefinition> = {
 				d: {declaration: 'color: red;'},
-				b: {classes: ['d'], declaration: 'padding: 10px;'},
-				c: {classes: ['d'], declaration: 'margin: 10px;'},
-				a: {classes: ['b', 'c', 'd']}, // d via c is diamond, explicit d is redundant
+				b: {composes: ['d'], declaration: 'padding: 10px;'},
+				c: {composes: ['d'], declaration: 'margin: 10px;'},
+				a: {composes: ['b', 'c', 'd']}, // d via c is diamond, explicit d is redundant
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -413,13 +421,13 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('empty nested classes array', () => {
-		test('handles class with empty classes array', () => {
+	describe('empty nested composes array', () => {
+		test('handles class with empty composes array', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				empty_classes: {classes: []},
+				empty_classes: {composes: []},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['empty_classes'],
 				definitions,
 				new Set(),
@@ -433,12 +441,12 @@ describe('resolve_classes', () => {
 			}
 		});
 
-		test('handles class with empty classes array and declaration', () => {
+		test('handles class with empty composes array and declaration', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				with_decl: {classes: [], declaration: 'color: blue;'},
+				with_decl: {composes: [], declaration: 'color: blue;'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['with_decl'],
 				definitions,
 				new Set(),
@@ -453,15 +461,15 @@ describe('resolve_classes', () => {
 		});
 	});
 
-	describe('multi-level nested classes with declarations', () => {
-		test('resolves nested classes with declarations at each level', () => {
+	describe('multi-level nested composes with declarations', () => {
+		test('resolves nested composes with declarations at each level', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				c: {declaration: 'color: red;'},
-				b: {classes: ['c'], declaration: 'padding: 10px;'},
-				a: {classes: ['b'], declaration: 'margin: 20px;'},
+				b: {composes: ['c'], declaration: 'padding: 10px;'},
+				a: {composes: ['b'], declaration: 'margin: 20px;'},
 			};
 
-			const result = resolve_classes(['a'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -475,10 +483,10 @@ describe('resolve_classes', () => {
 		test('keeps duplicate properties for CSS cascade', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				base_padding: {declaration: 'padding: 10px;'},
-				override_padding: {classes: ['base_padding'], declaration: 'padding: 20px;'},
+				override_padding: {composes: ['base_padding'], declaration: 'padding: 20px;'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['override_padding'],
 				definitions,
 				new Set(),
@@ -500,7 +508,7 @@ describe('resolve_classes', () => {
 				spaced: {declaration: '  padding: 10px;  '},
 			};
 
-			const result = resolve_classes(['spaced'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['spaced'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -514,7 +522,7 @@ describe('resolve_classes', () => {
 				b: {declaration: 'padding: 10px;'},
 			};
 
-			const result = resolve_classes(['a', 'b'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['a', 'b'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(true);
 			if (result.ok) {
@@ -527,7 +535,7 @@ describe('resolve_classes', () => {
 				whitespace_only: {declaration: '   '},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['whitespace_only'],
 				definitions,
 				new Set(),
@@ -551,7 +559,7 @@ describe('resolve_classes', () => {
 			};
 
 			// Simulate being called mid-resolution where 'outer' is already in stack
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['inner', 'outer'],
 				definitions,
 				new Set(['outer']),
@@ -571,15 +579,17 @@ describe('resolve_classes', () => {
 		test('propagates ruleset error from deeply nested class', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				clickable: {ruleset: '.clickable { cursor: pointer; }'},
-				wrapper: {classes: ['clickable']},
-				outer: {classes: ['wrapper']},
+				wrapper: {composes: ['clickable']},
+				outer: {composes: ['wrapper']},
 			};
 
-			const result = resolve_classes(['outer'], definitions, new Set(), new Set(), 'test_class');
+			const result = resolve_composes(['outer'], definitions, new Set(), new Set(), 'test_class');
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
-				expect(result.error.message).toContain('Cannot reference ruleset class "clickable"');
+				expect(result.error.message).toContain(
+					'Cannot reference ruleset class "clickable" in composes array',
+				);
 			}
 		});
 	});
@@ -590,7 +600,7 @@ describe('resolve_classes', () => {
 				empty_decl: {declaration: ''},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['empty_decl'],
 				definitions,
 				new Set(),
@@ -614,7 +624,7 @@ describe('resolve_classes', () => {
 				filled: {declaration: 'color: red;'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['empty', 'filled'],
 				definitions,
 				new Set(),
@@ -638,7 +648,7 @@ describe('resolve_classes', () => {
 				filled: {declaration: 'color: red;'},
 			};
 
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['empty1', 'filled', 'empty2'],
 				definitions,
 				new Set(),
@@ -664,7 +674,7 @@ describe('resolve_classes', () => {
 			};
 
 			// valid comes first, then ruleset_class, then another valid
-			const result = resolve_classes(
+			const result = resolve_composes(
 				['valid', 'ruleset_class', 'valid'],
 				definitions,
 				new Set(),
@@ -722,12 +732,12 @@ describe('resolve_class_definition', () => {
 		});
 	});
 
-	describe('classes-only definitions', () => {
-		test('resolves classes array', () => {
+	describe('composes-only definitions', () => {
+		test('resolves composes array', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
-			const def: CssClassDefinitionStatic = {classes: ['p_lg']};
+			const def: CssClassDefinitionStatic = {composes: ['p_lg']};
 
 			const result = resolve_class_definition(def, 'test', definitions);
 
@@ -738,13 +748,13 @@ describe('resolve_class_definition', () => {
 		});
 	});
 
-	describe('classes + declaration definitions', () => {
-		test('combines resolved classes with declaration', () => {
+	describe('composes + declaration definitions', () => {
+		test('combines resolved composes with declaration', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
 			const def: CssClassDefinitionStatic = {
-				classes: ['p_lg'],
+				composes: ['p_lg'],
 				declaration: 'margin: 10px;',
 			};
 
@@ -761,7 +771,7 @@ describe('resolve_class_definition', () => {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
 			const def: CssClassDefinitionStatic = {
-				classes: ['p_lg'],
+				composes: ['p_lg'],
 				declaration: '  margin: 10px;  ',
 			};
 
@@ -773,12 +783,12 @@ describe('resolve_class_definition', () => {
 			}
 		});
 
-		test('warns about empty declaration with classes', () => {
+		test('warns about empty declaration with composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 			};
 			const def: CssClassDefinitionStatic = {
-				classes: ['p_lg'],
+				composes: ['p_lg'],
 				declaration: '',
 			};
 
@@ -808,11 +818,11 @@ describe('resolve_class_definition', () => {
 	});
 
 	describe('self-reference prevention', () => {
-		test('detects self-reference in classes', () => {
+		test('detects self-reference in composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				self_ref: {classes: ['self_ref']},
+				self_ref: {composes: ['self_ref']},
 			};
-			const def: CssClassDefinitionStatic = {classes: ['self_ref']};
+			const def: CssClassDefinitionStatic = {composes: ['self_ref']};
 
 			// Note: resolve_class_definition adds the class name to the stack
 			const result = resolve_class_definition(def, 'self_ref', definitions);
@@ -827,13 +837,13 @@ describe('resolve_class_definition', () => {
 	describe('error propagation', () => {
 		test('propagates unknown class error', () => {
 			const definitions: Record<string, CssClassDefinition> = {};
-			const def: CssClassDefinitionStatic = {classes: ['nonexistent']};
+			const def: CssClassDefinitionStatic = {composes: ['nonexistent']};
 
 			const result = resolve_class_definition(def, 'test', definitions);
 
 			expect(result.ok).toBe(false);
 			if (!result.ok) {
-				expect(result.error.message).toContain('Unknown class "nonexistent"');
+				expect(result.error.message).toContain('Unknown class "nonexistent" in composes array');
 			}
 		});
 	});

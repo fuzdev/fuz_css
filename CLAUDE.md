@@ -159,7 +159,7 @@ import 'virtual:fuz.css';
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class registry
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Token class template generators
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite classes (`.box`, `.row`, `.column`, `.ellipsis`, `.pane`, `.panel`)
-- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - `resolve_classes()` for composing definitions
+- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - `resolve_composes()` for composing definitions
 - [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - `modified_class_interpreter` and `css_literal_interpreter`
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
 - [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing, selector modification

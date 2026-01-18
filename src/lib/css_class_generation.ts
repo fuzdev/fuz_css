@@ -48,17 +48,17 @@ export interface CssClassDefinitionBase {
 	comment?: string;
 }
 
-/** Pure utility composition (classes only). */
+/** Pure utility composition (composes only). */
 export interface CssClassDefinitionComposition extends CssClassDefinitionBase {
-	classes: Array<string>;
+	composes: Array<string>;
 	declaration?: never;
 	ruleset?: never;
 }
 
-/** Custom CSS declaration (optionally seeded with classes). */
+/** Custom CSS declaration (optionally seeded with composes). */
 export interface CssClassDefinitionDeclaration extends CssClassDefinitionBase {
 	declaration: string;
-	classes?: Array<string>;
+	composes?: Array<string>;
 	ruleset?: never;
 }
 
@@ -231,8 +231,8 @@ export const generate_classes_css = (
 			}
 		}
 
-		// Handle classes-based or declaration-based definitions
-		if ('classes' in v || 'declaration' in v) {
+		// Handle composes-based or declaration-based definitions
+		if ('composes' in v || 'declaration' in v) {
 			const resolution_result = resolve_class_definition(v, c, class_definitions);
 			if (!resolution_result.ok) {
 				// Add error diagnostic and skip this class

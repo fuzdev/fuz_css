@@ -1,7 +1,7 @@
 /**
  * CSS class resolution utilities for composing class definitions.
  *
- * Provides the `resolve_classes` helper to recursively resolve class names
+ * Provides the `resolve_composes` helper to recursively resolve class names
  * to their combined CSS declarations.
  *
  * @module
@@ -11,17 +11,17 @@ import type {InterpreterDiagnostic} from './diagnostics.js';
 import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.js';
 
 /**
- * Result from resolving a `classes` array to combined declarations.
+ * Result from resolving a `composes` array to combined declarations.
  */
-export type ResolveClassesResult =
+export type ResolveComposesResult =
 	| {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null}
 	| {ok: false; error: InterpreterDiagnostic};
 
 /**
- * Resolves a class definition's declaration, handling `classes` composition.
+ * Resolves a class definition's declaration, handling `composes` composition.
  *
- * If the definition has a `classes` property, resolves those classes recursively
- * and combines with any explicit `declaration`. If no `classes`, returns the
+ * If the definition has a `composes` property, resolves those classes recursively
+ * and combines with any explicit `declaration`. If no `composes`, returns the
  * explicit `declaration` directly.
  *
  * @param def - The class definition to resolve
@@ -33,13 +33,13 @@ export const resolve_class_definition = (
 	def: CssClassDefinitionStatic,
 	class_name: string,
 	definitions: Record<string, CssClassDefinition | undefined>,
-): ResolveClassesResult => {
+): ResolveComposesResult => {
 	let warnings: Array<InterpreterDiagnostic> | null = null;
 
-	// Handle classes-based definitions
-	if ('classes' in def && def.classes) {
-		const result = resolve_classes(
-			def.classes,
+	// Handle composes-based definitions
+	if ('composes' in def && def.composes) {
+		const result = resolve_composes(
+			def.composes,
 			definitions,
 			new Set([class_name]),
 			new Set(),
@@ -93,7 +93,7 @@ export const resolve_class_definition = (
 /**
  * Resolves an array of class names to their combined CSS declarations.
  *
- * Recursively resolves nested `classes` arrays and combines all declarations.
+ * Recursively resolves nested `composes` arrays and combines all declarations.
  * Validates that referenced classes exist and are resolvable (not rulesets or interpreters).
  *
  * Deduplication behavior:
@@ -109,13 +109,13 @@ export const resolve_class_definition = (
  * @mutates resolution_stack - Temporarily adds/removes names during recursion
  * @mutates visited - Adds resolved class names for deduplication
  */
-export const resolve_classes = (
+export const resolve_composes = (
 	class_names: Array<string>,
 	definitions: Record<string, CssClassDefinition | undefined>,
 	resolution_stack: Set<string>,
 	visited: Set<string>,
 	original_class_name: string,
-): ResolveClassesResult => {
+): ResolveComposesResult => {
 	const declarations: Array<string> = [];
 	let warnings: Array<InterpreterDiagnostic> | null = null;
 
@@ -159,7 +159,7 @@ export const resolve_classes = (
 				error: {
 					level: 'error',
 					class_name: original_class_name,
-					message: `Unknown class "${name}" in classes array`,
+					message: `Unknown class "${name}" in composes array`,
 					suggestion: `Check that "${name}" is defined in class_definitions`,
 				},
 			};
@@ -172,20 +172,20 @@ export const resolve_classes = (
 				error: {
 					level: 'error',
 					class_name: original_class_name,
-					message: `Cannot reference interpreter pattern "${name}" in classes array`,
+					message: `Cannot reference interpreter pattern "${name}" in composes array`,
 					suggestion: 'Only static class definitions can be referenced',
 				},
 			};
 		}
 
-		// Ruleset not allowed in classes
+		// Ruleset not allowed in composes
 		if ('ruleset' in def && def.ruleset) {
 			return {
 				ok: false,
 				error: {
 					level: 'error',
 					class_name: original_class_name,
-					message: `Cannot reference ruleset class "${name}" in classes array`,
+					message: `Cannot reference ruleset class "${name}" in composes array`,
 					suggestion: 'Ruleset classes have multiple selectors and cannot be inlined',
 				},
 			};
@@ -194,11 +194,11 @@ export const resolve_classes = (
 		// Mark as visited before processing (for deduplication)
 		visited.add(name);
 
-		// Recursive resolution for nested classes
-		if ('classes' in def && def.classes) {
+		// Recursive resolution for nested composes
+		if ('composes' in def && def.composes) {
 			resolution_stack.add(name);
-			const nested = resolve_classes(
-				def.classes,
+			const nested = resolve_composes(
+				def.composes,
 				definitions,
 				resolution_stack,
 				visited,

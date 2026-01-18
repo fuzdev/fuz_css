@@ -65,8 +65,8 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		}
 		const pseudo_element_css = modifiers.pseudo_element?.css ?? '';
 
-		// Handle classes-based or declaration-based definitions
-		if ('classes' in base_class || 'declaration' in base_class) {
+		// Handle composes-based or declaration-based definitions
+		if ('composes' in base_class || 'declaration' in base_class) {
 			const resolution_result = resolve_class_definition(
 				base_class,
 				base_class_name,

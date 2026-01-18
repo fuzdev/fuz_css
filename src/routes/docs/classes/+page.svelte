@@ -160,14 +160,14 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 		\`,
 	},
 
-	// 2. classes only - compose existing token/composite classes
+	// 2. composes only - compose existing token/composite classes
 	centered: {
-		classes: ['box', 'text-align:center'],
+		composes: ['box', 'text-align:center'],
 	},
 
-	// 3. classes + declaration - compose then extend
+	// 3. composes + declaration - compose then extend
 	centered: {
-		classes: ['box'],
+		composes: ['box'],
 		declaration: 'text-align: center;',
 	},
 
@@ -210,8 +210,8 @@ export const gen = gen_fuz_css({
 });`}
 			/>
 			<p>
-				The <code>classes</code> property resolves referenced classes and combines their
-				declarations. When both <code>classes</code> and <code>declaration</code> are present, the explicit
+				The <code>composes</code> property resolves referenced classes and combines their
+				declarations. When both <code>composes</code> and <code>declaration</code> are present, the explicit
 				declaration comes last (winning in the cascade for duplicate properties).
 			</p>
 
@@ -220,17 +220,17 @@ export const gen = gen_fuz_css({
 			<Code
 				lang="typescript"
 				content={`const composites: Record<string, CssClassDefinition> = {
-	spacing: {classes: ['p_lg', 'gap_md']},
-	surface: {classes: ['bg_1', 'border_radius_md', 'shadow_sm']},
-	panel: {classes: ['spacing', 'surface']}, // combines both
+	spacing: {composes: ['p_lg', 'gap_md']},
+	surface: {composes: ['bg_1', 'border_radius_md', 'shadow_sm']},
+	panel: {composes: ['spacing', 'surface']}, // combines both
 };`}
 			/>
 			<p>
-				Resolution is depth-first: nested classes are fully resolved before the parent's
+				Resolution is depth-first: nested composes are fully resolved before the parent's
 				<code>declaration</code> is appended. Circular references are detected and produce an error.
 			</p>
 
-			<h4>What <code>classes</code> can reference</h4>
+			<h4>What <code>composes</code> can reference</h4>
 			<ul>
 				<li>
 					token classes (<code>p_lg</code>, <code>color_a_5</code>) - resolved to their declarations
@@ -239,20 +239,20 @@ export const gen = gen_fuz_css({
 					composites with <code>declaration</code> - the declaration is included
 				</li>
 				<li>
-					composites with <code>classes</code> - recursively resolved
+					composites with <code>composes</code> - recursively resolved
 				</li>
 			</ul>
 			<p>
 				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
-				<code>classes</code> because they define their own selectors. The <code>classes</code>
+				<code>composes</code> because they define their own selectors. The <code>composes</code>
 				property merges declarations into a single rule, but multi-selector patterns like
 				<code>.clickable:hover {'{ ... }'}</code> cannot be inlined. Apply ruleset classes directly in
 				markup alongside other classes.
 			</p>
 			<aside>
 				<p>
-					If you reference a ruleset class in <code>classes</code>, you'll see:
-					<code>Cannot reference ruleset class "clickable" in classes array</code>. Apply the class
+					If you reference a ruleset class in <code>composes</code>, you'll see:
+					<code>Cannot reference ruleset class "clickable" in composes array</code>. Apply the class
 					directly in your markup instead -- the ruleset already contains all the selectors it
 					needs.
 				</p>
@@ -267,9 +267,9 @@ export const gen = gen_fuz_css({
 			<Code
 				lang="typescript"
 				content={`const composites: Record<string, CssClassDefinition> = {
-	card_base: {classes: ['p_lg', 'shadow_md']},
+	card_base: {composes: ['p_lg', 'shadow_md']},
 	card: {
-		classes: ['card_base'],
+		composes: ['card_base'],
 		declaration: 'border: 1px solid var(--border_color);'
 	},
 };`}
@@ -286,18 +286,19 @@ export const gen = gen_fuz_css({
 
 			<h4>Modifiers</h4>
 			<p>
-				All composite forms support modifiers. For <code>classes</code> and <code>declaration</code>
+				All composite forms support modifiers. For <code>composes</code> and
+				<code>declaration</code>
 				composites, declarations are combined and wrapped. For <code>ruleset</code> composites, modifiers
 				are applied to each selector (with smart conflict detection):
 			</p>
 			<Code
-				content={`<!-- hover:card resolves card's classes, applies :hover -->
+				content={`<!-- hover:card resolves card's composes, applies :hover -->
 <div class="hover:card md:dark:card md:clickable">`}
 			/>
 
 			<h4>Builtin composites</h4>
 			<p>
-				<strong>Composable</strong> (can be used in <code>classes</code> arrays):
+				<strong>Composable</strong> (can be used in <code>composes</code> arrays):
 			</p>
 			<ul>
 				<li><code>.box</code> - centered flex container</li>

@@ -554,13 +554,13 @@
 					{
 						"name": "CssClassDefinitionComposition",
 						"kind": "type",
-						"doc_comment": "Pure utility composition (classes only).",
+						"doc_comment": "Pure utility composition (composes only).",
 						"source_line": 52,
 						"type_signature": "CssClassDefinitionComposition",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
 							{
-								"name": "classes",
+								"name": "composes",
 								"kind": "variable",
 								"type_signature": "Array<string>"
 							},
@@ -579,7 +579,7 @@
 					{
 						"name": "CssClassDefinitionDeclaration",
 						"kind": "type",
-						"doc_comment": "Custom CSS declaration (optionally seeded with classes).",
+						"doc_comment": "Custom CSS declaration (optionally seeded with composes).",
 						"source_line": 59,
 						"type_signature": "CssClassDefinitionDeclaration",
 						"extends": ["CssClassDefinitionBase"],
@@ -590,7 +590,7 @@
 								"type_signature": "string"
 							},
 							{
-								"name": "classes",
+								"name": "composes",
 								"kind": "variable",
 								"type_signature": "Array<string>"
 							},
@@ -1044,19 +1044,19 @@
 				"path": "css_class_resolution.ts",
 				"declarations": [
 					{
-						"name": "ResolveClassesResult",
+						"name": "ResolveComposesResult",
 						"kind": "type",
-						"doc_comment": "Result from resolving a `classes` array to combined declarations.",
+						"doc_comment": "Result from resolving a `composes` array to combined declarations.",
 						"source_line": 16,
-						"type_signature": "ResolveClassesResult"
+						"type_signature": "ResolveComposesResult"
 					},
 					{
 						"name": "resolve_class_definition",
 						"kind": "function",
-						"doc_comment": "Resolves a class definition's declaration, handling `classes` composition.\n\nIf the definition has a `classes` property, resolves those classes recursively\nand combines with any explicit `declaration`. If no `classes`, returns the\nexplicit `declaration` directly.",
+						"doc_comment": "Resolves a class definition's declaration, handling `composes` composition.\n\nIf the definition has a `composes` property, resolves those classes recursively\nand combines with any explicit `declaration`. If no `composes`, returns the\nexplicit `declaration` directly.",
 						"source_line": 32,
-						"type_signature": "(def: CssClassDefinitionStatic, class_name: string, definitions: Record<string, CssClassDefinition | undefined>): ResolveClassesResult",
-						"return_type": "ResolveClassesResult",
+						"type_signature": "(def: CssClassDefinitionStatic, class_name: string, definitions: Record<string, CssClassDefinition | undefined>): ResolveComposesResult",
+						"return_type": "ResolveComposesResult",
 						"return_description": "Combined declaration or an error",
 						"parameters": [
 							{
@@ -1077,12 +1077,12 @@
 						]
 					},
 					{
-						"name": "resolve_classes",
+						"name": "resolve_composes",
 						"kind": "function",
-						"doc_comment": "Resolves an array of class names to their combined CSS declarations.\n\nRecursively resolves nested `classes` arrays and combines all declarations.\nValidates that referenced classes exist and are resolvable (not rulesets or interpreters).\n\nDeduplication behavior:\n- Diamond dependencies (class reached via different composition branches) are silently skipped\n- Redundant listings (class already included by an earlier sibling in this array) emit a warning",
+						"doc_comment": "Resolves an array of class names to their combined CSS declarations.\n\nRecursively resolves nested `composes` arrays and combines all declarations.\nValidates that referenced classes exist and are resolvable (not rulesets or interpreters).\n\nDeduplication behavior:\n- Diamond dependencies (class reached via different composition branches) are silently skipped\n- Redundant listings (class already included by an earlier sibling in this array) emit a warning",
 						"source_line": 112,
-						"type_signature": "(class_names: string[], definitions: Record<string, CssClassDefinition | undefined>, resolution_stack: Set<string>, visited: Set<string>, original_class_name: string): ResolveClassesResult",
-						"return_type": "ResolveClassesResult",
+						"type_signature": "(class_names: string[], definitions: Record<string, CssClassDefinition | undefined>, resolution_stack: Set<string>, visited: Set<string>, original_class_name: string): ResolveComposesResult",
+						"return_type": "ResolveComposesResult",
 						"return_description": "Combined declarations or an error",
 						"parameters": [
 							{
@@ -1113,7 +1113,7 @@
 						]
 					}
 				],
-				"module_comment": "CSS class resolution utilities for composing class definitions.\n\nProvides the `resolve_classes` helper to recursively resolve class names\nto their combined CSS declarations.",
+				"module_comment": "CSS class resolution utilities for composing class definitions.\n\nProvides the `resolve_composes` helper to recursively resolve class names\nto their combined CSS declarations.",
 				"dependents": ["css_class_generation.ts", "css_class_interpreters.ts"]
 			},
 			{
