@@ -1173,6 +1173,12 @@ const Component = () => <div className={styles} />;`}
 					<td>regex</td>
 					<td>AST (more capable, slower)</td>
 				</tr>
+				<tr>
+					<td>token source</td>
+					<td>CSS (<code>@theme</code>)</td>
+					<td>JS/TS config</td>
+					<td>TypeScript (importable)</td>
+				</tr>
 			</tbody>
 		</table>
 		<p>
@@ -1180,7 +1186,8 @@ const Component = () => <div className={styles} />;`}
 			TailwindCSS's DSL like UnoCSS.
 		</p>
 		<p>
-			fuz_css fits best when you prefer semantic HTML with styled defaults. The tradeoff is a more
+			fuz_css fits best when you prefer semantic HTML with styled defaults. Design tokens are
+			defined in TypeScript and can be imported for typesafe runtime access. The tradeoff is a more
 			verbose literal syntax, which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate,
 			or composites for repeated patterns.
 		</p>
