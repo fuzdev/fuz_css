@@ -317,7 +317,7 @@ export const gen = gen_fuz_css({
 				<li><code>.box</code> - centered flex container</li>
 				<li><code>.row</code> - horizontal flex row</li>
 				<li><code>.column</code> - vertical flex column</li>
-				<li><code>.formatted</code> - formatted text block</li>
+				<li><code>.formatted</code> - preserves whitespace with word-wrap</li>
 				<li><code>.ellipsis</code> - text overflow ellipsis</li>
 				<li><code>.pane</code> - pane container</li>
 				<li><code>.panel</code> - panel container</li>
@@ -624,40 +624,29 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 		<TomeSection>
 			<TomeSectionHeader text="Vite plugin" tag="h3" />
 			<p>
-				The Vite plugin uses transform-based extraction to generate CSS on-demand. It works with
-				Svelte and plain HTML/TS/JS out of the box, plus JSX frameworks (React, Preact, Solid, Vue
-				JSX) via the <code>acorn-jsx</code> plugin.
+				The Vite plugin extracts classes and generates CSS on-demand. It works with Svelte and plain
+				HTML/TS/JS out of the box. JSX frameworks (React, Preact, Solid) require the
+				<code>acorn-jsx</code> plugin -- see <a href="#React-and-JSX">React and JSX</a> below.
 			</p>
-			<Code lang={null} content="npm i -D acorn-jsx" />
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
 import {defineConfig} from 'vite';
-import react from '@vitejs/plugin-react';
-import jsx from 'acorn-jsx';
+import {sveltekit} from '@sveltejs/kit/vite';
 import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
 
 export default defineConfig({
-  plugins: [
-    react(),
-    vite_plugin_fuz_css({
-      acorn_plugins: [jsx()],
-    }),
-  ],
+  plugins: [sveltekit(), vite_plugin_fuz_css()],
 });`}
 			/>
-			<p>Then import the virtual module in your entry file:</p>
+			<p>
+				Import the virtual module in your entry file, <code>src/routes/+layout.svelte</code> for SvelteKit:
+			</p>
 			<Code
 				lang="ts"
-				content={`// main.tsx
-import '@fuzdev/fuz_css/style.css';
+				content={`import '@fuzdev/fuz_css/style.css';
 import '@fuzdev/fuz_css/theme.css'; // or bring your own
-import 'virtual:fuz.css'; // generated on-demand
-
-import {createRoot} from 'react-dom/client';
-import App from './App';
-
-createRoot(document.getElementById('root')!).render(<App />);`}
+import 'virtual:fuz.css'; // generated on-demand`}
 			/>
 			<p>
 				The plugin extracts classes from files as Vite processes them, including from
@@ -677,17 +666,17 @@ createRoot(document.getElementById('root')!).render(<App />);`}
 					<code>exclude_classes</code> - classes to exclude from output
 				</li>
 				<li>
-					<code>class_definitions</code> - custom class definitions to merge with builtins; can
+					<code>class_definitions</code> - custom class definitions to merge with defaults; can
 					define new classes or override existing ones (see
 					<a href="#Composite-classes">composite classes</a>)
 				</li>
 				<li>
 					<code>class_interpreters</code> - custom interpreters for dynamic class generation. Replaces
-					builtins entirely if provided; most users don't need this.
+					the default interpreters entirely if provided; most users don't need this.
 				</li>
 				<li>
 					<code>include_builtin_definitions</code> - set to <code>false</code> to use only your own
-					<code>class_definitions</code>, excluding all builtin token and composite classes
+					<code>class_definitions</code>, excluding all default token and composite classes
 				</li>
 				<li>
 					<code>filter_file</code> - custom filter for which files to process. Receives
@@ -726,16 +715,19 @@ declare module 'virtual:fuz.css' {
 			<TomeSectionHeader text="Gro generator" tag="h3" />
 			<p>
 				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, create a
-				<code>.gen.css.ts</code> file anywhere in <code>src/</code>:
+				<code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
 			</p>
 			<Code
 				lang="ts"
-				content={`// src/fuz.gen.css.ts (or src/routes/fuz.gen.css.ts, etc)
+				content={`// src/routes/fuz.gen.css.ts for SvelteKit,
+// or src/fuz.gen.css.ts, src/fuzClasses.gen.css.ts, etc
 import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
 
 export const gen = gen_fuz_css();`}
 			/>
-			<p>Then import the generated file:</p>
+			<p>
+				Then import the generated file, in <code>src/routes/+layout.svelte</code> for SvelteKit:
+			</p>
 			<Code
 				lang="ts"
 				content={`import '@fuzdev/fuz_css/style.css';
@@ -1106,7 +1098,7 @@ const Component = () => <div className={styles} />;`}
 		<p>
 			Interpreters dynamically generate CSS for class names that aren't in the static definitions
 			(which can be extended via <code>class_definitions</code> or replaced with
-			<code>include_builtin_definitions: false</code>). The builtin
+			<code>include_builtin_definitions: false</code>). The default
 			<a href="#Literal-classes">CSS-literal syntax</a> and
 			<a href="#Modifiers">modifier support</a> are both implemented as interpreters, which you can extend
 			or replace.
@@ -1150,7 +1142,7 @@ vite_plugin_fuz_css({
 			This enables full programmatic control over class-to-CSS generation.
 		</p>
 		<aside>
-			Custom interpreters replace the builtins entirely, so include <code
+			Custom interpreters replace the defaults entirely, so include <code
 				>...css_class_interpreters</code
 			>
 			to preserve CSS-literal and modified-class support. This area is experimental and the API may change.
