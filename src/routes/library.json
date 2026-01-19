@@ -2620,70 +2620,84 @@
 						"name": "MEDIA_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of media modifier names to their CSS output",
-						"source_line": 122,
+						"source_line": 137,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "ANCESTOR_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of ancestor modifier names to their CSS output",
-						"source_line": 127,
+						"source_line": 142,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "STATE_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of state modifier names to their CSS output",
-						"source_line": 132,
+						"source_line": 147,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "PSEUDO_ELEMENT_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of pseudo-element modifier names to their CSS output",
-						"source_line": 137,
+						"source_line": 152,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "ALL_MODIFIER_NAMES",
 						"kind": "variable",
 						"doc_comment": "All modifier names for quick lookup",
-						"source_line": 142,
+						"source_line": 157,
 						"type_signature": "Set<string>"
 					},
 					{
 						"name": "ARBITRARY_MIN_WIDTH_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for arbitrary min-width breakpoints: `min-width(800px):`",
-						"source_line": 147,
+						"source_line": 162,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "ARBITRARY_MAX_WIDTH_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for arbitrary max-width breakpoints: `max-width(600px):`",
-						"source_line": 152,
+						"source_line": 167,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_CHILD_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-child: `nth-child(2n+1):`",
-						"source_line": 157,
+						"source_line": 172,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "NTH_LAST_CHILD_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`",
+						"source_line": 177,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_OF_TYPE_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-of-type: `nth-of-type(2n):`",
-						"source_line": 162,
+						"source_line": 182,
+						"type_signature": "RegExp"
+					},
+					{
+						"name": "NTH_LAST_OF_TYPE_PATTERN",
+						"kind": "variable",
+						"doc_comment": "Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`",
+						"source_line": 187,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "parse_arbitrary_breakpoint",
 						"kind": "function",
 						"doc_comment": "Parses an arbitrary breakpoint modifier.",
-						"source_line": 169,
+						"source_line": 194,
 						"type_signature": "(segment: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The CSS media query or null if not an arbitrary breakpoint",
@@ -2697,8 +2711,8 @@
 					{
 						"name": "parse_parameterized_state",
 						"kind": "function",
-						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-of-type).",
-						"source_line": 188,
+						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).",
+						"source_line": 213,
 						"type_signature": "(segment: string): { name: string; css: string; type: \"state\"; } | null",
 						"return_type": "{ name: string; css: string; type: \"state\"; } | null",
 						"return_description": "Object with name (including parameter) and CSS, or null if not parameterized",
@@ -2713,7 +2727,7 @@
 						"name": "get_modifier",
 						"kind": "function",
 						"doc_comment": "Gets the modifier definition for a segment.\nHandles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).",
-						"source_line": 218,
+						"source_line": 261,
 						"type_signature": "(segment: string): (ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_type": "(ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_description": "The modifier definition or null if not a known modifier",
@@ -2728,7 +2742,7 @@
 						"name": "get_all_modifier_names",
 						"kind": "function",
 						"doc_comment": "Gets all modifier names for error message suggestions.",
-						"source_line": 260,
+						"source_line": 303,
 						"type_signature": "(): string[]",
 						"return_type": "string[]",
 						"parameters": []

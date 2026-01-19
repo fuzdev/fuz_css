@@ -66,6 +66,8 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{name: 'light', type: 'ancestor', css: ':root.light'},
 
 	// State modifiers - interaction (ordered for proper cascade: LVFHA)
+	{name: 'any-link', type: 'state', css: ':any-link'},
+	{name: 'link', type: 'state', css: ':link'},
 	{name: 'visited', type: 'state', css: ':visited', order: 1},
 	{name: 'focus-within', type: 'state', css: ':focus-within', order: 2},
 	{name: 'focus', type: 'state', css: ':focus', order: 3},
@@ -75,6 +77,8 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{name: 'target', type: 'state', css: ':target', order: 7},
 
 	// State modifiers - form states
+	{name: 'autofill', type: 'state', css: ':autofill'},
+	{name: 'blank', type: 'state', css: ':blank'},
 	{name: 'disabled', type: 'state', css: ':disabled'},
 	{name: 'enabled', type: 'state', css: ':enabled'},
 	{name: 'checked', type: 'state', css: ':checked'},
@@ -96,19 +100,30 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{name: 'first', type: 'state', css: ':first-child'},
 	{name: 'last', type: 'state', css: ':last-child'},
 	{name: 'only', type: 'state', css: ':only-child'},
+	{name: 'first-of-type', type: 'state', css: ':first-of-type'},
+	{name: 'last-of-type', type: 'state', css: ':last-of-type'},
+	{name: 'only-of-type', type: 'state', css: ':only-of-type'},
 	{name: 'odd', type: 'state', css: ':nth-child(odd)'},
 	{name: 'even', type: 'state', css: ':nth-child(even)'},
 	{name: 'empty', type: 'state', css: ':empty'},
-	// Note: nth-child(N) and nth-of-type(N) are handled dynamically via parse_parameterized_state
+	// Note: nth-child(N), nth-last-child(N), nth-of-type(N), nth-last-of-type(N) are handled dynamically
 
 	// State modifiers - UI states
 	{name: 'fullscreen', type: 'state', css: ':fullscreen'},
 	{name: 'modal', type: 'state', css: ':modal'},
+	{name: 'open', type: 'state', css: ':open'},
 	{name: 'popover-open', type: 'state', css: ':popover-open'},
+
+	// State modifiers - media states
+	{name: 'paused', type: 'state', css: ':paused'},
+	{name: 'playing', type: 'state', css: ':playing'},
 
 	// Pseudo-element modifiers
 	{name: 'before', type: 'pseudo-element', css: '::before'},
 	{name: 'after', type: 'pseudo-element', css: '::after'},
+	{name: 'cue', type: 'pseudo-element', css: '::cue'},
+	{name: 'first-letter', type: 'pseudo-element', css: '::first-letter'},
+	{name: 'first-line', type: 'pseudo-element', css: '::first-line'},
 	{name: 'placeholder', type: 'pseudo-element', css: '::placeholder'},
 	{name: 'selection', type: 'pseudo-element', css: '::selection'},
 	{name: 'marker', type: 'pseudo-element', css: '::marker'},
@@ -157,9 +172,19 @@ export const ARBITRARY_MAX_WIDTH_PATTERN = /^max-width\(([^)]+)\)$/;
 export const NTH_CHILD_PATTERN = /^nth-child\(([^)]+)\)$/;
 
 /**
+ * Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`
+ */
+export const NTH_LAST_CHILD_PATTERN = /^nth-last-child\(([^)]+)\)$/;
+
+/**
  * Pattern for parameterized nth-of-type: `nth-of-type(2n):`
  */
 export const NTH_OF_TYPE_PATTERN = /^nth-of-type\(([^)]+)\)$/;
+
+/**
+ * Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`
+ */
+export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
 
 /**
  * Parses an arbitrary breakpoint modifier.
@@ -181,7 +206,7 @@ export const parse_arbitrary_breakpoint = (segment: string): string | null => {
 };
 
 /**
- * Parses a parameterized state modifier (nth-child, nth-of-type).
+ * Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).
  *
  * @returns Object with name (including parameter) and CSS, or null if not parameterized
  */
@@ -197,11 +222,29 @@ export const parse_parameterized_state = (
 		};
 	}
 
+	const nth_last_child_match = NTH_LAST_CHILD_PATTERN.exec(segment);
+	if (nth_last_child_match) {
+		return {
+			name: segment,
+			css: `:nth-last-child(${nth_last_child_match[1]})`,
+			type: 'state',
+		};
+	}
+
 	const nth_of_type_match = NTH_OF_TYPE_PATTERN.exec(segment);
 	if (nth_of_type_match) {
 		return {
 			name: segment,
 			css: `:nth-of-type(${nth_of_type_match[1]})`,
+			type: 'state',
+		};
+	}
+
+	const nth_last_of_type_match = NTH_LAST_OF_TYPE_PATTERN.exec(segment);
+	if (nth_last_of_type_match) {
+		return {
+			name: segment,
+			css: `:nth-last-of-type(${nth_last_of_type_match[1]})`,
 			type: 'state',
 		};
 	}

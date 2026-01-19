@@ -7,10 +7,46 @@
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import {
+		space_variants,
+		color_variants,
+		intensity_variants,
+		border_color_intensity_variants,
+		text_color_variants,
+		font_size_variants,
+		font_family_variants,
+		line_height_variants,
+		icon_size_variants,
+		border_radius_variants,
+		border_width_variants,
+		outline_width_variants,
+		shadow_size_variants,
+		shadow_alpha_variants,
+		shadow_semantic_values,
+		distance_variants,
+	} from '@fuzdev/fuz_css/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'classes';
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+
+	/** Formats an array as a range string like `{xs5-xl15}` */
+	const variant_range = <T,>(arr: ReadonlyArray<T>): string => `{${arr[0]}-${arr.at(-1)}}`;
+
+	// Computed ranges from variable_data.ts
+	const space_range = variant_range(space_variants);
+	const hue_range = variant_range(color_variants);
+	const intensity_range = variant_range(intensity_variants);
+	const border_intensity_range = variant_range(border_color_intensity_variants);
+	const text_color_range = variant_range(text_color_variants);
+	const font_size_range = variant_range(font_size_variants);
+	const line_height_range = variant_range(line_height_variants);
+	const icon_size_range = variant_range(icon_size_variants);
+	const border_radius_range = variant_range(border_radius_variants);
+	const border_width_range = variant_range(border_width_variants);
+	const shadow_size_range = variant_range(shadow_size_variants);
+	const shadow_alpha_range = variant_range(shadow_alpha_variants);
+	const distance_range = variant_range(distance_variants);
 </script>
 
 <TomeContent {tome}>
@@ -66,74 +102,125 @@
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
-				Token classes map to <TomeLink name="variables">style variables</TomeLink> (design tokens). For
-				raw CSS values, use <a href="#Literal-classes">literal classes</a> instead.
+				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
+				close relationship to <TomeLink name="variables">style variables</TomeLink> -- each maps design
+				tokens to CSS properties. They're generated programmatically from variant arrays, making them
+				predictable and systematic. The composites documented
+				<a href="#Composite-classes">below</a>
+				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
+				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
 			<Code content="<div class=&quot;p_md gap_lg color_a_5&quot;>" />
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
-				use in JS -- imported from <ModuleLink module_path="variables.ts" />, but costing nothing
-				otherwise -- so each name is consistent across both JS and CSS, instead of converting
-				between
+				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
+				otherwise), so each name is consistent across both JS and CSS, instead of converting between
 				<code>kebab-case</code>
 				and <code>camelCase</code>. This also makes token classes visually distinct from
 				<a href="#Literal-classes">literal classes</a>; we find this improves readability.
 			</p>
 			<h4>Spacing</h4>
 			<ul class="unstyled">
-				<li><code>.p|pt|pr|pb|pl|px|py_xs5-xl15|0</code></li>
-				<li><code>.m|mt|mr|mb|ml|mx|my_xs5-xl15|0|auto</code></li>
-				<li><code>.gap|column_gap|row_gap_xs5-xl15</code></li>
-				<li><code>.top|bottom|left|right_xs5-xl15</code></li>
-				<li><code>.inset_xs5-xl15</code></li>
+				<li><code>.p_{space_range}</code>, <code>.p_0</code></li>
+				<li><code>.pt_{space_range}</code>, <code>.pt_0</code></li>
+				<li><code>.pr_{space_range}</code>, <code>.pr_0</code></li>
+				<li><code>.pb_{space_range}</code>, <code>.pb_0</code></li>
+				<li><code>.pl_{space_range}</code>, <code>.pl_0</code></li>
+				<li><code>.px_{space_range}</code>, <code>.px_0</code></li>
+				<li><code>.py_{space_range}</code>, <code>.py_0</code></li>
+				<li><code>.m_{space_range}</code>, <code>.m_0</code>, <code>.m_auto</code></li>
+				<li><code>.mt_{space_range}</code>, <code>.mt_0</code>, <code>.mt_auto</code></li>
+				<li><code>.mr_{space_range}</code>, <code>.mr_0</code>, <code>.mr_auto</code></li>
+				<li><code>.mb_{space_range}</code>, <code>.mb_0</code>, <code>.mb_auto</code></li>
+				<li><code>.ml_{space_range}</code>, <code>.ml_0</code>, <code>.ml_auto</code></li>
+				<li><code>.mx_{space_range}</code>, <code>.mx_0</code>, <code>.mx_auto</code></li>
+				<li><code>.my_{space_range}</code>, <code>.my_0</code>, <code>.my_auto</code></li>
+				<li><code>.gap_{space_range}</code></li>
+				<li><code>.column_gap_{space_range}</code></li>
+				<li><code>.row_gap_{space_range}</code></li>
+				<li><code>.top_{space_range}</code></li>
+				<li><code>.right_{space_range}</code></li>
+				<li><code>.bottom_{space_range}</code></li>
+				<li><code>.left_{space_range}</code></li>
+				<li><code>.inset_{space_range}</code></li>
 			</ul>
 			<aside class="mt_lg">
-				Padding and margin shorthands include <code>_0</code> (and <code>_auto</code> for margin)
-				for ergonomics: <code>px_0</code> is much shorter than
+				Padding and margin include <code>_0</code> (and <code>_auto</code> for margin) for
+				ergonomics: <code>px_0</code> is much shorter than
 				<code>padding-inline:0</code>. Other properties use literals for raw values.
 			</aside>
 			<h4>Sizing</h4>
 			<ul class="unstyled">
-				<li><code>.width|height_xs5-xl15</code></li>
+				<li><code>.width_{space_range}</code></li>
+				<li><code>.height_{space_range}</code></li>
+				<li>
+					<code>.width_upto_{distance_range}</code>, <code>.width_atleast_{distance_range}</code>
+				</li>
+				<li>
+					<code>.height_upto_{distance_range}</code>, <code>.height_atleast_{distance_range}</code>
+				</li>
 			</ul>
 			<h4>Colors</h4>
 			<ul class="unstyled">
-				<li><code>.color_a-j_1-9</code></li>
-				<li><code>.bg</code>, <code>.fg</code>, <code>.bg|fg_1-9</code></li>
-				<li><code>.bg_a-j_1-9</code></li>
-				<li><code>.text_color_0-10</code></li>
-				<li><code>.color_bg|fg_1-9</code> - text color using bg/fg</li>
-				<li><code>.darken|lighten_1-9</code> - background shading</li>
-				<li><code>.color_darken|lighten_1-9</code> - text shading</li>
-				<li><code>.hue_a-j</code></li>
+				<li><code>.color_{hue_range}_{intensity_range}</code></li>
+				<li><code>.bg</code>, <code>.fg</code></li>
+				<li><code>.bg_{intensity_range}</code>, <code>.fg_{intensity_range}</code></li>
+				<li><code>.bg_{hue_range}_{intensity_range}</code></li>
+				<li><code>.text_color_{text_color_range}</code></li>
+				<li><code>.color_bg</code>, <code>.color_fg</code></li>
+				<li><code>.color_bg_{intensity_range}</code>, <code>.color_fg_{intensity_range}</code></li>
+				<li><code>.darken_{intensity_range}</code>, <code>.lighten_{intensity_range}</code></li>
+				<li>
+					<code>.color_darken_{intensity_range}</code>,
+					<code>.color_lighten_{intensity_range}</code>
+				</li>
+				<li><code>.hue_{hue_range}</code></li>
 			</ul>
 			<h4>Typography</h4>
 			<ul class="unstyled">
-				<li><code>.font_family_sans|serif|mono</code></li>
-				<li><code>.font_size_xs-xl9</code></li>
-				<li><code>.line_height_xs-xl</code></li>
-				<li><code>.icon_size_xs-xl3</code></li>
+				<li>
+					{#each font_family_variants as font_family, i (font_family)}<code>.{font_family}</code
+						>{#if i < font_family_variants.length - 1},
+						{/if}{/each}
+				</li>
+				<li><code>.font_size_{font_size_range}</code></li>
+				<li><code>.line_height_{line_height_range}</code></li>
+				<li><code>.icon_size_{icon_size_range}</code></li>
 			</ul>
 			<h4>Borders</h4>
 			<ul class="unstyled">
-				<li><code>.border_color_1-5</code></li>
-				<li><code>.border_color_a-j</code></li>
-				<li><code>.border_width_1-9</code></li>
-				<li><code>.border_radius_xs3-xl</code></li>
-				<li><code>.border_top|bottom_left|right_radius_xs3-xl</code></li>
-				<li><code>.outline_width_1-9|focus|active</code></li>
-				<li><code>.outline_color_1-5</code></li>
-				<li><code>.outline_color_a-j</code></li>
+				<li><code>.border_color_{border_intensity_range}</code></li>
+				<li><code>.border_color_{hue_range}</code></li>
+				<li><code>.border_width_{border_width_range}</code></li>
+				<li><code>.border_radius_{border_radius_range}</code></li>
+				<li><code>.border_top_left_radius_{border_radius_range}</code></li>
+				<li><code>.border_top_right_radius_{border_radius_range}</code></li>
+				<li><code>.border_bottom_left_radius_{border_radius_range}</code></li>
+				<li><code>.border_bottom_right_radius_{border_radius_range}</code></li>
+				<li><code>.outline_width_{border_width_range}</code></li>
+				<li>
+					{#each outline_width_variants as variant, i (variant)}<code>.outline_width_{variant}</code
+						>{#if i < outline_width_variants.length - 1},
+						{/if}{/each}
+				</li>
+				<li><code>.outline_color_{border_intensity_range}</code></li>
+				<li><code>.outline_color_{hue_range}</code></li>
 			</ul>
 			<h4>Shadows</h4>
 			<ul class="unstyled">
-				<li><code>.shadow_xs-xl</code></li>
-				<li><code>.shadow_top|bottom_xs-xl</code></li>
-				<li><code>.shadow_inset_xs-xl</code></li>
-				<li><code>.shadow_inset_top|bottom_xs-xl</code></li>
-				<li><code>.shadow_color_a-j</code></li>
-				<li><code>.shadow_color_highlight|glow|shroud</code></li>
-				<li><code>.shadow_alpha_1-5</code></li>
+				<li><code>.shadow_{shadow_size_range}</code></li>
+				<li><code>.shadow_top_{shadow_size_range}</code></li>
+				<li><code>.shadow_bottom_{shadow_size_range}</code></li>
+				<li><code>.shadow_inset_{shadow_size_range}</code></li>
+				<li><code>.shadow_inset_top_{shadow_size_range}</code></li>
+				<li><code>.shadow_inset_bottom_{shadow_size_range}</code></li>
+				<li><code>.shadow_color_{hue_range}</code></li>
+				<li>
+					{#each shadow_semantic_values as value, i (value)}<code>.shadow_color_{value}</code
+						>{#if i < shadow_semantic_values.length - 1},
+						{/if}{/each}
+				</li>
+				<li><code>.shadow_alpha_{shadow_alpha_range}</code></li>
 			</ul>
 		</TomeSection>
 
@@ -323,12 +410,6 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
-				<li>
-					<code>.width_upto_xs-xl</code> / <code>.width_atleast_xs-xl</code> - width constraints
-				</li>
-				<li>
-					<code>.height_upto_xs-xl</code> / <code>.height_atleast_xs-xl</code> - height constraints
-				</li>
 			</ul>
 			<p>
 				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):
@@ -439,24 +520,20 @@ export const gen = gen_fuz_css({
 		<h4>State modifiers</h4>
 		<p>Pseudo-class modifiers for interaction and form states:</p>
 		<Code
-			content={`<!-- hover and focus effects -->
-<button class="hover:background-color:var(--color_a_6) focus:outline:2px~solid~var(--color_a_5)">
-
-<!-- form validation states -->
-<input class="invalid:border-color:var(--color_c_5) disabled:opacity:50%">
-
-<!-- structural selectors -->
-<li class="first:border-top:none last:border-bottom:none odd:background-color:var(--fg_1)">`}
+			content={`<button class="hover:opacity:80% focus:outline-color:blue">
+<input class="disabled:opacity:50% invalid:border-color:red">
+<li class="first:font-weight:bold odd:background-color:lightgray">`}
 		/>
 		<p>Available state modifiers include:</p>
 		<ul>
 			<li>
 				<strong>interaction:</strong> <code>hover:</code>, <code>focus:</code>,
 				<code>focus-visible:</code>, <code>focus-within:</code>, <code>active:</code>,
-				<code>visited:</code>, <code>target:</code>
+				<code>link:</code>, <code>visited:</code>, <code>any-link:</code>, <code>target:</code>
 			</li>
 			<li>
-				<strong>form:</strong> <code>disabled:</code>, <code>enabled:</code>, <code>checked:</code>,
+				<strong>form:</strong> <code>autofill:</code>, <code>blank:</code>,
+				<code>disabled:</code>, <code>enabled:</code>, <code>checked:</code>,
 				<code>indeterminate:</code>, <code>required:</code>, <code>optional:</code>,
 				<code>valid:</code>, <code>invalid:</code>, <code>user-valid:</code>,
 				<code>user-invalid:</code>, <code>in-range:</code>, <code>out-of-range:</code>,
@@ -465,23 +542,25 @@ export const gen = gen_fuz_css({
 			</li>
 			<li>
 				<strong>structural:</strong> <code>first:</code>, <code>last:</code>, <code>only:</code>,
+				<code>first-of-type:</code>, <code>last-of-type:</code>, <code>only-of-type:</code>,
 				<code>odd:</code>, <code>even:</code>, <code>empty:</code>, <code>nth-child(N):</code>,
-				<code>nth-of-type(N):</code>
+				<code>nth-last-child(N):</code>, <code>nth-of-type(N):</code>,
+				<code>nth-last-of-type(N):</code>
 			</li>
 			<li>
 				<strong>UI states:</strong> <code>fullscreen:</code>, <code>modal:</code>,
-				<code>popover-open:</code>
+				<code>open:</code>, <code>popover-open:</code>
+			</li>
+			<li>
+				<strong>media:</strong> <code>playing:</code>, <code>paused:</code>
 			</li>
 		</ul>
 
 		<h4>Color-scheme modifiers</h4>
 		<p>Apply styles in dark or light mode:</p>
 		<Code
-			content={`<!-- reduce shadow intensity in dark mode -->
-<div class="shadow_lg dark:shadow_sm">
-
-<!-- different border in light mode -->
-<div class="border:1px~solid~var(--fg_2) light:border:1px~solid~var(--fg_5)">`}
+			content={`<div class="shadow_lg dark:shadow_sm">
+<div class="color:black light:color:gray">`}
 		/>
 		<p>
 			<code>dark:</code> and <code>light:</code> use <code>:root.dark</code> and
@@ -492,16 +571,13 @@ export const gen = gen_fuz_css({
 		<h4>Pseudo-element modifiers</h4>
 		<p>Style generated content and element parts:</p>
 		<Code
-			content={`<!-- decorative element (explicit content required) -->
-<div class="before:content:'' before:display:block before:width:2rem before:height:2rem before:background:var(--color_a_5)">
-
-<!-- placeholder styling -->
-<input class="placeholder:color:var(--text_color_3) placeholder:font-style:italic">`}
+			content={`<span class="before:content:'→' before:margin-right:0.5rem">
+<input class="placeholder:opacity:50%">`}
 		/>
 		<p>
-			Available: <code>before:</code>, <code>after:</code>, <code>placeholder:</code>,
-			<code>selection:</code>,
-			<code>marker:</code>, <code>file:</code>, <code>backdrop:</code>
+			Available: <code>before:</code>, <code>after:</code>, <code>cue:</code>,
+			<code>first-letter:</code>, <code>first-line:</code>, <code>placeholder:</code>,
+			<code>selection:</code>, <code>marker:</code>, <code>file:</code>, <code>backdrop:</code>
 		</p>
 		<aside>
 			Note: <code>before:</code> and <code>after:</code> require explicit
@@ -512,10 +588,7 @@ export const gen = gen_fuz_css({
 		<h4>Media feature modifiers</h4>
 		<p>Accessibility and context-aware styles:</p>
 		<Code
-			content={`<!-- respect motion preferences -->
-<div class="motion-safe:transition:transform~0.3s~ease-out motion-reduce:transition:none">
-
-<!-- print-specific styles -->
+			content={`<div class="motion-reduce:animation:none">
 <nav class="print:display:none">`}
 		/>
 		<p>
