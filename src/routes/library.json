@@ -2477,16 +2477,16 @@
 								"type_signature": "boolean"
 							},
 							{
-								"name": "include_builtin_definitions",
+								"name": "include_default_definitions",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to include builtin class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
+								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
 							},
 							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name.\nRequired when `include_builtin_definitions` is `false`."
+								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
 							},
 							{
 								"name": "class_interpreters",
@@ -5193,16 +5193,16 @@
 								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
 							},
 							{
-								"name": "include_builtin_definitions",
+								"name": "include_default_definitions",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to include builtin class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
+								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
 							},
 							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with builtins.\nUser definitions take precedence over builtins with the same name.\nRequired when `include_builtin_definitions` is `false`."
+								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
 							},
 							{
 								"name": "class_interpreters",
