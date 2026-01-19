@@ -16,7 +16,8 @@
 <TomeContent {tome}>
 	<p>
 		fuz_css has two categories of CSS classes: utilities and builtins. Builtins are baked into the
-		main stylesheet; utility classes have 3 types, are optional, and require build tool integration.
+		main stylesheet; utility classes have three types, are optional, and require build tool
+		integration.
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
@@ -68,7 +69,7 @@
 				Token classes map to <TomeLink name="variables">style variables</TomeLink> (design tokens). For
 				raw CSS values, use <a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<div class=&quot;p_md gap_lg color_a_5 bg_1&quot;>" />
+			<Code content="<div class=&quot;p_md gap_lg color_a_5&quot;>" />
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS -- imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -147,8 +148,8 @@
 
 			<h4>Four definition forms</h4>
 			<p>
-				All four of these produce equivalent CSS output for <code>.centered</code>. The ruleset form
-				additionally demonstrates child selectors (<code>&gt; * + *</code>) which can't be expressed
+				All four of these produce the same CSS output for <code>.centered</code>, with the ruleset
+				form additionally demonstrating child selectors -- <code>&gt; * + *</code> -- which can't be expressed
 				with the other forms.
 			</p>
 			<Code
@@ -280,8 +281,8 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 				are applied to each selector (with smart conflict detection):
 			</p>
 			<Code
-				content={`<!-- hover:card resolves card's composes, applies :hover -->
-<div class="hover:card md:dark:card md:clickable">`}
+				content={`<!-- hover:foo resolves foo's \`composes\`, applies :hover -->
+<div class="hover:foo md:dark:foo md:clickable">`}
 			/>
 
 			<h4>Registering composites</h4>
@@ -363,7 +364,7 @@ export const gen = gen_fuz_css({
 <div class="width:calc(100%~-~20px) aspect-ratio:16/9">
 
 <!-- custom properties -->
-<div class="--card-padding:var(--space_lg) --card-bg:var(--color_a_2)">`}
+<div class="--foo-padding:var(--space_lg) --bar-bg:var(--color_a_2)">`}
 			/>
 			<p>
 				The <code>~</code> character represents a space in class names (since CSS classes can't
