@@ -138,9 +138,10 @@
 		<TomeSection>
 			<TomeSectionHeader text="Composite classes" tag="h3" />
 			<p>
-				Composites group multiple CSS declarations into a single class name. They have four forms:
-				raw CSS declarations, composition of other classes, a combination of both, or full rulesets
-				as an escape hatch for multi-selector patterns (hover states, child selectors, etc.).
+				Composites let you name and reuse patterns, extending the class system with your own
+				vocabulary. They have four forms: raw CSS declarations, composition of other classes, a
+				combination of both, or full rulesets as an escape hatch for multi-selector patterns (child
+				selectors, sibling combinators, etc.).
 			</p>
 
 			<h4>Four definition forms</h4>
@@ -1187,14 +1188,19 @@ const Component = () => <div className={styles} />;`}
 			</tbody>
 		</table>
 		<p>
-			Composites offer a high level of customization, including the ability to replicate much of
-			TailwindCSS's DSL like UnoCSS.
+			fuz_css's modifier system is less expressive than Tailwind's variants (no <code
+				>group-hover:</code
+			>, arbitrary variants, etc.). When you need parent-child relationships or complex selectors,
+			fuz_css expects you to write CSS directly via rulesets or <code>&lt;style&gt;</code> tags
+			rather than encoding everything in class names. The design is still evolving and
+			<a href="https://github.com/fuzdev/fuz_css/discussions">feedback</a> is welcome!
 		</p>
 		<p>
 			fuz_css fits best when you prefer semantic HTML with styled defaults. Design tokens are
-			defined in TypeScript and can be imported for typesafe runtime access. The tradeoff is a more
-			verbose literal syntax, which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate,
-			or composites for repeated patterns.
+			defined in TypeScript, naturally adapt to dark mode, and can be imported in TS for typesafe
+			runtime access. The tradeoffs include a more limited DSL and more verbose literal syntax,
+			which nudges you toward <code>&lt;style&gt;</code> tags, tokens when appropriate, or composites
+			for repeated patterns.
 		</p>
 	</TomeSection>
 	<hr />
