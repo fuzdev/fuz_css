@@ -351,19 +351,19 @@ export const gen = gen_fuz_css({
 			</p>
 			<Code
 				content={`<!-- basic syntax: property:value -->
-<div class="display:flex justify-content:center gap:var(--space_md)">
+<div class="display:flex justify-content:center">
 
 <!-- multi-value properties use ~ for spaces -->
-<div class="margin:1px~auto padding:var(--space_sm)~var(--space_lg)">
+<div class="margin:1px~3rem">
 
 <!-- numeric values -->
-<div class="opacity:50% font-weight:700 z-index:100 border-radius:8px">
+<div class="opacity:50% font-weight:700 z-index:100">
 
-<!-- arbitrary CSS values work natively -->
-<div class="width:calc(100%~-~20px) aspect-ratio:16/9">
+<!-- arbitrary CSS values -->
+<div class="width:calc(100%~-~20px)">
 
 <!-- custom properties -->
-<div class="--foo-padding:var(--space_lg) --bar-bg:var(--color_a_2)">`}
+<div class="--foo-bg:#abc">`}
 			/>
 			<p>
 				The <code>~</code> character represents a space in class names (since CSS classes can't
@@ -373,40 +373,6 @@ export const gen = gen_fuz_css({
 				Custom properties work directly: <code>--my-var:value</code> sets the property on the element.
 				This is useful for scoped variables or passing values to child components.
 			</p>
-
-			<h4>Common patterns</h4>
-			<h5>Layout and display:</h5>
-			<ul class="unstyled">
-				<li><code>.display:none|block|flex|grid|inline|inline-block|contents</code></li>
-				<li><code>.position:static|relative|absolute|fixed|sticky</code></li>
-				<li><code>.visibility:visible|hidden|collapse</code></li>
-				<li><code>.overflow:auto|hidden|scroll|clip|visible</code></li>
-			</ul>
-			<h5>Flexbox and grid:</h5>
-			<ul class="unstyled">
-				<li><code>.flex-direction:row|column|row-reverse|column-reverse</code></li>
-				<li><code>.flex-wrap:wrap|nowrap|wrap-reverse</code></li>
-				<li><code>.align-items:center|start|end|baseline|stretch</code></li>
-				<li>
-					<code>.justify-content:center|start|end|space-between|space-around|space-evenly</code>
-				</li>
-				<li><code>.flex:1</code>, <code>.flex-grow:1|0</code>, <code>.flex-shrink:1|0</code></li>
-			</ul>
-			<h5>Typography:</h5>
-			<ul class="unstyled">
-				<li><code>.text-align:left|center|right|justify</code></li>
-				<li><code>.white-space:normal|nowrap|pre|pre-wrap|pre-line</code></li>
-				<li><code>.word-break:normal|break-all|keep-all</code></li>
-				<li><code>.text-wrap:wrap|nowrap|balance|pretty</code></li>
-				<li><code>.user-select:none|auto|text|all</code></li>
-			</ul>
-			<h5>Borders and effects:</h5>
-			<ul class="unstyled">
-				<li><code>.border-style:none|solid|dashed|dotted</code></li>
-				<li><code>.float:left|right|none</code></li>
-				<li><code>.cursor:pointer|default|grab|text|not-allowed</code></li>
-				<li><code>.pointer-events:none|auto</code></li>
-			</ul>
 		</TomeSection>
 	</TomeSection>
 
