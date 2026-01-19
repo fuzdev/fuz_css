@@ -427,13 +427,14 @@ export const gen = gen_fuz_css({
 <div class="display:flex flex-direction:column md:flex-direction:row">
 
 <!-- hide on mobile -->
-<nav class="display:none md:display:flex">`}
+<nav class="display:none md:display:flex">
+
+<!-- max-width variant -->
+<div class="max-md:display:none">
+
+<!-- arbitrary breakpoints -->
+<div class="min-width(800px):color:red max-width(600px):color:blue">`}
 		/>
-		<p>
-			Max-width variants (<code>max-sm:</code>, <code>max-md:</code>, etc.) and arbitrary
-			breakpoints (<code>min-width(800px):</code>,
-			<code>max-width(600px):</code>) are also available.
-		</p>
 
 		<h4>State modifiers</h4>
 		<p>Pseudo-class modifiers for interaction and form states:</p>
