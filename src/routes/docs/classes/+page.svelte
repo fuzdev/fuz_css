@@ -29,7 +29,8 @@
 		</p>
 		<p>
 			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
-			rather than being foundational to the design -- see the
+			rather than being foundational to the design, and the DSL is currently more limited, with
+			interpreters providing a programmatic escape hatch -- see the
 			<a href="#Compared-to-alternatives">comparison</a> below.
 		</p>
 		<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
@@ -195,33 +196,24 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 	},
 };`}
 			/>
-			<p>Register custom composites with the plugin or generator:</p>
-			<h4>Vite plugin</h4>
+			<p>Generated CSS:</p>
 			<Code
-				lang="typescript"
-				content={`// vite.config.ts
-import {custom_composites} from './src/lib/composites.js';
-
-vite_plugin_fuz_css({
-	class_definitions: custom_composites,
-}),`}
+				lang="css"
+				content={`.centered {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}`}
 			/>
-			<h4>Gro generator</h4>
+			<p>And the ruleset form (4) includes the additional selector:</p>
 			<Code
-				lang="typescript"
-				content={`// fuz.gen.css.ts
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
-import {custom_composites} from '$lib/composites.js';
-
-export const gen = gen_fuz_css({
-	class_definitions: custom_composites,
-});`}
+				lang="css"
+				content={`.centered > * + * {
+  margin-top: var(--space_md);
+}`}
 			/>
-			<p>
-				The <code>composes</code> property resolves referenced classes and combines their
-				declarations. When both <code>composes</code> and <code>declaration</code> are present, the explicit
-				declaration comes last (winning in the cascade for duplicate properties).
-			</p>
 
 			<h4>Nesting</h4>
 			<p>
@@ -231,6 +223,11 @@ export const gen = gen_fuz_css({
 			</p>
 
 			<h4>What <code>composes</code> can reference</h4>
+			<p>
+				The <code>composes</code> property resolves referenced classes and combines their
+				declarations. When both <code>composes</code> and <code>declaration</code> are present, the explicit
+				declaration comes last (winning in the cascade for duplicate properties).
+			</p>
 			<ul>
 				<li>
 					token classes (<code>p_lg</code>, <code>color_a_5</code>) - resolved to their declarations
@@ -250,10 +247,11 @@ export const gen = gen_fuz_css({
 				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
 				<code>composes</code> because they define their own selectors. Modified classes (like
 				<code>hover:opacity:80%</code> or <code>md:p_lg</code>) cannot be used in
-				<code>composes</code> arrays because they require wrapper selectors - apply them directly in
-				markup instead. The <code>composes</code> property merges declarations into a single rule,
-				but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be inlined.
-				These limitations may be revisited in the future.
+				<code>composes</code> arrays because they require wrapper selectors -- apply them directly
+				in markup instead. The <code>composes</code> property merges declarations into a single
+				rule, but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be
+				inlined. These limitations may be revisited in the future, feedback is welcome in the
+				<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
 			</p>
 			<aside>
 				<p>The system tries to give helpful errors:</p>
@@ -273,28 +271,6 @@ export const gen = gen_fuz_css({
 				</ul>
 			</aside>
 
-			<h4>Generated output</h4>
-			<p>Given these definitions:</p>
-			<Code
-				lang="typescript"
-				content={`const composites: Record<string, CssClassDefinition> = {
-	card_base: {composes: ['p_lg', 'shadow_md']},
-	card: {
-		composes: ['card_base'],
-		declaration: 'border: 1px solid var(--border_color);'
-	},
-};`}
-			/>
-			<p>The generated CSS for <code>.card</code>:</p>
-			<Code
-				lang="css"
-				content={`.card {
-  padding: var(--space_lg);
-  box-shadow: var(--shadow_md);
-  border: 1px solid var(--border_color);
-}`}
-			/>
-
 			<h4>Modifiers</h4>
 			<p>
 				Composites support <a href="#Modifiers">modifiers</a> like any other class. For
@@ -306,6 +282,30 @@ export const gen = gen_fuz_css({
 			<Code
 				content={`<!-- hover:card resolves card's composes, applies :hover -->
 <div class="hover:card md:dark:card md:clickable">`}
+			/>
+
+			<h4>Registering composites</h4>
+			<p>Register custom composites with the Vite plugin or Gro generator:</p>
+			<h5>Vite plugin</h5>
+			<Code
+				lang="typescript"
+				content={`// vite.config.ts
+import {custom_composites} from './src/lib/composites.js';
+
+vite_plugin_fuz_css({
+	class_definitions: custom_composites,
+}),`}
+			/>
+			<h5>Gro generator</h5>
+			<Code
+				lang="typescript"
+				content={`// fuz.gen.css.ts
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+import {custom_composites} from '$lib/composites.js';
+
+export const gen = gen_fuz_css({
+	class_definitions: custom_composites,
+});`}
 			/>
 
 			<h4>Builtin composites</h4>
@@ -347,14 +347,14 @@ export const gen = gen_fuz_css({
 			<TomeSectionHeader text="Literal classes" tag="h3" />
 			<p>
 				Fuz supports an open-ended CSS-literal syntax: <code>property:value</code>. Any CSS property
-				and value works, offering an escape hatch without a DSL.
+				and value works, offering arbitrary styles without a DSL.
 			</p>
 			<Code
 				content={`<!-- basic syntax: property:value -->
 <div class="display:flex justify-content:center gap:var(--space_md)">
 
 <!-- multi-value properties use ~ for spaces -->
-<div class="margin:0~auto padding:var(--space_sm)~var(--space_lg)">
+<div class="margin:1px~auto padding:var(--space_sm)~var(--space_lg)">
 
 <!-- numeric values -->
 <div class="opacity:50% font-weight:700 z-index:100 border-radius:8px">
@@ -367,7 +367,7 @@ export const gen = gen_fuz_css({
 			/>
 			<p>
 				The <code>~</code> character represents a space in class names (since CSS classes can't
-				contain spaces). Use it for multi-value properties like <code>margin:0~auto</code>.
+				contain spaces). Use it for multi-value properties like <code>margin:1px~auto</code>.
 			</p>
 			<p>
 				Custom properties work directly: <code>--my-var:value</code> sets the property on the element.
@@ -852,50 +852,12 @@ export const gen = gen_fuz_css({
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="Practical patterns" />
-
-		<h4>Child component styling</h4>
-		<p>The primary motivating use case is passing styles across component boundaries:</p>
-		<Code
-			content={`<!-- Parent controls hover behavior -->
-<div class="hover:shadow_lg hover:transform:translateY(-2px)">
-
-<!-- Responsive layout on child -->
-<div class="display:flex flex-direction:column md:flex-direction:row">`}
-		/>
-
-		<h4>Conditional classes</h4>
-		<p>
-			Svelte <a href="https://svelte.dev/docs/svelte/class">supports</a> object and array patterns
-			to define classes with <a href="https://github.com/lukeed/clsx">clsx</a>, and fuz_css inspects
-			the AST to collect the ones you use:
-		</p>
-		<Code
-			lang="svelte"
-			content={`<span class={[
-	'p_md',
-	active && 'border:2px~solid~var(--color_a_5)',
-	variant === 'elevated' && 'shadow_lg'
-]} />`}
-		/>
-
-		<h4>Dark mode adaptations</h4>
-		<Code
-			content={`<!-- tone down shadows in dark mode -->
-<div class="shadow_lg dark:shadow_md">
-
-<!-- reduce image brightness in dark mode -->
-<img class="dark:filter:brightness(0.9)" alt="Hero">`}
-		/>
-	</TomeSection>
-
-	<TomeSection>
 		<TomeSectionHeader text="Builtin classes" />
 		<p>
 			fuz_css's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
 			HTML elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern
-			CSS reset. It includes CSS classes that provide common generic functionality -- these are
-			called builtin classes.
+			CSS reset that adapts to dark mode. It includes CSS classes that provide common generic
+			functionality -- these are called builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<p>Default list (styled):</p>
@@ -1139,6 +1101,62 @@ const Component = () => <div className={styles} />;`}
 	</TomeSection>
 
 	<TomeSection>
+		<TomeSectionHeader text="Custom interpreters" />
+		<p>
+			Interpreters dynamically generate CSS for class names that aren't in the static definitions
+			(which can be extended via <code>class_definitions</code> or replaced with
+			<code>include_builtin_definitions: false</code>). The builtin
+			<a href="#Literal-classes">CSS-literal syntax</a> and
+			<a href="#Modifiers">modifier support</a> are both implemented as interpreters, which you can extend
+			or replace.
+		</p>
+		<p>
+			For advanced use cases, you can define custom interpreters that generate CSS from arbitrary
+			class name patterns. This is similar to UnoCSS's dynamic rules, which also use regex +
+			function patterns. An interpreter has a regex <code>pattern</code> and an
+			<code>interpret</code> function that returns CSS (or <code>null</code> to pass):
+		</p>
+		<Code
+			lang="typescript"
+			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_generation.js';
+
+// Example: grid-cols-N classes like "grid-cols-4"
+// Unlike composites, interpreters can parameterize values
+const grid_cols_interpreter: CssClassDefinitionInterpreter = {
+  pattern: /^grid-cols-(\\d+)$/,
+  interpret: (matched) => {
+    const n = parseInt(matched[1]!, 10);
+    if (n < 1 || n > 24) return null;
+    return \`.grid-cols-\${n} { grid-template-columns: repeat(\${n}, minmax(0, 1fr)); }\`;
+  },
+};`}
+		/>
+		<p>
+			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand — something
+			that would require 24 separate composite definitions. Register with the Vite plugin or Gro generator:
+		</p>
+		<Code
+			lang="typescript"
+			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.js';
+
+vite_plugin_fuz_css({
+  class_interpreters: [grid_cols_interpreter, ...css_class_interpreters],
+})`}
+		/>
+		<p>
+			The interpreter context provides access to <code>class_definitions</code>,
+			<code>css_properties</code> (for validation), and <code>diagnostics</code> (for errors/warnings).
+			This enables full programmatic control over class-to-CSS generation.
+		</p>
+		<aside>
+			Custom interpreters replace the builtins entirely, so include <code
+				>...css_class_interpreters</code
+			>
+			to preserve CSS-literal and modified-class support. This area is experimental and the API may change.
+		</aside>
+	</TomeSection>
+
+	<TomeSection>
 		<TomeSectionHeader text="Compared to alternatives" />
 		<p>
 			TailwindCSS and UnoCSS are utility-first frameworks where classes have primacy. fuz_css is
@@ -1159,13 +1177,16 @@ const Component = () => <div className={styles} />;`}
 					<td>primary syntax</td>
 					<td>DSL-first</td>
 					<td>config-first</td>
-					<td>token DSL + CSS literals</td>
+					<td
+						><a href="#Token-classes">token DSL</a> +
+						<a href="#Literal-classes">CSS literals</a></td
+					>
 				</tr>
 				<tr>
 					<td>multi-property</td>
 					<td><code>@apply</code>, plugins</td>
 					<td>shortcuts</td>
-					<td>composites</td>
+					<td><a href="#Composite-classes">composites</a></td>
 				</tr>
 				<tr>
 					<td>arbitrary values</td>
@@ -1183,16 +1204,30 @@ const Component = () => <div className={styles} />;`}
 					<td>token source</td>
 					<td>CSS (<code>@theme</code>)</td>
 					<td>JS/TS config</td>
-					<td>TypeScript (importable)</td>
+					<td>TS variables (importable)</td>
+				</tr>
+				<tr>
+					<td>extensibility</td>
+					<td>plugins (JS)</td>
+					<td>rules, variants, presets</td>
+					<td><a href="#Custom-interpreters">interpreters</a> (TS)</td>
 				</tr>
 			</tbody>
 		</table>
 		<p>
-			fuz_css's modifier system is less expressive than Tailwind's variants (no <code
-				>group-hover:</code
-			>, arbitrary variants, etc.). When you need parent-child relationships or complex selectors,
-			fuz_css expects you to write CSS directly via rulesets or <code>&lt;style&gt;</code> tags
-			rather than encoding everything in class names. The design is still evolving and
+			fuz_css's modifier system is less expressive than TailwindCSS's variants. Missing:
+			parent/sibling/descendant state (<code>group-hover:</code>, <code>peer-invalid:</code>,
+			<code>has-checked:</code>), arbitrary variants (<code>[&.is-dragging]:</code>), child
+			selectors (<code>*:</code>), container queries (<code>@md:</code>), data/ARIA variants, and
+			more. When you need these patterns, fuz_css currently expects you to use rulesets or
+			<code>&lt;style&gt;</code> tags, but the API is still a work in progress, and a more powerful and
+			potentially more TailwindCSS-aligned system is on the table.
+		</p>
+		<p>
+			For extensibility, all three frameworks allow custom class-to-CSS mappings. UnoCSS's dynamic
+			rules use regex + function patterns similar to fuz_css interpreters, plus separate variants
+			for modifiers. TailwindCSS uses JS plugins and UnoCSS has the more mature extensibility story;
+			fuz_css offers comparable power with interpreters but it's still evolving --
 			<a href="https://github.com/fuzdev/fuz_css/discussions">feedback</a> is welcome!
 		</p>
 		<p>
