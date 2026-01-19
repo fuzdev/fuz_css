@@ -61,11 +61,11 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'test.json');
 		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 
-		await save_cached_extraction(cache_path, 'abc123', classes, null);
+		await save_cached_extraction(cache_path, 'abc123', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(2);
+		expect(loaded!.v).toBe(3);
 		expect(loaded!.content_hash).toBe('abc123');
 		expect(loaded!.classes).toEqual([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 		expect(loaded!.diagnostics).toBeNull();
@@ -85,7 +85,7 @@ describe('save_cached_extraction', () => {
 			['p_md', [{file: 'test.ts', line: 5, column: 8}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash123', classes, null);
+		await save_cached_extraction(cache_path, 'hash123', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -113,7 +113,7 @@ describe('save_cached_extraction', () => {
 			},
 		];
 
-		await save_cached_extraction(cache_path, 'hash456', classes, diagnostics);
+		await save_cached_extraction(cache_path, 'hash456', classes, null, diagnostics);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -126,7 +126,7 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'deep/nested/path/file.json');
 		const classes = new Map([['test', [{file: 'x.ts', line: 1, column: 1}]]]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null);
+		await save_cached_extraction(cache_path, 'hash', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -139,7 +139,7 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'empty.json');
 		const classes: Map<string, Array<{file: string; line: number; column: number}>> = new Map();
 
-		await save_cached_extraction(cache_path, 'hash', classes, null);
+		await save_cached_extraction(cache_path, 'hash', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -152,7 +152,7 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'empty_diag.json');
 		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 1}]]]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, []);
+		await save_cached_extraction(cache_path, 'hash', classes, null, []);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -163,11 +163,11 @@ describe('save_cached_extraction', () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'null_classes.json');
 
-		await save_cached_extraction(cache_path, 'hash', null, null);
+		await save_cached_extraction(cache_path, 'hash', null, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(2);
+		expect(loaded!.v).toBe(3);
 		expect(loaded!.content_hash).toBe('hash');
 		expect(loaded!.classes).toBeNull();
 		expect(loaded!.diagnostics).toBeNull();
@@ -179,8 +179,8 @@ describe('save_cached_extraction', () => {
 		const classes1 = new Map([['old', [{file: 'a.ts', line: 1, column: 1}]]]);
 		const classes2 = new Map([['new', [{file: 'b.ts', line: 2, column: 2}]]]);
 
-		await save_cached_extraction(cache_path, 'hash1', classes1, null);
-		await save_cached_extraction(cache_path, 'hash2', classes2, null);
+		await save_cached_extraction(cache_path, 'hash1', classes1, null, null);
+		await save_cached_extraction(cache_path, 'hash2', classes2, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -196,7 +196,7 @@ describe('save_cached_extraction', () => {
 			['日本語', [{file: 'src/中文.ts', line: 5, column: 10}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null);
+		await save_cached_extraction(cache_path, 'hash', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -216,7 +216,7 @@ describe('save_cached_extraction', () => {
 			['hover:opacity:80%', [{file: 'test.ts', line: 2, column: 1}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null);
+		await save_cached_extraction(cache_path, 'hash', classes, null, null);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -245,7 +245,7 @@ describe('save_cached_extraction', () => {
 			},
 		];
 
-		await save_cached_extraction(cache_path, 'hash', null, diagnostics);
+		await save_cached_extraction(cache_path, 'hash', null, null, diagnostics);
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -367,9 +367,10 @@ describe('delete_cached_extraction', () => {
 describe('from_cached_extraction', () => {
 	test('converts tuples to Map', () => {
 		const cached: CachedExtraction = {
-			v: 2,
+			v: 3,
 			content_hash: 'abc',
 			classes: [['box', [{file: 'f.ts', line: 1, column: 1}]]],
+			explicit_classes: null,
 			diagnostics: null,
 		};
 
@@ -382,9 +383,10 @@ describe('from_cached_extraction', () => {
 
 	test('handles null classes', () => {
 		const cached: CachedExtraction = {
-			v: 2,
+			v: 3,
 			content_hash: 'abc',
 			classes: null,
+			explicit_classes: null,
 			diagnostics: null,
 		};
 
@@ -396,9 +398,10 @@ describe('from_cached_extraction', () => {
 	test('handles empty classes array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 2,
+			v: 3,
 			content_hash: 'abc',
 			classes: [],
+			explicit_classes: null,
 			diagnostics: null,
 		};
 
@@ -418,9 +421,10 @@ describe('from_cached_extraction', () => {
 			},
 		];
 		const cached: CachedExtraction = {
-			v: 2,
+			v: 3,
 			content_hash: 'abc',
 			classes: null,
+			explicit_classes: null,
 			diagnostics,
 		};
 
@@ -431,9 +435,10 @@ describe('from_cached_extraction', () => {
 	test('handles empty diagnostics array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 2,
+			v: 3,
 			content_hash: 'abc',
 			classes: null,
+			explicit_classes: null,
 			diagnostics: [],
 		};
 

@@ -39,8 +39,9 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * - `ExtractionDiagnostic` or `SourceLocation` structure
  *
  * v2: Use null instead of empty arrays for classes/diagnostics
+ * v3: Add explicit_classes for @fuz-classes warnings
  */
-const CACHE_VERSION = 2;
+const CACHE_VERSION = 1;
 
 /**
  * Cached extraction result for a single file.
@@ -53,6 +54,8 @@ export interface CachedExtraction {
 	content_hash: string;
 	/** Classes as [name, locations] tuples, or null if none */
 	classes: Array<[string, Array<SourceLocation>]> | null;
+	/** Classes from @fuz-classes comments, or null if none */
+	explicit_classes: Array<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
 }
@@ -112,22 +115,27 @@ export const load_cached_extraction = async (
  * @param cache_path - Absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
  * @param classes - Extracted classes with their locations, or null if none
+ * @param explicit_classes - Classes from @fuz-classes comments, or null if none
  * @param diagnostics - Extraction diagnostics, or null if none
  */
 export const save_cached_extraction = async (
 	cache_path: string,
 	content_hash: string,
 	classes: Map<string, Array<SourceLocation>> | null,
+	explicit_classes: Set<string> | null,
 	diagnostics: Array<ExtractionDiagnostic> | null,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
+	const explicit_array =
+		explicit_classes && explicit_classes.size > 0 ? Array.from(explicit_classes) : null;
 	const diagnostics_array = diagnostics && diagnostics.length > 0 ? diagnostics : null;
 
 	const data: CachedExtraction = {
 		v: CACHE_VERSION,
 		content_hash,
 		classes: classes_array,
+		explicit_classes: explicit_array,
 		diagnostics: diagnostics_array,
 	};
 
@@ -161,8 +169,10 @@ export const from_cached_extraction = (
 	cached: CachedExtraction,
 ): {
 	classes: Map<string, Array<SourceLocation>> | null;
+	explicit_classes: Set<string> | null;
 	diagnostics: Array<ExtractionDiagnostic> | null;
 } => ({
 	classes: cached.classes ? new Map(cached.classes) : null,
+	explicit_classes: cached.explicit_classes ? new Set(cached.explicit_classes) : null,
 	diagnostics: cached.diagnostics,
 });

@@ -857,6 +857,12 @@ const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 /* @fuz-classes color_a_5 color_b_5 color_c_5 */
 const color = get_dynamic_color();`}
 			/>
+			<aside>
+				Classes annotated with <code>@fuz-classes</code> and configured with
+				<code>include_classes</code>
+				produce warnings if they can't be resolved. This helps catch typos like
+				<code>@fuz-classes color_a_55</code> instead of <code>color_a_5</code>.
+			</aside>
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
 					>include_classes</DeclarationLink
@@ -872,7 +878,8 @@ export const gen = gen_fuz_css({
 			/>
 			<p>
 				Use <DeclarationLink name="GenFuzCssOptions">exclude_classes</DeclarationLink> to filter out false
-				positives from extraction:
+				positives from extraction. This also suppresses warnings for these classes, even if they were
+				explicitly annotated:
 			</p>
 			<Code
 				lang="ts"

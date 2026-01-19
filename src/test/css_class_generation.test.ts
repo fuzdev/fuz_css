@@ -1574,3 +1574,91 @@ describe('modified_class_interpreter', () => {
 		});
 	});
 });
+
+describe('explicit_classes warnings', () => {
+	test('warns for unresolved explicit class', () => {
+		const result = generate_classes_css({
+			class_names: ['unknown_class'],
+			class_definitions: {},
+			interpreters: [],
+			css_properties: null,
+			explicit_classes: new Set(['unknown_class']),
+		});
+
+		expect(result.css).toBe('');
+		expect(result.diagnostics).toHaveLength(1);
+		expect(result.diagnostics[0]!.level).toBe('warning');
+		expect(result.diagnostics[0]!.class_name).toBe('unknown_class');
+		expect(result.diagnostics[0]!.message).toContain('No matching class definition');
+	});
+
+	test('no warning for non-explicit unresolved class', () => {
+		const result = generate_classes_css({
+			class_names: ['unknown_class'],
+			class_definitions: {},
+			interpreters: [],
+			css_properties: null,
+			// Not in explicit_classes
+		});
+
+		expect(result.css).toBe('');
+		expect(result.diagnostics).toHaveLength(0);
+	});
+
+	test('no warning when explicit class resolves to definition', () => {
+		const result = generate_classes_css({
+			class_names: ['box'],
+			class_definitions: css_class_composites,
+			interpreters: [],
+			css_properties: null,
+			explicit_classes: new Set(['box']),
+		});
+
+		expect(result.css).toContain('.box');
+		expect(result.diagnostics).toHaveLength(0);
+	});
+
+	test('no warning when interpreter pattern matches but returns error', () => {
+		// When CSS literal pattern matches but validation fails,
+		// the interpreter error is sufficient - no redundant "no definition" warning
+		const result = generate_classes_css({
+			class_names: ['invalid-property:value'],
+			class_definitions: {},
+			interpreters: [
+				{
+					pattern: /^([^:]+):(.+)$/,
+					interpret: (_match, ctx) => {
+						ctx.diagnostics.push({
+							level: 'error',
+							class_name: 'invalid-property:value',
+							message: 'Invalid property',
+							suggestion: null,
+						});
+						return null; // Pattern matched, but validation failed
+					},
+				},
+			],
+			css_properties: null,
+			explicit_classes: new Set(['invalid-property:value']),
+		});
+
+		// Should have interpreter error but NOT the "no definition" warning
+		expect(result.diagnostics).toHaveLength(1);
+		expect(result.diagnostics[0]!.message).toBe('Invalid property');
+	});
+
+	test('warning includes locations when provided', () => {
+		const loc: SourceLocation = {file: 'test.ts', line: 42, column: 5};
+		const result = generate_classes_css({
+			class_names: ['unknown_class'],
+			class_definitions: {},
+			interpreters: [],
+			css_properties: null,
+			explicit_classes: new Set(['unknown_class']),
+			class_locations: new Map([['unknown_class', [loc]]]),
+		});
+
+		expect(result.diagnostics).toHaveLength(1);
+		expect(result.diagnostics[0]!.locations).toEqual([loc]);
+	});
+});

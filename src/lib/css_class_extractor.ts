@@ -39,6 +39,11 @@ export interface ExtractionResult {
 	 * Keys = unique classes, values = locations for diagnostics/IDE integration.
 	 */
 	classes: Map<string, Array<SourceLocation>> | null;
+	/**
+	 * Classes explicitly annotated via `@fuz-classes` comments, or null if none.
+	 * These should produce warnings if they can't be resolved during generation.
+	 */
+	explicit_classes: Set<string> | null;
 	/** Variables that were used in class contexts, or null if none */
 	tracked_vars: Set<string> | null;
 	/** Diagnostics from the extraction phase, or null if none */
@@ -156,6 +161,8 @@ const CLASS_NAME_PATTERN = /(class|classes|class_?names?|class_?lists?)$/i;
 interface WalkState {
 	/** Map from class name to locations */
 	classes: Map<string, Array<SourceLocation>>;
+	/** Classes explicitly annotated via @fuz-classes comments */
+	explicit_classes: Set<string>;
 	/** Variables used in class contexts */
 	tracked_vars: Set<string>;
 	/** Variables with class-like names, mapped to their initializers */
@@ -197,6 +204,7 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
  */
 export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
 	const classes: Map<string, Array<SourceLocation>> = new Map();
+	const explicit_classes: Set<string> = new Set();
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
 	const diagnostics: Array<ExtractionDiagnostic> = [];
@@ -215,11 +223,12 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 			location: {file, line: 1, column: 1},
 		});
 		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, tracked_vars: null, diagnostics};
+		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
 	}
 
 	const state: WalkState = {
 		classes,
+		explicit_classes,
 		tracked_vars,
 		class_name_vars,
 		in_class_context: false,
@@ -252,6 +261,7 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 	// Convert empty to null
 	return {
 		classes: classes.size > 0 ? classes : null,
+		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
 		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
 	};
@@ -301,6 +311,7 @@ const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkStat
 			if (classes) {
 				for (const cls of classes) {
 					add_class(state, cls, location);
+					state.explicit_classes.add(cls);
 				}
 			}
 		},
@@ -368,6 +379,7 @@ const extract_fuz_classes_from_script = (
 		if (class_list) {
 			for (const cls of class_list) {
 				add_class(state, cls, location);
+				state.explicit_classes.add(cls);
 			}
 		}
 	}
@@ -387,6 +399,7 @@ export const extract_from_ts = (
 	acorn_plugins?: Array<AcornPlugin>,
 ): ExtractionResult => {
 	const classes: Map<string, Array<SourceLocation>> = new Map();
+	const explicit_classes: Set<string> = new Set();
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
 	const diagnostics: Array<ExtractionDiagnostic> = [];
@@ -425,7 +438,7 @@ export const extract_from_ts = (
 			location: {file, line: 1, column: 1},
 		});
 		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, tracked_vars: null, diagnostics};
+		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
 	}
 
 	// Process @fuz-classes comments
@@ -439,12 +452,14 @@ export const extract_from_ts = (
 		if (class_list) {
 			for (const cls of class_list) {
 				add_class_with_location(classes, cls, location);
+				explicit_classes.add(cls);
 			}
 		}
 	}
 
 	const state: WalkState = {
 		classes,
+		explicit_classes,
 		tracked_vars,
 		class_name_vars,
 		in_class_context: false,
@@ -464,6 +479,7 @@ export const extract_from_ts = (
 	// Convert empty to null
 	return {
 		classes: classes.size > 0 ? classes : null,
+		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
 		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
 	};

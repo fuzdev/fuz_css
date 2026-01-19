@@ -87,6 +87,8 @@ interface FileExtraction {
 	id: string;
 	/** Extracted classes, or null if none */
 	classes: Map<string, Array<SourceLocation>> | null;
+	/** Classes from @fuz-classes comments, or null if none */
+	explicit_classes: Set<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
@@ -224,7 +226,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				: raw_project_root + '/';
 			const resolved_cache_dir = join(project_root, cache_dir);
 
-			const css_classes = new CssClasses(include_set);
+			const css_classes = new CssClasses(include_set, exclude_set);
 			const current_paths: Set<string> = new Set();
 
 			const stats = {
@@ -300,6 +302,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					return {
 						id: node.id,
 						classes: result.classes,
+						explicit_classes: result.explicit_classes,
 						diagnostics: result.diagnostics,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
@@ -309,9 +312,9 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			);
 
 			// Add to CssClasses (null = empty, so use truthiness check)
-			for (const {id, classes, diagnostics} of extractions) {
-				if (classes || diagnostics) {
-					css_classes.add(id, classes, diagnostics);
+			for (const {id, classes, explicit_classes, diagnostics} of extractions) {
+				if (classes || explicit_classes || diagnostics) {
+					css_classes.add(id, classes, explicit_classes, diagnostics);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -327,8 +330,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			if (cache_writes.length > 0) {
 				await each_concurrent(
 					cache_writes,
-					async ({cache_path, content_hash, classes, diagnostics}) => {
-						await save_cached_extraction(cache_path, content_hash, classes, diagnostics);
+					async ({cache_path, content_hash, classes, explicit_classes, diagnostics}) => {
+						await save_cached_extraction(cache_path, content_hash, classes, explicit_classes, diagnostics);
 					},
 					cache_io_concurrency,
 				).catch((err) => log.warn('Cache write error:', err));
@@ -353,22 +356,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			}
 			previous_paths = current_paths;
 
-			// Get all classes with locations (single recalculation)
-			let {all_classes, all_classes_with_locations} = css_classes.get_all();
-
-			// Apply exclude filter if configured
-			if (exclude_set) {
-				const filtered: Set<string> = new Set();
-				const filtered_with_locations: Map<string, Array<SourceLocation> | null> = new Map();
-				for (const cls of all_classes) {
-					if (!exclude_set.has(cls)) {
-						filtered.add(cls);
-						filtered_with_locations.set(cls, all_classes_with_locations.get(cls) ?? null);
-					}
-				}
-				all_classes = filtered;
-				all_classes_with_locations = filtered_with_locations;
-			}
+			// Get all classes with locations (already filtered by exclude_classes)
+			const {all_classes, all_classes_with_locations, explicit_classes} = css_classes.get_all();
 
 			if (include_stats) {
 				log.info('File statistics:');
@@ -399,6 +388,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				css_properties,
 				log,
 				class_locations: all_classes_with_locations,
+				explicit_classes,
 			});
 
 			// Collect all diagnostics: extraction + generation

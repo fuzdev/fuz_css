@@ -122,13 +122,25 @@ export interface GenerateClassesCssOptions {
 	css_properties: Set<string> | null;
 	log?: Logger;
 	class_locations?: Map<string, Array<SourceLocation> | null>;
+	/**
+	 * Classes that were explicitly annotated (via @fuz-classes or include_classes).
+	 * Unresolved explicit classes produce warnings.
+	 */
+	explicit_classes?: Set<string> | null;
 }
 
 export const generate_classes_css = (
 	options: GenerateClassesCssOptions,
 ): GenerateClassesCssResult => {
-	const {class_names, class_definitions, interpreters, css_properties, log, class_locations} =
-		options;
+	const {
+		class_names,
+		class_definitions,
+		interpreters,
+		css_properties,
+		log,
+		class_locations,
+		explicit_classes,
+	} = options;
 	const interpreter_diagnostics: Array<InterpreterDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
 
@@ -184,11 +196,12 @@ export const generate_classes_css = (
 		const diag_count_before = interpreter_diagnostics.length;
 
 		// If not found statically, try interpreters
-		let from_interpreter = false;
+		let interpreter_matched = false;
 		if (!v) {
 			for (const interpreter of interpreters) {
 				const matched = c.match(interpreter.pattern);
 				if (matched) {
+					interpreter_matched = true;
 					const result = interpreter.interpret(matched, ctx);
 					if (result) {
 						// Check if the result is a full ruleset (contains braces)
@@ -200,7 +213,6 @@ export const generate_classes_css = (
 							// Simple declaration
 							v = {declaration: result, comment: interpreter.comment};
 						}
-						from_interpreter = true;
 						break;
 					}
 				}
@@ -215,6 +227,19 @@ export const generate_classes_css = (
 		}
 
 		if (!v) {
+			// Warn if this was an explicitly annotated class (via @fuz-classes or include_classes)
+			// but only if no interpreter pattern matched (if one matched but failed, error already reported)
+			if (explicit_classes?.has(c) && !interpreter_matched) {
+				const locations = class_locations?.get(c) ?? null;
+				diagnostics.push({
+					phase: 'generation',
+					level: 'warning',
+					message: 'No matching class definition found',
+					class_name: c,
+					suggestion: 'Check spelling or add a custom class definition',
+					locations,
+				});
+			}
 			continue;
 		}
 
@@ -297,7 +322,7 @@ export const generate_classes_css = (
 				const ruleset_without_comments = v.ruleset.replace(/\/\*[\s\S]*?\*\//g, '').trim();
 				const has_at_rules = ruleset_without_comments.startsWith('@');
 				if (
-					!from_interpreter &&
+					!interpreter_matched &&
 					!has_at_rules &&
 					is_single_selector_ruleset(parsed.rules, escaped_class)
 				) {

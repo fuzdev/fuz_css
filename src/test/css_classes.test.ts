@@ -93,7 +93,7 @@ describe('CssClasses', () => {
 			},
 		];
 
-		css_classes.add('file1.svelte', new Map(), diagnostics);
+		css_classes.add('file1.svelte', new Map(), null, diagnostics);
 
 		const result = css_classes.get_diagnostics();
 		expect(result).toHaveLength(1);
@@ -112,5 +112,59 @@ describe('CssClasses', () => {
 		css_classes.add('file2.svelte', new Map([['bar', [loc]]]));
 		const result2 = css_classes.get();
 		expect(result2.has('bar')).toBe(true);
+	});
+
+	test('explicit_classes tracks @fuz-classes annotations', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
+		const explicit = new Set(['annotated_class']);
+
+		css_classes.add('file1.ts', new Map([['regular', [loc]]]), explicit);
+
+		const {explicit_classes} = css_classes.get_all();
+		expect(explicit_classes).not.toBeNull();
+		expect(explicit_classes!.has('annotated_class')).toBe(true);
+		expect(explicit_classes!.has('regular')).toBe(false);
+	});
+
+	test('include_classes are included in explicit_classes', () => {
+		const css_classes = new CssClasses(new Set(['included_class']));
+
+		const {explicit_classes} = css_classes.get_all();
+		expect(explicit_classes).not.toBeNull();
+		expect(explicit_classes!.has('included_class')).toBe(true);
+	});
+
+	test('exclude_classes filters from all_classes', () => {
+		const css_classes = new CssClasses(null, new Set(['excluded']));
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', new Map([['kept', [loc]], ['excluded', [loc]]]));
+
+		const {all_classes} = css_classes.get_all();
+		expect(all_classes.has('kept')).toBe(true);
+		expect(all_classes.has('excluded')).toBe(false);
+	});
+
+	test('exclude_classes filters from explicit_classes', () => {
+		const include = new Set(['included_explicit']);
+		const exclude = new Set(['included_explicit']);
+		const css_classes = new CssClasses(include, exclude);
+
+		const {explicit_classes} = css_classes.get_all();
+		// included_explicit is in both include and exclude, so it should be excluded
+		expect(explicit_classes).toBeNull();
+	});
+
+	test('exclude_classes suppresses @fuz-classes warnings', () => {
+		const exclude = new Set(['annotated_but_excluded']);
+		const css_classes = new CssClasses(null, exclude);
+		const explicit = new Set(['annotated_but_excluded']);
+
+		css_classes.add('file1.ts', new Map(), explicit);
+
+		const {explicit_classes} = css_classes.get_all();
+		// Should be filtered out by exclude
+		expect(explicit_classes).toBeNull();
 	});
 });

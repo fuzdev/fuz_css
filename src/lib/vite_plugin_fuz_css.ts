@@ -28,12 +28,7 @@ import type {Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
 
 import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
-import {
-	type SourceLocation,
-	type ExtractionDiagnostic,
-	type Diagnostic,
-	CssGenerationError,
-} from './diagnostics.js';
+import {type Diagnostic, CssGenerationError} from './diagnostics.js';
 import {
 	generate_classes_css,
 	type CssClassDefinition,
@@ -52,6 +47,7 @@ import {
 	compute_hash,
 } from './css_cache.js';
 import {type FileFilter, filter_file_default} from './file_filter.js';
+import {CssClasses} from './css_classes.js';
 
 /* eslint-disable no-console */
 
@@ -128,21 +124,6 @@ export interface VitePluginFuzCssOptions {
 	cache_dir?: string;
 }
 
-/**
- * Class registry for tracking extracted classes across files.
- */
-interface ClassRegistry {
-	/** file path → extracted classes with locations */
-	files: Map<string, Map<string, Array<SourceLocation>>>;
-	/** file path → extraction diagnostics */
-	diagnostics: Map<string, Array<ExtractionDiagnostic>>;
-	/** file path → content hash for caching */
-	hashes: Map<string, string>;
-	/** aggregated classes, null = dirty, needs recompute */
-	all_classes: Set<string> | null;
-	/** aggregated class locations (null entry = include_class), null = dirty */
-	all_locations: Map<string, Array<SourceLocation> | null> | null;
-}
 
 /**
  * Creates the fuz_css Vite plugin.
@@ -179,13 +160,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
 	// Plugin state
-	const registry: ClassRegistry = {
-		files: new Map(),
-		diagnostics: new Map(),
-		hashes: new Map(),
-		all_classes: null,
-		all_locations: null,
-	};
+	const css_classes = new CssClasses(include_set, exclude_set);
+	const hashes: Map<string, string> = new Map();
 	let virtual_module_loaded = false;
 	let server: ViteDevServer | null = null;
 	let css_properties: Set<string> | null = null;
@@ -227,60 +203,14 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	};
 
 	/**
-	 * Recomputes aggregated classes from all files.
-	 * Returns locations map with null values for include_classes (no source location).
-	 */
-	const get_all_classes = (): {
-		classes: Set<string>;
-		locations: Map<string, Array<SourceLocation> | null>;
-	} => {
-		if (registry.all_classes && registry.all_locations) {
-			return {classes: registry.all_classes, locations: registry.all_locations};
-		}
-
-		const classes: Set<string> = new Set();
-		const locations: Map<string, Array<SourceLocation> | null> = new Map();
-
-		// Add include_classes first (with null locations - no source)
-		if (include_set) {
-			for (const c of include_set) {
-				classes.add(c);
-				locations.set(c, null);
-			}
-		}
-
-		// Aggregate from all files
-		for (const file_classes of registry.files.values()) {
-			for (const [name, locs] of file_classes) {
-				classes.add(name);
-				const existing = locations.get(name);
-				// Don't overwrite null from include_classes
-				if (existing === undefined) {
-					locations.set(name, [...locs]);
-				} else if (existing !== null) {
-					existing.push(...locs);
-				}
-			}
-		}
-
-		// Apply excludes
-		if (exclude_set) {
-			for (const c of exclude_set) {
-				classes.delete(c);
-				locations.delete(c);
-			}
-		}
-
-		registry.all_classes = classes;
-		registry.all_locations = locations;
-		return {classes, locations};
-	};
-
-	/**
-	 * Generates CSS from the current class registry.
+	 * Generates CSS from the current classes.
 	 */
 	const generate_css = (): string => {
-		const {classes, locations} = get_all_classes();
+		const {
+			all_classes: classes,
+			all_classes_with_locations: locations,
+			explicit_classes,
+		} = css_classes.get_all();
 
 		const result = generate_classes_css({
 			class_names: classes,
@@ -288,11 +218,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			interpreters: class_interpreters,
 			css_properties,
 			class_locations: locations,
+			explicit_classes,
 		});
 
 		// Collect all diagnostics: extraction + generation
 		const all_diagnostics: Array<Diagnostic> = [
-			...Array.from(registry.diagnostics.values()).flat(),
+			...css_classes.get_diagnostics(),
 			...result.diagnostics,
 		];
 
@@ -373,12 +304,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 			// Handle file deletion - watcher 'unlink' event
 			dev_server.watcher.on('unlink', (file) => {
-				if (registry.files.has(file)) {
-					registry.files.delete(file);
-					registry.diagnostics.delete(file);
-					registry.hashes.delete(file);
-					registry.all_classes = null;
-					registry.all_locations = null;
+				if (hashes.has(file)) {
+					css_classes.delete(file);
+					hashes.delete(file);
 
 					// Delete cache file (fire and forget)
 					if (!is_ci && resolved_cache_dir && project_root) {
@@ -450,7 +378,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 			// Compute content hash
 			const hash = await compute_hash(code);
-			const existing_hash = registry.hashes.get(id);
+			const existing_hash = hashes.get(id);
 
 			// Check if unchanged
 			if (existing_hash === hash) {
@@ -464,20 +392,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {classes, diagnostics} = from_cached_extraction(cached);
-					if (classes) {
-						registry.files.set(id, classes);
-					} else {
-						registry.files.delete(id);
-					}
-					if (diagnostics && diagnostics.length > 0) {
-						registry.diagnostics.set(id, diagnostics);
-					} else {
-						registry.diagnostics.delete(id);
-					}
-					registry.hashes.set(id, hash);
-					registry.all_classes = null;
-					registry.all_locations = null;
+					const {classes, explicit_classes, diagnostics} = from_cached_extraction(cached);
+					css_classes.add(id, classes, explicit_classes, diagnostics);
+					hashes.set(id, hash);
 
 					if (virtual_module_loaded) {
 						invalidate_virtual_module();
@@ -506,26 +423,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				}
 			}
 
-			// Update registry
-			if (result.classes) {
-				registry.files.set(id, result.classes);
-			} else {
-				registry.files.delete(id);
-			}
-			if (result.diagnostics && result.diagnostics.length > 0) {
-				registry.diagnostics.set(id, result.diagnostics);
-			} else {
-				registry.diagnostics.delete(id);
-			}
-			registry.hashes.set(id, hash);
-			registry.all_classes = null;
-			registry.all_locations = null;
+			// Update CssClasses
+			css_classes.add(id, result.classes, result.explicit_classes, result.diagnostics);
+			hashes.set(id, hash);
 
 			// Save to cache (fire and forget - don't block transform)
 			if (!is_ci && resolved_cache_dir && project_root) {
 				get_file_cache_path(id)
 					.then((cache_path) =>
-						save_cached_extraction(cache_path, hash, result.classes, result.diagnostics),
+						save_cached_extraction(cache_path, hash, result.classes, result.explicit_classes, result.diagnostics),
 					)
 					.catch(() => {
 						// Ignore cache errors

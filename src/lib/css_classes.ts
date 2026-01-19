@@ -12,10 +12,12 @@ import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 /**
  * Collection of CSS classes extracted from source files.
  * Tracks classes per-file for efficient incremental updates.
+ * Handles include/exclude filtering and explicit class tracking.
  * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 export class CssClasses {
-	include_classes: Set<string> | null;
+	#include_classes: Set<string> | null;
+	#exclude_classes: Set<string> | null;
 
 	#all: Set<string> = new Set();
 
@@ -27,13 +29,29 @@ export class CssClasses {
 	/** Classes by file id (files with no classes are not stored) */
 	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
 
+	/** Explicit classes (from @fuz-classes) by file id */
+	#explicit_by_id: Map<string, Set<string>> = new Map();
+
+	/** Aggregated explicit classes (from extraction + include_classes, minus exclude_classes) */
+	#explicit: Set<string> | null = null;
+
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
 	#diagnostics_by_id: Map<string, Array<ExtractionDiagnostic>> = new Map();
 
 	#dirty = true;
 
-	constructor(include_classes: Set<string> | null = null) {
-		this.include_classes = include_classes;
+	/**
+	 * Creates a new CssClasses collection.
+	 *
+	 * @param include_classes - Classes to always include (also treated as explicit for warnings)
+	 * @param exclude_classes - Classes to exclude from output (also suppresses warnings)
+	 */
+	constructor(
+		include_classes: Set<string> | null = null,
+		exclude_classes: Set<string> | null = null,
+	) {
+		this.#include_classes = include_classes;
+		this.#exclude_classes = exclude_classes;
 	}
 
 	/**
@@ -42,11 +60,13 @@ export class CssClasses {
 	 *
 	 * @param id - File identifier
 	 * @param classes - Map of class names to their source locations, or null if none
+	 * @param explicit_classes - Classes from @fuz-classes comments, or null if none
 	 * @param diagnostics - Extraction diagnostics from this file, or null if none
 	 */
 	add(
 		id: string,
 		classes: Map<string, Array<SourceLocation>> | null,
+		explicit_classes?: Set<string> | null,
 		diagnostics?: Array<ExtractionDiagnostic> | null,
 	): void {
 		this.#dirty = true;
@@ -54,6 +74,11 @@ export class CssClasses {
 			this.#by_id.set(id, classes);
 		} else {
 			this.#by_id.delete(id);
+		}
+		if (explicit_classes) {
+			this.#explicit_by_id.set(id, explicit_classes);
+		} else {
+			this.#explicit_by_id.delete(id);
 		}
 		if (diagnostics) {
 			this.#diagnostics_by_id.set(id, diagnostics);
@@ -66,11 +91,12 @@ export class CssClasses {
 	delete(id: string): void {
 		this.#dirty = true;
 		this.#by_id.delete(id);
+		this.#explicit_by_id.delete(id);
 		this.#diagnostics_by_id.delete(id);
 	}
 
 	/**
-	 * Gets all unique class names as a Set.
+	 * Gets all unique class names as a Set (with exclude filter applied).
 	 */
 	get(): Set<string> {
 		if (this.#dirty) {
@@ -81,7 +107,7 @@ export class CssClasses {
 	}
 
 	/**
-	 * Gets all classes with their source locations.
+	 * Gets all classes with their source locations (with exclude filter applied).
 	 * Locations from include_classes are null.
 	 */
 	get_with_locations(): Map<string, Array<SourceLocation> | null> {
@@ -96,10 +122,13 @@ export class CssClasses {
 	 * Gets all classes and their locations in a single call.
 	 * More efficient than calling `get()` and `get_with_locations()` separately
 	 * when both are needed (avoids potential double recalculation).
+	 *
+	 * Results have exclude filter applied and explicit_classes includes include_classes.
 	 */
 	get_all(): {
 		all_classes: Set<string>;
 		all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
+		explicit_classes: Set<string> | null;
 	} {
 		if (this.#dirty) {
 			this.#dirty = false;
@@ -108,6 +137,7 @@ export class CssClasses {
 		return {
 			all_classes: this.#all,
 			all_classes_with_locations: this.#all_with_locations_including_includes,
+			explicit_classes: this.#explicit,
 		};
 	}
 
@@ -126,16 +156,25 @@ export class CssClasses {
 		this.#all.clear();
 		this.#all_with_locations.clear();
 		this.#all_with_locations_including_includes.clear();
+		this.#explicit = null;
 
-		if (this.include_classes) {
-			for (const c of this.include_classes) {
+		const exclude = this.#exclude_classes;
+
+		// Add include_classes first (with null locations - no source)
+		if (this.#include_classes) {
+			for (const c of this.#include_classes) {
+				if (exclude?.has(c)) continue;
 				this.#all.add(c);
 				this.#all_with_locations_including_includes.set(c, null);
+				// include_classes are also explicit (user explicitly wants them)
+				(this.#explicit ??= new Set()).add(c);
 			}
 		}
 
+		// Aggregate from all files
 		for (const classes of this.#by_id.values()) {
 			for (const [cls, locations] of classes) {
+				if (exclude?.has(cls)) continue;
 				this.#all.add(cls);
 				const existing = this.#all_with_locations.get(cls);
 				if (existing) {
@@ -147,6 +186,14 @@ export class CssClasses {
 				if (!this.#all_with_locations_including_includes.has(cls)) {
 					this.#all_with_locations_including_includes.set(cls, this.#all_with_locations.get(cls)!);
 				}
+			}
+		}
+
+		// Aggregate explicit classes from all files (minus excludes)
+		for (const explicit of this.#explicit_by_id.values()) {
+			for (const cls of explicit) {
+				if (exclude?.has(cls)) continue;
+				(this.#explicit ??= new Set()).add(cls);
 			}
 		}
 	}
