@@ -138,12 +138,17 @@
 		<TomeSection>
 			<TomeSectionHeader text="Composite classes" tag="h3" />
 			<p>
-				Composites bundle multiple CSS declarations into a single class name. They have four forms:
+				Composites group multiple CSS declarations into a single class name. They have four forms:
 				raw CSS declarations, composition of other classes, a combination of both, or full rulesets
 				as an escape hatch for multi-selector patterns (hover states, child selectors, etc.).
 			</p>
 
 			<h4>Four definition forms</h4>
+			<p>
+				All four of these produce equivalent CSS output for <code>.centered</code>. The ruleset form
+				additionally demonstrates child selectors (<code>&gt; * + *</code>) which can't be expressed
+				with the other forms.
+			</p>
 			<Code
 				lang="typescript"
 				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.js';
@@ -153,6 +158,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 	centered: {
 		declaration: \`
 			display: flex;
+			flex-direction: column;
 			align-items: center;
 			justify-content: center;
 			text-align: center;
@@ -175,12 +181,14 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 		ruleset: \`
 			.centered {
 				display: flex;
+				flex-direction: column;
 				align-items: center;
 				justify-content: center;
+				text-align: center;
 			}
-			/* any selector: .centered > *, .centered:hover .foo, etc */
-			.centered:focus-within {
-				outline: 2px solid var(--color_a_5);
+			/* child selectors, pseudo-classes on children, etc */
+			.centered > * + * {
+				margin-top: var(--space_md);
 			}
 		\`,
 	},
