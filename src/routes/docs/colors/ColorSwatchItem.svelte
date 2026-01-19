@@ -5,19 +5,18 @@
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
 	const {
-		index,
+		intensity,
 		color_name,
 		computed_styles,
 	}: {
-		index: number;
+		intensity: number;
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
 	} = $props();
 
 	const themer = themer_context.get();
 
-	const num = $derived(index + 1);
-	const name = $derived(`color_${color_name}_${num}`);
+	const name = $derived(`color_${color_name}_${intensity}`);
 	const value = $derived.by(() => {
 		// handle the user switching between light/dark mode
 		// TODO could refactor to a class for variables

@@ -309,7 +309,7 @@
 						"kind": "variable",
 						"doc_comment": "All built-in CSS class definitions (token classes + composites).",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 43,
+						"source_line": 45,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
@@ -853,21 +853,9 @@
 						"type_signature": "\"top\" | \"right\" | \"bottom\" | \"left\""
 					},
 					{
-						"name": "COLOR_INTENSITIES",
-						"kind": "variable",
-						"source_line": 77,
-						"type_signature": "readonly [\"1\", \"2\", \"3\", \"4\", \"5\", \"6\", \"7\", \"8\", \"9\"]"
-					},
-					{
-						"name": "ColorIntensity",
-						"kind": "type",
-						"source_line": 78,
-						"type_signature": "\"1\" | \"2\" | \"3\" | \"4\" | \"5\" | \"6\" | \"7\" | \"8\" | \"9\""
-					},
-					{
 						"name": "format_variable_name",
 						"kind": "function",
-						"source_line": 81,
+						"source_line": 77,
 						"type_signature": "(str: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -881,7 +869,7 @@
 						"name": "format_spacing_value",
 						"kind": "function",
 						"doc_comment": "Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).\nUsed by margin, padding, gap, inset, top/right/bottom/left, etc.",
-						"source_line": 87,
+						"source_line": 83,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -895,7 +883,7 @@
 						"name": "format_dimension_value",
 						"kind": "function",
 						"doc_comment": "Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).\nUsed by width and height properties.",
-						"source_line": 99,
+						"source_line": 95,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -909,7 +897,7 @@
 						"name": "generate_property_classes",
 						"kind": "function",
 						"doc_comment": "Generate classes for a single CSS property with various values.",
-						"source_line": 123,
+						"source_line": 119,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((value: string) => string) | undefined, prefix?: string): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -941,7 +929,7 @@
 						"name": "generate_directional_classes",
 						"kind": "function",
 						"doc_comment": "Generate directional classes for properties like margin and padding.\nCreates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).",
-						"source_line": 146,
+						"source_line": 142,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((v: string) => string) | undefined): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -967,7 +955,7 @@
 						"name": "generate_border_radius_corners",
 						"kind": "function",
 						"doc_comment": "Generate border radius corner classes for all four corners.\nCreates classes for top-left, top-right, bottom-left, bottom-right corners.",
-						"source_line": 200,
+						"source_line": 196,
 						"type_signature": "(values: Iterable<string>, formatter?: ((value: string) => string) | undefined): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -988,7 +976,7 @@
 						"name": "generate_shadow_classes",
 						"kind": "function",
 						"doc_comment": "Generate shadow classes for various shadow types and sizes.\nCreates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.\nEach shadow uses color-mix with alpha values for transparency.",
-						"source_line": 229,
+						"source_line": 225,
 						"type_signature": "(sizes: Iterable<string>, alpha_mapping: Record<string, string>): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -2919,7 +2907,7 @@
 						"name": "TextColorVariant",
 						"kind": "type",
 						"source_line": 29,
-						"type_signature": "0 | 4 | 9 | 3 | 1 | 2 | 5 | 6 | 7 | 8 | 10"
+						"type_signature": "0 | 4 | 3 | 1 | 2 | 5 | 6 | 7 | 8 | 9 | 10"
 					},
 					{
 						"name": "text_color_variants",
@@ -2994,7 +2982,7 @@
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\""
 					},
 					{
-						"name": "shadow_font_size_variants",
+						"name": "shadow_size_variants",
 						"kind": "variable",
 						"source_line": 80,
 						"type_signature": "readonly [\"xs\", \"sm\", \"md\", \"lg\", \"xl\"]"
@@ -3054,34 +3042,58 @@
 						"type_signature": "readonly [\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\"]"
 					},
 					{
+						"name": "IntensityVariant",
+						"kind": "type",
+						"source_line": 106,
+						"type_signature": "4 | 3 | 1 | 2 | 5 | 6 | 7 | 8 | 9"
+					},
+					{
+						"name": "intensity_variants",
+						"kind": "variable",
+						"source_line": 107,
+						"type_signature": "readonly [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+					},
+					{
+						"name": "BorderColorIntensityVariant",
+						"kind": "type",
+						"source_line": 109,
+						"type_signature": "4 | 3 | 1 | 2 | 5"
+					},
+					{
+						"name": "border_color_intensity_variants",
+						"kind": "variable",
+						"source_line": 110,
+						"type_signature": "readonly [1, 2, 3, 4, 5]"
+					},
+					{
 						"name": "BorderWidthVariant",
 						"kind": "type",
-						"source_line": 105,
-						"type_signature": "4 | 9 | 3 | 1 | 2 | 5 | 6 | 7 | 8"
+						"source_line": 112,
+						"type_signature": "4 | 3 | 1 | 2 | 5 | 6 | 7 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",
 						"kind": "variable",
-						"source_line": 106,
+						"source_line": 113,
 						"type_signature": "readonly [1, 2, 3, 4, 5, 6, 7, 8, 9]"
 					},
 					{
 						"name": "OutlineWidthVariant",
 						"kind": "type",
-						"source_line": 108,
+						"source_line": 115,
 						"type_signature": "\"focus\" | \"active\""
 					},
 					{
 						"name": "outline_width_variants",
 						"kind": "variable",
-						"source_line": 109,
+						"source_line": 116,
 						"type_signature": "readonly [\"focus\", \"active\"]"
 					},
 					{
 						"name": "Z_INDEX_MAX",
 						"kind": "variable",
 						"doc_comment": "Maximum value for CSS z-index property (32-bit signed integer max).",
-						"source_line": 114,
+						"source_line": 121,
 						"type_signature": "2147483647"
 					}
 				],

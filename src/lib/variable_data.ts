@@ -76,8 +76,8 @@ export const shadow_variant_prefixes = [
 	'shadow_inset_bottom_',
 ] as const;
 
-export type ShadowSizeVariant = ArrayElement<typeof shadow_font_size_variants>;
-export const shadow_font_size_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
+export type ShadowSizeVariant = ArrayElement<typeof shadow_size_variants>;
+export const shadow_size_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
 export type ShadowAlphaVariant = ArrayElement<typeof shadow_alpha_variants>;
 export const shadow_alpha_variants = [1, 2, 3, 4, 5] as const;
@@ -101,6 +101,13 @@ export const icon_sizes = {
 
 export type ColorVariant = ArrayElement<typeof color_variants>;
 export const color_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
+
+// TODO maybe add 0 and 10?
+export type IntensityVariant = ArrayElement<typeof intensity_variants>;
+export const intensity_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+
+export type BorderColorIntensityVariant = ArrayElement<typeof border_color_intensity_variants>;
+export const border_color_intensity_variants = [1, 2, 3, 4, 5] as const;
 
 export type BorderWidthVariant = ArrayElement<typeof border_width_variants>;
 export const border_width_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;

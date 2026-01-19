@@ -11,6 +11,7 @@
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import {intensity_variants} from '$lib/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'shading';
 
@@ -89,8 +90,8 @@
 			>
 			<UnfinishedImplementationWarning />
 			<div class="swatch">
-				{#each {length: 9} as _, i (i)}
-					{@const name = 'darken_' + (i + 1)}
+				{#each intensity_variants as intensity (intensity)}
+					{@const name = 'darken_' + intensity}
 					<div>
 						<div class="color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
@@ -98,8 +99,8 @@
 				{/each}
 			</div>
 			<div class="swatch">
-				{#each {length: 9} as _, i (i)}
-					{@const name = 'lighten_' + (i + 1)}
+				{#each intensity_variants as intensity (intensity)}
+					{@const name = 'lighten_' + intensity}
 					<div>
 						<div class="color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
@@ -116,8 +117,8 @@
 				the same as <code>darken</code>. In dark mode, they're swapped.
 			</p>
 			<div class="swatch">
-				{#each {length: 9} as _, i (i)}
-					{@const name = 'bg_' + (i + 1)}
+				{#each intensity_variants as intensity (intensity)}
+					{@const name = 'bg_' + intensity}
 					<div>
 						<div class="color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
@@ -125,8 +126,8 @@
 				{/each}
 			</div>
 			<div class="swatch">
-				{#each {length: 9} as _, i (i)}
-					{@const name = 'fg_' + (i + 1)}
+				{#each intensity_variants as intensity (intensity)}
+					{@const name = 'fg_' + intensity}
 					<div>
 						<div class="color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>

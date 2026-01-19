@@ -10,7 +10,6 @@
 import type {CssClassDefinition} from './css_class_generation.js';
 import {
 	generate_classes,
-	COLOR_INTENSITIES,
 	generate_property_classes,
 	generate_directional_classes,
 	generate_border_radius_corners,
@@ -20,12 +19,15 @@ import {
 import {
 	space_variants,
 	color_variants,
+	intensity_variants,
+	border_color_intensity_variants,
 	text_color_variants,
 	font_size_variants,
 	icon_size_variants,
 	line_height_variants,
 	border_radius_variants,
 	border_width_variants,
+	shadow_size_variants,
 	shadow_semantic_values,
 	shadow_alpha_variants,
 } from './variable_data.js';
@@ -83,13 +85,13 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	...generate_property_classes(
 		'background-color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--darken_${v})`,
 		'darken',
 	),
 	...generate_property_classes(
 		'background-color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--lighten_${v})`,
 		'lighten',
 	),
@@ -97,25 +99,25 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	fg: {declaration: 'background-color: var(--fg);'},
 	...generate_property_classes(
 		'background-color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--bg_${v})`,
 		'bg',
 	),
 	...generate_property_classes(
 		'background-color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--fg_${v})`,
 		'fg',
 	),
 	...generate_property_classes(
 		'color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--darken_${v})`,
 		'color_darken',
 	),
 	...generate_property_classes(
 		'color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--lighten_${v})`,
 		'color_lighten',
 	),
@@ -123,13 +125,13 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	color_fg: {declaration: 'color: var(--fg);'},
 	...generate_property_classes(
 		'color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--bg_${v})`,
 		'color_bg',
 	),
 	...generate_property_classes(
 		'color',
-		[1, 2, 3, 4, 5, 6, 7, 8, 9].map(String),
+		intensity_variants.map(String),
 		(v) => `var(--fg_${v})`,
 		'color_fg',
 	),
@@ -141,20 +143,20 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		color_variants,
 	),
 	...generate_classes(
-		(hue: string, intensity: string) => ({
+		(hue: string, intensity: number) => ({
 			name: `color_${hue}_${intensity}`,
 			css: `color: var(--color_${hue}_${intensity});`,
 		}),
 		color_variants,
-		COLOR_INTENSITIES,
+		intensity_variants,
 	),
 	...generate_classes(
-		(hue: string, intensity: string) => ({
+		(hue: string, intensity: number) => ({
 			name: `bg_${hue}_${intensity}`,
 			css: `background-color: var(--color_${hue}_${intensity});`,
 		}),
 		color_variants,
-		COLOR_INTENSITIES,
+		intensity_variants,
 	),
 
 	/*
@@ -164,13 +166,13 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	*/
 	...generate_property_classes(
 		'border-color',
-		[1, 2, 3, 4, 5].map(String),
+		border_color_intensity_variants.map(String),
 		(v) => `var(--border_color_${v})`,
 	),
 	...generate_property_classes('border-color', color_variants, (v) => `var(--border_color_${v})`),
 	...generate_property_classes(
 		'outline-color',
-		[1, 2, 3, 4, 5].map(String),
+		border_color_intensity_variants.map(String),
 		(v) => `var(--border_color_${v})`,
 	),
 	...generate_property_classes('outline-color', color_variants, (v) => `var(--border_color_${v})`),
@@ -200,7 +202,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	shadows
 
 	*/
-	...generate_shadow_classes(['xs', 'sm', 'md', 'lg', 'xl'], {
+	...generate_shadow_classes(shadow_size_variants, {
 		xs: '1',
 		sm: '2',
 		md: '3',

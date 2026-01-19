@@ -7,6 +7,7 @@
 
 	import {
 		border_width_variants,
+		border_color_intensity_variants,
 		color_variants,
 		outline_width_variants,
 		border_radius_variants,
@@ -55,18 +56,18 @@
 		<TomeSectionHeader text="Border shades" />
 		<UnfinishedImplementationWarning />
 		<div class="border_examples border_colors">
-			{#each {length: 5} as _, i (i)}
-				{@const name = 'border_color_' + (i + 1)}
+			{#each border_color_intensity_variants as border_intensity (border_intensity)}
+				{@const name = 'border_color_' + border_intensity}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div class="border_example border_color" style:border-color="var(--{name})">
 							<StyleVariableButton {name} />
 						</div>
-						{#each {length: 5} as _, i (i)}
+						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
 								class="border_color_width"
 								style:border-color="var(--{name})"
-								style:border-width="var(--{'border_width_' + (i + 2)})"
+								style:border-width="var(--border_width_{border_width})"
 							></div>
 						{/each}
 					</div>
@@ -93,11 +94,11 @@
 						<div class="border_example border_color" style:border-color="var(--{name})">
 							<StyleVariableButton {name} />
 						</div>
-						{#each {length: 5} as _, i (i)}
+						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
 								class="border_color_width"
 								style:border-color="var(--{name})"
-								style:border-width="var(--{'border_width_' + (i + 2)})"
+								style:border-width="var(--border_width_{border_width})"
 							></div>
 						{/each}
 					</div>

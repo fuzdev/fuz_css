@@ -73,10 +73,6 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 export const CSS_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
 export type CssDirection = (typeof CSS_DIRECTIONS)[number];
 
-// TODO add '0' and '10' ?
-export const COLOR_INTENSITIES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
-export type ColorIntensity = (typeof COLOR_INTENSITIES)[number];
-
 // Helper to convert any string to a valid CSS variable name (snake_case)
 export const format_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
 
