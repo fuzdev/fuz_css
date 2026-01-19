@@ -35,13 +35,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			align-items: center;
 		`,
 	},
-	formatted: {
-		comment: 'Formats content to wrap long strings and preserve displayed whitespace.',
-		declaration: `
-			overflow: hidden;
-			white-space: break-spaces;
-		`,
-	},
 	ellipsis: {
 		declaration: `
 			display: block;

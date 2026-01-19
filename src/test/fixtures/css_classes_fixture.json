@@ -14,10 +14,6 @@
 		"comment": "can be used to override the direction of a `.box`",
 		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: row;\n\t\t\talign-items: center;\n\t\t"
 	},
-	"formatted": {
-		"comment": "Formats content to wrap long strings and preserve displayed whitespace.",
-		"declaration": "\n\t\t\toverflow: hidden;\n\t\t\twhite-space: break-spaces;\n\t\t"
-	},
 	"ellipsis": {
 		"declaration": "\n\t\t\tdisplay: block;\n\t\t\twhite-space: nowrap;\n\t\t\toverflow: hidden;\n\t\t\ttext-overflow: ellipsis;\n\t\t"
 	},

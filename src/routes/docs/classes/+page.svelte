@@ -317,7 +317,6 @@ export const gen = gen_fuz_css({
 				<li><code>.box</code> - centered flex container</li>
 				<li><code>.row</code> - horizontal flex row</li>
 				<li><code>.column</code> - vertical flex column</li>
-				<li><code>.formatted</code> - preserves whitespace with word-wrap</li>
 				<li><code>.ellipsis</code> - text overflow ellipsis</li>
 				<li><code>.pane</code> - pane container</li>
 				<li><code>.panel</code> - panel container</li>
@@ -923,7 +922,7 @@ export const gen = gen_fuz_css({
 		<TomeSectionHeader text="Framework support" />
 		<p>
 			fuz_css is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
-			work with any framework or plain HTML. The utility class generator has varying
+			work with any framework and plain HTML. The utility class generator has varying
 			<a href="#Class-detection">detection</a> support:
 		</p>
 		<table>
