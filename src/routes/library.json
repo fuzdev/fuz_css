@@ -1661,7 +1661,7 @@
 					{
 						"name": "try_resolve_literal",
 						"kind": "function",
-						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc.).",
+						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc).",
 						"source_line": 682,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null, context_class_name: string): LiteralResolutionResult",
 						"return_type": "LiteralResolutionResult",

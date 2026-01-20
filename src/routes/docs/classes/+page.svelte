@@ -100,8 +100,8 @@
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<p class=&quot;pl_xl3 color_h_5&quot;>token classes</p>" />
-			<p class="pl_xl3 color_h_5">token classes</p>
+			<Code content="<p class=&quot;pl_xl3 color_g_5&quot;>some token classes</p>" />
+			<p class="pl_xl3 color_g_5">some token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -225,8 +225,9 @@
 			</ul>
 			<aside class="mt_lg">
 				Padding and margin include <code>_0</code> (and <code>_auto</code> for margin) for
-				ergonomics: <code>px_0</code> is much shorter than
-				<code>padding-inline:0</code>. Other properties use literals for raw values.
+				ergonomics: <code>pb_0</code> is much shorter than
+				<code>padding-bottom:0</code>. Other properties use <a href="#Literal-classes">literals</a> for
+				raw values.
 			</aside>
 			<h4>Sizing</h4>
 			<p>See <TomeLink name="layout" />.</p>
@@ -458,7 +459,7 @@
 			<TomeSectionHeader text="Composite classes" tag="h3" />
 			<p>
 				Composites let you name and reuse patterns, extending the class system with your own
-				vocabulary. They have four forms: raw CSS declarations, composition of other classes, a
+				vocabulary. They have four forms: raw CSS declarations, compositions of other classes, a
 				combination of both, or full rulesets as an escape hatch for multi-selector patterns (child
 				selectors, sibling combinators, etc.).
 			</p>
