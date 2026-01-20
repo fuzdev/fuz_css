@@ -34,7 +34,7 @@
 {#snippet variant_range<T>(arr: ReadonlyArray<T>)}
 	<span class="text_color_5">{'{'}</span>{arr[0]}<span class="text_color_5">-</span>{arr.at(
 		-1,
-	)}<span class="text_color_5">{'}'}</span>
+	)}<span class="text_color_5">}</span>
 {/snippet}
 
 <TomeContent {tome}>

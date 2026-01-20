@@ -1661,7 +1661,7 @@
 					{
 						"name": "try_resolve_literal",
 						"kind": "function",
-						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc).",
+						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc.).",
 						"source_line": 682,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null, context_class_name: string): LiteralResolutionResult",
 						"return_type": "LiteralResolutionResult",
@@ -2497,16 +2497,16 @@
 								"type_signature": "boolean"
 							},
 							{
-								"name": "include_default_definitions",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
-							},
-							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
 								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
+							},
+							{
+								"name": "include_default_definitions",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
 							},
 							{
 								"name": "class_interpreters",
@@ -5251,16 +5251,16 @@
 								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
 							},
 							{
-								"name": "include_default_definitions",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
-							},
-							{
 								"name": "class_definitions",
 								"kind": "variable",
 								"type_signature": "Record<string, CssClassDefinition | undefined>",
 								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
+							},
+							{
+								"name": "include_default_definitions",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
 							},
 							{
 								"name": "class_interpreters",
