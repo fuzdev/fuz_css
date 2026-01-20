@@ -14,9 +14,9 @@
 	// TODO standardize
 </script>
 
-<main class="width_upto_md">
+<main class="width_atmost_md">
 	<section>
-		<header class="box width_upto_sm">
+		<header class="box width_atmost_sm">
 			<h1 class="mb_xl5" style:margin-top={MAIN_HEADER_MARGIN_TOP}>
 				{library.repo_name}
 			</h1>
@@ -24,7 +24,7 @@
 		<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
 	</section>
 	<section>
-		<div class="panel p_md width_upto_md">
+		<div class="panel p_md width_atmost_md">
 			<LibraryDetail {library} />
 		</div>
 	</section>

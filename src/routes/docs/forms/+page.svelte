@@ -64,7 +64,7 @@
 	...
 </form>`}
 		/>
-		<div class="width_upto_sm">
+		<div class="width_atmost_sm">
 			<form>
 				<fieldset>
 					<legend>This is a <MdnLink path="Web/HTML/Element/legend" /></legend>

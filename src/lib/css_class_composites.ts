@@ -43,19 +43,19 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			text-overflow: ellipsis;
 		`,
 	},
-	width_upto_xs: {
+	width_atmost_xs: {
 		declaration: 'width: 100%; max-width: var(--distance_xs);',
 	},
-	width_upto_sm: {
+	width_atmost_sm: {
 		declaration: 'width: 100%; max-width: var(--distance_sm);',
 	},
-	width_upto_md: {
+	width_atmost_md: {
 		declaration: 'width: 100%; max-width: var(--distance_md);',
 	},
-	width_upto_lg: {
+	width_atmost_lg: {
 		declaration: 'width: 100%; max-width: var(--distance_lg);',
 	},
-	width_upto_xl: {
+	width_atmost_xl: {
 		declaration: 'width: 100%; max-width: var(--distance_xl);',
 	},
 	width_atleast_xs: {
@@ -74,19 +74,19 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: 'width: 100%; min-width: var(--distance_xl);',
 	},
 	// TODO rethink if this breaks too often or confusingly, `height: 100%` depends on the parent and often won't take effect
-	height_upto_xs: {
+	height_atmost_xs: {
 		declaration: 'height: 100%; max-height: var(--distance_xs);',
 	},
-	height_upto_sm: {
+	height_atmost_sm: {
 		declaration: 'height: 100%; max-height: var(--distance_sm);',
 	},
-	height_upto_md: {
+	height_atmost_md: {
 		declaration: 'height: 100%; max-height: var(--distance_md);',
 	},
-	height_upto_lg: {
+	height_atmost_lg: {
 		declaration: 'height: 100%; max-height: var(--distance_lg);',
 	},
-	height_upto_xl: {
+	height_atmost_xl: {
 		declaration: 'height: 100%; max-height: var(--distance_xl);',
 	},
 	height_atleast_xs: {

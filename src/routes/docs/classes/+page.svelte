@@ -49,8 +49,8 @@
 			Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
 			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
 			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag and
-			<code>style</code> attribute. They're generated on-demand to include only what you use, and they're
-			totally optional.
+			<code>style</code> attribute. They're optional and generated on-demand to include only what you
+			use.
 		</p>
 		<p>
 			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
@@ -67,7 +67,9 @@
 			<li>
 				compose across component boundaries, avoiding fragile <code>:global()</code> selectors
 			</li>
-			<li>avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code></li>
+			<li>
+				let you avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code>
+			</li>
 		</ul>
 		<p>Compared to the <code>style</code> attribute, classes:</p>
 		<ul>
@@ -92,13 +94,14 @@
 			<p>
 				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
 				close relationship to <TomeLink name="variables">style variables</TomeLink> -- each maps design
-				tokens to CSS properties. They're generated programmatically from variant arrays, making them
-				predictable and systematic. The composites documented
+				tokens to CSS properties. They're generated programmatically from variant data, making them predictable
+				and systematic. The composites documented
 				<a href="#Composite-classes">below</a>
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<div class=&quot;p_md color_a_5&quot;>" />
+			<Code content="<p class=&quot;pl_xl3 color_h_5&quot;>token classes</p>" />
+			<p class="pl_xl3 color_h_5">token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -237,13 +240,13 @@
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.width_upto_{@render variant_range(distance_variants)}</code>
+						><code>.width_atmost_{@render variant_range(distance_variants)}</code>
 						<code>.width_atleast_{@render variant_range(distance_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.height_upto_{@render variant_range(distance_variants)}</code>
+						><code>.height_atmost_{@render variant_range(distance_variants)}</code>
 						<code>.height_atleast_{@render variant_range(distance_variants)}</code>
 					</span>
 				</li>

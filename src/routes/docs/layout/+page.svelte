@@ -39,8 +39,7 @@
 		</p>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Width variables" />
-		<aside>⚠️ maybe instead of "width" this should be "distance" or "length" something?</aside>
+		<TomeSectionHeader text="Distance variables" />
 		<ul class="unstyled">
 			{#each distance_variants as distance_variant (distance_variant)}
 				{@const name = 'distance_' + distance_variant}
@@ -53,8 +52,9 @@
 			{/each}
 		</ul>
 		<p>
-			Width variants have <a href={resolve('/docs/classes')}>classes</a> like <code>.width_sm</code>
-			and <code>.min_width_md</code>.
+			Distance variants have <a href={resolve('/docs/classes')}>classes</a> like
+			<code>.width_atmost_sm</code>
+			and <code>.width_atleast_md</code>.
 		</p>
 	</TomeSection>
 </TomeContent>

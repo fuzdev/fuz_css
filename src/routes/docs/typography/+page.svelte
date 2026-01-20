@@ -98,7 +98,7 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Font sizes" />
-		<form class="width_upto_sm">
+		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>
 		{#each font_size_variants as size (size.name)}

@@ -20,7 +20,7 @@
 			<blockquote class="shadow_inset_top_xs">CSS with more utility 🪴</blockquote>
 		</div>
 	</section>
-	<section class="width_upto_md p_sm border_radius_md shadow_xs">
+	<section class="width_atmost_md p_sm border_radius_md shadow_xs">
 		<div class="panel p_lg bg shadow_sm">
 			<Introduction />
 		</div>
@@ -28,7 +28,7 @@
 	<section>
 		<Card href={resolve('/docs')}>docs{#snippet icon()}🪴{/snippet}</Card>
 	</section>
-	<section class="width_upto_sm p_sm border_radius_md shadow_xs text-align:center">
+	<section class="width_atmost_sm p_sm border_radius_md shadow_xs text-align:center">
 		fuz_css is part of the Fuz stack, <br /> see
 		<a href="https://www.fuz.dev/">fuz.dev</a>
 		and

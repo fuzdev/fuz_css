@@ -40,7 +40,7 @@
 	<!-- </ContextmenuRoot> -->
 	<!-- {#if show_settings}
 		<Dialog onclose={() => (show_settings = false)}>
-			<div class="pane p_md width_upto_md mx_auto">
+			<div class="pane p_md width_atmost_md mx_auto">
 				<Settings />
 			</div>
 		</Dialog>
