@@ -7,6 +7,7 @@
 
 	import {
 		border_width_variants,
+		border_color_intensity_variants,
 		color_variants,
 		outline_width_variants,
 		border_radius_variants,
@@ -21,28 +22,25 @@
 	const computed_styles =
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
-	// TODO demo `border_style_values` from the data
-
 	const border_radius_classes = [
-		'border_radius_0',
-		'border_radius_14',
-		'border_radius_32',
-		'border_radius_100',
+		'border-radius:0',
+		'border-radius:14%',
+		'border-radius:32%',
+		'border-radius:100%',
 	];
 
 	const border_radius_corner_classes = [
-		'border_top_left_radius_26',
-		'border_top_right_radius_100 border_bottom_left_radius_100',
-		'border_bottom_right_radius_77',
+		'border-top-left-radius:26%',
+		'border-top-right-radius:100% border-bottom-left-radius:100%',
+		'border-bottom-right-radius:77%',
 	];
 
 	const border_radius_corner_size_classes = [
 		'border_top_left_radius_lg border_top_right_radius_sm',
 		'border_bottom_left_radius_md border_bottom_right_radius_xl',
 	];
-	// TODO improve class detection
-	// classes="border_top_right_radius_100 border_bottom_left_radius_100 border_top_left_radius_lg border_top_right_radius_sm border_bottom_left_radius_md border_bottom_right_radius_xl"
-	// classes="outline_width_focus outline_width_active"
+
+	// @fuz-classes outline_width_focus outline_width_active
 </script>
 
 <TomeContent {tome}>
@@ -58,18 +56,18 @@
 		<TomeSectionHeader text="Border shades" />
 		<UnfinishedImplementationWarning />
 		<div class="border_examples border_colors">
-			{#each {length: 5} as _, i (i)}
-				{@const name = 'border_color_' + (i + 1)}
+			{#each border_color_intensity_variants as border_intensity (border_intensity)}
+				{@const name = 'border_color_' + border_intensity}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div class="border_example border_color" style:border-color="var(--{name})">
 							<StyleVariableButton {name} />
 						</div>
-						{#each {length: 5} as _, i (i)}
+						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
 								class="border_color_width"
 								style:border-color="var(--{name})"
-								style:border-width="var(--{'border_width_' + (i + 2)})"
+								style:border-width="var(--border_width_{border_width})"
 							></div>
 						{/each}
 					</div>
@@ -96,11 +94,11 @@
 						<div class="border_example border_color" style:border-color="var(--{name})">
 							<StyleVariableButton {name} />
 						</div>
-						{#each {length: 5} as _, i (i)}
+						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
 								class="border_color_width"
 								style:border-color="var(--{name})"
-								style:border-width="var(--{'border_width_' + (i + 2)})"
+								style:border-width="var(--border_width_{border_width})"
 							></div>
 						{/each}
 					</div>
@@ -135,13 +133,13 @@
 		<p>
 			Each border utility class has a corresponding outline variant using the same border variables
 			(like <code>outline_color_b</code>, <code>outline_width_4</code>, and
-			<code>outline_style_solid</code>), and there are also two special outline variables:
+			<code>outline-style:solid</code>), and there are also two special outline variables:
 		</p>
 		<div class="border_examples outline_widths">
 			{#each outline_width_variants as outline_width_variant (outline_width_variant)}
 				{@const name = 'outline_width_' + outline_width_variant}
 				<div class="row">
-					<div class="border_example {name} outline_style_solid outline_color_3">
+					<div class="border_example {name} outline-style:solid outline_color_3">
 						<StyleVariableButton {name} />
 					</div>
 					<span class="pl_sm pr_sm">=</span><code

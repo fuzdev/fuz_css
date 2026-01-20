@@ -1,14 +1,14 @@
-import type {CssClassDeclaration} from './css_class_helpers.js';
+import type {CssClassDefinition} from './css_class_generation.js';
 
-export type ClassTemplateResult = {
+export type GeneratedClassResult = {
 	name: string;
 	css: string;
 } | null;
 
 export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
-	| ((v1: T1) => ClassTemplateResult)
-	| ((v1: T1, v2: T2) => ClassTemplateResult)
-	| ((v1: T1, v2: T2, v3: T3) => ClassTemplateResult);
+	| ((v1: T1) => GeneratedClassResult)
+	| ((v1: T1, v2: T2) => GeneratedClassResult)
+	| ((v1: T1, v2: T2, v3: T3) => GeneratedClassResult);
 
 /**
  * Generates CSS class declarations from templates.
@@ -39,8 +39,8 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	values: Iterable<T1>,
 	secondary?: Iterable<T2>,
 	tertiary?: Iterable<T3>,
-): Record<string, CssClassDeclaration> => {
-	const result: Record<string, CssClassDeclaration> = {};
+): Record<string, CssClassDefinition> => {
+	const result: Record<string, CssClassDefinition> = {};
 
 	for (const v1 of values) {
 		if (secondary) {
@@ -70,33 +70,11 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	return result;
 };
 
-// TODO refactor with `src/lib/variable_data.ts`, we may want `css_data.ts` or something
-export const CSS_GLOBALS = ['inherit', 'initial', 'revert', 'revert_layer', 'unset'] as const;
-export type CssGlobal = (typeof CSS_GLOBALS)[number];
-
 export const CSS_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
 export type CssDirection = (typeof CSS_DIRECTIONS)[number];
 
-// TODO add '0' and '10' ?
-export const COLOR_INTENSITIES = ['1', '2', '3', '4', '5', '6', '7', '8', '9'] as const;
-export type ColorIntensity = (typeof COLOR_INTENSITIES)[number];
-
-// Helper to convert snake_case to kebab-case for CSS property values
-export const to_kebab = (str: string): string => str.replace(/_/g, '-');
-
 // Helper to convert any string to a valid CSS variable name (snake_case)
-export const to_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
-
-// Helper to generate global value classes for any CSS property
-export const generate_global_classes = (property: string): Record<string, CssClassDeclaration> => {
-	return generate_classes(
-		(global: (typeof CSS_GLOBALS)[number]) => ({
-			name: `${to_variable_name(property)}_${global}`,
-			css: `${property}: ${to_kebab(global)};`,
-		}),
-		CSS_GLOBALS,
-	);
-};
+export const format_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
 
 /**
  * Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).
@@ -132,9 +110,8 @@ export const format_dimension_value = (value: string): string => {
 
 /**
  * Generate classes for a single CSS property with various values.
- * This is the most common pattern, used by display, visibility, float, etc.
  *
- * @param property - The CSS property name (e.g. 'display', 'gap')
+ * @param property - The CSS property name (e.g. 'font-size', 'gap')
  * @param values - The values to generate classes for
  * @param formatter - Optional function to format values (e.g. v => `var(--space_${v})`)
  * @param prefix - Optional class name prefix (defaults to property with dashes replaced by underscores)
@@ -143,11 +120,11 @@ export const generate_property_classes = (
 	property: string,
 	values: Iterable<string>,
 	formatter?: (value: string) => string,
-	prefix: string = to_variable_name(property),
-): Record<string, CssClassDeclaration> => {
+	prefix: string = format_variable_name(property),
+): Record<string, CssClassDefinition> => {
 	return generate_classes(
 		(value: string) => ({
-			name: `${prefix}_${to_variable_name(value)}`,
+			name: `${prefix}_${format_variable_name(value)}`,
 			css: `${property}: ${formatter?.(value) ?? value};`,
 		}),
 		values,
@@ -166,7 +143,7 @@ export const generate_directional_classes = (
 	property: string,
 	values: Iterable<string>,
 	formatter?: (v: string) => string,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const prefix = property[0]; // 'm' for margin, 'p' for padding
 
 	return generate_classes(
@@ -175,20 +152,29 @@ export const generate_directional_classes = (
 
 			// Map variants to their configurations
 			const configs: Record<string, {name: string; css: string} | undefined> = {
-				'': {name: `${prefix}_${to_variable_name(value)}`, css: `${property}: ${formatted};`},
-				t: {name: `${prefix}t_${to_variable_name(value)}`, css: `${property}-top: ${formatted};`},
-				r: {name: `${prefix}r_${to_variable_name(value)}`, css: `${property}-right: ${formatted};`},
+				'': {name: `${prefix}_${format_variable_name(value)}`, css: `${property}: ${formatted};`},
+				t: {
+					name: `${prefix}t_${format_variable_name(value)}`,
+					css: `${property}-top: ${formatted};`,
+				},
+				r: {
+					name: `${prefix}r_${format_variable_name(value)}`,
+					css: `${property}-right: ${formatted};`,
+				},
 				b: {
-					name: `${prefix}b_${to_variable_name(value)}`,
+					name: `${prefix}b_${format_variable_name(value)}`,
 					css: `${property}-bottom: ${formatted};`,
 				},
-				l: {name: `${prefix}l_${to_variable_name(value)}`, css: `${property}-left: ${formatted};`},
+				l: {
+					name: `${prefix}l_${format_variable_name(value)}`,
+					css: `${property}-left: ${formatted};`,
+				},
 				x: {
-					name: `${prefix}x_${to_variable_name(value)}`,
+					name: `${prefix}x_${format_variable_name(value)}`,
 					css: `${property}-left: ${formatted};\t${property}-right: ${formatted};`,
 				},
 				y: {
-					name: `${prefix}y_${to_variable_name(value)}`,
+					name: `${prefix}y_${format_variable_name(value)}`,
 					css: `${property}-top: ${formatted};\t${property}-bottom: ${formatted};`,
 				},
 			};
@@ -196,30 +182,6 @@ export const generate_directional_classes = (
 			return configs[variant] || null;
 		},
 		['', 't', 'r', 'b', 'l', 'x', 'y'],
-		values,
-	);
-};
-
-/**
- * Generate classes for properties with axis variants (e.g. overflow, overflow-x, overflow-y).
- *
- * @param property - The base CSS property name (e.g. 'overflow')
- * @param values - The values to generate classes for
- */
-export const generate_property_with_axes = (
-	property: string,
-	values: Iterable<string>,
-): Record<string, CssClassDeclaration> => {
-	return generate_classes(
-		(axis: string, value: string) => {
-			const prop = axis === '' ? property : `${property}-${axis}`;
-			const prefix = axis === '' ? property : `${property}_${axis}`;
-			return {
-				name: `${to_variable_name(prefix)}_${to_variable_name(value)}`,
-				css: `${prop}: ${value};`,
-			};
-		},
-		['', 'x', 'y'],
 		values,
 	);
 };
@@ -234,7 +196,7 @@ export const generate_property_with_axes = (
 export const generate_border_radius_corners = (
 	values: Iterable<string>,
 	formatter?: (value: string) => string,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const corners = [
 		{prop: 'border-top-left-radius', name: 'border_top_left_radius'},
 		{prop: 'border-top-right-radius', name: 'border_top_right_radius'},
@@ -244,7 +206,7 @@ export const generate_border_radius_corners = (
 
 	return generate_classes(
 		(corner: (typeof corners)[0], value: string) => ({
-			name: `${corner.name}_${to_variable_name(value)}`,
+			name: `${corner.name}_${format_variable_name(value)}`,
 			css: `${corner.prop}: ${formatter?.(value) ?? value};`,
 		}),
 		corners,
@@ -263,7 +225,7 @@ export const generate_border_radius_corners = (
 export const generate_shadow_classes = (
 	sizes: Iterable<string>,
 	alpha_mapping: Record<string, string>,
-): Record<string, CssClassDeclaration> => {
+): Record<string, CssClassDefinition> => {
 	const shadow_types = [
 		{prefix: 'shadow', var_prefix: 'shadow'},
 		{prefix: 'shadow_top', var_prefix: 'shadow_top'},

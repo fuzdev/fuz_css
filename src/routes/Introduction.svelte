@@ -1,37 +1,31 @@
 <script lang="ts">
-	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {resolve} from '$app/paths';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 </script>
 
 <p>
-	Fuz CSS is a CSS framework and design system built around semantic styles and style variables.
-	Semantic styles mean HTML elements are styled by default, with <code>.unstyled</code>
-	to opt out when needed. Style variables are design tokens and <MdnLink path="Web/CSS/--*"
-		>CSS custom properties</MdnLink
-	> with particular capabilities and conventions that integrate with the semantic styles and other features
-	like utility classes.
+	fuz_css is a CSS framework and design system for semantic HTML. It styles elements by default and
+	integrates custom properties, themes, and utility classes into a complete system. It's
+	Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and other JSX frameworks. For
+	more see the
+	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support</a> docs, and for
+	the companion Svelte components, see <a href="https://ui.fuz.dev/">fuz_ui</a>.
 </p>
 <p>
-	The only required parts are a
-	<ModuleLink path="style.css">reset stylesheet</ModuleLink> with the semantic defaults and a replaceable
-	<ModuleLink path="theme.css">theme stylesheet</ModuleLink> containing the variables used in the reset.
-	There's also a <a href={resolve('/docs/classes')}>utility class system</a> for convenience and
-	composition, and it <a href="https://css.fuz.dev/docs/api">exports</a> the underlying data, types,
-	and helpers for more complex usage. It works with any website and JS framework, and
-	<a href="https://ui.fuz.dev/">Fuz UI</a>
-	integrates it with Svelte.
+	The only required parts are a reset stylesheet with the semantic defaults and a replaceable theme
+	stylesheet containing the variables used in the reset, and these require no dependencies. There's
+	also
+	<a href={resolve('/docs/classes')}>utility classes</a>
+	for composition and convenience with a Vite plugin, and the library exports the full API for complex
+	usage.
 </p>
 <p>
-	See <a href={resolve('/docs')}>the docs</a>
-	and <a href="https://github.com/fuzdev/fuz_css#readme">readme</a>.
+	More at the <a href={resolve('/docs')}>docs</a>
+	and <a href="https://github.com/fuzdev/fuz_css">repo</a>.
 </p>
 
 <UnfinishedImplementationWarning>
-	Fuz CSS is in early alpha with breaking changes ahead. Input and feedback is appreciated in the
-	GitHub
-	<a href="https://github.com/fuzdev/fuz_css/issues">issues</a> and
-	<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
+	fuz_css is in early alpha with breaking changes ahead. Your input and feedback is appreciated in
+	the GitHub <a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
 </UnfinishedImplementationWarning>

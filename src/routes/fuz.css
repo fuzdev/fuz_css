@@ -6,36 +6,23 @@
 	align-items: center;
 	justify-content: center;
 }
-
+/* like `.box` but uncentered */
+.column {
+	display: flex;
+	flex-direction: column;
+}
 /* can be used to override the direction of a `.box` */
 .row {
 	display: flex;
 	flex-direction: row;
 	align-items: center;
 }
-
 .ellipsis {
 	display: block;
 	white-space: nowrap;
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-
-.width_upto_xs {
-	width: 100%;
-	max-width: var(--distance_xs);
-}
-
-.width_upto_sm {
-	width: 100%;
-	max-width: var(--distance_sm);
-}
-
-.width_upto_md {
-	width: 100%;
-	max-width: var(--distance_md);
-}
-
 .selectable {
 	--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);
 	--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);
@@ -61,29 +48,26 @@
 .selectable.selected.deselectable:not(:disabled) {
 	cursor: pointer;
 }
-
-/* A pane is a box floating over the page, like for dialogs.
-			By default it's opaque, resetting the background to the initial depth. */
+/* A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth. */
 .pane {
 	background-color: var(--pane_bg, var(--bg));
 	box-shadow: var(
 		--pane_shadow,
-		/* TODO this is terrible, maybe add all the variables? should be culled anyway? */
 		var(--shadow_bottom_md)
 			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent)
 	);
 	border-radius: var(--border_radius_xs);
 }
-
 /* A panel is a box embedded into the page, useful for visually isolating content. */
 .panel {
 	border-radius: var(--border_radius_xs);
 	background-color: var(--panel_bg, var(--fg_1));
 }
-
-/* TODO other button variants? */
-/* TODO this is slightly strange that it doesn't use --icon_size */
-/* These are used as modifiers to buttons, and so they use `:where` so they cascade. */
+/*
+TODO other button variants?
+TODO this is slightly strange that it doesn't use --icon_size.
+These are used as modifiers to buttons.
+*/
 .icon_button {
 	width: var(--input_height);
 	height: var(--input_height);
@@ -94,7 +78,6 @@
 	font-weight: 900;
 	padding: 0;
 }
-
 /* TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here? */
 .plain:not(:hover) {
 	--border_color: transparent;
@@ -105,7 +88,6 @@
 .plain:active {
 	--border_color: transparent;
 }
-
 .menu_item {
 	--border_radius: 0;
 	--border_color: var(--border_color_3);
@@ -163,7 +145,6 @@
 	text-overflow: ellipsis;
 	line-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */
 }
-
 .chip {
 	font-weight: 500;
 	padding-left: var(--space_xs);
@@ -173,40 +154,6 @@
 }
 a.chip {
 	font-weight: 600;
-}
-
-.position_relative {
-	position: relative;
-}
-.position_absolute {
-	position: absolute;
-}
-.position_sticky {
-	position: sticky;
-}
-.display_block {
-	display: block;
-}
-.display_inline {
-	display: inline;
-}
-.display_inline_block {
-	display: inline-block;
-}
-.display_flex {
-	display: flex;
-}
-.overflow_wrap_break_word {
-	overflow-wrap: break-word;
-}
-.flex_1 {
-	flex: 1;
-}
-.flex_wrap_wrap {
-	flex-wrap: wrap;
-}
-.justify_content_space_between {
-	justify-content: space-between;
 }
 .font_family_sans {
 	font-family: var(--font_family_sans);
@@ -233,26 +180,11 @@ a.chip {
 	font-size: var(--font_size_xl5);
 	--font_size: var(--font_size_xl5);
 }
-.text_align_center {
-	text-align: center;
-}
-.vertical_align_middle {
-	vertical-align: middle;
-}
-.word_break_break_all {
-	word-break: break-all;
-}
-.white_space_nowrap {
-	white-space: nowrap;
-}
-.white_space_pre {
-	white-space: pre;
-}
-.white_space_pre_wrap {
-	white-space: pre-wrap;
-}
 .text_color_3 {
 	color: var(--text_color_3);
+}
+.text_color_5 {
+	color: var(--text_color_5);
 }
 .darken_3 {
 	background-color: var(--darken_3);
@@ -304,9 +236,6 @@ a.chip {
 }
 .outline_width_active {
 	outline-width: var(--outline_width_active);
-}
-.outline_style_solid {
-	outline-style: solid;
 }
 .border_radius_sm {
 	border-radius: var(--border_radius_sm);
@@ -503,20 +432,17 @@ a.chip {
 .shadow_alpha_5 {
 	--shadow_alpha: var(--shadow_alpha_5);
 }
-.width_100 {
+.width_atmost_xs {
 	width: 100%;
+	max-width: var(--distance_xs);
 }
-.height_100 {
-	height: 100%;
+.width_atmost_sm {
+	width: 100%;
+	max-width: var(--distance_sm);
 }
-.top_0 {
-	top: 0;
-}
-.right_0 {
-	right: 0;
-}
-.inset_0 {
-	inset: 0;
+.width_atmost_md {
+	width: 100%;
+	max-width: var(--distance_md);
 }
 .p_sm {
 	padding: var(--space_sm);
@@ -576,11 +502,26 @@ a.chip {
 .mt_0 {
 	margin-top: 0;
 }
+.mt_xs {
+	margin-top: var(--space_xs);
+}
+.mt_sm {
+	margin-top: var(--space_sm);
+}
+.mt_md {
+	margin-top: var(--space_md);
+}
 .mt_lg {
 	margin-top: var(--space_lg);
 }
+.mt_xl {
+	margin-top: var(--space_xl);
+}
 .mt_xl2 {
 	margin-top: var(--space_xl2);
+}
+.mt_xl3 {
+	margin-top: var(--space_xl3);
 }
 .mt_xl4 {
 	margin-top: var(--space_xl4);
@@ -590,6 +531,18 @@ a.chip {
 }
 .mb_0 {
 	margin-bottom: 0;
+}
+.mb_xs5 {
+	margin-bottom: var(--space_xs5);
+}
+.mb_xs4 {
+	margin-bottom: var(--space_xs4);
+}
+.mb_xs3 {
+	margin-bottom: var(--space_xs3);
+}
+.mb_xs2 {
+	margin-bottom: var(--space_xs2);
 }
 .mb_xs {
 	margin-bottom: var(--space_xs);
@@ -603,11 +556,17 @@ a.chip {
 .mb_lg {
 	margin-bottom: var(--space_lg);
 }
+.mb_xl {
+	margin-bottom: var(--space_xl);
+}
 .mb_xl2 {
 	margin-bottom: var(--space_xl2);
 }
 .mb_xl3 {
 	margin-bottom: var(--space_xl3);
+}
+.mb_xl4 {
+	margin-bottom: var(--space_xl4);
 }
 .mb_xl5 {
 	margin-bottom: var(--space_xl5);
@@ -618,8 +577,23 @@ a.chip {
 .mb_xl9 {
 	margin-bottom: var(--space_xl9);
 }
+.ml_xs {
+	margin-left: var(--space_xs);
+}
 .ml_sm {
 	margin-left: var(--space_sm);
+}
+.ml_md {
+	margin-left: var(--space_md);
+}
+.ml_lg {
+	margin-left: var(--space_lg);
+}
+.ml_xl {
+	margin-left: var(--space_xl);
+}
+.ml_xl2 {
+	margin-left: var(--space_xl2);
 }
 .mx_auto {
 	margin-left: auto;
@@ -639,103 +613,122 @@ a.chip {
 .gap_lg {
 	gap: var(--space_lg);
 }
-.border_bottom_left_radius_100 {
+.border-bottom-left-radius\:100\% {
 	border-bottom-left-radius: 100%;
 }
-.border_bottom_right_radius_77 {
+.border-bottom-right-radius\:77\% {
 	border-bottom-right-radius: 77%;
 }
-.border_radius_0 {
+.border-radius\:0 {
 	border-radius: 0;
 }
-.border_radius_100 {
+.border-radius\:100\% {
 	border-radius: 100%;
 }
-.border_radius_14 {
+.border-radius\:14\% {
 	border-radius: 14%;
 }
-.border_radius_32 {
+.border-radius\:32\% {
 	border-radius: 32%;
 }
-.border_top_left_radius_26 {
+.border-top-left-radius\:26\% {
 	border-top-left-radius: 26%;
 }
-.border_top_right_radius_100 {
+.border-top-right-radius\:100\% {
 	border-top-right-radius: 100%;
 }
-.font_weight_1 {
+.display\:flex {
+	display: flex;
+}
+.display\:inline {
+	display: inline;
+}
+.flex-wrap\:wrap {
+	flex-wrap: wrap;
+}
+.flex\:1 {
+	flex: 1;
+}
+.font-weight\:1 {
 	font-weight: 1;
-	--font_weight: 1;
 }
-.font_weight_100 {
+.font-weight\:100 {
 	font-weight: 100;
-	--font_weight: 100;
 }
-.font_weight_1000 {
+.font-weight\:1000 {
 	font-weight: 1000;
-	--font_weight: 1000;
 }
-.font_weight_200 {
+.font-weight\:200 {
 	font-weight: 200;
-	--font_weight: 200;
 }
-.font_weight_234 {
+.font-weight\:234 {
 	font-weight: 234;
-	--font_weight: 234;
 }
-.font_weight_300 {
+.font-weight\:300 {
 	font-weight: 300;
-	--font_weight: 300;
 }
-.font_weight_400 {
+.font-weight\:400 {
 	font-weight: 400;
-	--font_weight: 400;
 }
-.font_weight_500 {
+.font-weight\:500 {
 	font-weight: 500;
-	--font_weight: 500;
 }
-.font_weight_555 {
+.font-weight\:555 {
 	font-weight: 555;
-	--font_weight: 555;
 }
-.font_weight_600 {
+.font-weight\:600 {
 	font-weight: 600;
-	--font_weight: 600;
 }
-.font_weight_700 {
+.font-weight\:700 {
 	font-weight: 700;
-	--font_weight: 700;
 }
-.font_weight_800 {
+.font-weight\:800 {
 	font-weight: 800;
-	--font_weight: 800;
 }
-.font_weight_900 {
+.font-weight\:900 {
 	font-weight: 900;
-	--font_weight: 900;
 }
-.font_weight_950 {
+.font-weight\:950 {
 	font-weight: 950;
-	--font_weight: 950;
 }
-.opacity_0 {
+.inset\:0 {
+	inset: 0;
+}
+.opacity\:0 {
 	opacity: 0;
 }
-.opacity_100 {
-	opacity: 1;
+.opacity\:100\% {
+	opacity: 100%;
 }
-.opacity_17 {
+.opacity\:17\% {
 	opacity: 17%;
 }
-.opacity_38 {
+.opacity\:38\% {
 	opacity: 38%;
 }
-.opacity_51 {
+.opacity\:51\% {
 	opacity: 51%;
 }
-.opacity_79 {
+.opacity\:79\% {
 	opacity: 79%;
+}
+.outline-style\:solid {
+	outline-style: solid;
+}
+.position\:absolute {
+	position: absolute;
+}
+.position\:relative {
+	position: relative;
+}
+.text-align\:center {
+	text-align: center;
+}
+.white-space\:nowrap {
+	white-space: nowrap;
+}
+.width\:100\% {
+	width: 100%;
 }
 
 /* generated by src/routes/fuz.gen.css.ts */

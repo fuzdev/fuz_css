@@ -9,7 +9,7 @@
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {
 		color_variants,
-		shadow_font_size_variants,
+		shadow_size_variants,
 		shadow_variant_prefixes,
 		shadow_alpha_variants,
 		type ShadowSizeVariant,
@@ -21,10 +21,9 @@
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
-	// TODO populates `fuz.css` with all of the shadows. Could be improved.
-	// classes="shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl"
-	// classes="shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5"
-	// classes="shadow_color_a shadow_color_b shadow_color_c shadow_color_d shadow_color_e shadow_color_f shadow_color_g shadow_color_h shadow_color_i shadow_color_j"
+	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
+	// @fuz-classes shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5
+	// @fuz-classes shadow_color_a shadow_color_b shadow_color_c shadow_color_d shadow_color_e shadow_color_f shadow_color_g shadow_color_h shadow_color_i shadow_color_j
 
 	// TODO duplicate shadows links
 </script>
@@ -35,7 +34,7 @@
 		the implementation.</UnfinishedImplementationWarning
 	>
 	<p>
-		Fuz CSS's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
+		fuz_css's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Shadow" />
@@ -45,13 +44,13 @@
 		>
 		{@render shadow_example_header()}
 		{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-			{#each shadow_font_size_variants as shadow_font_size_variant (shadow_font_size_variant)}
+			{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
 				<div class="shadow_example">
-					<div class="shadow_main_example {shadow_variant_prefix}{shadow_font_size_variant}">
-						<StyleVariableButton name="{shadow_variant_prefix}{shadow_font_size_variant}" />
+					<div class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant}">
+						<StyleVariableButton name="{shadow_variant_prefix}{shadow_size_variant}" />
 						<StyleVariableButton name="shadow_color" />
 					</div>
-					{@render shadow_variant_examples(null, shadow_font_size_variant, shadow_variant_prefix)}
+					{@render shadow_variant_examples(null, shadow_size_variant, shadow_variant_prefix)}
 				</div>
 			{/each}
 		{/each}
@@ -65,17 +64,17 @@
 		<div class="panel fg_3 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-				{#each shadow_font_size_variants as shadow_font_size_variant (shadow_font_size_variant)}
+				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
 					<div class="shadow_example">
 						<div
-							class="shadow_main_example {shadow_variant_prefix}{shadow_font_size_variant} shadow_color_highlight"
+							class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant} shadow_color_highlight"
 						>
-							<StyleVariableButton name="{shadow_variant_prefix}{shadow_font_size_variant}" />
+							<StyleVariableButton name="{shadow_variant_prefix}{shadow_size_variant}" />
 							<StyleVariableButton name="shadow_color_highlight" />
 						</div>
 						{@render shadow_variant_examples(
 							'highlight',
-							shadow_font_size_variant,
+							shadow_size_variant,
 							shadow_variant_prefix,
 						)}
 					</div>
@@ -92,19 +91,15 @@
 		<div class="panel darken_3 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-				{#each shadow_font_size_variants as shadow_font_size_variant (shadow_font_size_variant)}
+				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
 					<div class="shadow_example">
 						<div
-							class="shadow_main_example {shadow_variant_prefix}{shadow_font_size_variant} shadow_color_glow"
+							class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant} shadow_color_glow"
 						>
-							<StyleVariableButton name="{shadow_variant_prefix}{shadow_font_size_variant}" />
+							<StyleVariableButton name="{shadow_variant_prefix}{shadow_size_variant}" />
 							<StyleVariableButton name="shadow_color_glow" />
 						</div>
-						{@render shadow_variant_examples(
-							'glow',
-							shadow_font_size_variant,
-							shadow_variant_prefix,
-						)}
+						{@render shadow_variant_examples('glow', shadow_size_variant, shadow_variant_prefix)}
 					</div>
 				{/each}
 			{/each}
@@ -119,19 +114,15 @@
 		<div class="panel lighten_3 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-				{#each shadow_font_size_variants as shadow_font_size_variant (shadow_font_size_variant)}
+				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
 					<div class="shadow_example">
 						<div
-							class="shadow_main_example {shadow_variant_prefix}{shadow_font_size_variant} shadow_color_shroud"
+							class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant} shadow_color_shroud"
 						>
-							<StyleVariableButton name="{shadow_variant_prefix}{shadow_font_size_variant}" />
+							<StyleVariableButton name="{shadow_variant_prefix}{shadow_size_variant}" />
 							<StyleVariableButton name="shadow_color_shroud" />
 						</div>
-						{@render shadow_variant_examples(
-							'shroud',
-							shadow_font_size_variant,
-							shadow_variant_prefix,
-						)}
+						{@render shadow_variant_examples('shroud', shadow_size_variant, shadow_variant_prefix)}
 					</div>
 				{/each}
 			{/each}
@@ -148,20 +139,20 @@
 			{@const classes = 'color_' + color_variant}
 			<section>
 				{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-					{#each shadow_font_size_variants as shadow_font_size_variant (shadow_font_size_variant)}
+					{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
 						<div class="shadow_example">
 							<div
-								class="shadow_main_example {shadow_variant_prefix}{shadow_font_size_variant} shadow_color_{color_variant}"
+								class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant} shadow_color_{color_variant}"
 							>
 								<StyleVariableButton
-									name="{shadow_variant_prefix}{shadow_font_size_variant}"
+									name="{shadow_variant_prefix}{shadow_size_variant}"
 									{classes}
 								/>
 								<StyleVariableButton name="shadow_color_{color_variant}" {classes} />
 							</div>
 							{@render shadow_variant_examples(
 								color_variant,
-								shadow_font_size_variant,
+								shadow_size_variant,
 								shadow_variant_prefix,
 							)}
 						</div>
@@ -190,12 +181,12 @@
 
 {#snippet shadow_variant_examples(
 	color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null,
-	shadow_font_size_variant: ShadowSizeVariant,
+	shadow_size_variant: ShadowSizeVariant,
 	shadow_variant_prefix: string,
 )}
 	<div class="row gap_lg">
 		{#each shadow_alpha_variants as alpha (alpha)}
-			{@const shadow_size = shadow_variant_prefix + shadow_font_size_variant}
+			{@const shadow_size = shadow_variant_prefix + shadow_size_variant}
 			{@const shadow_color = `shadow_color${color_variant ? '_' + color_variant : ''}`}
 			<div
 				title="{shadow_size} with {shadow_color}"

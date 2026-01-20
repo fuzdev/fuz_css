@@ -64,7 +64,7 @@
 	...
 </form>`}
 		/>
-		<div class="width_upto_sm">
+		<div class="width_atmost_sm">
 			<form>
 				<fieldset>
 					<legend>This is a <MdnLink path="Web/HTML/Element/legend" /></legend>
@@ -92,7 +92,7 @@
 					>
 					<label class:disabled={created_account}>
 						<div class="title">select</div>
-						<select class="text_align_center font_size_xl5" disabled={created_account}>
+						<select class="text-align:center font_size_xl5" disabled={created_account}>
 							{#each faces as face (face)}
 								<option value={face}>{face}</option>
 							{/each}
@@ -109,7 +109,7 @@
 					out:fly={{y: 100, duration: ANIMATION_DURATION_FAST}}
 				>
 					<Alert status="error">cannot create account because the docs are fake</Alert>
-					<button type="button" class="width_100" onclick={() => (created_account = false)}>
+					<button type="button" class="width:100%" onclick={() => (created_account = false)}>
 						undo undo!
 					</button>
 				</form>

@@ -28,7 +28,7 @@
 </script>
 
 <svelte:head>
-	<title>Fuz CSS - magical organic stylesheets</title>
+	<title>fuz_css - CSS with more utility</title>
 </svelte:head>
 
 <Themed>
@@ -40,7 +40,7 @@
 	<!-- </ContextmenuRoot> -->
 	<!-- {#if show_settings}
 		<Dialog onclose={() => (show_settings = false)}>
-			<div class="pane p_md width_upto_md mx_auto">
+			<div class="pane p_md width_atmost_md mx_auto">
 				<Settings />
 			</div>
 		</Dialog>

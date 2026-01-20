@@ -27,7 +27,7 @@
 
 	// TODO refactor, also maybe add `950`?
 	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 1, 234, 555, 1000];
-	// classes="font_weight_100 font_weight_200 font_weight_300 font_weight_400 font_weight_500 font_weight_600 font_weight_700 font_weight_800 font_weight_900 font_weight_950 font_weight_1 font_weight_234 font_weight_555 font_weight_1000"
+	// @fuz-classes font-weight:100 font-weight:200 font-weight:300 font-weight:400 font-weight:500 font-weight:600 font-weight:700 font-weight:800 font-weight:900 font-weight:950 font-weight:1 font-weight:234 font-weight:555 font-weight:1000
 
 	const font_size_variants = default_variables.filter((p) => font_size_names.includes(p.name));
 
@@ -37,8 +37,7 @@
 	let selected_font_weight = $state(400);
 	let selected_size = $state(3);
 
-	// TODO needed for class inclusion
-	// class="font_family_sans font_family_serif font_family_mono"
+	// @fuz-classes font_family_sans font_family_serif font_family_mono
 </script>
 
 <TomeContent {tome}>
@@ -99,11 +98,11 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Font sizes" />
-		<form class="width_upto_sm">
+		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>
 		{#each font_size_variants as size (size.name)}
-			<div class="row flex_wrap_wrap">
+			<div class="row flex-wrap:wrap">
 				<StyleVariableButton attrs={{title: size.light}} name={size.name}
 					><span
 						style:font-size="var(--{size.name})"
@@ -124,7 +123,7 @@
 		<p>Font weight values can be any integer from 1 to 1000.</p>
 		<p>
 			There are no variables for <MdnLink path="Web/CSS/font-weight" /> but there are
-			<TomeLink name="classes" hash="Utility-classes">utility classes</TomeLink>.
+			<TomeLink name="classes" hash="Utility-class-types">utility classes</TomeLink>.
 		</p>
 		<form>
 			<FontSizeControl bind:selected_size />
@@ -132,10 +131,10 @@
 		<div>
 			{#each font_weights as font_weight (font_weight)}
 				<div
-					class="white_space_nowrap font_weight_{font_weight}"
+					class="white-space:nowrap font-weight:{font_weight}"
 					style:font-size="var(--{font_size_names[selected_size - 1]})"
 				>
-					.font_weight_{font_weight}
+					.font-weight:{font_weight}
 				</div>
 			{/each}
 		</div>

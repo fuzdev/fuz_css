@@ -1,6 +1,6 @@
-import type {CssClassDeclaration} from './css_class_helpers.js';
+import type {CssClassDefinition} from './css_class_generation.js';
 
-export const css_class_composites: Record<string, CssClassDeclaration | undefined> = {
+export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
 		declaration: `
 			image-rendering: -webkit-optimize-contrast; /* Safari */
@@ -9,206 +9,38 @@ export const css_class_composites: Record<string, CssClassDeclaration | undefine
 			image-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */
 		`,
 	},
+	circular: {
+		declaration: 'border-radius: 50%;',
+	},
 	box: {
-		ruleset: `
-			.box {
-				display: flex;
-				flex-direction: column;
-				align-items: center;
-				justify-content: center;
-			}
+		declaration: `
+			display: flex;
+			flex-direction: column;
+			align-items: center;
+			justify-content: center;
 		`,
 	},
 	column: {
-		ruleset: `
-			/* like \`.box\` but uncentered */
-			.column {
-				display: flex;
-				flex-direction: column;
-			}
+		comment: 'like `.box` but uncentered',
+		declaration: `
+			display: flex;
+			flex-direction: column;
 		`,
 	},
 	row: {
-		ruleset: `
-			/* can be used to override the direction of a \`.box\` */
-			.row {
-				display: flex;
-				flex-direction: row;
-				align-items: center;
-			}
-		`,
-	},
-	formatted: {
-		ruleset: `
-			/* Formats content to wrap long strings and preserve displayed whitespace. */
-			.formatted {
-				overflow: hidden;
-				white-space: break-spaces;
-			}
+		comment: 'can be used to override the direction of a `.box`',
+		declaration: `
+			display: flex;
+			flex-direction: row;
+			align-items: center;
 		`,
 	},
 	ellipsis: {
-		declaration: 'display: block;	white-space: nowrap;	overflow: hidden;	text-overflow: ellipsis;',
-	},
-	width_upto_xs: {
-		ruleset: `
-			.width_upto_xs {
-				width: 100%;
-				max-width: var(--distance_xs);
-			}
-		`,
-	},
-	width_upto_sm: {
-		ruleset: `
-			.width_upto_sm {
-				width: 100%;
-				max-width: var(--distance_sm);
-			}
-		`,
-	},
-	width_upto_md: {
-		ruleset: `
-			.width_upto_md {
-				width: 100%;
-				max-width: var(--distance_md);
-			}
-		`,
-	},
-	width_upto_lg: {
-		ruleset: `
-			.width_upto_lg {
-				width: 100%;
-				max-width: var(--distance_lg);
-			}
-		`,
-	},
-	width_upto_xl: {
-		ruleset: `
-			.width_upto_xl {
-				width: 100%;
-				max-width: var(--distance_xl);
-			}
-		`,
-	},
-	width_atleast_xs: {
-		ruleset: `
-			.width_atleast_xs {
-				width: 100%;
-				min-width: var(--distance_xs);
-			}
-		`,
-	},
-	width_atleast_sm: {
-		ruleset: `
-			.width_atleast_sm {
-				width: 100%;
-				min-width: var(--distance_sm);
-			}
-		`,
-	},
-	width_atleast_md: {
-		ruleset: `
-			.width_atleast_md {
-				width: 100%;
-				min-width: var(--distance_md);
-			}
-		`,
-	},
-	width_atleast_lg: {
-		ruleset: `
-			.width_atleast_lg {
-				width: 100%;
-				min-width: var(--distance_lg);
-			}
-		`,
-	},
-	width_atleast_xl: {
-		ruleset: `
-			.width_atleast_xl {
-				width: 100%;
-				min-width: var(--distance_xl);
-			}
-		`,
-	},
-	// TODO rethink if this breaks too often or confusingly, `height: 100%` depends on the parent and often won't take effect
-	height_upto_xs: {
-		ruleset: `
-			.height_upto_xs {
-				height: 100%;
-				max-height: var(--distance_xs);
-			}
-		`,
-	},
-	height_upto_sm: {
-		ruleset: `
-			.height_upto_sm {
-				height: 100%;
-				max-height: var(--distance_sm);
-			}
-		`,
-	},
-	height_upto_md: {
-		ruleset: `
-			.height_upto_md {
-				height: 100%;
-				max-height: var(--distance_md);
-			}
-		`,
-	},
-	height_upto_lg: {
-		ruleset: `
-			.height_upto_lg {
-				height: 100%;
-				max-height: var(--distance_lg);
-			}
-		`,
-	},
-	height_upto_xl: {
-		ruleset: `
-			.height_upto_xl {
-				height: 100%;
-				max-height: var(--distance_xl);
-			}
-		`,
-	},
-	height_atleast_xs: {
-		ruleset: `
-			.height_atleast_xs {
-				height: 100%;
-				min-height: var(--distance_xs);
-			}
-		`,
-	},
-	height_atleast_sm: {
-		ruleset: `
-			.height_atleast_sm {
-				height: 100%;
-				min-height: var(--distance_sm);
-			}
-		`,
-	},
-	height_atleast_md: {
-		ruleset: `
-			.height_atleast_md {
-				height: 100%;
-				min-height: var(--distance_md);
-			}
-		`,
-	},
-	height_atleast_lg: {
-		ruleset: `
-			.height_atleast_lg {
-				height: 100%;
-				min-height: var(--distance_lg);
-			}
-		`,
-	},
-	height_atleast_xl: {
-		ruleset: `
-			.height_atleast_xl {
-				height: 100%;
-				min-height: var(--distance_xl);
-			}
+		declaration: `
+			display: block;
+			white-space: nowrap;
+			overflow: hidden;
+			text-overflow: ellipsis;
 		`,
 	},
 	selectable: {
@@ -261,50 +93,42 @@ export const css_class_composites: Record<string, CssClassDeclaration | undefine
 		`,
 	},
 	pane: {
-		ruleset: `
-			/* A pane is a box floating over the page, like for dialogs.
-			By default it's opaque, resetting the background to the initial depth. */
-			.pane {
-				background-color: var(--pane_bg, var(--bg));
-				box-shadow: var(
-					--pane_shadow,
-					/* TODO this is terrible, maybe add all the variables? should be culled anyway? */
-						var(--shadow_bottom_md)
-						color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent)
-				);
-				border-radius: var(--border_radius_xs);
-			}
+		comment:
+			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
+		declaration: `
+			background-color: var(--pane_bg, var(--bg));
+			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));
+			border-radius: var(--border_radius_xs);
 		`,
 	},
 	panel: {
-		ruleset: `
-			/* A panel is a box embedded into the page, useful for visually isolating content. */
-			.panel {
-				border-radius: var(--border_radius_xs);
-				background-color: var(--panel_bg, var(--fg_1));
-			}
+		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
+		declaration: `
+			border-radius: var(--border_radius_xs);
+			background-color: var(--panel_bg, var(--fg_1));
 		`,
 	},
 	icon_button: {
-		ruleset: `
-			/* TODO other button variants? */
-			/* TODO this is slightly strange that it doesn't use --icon_size */
-			/* These are used as modifiers to buttons, and so they use \`:where\` so they cascade. */
-			.icon_button {
-				width: var(--input_height);
-				height: var(--input_height);
-				min-width: var(--input_height);
-				min-height: var(--input_height);
-				flex-shrink: 0;
-				line-height: 1;
-				font-weight: 900;
-				padding: 0;
-			}
+		comment: `
+			TODO other button variants?
+			TODO this is slightly strange that it doesn't use --icon_size.
+			These are used as modifiers to buttons.
+		`,
+		declaration: `
+			width: var(--input_height);
+			height: var(--input_height);
+			min-width: var(--input_height);
+			min-height: var(--input_height);
+			flex-shrink: 0;
+			line-height: 1;
+			font-weight: 900;
+			padding: 0;
 		`,
 	},
 	plain: {
+		comment:
+			'TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?',
 		ruleset: `
-			/* TODO maybe this belongs with the reset, like \`selected\`? or does \`selected\` belong here? */
 			.plain:not(:hover) {
 				--border_color: transparent;
 				box-shadow: none;

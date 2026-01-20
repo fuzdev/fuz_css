@@ -8,8 +8,8 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
-	import ModuleLink from '$routes/ModuleLink.svelte';
 	import {default_themes} from '$lib/themes.js';
 	import type {Theme} from '$lib/theme.js';
 	import ThemeForm from '$routes/ThemeForm.svelte';
@@ -28,21 +28,21 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			Fuz CSS supports both the browser's
+			fuz_css supports both the browser's
 			<MdnLink path="Web/CSS/color-scheme" />
 			and custom themes based on <TomeLink name="variables" />, which use
 			<MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink>.
 		</p>
 		<p>
-			Fuz CSS works with any JS framework, but it provides only stylesheets, not integrations. This
-			website uses my Svelte UI library <a href="https://ui.fuz.dev/">Fuz UI</a>
-			to provide the UI below to control the Fuz CSS color scheme and themes.
+			fuz_css works with any JS framework, but it provides only stylesheets, not integrations. This
+			website uses the companion Svelte UI library <a href="https://ui.fuz.dev/">fuz_ui</a>
+			to provide the UI below to control the fuz_css color scheme and themes.
 		</p>
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Color scheme" />
 		<p>
-			Fuz CSS supports
+			fuz_css supports
 			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes. To apply dark mode manually,
 			add the <code>dark</code> class to the root <code>html</code>
 			element.
@@ -55,7 +55,7 @@
 				>this one</a
 			>:
 		</p>
-		<div class="display_flex mb_lg">
+		<div class="display:flex mb_lg">
 			<ColorSchemeInput />
 		</div>
 		<p>
@@ -65,33 +65,33 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Builtin themes" />
+		<UnfinishedImplementationWarning
+			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
+		>
 		<p>
 			A theme is a simple JSON collection of <TomeLink name="variables" /> that can be transformed into
 			CSS that set custom properties. Each variable can have values for light and/or dark color schemes.
 			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>
 		<p>
-			These docs are a work in progress, for now see <ModuleLink path="theme.ts"
-				><code>@fuzdev/fuz_css/theme.ts</code></ModuleLink
-			> and <ModuleLink path="themes.ts"><code>@fuzdev/fuz_css/themes.ts</code></ModuleLink>.
+			These docs are a work in progress, for now see <ModuleLink module_path="theme.ts" /> and <ModuleLink
+				module_path="themes.ts"
+			/>.
 		</p>
 		<!-- TODO explain when exported <Code code={`<ThemeInput\n\t{themes}\n\t{selected_theme}\n/>`} /> -->
-		<div class="width_upto_xs mb_lg">
+		<div class="width_atmost_xs mb_lg">
 			<ThemeInput {themes} enable_editing onedit={(t) => (editing_theme = t)} />
 		</div>
 		<!-- <button class="mb_lg" onclick={() => (show_create_theme_dialog = true)} disabled
 				>create a new theme (todo)</button
 			> -->
-		<UnfinishedImplementationWarning
-			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
-		>
 	</TomeSection>
 </TomeContent>
 
 <!-- TODO enable creating themes -->
 <!-- {#if show_create_theme_dialog}
 	<Dialog onclose={() => (show_create_theme_dialog = false)} let:close>
-		<div class="pane p_md width_upto_md mx_auto">
+		<div class="pane p_md width_atmost_md mx_auto">
 			<div class="theme_editor_wrapper panel">
 				<ThemeForm
 					oncreate={(theme) => {
@@ -105,7 +105,7 @@
 {/if} -->
 {#if editing_theme}
 	<Dialog onclose={() => (editing_theme = null)}>
-		<div class="pane p_md width_upto_md mx_auto">
+		<div class="pane p_md width_atmost_md mx_auto">
 			<div class="theme_editor_wrapper">
 				<ThemeForm
 					theme={editing_theme}

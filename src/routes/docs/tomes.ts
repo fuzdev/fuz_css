@@ -2,6 +2,8 @@ import type {Tome} from '@fuzdev/fuz_ui/tome.js';
 
 import introduction from '$routes/docs/introduction/+page.svelte';
 import api from '$routes/docs/api/+page.svelte';
+import examples from '$routes/docs/examples/+page.svelte';
+import semantic from '$routes/docs/semantic/+page.svelte';
 import themes from '$routes/docs/themes/+page.svelte';
 import colors from '$routes/docs/colors/+page.svelte';
 import buttons from '$routes/docs/buttons/+page.svelte';
@@ -32,6 +34,22 @@ export const tomes: Array<Tome> = [
 		category: 'guide',
 		Component: api,
 		related_tomes: [],
+		related_modules: [],
+		related_declarations: [],
+	},
+	{
+		name: 'examples',
+		category: 'guide',
+		Component: examples,
+		related_tomes: ['classes'],
+		related_modules: [],
+		related_declarations: [],
+	},
+	{
+		name: 'semantic',
+		category: 'systems',
+		Component: semantic,
+		related_tomes: ['buttons', 'elements', 'forms', 'typography'],
 		related_modules: [],
 		related_declarations: [],
 	},

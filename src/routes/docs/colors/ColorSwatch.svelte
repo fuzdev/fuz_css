@@ -1,5 +1,6 @@
 <script lang="ts">
 	import ColorSwatchItem from '$routes/docs/colors/ColorSwatchItem.svelte';
+	import {intensity_variants} from '$lib/variable_data.js';
 
 	const {
 		color_name,
@@ -11,8 +12,8 @@
 </script>
 
 <ul class="unstyled">
-	{#each {length: 9} as _, index (index)}
-		<ColorSwatchItem {index} {color_name} {computed_styles} />
+	{#each intensity_variants as intensity (intensity)}
+		<ColorSwatchItem {intensity} {color_name} {computed_styles} />
 	{/each}
 </ul>
 

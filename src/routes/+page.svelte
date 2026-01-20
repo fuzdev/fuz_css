@@ -17,19 +17,19 @@
 		<h1 class="mb_sm" style:margin-top={MAIN_HEADER_MARGIN_TOP}>fuz_css</h1>
 		<Svg data={logo_fuz_css} size="var(--icon_size_xl2)" />
 		<div class="p_xl mt_lg border_radius_lg shadow_inset_bottom_xs">
-			<blockquote class="shadow_inset_top_xs">magical organic stylesheets 🌿</blockquote>
+			<blockquote class="shadow_inset_top_xs">CSS with more utility 🪴</blockquote>
 		</div>
 	</section>
-	<section class="width_upto_md p_sm border_radius_md shadow_xs">
+	<section class="width_atmost_md p_sm border_radius_md shadow_xs">
 		<div class="panel p_lg bg shadow_sm">
 			<Introduction />
 		</div>
 	</section>
 	<section>
-		<Card href={resolve('/docs')}>docs{#snippet icon()}🌿{/snippet}</Card>
+		<Card href={resolve('/docs')}>docs{#snippet icon()}🪴{/snippet}</Card>
 	</section>
-	<section class="width_upto_sm p_sm border_radius_md shadow_xs text_align_center">
-		Fuz CSS is part of the Fuz stack, <br /> see
+	<section class="width_atmost_sm p_sm border_radius_md shadow_xs text-align:center">
+		fuz_css is part of the Fuz stack, <br /> see
 		<a href="https://www.fuz.dev/">fuz.dev</a>
 		and
 		<a href="https://github.com/fuzdev" rel="noopener">github.com/fuzdev</a>
