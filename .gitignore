@@ -42,3 +42,6 @@ tmp/
 # Os
 .DS_Store
 Thumbs.db
+
+# Example lockfiles (generated fresh during tests)
+examples/*/package-lock.json
