@@ -23,8 +23,6 @@ import {
 	objectClasses,
 	// Comment hint examples
 	fromComment,
-	unknownExtracted,
-	arbitraryLiteral,
 } from '@fuzdev/fuz_css/example_class_utilities.js';
 
 export const App = () => {
@@ -141,12 +139,6 @@ export const App = () => {
 						<h3>Comment hints</h3>
 						<div className={fromComment}>
 							<code>// @fuz-classes {fromComment}</code> → .{fromComment}
-						</div>
-						<div>
-							<code>// @fuz-classes {unknownExtracted}</code> → extracted but excluded (no matching definition)
-						</div>
-						<div>
-							<code>// @fuz-classes {arbitraryLiteral}</code> → extracted but excluded (invalid property, not in @webref/css)
 						</div>
 					</div>
 				</section>
