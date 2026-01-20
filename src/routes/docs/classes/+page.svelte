@@ -29,25 +29,13 @@
 	const LIBRARY_ITEM_NAME = 'classes';
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
-
-	/** Formats an array as a range string like `{xs5-xl15}` */
-	const variant_range = <T,>(arr: ReadonlyArray<T>): string => `{${arr[0]}-${arr.at(-1)}}`;
-
-	// Computed ranges from variable_data.ts
-	const space_range = variant_range(space_variants);
-	const hue_range = variant_range(color_variants);
-	const intensity_range = variant_range(intensity_variants);
-	const border_intensity_range = variant_range(border_color_intensity_variants);
-	const text_color_range = variant_range(text_color_variants);
-	const font_size_range = variant_range(font_size_variants);
-	const line_height_range = variant_range(line_height_variants);
-	const icon_size_range = variant_range(icon_size_variants);
-	const border_radius_range = variant_range(border_radius_variants);
-	const border_width_range = variant_range(border_width_variants);
-	const shadow_size_range = variant_range(shadow_size_variants);
-	const shadow_alpha_range = variant_range(shadow_alpha_variants);
-	const distance_range = variant_range(distance_variants);
 </script>
+
+{#snippet variant_range<T>(arr: ReadonlyArray<T>)}
+	<span class="text_color_5">{'{'}</span>{arr[0]}<span class="text_color_5">-</span>{arr.at(
+		-1,
+	)}<span class="text_color_5">{'}'}</span>
+{/snippet}
 
 <TomeContent {tome}>
 	<p>
@@ -110,7 +98,7 @@
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<div class=&quot;p_md gap_lg color_a_5&quot;>" />
+			<Code content="<div class=&quot;p_md color_a_5&quot;>" />
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -121,28 +109,115 @@
 			</p>
 			<h4>Spacing</h4>
 			<ul class="unstyled">
-				<li><code>.p_{space_range}</code>, <code>.p_0</code></li>
-				<li><code>.pt_{space_range}</code>, <code>.pt_0</code></li>
-				<li><code>.pr_{space_range}</code>, <code>.pr_0</code></li>
-				<li><code>.pb_{space_range}</code>, <code>.pb_0</code></li>
-				<li><code>.pl_{space_range}</code>, <code>.pl_0</code></li>
-				<li><code>.px_{space_range}</code>, <code>.px_0</code></li>
-				<li><code>.py_{space_range}</code>, <code>.py_0</code></li>
-				<li><code>.m_{space_range}</code>, <code>.m_0</code>, <code>.m_auto</code></li>
-				<li><code>.mt_{space_range}</code>, <code>.mt_0</code>, <code>.mt_auto</code></li>
-				<li><code>.mr_{space_range}</code>, <code>.mr_0</code>, <code>.mr_auto</code></li>
-				<li><code>.mb_{space_range}</code>, <code>.mb_0</code>, <code>.mb_auto</code></li>
-				<li><code>.ml_{space_range}</code>, <code>.ml_0</code>, <code>.ml_auto</code></li>
-				<li><code>.mx_{space_range}</code>, <code>.mx_0</code>, <code>.mx_auto</code></li>
-				<li><code>.my_{space_range}</code>, <code>.my_0</code>, <code>.my_auto</code></li>
-				<li><code>.gap_{space_range}</code></li>
-				<li><code>.column_gap_{space_range}</code></li>
-				<li><code>.row_gap_{space_range}</code></li>
-				<li><code>.top_{space_range}</code></li>
-				<li><code>.right_{space_range}</code></li>
-				<li><code>.bottom_{space_range}</code></li>
-				<li><code>.left_{space_range}</code></li>
-				<li><code>.inset_{space_range}</code></li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.p_{@render variant_range(space_variants)}</code> <code>.p_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.pt_{@render variant_range(space_variants)}</code> <code>.pt_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.pr_{@render variant_range(space_variants)}</code> <code>.pr_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.pb_{@render variant_range(space_variants)}</code> <code>.pb_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.pl_{@render variant_range(space_variants)}</code> <code>.pl_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.px_{@render variant_range(space_variants)}</code> <code>.px_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.py_{@render variant_range(space_variants)}</code> <code>.py_0</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.m_{@render variant_range(space_variants)}</code> <code>.m_0</code>
+						<code>.m_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.mt_{@render variant_range(space_variants)}</code> <code>.mt_0</code>
+						<code>.mt_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.mr_{@render variant_range(space_variants)}</code> <code>.mr_0</code>
+						<code>.mr_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.mb_{@render variant_range(space_variants)}</code> <code>.mb_0</code>
+						<code>.mb_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.ml_{@render variant_range(space_variants)}</code> <code>.ml_0</code>
+						<code>.ml_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.mx_{@render variant_range(space_variants)}</code> <code>.mx_0</code>
+						<code>.mx_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.my_{@render variant_range(space_variants)}</code> <code>.my_0</code>
+						<code>.my_auto</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.gap_{@render variant_range(space_variants)}</code></span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.column_gap_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.row_gap_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.top_{@render variant_range(space_variants)}</code></span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.right_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.bottom_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.left_{@render variant_range(space_variants)}</code></span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.inset_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
 			</ul>
 			<aside class="mt_lg">
 				Padding and margin include <code>_0</code> (and <code>_auto</code> for margin) for
@@ -151,76 +226,222 @@
 			</aside>
 			<h4>Sizing</h4>
 			<ul class="unstyled">
-				<li><code>.width_{space_range}</code></li>
-				<li><code>.height_{space_range}</code></li>
-				<li>
-					<code>.width_upto_{distance_range}</code>, <code>.width_atleast_{distance_range}</code>
+				<li class="mb_md">
+					<span class="code_chips"><code>.width_{@render variant_range(space_variants)}</code></span
+					>
 				</li>
-				<li>
-					<code>.height_upto_{distance_range}</code>, <code>.height_atleast_{distance_range}</code>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.height_{@render variant_range(space_variants)}</code></span
+					>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.width_upto_{@render variant_range(distance_variants)}</code>
+						<code>.width_atleast_{@render variant_range(distance_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.height_upto_{@render variant_range(distance_variants)}</code>
+						<code>.height_atleast_{@render variant_range(distance_variants)}</code>
+					</span>
 				</li>
 			</ul>
 			<h4>Colors</h4>
 			<ul class="unstyled">
-				<li><code>.color_{hue_range}_{intensity_range}</code></li>
-				<li><code>.bg</code>, <code>.fg</code></li>
-				<li><code>.bg_{intensity_range}</code>, <code>.fg_{intensity_range}</code></li>
-				<li><code>.bg_{hue_range}_{intensity_range}</code></li>
-				<li><code>.text_color_{text_color_range}</code></li>
-				<li><code>.color_bg</code>, <code>.color_fg</code></li>
-				<li><code>.color_bg_{intensity_range}</code>, <code>.color_fg_{intensity_range}</code></li>
-				<li><code>.darken_{intensity_range}</code>, <code>.lighten_{intensity_range}</code></li>
-				<li>
-					<code>.color_darken_{intensity_range}</code>,
-					<code>.color_lighten_{intensity_range}</code>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code
+							>.color_{@render variant_range(color_variants)}_{@render variant_range(
+								intensity_variants,
+							)}</code
+						>
+					</span>
 				</li>
-				<li><code>.hue_{hue_range}</code></li>
+				<li class="mb_md"><span class="code_chips"><code>.bg</code> <code>.fg</code></span></li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.bg_{@render variant_range(intensity_variants)}</code>
+						<code>.fg_{@render variant_range(intensity_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code
+							>.bg_{@render variant_range(color_variants)}_{@render variant_range(
+								intensity_variants,
+							)}</code
+						>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.text_color_{@render variant_range(text_color_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.color_bg</code> <code>.color_fg</code></span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.color_bg_{@render variant_range(intensity_variants)}</code>
+						<code>.color_fg_{@render variant_range(intensity_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.darken_{@render variant_range(intensity_variants)}</code>
+						<code>.lighten_{@render variant_range(intensity_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.color_darken_{@render variant_range(intensity_variants)}</code>
+						<code>.color_lighten_{@render variant_range(intensity_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
+				</li>
 			</ul>
 			<h4>Typography</h4>
 			<ul class="unstyled">
-				<li>
-					{#each font_family_variants as font_family, i (font_family)}<code>.{font_family}</code
-						>{#if i < font_family_variants.length - 1},
-						{/if}{/each}
+				<li class="mb_md">
+					<span class="code_chips"
+						>{#each font_family_variants as font_family (font_family)}<code>.{font_family}</code
+							>{/each}
+					</span>
 				</li>
-				<li><code>.font_size_{font_size_range}</code></li>
-				<li><code>.line_height_{line_height_range}</code></li>
-				<li><code>.icon_size_{icon_size_range}</code></li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.font_size_{@render variant_range(font_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.line_height_{@render variant_range(line_height_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.icon_size_{@render variant_range(icon_size_variants)}</code>
+					</span>
+				</li>
 			</ul>
 			<h4>Borders</h4>
 			<ul class="unstyled">
-				<li><code>.border_color_{border_intensity_range}</code></li>
-				<li><code>.border_color_{hue_range}</code></li>
-				<li><code>.border_width_{border_width_range}</code></li>
-				<li><code>.border_radius_{border_radius_range}</code></li>
-				<li><code>.border_top_left_radius_{border_radius_range}</code></li>
-				<li><code>.border_top_right_radius_{border_radius_range}</code></li>
-				<li><code>.border_bottom_left_radius_{border_radius_range}</code></li>
-				<li><code>.border_bottom_right_radius_{border_radius_range}</code></li>
-				<li><code>.outline_width_{border_width_range}</code></li>
-				<li>
-					{#each outline_width_variants as variant, i (variant)}<code>.outline_width_{variant}</code
-						>{#if i < outline_width_variants.length - 1},
-						{/if}{/each}
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_color_{@render variant_range(border_color_intensity_variants)}</code>
+					</span>
 				</li>
-				<li><code>.outline_color_{border_intensity_range}</code></li>
-				<li><code>.outline_color_{hue_range}</code></li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_color_{@render variant_range(color_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_width_{@render variant_range(border_width_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_radius_{@render variant_range(border_radius_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_top_left_radius_{@render variant_range(border_radius_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_top_right_radius_{@render variant_range(border_radius_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_bottom_left_radius_{@render variant_range(border_radius_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.border_bottom_right_radius_{@render variant_range(border_radius_variants)}</code
+						>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.outline_width_{@render variant_range(border_width_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						>{#each outline_width_variants as variant (variant)}<code>.outline_width_{variant}</code
+							>{/each}
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.outline_color_{@render variant_range(border_color_intensity_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.outline_color_{@render variant_range(color_variants)}</code>
+					</span>
+				</li>
 			</ul>
 			<h4>Shadows</h4>
 			<ul class="unstyled">
-				<li><code>.shadow_{shadow_size_range}</code></li>
-				<li><code>.shadow_top_{shadow_size_range}</code></li>
-				<li><code>.shadow_bottom_{shadow_size_range}</code></li>
-				<li><code>.shadow_inset_{shadow_size_range}</code></li>
-				<li><code>.shadow_inset_top_{shadow_size_range}</code></li>
-				<li><code>.shadow_inset_bottom_{shadow_size_range}</code></li>
-				<li><code>.shadow_color_{hue_range}</code></li>
-				<li>
-					{#each shadow_semantic_values as value, i (value)}<code>.shadow_color_{value}</code
-						>{#if i < shadow_semantic_values.length - 1},
-						{/if}{/each}
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_{@render variant_range(shadow_size_variants)}</code>
+					</span>
 				</li>
-				<li><code>.shadow_alpha_{shadow_alpha_range}</code></li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_top_{@render variant_range(shadow_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_bottom_{@render variant_range(shadow_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_inset_{@render variant_range(shadow_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_inset_top_{@render variant_range(shadow_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_inset_bottom_{@render variant_range(shadow_size_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_color_{@render variant_range(color_variants)}</code>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						>{#each shadow_semantic_values as value (value)}<code>.shadow_color_{value}</code
+							>{/each}
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.shadow_alpha_{@render variant_range(shadow_alpha_variants)}</code>
+					</span>
+				</li>
 			</ul>
 		</TomeSection>
 
@@ -526,33 +747,40 @@ export const gen = gen_fuz_css({
 		/>
 		<p>Available state modifiers include:</p>
 		<ul>
-			<li>
-				<strong>interaction:</strong> <code>hover:</code>, <code>focus:</code>,
-				<code>focus-visible:</code>, <code>focus-within:</code>, <code>active:</code>,
-				<code>link:</code>, <code>visited:</code>, <code>any-link:</code>, <code>target:</code>
+			<li class="mb_md">
+				<span class="code_chips"
+					>interaction: <code>hover:</code> <code>focus:</code> <code>focus-visible:</code>
+					<code>focus-within:</code> <code>active:</code> <code>link:</code> <code>visited:</code>
+					<code>any-link:</code> <code>target:</code>
+				</span>
 			</li>
-			<li>
-				<strong>form:</strong> <code>autofill:</code>, <code>blank:</code>,
-				<code>disabled:</code>, <code>enabled:</code>, <code>checked:</code>,
-				<code>indeterminate:</code>, <code>required:</code>, <code>optional:</code>,
-				<code>valid:</code>, <code>invalid:</code>, <code>user-valid:</code>,
-				<code>user-invalid:</code>, <code>in-range:</code>, <code>out-of-range:</code>,
-				<code>placeholder-shown:</code>, <code>read-only:</code>, <code>read-write:</code>,
-				<code>default:</code>
+			<li class="mb_md">
+				<span class="code_chips"
+					>form: <code>autofill:</code> <code>blank:</code> <code>disabled:</code>
+					<code>enabled:</code> <code>checked:</code> <code>indeterminate:</code>
+					<code>required:</code> <code>optional:</code> <code>valid:</code> <code>invalid:</code>
+					<code>user-valid:</code> <code>user-invalid:</code> <code>in-range:</code>
+					<code>out-of-range:</code> <code>placeholder-shown:</code> <code>read-only:</code>
+					<code>read-write:</code> <code>default:</code>
+				</span>
 			</li>
-			<li>
-				<strong>structural:</strong> <code>first:</code>, <code>last:</code>, <code>only:</code>,
-				<code>first-of-type:</code>, <code>last-of-type:</code>, <code>only-of-type:</code>,
-				<code>odd:</code>, <code>even:</code>, <code>empty:</code>, <code>nth-child(N):</code>,
-				<code>nth-last-child(N):</code>, <code>nth-of-type(N):</code>,
-				<code>nth-last-of-type(N):</code>
+			<li class="mb_md">
+				<span class="code_chips"
+					>structural: <code>first:</code> <code>last:</code> <code>only:</code>
+					<code>first-of-type:</code> <code>last-of-type:</code> <code>only-of-type:</code>
+					<code>odd:</code> <code>even:</code> <code>empty:</code> <code>nth-child(N):</code>
+					<code>nth-last-child(N):</code> <code>nth-of-type(N):</code>
+					<code>nth-last-of-type(N):</code>
+				</span>
 			</li>
-			<li>
-				<strong>UI states:</strong> <code>fullscreen:</code>, <code>modal:</code>,
-				<code>open:</code>, <code>popover-open:</code>
+			<li class="mb_md">
+				<span class="code_chips"
+					>UI states: <code>fullscreen:</code> <code>modal:</code> <code>open:</code>
+					<code>popover-open:</code>
+				</span>
 			</li>
-			<li>
-				<strong>media:</strong> <code>playing:</code>, <code>paused:</code>
+			<li class="mb_md">
+				<span class="code_chips">media: <code>playing:</code> <code>paused:</code> </span>
 			</li>
 		</ul>
 
@@ -574,10 +802,10 @@ export const gen = gen_fuz_css({
 			content={`<span class="before:content:'→' before:margin-right:0.5rem">
 <input class="placeholder:opacity:50%">`}
 		/>
-		<p>
-			Available: <code>before:</code>, <code>after:</code>, <code>cue:</code>,
-			<code>first-letter:</code>, <code>first-line:</code>, <code>placeholder:</code>,
-			<code>selection:</code>, <code>marker:</code>, <code>file:</code>, <code>backdrop:</code>
+		<p class="code_chips">
+			Available: <code>before:</code> <code>after:</code> <code>cue:</code>
+			<code>first-letter:</code> <code>first-line:</code> <code>placeholder:</code>
+			<code>selection:</code> <code>marker:</code> <code>file:</code> <code>backdrop:</code>
 		</p>
 		<aside>
 			Note: <code>before:</code> and <code>after:</code> require explicit
@@ -591,10 +819,10 @@ export const gen = gen_fuz_css({
 			content={`<div class="motion-reduce:animation:none">
 <nav class="print:display:none">`}
 		/>
-		<p>
-			Available: <code>print:</code>, <code>motion-safe:</code>, <code>motion-reduce:</code>,
-			<code>contrast-more:</code>, <code>contrast-less:</code>, <code>portrait:</code>,
-			<code>landscape:</code>, <code>forced-colors:</code>
+		<p class="code_chips">
+			Available: <code>print:</code> <code>motion-safe:</code> <code>motion-reduce:</code>
+			<code>contrast-more:</code> <code>contrast-less:</code> <code>portrait:</code>
+			<code>landscape:</code> <code>forced-colors:</code>
 		</p>
 
 		<TomeSection>
@@ -1285,3 +1513,11 @@ vite_plugin_fuz_css({
 		</p>
 	</section>
 </TomeContent>
+
+<style>
+	.code_chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space_xs);
+	}
+</style>

@@ -195,6 +195,9 @@ a.chip {
 .text_color_3 {
 	color: var(--text_color_3);
 }
+.text_color_5 {
+	color: var(--text_color_5);
+}
 .darken_3 {
 	background-color: var(--darken_3);
 }
