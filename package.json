@@ -30,7 +30,7 @@
     "node": ">=22.15"
   },
   "peerDependencies": {
-    "@fuzdev/fuz_util": ">=0.42.0",
+    "@fuzdev/fuz_util": ">=0.45.3",
     "@sveltejs/acorn-typescript": "^1",
     "@webref/css": "^8",
     "acorn-jsx": "^5",
