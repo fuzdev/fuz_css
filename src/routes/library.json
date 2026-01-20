@@ -67,7 +67,7 @@
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/fuz_code": "^0.39.0",
-			"@fuzdev/fuz_ui": "^0.178.1",
+			"@fuzdev/fuz_ui": "^0.178.2",
 			"@fuzdev/fuz_util": "^0.45.3",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@ryanatkn/gro": "^0.186.0",
