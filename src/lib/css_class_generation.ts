@@ -220,20 +220,26 @@ export const generate_classes_css = (
 		}
 
 		// Convert any new interpreter diagnostics to GenerationDiagnostic with locations
+		// For non-explicit classes, downgrade CSS property errors to warnings (may be from other CSS systems)
+		// Structural errors (circular refs, unknown composes) remain errors regardless
 		for (let i = diag_count_before; i < interpreter_diagnostics.length; i++) {
 			const diag = interpreter_diagnostics[i]!;
 			const locations = class_locations?.get(diag.class_name) ?? null;
-			diagnostics.push(create_generation_diagnostic(diag, locations));
+			const is_explicit = explicit_classes?.has(diag.class_name) ?? false;
+			const is_css_property_error =
+				diag.level === 'error' && diag.message.startsWith('Unknown CSS property');
+			const level = is_css_property_error && !is_explicit ? 'warning' : diag.level;
+			diagnostics.push(create_generation_diagnostic({...diag, level}, locations));
 		}
 
 		if (!v) {
-			// Warn if this was an explicitly annotated class (via @fuz-classes or include_classes)
+			// Error if this was an explicitly requested class (via @fuz-classes or include_classes)
 			// but only if no interpreter pattern matched (if one matched but failed, error already reported)
 			if (explicit_classes?.has(c) && !interpreter_matched) {
 				const locations = class_locations?.get(c) ?? null;
 				diagnostics.push({
 					phase: 'generation',
-					level: 'warning',
+					level: 'error',
 					message: 'No matching class definition found',
 					class_name: c,
 					suggestion: 'Check spelling or add a custom class definition',

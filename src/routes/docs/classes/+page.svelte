@@ -1119,7 +1119,7 @@ const color = get_dynamic_color();`}
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>include_classes</code>
-				produce warnings if they can't be resolved. This helps catch typos like
+				produce errors if they can't be resolved. This helps catch typos like
 				<code>@fuz-classes color_a_55</code> instead of <code>color_a_5</code>.
 			</aside>
 			<p>

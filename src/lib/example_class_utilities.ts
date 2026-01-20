@@ -91,18 +91,3 @@ export const objectClasses = {mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3'};
  * Variable name `fromComment` doesn't end in class/classes/className.
  */
 export const fromComment = 'shadow_lg';
-
-// @fuz-classes unknown_not_included
-/**
- * Unknown class - extracted via @fuz-classes but has no CSS definition.
- * This class will be extracted but NOT included in output (no matching token/composite/literal).
- */
-export const unknownExtracted = 'unknown_not_included';
-
-// @fuz-classes not-real:extracted-but-excluded
-/**
- * Invalid literal - extracted via @fuz-classes but excluded from CSS output.
- * Properties are validated against `@webref/css` data, so `not-real` fails validation.
- * This demonstrates that extraction and generation are separate steps.
- */
-export const arbitraryLiteral = 'not-real:extracted-but-excluded';

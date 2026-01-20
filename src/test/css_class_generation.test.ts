@@ -1575,8 +1575,8 @@ describe('modified_class_interpreter', () => {
 	});
 });
 
-describe('explicit_classes warnings', () => {
-	test('warns for unresolved explicit class', () => {
+describe('explicit_classes diagnostics', () => {
+	test('errors for unresolved explicit class', () => {
 		const result = generate_classes_css({
 			class_names: ['unknown_class'],
 			class_definitions: {},
@@ -1587,12 +1587,12 @@ describe('explicit_classes warnings', () => {
 
 		expect(result.css).toBe('');
 		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.level).toBe('warning');
+		expect(result.diagnostics[0]!.level).toBe('error');
 		expect(result.diagnostics[0]!.class_name).toBe('unknown_class');
 		expect(result.diagnostics[0]!.message).toContain('No matching class definition');
 	});
 
-	test('no warning for non-explicit unresolved class', () => {
+	test('no diagnostic for non-explicit unresolved class without colon', () => {
 		const result = generate_classes_css({
 			class_names: ['unknown_class'],
 			class_definitions: {},
@@ -1605,7 +1605,7 @@ describe('explicit_classes warnings', () => {
 		expect(result.diagnostics).toHaveLength(0);
 	});
 
-	test('no warning when explicit class resolves to definition', () => {
+	test('no diagnostic when explicit class resolves to definition', () => {
 		const result = generate_classes_css({
 			class_names: ['box'],
 			class_definitions: css_class_composites,
@@ -1618,9 +1618,9 @@ describe('explicit_classes warnings', () => {
 		expect(result.diagnostics).toHaveLength(0);
 	});
 
-	test('no warning when interpreter pattern matches but returns error', () => {
-		// When CSS literal pattern matches but validation fails,
-		// the interpreter error is sufficient - no redundant "no definition" warning
+	test('error when interpreter pattern matches but returns error for explicit class', () => {
+		// When CSS literal pattern matches but validation fails for an explicit class,
+		// the interpreter error remains an error
 		const result = generate_classes_css({
 			class_names: ['invalid-property:value'],
 			class_definitions: {},
@@ -1631,7 +1631,7 @@ describe('explicit_classes warnings', () => {
 						ctx.diagnostics.push({
 							level: 'error',
 							class_name: 'invalid-property:value',
-							message: 'Invalid property',
+							message: 'Unknown CSS property "invalid-property"',
 							suggestion: null,
 						});
 						return null; // Pattern matched, but validation failed
@@ -1642,12 +1642,73 @@ describe('explicit_classes warnings', () => {
 			explicit_classes: new Set(['invalid-property:value']),
 		});
 
-		// Should have interpreter error but NOT the "no definition" warning
+		// Should have interpreter error (stays error because explicit)
 		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.message).toBe('Invalid property');
+		expect(result.diagnostics[0]!.level).toBe('error');
+		expect(result.diagnostics[0]!.message).toBe('Unknown CSS property "invalid-property"');
 	});
 
-	test('warning includes locations when provided', () => {
+	test('warning when CSS property error for non-explicit class', () => {
+		// When CSS literal pattern matches but validation fails for a non-explicit class,
+		// Unknown CSS property errors are downgraded to warning (may be from another CSS system)
+		const result = generate_classes_css({
+			class_names: ['invalid-property:value'],
+			class_definitions: {},
+			interpreters: [
+				{
+					pattern: /^([^:]+):(.+)$/,
+					interpret: (_match, ctx) => {
+						ctx.diagnostics.push({
+							level: 'error',
+							class_name: 'invalid-property:value',
+							message: 'Unknown CSS property "invalid-property"',
+							suggestion: null,
+						});
+						return null; // Pattern matched, but validation failed
+					},
+				},
+			],
+			css_properties: null,
+			// Not in explicit_classes - class was implicitly extracted from code
+		});
+
+		// Should have interpreter diagnostic but downgraded to warning
+		expect(result.diagnostics).toHaveLength(1);
+		expect(result.diagnostics[0]!.level).toBe('warning');
+		expect(result.diagnostics[0]!.message).toBe('Unknown CSS property "invalid-property"');
+	});
+
+	test('structural errors remain errors for non-explicit classes', () => {
+		// Structural errors like unknown composes or circular refs stay as errors
+		// regardless of whether the class is explicit - they indicate broken definitions
+		const result = generate_classes_css({
+			class_names: ['some-class:value'],
+			class_definitions: {},
+			interpreters: [
+				{
+					pattern: /^([^:]+):(.+)$/,
+					interpret: (_match, ctx) => {
+						ctx.diagnostics.push({
+							level: 'error',
+							class_name: 'some-class:value',
+							message: 'Circular reference detected',
+							suggestion: null,
+						});
+						return null;
+					},
+				},
+			],
+			css_properties: null,
+			// Not explicit
+		});
+
+		// Structural errors should NOT be downgraded
+		expect(result.diagnostics).toHaveLength(1);
+		expect(result.diagnostics[0]!.level).toBe('error');
+		expect(result.diagnostics[0]!.message).toBe('Circular reference detected');
+	});
+
+	test('error includes locations when provided', () => {
 		const loc: SourceLocation = {file: 'test.ts', line: 42, column: 5};
 		const result = generate_classes_css({
 			class_names: ['unknown_class'],

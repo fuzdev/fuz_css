@@ -2431,20 +2431,6 @@
 						"doc_comment": "Comment hint - extracted via",
 						"source_line": 93,
 						"type_signature": "\"shadow_lg\""
-					},
-					{
-						"name": "unknownExtracted",
-						"kind": "variable",
-						"doc_comment": "Unknown class - extracted via",
-						"source_line": 100,
-						"type_signature": "\"unknown_not_included\""
-					},
-					{
-						"name": "arbitraryLiteral",
-						"kind": "variable",
-						"doc_comment": "Invalid literal - extracted via",
-						"source_line": 108,
-						"type_signature": "\"not-real:extracted-but-excluded\""
 					}
 				],
 				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. The exports test specific extraction patterns\nthat require being in a separate module.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Patterns demonstrated:**\n- Naming patterns: All CLASS_NAME_PATTERN suffix variants\n- Expression patterns: Ternary, logical AND, arrays\n- Comment hints: `@fuz-classes` directive\n\nToken, composite, and literal classes are demonstrated inline in the examples\nsince they don't require special extraction testing."

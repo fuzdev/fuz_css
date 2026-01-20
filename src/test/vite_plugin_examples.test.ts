@@ -80,8 +80,6 @@ const EXPECTED_CLASSES = [
 	'mt_xl2', // objectClasses key
 	'mt_xl3', // objectClasses key
 	// From example_class_utilities.ts - Comment hints
-	// Note: 'not-real:extracted-but-excluded' is extracted via @fuz-classes but excluded
-	// from CSS output because 'not-real' fails @webref/css property validation
 	'shadow_lg', // fromComment via @fuz-classes
 	// From App - Layout
 	'max-width:1000px',
