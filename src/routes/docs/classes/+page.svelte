@@ -43,52 +43,50 @@
 		main stylesheet; utility classes have three types, are optional, and require build tool
 		integration.
 	</p>
+	<p>
+		Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
+		<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
+		component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag and
+		<code>style</code> attribute. They're optional and generated on-demand to include only what you use.
+	</p>
+	<p>
+		Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
+		rather than being foundational to the design, and the DSL is currently more limited, with
+		interpreters providing a programmatic escape hatch -- see the
+		<a href="#Compared-to-alternatives">comparison</a> below.
+	</p>
+	<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
+	<ul>
+		<li>
+			offer shorthand for style variables (<code>p_lg</code> vs
+			<code>padding: var(--space_lg)</code>)
+		</li>
+		<li>
+			compose across component boundaries, avoiding fragile <code>:global()</code> selectors
+		</li>
+		<li>
+			let you avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code>
+		</li>
+	</ul>
+	<p>Compared to the <code>style</code> attribute, classes:</p>
+	<ul>
+		<li>
+			support powerful modifiers for responsive widths, interaction states (like hover), and dark
+			mode
+		</li>
+		<li>provide more control over specificity</li>
+		<li>
+			compose ergonomically with libraries like <a href="https://github.com/lukeed/clsx">clsx</a>,
+			which Svelte supports <a href="https://svelte.dev/docs/svelte/class">natively</a>
+		</li>
+	</ul>
+	<p>
+		For cases where classes lack clear advantages, <code>style</code> and
+		<code>&lt;style&gt;</code>
+		are simpler and avoid generating class definitions, which can bloat your builds when overused.
+	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
-		<p>
-			Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
-			<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
-			component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag and
-			<code>style</code> attribute. They're optional and generated on-demand to include only what you
-			use.
-		</p>
-		<p>
-			Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
-			rather than being foundational to the design, and the DSL is currently more limited, with
-			interpreters providing a programmatic escape hatch -- see the
-			<a href="#Compared-to-alternatives">comparison</a> below.
-		</p>
-		<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
-		<ul>
-			<li>
-				offer shorthand for style variables (<code>p_lg</code> vs
-				<code>padding: var(--space_lg)</code>)
-			</li>
-			<li>
-				compose across component boundaries, avoiding fragile <code>:global()</code> selectors
-			</li>
-			<li>
-				let you avoid noisy class names like <code>foo-wrapper</code> and <code>bar-inner</code>
-			</li>
-		</ul>
-		<p>Compared to the <code>style</code> attribute, classes:</p>
-		<ul>
-			<li>
-				support powerful modifiers for responsive widths, interaction states (like hover), and dark
-				mode
-			</li>
-			<li>provide more control over specificity</li>
-			<li>
-				compose ergonomically with libraries like <a href="https://github.com/lukeed/clsx">clsx</a>,
-				which Svelte supports <a href="https://svelte.dev/docs/svelte/class">natively</a>
-			</li>
-		</ul>
-		<p>
-			For cases where classes lack clear advantages, <code>style</code> and
-			<code>&lt;style&gt;</code>
-			are simpler and avoid generating class definitions, which can bloat your builds when overused.
-		</p>
-
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
