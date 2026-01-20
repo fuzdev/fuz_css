@@ -100,17 +100,17 @@ export interface GenFuzCssOptions {
 	filter_file?: FileFilter;
 	include_stats?: boolean;
 	/**
-	 * Whether to include default class definitions (token and composite classes).
-	 * When `false`, `class_definitions` is required.
-	 * @default true
-	 */
-	include_default_definitions?: boolean;
-	/**
 	 * Additional class definitions to merge with defaults.
 	 * User definitions take precedence over defaults with the same name.
 	 * Required when `include_default_definitions` is `false`.
 	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
+	/**
+	 * Whether to include default class definitions (token and composite classes).
+	 * When `false`, `class_definitions` is required.
+	 * @default true
+	 */
+	include_default_definitions?: boolean;
 	/**
 	 * Custom interpreters for dynamic class generation.
 	 * Replaces the builtin interpreters entirely if provided.
@@ -181,8 +181,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const {
 		filter_file = filter_file_default,
 		include_stats = false,
-		include_default_definitions = true,
 		class_definitions: user_class_definitions,
+		include_default_definitions = true,
 		class_interpreters = css_class_interpreters,
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
