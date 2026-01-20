@@ -10,7 +10,7 @@ integrates custom properties, themes, and utility classes into a complete system
 It's Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and other JSX frameworks.
 
 It's in early alpha with breaking changes ahead.
-Feedback and design input in
+Feedback and design input is welcome in
 the [discussions](https://github.com/fuzdev/fuz_css/discussions).
 
 View the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/).
