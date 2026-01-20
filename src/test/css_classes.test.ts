@@ -139,7 +139,13 @@ describe('CssClasses', () => {
 		const css_classes = new CssClasses(null, new Set(['excluded']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['kept', [loc]], ['excluded', [loc]]]));
+		css_classes.add(
+			'file1.svelte',
+			new Map([
+				['kept', [loc]],
+				['excluded', [loc]],
+			]),
+		);
 
 		const {all_classes} = css_classes.get_all();
 		expect(all_classes.has('kept')).toBe(true);

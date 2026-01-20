@@ -331,7 +331,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				await each_concurrent(
 					cache_writes,
 					async ({cache_path, content_hash, classes, explicit_classes, diagnostics}) => {
-						await save_cached_extraction(cache_path, content_hash, classes, explicit_classes, diagnostics);
+						await save_cached_extraction(
+							cache_path,
+							content_hash,
+							classes,
+							explicit_classes,
+							diagnostics,
+						);
 					},
 					cache_io_concurrency,
 				).catch((err) => log.warn('Cache write error:', err));

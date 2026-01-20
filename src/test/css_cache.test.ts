@@ -65,7 +65,7 @@ describe('save_cached_extraction', () => {
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(3);
+		expect(loaded!.v).toBe(1);
 		expect(loaded!.content_hash).toBe('abc123');
 		expect(loaded!.classes).toEqual([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 		expect(loaded!.diagnostics).toBeNull();
@@ -167,7 +167,7 @@ describe('save_cached_extraction', () => {
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(3);
+		expect(loaded!.v).toBe(1);
 		expect(loaded!.content_hash).toBe('hash');
 		expect(loaded!.classes).toBeNull();
 		expect(loaded!.diagnostics).toBeNull();
@@ -367,7 +367,7 @@ describe('delete_cached_extraction', () => {
 describe('from_cached_extraction', () => {
 	test('converts tuples to Map', () => {
 		const cached: CachedExtraction = {
-			v: 3,
+			v: 1,
 			content_hash: 'abc',
 			classes: [['box', [{file: 'f.ts', line: 1, column: 1}]]],
 			explicit_classes: null,
@@ -383,7 +383,7 @@ describe('from_cached_extraction', () => {
 
 	test('handles null classes', () => {
 		const cached: CachedExtraction = {
-			v: 3,
+			v: 1,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
@@ -398,7 +398,7 @@ describe('from_cached_extraction', () => {
 	test('handles empty classes array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 3,
+			v: 1,
 			content_hash: 'abc',
 			classes: [],
 			explicit_classes: null,
@@ -421,7 +421,7 @@ describe('from_cached_extraction', () => {
 			},
 		];
 		const cached: CachedExtraction = {
-			v: 3,
+			v: 1,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
@@ -435,7 +435,7 @@ describe('from_cached_extraction', () => {
 	test('handles empty diagnostics array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 3,
+			v: 1,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
