@@ -894,9 +894,8 @@ export const gen = gen_fuz_css({
 import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 		/>
 		<p>
-			Utility classes are generated on-demand, including only the classes your code uses. Use the
-			<strong>Vite plugin</strong> for a virtual module, or the alternative
-			<strong>Gro generator</strong> for a static file.
+			To enable utility classes, use the Vite plugin for a virtual module, or the alternative Gro
+			generator for a static file. Continue reading for the specifics:
 		</p>
 
 		<TomeSection>
@@ -904,7 +903,8 @@ import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 			<p>
 				The Vite plugin extracts classes and generates CSS on-demand. It works with Svelte and plain
 				HTML/TS/JS out of the box. JSX frameworks (React, Preact, Solid) require the
-				<code>acorn-jsx</code> plugin -- see <a href="#React-and-JSX">React and JSX</a> below.
+				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
+				<a href="#React-and-JSX">React and JSX</a> below.
 			</p>
 			<Code
 				lang="ts"
@@ -928,8 +928,8 @@ import 'virtual:fuz.css'; // generated on-demand`}
 			/>
 			<p>
 				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR -- changes to classes trigger automatic
-				CSS updates.
+				<code>node_modules</code> dependencies. It supports HMR -- changes to classes in your code trigger
+				automatic CSS updates.
 			</p>
 			<h4>Plugin options</h4>
 			<ul>
