@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.44.0
+
+### Minor Changes
+
+- implement CSS literal classes ([#73](https://github.com/fuzdev/fuz_css/pull/73))
+
 ## 0.43.0
 
 ### Minor Changes
