@@ -1097,7 +1097,9 @@ const turtle_class_name = 'turtle';`}
 			</p>
 			<aside>
 				Currently, tracking is single-file only. Cross-module analysis and more sophisticated
-				inference are potential future improvements.
+				inference are potential future improvements. <a
+					href="https://github.com/fuzdev/fuz_css/discussions">Discussion</a
+				> is appreciated here.
 			</aside>
 
 			<h4>4. Manual hints</h4>
@@ -1123,13 +1125,11 @@ const color = get_dynamic_color();`}
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
 					>include_classes</DeclarationLink
-				> option in your generator config:
+				> option in your config to the Vite plugin or Gro generator:
 			</p>
 			<Code
 				lang="ts"
-				content={`import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
-
-export const gen = gen_fuz_css({
+				content={`vite_plugin_fuz_css({
 	include_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
 });`}
 			/>
@@ -1140,7 +1140,7 @@ export const gen = gen_fuz_css({
 			</p>
 			<Code
 				lang="ts"
-				content={`export const gen = gen_fuz_css({
+				content={`vite_plugin_fuz_css({
 	exclude_classes: ['some:false:positive'],
 });`}
 			/>
@@ -1197,7 +1197,7 @@ export const gen = gen_fuz_css({
 		/>
 		<aside>
 			The <code>:where()</code> selector keeps specificity as low as possible to minimize interference
-			with your styles.
+			with your styles. It's used throughout the reset stylesheet.
 		</aside>
 		<p>See the specific docs sections for more about <code>.unstyled</code>.</p>
 
@@ -1244,9 +1244,9 @@ export const gen = gen_fuz_css({
 					<td>all patterns including <code>class:</code> directives and array/object syntax</td>
 				</tr>
 				<tr>
-					<td>Plain HTML</td>
+					<td>plain HTML</td>
 					<td>full</td>
-					<td>static <code>class="..."</code> attributes</td>
+					<td>static <code>class="..."</code> attributes, script variables</td>
 				</tr>
 				<tr>
 					<td>React / JSX</td>
@@ -1279,15 +1279,14 @@ export const gen = gen_fuz_css({
 		</table>
 		<p>
 			The <DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> plugin config option
-			is an escape hatch for classes that can't be statically detected. Other acorn plugins can be added
-			via
+			is an escape hatch for classes that can't be statically detected. Acorn plugins can be added via
 			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support
 			like <a href="#React-and-JSX">JSX</a>.
 		</p>
 		<p>
-			In summary, class generation works only with TypeScript/JS, Svelte, and JSX. Angular is not
-			supported; Vue JSX is supported but the recommended SFC format is not. We could revisit this
-			if there's demand.
+			Out of the box, class generation works only with TypeScript/JS, Svelte, and JSX. Angular is
+			not supported; Vue JSX is supported but their recommended SFC format is not. We could revisit
+			this if there's demand.
 		</p>
 
 		<TomeSection>
@@ -1320,10 +1319,6 @@ export const gen = gen_fuz_css({
 					<code>classNames()</code> with nested arrays, objects, and utility calls
 				</li>
 				<li>
-					<strong>control flow:</strong> classes inside <code>{'{#each}'}</code>,
-					<code>{'{#if}'}</code>, <code>{'{#snippet}'}</code>, <code>{'{#await}'}</code>
-				</li>
-				<li>
 					<strong>scripts:</strong> both <code>&lt;script&gt;</code> and
 					<code>&lt;script module&gt;</code>, with naming convention and usage tracking
 				</li>
@@ -1333,8 +1328,9 @@ export const gen = gen_fuz_css({
 		<TomeSection>
 			<TomeSectionHeader text="React and JSX" tag="h3" />
 			<p>
-				To enable JSX support for React, Preact, Solid, etc, install <code>acorn-jsx</code> and pass it
-				to the plugin or generator:
+				To enable JSX support for React, Preact, Solid, etc, install <a
+					href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a
+				> and pass it to the plugin or generator:
 			</p>
 			<Code lang={null} content="npm i -D acorn-jsx" />
 			<h4>Vite plugin</h4>
@@ -1428,9 +1424,14 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 };`}
 		/>
 		<p>
-			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand -- something
-			that would require 24 separate composite definitions. Register with the Vite plugin or Gro generator:
+			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand --
+			something that would require 24 separate composite definitions. Note the classes for this
+			example could also be created as composites with a helper function -- fuz_css uses this
+			strategy internally to create its token classes in <ModuleLink
+				module_path="css_class_definitions.ts"
+			/>.
 		</p>
+		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
 			lang="typescript"
 			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.js';
@@ -1504,9 +1505,9 @@ vite_plugin_fuz_css({
 				</tr>
 				<tr>
 					<td>extensibility</td>
-					<td>plugins (JS)</td>
+					<td>plugins</td>
 					<td>rules, variants, presets</td>
-					<td><a href="#Custom-interpreters">interpreters</a> (TS)</td>
+					<td><a href="#Custom-interpreters">interpreters</a></td>
 				</tr>
 			</tbody>
 		</table>
