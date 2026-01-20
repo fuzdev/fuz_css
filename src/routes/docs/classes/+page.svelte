@@ -467,15 +467,15 @@
 			<h4>Four definition forms</h4>
 			<p>
 				All four of these produce the same CSS output for <code>.centered</code>, with the ruleset
-				form additionally demonstrating child selectors -- <code>&gt; * + *</code> -- which can't be expressed
-				with the other forms.
+				form additionally demonstrating child selectors (<code>&gt; * + *</code>) which can't be
+				expressed with the other forms.
 			</p>
 			<Code
 				lang="typescript"
 				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.js';
 
 export const custom_composites: Record<string, CssClassDefinition> = {
-	// 1. declaration only - custom CSS properties
+	// 1. \`declaration\` only - custom CSS properties
 	centered: {
 		declaration: \`
 			display: flex;
@@ -486,18 +486,18 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 		\`,
 	},
 
-	// 2. composes only - compose existing token/composite classes
+	// 2. \`composes\` only - compose existing token/composite classes
 	centered: {
 		composes: ['box', 'text-align:center'],
 	},
 
-	// 3. composes + declaration - compose then extend
+	// 3. \`composes\` + \`declaration\` - compose then extend
 	centered: {
 		composes: ['box'],
 		declaration: 'text-align: center;',
 	},
 
-	// 4. ruleset - full CSS with multiple selectors (not composable)
+	// 4. \`ruleset\` - full CSS with multiple selectors (not composable)
 	centered: {
 		ruleset: \`
 			.centered {
@@ -566,10 +566,10 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 				<strong>Not allowed:</strong> Composites with <code>ruleset</code> cannot be referenced in
 				<code>composes</code> because they define their own selectors. Modified classes (like
 				<code>hover:opacity:80%</code> or <code>md:p_lg</code>) cannot be used in
-				<code>composes</code> arrays because they require wrapper selectors -- apply them directly
-				in markup instead. The <code>composes</code> property merges declarations into a single
-				rule, but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be
-				inlined. These limitations may be revisited in the future, feedback is welcome in the
+				<code>composes</code> arrays because they require wrapper selectors (apply them directly in
+				markup instead). The <code>composes</code> property merges declarations into a single rule,
+				but multi-selector patterns like <code>.clickable:hover {'{ ... }'}</code> cannot be
+				inlined. These limitations may be revisited in the future; feedback is welcome in the
 				<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
 			</p>
 			<aside>
@@ -619,13 +619,13 @@ vite_plugin_fuz_css({
 			<Code
 				lang="typescript"
 				content={`// fuz.gen.css.ts
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
 import {custom_composites} from '$lib/composites.js';
 
 export const gen = gen_fuz_css({
 	class_definitions: custom_composites,
 });`}
 			/>
+			See <a href="#Usage">Usage</a> for more details.
 
 			<h4>Builtin composites</h4>
 			<p>
@@ -759,14 +759,15 @@ export const gen = gen_fuz_css({
 		<ul>
 			<li class="mb_md">
 				<span class="code_chips"
-					>interaction: <code>hover:</code> <code>focus:</code> <code>focus-visible:</code>
+					><strong>interaction:</strong> <code>hover:</code> <code>focus:</code>
+					<code>focus-visible:</code>
 					<code>focus-within:</code> <code>active:</code> <code>link:</code> <code>visited:</code>
 					<code>any-link:</code> <code>target:</code>
 				</span>
 			</li>
 			<li class="mb_md">
 				<span class="code_chips"
-					>form: <code>autofill:</code> <code>blank:</code> <code>disabled:</code>
+					><strong>form:</strong> <code>autofill:</code> <code>blank:</code> <code>disabled:</code>
 					<code>enabled:</code> <code>checked:</code> <code>indeterminate:</code>
 					<code>required:</code> <code>optional:</code> <code>valid:</code> <code>invalid:</code>
 					<code>user-valid:</code> <code>user-invalid:</code> <code>in-range:</code>
@@ -776,7 +777,7 @@ export const gen = gen_fuz_css({
 			</li>
 			<li class="mb_md">
 				<span class="code_chips"
-					>structural: <code>first:</code> <code>last:</code> <code>only:</code>
+					><strong>structural:</strong> <code>first:</code> <code>last:</code> <code>only:</code>
 					<code>first-of-type:</code> <code>last-of-type:</code> <code>only-of-type:</code>
 					<code>odd:</code> <code>even:</code> <code>empty:</code> <code>nth-child(N):</code>
 					<code>nth-last-child(N):</code> <code>nth-of-type(N):</code>
@@ -785,7 +786,8 @@ export const gen = gen_fuz_css({
 			</li>
 			<li class="mb_md">
 				<span class="code_chips"
-					>UI states: <code>fullscreen:</code> <code>modal:</code> <code>open:</code>
+					><strong>UI states:</strong> <code>fullscreen:</code> <code>modal:</code>
+					<code>open:</code>
 					<code>popover-open:</code>
 				</span>
 			</li>
@@ -813,7 +815,7 @@ export const gen = gen_fuz_css({
 <input class="placeholder:opacity:50%">`}
 		/>
 		<p class="code_chips">
-			Available: <code>before:</code> <code>after:</code> <code>cue:</code>
+			<strong>available:</strong> <code>before:</code> <code>after:</code> <code>cue:</code>
 			<code>first-letter:</code> <code>first-line:</code> <code>placeholder:</code>
 			<code>selection:</code> <code>marker:</code> <code>file:</code> <code>backdrop:</code>
 		</p>
@@ -830,7 +832,8 @@ export const gen = gen_fuz_css({
 <nav class="print:display:none">`}
 		/>
 		<p class="code_chips">
-			Available: <code>print:</code> <code>motion-safe:</code> <code>motion-reduce:</code>
+			<strong>available:</strong> <code>print:</code> <code>motion-safe:</code>
+			<code>motion-reduce:</code>
 			<code>contrast-more:</code> <code>contrast-less:</code> <code>portrait:</code>
 			<code>landscape:</code> <code>forced-colors:</code>
 		</p>
