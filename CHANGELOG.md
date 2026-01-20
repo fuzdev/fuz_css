@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.44.1
+
+### Patch Changes
+
+- bump peer deps ([1a623e6](https://github.com/fuzdev/fuz_css/commit/1a623e6))
+
 ## 0.44.0
 
 ### Minor Changes
