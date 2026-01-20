@@ -320,7 +320,7 @@
 						"kind": "variable",
 						"doc_comment": "All built-in CSS class definitions (token classes + composites).",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 45,
+						"source_line": 46,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],

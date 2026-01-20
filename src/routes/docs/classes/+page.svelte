@@ -111,6 +111,7 @@
 				<a href="#Literal-classes">literal classes</a>; we find this improves readability.
 			</p>
 			<h4>Spacing</h4>
+			<p>See <TomeLink name="layout" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -228,6 +229,7 @@
 				<code>padding-inline:0</code>. Other properties use literals for raw values.
 			</aside>
 			<h4>Sizing</h4>
+			<p>See <TomeLink name="layout" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"><code>.width_{@render variant_range(space_variants)}</code></span
@@ -252,6 +254,7 @@
 				</li>
 			</ul>
 			<h4>Colors</h4>
+			<p>See <TomeLink name="colors" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -309,6 +312,7 @@
 				</li>
 			</ul>
 			<h4>Typography</h4>
+			<p>See <TomeLink name="typography" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -333,6 +337,7 @@
 				</li>
 			</ul>
 			<h4>Borders</h4>
+			<p>See <TomeLink name="borders" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -398,6 +403,7 @@
 				</li>
 			</ul>
 			<h4>Shadows</h4>
+			<p>See <TomeLink name="shadows" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"

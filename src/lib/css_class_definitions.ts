@@ -18,6 +18,7 @@ import {
 } from './css_class_generators.js';
 import {
 	space_variants,
+	distance_variants,
 	color_variants,
 	intensity_variants,
 	border_color_intensity_variants,
@@ -238,6 +239,35 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	*/
 	...generate_property_classes('width', space_variants, (v) => `var(--space_${v})`),
 	...generate_property_classes('height', space_variants, (v) => `var(--space_${v})`),
+
+	...generate_classes(
+		(v: string) => ({
+			name: `width_atmost_${v}`,
+			css: `width: 100%; max-width: var(--distance_${v});`,
+		}),
+		distance_variants,
+	),
+	...generate_classes(
+		(v: string) => ({
+			name: `width_atleast_${v}`,
+			css: `width: 100%; min-width: var(--distance_${v});`,
+		}),
+		distance_variants,
+	),
+	...generate_classes(
+		(v: string) => ({
+			name: `height_atmost_${v}`,
+			css: `height: 100%; max-height: var(--distance_${v});`,
+		}),
+		distance_variants,
+	),
+	...generate_classes(
+		(v: string) => ({
+			name: `height_atleast_${v}`,
+			css: `height: 100%; min-height: var(--distance_${v});`,
+		}),
+		distance_variants,
+	),
 
 	...generate_property_classes('top', space_variants, format_spacing_value),
 	...generate_property_classes('right', space_variants, format_spacing_value),

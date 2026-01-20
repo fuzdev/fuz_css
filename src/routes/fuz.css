@@ -23,18 +23,6 @@
 	overflow: hidden;
 	text-overflow: ellipsis;
 }
-.width_atmost_xs {
-	width: 100%;
-	max-width: var(--distance_xs);
-}
-.width_atmost_sm {
-	width: 100%;
-	max-width: var(--distance_sm);
-}
-.width_atmost_md {
-	width: 100%;
-	max-width: var(--distance_md);
-}
 .selectable {
 	--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);
 	--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);
@@ -443,6 +431,18 @@ a.chip {
 }
 .shadow_alpha_5 {
 	--shadow_alpha: var(--shadow_alpha_5);
+}
+.width_atmost_xs {
+	width: 100%;
+	max-width: var(--distance_xs);
+}
+.width_atmost_sm {
+	width: 100%;
+	max-width: var(--distance_sm);
+}
+.width_atmost_md {
+	width: 100%;
+	max-width: var(--distance_md);
 }
 .p_sm {
 	padding: var(--space_sm);
