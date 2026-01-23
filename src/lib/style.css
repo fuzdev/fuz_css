@@ -226,15 +226,13 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	color: var(--text_color, var(--text_70));
 	background-color: var(--shade_10);
 }
-:where(aside:not(.unstyled):hover) {
-	border-left-color: var(--shade_40);
-}
 
 :where(blockquote:not(.unstyled)) {
-	border-radius: var(--border_radius, var(--border_radius_xs));
+	border-left-color: var(--border_color);
+	border-left-style: var(--border_style);
+	border-left-width: var(--border_width_8);
 	padding: var(--space_md);
 	color: var(--text_color, var(--text_70));
-	background-color: var(--shade_10);
 }
 
 :where(code:not(.unstyled)) {
