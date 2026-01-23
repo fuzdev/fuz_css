@@ -223,7 +223,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-left-width: var(--border_width_3);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	padding: var(--space_md);
-	color: var(--text_color, var(--text_70));
+	color: var(--text_color);
 	background-color: var(--shade_10);
 }
 
@@ -232,7 +232,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-left-style: var(--border_style);
 	border-left-width: var(--border_width_8);
 	padding: var(--space_md);
-	color: var(--text_color, var(--text_70));
+	color: var(--text_color);
 }
 
 :where(code:not(.unstyled)) {
@@ -240,7 +240,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	font-family: var(--font_family_mono);
 	-webkit-hyphens: none;
 	hyphens: none;
-	color: var(--text_color, var(--text_70));
+	color: var(--text_color);
 	background-color: var(--shade_10);
 	padding: 0 var(--space_xs2);
 	border-radius: var(--border_radius, var(--border_radius_xs));
@@ -253,7 +253,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 :where(pre:not(.unstyled)) {
 	font-family: var(--font_family_mono);
-	color: var(--text_color, var(--text_70));
+	color: var(--text_color);
 	white-space: pre;
 	overflow: auto;
 	max-width: 100%;
