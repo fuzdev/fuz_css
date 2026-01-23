@@ -20,15 +20,6 @@
 	const toggle_color_scheme = () => {
 		themer.color_scheme = themer.color_scheme === 'light' ? 'dark' : 'light';
 	};
-
-	const opacity_classes = [
-		'opacity:0',
-		'opacity:17%',
-		'opacity:38%',
-		'opacity:51%',
-		'opacity:79%',
-		'opacity:100%',
-	];
 </script>
 
 <TomeContent {tome}>
@@ -66,9 +57,15 @@
 				>shade_00</code
 			>
 			through <code>shade_100</code>) are tinted using the theme's
-			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion.
+			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion. The scale also
+			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
+			contrast needs.
 		</p>
 		<div class="swatch">
+			<div>
+				<div class="color" style:background-color="var(--shade_min)"></div>
+				<small><StyleVariableButton name="shade_min" /></small>
+			</div>
 			{#each shade_variants as shade (shade)}
 				{@const name = 'shade_' + shade}
 				<div>
@@ -76,10 +73,18 @@
 					<small><StyleVariableButton {name} /></small>
 				</div>
 			{/each}
+			<div>
+				<div class="color" style:background-color="var(--shade_max)"></div>
+				<small><StyleVariableButton name="shade_max" /></small>
+			</div>
 		</div>
 		<TomeSection>
 			<TomeSectionHeader text="Key values" tag="h4" />
 			<ul>
+				<li>
+					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
+					mode). Used for input backgrounds.
+				</li>
 				<li>
 					<code>shade_00</code> / <code>--surface</code>: The base background. Use
 					<code>var(--surface)</code> for readability.
@@ -89,29 +94,6 @@
 				<li><code>shade_20</code>: More elevated (active/pressed states).</li>
 				<li><code>shade_30</code>: Default border intensity.</li>
 				<li><code>shade_100</code>: Maximum tinted contrast.</li>
-			</ul>
-		</TomeSection>
-		<TomeSection>
-			<TomeSectionHeader text="Untinted extremes" tag="h4" />
-			<p>
-				For maximum contrast needs without tinting, use <code>shade_min</code> and
-				<code>shade_max</code>:
-			</p>
-			<div class="swatch swatch_small">
-				<div>
-					<div class="color" style:background-color="var(--shade_min)"></div>
-					<small><StyleVariableButton name="shade_min" /></small>
-				</div>
-				<div>
-					<div class="color" style:background-color="var(--shade_max)"></div>
-					<small><StyleVariableButton name="shade_max" /></small>
-				</div>
-			</div>
-			<ul>
-				<li>
-					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
-					mode). Used for input backgrounds.
-				</li>
 				<li>
 					<code>shade_max</code>: Untinted contrast-side extreme (black in light mode, white in dark
 					mode). Rarely needed.
@@ -170,10 +152,6 @@ background-color: var(--shade_min);`}
 		grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
 		grid-auto-flow: row;
 	}
-	.swatch_small {
-		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
-		max-width: 300px;
-	}
 	.color {
 		height: var(--input_height_sm);
 	}
@@ -182,14 +160,5 @@ background-color: var(--shade_min);`}
 		display: flex;
 		justify-content: center;
 		align-items: center;
-	}
-	.opacity_example {
-		position: relative;
-		width: 150px;
-		height: 50px;
-		display: flex;
-		align-items: center;
-		margin-bottom: var(--space_md);
-		padding: var(--space_md);
 	}
 </style>

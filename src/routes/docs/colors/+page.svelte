@@ -53,8 +53,7 @@
 			A color's subjective appearance depends on the context in which it's viewed, especially the
 			surrounding colors and values. fuz_css's semantic colors are designed to work across color
 			schemes, so each fuz_css color <TomeLink name="variables">variable</TomeLink> has two values, one
-			for light and one for dark mode. The exceptions are the lightest (1) and darkest (9) variants, although
-			this may change if it yields better results.
+			for light and one for dark mode.
 		</p>
 		<h4>Custom themes</h4>
 		<p>
@@ -76,12 +75,9 @@
 		<TomeSectionHeader text="Caveats" />
 		<p>
 			For performance reasons, fuz_css does not currently have an extensive set of variants, like
-			specialized states for elements or color values like "blue". Each of the 7 hues has 9 HSL
-			color values (e.g. <code>hsl(120 55% 36%)</code>) and 9 HSL component values (e.g.
-			<code>120 55% 36%</code>, useful to efficiently apply custom alpha), handling most cases, and
-			the base colors can be customized with platform APIs like the <MdnLink
-				path="Web/CSS/color_value/color-mix"
-			/> CSS function.
+			specialized states for elements or color values like "blue". Each of the 10 hues has 11
+			intensity variants (05 through 95), handling most cases. The base colors can be customized
+			with platform APIs like the <MdnLink path="Web/CSS/color_value/color-mix" /> CSS function.
 		</p>
 		<p>
 			Variants will be expanded when fuz_css includes a Vite plugin or other build tooling for
@@ -123,8 +119,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="Color variables" />
 		<p>
-			There are 9 variables per color, numbered 1 to 9, lightest to darkest. The 5th variable of
-			each color is used as the base for things like <TomeLink name="buttons" />.
+			There are 11 variables per color (05, 10, 20, ..., 80, 90, 95), from subtle to bold. The 50
+			variant of each color is used as the base for things like <TomeLink name="buttons" />.
 		</p>
 		<p>
 			Note that these values differ between light and dark modes! See the discussion above for why.

@@ -643,24 +643,6 @@ a.chip {
 .justify-content\:space-between {
 	justify-content: space-between;
 }
-.opacity\:0 {
-	opacity: 0;
-}
-.opacity\:100\% {
-	opacity: 100%;
-}
-.opacity\:17\% {
-	opacity: 17%;
-}
-.opacity\:38\% {
-	opacity: 38%;
-}
-.opacity\:51\% {
-	opacity: 51%;
-}
-.opacity\:79\% {
-	opacity: 79%;
-}
 .outline-style\:solid {
 	outline-style: solid;
 }
