@@ -9,7 +9,6 @@
 
 	import HueSwatch from '$routes/docs/colors/HueSwatch.svelte';
 	import ColorSwatch from '$routes/docs/colors/ColorSwatch.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import {color_variants} from '$lib/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'colors';
@@ -72,28 +71,7 @@
 		</p>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Caveats" />
-		<p>
-			For performance reasons, fuz_css does not currently have an extensive set of variants, like
-			specialized states for elements or color values like "blue". Each of the 10 hues has 11
-			intensity variants (05 through 95), handling most cases. The base colors can be customized
-			with platform APIs like the <MdnLink path="Web/CSS/color_value/color-mix" /> CSS function.
-		</p>
-		<p>
-			Variants will be expanded when fuz_css includes a Vite plugin or other build tooling for
-			optimization. A downside of removing unused styles is that they won't be available to your
-			end-users at runtime. We'll probably end up with an interpreted language like Tailwind's
-			just-in-time compiler.
-		</p>
-	</TomeSection>
-	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
-		<UnfinishedImplementationWarning>
-			Colors are unfinished. I'm thinking of adding orange and cyan for a total of 9 hues. fuz_css
-			may also change from HSL to <MdnLink
-				path="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch"
-			/>.
-		</UnfinishedImplementationWarning>
 		<p>
 			Hue variables contain a single <MdnLink path="Web/CSS/hue" /> number. Each color variable combines
 			a hue variable with hardcoded saturation and lightness values for light and dark modes.

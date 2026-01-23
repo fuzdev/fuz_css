@@ -121,8 +121,8 @@ background-color: var(--surface);
 /* Elevated panel or card */
 background-color: var(--shade_10);
 
-/* Hover state */
-background-color: var(--shade_10);
+/* Hover state on surface */
+background-color: var(--shade_05);
 
 /* Active/pressed state */
 background-color: var(--shade_20);
