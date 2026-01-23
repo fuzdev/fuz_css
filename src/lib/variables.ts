@@ -575,6 +575,18 @@ export const tint_saturation: StyleVariable = {name: 'tint_saturation', light: '
 
 shade scale - the primary system for backgrounds and surfaces
 
+These lightness values are derived from the old alpha-based darken/lighten system to preserve
+the proven perceptual curve. The old system used alpha overlays (6%, 12%, 21%, 32%, 45%, 65%,
+80%, 89%, 96%) which produced non-linear effective lightness when composited on the 96%/6%
+background. These values are the computed effective lightness from that system.
+
+Note: This creates an asymmetric scale (light and dark values don't mirror) because alpha
+blending produces different results depending on the base color. This asymmetry matched the
+old visual feel and was not problematic in practice.
+
+TODO: Revisit this curve when migrating to OKLCH. OKLCH provides perceptually uniform lightness,
+so we may want to switch to a symmetric or mathematically derived scale at that point.
+
 */
 // Untinted adaptive extremes
 export const shade_min: StyleVariable = {
@@ -588,6 +600,7 @@ export const shade_max: StyleVariable = {
 	dark: '#fff',
 };
 // Tinted shade scale (00-100)
+// Values derived from old alpha system: shade_N0 ≈ effective lightness of fg_N on 96%/6% background
 export const shade_00: StyleVariable = {
 	name: 'shade_00',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
@@ -595,58 +608,58 @@ export const shade_00: StyleVariable = {
 };
 export const shade_05: StyleVariable = {
 	name: 'shade_05',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 94%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 10%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 93%)', // interpolated
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 9%)', // interpolated
 };
 export const shade_10: StyleVariable = {
 	name: 'shade_10',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 16%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)', // from fg_1: 96% * (1 - 0.06)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 12%)', // from fg_1: 6% + 94% * 0.06
 };
 export const shade_20: StyleVariable = {
 	name: 'shade_20',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 82%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 22%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 84%)', // from fg_2: 96% * (1 - 0.12)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 17%)', // from fg_2: 6% + 94% * 0.12
 };
 export const shade_30: StyleVariable = {
 	name: 'shade_30',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 72%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 30%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 76%)', // from fg_3: 96% * (1 - 0.21)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 26%)', // from fg_3: 6% + 94% * 0.21
 };
 export const shade_40: StyleVariable = {
 	name: 'shade_40',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 62%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 40%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 65%)', // from fg_4: 96% * (1 - 0.32)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 36%)', // from fg_4: 6% + 94% * 0.32
 };
 export const shade_50: StyleVariable = {
 	name: 'shade_50',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 50%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 50%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 53%)', // from fg_5: 96% * (1 - 0.45)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 48%)', // from fg_5: 6% + 94% * 0.45
 };
 export const shade_60: StyleVariable = {
 	name: 'shade_60',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 40%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 62%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 34%)', // from fg_6: 96% * (1 - 0.65)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 67%)', // from fg_6: 6% + 94% * 0.65
 };
 export const shade_70: StyleVariable = {
 	name: 'shade_70',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 30%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 72%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 19%)', // from fg_7: 96% * (1 - 0.80)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 81%)', // from fg_7: 6% + 94% * 0.80
 };
 export const shade_80: StyleVariable = {
 	name: 'shade_80',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 22%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 82%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 11%)', // from fg_8: 96% * (1 - 0.89)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)', // from fg_8: 6% + 94% * 0.89
 };
 export const shade_90: StyleVariable = {
 	name: 'shade_90',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 16%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)', // capped (fg_9 would be 4%, but must stay above shade_100)
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 93%)', // adjusted to fit within scale
 };
 export const shade_95: StyleVariable = {
 	name: 'shade_95',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 10%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 94%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 7%)', // interpolated between shade_90 and shade_100
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 95%)', // interpolated
 };
 export const shade_100: StyleVariable = {
 	name: 'shade_100',
