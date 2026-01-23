@@ -633,7 +633,7 @@ describe('generate_classes_css', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);'},
 			};
 
 			const result = generate_classes_css({
@@ -646,7 +646,7 @@ describe('generate_classes_css', () => {
 			expect(result.css).toContain('.card {');
 			expect(result.css).toContain('padding: var(--space_lg);');
 			expect(result.css).toContain('border-radius: var(--border_radius_md);');
-			expect(result.css).toContain('--card-bg: var(--bg_1);');
+			expect(result.css).toContain('--card-bg: var(--shade_10);');
 			expect(result.diagnostics).toHaveLength(0);
 		});
 

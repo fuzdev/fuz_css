@@ -155,7 +155,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				padding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));
 			}
 			.menu_item.selected {
-				/* TODO different patterns for border and bg? */
+				/* TODO different patterns for border and surface? */
 				--border_color: var(--color_a_50);
 				background-color: var(--shade_10);
 				z-index: 1;

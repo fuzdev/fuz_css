@@ -40,7 +40,7 @@
 				by other variables, both in calculations and to add useful semantics (e.g. <code
 					>button_fill_hover</code
 				>
-				defaults to <code>fg_2</code> but can be themed independently)
+				uses <code>shade_50</code> but can be themed independently)
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in

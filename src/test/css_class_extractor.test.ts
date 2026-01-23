@@ -880,9 +880,9 @@ describe('complex modifiers', () => {
 	});
 
 	test('extracts nth-child modifier classes', () => {
-		const source = `<div class="nth-child(2n+1):background:var(--bg_2)"></div>`;
+		const source = `<div class="nth-child(2n+1):background:var(--shade_20)"></div>`;
 		const result = extract_from_svelte(source);
-		class_names_equal(result, ['nth-child(2n+1):background:var(--bg_2)']);
+		class_names_equal(result, ['nth-child(2n+1):background:var(--shade_20)']);
 	});
 });
 

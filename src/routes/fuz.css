@@ -102,7 +102,7 @@ These are used as modifiers to buttons.
 	padding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));
 }
 .menu_item.selected {
-	/* TODO different patterns for border and bg? */
+	/* TODO different patterns for border and surface? */
 	--border_color: var(--color_a_50);
 	background-color: var(--shade_10);
 	z-index: 1;
@@ -203,6 +203,9 @@ a.chip {
 }
 .bg_a_70 {
 	background-color: var(--color_a_70);
+}
+.outline_color_30 {
+	outline-color: var(--shade_30);
 }
 .outline_width_focus {
 	outline-width: var(--outline_width_focus);

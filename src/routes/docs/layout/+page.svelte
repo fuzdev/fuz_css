@@ -73,7 +73,7 @@
 		top: 0;
 		height: 100%;
 		z-index: -1;
-		background-color: var(--fg_2);
+		background-color: var(--shade_20);
 	}
 
 	.variable_wrapper {

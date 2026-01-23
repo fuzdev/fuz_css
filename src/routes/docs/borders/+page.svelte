@@ -139,7 +139,7 @@
 			{#each outline_width_variants as outline_width_variant (outline_width_variant)}
 				{@const name = 'outline_width_' + outline_width_variant}
 				<div class="row">
-					<div class="border_example {name} outline-style:solid outline_color_3">
+					<div class="border_example {name} outline-style:solid outline_color_30">
 						<StyleVariableButton {name} />
 					</div>
 					<span class="pl_sm pr_sm">=</span><code
@@ -267,6 +267,6 @@
 		padding: var(--space_xl5) var(--space_md);
 	}
 	.border_radius {
-		background-color: var(--fg_2);
+		background-color: var(--shade_20);
 	}
 </style>
