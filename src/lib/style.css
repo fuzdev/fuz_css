@@ -34,7 +34,7 @@ Some notes:
 :root,
 :host {
 	color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
-	background-color: var(--surface);
+	background-color: var(--shade_00);
 	color: var(--text_color);
 	accent-color: var(--color_a_50);
 	line-height: var(--line_height_md);
@@ -318,7 +318,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 :where(option:not(.unstyled)) {
 	color: var(--text_color);
-	background-color: var(--surface);
+	background-color: var(--shade_00);
 }
 
 :where(:is(input, textarea, select):not(.unstyled):hover) {

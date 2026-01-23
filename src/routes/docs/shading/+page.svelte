@@ -85,10 +85,7 @@
 					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
 					mode). Used for input backgrounds.
 				</li>
-				<li>
-					<code>shade_00</code> / <code>--surface</code>: The base background. Use
-					<code>var(--surface)</code> for readability.
-				</li>
+				<li><code>shade_00</code>: The base background.</li>
 				<li><code>shade_05</code>: Very subtle (hover states on surface).</li>
 				<li><code>shade_10</code>: Subtle elevation (panels, cards, aside, blockquote, code).</li>
 				<li><code>shade_20</code>: More elevated (active/pressed states).</li>
@@ -116,12 +113,12 @@
 		<p>Common shade assignments:</p>
 		<Code
 			content={`/* Base page background */
-background-color: var(--surface);
+background-color: var(--shade_00);
 
 /* Elevated panel or card */
 background-color: var(--shade_10);
 
-/* Hover state on surface */
+/* Hover state on shade_00 */
 background-color: var(--shade_05);
 
 /* Active/pressed state */

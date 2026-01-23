@@ -79,9 +79,10 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	*/
 	// Text colors (flipped scale: low numbers = subtle, high numbers = bold)
+	text_min: {declaration: 'color: var(--text_min);'},
+	text_max: {declaration: 'color: var(--text_max);'},
 	...generate_property_classes('color', text_variants, (v) => `var(--text_${v})`, 'text'),
 	// Shade scale (tinted backgrounds)
-	surface: {declaration: 'background-color: var(--surface);'},
 	shade_min: {declaration: 'background-color: var(--shade_min);'},
 	shade_max: {declaration: 'background-color: var(--shade_max);'},
 	...generate_property_classes(
@@ -90,8 +91,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--shade_${v})`,
 		'shade',
 	),
-	// Knockout text (for text on dark backgrounds)
-	color_surface: {declaration: 'color: var(--surface);'},
 	// Hue classes
 	...generate_classes(
 		(hue: string) => ({

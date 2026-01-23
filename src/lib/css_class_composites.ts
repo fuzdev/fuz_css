@@ -96,7 +96,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment:
 			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
-			background-color: var(--surface);
+			background-color: var(--shade_00);
 			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));
 			border-radius: var(--border_radius_xs);
 		`,

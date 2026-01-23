@@ -21,7 +21,7 @@
 		</div>
 	</section>
 	<section class="width_atmost_md p_sm border_radius_md shadow_xs">
-		<div class="panel p_lg surface shadow_sm">
+		<div class="panel p_lg shade_00 shadow_sm">
 			<Introduction />
 		</div>
 	</section>

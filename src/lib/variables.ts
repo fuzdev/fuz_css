@@ -666,11 +666,6 @@ export const shade_100: StyleVariable = {
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 };
-// Semantic alias for the base surface
-export const surface: StyleVariable = {
-	name: 'surface',
-	light: 'var(--shade_00)',
-};
 
 /*
 
@@ -678,7 +673,26 @@ text colors - flipped scale where low numbers = subtle, high numbers = bold
 
 */
 /* text colors don't use alpha because it affects performance too much */
+
+// Untinted text extremes (parallel to shade_min/shade_max)
+export const text_min: StyleVariable = {
+	name: 'text_min',
+	light: '#fff',
+	dark: '#000',
+};
+export const text_max: StyleVariable = {
+	name: 'text_max',
+	light: '#000',
+	dark: '#fff',
+};
+
 export const text_color: StyleVariable = {name: 'text_color', light: 'var(--text_80)'};
+// text_00: surface-side endpoint (essentially the surface color as text)
+export const text_00: StyleVariable = {
+	name: 'text_00',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
+};
 // text_05: very faint, near-surface (watermarks, ghost text)
 export const text_05: StyleVariable = {
 	name: 'text_05',
@@ -729,10 +743,16 @@ export const text_90: StyleVariable = {
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
 };
-// text_95: highest emphasis
+// text_95: very high emphasis
 export const text_95: StyleVariable = {
 	name: 'text_95',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 4%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+};
+// text_100: contrast-side endpoint (essentially the ink color as text)
+export const text_100: StyleVariable = {
+	name: 'text_100',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 };
 export const text_disabled: StyleVariable = {
@@ -1283,10 +1303,12 @@ export const default_variables: Array<StyleVariable> = [
 	shade_90,
 	shade_95,
 	shade_100,
-	surface,
 
 	/* text colors don't use alpha because it affects performance too much */
+	text_min,
+	text_max,
 	text_color,
+	text_00,
 	text_05,
 	text_10,
 	text_20,
@@ -1298,6 +1320,7 @@ export const default_variables: Array<StyleVariable> = [
 	text_80,
 	text_90,
 	text_95,
+	text_100,
 	text_disabled,
 
 	/* fonts */

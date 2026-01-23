@@ -28,6 +28,7 @@ export const font_family_variants = [
 
 export type TextVariant = ArrayElement<typeof text_variants>;
 export const text_variants = [
+	'00',
 	'05',
 	'10',
 	'20',
@@ -39,6 +40,7 @@ export const text_variants = [
 	'80',
 	'90',
 	'95',
+	'100',
 ] as const;
 
 export type ShadeVariant = ArrayElement<typeof shade_variants>;

@@ -44,7 +44,7 @@
 		min-height: var(--input_height_sm);
 	}
 	li:hover {
-		background-color: var(--surface);
+		background-color: var(--shade_00);
 	}
 	.text {
 		display: flex;

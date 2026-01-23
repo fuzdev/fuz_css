@@ -25,7 +25,7 @@
 	},
 	"pane": {
 		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
-		"declaration": "\n\t\t\tbackground-color: var(--surface);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
+		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
 	},
 	"panel": {
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
@@ -116,6 +116,9 @@
 	"icon_size_xl3": {
 		"declaration": "font-size: var(--icon_size_xl3); --font_size: var(--icon_size_xl3);"
 	},
+	"text_min": {"declaration": "color: var(--text_min);"},
+	"text_max": {"declaration": "color: var(--text_max);"},
+	"text_00": {"declaration": "color: var(--text_00);"},
 	"text_05": {"declaration": "color: var(--text_05);"},
 	"text_10": {"declaration": "color: var(--text_10);"},
 	"text_20": {"declaration": "color: var(--text_20);"},
@@ -127,7 +130,7 @@
 	"text_80": {"declaration": "color: var(--text_80);"},
 	"text_90": {"declaration": "color: var(--text_90);"},
 	"text_95": {"declaration": "color: var(--text_95);"},
-	"surface": {"declaration": "background-color: var(--surface);"},
+	"text_100": {"declaration": "color: var(--text_100);"},
 	"shade_min": {"declaration": "background-color: var(--shade_min);"},
 	"shade_max": {"declaration": "background-color: var(--shade_max);"},
 	"shade_00": {"declaration": "background-color: var(--shade_00);"},
@@ -143,7 +146,6 @@
 	"shade_90": {"declaration": "background-color: var(--shade_90);"},
 	"shade_95": {"declaration": "background-color: var(--shade_95);"},
 	"shade_100": {"declaration": "background-color: var(--shade_100);"},
-	"color_surface": {"declaration": "color: var(--surface);"},
 	"hue_a": {"declaration": "--hue: var(--hue_a);"},
 	"hue_b": {"declaration": "--hue: var(--hue_b);"},
 	"hue_c": {"declaration": "--hue: var(--hue_c);"},

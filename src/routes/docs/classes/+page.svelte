@@ -274,18 +274,18 @@
 					</span>
 				</li>
 				<li class="mb_md">
-					<span class="code_chips"><code>.text_{@render variant_range(text_variants)}</code> </span>
-				</li>
-				<li class="mb_md">
 					<span class="code_chips"
-						><code>.surface</code>
-						<code>.shade_min</code>
-						<code>.shade_max</code>
-						<code>.shade_{@render variant_range(shade_variants)}</code>
+						><code>.text_min</code>
+						<code>.text_max</code>
+						<code>.text_{@render variant_range(text_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
-					<span class="code_chips"><code>.color_surface</code></span>
+					<span class="code_chips"
+						><code>.shade_min</code>
+						<code>.shade_max</code>
+						<code>.shade_{@render variant_range(shade_variants)}</code>
+					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>

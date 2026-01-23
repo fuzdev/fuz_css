@@ -38,7 +38,7 @@
 		padding: var(--space_xs2);
 	}
 	li:hover {
-		background-color: var(--surface);
+		background-color: var(--shade_00);
 	}
 	.text {
 		display: flex;
