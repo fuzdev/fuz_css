@@ -160,18 +160,6 @@ background-color: var(--shade_min);`}
 			values like <code>hsla(0 0% 0% / 10%)</code>.
 		</p>
 	</TomeSection>
-	<TomeSection>
-		<TomeSectionHeader text="Opacity" />
-		<p>Interpreted utility classes, 0 to 100 (%).</p>
-		<div>
-			{#each opacity_classes as opacity_class (opacity_class)}
-				<div class="opacity_example font_family_mono relative">
-					<div class="position:absolute inset:0 bg_a_70 {opacity_class}"></div>
-					<div class="position:relative">.{opacity_class}</div>
-				</div>
-			{/each}
-		</div>
-	</TomeSection>
 </TomeContent>
 
 <style>

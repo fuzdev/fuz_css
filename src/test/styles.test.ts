@@ -54,6 +54,7 @@ test('variables in the CSS exist', () => {
  * This means they can be contextually used when defined, but otherwise have a fallback.
  */
 const known_without_variables = new Set([
+	'fill', // contextual variable set by button color classes (e.g., .color_a sets --fill: var(--color_a_40))
 	'button_fill',
 	'button_fill_hover',
 	'button_fill_active',

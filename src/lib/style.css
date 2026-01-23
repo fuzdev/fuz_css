@@ -508,9 +508,9 @@ TODO think through these patterns to get somewhere consistent
 	--min_height: var(--input_height);
 	--text_color: var(--text_70);
 	--button_text_color: var(--text_color);
-	--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);
-	--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);
-	--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);
+	--button_fill: color-mix(in hsl, var(--fill, var(--shade_50)) 8%, transparent);
+	--button_fill_hover: color-mix(in hsl, var(--fill, var(--shade_50)) 16%, transparent);
+	--button_fill_active: color-mix(in hsl, var(--fill, var(--shade_50)) 24%, transparent);
 	--button_border_color: var(--border_color);
 	/* TODO give real values, 90%? */
 	--button_border_color_hover: color-mix(in hsl, var(--border_color) 90%, var(--shade_max));
@@ -618,9 +618,9 @@ TODO think through these patterns to get somewhere consistent
 }
 :where(button:not(.unstyled).selected) {
 	--button_text_color: var(--text_10);
-	--button_fill: var(--shade_50);
-	--button_fill_hover: var(--shade_50);
-	--button_fill_active: var(--shade_50);
+	--button_fill: var(--fill, var(--shade_50));
+	--button_fill_hover: var(--fill, var(--shade_50));
+	--button_fill_active: var(--fill, var(--shade_50));
 	--button_border_color: var(--border_color);
 }
 :where(button:not(.unstyled).selected:not(.deselectable)) {
@@ -640,7 +640,7 @@ TODO think through these patterns to get somewhere consistent
 	--button_text_color: color-mix(in hsl, var(--text_color) 90%, var(--shade_max));
 }
 :where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
-	--button_text_color: var(--text_05);
+	--button_text_color: var(--shade_min);
 }
 :where(button:not(.unstyled):not(:disabled):active) {
 	--button_fill: var(--button_fill_active);

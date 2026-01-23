@@ -201,9 +201,6 @@ a.chip {
 .color_g_50 {
 	color: var(--color_g_50);
 }
-.bg_a_70 {
-	background-color: var(--color_a_70);
-}
 .outline_color_30 {
 	outline-color: var(--shade_30);
 }
@@ -642,9 +639,6 @@ a.chip {
 }
 .height\:100\% {
 	height: 100%;
-}
-.inset\:0 {
-	inset: 0;
 }
 .justify-content\:space-between {
 	justify-content: space-between;
