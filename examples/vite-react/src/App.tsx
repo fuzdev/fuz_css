@@ -42,7 +42,7 @@ export const App = () => {
 
 					<div>
 						<h3>Token classes</h3>
-						<div className="p_md bg_d_2">.p_md .bg_d_2</div>
+						<div className="p_md bg_d_20">.p_md .bg_d_20</div>
 						<div className="pl_xl5 font_size_lg">.pl_xl5 .font_size_lg</div>
 						<div className="shadow_sm">.shadow_sm</div>
 					</div>
@@ -58,7 +58,7 @@ export const App = () => {
 					<div>
 						<h3>Literal classes</h3>
 						<div className="opacity:60%">.opacity:60%</div>
-						<div className="color:var(--color_j_5)">.color:var(--color_j_5)</div>
+						<div className="color:var(--color_j_50)">.color:var(--color_j_50)</div>
 						<div className="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
 					</div>
 				</section>

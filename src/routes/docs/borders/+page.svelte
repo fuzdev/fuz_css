@@ -7,7 +7,7 @@
 
 	import {
 		border_width_variants,
-		border_color_intensity_variants,
+		shade_variants,
 		color_variants,
 		outline_width_variants,
 		border_radius_variants,
@@ -56,8 +56,8 @@
 		<TomeSectionHeader text="Border shades" />
 		<UnfinishedImplementationWarning />
 		<div class="border_examples border_colors">
-			{#each border_color_intensity_variants as border_intensity (border_intensity)}
-				{@const name = 'border_color_' + border_intensity}
+			{#each shade_variants as shade (shade)}
+				{@const name = 'shade_' + shade}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div class="border_example border_color" style:border-color="var(--{name})">
@@ -88,7 +88,7 @@
 		<UnfinishedImplementationWarning />
 		<div class="border_examples border_colors">
 			{#each color_variants as color_variant (color_variant)}
-				{@const name = 'border_color_' + color_variant}
+				{@const name = 'color_' + color_variant + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div class="border_example border_color" style:border-color="var(--{name})">
@@ -254,7 +254,7 @@
 	}
 
 	.border_width {
-		border-color: var(--border_color_5);
+		border-color: var(--shade_50);
 		border-style: solid;
 	}
 

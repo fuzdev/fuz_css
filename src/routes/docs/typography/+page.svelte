@@ -17,7 +17,7 @@
 	import {
 		line_height_names,
 		font_size_names,
-		text_color_variants,
+		text_variants,
 		font_family_variants,
 	} from '$lib/variable_data.js';
 
@@ -145,8 +145,8 @@
 			Add color-scheme-adaptive versions?
 		</UnfinishedImplementationWarning>
 		<div class="panel">
-			{#each text_color_variants as text_variant (text_variant)}
-				{@const name = 'text_color_' + text_variant}
+			{#each text_variants as text_variant (text_variant)}
+				{@const name = 'text_' + text_variant}
 				<div class="row">
 					<StyleVariableButton {name}
 						><span class="font_family_mono" style:color="var(--{name})">
@@ -157,7 +157,7 @@
 			{/each}
 		</div>
 	</TomeSection>
-	<!-- <section> 'text_color_disabled' 'text_active'</section> -->
+	<!-- <section> 'text_disabled'</section> -->
 	<TomeSection>
 		<TomeSectionHeader text="Line heights" />
 		<aside>Learn more about <MdnLink path="Web/CSS/line-height" />.</aside>

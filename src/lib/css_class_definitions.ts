@@ -21,8 +21,8 @@ import {
 	distance_variants,
 	color_variants,
 	intensity_variants,
-	border_color_intensity_variants,
-	text_color_variants,
+	shade_variants,
+	text_variants,
 	font_size_variants,
 	icon_size_variants,
 	line_height_variants,
@@ -78,64 +78,21 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	colors
 
 	*/
-	...generate_property_classes(
-		'color',
-		text_color_variants.map(String),
-		(v) => `var(--text_color_${v})`,
-		'text_color',
-	),
-	...generate_property_classes(
-		'background-color',
-		intensity_variants.map(String),
-		(v) => `var(--darken_${v})`,
-		'darken',
-	),
+	// Text colors (flipped scale: low numbers = subtle, high numbers = bold)
+	...generate_property_classes('color', text_variants, (v) => `var(--text_${v})`, 'text'),
+	// Shade scale (tinted backgrounds)
+	surface: {declaration: 'background-color: var(--surface);'},
+	shade_min: {declaration: 'background-color: var(--shade_min);'},
+	shade_max: {declaration: 'background-color: var(--shade_max);'},
 	...generate_property_classes(
 		'background-color',
-		intensity_variants.map(String),
-		(v) => `var(--lighten_${v})`,
-		'lighten',
+		shade_variants,
+		(v) => `var(--shade_${v})`,
+		'shade',
 	),
-	bg: {declaration: 'background-color: var(--bg);'},
-	fg: {declaration: 'background-color: var(--fg);'},
-	...generate_property_classes(
-		'background-color',
-		intensity_variants.map(String),
-		(v) => `var(--bg_${v})`,
-		'bg',
-	),
-	...generate_property_classes(
-		'background-color',
-		intensity_variants.map(String),
-		(v) => `var(--fg_${v})`,
-		'fg',
-	),
-	...generate_property_classes(
-		'color',
-		intensity_variants.map(String),
-		(v) => `var(--darken_${v})`,
-		'color_darken',
-	),
-	...generate_property_classes(
-		'color',
-		intensity_variants.map(String),
-		(v) => `var(--lighten_${v})`,
-		'color_lighten',
-	),
-	color_bg: {declaration: 'color: var(--bg);'},
-	color_fg: {declaration: 'color: var(--fg);'},
-	...generate_property_classes(
-		'color',
-		intensity_variants.map(String),
-		(v) => `var(--bg_${v})`,
-		'color_bg',
-	),
-	...generate_property_classes(
-		'color',
-		intensity_variants.map(String),
-		(v) => `var(--fg_${v})`,
-		'color_fg',
-	),
+	// Knockout text (for text on dark backgrounds)
+	color_surface: {declaration: 'color: var(--surface);'},
+	// Hue classes
 	...generate_classes(
 		(hue: string) => ({
 			name: `hue_${hue}`,
@@ -143,16 +100,18 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		color_variants,
 	),
+	// Color intensity classes (text color)
 	...generate_classes(
-		(hue: string, intensity: number) => ({
+		(hue: string, intensity: string) => ({
 			name: `color_${hue}_${intensity}`,
 			css: `color: var(--color_${hue}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,
 	),
+	// Color intensity classes (background color)
 	...generate_classes(
-		(hue: string, intensity: number) => ({
+		(hue: string, intensity: string) => ({
 			name: `bg_${hue}_${intensity}`,
 			css: `background-color: var(--color_${hue}_${intensity});`,
 		}),
@@ -165,18 +124,14 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	borders
 
 	*/
-	...generate_property_classes(
-		'border-color',
-		border_color_intensity_variants.map(String),
-		(v) => `var(--border_color_${v})`,
-	),
-	...generate_property_classes('border-color', color_variants, (v) => `var(--border_color_${v})`),
-	...generate_property_classes(
-		'outline-color',
-		border_color_intensity_variants.map(String),
-		(v) => `var(--border_color_${v})`,
-	),
-	...generate_property_classes('outline-color', color_variants, (v) => `var(--border_color_${v})`),
+	// Border colors using shade scale
+	...generate_property_classes('border-color', shade_variants, (v) => `var(--shade_${v})`),
+	// Border colors using hue colors
+	...generate_property_classes('border-color', color_variants, (v) => `var(--color_${v}_50)`),
+	// Outline colors using shade scale
+	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
+	// Outline colors using hue colors
+	...generate_property_classes('outline-color', color_variants, (v) => `var(--color_${v}_50)`),
 
 	...generate_property_classes(
 		'border-width',
@@ -216,13 +171,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			css: `--shadow_color: var(--shadow_color_${value});`,
 		}),
 		shadow_semantic_values,
-	),
-	...generate_classes(
-		(hue: string) => ({
-			name: `shadow_color_${hue}`,
-			css: `--shadow_color: var(--shadow_color_${hue});`,
-		}),
-		color_variants,
 	),
 	...generate_classes(
 		(alpha: number) => ({

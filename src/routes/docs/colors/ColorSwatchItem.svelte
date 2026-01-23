@@ -9,7 +9,7 @@
 		color_name,
 		computed_styles,
 	}: {
-		intensity: number;
+		intensity: string;
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
 	} = $props();
@@ -44,7 +44,7 @@
 		min-height: var(--input_height_sm);
 	}
 	li:hover {
-		background-color: var(--bg);
+		background-color: var(--surface);
 	}
 	.text {
 		display: flex;

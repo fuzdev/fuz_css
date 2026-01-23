@@ -11,8 +11,8 @@
 		space_variants,
 		color_variants,
 		intensity_variants,
-		border_color_intensity_variants,
-		text_color_variants,
+		shade_variants,
+		text_variants,
 		font_size_variants,
 		font_family_variants,
 		line_height_variants,
@@ -32,9 +32,9 @@
 </script>
 
 {#snippet variant_range<T>(arr: ReadonlyArray<T>)}
-	<span class="text_color_5">{'{'}</span>{arr[0]}<span class="text_color_5">-</span>{arr.at(
-		-1,
-	)}<span class="text_color_5">}</span>
+	<span class="text_50">{'{'}</span>{arr[0]}<span class="text_50">-</span>{arr.at(-1)}<span
+		class="text_50">}</span
+	>
 {/snippet}
 
 <TomeContent {tome}>
@@ -98,8 +98,8 @@
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<p class=&quot;pl_xl3 color_g_5&quot;>some token classes</p>" />
-			<p class="pl_xl3 color_g_5">some token classes</p>
+			<Code content="<p class=&quot;pl_xl3 color_g_50&quot;>some token classes</p>" />
+			<p class="pl_xl3 color_g_50">some token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -264,13 +264,6 @@
 						>
 					</span>
 				</li>
-				<li class="mb_md"><span class="code_chips"><code>.bg</code> <code>.fg</code></span></li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.bg_{@render variant_range(intensity_variants)}</code>
-						<code>.fg_{@render variant_range(intensity_variants)}</code>
-					</span>
-				</li>
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
@@ -281,30 +274,18 @@
 					</span>
 				</li>
 				<li class="mb_md">
-					<span class="code_chips"
-						><code>.text_color_{@render variant_range(text_color_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"><code>.color_bg</code> <code>.color_fg</code></span>
+					<span class="code_chips"><code>.text_{@render variant_range(text_variants)}</code> </span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.color_bg_{@render variant_range(intensity_variants)}</code>
-						<code>.color_fg_{@render variant_range(intensity_variants)}</code>
+						><code>.surface</code>
+						<code>.shade_min</code>
+						<code>.shade_max</code>
+						<code>.shade_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
-					<span class="code_chips"
-						><code>.darken_{@render variant_range(intensity_variants)}</code>
-						<code>.lighten_{@render variant_range(intensity_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.color_darken_{@render variant_range(intensity_variants)}</code>
-						<code>.color_lighten_{@render variant_range(intensity_variants)}</code>
-					</span>
+					<span class="code_chips"><code>.color_surface</code></span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
@@ -340,7 +321,7 @@
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.border_color_{@render variant_range(border_color_intensity_variants)}</code>
+						><code>.border_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -392,7 +373,7 @@
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.outline_color_{@render variant_range(border_color_intensity_variants)}</code>
+						><code>.outline_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -432,11 +413,6 @@
 				<li class="mb_md">
 					<span class="code_chips"
 						><code>.shadow_inset_bottom_{@render variant_range(shadow_size_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.shadow_color_{@render variant_range(color_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -547,7 +523,8 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			</p>
 			<ul>
 				<li>
-					token classes (<code>p_lg</code>, <code>color_a_5</code>) - resolved to their declarations
+					token classes (<code>p_lg</code>, <code>color_a_50</code>) - resolved to their
+					declarations
 				</li>
 				<li>
 					composites with <code>declaration</code> - the declaration is included
@@ -1113,14 +1090,14 @@ const turtle_class_name = 'turtle';`}
 				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
 const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 
-/* @fuz-classes color_a_5 color_b_5 color_c_5 */
+/* @fuz-classes color_a_50 color_b_50 color_c_50 */
 const color = get_dynamic_color();`}
 			/>
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>include_classes</code>
 				produce errors if they can't be resolved. This helps catch typos like
-				<code>@fuz-classes color_a_55</code> instead of <code>color_a_5</code>.
+				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
 			</aside>
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
@@ -1305,8 +1282,9 @@ const color = get_dynamic_color();`}
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
-					<code>`color_a_5 $&#123;base&#125;`</code> extracts <code>color_a_5</code>, but
-					<code>`color_$&#123;hue&#125;_5`</code> cannot be extracted; use <code>@fuz-classes</code>
+					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
+					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
+					<code>@fuz-classes</code>
 					or
 					<code>include_classes</code>)
 				</li>

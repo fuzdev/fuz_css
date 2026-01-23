@@ -26,8 +26,37 @@ export const font_family_variants = [
 	'font_family_mono',
 ] as const;
 
-export type TextColorVariant = ArrayElement<typeof text_color_variants>;
-export const text_color_variants = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10] as const;
+export type TextVariant = ArrayElement<typeof text_variants>;
+export const text_variants = [
+	'05',
+	'10',
+	'20',
+	'30',
+	'40',
+	'50',
+	'60',
+	'70',
+	'80',
+	'90',
+	'95',
+] as const;
+
+export type ShadeVariant = ArrayElement<typeof shade_variants>;
+export const shade_variants = [
+	'00',
+	'05',
+	'10',
+	'20',
+	'30',
+	'40',
+	'50',
+	'60',
+	'70',
+	'80',
+	'90',
+	'95',
+	'100',
+] as const;
 
 export type SpaceVariant = ArrayElement<typeof space_variants>;
 export const space_variants = [
@@ -102,12 +131,20 @@ export const icon_sizes = {
 export type ColorVariant = ArrayElement<typeof color_variants>;
 export const color_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
 
-// TODO maybe add 0 and 10?
 export type IntensityVariant = ArrayElement<typeof intensity_variants>;
-export const intensity_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
-
-export type BorderColorIntensityVariant = ArrayElement<typeof border_color_intensity_variants>;
-export const border_color_intensity_variants = [1, 2, 3, 4, 5] as const;
+export const intensity_variants = [
+	'05',
+	'10',
+	'20',
+	'30',
+	'40',
+	'50',
+	'60',
+	'70',
+	'80',
+	'90',
+	'95',
+] as const;
 
 export type BorderWidthVariant = ArrayElement<typeof border_width_variants>;
 export const border_width_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;

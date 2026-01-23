@@ -8,12 +8,10 @@
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {
-		color_variants,
 		shadow_size_variants,
 		shadow_variant_prefixes,
 		shadow_alpha_variants,
 		type ShadowSizeVariant,
-		type ColorVariant,
 	} from '$lib/variable_data.js';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -23,7 +21,6 @@
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5
-	// @fuz-classes shadow_color_a shadow_color_b shadow_color_c shadow_color_d shadow_color_e shadow_color_f shadow_color_g shadow_color_h shadow_color_i shadow_color_j
 
 	// TODO duplicate shadows links
 </script>
@@ -61,7 +58,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
 		<p>Hightlights lighten in light mode and darken in dark mode.</p>
-		<div class="panel fg_3 p_md">
+		<div class="panel shade_10 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
 				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
@@ -88,7 +85,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Glow" />
 		<p>Glows lighten in both light and dark mode.</p>
-		<div class="panel darken_3 p_md">
+		<div class="panel shade_30 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
 				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
@@ -111,7 +108,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
 		<p>Shrouds darken in both light and dark mode.</p>
-		<div class="panel lighten_3 p_md">
+		<div class="panel shade_70 p_md">
 			{@render shadow_example_header()}
 			{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
 				{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
@@ -127,39 +124,6 @@
 				{/each}
 			{/each}
 		</div>
-	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
-	<TomeSection>
-		<TomeSectionHeader text="Colorful shadows" />
-		<p>These are darker in light mode than in dark mode.</p>
-		{@render shadow_example_header()}
-		{#each color_variants as color_variant (color_variant)}
-			{@const classes = 'color_' + color_variant}
-			<section>
-				{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
-					{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
-						<div class="shadow_example">
-							<div
-								class="shadow_main_example {shadow_variant_prefix}{shadow_size_variant} shadow_color_{color_variant}"
-							>
-								<StyleVariableButton
-									name="{shadow_variant_prefix}{shadow_size_variant}"
-									{classes}
-								/>
-								<StyleVariableButton name="shadow_color_{color_variant}" {classes} />
-							</div>
-							{@render shadow_variant_examples(
-								color_variant,
-								shadow_size_variant,
-								shadow_variant_prefix,
-							)}
-						</div>
-					{/each}
-				{/each}
-			</section>
-		{/each}
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
@@ -180,7 +144,7 @@
 {/snippet}
 
 {#snippet shadow_variant_examples(
-	color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null,
+	color_variant: 'highlight' | 'glow' | 'shroud' | null,
 	shadow_size_variant: ShadowSizeVariant,
 	shadow_variant_prefix: string,
 )}

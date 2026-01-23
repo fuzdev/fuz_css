@@ -10,8 +10,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import {intensity_variants} from '$lib/variable_data.js';
+	import {shade_variants} from '$lib/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'shading';
 
@@ -34,11 +33,6 @@
 
 <TomeContent {tome}>
 	<section>
-		<UnfinishedImplementationWarning>
-			These concepts are still developing - some things are incomplete or inconsistent, and there
-			will be a lot of breaking changes. One thing I don't like is the performance cost of
-			transparency being used a lot, but the automatic stacking is nice.
-		</UnfinishedImplementationWarning>
 		<p>
 			fuz_css is designed around two simplistic models of light, one for dark mode and one for light
 			mode, mapping to the web platform's <MdnLink path="Web/CSS/color-scheme" />. The goal is easy
@@ -60,132 +54,110 @@
 			against a black background.
 		</p>
 		<p>
-			This distinction leads to complication. For example, applying a black shadow to an element has
-			a particular visual impact on the typical light mode page, but viewed in dark mode, it would
-			disappear completely against a black background.
-		</p>
-		<p>
-			fuz_css provides APIs that simplify or hide this complexity. For example, the <code
-				>lighten</code
-			>
-			and <code>darken</code> variables are the same in light and dark modes, but
-			<code>fg</code>
-			and <code>bg</code> are equivalent values that swap places in dark mode. Thus <code>bg</code>
-			and <code>fg</code> are called color-scheme-aware, and <code>lighten</code> and
-			<code>darken</code> are color-scheme-agnostic. (maybe you can think of better terminology? I
-			like the word "adaptive" but idk) The <TomeLink name="colors" /> docs elaborate more on this point
-			and the <TomeLink name="shadows" /> docs implement more of the idea.
-		</p>
-		<p>
-			Opacity is used to enable arbitrary stacking that visually inherits its context. Not all cases
-			are properly handled yet, and some choices are made for performance reasons, like avoiding
-			opacity on text. (assuming this is still a thing?)
+			The shade scale provides a unified system for backgrounds and surfaces that adapts
+			automatically to light and dark modes. Numbers represent prominence: low numbers are subtle
+			(near the base surface), high numbers are bold (high contrast).
 		</p>
 	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Shades and highlights" />
-		<TomeSection>
-			<TomeSectionHeader text="darken and lighten" tag="h4"
-				><code>darken</code> and <code>lighten</code></TomeSectionHeader
+		<TomeSectionHeader text="The shade scale" />
+		<p>
+			The shade scale is the primary system for backgrounds and surfaces. All numbered shades (<code
+				>shade_00</code
 			>
-			<UnfinishedImplementationWarning />
-			<div class="swatch">
-				{#each intensity_variants as intensity (intensity)}
-					{@const name = 'darken_' + intensity}
-					<div>
-						<div class="color" style:background-color="var(--{name})"></div>
-						<small><StyleVariableButton {name} /></small>
-					</div>
-				{/each}
-			</div>
-			<div class="swatch">
-				{#each intensity_variants as intensity (intensity)}
-					{@const name = 'lighten_' + intensity}
-					<div>
-						<div class="color" style:background-color="var(--{name})"></div>
-						<small><StyleVariableButton {name} /></small>
-					</div>
-				{/each}
-			</div>
+			through <code>shade_100</code>) are tinted using the theme's
+			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion.
+		</p>
+		<div class="swatch">
+			{#each shade_variants as shade (shade)}
+				{@const name = 'shade_' + shade}
+				<div>
+					<div class="color" style:background-color="var(--{name})"></div>
+					<small><StyleVariableButton {name} /></small>
+				</div>
+			{/each}
+		</div>
+		<TomeSection>
+			<TomeSectionHeader text="Key values" tag="h4" />
+			<ul>
+				<li>
+					<code>shade_00</code> / <code>--surface</code>: The base background. Use
+					<code>var(--surface)</code> for readability.
+				</li>
+				<li><code>shade_05</code>: Very subtle (hover states on surface).</li>
+				<li><code>shade_10</code>: Subtle elevation (panels, cards, aside, blockquote, code).</li>
+				<li><code>shade_20</code>: More elevated (active/pressed states).</li>
+				<li><code>shade_30</code>: Default border intensity.</li>
+				<li><code>shade_100</code>: Maximum tinted contrast.</li>
+			</ul>
 		</TomeSection>
 		<TomeSection>
-			<TomeSectionHeader text="bg and fg" tag="h4"
-				><code>bg</code> and <code>fg</code></TomeSectionHeader
-			>
+			<TomeSectionHeader text="Untinted extremes" tag="h4" />
 			<p>
-				In light mode, <code>bg</code> is the same as <code>lighten</code> and <code>fg</code> is
-				the same as <code>darken</code>. In dark mode, they're swapped.
+				For maximum contrast needs without tinting, use <code>shade_min</code> and
+				<code>shade_max</code>:
 			</p>
-			<div class="swatch">
-				{#each intensity_variants as intensity (intensity)}
-					{@const name = 'bg_' + intensity}
-					<div>
-						<div class="color" style:background-color="var(--{name})"></div>
-						<small><StyleVariableButton {name} /></small>
-					</div>
-				{/each}
+			<div class="swatch swatch_small">
+				<div>
+					<div class="color" style:background-color="var(--shade_min)"></div>
+					<small><StyleVariableButton name="shade_min" /></small>
+				</div>
+				<div>
+					<div class="color" style:background-color="var(--shade_max)"></div>
+					<small><StyleVariableButton name="shade_max" /></small>
+				</div>
 			</div>
-			<div class="swatch">
-				{#each intensity_variants as intensity (intensity)}
-					{@const name = 'fg_' + intensity}
-					<div>
-						<div class="color" style:background-color="var(--{name})"></div>
-						<small><StyleVariableButton {name} /></small>
-					</div>
-				{/each}
-			</div>
+			<ul>
+				<li>
+					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
+					mode). Used for input backgrounds.
+				</li>
+				<li>
+					<code>shade_max</code>: Untinted contrast-side extreme (black in light mode, white in dark
+					mode). Rarely needed.
+				</li>
+			</ul>
 		</TomeSection>
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
 		<aside class="mt_xl2 width_atmost_sm mx_auto">
 			<p>
-				tip: Try <button type="button" onclick={toggle_color_scheme}>toggling</button> between light
-				and dark to see how <code>bg</code> and <code>fg</code>
-				change, while <code>darken</code> and <code>lighten</code> don't change but do appear significantly
-				different because of the context.
+				tip: Try <button type="button" onclick={toggle_color_scheme}>toggling</button> between light and
+				dark to see how the shade scale adapts. Lower numbers stay near the surface, higher numbers move
+				toward maximum contrast.
 			</p>
 		</aside>
 	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Stacking transparency" />
-		<UnfinishedImplementationWarning />
-		<p>
-			Many styles are designed to stack, so things can appear in different contexts while retaining
-			relative color value distinctiveness ("color value" as in darkness-lightness). Internally this
-			uses simple transparency instead of complex selectors or other structure.
-		</p>
+		<TomeSectionHeader text="Usage patterns" />
+		<p>Common shade assignments:</p>
 		<Code
-			content={`<div class="fg_1 p_sm">
-	<div class="fg_1 p_sm">
-		<div class="fg_1 p_sm">
-			<div class="fg_1 p_sm">
-				<div class="bg p_sm">
-					...
-				</div>
-			</div>
-		</div>
-</div>`}
+			content={`/* Base page background */
+background-color: var(--surface);
+
+/* Elevated panel or card */
+background-color: var(--shade_10);
+
+/* Hover state */
+background-color: var(--shade_10);
+
+/* Active/pressed state */
+background-color: var(--shade_20);
+
+/* Default border */
+border-color: var(--shade_30);
+
+/* Subtle border (tables) */
+border-color: var(--shade_10);
+
+/* Input backgrounds (untinted for contrast) */
+background-color: var(--shade_min);`}
 		/>
-		<div class="fg_1 p_sm">
-			<div class="fg_1 p_sm">
-				<div class="fg_1 p_sm">
-					<div class="fg_1 p_sm">
-						<p class="bg p_sm">
-							these shades use opacity, but notice how contrast changes with depth, creating
-							limitations
-						</p>
-					</div>
-				</div>
-			</div>
-		</div>
 		<p class="mt_lg">
-			This adds some complexity and performance costs, and it's currently incomplete, but so far it
-			feels like an elegant solution with many unfinished details, and I plan to continue
-			integrating the idea in more places while considering alternative designs. However alpha
-			transparency has multiple costs, so I'm trying to be mindful to not use alpha for text and
-			other cases that are more performance-sensitive, but we may need to change this behavior for
-			the base cases, or include performance themes.
+			Shades are opaque and don't accumulate when nested. This is more performant and predictable
+			than alpha-based stacking. For rare cases requiring true overlay stacking, use inline alpha
+			values like <code>hsla(0 0% 0% / 10%)</code>.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -194,7 +166,7 @@
 		<div>
 			{#each opacity_classes as opacity_class (opacity_class)}
 				<div class="opacity_example font_family_mono relative">
-					<div class="position:absolute inset:0 bg_a_7 {opacity_class}"></div>
+					<div class="position:absolute inset:0 bg_a_70 {opacity_class}"></div>
 					<div class="position:relative">.{opacity_class}</div>
 				</div>
 			{/each}
@@ -209,6 +181,10 @@
 		display: grid;
 		grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
 		grid-auto-flow: row;
+	}
+	.swatch_small {
+		grid-template-columns: repeat(auto-fill, minmax(100px, 1fr));
+		max-width: 300px;
 	}
 	.color {
 		height: var(--input_height_sm);

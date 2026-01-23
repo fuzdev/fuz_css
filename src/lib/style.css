@@ -34,9 +34,9 @@ Some notes:
 :root,
 :host {
 	color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
-	background-color: var(--bg);
+	background-color: var(--surface);
 	color: var(--text_color);
-	accent-color: var(--color_a_5);
+	accent-color: var(--color_a_50);
 	line-height: var(--line_height_md);
 	font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
 	/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -223,18 +223,18 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-left-width: var(--border_width_3);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	padding: var(--space_md);
-	color: var(--text_color, var(--text_color_3));
-	background-color: var(--fg_1);
+	color: var(--text_color, var(--text_70));
+	background-color: var(--shade_10);
 }
 :where(aside:not(.unstyled):hover) {
-	border-left-color: var(--border_color_4);
+	border-left-color: var(--shade_40);
 }
 
 :where(blockquote:not(.unstyled)) {
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	padding: var(--space_md);
-	color: var(--text_color, var(--text_color_3));
-	background-color: var(--fg_1);
+	color: var(--text_color, var(--text_70));
+	background-color: var(--shade_10);
 }
 
 :where(code:not(.unstyled)) {
@@ -242,8 +242,8 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	font-family: var(--font_family_mono);
 	-webkit-hyphens: none;
 	hyphens: none;
-	color: var(--text_color, var(--text_color_3));
-	background-color: var(--fg_1);
+	color: var(--text_color, var(--text_70));
+	background-color: var(--shade_10);
 	padding: 0 var(--space_xs2);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
@@ -255,15 +255,15 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 :where(pre:not(.unstyled)) {
 	font-family: var(--font_family_mono);
-	color: var(--text_color, var(--text_color_3));
+	color: var(--text_color, var(--text_70));
 	white-space: pre;
 	overflow: auto;
 	max-width: 100%;
 }
 
 :where(hr:not(.unstyled)) {
-	border-top: 1px solid var(--border_color_3);
-	border-bottom: 2px solid var(--border_color_3);
+	border-top: 1px solid var(--shade_30);
+	border-bottom: 2px solid var(--shade_30);
 	border-left: none;
 	border-right: none;
 	width: 100%;
@@ -320,11 +320,11 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 :where(option:not(.unstyled)) {
 	color: var(--text_color);
-	background-color: var(--bg);
+	background-color: var(--surface);
 }
 
 :where(:is(input, textarea, select):not(.unstyled):hover) {
-	--border_color: var(--border_color_2);
+	--border_color: var(--shade_20);
 }
 
 /* these have no active states because they feel buggy in the browsers,
@@ -385,14 +385,14 @@ so for consistent visuals we opt to include no active state */
 /* TODO @many figure these variables out so they're easily customized (similar pattern in a lot of places) */
 :where(input[type='range']:not(.unstyled)) {
 	--thumb_size: var(--space_xl);
-	--thumb_background_color: var(--text_color_3);
+	--thumb_background_color: var(--text_70);
 	cursor: pointer;
 }
 :where(input[type='range']:not(.unstyled):hover:not(:disabled)) {
-	--thumb_background_color: var(--color_a_5);
+	--thumb_background_color: var(--color_a_50);
 }
 :where(input[type='range']:not(.unstyled):disabled:active) {
-	--thumb_background_color: var(--color_c_5);
+	--thumb_background_color: var(--color_c_50);
 }
 :where(input[type='range']:not(.unstyled))::-webkit-slider-thumb {
 	appearance: none;
@@ -434,8 +434,8 @@ so for consistent visuals we opt to include no active state */
 see https://caniuse.com/css-has
  */
 :where(input:not(.unstyled):checked:not(:disabled)) {
-	--text_color: var(--text_active);
-	--border_color: var(--color_a_5);
+	--text_color: var(--color_a_50);
+	--border_color: var(--color_a_50);
 }
 :where(input[type='radio']:not(.unstyled):checked) {
 	cursor: default;
@@ -481,11 +481,11 @@ for disabled colors without needing a wrapper .disabled class */
 }
 :where(label.selected:not(.unstyled)) {
 	cursor: default;
-	--text_color: var(--text_active);
+	--text_color: var(--color_a_50);
 }
 :where(label.disabled:not(.unstyled)) {
 	cursor: default;
-	--text_color: var(--text_color_disabled);
+	--text_color: var(--text_disabled);
 }
 :where(label.row:not(.unstyled)) {
 	justify-content: flex-start;
@@ -506,15 +506,15 @@ TODO think through these patterns to get somewhere consistent
 */
 :where(button:not(.unstyled)) {
 	--min_height: var(--input_height);
-	--text_color: var(--text_color_3);
+	--text_color: var(--text_70);
 	--button_text_color: var(--text_color);
-	--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);
-	--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);
-	--button_fill_active: color-mix(in hsl, var(--fill) 24%, transparent);
+	--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);
+	--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);
+	--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);
 	--button_border_color: var(--border_color);
 	/* TODO give real values, 90%? */
-	--button_border_color_hover: color-mix(in hsl, var(--border_color) 90%, var(--fg_10));
-	--button_border_color_active: color-mix(in hsl, var(--border_color) 80%, var(--fg_10));
+	--button_border_color_hover: color-mix(in hsl, var(--border_color) 90%, var(--shade_max));
+	--button_border_color_active: color-mix(in hsl, var(--border_color) 80%, var(--shade_max));
 	color: var(--button_text_color);
 	background-color: var(--button_fill);
 	cursor: pointer;
@@ -538,7 +538,7 @@ TODO think through these patterns to get somewhere consistent
 }
 
 :where(:is(button, input, textarea, select):not(.unstyled):focus) {
-	--border_color: var(--color_a_5);
+	--border_color: var(--color_a_50);
 	--outline_width: var(--outline_width_focus);
 }
 
@@ -546,64 +546,64 @@ TODO think through these patterns to get somewhere consistent
 /* TODO hover variants with brighter borders? maybe use a colorless border for that? */
 
 :where(button:not(.unstyled).color_a) {
-	--text_color: var(--color_a_5);
-	--fill: var(--fill_a);
-	--border_color: var(--border_color_a);
-	--outline_color: var(--border_color_a);
+	--text_color: var(--color_a_50);
+	--fill: var(--color_a_40);
+	--border_color: var(--color_a_50);
+	--outline_color: var(--color_a_50);
 }
 :where(button:not(.unstyled).color_b) {
-	--text_color: var(--color_b_5);
-	--fill: var(--fill_b);
-	--border_color: var(--border_color_b);
-	--outline_color: var(--border_color_b);
+	--text_color: var(--color_b_50);
+	--fill: var(--color_b_40);
+	--border_color: var(--color_b_50);
+	--outline_color: var(--color_b_50);
 }
 :where(button:not(.unstyled).color_c) {
-	--text_color: var(--color_c_5);
-	--fill: var(--fill_c);
-	--border_color: var(--border_color_c);
-	--outline_color: var(--border_color_c);
+	--text_color: var(--color_c_50);
+	--fill: var(--color_c_40);
+	--border_color: var(--color_c_50);
+	--outline_color: var(--color_c_50);
 }
 :where(button:not(.unstyled).color_d) {
-	--text_color: var(--color_d_5);
-	--fill: var(--fill_d);
-	--border_color: var(--border_color_d);
-	--outline_color: var(--border_color_d);
+	--text_color: var(--color_d_50);
+	--fill: var(--color_d_40);
+	--border_color: var(--color_d_50);
+	--outline_color: var(--color_d_50);
 }
 :where(button:not(.unstyled).color_e) {
-	--text_color: var(--color_e_5);
-	--fill: var(--fill_e);
-	--border_color: var(--border_color_e);
-	--outline_color: var(--border_color_e);
+	--text_color: var(--color_e_50);
+	--fill: var(--color_e_40);
+	--border_color: var(--color_e_50);
+	--outline_color: var(--color_e_50);
 }
 :where(button:not(.unstyled).color_f) {
-	--text_color: var(--color_f_5);
-	--fill: var(--fill_f);
-	--border_color: var(--border_color_f);
-	--outline_color: var(--border_color_f);
+	--text_color: var(--color_f_50);
+	--fill: var(--color_f_40);
+	--border_color: var(--color_f_50);
+	--outline_color: var(--color_f_50);
 }
 :where(button:not(.unstyled).color_g) {
-	--text_color: var(--color_g_5);
-	--fill: var(--fill_g);
-	--border_color: var(--border_color_g);
-	--outline_color: var(--border_color_g);
+	--text_color: var(--color_g_50);
+	--fill: var(--color_g_40);
+	--border_color: var(--color_g_50);
+	--outline_color: var(--color_g_50);
 }
 :where(button:not(.unstyled).color_h) {
-	--text_color: var(--color_h_5);
-	--fill: var(--fill_h);
-	--border_color: var(--border_color_h);
-	--outline_color: var(--border_color_h);
+	--text_color: var(--color_h_50);
+	--fill: var(--color_h_40);
+	--border_color: var(--color_h_50);
+	--outline_color: var(--color_h_50);
 }
 :where(button:not(.unstyled).color_i) {
-	--text_color: var(--color_i_5);
-	--fill: var(--fill_i);
-	--border_color: var(--border_color_i);
-	--outline_color: var(--border_color_i);
+	--text_color: var(--color_i_50);
+	--fill: var(--color_i_40);
+	--border_color: var(--color_i_50);
+	--outline_color: var(--color_i_50);
 }
 :where(button:not(.unstyled).color_j) {
-	--text_color: var(--color_j_5);
-	--fill: var(--fill_j);
-	--border_color: var(--border_color_j);
-	--outline_color: var(--border_color_j);
+	--text_color: var(--color_j_50);
+	--fill: var(--color_j_40);
+	--border_color: var(--color_j_50);
+	--outline_color: var(--color_j_50);
 }
 
 /* TODO try to rearrange some of this to go after the colored variants */
@@ -617,10 +617,10 @@ TODO think through these patterns to get somewhere consistent
 	outline: none;
 }
 :where(button:not(.unstyled).selected) {
-	--button_text_color: var(--text_color_9);
-	--button_fill: var(--fill);
-	--button_fill_hover: var(--fill);
-	--button_fill_active: var(--fill);
+	--button_text_color: var(--text_10);
+	--button_fill: var(--shade_50);
+	--button_fill_hover: var(--shade_50);
+	--button_fill_active: var(--shade_50);
 	--button_border_color: var(--border_color);
 }
 :where(button:not(.unstyled).selected:not(.deselectable)) {
@@ -637,10 +637,10 @@ TODO think through these patterns to get somewhere consistent
 :where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
 	/* TODO or set a hover var? make consistent with fill */
 	--button_border_color: var(--button_border_color_hover);
-	--button_text_color: color-mix(in hsl, var(--text_color) 90%, var(--fg_10));
+	--button_text_color: color-mix(in hsl, var(--text_color) 90%, var(--shade_max));
 }
 :where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
-	--button_text_color: var(--text_color_10);
+	--button_text_color: var(--text_05);
 }
 :where(button:not(.unstyled):not(:disabled):active) {
 	--button_fill: var(--button_fill_active);
@@ -652,13 +652,13 @@ TODO think through these patterns to get somewhere consistent
 	:is(input, textarea, select, button):not(.unstyled):disabled:active,
 	label:not(.unstyled).disabled:active
 ) {
-	--text_color: var(--color_c_5);
-	--border_color: var(--color_c_5);
+	--text_color: var(--color_c_50);
+	--border_color: var(--color_c_50);
 }
 /* TODO is there a cleaner way to override these through vars? */
 :where(button:not(.unstyled).selected:disabled:active) {
-	--text_color: var(--text_color_9);
-	--fill: var(--fill_c);
+	--text_color: var(--text_10);
+	--fill: var(--color_c_40);
 }
 :where(button:not(.unstyled):not(.selected):disabled:active) {
 	--fill: transparent;
@@ -692,10 +692,10 @@ TODO think through these patterns to get somewhere consistent
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
 :where(summary:hover:not(.unstyled)) {
-	background-color: var(--fg_1);
+	background-color: var(--shade_10);
 }
 :where(summary:active:not(.unstyled)) {
-	background-color: var(--fg_2);
+	background-color: var(--shade_20);
 }
 :where(details[open] summary:not(.unstyled)) {
 	margin-bottom: var(--space_sm);
@@ -714,10 +714,10 @@ TODO think through these patterns to get somewhere consistent
 	padding: var(--space_xs3) var(--space_sm);
 }
 :where(tr) {
-	border-bottom: 1px solid var(--border_color_1);
+	border-bottom: 1px solid var(--shade_10);
 }
 :where(tr:hover) {
-	background-color: var(--fg_1);
+	background-color: var(--shade_10);
 }
 
 :where(abbr[title]) {

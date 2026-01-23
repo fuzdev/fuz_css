@@ -40,7 +40,7 @@ if (!SKIP) {
 const EXPECTED_CLASSES = [
 	// From App - Class Types section (Token classes)
 	'p_md', // also used in main wrapper
-	'bg_d_2',
+	'bg_d_20',
 	'pl_xl5',
 	'font_size_lg',
 	'shadow_sm',
@@ -49,7 +49,7 @@ const EXPECTED_CLASSES = [
 	'ellipsis',
 	// From App - Class Types section (Literal classes)
 	'opacity:60%',
-	'color:var(--color_j_5)',
+	'color:var(--color_j_50)',
 	'box-shadow:0~4px~8px~rgb(0,0,0,0.2)',
 	// From example_class_utilities.ts - Naming patterns (mb_* + ml_* for plurals)
 	'mb_xs5', // demoClass
