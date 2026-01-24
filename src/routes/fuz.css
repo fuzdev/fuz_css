@@ -183,23 +183,47 @@ a.chip {
 .text_50 {
 	color: var(--text_50);
 }
+.text_70 {
+	color: var(--text_70);
+}
 .shade_00 {
 	background-color: var(--shade_00);
 }
 .shade_10 {
 	background-color: var(--shade_10);
 }
-.shade_30 {
-	background-color: var(--shade_30);
-}
-.shade_70 {
-	background-color: var(--shade_70);
+.shade_100 {
+	background-color: var(--shade_100);
 }
 .color_a_50 {
 	color: var(--color_a_50);
 }
+.color_b_50 {
+	color: var(--color_b_50);
+}
+.color_c_50 {
+	color: var(--color_c_50);
+}
+.color_d_50 {
+	color: var(--color_d_50);
+}
+.color_e_50 {
+	color: var(--color_e_50);
+}
+.color_f_50 {
+	color: var(--color_f_50);
+}
 .color_g_50 {
 	color: var(--color_g_50);
+}
+.color_h_50 {
+	color: var(--color_h_50);
+}
+.darken_3 {
+	background-color: var(--darken_3);
+}
+.lighten_3 {
+	background-color: var(--lighten_3);
 }
 .outline_color_30 {
 	outline-color: var(--shade_30);
@@ -351,15 +375,6 @@ a.chip {
 	box-shadow: var(--shadow_inset_bottom_xl)
 		color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_5)), transparent);
 }
-.shadow_color_highlight {
-	--shadow_color: var(--shadow_color_highlight);
-}
-.shadow_color_glow {
-	--shadow_color: var(--shadow_color_glow);
-}
-.shadow_color_shroud {
-	--shadow_color: var(--shadow_color_shroud);
-}
 .shadow_alpha_1 {
 	--shadow_alpha: var(--shadow_alpha_1);
 }
@@ -374,6 +389,36 @@ a.chip {
 }
 .shadow_alpha_5 {
 	--shadow_alpha: var(--shadow_alpha_5);
+}
+.shadow_color_a_60 {
+	--shadow_color: var(--color_a_60);
+}
+.shadow_color_b_60 {
+	--shadow_color: var(--color_b_60);
+}
+.shadow_color_c_60 {
+	--shadow_color: var(--color_c_60);
+}
+.shadow_color_d_60 {
+	--shadow_color: var(--color_d_60);
+}
+.shadow_color_e_60 {
+	--shadow_color: var(--color_e_60);
+}
+.shadow_color_f_60 {
+	--shadow_color: var(--color_f_60);
+}
+.shadow_color_g_60 {
+	--shadow_color: var(--color_g_60);
+}
+.shadow_color_h_60 {
+	--shadow_color: var(--color_h_60);
+}
+.shadow_color_i_60 {
+	--shadow_color: var(--color_i_60);
+}
+.shadow_color_j_60 {
+	--shadow_color: var(--color_j_60);
 }
 .width_atmost_xs {
 	width: 100%;

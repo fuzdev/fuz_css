@@ -1,8 +1,11 @@
 import {test, assert} from 'vitest';
 
-import {default_variables} from '$lib/variables.js';
+import {default_variables, absolute_color_variables} from '$lib/variables.js';
 import * as exported_variables from '$lib/variables.js';
 import {is_style_variable_name, type StyleVariable} from '$lib/variable.js';
+
+// Create a set of absolute color variable names for quick lookup (these are dynamically generated)
+const absolute_color_variable_names = new Set(absolute_color_variables.map((v) => v.name));
 
 test('variable names are valid', () => {
 	for (const v of default_variables) {
@@ -20,6 +23,8 @@ test('variables have no duplicates', () => {
 
 test('variable names match their identifiers', () => {
 	for (const v of default_variables) {
+		// Skip dynamically generated absolute color variables (they're not individually exported)
+		if (absolute_color_variable_names.has(v.name)) continue;
 		assert.ok(
 			v.name in exported_variables,
 			`default variable with name "${v.name}" has no matching exported identifier`,

@@ -320,7 +320,7 @@
 						"kind": "variable",
 						"doc_comment": "All built-in CSS class definitions (token classes + composites).",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 46,
+						"source_line": 48,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
@@ -3089,43 +3089,67 @@
 						"name": "IntensityVariant",
 						"kind": "type",
 						"source_line": 136,
-						"type_signature": "\"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\""
+						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "intensity_variants",
 						"kind": "variable",
 						"source_line": 137,
-						"type_signature": "readonly [\"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\"]"
+						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
 					},
 					{
 						"name": "BorderWidthVariant",
 						"kind": "type",
-						"source_line": 151,
+						"source_line": 153,
 						"type_signature": "4 | 3 | 5 | 7 | 6 | 1 | 2 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",
 						"kind": "variable",
-						"source_line": 152,
+						"source_line": 154,
 						"type_signature": "readonly [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+					},
+					{
+						"name": "DarkenLightenVariant",
+						"kind": "type",
+						"source_line": 156,
+						"type_signature": "4 | 3 | 5 | 7 | 6 | 1 | 2 | 8 | 9"
+					},
+					{
+						"name": "darken_lighten_variants",
+						"kind": "variable",
+						"source_line": 157,
+						"type_signature": "readonly [1, 2, 3, 4, 5, 6, 7, 8, 9]"
+					},
+					{
+						"name": "ColorSchemeVariant",
+						"kind": "type",
+						"source_line": 159,
+						"type_signature": "\"dark\" | \"light\""
+					},
+					{
+						"name": "color_scheme_variants",
+						"kind": "variable",
+						"source_line": 160,
+						"type_signature": "readonly [\"light\", \"dark\"]"
 					},
 					{
 						"name": "OutlineWidthVariant",
 						"kind": "type",
-						"source_line": 154,
+						"source_line": 162,
 						"type_signature": "\"focus\" | \"active\""
 					},
 					{
 						"name": "outline_width_variants",
 						"kind": "variable",
-						"source_line": 155,
+						"source_line": 163,
 						"type_signature": "readonly [\"focus\", \"active\"]"
 					},
 					{
 						"name": "Z_INDEX_MAX",
 						"kind": "variable",
 						"doc_comment": "Maximum value for CSS z-index property (32-bit signed integer max).",
-						"source_line": 160,
+						"source_line": 168,
 						"type_signature": "2147483647"
 					}
 				],
@@ -3253,1720 +3277,2111 @@
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_05",
+						"name": "color_a_00",
 						"kind": "variable",
 						"source_line": 34,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_10",
+						"name": "color_a_05",
 						"kind": "variable",
 						"source_line": 39,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_20",
+						"name": "color_a_10",
 						"kind": "variable",
-						"source_line": 43,
+						"source_line": 44,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_30",
+						"name": "color_a_20",
 						"kind": "variable",
 						"source_line": 48,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_40",
+						"name": "color_a_30",
 						"kind": "variable",
 						"source_line": 53,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_50",
+						"name": "color_a_40",
 						"kind": "variable",
 						"source_line": 58,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_60",
+						"name": "color_a_50",
 						"kind": "variable",
 						"source_line": 63,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_70",
+						"name": "color_a_60",
 						"kind": "variable",
 						"source_line": 68,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_80",
+						"name": "color_a_70",
 						"kind": "variable",
 						"source_line": 73,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_90",
+						"name": "color_a_80",
 						"kind": "variable",
 						"source_line": 78,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_a_95",
+						"name": "color_a_90",
 						"kind": "variable",
-						"source_line": 82,
+						"source_line": 83,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_05",
+						"name": "color_a_95",
 						"kind": "variable",
 						"source_line": 87,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_10",
+						"name": "color_a_100",
 						"kind": "variable",
 						"source_line": 92,
 						"type_signature": "StyleVariable"
 					},
 					{
+						"name": "color_b_00",
+						"kind": "variable",
+						"source_line": 97,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_b_05",
+						"kind": "variable",
+						"source_line": 102,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_b_10",
+						"kind": "variable",
+						"source_line": 107,
+						"type_signature": "StyleVariable"
+					},
+					{
 						"name": "color_b_20",
-						"kind": "variable",
-						"source_line": 96,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "color_b_30",
-						"kind": "variable",
-						"source_line": 101,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "color_b_40",
-						"kind": "variable",
-						"source_line": 106,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "color_b_50",
 						"kind": "variable",
 						"source_line": 111,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_60",
+						"name": "color_b_30",
 						"kind": "variable",
 						"source_line": 116,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_70",
+						"name": "color_b_40",
 						"kind": "variable",
 						"source_line": 121,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_80",
+						"name": "color_b_50",
 						"kind": "variable",
 						"source_line": 126,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "color_b_90",
+						"name": "color_b_60",
 						"kind": "variable",
 						"source_line": 131,
 						"type_signature": "StyleVariable"
 					},
 					{
+						"name": "color_b_70",
+						"kind": "variable",
+						"source_line": 136,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_b_80",
+						"kind": "variable",
+						"source_line": 141,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_b_90",
+						"kind": "variable",
+						"source_line": 146,
+						"type_signature": "StyleVariable"
+					},
+					{
 						"name": "color_b_95",
 						"kind": "variable",
-						"source_line": 135,
+						"source_line": 150,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_b_100",
+						"kind": "variable",
+						"source_line": 155,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_c_00",
+						"kind": "variable",
+						"source_line": 160,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_05",
 						"kind": "variable",
-						"source_line": 140,
+						"source_line": 165,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_10",
 						"kind": "variable",
-						"source_line": 145,
+						"source_line": 170,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_20",
 						"kind": "variable",
-						"source_line": 149,
+						"source_line": 174,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_30",
 						"kind": "variable",
-						"source_line": 154,
+						"source_line": 179,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_40",
 						"kind": "variable",
-						"source_line": 159,
+						"source_line": 184,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_50",
 						"kind": "variable",
-						"source_line": 164,
+						"source_line": 189,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_60",
 						"kind": "variable",
-						"source_line": 169,
+						"source_line": 194,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_70",
 						"kind": "variable",
-						"source_line": 174,
+						"source_line": 199,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_80",
 						"kind": "variable",
-						"source_line": 179,
+						"source_line": 204,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_90",
 						"kind": "variable",
-						"source_line": 184,
+						"source_line": 209,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_c_95",
 						"kind": "variable",
-						"source_line": 188,
+						"source_line": 213,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_c_100",
+						"kind": "variable",
+						"source_line": 218,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_d_00",
+						"kind": "variable",
+						"source_line": 223,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_05",
 						"kind": "variable",
-						"source_line": 193,
+						"source_line": 228,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_10",
 						"kind": "variable",
-						"source_line": 198,
+						"source_line": 233,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_20",
 						"kind": "variable",
-						"source_line": 202,
+						"source_line": 237,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_30",
 						"kind": "variable",
-						"source_line": 207,
+						"source_line": 242,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_40",
 						"kind": "variable",
-						"source_line": 212,
+						"source_line": 247,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_50",
 						"kind": "variable",
-						"source_line": 217,
+						"source_line": 252,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_60",
 						"kind": "variable",
-						"source_line": 222,
+						"source_line": 257,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_70",
 						"kind": "variable",
-						"source_line": 227,
+						"source_line": 262,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_80",
 						"kind": "variable",
-						"source_line": 232,
+						"source_line": 267,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_90",
 						"kind": "variable",
-						"source_line": 237,
+						"source_line": 272,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_d_95",
 						"kind": "variable",
-						"source_line": 241,
+						"source_line": 276,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_d_100",
+						"kind": "variable",
+						"source_line": 281,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_e_00",
+						"kind": "variable",
+						"source_line": 286,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_05",
 						"kind": "variable",
-						"source_line": 246,
+						"source_line": 291,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_10",
 						"kind": "variable",
-						"source_line": 251,
+						"source_line": 296,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_20",
 						"kind": "variable",
-						"source_line": 255,
+						"source_line": 300,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_30",
 						"kind": "variable",
-						"source_line": 260,
+						"source_line": 305,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_40",
 						"kind": "variable",
-						"source_line": 265,
+						"source_line": 310,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_50",
 						"kind": "variable",
-						"source_line": 270,
+						"source_line": 315,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_60",
 						"kind": "variable",
-						"source_line": 275,
+						"source_line": 320,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_70",
 						"kind": "variable",
-						"source_line": 280,
+						"source_line": 325,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_80",
 						"kind": "variable",
-						"source_line": 285,
+						"source_line": 330,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_90",
 						"kind": "variable",
-						"source_line": 290,
+						"source_line": 335,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_e_95",
 						"kind": "variable",
-						"source_line": 294,
+						"source_line": 339,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_e_100",
+						"kind": "variable",
+						"source_line": 344,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_f_00",
+						"kind": "variable",
+						"source_line": 349,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_05",
 						"kind": "variable",
-						"source_line": 299,
+						"source_line": 354,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_10",
 						"kind": "variable",
-						"source_line": 304,
+						"source_line": 359,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_20",
 						"kind": "variable",
-						"source_line": 308,
+						"source_line": 363,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_30",
 						"kind": "variable",
-						"source_line": 313,
+						"source_line": 368,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_40",
 						"kind": "variable",
-						"source_line": 318,
+						"source_line": 373,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_50",
 						"kind": "variable",
-						"source_line": 323,
+						"source_line": 378,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_60",
 						"kind": "variable",
-						"source_line": 328,
+						"source_line": 383,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_70",
 						"kind": "variable",
-						"source_line": 333,
+						"source_line": 388,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_80",
 						"kind": "variable",
-						"source_line": 338,
+						"source_line": 393,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_90",
 						"kind": "variable",
-						"source_line": 343,
+						"source_line": 398,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_f_95",
 						"kind": "variable",
-						"source_line": 347,
+						"source_line": 402,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_f_100",
+						"kind": "variable",
+						"source_line": 407,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_g_00",
+						"kind": "variable",
+						"source_line": 412,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_05",
 						"kind": "variable",
-						"source_line": 352,
+						"source_line": 417,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_10",
 						"kind": "variable",
-						"source_line": 357,
+						"source_line": 422,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_20",
 						"kind": "variable",
-						"source_line": 361,
+						"source_line": 426,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_30",
 						"kind": "variable",
-						"source_line": 366,
+						"source_line": 431,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_40",
 						"kind": "variable",
-						"source_line": 371,
+						"source_line": 436,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_50",
 						"kind": "variable",
-						"source_line": 376,
+						"source_line": 441,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_60",
 						"kind": "variable",
-						"source_line": 381,
+						"source_line": 446,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_70",
 						"kind": "variable",
-						"source_line": 386,
+						"source_line": 451,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_80",
 						"kind": "variable",
-						"source_line": 391,
+						"source_line": 456,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_90",
 						"kind": "variable",
-						"source_line": 396,
+						"source_line": 461,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_g_95",
 						"kind": "variable",
-						"source_line": 400,
+						"source_line": 465,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_g_100",
+						"kind": "variable",
+						"source_line": 470,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_h_00",
+						"kind": "variable",
+						"source_line": 475,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_05",
 						"kind": "variable",
-						"source_line": 405,
+						"source_line": 480,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_10",
 						"kind": "variable",
-						"source_line": 410,
+						"source_line": 485,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_20",
 						"kind": "variable",
-						"source_line": 414,
+						"source_line": 489,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_30",
 						"kind": "variable",
-						"source_line": 419,
+						"source_line": 494,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_40",
 						"kind": "variable",
-						"source_line": 424,
+						"source_line": 499,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_50",
 						"kind": "variable",
-						"source_line": 429,
+						"source_line": 504,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_60",
 						"kind": "variable",
-						"source_line": 434,
+						"source_line": 509,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_70",
 						"kind": "variable",
-						"source_line": 439,
+						"source_line": 514,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_80",
 						"kind": "variable",
-						"source_line": 444,
+						"source_line": 519,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_90",
 						"kind": "variable",
-						"source_line": 449,
+						"source_line": 524,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_h_95",
 						"kind": "variable",
-						"source_line": 453,
+						"source_line": 528,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_h_100",
+						"kind": "variable",
+						"source_line": 533,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_i_00",
+						"kind": "variable",
+						"source_line": 538,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_05",
 						"kind": "variable",
-						"source_line": 458,
+						"source_line": 543,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_10",
 						"kind": "variable",
-						"source_line": 463,
+						"source_line": 548,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_20",
 						"kind": "variable",
-						"source_line": 467,
+						"source_line": 552,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_30",
 						"kind": "variable",
-						"source_line": 472,
+						"source_line": 557,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_40",
 						"kind": "variable",
-						"source_line": 477,
+						"source_line": 562,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_50",
 						"kind": "variable",
-						"source_line": 482,
+						"source_line": 567,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_60",
 						"kind": "variable",
-						"source_line": 487,
+						"source_line": 572,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_70",
 						"kind": "variable",
-						"source_line": 492,
+						"source_line": 577,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_80",
 						"kind": "variable",
-						"source_line": 497,
+						"source_line": 582,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_90",
 						"kind": "variable",
-						"source_line": 502,
+						"source_line": 587,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_i_95",
 						"kind": "variable",
-						"source_line": 506,
+						"source_line": 591,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_i_100",
+						"kind": "variable",
+						"source_line": 596,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "color_j_00",
+						"kind": "variable",
+						"source_line": 601,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_05",
 						"kind": "variable",
-						"source_line": 511,
+						"source_line": 606,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_10",
 						"kind": "variable",
-						"source_line": 516,
+						"source_line": 611,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_20",
 						"kind": "variable",
-						"source_line": 520,
+						"source_line": 615,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_30",
 						"kind": "variable",
-						"source_line": 525,
+						"source_line": 620,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_40",
 						"kind": "variable",
-						"source_line": 530,
+						"source_line": 625,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_50",
 						"kind": "variable",
-						"source_line": 535,
+						"source_line": 630,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_60",
 						"kind": "variable",
-						"source_line": 540,
+						"source_line": 635,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_70",
 						"kind": "variable",
-						"source_line": 545,
+						"source_line": 640,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_80",
 						"kind": "variable",
-						"source_line": 550,
+						"source_line": 645,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_90",
 						"kind": "variable",
-						"source_line": 555,
+						"source_line": 650,
 						"type_signature": "StyleVariable"
 					},
 					{
 						"name": "color_j_95",
 						"kind": "variable",
-						"source_line": 559,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "tint_hue",
-						"kind": "variable",
-						"source_line": 571,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "tint_saturation",
-						"kind": "variable",
-						"source_line": 572,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_min",
-						"kind": "variable",
-						"source_line": 592,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_max",
-						"kind": "variable",
-						"source_line": 597,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_00",
-						"kind": "variable",
-						"source_line": 604,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_05",
-						"kind": "variable",
-						"source_line": 609,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_10",
-						"kind": "variable",
-						"source_line": 614,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_20",
-						"kind": "variable",
-						"source_line": 619,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_30",
-						"kind": "variable",
-						"source_line": 624,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_40",
-						"kind": "variable",
-						"source_line": 629,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_50",
-						"kind": "variable",
-						"source_line": 634,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_60",
-						"kind": "variable",
-						"source_line": 639,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_70",
-						"kind": "variable",
-						"source_line": 644,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_80",
-						"kind": "variable",
-						"source_line": 649,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shade_90",
-						"kind": "variable",
 						"source_line": 654,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shade_95",
+						"name": "color_j_100",
 						"kind": "variable",
 						"source_line": 659,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shade_100",
+						"name": "tint_hue",
 						"kind": "variable",
-						"source_line": 664,
+						"source_line": 671,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_min",
+						"name": "tint_saturation",
 						"kind": "variable",
-						"source_line": 678,
+						"source_line": 672,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_max",
+						"name": "shade_min",
 						"kind": "variable",
-						"source_line": 683,
+						"source_line": 692,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_color",
+						"name": "shade_max",
 						"kind": "variable",
-						"source_line": 689,
+						"source_line": 697,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_00",
+						"name": "shade_00",
 						"kind": "variable",
-						"source_line": 690,
+						"source_line": 704,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_05",
+						"name": "shade_05",
 						"kind": "variable",
-						"source_line": 695,
+						"source_line": 709,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_10",
+						"name": "shade_10",
 						"kind": "variable",
-						"source_line": 700,
+						"source_line": 714,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_20",
+						"name": "shade_20",
 						"kind": "variable",
-						"source_line": 705,
+						"source_line": 719,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_30",
-						"kind": "variable",
-						"source_line": 710,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "text_40",
-						"kind": "variable",
-						"source_line": 715,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "text_50",
-						"kind": "variable",
-						"source_line": 720,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "text_60",
+						"name": "shade_30",
 						"kind": "variable",
 						"source_line": 724,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_70",
+						"name": "shade_40",
 						"kind": "variable",
 						"source_line": 729,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_80",
+						"name": "shade_50",
 						"kind": "variable",
 						"source_line": 734,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_90",
+						"name": "shade_60",
 						"kind": "variable",
 						"source_line": 739,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_95",
+						"name": "shade_70",
 						"kind": "variable",
 						"source_line": 744,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_100",
+						"name": "shade_80",
 						"kind": "variable",
 						"source_line": 749,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_disabled",
+						"name": "shade_90",
 						"kind": "variable",
 						"source_line": 754,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "font_family_sans",
+						"name": "shade_95",
 						"kind": "variable",
-						"source_line": 760,
+						"source_line": 759,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "font_family_serif",
+						"name": "shade_100",
 						"kind": "variable",
-						"source_line": 766,
+						"source_line": 764,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "font_family_mono",
-						"kind": "variable",
-						"source_line": 771,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xs",
-						"kind": "variable",
-						"source_line": 777,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_sm",
-						"kind": "variable",
-						"source_line": 778,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_md",
-						"kind": "variable",
-						"source_line": 779,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_lg",
-						"kind": "variable",
-						"source_line": 780,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl",
+						"name": "shade_00_light",
 						"kind": "variable",
 						"source_line": 781,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "font_size_xl2",
-						"kind": "variable",
-						"source_line": 782,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl3",
-						"kind": "variable",
-						"source_line": 783,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl4",
-						"kind": "variable",
-						"source_line": 784,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl5",
+						"name": "shade_00_dark",
 						"kind": "variable",
 						"source_line": 785,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "font_size_xl6",
-						"kind": "variable",
-						"source_line": 786,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl7",
-						"kind": "variable",
-						"source_line": 787,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl8",
-						"kind": "variable",
-						"source_line": 788,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "font_size_xl9",
+						"name": "shade_05_light",
 						"kind": "variable",
 						"source_line": 789,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "line_height_xs",
-						"kind": "variable",
-						"source_line": 791,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "line_height_sm",
-						"kind": "variable",
-						"source_line": 792,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "line_height_md",
+						"name": "shade_05_dark",
 						"kind": "variable",
 						"source_line": 793,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "line_height_lg",
+						"name": "shade_10_light",
 						"kind": "variable",
-						"source_line": 794,
+						"source_line": 797,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "line_height_xl",
+						"name": "shade_10_dark",
 						"kind": "variable",
-						"source_line": 795,
+						"source_line": 801,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "link_color",
+						"name": "shade_20_light",
 						"kind": "variable",
-						"source_line": 798,
+						"source_line": 805,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_decoration",
+						"name": "shade_20_dark",
 						"kind": "variable",
-						"source_line": 803,
+						"source_line": 809,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_decoration_hover",
+						"name": "shade_30_light",
 						"kind": "variable",
-						"source_line": 804,
+						"source_line": 813,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "text_decoration_selected",
+						"name": "shade_30_dark",
 						"kind": "variable",
-						"source_line": 808,
+						"source_line": 817,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "link_color_selected",
-						"kind": "variable",
-						"source_line": 812,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xs5",
-						"kind": "variable",
-						"source_line": 818,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xs4",
-						"kind": "variable",
-						"source_line": 819,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xs3",
-						"kind": "variable",
-						"source_line": 820,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xs2",
+						"name": "shade_40_light",
 						"kind": "variable",
 						"source_line": 821,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "space_xs",
-						"kind": "variable",
-						"source_line": 822,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_sm",
-						"kind": "variable",
-						"source_line": 823,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_md",
-						"kind": "variable",
-						"source_line": 824,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_lg",
+						"name": "shade_40_dark",
 						"kind": "variable",
 						"source_line": 825,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "space_xl",
-						"kind": "variable",
-						"source_line": 826,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl2",
-						"kind": "variable",
-						"source_line": 827,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl3",
-						"kind": "variable",
-						"source_line": 828,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl4",
+						"name": "shade_50_light",
 						"kind": "variable",
 						"source_line": 829,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "space_xl5",
-						"kind": "variable",
-						"source_line": 830,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl6",
-						"kind": "variable",
-						"source_line": 831,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl7",
-						"kind": "variable",
-						"source_line": 832,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl8",
+						"name": "shade_50_dark",
 						"kind": "variable",
 						"source_line": 833,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "space_xl9",
-						"kind": "variable",
-						"source_line": 834,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl10",
-						"kind": "variable",
-						"source_line": 835,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl11",
-						"kind": "variable",
-						"source_line": 836,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl12",
+						"name": "shade_60_light",
 						"kind": "variable",
 						"source_line": 837,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "space_xl13",
-						"kind": "variable",
-						"source_line": 838,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl14",
-						"kind": "variable",
-						"source_line": 839,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "space_xl15",
-						"kind": "variable",
-						"source_line": 840,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "distance_xs",
+						"name": "shade_60_dark",
 						"kind": "variable",
 						"source_line": 841,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "distance_sm",
-						"kind": "variable",
-						"source_line": 842,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "distance_md",
-						"kind": "variable",
-						"source_line": 843,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "distance_lg",
-						"kind": "variable",
-						"source_line": 844,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "distance_xl",
+						"name": "shade_70_light",
 						"kind": "variable",
 						"source_line": 845,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_color",
+						"name": "shade_70_dark",
 						"kind": "variable",
-						"source_line": 848,
+						"source_line": 849,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_style",
+						"name": "shade_80_light",
 						"kind": "variable",
-						"source_line": 852,
+						"source_line": 853,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_width",
+						"name": "shade_80_dark",
 						"kind": "variable",
-						"source_line": 856,
+						"source_line": 857,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_width_1",
-						"kind": "variable",
-						"source_line": 860,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_2",
+						"name": "shade_90_light",
 						"kind": "variable",
 						"source_line": 861,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_width_3",
-						"kind": "variable",
-						"source_line": 862,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_4",
-						"kind": "variable",
-						"source_line": 863,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_5",
-						"kind": "variable",
-						"source_line": 864,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_6",
+						"name": "shade_90_dark",
 						"kind": "variable",
 						"source_line": 865,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_width_7",
-						"kind": "variable",
-						"source_line": 866,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_8",
-						"kind": "variable",
-						"source_line": 867,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_width_9",
-						"kind": "variable",
-						"source_line": 868,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "outline_width",
+						"name": "shade_95_light",
 						"kind": "variable",
 						"source_line": 869,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "outline_width_focus",
+						"name": "shade_95_dark",
 						"kind": "variable",
 						"source_line": 873,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "outline_width_active",
+						"name": "shade_100_light",
 						"kind": "variable",
-						"source_line": 878,
+						"source_line": 877,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "outline_style",
+						"name": "shade_100_dark",
 						"kind": "variable",
-						"source_line": 883,
+						"source_line": 881,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "outline_color",
+						"name": "darken_1",
 						"kind": "variable",
-						"source_line": 884,
+						"source_line": 897,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_radius_xs3",
+						"name": "darken_2",
 						"kind": "variable",
-						"source_line": 890,
+						"source_line": 898,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "border_radius_xs2",
-						"kind": "variable",
-						"source_line": 891,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_radius_xs",
-						"kind": "variable",
-						"source_line": 892,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_radius_sm",
-						"kind": "variable",
-						"source_line": 893,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_radius_md",
-						"kind": "variable",
-						"source_line": 894,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_radius_lg",
-						"kind": "variable",
-						"source_line": 895,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "border_radius_xl",
-						"kind": "variable",
-						"source_line": 896,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "button_shadow",
+						"name": "darken_3",
 						"kind": "variable",
 						"source_line": 899,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "button_shadow_hover",
+						"name": "darken_4",
+						"kind": "variable",
+						"source_line": 900,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "darken_5",
+						"kind": "variable",
+						"source_line": 901,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "darken_6",
+						"kind": "variable",
+						"source_line": 902,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "darken_7",
+						"kind": "variable",
+						"source_line": 903,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "darken_8",
+						"kind": "variable",
+						"source_line": 904,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "darken_9",
 						"kind": "variable",
 						"source_line": 905,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "button_shadow_active",
+						"name": "lighten_1",
+						"kind": "variable",
+						"source_line": 906,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "lighten_2",
+						"kind": "variable",
+						"source_line": 907,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "lighten_3",
+						"kind": "variable",
+						"source_line": 908,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "lighten_4",
+						"kind": "variable",
+						"source_line": 909,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "lighten_5",
+						"kind": "variable",
+						"source_line": 910,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "lighten_6",
 						"kind": "variable",
 						"source_line": 911,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "input_fill",
+						"name": "lighten_7",
 						"kind": "variable",
-						"source_line": 918,
+						"source_line": 912,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "input_padding_y",
+						"name": "lighten_8",
 						"kind": "variable",
-						"source_line": 919,
+						"source_line": 913,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "input_padding_x",
+						"name": "lighten_9",
 						"kind": "variable",
-						"source_line": 920,
+						"source_line": 914,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "input_width_min",
-						"kind": "variable",
-						"source_line": 921,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "input_height",
-						"kind": "variable",
-						"source_line": 922,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "input_height_sm",
-						"kind": "variable",
-						"source_line": 923,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "input_height_inner",
+						"name": "text_min",
 						"kind": "variable",
 						"source_line": 924,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_xs",
+						"name": "text_max",
 						"kind": "variable",
-						"source_line": 944,
+						"source_line": 929,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_top_xs",
+						"name": "text_color",
 						"kind": "variable",
-						"source_line": 948,
+						"source_line": 935,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_bottom_xs",
+						"name": "text_00",
 						"kind": "variable",
-						"source_line": 952,
+						"source_line": 936,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_xs",
+						"name": "text_05",
+						"kind": "variable",
+						"source_line": 941,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "text_10",
+						"kind": "variable",
+						"source_line": 946,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "text_20",
+						"kind": "variable",
+						"source_line": 951,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "text_30",
 						"kind": "variable",
 						"source_line": 956,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_top_xs",
+						"name": "text_40",
 						"kind": "variable",
-						"source_line": 960,
+						"source_line": 961,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_bottom_xs",
+						"name": "text_50",
 						"kind": "variable",
-						"source_line": 964,
+						"source_line": 966,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_sm",
+						"name": "text_60",
 						"kind": "variable",
-						"source_line": 968,
+						"source_line": 970,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_top_sm",
+						"name": "text_70",
 						"kind": "variable",
-						"source_line": 972,
+						"source_line": 975,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_bottom_sm",
-						"kind": "variable",
-						"source_line": 976,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shadow_inset_sm",
+						"name": "text_80",
 						"kind": "variable",
 						"source_line": 980,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_top_sm",
+						"name": "text_90",
 						"kind": "variable",
-						"source_line": 984,
+						"source_line": 985,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_bottom_sm",
+						"name": "text_95",
 						"kind": "variable",
-						"source_line": 988,
+						"source_line": 990,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_md",
+						"name": "text_100",
 						"kind": "variable",
-						"source_line": 992,
+						"source_line": 995,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_top_md",
-						"kind": "variable",
-						"source_line": 996,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shadow_bottom_md",
+						"name": "text_disabled",
 						"kind": "variable",
 						"source_line": 1000,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_md",
+						"name": "font_family_sans",
 						"kind": "variable",
-						"source_line": 1004,
+						"source_line": 1006,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_top_md",
-						"kind": "variable",
-						"source_line": 1008,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "shadow_inset_bottom_md",
+						"name": "font_family_serif",
 						"kind": "variable",
 						"source_line": 1012,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_lg",
+						"name": "font_family_mono",
 						"kind": "variable",
-						"source_line": 1016,
+						"source_line": 1017,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_top_lg",
+						"name": "font_size_xs",
 						"kind": "variable",
-						"source_line": 1020,
+						"source_line": 1023,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_bottom_lg",
+						"name": "font_size_sm",
 						"kind": "variable",
 						"source_line": 1024,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_lg",
+						"name": "font_size_md",
+						"kind": "variable",
+						"source_line": 1025,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_lg",
+						"kind": "variable",
+						"source_line": 1026,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl",
+						"kind": "variable",
+						"source_line": 1027,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl2",
 						"kind": "variable",
 						"source_line": 1028,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_top_lg",
+						"name": "font_size_xl3",
+						"kind": "variable",
+						"source_line": 1029,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl4",
+						"kind": "variable",
+						"source_line": 1030,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl5",
+						"kind": "variable",
+						"source_line": 1031,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl6",
 						"kind": "variable",
 						"source_line": 1032,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_bottom_lg",
+						"name": "font_size_xl7",
 						"kind": "variable",
-						"source_line": 1036,
+						"source_line": 1033,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_xl",
+						"name": "font_size_xl8",
+						"kind": "variable",
+						"source_line": 1034,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "font_size_xl9",
+						"kind": "variable",
+						"source_line": 1035,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "line_height_xs",
+						"kind": "variable",
+						"source_line": 1037,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "line_height_sm",
+						"kind": "variable",
+						"source_line": 1038,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "line_height_md",
+						"kind": "variable",
+						"source_line": 1039,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "line_height_lg",
 						"kind": "variable",
 						"source_line": 1040,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_top_xl",
+						"name": "line_height_xl",
+						"kind": "variable",
+						"source_line": 1041,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "link_color",
 						"kind": "variable",
 						"source_line": 1044,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_bottom_xl",
+						"name": "text_decoration",
 						"kind": "variable",
-						"source_line": 1048,
+						"source_line": 1049,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_xl",
+						"name": "text_decoration_hover",
 						"kind": "variable",
-						"source_line": 1052,
+						"source_line": 1050,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_top_xl",
+						"name": "text_decoration_selected",
 						"kind": "variable",
-						"source_line": 1056,
+						"source_line": 1054,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_inset_bottom_xl",
+						"name": "link_color_selected",
 						"kind": "variable",
-						"source_line": 1060,
+						"source_line": 1058,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_color",
+						"name": "space_xs5",
+						"kind": "variable",
+						"source_line": 1064,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xs4",
 						"kind": "variable",
 						"source_line": 1065,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_color_highlight",
+						"name": "space_xs3",
+						"kind": "variable",
+						"source_line": 1066,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xs2",
+						"kind": "variable",
+						"source_line": 1067,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xs",
+						"kind": "variable",
+						"source_line": 1068,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_sm",
+						"kind": "variable",
+						"source_line": 1069,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_md",
 						"kind": "variable",
 						"source_line": 1070,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_color_glow",
+						"name": "space_lg",
+						"kind": "variable",
+						"source_line": 1071,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl",
+						"kind": "variable",
+						"source_line": 1072,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl2",
+						"kind": "variable",
+						"source_line": 1073,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl3",
+						"kind": "variable",
+						"source_line": 1074,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl4",
 						"kind": "variable",
 						"source_line": 1075,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_color_shroud",
+						"name": "space_xl5",
+						"kind": "variable",
+						"source_line": 1076,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl6",
+						"kind": "variable",
+						"source_line": 1077,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl7",
+						"kind": "variable",
+						"source_line": 1078,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl8",
+						"kind": "variable",
+						"source_line": 1079,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl9",
 						"kind": "variable",
 						"source_line": 1080,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_alpha_1",
+						"name": "space_xl10",
+						"kind": "variable",
+						"source_line": 1081,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl11",
+						"kind": "variable",
+						"source_line": 1082,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl12",
+						"kind": "variable",
+						"source_line": 1083,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl13",
 						"kind": "variable",
 						"source_line": 1084,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_alpha_2",
+						"name": "space_xl14",
+						"kind": "variable",
+						"source_line": 1085,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "space_xl15",
+						"kind": "variable",
+						"source_line": 1086,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "distance_xs",
+						"kind": "variable",
+						"source_line": 1087,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "distance_sm",
 						"kind": "variable",
 						"source_line": 1088,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_alpha_3",
+						"name": "distance_md",
 						"kind": "variable",
-						"source_line": 1092,
+						"source_line": 1089,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_alpha_4",
+						"name": "distance_lg",
 						"kind": "variable",
-						"source_line": 1096,
+						"source_line": 1090,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_alpha_5",
+						"name": "distance_xl",
 						"kind": "variable",
-						"source_line": 1100,
+						"source_line": 1091,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_xs",
+						"name": "border_color",
+						"kind": "variable",
+						"source_line": 1094,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_style",
+						"kind": "variable",
+						"source_line": 1098,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width",
+						"kind": "variable",
+						"source_line": 1102,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_1",
+						"kind": "variable",
+						"source_line": 1106,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_2",
+						"kind": "variable",
+						"source_line": 1107,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_3",
 						"kind": "variable",
 						"source_line": 1108,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_sm",
+						"name": "border_width_4",
+						"kind": "variable",
+						"source_line": 1109,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_5",
+						"kind": "variable",
+						"source_line": 1110,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_6",
+						"kind": "variable",
+						"source_line": 1111,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_width_7",
 						"kind": "variable",
 						"source_line": 1112,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_md",
+						"name": "border_width_8",
 						"kind": "variable",
-						"source_line": 1116,
+						"source_line": 1113,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_lg",
+						"name": "border_width_9",
 						"kind": "variable",
-						"source_line": 1120,
+						"source_line": 1114,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_xl",
+						"name": "outline_width",
+						"kind": "variable",
+						"source_line": 1115,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "outline_width_focus",
+						"kind": "variable",
+						"source_line": 1119,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "outline_width_active",
 						"kind": "variable",
 						"source_line": 1124,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_xl2",
+						"name": "outline_style",
 						"kind": "variable",
-						"source_line": 1128,
+						"source_line": 1129,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "icon_size_xl3",
+						"name": "outline_color",
 						"kind": "variable",
-						"source_line": 1132,
+						"source_line": 1130,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "duration_1",
+						"name": "border_radius_xs3",
+						"kind": "variable",
+						"source_line": 1136,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_radius_xs2",
+						"kind": "variable",
+						"source_line": 1137,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_radius_xs",
+						"kind": "variable",
+						"source_line": 1138,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_radius_sm",
+						"kind": "variable",
+						"source_line": 1139,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "border_radius_md",
 						"kind": "variable",
 						"source_line": 1140,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "duration_2",
+						"name": "border_radius_lg",
 						"kind": "variable",
 						"source_line": 1141,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "duration_3",
+						"name": "border_radius_xl",
 						"kind": "variable",
 						"source_line": 1142,
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "duration_4",
-						"kind": "variable",
-						"source_line": 1143,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "duration_5",
-						"kind": "variable",
-						"source_line": 1144,
-						"type_signature": "StyleVariable"
-					},
-					{
-						"name": "duration_6",
+						"name": "button_shadow",
 						"kind": "variable",
 						"source_line": 1145,
 						"type_signature": "StyleVariable"
 					},
 					{
+						"name": "button_shadow_hover",
+						"kind": "variable",
+						"source_line": 1151,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "button_shadow_active",
+						"kind": "variable",
+						"source_line": 1157,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_fill",
+						"kind": "variable",
+						"source_line": 1164,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_padding_y",
+						"kind": "variable",
+						"source_line": 1165,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_padding_x",
+						"kind": "variable",
+						"source_line": 1166,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_width_min",
+						"kind": "variable",
+						"source_line": 1167,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_height",
+						"kind": "variable",
+						"source_line": 1168,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_height_sm",
+						"kind": "variable",
+						"source_line": 1169,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "input_height_inner",
+						"kind": "variable",
+						"source_line": 1170,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_xs",
+						"kind": "variable",
+						"source_line": 1190,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_top_xs",
+						"kind": "variable",
+						"source_line": 1194,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_bottom_xs",
+						"kind": "variable",
+						"source_line": 1198,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_xs",
+						"kind": "variable",
+						"source_line": 1202,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_top_xs",
+						"kind": "variable",
+						"source_line": 1206,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_bottom_xs",
+						"kind": "variable",
+						"source_line": 1210,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_sm",
+						"kind": "variable",
+						"source_line": 1214,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_top_sm",
+						"kind": "variable",
+						"source_line": 1218,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_bottom_sm",
+						"kind": "variable",
+						"source_line": 1222,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_sm",
+						"kind": "variable",
+						"source_line": 1226,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_top_sm",
+						"kind": "variable",
+						"source_line": 1230,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_bottom_sm",
+						"kind": "variable",
+						"source_line": 1234,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_md",
+						"kind": "variable",
+						"source_line": 1238,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_top_md",
+						"kind": "variable",
+						"source_line": 1242,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_bottom_md",
+						"kind": "variable",
+						"source_line": 1246,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_md",
+						"kind": "variable",
+						"source_line": 1250,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_top_md",
+						"kind": "variable",
+						"source_line": 1254,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_bottom_md",
+						"kind": "variable",
+						"source_line": 1258,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_lg",
+						"kind": "variable",
+						"source_line": 1262,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_top_lg",
+						"kind": "variable",
+						"source_line": 1266,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_bottom_lg",
+						"kind": "variable",
+						"source_line": 1270,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_lg",
+						"kind": "variable",
+						"source_line": 1274,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_top_lg",
+						"kind": "variable",
+						"source_line": 1278,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_bottom_lg",
+						"kind": "variable",
+						"source_line": 1282,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_xl",
+						"kind": "variable",
+						"source_line": 1286,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_top_xl",
+						"kind": "variable",
+						"source_line": 1290,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_bottom_xl",
+						"kind": "variable",
+						"source_line": 1294,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_xl",
+						"kind": "variable",
+						"source_line": 1298,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_top_xl",
+						"kind": "variable",
+						"source_line": 1302,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_inset_bottom_xl",
+						"kind": "variable",
+						"source_line": 1306,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_color",
+						"kind": "variable",
+						"source_line": 1311,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_color_highlight",
+						"kind": "variable",
+						"source_line": 1316,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_color_glow",
+						"kind": "variable",
+						"source_line": 1321,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_color_shroud",
+						"kind": "variable",
+						"source_line": 1326,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_alpha_1",
+						"kind": "variable",
+						"source_line": 1330,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_alpha_2",
+						"kind": "variable",
+						"source_line": 1334,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_alpha_3",
+						"kind": "variable",
+						"source_line": 1338,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_alpha_4",
+						"kind": "variable",
+						"source_line": 1342,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "shadow_alpha_5",
+						"kind": "variable",
+						"source_line": 1346,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_xs",
+						"kind": "variable",
+						"source_line": 1354,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_sm",
+						"kind": "variable",
+						"source_line": 1358,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_md",
+						"kind": "variable",
+						"source_line": 1362,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_lg",
+						"kind": "variable",
+						"source_line": 1366,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_xl",
+						"kind": "variable",
+						"source_line": 1370,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_xl2",
+						"kind": "variable",
+						"source_line": 1374,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "icon_size_xl3",
+						"kind": "variable",
+						"source_line": 1378,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_1",
+						"kind": "variable",
+						"source_line": 1386,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_2",
+						"kind": "variable",
+						"source_line": 1387,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_3",
+						"kind": "variable",
+						"source_line": 1388,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_4",
+						"kind": "variable",
+						"source_line": 1389,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_5",
+						"kind": "variable",
+						"source_line": 1390,
+						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "duration_6",
+						"kind": "variable",
+						"source_line": 1391,
+						"type_signature": "StyleVariable"
+					},
+					{
 						"name": "disabled_opacity",
 						"kind": "variable",
-						"source_line": 1147,
+						"source_line": 1393,
 						"type_signature": "StyleVariable"
+					},
+					{
+						"name": "absolute_color_variables",
+						"kind": "variable",
+						"doc_comment": "Absolute color variants for all hues and intensities.\nNon-adaptive: these don't change between light and dark color schemes.",
+						"source_line": 1584,
+						"type_signature": "StyleVariable[]"
 					},
 					{
 						"name": "default_variables",
 						"kind": "variable",
 						"doc_comment": "These are implicitly the variables for the `base` theme.\nSee also the empty `variables` array of the `base` theme above.",
-						"source_line": 1156,
+						"source_line": 1590,
 						"type_signature": "StyleVariable[]"
 					}
 				],

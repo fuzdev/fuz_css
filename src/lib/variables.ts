@@ -1,5 +1,5 @@
 import type {StyleVariable} from './variable.js';
-import {icon_sizes} from './variable_data.js';
+import {icon_sizes, color_variants, intensity_variants} from './variable_data.js';
 
 /*
 
@@ -31,6 +31,11 @@ export const hue_g: StyleVariable = {name: 'hue_g', light: '335', summary: 'pink
 export const hue_h: StyleVariable = {name: 'hue_h', light: '17', summary: 'orange'};
 export const hue_i: StyleVariable = {name: 'hue_i', light: '185', summary: 'cyan'};
 export const hue_j: StyleVariable = {name: 'hue_j', light: '155', summary: 'teal'};
+export const color_a_00: StyleVariable = {
+	name: 'color_a_00',
+	light: 'hsl(var(--hue_a) 70% 98%)',
+	dark: 'hsl(var(--hue_a) 70% 92%)',
+};
 export const color_a_05: StyleVariable = {
 	name: 'color_a_05',
 	light: 'hsl(var(--hue_a) 68% 95%)',
@@ -83,6 +88,16 @@ export const color_a_95: StyleVariable = {
 	name: 'color_a_95',
 	light: 'hsl(var(--hue_a) 55% 5%)',
 	dark: 'hsl(var(--hue_a) 55% 12%)',
+};
+export const color_a_100: StyleVariable = {
+	name: 'color_a_100',
+	light: 'hsl(var(--hue_a) 55% 2%)',
+	dark: 'hsl(var(--hue_a) 55% 6%)',
+};
+export const color_b_00: StyleVariable = {
+	name: 'color_b_00',
+	light: 'hsl(var(--hue_b) 55% 98%)',
+	dark: 'hsl(var(--hue_b) 55% 92%)',
 };
 export const color_b_05: StyleVariable = {
 	name: 'color_b_05',
@@ -137,6 +152,16 @@ export const color_b_95: StyleVariable = {
 	light: 'hsl(var(--hue_b) 78% 4%)',
 	dark: 'hsl(var(--hue_b) 70% 10%)',
 };
+export const color_b_100: StyleVariable = {
+	name: 'color_b_100',
+	light: 'hsl(var(--hue_b) 80% 2%)',
+	dark: 'hsl(var(--hue_b) 75% 6%)',
+};
+export const color_c_00: StyleVariable = {
+	name: 'color_c_00',
+	light: 'hsl(var(--hue_c) 90% 98%)',
+	dark: 'hsl(var(--hue_c) 90% 92%)',
+};
 export const color_c_05: StyleVariable = {
 	name: 'color_c_05',
 	light: 'hsl(var(--hue_c) 88% 96%)',
@@ -189,6 +214,16 @@ export const color_c_95: StyleVariable = {
 	name: 'color_c_95',
 	light: 'hsl(var(--hue_c) 65% 5%)',
 	dark: 'hsl(var(--hue_c) 65% 12%)',
+};
+export const color_c_100: StyleVariable = {
+	name: 'color_c_100',
+	light: 'hsl(var(--hue_c) 65% 2%)',
+	dark: 'hsl(var(--hue_c) 65% 6%)',
+};
+export const color_d_00: StyleVariable = {
+	name: 'color_d_00',
+	light: 'hsl(var(--hue_d) 55% 98%)',
+	dark: 'hsl(var(--hue_d) 55% 92%)',
 };
 export const color_d_05: StyleVariable = {
 	name: 'color_d_05',
@@ -243,6 +278,16 @@ export const color_d_95: StyleVariable = {
 	light: 'hsl(var(--hue_d) 50% 5%)',
 	dark: 'hsl(var(--hue_d) 50% 12%)',
 };
+export const color_d_100: StyleVariable = {
+	name: 'color_d_100',
+	light: 'hsl(var(--hue_d) 50% 2%)',
+	dark: 'hsl(var(--hue_d) 50% 6%)',
+};
+export const color_e_00: StyleVariable = {
+	name: 'color_e_00',
+	light: 'hsl(var(--hue_e) 90% 98%)',
+	dark: 'hsl(var(--hue_e) 90% 92%)',
+};
 export const color_e_05: StyleVariable = {
 	name: 'color_e_05',
 	light: 'hsl(var(--hue_e) 88% 95%)',
@@ -295,6 +340,16 @@ export const color_e_95: StyleVariable = {
 	name: 'color_e_95',
 	light: 'hsl(var(--hue_e) 88% 5%)',
 	dark: 'hsl(var(--hue_e) 88% 12%)',
+};
+export const color_e_100: StyleVariable = {
+	name: 'color_e_100',
+	light: 'hsl(var(--hue_e) 90% 2%)',
+	dark: 'hsl(var(--hue_e) 90% 6%)',
+};
+export const color_f_00: StyleVariable = {
+	name: 'color_f_00',
+	light: 'hsl(var(--hue_f) 30% 98%)',
+	dark: 'hsl(var(--hue_f) 30% 92%)',
 };
 export const color_f_05: StyleVariable = {
 	name: 'color_f_05',
@@ -349,6 +404,16 @@ export const color_f_95: StyleVariable = {
 	light: 'hsl(var(--hue_f) 82% 3%)',
 	dark: 'hsl(var(--hue_f) 75% 10%)',
 };
+export const color_f_100: StyleVariable = {
+	name: 'color_f_100',
+	light: 'hsl(var(--hue_f) 85% 2%)',
+	dark: 'hsl(var(--hue_f) 80% 6%)',
+};
+export const color_g_00: StyleVariable = {
+	name: 'color_g_00',
+	light: 'hsl(var(--hue_g) 75% 98%)',
+	dark: 'hsl(var(--hue_g) 75% 94%)',
+};
 export const color_g_05: StyleVariable = {
 	name: 'color_g_05',
 	light: 'hsl(var(--hue_g) 74% 95%)',
@@ -401,6 +466,16 @@ export const color_g_95: StyleVariable = {
 	name: 'color_g_95',
 	light: 'hsl(var(--hue_g) 72% 5%)',
 	dark: 'hsl(var(--hue_g) 72% 12%)',
+};
+export const color_g_100: StyleVariable = {
+	name: 'color_g_100',
+	light: 'hsl(var(--hue_g) 72% 2%)',
+	dark: 'hsl(var(--hue_g) 72% 6%)',
+};
+export const color_h_00: StyleVariable = {
+	name: 'color_h_00',
+	light: 'hsl(var(--hue_h) 95% 98%)',
+	dark: 'hsl(var(--hue_h) 95% 94%)',
 };
 export const color_h_05: StyleVariable = {
 	name: 'color_h_05',
@@ -455,6 +530,16 @@ export const color_h_95: StyleVariable = {
 	light: 'hsl(var(--hue_h) 90% 5%)',
 	dark: 'hsl(var(--hue_h) 90% 12%)',
 };
+export const color_h_100: StyleVariable = {
+	name: 'color_h_100',
+	light: 'hsl(var(--hue_h) 90% 2%)',
+	dark: 'hsl(var(--hue_h) 90% 6%)',
+};
+export const color_i_00: StyleVariable = {
+	name: 'color_i_00',
+	light: 'hsl(var(--hue_i) 80% 98%)',
+	dark: 'hsl(var(--hue_i) 80% 92%)',
+};
 export const color_i_05: StyleVariable = {
 	name: 'color_i_05',
 	light: 'hsl(var(--hue_i) 77% 94%)',
@@ -508,6 +593,16 @@ export const color_i_95: StyleVariable = {
 	light: 'hsl(var(--hue_i) 75% 5%)',
 	dark: 'hsl(var(--hue_i) 75% 12%)',
 };
+export const color_i_100: StyleVariable = {
+	name: 'color_i_100',
+	light: 'hsl(var(--hue_i) 75% 2%)',
+	dark: 'hsl(var(--hue_i) 75% 6%)',
+};
+export const color_j_00: StyleVariable = {
+	name: 'color_j_00',
+	light: 'hsl(var(--hue_j) 65% 98%)',
+	dark: 'hsl(var(--hue_j) 65% 92%)',
+};
 export const color_j_05: StyleVariable = {
 	name: 'color_j_05',
 	light: 'hsl(var(--hue_j) 62% 94%)',
@@ -560,6 +655,11 @@ export const color_j_95: StyleVariable = {
 	name: 'color_j_95',
 	light: 'hsl(var(--hue_j) 78% 5%)',
 	dark: 'hsl(var(--hue_j) 78% 12%)',
+};
+export const color_j_100: StyleVariable = {
+	name: 'color_j_100',
+	light: 'hsl(var(--hue_j) 80% 2%)',
+	dark: 'hsl(var(--hue_j) 80% 6%)',
 };
 
 /*
@@ -666,6 +766,152 @@ export const shade_100: StyleVariable = {
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 };
+
+/*
+
+Non-adaptive shade variants - fixed lightness regardless of color scheme
+
+shade_XX_light: uses the light-mode lightness value in both schemes
+shade_XX_dark: uses the dark-mode lightness value in both schemes
+
+Use when you need consistent appearance regardless of color scheme,
+such as demo backgrounds or UI elements that shouldn't adapt.
+
+*/
+export const shade_00_light: StyleVariable = {
+	name: 'shade_00_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+};
+export const shade_00_dark: StyleVariable = {
+	name: 'shade_00_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
+};
+export const shade_05_light: StyleVariable = {
+	name: 'shade_05_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 93%)',
+};
+export const shade_05_dark: StyleVariable = {
+	name: 'shade_05_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 9%)',
+};
+export const shade_10_light: StyleVariable = {
+	name: 'shade_10_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+};
+export const shade_10_dark: StyleVariable = {
+	name: 'shade_10_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 12%)',
+};
+export const shade_20_light: StyleVariable = {
+	name: 'shade_20_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 84%)',
+};
+export const shade_20_dark: StyleVariable = {
+	name: 'shade_20_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 17%)',
+};
+export const shade_30_light: StyleVariable = {
+	name: 'shade_30_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 76%)',
+};
+export const shade_30_dark: StyleVariable = {
+	name: 'shade_30_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 26%)',
+};
+export const shade_40_light: StyleVariable = {
+	name: 'shade_40_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 65%)',
+};
+export const shade_40_dark: StyleVariable = {
+	name: 'shade_40_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 36%)',
+};
+export const shade_50_light: StyleVariable = {
+	name: 'shade_50_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 53%)',
+};
+export const shade_50_dark: StyleVariable = {
+	name: 'shade_50_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 48%)',
+};
+export const shade_60_light: StyleVariable = {
+	name: 'shade_60_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 34%)',
+};
+export const shade_60_dark: StyleVariable = {
+	name: 'shade_60_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 67%)',
+};
+export const shade_70_light: StyleVariable = {
+	name: 'shade_70_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 19%)',
+};
+export const shade_70_dark: StyleVariable = {
+	name: 'shade_70_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 81%)',
+};
+export const shade_80_light: StyleVariable = {
+	name: 'shade_80_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 13%)',
+};
+export const shade_80_dark: StyleVariable = {
+	name: 'shade_80_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 87%)',
+};
+export const shade_90_light: StyleVariable = {
+	name: 'shade_90_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 10%)',
+};
+export const shade_90_dark: StyleVariable = {
+	name: 'shade_90_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+};
+export const shade_95_light: StyleVariable = {
+	name: 'shade_95_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
+};
+export const shade_95_dark: StyleVariable = {
+	name: 'shade_95_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 92%)',
+};
+export const shade_100_light: StyleVariable = {
+	name: 'shade_100_light',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
+};
+export const shade_100_dark: StyleVariable = {
+	name: 'shade_100_dark',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+};
+
+/*
+
+darken/lighten - non-adaptive alpha overlays
+
+Color-scheme-agnostic overlays for consistent darkening/lightening regardless of
+light or dark mode. Use for backdrops, overlays, and demo backgrounds that need
+consistent contrast. Unlike the adaptive shade scale, these don't flip.
+
+Perceptual curve: 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%
+
+*/
+export const darken_1: StyleVariable = {name: 'darken_1', light: '#0000000f', summary: '6%'};
+export const darken_2: StyleVariable = {name: 'darken_2', light: '#0000001f', summary: '12%'};
+export const darken_3: StyleVariable = {name: 'darken_3', light: '#00000036', summary: '21%'};
+export const darken_4: StyleVariable = {name: 'darken_4', light: '#00000052', summary: '32%'};
+export const darken_5: StyleVariable = {name: 'darken_5', light: '#00000073', summary: '45%'};
+export const darken_6: StyleVariable = {name: 'darken_6', light: '#000000a6', summary: '65%'};
+export const darken_7: StyleVariable = {name: 'darken_7', light: '#000000cc', summary: '80%'};
+export const darken_8: StyleVariable = {name: 'darken_8', light: '#000000e3', summary: '89%'};
+export const darken_9: StyleVariable = {name: 'darken_9', light: '#000000f5', summary: '96%'};
+export const lighten_1: StyleVariable = {name: 'lighten_1', light: '#ffffff0f', summary: '6%'};
+export const lighten_2: StyleVariable = {name: 'lighten_2', light: '#ffffff1f', summary: '12%'};
+export const lighten_3: StyleVariable = {name: 'lighten_3', light: '#ffffff36', summary: '21%'};
+export const lighten_4: StyleVariable = {name: 'lighten_4', light: '#ffffff52', summary: '32%'};
+export const lighten_5: StyleVariable = {name: 'lighten_5', light: '#ffffff73', summary: '45%'};
+export const lighten_6: StyleVariable = {name: 'lighten_6', light: '#ffffffa6', summary: '65%'};
+export const lighten_7: StyleVariable = {name: 'lighten_7', light: '#ffffffcc', summary: '80%'};
+export const lighten_8: StyleVariable = {name: 'lighten_8', light: '#ffffffe3', summary: '89%'};
+export const lighten_9: StyleVariable = {name: 'lighten_9', light: '#fffffff5', summary: '96%'};
 
 /*
 
@@ -1150,6 +1396,194 @@ export const disabled_opacity: StyleVariable = {
 };
 
 /**
+ * Collect all color variables by hue for easy access.
+ */
+const color_variables_by_hue: Record<string, Record<string, StyleVariable>> = {
+	a: {
+		color_a_00,
+		color_a_05,
+		color_a_10,
+		color_a_20,
+		color_a_30,
+		color_a_40,
+		color_a_50,
+		color_a_60,
+		color_a_70,
+		color_a_80,
+		color_a_90,
+		color_a_95,
+		color_a_100,
+	},
+	b: {
+		color_b_00,
+		color_b_05,
+		color_b_10,
+		color_b_20,
+		color_b_30,
+		color_b_40,
+		color_b_50,
+		color_b_60,
+		color_b_70,
+		color_b_80,
+		color_b_90,
+		color_b_95,
+		color_b_100,
+	},
+	c: {
+		color_c_00,
+		color_c_05,
+		color_c_10,
+		color_c_20,
+		color_c_30,
+		color_c_40,
+		color_c_50,
+		color_c_60,
+		color_c_70,
+		color_c_80,
+		color_c_90,
+		color_c_95,
+		color_c_100,
+	},
+	d: {
+		color_d_00,
+		color_d_05,
+		color_d_10,
+		color_d_20,
+		color_d_30,
+		color_d_40,
+		color_d_50,
+		color_d_60,
+		color_d_70,
+		color_d_80,
+		color_d_90,
+		color_d_95,
+		color_d_100,
+	},
+	e: {
+		color_e_00,
+		color_e_05,
+		color_e_10,
+		color_e_20,
+		color_e_30,
+		color_e_40,
+		color_e_50,
+		color_e_60,
+		color_e_70,
+		color_e_80,
+		color_e_90,
+		color_e_95,
+		color_e_100,
+	},
+	f: {
+		color_f_00,
+		color_f_05,
+		color_f_10,
+		color_f_20,
+		color_f_30,
+		color_f_40,
+		color_f_50,
+		color_f_60,
+		color_f_70,
+		color_f_80,
+		color_f_90,
+		color_f_95,
+		color_f_100,
+	},
+	g: {
+		color_g_00,
+		color_g_05,
+		color_g_10,
+		color_g_20,
+		color_g_30,
+		color_g_40,
+		color_g_50,
+		color_g_60,
+		color_g_70,
+		color_g_80,
+		color_g_90,
+		color_g_95,
+		color_g_100,
+	},
+	h: {
+		color_h_00,
+		color_h_05,
+		color_h_10,
+		color_h_20,
+		color_h_30,
+		color_h_40,
+		color_h_50,
+		color_h_60,
+		color_h_70,
+		color_h_80,
+		color_h_90,
+		color_h_95,
+		color_h_100,
+	},
+	i: {
+		color_i_00,
+		color_i_05,
+		color_i_10,
+		color_i_20,
+		color_i_30,
+		color_i_40,
+		color_i_50,
+		color_i_60,
+		color_i_70,
+		color_i_80,
+		color_i_90,
+		color_i_95,
+		color_i_100,
+	},
+	j: {
+		color_j_00,
+		color_j_05,
+		color_j_10,
+		color_j_20,
+		color_j_30,
+		color_j_40,
+		color_j_50,
+		color_j_60,
+		color_j_70,
+		color_j_80,
+		color_j_90,
+		color_j_95,
+		color_j_100,
+	},
+};
+
+/**
+ * Generate absolute color variants (non-adaptive).
+ * color_X_XX_light: uses the light-mode value in both color schemes
+ * color_X_XX_dark: uses the dark-mode value in both color schemes (falls back to light if no dark)
+ */
+const generate_absolute_color_variables = (): Array<StyleVariable> => {
+	const result: Array<StyleVariable> = [];
+	for (const hue of color_variants) {
+		for (const intensity of intensity_variants) {
+			const name_base = `color_${hue}_${intensity}`;
+			const source = color_variables_by_hue[hue]![name_base]!;
+			// _light variant uses the light-mode value
+			result.push({
+				name: `${name_base}_light`,
+				light: source.light,
+			});
+			// _dark variant uses the dark-mode value (or light if no dark exists)
+			result.push({
+				name: `${name_base}_dark`,
+				light: source.dark ?? source.light,
+			});
+		}
+	}
+	return result;
+};
+
+/**
+ * Absolute color variants for all hues and intensities.
+ * Non-adaptive: these don't change between light and dark color schemes.
+ */
+export const absolute_color_variables: Array<StyleVariable> = generate_absolute_color_variables();
+
+/**
  * These are implicitly the variables for the `base` theme.
  * See also the empty `variables` array of the `base` theme above.
  */
@@ -1168,6 +1602,7 @@ export const default_variables: Array<StyleVariable> = [
 	hue_h,
 	hue_i,
 	hue_j,
+	color_a_00,
 	color_a_05,
 	color_a_10,
 	color_a_20,
@@ -1179,6 +1614,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_a_80,
 	color_a_90,
 	color_a_95,
+	color_a_100,
+	color_b_00,
 	color_b_05,
 	color_b_10,
 	color_b_20,
@@ -1190,6 +1627,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_b_80,
 	color_b_90,
 	color_b_95,
+	color_b_100,
+	color_c_00,
 	color_c_05,
 	color_c_10,
 	color_c_20,
@@ -1201,6 +1640,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_c_80,
 	color_c_90,
 	color_c_95,
+	color_c_100,
+	color_d_00,
 	color_d_05,
 	color_d_10,
 	color_d_20,
@@ -1212,6 +1653,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_d_80,
 	color_d_90,
 	color_d_95,
+	color_d_100,
+	color_e_00,
 	color_e_05,
 	color_e_10,
 	color_e_20,
@@ -1223,6 +1666,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_e_80,
 	color_e_90,
 	color_e_95,
+	color_e_100,
+	color_f_00,
 	color_f_05,
 	color_f_10,
 	color_f_20,
@@ -1234,6 +1679,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_f_80,
 	color_f_90,
 	color_f_95,
+	color_f_100,
+	color_g_00,
 	color_g_05,
 	color_g_10,
 	color_g_20,
@@ -1245,6 +1692,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_g_80,
 	color_g_90,
 	color_g_95,
+	color_g_100,
+	color_h_00,
 	color_h_05,
 	color_h_10,
 	color_h_20,
@@ -1256,6 +1705,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_h_80,
 	color_h_90,
 	color_h_95,
+	color_h_100,
+	color_i_00,
 	color_i_05,
 	color_i_10,
 	color_i_20,
@@ -1267,6 +1718,8 @@ export const default_variables: Array<StyleVariable> = [
 	color_i_80,
 	color_i_90,
 	color_i_95,
+	color_i_100,
+	color_j_00,
 	color_j_05,
 	color_j_10,
 	color_j_20,
@@ -1278,6 +1731,10 @@ export const default_variables: Array<StyleVariable> = [
 	color_j_80,
 	color_j_90,
 	color_j_95,
+	color_j_100,
+
+	/* absolute color variants (non-adaptive) */
+	...absolute_color_variables,
 
 	/* tint colors */
 	tint_hue,
@@ -1299,6 +1756,54 @@ export const default_variables: Array<StyleVariable> = [
 	shade_90,
 	shade_95,
 	shade_100,
+
+	/* non-adaptive shade variants */
+	shade_00_light,
+	shade_00_dark,
+	shade_05_light,
+	shade_05_dark,
+	shade_10_light,
+	shade_10_dark,
+	shade_20_light,
+	shade_20_dark,
+	shade_30_light,
+	shade_30_dark,
+	shade_40_light,
+	shade_40_dark,
+	shade_50_light,
+	shade_50_dark,
+	shade_60_light,
+	shade_60_dark,
+	shade_70_light,
+	shade_70_dark,
+	shade_80_light,
+	shade_80_dark,
+	shade_90_light,
+	shade_90_dark,
+	shade_95_light,
+	shade_95_dark,
+	shade_100_light,
+	shade_100_dark,
+
+	/* darken/lighten alpha overlays */
+	darken_1,
+	darken_2,
+	darken_3,
+	darken_4,
+	darken_5,
+	darken_6,
+	darken_7,
+	darken_8,
+	darken_9,
+	lighten_1,
+	lighten_2,
+	lighten_3,
+	lighten_4,
+	lighten_5,
+	lighten_6,
+	lighten_7,
+	lighten_8,
+	lighten_9,
 
 	/* text colors don't use alpha because it affects performance too much */
 	text_min,

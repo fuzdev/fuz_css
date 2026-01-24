@@ -90,26 +90,26 @@
 				<h3>Interactive</h3>
 				<div class="row gap_md mb_lg">
 					<button
-						class="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d"
+						class="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50"
 						onclick={() => count++}
 					>
 						count: {count}
 					</button>
 					<span
-						>.hover:border_color_b .hover:outline_color_b .active:border_color_d
-						.active:outline_color_d</span
+						>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50
+						.active:outline_color_d_50</span
 					>
 				</div>
 				<div class="row gap_md mb_lg">
 					<button
-						class="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h"
+						class="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50"
 						onclick={() => (count = 0)}
 					>
 						reset
 					</button>
 					<span
-						>.hover:border_color_g .hover:outline_color_g .active:border_color_h
-						.active:outline_color_h</span
+						>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50
+						.active:outline_color_h_50</span
 					>
 				</div>
 			</div>

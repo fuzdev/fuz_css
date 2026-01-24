@@ -1457,15 +1457,15 @@ describe('modified_class_interpreter', () => {
 	describe('state modifier ordering for cascade', () => {
 		test('hover classes come before active classes in output (LVFHA order)', () => {
 			const result = generate_classes_css({
-				class_names: ['active:border_color_a', 'hover:border_color_b'],
+				class_names: ['active:border_color_a_50', 'hover:border_color_b_50'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,
 			});
 
 			// Find positions of hover and active classes in the output
-			const hover_pos = result.css.indexOf('.hover\\:border_color_b');
-			const active_pos = result.css.indexOf('.active\\:border_color_a');
+			const hover_pos = result.css.indexOf('.hover\\:border_color_b_50');
+			const active_pos = result.css.indexOf('.active\\:border_color_a_50');
 
 			expect(hover_pos).toBeGreaterThan(-1);
 			expect(active_pos).toBeGreaterThan(-1);

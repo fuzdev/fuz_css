@@ -10,7 +10,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
-	import {shade_variants} from '$lib/variable_data.js';
+	import {shade_variants, darken_lighten_variants} from '$lib/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'shading';
 
@@ -109,6 +109,61 @@
 		</aside>
 	</section>
 	<TomeSection>
+		<TomeSectionHeader text="Darken/lighten overlays" />
+		<p>
+			In addition to the adaptive shade scale, fuz_css provides non-adaptive alpha-based overlays (<code
+				>darken_1</code
+			>
+			through <code>darken_9</code> and <code>lighten_1</code> through
+			<code>lighten_9</code>). Unlike shades, these don't flip between light and dark modes - they
+			always darken or lighten regardless of color scheme.
+		</p>
+		<p>Use cases include:</p>
+		<ul>
+			<li>
+				<strong>Backdrops and overlays</strong> - consistent dimming/brightening for modals, dialogs,
+				and popups
+			</li>
+			<li>
+				<strong>Demo backgrounds</strong> - contrasting backgrounds that show off glows/shadows
+			</li>
+			<li><strong>Alpha stacking</strong> - when you need overlays that accumulate</li>
+		</ul>
+		<TomeSection>
+			<TomeSectionHeader text="Darken" tag="h4" />
+			<p>Alpha overlays that darken regardless of color scheme (always adds black).</p>
+			<div class="overlay_swatch">
+				{#each darken_lighten_variants as v (v)}
+					{@const name = 'darken_' + v}
+					<div>
+						<div class="overlay_color darken_{v}"></div>
+						<small><StyleVariableButton {name} /></small>
+					</div>
+				{/each}
+			</div>
+		</TomeSection>
+		<TomeSection>
+			<TomeSectionHeader text="Lighten" tag="h4" />
+			<p>Alpha overlays that lighten regardless of color scheme (always adds white).</p>
+			<div class="overlay_swatch shade_100">
+				{#each darken_lighten_variants as v (v)}
+					{@const name = 'lighten_' + v}
+					<div>
+						<div class="overlay_color lighten_{v}"></div>
+						<small><StyleVariableButton {name} /></small>
+					</div>
+				{/each}
+			</div>
+		</TomeSection>
+		<TomeSection>
+			<TomeSectionHeader text="Perceptual curve" tag="h4" />
+			<p>
+				Both scales use a perceptual curve: 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%. This matches
+				the original alpha-based system that the shade scale was derived from.
+			</p>
+		</TomeSection>
+	</TomeSection>
+	<TomeSection>
 		<TomeSectionHeader text="Usage patterns" />
 		<p>Common shade assignments:</p>
 		<Code
@@ -167,5 +222,16 @@ background-color: var(--shade_min);`}
 		display: flex;
 		justify-content: center;
 		align-items: center;
+	}
+	.overlay_swatch {
+		font-family: var(--font_family_mono);
+		margin-bottom: var(--space_md);
+		display: grid;
+		grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+		grid-auto-flow: row;
+		border-radius: var(--border_radius_xs2);
+	}
+	.overlay_color {
+		height: var(--input_height_sm);
 	}
 </style>

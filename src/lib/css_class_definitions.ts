@@ -31,6 +31,8 @@ import {
 	shadow_size_variants,
 	shadow_semantic_values,
 	shadow_alpha_variants,
+	darken_lighten_variants,
+	color_scheme_variants,
 } from './variable_data.js';
 import {css_class_composites} from './css_class_composites.js';
 
@@ -91,6 +93,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--shade_${v})`,
 		'shade',
 	),
+	// Non-adaptive shade backgrounds (fixed to specific color scheme value)
+	...generate_classes(
+		(shade: string, mode: string) => ({
+			name: `shade_${shade}_${mode}`,
+			css: `background-color: var(--shade_${shade}_${mode});`,
+		}),
+		shade_variants,
+		color_scheme_variants,
+	),
 	// Hue classes
 	...generate_classes(
 		(hue: string) => ({
@@ -117,6 +128,39 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		color_variants,
 		intensity_variants,
 	),
+	// Absolute color text classes (non-adaptive)
+	...generate_classes(
+		(hue: string, intensity: string, mode: string) => ({
+			name: `color_${hue}_${intensity}_${mode}`,
+			css: `color: var(--color_${hue}_${intensity}_${mode});`,
+		}),
+		color_variants,
+		intensity_variants,
+		color_scheme_variants,
+	),
+	// Absolute color background classes (non-adaptive)
+	...generate_classes(
+		(hue: string, intensity: string, mode: string) => ({
+			name: `bg_${hue}_${intensity}_${mode}`,
+			css: `background-color: var(--color_${hue}_${intensity}_${mode});`,
+		}),
+		color_variants,
+		intensity_variants,
+		color_scheme_variants,
+	),
+	// Darken/lighten overlays (non-adaptive, alpha-based)
+	...generate_property_classes(
+		'background-color',
+		darken_lighten_variants.map(String),
+		(v) => `var(--darken_${v})`,
+		'darken',
+	),
+	...generate_property_classes(
+		'background-color',
+		darken_lighten_variants.map(String),
+		(v) => `var(--lighten_${v})`,
+		'lighten',
+	),
 
 	/*
 
@@ -125,12 +169,26 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	*/
 	// Border colors using shade scale
 	...generate_property_classes('border-color', shade_variants, (v) => `var(--shade_${v})`),
-	// Border colors using hue colors
-	...generate_property_classes('border-color', color_variants, (v) => `var(--color_${v}_50)`),
+	// Border colors using hue + intensity (sets both property and contextual variable)
+	...generate_classes(
+		(hue: string, intensity: string) => ({
+			name: `border_color_${hue}_${intensity}`,
+			css: `border-color: var(--color_${hue}_${intensity}); --border_color: var(--color_${hue}_${intensity});`,
+		}),
+		color_variants,
+		intensity_variants,
+	),
 	// Outline colors using shade scale
 	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
-	// Outline colors using hue colors
-	...generate_property_classes('outline-color', color_variants, (v) => `var(--color_${v}_50)`),
+	// Outline colors using hue + intensity (sets both property and contextual variable)
+	...generate_classes(
+		(hue: string, intensity: string) => ({
+			name: `outline_color_${hue}_${intensity}`,
+			css: `outline-color: var(--color_${hue}_${intensity}); --outline_color: var(--color_${hue}_${intensity});`,
+		}),
+		color_variants,
+		intensity_variants,
+	),
 
 	...generate_property_classes(
 		'border-width',
@@ -177,6 +235,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			css: `--shadow_alpha: var(--shadow_alpha_${alpha});`,
 		}),
 		shadow_alpha_variants,
+	),
+	// Shadow colors using hue + intensity (sets contextual variable only)
+	...generate_classes(
+		(hue: string, intensity: string) => ({
+			name: `shadow_color_${hue}_${intensity}`,
+			css: `--shadow_color: var(--color_${hue}_${intensity});`,
+		}),
+		color_variants,
+		intensity_variants,
 	),
 
 	/*

@@ -2,7 +2,11 @@ import {test, assert} from 'vitest';
 import {readFileSync} from 'node:fs';
 
 import * as exported_variables from '$lib/variables.js';
+import {absolute_color_variables} from '$lib/variables.js';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
+
+// Create a set of absolute color variable names for quick lookup
+const absolute_color_variable_names = new Set(absolute_color_variables.map((v) => v.name));
 
 // vitest replaces this with an empty string because CSS isn't opted into being processed,
 // and it has no CLI option, so just read it directly
@@ -26,6 +30,9 @@ test('variables in the CSS exist', () => {
 		for (const name of variable_names) {
 			if (name in exported_variables) {
 				// Variable exists in exported variables, all good
+				continue;
+			} else if (absolute_color_variable_names.has(name)) {
+				// Variable is a dynamically generated absolute color variable, all good
 				continue;
 			} else if (known_without_variables.has(name)) {
 				// Found a known variable that doesn't have an export
