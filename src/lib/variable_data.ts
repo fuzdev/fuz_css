@@ -153,8 +153,23 @@ export const intensity_variants = [
 export type BorderWidthVariant = ArrayElement<typeof border_width_variants>;
 export const border_width_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
+export type AlphaVariant = ArrayElement<typeof alpha_variants>;
+export const alpha_variants = [
+	'05',
+	'10',
+	'20',
+	'30',
+	'40',
+	'50',
+	'60',
+	'70',
+	'80',
+	'90',
+	'95',
+] as const;
+
 export type DarkenLightenVariant = ArrayElement<typeof darken_lighten_variants>;
-export const darken_lighten_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
+export const darken_lighten_variants = alpha_variants;
 
 export type ColorSchemeVariant = ArrayElement<typeof color_scheme_variants>;
 export const color_scheme_variants = ['light', 'dark'] as const;

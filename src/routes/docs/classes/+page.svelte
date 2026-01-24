@@ -1311,8 +1311,9 @@ const color = get_dynamic_color();`}
 			<TomeSectionHeader text="Svelte-first" tag="h3" />
 			<p>
 				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> parses and analyzes
-				the AST to understand <a href="https://svelte.dev/docs/svelte/class">Svelte's class syntax</a
-				>. Supported constructs:
+				the AST to understand
+				<a href="https://svelte.dev/docs/svelte/class">Svelte's class syntax</a>. Supported
+				constructs:
 			</p>
 			<ul>
 				<li>

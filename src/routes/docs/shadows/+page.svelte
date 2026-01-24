@@ -22,7 +22,7 @@
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5
-	// @fuz-classes darken_3 lighten_3
+	// @fuz-classes darken_30 lighten_30
 	// @fuz-classes shadow_color_a_60 shadow_color_b_60 shadow_color_c_60 shadow_color_d_60 shadow_color_e_60 shadow_color_f_60 shadow_color_g_60 shadow_color_h_60 shadow_color_i_60 shadow_color_j_60
 
 	// TODO duplicate shadows links
@@ -60,7 +60,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Glow" />
 		<p>Glows lighten in both light and dark mode.</p>
-		<div class="panel darken_3 p_md">
+		<div class="panel darken_30 p_md">
 			{@render shadow_section('glow')}
 		</div>
 	</TomeSection>
@@ -70,7 +70,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
 		<p>Shrouds darken in both light and dark mode.</p>
-		<div class="panel lighten_3 p_md">
+		<div class="panel lighten_30 p_md">
 			{@render shadow_section('shroud')}
 		</div>
 	</TomeSection>
@@ -80,9 +80,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The
-			intensity controls the color's prominence (60 is a good starting point for visible colored
-			shadows).
+			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
+			controls the color's prominence (60 is a good starting point for visible colored shadows).
 		</p>
 		{#each color_variants as color_variant (color_variant)}
 			<section>

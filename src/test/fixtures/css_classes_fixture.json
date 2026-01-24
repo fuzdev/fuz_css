@@ -18,7 +18,7 @@
 		"declaration": "\n\t\t\tdisplay: block;\n\t\t\twhite-space: nowrap;\n\t\t\toverflow: hidden;\n\t\t\ttext-overflow: ellipsis;\n\t\t"
 	},
 	"selectable": {
-		"ruleset": "\n\t\t\t.selectable {\n\t\t\t\t--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);\n\t\t\t\t--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);\n\t\t\t\t--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);\n\t\t\t\tcursor: pointer;\n\t\t\t\tbackground-color: var(--button_fill);\n\t\t\t\tborder-color: var(--shade_30);\n\t\t\t\tborder-style: var(--border_style);\n\t\t\t\tborder-width: var(--border_width);\n\t\t\t}\n\t\t\t.selectable:hover {\n\t\t\t\tbackground-color: var(--button_fill_hover);\n\t\t\t\tborder-color: var(--shade_20);\n\t\t\t}\n\t\t\t.selectable.selected,\n\t\t\t.selectable:active {\n\t\t\t\tbackground-color: var(--button_fill_active);\n\t\t\t\tborder-color: var(--color_a_50);\n\t\t\t}\n\t\t\t.selectable.selected {\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.selectable.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t"
+		"ruleset": "\n\t\t\t.selectable {\n\t\t\t\t--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);\n\t\t\t\t--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);\n\t\t\t\t--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);\n\t\t\t\tcursor: pointer;\n\t\t\t\tbackground-color: var(--button_fill);\n\t\t\t\tborder-color: var(--border_color_30);\n\t\t\t\tborder-style: var(--border_style);\n\t\t\t\tborder-width: var(--border_width);\n\t\t\t}\n\t\t\t.selectable:hover {\n\t\t\t\tbackground-color: var(--button_fill_hover);\n\t\t\t\tborder-color: var(--border_color_20);\n\t\t\t}\n\t\t\t.selectable.selected,\n\t\t\t.selectable:active {\n\t\t\t\tbackground-color: var(--button_fill_active);\n\t\t\t\tborder-color: var(--color_a_50);\n\t\t\t}\n\t\t\t.selectable.selected {\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.selectable.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t"
 	},
 	"clickable": {
 		"ruleset": "\n\t\t\t.clickable {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransform: var(--clickable_transform, scale3d(1, 1, 1));\n\t\t\t\ttransform-origin: var(--clickable_transform_origin);\n\t\t\t\ttransition-duration: var(--clickable_transition_duration); /* default to instant, chunky/lofi */\n\t\t\t}\n\t\t\t.clickable:focus {\n\t\t\t\ttransform: var(--clickable_transform_focus, scale3d(1.07, 1.07, 1.07));\n\t\t\t}\n\t\t\t.clickable:hover {\n\t\t\t\ttransform: var(--clickable_transform_hover, scale3d(1.1, 1.1, 1.1));\n\t\t\t}\n\t\t\t.clickable:active,\n\t\t\t.clickable.active {\n\t\t\t\ttransform: var(--clickable_transform_active, scale3d(1.2, 1.2, 1.2));\n\t\t\t}\n\t\t"
@@ -29,7 +29,7 @@
 	},
 	"panel": {
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
-		"declaration": "\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\tbackground-color: var(--shade_10);\n\t\t"
+		"declaration": "\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
 	},
 	"icon_button": {
 		"comment": "\n\t\t\tTODO other button variants?\n\t\t\tTODO this is slightly strange that it doesn't use --icon_size.\n\t\t\tThese are used as modifiers to buttons.\n\t\t",
@@ -40,13 +40,13 @@
 		"ruleset": "\n\t\t\t.plain:not(:hover) {\n\t\t\t\t--border_color: transparent;\n\t\t\t\tbox-shadow: none;\n\t\t\t\t--button_fill: transparent;\n\t\t\t}\n\t\t\t.plain:hover, .plain:active {\n\t\t\t\t--border_color: transparent;\n\t\t\t}\n\t\t"
 	},
 	"menu_item": {
-		"ruleset": "\n\t\t\t.menu_item {\n\t\t\t\t--border_radius: 0;\n\t\t\t\t--border_color: var(--shade_30);\n\t\t\t\tposition: relative;\n\t\t\t\tz-index: 2;\n\t\t\t\tcursor: pointer;\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-height: var(--min_height, var(--icon_size_sm));\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: space-between;\n\t\t\t\talign-items: center;\n\t\t\t\tpadding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));\n\t\t\t}\n\t\t\t.menu_item.selected {\n\t\t\t\t/* TODO different patterns for border and surface? */\n\t\t\t\t--border_color: var(--color_a_50);\n\t\t\t\tbackground-color: var(--shade_10);\n\t\t\t\tz-index: 1;\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.menu_item.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t\t.menu_item:hover {\n\t\t\t\t--border_color: var(--shade_30);\n\t\t\t\tbackground-color: var(--shade_05);\n\t\t\t}\n\t\t\t.menu_item:active,\n\t\t\t.menu_item.selected:hover {\n\t\t\t\t--border_color: var(--shade_30);\n\t\t\t\tbackground-color: var(--shade_20);\n\t\t\t}\n\t\t\t.menu_item.plain {\n\t\t\t\tborder: none;\n\t\t\t}\n\t\t\t.menu_item .content {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tflex: 1;\n\t\t\t\t/* allows the flex children to shrink */\n\t\t\t\tmin-width: 0;\n\t\t\t}\n\t\t\t.menu_item .icon {\n\t\t\t\twidth: var(--icon_size, var(--icon_size_md));\n\t\t\t\tmargin-right: var(--space_sm);\n\t\t\t\tflex-shrink: 0;\n\t\t\t\ttext-align: center;\n\t\t\t\tfont-weight: 900;\n\t\t\t}\n\t\t\t.menu_item .title {\n\t\t\t\tmargin-right: var(--space_lg);\n\t\t\t\tflex-shrink: 1;\n\t\t\t\toverflow: hidden;\n\t\t\t\twhite-space: nowrap;\n\t\t\t\ttext-overflow: ellipsis;\n\t\t\t\tline-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */\n\t\t\t}\n\t\t"
+		"ruleset": "\n\t\t\t.menu_item {\n\t\t\t\t--border_radius: 0;\n\t\t\t\t--border_color: var(--border_color_30);\n\t\t\t\tposition: relative;\n\t\t\t\tz-index: 2;\n\t\t\t\tcursor: pointer;\n\t\t\t\twidth: 100%;\n\t\t\t\tmin-height: var(--min_height, var(--icon_size_sm));\n\t\t\t\tdisplay: flex;\n\t\t\t\tjustify-content: space-between;\n\t\t\t\talign-items: center;\n\t\t\t\tpadding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));\n\t\t\t}\n\t\t\t.menu_item.selected {\n\t\t\t\t/* TODO different patterns for border and surface? */\n\t\t\t\t--border_color: var(--color_a_50);\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tz-index: 1;\n\t\t\t\tcursor: default;\n\t\t\t}\n\t\t\t.menu_item.selected.deselectable:not(:disabled) {\n\t\t\t\tcursor: pointer;\n\t\t\t}\n\t\t\t.menu_item:hover {\n\t\t\t\t--border_color: var(--border_color_30);\n\t\t\t\tbackground-color: var(--fg_05);\n\t\t\t}\n\t\t\t.menu_item:active,\n\t\t\t.menu_item.selected:hover {\n\t\t\t\t--border_color: var(--border_color_30);\n\t\t\t\tbackground-color: var(--fg_20);\n\t\t\t}\n\t\t\t.menu_item.plain {\n\t\t\t\tborder: none;\n\t\t\t}\n\t\t\t.menu_item .content {\n\t\t\t\tdisplay: flex;\n\t\t\t\talign-items: center;\n\t\t\t\tflex: 1;\n\t\t\t\t/* allows the flex children to shrink */\n\t\t\t\tmin-width: 0;\n\t\t\t}\n\t\t\t.menu_item .icon {\n\t\t\t\twidth: var(--icon_size, var(--icon_size_md));\n\t\t\t\tmargin-right: var(--space_sm);\n\t\t\t\tflex-shrink: 0;\n\t\t\t\ttext-align: center;\n\t\t\t\tfont-weight: 900;\n\t\t\t}\n\t\t\t.menu_item .title {\n\t\t\t\tmargin-right: var(--space_lg);\n\t\t\t\tflex-shrink: 1;\n\t\t\t\toverflow: hidden;\n\t\t\t\twhite-space: nowrap;\n\t\t\t\ttext-overflow: ellipsis;\n\t\t\t\tline-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */\n\t\t\t}\n\t\t"
 	},
 	"chevron": {
 		"ruleset": "\n\t\t\t.chevron {\n\t\t\t\tposition: relative;\n\t\t\t\theight: 8px;\n\t\t\t}\n\t\t\t.chevron::before {\n\t\t\t\tdisplay: block;\n\t\t\t\tcontent: '';\n\t\t\t\tborder: 4px solid transparent;\n\t\t\t\tborder-left-color: var(--text_70);\n\t\t\t}\n\t\t"
 	},
 	"chip": {
-		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tpadding-left: var(--space_xs);\n\t\t\t\tpadding-right: var(--space_xs);\n\t\t\t\tbackground-color: var(--shade_10);\n\t\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.color_a {\n\t\t\t\tcolor: var(--color_a_50);\n\t\t\t\tbackground-color: var(--color_a_10);\n\t\t\t}\n\t\t\t.chip.color_b {\n\t\t\t\tcolor: var(--color_b_50);\n\t\t\t\tbackground-color: var(--color_b_10);\n\t\t\t}\n\t\t\t.chip.color_c {\n\t\t\t\tcolor: var(--color_c_50);\n\t\t\t\tbackground-color: var(--color_c_10);\n\t\t\t}\n\t\t\t.chip.color_d {\n\t\t\t\tcolor: var(--color_d_50);\n\t\t\t\tbackground-color: var(--color_d_10);\n\t\t\t}\n\t\t\t.chip.color_e {\n\t\t\t\tcolor: var(--color_e_50);\n\t\t\t\tbackground-color: var(--color_e_10);\n\t\t\t}\n\t\t\t.chip.color_f {\n\t\t\t\tcolor: var(--color_f_50);\n\t\t\t\tbackground-color: var(--color_f_10);\n\t\t\t}\n\t\t\t.chip.color_g {\n\t\t\t\tcolor: var(--color_g_50);\n\t\t\t\tbackground-color: var(--color_g_10);\n\t\t\t}\n\t\t\t.chip.color_h {\n\t\t\t\tcolor: var(--color_h_50);\n\t\t\t\tbackground-color: var(--color_h_10);\n\t\t\t}\n\t\t\t.chip.color_i {\n\t\t\t\tcolor: var(--color_i_50);\n\t\t\t\tbackground-color: var(--color_i_10);\n\t\t\t}\n\t\t\t.chip.color_j {\n\t\t\t\tcolor: var(--color_j_50);\n\t\t\t\tbackground-color: var(--color_j_10);\n\t\t\t}\n\t\t"
+		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tpadding-left: var(--space_xs);\n\t\t\t\tpadding-right: var(--space_xs);\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.color_a {\n\t\t\t\tcolor: var(--color_a_50);\n\t\t\t\tbackground-color: var(--color_a_10);\n\t\t\t}\n\t\t\t.chip.color_b {\n\t\t\t\tcolor: var(--color_b_50);\n\t\t\t\tbackground-color: var(--color_b_10);\n\t\t\t}\n\t\t\t.chip.color_c {\n\t\t\t\tcolor: var(--color_c_50);\n\t\t\t\tbackground-color: var(--color_c_10);\n\t\t\t}\n\t\t\t.chip.color_d {\n\t\t\t\tcolor: var(--color_d_50);\n\t\t\t\tbackground-color: var(--color_d_10);\n\t\t\t}\n\t\t\t.chip.color_e {\n\t\t\t\tcolor: var(--color_e_50);\n\t\t\t\tbackground-color: var(--color_e_10);\n\t\t\t}\n\t\t\t.chip.color_f {\n\t\t\t\tcolor: var(--color_f_50);\n\t\t\t\tbackground-color: var(--color_f_10);\n\t\t\t}\n\t\t\t.chip.color_g {\n\t\t\t\tcolor: var(--color_g_50);\n\t\t\t\tbackground-color: var(--color_g_10);\n\t\t\t}\n\t\t\t.chip.color_h {\n\t\t\t\tcolor: var(--color_h_50);\n\t\t\t\tbackground-color: var(--color_h_10);\n\t\t\t}\n\t\t\t.chip.color_i {\n\t\t\t\tcolor: var(--color_i_50);\n\t\t\t\tbackground-color: var(--color_i_10);\n\t\t\t}\n\t\t\t.chip.color_j {\n\t\t\t\tcolor: var(--color_j_50);\n\t\t\t\tbackground-color: var(--color_j_10);\n\t\t\t}\n\t\t"
 	},
 	"font_family_sans": {"declaration": "font-family: var(--font_family_sans);"},
 	"font_family_serif": {"declaration": "font-family: var(--font_family_serif);"},
@@ -962,36 +962,84 @@
 	"bg_j_95_dark": {"declaration": "background-color: var(--color_j_95_dark);"},
 	"bg_j_100_light": {"declaration": "background-color: var(--color_j_100_light);"},
 	"bg_j_100_dark": {"declaration": "background-color: var(--color_j_100_dark);"},
-	"darken_1": {"declaration": "background-color: var(--darken_1);"},
-	"darken_2": {"declaration": "background-color: var(--darken_2);"},
-	"darken_3": {"declaration": "background-color: var(--darken_3);"},
-	"darken_4": {"declaration": "background-color: var(--darken_4);"},
-	"darken_5": {"declaration": "background-color: var(--darken_5);"},
-	"darken_6": {"declaration": "background-color: var(--darken_6);"},
-	"darken_7": {"declaration": "background-color: var(--darken_7);"},
-	"darken_8": {"declaration": "background-color: var(--darken_8);"},
-	"darken_9": {"declaration": "background-color: var(--darken_9);"},
-	"lighten_1": {"declaration": "background-color: var(--lighten_1);"},
-	"lighten_2": {"declaration": "background-color: var(--lighten_2);"},
-	"lighten_3": {"declaration": "background-color: var(--lighten_3);"},
-	"lighten_4": {"declaration": "background-color: var(--lighten_4);"},
-	"lighten_5": {"declaration": "background-color: var(--lighten_5);"},
-	"lighten_6": {"declaration": "background-color: var(--lighten_6);"},
-	"lighten_7": {"declaration": "background-color: var(--lighten_7);"},
-	"lighten_8": {"declaration": "background-color: var(--lighten_8);"},
-	"lighten_9": {"declaration": "background-color: var(--lighten_9);"},
+	"darken_05": {"declaration": "background-color: var(--darken_05);"},
+	"darken_10": {"declaration": "background-color: var(--darken_10);"},
+	"darken_20": {"declaration": "background-color: var(--darken_20);"},
+	"darken_30": {"declaration": "background-color: var(--darken_30);"},
+	"darken_40": {"declaration": "background-color: var(--darken_40);"},
+	"darken_50": {"declaration": "background-color: var(--darken_50);"},
+	"darken_60": {"declaration": "background-color: var(--darken_60);"},
+	"darken_70": {"declaration": "background-color: var(--darken_70);"},
+	"darken_80": {"declaration": "background-color: var(--darken_80);"},
+	"darken_90": {"declaration": "background-color: var(--darken_90);"},
+	"darken_95": {"declaration": "background-color: var(--darken_95);"},
+	"lighten_05": {"declaration": "background-color: var(--lighten_05);"},
+	"lighten_10": {"declaration": "background-color: var(--lighten_10);"},
+	"lighten_20": {"declaration": "background-color: var(--lighten_20);"},
+	"lighten_30": {"declaration": "background-color: var(--lighten_30);"},
+	"lighten_40": {"declaration": "background-color: var(--lighten_40);"},
+	"lighten_50": {"declaration": "background-color: var(--lighten_50);"},
+	"lighten_60": {"declaration": "background-color: var(--lighten_60);"},
+	"lighten_70": {"declaration": "background-color: var(--lighten_70);"},
+	"lighten_80": {"declaration": "background-color: var(--lighten_80);"},
+	"lighten_90": {"declaration": "background-color: var(--lighten_90);"},
+	"lighten_95": {"declaration": "background-color: var(--lighten_95);"},
+	"fg_05": {"declaration": "background-color: var(--fg_05);"},
+	"fg_10": {"declaration": "background-color: var(--fg_10);"},
+	"fg_20": {"declaration": "background-color: var(--fg_20);"},
+	"fg_30": {"declaration": "background-color: var(--fg_30);"},
+	"fg_40": {"declaration": "background-color: var(--fg_40);"},
+	"fg_50": {"declaration": "background-color: var(--fg_50);"},
+	"fg_60": {"declaration": "background-color: var(--fg_60);"},
+	"fg_70": {"declaration": "background-color: var(--fg_70);"},
+	"fg_80": {"declaration": "background-color: var(--fg_80);"},
+	"fg_90": {"declaration": "background-color: var(--fg_90);"},
+	"fg_95": {"declaration": "background-color: var(--fg_95);"},
+	"bg_05": {"declaration": "background-color: var(--bg_05);"},
+	"bg_10": {"declaration": "background-color: var(--bg_10);"},
+	"bg_20": {"declaration": "background-color: var(--bg_20);"},
+	"bg_30": {"declaration": "background-color: var(--bg_30);"},
+	"bg_40": {"declaration": "background-color: var(--bg_40);"},
+	"bg_50": {"declaration": "background-color: var(--bg_50);"},
+	"bg_60": {"declaration": "background-color: var(--bg_60);"},
+	"bg_70": {"declaration": "background-color: var(--bg_70);"},
+	"bg_80": {"declaration": "background-color: var(--bg_80);"},
+	"bg_90": {"declaration": "background-color: var(--bg_90);"},
+	"bg_95": {"declaration": "background-color: var(--bg_95);"},
 	"border_color_00": {"declaration": "border-color: var(--shade_00);"},
-	"border_color_05": {"declaration": "border-color: var(--shade_05);"},
-	"border_color_10": {"declaration": "border-color: var(--shade_10);"},
-	"border_color_20": {"declaration": "border-color: var(--shade_20);"},
-	"border_color_30": {"declaration": "border-color: var(--shade_30);"},
-	"border_color_40": {"declaration": "border-color: var(--shade_40);"},
-	"border_color_50": {"declaration": "border-color: var(--shade_50);"},
-	"border_color_60": {"declaration": "border-color: var(--shade_60);"},
-	"border_color_70": {"declaration": "border-color: var(--shade_70);"},
-	"border_color_80": {"declaration": "border-color: var(--shade_80);"},
-	"border_color_90": {"declaration": "border-color: var(--shade_90);"},
-	"border_color_95": {"declaration": "border-color: var(--shade_95);"},
+	"border_color_05": {
+		"declaration": "border-color: var(--border_color_05); --border_color: var(--border_color_05);"
+	},
+	"border_color_10": {
+		"declaration": "border-color: var(--border_color_10); --border_color: var(--border_color_10);"
+	},
+	"border_color_20": {
+		"declaration": "border-color: var(--border_color_20); --border_color: var(--border_color_20);"
+	},
+	"border_color_30": {
+		"declaration": "border-color: var(--border_color_30); --border_color: var(--border_color_30);"
+	},
+	"border_color_40": {
+		"declaration": "border-color: var(--border_color_40); --border_color: var(--border_color_40);"
+	},
+	"border_color_50": {
+		"declaration": "border-color: var(--border_color_50); --border_color: var(--border_color_50);"
+	},
+	"border_color_60": {
+		"declaration": "border-color: var(--border_color_60); --border_color: var(--border_color_60);"
+	},
+	"border_color_70": {
+		"declaration": "border-color: var(--border_color_70); --border_color: var(--border_color_70);"
+	},
+	"border_color_80": {
+		"declaration": "border-color: var(--border_color_80); --border_color: var(--border_color_80);"
+	},
+	"border_color_90": {
+		"declaration": "border-color: var(--border_color_90); --border_color: var(--border_color_90);"
+	},
+	"border_color_95": {
+		"declaration": "border-color: var(--border_color_95); --border_color: var(--border_color_95);"
+	},
 	"border_color_100": {"declaration": "border-color: var(--shade_100);"},
 	"border_color_a_00": {
 		"declaration": "border-color: var(--color_a_00); --border_color: var(--color_a_00);"

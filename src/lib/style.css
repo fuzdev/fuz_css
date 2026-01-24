@@ -224,7 +224,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	padding: var(--space_md);
 	color: var(--text_color);
-	background-color: var(--shade_10);
+	background-color: var(--fg_10);
 }
 
 :where(blockquote:not(.unstyled)) {
@@ -233,6 +233,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-left-width: var(--border_width_8);
 	padding: var(--space_md);
 	color: var(--text_color);
+	background-color: var(--fg_10);
 }
 
 :where(code:not(.unstyled)) {
@@ -241,7 +242,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	-webkit-hyphens: none;
 	hyphens: none;
 	color: var(--text_color);
-	background-color: var(--shade_10);
+	background-color: var(--fg_10);
 	padding: 0 var(--space_xs2);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
@@ -260,8 +261,8 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 }
 
 :where(hr:not(.unstyled)) {
-	border-top: 1px solid var(--shade_30);
-	border-bottom: 2px solid var(--shade_30);
+	border-top: 1px solid var(--border_color_30);
+	border-bottom: 2px solid var(--border_color_30);
 	border-left: none;
 	border-right: none;
 	width: 100%;
@@ -322,7 +323,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 }
 
 :where(:is(input, textarea, select):not(.unstyled):hover) {
-	--border_color: var(--shade_20);
+	--border_color: var(--border_color_20);
 }
 
 /* these have no active states because they feel buggy in the browsers,
@@ -690,10 +691,10 @@ TODO think through these patterns to get somewhere consistent
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
 :where(summary:hover:not(.unstyled)) {
-	background-color: var(--shade_05);
+	background-color: var(--fg_05);
 }
 :where(summary:active:not(.unstyled)) {
-	background-color: var(--shade_20);
+	background-color: var(--fg_20);
 }
 :where(details[open] summary:not(.unstyled)) {
 	margin-bottom: var(--space_sm);
@@ -712,10 +713,10 @@ TODO think through these patterns to get somewhere consistent
 	padding: var(--space_xs3) var(--space_sm);
 }
 :where(tr) {
-	border-bottom: 1px solid var(--shade_10);
+	border-bottom: 1px solid var(--border_color_10);
 }
 :where(tr:hover) {
-	background-color: var(--shade_05);
+	background-color: var(--fg_05);
 }
 
 :where(abbr[title]) {

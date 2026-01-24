@@ -151,24 +151,43 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	// Darken/lighten overlays (non-adaptive, alpha-based)
 	...generate_property_classes(
 		'background-color',
-		darken_lighten_variants.map(String),
+		darken_lighten_variants,
 		(v) => `var(--darken_${v})`,
 		'darken',
 	),
 	...generate_property_classes(
 		'background-color',
-		darken_lighten_variants.map(String),
+		darken_lighten_variants,
 		(v) => `var(--lighten_${v})`,
 		'lighten',
 	),
-
+	// Adaptive alpha overlays (fg = toward foreground, bg = toward background)
+	...generate_property_classes(
+		'background-color',
+		darken_lighten_variants,
+		(v) => `var(--fg_${v})`,
+		'fg',
+	),
+	...generate_property_classes(
+		'background-color',
+		darken_lighten_variants,
+		(v) => `var(--bg_${v})`,
+		'bg',
+	),
 	/*
 
 	borders
 
 	*/
-	// Border colors using shade scale
+	// Border colors using shade scale (opaque, for explicit shade-based borders)
 	...generate_property_classes('border-color', shade_variants, (v) => `var(--shade_${v})`),
+	// Border color alpha (tinted alpha borders - overrides shade-based for 05-95)
+	...generate_property_classes(
+		'border-color',
+		darken_lighten_variants,
+		(v) => `var(--border_color_${v}); --border_color: var(--border_color_${v})`,
+		'border_color',
+	),
 	// Border colors using hue + intensity (sets both property and contextual variable)
 	...generate_classes(
 		(hue: string, intensity: string) => ({

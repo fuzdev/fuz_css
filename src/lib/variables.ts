@@ -911,27 +911,218 @@ Color-scheme-agnostic overlays for consistent darkening/lightening regardless of
 light or dark mode. Use for backdrops, overlays, and demo backgrounds that need
 consistent contrast. Unlike the adaptive shade scale, these don't flip.
 
-Perceptual curve: 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%
+Perceptual curve: 3%, 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%, 98%
 
 */
-export const darken_1: StyleVariable = {name: 'darken_1', light: '#0000000f', summary: '6%'};
-export const darken_2: StyleVariable = {name: 'darken_2', light: '#0000001f', summary: '12%'};
-export const darken_3: StyleVariable = {name: 'darken_3', light: '#00000036', summary: '21%'};
-export const darken_4: StyleVariable = {name: 'darken_4', light: '#00000052', summary: '32%'};
-export const darken_5: StyleVariable = {name: 'darken_5', light: '#00000073', summary: '45%'};
-export const darken_6: StyleVariable = {name: 'darken_6', light: '#000000a6', summary: '65%'};
-export const darken_7: StyleVariable = {name: 'darken_7', light: '#000000cc', summary: '80%'};
-export const darken_8: StyleVariable = {name: 'darken_8', light: '#000000e3', summary: '89%'};
-export const darken_9: StyleVariable = {name: 'darken_9', light: '#000000f5', summary: '96%'};
-export const lighten_1: StyleVariable = {name: 'lighten_1', light: '#ffffff0f', summary: '6%'};
-export const lighten_2: StyleVariable = {name: 'lighten_2', light: '#ffffff1f', summary: '12%'};
-export const lighten_3: StyleVariable = {name: 'lighten_3', light: '#ffffff36', summary: '21%'};
-export const lighten_4: StyleVariable = {name: 'lighten_4', light: '#ffffff52', summary: '32%'};
-export const lighten_5: StyleVariable = {name: 'lighten_5', light: '#ffffff73', summary: '45%'};
-export const lighten_6: StyleVariable = {name: 'lighten_6', light: '#ffffffa6', summary: '65%'};
-export const lighten_7: StyleVariable = {name: 'lighten_7', light: '#ffffffcc', summary: '80%'};
-export const lighten_8: StyleVariable = {name: 'lighten_8', light: '#ffffffe3', summary: '89%'};
-export const lighten_9: StyleVariable = {name: 'lighten_9', light: '#fffffff5', summary: '96%'};
+export const darken_05: StyleVariable = {name: 'darken_05', light: '#00000008', summary: '3%'};
+export const darken_10: StyleVariable = {name: 'darken_10', light: '#0000000f', summary: '6%'};
+export const darken_20: StyleVariable = {name: 'darken_20', light: '#0000001f', summary: '12%'};
+export const darken_30: StyleVariable = {name: 'darken_30', light: '#00000036', summary: '21%'};
+export const darken_40: StyleVariable = {name: 'darken_40', light: '#00000052', summary: '32%'};
+export const darken_50: StyleVariable = {name: 'darken_50', light: '#00000073', summary: '45%'};
+export const darken_60: StyleVariable = {name: 'darken_60', light: '#000000a6', summary: '65%'};
+export const darken_70: StyleVariable = {name: 'darken_70', light: '#000000cc', summary: '80%'};
+export const darken_80: StyleVariable = {name: 'darken_80', light: '#000000e3', summary: '89%'};
+export const darken_90: StyleVariable = {name: 'darken_90', light: '#000000f5', summary: '96%'};
+export const darken_95: StyleVariable = {name: 'darken_95', light: '#000000fa', summary: '98%'};
+export const lighten_05: StyleVariable = {name: 'lighten_05', light: '#ffffff08', summary: '3%'};
+export const lighten_10: StyleVariable = {name: 'lighten_10', light: '#ffffff0f', summary: '6%'};
+export const lighten_20: StyleVariable = {name: 'lighten_20', light: '#ffffff1f', summary: '12%'};
+export const lighten_30: StyleVariable = {name: 'lighten_30', light: '#ffffff36', summary: '21%'};
+export const lighten_40: StyleVariable = {name: 'lighten_40', light: '#ffffff52', summary: '32%'};
+export const lighten_50: StyleVariable = {name: 'lighten_50', light: '#ffffff73', summary: '45%'};
+export const lighten_60: StyleVariable = {name: 'lighten_60', light: '#ffffffa6', summary: '65%'};
+export const lighten_70: StyleVariable = {name: 'lighten_70', light: '#ffffffcc', summary: '80%'};
+export const lighten_80: StyleVariable = {name: 'lighten_80', light: '#ffffffe3', summary: '89%'};
+export const lighten_90: StyleVariable = {name: 'lighten_90', light: '#fffffff5', summary: '96%'};
+export const lighten_95: StyleVariable = {name: 'lighten_95', light: '#fffffffa', summary: '98%'};
+
+/*
+
+fg/bg - adaptive alpha overlays
+
+Color-scheme-adaptive overlays that swap direction per color scheme:
+- fg (foreground direction) = toward contrast (darkens in light mode, lightens in dark mode)
+- bg (background direction) = toward surface (lightens in light mode, darkens in dark mode)
+
+Use for subtle backgrounds that work in both color schemes without explicit conditionals.
+These stack when nested (alpha accumulates), unlike the opaque shade scale.
+
+*/
+export const fg_05: StyleVariable = {
+	name: 'fg_05',
+	light: 'var(--darken_05)',
+	dark: 'var(--lighten_05)',
+};
+export const fg_10: StyleVariable = {
+	name: 'fg_10',
+	light: 'var(--darken_10)',
+	dark: 'var(--lighten_10)',
+};
+export const fg_20: StyleVariable = {
+	name: 'fg_20',
+	light: 'var(--darken_20)',
+	dark: 'var(--lighten_20)',
+};
+export const fg_30: StyleVariable = {
+	name: 'fg_30',
+	light: 'var(--darken_30)',
+	dark: 'var(--lighten_30)',
+};
+export const fg_40: StyleVariable = {
+	name: 'fg_40',
+	light: 'var(--darken_40)',
+	dark: 'var(--lighten_40)',
+};
+export const fg_50: StyleVariable = {
+	name: 'fg_50',
+	light: 'var(--darken_50)',
+	dark: 'var(--lighten_50)',
+};
+export const fg_60: StyleVariable = {
+	name: 'fg_60',
+	light: 'var(--darken_60)',
+	dark: 'var(--lighten_60)',
+};
+export const fg_70: StyleVariable = {
+	name: 'fg_70',
+	light: 'var(--darken_70)',
+	dark: 'var(--lighten_70)',
+};
+export const fg_80: StyleVariable = {
+	name: 'fg_80',
+	light: 'var(--darken_80)',
+	dark: 'var(--lighten_80)',
+};
+export const fg_90: StyleVariable = {
+	name: 'fg_90',
+	light: 'var(--darken_90)',
+	dark: 'var(--lighten_90)',
+};
+export const fg_95: StyleVariable = {
+	name: 'fg_95',
+	light: 'var(--darken_95)',
+	dark: 'var(--lighten_95)',
+};
+export const bg_05: StyleVariable = {
+	name: 'bg_05',
+	light: 'var(--lighten_05)',
+	dark: 'var(--darken_05)',
+};
+export const bg_10: StyleVariable = {
+	name: 'bg_10',
+	light: 'var(--lighten_10)',
+	dark: 'var(--darken_10)',
+};
+export const bg_20: StyleVariable = {
+	name: 'bg_20',
+	light: 'var(--lighten_20)',
+	dark: 'var(--darken_20)',
+};
+export const bg_30: StyleVariable = {
+	name: 'bg_30',
+	light: 'var(--lighten_30)',
+	dark: 'var(--darken_30)',
+};
+export const bg_40: StyleVariable = {
+	name: 'bg_40',
+	light: 'var(--lighten_40)',
+	dark: 'var(--darken_40)',
+};
+export const bg_50: StyleVariable = {
+	name: 'bg_50',
+	light: 'var(--lighten_50)',
+	dark: 'var(--darken_50)',
+};
+export const bg_60: StyleVariable = {
+	name: 'bg_60',
+	light: 'var(--lighten_60)',
+	dark: 'var(--darken_60)',
+};
+export const bg_70: StyleVariable = {
+	name: 'bg_70',
+	light: 'var(--lighten_70)',
+	dark: 'var(--darken_70)',
+};
+export const bg_80: StyleVariable = {
+	name: 'bg_80',
+	light: 'var(--lighten_80)',
+	dark: 'var(--darken_80)',
+};
+export const bg_90: StyleVariable = {
+	name: 'bg_90',
+	light: 'var(--lighten_90)',
+	dark: 'var(--darken_90)',
+};
+export const bg_95: StyleVariable = {
+	name: 'bg_95',
+	light: 'var(--lighten_95)',
+	dark: 'var(--darken_95)',
+};
+
+/*
+
+border_color alpha - tinted alpha borders for accessibility
+
+Theme-integrated borders with alpha transparency. Tinted with tint_hue for cohesion.
+Higher alpha in dark mode compensates for lower perceived contrast.
+
+*/
+export const border_color_05: StyleVariable = {
+	name: 'border_color_05',
+	light: 'hsl(var(--tint_hue) 60% 20% / 10%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 15%)',
+};
+export const border_color_10: StyleVariable = {
+	name: 'border_color_10',
+	light: 'hsl(var(--tint_hue) 60% 20% / 15%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 25%)',
+};
+export const border_color_20: StyleVariable = {
+	name: 'border_color_20',
+	light: 'hsl(var(--tint_hue) 60% 20% / 25%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 40%)',
+};
+export const border_color_30: StyleVariable = {
+	name: 'border_color_30',
+	light: 'hsl(var(--tint_hue) 60% 20% / 35%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 55%)',
+};
+export const border_color_40: StyleVariable = {
+	name: 'border_color_40',
+	light: 'hsl(var(--tint_hue) 60% 20% / 50%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 70%)',
+};
+export const border_color_50: StyleVariable = {
+	name: 'border_color_50',
+	light: 'hsl(var(--tint_hue) 60% 20% / 65%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 80%)',
+};
+export const border_color_60: StyleVariable = {
+	name: 'border_color_60',
+	light: 'hsl(var(--tint_hue) 60% 20% / 75%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 85%)',
+};
+export const border_color_70: StyleVariable = {
+	name: 'border_color_70',
+	light: 'hsl(var(--tint_hue) 60% 20% / 82%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 90%)',
+};
+export const border_color_80: StyleVariable = {
+	name: 'border_color_80',
+	light: 'hsl(var(--tint_hue) 60% 20% / 88%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 93%)',
+};
+export const border_color_90: StyleVariable = {
+	name: 'border_color_90',
+	light: 'hsl(var(--tint_hue) 60% 20% / 94%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 96%)',
+};
+export const border_color_95: StyleVariable = {
+	name: 'border_color_95',
+	light: 'hsl(var(--tint_hue) 60% 20% / 97%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 98%)',
+};
 
 /*
 
@@ -1806,24 +1997,65 @@ export const default_variables: Array<StyleVariable> = [
 	shade_100_dark,
 
 	/* darken/lighten alpha overlays */
-	darken_1,
-	darken_2,
-	darken_3,
-	darken_4,
-	darken_5,
-	darken_6,
-	darken_7,
-	darken_8,
-	darken_9,
-	lighten_1,
-	lighten_2,
-	lighten_3,
-	lighten_4,
-	lighten_5,
-	lighten_6,
-	lighten_7,
-	lighten_8,
-	lighten_9,
+	darken_05,
+	darken_10,
+	darken_20,
+	darken_30,
+	darken_40,
+	darken_50,
+	darken_60,
+	darken_70,
+	darken_80,
+	darken_90,
+	darken_95,
+	lighten_05,
+	lighten_10,
+	lighten_20,
+	lighten_30,
+	lighten_40,
+	lighten_50,
+	lighten_60,
+	lighten_70,
+	lighten_80,
+	lighten_90,
+	lighten_95,
+
+	/* fg/bg adaptive alpha overlays */
+	fg_05,
+	fg_10,
+	fg_20,
+	fg_30,
+	fg_40,
+	fg_50,
+	fg_60,
+	fg_70,
+	fg_80,
+	fg_90,
+	fg_95,
+	bg_05,
+	bg_10,
+	bg_20,
+	bg_30,
+	bg_40,
+	bg_50,
+	bg_60,
+	bg_70,
+	bg_80,
+	bg_90,
+	bg_95,
+
+	/* border_color alpha */
+	border_color_05,
+	border_color_10,
+	border_color_20,
+	border_color_30,
+	border_color_40,
+	border_color_50,
+	border_color_60,
+	border_color_70,
+	border_color_80,
+	border_color_90,
+	border_color_95,
 
 	/* text colors don't use alpha because it affects performance too much */
 	text_min,
