@@ -112,6 +112,7 @@
 		<TomeSectionHeader text="Usage patterns" />
 		<p>Common shade assignments:</p>
 		<Code
+			lang="css"
 			content={`/* Base page background */
 background-color: var(--shade_00);
 
