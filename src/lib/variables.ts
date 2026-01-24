@@ -648,18 +648,18 @@ export const shade_70: StyleVariable = {
 };
 export const shade_80: StyleVariable = {
 	name: 'shade_80',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 11%)', // from fg_8: 96% * (1 - 0.89)
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)', // from fg_8: 6% + 94% * 0.89
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 13%)', // spread out for better visual distinction
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 87%)',
 };
 export const shade_90: StyleVariable = {
 	name: 'shade_90',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)', // capped (fg_9 would be 4%, but must stay above shade_100)
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 93%)', // adjusted to fit within scale
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 10%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
 };
 export const shade_95: StyleVariable = {
 	name: 'shade_95',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 7%)', // interpolated between shade_90 and shade_100
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 95%)', // interpolated
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 92%)',
 };
 export const shade_100: StyleVariable = {
 	name: 'shade_100',
@@ -687,22 +687,20 @@ export const text_max: StyleVariable = {
 };
 
 export const text_color: StyleVariable = {name: 'text_color', light: 'var(--text_80)'};
-// text_00: surface-side endpoint (essentially the surface color as text)
 export const text_00: StyleVariable = {
 	name: 'text_00',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
 };
-// text_05: very faint, near-surface (watermarks, ghost text)
 export const text_05: StyleVariable = {
 	name: 'text_05',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 98%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 94%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 10%)',
 };
 export const text_10: StyleVariable = {
 	name: 'text_10',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 12%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 14%)',
 };
 export const text_20: StyleVariable = {
 	name: 'text_20',
@@ -743,17 +741,15 @@ export const text_90: StyleVariable = {
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
 };
-// text_95: very high emphasis
 export const text_95: StyleVariable = {
 	name: 'text_95',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 4%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 };
-// text_100: contrast-side endpoint (essentially the ink color as text)
 export const text_100: StyleVariable = {
 	name: 'text_100',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 2%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 98%)',
 };
 export const text_disabled: StyleVariable = {
 	name: 'text_disabled',

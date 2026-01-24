@@ -253,7 +253,12 @@
 				</li>
 			</ul>
 			<h4>Colors</h4>
-			<p>See <TomeLink name="colors" />.</p>
+			<p>
+				See <TomeLink name="colors" />, <TomeLink name="shading" />, and <TomeLink
+					name="typography"
+					hash="Text-colors"
+				/>.
+			</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -291,6 +296,12 @@
 					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
 				</li>
 			</ul>
+			<aside>
+				The <code>text_*</code> and <code>shade_*</code> scales are separate because text and
+				backgrounds have different contrast requirements. Use <code>text_*</code> for text colors
+				and <code>shade_*</code> for backgrounds. Both follow "prominence" semantics for light and dark
+				modes: low numbers are subtle, high numbers are strong.
+			</aside>
 			<h4>Typography</h4>
 			<p>See <TomeLink name="typography" />.</p>
 			<ul class="unstyled">

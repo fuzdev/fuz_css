@@ -135,16 +135,16 @@
 	--shade_50: hsl(var(--tint_hue) var(--tint_saturation) 53%);
 	--shade_60: hsl(var(--tint_hue) var(--tint_saturation) 34%);
 	--shade_70: hsl(var(--tint_hue) var(--tint_saturation) 19%);
-	--shade_80: hsl(var(--tint_hue) var(--tint_saturation) 11%);
-	--shade_90: hsl(var(--tint_hue) var(--tint_saturation) 8%);
-	--shade_95: hsl(var(--tint_hue) var(--tint_saturation) 7%);
+	--shade_80: hsl(var(--tint_hue) var(--tint_saturation) 13%);
+	--shade_90: hsl(var(--tint_hue) var(--tint_saturation) 10%);
+	--shade_95: hsl(var(--tint_hue) var(--tint_saturation) 8%);
 	--shade_100: hsl(var(--tint_hue) var(--tint_saturation) 6%);
 	--text_min: #fff;
 	--text_max: #000;
 	--text_color: var(--text_80);
 	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 96%);
-	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 98%);
-	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 94%);
+	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 82%);
 	--text_30: hsl(var(--tint_hue) var(--tint_saturation) 68%);
 	--text_40: hsl(var(--tint_hue) var(--tint_saturation) 59%);
@@ -154,7 +154,7 @@
 	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 16%);
 	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 8%);
 	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 4%);
-	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 6%);
+	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 2%);
 	--text_disabled: var(--text_50);
 	--font_family_sans:
 		system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; /* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -415,15 +415,15 @@
 	--shade_50: hsl(var(--tint_hue) var(--tint_saturation) 48%);
 	--shade_60: hsl(var(--tint_hue) var(--tint_saturation) 67%);
 	--shade_70: hsl(var(--tint_hue) var(--tint_saturation) 81%);
-	--shade_80: hsl(var(--tint_hue) var(--tint_saturation) 90%);
-	--shade_90: hsl(var(--tint_hue) var(--tint_saturation) 93%);
-	--shade_95: hsl(var(--tint_hue) var(--tint_saturation) 95%);
+	--shade_80: hsl(var(--tint_hue) var(--tint_saturation) 87%);
+	--shade_90: hsl(var(--tint_hue) var(--tint_saturation) 90%);
+	--shade_95: hsl(var(--tint_hue) var(--tint_saturation) 92%);
 	--shade_100: hsl(var(--tint_hue) var(--tint_saturation) 96%);
 	--text_min: #000;
 	--text_max: #fff;
 	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 6%);
-	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 8%);
-	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 12%);
+	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 10%);
+	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 14%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 22%);
 	--text_30: hsl(var(--tint_hue) var(--tint_saturation) 30%);
 	--text_40: hsl(var(--tint_hue) var(--tint_saturation) 40%);
@@ -432,7 +432,7 @@
 	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 80%);
 	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 96%);
-	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 98%);
 	--link_color: hsl(var(--hue_a) 61% 58%);
 	--button_shadow:
 		var(--shadow_inset_top_xs)

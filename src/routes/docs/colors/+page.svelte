@@ -103,6 +103,12 @@
 		<p>
 			Note that these values differ between light and dark modes! See the discussion above for why.
 		</p>
+		<p>
+			Unlike the <TomeLink name="shading">shade</TomeLink> and
+			<TomeLink name="typography" hash="Text-colors">text</TomeLink> scales (which are separate), color
+			variables can be used for both text and backgrounds via utility classes:
+			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
+		</p>
 		<p>These colors were eyeballed by a programmer, and will change :]</p>
 		<ul class="palette unstyled pt_xl2">
 			{#each color_variants as color_name (color_name)}

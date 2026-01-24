@@ -12,7 +12,6 @@
 	import FontSizeControl from '$routes/FontSizeControl.svelte';
 	import {default_variables} from '$lib/variables.js';
 	import IconSizes from '$routes/docs/typography/IconSizes.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {
 		line_height_names,
@@ -141,9 +140,26 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Text colors">Text colors</TomeSectionHeader>
-		<UnfinishedImplementationWarning>
-			Add color-scheme-adaptive versions?
-		</UnfinishedImplementationWarning>
+		<p>
+			The text scale (<code>text_00</code> through <code>text_100</code>) provides tinted neutral
+			colors optimized for text legibility. The scale uses "prominence" semantics for light and dark
+			modes: low numbers are subtle, high numbers are strong. This matches the
+			<TomeLink name="shading">shade scale</TomeLink> pattern.
+		</p>
+		<ul>
+			<li><code>text_00</code>: surface-side endpoint (essentially invisible on surface)</li>
+			<li>
+				<code>text_10</code>-<code>text_30</code>: very subtle/faint text (watermarks, hints)
+			</li>
+			<li><code>text_50</code>: disabled text (<code>text_disabled</code>)</li>
+			<li><code>text_80</code>: default body text (<code>--text_color</code>)</li>
+			<li><code>text_90</code>-<code>text_100</code>: high emphasis/headings</li>
+		</ul>
+		<p>
+			The text scale is separate from the shade scale because text and backgrounds have different
+			contrast requirements. Use <code>text_*</code> for text colors and <code>shade_*</code> for
+			backgrounds. For colored text, use <code>color_a_50</code> etc.
+		</p>
 		<div class="panel">
 			{#each text_variants as text_variant (text_variant)}
 				{@const name = 'text_' + text_variant}

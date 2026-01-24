@@ -139,6 +139,15 @@ background-color: var(--shade_min);`}
 			values like <code>hsla(0 0% 0% / 10%)</code>.
 		</p>
 	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="Text colors" />
+		<p>
+			For text colors, see the <TomeLink name="typography" hash="Text-colors">text scale</TomeLink>
+			(<code>text_00</code> through <code>text_100</code>). Both scales use the same "prominence"
+			semantics for light and dark modes: low numbers are subtle, high numbers are strong. They're
+			separate scales because text and backgrounds have different contrast requirements.
+		</p>
+	</TomeSection>
 </TomeContent>
 
 <style>
