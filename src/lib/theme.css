@@ -611,7 +611,7 @@
 			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_2), transparent),
 		var(--shadow_inset_bottom_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_2), transparent);
-	--input_fill: var(--shade_min);
+	--input_fill: var(--bg_80);
 	--input_padding_y: 0;
 	--input_padding_x: var(--space_lg);
 	--input_width_min: 100px;

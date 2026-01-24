@@ -691,7 +691,7 @@ TODO think through these patterns to get somewhere consistent
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
 :where(summary:hover:not(.unstyled)) {
-	background-color: var(--fg_05);
+	background-color: var(--fg_10);
 }
 :where(summary:active:not(.unstyled)) {
 	background-color: var(--fg_20);
@@ -716,7 +716,7 @@ TODO think through these patterns to get somewhere consistent
 	border-bottom: 1px solid var(--border_color_10);
 }
 :where(tr:hover) {
-	background-color: var(--fg_05);
+	background-color: var(--fg_10);
 }
 
 :where(abbr[title]) {

@@ -166,7 +166,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 			.menu_item:hover {
 				--border_color: var(--border_color_30);
-				background-color: var(--fg_05);
+				background-color: var(--fg_10);
 			}
 			.menu_item:active,
 			.menu_item.selected:hover {

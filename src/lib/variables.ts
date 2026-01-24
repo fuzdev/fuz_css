@@ -1372,7 +1372,7 @@ export const button_shadow_active: StyleVariable = {
 };
 
 /* inputs */
-export const input_fill: StyleVariable = {name: 'input_fill', light: 'var(--shade_min)'};
+export const input_fill: StyleVariable = {name: 'input_fill', light: 'var(--bg_80)'};
 export const input_padding_y: StyleVariable = {name: 'input_padding_y', light: '0'};
 export const input_padding_x: StyleVariable = {name: 'input_padding_x', light: 'var(--space_lg)'};
 export const input_width_min: StyleVariable = {name: 'input_width_min', light: '100px'};

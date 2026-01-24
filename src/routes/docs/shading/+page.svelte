@@ -13,6 +13,8 @@
 	import {shade_variants, alpha_variants} from '$lib/variable_data.js';
 
 	// @fuz-classes fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95
+	// @fuz-classes bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95
+	// @fuz-classes shade_50
 	// @fuz-classes darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95
 	// @fuz-classes lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95
 	// @fuz-classes border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95
@@ -117,7 +119,8 @@
 		<TomeSectionHeader text="Adaptive alpha overlays (fg/bg)" />
 		<p>
 			The <code>fg</code> and <code>bg</code> variables provide alpha-based overlays that adapt to the
-			color scheme. Unlike the opaque shade scale, these stack when nested.
+			color scheme. Unlike the opaque shade scale, these stack when nested and are used by composites
+			like <code>.panel</code> and <code>.chip</code>.
 		</p>
 		<ul>
 			<li>
@@ -129,6 +132,10 @@
 				for surfaces that blend toward the background.
 			</li>
 		</ul>
+		<p>
+			In light mode, <code>fg</code> is the same as <code>darken</code> and <code>bg</code> is the
+			same as <code>lighten</code>. In dark mode, they're swapped.
+		</p>
 		<TomeSection>
 			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
 			<p>Adaptive overlays that add contrast with the surface.</p>
@@ -143,11 +150,35 @@
 			</div>
 		</TomeSection>
 		<TomeSection>
+			<TomeSectionHeader text="bg (toward background)" tag="h4" />
+			<p>Adaptive overlays that reduce contrast with the surface.</p>
+			<div class="overlay_swatch shade_50">
+				{#each alpha_variants as v (v)}
+					{@const name = 'bg_' + v}
+					<div>
+						<div class="overlay_color bg_{v}"></div>
+						<small><StyleVariableButton {name} /></small>
+					</div>
+				{/each}
+			</div>
+		</TomeSection>
+		<TomeSection>
 			<TomeSectionHeader text="Stacking behavior" tag="h4" />
 			<p>
 				Unlike the opaque shade scale, alpha overlays <strong>stack</strong> when nested. Each layer adds
 				more contrast:
 			</p>
+			<Code
+				content={`<div class="fg_10 p_sm">
+	<div class="fg_10 p_sm">
+		<div class="fg_10 p_sm">
+			<div class="fg_10 p_sm">
+				...
+			</div>
+		</div>
+	</div>
+</div>`}
+			/>
 			<div class="stacking_demo">
 				<div class="stacking_layer fg_10">
 					<span>fg_10</span>
@@ -155,13 +186,17 @@
 						<span>nested fg_10</span>
 						<div class="stacking_layer fg_10">
 							<span>triple nested</span>
+							<div class="stacking_layer fg_10">
+								<span>quadruple nested</span>
+							</div>
 						</div>
 					</div>
 				</div>
 			</div>
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
-				elevated containers.
+				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
+				<code>.menu_item</code> use <code>fg_10</code> for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -232,35 +267,38 @@
 		</div>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Usage patterns" />
-		<p>Common shade assignments:</p>
+		<TomeSectionHeader text="When to use which" />
+		<p>
+			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested UI:
+		</p>
+		<Code
+			lang="css"
+			content={`/* Elevated panel (stacks when nested) */
+background-color: var(--fg_10);
+
+/* Hover state (stacks on any background) */
+background-color: var(--fg_10);
+
+/* Active/pressed state */
+background-color: var(--fg_20);`}
+		/>
+		<p class="mt_md">
+			<strong>Use <code>shade_NN</code></strong> when you need explicit, predictable opaque surfaces:
+		</p>
 		<Code
 			lang="css"
 			content={`/* Base page background */
 background-color: var(--shade_00);
 
-/* Elevated panel or card */
-background-color: var(--shade_10);
-
-/* Hover state on shade_00 */
-background-color: var(--shade_05);
-
-/* Active/pressed state */
-background-color: var(--shade_20);
-
-/* Default border */
+/* Opaque border */
 border-color: var(--shade_30);
-
-/* Subtle border (tables) */
-border-color: var(--shade_10);
 
 /* Input backgrounds (untinted for contrast) */
 background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
-			Shades are opaque and don't accumulate when nested. This is more performant and predictable
-			than alpha-based stacking. For rare cases requiring true overlay stacking, use inline alpha
-			values like <code>hsla(0 0% 0% / 10%)</code>.
+			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menu_item</code>) use
+			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque base.
 		</p>
 	</TomeSection>
 	<TomeSection>
