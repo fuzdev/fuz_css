@@ -7,6 +7,7 @@ import semantic from '$routes/docs/semantic/+page.svelte';
 import themes from '$routes/docs/themes/+page.svelte';
 import colors from '$routes/docs/colors/+page.svelte';
 import buttons from '$routes/docs/buttons/+page.svelte';
+import chips from '$routes/docs/chips/+page.svelte';
 import forms from '$routes/docs/forms/+page.svelte';
 import elements from '$routes/docs/elements/+page.svelte';
 import classes from '$routes/docs/classes/+page.svelte';
@@ -73,7 +74,7 @@ export const tomes: Array<Tome> = [
 		name: 'classes',
 		category: 'systems',
 		Component: classes,
-		related_tomes: ['elements'],
+		related_tomes: ['chips', 'elements'],
 		related_modules: [],
 		related_declarations: [],
 	},
@@ -81,7 +82,7 @@ export const tomes: Array<Tome> = [
 		name: 'colors',
 		category: 'styles',
 		Component: colors,
-		related_tomes: ['themes', 'buttons', 'borders', 'shading', 'shadows'],
+		related_tomes: ['themes', 'buttons', 'chips', 'borders', 'shading', 'shadows'],
 		related_modules: [],
 		related_declarations: [],
 	},
@@ -89,7 +90,15 @@ export const tomes: Array<Tome> = [
 		name: 'buttons',
 		category: 'styles',
 		Component: buttons,
-		related_tomes: ['colors', 'elements', 'forms', 'borders'],
+		related_tomes: ['colors', 'chips', 'elements', 'forms', 'borders'],
+		related_modules: [],
+		related_declarations: [],
+	},
+	{
+		name: 'chips',
+		category: 'styles',
+		Component: chips,
+		related_tomes: ['colors', 'buttons', 'classes'],
 		related_modules: [],
 		related_declarations: [],
 	},

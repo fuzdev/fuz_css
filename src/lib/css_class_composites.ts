@@ -226,6 +226,46 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			a.chip {
 				font-weight: 600;
 			}
+			.chip.color_a {
+				color: var(--color_a_50);
+				background-color: var(--color_a_10);
+			}
+			.chip.color_b {
+				color: var(--color_b_50);
+				background-color: var(--color_b_10);
+			}
+			.chip.color_c {
+				color: var(--color_c_50);
+				background-color: var(--color_c_10);
+			}
+			.chip.color_d {
+				color: var(--color_d_50);
+				background-color: var(--color_d_10);
+			}
+			.chip.color_e {
+				color: var(--color_e_50);
+				background-color: var(--color_e_10);
+			}
+			.chip.color_f {
+				color: var(--color_f_50);
+				background-color: var(--color_f_10);
+			}
+			.chip.color_g {
+				color: var(--color_g_50);
+				background-color: var(--color_g_10);
+			}
+			.chip.color_h {
+				color: var(--color_h_50);
+				background-color: var(--color_h_10);
+			}
+			.chip.color_i {
+				color: var(--color_i_50);
+				background-color: var(--color_i_10);
+			}
+			.chip.color_j {
+				color: var(--color_j_50);
+				background-color: var(--color_j_10);
+			}
 		`,
 	},
 };

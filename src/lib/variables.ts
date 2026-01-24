@@ -34,16 +34,17 @@ export const hue_j: StyleVariable = {name: 'hue_j', light: '155', summary: 'teal
 export const color_a_00: StyleVariable = {
 	name: 'color_a_00',
 	light: 'hsl(var(--hue_a) 70% 98%)',
-	dark: 'hsl(var(--hue_a) 70% 92%)',
+	dark: 'hsl(var(--hue_a) 70% 4%)',
 };
 export const color_a_05: StyleVariable = {
 	name: 'color_a_05',
 	light: 'hsl(var(--hue_a) 68% 95%)',
-	dark: 'hsl(var(--hue_a) 68% 88%)',
+	dark: 'hsl(var(--hue_a) 68% 8%)',
 };
 export const color_a_10: StyleVariable = {
 	name: 'color_a_10',
 	light: 'hsl(var(--hue_a) 65% 91%)',
+	dark: 'hsl(var(--hue_a) 65% 12%)',
 };
 export const color_a_20: StyleVariable = {
 	name: 'color_a_20',
@@ -83,30 +84,32 @@ export const color_a_80: StyleVariable = {
 export const color_a_90: StyleVariable = {
 	name: 'color_a_90',
 	light: 'hsl(var(--hue_a) 55% 10%)',
+	dark: 'hsl(var(--hue_a) 55% 88%)',
 };
 export const color_a_95: StyleVariable = {
 	name: 'color_a_95',
 	light: 'hsl(var(--hue_a) 55% 5%)',
-	dark: 'hsl(var(--hue_a) 55% 12%)',
+	dark: 'hsl(var(--hue_a) 55% 92%)',
 };
 export const color_a_100: StyleVariable = {
 	name: 'color_a_100',
 	light: 'hsl(var(--hue_a) 55% 2%)',
-	dark: 'hsl(var(--hue_a) 55% 6%)',
+	dark: 'hsl(var(--hue_a) 55% 96%)',
 };
 export const color_b_00: StyleVariable = {
 	name: 'color_b_00',
 	light: 'hsl(var(--hue_b) 55% 98%)',
-	dark: 'hsl(var(--hue_b) 55% 92%)',
+	dark: 'hsl(var(--hue_b) 55% 4%)',
 };
 export const color_b_05: StyleVariable = {
 	name: 'color_b_05',
 	light: 'hsl(var(--hue_b) 52% 94%)',
-	dark: 'hsl(var(--hue_b) 52% 87%)',
+	dark: 'hsl(var(--hue_b) 52% 8%)',
 };
 export const color_b_10: StyleVariable = {
 	name: 'color_b_10',
 	light: 'hsl(var(--hue_b) 55% 90%)',
+	dark: 'hsl(var(--hue_b) 55% 12%)',
 };
 export const color_b_20: StyleVariable = {
 	name: 'color_b_20',
@@ -146,30 +149,32 @@ export const color_b_80: StyleVariable = {
 export const color_b_90: StyleVariable = {
 	name: 'color_b_90',
 	light: 'hsl(var(--hue_b) 75% 7%)',
+	dark: 'hsl(var(--hue_b) 75% 88%)',
 };
 export const color_b_95: StyleVariable = {
 	name: 'color_b_95',
 	light: 'hsl(var(--hue_b) 78% 4%)',
-	dark: 'hsl(var(--hue_b) 70% 10%)',
+	dark: 'hsl(var(--hue_b) 78% 92%)',
 };
 export const color_b_100: StyleVariable = {
 	name: 'color_b_100',
 	light: 'hsl(var(--hue_b) 80% 2%)',
-	dark: 'hsl(var(--hue_b) 75% 6%)',
+	dark: 'hsl(var(--hue_b) 80% 96%)',
 };
 export const color_c_00: StyleVariable = {
 	name: 'color_c_00',
 	light: 'hsl(var(--hue_c) 90% 98%)',
-	dark: 'hsl(var(--hue_c) 90% 92%)',
+	dark: 'hsl(var(--hue_c) 90% 4%)',
 };
 export const color_c_05: StyleVariable = {
 	name: 'color_c_05',
 	light: 'hsl(var(--hue_c) 88% 96%)',
-	dark: 'hsl(var(--hue_c) 88% 88%)',
+	dark: 'hsl(var(--hue_c) 88% 8%)',
 };
 export const color_c_10: StyleVariable = {
 	name: 'color_c_10',
 	light: 'hsl(var(--hue_c) 85% 92%)',
+	dark: 'hsl(var(--hue_c) 85% 12%)',
 };
 export const color_c_20: StyleVariable = {
 	name: 'color_c_20',
@@ -209,30 +214,32 @@ export const color_c_80: StyleVariable = {
 export const color_c_90: StyleVariable = {
 	name: 'color_c_90',
 	light: 'hsl(var(--hue_c) 65% 10%)',
+	dark: 'hsl(var(--hue_c) 65% 88%)',
 };
 export const color_c_95: StyleVariable = {
 	name: 'color_c_95',
 	light: 'hsl(var(--hue_c) 65% 5%)',
-	dark: 'hsl(var(--hue_c) 65% 12%)',
+	dark: 'hsl(var(--hue_c) 65% 92%)',
 };
 export const color_c_100: StyleVariable = {
 	name: 'color_c_100',
 	light: 'hsl(var(--hue_c) 65% 2%)',
-	dark: 'hsl(var(--hue_c) 65% 6%)',
+	dark: 'hsl(var(--hue_c) 65% 96%)',
 };
 export const color_d_00: StyleVariable = {
 	name: 'color_d_00',
 	light: 'hsl(var(--hue_d) 55% 98%)',
-	dark: 'hsl(var(--hue_d) 55% 92%)',
+	dark: 'hsl(var(--hue_d) 55% 4%)',
 };
 export const color_d_05: StyleVariable = {
 	name: 'color_d_05',
 	light: 'hsl(var(--hue_d) 52% 95%)',
-	dark: 'hsl(var(--hue_d) 52% 87%)',
+	dark: 'hsl(var(--hue_d) 52% 8%)',
 };
 export const color_d_10: StyleVariable = {
 	name: 'color_d_10',
 	light: 'hsl(var(--hue_d) 50% 91%)',
+	dark: 'hsl(var(--hue_d) 50% 12%)',
 };
 export const color_d_20: StyleVariable = {
 	name: 'color_d_20',
@@ -272,30 +279,32 @@ export const color_d_80: StyleVariable = {
 export const color_d_90: StyleVariable = {
 	name: 'color_d_90',
 	light: 'hsl(var(--hue_d) 50% 10%)',
+	dark: 'hsl(var(--hue_d) 50% 88%)',
 };
 export const color_d_95: StyleVariable = {
 	name: 'color_d_95',
 	light: 'hsl(var(--hue_d) 50% 5%)',
-	dark: 'hsl(var(--hue_d) 50% 12%)',
+	dark: 'hsl(var(--hue_d) 50% 92%)',
 };
 export const color_d_100: StyleVariable = {
 	name: 'color_d_100',
 	light: 'hsl(var(--hue_d) 50% 2%)',
-	dark: 'hsl(var(--hue_d) 50% 6%)',
+	dark: 'hsl(var(--hue_d) 50% 96%)',
 };
 export const color_e_00: StyleVariable = {
 	name: 'color_e_00',
 	light: 'hsl(var(--hue_e) 90% 98%)',
-	dark: 'hsl(var(--hue_e) 90% 92%)',
+	dark: 'hsl(var(--hue_e) 90% 4%)',
 };
 export const color_e_05: StyleVariable = {
 	name: 'color_e_05',
 	light: 'hsl(var(--hue_e) 88% 95%)',
-	dark: 'hsl(var(--hue_e) 88% 88%)',
+	dark: 'hsl(var(--hue_e) 88% 8%)',
 };
 export const color_e_10: StyleVariable = {
 	name: 'color_e_10',
 	light: 'hsl(var(--hue_e) 85% 91%)',
+	dark: 'hsl(var(--hue_e) 85% 12%)',
 };
 export const color_e_20: StyleVariable = {
 	name: 'color_e_20',
@@ -335,30 +344,32 @@ export const color_e_80: StyleVariable = {
 export const color_e_90: StyleVariable = {
 	name: 'color_e_90',
 	light: 'hsl(var(--hue_e) 85% 10%)',
+	dark: 'hsl(var(--hue_e) 85% 88%)',
 };
 export const color_e_95: StyleVariable = {
 	name: 'color_e_95',
 	light: 'hsl(var(--hue_e) 88% 5%)',
-	dark: 'hsl(var(--hue_e) 88% 12%)',
+	dark: 'hsl(var(--hue_e) 88% 92%)',
 };
 export const color_e_100: StyleVariable = {
 	name: 'color_e_100',
 	light: 'hsl(var(--hue_e) 90% 2%)',
-	dark: 'hsl(var(--hue_e) 90% 6%)',
+	dark: 'hsl(var(--hue_e) 90% 96%)',
 };
 export const color_f_00: StyleVariable = {
 	name: 'color_f_00',
 	light: 'hsl(var(--hue_f) 30% 98%)',
-	dark: 'hsl(var(--hue_f) 30% 92%)',
+	dark: 'hsl(var(--hue_f) 30% 4%)',
 };
 export const color_f_05: StyleVariable = {
 	name: 'color_f_05',
 	light: 'hsl(var(--hue_f) 30% 92%)',
-	dark: 'hsl(var(--hue_f) 30% 84%)',
+	dark: 'hsl(var(--hue_f) 30% 8%)',
 };
 export const color_f_10: StyleVariable = {
 	name: 'color_f_10',
 	light: 'hsl(var(--hue_f) 32% 87%)',
+	dark: 'hsl(var(--hue_f) 32% 12%)',
 };
 export const color_f_20: StyleVariable = {
 	name: 'color_f_20',
@@ -398,30 +409,32 @@ export const color_f_80: StyleVariable = {
 export const color_f_90: StyleVariable = {
 	name: 'color_f_90',
 	light: 'hsl(var(--hue_f) 80% 6%)',
+	dark: 'hsl(var(--hue_f) 80% 88%)',
 };
 export const color_f_95: StyleVariable = {
 	name: 'color_f_95',
 	light: 'hsl(var(--hue_f) 82% 3%)',
-	dark: 'hsl(var(--hue_f) 75% 10%)',
+	dark: 'hsl(var(--hue_f) 82% 92%)',
 };
 export const color_f_100: StyleVariable = {
 	name: 'color_f_100',
 	light: 'hsl(var(--hue_f) 85% 2%)',
-	dark: 'hsl(var(--hue_f) 80% 6%)',
+	dark: 'hsl(var(--hue_f) 85% 96%)',
 };
 export const color_g_00: StyleVariable = {
 	name: 'color_g_00',
 	light: 'hsl(var(--hue_g) 75% 98%)',
-	dark: 'hsl(var(--hue_g) 75% 94%)',
+	dark: 'hsl(var(--hue_g) 75% 4%)',
 };
 export const color_g_05: StyleVariable = {
 	name: 'color_g_05',
 	light: 'hsl(var(--hue_g) 74% 95%)',
-	dark: 'hsl(var(--hue_g) 74% 90%)',
+	dark: 'hsl(var(--hue_g) 74% 8%)',
 };
 export const color_g_10: StyleVariable = {
 	name: 'color_g_10',
 	light: 'hsl(var(--hue_g) 72% 91%)',
+	dark: 'hsl(var(--hue_g) 72% 12%)',
 };
 export const color_g_20: StyleVariable = {
 	name: 'color_g_20',
@@ -461,30 +474,32 @@ export const color_g_80: StyleVariable = {
 export const color_g_90: StyleVariable = {
 	name: 'color_g_90',
 	light: 'hsl(var(--hue_g) 72% 10%)',
+	dark: 'hsl(var(--hue_g) 72% 88%)',
 };
 export const color_g_95: StyleVariable = {
 	name: 'color_g_95',
 	light: 'hsl(var(--hue_g) 72% 5%)',
-	dark: 'hsl(var(--hue_g) 72% 12%)',
+	dark: 'hsl(var(--hue_g) 72% 92%)',
 };
 export const color_g_100: StyleVariable = {
 	name: 'color_g_100',
 	light: 'hsl(var(--hue_g) 72% 2%)',
-	dark: 'hsl(var(--hue_g) 72% 6%)',
+	dark: 'hsl(var(--hue_g) 72% 96%)',
 };
 export const color_h_00: StyleVariable = {
 	name: 'color_h_00',
 	light: 'hsl(var(--hue_h) 95% 98%)',
-	dark: 'hsl(var(--hue_h) 95% 94%)',
+	dark: 'hsl(var(--hue_h) 95% 4%)',
 };
 export const color_h_05: StyleVariable = {
 	name: 'color_h_05',
 	light: 'hsl(var(--hue_h) 92% 95%)',
-	dark: 'hsl(var(--hue_h) 92% 90%)',
+	dark: 'hsl(var(--hue_h) 92% 8%)',
 };
 export const color_h_10: StyleVariable = {
 	name: 'color_h_10',
 	light: 'hsl(var(--hue_h) 90% 91%)',
+	dark: 'hsl(var(--hue_h) 90% 12%)',
 };
 export const color_h_20: StyleVariable = {
 	name: 'color_h_20',
@@ -524,30 +539,32 @@ export const color_h_80: StyleVariable = {
 export const color_h_90: StyleVariable = {
 	name: 'color_h_90',
 	light: 'hsl(var(--hue_h) 90% 10%)',
+	dark: 'hsl(var(--hue_h) 90% 88%)',
 };
 export const color_h_95: StyleVariable = {
 	name: 'color_h_95',
 	light: 'hsl(var(--hue_h) 90% 5%)',
-	dark: 'hsl(var(--hue_h) 90% 12%)',
+	dark: 'hsl(var(--hue_h) 90% 92%)',
 };
 export const color_h_100: StyleVariable = {
 	name: 'color_h_100',
 	light: 'hsl(var(--hue_h) 90% 2%)',
-	dark: 'hsl(var(--hue_h) 90% 6%)',
+	dark: 'hsl(var(--hue_h) 90% 96%)',
 };
 export const color_i_00: StyleVariable = {
 	name: 'color_i_00',
 	light: 'hsl(var(--hue_i) 80% 98%)',
-	dark: 'hsl(var(--hue_i) 80% 92%)',
+	dark: 'hsl(var(--hue_i) 80% 4%)',
 };
 export const color_i_05: StyleVariable = {
 	name: 'color_i_05',
 	light: 'hsl(var(--hue_i) 77% 94%)',
-	dark: 'hsl(var(--hue_i) 77% 87%)',
+	dark: 'hsl(var(--hue_i) 77% 8%)',
 };
 export const color_i_10: StyleVariable = {
 	name: 'color_i_10',
 	light: 'hsl(var(--hue_i) 75% 89%)',
+	dark: 'hsl(var(--hue_i) 75% 12%)',
 };
 export const color_i_20: StyleVariable = {
 	name: 'color_i_20',
@@ -587,30 +604,32 @@ export const color_i_80: StyleVariable = {
 export const color_i_90: StyleVariable = {
 	name: 'color_i_90',
 	light: 'hsl(var(--hue_i) 75% 10%)',
+	dark: 'hsl(var(--hue_i) 75% 88%)',
 };
 export const color_i_95: StyleVariable = {
 	name: 'color_i_95',
 	light: 'hsl(var(--hue_i) 75% 5%)',
-	dark: 'hsl(var(--hue_i) 75% 12%)',
+	dark: 'hsl(var(--hue_i) 75% 92%)',
 };
 export const color_i_100: StyleVariable = {
 	name: 'color_i_100',
 	light: 'hsl(var(--hue_i) 75% 2%)',
-	dark: 'hsl(var(--hue_i) 75% 6%)',
+	dark: 'hsl(var(--hue_i) 75% 96%)',
 };
 export const color_j_00: StyleVariable = {
 	name: 'color_j_00',
 	light: 'hsl(var(--hue_j) 65% 98%)',
-	dark: 'hsl(var(--hue_j) 65% 92%)',
+	dark: 'hsl(var(--hue_j) 65% 4%)',
 };
 export const color_j_05: StyleVariable = {
 	name: 'color_j_05',
 	light: 'hsl(var(--hue_j) 62% 94%)',
-	dark: 'hsl(var(--hue_j) 62% 87%)',
+	dark: 'hsl(var(--hue_j) 62% 8%)',
 };
 export const color_j_10: StyleVariable = {
 	name: 'color_j_10',
 	light: 'hsl(var(--hue_j) 60% 89%)',
+	dark: 'hsl(var(--hue_j) 60% 12%)',
 };
 export const color_j_20: StyleVariable = {
 	name: 'color_j_20',
@@ -650,16 +669,17 @@ export const color_j_80: StyleVariable = {
 export const color_j_90: StyleVariable = {
 	name: 'color_j_90',
 	light: 'hsl(var(--hue_j) 75% 10%)',
+	dark: 'hsl(var(--hue_j) 75% 88%)',
 };
 export const color_j_95: StyleVariable = {
 	name: 'color_j_95',
 	light: 'hsl(var(--hue_j) 78% 5%)',
-	dark: 'hsl(var(--hue_j) 78% 12%)',
+	dark: 'hsl(var(--hue_j) 78% 92%)',
 };
 export const color_j_100: StyleVariable = {
 	name: 'color_j_100',
 	light: 'hsl(var(--hue_j) 80% 2%)',
-	dark: 'hsl(var(--hue_j) 80% 6%)',
+	dark: 'hsl(var(--hue_j) 80% 96%)',
 };
 
 /*
