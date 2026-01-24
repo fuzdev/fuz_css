@@ -58,49 +58,4 @@
 			<ColorSchemeInput />
 		</div>
 	</TomeSection>
-
-	<TomeSection>
-		<TomeSectionHeader text="Chip examples" />
-		<section>
-			<p>Chips are useful for inline metadata:</p>
-			<Code
-				content={`<p>
-	Status: <span class="chip color_a">active</span>
-</p>`}
-			/>
-			<p>
-				Status: <span class="chip color_a">active</span>
-			</p>
-		</section>
-		<section>
-			<p>Or for navigation links:</p>
-			<Code
-				content={`<nav>
-	<a class="chip" href="#">home</a>
-	<a class="chip" href="#">about</a>
-	<a class="chip color_h" href="#">Button.svelte</a>
-</nav>`}
-			/>
-			<nav class="row gap_md">
-				<a class="chip" href="#">home</a>
-				<a class="chip" href="#">about</a>
-				<a class="chip color_h" href="#">Button.svelte</a>
-			</nav>
-		</section>
-		<section>
-			<p>Or for tags and categories:</p>
-			<Code
-				content={`<div class="row gap_md">
-	<span class="chip color_d">TypeScript</span>
-	<span class="chip color_h">Svelte</span>
-	<span class="chip color_b">CSS</span>
-</div>`}
-			/>
-			<div class="row gap_md flex-wrap:wrap">
-				<span class="chip color_d">TypeScript</span>
-				<span class="chip color_h">Svelte</span>
-				<span class="chip color_b">CSS</span>
-			</div>
-		</section>
-	</TomeSection>
 </TomeContent>
