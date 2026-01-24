@@ -110,7 +110,11 @@
 			<div class="shadow_example">
 				<div class="shadow_main_example {shadow_size_name} {shadow_color_name}">
 					<StyleVariableButton name={shadow_size_name} {classes} />
-					<StyleVariableButton name={shadow_color_name} {classes} />
+					{#if is_hue}
+						<code class="p_xs {classes}">{shadow_color_name}</code>
+					{:else}
+						<StyleVariableButton name={shadow_color_name} {classes} />
+					{/if}
 				</div>
 				{@render shadow_variant_examples(shadow_color_name, shadow_size_name)}
 			</div>

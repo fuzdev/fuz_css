@@ -472,6 +472,9 @@ a.chip {
 	width: 100%;
 	max-width: var(--distance_md);
 }
+.p_xs {
+	padding: var(--space_xs);
+}
 .p_sm {
 	padding: var(--space_sm);
 }

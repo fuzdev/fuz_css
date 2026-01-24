@@ -33,8 +33,9 @@
 		</div>
 		<div class:mb_xs>
 			<!-- eslint-disable-next-line svelte/no-useless-mustaches -->
-			<Code content={`<a class="chip" href="#">a link chip</a>`} />
-			<a class="chip" href="#">a link chip</a>
+			<Code content={`<a class="chip">a link chip</a>`} />
+			<!-- svelte-ignore a11y_missing_attribute -->
+			<a class="chip">a link chip</a>
 		</div>
 	</section>
 
@@ -51,7 +52,8 @@
 			<section>
 				<Code content={`<span class="chip ${color_name}">`} />
 				<span class="chip {color_name}" class:mb_xs>.chip.{color_name}</span>
-				<a class="chip {color_name}" href="#" class:mb_xs>a.chip.{color_name}</a>
+				<!-- svelte-ignore a11y_missing_attribute -->
+				<a class="chip {color_name}" class:mb_xs>a.chip.{color_name}</a>
 			</section>
 		{/each}
 		<div class="box width:100% mb_lg">
