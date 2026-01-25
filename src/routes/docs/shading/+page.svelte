@@ -8,8 +8,8 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {shade_variants, alpha_variants} from '$lib/variable_data.js';
 
 	// @fuz-classes fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95
@@ -241,9 +241,7 @@
 		<div class="border_demo">
 			{#each alpha_variants as v (v)}
 				{@const name = 'border_color_' + v}
-				<div class="border_sample" style:border-color="var(--{name})">
-					<small><StyleVariableButton {name} /></small>
-				</div>
+				<StyleVariableButton {name} plain={false} style="border-color: var(--{name})" />
 			{/each}
 		</div>
 	</TomeSection>
@@ -339,14 +337,5 @@ background-color: var(--shade_min);`}
 		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 		gap: var(--space_sm);
 		margin-bottom: var(--space_md);
-	}
-	.border_sample {
-		border-width: var(--border_width_2);
-		border-style: solid;
-		padding: var(--space_sm);
-		border-radius: var(--border_radius_xs);
-		display: flex;
-		justify-content: center;
-		align-items: center;
 	}
 </style>

@@ -7,9 +7,9 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {default_variables} from '$lib/variables.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
@@ -81,7 +81,7 @@ export interface StyleVariable {
 		<!-- TODO add info through the contextmenu or dialog -->
 		<div class="variables">
 			{#each variables as variable (variable.name)}
-				<StyleVariableButton name={variable.name} classes="menu_item" />
+				<StyleVariableButton name={variable.name} class="menu_item" />
 			{/each}
 		</div>
 	</TomeSection>

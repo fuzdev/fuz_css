@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type {Snippet} from 'svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {font_size_variants} from '$lib/variable_data.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
 	let {
 		selected_size = $bindable(2),

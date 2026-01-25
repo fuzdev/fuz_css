@@ -3,10 +3,10 @@
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 	import {resolve} from '$app/paths';
 
 	import {space_variants, distance_variants} from '$lib/variable_data.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
 	const LIBRARY_ITEM_NAME = 'layout';
 

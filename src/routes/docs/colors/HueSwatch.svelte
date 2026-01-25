@@ -1,5 +1,5 @@
 <script lang="ts">
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	const {
 		color_name,

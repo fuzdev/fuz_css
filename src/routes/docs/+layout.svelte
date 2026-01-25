@@ -5,9 +5,9 @@
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
 	import {logo_fuz} from '@fuzdev/fuz_ui/logos.js';
 	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
+	import {selected_variable_context} from '@fuzdev/fuz_ui/style_variable_helpers.svelte.js';
 
 	import {tomes} from '$routes/docs/tomes.js';
-	import {selected_variable_context} from '$routes/style_variable_helpers.svelte.js';
 	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 

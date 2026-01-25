@@ -7,12 +7,12 @@
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import FontWeightControl from '$routes/FontWeightControl.svelte';
 	import FontSizeControl from '$routes/FontSizeControl.svelte';
 	import {default_variables} from '$lib/variables.js';
 	import IconSizes from '$routes/docs/typography/IconSizes.svelte';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {
 		line_height_names,
 		font_size_names,
@@ -102,7 +102,7 @@
 		</form>
 		{#each font_size_variants as size (size.name)}
 			<div class="row flex-wrap:wrap">
-				<StyleVariableButton attrs={{title: size.light}} name={size.name}
+				<StyleVariableButton title={size.light} name={size.name}
 					><span
 						style:font-size="var(--{size.name})"
 						style:font-weight={selected_font_weight}

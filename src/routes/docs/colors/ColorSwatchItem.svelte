@@ -1,8 +1,7 @@
 <script lang="ts">
 	import {hsl_to_hex_string, hsl_to_rgb, parse_hsl_string} from '@fuzdev/fuz_util/colors.js';
 	import {themer_context} from '@fuzdev/fuz_ui/themer.svelte.js';
-
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	const {
 		intensity,

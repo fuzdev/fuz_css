@@ -4,6 +4,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {
 		border_width_variants,
@@ -12,7 +13,6 @@
 		outline_width_variants,
 		border_radius_variants,
 	} from '$lib/variable_data.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'borders';
