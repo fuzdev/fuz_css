@@ -114,12 +114,12 @@
 		</p>
 		<ul>
 			<li>
-				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode. Use
-				for elevated surfaces like panels, cards, and hover states.
+				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode; use
+				for elevated surfaces like panels, cards, and hover states
 			</li>
 			<li>
-				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode. Use
-				for surfaces that blend toward the background.
+				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode; use
+				for surfaces that blend toward the background
 			</li>
 		</ul>
 		<p>

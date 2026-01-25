@@ -513,7 +513,7 @@
 	--text_min: #fff;
 	--text_max: #000;
 	--text_color: var(--text_80);
-	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--text_00: #fff;
 	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 94%);
 	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 82%);
@@ -525,7 +525,7 @@
 	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 16%);
 	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 8%);
 	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 4%);
-	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 2%);
+	--text_100: #000;
 	--text_disabled: var(--text_50);
 	--font_family_sans:
 		system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; /* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -672,10 +672,11 @@
 	--shadow_inset_bottom_md: inset 0 -2.5px 6px 0px;
 	--shadow_inset_bottom_lg: inset 0 -3.5px 10px 0px;
 	--shadow_inset_bottom_xl: inset 0 -5px 20px 1px;
-	--shadow_color_umbra: hsl(var(--tint_hue) var(--tint_saturation) 0%);
+	--shadow_color_umbra: #000;
 	--shadow_color_highlight: hsl(var(--tint_hue) var(--tint_saturation) 94%);
 	--shadow_color_glow: hsl(var(--tint_hue) var(--tint_saturation) 94%);
-	--shadow_color_shroud: hsl(var(--tint_hue) var(--tint_saturation) 0%);
+	--shadow_color_shroud: #000;
+	--shadow_alpha_00: 0%;
 	--shadow_alpha_05: 3%;
 	--shadow_alpha_10: 6%;
 	--shadow_alpha_20: 12%;
@@ -687,6 +688,7 @@
 	--shadow_alpha_80: 89%;
 	--shadow_alpha_90: 96%;
 	--shadow_alpha_95: 98%;
+	--shadow_alpha_100: 100%;
 	--icon_size_xs: 18px;
 	--icon_size_sm: 32px;
 	--icon_size_md: 48px;
@@ -889,7 +891,7 @@
 	--border_color_100: hsl(var(--tint_hue) 60% 80% / 100%);
 	--text_min: #000;
 	--text_max: #fff;
-	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 6%);
+	--text_00: #000;
 	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 10%);
 	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 14%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 22%);
@@ -900,7 +902,7 @@
 	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 80%);
 	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 96%);
-	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 98%);
+	--text_100: #fff;
 	--link_color: hsl(var(--hue_a) 61% 58%);
 	--button_shadow:
 		var(--shadow_inset_top_xs)
@@ -930,7 +932,7 @@
 		var(--shadow_inset_top_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 	--shadow_color_umbra: hsl(var(--tint_hue) var(--tint_saturation) 82%);
-	--shadow_color_highlight: hsl(var(--tint_hue) var(--tint_saturation) 0%);
+	--shadow_color_highlight: #000;
 	--shadow_color_glow: hsl(var(--tint_hue) var(--tint_saturation) 82%);
 }
 

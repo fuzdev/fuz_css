@@ -939,7 +939,11 @@ export const lighten_70: StyleVariable = {name: 'lighten_70', light: '#ffffffcc'
 export const lighten_80: StyleVariable = {name: 'lighten_80', light: '#ffffffe3', summary: '89%'};
 export const lighten_90: StyleVariable = {name: 'lighten_90', light: '#fffffff5', summary: '96%'};
 export const lighten_95: StyleVariable = {name: 'lighten_95', light: '#fffffffa', summary: '98%'};
-export const lighten_100: StyleVariable = {name: 'lighten_100', light: '#ffffffff', summary: '100%'};
+export const lighten_100: StyleVariable = {
+	name: 'lighten_100',
+	light: '#ffffffff',
+	summary: '100%',
+};
 
 /*
 
@@ -1180,8 +1184,8 @@ export const text_max: StyleVariable = {
 export const text_color: StyleVariable = {name: 'text_color', light: 'var(--text_80)'};
 export const text_00: StyleVariable = {
 	name: 'text_00',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 6%)',
+	light: '#fff',
+	dark: '#000',
 };
 export const text_05: StyleVariable = {
 	name: 'text_05',
@@ -1239,8 +1243,8 @@ export const text_95: StyleVariable = {
 };
 export const text_100: StyleVariable = {
 	name: 'text_100',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 2%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 98%)',
+	light: '#000',
+	dark: '#fff',
 };
 export const text_disabled: StyleVariable = {
 	name: 'text_disabled',
@@ -1555,13 +1559,13 @@ export const shadow_inset_bottom_xl: StyleVariable = {
 
 export const shadow_color_umbra: StyleVariable = {
 	name: 'shadow_color_umbra',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 0%)',
+	light: '#000',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 82%)',
 };
 export const shadow_color_highlight: StyleVariable = {
 	name: 'shadow_color_highlight',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 94%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 0%)',
+	dark: '#000',
 };
 export const shadow_color_glow: StyleVariable = {
 	name: 'shadow_color_glow',
@@ -1570,10 +1574,11 @@ export const shadow_color_glow: StyleVariable = {
 };
 export const shadow_color_shroud: StyleVariable = {
 	name: 'shadow_color_shroud',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 0%)',
+	light: '#000',
 };
 // TODO @ryanatkn consider sharing an alpha abstraction with darken/lighten - these use the same perceptual scale
 // TODO @ryanatkn are these variables needed, or can classes just use inline percentages?
+export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%'};
 export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '3%'};
 export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '6%'};
 export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '12%'};
@@ -1585,6 +1590,7 @@ export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '
 export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '89%'};
 export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%'};
 export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '98%'};
+export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%'};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,
@@ -2253,6 +2259,7 @@ export const default_variables: Array<StyleVariable> = [
 	shadow_color_highlight,
 	shadow_color_glow,
 	shadow_color_shroud,
+	shadow_alpha_00,
 	shadow_alpha_05,
 	shadow_alpha_10,
 	shadow_alpha_20,
@@ -2264,6 +2271,7 @@ export const default_variables: Array<StyleVariable> = [
 	shadow_alpha_80,
 	shadow_alpha_90,
 	shadow_alpha_95,
+	shadow_alpha_100,
 
 	/* icons */
 	icon_size_xs,

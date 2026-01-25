@@ -147,13 +147,13 @@
 			<TomeLink name="shading">shade scale</TomeLink> pattern.
 		</p>
 		<ul>
-			<li><code>text_00</code>: surface-side endpoint (essentially invisible on surface)</li>
+			<li><code>text_00</code> - surface-side endpoint: essentially invisible on surface</li>
 			<li>
-				<code>text_10</code>-<code>text_30</code>: very subtle/faint text (watermarks, hints)
+				<code>text_10</code>-<code>text_30</code> - very subtle/faint text: watermarks, hints
 			</li>
-			<li><code>text_50</code>: disabled text (<code>text_disabled</code>)</li>
-			<li><code>text_80</code>: default body text (<code>--text_color</code>)</li>
-			<li><code>text_90</code>-<code>text_100</code>: high emphasis/headings</li>
+			<li><code>text_50</code> - disabled text: <code>text_disabled</code></li>
+			<li><code>text_80</code> - default body text: <code>--text_color</code></li>
+			<li><code>text_90</code>-<code>text_100</code> - high emphasis/headings</li>
 		</ul>
 		<p>
 			The text scale is separate from the shade scale because text and backgrounds have different
