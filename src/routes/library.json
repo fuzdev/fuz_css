@@ -3035,13 +3035,13 @@
 						"name": "ShadowSemanticValue",
 						"kind": "type",
 						"source_line": 113,
-						"type_signature": "\"highlight\" | \"glow\" | \"shroud\""
+						"type_signature": "\"umbra\" | \"highlight\" | \"glow\" | \"shroud\""
 					},
 					{
 						"name": "shadow_semantic_values",
 						"kind": "variable",
 						"source_line": 114,
-						"type_signature": "readonly [\"highlight\", \"glow\", \"shroud\"]"
+						"type_signature": "readonly [\"umbra\", \"highlight\", \"glow\", \"shroud\"]"
 					},
 					{
 						"name": "IconSizeVariant",
@@ -5467,7 +5467,7 @@
 						"type_signature": "StyleVariable"
 					},
 					{
-						"name": "shadow_color",
+						"name": "shadow_color_umbra",
 						"kind": "variable",
 						"source_line": 1522,
 						"type_signature": "StyleVariable"

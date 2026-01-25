@@ -598,17 +598,29 @@
 	--border_radius_xl: 5.5rem;
 	--button_shadow:
 		var(--shadow_inset_bottom_xs)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30),
+				transparent
+			),
 		var(--shadow_inset_top_xs)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent);
 	--button_shadow_hover:
 		var(--shadow_inset_bottom_sm)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
+				transparent
+			),
 		var(--shadow_inset_top_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 	--button_shadow_active:
 		var(--shadow_inset_top_sm)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
+				transparent
+			),
 		var(--shadow_inset_bottom_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 	--input_fill: var(--bg_80);
@@ -650,7 +662,7 @@
 	--shadow_inset_bottom_md: inset 0 -2.5px 6px 0px;
 	--shadow_inset_bottom_lg: inset 0 -3.5px 10px 0px;
 	--shadow_inset_bottom_xl: inset 0 -5px 20px 1px;
-	--shadow_color: hsl(var(--tint_hue) var(--tint_saturation) 0%);
+	--shadow_color_umbra: hsl(var(--tint_hue) var(--tint_saturation) 0%);
 	--shadow_color_highlight: hsl(var(--tint_hue) var(--tint_saturation) 94%);
 	--shadow_color_glow: hsl(var(--tint_hue) var(--tint_saturation) 94%);
 	--shadow_color_shroud: hsl(var(--tint_hue) var(--tint_saturation) 0%);
@@ -876,20 +888,32 @@
 	--link_color: hsl(var(--hue_a) 61% 58%);
 	--button_shadow:
 		var(--shadow_inset_top_xs)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30),
+				transparent
+			),
 		var(--shadow_inset_bottom_xs)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent);
 	--button_shadow_hover:
 		var(--shadow_inset_top_sm)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
+				transparent
+			),
 		var(--shadow_inset_bottom_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 	--button_shadow_active:
 		var(--shadow_inset_bottom_sm)
-			color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent),
+			color-mix(
+				in hsl,
+				var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
+				transparent
+			),
 		var(--shadow_inset_top_sm)
 			color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
-	--shadow_color: hsl(var(--tint_hue) var(--tint_saturation) 82%);
+	--shadow_color_umbra: hsl(var(--tint_hue) var(--tint_saturation) 82%);
 	--shadow_color_highlight: hsl(var(--tint_hue) var(--tint_saturation) 0%);
 	--shadow_color_glow: hsl(var(--tint_hue) var(--tint_saturation) 82%);
 }

@@ -1356,14 +1356,14 @@ export const border_radius_xl: StyleVariable = {name: 'border_radius_xl', light:
 export const button_shadow: StyleVariable = {
 	name: 'button_shadow',
 	light:
-		'var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent), var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
-	dark: 'var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent), var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
+		'var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30), transparent), var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
+	dark: 'var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30), transparent), var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
 };
 export const button_shadow_hover: StyleVariable = {
 	name: 'button_shadow_hover',
 	light:
-		'var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
-	dark: 'var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
+		'var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
+	dark: 'var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
 };
 export const button_shadow_active: StyleVariable = {
 	name: 'button_shadow_active',
@@ -1519,8 +1519,8 @@ export const shadow_inset_bottom_xl: StyleVariable = {
 	light: 'inset 0 -5px 20px 1px',
 };
 
-export const shadow_color: StyleVariable = {
-	name: 'shadow_color',
+export const shadow_color_umbra: StyleVariable = {
+	name: 'shadow_color_umbra',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 0%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 82%)',
 };
@@ -2205,7 +2205,7 @@ export const default_variables: Array<StyleVariable> = [
 	shadow_inset_bottom_md,
 	shadow_inset_bottom_lg,
 	shadow_inset_bottom_xl,
-	shadow_color,
+	shadow_color_umbra,
 	shadow_color_highlight,
 	shadow_color_glow,
 	shadow_color_shroud,

@@ -238,7 +238,7 @@ export const generate_shadow_classes = (
 	return generate_classes(
 		(type: (typeof shadow_types)[0], size: string) => ({
 			name: `${type.prefix}_${size}`,
-			css: `box-shadow: var(--${type.var_prefix}_${size}) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_${alpha_mapping[size]})), transparent);`,
+			css: `box-shadow: var(--${type.var_prefix}_${size}) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${alpha_mapping[size]})), transparent);`,
 		}),
 		shadow_types,
 		sizes,

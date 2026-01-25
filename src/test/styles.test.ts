@@ -91,4 +91,5 @@ const known_without_variables = new Set([
 	'button_border_color_active',
 	'shadow',
 	'shadow_alpha',
+	'shadow_color',
 ]);

@@ -25,7 +25,7 @@
 	},
 	"pane": {
 		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
-		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_50), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
+		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
 	},
 	"panel": {
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
@@ -1936,95 +1936,96 @@
 		"declaration": "border-bottom-right-radius: var(--border_radius_xl);"
 	},
 	"shadow_xs": {
-		"declaration": "box-shadow: var(--shadow_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_sm": {
-		"declaration": "box-shadow: var(--shadow_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_md": {
-		"declaration": "box-shadow: var(--shadow_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_lg": {
-		"declaration": "box-shadow: var(--shadow_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_xl": {
-		"declaration": "box-shadow: var(--shadow_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
 	"shadow_top_xs": {
-		"declaration": "box-shadow: var(--shadow_top_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_top_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_top_sm": {
-		"declaration": "box-shadow: var(--shadow_top_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_top_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_top_md": {
-		"declaration": "box-shadow: var(--shadow_top_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_top_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_top_lg": {
-		"declaration": "box-shadow: var(--shadow_top_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_top_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_top_xl": {
-		"declaration": "box-shadow: var(--shadow_top_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_top_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
 	"shadow_bottom_xs": {
-		"declaration": "box-shadow: var(--shadow_bottom_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_bottom_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_bottom_sm": {
-		"declaration": "box-shadow: var(--shadow_bottom_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_bottom_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_bottom_md": {
-		"declaration": "box-shadow: var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_bottom_lg": {
-		"declaration": "box-shadow: var(--shadow_bottom_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_bottom_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_bottom_xl": {
-		"declaration": "box-shadow: var(--shadow_bottom_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_bottom_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
 	"shadow_inset_xs": {
-		"declaration": "box-shadow: var(--shadow_inset_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_inset_sm": {
-		"declaration": "box-shadow: var(--shadow_inset_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_inset_md": {
-		"declaration": "box-shadow: var(--shadow_inset_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_inset_lg": {
-		"declaration": "box-shadow: var(--shadow_inset_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_inset_xl": {
-		"declaration": "box-shadow: var(--shadow_inset_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
 	"shadow_inset_top_xs": {
-		"declaration": "box-shadow: var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_inset_top_sm": {
-		"declaration": "box-shadow: var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_inset_top_md": {
-		"declaration": "box-shadow: var(--shadow_inset_top_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_top_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_inset_top_lg": {
-		"declaration": "box-shadow: var(--shadow_inset_top_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_top_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_inset_top_xl": {
-		"declaration": "box-shadow: var(--shadow_inset_top_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_top_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
 	"shadow_inset_bottom_xs": {
-		"declaration": "box-shadow: var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_30)), transparent);"
 	},
 	"shadow_inset_bottom_sm": {
-		"declaration": "box-shadow: var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_40)), transparent);"
 	},
 	"shadow_inset_bottom_md": {
-		"declaration": "box-shadow: var(--shadow_inset_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_50)), transparent);"
 	},
 	"shadow_inset_bottom_lg": {
-		"declaration": "box-shadow: var(--shadow_inset_bottom_lg) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_bottom_lg) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_60)), transparent);"
 	},
 	"shadow_inset_bottom_xl": {
-		"declaration": "box-shadow: var(--shadow_inset_bottom_xl) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
+		"declaration": "box-shadow: var(--shadow_inset_bottom_xl) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_70)), transparent);"
 	},
+	"shadow_color_umbra": {"declaration": "--shadow_color: var(--shadow_color_umbra);"},
 	"shadow_color_highlight": {"declaration": "--shadow_color: var(--shadow_color_highlight);"},
 	"shadow_color_glow": {"declaration": "--shadow_color: var(--shadow_color_glow);"},
 	"shadow_color_shroud": {"declaration": "--shadow_color: var(--shadow_color_shroud);"},

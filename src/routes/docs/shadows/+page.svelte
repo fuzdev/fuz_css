@@ -26,7 +26,7 @@
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95
-	// @fuz-classes shadow_color_highlight shadow_color_glow shadow_color_shroud
+	// @fuz-classes shadow_color_umbra shadow_color_highlight shadow_color_glow shadow_color_shroud
 	// @fuz-classes shadow_color_a_00 shadow_color_a_05 shadow_color_a_10 shadow_color_a_20 shadow_color_a_30 shadow_color_a_40 shadow_color_a_50 shadow_color_a_60 shadow_color_a_70 shadow_color_a_80 shadow_color_a_90 shadow_color_a_95 shadow_color_a_100
 	// @fuz-classes shadow_color_b_00 shadow_color_b_05 shadow_color_b_10 shadow_color_b_20 shadow_color_b_30 shadow_color_b_40 shadow_color_b_50 shadow_color_b_60 shadow_color_b_70 shadow_color_b_80 shadow_color_b_90 shadow_color_b_95 shadow_color_b_100
 	// @fuz-classes shadow_color_c_00 shadow_color_c_05 shadow_color_c_10 shadow_color_c_20 shadow_color_c_30 shadow_color_c_40 shadow_color_c_50 shadow_color_c_60 shadow_color_c_70 shadow_color_c_80 shadow_color_c_90 shadow_color_c_95 shadow_color_c_100
@@ -50,13 +50,13 @@
 		fuz_css's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
 	</p>
 	<TomeSection>
-		<TomeSectionHeader text="Shadow" />
-		<p>Shadows darken in light mode and lighten in dark mode (shadows are adaptive).</p>
-		<UnfinishedImplementationWarning
-			>Maybe rename for clarity? It's weird that shadows lighten in dark mode.</UnfinishedImplementationWarning
-		>
+		<TomeSectionHeader text="Umbra" />
+		<p>
+			Umbras are adaptive shadows that darken in light mode and lighten in dark mode. This is the
+			default shadow behavior, creating natural depth perception in both color schemes.
+		</p>
 		<form><ColorSchemeInput /></form>
-		{@render shadow_examples(null)}
+		{@render shadow_examples('umbra')}
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
@@ -98,10 +98,10 @@
 </TomeContent>
 
 {#snippet shadow_examples(
-	color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null,
+	color_variant: ColorVariant | 'umbra' | 'highlight' | 'glow' | 'shroud' | null,
 	intensity: IntensityVariant = '60',
 )}
-	{@const is_hue = color_variant && !['highlight', 'glow', 'shroud'].includes(color_variant)}
+	{@const is_hue = color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}
 	{@const shadow_color_name = is_hue
 		? `shadow_color_${color_variant}_${intensity}`
 		: color_variant
@@ -118,7 +118,7 @@
 					{#if is_hue}
 						<code class="p_xs {classes}">{shadow_color_name}</code>
 					{:else}
-						<StyleVariableButton name={shadow_color_name ?? 'shadow_color'} {classes} />
+						<StyleVariableButton name={shadow_color_name ?? 'shadow_color_umbra'} {classes} />
 					{/if}
 				</div>
 				{@render shadow_variant_examples(shadow_color_name, shadow_size_name)}
@@ -144,7 +144,7 @@
 	<div class="row gap_lg">
 		{#each shadow_alpha_variants as alpha (alpha)}
 			<div
-				title="{shadow_size_name} with {shadow_color_name ?? 'shadow_color'}"
+				title="{shadow_size_name} with {shadow_color_name ?? 'shadow_color_umbra'}"
 				class="shadow_variant_example {shadow_size_name} {shadow_color_name} shadow_alpha_{alpha}"
 			></div>
 		{/each}

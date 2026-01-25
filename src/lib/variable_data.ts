@@ -111,7 +111,7 @@ export type ShadowSizeVariant = ArrayElement<typeof shadow_size_variants>;
 export const shadow_size_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
 export type ShadowSemanticValue = ArrayElement<typeof shadow_semantic_values>;
-export const shadow_semantic_values = ['highlight', 'glow', 'shroud'] as const;
+export const shadow_semantic_values = ['umbra', 'highlight', 'glow', 'shroud'] as const;
 
 export type IconSizeVariant = ArrayElement<typeof icon_size_variants>;
 export const icon_size_variants = ['xs', 'sm', 'md', 'lg', 'xl', 'xl2', 'xl3'] as const;
