@@ -12,12 +12,12 @@
 
 	import {shade_variants, alpha_variants} from '$lib/variable_data.js';
 
-	// @fuz-classes fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95
-	// @fuz-classes bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95
+	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
+	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100
 	// @fuz-classes shade_50
-	// @fuz-classes darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95
-	// @fuz-classes lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95
-	// @fuz-classes border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95
+	// @fuz-classes darken_00 darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95 darken_100
+	// @fuz-classes lighten_00 lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95 lighten_100
+	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
 
 	const LIBRARY_ITEM_NAME = 'shading';
 
@@ -241,7 +241,7 @@
 		<div class="border_demo">
 			{#each alpha_variants as v (v)}
 				{@const name = 'border_color_' + v}
-				<StyleVariableButton {name} plain={false} style="border-color: var(--{name})" />
+				<StyleVariableButton {name} class={name} />
 			{/each}
 		</div>
 	</TomeSection>
@@ -296,7 +296,7 @@ background-color: var(--shade_min);`}
 		font-family: var(--font_family_mono);
 		margin-bottom: var(--space_md);
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 		grid-auto-flow: row;
 	}
 	.color {
@@ -312,7 +312,7 @@ background-color: var(--shade_min);`}
 		font-family: var(--font_family_mono);
 		margin-bottom: var(--space_md);
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
 		grid-auto-flow: row;
 		border-radius: var(--border_radius_xs2);
 	}
@@ -334,7 +334,7 @@ background-color: var(--shade_min);`}
 	}
 	.border_demo {
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
 		gap: var(--space_sm);
 		margin-bottom: var(--space_md);
 	}

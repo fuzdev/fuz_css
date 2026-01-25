@@ -962,6 +962,7 @@
 	"bg_j_95_dark": {"declaration": "background-color: var(--color_j_95_dark);"},
 	"bg_j_100_light": {"declaration": "background-color: var(--color_j_100_light);"},
 	"bg_j_100_dark": {"declaration": "background-color: var(--color_j_100_dark);"},
+	"darken_00": {"declaration": "background-color: var(--darken_00);"},
 	"darken_05": {"declaration": "background-color: var(--darken_05);"},
 	"darken_10": {"declaration": "background-color: var(--darken_10);"},
 	"darken_20": {"declaration": "background-color: var(--darken_20);"},
@@ -973,6 +974,8 @@
 	"darken_80": {"declaration": "background-color: var(--darken_80);"},
 	"darken_90": {"declaration": "background-color: var(--darken_90);"},
 	"darken_95": {"declaration": "background-color: var(--darken_95);"},
+	"darken_100": {"declaration": "background-color: var(--darken_100);"},
+	"lighten_00": {"declaration": "background-color: var(--lighten_00);"},
 	"lighten_05": {"declaration": "background-color: var(--lighten_05);"},
 	"lighten_10": {"declaration": "background-color: var(--lighten_10);"},
 	"lighten_20": {"declaration": "background-color: var(--lighten_20);"},
@@ -984,6 +987,8 @@
 	"lighten_80": {"declaration": "background-color: var(--lighten_80);"},
 	"lighten_90": {"declaration": "background-color: var(--lighten_90);"},
 	"lighten_95": {"declaration": "background-color: var(--lighten_95);"},
+	"lighten_100": {"declaration": "background-color: var(--lighten_100);"},
+	"fg_00": {"declaration": "background-color: var(--fg_00);"},
 	"fg_05": {"declaration": "background-color: var(--fg_05);"},
 	"fg_10": {"declaration": "background-color: var(--fg_10);"},
 	"fg_20": {"declaration": "background-color: var(--fg_20);"},
@@ -995,6 +1000,8 @@
 	"fg_80": {"declaration": "background-color: var(--fg_80);"},
 	"fg_90": {"declaration": "background-color: var(--fg_90);"},
 	"fg_95": {"declaration": "background-color: var(--fg_95);"},
+	"fg_100": {"declaration": "background-color: var(--fg_100);"},
+	"bg_00": {"declaration": "background-color: var(--bg_00);"},
 	"bg_05": {"declaration": "background-color: var(--bg_05);"},
 	"bg_10": {"declaration": "background-color: var(--bg_10);"},
 	"bg_20": {"declaration": "background-color: var(--bg_20);"},
@@ -1006,7 +1013,10 @@
 	"bg_80": {"declaration": "background-color: var(--bg_80);"},
 	"bg_90": {"declaration": "background-color: var(--bg_90);"},
 	"bg_95": {"declaration": "background-color: var(--bg_95);"},
-	"border_color_00": {"declaration": "border-color: var(--shade_00);"},
+	"bg_100": {"declaration": "background-color: var(--bg_100);"},
+	"border_color_00": {
+		"declaration": "border-color: var(--border_color_00); --border_color: var(--border_color_00);"
+	},
 	"border_color_05": {
 		"declaration": "border-color: var(--border_color_05); --border_color: var(--border_color_05);"
 	},
@@ -1040,7 +1050,9 @@
 	"border_color_95": {
 		"declaration": "border-color: var(--border_color_95); --border_color: var(--border_color_95);"
 	},
-	"border_color_100": {"declaration": "border-color: var(--shade_100);"},
+	"border_color_100": {
+		"declaration": "border-color: var(--border_color_100); --border_color: var(--border_color_100);"
+	},
 	"border_color_a_00": {
 		"declaration": "border-color: var(--color_a_00); --border_color: var(--color_a_00);"
 	},
@@ -2029,6 +2041,7 @@
 	"shadow_color_highlight": {"declaration": "--shadow_color: var(--shadow_color_highlight);"},
 	"shadow_color_glow": {"declaration": "--shadow_color: var(--shadow_color_glow);"},
 	"shadow_color_shroud": {"declaration": "--shadow_color: var(--shadow_color_shroud);"},
+	"shadow_alpha_00": {"declaration": "--shadow_alpha: var(--shadow_alpha_00);"},
 	"shadow_alpha_05": {"declaration": "--shadow_alpha: var(--shadow_alpha_05);"},
 	"shadow_alpha_10": {"declaration": "--shadow_alpha: var(--shadow_alpha_10);"},
 	"shadow_alpha_20": {"declaration": "--shadow_alpha: var(--shadow_alpha_20);"},
@@ -2040,6 +2053,7 @@
 	"shadow_alpha_80": {"declaration": "--shadow_alpha: var(--shadow_alpha_80);"},
 	"shadow_alpha_90": {"declaration": "--shadow_alpha: var(--shadow_alpha_90);"},
 	"shadow_alpha_95": {"declaration": "--shadow_alpha: var(--shadow_alpha_95);"},
+	"shadow_alpha_100": {"declaration": "--shadow_alpha: var(--shadow_alpha_100);"},
 	"shadow_color_a_00": {"declaration": "--shadow_color: var(--color_a_00);"},
 	"shadow_color_a_05": {"declaration": "--shadow_color: var(--color_a_05);"},
 	"shadow_color_a_10": {"declaration": "--shadow_color: var(--color_a_10);"},

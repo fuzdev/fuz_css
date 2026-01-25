@@ -914,6 +914,7 @@ consistent contrast. Unlike the adaptive shade scale, these don't flip.
 Perceptual curve: 3%, 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%, 98%
 
 */
+export const darken_00: StyleVariable = {name: 'darken_00', light: '#00000000', summary: '0%'};
 export const darken_05: StyleVariable = {name: 'darken_05', light: '#00000008', summary: '3%'};
 export const darken_10: StyleVariable = {name: 'darken_10', light: '#0000000f', summary: '6%'};
 export const darken_20: StyleVariable = {name: 'darken_20', light: '#0000001f', summary: '12%'};
@@ -925,6 +926,8 @@ export const darken_70: StyleVariable = {name: 'darken_70', light: '#000000cc', 
 export const darken_80: StyleVariable = {name: 'darken_80', light: '#000000e3', summary: '89%'};
 export const darken_90: StyleVariable = {name: 'darken_90', light: '#000000f5', summary: '96%'};
 export const darken_95: StyleVariable = {name: 'darken_95', light: '#000000fa', summary: '98%'};
+export const darken_100: StyleVariable = {name: 'darken_100', light: '#000000ff', summary: '100%'};
+export const lighten_00: StyleVariable = {name: 'lighten_00', light: '#ffffff00', summary: '0%'};
 export const lighten_05: StyleVariable = {name: 'lighten_05', light: '#ffffff08', summary: '3%'};
 export const lighten_10: StyleVariable = {name: 'lighten_10', light: '#ffffff0f', summary: '6%'};
 export const lighten_20: StyleVariable = {name: 'lighten_20', light: '#ffffff1f', summary: '12%'};
@@ -936,6 +939,7 @@ export const lighten_70: StyleVariable = {name: 'lighten_70', light: '#ffffffcc'
 export const lighten_80: StyleVariable = {name: 'lighten_80', light: '#ffffffe3', summary: '89%'};
 export const lighten_90: StyleVariable = {name: 'lighten_90', light: '#fffffff5', summary: '96%'};
 export const lighten_95: StyleVariable = {name: 'lighten_95', light: '#fffffffa', summary: '98%'};
+export const lighten_100: StyleVariable = {name: 'lighten_100', light: '#ffffffff', summary: '100%'};
 
 /*
 
@@ -949,6 +953,11 @@ Use for subtle backgrounds that work in both color schemes without explicit cond
 These stack when nested (alpha accumulates), unlike the opaque shade scale.
 
 */
+export const fg_00: StyleVariable = {
+	name: 'fg_00',
+	light: 'var(--darken_00)',
+	dark: 'var(--lighten_00)',
+};
 export const fg_05: StyleVariable = {
 	name: 'fg_05',
 	light: 'var(--darken_05)',
@@ -1003,6 +1012,16 @@ export const fg_95: StyleVariable = {
 	name: 'fg_95',
 	light: 'var(--darken_95)',
 	dark: 'var(--lighten_95)',
+};
+export const fg_100: StyleVariable = {
+	name: 'fg_100',
+	light: 'var(--darken_100)',
+	dark: 'var(--lighten_100)',
+};
+export const bg_00: StyleVariable = {
+	name: 'bg_00',
+	light: 'var(--lighten_00)',
+	dark: 'var(--darken_00)',
 };
 export const bg_05: StyleVariable = {
 	name: 'bg_05',
@@ -1059,6 +1078,11 @@ export const bg_95: StyleVariable = {
 	light: 'var(--lighten_95)',
 	dark: 'var(--darken_95)',
 };
+export const bg_100: StyleVariable = {
+	name: 'bg_100',
+	light: 'var(--lighten_100)',
+	dark: 'var(--darken_100)',
+};
 
 /*
 
@@ -1068,6 +1092,11 @@ Theme-integrated borders with alpha transparency. Tinted with tint_hue for cohes
 Higher alpha in dark mode compensates for lower perceived contrast.
 
 */
+export const border_color_00: StyleVariable = {
+	name: 'border_color_00',
+	light: 'hsl(var(--tint_hue) 60% 20% / 0%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 0%)',
+};
 export const border_color_05: StyleVariable = {
 	name: 'border_color_05',
 	light: 'hsl(var(--tint_hue) 60% 20% / 10%)',
@@ -1122,6 +1151,11 @@ export const border_color_95: StyleVariable = {
 	name: 'border_color_95',
 	light: 'hsl(var(--tint_hue) 60% 20% / 97%)',
 	dark: 'hsl(var(--tint_hue) 60% 80% / 98%)',
+};
+export const border_color_100: StyleVariable = {
+	name: 'border_color_100',
+	light: 'hsl(var(--tint_hue) 60% 20% / 100%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 100%)',
 };
 
 /*
@@ -1990,6 +2024,7 @@ export const default_variables: Array<StyleVariable> = [
 	shade_100_dark,
 
 	/* darken/lighten alpha overlays */
+	darken_00,
 	darken_05,
 	darken_10,
 	darken_20,
@@ -2001,6 +2036,8 @@ export const default_variables: Array<StyleVariable> = [
 	darken_80,
 	darken_90,
 	darken_95,
+	darken_100,
+	lighten_00,
 	lighten_05,
 	lighten_10,
 	lighten_20,
@@ -2012,8 +2049,10 @@ export const default_variables: Array<StyleVariable> = [
 	lighten_80,
 	lighten_90,
 	lighten_95,
+	lighten_100,
 
 	/* fg/bg adaptive alpha overlays */
+	fg_00,
 	fg_05,
 	fg_10,
 	fg_20,
@@ -2025,6 +2064,8 @@ export const default_variables: Array<StyleVariable> = [
 	fg_80,
 	fg_90,
 	fg_95,
+	fg_100,
+	bg_00,
 	bg_05,
 	bg_10,
 	bg_20,
@@ -2036,8 +2077,10 @@ export const default_variables: Array<StyleVariable> = [
 	bg_80,
 	bg_90,
 	bg_95,
+	bg_100,
 
 	/* border_color alpha */
+	border_color_00,
 	border_color_05,
 	border_color_10,
 	border_color_20,
@@ -2049,6 +2092,7 @@ export const default_variables: Array<StyleVariable> = [
 	border_color_80,
 	border_color_90,
 	border_color_95,
+	border_color_100,
 
 	/* text colors don't use alpha because it affects performance too much */
 	text_min,

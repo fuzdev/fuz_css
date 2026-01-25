@@ -152,6 +152,7 @@ export const border_width_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
 export type AlphaVariant = ArrayElement<typeof alpha_variants>;
 export const alpha_variants = [
+	'00',
 	'05',
 	'10',
 	'20',
@@ -163,6 +164,7 @@ export const alpha_variants = [
 	'80',
 	'90',
 	'95',
+	'100',
 ] as const;
 
 export type DarkenLightenVariant = ArrayElement<typeof darken_lighten_variants>;

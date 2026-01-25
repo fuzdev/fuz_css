@@ -227,9 +227,6 @@ a.chip {
 .text_50 {
 	color: var(--text_50);
 }
-.text_70 {
-	color: var(--text_70);
-}
 .shade_00 {
 	background-color: var(--shade_00);
 }
@@ -242,26 +239,11 @@ a.chip {
 .color_a_50 {
 	color: var(--color_a_50);
 }
-.color_b_50 {
-	color: var(--color_b_50);
-}
-.color_c_50 {
-	color: var(--color_c_50);
-}
-.color_d_50 {
-	color: var(--color_d_50);
-}
-.color_e_50 {
-	color: var(--color_e_50);
-}
-.color_f_50 {
-	color: var(--color_f_50);
-}
 .color_g_50 {
 	color: var(--color_g_50);
 }
-.color_h_50 {
-	color: var(--color_h_50);
+.darken_00 {
+	background-color: var(--darken_00);
 }
 .darken_05 {
 	background-color: var(--darken_05);
@@ -296,6 +278,12 @@ a.chip {
 .darken_95 {
 	background-color: var(--darken_95);
 }
+.darken_100 {
+	background-color: var(--darken_100);
+}
+.lighten_00 {
+	background-color: var(--lighten_00);
+}
 .lighten_05 {
 	background-color: var(--lighten_05);
 }
@@ -328,6 +316,12 @@ a.chip {
 }
 .lighten_95 {
 	background-color: var(--lighten_95);
+}
+.lighten_100 {
+	background-color: var(--lighten_100);
+}
+.fg_00 {
+	background-color: var(--fg_00);
 }
 .fg_05 {
 	background-color: var(--fg_05);
@@ -362,6 +356,12 @@ a.chip {
 .fg_95 {
 	background-color: var(--fg_95);
 }
+.fg_100 {
+	background-color: var(--fg_100);
+}
+.bg_00 {
+	background-color: var(--bg_00);
+}
 .bg_05 {
 	background-color: var(--bg_05);
 }
@@ -394,6 +394,13 @@ a.chip {
 }
 .bg_95 {
 	background-color: var(--bg_95);
+}
+.bg_100 {
+	background-color: var(--bg_100);
+}
+.border_color_00 {
+	border-color: var(--border_color_00);
+	--border_color: var(--border_color_00);
 }
 .border_color_05 {
 	border-color: var(--border_color_05);
@@ -438,6 +445,10 @@ a.chip {
 .border_color_95 {
 	border-color: var(--border_color_95);
 	--border_color: var(--border_color_95);
+}
+.border_color_100 {
+	border-color: var(--border_color_100);
+	--border_color: var(--border_color_100);
 }
 .outline_color_30 {
 	outline-color: var(--shade_30);
@@ -1218,10 +1229,6 @@ a.chip {
 	padding-top: var(--space_xs);
 	padding-bottom: var(--space_xs);
 }
-.py_md {
-	padding-top: var(--space_md);
-	padding-bottom: var(--space_md);
-}
 .mt_0 {
 	margin-top: 0;
 }
@@ -1329,9 +1336,6 @@ a.chip {
 .my_md {
 	margin-top: var(--space_md);
 	margin-bottom: var(--space_md);
-}
-.gap_xs2 {
-	gap: var(--space_xs2);
 }
 .gap_xs {
 	gap: var(--space_xs);

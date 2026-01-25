@@ -445,6 +445,7 @@
 	--shade_95_dark: hsl(var(--tint_hue) var(--tint_saturation) 92%);
 	--shade_100_light: hsl(var(--tint_hue) var(--tint_saturation) 6%);
 	--shade_100_dark: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--darken_00: #00000000; /* 0% */
 	--darken_05: #00000008; /* 3% */
 	--darken_10: #0000000f; /* 6% */
 	--darken_20: #0000001f; /* 12% */
@@ -456,6 +457,8 @@
 	--darken_80: #000000e3; /* 89% */
 	--darken_90: #000000f5; /* 96% */
 	--darken_95: #000000fa; /* 98% */
+	--darken_100: #000000ff; /* 100% */
+	--lighten_00: #ffffff00; /* 0% */
 	--lighten_05: #ffffff08; /* 3% */
 	--lighten_10: #ffffff0f; /* 6% */
 	--lighten_20: #ffffff1f; /* 12% */
@@ -467,6 +470,8 @@
 	--lighten_80: #ffffffe3; /* 89% */
 	--lighten_90: #fffffff5; /* 96% */
 	--lighten_95: #fffffffa; /* 98% */
+	--lighten_100: #ffffffff; /* 100% */
+	--fg_00: var(--darken_00);
 	--fg_05: var(--darken_05);
 	--fg_10: var(--darken_10);
 	--fg_20: var(--darken_20);
@@ -478,6 +483,8 @@
 	--fg_80: var(--darken_80);
 	--fg_90: var(--darken_90);
 	--fg_95: var(--darken_95);
+	--fg_100: var(--darken_100);
+	--bg_00: var(--lighten_00);
 	--bg_05: var(--lighten_05);
 	--bg_10: var(--lighten_10);
 	--bg_20: var(--lighten_20);
@@ -489,6 +496,8 @@
 	--bg_80: var(--lighten_80);
 	--bg_90: var(--lighten_90);
 	--bg_95: var(--lighten_95);
+	--bg_100: var(--lighten_100);
+	--border_color_00: hsl(var(--tint_hue) 60% 20% / 0%);
 	--border_color_05: hsl(var(--tint_hue) 60% 20% / 10%);
 	--border_color_10: hsl(var(--tint_hue) 60% 20% / 15%);
 	--border_color_20: hsl(var(--tint_hue) 60% 20% / 25%);
@@ -500,6 +509,7 @@
 	--border_color_80: hsl(var(--tint_hue) 60% 20% / 88%);
 	--border_color_90: hsl(var(--tint_hue) 60% 20% / 94%);
 	--border_color_95: hsl(var(--tint_hue) 60% 20% / 97%);
+	--border_color_100: hsl(var(--tint_hue) 60% 20% / 100%);
 	--text_min: #fff;
 	--text_max: #000;
 	--text_color: var(--text_80);
@@ -838,6 +848,7 @@
 	--shade_90: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--shade_95: hsl(var(--tint_hue) var(--tint_saturation) 92%);
 	--shade_100: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--fg_00: var(--lighten_00);
 	--fg_05: var(--lighten_05);
 	--fg_10: var(--lighten_10);
 	--fg_20: var(--lighten_20);
@@ -849,6 +860,8 @@
 	--fg_80: var(--lighten_80);
 	--fg_90: var(--lighten_90);
 	--fg_95: var(--lighten_95);
+	--fg_100: var(--lighten_100);
+	--bg_00: var(--darken_00);
 	--bg_05: var(--darken_05);
 	--bg_10: var(--darken_10);
 	--bg_20: var(--darken_20);
@@ -860,6 +873,8 @@
 	--bg_80: var(--darken_80);
 	--bg_90: var(--darken_90);
 	--bg_95: var(--darken_95);
+	--bg_100: var(--darken_100);
+	--border_color_00: hsl(var(--tint_hue) 60% 80% / 0%);
 	--border_color_05: hsl(var(--tint_hue) 60% 80% / 15%);
 	--border_color_10: hsl(var(--tint_hue) 60% 80% / 25%);
 	--border_color_20: hsl(var(--tint_hue) 60% 80% / 40%);
@@ -871,6 +886,7 @@
 	--border_color_80: hsl(var(--tint_hue) 60% 80% / 93%);
 	--border_color_90: hsl(var(--tint_hue) 60% 80% / 96%);
 	--border_color_95: hsl(var(--tint_hue) 60% 80% / 98%);
+	--border_color_100: hsl(var(--tint_hue) 60% 80% / 100%);
 	--text_min: #000;
 	--text_max: #fff;
 	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 6%);
