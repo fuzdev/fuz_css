@@ -51,45 +51,37 @@
 	</p>
 	<TomeSection>
 		<TomeSectionHeader text="Shadow" />
-		<p>Shadows darken in light mode and lighten in dark mode.</p>
+		<p>Shadows darken in light mode and lighten in dark mode (shadows are adaptive).</p>
 		<UnfinishedImplementationWarning
 			>Maybe rename for clarity? It's weird that shadows lighten in dark mode.</UnfinishedImplementationWarning
 		>
+		<form><ColorSchemeInput /></form>
 		{@render shadow_examples(null)}
 	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
-		<p>Highlights lighten in light mode and darken in dark mode.</p>
+		<p>Highlights lighten in light mode and darken in dark mode (highlights are adaptive).</p>
+		<form><ColorSchemeInput /></form>
 		<div class="panel fg_10 p_md">
 			{@render shadow_examples('highlight')}
 		</div>
 	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Glow" />
-		<p>Glows lighten in both light and dark mode.</p>
+		<p>Glows lighten in both light and dark mode (glows are not adaptive).</p>
+		<form><ColorSchemeInput /></form>
 		<div class="panel darken_30 p_md">
 			{@render shadow_examples('glow')}
 		</div>
 	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
-		<p>Shrouds darken in both light and dark mode.</p>
+		<p>Shrouds darken in both light and dark mode (shrouds are not adaptive).</p>
+		<form><ColorSchemeInput /></form>
 		<div class="panel lighten_10 p_md">
 			{@render shadow_examples('shroud')}
 		</div>
 	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
@@ -103,9 +95,6 @@
 			</TomeSection>
 		{/each}
 	</TomeSection>
-	<section>
-		<ColorSchemeInput />
-	</section>
 </TomeContent>
 
 {#snippet shadow_examples(
@@ -165,18 +154,21 @@
 {#snippet intensity_selector(color_variant: ColorVariant)}
 	<TomeSectionHeader text="shadow_color_{color_variant}_" tag="h3" />
 	<form class="intensity_selector">
-		{#each intensity_variants as intensity (intensity)}
-			<label class="box gap_xs mb_0" class:selected={selected_intensity === intensity}>
-				<input
-					type="radio"
-					name="intensity"
-					value={intensity}
-					bind:group={selected_intensity}
-					class="screen_reader_only"
-				/>
-				{intensity}
-			</label>
-		{/each}
+		<fieldset class="row mb_0">
+			{#each intensity_variants as intensity (intensity)}
+				<label class="box gap_xs mb_0 px_xs3" class:selected={selected_intensity === intensity}>
+					<input
+						type="radio"
+						name="intensity"
+						value={intensity}
+						bind:group={selected_intensity}
+						class="screen_reader_only"
+					/>
+					{intensity}
+				</label>
+			{/each}
+		</fieldset>
+		<ColorSchemeInput />
 	</form>
 {/snippet}
 
@@ -212,7 +204,7 @@
 	.intensity_selector {
 		display: flex;
 		flex-wrap: wrap;
-		align-items: center;
+		align-items: start;
 		gap: var(--space_xs);
 		padding: var(--space_sm) 0;
 	}

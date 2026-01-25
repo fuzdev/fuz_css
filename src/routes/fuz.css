@@ -1071,6 +1071,10 @@ a.chip {
 .pl_xl3 {
 	padding-left: var(--space_xl3);
 }
+.px_xs3 {
+	padding-left: var(--space_xs3);
+	padding-right: var(--space_xs3);
+}
 .px_md {
 	padding-left: var(--space_md);
 	padding-right: var(--space_md);
