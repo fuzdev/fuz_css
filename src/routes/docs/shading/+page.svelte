@@ -207,15 +207,6 @@
 			consistent darkening or lightening regardless of color scheme. These are the underlying
 			primitives that <code>fg</code> and <code>bg</code> reference.
 		</p>
-		<p>Use cases include:</p>
-		<ul>
-			<li>
-				<strong>Backdrops and overlays</strong> - consistent dimming for modals and dialogs
-			</li>
-			<li>
-				<strong>Demo backgrounds</strong> - contrasting backgrounds that show off glows/shadows
-			</li>
-		</ul>
 		<TomeSection>
 			<TomeSectionHeader text="Darken" tag="h4" />
 			<p>Alpha overlays that always add black.</p>

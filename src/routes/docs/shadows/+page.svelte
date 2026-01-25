@@ -62,7 +62,7 @@
 		<TomeSectionHeader text="Highlight" />
 		<p>Highlights are adaptive shadows that lighten in light mode and darken in dark mode.</p>
 		<form><ColorSchemeInput /></form>
-		<div class="panel fg_10 p_md">
+		<div class="panel fg_30 p_md">
 			{@render shadow_examples('highlight')}
 		</div>
 	</TomeSection>
@@ -78,7 +78,7 @@
 		<TomeSectionHeader text="Shroud" />
 		<p>Shrouds are non-adaptive shadows that darken in both light and dark mode.</p>
 		<form><ColorSchemeInput /></form>
-		<div class="panel lighten_10 p_md">
+		<div class="panel lighten_30 p_md">
 			{@render shadow_examples('shroud')}
 		</div>
 	</TomeSection>
