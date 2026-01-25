@@ -79,8 +79,8 @@
 			<TomeSectionHeader text="Key values" tag="h4" />
 			<ul>
 				<li>
-					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
-					mode). Used for input backgrounds.
+					<code>shade_min</code>: untinted surface-side extreme -- white in light mode, black in
+					dark mode; used for input backgrounds
 				</li>
 				<li><code>shade_00</code>: the base background</li>
 				<li><code>shade_05</code>: very subtle: hover states on surface</li>
