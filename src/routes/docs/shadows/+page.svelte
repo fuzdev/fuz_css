@@ -157,7 +157,7 @@
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">
 			{#each intensity_variants as intensity (intensity)}
-				<label class="box gap_xs mb_0 px_xs3" class:selected={selected_intensity === intensity}>
+				<label class="box gap_xs mb_0 px_xs4" class:selected={selected_intensity === intensity}>
 					<input
 						type="radio"
 						name="intensity"
@@ -206,7 +206,7 @@
 		display: flex;
 		flex-wrap: wrap;
 		align-items: start;
-		gap: var(--space_xs);
+		gap: var(--space_xl);
 		padding: var(--space_sm) 0;
 	}
 </style>
