@@ -38,22 +38,13 @@
 			> can choose to implement either light mode or dark mode or both.
 		</p>
 		<p>
-			Light mode's starting point is plain white documents (like paper) where we can think of UI
-			construction as assembling elements that contrast against the white background, replacing some
-			of the white blankness with darkened values/color/shape. In other words, we start with full
-			lightness and subtract light to make visuals. Black shadows on the white background make
-			natural sense, and white glows against a white background are invisible.
+			Light mode's starting point is plain white documents (like paper) where we subtract light to
+			create contrast and shape. Black shadows on white make natural sense; white glows are near
+			invisible.
 		</p>
 		<p>
-			In contrast, dark mode's starting point is a lightless void where we add light. We add
-			elements which emanate light. I think of videogames and virtual/augmented/actual reality.
-			Black shadows are invisible against a black background, and white glows make natural sense
-			against a black background.
-		</p>
-		<p>
-			The shade scale provides a unified system for backgrounds and surfaces that adapts
-			automatically to light and dark modes. Numbers represent prominence: low numbers are subtle
-			(near the base surface), high numbers are bold (high contrast).
+			Dark mode's starting point is a lightless void where we add light. Elements emit light to fill
+			the darkness. White glows make natural sense; black shadows are near invisible.
 		</p>
 	</section>
 	<TomeSection>
