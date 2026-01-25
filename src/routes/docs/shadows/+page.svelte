@@ -107,7 +107,7 @@
 		? `shadow_color_${color_variant}_${intensity}`
 		: color_variant
 			? `shadow_color_${color_variant}`
-			: null}
+			: 'shadow_color_umbra'}
 	{@const classes = is_hue ? 'color_' + color_variant : undefined}
 	{@render shadow_example_header()}
 	{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
@@ -119,7 +119,12 @@
 					{#if is_hue}
 						<code class="p_xs {classes}">{shadow_color_name}</code>
 					{:else}
-						<StyleVariableButton name={shadow_color_name ?? 'shadow_color_umbra'} {classes} />
+						<StyleVariableButton name={shadow_color_name} {classes}
+							><span>
+								{shadow_color_name}
+								{#if color_variant === 'umbra'}&nbsp;<small>(default)</small>{/if}</span
+							></StyleVariableButton
+						>
 					{/if}
 				</div>
 				{@render shadow_variant_examples(shadow_color_name, shadow_size_name)}
@@ -177,7 +182,6 @@
 	.shadow_example {
 		position: relative;
 		padding: var(--space_md);
-		font-family: var(--font_family_mono);
 		border-radius: var(--border_radius_xs3);
 		display: flex;
 		align-items: center;
@@ -188,6 +192,7 @@
 	.shadow_main_example {
 		flex: 1;
 		display: flex;
+		align-items: center;
 		flex-wrap: wrap;
 		padding: var(--space_xs);
 		min-height: var(--input_height);
