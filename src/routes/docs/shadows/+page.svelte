@@ -60,7 +60,7 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
-		<p>Highlights lighten in light mode and darken in dark mode (highlights are adaptive).</p>
+		<p>Highlights are adaptive shadows that lighten in light mode and darken in dark mode.</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel fg_10 p_md">
 			{@render shadow_examples('highlight')}
@@ -68,7 +68,7 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Glow" />
-		<p>Glows lighten in both light and dark mode (glows are not adaptive).</p>
+		<p>Glows are non-adaptive shadows that lighten in both light and dark mode.</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel darken_30 p_md">
 			{@render shadow_examples('glow')}
@@ -76,7 +76,7 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
-		<p>Shrouds darken in both light and dark mode (shrouds are not adaptive).</p>
+		<p>Shrouds are non-adaptive shadows that darken in both light and dark mode.</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel lighten_10 p_md">
 			{@render shadow_examples('shroud')}
@@ -101,7 +101,8 @@
 	color_variant: ColorVariant | 'umbra' | 'highlight' | 'glow' | 'shroud' | null,
 	intensity: IntensityVariant = '60',
 )}
-	{@const is_hue = color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}
+	{@const is_hue =
+		color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}
 	{@const shadow_color_name = is_hue
 		? `shadow_color_${color_variant}_${intensity}`
 		: color_variant
