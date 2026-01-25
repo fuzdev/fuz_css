@@ -94,6 +94,9 @@
 			{/each}
 		</ul>
 	</TomeSection>
+	<section class="box">
+		<ColorSchemeInput />
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Color variables" />
 		<p>
@@ -116,9 +119,9 @@
 			{/each}
 		</ul>
 	</TomeSection>
-	<div class="box width:100% mb_lg">
+	<section class="box">
 		<ColorSchemeInput />
-	</div>
+	</section>
 </TomeContent>
 
 <style>

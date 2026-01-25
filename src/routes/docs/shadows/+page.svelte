@@ -165,10 +165,10 @@
 {/snippet}
 
 {#snippet intensity_selector()}
-	<div class="intensity_selector">
-		<span class="text_sm">intensity:</span>
+	<form class="intensity_selector">
+		<span class="title">shadow_color_a_</span>
 		{#each intensity_variants as intensity (intensity)}
-			<label class="chip" class:selected={selected_intensity === intensity}>
+			<label class="box gap_xs mb_0" class:selected={selected_intensity === intensity}>
 				<input
 					type="radio"
 					name="intensity"
@@ -179,7 +179,7 @@
 				{intensity}
 			</label>
 		{/each}
-	</div>
+	</form>
 {/snippet}
 
 <style>
