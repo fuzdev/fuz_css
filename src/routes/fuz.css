@@ -229,9 +229,6 @@ a.chip {
 .shade_00 {
 	background-color: var(--shade_00);
 }
-.shade_10 {
-	background-color: var(--shade_10);
-}
 .shade_50 {
 	background-color: var(--shade_50);
 }

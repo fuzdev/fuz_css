@@ -50,7 +50,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
 		<p>Highlights lighten in light mode and darken in dark mode.</p>
-		<div class="panel shade_10 p_md">
+		<div class="panel lighten_10 p_md">
 			{@render shadow_section('highlight')}
 		</div>
 	</TomeSection>
@@ -70,7 +70,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
 		<p>Shrouds darken in both light and dark mode.</p>
-		<div class="panel lighten_30 p_md">
+		<div class="panel lighten_10 p_md">
 			{@render shadow_section('shroud')}
 		</div>
 	</TomeSection>
