@@ -32,10 +32,8 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css is designed around two simplistic models of light, one for dark mode and one for light
-			mode, mapping to the web platform's <MdnLink path="Web/CSS/color-scheme" />. Many style
-			variables are <em>adaptive</em>, meaning they automatically adjusting their values based on
-			the color scheme so you write styles once and they work naturally in both modes. Each <TomeLink
+			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
+			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each <TomeLink
 				name="themes">theme</TomeLink
 			> can choose to implement either light mode or dark mode or both.
 		</p>
