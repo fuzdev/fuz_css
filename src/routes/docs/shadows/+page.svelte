@@ -12,7 +12,9 @@
 		shadow_size_variants,
 		shadow_variant_prefixes,
 		shadow_alpha_variants,
+		intensity_variants,
 		type ColorVariant,
+		type IntensityVariant,
 	} from '$lib/variable_data.js';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -20,11 +22,22 @@
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
+	let selected_intensity: IntensityVariant = $state('60');
+
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
-	// @fuz-classes shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5
+	// @fuz-classes shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95
 	// @fuz-classes shadow_color_highlight shadow_color_glow shadow_color_shroud
-	// @fuz-classes darken_30 lighten_30
-	// @fuz-classes shadow_color_a_60 shadow_color_b_60 shadow_color_c_60 shadow_color_d_60 shadow_color_e_60 shadow_color_f_60 shadow_color_g_60 shadow_color_h_60 shadow_color_i_60 shadow_color_j_60
+	// @fuz-classes darken_30 lighten_30 fg_10
+	// @fuz-classes shadow_color_a_00 shadow_color_a_05 shadow_color_a_10 shadow_color_a_20 shadow_color_a_30 shadow_color_a_40 shadow_color_a_50 shadow_color_a_60 shadow_color_a_70 shadow_color_a_80 shadow_color_a_90 shadow_color_a_95 shadow_color_a_100
+	// @fuz-classes shadow_color_b_00 shadow_color_b_05 shadow_color_b_10 shadow_color_b_20 shadow_color_b_30 shadow_color_b_40 shadow_color_b_50 shadow_color_b_60 shadow_color_b_70 shadow_color_b_80 shadow_color_b_90 shadow_color_b_95 shadow_color_b_100
+	// @fuz-classes shadow_color_c_00 shadow_color_c_05 shadow_color_c_10 shadow_color_c_20 shadow_color_c_30 shadow_color_c_40 shadow_color_c_50 shadow_color_c_60 shadow_color_c_70 shadow_color_c_80 shadow_color_c_90 shadow_color_c_95 shadow_color_c_100
+	// @fuz-classes shadow_color_d_00 shadow_color_d_05 shadow_color_d_10 shadow_color_d_20 shadow_color_d_30 shadow_color_d_40 shadow_color_d_50 shadow_color_d_60 shadow_color_d_70 shadow_color_d_80 shadow_color_d_90 shadow_color_d_95 shadow_color_d_100
+	// @fuz-classes shadow_color_e_00 shadow_color_e_05 shadow_color_e_10 shadow_color_e_20 shadow_color_e_30 shadow_color_e_40 shadow_color_e_50 shadow_color_e_60 shadow_color_e_70 shadow_color_e_80 shadow_color_e_90 shadow_color_e_95 shadow_color_e_100
+	// @fuz-classes shadow_color_f_00 shadow_color_f_05 shadow_color_f_10 shadow_color_f_20 shadow_color_f_30 shadow_color_f_40 shadow_color_f_50 shadow_color_f_60 shadow_color_f_70 shadow_color_f_80 shadow_color_f_90 shadow_color_f_95 shadow_color_f_100
+	// @fuz-classes shadow_color_g_00 shadow_color_g_05 shadow_color_g_10 shadow_color_g_20 shadow_color_g_30 shadow_color_g_40 shadow_color_g_50 shadow_color_g_60 shadow_color_g_70 shadow_color_g_80 shadow_color_g_90 shadow_color_g_95 shadow_color_g_100
+	// @fuz-classes shadow_color_h_00 shadow_color_h_05 shadow_color_h_10 shadow_color_h_20 shadow_color_h_30 shadow_color_h_40 shadow_color_h_50 shadow_color_h_60 shadow_color_h_70 shadow_color_h_80 shadow_color_h_90 shadow_color_h_95 shadow_color_h_100
+	// @fuz-classes shadow_color_i_00 shadow_color_i_05 shadow_color_i_10 shadow_color_i_20 shadow_color_i_30 shadow_color_i_40 shadow_color_i_50 shadow_color_i_60 shadow_color_i_70 shadow_color_i_80 shadow_color_i_90 shadow_color_i_95 shadow_color_i_100
+	// @fuz-classes shadow_color_j_00 shadow_color_j_05 shadow_color_j_10 shadow_color_j_20 shadow_color_j_30 shadow_color_j_40 shadow_color_j_50 shadow_color_j_60 shadow_color_j_70 shadow_color_j_80 shadow_color_j_90 shadow_color_j_95 shadow_color_j_100
 
 	// TODO duplicate shadows links
 </script>
@@ -84,21 +97,26 @@
 			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
 			controls the color's prominence (60 is a good starting point for visible colored shadows).
 		</p>
+		{@render intensity_selector()}
 		{#each color_variants as color_variant (color_variant)}
 			<section>
-				{@render shadow_section(color_variant)}
+				{@render shadow_section(color_variant, selected_intensity)}
 			</section>
 		{/each}
+		{@render intensity_selector()}
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
 	</section>
 </TomeContent>
 
-{#snippet shadow_section(color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null)}
+{#snippet shadow_section(
+	color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null,
+	intensity: IntensityVariant = '60',
+)}
 	{@const is_hue = color_variant && !['highlight', 'glow', 'shroud'].includes(color_variant)}
 	{@const shadow_color_name = is_hue
-		? `shadow_color_${color_variant}_60`
+		? `shadow_color_${color_variant}_${intensity}`
 		: color_variant
 			? `shadow_color_${color_variant}`
 			: null}
@@ -146,6 +164,24 @@
 	</div>
 {/snippet}
 
+{#snippet intensity_selector()}
+	<div class="intensity_selector">
+		<span class="text_sm">intensity:</span>
+		{#each intensity_variants as intensity (intensity)}
+			<label class="chip" class:selected={selected_intensity === intensity}>
+				<input
+					type="radio"
+					name="intensity"
+					value={intensity}
+					bind:group={selected_intensity}
+					class="screen_reader_only"
+				/>
+				{intensity}
+			</label>
+		{/each}
+	</div>
+{/snippet}
+
 <style>
 	.shadow_example {
 		position: relative;
@@ -174,5 +210,12 @@
 		width: var(--input_height);
 		min-width: var(--input_height);
 		height: var(--input_height);
+	}
+	.intensity_selector {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		gap: var(--space_xs);
+		padding: var(--space_sm) 0;
 	}
 </style>

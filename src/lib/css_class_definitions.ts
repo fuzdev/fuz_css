@@ -235,11 +235,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	*/
 	...generate_shadow_classes(shadow_size_variants, {
-		xs: '1',
-		sm: '2',
-		md: '3',
-		lg: '4',
-		xl: '5',
+		xs: '30',
+		sm: '40',
+		md: '50',
+		lg: '60',
+		xl: '70',
 	}),
 	...generate_classes(
 		(value: string) => ({
@@ -249,7 +249,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		shadow_semantic_values,
 	),
 	...generate_classes(
-		(alpha: number) => ({
+		(alpha: string) => ({
 			name: `shadow_alpha_${alpha}`,
 			css: `--shadow_alpha: var(--shadow_alpha_${alpha});`,
 		}),

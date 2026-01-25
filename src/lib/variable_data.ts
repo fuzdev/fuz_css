@@ -110,9 +110,6 @@ export const shadow_variant_prefixes = [
 export type ShadowSizeVariant = ArrayElement<typeof shadow_size_variants>;
 export const shadow_size_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
-export type ShadowAlphaVariant = ArrayElement<typeof shadow_alpha_variants>;
-export const shadow_alpha_variants = [1, 2, 3, 4, 5] as const;
-
 export type ShadowSemanticValue = ArrayElement<typeof shadow_semantic_values>;
 export const shadow_semantic_values = ['highlight', 'glow', 'shroud'] as const;
 
@@ -170,6 +167,9 @@ export const alpha_variants = [
 
 export type DarkenLightenVariant = ArrayElement<typeof darken_lighten_variants>;
 export const darken_lighten_variants = alpha_variants;
+
+export type ShadowAlphaVariant = ArrayElement<typeof shadow_alpha_variants>;
+export const shadow_alpha_variants = alpha_variants;
 
 export type ColorSchemeVariant = ArrayElement<typeof color_scheme_variants>;
 export const color_scheme_variants = ['light', 'dark'] as const;

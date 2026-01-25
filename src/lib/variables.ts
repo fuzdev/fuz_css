@@ -1356,14 +1356,14 @@ export const border_radius_xl: StyleVariable = {name: 'border_radius_xl', light:
 export const button_shadow: StyleVariable = {
 	name: 'button_shadow',
 	light:
-		'var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_1), transparent), var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_1), transparent)',
-	dark: 'var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_1), transparent), var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_1), transparent)',
+		'var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent), var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
+	dark: 'var(--shadow_inset_top_xs) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_30), transparent), var(--shadow_inset_bottom_xs) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
 };
 export const button_shadow_hover: StyleVariable = {
 	name: 'button_shadow_hover',
 	light:
-		'var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_2), transparent), var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_2), transparent)',
-	dark: 'var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_2), transparent), var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_2), transparent)',
+		'var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
+	dark: 'var(--shadow_inset_top_sm) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in hsl, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
 };
 export const button_shadow_active: StyleVariable = {
 	name: 'button_shadow_active',
@@ -1538,26 +1538,19 @@ export const shadow_color_shroud: StyleVariable = {
 	name: 'shadow_color_shroud',
 	light: 'hsl(var(--tint_hue) var(--tint_saturation) 0%)',
 };
-export const shadow_alpha_1: StyleVariable = {
-	name: 'shadow_alpha_1',
-	light: '20%',
-};
-export const shadow_alpha_2: StyleVariable = {
-	name: 'shadow_alpha_2',
-	light: '30%',
-};
-export const shadow_alpha_3: StyleVariable = {
-	name: 'shadow_alpha_3',
-	light: '40%',
-};
-export const shadow_alpha_4: StyleVariable = {
-	name: 'shadow_alpha_4',
-	light: '60%',
-};
-export const shadow_alpha_5: StyleVariable = {
-	name: 'shadow_alpha_5',
-	light: '80%',
-};
+// TODO @ryanatkn consider sharing an alpha abstraction with darken/lighten - these use the same perceptual scale
+// TODO @ryanatkn are these variables needed, or can classes just use inline percentages?
+export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '3%'};
+export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '6%'};
+export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '12%'};
+export const shadow_alpha_30: StyleVariable = {name: 'shadow_alpha_30', light: '21%'};
+export const shadow_alpha_40: StyleVariable = {name: 'shadow_alpha_40', light: '32%'};
+export const shadow_alpha_50: StyleVariable = {name: 'shadow_alpha_50', light: '45%'};
+export const shadow_alpha_60: StyleVariable = {name: 'shadow_alpha_60', light: '65%'};
+export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '80%'};
+export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '89%'};
+export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%'};
+export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '98%'};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,
@@ -2216,11 +2209,17 @@ export const default_variables: Array<StyleVariable> = [
 	shadow_color_highlight,
 	shadow_color_glow,
 	shadow_color_shroud,
-	shadow_alpha_1,
-	shadow_alpha_2,
-	shadow_alpha_3,
-	shadow_alpha_4,
-	shadow_alpha_5,
+	shadow_alpha_05,
+	shadow_alpha_10,
+	shadow_alpha_20,
+	shadow_alpha_30,
+	shadow_alpha_40,
+	shadow_alpha_50,
+	shadow_alpha_60,
+	shadow_alpha_70,
+	shadow_alpha_80,
+	shadow_alpha_90,
+	shadow_alpha_95,
 
 	/* icons */
 	icon_size_xs,
