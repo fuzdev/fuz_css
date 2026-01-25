@@ -26,8 +26,12 @@ export const font_family_variants = [
 	'font_family_mono',
 ] as const;
 
-export type TextVariant = ArrayElement<typeof text_variants>;
-export const text_variants = [
+/**
+ * The standard numeric scale used across multiple variable families.
+ * Provides 13 steps from 00 (surface/subtle) to 100 (contrast/bold).
+ */
+export type NumericScaleVariant = ArrayElement<typeof numeric_scale_variants>;
+export const numeric_scale_variants = [
 	'00',
 	'05',
 	'10',
@@ -43,22 +47,26 @@ export const text_variants = [
 	'100',
 ] as const;
 
-export type ShadeVariant = ArrayElement<typeof shade_variants>;
-export const shade_variants = [
-	'00',
-	'05',
-	'10',
-	'20',
-	'30',
-	'40',
-	'50',
-	'60',
-	'70',
-	'80',
-	'90',
-	'95',
-	'100',
-] as const;
+/**
+ * Numeric scale with min/max extremes for scales that need untinted endpoints.
+ * Used by text and shade scales where min/max represent pure black/white values.
+ */
+export type NumericScaleWithExtremesVariant = ArrayElement<typeof numeric_scale_with_extremes>;
+export const numeric_scale_with_extremes = ['min', ...numeric_scale_variants, 'max'] as const;
+
+export type TextVariant = NumericScaleVariant;
+export const text_variants = numeric_scale_variants;
+
+/** Full text scale including min/max extremes for knockout text. */
+export type TextScaleVariant = NumericScaleWithExtremesVariant;
+export const text_scale_variants = numeric_scale_with_extremes;
+
+export type ShadeVariant = NumericScaleVariant;
+export const shade_variants = numeric_scale_variants;
+
+/** Full shade scale including min/max extremes for untinted surfaces. */
+export type ShadeScaleVariant = NumericScaleWithExtremesVariant;
+export const shade_scale_variants = numeric_scale_with_extremes;
 
 export type SpaceVariant = ArrayElement<typeof space_variants>;
 export const space_variants = [
@@ -130,42 +138,14 @@ export const icon_sizes = {
 export type ColorVariant = ArrayElement<typeof color_variants>;
 export const color_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
 
-export type IntensityVariant = ArrayElement<typeof intensity_variants>;
-export const intensity_variants = [
-	'00',
-	'05',
-	'10',
-	'20',
-	'30',
-	'40',
-	'50',
-	'60',
-	'70',
-	'80',
-	'90',
-	'95',
-	'100',
-] as const;
+export type IntensityVariant = NumericScaleVariant;
+export const intensity_variants = numeric_scale_variants;
 
 export type BorderWidthVariant = ArrayElement<typeof border_width_variants>;
 export const border_width_variants = [1, 2, 3, 4, 5, 6, 7, 8, 9] as const;
 
-export type AlphaVariant = ArrayElement<typeof alpha_variants>;
-export const alpha_variants = [
-	'00',
-	'05',
-	'10',
-	'20',
-	'30',
-	'40',
-	'50',
-	'60',
-	'70',
-	'80',
-	'90',
-	'95',
-	'100',
-] as const;
+export type AlphaVariant = NumericScaleVariant;
+export const alpha_variants = numeric_scale_variants;
 
 export type DarkenLightenVariant = ArrayElement<typeof darken_lighten_variants>;
 export const darken_lighten_variants = alpha_variants;

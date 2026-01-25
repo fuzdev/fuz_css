@@ -115,11 +115,11 @@
 			{@const shadow_size_name = shadow_variant_prefix + shadow_size_variant}
 			<div class="shadow_example">
 				<div class="shadow_main_example {shadow_size_name} {shadow_color_name}">
-					<StyleVariableButton name={shadow_size_name} {classes} />
+					<StyleVariableButton name={shadow_size_name} class={classes} />
 					{#if is_hue}
 						<code class="p_xs {classes}">{shadow_color_name}</code>
 					{:else}
-						<StyleVariableButton name={shadow_color_name} {classes}
+						<StyleVariableButton name={shadow_color_name} class={classes}
 							><span>
 								{shadow_color_name}
 								{#if color_variant === 'umbra'}&nbsp;<small>(default)</small>{/if}</span

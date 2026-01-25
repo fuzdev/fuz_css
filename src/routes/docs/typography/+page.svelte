@@ -16,7 +16,7 @@
 	import {
 		line_height_names,
 		font_size_names,
-		text_variants,
+		text_scale_variants,
 		font_family_variants,
 	} from '$lib/variable_data.js';
 
@@ -154,6 +154,9 @@
 			<li><code>text_50</code> - disabled text: <code>text_disabled</code></li>
 			<li><code>text_80</code> - default body text: <code>--text_color</code></li>
 			<li><code>text_90</code>-<code>text_100</code> - high emphasis/headings</li>
+			<li>
+				<code>text_min</code>/<code>text_max</code> - knockout text (pure white/black without tint)
+			</li>
 		</ul>
 		<p>
 			The text scale is separate from the shade scale because text and backgrounds have different
@@ -161,8 +164,8 @@
 			backgrounds. For colored text, use <code>color_a_50</code> etc.
 		</p>
 		<div class="panel">
-			{#each text_variants as text_variant (text_variant)}
-				{@const name = 'text_' + text_variant}
+			{#each text_scale_variants as variant (variant)}
+				{@const name = 'text_' + variant}
 				<div class="row">
 					<StyleVariableButton {name}
 						><span class="font_family_mono" style:color="var(--{name})">

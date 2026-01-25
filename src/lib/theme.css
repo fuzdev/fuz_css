@@ -497,7 +497,7 @@
 	--bg_90: var(--lighten_90);
 	--bg_95: var(--lighten_95);
 	--bg_100: var(--lighten_100);
-	--border_color_00: hsl(var(--tint_hue) 60% 20% / 0%);
+	--border_color_00: transparent;
 	--border_color_05: hsl(var(--tint_hue) 60% 20% / 10%);
 	--border_color_10: hsl(var(--tint_hue) 60% 20% / 15%);
 	--border_color_20: hsl(var(--tint_hue) 60% 20% / 25%);
@@ -509,23 +509,23 @@
 	--border_color_80: hsl(var(--tint_hue) 60% 20% / 88%);
 	--border_color_90: hsl(var(--tint_hue) 60% 20% / 94%);
 	--border_color_95: hsl(var(--tint_hue) 60% 20% / 97%);
-	--border_color_100: hsl(var(--tint_hue) 60% 20% / 100%);
+	--border_color_100: hsl(var(--tint_hue) 60% 20%);
 	--text_min: #fff;
 	--text_max: #000;
 	--text_color: var(--text_80);
-	--text_00: #fff;
+	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 96%);
 	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 94%);
 	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 82%);
-	--text_30: hsl(var(--tint_hue) var(--tint_saturation) 68%);
+	--text_30: hsl(var(--tint_hue) var(--tint_saturation) 70%);
 	--text_40: hsl(var(--tint_hue) var(--tint_saturation) 59%);
 	--text_50: hsl(var(--tint_hue) var(--tint_saturation) 50%);
 	--text_60: hsl(var(--tint_hue) var(--tint_saturation) 41%);
 	--text_70: hsl(var(--tint_hue) var(--tint_saturation) 32%);
-	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 16%);
-	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 8%);
-	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 4%);
-	--text_100: #000;
+	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 21%);
+	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 13%);
+	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 8%);
+	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 4%);
 	--text_disabled: var(--text_50);
 	--font_family_sans:
 		system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; /* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -876,7 +876,7 @@
 	--bg_90: var(--darken_90);
 	--bg_95: var(--darken_95);
 	--bg_100: var(--darken_100);
-	--border_color_00: hsl(var(--tint_hue) 60% 80% / 0%);
+	--border_color_00: transparent;
 	--border_color_05: hsl(var(--tint_hue) 60% 80% / 15%);
 	--border_color_10: hsl(var(--tint_hue) 60% 80% / 25%);
 	--border_color_20: hsl(var(--tint_hue) 60% 80% / 40%);
@@ -888,10 +888,10 @@
 	--border_color_80: hsl(var(--tint_hue) 60% 80% / 93%);
 	--border_color_90: hsl(var(--tint_hue) 60% 80% / 96%);
 	--border_color_95: hsl(var(--tint_hue) 60% 80% / 98%);
-	--border_color_100: hsl(var(--tint_hue) 60% 80% / 100%);
+	--border_color_100: hsl(var(--tint_hue) 60% 80%);
 	--text_min: #000;
 	--text_max: #fff;
-	--text_00: #000;
+	--text_00: hsl(var(--tint_hue) var(--tint_saturation) 4%);
 	--text_05: hsl(var(--tint_hue) var(--tint_saturation) 10%);
 	--text_10: hsl(var(--tint_hue) var(--tint_saturation) 14%);
 	--text_20: hsl(var(--tint_hue) var(--tint_saturation) 22%);
@@ -900,9 +900,9 @@
 	--text_60: hsl(var(--tint_hue) var(--tint_saturation) 58%);
 	--text_70: hsl(var(--tint_hue) var(--tint_saturation) 69%);
 	--text_80: hsl(var(--tint_hue) var(--tint_saturation) 80%);
-	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 90%);
-	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 96%);
-	--text_100: #fff;
+	--text_90: hsl(var(--tint_hue) var(--tint_saturation) 87%);
+	--text_95: hsl(var(--tint_hue) var(--tint_saturation) 92%);
+	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 96%);
 	--link_color: hsl(var(--hue_a) 61% 58%);
 	--button_shadow:
 		var(--shadow_inset_top_xs)

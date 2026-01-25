@@ -320,7 +320,7 @@
 						"kind": "variable",
 						"doc_comment": "All built-in CSS class definitions (token classes + composites).",
 						"see_also": ["`generate_classes_css`"],
-						"source_line": 48,
+						"source_line": 49,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
 					}
 				],
@@ -2936,232 +2936,284 @@
 						"type_signature": "readonly [\"font_family_sans\", \"font_family_serif\", \"font_family_mono\"]"
 					},
 					{
+						"name": "NumericScaleVariant",
+						"kind": "type",
+						"doc_comment": "The standard numeric scale used across multiple variable families.\nProvides 13 steps from 00 (surface/subtle) to 100 (contrast/bold).",
+						"source_line": 33,
+						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
+					},
+					{
+						"name": "numeric_scale_variants",
+						"kind": "variable",
+						"source_line": 34,
+						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
+					},
+					{
+						"name": "NumericScaleWithExtremesVariant",
+						"kind": "type",
+						"doc_comment": "Numeric scale with min/max extremes for scales that need untinted endpoints.\nUsed by text and shade scales where min/max represent pure black/white values.",
+						"source_line": 54,
+						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\" | \"min\" | \"max\""
+					},
+					{
+						"name": "numeric_scale_with_extremes",
+						"kind": "variable",
+						"source_line": 55,
+						"type_signature": "readonly [\"min\", \"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\", \"max\"]"
+					},
+					{
 						"name": "TextVariant",
 						"kind": "type",
-						"source_line": 29,
+						"source_line": 57,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "text_variants",
 						"kind": "variable",
-						"source_line": 30,
+						"source_line": 58,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
+					},
+					{
+						"name": "TextScaleVariant",
+						"kind": "type",
+						"doc_comment": "Full text scale including min/max extremes for knockout text.",
+						"source_line": 61,
+						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\" | \"min\" | \"max\""
+					},
+					{
+						"name": "text_scale_variants",
+						"kind": "variable",
+						"source_line": 62,
+						"type_signature": "readonly [\"min\", \"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\", \"max\"]"
 					},
 					{
 						"name": "ShadeVariant",
 						"kind": "type",
-						"source_line": 46,
+						"source_line": 64,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "shade_variants",
 						"kind": "variable",
-						"source_line": 47,
+						"source_line": 65,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
+					},
+					{
+						"name": "ShadeScaleVariant",
+						"kind": "type",
+						"doc_comment": "Full shade scale including min/max extremes for untinted surfaces.",
+						"source_line": 68,
+						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\" | \"min\" | \"max\""
+					},
+					{
+						"name": "shade_scale_variants",
+						"kind": "variable",
+						"source_line": 69,
+						"type_signature": "readonly [\"min\", \"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\", \"max\"]"
 					},
 					{
 						"name": "SpaceVariant",
 						"kind": "type",
-						"source_line": 63,
+						"source_line": 71,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\" | \"xl2\" | \"xl3\" | \"xl4\" | \"xl5\" | \"xl6\" | \"xl7\" | \"xl8\" | \"xl9\" | \"xs5\" | \"xs4\" | \"xs3\" | \"xs2\" | \"xl10\" | \"xl11\" | \"xl12\" | \"xl13\" | \"xl14\" | \"xl15\""
 					},
 					{
 						"name": "space_variants",
 						"kind": "variable",
-						"source_line": 64,
+						"source_line": 72,
 						"type_signature": "readonly [\"xs5\", \"xs4\", \"xs3\", \"xs2\", \"xs\", \"sm\", \"md\", \"lg\", \"xl\", \"xl2\", \"xl3\", \"xl4\", \"xl5\", \"xl6\", \"xl7\", \"xl8\", \"xl9\", \"xl10\", \"xl11\", \"xl12\", \"xl13\", \"xl14\", \"xl15\"]"
 					},
 					{
 						"name": "DistanceVariant",
 						"kind": "type",
-						"source_line": 90,
+						"source_line": 98,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\""
 					},
 					{
 						"name": "distance_variants",
 						"kind": "variable",
-						"source_line": 91,
+						"source_line": 99,
 						"type_signature": "readonly [\"xs\", \"sm\", \"md\", \"lg\", \"xl\"]"
 					},
 					{
 						"name": "BorderRadiusVariant",
 						"kind": "type",
-						"source_line": 93,
+						"source_line": 101,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\" | \"xs3\" | \"xs2\""
 					},
 					{
 						"name": "border_radius_variants",
 						"kind": "variable",
-						"source_line": 94,
+						"source_line": 102,
 						"type_signature": "readonly [\"xs3\", \"xs2\", \"xs\", \"sm\", \"md\", \"lg\", \"xl\"]"
 					},
 					{
 						"name": "LineHeightVariant",
 						"kind": "type",
-						"source_line": 96,
+						"source_line": 104,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\""
 					},
 					{
 						"name": "line_height_variants",
 						"kind": "variable",
-						"source_line": 97,
+						"source_line": 105,
 						"type_signature": "readonly [\"xs\", \"sm\", \"md\", \"lg\", \"xl\"]"
 					},
 					{
 						"name": "line_height_names",
 						"kind": "variable",
-						"source_line": 99,
+						"source_line": 107,
 						"type_signature": "string[]"
 					},
 					{
 						"name": "shadow_variant_prefixes",
 						"kind": "variable",
-						"source_line": 101,
+						"source_line": 109,
 						"type_signature": "readonly [\"shadow_\", \"shadow_top_\", \"shadow_bottom_\", \"shadow_inset_\", \"shadow_inset_top_\", \"shadow_inset_bottom_\"]"
 					},
 					{
 						"name": "ShadowSizeVariant",
 						"kind": "type",
-						"source_line": 110,
+						"source_line": 118,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\""
 					},
 					{
 						"name": "shadow_size_variants",
 						"kind": "variable",
-						"source_line": 111,
+						"source_line": 119,
 						"type_signature": "readonly [\"xs\", \"sm\", \"md\", \"lg\", \"xl\"]"
 					},
 					{
 						"name": "ShadowSemanticValue",
 						"kind": "type",
-						"source_line": 113,
+						"source_line": 121,
 						"type_signature": "\"umbra\" | \"highlight\" | \"glow\" | \"shroud\""
 					},
 					{
 						"name": "shadow_semantic_values",
 						"kind": "variable",
-						"source_line": 114,
+						"source_line": 122,
 						"type_signature": "readonly [\"umbra\", \"highlight\", \"glow\", \"shroud\"]"
 					},
 					{
 						"name": "IconSizeVariant",
 						"kind": "type",
-						"source_line": 116,
+						"source_line": 124,
 						"type_signature": "\"xs\" | \"sm\" | \"md\" | \"lg\" | \"xl\" | \"xl2\" | \"xl3\""
 					},
 					{
 						"name": "icon_size_variants",
 						"kind": "variable",
-						"source_line": 117,
+						"source_line": 125,
 						"type_signature": "readonly [\"xs\", \"sm\", \"md\", \"lg\", \"xl\", \"xl2\", \"xl3\"]"
 					},
 					{
 						"name": "icon_sizes",
 						"kind": "variable",
-						"source_line": 120,
+						"source_line": 128,
 						"type_signature": "{ icon_size_xs: string; icon_size_sm: string; icon_size_md: string; icon_size_lg: string; icon_size_xl: string; icon_size_xl2: string; icon_size_xl3: string; }"
 					},
 					{
 						"name": "ColorVariant",
 						"kind": "type",
-						"source_line": 130,
+						"source_line": 138,
 						"type_signature": "\"a\" | \"b\" | \"c\" | \"d\" | \"e\" | \"f\" | \"g\" | \"h\" | \"i\" | \"j\""
 					},
 					{
 						"name": "color_variants",
 						"kind": "variable",
-						"source_line": 131,
+						"source_line": 139,
 						"type_signature": "readonly [\"a\", \"b\", \"c\", \"d\", \"e\", \"f\", \"g\", \"h\", \"i\", \"j\"]"
 					},
 					{
 						"name": "IntensityVariant",
 						"kind": "type",
-						"source_line": 133,
+						"source_line": 141,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "intensity_variants",
 						"kind": "variable",
-						"source_line": 134,
+						"source_line": 142,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
 					},
 					{
 						"name": "BorderWidthVariant",
 						"kind": "type",
-						"source_line": 150,
+						"source_line": 144,
 						"type_signature": "4 | 3 | 5 | 7 | 6 | 1 | 2 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",
 						"kind": "variable",
-						"source_line": 151,
+						"source_line": 145,
 						"type_signature": "readonly [1, 2, 3, 4, 5, 6, 7, 8, 9]"
 					},
 					{
 						"name": "AlphaVariant",
 						"kind": "type",
-						"source_line": 153,
+						"source_line": 147,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "alpha_variants",
 						"kind": "variable",
-						"source_line": 154,
+						"source_line": 148,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
 					},
 					{
 						"name": "DarkenLightenVariant",
 						"kind": "type",
-						"source_line": 170,
+						"source_line": 150,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "darken_lighten_variants",
 						"kind": "variable",
-						"source_line": 171,
+						"source_line": 151,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
 					},
 					{
 						"name": "ShadowAlphaVariant",
 						"kind": "type",
-						"source_line": 173,
+						"source_line": 153,
 						"type_signature": "\"00\" | \"05\" | \"10\" | \"20\" | \"30\" | \"40\" | \"50\" | \"60\" | \"70\" | \"80\" | \"90\" | \"95\" | \"100\""
 					},
 					{
 						"name": "shadow_alpha_variants",
 						"kind": "variable",
-						"source_line": 174,
+						"source_line": 154,
 						"type_signature": "readonly [\"00\", \"05\", \"10\", \"20\", \"30\", \"40\", \"50\", \"60\", \"70\", \"80\", \"90\", \"95\", \"100\"]"
 					},
 					{
 						"name": "ColorSchemeVariant",
 						"kind": "type",
-						"source_line": 176,
+						"source_line": 156,
 						"type_signature": "\"dark\" | \"light\""
 					},
 					{
 						"name": "color_scheme_variants",
 						"kind": "variable",
-						"source_line": 177,
+						"source_line": 157,
 						"type_signature": "readonly [\"light\", \"dark\"]"
 					},
 					{
 						"name": "OutlineWidthVariant",
 						"kind": "type",
-						"source_line": 179,
+						"source_line": 159,
 						"type_signature": "\"focus\" | \"active\""
 					},
 					{
 						"name": "outline_width_variants",
 						"kind": "variable",
-						"source_line": 180,
+						"source_line": 160,
 						"type_signature": "readonly [\"focus\", \"active\"]"
 					},
 					{
 						"name": "Z_INDEX_MAX",
 						"kind": "variable",
 						"doc_comment": "Maximum value for CSS z-index property (32-bit signed integer max).",
-						"source_line": 185,
+						"source_line": 165,
 						"type_signature": "2147483647"
 					}
 				],

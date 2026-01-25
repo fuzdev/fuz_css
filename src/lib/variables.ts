@@ -1098,8 +1098,8 @@ Higher alpha in dark mode compensates for lower perceived contrast.
 */
 export const border_color_00: StyleVariable = {
 	name: 'border_color_00',
-	light: 'hsl(var(--tint_hue) 60% 20% / 0%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 0%)',
+	light: 'transparent',
+	dark: 'transparent',
 };
 export const border_color_05: StyleVariable = {
 	name: 'border_color_05',
@@ -1158,8 +1158,8 @@ export const border_color_95: StyleVariable = {
 };
 export const border_color_100: StyleVariable = {
 	name: 'border_color_100',
-	light: 'hsl(var(--tint_hue) 60% 20% / 100%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 100%)',
+	light: 'hsl(var(--tint_hue) 60% 20%)',
+	dark: 'hsl(var(--tint_hue) 60% 80%)',
 };
 
 /*
@@ -1184,8 +1184,8 @@ export const text_max: StyleVariable = {
 export const text_color: StyleVariable = {name: 'text_color', light: 'var(--text_80)'};
 export const text_00: StyleVariable = {
 	name: 'text_00',
-	light: '#fff',
-	dark: '#000',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 4%)',
 };
 export const text_05: StyleVariable = {
 	name: 'text_05',
@@ -1204,7 +1204,7 @@ export const text_20: StyleVariable = {
 };
 export const text_30: StyleVariable = {
 	name: 'text_30',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 68%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 70%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 30%)',
 };
 export const text_40: StyleVariable = {
@@ -1228,23 +1228,23 @@ export const text_70: StyleVariable = {
 };
 export const text_80: StyleVariable = {
 	name: 'text_80',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 16%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 21%)',
 	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 80%)',
 };
 export const text_90: StyleVariable = {
 	name: 'text_90',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 13%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 87%)',
 };
 export const text_95: StyleVariable = {
 	name: 'text_95',
-	light: 'hsl(var(--tint_hue) var(--tint_saturation) 4%)',
-	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 92%)',
 };
 export const text_100: StyleVariable = {
 	name: 'text_100',
-	light: '#000',
-	dark: '#fff',
+	light: 'hsl(var(--tint_hue) var(--tint_saturation) 4%)',
+	dark: 'hsl(var(--tint_hue) var(--tint_saturation) 96%)',
 };
 export const text_disabled: StyleVariable = {
 	name: 'text_disabled',

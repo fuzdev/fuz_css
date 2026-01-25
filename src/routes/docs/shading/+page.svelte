@@ -10,7 +10,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {shade_variants, alpha_variants} from '$lib/variable_data.js';
+	import {shade_scale_variants, alpha_variants} from '$lib/variable_data.js';
 
 	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
 	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100
@@ -59,21 +59,13 @@
 			contrast needs.
 		</p>
 		<div class="swatch">
-			<div>
-				<div class="color" style:background-color="var(--shade_min)"></div>
-				<small><StyleVariableButton name="shade_min" /></small>
-			</div>
-			{#each shade_variants as shade (shade)}
+			{#each shade_scale_variants as shade (shade)}
 				{@const name = 'shade_' + shade}
 				<div>
 					<div class="color" style:background-color="var(--{name})"></div>
 					<small><StyleVariableButton {name} /></small>
 				</div>
 			{/each}
-			<div>
-				<div class="color" style:background-color="var(--shade_max)"></div>
-				<small><StyleVariableButton name="shade_max" /></small>
-			</div>
 		</div>
 		<TomeSection>
 			<TomeSectionHeader text="Key values" tag="h4" />
