@@ -22,6 +22,7 @@
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_1 shadow_alpha_2 shadow_alpha_3 shadow_alpha_4 shadow_alpha_5
+	// @fuz-classes shadow_color_highlight shadow_color_glow shadow_color_shroud
 	// @fuz-classes darken_30 lighten_30
 	// @fuz-classes shadow_color_a_60 shadow_color_b_60 shadow_color_c_60 shadow_color_d_60 shadow_color_e_60 shadow_color_f_60 shadow_color_g_60 shadow_color_h_60 shadow_color_i_60 shadow_color_j_60
 
@@ -50,7 +51,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
 		<p>Highlights lighten in light mode and darken in dark mode.</p>
-		<div class="panel lighten_10 p_md">
+		<div class="panel fg_10 p_md">
 			{@render shadow_section('highlight')}
 		</div>
 	</TomeSection>
@@ -100,7 +101,7 @@
 		? `shadow_color_${color_variant}_60`
 		: color_variant
 			? `shadow_color_${color_variant}`
-			: 'shadow_color'}
+			: null}
 	{@const classes = is_hue ? 'color_' + color_variant : undefined}
 	{@render shadow_example_header()}
 	{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
@@ -112,7 +113,7 @@
 					{#if is_hue}
 						<code class="p_xs {classes}">{shadow_color_name}</code>
 					{:else}
-						<StyleVariableButton name={shadow_color_name} {classes} />
+						<StyleVariableButton name={shadow_color_name ?? 'shadow_color'} {classes} />
 					{/if}
 				</div>
 				{@render shadow_variant_examples(shadow_color_name, shadow_size_name)}
@@ -134,11 +135,11 @@
 	</div>
 {/snippet}
 
-{#snippet shadow_variant_examples(shadow_color_name: string, shadow_size_name: string)}
+{#snippet shadow_variant_examples(shadow_color_name: string | null, shadow_size_name: string)}
 	<div class="row gap_lg">
 		{#each shadow_alpha_variants as alpha (alpha)}
 			<div
-				title="{shadow_size_name} with {shadow_color_name}"
+				title="{shadow_size_name} with {shadow_color_name ?? 'shadow_color'}"
 				class="shadow_variant_example {shadow_size_name} {shadow_color_name} shadow_alpha_{alpha}"
 			></div>
 		{/each}

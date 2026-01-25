@@ -118,9 +118,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Adaptive alpha overlays (fg/bg)" />
 		<p>
-			The <code>fg</code> and <code>bg</code> variables provide alpha-based overlays that adapt to the
-			color scheme. Unlike the opaque shade scale, these stack when nested and are used by composites
-			like <code>.panel</code> and <code>.chip</code>.
+			The <code>fg</code> and <code>bg</code> variables provide alpha-based overlays that adapt to
+			the color scheme. Unlike the opaque shade scale, these stack when nested and are used by
+			composites like <code>.panel</code> and <code>.chip</code>.
 		</p>
 		<ul>
 			<li>
@@ -139,7 +139,7 @@
 		<TomeSection>
 			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
 			<p>Adaptive overlays that add contrast with the surface.</p>
-			<div class="overlay_swatch">
+			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'fg_' + v}
 					<div>
@@ -152,7 +152,7 @@
 		<TomeSection>
 			<TomeSectionHeader text="bg (toward background)" tag="h4" />
 			<p>Adaptive overlays that reduce contrast with the surface.</p>
-			<div class="overlay_swatch shade_50">
+			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'bg_' + v}
 					<div>
@@ -219,7 +219,7 @@
 		<TomeSection>
 			<TomeSectionHeader text="Darken" tag="h4" />
 			<p>Alpha overlays that always add black.</p>
-			<div class="overlay_swatch">
+			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'darken_' + v}
 					<div>
@@ -232,7 +232,7 @@
 		<TomeSection>
 			<TomeSectionHeader text="Lighten" tag="h4" />
 			<p>Alpha overlays that always add white.</p>
-			<div class="overlay_swatch shade_100">
+			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'lighten_' + v}
 					<div>
@@ -317,7 +317,7 @@ background-color: var(--shade_min);`}
 		font-family: var(--font_family_mono);
 		margin-bottom: var(--space_md);
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 		grid-auto-flow: row;
 	}
 	.color {
@@ -333,7 +333,7 @@ background-color: var(--shade_min);`}
 		font-family: var(--font_family_mono);
 		margin-bottom: var(--space_md);
 		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(85px, 1fr));
+		grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
 		grid-auto-flow: row;
 		border-radius: var(--border_radius_xs2);
 	}

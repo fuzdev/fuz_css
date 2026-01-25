@@ -229,11 +229,11 @@ a.chip {
 .shade_00 {
 	background-color: var(--shade_00);
 }
+.shade_20 {
+	background-color: var(--shade_20);
+}
 .shade_50 {
 	background-color: var(--shade_50);
-}
-.shade_100 {
-	background-color: var(--shade_100);
 }
 .color_a_50 {
 	color: var(--color_a_50);
@@ -584,6 +584,15 @@ a.chip {
 .shadow_inset_bottom_xl {
 	box-shadow: var(--shadow_inset_bottom_xl)
 		color-mix(in hsl, var(--shadow_color) var(--shadow_alpha, var(--shadow_alpha_5)), transparent);
+}
+.shadow_color_highlight {
+	--shadow_color: var(--shadow_color_highlight);
+}
+.shadow_color_glow {
+	--shadow_color: var(--shadow_color_glow);
+}
+.shadow_color_shroud {
+	--shadow_color: var(--shadow_color_shroud);
 }
 .shadow_alpha_1 {
 	--shadow_alpha: var(--shadow_alpha_1);
