@@ -82,15 +82,15 @@
 					<code>shade_min</code>: Untinted surface-side extreme (white in light mode, black in dark
 					mode). Used for input backgrounds.
 				</li>
-				<li><code>shade_00</code>: The base background.</li>
-				<li><code>shade_05</code>: Very subtle (hover states on surface).</li>
-				<li><code>shade_10</code>: Subtle elevation (panels, cards, aside, blockquote, code).</li>
-				<li><code>shade_20</code>: More elevated (active/pressed states).</li>
-				<li><code>shade_30</code>: Default border intensity.</li>
-				<li><code>shade_100</code>: Maximum tinted contrast.</li>
+				<li><code>shade_00</code>: the base background</li>
+				<li><code>shade_05</code>: very subtle: hover states on surface</li>
+				<li><code>shade_10</code>: subtle elevation: panels, cards, aside, blockquote, code</li>
+				<li><code>shade_20</code>: more elevated: active/pressed states</li>
+				<li><code>shade_30</code>: default border intensity</li>
+				<li><code>shade_100</code>: maximum tinted contrast</li>
 				<li>
-					<code>shade_max</code>: Untinted contrast-side extreme (black in light mode, white in dark
-					mode). Rarely needed.
+					<code>shade_max</code>: untinted contrast-side extreme: black in light mode, white in dark
+					mode; rarely needed
 				</li>
 			</ul>
 		</TomeSection>
