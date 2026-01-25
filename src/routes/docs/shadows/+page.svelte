@@ -27,7 +27,6 @@
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95
 	// @fuz-classes shadow_color_highlight shadow_color_glow shadow_color_shroud
-	// @fuz-classes darken_30 lighten_30 fg_10
 	// @fuz-classes shadow_color_a_00 shadow_color_a_05 shadow_color_a_10 shadow_color_a_20 shadow_color_a_30 shadow_color_a_40 shadow_color_a_50 shadow_color_a_60 shadow_color_a_70 shadow_color_a_80 shadow_color_a_90 shadow_color_a_95 shadow_color_a_100
 	// @fuz-classes shadow_color_b_00 shadow_color_b_05 shadow_color_b_10 shadow_color_b_20 shadow_color_b_30 shadow_color_b_40 shadow_color_b_50 shadow_color_b_60 shadow_color_b_70 shadow_color_b_80 shadow_color_b_90 shadow_color_b_95 shadow_color_b_100
 	// @fuz-classes shadow_color_c_00 shadow_color_c_05 shadow_color_c_10 shadow_color_c_20 shadow_color_c_30 shadow_color_c_40 shadow_color_c_50 shadow_color_c_60 shadow_color_c_70 shadow_color_c_80 shadow_color_c_90 shadow_color_c_95 shadow_color_c_100
@@ -56,7 +55,7 @@
 		<UnfinishedImplementationWarning
 			>Maybe rename for clarity? It's weird that shadows lighten in dark mode.</UnfinishedImplementationWarning
 		>
-		{@render shadow_section(null)}
+		{@render shadow_examples(null)}
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
@@ -65,7 +64,7 @@
 		<TomeSectionHeader text="Highlight" />
 		<p>Highlights lighten in light mode and darken in dark mode.</p>
 		<div class="panel fg_10 p_md">
-			{@render shadow_section('highlight')}
+			{@render shadow_examples('highlight')}
 		</div>
 	</TomeSection>
 	<section>
@@ -75,7 +74,7 @@
 		<TomeSectionHeader text="Glow" />
 		<p>Glows lighten in both light and dark mode.</p>
 		<div class="panel darken_30 p_md">
-			{@render shadow_section('glow')}
+			{@render shadow_examples('glow')}
 		</div>
 	</TomeSection>
 	<section>
@@ -85,7 +84,7 @@
 		<TomeSectionHeader text="Shroud" />
 		<p>Shrouds darken in both light and dark mode.</p>
 		<div class="panel lighten_10 p_md">
-			{@render shadow_section('shroud')}
+			{@render shadow_examples('shroud')}
 		</div>
 	</TomeSection>
 	<section>
@@ -95,22 +94,21 @@
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
 			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
-			controls the color's prominence (60 is a good starting point for visible colored shadows).
+			controls the color's prominence -- 60 is a fine starting point for visible colored shadows.
 		</p>
-		{@render intensity_selector()}
 		{#each color_variants as color_variant (color_variant)}
-			<section>
-				{@render shadow_section(color_variant, selected_intensity)}
-			</section>
+			<TomeSection>
+				{@render intensity_selector(color_variant)}
+				{@render shadow_examples(color_variant, selected_intensity)}
+			</TomeSection>
 		{/each}
-		{@render intensity_selector()}
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
 	</section>
 </TomeContent>
 
-{#snippet shadow_section(
+{#snippet shadow_examples(
 	color_variant: ColorVariant | 'highlight' | 'glow' | 'shroud' | null,
 	intensity: IntensityVariant = '60',
 )}
@@ -164,9 +162,9 @@
 	</div>
 {/snippet}
 
-{#snippet intensity_selector()}
+{#snippet intensity_selector(color_variant: ColorVariant)}
+	<TomeSectionHeader text="shadow_color_{color_variant}_" tag="h3" />
 	<form class="intensity_selector">
-		<span class="title">shadow_color_a_</span>
 		{#each intensity_variants as intensity (intensity)}
 			<label class="box gap_xs mb_0" class:selected={selected_intensity === intensity}>
 				<input
