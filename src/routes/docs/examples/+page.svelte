@@ -1,4 +1,5 @@
 <script lang="ts">
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
@@ -23,5 +24,10 @@
 			<li><a href="{GITHUB_EXAMPLES}/vite-preact">vite-preact</a> - Preact</li>
 			<li><a href="{GITHUB_EXAMPLES}/vite-solid">vite-solid</a> - Solid</li>
 		</ul>
+		<p>
+			For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, see
+			<a href="https://github.com/fuzdev/fuz_template">fuz_template</a> for integration with
+			<ModuleLink module_path="gen_fuz_css.ts" />.
+		</p>
 	</section>
 </TomeContent>
