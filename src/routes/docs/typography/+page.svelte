@@ -25,8 +25,8 @@
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
 	// TODO refactor, also maybe add `950`?
-	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 1, 234, 555, 1000];
-	// @fuz-classes font-weight:100 font-weight:200 font-weight:300 font-weight:400 font-weight:500 font-weight:600 font-weight:700 font-weight:800 font-weight:900 font-weight:950 font-weight:1 font-weight:234 font-weight:555 font-weight:1000
+	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 234, 555, 997];
+	// @fuz-classes font-weight:100 font-weight:200 font-weight:300 font-weight:400 font-weight:500 font-weight:600 font-weight:700 font-weight:800 font-weight:900 font-weight:950 font-weight:234 font-weight:555 font-weight:997
 
 	const font_size_variants = default_variables.filter((p) => font_size_names.includes(p.name));
 
