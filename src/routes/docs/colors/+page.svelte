@@ -34,6 +34,8 @@
 		'septenary/info',
 		'octonary/flourish',
 	];
+
+	// TODO BLOCK document the absolute colors (and probably make the adaptive ones use var() on them directly)
 </script>
 
 <TomeContent {tome}>
