@@ -41,6 +41,8 @@
 	];
 
 	// @fuz-classes outline_width_focus outline_width_active
+
+	// TODO BLOCK switcher for the color intensity like on docs/shadows
 </script>
 
 <TomeContent {tome}>

@@ -27,6 +27,9 @@
 	const toggle_color_scheme = () => {
 		themer.color_scheme = themer.color_scheme === 'light' ? 'dark' : 'light';
 	};
+
+	// TODO BLOCK "Alpha borders" section may belong under docs/borders, alpha needs to be mentioned there
+	// TODO BLOCK add theme toggle below in at least one more place
 </script>
 
 <TomeContent {tome}>
