@@ -39,6 +39,8 @@
 	// @fuz-classes shadow_color_j_00 shadow_color_j_05 shadow_color_j_10 shadow_color_j_20 shadow_color_j_30 shadow_color_j_40 shadow_color_j_50 shadow_color_j_60 shadow_color_j_70 shadow_color_j_80 shadow_color_j_90 shadow_color_j_95 shadow_color_j_100
 
 	// TODO duplicate shadows links
+
+	// TODO BLOCK shadow_alpha_00 not working
 </script>
 
 <TomeContent {tome}>
@@ -117,7 +119,7 @@
 				<div class="shadow_main_example {shadow_size_name} {shadow_color_name}">
 					<StyleVariableButton name={shadow_size_name} class={classes} />
 					{#if is_hue}
-						<code class="p_xs {classes}">{shadow_color_name}</code>
+						<code class="p_xs {classes}">.{shadow_color_name}</code>
 					{:else}
 						<StyleVariableButton name={shadow_color_name} class={classes}
 							><span>
