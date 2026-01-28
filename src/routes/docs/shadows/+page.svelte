@@ -40,7 +40,7 @@
 
 	// TODO duplicate shadows links
 
-	// TODO BLOCK think about glow/shroud vs lighten/darken as color names
+	// TODO BLOCK think about glow/shroud vs lighten/darken as color names, same concept right?
 </script>
 
 <TomeContent {tome}>
