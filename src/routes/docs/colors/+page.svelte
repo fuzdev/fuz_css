@@ -46,8 +46,8 @@
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
-			default but could be any color. Each hue has 13 intensity variants (00,05,10,20,...90,95,100)
-			tuned independently for visual balance across color schemes.
+			default but could be any color. Each hue has 13 intensity variants tuned independently for
+			visual balance across color schemes.
 		</p>
 	</section>
 	<TomeSection>
