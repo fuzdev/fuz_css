@@ -226,9 +226,11 @@ a.chip {
 }
 .text_50 {
 	color: var(--text_50);
+	--text_color: var(--text_50);
 }
 .text_70 {
 	color: var(--text_70);
+	--text_color: var(--text_70);
 }
 .shade_00 {
 	background-color: var(--shade_00);
@@ -241,33 +243,43 @@ a.chip {
 }
 .color_a_50 {
 	color: var(--color_a_50);
+	--text_color: var(--color_a_50);
 }
 .color_b_50 {
 	color: var(--color_b_50);
+	--text_color: var(--color_b_50);
 }
 .color_c_50 {
 	color: var(--color_c_50);
+	--text_color: var(--color_c_50);
 }
 .color_d_50 {
 	color: var(--color_d_50);
+	--text_color: var(--color_d_50);
 }
 .color_e_50 {
 	color: var(--color_e_50);
+	--text_color: var(--color_e_50);
 }
 .color_f_50 {
 	color: var(--color_f_50);
+	--text_color: var(--color_f_50);
 }
 .color_g_50 {
 	color: var(--color_g_50);
+	--text_color: var(--color_g_50);
 }
 .color_h_50 {
 	color: var(--color_h_50);
+	--text_color: var(--color_h_50);
 }
 .color_i_50 {
 	color: var(--color_i_50);
+	--text_color: var(--color_i_50);
 }
 .color_j_50 {
 	color: var(--color_j_50);
+	--text_color: var(--color_j_50);
 }
 .darken_00 {
 	background-color: var(--darken_00);

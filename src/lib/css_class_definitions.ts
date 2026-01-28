@@ -82,7 +82,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	*/
 	// Text colors (flipped scale: low numbers = subtle, high numbers = bold)
-	...generate_property_classes('color', text_scale_variants, (v) => `var(--text_${v})`, 'text'),
+	...generate_property_classes('color', text_scale_variants, (v) => `var(--text_${v}); --text_color: var(--text_${v})`, 'text'),
 	// Shade scale (tinted backgrounds)
 	...generate_property_classes(
 		'background-color',
@@ -111,7 +111,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string) => ({
 			name: `color_${hue}_${intensity}`,
-			css: `color: var(--color_${hue}_${intensity});`,
+			css: `color: var(--color_${hue}_${intensity}); --text_color: var(--color_${hue}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,
@@ -129,7 +129,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string, mode: string) => ({
 			name: `color_${hue}_${intensity}_${mode}`,
-			css: `color: var(--color_${hue}_${intensity}_${mode});`,
+			css: `color: var(--color_${hue}_${intensity}_${mode}); --text_color: var(--color_${hue}_${intensity}_${mode});`,
 		}),
 		color_variants,
 		intensity_variants,

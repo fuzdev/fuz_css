@@ -279,6 +279,13 @@
 						>
 					</span>
 				</li>
+			</ul>
+			<aside>
+				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
+				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
+				<code>color: var(--text_color)</code> inherit the color properly.
+			</aside>
+			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
 						><code>.text_min</code>

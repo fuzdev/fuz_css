@@ -143,7 +143,10 @@ border-color: var(--shade_30);
 				{@const text_class = 'color_' + color_variant + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
-						<div class="border_example border_color {text_class}" style:border-color="var(--{name})">
+						<div
+							class="border_example border_color {text_class}"
+							style:border-color="var(--{name})"
+						>
 							<StyleVariableButton {name} class={text_class} />
 						</div>
 						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
@@ -154,7 +157,7 @@ border-color: var(--shade_30);
 							></div>
 						{/each}
 					</div>
-					<div class={text_class} style:width="200px">
+					<div style:width="200px">
 						<span class="pl_sm pr_sm">=</span><code
 							>{computed_styles?.getPropertyValue('--' + name)}</code
 						>
