@@ -123,7 +123,7 @@
 		</p>
 		<TomeSection>
 			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
-			<p>Adaptive overlays that add contrast with the surface.</p>
+			<p>Adaptive alpha overlays that add contrast with the surface.</p>
 			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'fg_' + v}
@@ -136,7 +136,7 @@
 		</TomeSection>
 		<TomeSection>
 			<TomeSectionHeader text="bg (toward background)" tag="h4" />
-			<p>Adaptive overlays that reduce contrast with the surface.</p>
+			<p>Adaptive alpha overlays that reduce contrast with the surface.</p>
 			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
 					{@const name = 'bg_' + v}
@@ -186,7 +186,7 @@
 		</TomeSection>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Darken/lighten overlays" />
+		<TomeSectionHeader text="Darken/lighten alpha overlays" />
 		<p>
 			The non-adaptive <code>darken_NN</code> and <code>lighten_NN</code> variables provide
 			consistent darkening or lightening regardless of color scheme. These are the underlying
@@ -221,17 +221,17 @@
 		<TomeSection>
 			<TomeSectionHeader text="Perceptual curve" tag="h4" />
 			<p>
-				Both scales use a perceptual curve: 3%, 6%, 12%, 21%, 32%, 45%, 65%, 80%, 89%, 96%, 98%.
-				This provides visually even steps across the range.
+				Both scales use a perceptual curve from 0% to 100%: 0%, 3%, 6%, 12%, 21%, 32%, 45%, 65%,
+				80%, 89%, 96%, 98%, 100%. This provides visually even steps across the range.
 			</p>
 		</TomeSection>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Alpha borders" />
+		<TomeSectionHeader text="Tinted alpha borders" />
 		<p>
 			The <code>border_color_NN</code> variables provide tinted alpha borders that integrate with
-			the theme. They use <code>tint_hue</code> for cohesion and have higher alpha in dark mode to compensate
-			for lower perceived contrast.
+			the theme. They use <code>tint_hue</code> for cohesion and have higher alpha in dark mode because
+			light-on-dark borders have lower perceived contrast than dark-on-light.
 		</p>
 		<div class="border_demo">
 			{#each alpha_variants as v (v)}
@@ -247,13 +247,13 @@
 		</p>
 		<Code
 			lang="css"
-			content={`/* Elevated panel (stacks when nested) */
+			content={`/* elevated panel (stacks when nested) */
 background-color: var(--fg_10);
 
-/* Hover state (stacks on any background) */
+/* hover state (stacks on any background) */
 background-color: var(--fg_10);
 
-/* Active/pressed state */
+/* active/pressed state */
 background-color: var(--fg_20);`}
 		/>
 		<p class="mt_md">
@@ -261,13 +261,13 @@ background-color: var(--fg_20);`}
 		</p>
 		<Code
 			lang="css"
-			content={`/* Base page background */
+			content={`/* base page background */
 background-color: var(--shade_00);
 
-/* Opaque border */
+/* opaque border */
 border-color: var(--shade_30);
 
-/* Input backgrounds (untinted for contrast) */
+/* input backgrounds (untinted for contrast) */
 background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
