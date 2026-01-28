@@ -1,5 +1,12 @@
 # @fuzdev/fuz_css
 
+## 0.45.0
+
+### Minor Changes
+
+- add optional zod peer dep ([d7bc9a3](https://github.com/fuzdev/fuz_css/commit/d7bc9a3))
+- rework shading and color systems ([#74](https://github.com/fuzdev/fuz_css/pull/74))
+
 ## 0.44.1
 
 ### Patch Changes
