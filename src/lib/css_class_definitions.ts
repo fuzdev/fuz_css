@@ -82,7 +82,12 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	*/
 	// Text colors (flipped scale: low numbers = subtle, high numbers = bold)
-	...generate_property_classes('color', text_scale_variants, (v) => `var(--text_${v}); --text_color: var(--text_${v})`, 'text'),
+	...generate_property_classes(
+		'color',
+		text_scale_variants,
+		(v) => `var(--text_${v}); --text_color: var(--text_${v})`,
+		'text',
+	),
 	// Shade scale (tinted backgrounds)
 	...generate_property_classes(
 		'background-color',

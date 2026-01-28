@@ -40,26 +40,6 @@
 
 	// TODO duplicate shadows links
 
-	// TODO BLOCK think about glow/shroud vs lighten/darken as color names, same concept right?
-	// The overlap:
-	// ┌────────────────┬─────────────────┬─────────────────┐
-	// │ Shadow concept │ General overlay │     Effect      │
-	// ├────────────────┼─────────────────┼─────────────────┤
-	// │ glow           │ lighten         │ Adds brightness │
-	// ├────────────────┼─────────────────┼─────────────────┤
-	// │ shroud         │ darken          │ Adds darkness   │
-	// └────────────────┴─────────────────┴─────────────────┘
-	// Key differences:
-	// - Shadow colors (glow/shroud): Tinted using tint_hue/tint_saturation, used in box-shadow
-	// - Overlays (lighten/darken): Untinted pure black/white with alpha, used for backgrounds
-
-	// Additionally:
-	// - umbra (shadow that darkens adaptively - dark in light mode, light in dark)
-	// - highlight (shadow that lightens adaptively - light in light mode, dark in dark)
-
-	// Open question: Should the naming be unified for consistency, or kept distinct because they serve different contexts (shadows vs
-	// backgrounds)?
-
 	// TODO BLOCK @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
@@ -75,14 +55,20 @@
 		<TomeSectionHeader text="Umbra" />
 		<p>
 			Umbras are adaptive shadows that darken in light mode and lighten in dark mode. This is the
-			default shadow behavior, creating natural depth perception in both color schemes.
+			default shadow behavior, creating natural depth perception in both color schemes. In light
+			mode umbra is untinted (pure black); in dark mode it's tinted using
+			<code>tint_hue</code>/<code>tint_saturation</code>.
 		</p>
 		<form><ColorSchemeInput /></form>
 		{@render shadow_examples('umbra')}
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Highlight" />
-		<p>Highlights are adaptive shadows that lighten in light mode and darken in dark mode.</p>
+		<p>
+			Highlights are adaptive shadows that lighten in light mode and darken in dark mode. In light
+			mode highlight is tinted using <code>tint_hue</code>/<code>tint_saturation</code>; in dark
+			mode it's untinted (pure black).
+		</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel fg_30 p_md">
 			{@render shadow_examples('highlight')}
@@ -90,7 +76,10 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Glow" />
-		<p>Glows are non-adaptive shadows that lighten in both light and dark mode.</p>
+		<p>
+			Glows are non-adaptive shadows that lighten in both light and dark mode. Glow colors are
+			tinted using the theme's <code>tint_hue</code> and <code>tint_saturation</code>.
+		</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel darken_30 p_md">
 			{@render shadow_examples('glow')}
@@ -98,7 +87,11 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Shroud" />
-		<p>Shrouds are non-adaptive shadows that darken in both light and dark mode.</p>
+		<p>
+			Shrouds are non-adaptive shadows that darken in both light and dark mode. Unlike glow, shroud
+			is untinted (pure black) because dark shadows typically don't benefit from tinting. This
+			asymmetry is intentional but subject to change.
+		</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel lighten_30 p_md">
 			{@render shadow_examples('shroud')}

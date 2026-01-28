@@ -1595,7 +1595,12 @@ export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '
 export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '88%', dark: '91%'};
 export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%', dark: '98%'};
 export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '99%', dark: '100%'};
-export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%', dark: '100%'};
+export const shadow_alpha_100: StyleVariable = {
+	name: 'shadow_alpha_100',
+	light: '100%',
+	// TODO BLOCK should this be an error when light === dark? (see tests)
+	dark: '100%',
+};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,
