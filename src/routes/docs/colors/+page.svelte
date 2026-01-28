@@ -37,57 +37,37 @@
 </script>
 
 <TomeContent {tome}>
-	<TomeSection>
-		<TomeSectionHeader text="Color semantics" />
+	<section>
 		<p>
-			fuz_css provides a palette of color and hue <TomeLink name="variables" /> designed to support concise
-			authoring in light and dark modes, as well as straightforward <TomeLink name="themes"
-				>theming</TomeLink
-			> by both developers and end-users at runtime. The colors have more semantics than just plain values,
-			so they automatically adapt to dark mode and custom themes, at the cost of having different values
-			depending on color scheme and theme.
-		</p>
-		<h4>Adapting colors to dark mode</h4>
-		<p>
-			A color's subjective appearance depends on the context in which it's viewed, especially the
-			surrounding colors and values. fuz_css's semantic colors are designed to work across color
-			schemes, so each fuz_css color <TomeLink name="variables">variable</TomeLink> has two values, one
-			for light and one for dark mode.
-		</p>
-		<h4>Custom themes</h4>
-		<p>
-			Instead of "blue" and "red", colors are named with letters like "a" and "b", so you can change
-			the primary "a" from blue to any color in a theme without breaking the name-to-color
-			correspondence everywhere. This also flexibly handles more colors and cases than using names
-			like "primary", and although it takes some learning, it's a simple pattern to remember.
-			("primary" and its ilk require learning too!)
+			fuz_css provides color <TomeLink name="variables" /> that adapt to the
+			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each
+			<TomeLink name="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity variants
+			(00-100).
 		</p>
 		<p>
-			A downside of this approach is that changing a color like the primary "a" affects the many
-			places it's used. Sometimes you may want to change the color of a specific element or state,
-			not all the things. In those cases, use plain CSS and optionally fuz_css variables. Compared
-			to most libraries, fuz_css provides fewer handles for granular color customizations, but the
-			benefits include consistency, efficiency, DRY authoring, and ease of app-wide theming.
+			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
+			default but could be any color. Each hue has 13 intensity variants (00,05,10,20,...90,95,100)
+			tuned independently for visual balance across color schemes.
 		</p>
-	</TomeSection>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<p>
 			Hue variables contain a single <MdnLink path="Web/CSS/hue" /> number. Each color variable combines
-			a hue variable with hardcoded saturation and lightness values for light and dark modes.
+			a hue variable with saturation and lightness values for light and dark modes.
 		</p>
 		<p>
 			Hue variables therefore provide a single source of truth that's easy to theme, but to achieve
-			pleasing results, setting the hue alone is not always sufficient. Custom colors will often
-			require you to set per-variable saturation and lightness values.
+			pleasing results, setting the hue alone is not always sufficient. Custom colors generally need
+			tuning for saturation and lightness.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the color variables.
 			For example, fuz_css's base stylesheet uses <code>hue_a</code> for the semi-transparent
-			<code>::selection</code>. (try selecting some text -
+			<code>::selection</code>. (try selecting some text --
 			<span class="color_a_50">same hue!</span>)
 		</p>
-		<p>Unlike the color variables, the hue variables are the same in both light and dark modes.</p>
+		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
 			{#each color_variants as color_name, i (color_name)}
 				<HueSwatch {color_name} {computed_styles} description={descriptions[i]!} />
