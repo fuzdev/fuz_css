@@ -33,8 +33,8 @@
 			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
 			<MdnLink path="Web/CSS/color-scheme" />. Adaptive means the underlying values change between
 			light and dark modes to maintain consistent prominence -- low numbers stay subtle, high
-			numbers stay strong. Each <TomeLink name="themes">theme</TomeLink> can implement light mode,
-			dark mode, or both.
+			numbers stay strong. Each <TomeLink name="themes">theme</TomeLink> can implement light mode, dark
+			mode, or both.
 		</p>
 		<p>
 			Light mode's starting point is plain white documents (like paper) where we subtract light to
