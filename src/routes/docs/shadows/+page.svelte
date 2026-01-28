@@ -39,6 +39,8 @@
 	// @fuz-classes shadow_color_j_00 shadow_color_j_05 shadow_color_j_10 shadow_color_j_20 shadow_color_j_30 shadow_color_j_40 shadow_color_j_50 shadow_color_j_60 shadow_color_j_70 shadow_color_j_80 shadow_color_j_90 shadow_color_j_95 shadow_color_j_100
 
 	// TODO duplicate shadows links
+
+	// TODO BLOCK think about glow/shroud vs lighten/darken as color names
 </script>
 
 <TomeContent {tome}>
