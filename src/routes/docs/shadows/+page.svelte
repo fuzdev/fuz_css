@@ -41,6 +41,7 @@
 	// TODO duplicate shadows links
 
 	// TODO BLOCK think about glow/shroud vs lighten/darken as color names, same concept right?
+	// TODO BLOCK @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
 <TomeContent {tome}>

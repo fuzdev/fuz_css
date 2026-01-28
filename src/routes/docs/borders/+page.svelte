@@ -46,6 +46,7 @@
 	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
 
 	// TODO BLOCK switcher for the color intensity like on docs/shadows
+	// TODO BLOCK @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
 <TomeContent {tome}>
