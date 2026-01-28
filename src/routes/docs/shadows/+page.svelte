@@ -135,7 +135,7 @@
 
 {#snippet shadow_example_header()}
 	<div class="shadow_example">
-		<code>shadow_alpha_</code>
+		<code>shadow_alpha</code>
 		<div class="row gap_lg">
 			{#each shadow_alpha_variants as alpha (alpha)}
 				<code class="shadow_variant_example box">
@@ -158,7 +158,9 @@
 {/snippet}
 
 {#snippet intensity_selector(color_variant: ColorVariant)}
-	<TomeSectionHeader text="shadow_color_{color_variant}_" tag="h3" />
+	<TomeSectionHeader text="shadow_color_{color_variant}" tag="h3"
+		>shadow_color_{color_variant}_{selected_intensity}</TomeSectionHeader
+	>
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">
 			{#each intensity_variants as intensity (intensity)}
