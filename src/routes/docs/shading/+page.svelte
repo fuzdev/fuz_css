@@ -17,8 +17,6 @@
 	// @fuz-classes shade_50
 	// @fuz-classes darken_00 darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95 darken_100
 	// @fuz-classes lighten_00 lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95 lighten_100
-	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
-
 	const LIBRARY_ITEM_NAME = 'shading';
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
@@ -28,7 +26,6 @@
 		themer.color_scheme = themer.color_scheme === 'light' ? 'dark' : 'light';
 	};
 
-	// TODO BLOCK "Alpha borders" section may belong under docs/borders, alpha needs to be mentioned there
 	// TODO BLOCK add theme toggle below in at least one more place
 </script>
 
@@ -227,20 +224,6 @@
 		</TomeSection>
 	</TomeSection>
 	<TomeSection>
-		<TomeSectionHeader text="Tinted alpha borders" />
-		<p>
-			The <code>border_color_NN</code> variables provide tinted alpha borders that integrate with
-			the theme. They use <code>tint_hue</code> for cohesion and have higher alpha in dark mode because
-			light-on-dark borders have lower perceived contrast than dark-on-light.
-		</p>
-		<div class="border_demo">
-			{#each alpha_variants as v (v)}
-				{@const name = 'border_color_' + v}
-				<StyleVariableButton {name} class={name} />
-			{/each}
-		</div>
-	</TomeSection>
-	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
 			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested UI:
@@ -326,11 +309,5 @@ background-color: var(--shade_min);`}
 	.stacking_layer span {
 		font-family: var(--font_family_mono);
 		font-size: var(--font_size_sm);
-	}
-	.border_demo {
-		display: grid;
-		grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
-		gap: var(--space_sm);
-		margin-bottom: var(--space_md);
 	}
 </style>
