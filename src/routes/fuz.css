@@ -263,6 +263,12 @@ a.chip {
 .color_h_50 {
 	color: var(--color_h_50);
 }
+.color_i_50 {
+	color: var(--color_i_50);
+}
+.color_j_50 {
+	color: var(--color_j_50);
+}
 .darken_00 {
 	background-color: var(--darken_00);
 }

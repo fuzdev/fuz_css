@@ -14,6 +14,8 @@
 		outline_width_variants,
 		border_radius_variants,
 		alpha_variants,
+		intensity_variants,
+		type IntensityVariant,
 	} from '$lib/variable_data.js';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -42,11 +44,13 @@
 		'border_bottom_left_radius_md border_bottom_right_radius_xl',
 	];
 
+	let selected_intensity: IntensityVariant = $state('50');
+
 	// @fuz-classes outline_width_focus outline_width_active
 	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
+	// @fuz-classes color_a_50 color_b_50 color_c_50 color_d_50 color_e_50 color_f_50 color_g_50 color_h_50 color_i_50 color_j_50
 
-	// TODO BLOCK switcher for the color intensity like on docs/shadows
-	// TODO BLOCK @many smoother gradient? esp on the low end? for both shadows and borders
+	// TODO @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
 <TomeContent {tome}>
@@ -112,14 +116,35 @@ border-color: var(--shade_30);
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
-		<UnfinishedImplementationWarning />
+		<p>
+			Use color variables like <code>color_a_{selected_intensity}</code> for colored borders. The intensity
+			controls the color's prominence.
+		</p>
+		<form class="intensity_selector">
+			<fieldset class="row mb_0">
+				{#each intensity_variants as intensity (intensity)}
+					<label class="box gap_xs mb_0 px_xs4" class:selected={selected_intensity === intensity}>
+						<input
+							type="radio"
+							name="intensity"
+							value={intensity}
+							bind:group={selected_intensity}
+							class="screen_reader_only"
+						/>
+						{intensity}
+					</label>
+				{/each}
+			</fieldset>
+			<ColorSchemeInput />
+		</form>
 		<div class="border_examples border_colors">
 			{#each color_variants as color_variant (color_variant)}
-				{@const name = 'color_' + color_variant + '_50'}
+				{@const name = 'color_' + color_variant + '_' + selected_intensity}
+				{@const text_class = 'color_' + color_variant + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
-						<div class="border_example border_color" style:border-color="var(--{name})">
-							<StyleVariableButton {name} />
+						<div class="border_example border_color {text_class}" style:border-color="var(--{name})">
+							<StyleVariableButton {name} class={text_class} />
 						</div>
 						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
@@ -129,7 +154,7 @@ border-color: var(--shade_30);
 							></div>
 						{/each}
 					</div>
-					<div style:width="200px">
+					<div class={text_class} style:width="200px">
 						<span class="pl_sm pr_sm">=</span><code
 							>{computed_styles?.getPropertyValue('--' + name)}</code
 						>
@@ -300,5 +325,12 @@ border-color: var(--shade_30);
 	}
 	.border_radius {
 		background-color: var(--shade_20);
+	}
+	.intensity_selector {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: start;
+		gap: var(--space_xl);
+		padding: var(--space_sm) 0;
 	}
 </style>

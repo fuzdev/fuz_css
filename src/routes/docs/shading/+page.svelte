@@ -25,8 +25,6 @@
 	const toggle_color_scheme = () => {
 		themer.color_scheme = themer.color_scheme === 'light' ? 'dark' : 'light';
 	};
-
-	// TODO BLOCK add theme toggle below in at least one more place
 </script>
 
 <TomeContent {tome}>
@@ -182,6 +180,9 @@
 			</p>
 		</TomeSection>
 	</TomeSection>
+	<section class="box">
+		<ColorSchemeInput />
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Darken/lighten alpha overlays" />
 		<p>
@@ -223,6 +224,9 @@
 			</p>
 		</TomeSection>
 	</TomeSection>
+	<section class="box">
+		<ColorSchemeInput />
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
