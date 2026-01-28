@@ -753,6 +753,9 @@ a.chip {
 .shadow_color_shroud {
 	--shadow_color: var(--shadow_color_shroud);
 }
+.shadow_alpha_00 {
+	--shadow_alpha: var(--shadow_alpha_00);
+}
 .shadow_alpha_05 {
 	--shadow_alpha: var(--shadow_alpha_05);
 }
@@ -785,6 +788,9 @@ a.chip {
 }
 .shadow_alpha_95 {
 	--shadow_alpha: var(--shadow_alpha_95);
+}
+.shadow_alpha_100 {
+	--shadow_alpha: var(--shadow_alpha_100);
 }
 .shadow_color_a_00 {
 	--shadow_color: var(--color_a_00);

@@ -25,7 +25,7 @@
 	let selected_intensity: IntensityVariant = $state('60');
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
-	// @fuz-classes shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95
+	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95 shadow_alpha_100
 	// @fuz-classes shadow_color_umbra shadow_color_highlight shadow_color_glow shadow_color_shroud
 	// @fuz-classes shadow_color_a_00 shadow_color_a_05 shadow_color_a_10 shadow_color_a_20 shadow_color_a_30 shadow_color_a_40 shadow_color_a_50 shadow_color_a_60 shadow_color_a_70 shadow_color_a_80 shadow_color_a_90 shadow_color_a_95 shadow_color_a_100
 	// @fuz-classes shadow_color_b_00 shadow_color_b_05 shadow_color_b_10 shadow_color_b_20 shadow_color_b_30 shadow_color_b_40 shadow_color_b_50 shadow_color_b_60 shadow_color_b_70 shadow_color_b_80 shadow_color_b_90 shadow_color_b_95 shadow_color_b_100
@@ -39,8 +39,6 @@
 	// @fuz-classes shadow_color_j_00 shadow_color_j_05 shadow_color_j_10 shadow_color_j_20 shadow_color_j_30 shadow_color_j_40 shadow_color_j_50 shadow_color_j_60 shadow_color_j_70 shadow_color_j_80 shadow_color_j_90 shadow_color_j_95 shadow_color_j_100
 
 	// TODO duplicate shadows links
-
-	// TODO BLOCK shadow_alpha_00 not working
 </script>
 
 <TomeContent {tome}>
