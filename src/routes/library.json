@@ -2571,7 +2571,7 @@
 						]
 					}
 				],
-				"module_comment": "Gro generator for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
+				"module_comment": "[Gro generator](https://github.com/ryanatkn/gro) for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
 				"dependencies": [
 					"css_cache.ts",
 					"css_class_definitions.ts",
