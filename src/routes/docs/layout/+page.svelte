@@ -19,6 +19,13 @@
 </script>
 
 <TomeContent {tome}>
+	<section>
+		<p>
+			fuz_css provides space and distance <a href={resolve('/docs/variables')}>variables</a> for
+			consistent sizing across your UI. Space variants work with utility classes like
+			<code>.p_md</code> and <code>.gap_lg</code>.
+		</p>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Space variables" />
 		<ul class="unstyled">

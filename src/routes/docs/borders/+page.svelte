@@ -62,12 +62,18 @@
 	<!-- <div>outline_style</div> -->
 	<!-- <div>outline_color</div> -->
 
+	<section>
+		<p>
+			Border variables integrate with the <TomeLink name="themes">theme</TomeLink> system and adapt
+			to color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha
+			because light-on-dark has lower perceived contrast.
+		</p>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Tinted alpha borders" />
 		<p>
 			The <code>border_color_NN</code> variables provide tinted alpha borders that integrate with
-			the theme. They use <code>tint_hue</code> for cohesion and have higher alpha in dark mode because
-			light-on-dark borders have lower perceived contrast than dark-on-light.
+			the theme. They use <code>tint_hue</code> for cohesion.
 		</p>
 		<div class="border_examples border_colors">
 			{#each alpha_variants as v (v)}

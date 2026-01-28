@@ -2,14 +2,18 @@ import {test, assert} from 'vitest';
 
 import {default_variables, absolute_color_variables} from '$lib/variables.js';
 import * as exported_variables from '$lib/variables.js';
-import {is_style_variable_name, type StyleVariable} from '$lib/variable.js';
+import {StyleVariable} from '$lib/variable.js';
 
 // Create a set of absolute color variable names for quick lookup (these are dynamically generated)
 const absolute_color_variable_names = new Set(absolute_color_variables.map((v) => v.name));
 
-test('variable names are valid', () => {
+test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
-		assert.ok(is_style_variable_name(v.name), `variable name "${v.name}" is valid`);
+		const result = StyleVariable.safeParse(v);
+		assert.ok(
+			result.success,
+			`variable "${v.name}" failed validation: ${JSON.stringify(result.error?.issues)}`,
+		);
 	}
 });
 
@@ -48,5 +52,4 @@ test('variable identifiers are all included in `default_variables`', () => {
 	}
 });
 
-// TODO extract?
-const is_style_variable = (v: any): v is StyleVariable => typeof v === 'object' && 'name' in v;
+const is_style_variable = (v: unknown): v is StyleVariable => StyleVariable.safeParse(v).success;

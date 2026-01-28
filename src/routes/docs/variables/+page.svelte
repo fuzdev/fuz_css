@@ -31,7 +31,7 @@
 			They're design tokens with an API.
 		</p>
 		<p>
-			The goal of the variables system is to provide runtime theming that's efficient and ergnomic
+			The goal of the variables system is to provide runtime theming that's efficient and ergonomic
 			for both developers and end-users. Variables can be composed in multiple ways:
 		</p>
 		<ul>

@@ -1099,7 +1099,6 @@ Higher alpha in dark mode compensates for lower perceived contrast.
 export const border_color_00: StyleVariable = {
 	name: 'border_color_00',
 	light: 'transparent',
-	dark: 'transparent',
 };
 // Perceptually-uniform alpha curve for borders (matches shadow_alpha curve)
 // - Small gaps at low end, large gaps at high end
@@ -1583,7 +1582,7 @@ export const shadow_color_shroud: StyleVariable = {
 // - Small gaps at low end (subtle changes are perceptible)
 // - Large gaps at high end (need bigger changes to notice)
 // - Dark mode boosted at low end (shadows less visible against dark backgrounds)
-export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%', dark: '0%'};
+export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%'};
 export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '6%', dark: '13%'};
 export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '10%', dark: '19%'};
 export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '16%', dark: '27%'};
@@ -1595,12 +1594,7 @@ export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '
 export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '88%', dark: '91%'};
 export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%', dark: '98%'};
 export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '99%', dark: '100%'};
-export const shadow_alpha_100: StyleVariable = {
-	name: 'shadow_alpha_100',
-	light: '100%',
-	// TODO BLOCK should this be an error when light === dark? (see tests)
-	dark: '100%',
-};
+export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%'};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,

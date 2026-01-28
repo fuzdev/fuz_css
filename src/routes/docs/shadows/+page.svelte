@@ -46,9 +46,13 @@
 		>This is unfinished and will change. It feels simultaneously limiting in usage and bloated in
 		the implementation.</UnfinishedImplementationWarning
 	>
-	<p>
-		fuz_css's shadows build on the light model discussed in the <TomeLink name="shading" /> docs.
-	</p>
+	<section>
+		<p>
+			fuz_css provides four semantic shadow types that build on the light model in the
+			<TomeLink name="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
+			light emphasis, and shroud for dark overlays.
+		</p>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Umbra" />
 		<p>
