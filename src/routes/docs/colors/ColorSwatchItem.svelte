@@ -28,7 +28,7 @@
 <li style:--bg_color="var(--{name})">
 	<div class="color"></div>
 	<div class="text">
-		<StyleVariableButton {name} />
+		<StyleVariableButton {name} style="width: 140px; justify-content: start;" />
 		<div class="hex">{hsl && hsl_to_hex_string(...hsl)}</div>
 		<div class="hsl">{value}</div>
 		<div class="rgb">rgb({hsl && hsl_to_rgb(...hsl).join(' ')})</div>
