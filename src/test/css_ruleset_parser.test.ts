@@ -403,10 +403,10 @@ describe('ruleset_contains_class', () => {
 	});
 
 	test('handles class name with numbers', () => {
-		const css = '.color_a_5 { color: var(--color_a_5); }';
+		const css = '.color_a_50 { color: var(--color_a_50); }';
 		const result = parse_ruleset(css);
 
-		expect(ruleset_contains_class(result.rules, 'color_a_5')).toBe(true);
+		expect(ruleset_contains_class(result.rules, 'color_a_50')).toBe(true);
 		expect(ruleset_contains_class(result.rules, 'color_a')).toBe(false);
 	});
 
@@ -930,13 +930,13 @@ describe('modify_single_selector', () => {
 
 		test('handles class name with underscores and numbers', () => {
 			const result = modify_single_selector(
-				'.color_a_5',
-				'color_a_5',
-				'hover\\:color_a_5',
+				'.color_a_50',
+				'color_a_50',
+				'hover\\:color_a_50',
 				':hover',
 				'',
 			);
-			expect(result).toBe('.hover\\:color_a_5:hover');
+			expect(result).toBe('.hover\\:color_a_50:hover');
 		});
 
 		test('inserts state before CSS2 :before pseudo-element', () => {

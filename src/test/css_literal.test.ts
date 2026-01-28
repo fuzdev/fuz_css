@@ -84,7 +84,7 @@ describe('is_possible_css_literal', () => {
 
 	const negative_cases = [
 		'opacity_50', // underscore pattern
-		'color_a_5', // underscore pattern
+		'color_a_50', // underscore pattern
 		'box', // no colon
 		'p_md', // underscore pattern
 		'', // empty

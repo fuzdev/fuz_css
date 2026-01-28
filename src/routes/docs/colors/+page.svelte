@@ -9,7 +9,6 @@
 
 	import HueSwatch from '$routes/docs/colors/HueSwatch.svelte';
 	import ColorSwatch from '$routes/docs/colors/ColorSwatch.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import {color_variants} from '$lib/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'colors';
@@ -38,107 +37,111 @@
 </script>
 
 <TomeContent {tome}>
-	<TomeSection>
-		<TomeSectionHeader text="Color semantics" />
+	<section>
 		<p>
-			fuz_css provides a palette of color and hue <TomeLink name="variables" /> designed to support concise
-			authoring in light and dark modes, as well as straightforward <TomeLink name="themes"
-				>theming</TomeLink
-			> by both developers and end-users at runtime. The colors have more semantics than just plain values,
-			so they automatically adapt to dark mode and custom themes, at the cost of having different values
-			depending on color scheme and theme.
-		</p>
-		<h4>Adapting colors to dark mode</h4>
-		<p>
-			A color's subjective appearance depends on the context in which it's viewed, especially the
-			surrounding colors and values. fuz_css's semantic colors are designed to work across color
-			schemes, so each fuz_css color <TomeLink name="variables">variable</TomeLink> has two values, one
-			for light and one for dark mode. The exceptions are the lightest (1) and darkest (9) variants, although
-			this may change if it yields better results.
-		</p>
-		<h4>Custom themes</h4>
-		<p>
-			Instead of "blue" and "red", colors are named with letters like "a" and "b", so you can change
-			the primary "a" from blue to any color in a theme without breaking the name-to-color
-			correspondence everywhere. This also flexibly handles more colors and cases than using names
-			like "primary", and although it takes some learning, it's a simple pattern to remember.
-			("primary" and its ilk require learning too!)
+			fuz_css provides color <TomeLink name="variables" /> that adapt to the
+			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each
+			<TomeLink name="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity variants
+			(00-100).
 		</p>
 		<p>
-			A downside of this approach is that changing a color like the primary "a" affects the many
-			places it's used. Sometimes you may want to change the color of a specific element or state,
-			not all the things. In those cases, use plain CSS and optionally fuz_css variables. Compared
-			to most libraries, fuz_css provides fewer handles for granular color customizations, but the
-			benefits include consistency, efficiency, DRY authoring, and ease of app-wide theming.
+			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
+			default but could be any color. Each hue has 13 intensity variants tuned independently for
+			visual balance across color schemes.
 		</p>
-	</TomeSection>
-	<TomeSection>
-		<TomeSectionHeader text="Caveats" />
-		<p>
-			For performance reasons, fuz_css does not currently have an extensive set of variants, like
-			specialized states for elements or color values like "blue". Each of the 7 hues has 9 HSL
-			color values (e.g. <code>hsl(120 55% 36%)</code>) and 9 HSL component values (e.g.
-			<code>120 55% 36%</code>, useful to efficiently apply custom alpha), handling most cases, and
-			the base colors can be customized with platform APIs like the <MdnLink
-				path="Web/CSS/color_value/color-mix"
-			/> CSS function.
-		</p>
-		<p>
-			Variants will be expanded when fuz_css includes a Vite plugin or other build tooling for
-			optimization. A downside of removing unused styles is that they won't be available to your
-			end-users at runtime. We'll probably end up with an interpreted language like Tailwind's
-			just-in-time compiler.
-		</p>
-	</TomeSection>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
-		<UnfinishedImplementationWarning>
-			Colors are unfinished. I'm thinking of adding orange and cyan for a total of 9 hues. fuz_css
-			may also change from HSL to <MdnLink
-				path="https://developer.mozilla.org/en-US/docs/Web/CSS/color_value/oklch"
-			/>.
-		</UnfinishedImplementationWarning>
 		<p>
 			Hue variables contain a single <MdnLink path="Web/CSS/hue" /> number. Each color variable combines
-			a hue variable with hardcoded saturation and lightness values for light and dark modes.
+			a hue variable with saturation and lightness values for light and dark modes.
 		</p>
 		<p>
 			Hue variables therefore provide a single source of truth that's easy to theme, but to achieve
-			pleasing results, setting the hue alone is not always sufficient. Custom colors will often
-			require you to set per-variable saturation and lightness values.
+			pleasing results, setting the hue alone is not always sufficient. Custom colors generally need
+			tuning for saturation and lightness.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the color variables.
 			For example, fuz_css's base stylesheet uses <code>hue_a</code> for the semi-transparent
-			<code>::selection</code>. (try selecting some text -
-			<span class="color_a_5">same hue!</span>)
+			<code>::selection</code>. (try selecting some text --
+			<span class="color_a_50">same hue!</span>)
 		</p>
-		<p>Unlike the color variables, the hue variables are the same in both light and dark modes.</p>
+		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
 			{#each color_variants as color_name, i (color_name)}
 				<HueSwatch {color_name} {computed_styles} description={descriptions[i]!} />
 			{/each}
 		</ul>
 	</TomeSection>
+	<section class="box">
+		<ColorSchemeInput />
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Color variables" />
 		<p>
-			There are 9 variables per color, numbered 1 to 9, lightest to darkest. The 5th variable of
-			each color is used as the base for things like <TomeLink name="buttons" />.
+			There are 13 intensity variants per hue (00, 05, 10, 20, ..., 80, 90, 95, 100), from subtle to
+			bold. The 50 variant of each color is used as the base for things like
+			<TomeLink name="buttons" />.
 		</p>
 		<p>
-			Note that these values differ between light and dark modes! See the discussion above for why.
+			Unlike the <TomeLink name="shading">shade</TomeLink> and
+			<TomeLink name="typography" hash="Text-colors">text</TomeLink> scales (which are separate), color
+			variables can be used for both text and backgrounds via utility classes:
+			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
-		<p>These colors were eyeballed by a programmer, and will change :]</p>
-		<ul class="palette unstyled pt_xl2">
-			{#each color_variants as color_name (color_name)}
-				<ColorSwatch {color_name} {computed_styles} />
-			{/each}
+		<p>Each color exists in two forms:</p>
+		<ul>
+			<li>
+				<strong>Adaptive</strong> (<code>color_a_50</code>) — switches between light and dark values
+				based on color scheme. Use for most UI work.
+			</li>
+			<li>
+				<strong>Absolute</strong> (<code>color_a_50_light</code>, <code>color_a_50_dark</code>) —
+				stable values that never change. Use when you need a pinned color.
+			</li>
 		</ul>
+		<TomeSection>
+			<TomeSectionHeader tag="h3" text="Adaptive colors" />
+			<p>
+				The colors you'll use most often. They automatically adjust to maintain visual consistency
+				across color schemes. Note that these values differ between light and dark modes! See the
+				discussion above for why.
+			</p>
+			<ul class="palette unstyled pt_xl2">
+				{#each color_variants as color_name (color_name)}
+					<ColorSwatch {color_name} {computed_styles} />
+				{/each}
+			</ul>
+		</TomeSection>
+		<section class="box">
+			<ColorSchemeInput />
+		</section>
+		<TomeSection>
+			<TomeSectionHeader tag="h3" text="Absolute colors" />
+			<p>
+				Sometimes you need a color that <em>doesn't</em> adapt — logos, charts, color-coded data, or elements
+				that must match across screenshots. Every adaptive color has two absolute variants:
+			</p>
+			<ul>
+				<li><code>color_a_50_light</code> — the value used in light mode</li>
+				<li><code>color_a_50_dark</code> — the value used in dark mode</li>
+			</ul>
+			<p>
+				These are stable regardless of color scheme. Light and dark variants are tuned independently
+				for visual balance -- achieving equivalent appearance across color schemes requires
+				different saturation and lightness values.
+			</p>
+			<ul class="palette unstyled pt_xl2">
+				{#each color_variants as color_name (color_name)}
+					<ColorSwatch {color_name} {computed_styles} absolute />
+				{/each}
+			</ul>
+		</TomeSection>
 	</TomeSection>
-	<div class="box width:100% mb_lg">
+	<section class="box">
 		<ColorSchemeInput />
-	</div>
+	</section>
 </TomeContent>
 
 <style>

@@ -42,7 +42,7 @@ export const App = () => {
 
 					<div>
 						<h3>Token classes</h3>
-						<div class="p_md bg_d_2">.p_md .bg_d_2</div>
+						<div class="p_md bg_d_20">.p_md .bg_d_20</div>
 						<div class="pl_xl5 font_size_lg">.pl_xl5 .font_size_lg</div>
 						<div class="shadow_sm">.shadow_sm</div>
 					</div>
@@ -58,7 +58,7 @@ export const App = () => {
 					<div>
 						<h3>Literal classes</h3>
 						<div class="opacity:60%">.opacity:60%</div>
-						<div class="color:var(--color_j_5)">.color:var(--color_j_5)</div>
+						<div class="color:var(--color_j_50)">.color:var(--color_j_50)</div>
 						<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
 					</div>
 				</section>
@@ -83,16 +83,16 @@ export const App = () => {
 					<div>
 						<h3>Interactive</h3>
 						<div class="row gap_md mb_lg">
-							<button class="hover:border_color_b hover:outline_color_b active:border_color_d active:outline_color_d" onClick={() => setCount((c) => c + 1)}>
+							<button class="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50" onClick={() => setCount((c) => c + 1)}>
 								count: {count}
 							</button>
-							<span>.hover:border_color_b .hover:outline_color_b .active:border_color_d .active:outline_color_d</span>
+							<span>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50 .active:outline_color_d_50</span>
 						</div>
 						<div class="row gap_md mb_lg">
-							<button class="hover:border_color_g hover:outline_color_g active:border_color_h active:outline_color_h" onClick={() => setCount(0)}>
+							<button class="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50" onClick={() => setCount(0)}>
 								reset
 							</button>
-							<span>.hover:border_color_g .hover:outline_color_g .active:border_color_h .active:outline_color_h</span>
+							<span>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50 .active:outline_color_h_50</span>
 						</div>
 					</div>
 				</section>

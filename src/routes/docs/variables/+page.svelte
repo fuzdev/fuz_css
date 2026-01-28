@@ -7,9 +7,9 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {default_variables} from '$lib/variables.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
@@ -31,7 +31,7 @@
 			They're design tokens with an API.
 		</p>
 		<p>
-			The goal of the variables system is to provide runtime theming that's efficient and ergnomic
+			The goal of the variables system is to provide runtime theming that's efficient and ergonomic
 			for both developers and end-users. Variables can be composed in multiple ways:
 		</p>
 		<ul>
@@ -40,7 +40,7 @@
 				by other variables, both in calculations and to add useful semantics (e.g. <code
 					>button_fill_hover</code
 				>
-				defaults to <code>fg_2</code> but can be themed independently)
+				uses <code>shade_50</code> but can be themed independently)
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in
@@ -81,7 +81,7 @@ export interface StyleVariable {
 		<!-- TODO add info through the contextmenu or dialog -->
 		<div class="variables">
 			{#each variables as variable (variable.name)}
-				<StyleVariableButton name={variable.name} classes="menu_item" />
+				<StyleVariableButton name={variable.name} class="menu_item" />
 			{/each}
 		</div>
 	</TomeSection>

@@ -40,7 +40,7 @@ if (!SKIP) {
 const EXPECTED_CLASSES = [
 	// From App - Class Types section (Token classes)
 	'p_md', // also used in main wrapper
-	'bg_d_2',
+	'bg_d_20',
 	'pl_xl5',
 	'font_size_lg',
 	'shadow_sm',
@@ -49,7 +49,7 @@ const EXPECTED_CLASSES = [
 	'ellipsis',
 	// From App - Class Types section (Literal classes)
 	'opacity:60%',
-	'color:var(--color_j_5)',
+	'color:var(--color_j_50)',
 	'box-shadow:0~4px~8px~rgb(0,0,0,0.2)',
 	// From example_class_utilities.ts - Naming patterns (mb_* + ml_* for plurals)
 	'mb_xs5', // demoClass
@@ -98,14 +98,14 @@ const EXPECTED_CLASSES = [
 	'flex:1',
 	// From App - Interactive (hover/active state modifiers)
 	'row',
-	'hover:border_color_b',
-	'hover:outline_color_b',
-	'active:border_color_d',
-	'active:outline_color_d',
-	'hover:border_color_g',
-	'hover:outline_color_g',
-	'active:border_color_h',
-	'active:outline_color_h',
+	'hover:border_color_b_50',
+	'hover:outline_color_b_50',
+	'active:border_color_d_50',
+	'active:outline_color_d_50',
+	'hover:border_color_g_50',
+	'hover:outline_color_g_50',
+	'active:border_color_h_50',
+	'active:outline_color_h_50',
 ].sort();
 
 /**

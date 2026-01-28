@@ -108,7 +108,7 @@ describe('resolve_composes', () => {
 			const definitions: Record<string, CssClassDefinition> = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);'},
 			};
 
 			const result = resolve_composes(['card'], definitions, new Set(), new Set(), 'test_class');
@@ -117,7 +117,7 @@ describe('resolve_composes', () => {
 			if (result.ok) {
 				// Note: The resolved composes come first, then the declaration
 				expect(result.declaration).toBe(
-					'padding: var(--space_lg); border-radius: var(--border_radius_md); --card-bg: var(--bg_1);',
+					'padding: var(--space_lg); border-radius: var(--border_radius_md); --card-bg: var(--shade_10);',
 				);
 			}
 		});

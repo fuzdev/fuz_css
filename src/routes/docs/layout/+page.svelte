@@ -3,10 +3,10 @@
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 	import {resolve} from '$app/paths';
 
 	import {space_variants, distance_variants} from '$lib/variable_data.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 
 	const LIBRARY_ITEM_NAME = 'layout';
 
@@ -19,6 +19,13 @@
 </script>
 
 <TomeContent {tome}>
+	<section>
+		<p>
+			fuz_css provides space and distance <a href={resolve('/docs/variables')}>variables</a> for
+			consistent sizing across your UI. Space variants work with utility classes like
+			<code>.p_md</code> and <code>.gap_lg</code>.
+		</p>
+	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Space variables" />
 		<ul class="unstyled">
@@ -73,7 +80,7 @@
 		top: 0;
 		height: 100%;
 		z-index: -1;
-		background-color: var(--fg_2);
+		background-color: var(--shade_20);
 	}
 
 	.variable_wrapper {

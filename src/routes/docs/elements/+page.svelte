@@ -23,15 +23,17 @@
 <!-- eslint-disable svelte/no-useless-mustaches -->
 
 <TomeContent {tome}>
-	<p>
-		fuz_css applies default styles to semantic HTML elements in its <SourceFileLink path="style.css"
-			>reset stylesheet</SourceFileLink
-		>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
-		user-friendly styling and theme integration automatically. The defaults are low specificity using
-		<code>:where</code>
-		so they're easy to override, and you can opt out by adding
-		<code>.unstyled</code> to an element.
-	</p>
+	<section>
+		<p>
+			fuz_css applies default styles to semantic HTML elements in its <SourceFileLink
+				path="style.css">reset stylesheet</SourceFileLink
+			>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
+			user-friendly styling and theme integration automatically. The defaults are low specificity using
+			<code>:where</code>
+			so they're easy to override, and you can opt out by adding
+			<code>.unstyled</code> to an element.
+		</p>
+	</section>
 	<UnfinishedImplementationWarning
 		>Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css/issues"
 			>requests</a

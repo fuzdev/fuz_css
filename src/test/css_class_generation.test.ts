@@ -633,7 +633,7 @@ describe('generate_classes_css', () => {
 			const definitions = {
 				p_lg: {declaration: 'padding: var(--space_lg);'},
 				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--bg_1);'},
+				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);'},
 			};
 
 			const result = generate_classes_css({
@@ -646,7 +646,7 @@ describe('generate_classes_css', () => {
 			expect(result.css).toContain('.card {');
 			expect(result.css).toContain('padding: var(--space_lg);');
 			expect(result.css).toContain('border-radius: var(--border_radius_md);');
-			expect(result.css).toContain('--card-bg: var(--bg_1);');
+			expect(result.css).toContain('--card-bg: var(--shade_10);');
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
@@ -1457,15 +1457,15 @@ describe('modified_class_interpreter', () => {
 	describe('state modifier ordering for cascade', () => {
 		test('hover classes come before active classes in output (LVFHA order)', () => {
 			const result = generate_classes_css({
-				class_names: ['active:border_color_a', 'hover:border_color_b'],
+				class_names: ['active:border_color_a_50', 'hover:border_color_b_50'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,
 			});
 
 			// Find positions of hover and active classes in the output
-			const hover_pos = result.css.indexOf('.hover\\:border_color_b');
-			const active_pos = result.css.indexOf('.active\\:border_color_a');
+			const hover_pos = result.css.indexOf('.hover\\:border_color_b_50');
+			const active_pos = result.css.indexOf('.active\\:border_color_a_50');
 
 			expect(hover_pos).toBeGreaterThan(-1);
 			expect(active_pos).toBeGreaterThan(-1);

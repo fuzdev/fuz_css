@@ -11,8 +11,8 @@
 		space_variants,
 		color_variants,
 		intensity_variants,
-		border_color_intensity_variants,
-		text_color_variants,
+		shade_variants,
+		text_variants,
 		font_size_variants,
 		font_family_variants,
 		line_height_variants,
@@ -24,6 +24,7 @@
 		shadow_alpha_variants,
 		shadow_semantic_values,
 		distance_variants,
+		darken_lighten_variants,
 	} from '@fuzdev/fuz_css/variable_data.js';
 
 	const LIBRARY_ITEM_NAME = 'classes';
@@ -32,9 +33,9 @@
 </script>
 
 {#snippet variant_range<T>(arr: ReadonlyArray<T>)}
-	<span class="text_color_5">{'{'}</span>{arr[0]}<span class="text_color_5">-</span>{arr.at(
-		-1,
-	)}<span class="text_color_5">}</span>
+	<span class="text_50">{'{'}</span>{arr[0]}<span class="text_50">-</span>{arr.at(-1)}<span
+		class="text_50">}</span
+	>
 {/snippet}
 
 <TomeContent {tome}>
@@ -98,8 +99,8 @@
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<p class=&quot;pl_xl3 color_g_5&quot;>some token classes</p>" />
-			<p class="pl_xl3 color_g_5">some token classes</p>
+			<Code content="<p class=&quot;pl_xl3 color_g_50&quot;>some token classes</p>" />
+			<p class="pl_xl3 color_g_50">some token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -253,7 +254,12 @@
 				</li>
 			</ul>
 			<h4>Colors</h4>
-			<p>See <TomeLink name="colors" />.</p>
+			<p>
+				See <TomeLink name="colors" />, <TomeLink name="shading" />, and <TomeLink
+					name="typography"
+					hash="Text-colors"
+				/>.
+			</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -262,13 +268,6 @@
 								intensity_variants,
 							)}</code
 						>
-					</span>
-				</li>
-				<li class="mb_md"><span class="code_chips"><code>.bg</code> <code>.fg</code></span></li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.bg_{@render variant_range(intensity_variants)}</code>
-						<code>.fg_{@render variant_range(intensity_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -280,36 +279,43 @@
 						>
 					</span>
 				</li>
+			</ul>
+			<aside>
+				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
+				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
+				<code>color: var(--text_color)</code> inherit the color properly.
+			</aside>
+			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.text_color_{@render variant_range(text_color_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"><code>.color_bg</code> <code>.color_fg</code></span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.color_bg_{@render variant_range(intensity_variants)}</code>
-						<code>.color_fg_{@render variant_range(intensity_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"
-						><code>.darken_{@render variant_range(intensity_variants)}</code>
-						<code>.lighten_{@render variant_range(intensity_variants)}</code>
+						><code>.text_min</code>
+						<code>.text_max</code>
+						<code>.text_{@render variant_range(text_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.color_darken_{@render variant_range(intensity_variants)}</code>
-						<code>.color_lighten_{@render variant_range(intensity_variants)}</code>
+						><code>.shade_min</code>
+						<code>.shade_max</code>
+						<code>.shade_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
 				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						><code>.darken_{@render variant_range(darken_lighten_variants)}</code>
+						<code>.lighten_{@render variant_range(darken_lighten_variants)}</code>
+					</span>
+				</li>
 			</ul>
+			<aside>
+				The <code>text_*</code> and <code>shade_*</code> scales are separate because text and
+				backgrounds have different contrast requirements. Use <code>text_*</code> for text colors
+				and <code>shade_*</code> for backgrounds. Both follow "prominence" semantics for light and dark
+				modes: low numbers are subtle, high numbers are strong.
+			</aside>
 			<h4>Typography</h4>
 			<p>See <TomeLink name="typography" />.</p>
 			<ul class="unstyled">
@@ -340,12 +346,16 @@
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.border_color_{@render variant_range(border_color_intensity_variants)}</code>
+						><code>.border_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.border_color_{@render variant_range(color_variants)}</code>
+						><code
+							>.border_color_{@render variant_range(color_variants)}_{@render variant_range(
+								intensity_variants,
+							)}</code
+						>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -392,12 +402,16 @@
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.outline_color_{@render variant_range(border_color_intensity_variants)}</code>
+						><code>.outline_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.outline_color_{@render variant_range(color_variants)}</code>
+						><code
+							>.outline_color_{@render variant_range(color_variants)}_{@render variant_range(
+								intensity_variants,
+							)}</code
+						>
 					</span>
 				</li>
 			</ul>
@@ -436,13 +450,17 @@
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						><code>.shadow_color_{@render variant_range(color_variants)}</code>
+						>{#each shadow_semantic_values as value (value)}<code>.shadow_color_{value}</code
+							>{/each}
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						>{#each shadow_semantic_values as value (value)}<code>.shadow_color_{value}</code
-							>{/each}
+						><code
+							>.shadow_color_{@render variant_range(color_variants)}_{@render variant_range(
+								intensity_variants,
+							)}</code
+						>
 					</span>
 				</li>
 				<li class="mb_md">
@@ -469,7 +487,7 @@
 				expressed with the other forms.
 			</p>
 			<Code
-				lang="typescript"
+				lang="ts"
 				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.js';
 
 export const custom_composites: Record<string, CssClassDefinition> = {
@@ -547,7 +565,8 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			</p>
 			<ul>
 				<li>
-					token classes (<code>p_lg</code>, <code>color_a_5</code>) - resolved to their declarations
+					token classes (<code>p_lg</code>, <code>color_a_50</code>) - resolved to their
+					declarations
 				</li>
 				<li>
 					composites with <code>declaration</code> - the declaration is included
@@ -605,7 +624,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			<p>Register custom composites with the Vite plugin or Gro generator:</p>
 			<h5>Vite plugin</h5>
 			<Code
-				lang="typescript"
+				lang="ts"
 				content={`// vite.config.ts
 import {custom_composites} from './src/lib/composites.js';
 
@@ -615,7 +634,7 @@ vite_plugin_fuz_css({
 			/>
 			<h5>Gro generator</h5>
 			<Code
-				lang="typescript"
+				lang="ts"
 				content={`// fuz.gen.css.ts
 import {custom_composites} from '$lib/composites.js';
 
@@ -894,15 +913,19 @@ export const gen = gen_fuz_css({
 import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
 		/>
 		<p>
-			To enable utility classes, use the Vite plugin for a virtual module, or the alternative Gro
-			generator for a static file. Continue reading for the specifics:
+			To enable utility classes, use the <ModuleLink module_path="vite_plugin_fuz_css.ts"
+				>Vite plugin</ModuleLink
+			> for a virtual module, or the alternative <ModuleLink module_path="gen_fuz_css.ts"
+				>Gro generator</ModuleLink
+			> for a static file. Continue reading for the specifics:
 		</p>
 
 		<TomeSection>
 			<TomeSectionHeader text="Vite plugin" tag="h3" />
 			<p>
-				The Vite plugin extracts classes and generates CSS on-demand. It works with Svelte and plain
-				HTML/TS/JS out of the box. JSX frameworks (React, Preact, Solid) require the
+				The <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> extracts classes
+				and generates CSS on-demand. It works with Svelte and plain HTML/TS/JS out of the box. JSX frameworks
+				(React, Preact, Solid) require the
 				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
 				<a href="#React-and-JSX">React and JSX</a> below.
 			</p>
@@ -990,8 +1013,9 @@ declare module 'virtual:fuz.css' {
 		<TomeSection>
 			<TomeSectionHeader text="Gro generator" tag="h3" />
 			<p>
-				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, create a
-				<code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
+				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, the <ModuleLink
+					module_path="gen_fuz_css.ts"
+				/> generator creates a <code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
 			</p>
 			<Code
 				lang="ts"
@@ -1035,8 +1059,8 @@ import './fuz.css'; // generated by Gro`}
 		<TomeSection>
 			<TomeSectionHeader text="Class detection" tag="h3" />
 			<p>
-				The extractor scans your source files and extracts class names using three automatic
-				mechanisms, plus manual hints for edge cases:
+				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> scans your source
+				files and extracts class names using three automatic mechanisms, plus manual hints for edge cases:
 			</p>
 
 			<h4>1. Direct extraction from class attributes</h4>
@@ -1065,7 +1089,7 @@ import './fuz.css'; // generated by Gro`}
 				are always extracted, regardless of where they're used:
 			</p>
 			<Code
-				lang="typescript"
+				lang="ts"
 				content={`// extracted because of naming convention
 const buttonClasses = 'color_d font_size_lg';
 const buttonClass = active ? 'active' : null;
@@ -1109,18 +1133,42 @@ const turtle_class_name = 'turtle';`}
 				> comment:
 			</p>
 			<Code
-				lang="typescript"
+				lang="ts"
 				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
 const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 
-/* @fuz-classes color_a_5 color_b_5 color_c_5 */
+/* @fuz-classes color_a_50 color_b_50 color_c_50 */
 const color = get_dynamic_color();`}
 			/>
+			<p>
+				A common case is iterating over variant arrays to generate demos or UI. The extractor sees
+				<code>class="shadow_alpha_{'{'}variant}"</code>
+				but can't resolve what <code>variant</code> will be at runtime:
+			</p>
+			<!-- eslint-disable-next-line no-useless-concat -->
+			<Code
+				lang="svelte"
+				content={'<' +
+					`script>
+	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.js';
+
+	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
+</script>
+
+{#each shadow_alpha_variants as variant}
+	<div class="shadow_alpha_{variant}">...</div>
+{/each}`}
+			/>
+			<aside>
+				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -- they're
+				generally not used directly in your code (they exist mainly for programmatic usage ergonomics),
+				so the class won't be generated unless you hint it.
+			</aside>
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>include_classes</code>
 				produce errors if they can't be resolved. This helps catch typos like
-				<code>@fuz-classes color_a_55</code> instead of <code>color_a_5</code>.
+				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
 			</aside>
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
@@ -1225,8 +1273,9 @@ const color = get_dynamic_color();`}
 	<TomeSection>
 		<TomeSectionHeader text="Framework support" />
 		<p>
-			fuz_css is Svelte-first, but the base styles (<code>style.css</code>, <code>theme.css</code>)
-			work with any framework and plain HTML. The utility class generator has varying
+			fuz_css is Svelte-first, but the base styles (<ModuleLink module_path="style.css" />,
+			<ModuleLink module_path="theme.css" />) work with any framework and plain HTML. The utility
+			class generator has varying
 			<a href="#Class-detection">detection</a> support:
 		</p>
 		<table>
@@ -1292,9 +1341,10 @@ const color = get_dynamic_color();`}
 		<TomeSection>
 			<TomeSectionHeader text="Svelte-first" tag="h3" />
 			<p>
-				The extractor parses and analyzes the AST to understand <a
-					href="https://svelte.dev/docs/svelte/class">Svelte's class syntax</a
-				>. Supported constructs:
+				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> parses and analyzes
+				the AST to understand
+				<a href="https://svelte.dev/docs/svelte/class">Svelte's class syntax</a>. Supported
+				constructs:
 			</p>
 			<ul>
 				<li>
@@ -1305,8 +1355,9 @@ const color = get_dynamic_color();`}
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
-					<code>`color_a_5 $&#123;base&#125;`</code> extracts <code>color_a_5</code>, but
-					<code>`color_$&#123;hue&#125;_5`</code> cannot be extracted; use <code>@fuz-classes</code>
+					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
+					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
+					<code>@fuz-classes</code>
 					or
 					<code>include_classes</code>)
 				</li>
@@ -1395,8 +1446,9 @@ const Component = () => <div className={styles} />;`}
 	<TomeSection>
 		<TomeSectionHeader text="Custom interpreters" />
 		<p>
-			Interpreters dynamically generate CSS for class names that aren't in the static definitions
-			(which can be extended via <code>class_definitions</code> or replaced with
+			<ModuleLink module_path="css_class_interpreters.ts">Interpreters</ModuleLink> dynamically generate
+			CSS for class names that aren't in the static definitions (which can be extended via
+			<code>class_definitions</code> or replaced with
 			<code>include_default_definitions: false</code>). The default
 			<a href="#Literal-classes">CSS-literal syntax</a> and
 			<a href="#Modifiers">modifier support</a> are both implemented as interpreters, which you can extend
@@ -1409,7 +1461,7 @@ const Component = () => <div className={styles} />;`}
 			<code>interpret</code> function that returns CSS (or <code>null</code> to pass):
 		</p>
 		<Code
-			lang="typescript"
+			lang="ts"
 			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_generation.js';
 
 // Example: grid-cols-N classes like "grid-cols-4"
@@ -1433,7 +1485,7 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 		</p>
 		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
-			lang="typescript"
+			lang="ts"
 			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.js';
 
 vite_plugin_fuz_css({

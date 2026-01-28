@@ -1,5 +1,5 @@
 <script lang="ts">
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	const {
 		color_name,
@@ -38,7 +38,7 @@
 		padding: var(--space_xs2);
 	}
 	li:hover {
-		background-color: var(--bg);
+		background-color: var(--shade_00);
 	}
 	.text {
 		display: flex;

@@ -7,17 +7,16 @@
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import FontWeightControl from '$routes/FontWeightControl.svelte';
 	import FontSizeControl from '$routes/FontSizeControl.svelte';
 	import {default_variables} from '$lib/variables.js';
 	import IconSizes from '$routes/docs/typography/IconSizes.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import {
 		line_height_names,
 		font_size_names,
-		text_color_variants,
+		text_scale_variants,
 		font_family_variants,
 	} from '$lib/variable_data.js';
 
@@ -26,8 +25,8 @@
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
 	// TODO refactor, also maybe add `950`?
-	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 1, 234, 555, 1000];
-	// @fuz-classes font-weight:100 font-weight:200 font-weight:300 font-weight:400 font-weight:500 font-weight:600 font-weight:700 font-weight:800 font-weight:900 font-weight:950 font-weight:1 font-weight:234 font-weight:555 font-weight:1000
+	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 234, 555, 997];
+	// @fuz-classes font-weight:100 font-weight:200 font-weight:300 font-weight:400 font-weight:500 font-weight:600 font-weight:700 font-weight:800 font-weight:900 font-weight:950 font-weight:234 font-weight:555 font-weight:997
 
 	const font_size_variants = default_variables.filter((p) => font_size_names.includes(p.name));
 
@@ -103,7 +102,7 @@
 		</form>
 		{#each font_size_variants as size (size.name)}
 			<div class="row flex-wrap:wrap">
-				<StyleVariableButton attrs={{title: size.light}} name={size.name}
+				<StyleVariableButton title={size.light} name={size.name}
 					><span
 						style:font-size="var(--{size.name})"
 						style:font-weight={selected_font_weight}
@@ -141,12 +140,32 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Text colors">Text colors</TomeSectionHeader>
-		<UnfinishedImplementationWarning>
-			Add color-scheme-adaptive versions?
-		</UnfinishedImplementationWarning>
+		<p>
+			The text scale (<code>text_00</code> through <code>text_100</code>) provides tinted neutral
+			colors optimized for text legibility. The scale uses "prominence" semantics for light and dark
+			modes: low numbers are subtle, high numbers are strong. This matches the
+			<TomeLink name="shading">shade scale</TomeLink> pattern.
+		</p>
+		<ul>
+			<li><code>text_00</code> - surface-side endpoint: essentially invisible on surface</li>
+			<li>
+				<code>text_10</code>-<code>text_30</code> - very subtle/faint text: watermarks, hints
+			</li>
+			<li><code>text_50</code> - disabled text: <code>text_disabled</code></li>
+			<li><code>text_80</code> - default body text: <code>--text_color</code></li>
+			<li><code>text_90</code>-<code>text_100</code> - high emphasis/headings</li>
+			<li>
+				<code>text_min</code>/<code>text_max</code> - knockout text (pure white/black without tint)
+			</li>
+		</ul>
+		<p>
+			The text scale is separate from the shade scale because text and backgrounds have different
+			contrast requirements. Use <code>text_*</code> for text colors and <code>shade_*</code> for
+			backgrounds. For colored text, use <code>color_a_50</code> etc.
+		</p>
 		<div class="panel">
-			{#each text_color_variants as text_variant (text_variant)}
-				{@const name = 'text_color_' + text_variant}
+			{#each text_scale_variants as variant (variant)}
+				{@const name = 'text_' + variant}
 				<div class="row">
 					<StyleVariableButton {name}
 						><span class="font_family_mono" style:color="var(--{name})">
@@ -157,7 +176,7 @@
 			{/each}
 		</div>
 	</TomeSection>
-	<!-- <section> 'text_color_disabled' 'text_active'</section> -->
+	<!-- <section> 'text_disabled'</section> -->
 	<TomeSection>
 		<TomeSectionHeader text="Line heights" />
 		<aside>Learn more about <MdnLink path="Web/CSS/line-height" />.</aside>

@@ -1,18 +1,22 @@
 <script lang="ts">
+	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {
 		border_width_variants,
-		border_color_intensity_variants,
 		color_variants,
 		outline_width_variants,
 		border_radius_variants,
+		alpha_variants,
+		intensity_variants,
+		type IntensityVariant,
 	} from '$lib/variable_data.js';
-	import StyleVariableButton from '$routes/StyleVariableButton.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'borders';
@@ -40,7 +44,13 @@
 		'border_bottom_left_radius_md border_bottom_right_radius_xl',
 	];
 
+	let selected_intensity: IntensityVariant = $state('50');
+
 	// @fuz-classes outline_width_focus outline_width_active
+	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
+	// @fuz-classes color_a_50 color_b_50 color_c_50 color_d_50 color_e_50 color_f_50 color_g_50 color_h_50 color_i_50 color_j_50
+
+	// TODO @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
 <TomeContent {tome}>
@@ -52,26 +62,35 @@
 	<!-- <div>outline_style</div> -->
 	<!-- <div>outline_color</div> -->
 
+	<section>
+		<p>
+			Border variables integrate with the <TomeLink name="themes">theme</TomeLink> system and adapt to
+			color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha because
+			light-on-dark has lower perceived contrast.
+		</p>
+	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Border shades" />
-		<UnfinishedImplementationWarning />
+		<TomeSectionHeader text="Tinted alpha borders" />
+		<p>
+			The <code>border_color_NN</code> variables provide tinted alpha borders that integrate with
+			the theme. They use <code>tint_hue</code> for cohesion.
+		</p>
 		<div class="border_examples border_colors">
-			{#each border_color_intensity_variants as border_intensity (border_intensity)}
-				{@const name = 'border_color_' + border_intensity}
+			{#each alpha_variants as v (v)}
+				{@const name = 'border_color_' + v}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
-						<div class="border_example border_color" style:border-color="var(--{name})">
+						<div class="border_example border_color {name}">
 							<StyleVariableButton {name} />
 						</div>
 						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
-								class="border_color_width"
-								style:border-color="var(--{name})"
+								class="border_color_width {name}"
 								style:border-width="var(--border_width_{border_width})"
 							></div>
 						{/each}
 					</div>
-					<div>
+					<div style:width="250px">
 						<span class="pl_sm pr_sm">=</span><code
 							>{computed_styles?.getPropertyValue('--' + name)}</code
 						>
@@ -79,20 +98,62 @@
 				</div>
 			{/each}
 		</div>
+		<TomeSection>
+			<TomeSectionHeader text="Opaque borders with shades" tag="h4" />
+			<UnfinishedImplementationWarning
+				>We may want to add <code>border_shade_NN</code> utility classes for opaque borders.</UnfinishedImplementationWarning
+			>
+			<p>
+				For opaque borders, use <TomeLink name="shading">shade</TomeLink> variables directly. This avoids
+				alpha transparency but requires inline styles or custom classes:
+			</p>
+			<Code
+				lang="css"
+				content={`/* inline style */
+border-color: var(--shade_30);
+
+/* or set the contextual variable */
+--border_color: var(--shade_30);`}
+			/>
+		</TomeSection>
 	</TomeSection>
 	<section>
 		<ColorSchemeInput />
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
-		<UnfinishedImplementationWarning />
+		<p>
+			Use color variables like <code>color_a_{selected_intensity}</code> for colored borders. The intensity
+			controls the color's prominence.
+		</p>
+		<form class="intensity_selector">
+			<fieldset class="row mb_0">
+				{#each intensity_variants as intensity (intensity)}
+					<label class="box gap_xs mb_0 px_xs4" class:selected={selected_intensity === intensity}>
+						<input
+							type="radio"
+							name="intensity"
+							value={intensity}
+							bind:group={selected_intensity}
+							class="screen_reader_only"
+						/>
+						{intensity}
+					</label>
+				{/each}
+			</fieldset>
+			<ColorSchemeInput />
+		</form>
 		<div class="border_examples border_colors">
 			{#each color_variants as color_variant (color_variant)}
-				{@const name = 'border_color_' + color_variant}
+				{@const name = 'color_' + color_variant + '_' + selected_intensity}
+				{@const text_class = 'color_' + color_variant + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
-						<div class="border_example border_color" style:border-color="var(--{name})">
-							<StyleVariableButton {name} />
+						<div
+							class="border_example border_color {text_class}"
+							style:border-color="var(--{name})"
+						>
+							<StyleVariableButton {name} class={text_class} />
 						</div>
 						{#each border_width_variants.slice(1, 6) as border_width (border_width)}
 							<div
@@ -102,7 +163,7 @@
 							></div>
 						{/each}
 					</div>
-					<div>
+					<div style:width="200px">
 						<span class="pl_sm pr_sm">=</span><code
 							>{computed_styles?.getPropertyValue('--' + name)}</code
 						>
@@ -139,7 +200,7 @@
 			{#each outline_width_variants as outline_width_variant (outline_width_variant)}
 				{@const name = 'outline_width_' + outline_width_variant}
 				<div class="row">
-					<div class="border_example {name} outline-style:solid outline_color_3">
+					<div class="border_example {name} outline-style:solid outline_color_30">
 						<StyleVariableButton {name} />
 					</div>
 					<span class="pl_sm pr_sm">=</span><code
@@ -151,6 +212,9 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Border radius" />
+		<p>
+			Border variables with <TomeLink name="classes" hash="Token-classes">token classes</TomeLink>:
+		</p>
 		<div class="border_examples border_radii">
 			{#each border_radius_variants as radius (radius)}
 				{@const name = 'border_radius_' + radius}
@@ -164,28 +228,12 @@
 				</div>
 			{/each}
 		</div>
-		<TomeSectionHeader tag="h4" text="Border radius percentages" />
-		<p>Interpreted utility classes, 0 to 100 (%).</p>
-		<div class="border_examples border_radii">
-			{#each border_radius_classes as border_radius_class (border_radius_class)}
-				<div class="row">
-					<div
-						class="border_example border_radius {border_radius_class} font_family_mono"
-						style:width="200px"
-						style:height="100px"
-					>
-						.{border_radius_class}
-					</div>
-				</div>
-			{/each}
-		</div>
-		<TomeSectionHeader tag="h4" text="Border radius corners" />
 		<div class="border_examples border_radii">
 			{#each border_radius_corner_size_classes as classes (classes)}
 				<div class="row">
 					<div
 						class="border_example border_radius {classes} font_family_mono"
-						style:width="320px"
+						style:width="325px"
 						style:height="100px"
 					>
 						{#each classes.split(' ') as class_name (class_name)}
@@ -195,23 +243,41 @@
 				</div>
 			{/each}
 		</div>
-		<TomeSectionHeader tag="h4" text="Border radius corner percentages" />
-		<p>Interpreted utility classes, 0 to 100 (%).</p>
-		<div class="border_examples border_radii">
-			{#each border_radius_corner_classes as classes (classes)}
-				<div class="row">
-					<div
-						class="border_example border_radius {classes} font_family_mono"
-						style:width="320px"
-						style:height="100px"
-					>
-						{#each classes.split(' ') as class_name (class_name)}
-							<div>.{class_name}</div>
-						{/each}
+		<TomeSection>
+			<TomeSectionHeader tag="h4" text="Custom values" />
+			<p>
+				Border <TomeLink name="classes" hash="Literal-classes">literal classes</TomeLink> for open-ended
+				values:
+			</p>
+			<div class="border_examples border_radii">
+				{#each border_radius_classes as border_radius_class (border_radius_class)}
+					<div class="row">
+						<div
+							class="border_example border_radius {border_radius_class} font_family_mono"
+							style:width="220px"
+							style:height="100px"
+						>
+							.{border_radius_class}
+						</div>
 					</div>
-				</div>
-			{/each}
-		</div>
+				{/each}
+			</div>
+			<div class="border_examples border_radii">
+				{#each border_radius_corner_classes as classes (classes)}
+					<div class="row">
+						<div
+							class="border_example border_radius {classes} font_family_mono"
+							style:width="325px"
+							style:height="100px"
+						>
+							{#each classes.split(' ') as class_name (class_name)}
+								<div>.{class_name}</div>
+							{/each}
+						</div>
+					</div>
+				{/each}
+			</div>
+		</TomeSection>
 	</TomeSection>
 </TomeContent>
 
@@ -254,7 +320,7 @@
 	}
 
 	.border_width {
-		border-color: var(--border_color_5);
+		border-color: var(--shade_50);
 		border-style: solid;
 	}
 
@@ -267,6 +333,13 @@
 		padding: var(--space_xl5) var(--space_md);
 	}
 	.border_radius {
-		background-color: var(--fg_2);
+		background-color: var(--shade_20);
+	}
+	.intensity_selector {
+		display: flex;
+		flex-wrap: wrap;
+		align-items: start;
+		gap: var(--space_xl);
+		padding: var(--space_sm) 0;
 	}
 </style>

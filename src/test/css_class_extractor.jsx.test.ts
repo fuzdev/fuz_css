@@ -190,13 +190,13 @@ const Toggle = ({ isOn, hasError }) => (
 		const jsx = (await import('acorn-jsx')).default;
 		const source = `
 const Item = ({ selected }) => (
-	<div class="item p_md" classList={{ selected, 'bg_2': selected }}>
+	<div class="item p_md" classList={{ selected, 'shade_20': selected }}>
 		Item
 	</div>
 );
 `;
 		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
-		class_names_equal(result, ['item', 'p_md', 'selected', 'bg_2']);
+		class_names_equal(result, ['item', 'p_md', 'selected', 'shade_20']);
 	});
 
 	test('Solid: extracts from classList with string literal keys', async () => {

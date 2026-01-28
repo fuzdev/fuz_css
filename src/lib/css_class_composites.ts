@@ -46,23 +46,23 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	selectable: {
 		ruleset: `
 			.selectable {
-				--button_fill: color-mix(in hsl, var(--fill) 8%, transparent);
-				--button_fill_hover: color-mix(in hsl, var(--fill) 16%, transparent);
-				--button_fill_active: color-mix(in hsl, var(--fill) 24%, transparent);
+				--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);
+				--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);
+				--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);
 				cursor: pointer;
 				background-color: var(--button_fill);
-				border-color: var(--border_color_3);
+				border-color: var(--border_color_30);
 				border-style: var(--border_style);
 				border-width: var(--border_width);
 			}
 			.selectable:hover {
 				background-color: var(--button_fill_hover);
-				border-color: var(--border_color_2);
+				border-color: var(--border_color_20);
 			}
 			.selectable.selected,
 			.selectable:active {
 				background-color: var(--button_fill_active);
-				border-color: var(--color_a_5);
+				border-color: var(--color_a_50);
 			}
 			.selectable.selected {
 				cursor: default;
@@ -96,8 +96,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment:
 			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
-			background-color: var(--pane_bg, var(--bg));
-			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color) var(--shadow_alpha_3), transparent));
+			background-color: var(--shade_00);
+			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
 			border-radius: var(--border_radius_xs);
 		`,
 	},
@@ -105,7 +105,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius_xs);
-			background-color: var(--panel_bg, var(--fg_1));
+			background-color: var(--fg_10);
 		`,
 	},
 	icon_button: {
@@ -143,7 +143,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		ruleset: `
 			.menu_item {
 				--border_radius: 0;
-				--border_color: var(--border_color_3);
+				--border_color: var(--border_color_30);
 				position: relative;
 				z-index: 2;
 				cursor: pointer;
@@ -155,9 +155,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				padding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));
 			}
 			.menu_item.selected {
-				/* TODO different patterns for border and bg? */
-				--border_color: var(--color_a_5);
-				background-color: var(--fg_1);
+				/* TODO different patterns for border and surface? */
+				--border_color: var(--color_a_50);
+				background-color: var(--fg_10);
 				z-index: 1;
 				cursor: default;
 			}
@@ -165,13 +165,13 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				cursor: pointer;
 			}
 			.menu_item:hover {
-				--border_color: var(--border_color_3);
-				background-color: var(--fg_0);
+				--border_color: var(--border_color_30);
+				background-color: var(--fg_10);
 			}
 			.menu_item:active,
 			.menu_item.selected:hover {
-				--border_color: var(--border_color_3);
-				background-color: var(--fg_2);
+				--border_color: var(--border_color_30);
+				background-color: var(--fg_20);
 			}
 			.menu_item.plain {
 				border: none;
@@ -210,7 +210,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				display: block;
 				content: '';
 				border: 4px solid transparent;
-				border-left-color: var(--text_color_3);
+				border-left-color: var(--text_70);
 			}
 		`,
 	},
@@ -220,11 +220,51 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				font-weight: 500;
 				padding-left: var(--space_xs);
 				padding-right: var(--space_xs);
-				background-color: var(--fg_1);
+				background-color: var(--fg_10);
 				border-radius: var(--border_radius_xs);
 			}
 			a.chip {
 				font-weight: 600;
+			}
+			.chip.color_a {
+				color: var(--color_a_50);
+				background-color: var(--color_a_10);
+			}
+			.chip.color_b {
+				color: var(--color_b_50);
+				background-color: var(--color_b_10);
+			}
+			.chip.color_c {
+				color: var(--color_c_50);
+				background-color: var(--color_c_10);
+			}
+			.chip.color_d {
+				color: var(--color_d_50);
+				background-color: var(--color_d_10);
+			}
+			.chip.color_e {
+				color: var(--color_e_50);
+				background-color: var(--color_e_10);
+			}
+			.chip.color_f {
+				color: var(--color_f_50);
+				background-color: var(--color_f_10);
+			}
+			.chip.color_g {
+				color: var(--color_g_50);
+				background-color: var(--color_g_10);
+			}
+			.chip.color_h {
+				color: var(--color_h_50);
+				background-color: var(--color_h_10);
+			}
+			.chip.color_i {
+				color: var(--color_i_50);
+				background-color: var(--color_i_10);
+			}
+			.chip.color_j {
+				color: var(--color_j_50);
+				background-color: var(--color_j_10);
 			}
 		`,
 	},

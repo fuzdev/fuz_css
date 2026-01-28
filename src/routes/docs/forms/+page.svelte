@@ -36,9 +36,11 @@
 
 <TomeContent {tome}>
 	<UnfinishedImplementationWarning>Forms need more work.</UnfinishedImplementationWarning>
-	<p>
-		Form elements have basic default styles that can be omitted with <code>.unstyled</code>.
-	</p>
+	<section>
+		<p>
+			Form elements have basic default styles that can be omitted with <code>.unstyled</code>.
+		</p>
+	</section>
 
 	<TomeSection>
 		<TomeSectionHeader text="form with a fieldset">

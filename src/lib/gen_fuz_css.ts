@@ -1,5 +1,5 @@
 /**
- * Gro generator for creating optimized utility CSS from extracted class names.
+ * [Gro generator](https://github.com/ryanatkn/gro) for creating optimized utility CSS from extracted class names.
  * Scans source files, extracts CSS classes with AST-based parsing, and generates
  * only the CSS for classes actually used. Includes per-file caching with content
  * hash validation for fast incremental rebuilds.

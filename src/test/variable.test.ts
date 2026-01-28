@@ -1,23 +1,30 @@
 import {test, assert} from 'vitest';
 
-import {is_style_variable_name} from '$lib/variable.js';
+import {StyleVariable} from '$lib/variable.js';
 
-test('is_style_variable_name', () => {
-	// valid names
-	assert.ok(is_style_variable_name('a'));
-	assert.ok(is_style_variable_name('ab'));
-	assert.ok(is_style_variable_name('a_b'));
-	assert.ok(is_style_variable_name('a_9'));
-	assert.ok(is_style_variable_name('a_b_c'));
-	// invalid
-	assert.ok(!is_style_variable_name('A'));
-	assert.ok(!is_style_variable_name('_a'));
-	assert.ok(!is_style_variable_name('_a_b'));
-	assert.ok(!is_style_variable_name('a_'));
-	assert.ok(!is_style_variable_name('a_b_'));
-	assert.ok(!is_style_variable_name('a-b'));
-	assert.ok(!is_style_variable_name('a_B'));
-	assert.ok(!is_style_variable_name('9'));
-	assert.ok(!is_style_variable_name('9a'));
-	assert.ok(!is_style_variable_name('9_a'));
+test('StyleVariable validates light-only', () => {
+	const result = StyleVariable.safeParse({name: 'foo', light: '10px'});
+	assert.ok(result.success);
+});
+
+test('StyleVariable validates dark-only', () => {
+	const result = StyleVariable.safeParse({name: 'foo', dark: '10px'});
+	assert.ok(result.success);
+});
+
+test('StyleVariable validates different light and dark', () => {
+	const result = StyleVariable.safeParse({name: 'foo', light: '10px', dark: '20px'});
+	assert.ok(result.success);
+});
+
+test('StyleVariable rejects missing light and dark', () => {
+	const result = StyleVariable.safeParse({name: 'foo'});
+	assert.ok(!result.success);
+	assert.ok(result.error.issues.some((i) => i.message.includes('at least one')));
+});
+
+test('StyleVariable rejects identical light and dark', () => {
+	const result = StyleVariable.safeParse({name: 'foo', light: '10px', dark: '10px'});
+	assert.ok(!result.success);
+	assert.ok(result.error.issues.some((i) => i.message.includes('must differ')));
 });
