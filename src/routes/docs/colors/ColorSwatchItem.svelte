@@ -7,15 +7,17 @@
 		intensity,
 		color_name,
 		computed_styles,
+		suffix,
 	}: {
 		intensity: string;
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;
+		suffix?: 'light' | 'dark';
 	} = $props();
 
 	const themer = themer_context.get();
 
-	const name = $derived(`color_${color_name}_${intensity}`);
+	const name = $derived(`color_${color_name}_${intensity}` + (suffix ? `_${suffix}` : ''));
 	const value = $derived.by(() => {
 		// handle the user switching between light/dark mode
 		// TODO could refactor to a class for variables
@@ -23,12 +25,13 @@
 		return computed_styles?.getPropertyValue('--' + name);
 	});
 	const hsl = $derived(value && parse_hsl_string(value));
+	const width = $derived(suffix ? '195px' : '140px');
 </script>
 
 <li style:--bg_color="var(--{name})">
 	<div class="color"></div>
 	<div class="text">
-		<StyleVariableButton {name} style="width: 140px; justify-content: start;" />
+		<StyleVariableButton {name} style="width: {width}; justify-content: start;" />
 		<div class="hex">{hsl && hsl_to_hex_string(...hsl)}</div>
 		<div class="hsl">{value}</div>
 		<div class="rgb">rgb({hsl && hsl_to_rgb(...hsl).join(' ')})</div>

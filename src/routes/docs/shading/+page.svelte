@@ -217,10 +217,10 @@
 			</div>
 		</TomeSection>
 		<TomeSection>
-			<TomeSectionHeader text="Perceptual curve" tag="h4" />
+			<TomeSectionHeader text="Visual balance" tag="h4" />
 			<p>
-				Both scales use a perceptual curve from 0% to 100%: 0%, 3%, 6%, 12%, 21%, 32%, 45%, 65%,
-				80%, 89%, 96%, 98%, 100%. This provides visually even steps across the range.
+				Both scales are tuned for visual balance, not mathematical spacing: 0%, 3%, 6%, 12%, 21%,
+				32%, 45%, 65%, 80%, 89%, 96%, 98%, 100%. This provides visually even steps across the range.
 			</p>
 		</TomeSection>
 	</TomeSection>

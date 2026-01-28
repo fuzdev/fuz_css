@@ -34,8 +34,6 @@
 		'septenary/info',
 		'octonary/flourish',
 	];
-
-	// TODO BLOCK document the absolute colors (and probably make the adaptive ones use var() on them directly)
 </script>
 
 <TomeContent {tome}>
@@ -102,11 +100,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Color variables" />
 		<p>
-			There are 11 variables per color (05, 10, 20, ..., 80, 90, 95), from subtle to bold. The 50
-			variant of each color is used as the base for things like <TomeLink name="buttons" />.
-		</p>
-		<p>
-			Note that these values differ between light and dark modes! See the discussion above for why.
+			There are 13 intensity variants per hue (00, 05, 10, 20, ..., 80, 90, 95, 100), from subtle to
+			bold. The 50 variant of each color is used as the base for things like
+			<TomeLink name="buttons" />.
 		</p>
 		<p>
 			Unlike the <TomeLink name="shading">shade</TomeLink> and
@@ -114,12 +110,54 @@
 			variables can be used for both text and backgrounds via utility classes:
 			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
-		<p>These colors were eyeballed by a programmer, and will change :]</p>
-		<ul class="palette unstyled pt_xl2">
-			{#each color_variants as color_name (color_name)}
-				<ColorSwatch {color_name} {computed_styles} />
-			{/each}
+		<p>Each color exists in two forms:</p>
+		<ul>
+			<li>
+				<strong>Adaptive</strong> (<code>color_a_50</code>) — switches between light and dark values
+				based on color scheme. Use for most UI work.
+			</li>
+			<li>
+				<strong>Absolute</strong> (<code>color_a_50_light</code>, <code>color_a_50_dark</code>) —
+				stable values that never change. Use when you need a pinned color.
+			</li>
 		</ul>
+		<TomeSection>
+			<TomeSectionHeader tag="h3" text="Adaptive colors" />
+			<p>
+				The colors you'll use most often. They automatically adjust to maintain visual consistency
+				across color schemes. Note that these values differ between light and dark modes! See the
+				discussion above for why.
+			</p>
+			<ul class="palette unstyled pt_xl2">
+				{#each color_variants as color_name (color_name)}
+					<ColorSwatch {color_name} {computed_styles} />
+				{/each}
+			</ul>
+		</TomeSection>
+		<section class="box">
+			<ColorSchemeInput />
+		</section>
+		<TomeSection>
+			<TomeSectionHeader tag="h3" text="Absolute colors" />
+			<p>
+				Sometimes you need a color that <em>doesn't</em> adapt — logos, charts, color-coded data, or elements
+				that must match across screenshots. Every adaptive color has two absolute variants:
+			</p>
+			<ul>
+				<li><code>color_a_50_light</code> — the value used in light mode</li>
+				<li><code>color_a_50_dark</code> — the value used in dark mode</li>
+			</ul>
+			<p>
+				These are stable regardless of color scheme. Light and dark variants are tuned independently
+				for visual balance -- achieving equivalent appearance across color schemes requires
+				different saturation and lightness values.
+			</p>
+			<ul class="palette unstyled pt_xl2">
+				{#each color_variants as color_name (color_name)}
+					<ColorSwatch {color_name} {computed_styles} absolute />
+				{/each}
+			</ul>
+		</TomeSection>
 	</TomeSection>
 	<section class="box">
 		<ColorSchemeInput />
