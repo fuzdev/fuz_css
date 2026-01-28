@@ -1101,60 +1101,63 @@ export const border_color_00: StyleVariable = {
 	light: 'transparent',
 	dark: 'transparent',
 };
+// Perceptually-uniform alpha curve for borders (matches shadow_alpha curve)
+// - Small gaps at low end, large gaps at high end
+// - Dark mode boosted at low end (borders less visible against dark backgrounds)
 export const border_color_05: StyleVariable = {
 	name: 'border_color_05',
-	light: 'hsl(var(--tint_hue) 60% 20% / 10%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 15%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 4%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 8%)',
 };
 export const border_color_10: StyleVariable = {
 	name: 'border_color_10',
-	light: 'hsl(var(--tint_hue) 60% 20% / 15%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 25%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 7%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 14%)',
 };
 export const border_color_20: StyleVariable = {
 	name: 'border_color_20',
-	light: 'hsl(var(--tint_hue) 60% 20% / 25%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 40%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 13%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 22%)',
 };
 export const border_color_30: StyleVariable = {
 	name: 'border_color_30',
-	light: 'hsl(var(--tint_hue) 60% 20% / 35%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 55%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 22%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 32%)',
 };
 export const border_color_40: StyleVariable = {
 	name: 'border_color_40',
-	light: 'hsl(var(--tint_hue) 60% 20% / 50%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 70%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 34%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 44%)',
 };
 export const border_color_50: StyleVariable = {
 	name: 'border_color_50',
-	light: 'hsl(var(--tint_hue) 60% 20% / 65%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 80%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 48%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 56%)',
 };
 export const border_color_60: StyleVariable = {
 	name: 'border_color_60',
-	light: 'hsl(var(--tint_hue) 60% 20% / 75%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 85%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 62%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 68%)',
 };
 export const border_color_70: StyleVariable = {
 	name: 'border_color_70',
-	light: 'hsl(var(--tint_hue) 60% 20% / 82%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 90%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 76%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 80%)',
 };
 export const border_color_80: StyleVariable = {
 	name: 'border_color_80',
 	light: 'hsl(var(--tint_hue) 60% 20% / 88%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 93%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 90%)',
 };
 export const border_color_90: StyleVariable = {
 	name: 'border_color_90',
-	light: 'hsl(var(--tint_hue) 60% 20% / 94%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 96%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 96%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 97%)',
 };
 export const border_color_95: StyleVariable = {
 	name: 'border_color_95',
-	light: 'hsl(var(--tint_hue) 60% 20% / 97%)',
-	dark: 'hsl(var(--tint_hue) 60% 80% / 98%)',
+	light: 'hsl(var(--tint_hue) 60% 20% / 99%)',
+	dark: 'hsl(var(--tint_hue) 60% 80% / 99%)',
 };
 export const border_color_100: StyleVariable = {
 	name: 'border_color_100',
@@ -1576,21 +1579,23 @@ export const shadow_color_shroud: StyleVariable = {
 	name: 'shadow_color_shroud',
 	light: '#000',
 };
-// TODO @ryanatkn consider sharing an alpha abstraction with darken/lighten - these use the same perceptual scale
-// TODO @ryanatkn are these variables needed, or can classes just use inline percentages?
-export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%'};
-export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '3%'};
-export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '6%'};
-export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '12%'};
-export const shadow_alpha_30: StyleVariable = {name: 'shadow_alpha_30', light: '21%'};
-export const shadow_alpha_40: StyleVariable = {name: 'shadow_alpha_40', light: '32%'};
-export const shadow_alpha_50: StyleVariable = {name: 'shadow_alpha_50', light: '45%'};
-export const shadow_alpha_60: StyleVariable = {name: 'shadow_alpha_60', light: '65%'};
-export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '80%'};
-export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '89%'};
-export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%'};
-export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '98%'};
-export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%'};
+// Perceptually-uniform alpha curve for shadows:
+// - Small gaps at low end (subtle changes are perceptible)
+// - Large gaps at high end (need bigger changes to notice)
+// - Dark mode boosted at low end (shadows less visible against dark backgrounds)
+export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%', dark: '0%'};
+export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '6%', dark: '13%'};
+export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '10%', dark: '19%'};
+export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '16%', dark: '27%'};
+export const shadow_alpha_30: StyleVariable = {name: 'shadow_alpha_30', light: '25%', dark: '37%'};
+export const shadow_alpha_40: StyleVariable = {name: 'shadow_alpha_40', light: '36%', dark: '47%'};
+export const shadow_alpha_50: StyleVariable = {name: 'shadow_alpha_50', light: '50%', dark: '59%'};
+export const shadow_alpha_60: StyleVariable = {name: 'shadow_alpha_60', light: '64%', dark: '71%'};
+export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '77%', dark: '83%'};
+export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '88%', dark: '91%'};
+export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%', dark: '98%'};
+export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '99%', dark: '100%'};
+export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%', dark: '100%'};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,

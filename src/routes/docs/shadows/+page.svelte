@@ -41,6 +41,25 @@
 	// TODO duplicate shadows links
 
 	// TODO BLOCK think about glow/shroud vs lighten/darken as color names, same concept right?
+	// The overlap:
+	// ┌────────────────┬─────────────────┬─────────────────┐
+	// │ Shadow concept │ General overlay │     Effect      │
+	// ├────────────────┼─────────────────┼─────────────────┤
+	// │ glow           │ lighten         │ Adds brightness │
+	// ├────────────────┼─────────────────┼─────────────────┤
+	// │ shroud         │ darken          │ Adds darkness   │
+	// └────────────────┴─────────────────┴─────────────────┘
+	// Key differences:
+	// - Shadow colors (glow/shroud): Tinted using tint_hue/tint_saturation, used in box-shadow
+	// - Overlays (lighten/darken): Untinted pure black/white with alpha, used for backgrounds
+
+	// Additionally:
+	// - umbra (shadow that darkens adaptively - dark in light mode, light in dark)
+	// - highlight (shadow that lightens adaptively - light in light mode, dark in dark)
+
+	// Open question: Should the naming be unified for consistency, or kept distinct because they serve different contexts (shadows vs
+	// backgrounds)?
+
 	// TODO BLOCK @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
 
