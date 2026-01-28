@@ -1133,6 +1133,30 @@ const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 /* @fuz-classes color_a_50 color_b_50 color_c_50 */
 const color = get_dynamic_color();`}
 			/>
+			<p>
+				A common case is iterating over variant arrays to generate demos or UI. The extractor sees
+				<code>class="shadow_alpha_{'{'}variant}"</code>
+				but can't resolve what <code>variant</code> will be at runtime:
+			</p>
+			<!-- eslint-disable-next-line no-useless-concat -->
+			<Code
+				lang="svelte"
+				content={'<' +
+					`script>
+	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.js';
+
+	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
+</script>
+
+{#each shadow_alpha_variants as variant}
+	<div class="shadow_alpha_{variant}">...</div>
+{/each}`}
+			/>
+			<aside>
+				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -- they're
+				generally not used directly in your code (they exist mainly for programmatic usage ergonomics),
+				so the class won't be generated unless you hint it.
+			</aside>
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>include_classes</code>

@@ -46,6 +46,17 @@ Two generators available, both using AST-based extraction ([css_class_extractor.
 
 Both output only CSS for classes actually used. Supports Svelte 5.16+ class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
 
+**Troubleshooting missing classes:** When iterating over variant arrays to generate class names dynamically (e.g., `class="shadow_alpha_{variant}"` where `variant` comes from `shadow_alpha_variants`), the AST extractor cannot statically detect the full class names. Use `// @fuz-classes` comments to list all possible values:
+
+```ts
+// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
+{#each shadow_alpha_variants as variant}
+  <div class="shadow_alpha_{variant}">...</div>
+{/each}
+```
+
+This is especially easy to miss for edge values like `_00` and `_100` that may not appear in other static usages.
+
 **Shared options (both generators):**
 
 - `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`, excluding tests/gen files)
