@@ -1,0 +1,1 @@
+import{j as o,k as u,H as _,l as t,m as g,C as m,n as a,o as i,q as n,v as p}from"./DYRElyAP.js";function E(d,r){let s=null,f=t;var l;if(t){s=p;for(var e=g(document.head);e!==null&&(e.nodeType!==m||e.data!==d);)e=a(e);if(e===null)i(!1);else{var y=a(e);e.remove(),n(y)}}t||(l=document.head.appendChild(o()));try{u(()=>r(l),_)}finally{f&&(i(!0),n(s))}}export{E as h};
