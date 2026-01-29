@@ -1214,6 +1214,23 @@ const color = get_dynamic_color();`}
 	exclude_classes: ['some:false:positive'],
 });`}
 			/>
+
+			<h4>5. Build-time limitations</h4>
+			<p>
+				Class and element detection happens at build time via static analysis. Content created
+				dynamically at runtime (<code>document.createElement()</code>, <code>innerHTML</code>,
+				framework hydration) won't be detected.
+			</p>
+			<p>
+				Use <DeclarationLink name="GenFuzCssOptions">include_elements</DeclarationLink> to force-include
+				element styles for runtime-created elements:
+			</p>
+			<Code
+				lang="ts"
+				content={`vite_plugin_fuz_css({
+	include_elements: ['dialog', 'details', 'datalist'],
+});`}
+			/>
 		</TomeSection>
 	</TomeSection>
 

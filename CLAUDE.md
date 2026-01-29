@@ -57,6 +57,20 @@ Both output only CSS for classes actually used. Supports Svelte 5.16+ class synt
 
 This is especially easy to miss for edge values like `_00` and `_100` that may not appear in other static usages.
 
+### Limitations
+
+**Static extraction only:** Unified CSS generation happens at build time via AST analysis. Elements and classes created dynamically at runtime (`document.createElement()`, `innerHTML`, dynamic frameworks) won't be detected.
+
+**Workaround:** Use `include_elements` and `include_classes` options:
+```ts
+gen_fuz_css({
+	include_elements: ['dialog', 'details'],  // Force include element styles
+	include_classes: ['dynamic-modal'],       // Force include utility classes
+});
+```
+
+**SSR/SSG:** Works correctly - CSS is bundled as a static asset before server rendering.
+
 **Shared options (both generators):**
 
 - `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`, excluding tests/gen files)
@@ -172,6 +186,7 @@ Both generators support these options for unified CSS:
 - `theme_specificity` - Specificity multiplier for `:root` selector (default: `1`)
 - `include_elements` - Additional HTML elements to always include styles for
 - `include_variables` - Additional CSS variables to always include in theme output
+- `include_all_variables` - Include all theme variables regardless of detection (for debugging)
 
 ### Breaking change note
 

@@ -167,6 +167,12 @@ export interface VitePluginFuzCssOptions {
 	 * Useful for variables referenced dynamically.
 	 */
 	include_variables?: Iterable<string>;
+	/**
+	 * Include all theme variables regardless of detection.
+	 * Useful for debugging or when many variables are used dynamically.
+	 * @default false
+	 */
+	include_all_variables?: boolean;
 }
 
 /**
@@ -192,6 +198,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
+		include_all_variables,
 	} = options;
 
 	// Merge class definitions (user definitions take precedence)
@@ -302,6 +309,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				utility_variables_used: utility_result.variables_used,
 				include_elements,
 				include_variables,
+				include_all_variables,
 				theme_specificity,
 			});
 

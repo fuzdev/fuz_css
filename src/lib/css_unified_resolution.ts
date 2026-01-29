@@ -19,6 +19,7 @@ import {
 	type VariableDependencyGraph,
 	resolve_variables_transitive,
 	generate_theme_css,
+	get_all_variable_names,
 } from './variable_graph.js';
 import {type ClassVariableIndex, collect_class_variables} from './class_variable_index.js';
 
@@ -80,6 +81,12 @@ export interface CssResolutionOptions {
 	include_elements?: Iterable<string>;
 	/** Additional variables to always include */
 	include_variables?: Iterable<string>;
+	/**
+	 * Include all theme variables regardless of detection.
+	 * Useful for debugging or when many variables are used dynamically.
+	 * @default false
+	 */
+	include_all_variables?: boolean;
 	/** Specificity multiplier for theme selector (default 1) */
 	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
@@ -108,6 +115,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		utility_variables_used,
 		include_elements,
 		include_variables,
+		include_all_variables = false,
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
@@ -178,6 +186,13 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	// e) User-specified include_variables
 	if (include_variables) {
 		for (const v of include_variables) {
+			all_variables.add(v);
+		}
+	}
+
+	// f) Include all variables if requested (for debugging)
+	if (include_all_variables) {
+		for (const v of get_all_variable_names(variable_graph)) {
 			all_variables.add(v);
 		}
 	}

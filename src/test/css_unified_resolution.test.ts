@@ -457,6 +457,56 @@ describe('resolve_css', () => {
 				expect(result.resolved_variables.has('forced')).toBe(true);
 			});
 
+			test('include_all_variables includes every variable', () => {
+				const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+					{name: 'color_a', light: 'blue'},
+					{name: 'color_b', light: 'green'},
+					{name: 'color_c', light: 'red'},
+					{name: 'space_sm', light: '8px'},
+					{name: 'space_md', light: '16px'},
+				]);
+
+				const result = resolve_css({
+					style_rule_index,
+					variable_graph,
+					class_variable_index,
+					detected_elements: new Set(),
+					detected_classes: new Set(),
+					detected_css_variables: new Set(), // No detected variables
+					utility_variables_used: new Set(),
+					include_all_variables: true,
+				});
+
+				// All 5 variables should be included
+				expect(result.resolved_variables.size).toBe(5);
+				expect(result.resolved_variables.has('color_a')).toBe(true);
+				expect(result.resolved_variables.has('color_b')).toBe(true);
+				expect(result.resolved_variables.has('color_c')).toBe(true);
+				expect(result.resolved_variables.has('space_sm')).toBe(true);
+				expect(result.resolved_variables.has('space_md')).toBe(true);
+			});
+
+			test('include_all_variables includes transitive deps', () => {
+				const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+					{name: 'base', light: '10'},
+					{name: 'derived', light: 'calc(var(--base) * 2)'},
+				]);
+
+				const result = resolve_css({
+					style_rule_index,
+					variable_graph,
+					class_variable_index,
+					detected_elements: new Set(),
+					detected_classes: new Set(),
+					detected_css_variables: new Set(),
+					utility_variables_used: new Set(),
+					include_all_variables: true,
+				});
+
+				expect(result.resolved_variables.has('base')).toBe(true);
+				expect(result.resolved_variables.has('derived')).toBe(true);
+			});
+
 			test('combines all sources', () => {
 				const class_defs: Record<string, CssClassDefinition | undefined> = {
 					gap_sm: {declaration: 'gap: var(--space_sm)'},

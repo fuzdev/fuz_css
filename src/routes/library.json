@@ -2261,7 +2261,7 @@
 						"name": "CssResolutionStats",
 						"kind": "type",
 						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
-						"source_line": 28,
+						"source_line": 29,
 						"type_signature": "CssResolutionStats",
 						"properties": [
 							{
@@ -2300,7 +2300,7 @@
 						"name": "CssResolutionResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS resolution.",
-						"source_line": 44,
+						"source_line": 45,
 						"type_signature": "CssResolutionResult",
 						"properties": [
 							{
@@ -2351,7 +2351,7 @@
 						"name": "CssResolutionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS resolution.",
-						"source_line": 64,
+						"source_line": 65,
 						"type_signature": "CssResolutionOptions",
 						"properties": [
 							{
@@ -2409,6 +2409,12 @@
 								"doc_comment": "Additional variables to always include"
 							},
 							{
+								"name": "include_all_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include all theme variables regardless of detection (for debugging)"
+							},
+							{
 								"name": "theme_specificity",
 								"kind": "variable",
 								"type_signature": "number",
@@ -2432,7 +2438,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, include_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 100,
+						"source_line": 103,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"parameters": [
@@ -2446,7 +2452,7 @@
 						"name": "generate_unified_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 254,
+						"source_line": 265,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: { include_theme?: boolean | undefined; include_base?: boolean | undefined; include_utilities?: boolean | undefined; }): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
@@ -3015,13 +3021,19 @@
 								"kind": "variable",
 								"type_signature": "Iterable<string>",
 								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
+							},
+							{
+								"name": "include_all_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
 							}
 						]
 					},
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 212,
+						"source_line": 218,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -6749,6 +6761,12 @@
 								"kind": "variable",
 								"type_signature": "Iterable<string>",
 								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
+							},
+							{
+								"name": "include_all_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
 							}
 						]
 					},
@@ -6756,7 +6774,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 178,
+						"source_line": 184,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [

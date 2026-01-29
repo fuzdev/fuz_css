@@ -207,6 +207,12 @@ export interface GenFuzCssOptions {
 	 * Useful for variables referenced dynamically.
 	 */
 	include_variables?: Iterable<string>;
+	/**
+	 * Include all theme variables regardless of detection.
+	 * Useful for debugging or when many variables are used dynamically.
+	 * @default false
+	 */
+	include_all_variables?: boolean;
 }
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
@@ -230,6 +236,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
+		include_all_variables,
 	} = options;
 
 	// Convert to Sets for efficient lookup
@@ -485,6 +492,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					utility_variables_used: utility_result.variables_used,
 					include_elements,
 					include_variables,
+					include_all_variables,
 					theme_specificity,
 					include_stats,
 				});
