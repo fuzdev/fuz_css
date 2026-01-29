@@ -2412,7 +2412,7 @@
 								"name": "include_all_variables",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Include all theme variables regardless of detection (for debugging)"
+								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
 							},
 							{
 								"name": "theme_specificity",
@@ -2438,7 +2438,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, include_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 103,
+						"source_line": 107,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"parameters": [
@@ -2452,7 +2452,7 @@
 						"name": "generate_unified_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 265,
+						"source_line": 269,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: { include_theme?: boolean | undefined; include_base?: boolean | undefined; include_utilities?: boolean | undefined; }): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
