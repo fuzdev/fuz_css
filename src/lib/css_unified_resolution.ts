@@ -20,6 +20,7 @@ import {
 	resolve_variables_transitive,
 	generate_theme_css,
 	get_all_variable_names,
+	find_similar_variable,
 } from './variable_graph.js';
 import {type ClassVariableIndex, collect_class_variables} from './class_variable_index.js';
 
@@ -213,16 +214,21 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		});
 	}
 
-	// Add missing variable warnings
+	// Add typo warnings for missing variables that look like misspelled theme variables
+	// User-defined variables (not similar to any theme variable) are silently ignored
 	for (const name of resolution.missing) {
-		diagnostics.push({
-			phase: 'generation',
-			level: 'warning',
-			message: `CSS variable "--${name}" not found in theme variables`,
-			suggestion: 'Check spelling or add to include_variables option',
-			class_name: `var(--${name})`,
-			locations: null,
-		});
+		const similar = find_similar_variable(variable_graph, name);
+		if (similar) {
+			diagnostics.push({
+				phase: 'generation',
+				level: 'warning',
+				message: `CSS variable "--${name}" not found - did you mean "--${similar}"?`,
+				suggestion: `Check spelling. Similar theme variable: --${similar}`,
+				class_name: `var(--${name})`,
+				locations: null,
+			});
+		}
+		// Variables not similar to any theme variable are assumed to be user-defined
 	}
 
 	// Step 5: Generate theme CSS

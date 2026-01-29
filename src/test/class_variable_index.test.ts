@@ -2,11 +2,11 @@ import {test, expect} from 'vitest';
 
 import {
 	build_class_variable_index,
-	get_default_class_variable_index,
 	get_class_variables,
 	collect_class_variables,
 	get_classes_using_variable,
 } from '../lib/class_variable_index.js';
+import {css_class_definitions} from '../lib/css_class_definitions.js';
 import type {CssClassDefinition} from '../lib/css_class_generation.js';
 
 test('build_class_variable_index - declaration with variable', () => {
@@ -92,15 +92,16 @@ test('get_class_variables - existing class', () => {
 
 	const vars = get_class_variables(index, 'p_md');
 
-	expect(vars.has('space_md')).toBe(true);
+	expect(vars).not.toBeNull();
+	expect(vars!.has('space_md')).toBe(true);
 });
 
-test('get_class_variables - missing class returns empty set', () => {
+test('get_class_variables - missing class returns null', () => {
 	const index = build_class_variable_index({});
 
 	const vars = get_class_variables(index, 'nonexistent');
 
-	expect(vars.size).toBe(0);
+	expect(vars).toBeNull();
 });
 
 test('collect_class_variables - multiple classes', () => {
@@ -156,8 +157,8 @@ test('get_classes_using_variable - unused variable', () => {
 	expect(classes.length).toBe(0);
 });
 
-test('get_default_class_variable_index - loads actual definitions', () => {
-	const index = get_default_class_variable_index();
+test('build_class_variable_index - with default definitions', () => {
+	const index = build_class_variable_index(css_class_definitions);
 
 	// Should have many classes
 	expect(index.by_class.size).toBeGreaterThan(50);
@@ -171,14 +172,6 @@ test('get_default_class_variable_index - loads actual definitions', () => {
 	const font_size_lg_vars = index.by_class.get('font_size_lg');
 	expect(font_size_lg_vars).toBeDefined();
 	expect(font_size_lg_vars!.has('font_size_lg')).toBe(true);
-});
-
-test('get_default_class_variable_index - cached', () => {
-	const index1 = get_default_class_variable_index();
-	const index2 = get_default_class_variable_index();
-
-	// Should be the same instance (cached)
-	expect(index1).toBe(index2);
 });
 
 test('build_class_variable_index - color classes', () => {

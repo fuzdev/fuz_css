@@ -538,14 +538,14 @@ export const extract_from_ts = (
  *
  * @param source - The file source code
  * @param options - Extraction options
- * @returns Set of class names
+ * @returns Set of class names, or null if none found
  */
 export const extract_css_classes = (
 	source: string,
 	options: ExtractCssClassesOptions = {},
-): Set<string> => {
+): Set<string> | null => {
 	const result = extract_css_classes_with_locations(source, options);
-	return result.classes ? new Set(result.classes.keys()) : new Set();
+	return result.classes ? new Set(result.classes.keys()) : null;
 };
 
 /**

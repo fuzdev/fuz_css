@@ -8,6 +8,8 @@
  * @module
  */
 
+import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
+
 import {default_variables} from './variables.js';
 import type {StyleVariable} from './variable.js';
 import {extract_css_variables} from './css_variable_utils.js';
@@ -245,4 +247,45 @@ export const get_all_variable_names = (graph: VariableDependencyGraph): Set<stri
  */
 export const has_variable = (graph: VariableDependencyGraph, name: string): boolean => {
 	return graph.variables.has(name);
+};
+
+/**
+ * Computes normalized string similarity (0-1, where 1 = identical).
+ */
+const string_similarity = (a: string, b: string): number => {
+	const max_len = Math.max(a.length, b.length);
+	if (max_len === 0) return 1;
+	return 1 - levenshtein_distance(a, b) / max_len;
+};
+
+/** Minimum similarity threshold to consider a variable name a likely typo.
+ * Set to 0.85 to catch single-character typos while avoiding false positives
+ * for user variables that are prefixes of theme variables (e.g., border_radius vs border_radius_xs).
+ */
+const TYPO_SIMILARITY_THRESHOLD = 0.85;
+
+/**
+ * Finds the most similar variable in the graph to the given name.
+ * Returns null if no variable exceeds the similarity threshold.
+ *
+ * @param graph - The variable dependency graph
+ * @param name - The variable name to find similar matches for
+ * @returns The most similar variable name, or null if none are similar enough
+ */
+export const find_similar_variable = (
+	graph: VariableDependencyGraph,
+	name: string,
+): string | null => {
+	let best_match: string | null = null;
+	let best_similarity = TYPO_SIMILARITY_THRESHOLD;
+
+	for (const known of graph.variables.keys()) {
+		const similarity = string_similarity(name, known);
+		if (similarity > best_similarity) {
+			best_similarity = similarity;
+			best_match = known;
+		}
+	}
+
+	return best_match;
 };

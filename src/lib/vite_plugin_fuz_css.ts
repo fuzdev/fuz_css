@@ -50,7 +50,7 @@ import {type FileFilter, filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
 import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
 import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
-import {type ClassVariableIndex, get_default_class_variable_index} from './class_variable_index.js';
+import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
 
 /* eslint-disable no-console */
@@ -225,11 +225,30 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let project_root: string | null = null;
 	let hmr_timeout: ReturnType<typeof setTimeout> | null = null;
 	let last_generated_css: string | null = null;
+	let pending_css: string | null = null; // CSS generated during HMR, reused by load()
 
-	// Unified CSS resources (loaded eagerly in buildStart when unified mode is enabled)
+	// Unified CSS resources (loaded lazily on first CSS generation when unified mode is enabled)
 	let style_rule_index: StyleRuleIndex | null = null;
 	let variable_graph: VariableDependencyGraph | null = null;
 	let class_variable_index: ClassVariableIndex | null = null;
+
+	// Promise for in-flight resource loading (prevents duplicate loads)
+	let unified_resources_promise: Promise<void> | null = null;
+
+	/** Ensures unified CSS resources are loaded. Safe to call multiple times. */
+	const ensure_unified_resources = async (): Promise<void> => {
+		if (style_rule_index !== null) return; // Already loaded
+		if (unified_resources_promise) {
+			await unified_resources_promise; // Wait for in-flight loading
+			return;
+		}
+		unified_resources_promise = (async () => {
+			style_rule_index = await load_style_rule_index();
+			variable_graph = build_default_variable_graph();
+			class_variable_index = build_class_variable_index(all_class_definitions);
+		})();
+		await unified_resources_promise;
+	};
 
 	/** Logs a warning message (works in both dev and build) */
 	const log_warn = (msg: string): void => {
@@ -364,6 +383,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	const invalidate_virtual_module = (): void => {
 		if (!server) return;
 
+		// Skip HMR if unified resources aren't loaded yet
+		// (will be loaded on first load() call, CSS regenerated then)
+		if ((include_base_styles || include_theme_styles) && style_rule_index === null) {
+			return;
+		}
+
 		// Debounce: wait 10ms for more changes before triggering HMR
 		if (hmr_timeout) {
 			clearTimeout(hmr_timeout);
@@ -377,6 +402,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				return; // No change, skip HMR
 			}
 			last_generated_css = new_css;
+			pending_css = new_css; // Store for reuse in load() to avoid regenerating
 
 			const mod = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID_JS);
 			if (mod) {
@@ -435,18 +461,21 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					}
 				}
 			});
+
+			// Clean up pending timeout on server close
+			dev_server.httpServer?.on('close', () => {
+				if (hmr_timeout) {
+					clearTimeout(hmr_timeout);
+					hmr_timeout = null;
+				}
+			});
 		},
 
 		async buildStart() {
-			// Load CSS properties for validation
+			// Load CSS properties for validation (needed for transform())
 			css_properties = await load_css_properties();
-
-			// Load unified CSS resources if unified mode is enabled
-			if (include_base_styles || include_theme_styles) {
-				style_rule_index = await load_style_rule_index();
-				variable_graph = build_default_variable_graph();
-				class_variable_index = get_default_class_variable_index();
-			}
+			// Note: Unified CSS resources (style_rule_index, variable_graph, class_variable_index)
+			// are loaded lazily on first load() call via ensure_unified_resources()
 		},
 
 		resolveId(id) {
@@ -458,11 +487,17 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			return undefined;
 		},
 
-		load(id) {
+		async load(id) {
 			// Dev mode: JS module that injects CSS and handles HMR
 			if (id === RESOLVED_VIRTUAL_ID_JS) {
 				virtual_module_loaded = true;
-				const css = generate_css();
+				// Defer resource loading to first virtual module access
+				if (include_base_styles || include_theme_styles) {
+					await ensure_unified_resources();
+				}
+				// Use pending CSS from HMR if available, avoiding redundant generation
+				const css = pending_css ?? generate_css();
+				pending_css = null;
 				last_generated_css = css; // Track for HMR diffing
 				const escaped_css = JSON.stringify(css);
 				return `
@@ -487,6 +522,10 @@ export {};
 			// Build mode: plain CSS
 			if (id === RESOLVED_VIRTUAL_ID_CSS) {
 				virtual_module_loaded = true;
+				// Defer resource loading to first virtual module access
+				if (include_base_styles || include_theme_styles) {
+					await ensure_unified_resources();
+				}
 				// Return empty CSS for build - generateBundle will append the complete CSS
 				return '/* fuz_css placeholder */';
 			}

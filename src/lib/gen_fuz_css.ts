@@ -40,7 +40,7 @@ import {
 } from './css_cache.js';
 import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
 import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
-import {type ClassVariableIndex, get_default_class_variable_index} from './class_variable_index.js';
+import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
 
 /**
@@ -243,10 +243,28 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const include_set = include_classes ? new Set(include_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
-	// Lazy-load expensive resources for unified CSS generation
+	// Validate and compute merged class definitions upfront
+	if (!include_default_definitions && !user_class_definitions) {
+		throw new Error('class_definitions is required when include_default_definitions is false');
+	}
+	const all_class_definitions = include_default_definitions
+		? user_class_definitions
+			? {...css_class_definitions, ...user_class_definitions}
+			: css_class_definitions
+		: user_class_definitions!;
+
+	// Lazy-load expensive resources (cached per generator instance)
+	let css_properties: Set<string> | null = null;
 	let style_rule_index: StyleRuleIndex | null = null;
 	let variable_graph: VariableDependencyGraph | null = null;
 	let class_variable_index: ClassVariableIndex | null = null;
+
+	const get_css_properties = async (): Promise<Set<string>> => {
+		if (!css_properties) {
+			css_properties = await load_css_properties();
+		}
+		return css_properties;
+	};
 
 	const get_style_index = async (): Promise<StyleRuleIndex> => {
 		if (!style_rule_index) {
@@ -264,7 +282,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 	const get_class_variable_index = (): ClassVariableIndex => {
 		if (!class_variable_index) {
-			class_variable_index = get_default_class_variable_index();
+			class_variable_index = build_class_variable_index(all_class_definitions);
 		}
 		return class_variable_index;
 	};
@@ -284,8 +302,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		generate: async ({filer, log, origin_path}) => {
 			log.info('generating fuz_css classes...');
 
-			// Load CSS properties for validation before generation
-			const css_properties = await load_css_properties();
+			// Load CSS properties for validation (cached per instance)
+			const cached_css_properties = await get_css_properties();
 
 			await filer.init();
 
@@ -453,21 +471,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			// Merge class definitions (user definitions take precedence)
-			if (!include_default_definitions && !user_class_definitions) {
-				throw new Error('class_definitions is required when include_default_definitions is false');
-			}
-			const all_class_definitions = include_default_definitions
-				? user_class_definitions
-					? {...css_class_definitions, ...user_class_definitions}
-					: css_class_definitions
-				: user_class_definitions!;
-
 			const utility_result = generate_classes_css({
 				class_names: all_classes,
 				class_definitions: all_class_definitions,
 				interpreters: class_interpreters,
-				css_properties,
+				css_properties: cached_css_properties,
 				log,
 				class_locations: all_classes_with_locations,
 				explicit_classes,

@@ -7,6 +7,7 @@ import {
 	generate_theme_css,
 	get_all_variable_names,
 	has_variable,
+	find_similar_variable,
 	VARIABLE_GRAPH_VERSION,
 } from '../lib/variable_graph.js';
 import type {StyleVariable} from '../lib/variable.js';
@@ -495,5 +496,81 @@ describe('build_default_variable_graph', () => {
 
 		expect(result.variables.has('color_a_50')).toBe(true);
 		expect(result.variables.has('hue_a')).toBe(true);
+	});
+});
+
+describe('find_similar_variable', () => {
+	test('finds similar variable for typo (missing character)', () => {
+		const variables: Array<StyleVariable> = [
+			{name: 'color_primary', light: 'blue'},
+			{name: 'color_secondary', light: 'green'},
+		];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// Missing 'a' - should match color_primary
+		expect(find_similar_variable(graph, 'color_primry')).toBe('color_primary');
+	});
+
+	test('finds similar variable for typo (extra character)', () => {
+		const variables: Array<StyleVariable> = [
+			{name: 'background', light: '#fff'},
+			{name: 'foreground', light: '#000'},
+		];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// Extra 'u' - should match background
+		expect(find_similar_variable(graph, 'backuground')).toBe('background');
+	});
+
+	test('finds similar variable for typo (swapped characters)', () => {
+		const variables: Array<StyleVariable> = [{name: 'border_radius', light: '4px'}];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// 'boarder' instead of 'border' - should match
+		expect(find_similar_variable(graph, 'boarder_radius')).toBe('border_radius');
+	});
+
+	test('returns null for dissimilar variable', () => {
+		const variables: Array<StyleVariable> = [
+			{name: 'color_primary', light: 'blue'},
+			{name: 'spacing_md', light: '16px'},
+		];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// Completely different - should return null
+		expect(find_similar_variable(graph, 'fill')).toBeNull();
+		expect(find_similar_variable(graph, 'shadow')).toBeNull();
+		expect(find_similar_variable(graph, 'icon_size')).toBeNull();
+	});
+
+	test('returns null for empty graph', () => {
+		const graph = build_variable_graph([], 'test-hash');
+
+		expect(find_similar_variable(graph, 'anything')).toBeNull();
+	});
+
+	test('finds best match among multiple similar variables', () => {
+		const variables: Array<StyleVariable> = [
+			{name: 'color_a_1', light: '1'},
+			{name: 'color_a_2', light: '2'},
+			{name: 'color_a_3', light: '3'},
+		];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// 'color_a_' should match one of them (closest)
+		const result = find_similar_variable(graph, 'color_a_');
+		expect(result).not.toBeNull();
+		expect(result).toMatch(/^color_a_[123]$/);
+	});
+
+	test('returns null for short dissimilar strings', () => {
+		const variables: Array<StyleVariable> = [
+			{name: 'shadow_xs', light: '1px'},
+			{name: 'shadow_sm', light: '2px'},
+		];
+		const graph = build_variable_graph(variables, 'test-hash');
+
+		// 'shadow' alone is too different from 'shadow_xs' (similarity ~0.67)
+		expect(find_similar_variable(graph, 'shadow')).toBeNull();
 	});
 });

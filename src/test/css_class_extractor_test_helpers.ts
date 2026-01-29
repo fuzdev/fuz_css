@@ -14,8 +14,9 @@ export const class_names_equal = (
 
 /**
  * Helper to assert a Set of class names matches expected values.
- * For use with `extract_css_classes` which returns a Set directly.
+ * For use with `extract_css_classes` which returns a Set or null.
  */
-export const class_set_equal = (result: Set<string>, expected: Array<string>): void => {
-	expect([...result]).toEqual(expected);
+export const class_set_equal = (result: Set<string> | null, expected: Array<string>): void => {
+	const actual = result ? [...result] : [];
+	expect(actual).toEqual(expected);
 };

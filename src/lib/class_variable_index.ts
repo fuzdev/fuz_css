@@ -9,7 +9,6 @@
  */
 
 import type {CssClassDefinition} from './css_class_generation.js';
-import {css_class_definitions} from './css_class_definitions.js';
 import {extract_css_variables} from './css_variable_utils.js';
 
 /**
@@ -73,28 +72,16 @@ const extract_variables_from_definition = (definition: CssClassDefinition): Set<
 };
 
 /**
- * Builds the default class variable index from fuz_css class definitions.
- * This is lazily built and cached on first access.
- */
-let default_index: ClassVariableIndex | null = null;
-
-export const get_default_class_variable_index = (): ClassVariableIndex => {
-	if (!default_index) {
-		default_index = build_class_variable_index(css_class_definitions);
-	}
-	return default_index;
-};
-
-/**
  * Gets variables used by a specific class.
  *
  * @param index - The class variable index
  * @param class_name - Name of the class to lookup
- * @returns Set of variable names (without -- prefix), or empty set if class not found
+ * @returns Set of variable names (without -- prefix), or null if class not found
  */
-export const get_class_variables = (index: ClassVariableIndex, class_name: string): Set<string> => {
-	return index.by_class.get(class_name) ?? new Set();
-};
+export const get_class_variables = (
+	index: ClassVariableIndex,
+	class_name: string,
+): Set<string> | null => index.by_class.get(class_name) ?? null;
 
 /**
  * Collects all variables used by a set of classes.
