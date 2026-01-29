@@ -27,31 +27,36 @@
 import type {Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
 
-import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
+import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {type Diagnostic, CssGenerationError} from './diagnostics.js';
-import {
-	generate_classes_css,
-	type CssClassDefinition,
-	type CssClassDefinitionInterpreter,
-} from './css_class_generation.js';
+import {generate_classes_css} from './css_class_generation.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
 	DEFAULT_CACHE_DIR,
-	get_cache_path,
+	get_file_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
-	compute_hash,
 } from './css_cache.js';
-import {type FileFilter, filter_file_default} from './file_filter.js';
+import {compute_hash} from './hash.js';
+import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
-import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
-import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
+import {
+	type StyleRuleIndex,
+	load_style_rule_index,
+	create_style_rule_index,
+} from './style_rule_parser.js';
+import {
+	type VariableDependencyGraph,
+	type VariablesOption,
+	build_variable_graph_from_options,
+} from './variable_graph.js';
 import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /* eslint-disable no-console */
 
@@ -81,99 +86,10 @@ const is_ci = !!process.env.CI;
 
 /**
  * Options for the fuz_css Vite plugin.
+ * Extends the shared base options (no additional Vite-specific options currently needed).
  */
-export interface VitePluginFuzCssOptions {
-	/**
-	 * Filter function to determine which files to extract classes from.
-	 * By default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,
-	 * excluding test files and .gen files.
-	 */
-	filter_file?: FileFilter;
-	/**
-	 * Additional class definitions to merge with defaults.
-	 * User definitions take precedence over defaults with the same name.
-	 * Required when `include_default_definitions` is `false`.
-	 */
-	class_definitions?: Record<string, CssClassDefinition | undefined>;
-	/**
-	 * Whether to include default class definitions (token and composite classes).
-	 * When `false`, `class_definitions` is required.
-	 * @default true
-	 */
-	include_default_definitions?: boolean;
-	/**
-	 * Custom interpreters for dynamic class generation.
-	 * Replaces the builtin interpreters entirely if provided.
-	 */
-	class_interpreters?: Array<CssClassDefinitionInterpreter>;
-	/**
-	 * Classes to always include in the output, regardless of detection.
-	 */
-	include_classes?: Iterable<string>;
-	/**
-	 * Classes to exclude from the output, even if detected.
-	 */
-	exclude_classes?: Iterable<string>;
-	/**
-	 * Additional acorn plugins for parsing.
-	 * Use `acorn-jsx` for React/Preact/Solid projects.
-	 */
-	acorn_plugins?: Array<AcornPlugin>;
-	/**
-	 * How to handle CSS-literal errors during generation.
-	 * - 'log': Log errors, skip invalid classes, continue
-	 * - 'throw': Throw on first error, fail the build
-	 * @default 'throw' in CI, 'log' otherwise
-	 */
-	on_error?: 'log' | 'throw';
-	/**
-	 * How to handle warnings during generation.
-	 * - 'log': Log warnings, continue
-	 * - 'throw': Throw on first warning, fail the build
-	 * - 'ignore': Suppress warnings entirely
-	 * @default 'log'
-	 */
-	on_warning?: 'log' | 'throw' | 'ignore';
-	/**
-	 * Cache directory relative to project root.
-	 * @default DEFAULT_CACHE_DIR
-	 */
-	cache_dir?: string;
-	/**
-	 * Whether to include base styles from style.css.
-	 * When enabled, only styles for detected elements are included.
-	 * @default true
-	 */
-	include_base_styles?: boolean;
-	/**
-	 * Whether to include theme variables from the variable graph.
-	 * When enabled, only variables needed by base styles and utility classes are included.
-	 * @default true
-	 */
-	include_theme_styles?: boolean;
-	/**
-	 * Specificity multiplier for theme CSS selectors.
-	 * Value of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
-	 * @default 1
-	 */
-	theme_specificity?: number;
-	/**
-	 * Additional HTML elements to always include styles for.
-	 * Useful for elements generated at runtime.
-	 */
-	include_elements?: Iterable<string>;
-	/**
-	 * Additional CSS variables to always include in theme output.
-	 * Useful for variables referenced dynamically.
-	 */
-	include_variables?: Iterable<string>;
-	/**
-	 * Include all theme variables regardless of detection.
-	 * Useful for debugging or when many variables are used dynamically.
-	 * @default false
-	 */
-	include_all_variables?: boolean;
-}
+// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+export interface VitePluginFuzCssOptions extends CssGeneratorBaseOptions {}
 
 /**
  * Creates the fuz_css Vite plugin.
@@ -193,13 +109,18 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
 		cache_dir = DEFAULT_CACHE_DIR,
-		include_base_styles = true,
-		include_theme_styles = true,
+		base_css,
+		variables,
+		treeshake_base_css = true,
+		treeshake_variables = true,
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
-		include_all_variables,
 	} = options;
+
+	// Derive include flags from null check
+	const include_base = base_css !== null;
+	const include_theme = variables !== null;
 
 	// Merge class definitions (validates that definitions exist when needed)
 	const all_class_definitions = merge_class_definitions(
@@ -239,8 +160,16 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			return;
 		}
 		unified_resources_promise = (async () => {
-			style_rule_index = await load_style_rule_index();
-			variable_graph = build_default_variable_graph();
+			// Load style rule index based on base_css option
+			if (typeof base_css === 'string') {
+				style_rule_index = await create_style_rule_index(base_css);
+			} else {
+				style_rule_index = await load_style_rule_index();
+			}
+
+			// Build variable graph based on variables option
+			variable_graph = build_variable_graph_from_options(variables as VariablesOption);
+
 			class_variable_index = build_class_variable_index(all_class_definitions);
 		})();
 		await unified_resources_promise;
@@ -262,21 +191,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		} else {
 			console.error(msg);
 		}
-	};
-
-	/**
-	 * Computes cache path for a file.
-	 * Internal files use relative paths, external files use hashed absolute paths.
-	 */
-	const get_file_cache_path = async (file_id: string): Promise<string> => {
-		const is_internal = file_id.startsWith(project_root!);
-		return is_internal
-			? get_cache_path(file_id, resolved_cache_dir!, project_root!)
-			: join(
-					resolved_cache_dir!,
-					'_external',
-					(await compute_hash(file_id)).slice(0, 16) + '.json',
-				);
 	};
 
 	/**
@@ -306,10 +220,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			...utility_result.diagnostics,
 		];
 
-		// Generate unified CSS if base or theme styles are enabled and resources are loaded
+		// Generate unified CSS if base or theme are enabled and resources are loaded
 		let final_css: string;
 		if (
-			(include_base_styles || include_theme_styles) &&
+			(include_base || include_theme) &&
 			style_rule_index &&
 			variable_graph &&
 			class_variable_index
@@ -324,16 +238,17 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				utility_variables_used: utility_result.variables_used,
 				include_elements,
 				include_variables,
-				include_all_variables,
 				theme_specificity,
+				treeshake_base_css,
+				treeshake_variables,
 			});
 
 			// Add resolution diagnostics
 			all_diagnostics.push(...resolution.diagnostics);
 
 			final_css = generate_unified_css(resolution, utility_result.css, {
-				include_theme: include_theme_styles,
-				include_base: include_base_styles,
+				include_theme,
+				include_base,
 				include_utilities: true,
 			});
 		} else {
@@ -381,7 +296,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 		// Skip HMR if unified resources aren't loaded yet
 		// (will be loaded on first load() call, CSS regenerated then)
-		if ((include_base_styles || include_theme_styles) && style_rule_index === null) {
+		if ((include_base || include_theme) && style_rule_index === null) {
 			return;
 		}
 
@@ -445,11 +360,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 					// Delete cache file (fire and forget)
 					if (!is_ci && resolved_cache_dir && project_root) {
-						get_file_cache_path(file)
-							.then((cache_path) => delete_cached_extraction(cache_path))
-							.catch(() => {
-								// Ignore cache deletion errors
-							});
+						const cache_path = get_file_cache_path(file, resolved_cache_dir, project_root);
+						delete_cached_extraction(cache_path).catch(() => {
+							// Ignore cache deletion errors
+						});
 					}
 
 					if (virtual_module_loaded) {
@@ -488,7 +402,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (id === RESOLVED_VIRTUAL_ID_JS) {
 				virtual_module_loaded = true;
 				// Defer resource loading to first virtual module access
-				if (include_base_styles || include_theme_styles) {
+				if (include_base || include_theme) {
 					await ensure_unified_resources();
 				}
 				// Use pending CSS from HMR if available, avoiding redundant generation
@@ -519,7 +433,7 @@ export {};
 			if (id === RESOLVED_VIRTUAL_ID_CSS) {
 				virtual_module_loaded = true;
 				// Defer resource loading to first virtual module access
-				if (include_base_styles || include_theme_styles) {
+				if (include_base || include_theme) {
 					await ensure_unified_resources();
 				}
 				// Return empty CSS for build - generateBundle will append the complete CSS
@@ -565,7 +479,7 @@ export {};
 
 			// Try cache (if not CI and we have cache dir)
 			if (!is_ci && resolved_cache_dir && project_root) {
-				const cache_path = await get_file_cache_path(id);
+				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
 				const cached = await load_cached_extraction(cache_path);
 
 				if (cached?.content_hash === hash) {
@@ -615,21 +529,18 @@ export {};
 
 			// Save to cache (fire and forget - don't block transform)
 			if (!is_ci && resolved_cache_dir && project_root) {
-				get_file_cache_path(id)
-					.then((cache_path) =>
-						save_cached_extraction(
-							cache_path,
-							hash,
-							result.classes,
-							result.explicit_classes,
-							result.diagnostics,
-							result.elements,
-							result.css_variables,
-						),
-					)
-					.catch(() => {
-						// Ignore cache errors
-					});
+				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
+				save_cached_extraction(
+					cache_path,
+					hash,
+					result.classes,
+					result.explicit_classes,
+					result.diagnostics,
+					result.elements,
+					result.css_variables,
+				).catch(() => {
+					// Ignore cache errors
+				});
 			}
 
 			// Trigger HMR if virtual module already loaded

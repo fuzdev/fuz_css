@@ -13,6 +13,7 @@ import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
 import {default_variables} from './variables.js';
 import type {StyleVariable} from './variable.js';
 import {extract_css_variables} from './css_variable_utils.js';
+import {compute_hash_sync} from './hash.js';
 
 /**
  * Information about a single style variable and its dependencies.
@@ -88,23 +89,9 @@ export const build_default_variable_graph = (): VariableDependencyGraph => {
 	const content = default_variables
 		.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`)
 		.join('|');
-	const content_hash = simple_hash(content);
+	const content_hash = compute_hash_sync(content);
 
 	return build_variable_graph(default_variables, content_hash);
-};
-
-/**
- * Simple string hash for content-based cache invalidation.
- * Not cryptographic, just for comparison.
- */
-const simple_hash = (str: string): string => {
-	let hash = 0;
-	for (let i = 0; i < str.length; i++) {
-		const char = str.charCodeAt(i);
-		hash = (hash << 5) - hash + char;
-		hash |= 0; // Convert to 32-bit integer
-	}
-	return hash.toString(16);
 };
 
 /**
@@ -288,4 +275,46 @@ export const find_similar_variable = (
 	}
 
 	return best_match;
+};
+
+/**
+ * Type for the variables option used by CSS generators.
+ * Supports three forms:
+ * - `undefined` - Use default variables
+ * - `null` - Disable theme generation entirely
+ * - `Array<StyleVariable>` - Custom variables array
+ * - `(defaults) => Array<StyleVariable>` - Callback to modify defaults
+ */
+export type VariablesOption =
+	| Array<StyleVariable>
+	| ((defaults: Array<StyleVariable>) => Array<StyleVariable>)
+	| null
+	| undefined;
+
+/**
+ * Resolves a variables option to a concrete array of style variables.
+ *
+ * @param variables - The variables option (undefined, null, array, or callback)
+ * @returns Resolved array of style variables, or empty array if null
+ */
+export const resolve_variables_option = (variables: VariablesOption): Array<StyleVariable> => {
+	if (variables === null) return [];
+	return typeof variables === 'function'
+		? variables(default_variables)
+		: (variables ?? default_variables);
+};
+
+/**
+ * Builds a variable dependency graph from a variables option.
+ * Handles all option forms: undefined (defaults), null (disabled), array, or callback.
+ *
+ * @param variables - The variables option from generator config
+ * @returns VariableDependencyGraph built from the resolved variables
+ */
+export const build_variable_graph_from_options = (
+	variables: VariablesOption,
+): VariableDependencyGraph => {
+	const resolved = resolve_variables_option(variables);
+	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');
+	return build_variable_graph(resolved, compute_hash_sync(content));
 };

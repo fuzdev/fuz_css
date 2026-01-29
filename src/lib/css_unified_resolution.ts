@@ -82,18 +82,24 @@ export interface CssResolutionOptions {
 	include_elements?: Iterable<string>;
 	/** Additional variables to always include */
 	include_variables?: Iterable<string>;
-	/**
-	 * Include all theme variables regardless of detection.
-	 * Useful for debugging or when many variables are used dynamically.
-	 * @default false
-	 */
-	include_all_variables?: boolean;
 	/** Specificity multiplier for theme selector (default 1) */
 	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
 	include_stats?: boolean;
 	/** Warn when detected elements have no matching style rules (default false) */
 	warn_unmatched_elements?: boolean;
+	/**
+	 * Whether to tree-shake base styles to only include rules for detected elements.
+	 * When false, includes all rules from the style index.
+	 * @default true
+	 */
+	treeshake_base_css?: boolean;
+	/**
+	 * Whether to tree-shake theme variables to only include those referenced.
+	 * When false, includes all variables from the variable graph.
+	 * @default true
+	 */
+	treeshake_variables?: boolean;
 }
 
 /**
@@ -116,10 +122,11 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		utility_variables_used,
 		include_elements,
 		include_variables,
-		include_all_variables = false,
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
+		treeshake_base_css = true,
+		treeshake_variables = true,
 	} = options;
 
 	const diagnostics: Array<GenerationDiagnostic> = [];
@@ -136,11 +143,18 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Step 2: Get matching rules from style.css
-	const included_rule_indices = get_matching_rules(
-		style_rule_index,
-		included_elements,
-		detected_classes,
-	);
+	let included_rule_indices: Set<number>;
+	if (treeshake_base_css) {
+		// Only include rules matching detected elements and classes
+		included_rule_indices = get_matching_rules(
+			style_rule_index,
+			included_elements,
+			detected_classes,
+		);
+	} else {
+		// Include ALL rules (no tree-shaking)
+		included_rule_indices = new Set(style_rule_index.rules.map((_, i) => i));
+	}
 
 	// Step 2b: Warn about elements with no matching style rules
 	if (warn_unmatched_elements) {
@@ -191,8 +205,8 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		}
 	}
 
-	// f) Include all variables if requested (for debugging)
-	if (include_all_variables) {
+	// f) Include all variables if tree-shaking is disabled
+	if (!treeshake_variables) {
 		for (const v of get_all_variable_names(variable_graph)) {
 			all_variables.add(v);
 		}
@@ -265,6 +279,18 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 };
 
 /**
+ * Options for unified CSS output generation.
+ */
+export interface GenerateUnifiedCssOptions {
+	/** Include theme variables section. @default true */
+	include_theme?: boolean;
+	/** Include base styles section. @default true */
+	include_base?: boolean;
+	/** Include utility classes section. @default true */
+	include_utilities?: boolean;
+}
+
+/**
  * Generates combined CSS output from resolution result.
  *
  * @param result - Resolution result from resolve_css
@@ -275,26 +301,25 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 export const generate_unified_css = (
 	result: CssResolutionResult,
 	utility_css: string,
-	options: {
-		include_theme?: boolean;
-		include_base?: boolean;
-		include_utilities?: boolean;
-	} = {},
+	options: GenerateUnifiedCssOptions = {},
 ): string => {
 	const {include_theme = true, include_base = true, include_utilities = true} = options;
 
 	const parts: Array<string> = [];
 
+	// Theme section
 	if (include_theme && result.theme_css) {
 		parts.push('/* Theme Variables */');
 		parts.push(result.theme_css);
 	}
 
+	// Base styles section
 	if (include_base && result.base_css) {
 		parts.push('/* Base Styles */');
 		parts.push(result.base_css);
 	}
 
+	// Utility classes section
 	if (include_utilities && utility_css) {
 		parts.push('/* Utility Classes */');
 		parts.push(utility_css);

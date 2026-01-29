@@ -11,21 +11,7 @@ import {mkdir, readFile, writeFile, unlink, rename} from 'node:fs/promises';
 import {dirname, join} from 'node:path';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-
-/**
- * Computes SHA-256 hash of content using Web Crypto API.
- */
-export const compute_hash = async (content: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const buffer = encoder.encode(content);
-	const digested = await crypto.subtle.digest('SHA-256', buffer);
-	const bytes = Array.from(new Uint8Array(digested));
-	let hex = '';
-	for (const h of bytes) {
-		hex += h.toString(16).padStart(2, '0');
-	}
-	return hex;
-};
+import {compute_hash_sync} from './hash.js';
 
 /**
  * Default cache directory relative to project root.
@@ -82,6 +68,26 @@ export const get_cache_path = (
 	}
 	const relative = source_path.slice(project_root.length);
 	return join(cache_dir, relative + '.json');
+};
+
+/**
+ * Computes cache path for a file, handling both internal and external paths.
+ * Internal files use relative paths mirroring source tree.
+ * External files (outside project root) use hashed absolute paths in `_external/`.
+ *
+ * @param file_id - Absolute path to the source file
+ * @param cache_dir - Absolute path to the cache directory
+ * @param project_root - Normalized project root (must end with `/`)
+ */
+export const get_file_cache_path = (
+	file_id: string,
+	cache_dir: string,
+	project_root: string,
+): string => {
+	const is_internal = file_id.startsWith(project_root);
+	return is_internal
+		? get_cache_path(file_id, cache_dir, project_root)
+		: join(cache_dir, '_external', compute_hash_sync(file_id).slice(0, 16) + '.json');
 };
 
 /**

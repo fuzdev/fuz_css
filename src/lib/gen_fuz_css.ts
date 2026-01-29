@@ -11,8 +11,8 @@ import {join} from 'node:path';
 import type {Gen} from '@ryanatkn/gro/gen.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
-import {type FileFilter, filter_file_default} from './file_filter.js';
-import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
+import {filter_file_default} from './file_filter.js';
+import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {
 	type SourceLocation,
 	type ExtractionDiagnostic,
@@ -21,27 +21,31 @@ import {
 	CssGenerationError,
 } from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
-import {
-	generate_classes_css,
-	type CssClassDefinition,
-	type CssClassDefinitionInterpreter,
-} from './css_class_generation.js';
+import {generate_classes_css} from './css_class_generation.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
 	DEFAULT_CACHE_DIR,
-	get_cache_path,
+	get_file_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
-	compute_hash,
 } from './css_cache.js';
-import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
-import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
+import {
+	type StyleRuleIndex,
+	load_style_rule_index,
+	create_style_rule_index,
+} from './style_rule_parser.js';
+import {
+	type VariableDependencyGraph,
+	type VariablesOption,
+	build_variable_graph_from_options,
+} from './variable_graph.js';
 import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -67,22 +71,6 @@ const DEFAULT_CONCURRENCY = 8;
 const DEFAULT_CACHE_IO_CONCURRENCY = 50;
 
 /**
- * Computes cache path for a file.
- * Internal files use relative paths mirroring source tree.
- * External files (outside project root) use hashed absolute paths in `_external/`.
- */
-const get_file_cache_path = async (
-	file_id: string,
-	cache_dir: string,
-	project_root: string,
-): Promise<string> => {
-	const is_internal = file_id.startsWith(project_root);
-	return is_internal
-		? get_cache_path(file_id, cache_dir, project_root)
-		: join(cache_dir, '_external', (await compute_hash(file_id)).slice(0, 16) + '.json');
-};
-
-/**
  * Result from extracting CSS classes from a single file.
  * Used internally during parallel extraction with caching.
  * Uses `null` instead of empty collections to avoid allocation overhead.
@@ -104,56 +92,16 @@ interface FileExtraction {
 	content_hash: string;
 }
 
-export interface GenFuzCssOptions {
-	filter_file?: FileFilter;
+/**
+ * Options for the Gro CSS generator.
+ * Extends the shared base options with Gro-specific settings.
+ */
+export interface GenFuzCssOptions extends CssGeneratorBaseOptions {
+	/**
+	 * Whether to include file and resolution statistics in the output.
+	 * @default false
+	 */
 	include_stats?: boolean;
-	/**
-	 * Additional class definitions to merge with defaults.
-	 * User definitions take precedence over defaults with the same name.
-	 * Required when `include_default_definitions` is `false`.
-	 */
-	class_definitions?: Record<string, CssClassDefinition | undefined>;
-	/**
-	 * Whether to include default class definitions (token and composite classes).
-	 * When `false`, `class_definitions` is required.
-	 * @default true
-	 */
-	include_default_definitions?: boolean;
-	/**
-	 * Custom interpreters for dynamic class generation.
-	 * Replaces the builtin interpreters entirely if provided.
-	 */
-	class_interpreters?: Array<CssClassDefinitionInterpreter>;
-	/**
-	 * How to handle CSS-literal errors during generation.
-	 * - 'log': Log errors, skip invalid classes, continue
-	 * - 'throw': Throw on first error, fail the build
-	 * @default 'throw' in CI, 'log' otherwise
-	 */
-	on_error?: 'log' | 'throw';
-	/**
-	 * How to handle warnings during generation.
-	 * - 'log': Log warnings, continue
-	 * - 'throw': Throw on first warning, fail the build
-	 * - 'ignore': Suppress warnings entirely
-	 * @default 'log'
-	 */
-	on_warning?: 'log' | 'throw' | 'ignore';
-	/**
-	 * Classes to always include in the output, regardless of whether they're detected in source files.
-	 * Useful for dynamically generated class names that can't be statically extracted.
-	 */
-	include_classes?: Iterable<string>;
-	/**
-	 * Classes to exclude from the output, even if they're detected in source files.
-	 * Useful for filtering out false positives from extraction.
-	 */
-	exclude_classes?: Iterable<string>;
-	/**
-	 * Cache directory relative to project_root.
-	 * @default DEFAULT_CACHE_DIR
-	 */
-	cache_dir?: string;
 	/**
 	 * Project root directory. Source paths must be under this directory.
 	 * @default process.cwd()
@@ -170,53 +118,6 @@ export interface GenFuzCssOptions {
 	 * @default 50
 	 */
 	cache_io_concurrency?: number;
-	/**
-	 * Additional acorn plugins to use when parsing TS/JS files.
-	 * Useful for adding JSX support via `acorn-jsx` for React projects.
-	 *
-	 * @example
-	 * ```ts
-	 * import jsx from 'acorn-jsx';
-	 * export const gen = gen_fuz_css({
-	 *   acorn_plugins: [jsx()],
-	 * });
-	 * ```
-	 */
-	acorn_plugins?: Array<AcornPlugin>;
-	/**
-	 * Whether to include base styles from style.css.
-	 * When enabled, only styles for detected elements are included.
-	 * @default true
-	 */
-	include_base_styles?: boolean;
-	/**
-	 * Whether to include theme variables from the variable graph.
-	 * When enabled, only variables needed by base styles and utility classes are included.
-	 * @default true
-	 */
-	include_theme_styles?: boolean;
-	/**
-	 * Specificity multiplier for theme CSS selectors.
-	 * Value of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
-	 * @default 1
-	 */
-	theme_specificity?: number;
-	/**
-	 * Additional HTML elements to always include styles for.
-	 * Useful for elements generated at runtime.
-	 */
-	include_elements?: Iterable<string>;
-	/**
-	 * Additional CSS variables to always include in theme output.
-	 * Useful for variables referenced dynamically.
-	 */
-	include_variables?: Iterable<string>;
-	/**
-	 * Include all theme variables regardless of detection.
-	 * Useful for debugging or when many variables are used dynamically.
-	 * @default false
-	 */
-	include_all_variables?: boolean;
 }
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
@@ -235,13 +136,18 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 		acorn_plugins,
-		include_base_styles = true,
-		include_theme_styles = true,
+		base_css,
+		variables,
+		treeshake_base_css = true,
+		treeshake_variables = true,
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
-		include_all_variables,
 	} = options;
+
+	// Derive include flags from null check
+	const include_base = base_css !== null;
+	const include_theme = variables !== null;
 
 	// Convert to Sets for efficient lookup
 	const include_set = include_classes ? new Set(include_classes) : null;
@@ -268,14 +174,20 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 	const get_style_index = async (): Promise<StyleRuleIndex> => {
 		if (!style_rule_index) {
-			style_rule_index = await load_style_rule_index();
+			if (typeof base_css === 'string') {
+				// Custom CSS string provided
+				style_rule_index = await create_style_rule_index(base_css);
+			} else {
+				// Use default style.css
+				style_rule_index = await load_style_rule_index();
+			}
 		}
 		return style_rule_index;
 	};
 
 	const get_variable_graph = (): VariableDependencyGraph => {
 		if (!variable_graph) {
-			variable_graph = build_default_variable_graph();
+			variable_graph = build_variable_graph_from_options(variables as VariablesOption);
 		}
 		return variable_graph;
 	};
@@ -363,7 +275,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				nodes,
 				async (node): Promise<FileExtraction> => {
 					current_paths.add(node.id);
-					const cache_path = await get_file_cache_path(node.id, resolved_cache_dir, project_root);
+					const cache_path = get_file_cache_path(node.id, resolved_cache_dir, project_root);
 
 					// Try cache (skip on CI)
 					if (!is_ci) {
@@ -458,7 +370,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					await each_concurrent(
 						paths_to_delete,
 						async (path) => {
-							const cache_path = await get_file_cache_path(path, resolved_cache_dir, project_root);
+							const cache_path = get_file_cache_path(path, resolved_cache_dir, project_root);
 							await delete_cached_extraction(cache_path);
 						},
 						cache_io_concurrency,
@@ -506,9 +418,9 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				...utility_result.diagnostics,
 			];
 
-			// Generate unified CSS if base or theme styles are enabled
+			// Generate unified CSS if base or theme are enabled
 			let final_css: string;
-			if (include_base_styles || include_theme_styles) {
+			if (include_base || include_theme) {
 				const resolution = resolve_css({
 					style_rule_index: await get_style_index(),
 					variable_graph: get_variable_graph(),
@@ -519,9 +431,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					utility_variables_used: utility_result.variables_used,
 					include_elements,
 					include_variables,
-					include_all_variables,
 					theme_specificity,
 					include_stats,
+					treeshake_base_css,
+					treeshake_variables,
 				});
 
 				// Log resolution stats if requested
@@ -539,8 +452,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				all_diagnostics.push(...resolution.diagnostics);
 
 				final_css = generate_unified_css(resolution, utility_result.css, {
-					include_theme: include_theme_styles,
-					include_base: include_base_styles,
+					include_theme,
+					include_base,
 					include_utilities: true,
 				});
 			} else {

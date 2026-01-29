@@ -238,31 +238,17 @@
 				"path": "css_cache.ts",
 				"declarations": [
 					{
-						"name": "compute_hash",
-						"kind": "function",
-						"doc_comment": "Computes SHA-256 hash of content using Web Crypto API.",
-						"source_line": 18,
-						"type_signature": "(content: string): Promise<string>",
-						"return_type": "Promise<string>",
-						"parameters": [
-							{
-								"name": "content",
-								"type": "string"
-							}
-						]
-					},
-					{
 						"name": "DEFAULT_CACHE_DIR",
 						"kind": "variable",
 						"doc_comment": "Default cache directory relative to project root.",
-						"source_line": 33,
+						"source_line": 19,
 						"type_signature": "\".fuz/cache/css\""
 					},
 					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 50,
+						"source_line": 36,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -313,7 +299,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 75,
+						"source_line": 61,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -335,10 +321,35 @@
 						]
 					},
 					{
+						"name": "get_file_cache_path",
+						"kind": "function",
+						"doc_comment": "Computes cache path for a file, handling both internal and external paths.\nInternal files use relative paths mirroring source tree.\nExternal files (outside project root) use hashed absolute paths in `_external/`.",
+						"source_line": 82,
+						"type_signature": "(file_id: string, cache_dir: string, project_root: string): string",
+						"return_type": "string",
+						"parameters": [
+							{
+								"name": "file_id",
+								"type": "string",
+								"description": "- Absolute path to the source file"
+							},
+							{
+								"name": "cache_dir",
+								"type": "string",
+								"description": "- Absolute path to the cache directory"
+							},
+							{
+								"name": "project_root",
+								"type": "string",
+								"description": "- Normalized project root (must end with `/`)"
+							}
+						]
+					},
+					{
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 94,
+						"source_line": 100,
 						"type_signature": "(cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -353,7 +364,7 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
-						"source_line": 127,
+						"source_line": 133,
 						"type_signature": "(cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements?: Set<...> | ... 1 more ... | undefined, css_variables?: Set<...> | ... 1 more ... | undefined): Promise<...>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -400,7 +411,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 169,
+						"source_line": 175,
 						"type_signature": "(cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -415,7 +426,7 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 181,
+						"source_line": 187,
 						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
 						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
 						"parameters": [
@@ -428,6 +439,7 @@
 					}
 				],
 				"module_comment": "Cache infrastructure for incremental CSS class extraction.\n\nProvides per-file caching with content hash validation to avoid\nre-extracting classes from unchanged files.",
+				"dependencies": ["hash.ts"],
 				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
@@ -1900,6 +1912,174 @@
 				]
 			},
 			{
+				"path": "css_plugin_options.ts",
+				"declarations": [
+					{
+						"name": "CssExtractionOptions",
+						"kind": "type",
+						"doc_comment": "Options for CSS class extraction from source files.\nControls which files to scan and how to parse them.",
+						"source_line": 20,
+						"type_signature": "CssExtractionOptions",
+						"properties": [
+							{
+								"name": "filter_file",
+								"kind": "variable",
+								"type_signature": "FileFilter",
+								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
+							},
+							{
+								"name": "acorn_plugins",
+								"kind": "variable",
+								"type_signature": "Array<AcornPlugin>",
+								"doc_comment": "Additional acorn plugins for parsing.\nUse `acorn-jsx` for React/Preact/Solid projects."
+							}
+						]
+					},
+					{
+						"name": "CssClassOptions",
+						"kind": "type",
+						"doc_comment": "Options for CSS class definitions and interpretation.\nControls how classes are defined and how dynamic classes are generated.",
+						"source_line": 44,
+						"type_signature": "CssClassOptions",
+						"properties": [
+							{
+								"name": "class_definitions",
+								"kind": "variable",
+								"type_signature": "Record<string, CssClassDefinition | undefined>",
+								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
+							},
+							{
+								"name": "include_default_definitions",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
+							},
+							{
+								"name": "class_interpreters",
+								"kind": "variable",
+								"type_signature": "Array<CssClassDefinitionInterpreter>",
+								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
+							},
+							{
+								"name": "include_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to always include in the output, regardless of detection.\nUseful for dynamically generated class names that can't be statically extracted."
+							},
+							{
+								"name": "exclude_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to exclude from the output, even if detected.\nUseful for filtering out false positives from extraction."
+							}
+						]
+					},
+					{
+						"name": "UnifiedCssOptions",
+						"kind": "type",
+						"doc_comment": "Options for unified CSS generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
+						"source_line": 78,
+						"type_signature": "UnifiedCssOptions",
+						"properties": [
+							{
+								"name": "base_css",
+								"kind": "variable",
+								"type_signature": "string | null",
+								"doc_comment": "Base styles (element defaults) configuration.\n- `undefined` (default): Use default style.css\n- `null`: Disable base styles entirely\n- `string`: Custom CSS to use as base styles"
+							},
+							{
+								"name": "variables",
+								"kind": "variable",
+								"type_signature": "| Array<StyleVariable>\n\t\t| null\n\t\t| ((defaults: Array<StyleVariable>) => Array<StyleVariable>)",
+								"doc_comment": "Theme variables configuration.\n- `undefined` (default): Use default variables from fuz_css\n- `null`: Disable theme entirely\n- `Array<StyleVariable>`: Custom variable definitions (replaces defaults)\n- `(defaults) => Array<StyleVariable>`: Callback to modify default variables"
+							},
+							{
+								"name": "treeshake_base_css",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the base styles."
+							},
+							{
+								"name": "treeshake_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables."
+							},
+							{
+								"name": "theme_specificity",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Specificity multiplier for theme CSS selectors.\nValue of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`)."
+							},
+							{
+								"name": "include_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Additional HTML elements to always include styles for.\nUseful for elements generated at runtime via `document.createElement()`."
+							},
+							{
+								"name": "include_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
+							}
+						]
+					},
+					{
+						"name": "CssDiagnosticsOptions",
+						"kind": "type",
+						"doc_comment": "Options for error and warning handling.",
+						"source_line": 144,
+						"type_signature": "CssDiagnosticsOptions",
+						"properties": [
+							{
+								"name": "on_error",
+								"kind": "variable",
+								"type_signature": "'log' | 'throw'",
+								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log': Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
+							},
+							{
+								"name": "on_warning",
+								"kind": "variable",
+								"type_signature": "'log' | 'throw' | 'ignore'",
+								"doc_comment": "How to handle warnings during generation.\n- 'log': Log warnings, continue\n- 'throw': Throw on first warning, fail the build\n- 'ignore': Suppress warnings entirely"
+							}
+						]
+					},
+					{
+						"name": "CssCacheOptions",
+						"kind": "type",
+						"doc_comment": "Options for cache behavior.",
+						"source_line": 165,
+						"type_signature": "CssCacheOptions",
+						"properties": [
+							{
+								"name": "cache_dir",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Cache directory relative to project root."
+							}
+						]
+					},
+					{
+						"name": "CssGeneratorBaseOptions",
+						"kind": "type",
+						"doc_comment": "Combined base options shared by both Gro and Vite plugins.\nThese options work identically in both contexts.",
+						"source_line": 177,
+						"type_signature": "CssGeneratorBaseOptions",
+						"extends": [
+							"CssExtractionOptions",
+							"CssClassOptions",
+							"UnifiedCssOptions",
+							"CssDiagnosticsOptions",
+							"CssCacheOptions"
+						],
+						"properties": []
+					}
+				],
+				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and unified CSS.\nThis module provides the shared types to ensure consistency."
+			},
+			{
 				"path": "css_ruleset_parser.ts",
 				"declarations": [
 					{
@@ -2428,12 +2608,6 @@
 								"doc_comment": "Additional variables to always include"
 							},
 							{
-								"name": "include_all_variables",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
-							},
-							{
 								"name": "theme_specificity",
 								"kind": "variable",
 								"type_signature": "number",
@@ -2450,6 +2624,18 @@
 								"kind": "variable",
 								"type_signature": "boolean",
 								"doc_comment": "Warn when detected elements have no matching style rules (default false)"
+							},
+							{
+								"name": "treeshake_base_css",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the style index."
+							},
+							{
+								"name": "treeshake_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables from the variable graph."
 							}
 						]
 					},
@@ -2457,7 +2643,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, include_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 108,
+						"source_line": 114,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"parameters": [
@@ -2468,11 +2654,38 @@
 						]
 					},
 					{
+						"name": "GenerateUnifiedCssOptions",
+						"kind": "type",
+						"doc_comment": "Options for unified CSS output generation.",
+						"source_line": 284,
+						"type_signature": "GenerateUnifiedCssOptions",
+						"properties": [
+							{
+								"name": "include_theme",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include theme variables section."
+							},
+							{
+								"name": "include_base",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include base styles section."
+							},
+							{
+								"name": "include_utilities",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include utility classes section."
+							}
+						]
+					},
+					{
 						"name": "generate_unified_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 275,
-						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: { include_theme?: boolean | undefined; include_base?: boolean | undefined; include_utilities?: boolean | undefined; }): string",
+						"source_line": 301,
+						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateUnifiedCssOptions): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
 						"parameters": [
@@ -2488,7 +2701,7 @@
 							},
 							{
 								"name": "options",
-								"type": "{ include_theme?: boolean | undefined; include_base?: boolean | undefined; include_utilities?: boolean | undefined; }",
+								"type": "GenerateUnifiedCssOptions",
 								"description": "- Output options",
 								"default_value": "{}"
 							}
@@ -2926,66 +3139,16 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 107,
+						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
+						"source_line": 99,
 						"type_signature": "GenFuzCssOptions",
+						"extends": ["CssGeneratorBaseOptions"],
 						"properties": [
-							{
-								"name": "filter_file",
-								"kind": "variable",
-								"type_signature": "FileFilter"
-							},
 							{
 								"name": "include_stats",
 								"kind": "variable",
-								"type_signature": "boolean"
-							},
-							{
-								"name": "class_definitions",
-								"kind": "variable",
-								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
-							},
-							{
-								"name": "include_default_definitions",
-								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
-							},
-							{
-								"name": "class_interpreters",
-								"kind": "variable",
-								"type_signature": "Array<CssClassDefinitionInterpreter>",
-								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
-							},
-							{
-								"name": "on_error",
-								"kind": "variable",
-								"type_signature": "'log' | 'throw'",
-								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log': Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
-							},
-							{
-								"name": "on_warning",
-								"kind": "variable",
-								"type_signature": "'log' | 'throw' | 'ignore'",
-								"doc_comment": "How to handle warnings during generation.\n- 'log': Log warnings, continue\n- 'throw': Throw on first warning, fail the build\n- 'ignore': Suppress warnings entirely"
-							},
-							{
-								"name": "include_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to always include in the output, regardless of whether they're detected in source files.\nUseful for dynamically generated class names that can't be statically extracted."
-							},
-							{
-								"name": "exclude_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to exclude from the output, even if they're detected in source files.\nUseful for filtering out false positives from extraction."
-							},
-							{
-								"name": "cache_dir",
-								"kind": "variable",
-								"type_signature": "string",
-								"doc_comment": "Cache directory relative to project_root."
+								"doc_comment": "Whether to include file and resolution statistics in the output."
 							},
 							{
 								"name": "project_root",
@@ -3004,55 +3167,13 @@
 								"kind": "variable",
 								"type_signature": "number",
 								"doc_comment": "Max concurrent cache writes and deletes (I/O-bound)."
-							},
-							{
-								"name": "acorn_plugins",
-								"kind": "variable",
-								"type_signature": "Array<AcornPlugin>",
-								"doc_comment": "Additional acorn plugins to use when parsing TS/JS files.\nUseful for adding JSX support via `acorn-jsx` for React projects."
-							},
-							{
-								"name": "include_base_styles",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include base styles from style.css.\nWhen enabled, only styles for detected elements are included."
-							},
-							{
-								"name": "include_theme_styles",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include theme variables from the variable graph.\nWhen enabled, only variables needed by base styles and utility classes are included."
-							},
-							{
-								"name": "theme_specificity",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Specificity multiplier for theme CSS selectors.\nValue of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`)."
-							},
-							{
-								"name": "include_elements",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional HTML elements to always include styles for.\nUseful for elements generated at runtime."
-							},
-							{
-								"name": "include_variables",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
-							},
-							{
-								"name": "include_all_variables",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
 							}
 						]
 					},
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 222,
+						"source_line": 123,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -3079,6 +3200,50 @@
 					"file_filter.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
+				]
+			},
+			{
+				"path": "hash.ts",
+				"declarations": [
+					{
+						"name": "compute_hash",
+						"kind": "function",
+						"doc_comment": "Computes SHA-256 hash of content using Web Crypto API.\nUse for file content hashing where async is acceptable.",
+						"source_line": 17,
+						"type_signature": "(content: string): Promise<string>",
+						"return_type": "Promise<string>",
+						"return_description": "Hex-encoded SHA-256 hash",
+						"parameters": [
+							{
+								"name": "content",
+								"type": "string",
+								"description": "- String content to hash"
+							}
+						]
+					},
+					{
+						"name": "compute_hash_sync",
+						"kind": "function",
+						"doc_comment": "Computes a simple synchronous hash for content-based cache invalidation.\nUses DJB2 algorithm - not cryptographic, just for comparison.\nUse for in-memory content where sync is preferred (variable graphs, etc).",
+						"source_line": 37,
+						"type_signature": "(str: string): string",
+						"return_type": "string",
+						"return_description": "Hex-encoded hash",
+						"parameters": [
+							{
+								"name": "str",
+								"type": "string",
+								"description": "- String content to hash"
+							}
+						]
+					}
+				],
+				"module_comment": "Hash utilities for cache invalidation.\n\nProvides both async (SHA-256) and sync (DJB2-style) hash functions\nfor different use cases in the CSS generation pipeline.",
+				"dependents": [
+					"css_cache.ts",
+					"style_rule_parser.ts",
+					"variable_graph.ts",
+					"vite_plugin_fuz_css.ts"
 				]
 			},
 			{
@@ -3273,7 +3438,7 @@
 						"name": "StyleRuleBase",
 						"kind": "type",
 						"doc_comment": "Base fields shared by all style rules.",
-						"source_line": 20,
+						"source_line": 21,
 						"type_signature": "StyleRuleBase",
 						"properties": [
 							{
@@ -3312,14 +3477,14 @@
 						"name": "CoreReason",
 						"kind": "type",
 						"doc_comment": "Reasons a rule is considered \"core\" and always included.",
-						"source_line": 36,
+						"source_line": 37,
 						"type_signature": "CoreReason"
 					},
 					{
 						"name": "CoreStyleRule",
 						"kind": "type",
 						"doc_comment": "A core style rule that is always included in output.",
-						"source_line": 48,
+						"source_line": 49,
 						"type_signature": "CoreStyleRule",
 						"extends": ["StyleRuleBase"],
 						"properties": [
@@ -3339,7 +3504,7 @@
 						"name": "NonCoreStyleRule",
 						"kind": "type",
 						"doc_comment": "A non-core style rule included only when its elements/classes are detected.",
-						"source_line": 56,
+						"source_line": 57,
 						"type_signature": "NonCoreStyleRule",
 						"extends": ["StyleRuleBase"],
 						"properties": [
@@ -3359,14 +3524,14 @@
 						"name": "StyleRule",
 						"kind": "type",
 						"doc_comment": "A parsed style rule with metadata for filtering.\nDiscriminated union: check `is_core` to narrow to CoreStyleRule or NonCoreStyleRule.\nAll rules have a consistent shape - `core_reason` is null for non-core rules.",
-						"source_line": 66,
+						"source_line": 67,
 						"type_signature": "StyleRule"
 					},
 					{
 						"name": "StyleRuleIndex",
 						"kind": "type",
 						"doc_comment": "Index of parsed style rules for efficient lookup.",
-						"source_line": 71,
+						"source_line": 72,
 						"type_signature": "StyleRuleIndex",
 						"properties": [
 							{
@@ -3405,14 +3570,14 @@
 						"name": "STYLE_RULE_PARSER_VERSION",
 						"kind": "variable",
 						"doc_comment": "Current version of the style rule parser. Bump when logic changes.",
-						"source_line": 85,
+						"source_line": 86,
 						"type_signature": "1"
 					},
 					{
 						"name": "parse_style_css",
 						"kind": "function",
 						"doc_comment": "Parses a CSS stylesheet into a StyleRuleIndex.",
-						"source_line": 94,
+						"source_line": 95,
 						"type_signature": "(css: string, content_hash: string): StyleRuleIndex",
 						"return_type": "StyleRuleIndex",
 						"return_description": "StyleRuleIndex with rules and lookup maps",
@@ -3433,7 +3598,7 @@
 						"name": "load_style_rule_index",
 						"kind": "function",
 						"doc_comment": "Loads and parses the default style.css file.",
-						"source_line": 500,
+						"source_line": 501,
 						"type_signature": "(style_css_path?: string | undefined): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
 						"return_description": "Promise resolving to StyleRuleIndex",
@@ -3447,10 +3612,26 @@
 						]
 					},
 					{
+						"name": "create_style_rule_index",
+						"kind": "function",
+						"doc_comment": "Creates a StyleRuleIndex from a custom CSS string.\nUse this to parse user-provided base styles instead of loading from file.",
+						"source_line": 515,
+						"type_signature": "(css: string): Promise<StyleRuleIndex>",
+						"return_type": "Promise<StyleRuleIndex>",
+						"return_description": "Promise resolving to StyleRuleIndex",
+						"parameters": [
+							{
+								"name": "css",
+								"type": "string",
+								"description": "- Raw CSS string to parse"
+							}
+						]
+					},
+					{
 						"name": "get_matching_rules",
 						"kind": "function",
 						"doc_comment": "Gets rules that should be included based on detected elements and classes.",
-						"source_line": 530,
+						"source_line": 528,
 						"type_signature": "(index: StyleRuleIndex, detected_elements: Set<string>, detected_classes: Set<string>): Set<number>",
 						"return_type": "Set<number>",
 						"return_description": "Set of rule indices to include",
@@ -3476,7 +3657,7 @@
 						"name": "generate_base_css",
 						"kind": "function",
 						"doc_comment": "Generates CSS from a StyleRuleIndex with only the included rules.",
-						"source_line": 574,
+						"source_line": 572,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): string",
 						"return_type": "string",
 						"return_description": "CSS string with only included rules, in original order",
@@ -3497,7 +3678,7 @@
 						"name": "collect_rule_variables",
 						"kind": "function",
 						"doc_comment": "Collects all CSS variables used by the included rules.",
-						"source_line": 593,
+						"source_line": 591,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of variable names (without -- prefix)",
@@ -3516,7 +3697,7 @@
 					}
 				],
 				"module_comment": "Style.css rule parser for unified CSS generation.\n\nParses the fuz_css style.css file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe unified CSS generator to include only the rules needed for\nelements actually used in the project.",
-				"dependencies": ["css_variable_utils.ts"],
+				"dependencies": ["css_variable_utils.ts", "hash.ts"],
 				"dependents": ["css_unified_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
@@ -3976,7 +4157,7 @@
 						"name": "VariableInfo",
 						"kind": "type",
 						"doc_comment": "Information about a single style variable and its dependencies.",
-						"source_line": 20,
+						"source_line": 21,
 						"type_signature": "VariableInfo",
 						"properties": [
 							{
@@ -4015,7 +4196,7 @@
 						"name": "VariableDependencyGraph",
 						"kind": "type",
 						"doc_comment": "Dependency graph for style variables.",
-						"source_line": 36,
+						"source_line": 37,
 						"type_signature": "VariableDependencyGraph",
 						"properties": [
 							{
@@ -4042,14 +4223,14 @@
 						"name": "VARIABLE_GRAPH_VERSION",
 						"kind": "variable",
 						"doc_comment": "Current version of the variable graph builder. Bump when logic changes.",
-						"source_line": 46,
+						"source_line": 47,
 						"type_signature": "1"
 					},
 					{
 						"name": "build_variable_graph",
 						"kind": "function",
 						"doc_comment": "Builds a dependency graph from an array of style variables.",
-						"source_line": 55,
+						"source_line": 56,
 						"type_signature": "(variables: { name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[], content_hash: string): VariableDependencyGraph",
 						"return_type": "VariableDependencyGraph",
 						"return_description": "VariableDependencyGraph",
@@ -4070,7 +4251,7 @@
 						"name": "build_default_variable_graph",
 						"kind": "function",
 						"doc_comment": "Builds the default variable graph from the fuz_css default_variables.\nUses a cached hash based on the variables array.",
-						"source_line": 85,
+						"source_line": 86,
 						"type_signature": "(): VariableDependencyGraph",
 						"return_type": "VariableDependencyGraph",
 						"parameters": []
@@ -4079,7 +4260,7 @@
 						"name": "ResolveVariablesResult",
 						"kind": "type",
 						"doc_comment": "Result from transitive variable resolution.",
-						"source_line": 113,
+						"source_line": 100,
 						"type_signature": "ResolveVariablesResult",
 						"properties": [
 							{
@@ -4106,7 +4287,7 @@
 						"name": "resolve_variables_transitive",
 						"kind": "function",
 						"doc_comment": "Resolves variables transitively using DFS with cycle detection.\nWhen a variable is requested, all variables it depends on are included.\nBoth light and dark dependencies are always resolved together.",
-						"source_line": 131,
+						"source_line": 118,
 						"type_signature": "(graph: VariableDependencyGraph, initial_variables: Iterable<string>): ResolveVariablesResult",
 						"return_type": "ResolveVariablesResult",
 						"return_description": "ResolveVariablesResult with all transitive dependencies",
@@ -4127,7 +4308,7 @@
 						"name": "generate_theme_css",
 						"kind": "function",
 						"doc_comment": "Generates theme CSS for the resolved variables.",
-						"source_line": 198,
+						"source_line": 185,
 						"type_signature": "(graph: VariableDependencyGraph, resolved_variables: Set<string>, specificity?: number): { light_css: string; dark_css: string; }",
 						"return_type": "{ light_css: string; dark_css: string; }",
 						"return_description": "Object with light_css and dark_css strings",
@@ -4154,7 +4335,7 @@
 						"name": "get_all_variable_names",
 						"kind": "function",
 						"doc_comment": "Gets all variable names from the graph.",
-						"source_line": 241,
+						"source_line": 228,
 						"type_signature": "(graph: VariableDependencyGraph): Set<string>",
 						"return_type": "Set<string>",
 						"parameters": [
@@ -4168,7 +4349,7 @@
 						"name": "has_variable",
 						"kind": "function",
 						"doc_comment": "Checks if a variable exists in the graph.",
-						"source_line": 248,
+						"source_line": 235,
 						"type_signature": "(graph: VariableDependencyGraph, name: string): boolean",
 						"return_type": "boolean",
 						"parameters": [
@@ -4186,7 +4367,7 @@
 						"name": "find_similar_variable",
 						"kind": "function",
 						"doc_comment": "Finds the most similar variable in the graph to the given name.\nReturns null if no variable exceeds the similarity threshold.",
-						"source_line": 275,
+						"source_line": 262,
 						"type_signature": "(graph: VariableDependencyGraph, name: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The most similar variable name, or null if none are similar enough",
@@ -4202,10 +4383,49 @@
 								"description": "- The variable name to find similar matches for"
 							}
 						]
+					},
+					{
+						"name": "VariablesOption",
+						"kind": "type",
+						"doc_comment": "Type for the variables option used by CSS generators.\nSupports three forms:\n- `undefined` - Use default variables\n- `null` - Disable theme generation entirely\n- `Array<StyleVariable>` - Custom variables array\n- `(defaults) => Array<StyleVariable>` - Callback to modify defaults",
+						"source_line": 288,
+						"type_signature": "VariablesOption"
+					},
+					{
+						"name": "resolve_variables_option",
+						"kind": "function",
+						"doc_comment": "Resolves a variables option to a concrete array of style variables.",
+						"source_line": 300,
+						"type_signature": "(variables: VariablesOption): { name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]",
+						"return_type": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]",
+						"return_description": "Resolved array of style variables, or empty array if null",
+						"parameters": [
+							{
+								"name": "variables",
+								"type": "VariablesOption",
+								"description": "- The variables option (undefined, null, array, or callback)"
+							}
+						]
+					},
+					{
+						"name": "build_variable_graph_from_options",
+						"kind": "function",
+						"doc_comment": "Builds a variable dependency graph from a variables option.\nHandles all option forms: undefined (defaults), null (disabled), array, or callback.",
+						"source_line": 314,
+						"type_signature": "(variables: VariablesOption): VariableDependencyGraph",
+						"return_type": "VariableDependencyGraph",
+						"return_description": "VariableDependencyGraph built from the resolved variables",
+						"parameters": [
+							{
+								"name": "variables",
+								"type": "VariablesOption",
+								"description": "- The variables option from generator config"
+							}
+						]
 					}
 				],
 				"module_comment": "Variable dependency graph for unified CSS generation.\n\nBuilds a dependency graph from style variables to enable transitive\nresolution of CSS custom properties. When a variable is needed,\nall variables it depends on are also included.",
-				"dependencies": ["css_variable_utils.ts", "variables.ts"],
+				"dependencies": ["css_variable_utils.ts", "hash.ts", "variables.ts"],
 				"dependents": ["css_unified_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
@@ -6744,119 +6964,23 @@
 						"name": "FUZ_CSS_MARKER",
 						"kind": "variable",
 						"doc_comment": "Marker comment used to delimit generated CSS in the output.",
-						"source_line": 59,
+						"source_line": 64,
 						"type_signature": "\"/* generated by vite_plugin_fuz_css */\""
 					},
 					{
 						"name": "VitePluginFuzCssOptions",
 						"kind": "type",
-						"doc_comment": "Options for the fuz_css Vite plugin.",
-						"source_line": 85,
+						"doc_comment": "Options for the fuz_css Vite plugin.\nExtends the shared base options (no additional Vite-specific options currently needed).",
+						"source_line": 92,
 						"type_signature": "VitePluginFuzCssOptions",
-						"properties": [
-							{
-								"name": "filter_file",
-								"kind": "variable",
-								"type_signature": "FileFilter",
-								"doc_comment": "Filter function to determine which files to extract classes from.\nBy default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,\nexcluding test files and .gen files."
-							},
-							{
-								"name": "class_definitions",
-								"kind": "variable",
-								"type_signature": "Record<string, CssClassDefinition | undefined>",
-								"doc_comment": "Additional class definitions to merge with defaults.\nUser definitions take precedence over defaults with the same name.\nRequired when `include_default_definitions` is `false`."
-							},
-							{
-								"name": "include_default_definitions",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include default class definitions (token and composite classes).\nWhen `false`, `class_definitions` is required."
-							},
-							{
-								"name": "class_interpreters",
-								"kind": "variable",
-								"type_signature": "Array<CssClassDefinitionInterpreter>",
-								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
-							},
-							{
-								"name": "include_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to always include in the output, regardless of detection."
-							},
-							{
-								"name": "exclude_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to exclude from the output, even if detected."
-							},
-							{
-								"name": "acorn_plugins",
-								"kind": "variable",
-								"type_signature": "Array<AcornPlugin>",
-								"doc_comment": "Additional acorn plugins for parsing.\nUse `acorn-jsx` for React/Preact/Solid projects."
-							},
-							{
-								"name": "on_error",
-								"kind": "variable",
-								"type_signature": "'log' | 'throw'",
-								"doc_comment": "How to handle CSS-literal errors during generation.\n- 'log': Log errors, skip invalid classes, continue\n- 'throw': Throw on first error, fail the build"
-							},
-							{
-								"name": "on_warning",
-								"kind": "variable",
-								"type_signature": "'log' | 'throw' | 'ignore'",
-								"doc_comment": "How to handle warnings during generation.\n- 'log': Log warnings, continue\n- 'throw': Throw on first warning, fail the build\n- 'ignore': Suppress warnings entirely"
-							},
-							{
-								"name": "cache_dir",
-								"kind": "variable",
-								"type_signature": "string",
-								"doc_comment": "Cache directory relative to project root."
-							},
-							{
-								"name": "include_base_styles",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include base styles from style.css.\nWhen enabled, only styles for detected elements are included."
-							},
-							{
-								"name": "include_theme_styles",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include theme variables from the variable graph.\nWhen enabled, only variables needed by base styles and utility classes are included."
-							},
-							{
-								"name": "theme_specificity",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Specificity multiplier for theme CSS selectors.\nValue of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`)."
-							},
-							{
-								"name": "include_elements",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional HTML elements to always include styles for.\nUseful for elements generated at runtime."
-							},
-							{
-								"name": "include_variables",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
-							},
-							{
-								"name": "include_all_variables",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include all theme variables regardless of detection.\nUseful for debugging or when many variables are used dynamically."
-							}
-						]
+						"extends": ["CssGeneratorBaseOptions"],
+						"properties": []
 					},
 					{
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 184,
+						"source_line": 100,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [
@@ -6881,6 +7005,7 @@
 					"css_unified_resolution.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
+					"hash.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
 				]

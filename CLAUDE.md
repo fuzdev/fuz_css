@@ -62,10 +62,11 @@ This is especially easy to miss for edge values like `_00` and `_100` that may n
 **Static extraction only:** Unified CSS generation happens at build time via AST analysis. Elements and classes created dynamically at runtime (`document.createElement()`, `innerHTML`, dynamic frameworks) won't be detected.
 
 **Workaround:** Use `include_elements` and `include_classes` options:
+
 ```ts
 gen_fuz_css({
-	include_elements: ['dialog', 'details'],  // Force include element styles
-	include_classes: ['dynamic-modal'],       // Force include utility classes
+	include_elements: ['dialog', 'details'], // Force include element styles
+	include_classes: ['dynamic-modal'], // Force include utility classes
 });
 ```
 
@@ -136,6 +137,7 @@ See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src
 By default, the generated CSS includes theme variables, base styles, and utility classes in a single output. This is the recommended approach for most projects:
 
 **SvelteKit (Gro):**
+
 ```ts
 // src/routes/fuz.gen.css.ts
 import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
@@ -143,6 +145,7 @@ export const gen = gen_fuz_css(); // includes theme + base + utilities
 ```
 
 **Vite (Svelte/React/Preact/Solid):**
+
 ```ts
 // vite.config.ts
 import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
@@ -162,13 +165,13 @@ For projects that manage their own theme/base styles, disable the unified output
 
 ```ts
 gen_fuz_css({
-	include_base_styles: false,
-	include_theme_styles: false,
+	base_css: null,
+	variables: null,
 });
 // or
 vite_plugin_fuz_css({
-	include_base_styles: false,
-	include_theme_styles: false,
+	base_css: null,
+	variables: null,
 });
 
 // Then import separately:
@@ -177,22 +180,54 @@ import '@fuzdev/fuz_css/theme.css';
 import 'virtual:fuz.css'; // or generated fuz.css
 ```
 
+### Custom base styles
+
+Provide custom CSS for base element styles:
+
+```ts
+gen_fuz_css({
+	base_css: `
+		button { color: blue; }
+		input { border: 1px solid; }
+	`,
+});
+```
+
+### Custom variables
+
+Override or extend default theme variables:
+
+```ts
+// Override specific variables using callback
+gen_fuz_css({
+	variables: (defaults) =>
+		defaults.map(
+			(v) => (v.name === 'hue_a' ? {...v, light: '30'} : v), // orange primary
+		),
+});
+
+// Add custom variables
+gen_fuz_css({
+	variables: (defaults) => [...defaults, {name: 'my_brand', light: '#ff6600', dark: '#ff8833'}],
+});
+
+// Complete replacement
+gen_fuz_css({
+	variables: my_custom_variables,
+});
+```
+
 ### Unified CSS options
 
 Both generators support these options for unified CSS:
 
-- `include_base_styles` - Include base styles from style.css (default: `true`)
-- `include_theme_styles` - Include theme variables (default: `true`)
+- `base_css` - Base styles: `undefined` (default style.css), `null` (disabled), or custom CSS string
+- `variables` - Theme variables: `undefined` (defaults), `null` (disabled), `StyleVariable[]` (custom), or callback `(defaults) => StyleVariable[]`
+- `treeshake_base_css` - Tree-shake base styles to detected elements (default: `true`)
+- `treeshake_variables` - Tree-shake theme variables to referenced ones (default: `true`)
 - `theme_specificity` - Specificity multiplier for `:root` selector (default: `1`)
 - `include_elements` - Additional HTML elements to always include styles for
 - `include_variables` - Additional CSS variables to always include in theme output
-- `include_all_variables` - Include all theme variables regardless of detection (for debugging)
-
-### Breaking change note
-
-Projects upgrading from earlier versions that imported `style.css` and `theme.css` separately should either:
-1. Remove those imports (unified mode handles them), or
-2. Set `include_base_styles: false, include_theme_styles: false` to preserve the old behavior
 
 ## Docs
 
@@ -221,6 +256,8 @@ Projects upgrading from earlier versions that imported `style.css` and `theme.cs
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator API with per-file caching
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin for Svelte/React/Preact/Solid, `virtual:fuz.css` virtual module with HMR
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure (`.fuz/cache/css/`)
+- [hash.ts](src/lib/hash.ts) - Hash utilities for cache invalidation (`compute_hash` async SHA-256, `compute_hash_sync` sync DJB2)
+- [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for transitive resolution of CSS custom properties
 - [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection for tracking classes per-file
 - [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClassDefinition` types, `generate_classes_css()`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class registry

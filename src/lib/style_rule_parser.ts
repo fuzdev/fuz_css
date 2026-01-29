@@ -13,6 +13,7 @@ import {readFile} from 'node:fs/promises';
 import {parseCss, type AST} from 'svelte/compiler';
 
 import {extract_css_variables} from './css_variable_utils.js';
+import {compute_hash} from './hash.js';
 
 /**
  * Base fields shared by all style rules.
@@ -500,23 +501,20 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 export const load_style_rule_index = async (style_css_path?: string): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
 	const css = await readFile(path, 'utf8');
-	const content_hash = await compute_content_hash(css);
+	const content_hash = await compute_hash(css);
 	return parse_style_css(css, content_hash);
 };
 
 /**
- * Computes a simple content hash for cache invalidation.
+ * Creates a StyleRuleIndex from a custom CSS string.
+ * Use this to parse user-provided base styles instead of loading from file.
+ *
+ * @param css - Raw CSS string to parse
+ * @returns Promise resolving to StyleRuleIndex
  */
-const compute_content_hash = async (content: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const buffer = encoder.encode(content);
-	const digested = await crypto.subtle.digest('SHA-256', buffer);
-	const bytes = Array.from(new Uint8Array(digested));
-	let hex = '';
-	for (const h of bytes) {
-		hex += h.toString(16).padStart(2, '0');
-	}
-	return hex;
+export const create_style_rule_index = async (css: string): Promise<StyleRuleIndex> => {
+	const content_hash = await compute_hash(css);
+	return parse_style_css(css, content_hash);
 };
 
 /**
