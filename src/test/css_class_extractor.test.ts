@@ -1223,6 +1223,81 @@ describe('element detection', () => {
 		expect(result.elements?.has('a')).toBe(true);
 	});
 
+	test('svelte:element dynamic tag is not added to elements', () => {
+		// svelte:element has a dynamic tag that cannot be statically determined
+		// The extractor correctly skips it (only RegularElement nodes are tracked)
+		const source = `
+<script>
+	let tag = 'button';
+</script>
+<svelte:element this={tag} class="dynamic">Content</svelte:element>
+<div class="static">Static content</div>
+`;
+		const result = extract_from_svelte(source);
+		// Static div should be detected
+		expect(result.elements?.has('div')).toBe(true);
+		// svelte:element is not an HTML element name, it's a Svelte construct
+		// The actual tag (from `this={tag}`) cannot be statically determined
+		expect(result.elements?.has('svelte:element')).toBe(false);
+		// The variable 'tag' value 'button' is NOT extracted because it's not in a class context
+		expect(result.elements?.has('button')).toBe(false);
+		// Classes from svelte:element are still extracted
+		expect(result.classes?.has('dynamic')).toBe(true);
+	});
+
+	test('svelte:body and svelte:window are not added to elements', () => {
+		const source = `
+<svelte:body on:click={handleClick} />
+<svelte:window on:resize={handleResize} />
+<main>Content</main>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('main')).toBe(true);
+		expect(result.elements?.has('svelte:body')).toBe(false);
+		expect(result.elements?.has('svelte:window')).toBe(false);
+		// Note: the actual 'body' and 'window' aren't extracted either
+		// because these are special Svelte directives, not HTML elements
+	});
+
+	test('svelte:head is not added to elements but child elements are', () => {
+		const source = `
+<svelte:head>
+	<title>Page Title</title>
+	<meta name="description" content="..." />
+	<link rel="stylesheet" href="style.css" />
+</svelte:head>
+<main>Content</main>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('main')).toBe(true);
+		expect(result.elements?.has('title')).toBe(true);
+		expect(result.elements?.has('meta')).toBe(true);
+		expect(result.elements?.has('link')).toBe(true);
+		expect(result.elements?.has('svelte:head')).toBe(false);
+	});
+
+	test('slot element is detected and fallback content elements are extracted', () => {
+		const source = `
+<slot name="header">
+	<header class="default-header">
+		<h1>Default Title</h1>
+	</header>
+</slot>
+<slot>
+	<p>Default paragraph</p>
+</slot>
+`;
+		const result = extract_from_svelte(source);
+		// slot itself is detected as an element (it's a valid HTML element)
+		expect(result.elements?.has('slot')).toBe(true);
+		// Fallback content elements are also detected
+		expect(result.elements?.has('header')).toBe(true);
+		expect(result.elements?.has('h1')).toBe(true);
+		expect(result.elements?.has('p')).toBe(true);
+		// Classes from fallback content are extracted
+		expect(result.classes?.has('default-header')).toBe(true);
+	});
+
 	test('detects SVG elements', () => {
 		const source = `
 <svg viewBox="0 0 100 100" class="icon">

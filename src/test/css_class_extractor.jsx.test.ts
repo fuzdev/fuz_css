@@ -379,3 +379,138 @@ const Component = () => <div classList={{ [activeClass]: isActive, base: true }}
 		class_names_equal(result, ['is-active', 'base']);
 	});
 });
+
+describe('JSX element detection', () => {
+	test('detects lowercase HTML elements', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const Layout = () => (
+	<div className="container">
+		<header>Header</header>
+		<main>Content</main>
+		<footer>Footer</footer>
+	</div>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.elements?.has('header')).toBe(true);
+		expect(result.elements?.has('main')).toBe(true);
+		expect(result.elements?.has('footer')).toBe(true);
+	});
+
+	test('filters out PascalCase components from elements', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+import Button from './Button';
+import Card from './Card';
+
+const App = () => (
+	<div>
+		<Button className="btn">Click</Button>
+		<Card>
+			<span>Content</span>
+		</Card>
+	</div>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		// Lowercase elements should be detected
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.elements?.has('span')).toBe(true);
+		// PascalCase components should NOT be detected as elements
+		expect(result.elements?.has('Button')).toBe(false);
+		expect(result.elements?.has('Card')).toBe(false);
+		expect(result.elements?.has('App')).toBe(false);
+	});
+
+	test('handles JSX fragments', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const List = () => (
+	<>
+		<ul>
+			<li>Item 1</li>
+			<li>Item 2</li>
+		</ul>
+	</>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		expect(result.elements?.has('ul')).toBe(true);
+		expect(result.elements?.has('li')).toBe(true);
+		// Fragments don't have a tag name
+	});
+
+	test('detects SVG elements in JSX', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const Icon = () => (
+	<svg viewBox="0 0 100 100" className="icon">
+		<circle cx="50" cy="50" r="40" />
+		<path d="M10 10" />
+	</svg>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		expect(result.elements?.has('svg')).toBe(true);
+		expect(result.elements?.has('circle')).toBe(true);
+		expect(result.elements?.has('path')).toBe(true);
+	});
+
+	test('detects custom elements with dashes in JSX', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+const App = () => (
+	<div>
+		<my-button>Click</my-button>
+		<custom-card>Content</custom-card>
+	</div>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.elements?.has('my-button')).toBe(true);
+		expect(result.elements?.has('custom-card')).toBe(true);
+	});
+
+	test('distinguishes HTML elements from React built-ins', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+import { Suspense, Fragment } from 'react';
+
+const App = () => (
+	<Suspense fallback={<div>Loading...</div>}>
+		<Fragment>
+			<section>Content</section>
+		</Fragment>
+	</Suspense>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		// Lowercase elements are detected
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.elements?.has('section')).toBe(true);
+		// PascalCase React built-ins are NOT detected
+		expect(result.elements?.has('Suspense')).toBe(false);
+		expect(result.elements?.has('Fragment')).toBe(false);
+	});
+
+	test('returns null elements when no HTML elements present', async () => {
+		const jsx = (await import('acorn-jsx')).default;
+		const source = `
+import Button from './Button';
+import Card from './Card';
+
+// Only components, no HTML elements
+const App = () => (
+	<Button>
+		<Card>Content</Card>
+	</Button>
+);
+`;
+		const result = extract_from_ts(source, 'component.tsx', [jsx()]);
+		// No lowercase elements, so elements should be null
+		expect(result.elements).toBeNull();
+	});
+});

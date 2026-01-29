@@ -1206,6 +1206,45 @@ describe('resolve_css', () => {
 	});
 
 	describe('empty scenarios', () => {
+		test('projects without any HTML elements still work', () => {
+			// Scenario: A project that only uses Svelte/React components, no raw HTML elements
+			// This can happen with component libraries where all elements are wrapped in components
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					* { box-sizing: border-box; }
+					:root { font-size: 16px; }
+					body { margin: 0; }
+					button { color: red; }
+					input { border: 1px solid; }
+				`,
+				[
+					{name: 'text_color', light: 'black'},
+					{name: 'bg_color', light: 'white'},
+				],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(), // No elements detected
+				detected_classes: new Set(['p_md', 'box']), // But classes are used
+				detected_css_variables: new Set(['text_color']),
+				utility_variables_used: new Set(['bg_color']),
+			});
+
+			// Core rules should still be included
+			expect(result.base_css).toContain('box-sizing: border-box');
+			expect(result.base_css).toContain('font-size: 16px');
+			expect(result.base_css).toContain('margin: 0');
+			// Non-core element rules should NOT be included
+			expect(result.base_css).not.toContain('button');
+			expect(result.base_css).not.toContain('input');
+			// Theme CSS should work
+			expect(result.theme_css).toContain('--text_color: black');
+			expect(result.theme_css).toContain('--bg_color: white');
+		});
+
 		test('empty style_rule_index', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color', light: 'blue'},

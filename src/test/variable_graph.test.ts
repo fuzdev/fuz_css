@@ -383,3 +383,118 @@ test('resolve_variables_transitive - cycle in dark mode deps only', () => {
 	expect(result.variables.has('b')).toBe(true);
 	expect(result.warnings.length).toBeGreaterThan(0);
 });
+
+// Transitive resolution completeness tests
+
+test('resolve_variables_transitive - does not miss sibling dependencies', () => {
+	// Scenario: A depends on B, A also depends on C, B depends on D
+	// When resolving A, we should get A, B, C, and D
+	const variables: Array<StyleVariable> = [
+		{name: 'd', light: 'base-value'},
+		{name: 'b', light: 'var(--d)'},
+		{name: 'c', light: 'independent-value'},
+		{name: 'a', light: 'calc(var(--b) + var(--c))'},
+	];
+	const graph = build_variable_graph(variables, 'test-hash');
+
+	const result = resolve_variables_transitive(graph, ['a']);
+
+	expect(result.variables.has('a')).toBe(true);
+	expect(result.variables.has('b')).toBe(true);
+	expect(result.variables.has('c')).toBe(true);
+	expect(result.variables.has('d')).toBe(true);
+	expect(result.variables.size).toBe(4);
+});
+
+test('resolve_variables_transitive - handles complex tree with shared nodes', () => {
+	// Complex dependency tree:
+	//     root
+	//    /    \
+	//   a      b
+	//  / \    / \
+	// c   d  d   e
+	//     |
+	//     f
+	// d is shared between a and b paths
+	const variables: Array<StyleVariable> = [
+		{name: 'f', light: 'leaf-f'},
+		{name: 'c', light: 'leaf-c'},
+		{name: 'e', light: 'leaf-e'},
+		{name: 'd', light: 'var(--f)'},
+		{name: 'a', light: 'calc(var(--c) + var(--d))'},
+		{name: 'b', light: 'calc(var(--d) + var(--e))'},
+		{name: 'root', light: 'calc(var(--a) + var(--b))'},
+	];
+	const graph = build_variable_graph(variables, 'test-hash');
+
+	const result = resolve_variables_transitive(graph, ['root']);
+
+	// All 7 variables should be resolved
+	expect(result.variables.size).toBe(7);
+	expect(result.variables.has('root')).toBe(true);
+	expect(result.variables.has('a')).toBe(true);
+	expect(result.variables.has('b')).toBe(true);
+	expect(result.variables.has('c')).toBe(true);
+	expect(result.variables.has('d')).toBe(true);
+	expect(result.variables.has('e')).toBe(true);
+	expect(result.variables.has('f')).toBe(true);
+});
+
+test('resolve_variables_transitive - mixed light and dark dependencies at multiple depths', () => {
+	// Variables with different light/dark dependencies at different depths
+	const variables: Array<StyleVariable> = [
+		{name: 'light_leaf', light: '#fff'},
+		{name: 'dark_leaf', dark: '#000'},
+		{name: 'light_mid', light: 'var(--light_leaf)'},
+		{name: 'dark_mid', dark: 'var(--dark_leaf)'},
+		{name: 'themed', light: 'var(--light_mid)', dark: 'var(--dark_mid)'},
+	];
+	const graph = build_variable_graph(variables, 'test-hash');
+
+	const result = resolve_variables_transitive(graph, ['themed']);
+
+	// Should resolve all variables in both light and dark chains
+	expect(result.variables.has('themed')).toBe(true);
+	expect(result.variables.has('light_mid')).toBe(true);
+	expect(result.variables.has('dark_mid')).toBe(true);
+	expect(result.variables.has('light_leaf')).toBe(true);
+	expect(result.variables.has('dark_leaf')).toBe(true);
+	expect(result.variables.size).toBe(5);
+});
+
+test('resolve_variables_transitive - multiple starting points share dependencies', () => {
+	// When starting with multiple variables that share deps, deps are resolved once
+	const variables: Array<StyleVariable> = [
+		{name: 'shared', light: 'shared-value'},
+		{name: 'x', light: 'var(--shared)'},
+		{name: 'y', light: 'var(--shared)'},
+	];
+	const graph = build_variable_graph(variables, 'test-hash');
+
+	const result = resolve_variables_transitive(graph, ['x', 'y']);
+
+	expect(result.variables.has('x')).toBe(true);
+	expect(result.variables.has('y')).toBe(true);
+	expect(result.variables.has('shared')).toBe(true);
+	expect(result.variables.size).toBe(3); // No duplicates
+});
+
+test('resolve_variables_transitive - handles var() with fallback containing var()', () => {
+	// CSS var() can have fallbacks: var(--a, var(--b, var(--c)))
+	// Both the primary and fallback variables should be resolved
+	const variables: Array<StyleVariable> = [
+		{name: 'a', light: '1'},
+		{name: 'b', light: '2'},
+		{name: 'c', light: '3'},
+		{name: 'composed', light: 'var(--a, var(--b, var(--c)))'},
+	];
+	const graph = build_variable_graph(variables, 'test-hash');
+
+	const result = resolve_variables_transitive(graph, ['composed']);
+
+	// All variables in the fallback chain should be resolved
+	expect(result.variables.has('composed')).toBe(true);
+	expect(result.variables.has('a')).toBe(true);
+	expect(result.variables.has('b')).toBe(true);
+	expect(result.variables.has('c')).toBe(true);
+});

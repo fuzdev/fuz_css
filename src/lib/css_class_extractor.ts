@@ -610,6 +610,32 @@ const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// SvelteHead injects children into document <head> - walk its fragment
+		SvelteHead(_node, {next}) {
+			next();
+		},
+		// TitleElement is a special element type for <title> inside svelte:head
+		TitleElement(node, {state, next}) {
+			state.elements.add(node.name);
+			process_element_attributes(node.attributes, state);
+			next();
+		},
+		// SlotElement is <slot> - can have fallback content with elements
+		SlotElement(node, {state, next}) {
+			state.elements.add(node.name);
+			process_element_attributes(node.attributes, state);
+			next();
+		},
+		// SvelteBody, SvelteWindow, SvelteDocument don't have element children
+		SvelteBody(_node, {next}) {
+			next();
+		},
+		SvelteWindow(_node, {next}) {
+			next();
+		},
+		SvelteDocument(_node, {next}) {
+			next();
+		},
 	};
 
 	walk(fragment as AST.SvelteNode, state, visitors);

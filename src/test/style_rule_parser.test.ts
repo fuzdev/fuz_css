@@ -522,3 +522,88 @@ test('parse_style_css - @font-face included when no elements detected', () => {
 	// Button should not be included (not core, no matching elements)
 	expect(included.has(1)).toBe(false);
 });
+
+// Attribute selector tests
+
+test('parse_style_css - attribute selector extracts element', () => {
+	const css = `input[type='checkbox'] { width: 20px; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
+
+test('parse_style_css - attribute selector with quotes', () => {
+	const css = `a[href^="https://"] { color: green; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('a')).toBe(true);
+});
+
+test('parse_style_css - attribute selector without value', () => {
+	const css = `input[required] { border-color: red; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
+
+test('parse_style_css - attribute selector with class does not extract class from attribute', () => {
+	// This tests current behavior: class names inside attribute selectors are NOT extracted
+	// This is intentional - [class~="foo"] targets elements with class "foo", but it's
+	// a style rule about existing classes, not a class the rule "uses"
+	const css = `[class~="unstyled"] { all: unset; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	// The class "unstyled" is NOT extracted because it's inside an attribute selector
+	// This is the current behavior - attribute selector class extraction is not implemented
+	expect(index.rules[0]!.classes.has('unstyled')).toBe(false);
+	// No elements either (bare attribute selector)
+	expect(index.rules[0]!.elements.size).toBe(0);
+});
+
+test('parse_style_css - class selector alongside attribute selector', () => {
+	// When .class is used normally alongside attribute selectors, both are extracted
+	const css = `input.error[type='text'] { border: 2px solid red; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+	expect(index.rules[0]!.classes.has('error')).toBe(true);
+});
+
+test('parse_style_css - multiple attribute selectors', () => {
+	const css = `input[type='text'][required] { background: pink; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
+
+test('parse_style_css - attribute selector in :where()', () => {
+	const css = `:where(input[type='number'], input[type='text']) { font-family: monospace; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
+
+test('parse_style_css - attribute selector inside :not()', () => {
+	const css = `input:not([disabled]) { cursor: pointer; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
+
+test('parse_style_css - data attribute selectors', () => {
+	const css = `[data-theme='dark'] { background: black; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	// No elements (bare attribute selector)
+	expect(index.rules[0]!.elements.size).toBe(0);
+	expect(index.rules[0]!.classes.size).toBe(0);
+});
+
+test('parse_style_css - comma in attribute selector value is handled', () => {
+	// Ensure commas inside attribute selector values don't split the selector
+	const css = `input[placeholder='a, b, c'] { color: gray; }`;
+	const index = parse_style_css(css, 'test-hash');
+
+	expect(index.rules.length).toBe(1);
+	expect(index.rules[0]!.elements.has('input')).toBe(true);
+});
