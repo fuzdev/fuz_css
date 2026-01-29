@@ -15,9 +15,9 @@ import {parseCss, type AST} from 'svelte/compiler';
 import {extract_css_variables} from './css_variable_utils.js';
 
 /**
- * A parsed style rule with metadata for filtering.
+ * Base fields shared by all style rules.
  */
-export interface StyleRule {
+export interface StyleRuleBase {
 	/** The full CSS text for this rule (including selector and declarations) */
 	css: string;
 	/** HTML element names this rule targets (e.g., 'button', 'input') */
@@ -28,11 +28,42 @@ export interface StyleRule {
 	variables_used: Set<string>;
 	/** Original order in style.css (for preserving cascade) */
 	order: number;
-	/** Whether this is a core rule that should always be included */
-	is_core: boolean;
-	/** Reason this rule is considered core, if applicable */
-	core_reason?: 'universal' | 'root' | 'body' | 'media_query' | 'html' | 'host' | 'font_face';
 }
+
+/**
+ * Reasons a rule is considered "core" and always included.
+ */
+export type CoreReason =
+	| 'universal'
+	| 'root'
+	| 'body'
+	| 'media_query'
+	| 'html'
+	| 'host'
+	| 'font_face';
+
+/**
+ * A core style rule that is always included in output.
+ */
+export interface CoreStyleRule extends StyleRuleBase {
+	is_core: true;
+	core_reason: CoreReason;
+}
+
+/**
+ * A non-core style rule included only when its elements/classes are detected.
+ */
+export interface NonCoreStyleRule extends StyleRuleBase {
+	is_core: false;
+	core_reason: null;
+}
+
+/**
+ * A parsed style rule with metadata for filtering.
+ * Discriminated union: check `is_core` to narrow to CoreStyleRule or NonCoreStyleRule.
+ * All rules have a consistent shape - `core_reason` is null for non-core rules.
+ */
+export type StyleRule = CoreStyleRule | NonCoreStyleRule;
 
 /**
  * Index of parsed style rules for efficient lookup.
@@ -153,6 +184,7 @@ const extract_style_rule = (rule: AST.CSS.Rule, css: string, order: number): Sty
 	// Determine if core rule
 	const {is_core, core_reason} = check_core_rule(selector_css, elements);
 
+	// Type assertion needed because destructuring widens is_core to boolean
 	return {
 		css: rule_css,
 		elements,
@@ -161,7 +193,7 @@ const extract_style_rule = (rule: AST.CSS.Rule, css: string, order: number): Sty
 		order,
 		is_core,
 		core_reason,
-	};
+	} as StyleRule;
 };
 
 /**
@@ -206,14 +238,17 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 	) {
 		extract_nested_rules(atrule.block, css, elements, classes, variables_used);
 
-		// Determine if this is a core rule
-		let is_core = false;
-		let core_reason: StyleRule['core_reason'];
-
-		if (atrule.name === 'media') {
-			// prefers-reduced-motion media queries are core (accessibility)
-			is_core = atrule.prelude.includes('prefers-reduced-motion');
-			core_reason = is_core ? 'media_query' : undefined;
+		// prefers-reduced-motion media queries are core (accessibility)
+		if (atrule.name === 'media' && atrule.prelude.includes('prefers-reduced-motion')) {
+			return {
+				css: rule_css,
+				elements,
+				classes,
+				variables_used,
+				order,
+				is_core: true,
+				core_reason: 'media_query',
+			} as const;
 		}
 
 		return {
@@ -222,9 +257,9 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			classes,
 			variables_used,
 			order,
-			is_core,
-			core_reason,
-		};
+			is_core: false,
+			core_reason: null,
+		} as const;
 	}
 
 	// Handle @keyframes - include it if any rules reference animations
@@ -243,7 +278,8 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			variables_used,
 			order,
 			is_core: false,
-		};
+			core_reason: null,
+		} as const;
 	}
 
 	// Handle @font-face - global rule that should always be included
@@ -262,7 +298,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			order,
 			is_core: true,
 			core_reason: 'font_face',
-		};
+		} as const;
 	}
 
 	// Skip other at-rules (@charset, @import, @namespace, @page, etc.)
@@ -413,6 +449,12 @@ const parse_single_selector = (
 };
 
 /**
+ * Result from core rule check - discriminated union for type safety.
+ * Both variants include `core_reason` for consistent object shape.
+ */
+type CoreRuleCheck = {is_core: true; core_reason: CoreReason} | {is_core: false; core_reason: null};
+
+/**
  * Checks if a rule is a "core" rule that should always be included.
  * Core rules include:
  * - Universal selector (*) rules
@@ -420,10 +462,7 @@ const parse_single_selector = (
  * - body rules
  * - html rules
  */
-const check_core_rule = (
-	selector_css: string,
-	elements: Set<string>,
-): {is_core: boolean; core_reason?: StyleRule['core_reason']} => {
+const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleCheck => {
 	// Universal selector
 	if (selector_css.includes('*')) {
 		return {is_core: true, core_reason: 'universal'};
@@ -449,7 +488,7 @@ const check_core_rule = (
 		return {is_core: true, core_reason: 'html'};
 	}
 
-	return {is_core: false};
+	return {is_core: false, core_reason: null};
 };
 
 /**

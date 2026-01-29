@@ -3270,11 +3270,11 @@
 				"path": "style_rule_parser.ts",
 				"declarations": [
 					{
-						"name": "StyleRule",
+						"name": "StyleRuleBase",
 						"kind": "type",
-						"doc_comment": "A parsed style rule with metadata for filtering.",
+						"doc_comment": "Base fields shared by all style rules.",
 						"source_line": 20,
-						"type_signature": "StyleRule",
+						"type_signature": "StyleRuleBase",
 						"properties": [
 							{
 								"name": "css",
@@ -3305,26 +3305,68 @@
 								"kind": "variable",
 								"type_signature": "number",
 								"doc_comment": "Original order in style.css (for preserving cascade)"
-							},
+							}
+						]
+					},
+					{
+						"name": "CoreReason",
+						"kind": "type",
+						"doc_comment": "Reasons a rule is considered \"core\" and always included.",
+						"source_line": 36,
+						"type_signature": "CoreReason"
+					},
+					{
+						"name": "CoreStyleRule",
+						"kind": "type",
+						"doc_comment": "A core style rule that is always included in output.",
+						"source_line": 48,
+						"type_signature": "CoreStyleRule",
+						"extends": ["StyleRuleBase"],
+						"properties": [
 							{
 								"name": "is_core",
 								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether this is a core rule that should always be included"
+								"type_signature": "true"
 							},
 							{
 								"name": "core_reason",
 								"kind": "variable",
-								"type_signature": "'universal' | 'root' | 'body' | 'media_query' | 'html' | 'host' | 'font_face'",
-								"doc_comment": "Reason this rule is considered core, if applicable"
+								"type_signature": "CoreReason"
 							}
 						]
+					},
+					{
+						"name": "NonCoreStyleRule",
+						"kind": "type",
+						"doc_comment": "A non-core style rule included only when its elements/classes are detected.",
+						"source_line": 56,
+						"type_signature": "NonCoreStyleRule",
+						"extends": ["StyleRuleBase"],
+						"properties": [
+							{
+								"name": "is_core",
+								"kind": "variable",
+								"type_signature": "false"
+							},
+							{
+								"name": "core_reason",
+								"kind": "variable",
+								"type_signature": "null"
+							}
+						]
+					},
+					{
+						"name": "StyleRule",
+						"kind": "type",
+						"doc_comment": "A parsed style rule with metadata for filtering.\nDiscriminated union: check `is_core` to narrow to CoreStyleRule or NonCoreStyleRule.\nAll rules have a consistent shape - `core_reason` is null for non-core rules.",
+						"source_line": 66,
+						"type_signature": "StyleRule"
 					},
 					{
 						"name": "StyleRuleIndex",
 						"kind": "type",
 						"doc_comment": "Index of parsed style rules for efficient lookup.",
-						"source_line": 40,
+						"source_line": 71,
 						"type_signature": "StyleRuleIndex",
 						"properties": [
 							{
@@ -3363,14 +3405,14 @@
 						"name": "STYLE_RULE_PARSER_VERSION",
 						"kind": "variable",
 						"doc_comment": "Current version of the style rule parser. Bump when logic changes.",
-						"source_line": 54,
+						"source_line": 85,
 						"type_signature": "1"
 					},
 					{
 						"name": "parse_style_css",
 						"kind": "function",
 						"doc_comment": "Parses a CSS stylesheet into a StyleRuleIndex.",
-						"source_line": 63,
+						"source_line": 94,
 						"type_signature": "(css: string, content_hash: string): StyleRuleIndex",
 						"return_type": "StyleRuleIndex",
 						"return_description": "StyleRuleIndex with rules and lookup maps",
@@ -3391,7 +3433,7 @@
 						"name": "load_style_rule_index",
 						"kind": "function",
 						"doc_comment": "Loads and parses the default style.css file.",
-						"source_line": 461,
+						"source_line": 500,
 						"type_signature": "(style_css_path?: string | undefined): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
 						"return_description": "Promise resolving to StyleRuleIndex",
@@ -3408,7 +3450,7 @@
 						"name": "get_matching_rules",
 						"kind": "function",
 						"doc_comment": "Gets rules that should be included based on detected elements and classes.",
-						"source_line": 491,
+						"source_line": 530,
 						"type_signature": "(index: StyleRuleIndex, detected_elements: Set<string>, detected_classes: Set<string>): Set<number>",
 						"return_type": "Set<number>",
 						"return_description": "Set of rule indices to include",
@@ -3434,7 +3476,7 @@
 						"name": "generate_base_css",
 						"kind": "function",
 						"doc_comment": "Generates CSS from a StyleRuleIndex with only the included rules.",
-						"source_line": 535,
+						"source_line": 574,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): string",
 						"return_type": "string",
 						"return_description": "CSS string with only included rules, in original order",
@@ -3455,7 +3497,7 @@
 						"name": "collect_rule_variables",
 						"kind": "function",
 						"doc_comment": "Collects all CSS variables used by the included rules.",
-						"source_line": 554,
+						"source_line": 593,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of variable names (without -- prefix)",
