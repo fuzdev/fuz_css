@@ -1206,3 +1206,119 @@ describe('SourceIndex', () => {
 		expect(index.get_location(10, 'f').line).toBe(3); // 'g'
 	});
 });
+
+describe('element detection', () => {
+	test('detects common HTML elements', () => {
+		const source = `
+<div class="container">
+	<button>Click</button>
+	<input type="text" />
+	<a href="#">Link</a>
+</div>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.elements?.has('button')).toBe(true);
+		expect(result.elements?.has('input')).toBe(true);
+		expect(result.elements?.has('a')).toBe(true);
+	});
+
+	test('detects SVG elements', () => {
+		const source = `
+<svg viewBox="0 0 100 100" class="icon">
+	<circle cx="50" cy="50" r="40" class="circle" />
+	<path d="M10 10" class="path" />
+	<g class="group">
+		<rect x="0" y="0" width="10" height="10" />
+	</g>
+</svg>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('svg')).toBe(true);
+		expect(result.elements?.has('circle')).toBe(true);
+		expect(result.elements?.has('path')).toBe(true);
+		expect(result.elements?.has('g')).toBe(true);
+		expect(result.elements?.has('rect')).toBe(true);
+	});
+
+	test('detects MathML elements', () => {
+		const source = `
+<math class="equation">
+	<mrow class="row">
+		<mi>x</mi>
+		<mo>=</mo>
+		<mfrac>
+			<mrow><mo>-</mo><mi>b</mi></mrow>
+			<mrow><mn>2</mn><mi>a</mi></mrow>
+		</mfrac>
+	</mrow>
+</math>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('math')).toBe(true);
+		expect(result.elements?.has('mrow')).toBe(true);
+		expect(result.elements?.has('mi')).toBe(true);
+		expect(result.elements?.has('mo')).toBe(true);
+		expect(result.elements?.has('mfrac')).toBe(true);
+		expect(result.elements?.has('mn')).toBe(true);
+	});
+
+	test('detects custom elements with dashes', () => {
+		const source = `
+<my-button class="btn">Click</my-button>
+<custom-card class="card">
+	<card-header>Title</card-header>
+	<card-body>Content</card-body>
+</custom-card>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('my-button')).toBe(true);
+		expect(result.elements?.has('custom-card')).toBe(true);
+		expect(result.elements?.has('card-header')).toBe(true);
+		expect(result.elements?.has('card-body')).toBe(true);
+	});
+
+	test('does not detect Svelte components as elements', () => {
+		const source = `
+<script>
+	import Button from './Button.svelte';
+	import Card from './Card.svelte';
+</script>
+<Button class="btn">Click</Button>
+<Card>Content</Card>
+<div>Regular element</div>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('Button')).toBe(false);
+		expect(result.elements?.has('Card')).toBe(false);
+		expect(result.elements?.has('div')).toBe(true);
+	});
+
+	test('detects elements in nested control flow', () => {
+		const source = `
+{#if condition}
+	<article class="post">
+		{#each items as item}
+			<section class="item">
+				<header>Title</header>
+			</section>
+		{/each}
+	</article>
+{/if}
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements?.has('article')).toBe(true);
+		expect(result.elements?.has('section')).toBe(true);
+		expect(result.elements?.has('header')).toBe(true);
+	});
+
+	test('returns null elements for file with no elements', () => {
+		const source = `
+<script>
+	const x = 1;
+</script>
+`;
+		const result = extract_from_svelte(source);
+		expect(result.elements).toBeNull();
+	});
+});

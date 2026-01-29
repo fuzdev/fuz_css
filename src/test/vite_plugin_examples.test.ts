@@ -163,6 +163,20 @@ const extract_fuz_css = (css: string): string | null => {
 };
 
 /**
+ * Extracts just the utility classes section from the unified CSS.
+ * The unified output has sections: Theme Variables, Base Styles, Utility Classes.
+ */
+const extract_utility_section = (css: string): string => {
+	const utility_marker = '/* Utility Classes */';
+	const idx = css.indexOf(utility_marker);
+	if (idx === -1) {
+		// No utility section marker - return as-is (utility-only mode)
+		return css;
+	}
+	return css.slice(idx);
+};
+
+/**
  * Extracts class names from CSS content.
  * Handles escaped characters in class names (colons, percent signs, parens, tildes, commas, dots).
  */
@@ -196,7 +210,9 @@ const create_example_tests = (example_name: string, app_file: string): void => {
 			build_example(example_name);
 			css = await read_generated_css(example_name);
 			fuz_css = extract_fuz_css(css);
-			extracted_classes = fuz_css ? extract_class_names(fuz_css) : [];
+			// Extract only utility classes section for comparison (unified mode includes base styles)
+			const utility_css = fuz_css ? extract_utility_section(fuz_css) : '';
+			extracted_classes = utility_css ? extract_class_names(utility_css) : [];
 			// Store for cross-example comparison
 			example_results.set(example_name, extracted_classes);
 		}, 120_000); // 2 minute timeout for install + build

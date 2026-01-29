@@ -1,0 +1,248 @@
+/**
+ * Variable dependency graph for unified CSS generation.
+ *
+ * Builds a dependency graph from style variables to enable transitive
+ * resolution of CSS custom properties. When a variable is needed,
+ * all variables it depends on are also included.
+ *
+ * @module
+ */
+
+import {default_variables} from './variables.js';
+import type {StyleVariable} from './variable.js';
+import {extract_css_variables} from './css_variable_utils.js';
+
+/**
+ * Information about a single style variable and its dependencies.
+ */
+export interface VariableInfo {
+	/** Variable name (without -- prefix) */
+	name: string;
+	/** Variables referenced in the light value */
+	light_deps: Set<string>;
+	/** Variables referenced in the dark value */
+	dark_deps: Set<string>;
+	/** The CSS value for light mode, or undefined if not defined */
+	light_css: string | undefined;
+	/** The CSS value for dark mode, or undefined if not defined */
+	dark_css: string | undefined;
+}
+
+/**
+ * Dependency graph for style variables.
+ */
+export interface VariableDependencyGraph {
+	/** Map from variable name to its info */
+	variables: Map<string, VariableInfo>;
+	/** Content hash for cache invalidation */
+	content_hash: string;
+	/** Graph version for cache invalidation */
+	version: number;
+}
+
+/** Current version of the variable graph builder. Bump when logic changes. */
+export const VARIABLE_GRAPH_VERSION = 1;
+
+/**
+ * Builds a dependency graph from an array of style variables.
+ *
+ * @param variables - Array of StyleVariable objects
+ * @param content_hash - Hash of the source for cache invalidation
+ * @returns VariableDependencyGraph
+ */
+export const build_variable_graph = (
+	variables: Array<StyleVariable>,
+	content_hash: string,
+): VariableDependencyGraph => {
+	const graph: Map<string, VariableInfo> = new Map();
+
+	for (const v of variables) {
+		const light_deps = v.light ? extract_css_variables(v.light) : new Set<string>();
+		const dark_deps = v.dark ? extract_css_variables(v.dark) : new Set<string>();
+
+		graph.set(v.name, {
+			name: v.name,
+			light_deps,
+			dark_deps,
+			light_css: v.light,
+			dark_css: v.dark,
+		});
+	}
+
+	return {
+		variables: graph,
+		content_hash,
+		version: VARIABLE_GRAPH_VERSION,
+	};
+};
+
+/**
+ * Builds the default variable graph from the fuz_css default_variables.
+ * Uses a cached hash based on the variables array.
+ */
+export const build_default_variable_graph = (): VariableDependencyGraph => {
+	// Create a simple hash from the variable names and values
+	// This is deterministic for the same input
+	const content = default_variables
+		.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`)
+		.join('|');
+	const content_hash = simple_hash(content);
+
+	return build_variable_graph(default_variables, content_hash);
+};
+
+/**
+ * Simple string hash for content-based cache invalidation.
+ * Not cryptographic, just for comparison.
+ */
+const simple_hash = (str: string): string => {
+	let hash = 0;
+	for (let i = 0; i < str.length; i++) {
+		const char = str.charCodeAt(i);
+		hash = (hash << 5) - hash + char;
+		hash |= 0; // Convert to 32-bit integer
+	}
+	return hash.toString(16);
+};
+
+/**
+ * Result from transitive variable resolution.
+ */
+export interface ResolveVariablesResult {
+	/** All resolved variable names */
+	variables: Set<string>;
+	/** Warning messages for cycles */
+	warnings: Array<string>;
+	/** Variable names that were requested but not found in the graph */
+	missing: Set<string>;
+}
+
+/**
+ * Resolves variables transitively using DFS with cycle detection.
+ * When a variable is requested, all variables it depends on are included.
+ * Both light and dark dependencies are always resolved together.
+ *
+ * @param graph - The variable dependency graph
+ * @param initial_variables - Initial set of variable names to resolve
+ * @returns ResolveVariablesResult with all transitive dependencies
+ */
+export const resolve_variables_transitive = (
+	graph: VariableDependencyGraph,
+	initial_variables: Iterable<string>,
+): ResolveVariablesResult => {
+	const resolved: Set<string> = new Set();
+	const warnings: Array<string> = [];
+	const missing: Set<string> = new Set();
+	const reported_cycles: Set<string> = new Set();
+
+	// DFS with path tracking for cycle detection
+	// `path` tracks the current call stack to detect back-edges (cycles)
+	const resolve = (name: string, path: Set<string>): void => {
+		// Check for cycles FIRST - if we're revisiting a node in the current path, it's a cycle
+		if (path.has(name)) {
+			// Only report each cycle once
+			if (!reported_cycles.has(name)) {
+				warnings.push(`Circular dependency detected for variable: ${name}`);
+				reported_cycles.add(name);
+			}
+			return;
+		}
+
+		// Skip if already fully resolved (from a different path)
+		if (resolved.has(name)) {
+			return;
+		}
+
+		// Add to path (current traversal stack)
+		path.add(name);
+
+		const info = graph.variables.get(name);
+		if (info) {
+			// Recursively resolve all dependencies BEFORE marking as resolved
+			for (const dep of info.light_deps) {
+				resolve(dep, path);
+			}
+			for (const dep of info.dark_deps) {
+				resolve(dep, path);
+			}
+		} else {
+			// Variable not found in graph - track as missing
+			missing.add(name);
+		}
+
+		// Mark as resolved AFTER processing dependencies
+		resolved.add(name);
+
+		// Remove from path (backtrack)
+		path.delete(name);
+	};
+
+	// Start resolution from each initial variable
+	for (const name of initial_variables) {
+		resolve(name, new Set());
+	}
+
+	return {variables: resolved, warnings, missing};
+};
+
+/**
+ * Generates theme CSS for the resolved variables.
+ *
+ * @param graph - The variable dependency graph
+ * @param resolved_variables - Set of variable names to include
+ * @param specificity - Number of times to repeat the selector (default 1)
+ * @returns Object with light_css and dark_css strings
+ */
+export const generate_theme_css = (
+	graph: VariableDependencyGraph,
+	resolved_variables: Set<string>,
+	specificity = 1,
+): {light_css: string; dark_css: string} => {
+	const light_declarations: Array<string> = [];
+	const dark_declarations: Array<string> = [];
+
+	// Process variables in a consistent order (alphabetical by name)
+	const sorted_names = Array.from(resolved_variables).sort();
+
+	for (const name of sorted_names) {
+		const info = graph.variables.get(name);
+		if (!info) continue;
+
+		if (info.light_css !== undefined) {
+			light_declarations.push(`\t--${name}: ${info.light_css};`);
+		}
+		if (info.dark_css !== undefined) {
+			dark_declarations.push(`\t--${name}: ${info.dark_css};`);
+		}
+	}
+
+	const scope = ':root'.repeat(specificity);
+	const dark_scope = `${scope}.dark`;
+
+	let light_css = '';
+	let dark_css = '';
+
+	if (light_declarations.length > 0) {
+		light_css = `${scope} {\n${light_declarations.join('\n')}\n}`;
+	}
+
+	if (dark_declarations.length > 0) {
+		dark_css = `${dark_scope} {\n${dark_declarations.join('\n')}\n}`;
+	}
+
+	return {light_css, dark_css};
+};
+
+/**
+ * Gets all variable names from the graph.
+ */
+export const get_all_variable_names = (graph: VariableDependencyGraph): Set<string> => {
+	return new Set(graph.variables.keys());
+};
+
+/**
+ * Checks if a variable exists in the graph.
+ */
+export const has_variable = (graph: VariableDependencyGraph, name: string): boolean => {
+	return graph.variables.has(name);
+};

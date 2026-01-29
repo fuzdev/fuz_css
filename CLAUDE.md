@@ -117,12 +117,18 @@ See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src
 
 ## Usage
 
-Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base styles. Generate utility classes via:
+### Unified mode (default)
 
-**SvelteKit (Gro):** Use [gen_fuz_css()](src/lib/gen_fuz_css.ts) in a `.gen.css.ts` file.
+By default, the generated CSS includes theme variables, base styles, and utility classes in a single output. This is the recommended approach for most projects:
+
+**SvelteKit (Gro):**
+```ts
+// src/routes/fuz.gen.css.ts
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+export const gen = gen_fuz_css(); // includes theme + base + utilities
+```
 
 **Vite (Svelte/React/Preact/Solid):**
-
 ```ts
 // vite.config.ts
 import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
@@ -132,11 +138,46 @@ export default defineConfig({
 	plugins: [vite_plugin_fuz_css({acorn_plugins: [jsx()]})],
 });
 
-// main.ts
-import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own
+// main.ts - single import for everything
 import 'virtual:fuz.css';
 ```
+
+### Utility-only mode
+
+For projects that manage their own theme/base styles, disable the unified output:
+
+```ts
+gen_fuz_css({
+	include_base_styles: false,
+	include_theme_styles: false,
+});
+// or
+vite_plugin_fuz_css({
+	include_base_styles: false,
+	include_theme_styles: false,
+});
+
+// Then import separately:
+import '@fuzdev/fuz_css/style.css';
+import '@fuzdev/fuz_css/theme.css';
+import 'virtual:fuz.css'; // or generated fuz.css
+```
+
+### Unified CSS options
+
+Both generators support these options for unified CSS:
+
+- `include_base_styles` - Include base styles from style.css (default: `true`)
+- `include_theme_styles` - Include theme variables (default: `true`)
+- `theme_specificity` - Specificity multiplier for `:root` selector (default: `1`)
+- `include_elements` - Additional HTML elements to always include styles for
+- `include_variables` - Additional CSS variables to always include in theme output
+
+### Breaking change note
+
+Projects upgrading from earlier versions that imported `style.css` and `theme.css` separately should either:
+1. Remove those imports (unified mode handles them), or
+2. Set `include_base_styles: false, include_theme_styles: false` to preserve the old behavior
 
 ## Docs
 

@@ -38,10 +38,10 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * - `extract_css_classes_with_locations()` logic or output
  * - `ExtractionDiagnostic` or `SourceLocation` structure
  *
- * v2: Use null instead of empty arrays for classes/diagnostics
- * v3: Add explicit_classes for @fuz-classes warnings
+ * v1: Initial version with classes and diagnostics
+ * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
  */
-const CACHE_VERSION = 1;
+const CACHE_VERSION = 2;
 
 /**
  * Cached extraction result for a single file.
@@ -58,6 +58,10 @@ export interface CachedExtraction {
 	explicit_classes: Array<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/** HTML elements found in the file, or null if none */
+	elements: Array<string> | null;
+	/** CSS variables referenced (without -- prefix), or null if none */
+	css_variables: Array<string> | null;
 }
 
 /**
@@ -117,6 +121,8 @@ export const load_cached_extraction = async (
  * @param classes - Extracted classes with their locations, or null if none
  * @param explicit_classes - Classes from @fuz-classes comments, or null if none
  * @param diagnostics - Extraction diagnostics, or null if none
+ * @param elements - HTML elements found in the file, or null if none
+ * @param css_variables - CSS variables referenced (without -- prefix), or null if none
  */
 export const save_cached_extraction = async (
 	cache_path: string,
@@ -124,12 +130,17 @@ export const save_cached_extraction = async (
 	classes: Map<string, Array<SourceLocation>> | null,
 	explicit_classes: Set<string> | null,
 	diagnostics: Array<ExtractionDiagnostic> | null,
+	elements?: Set<string> | null,
+	css_variables?: Set<string> | null,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
 	const explicit_array =
 		explicit_classes && explicit_classes.size > 0 ? Array.from(explicit_classes) : null;
 	const diagnostics_array = diagnostics && diagnostics.length > 0 ? diagnostics : null;
+	const elements_array = elements && elements.size > 0 ? Array.from(elements) : null;
+	const css_variables_array =
+		css_variables && css_variables.size > 0 ? Array.from(css_variables) : null;
 
 	const data: CachedExtraction = {
 		v: CACHE_VERSION,
@@ -137,6 +148,8 @@ export const save_cached_extraction = async (
 		classes: classes_array,
 		explicit_classes: explicit_array,
 		diagnostics: diagnostics_array,
+		elements: elements_array,
+		css_variables: css_variables_array,
 	};
 
 	// Atomic write: temp file + rename
@@ -171,8 +184,12 @@ export const from_cached_extraction = (
 	classes: Map<string, Array<SourceLocation>> | null;
 	explicit_classes: Set<string> | null;
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	elements: Set<string> | null;
+	css_variables: Set<string> | null;
 } => ({
 	classes: cached.classes ? new Map(cached.classes) : null,
 	explicit_classes: cached.explicit_classes ? new Set(cached.explicit_classes) : null,
 	diagnostics: cached.diagnostics,
+	elements: cached.elements ? new Set(cached.elements) : null,
+	css_variables: cached.css_variables ? new Set(cached.css_variables) : null,
 });

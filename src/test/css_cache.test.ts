@@ -65,7 +65,7 @@ describe('save_cached_extraction', () => {
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(1);
+		expect(loaded!.v).toBe(2);
 		expect(loaded!.content_hash).toBe('abc123');
 		expect(loaded!.classes).toEqual([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 		expect(loaded!.diagnostics).toBeNull();
@@ -167,7 +167,7 @@ describe('save_cached_extraction', () => {
 		const loaded = await load_cached_extraction(cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(1);
+		expect(loaded!.v).toBe(2);
 		expect(loaded!.content_hash).toBe('hash');
 		expect(loaded!.classes).toBeNull();
 		expect(loaded!.diagnostics).toBeNull();
@@ -367,11 +367,13 @@ describe('delete_cached_extraction', () => {
 describe('from_cached_extraction', () => {
 	test('converts tuples to Map', () => {
 		const cached: CachedExtraction = {
-			v: 1,
+			v: 2,
 			content_hash: 'abc',
 			classes: [['box', [{file: 'f.ts', line: 1, column: 1}]]],
 			explicit_classes: null,
 			diagnostics: null,
+			elements: null,
+			css_variables: null,
 		};
 
 		const result = from_cached_extraction(cached);
@@ -383,11 +385,13 @@ describe('from_cached_extraction', () => {
 
 	test('handles null classes', () => {
 		const cached: CachedExtraction = {
-			v: 1,
+			v: 2,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
 			diagnostics: null,
+			elements: null,
+			css_variables: null,
 		};
 
 		const result = from_cached_extraction(cached);
@@ -398,11 +402,13 @@ describe('from_cached_extraction', () => {
 	test('handles empty classes array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 1,
+			v: 2,
 			content_hash: 'abc',
 			classes: [],
 			explicit_classes: null,
 			diagnostics: null,
+			elements: null,
+			css_variables: null,
 		};
 
 		const result = from_cached_extraction(cached);
@@ -421,11 +427,13 @@ describe('from_cached_extraction', () => {
 			},
 		];
 		const cached: CachedExtraction = {
-			v: 1,
+			v: 2,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
 			diagnostics,
+			elements: null,
+			css_variables: null,
 		};
 
 		const result = from_cached_extraction(cached);
@@ -435,14 +443,136 @@ describe('from_cached_extraction', () => {
 	test('handles empty diagnostics array', () => {
 		// Edge case: empty array instead of null (shouldn't happen in normal operation)
 		const cached: CachedExtraction = {
-			v: 1,
+			v: 2,
 			content_hash: 'abc',
 			classes: null,
 			explicit_classes: null,
 			diagnostics: [],
+			elements: null,
+			css_variables: null,
 		};
 
 		const result = from_cached_extraction(cached);
 		expect(result.diagnostics).toEqual([]);
+	});
+
+	test('handles elements and css_variables', () => {
+		const cached: CachedExtraction = {
+			v: 2,
+			content_hash: 'abc',
+			classes: null,
+			explicit_classes: null,
+			diagnostics: null,
+			elements: ['button', 'div'],
+			css_variables: ['text_color', 'bg_color'],
+		};
+
+		const result = from_cached_extraction(cached);
+		expect(result.elements).toBeInstanceOf(Set);
+		expect(result.elements?.has('button')).toBe(true);
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.css_variables).toBeInstanceOf(Set);
+		expect(result.css_variables?.has('text_color')).toBe(true);
+		expect(result.css_variables?.has('bg_color')).toBe(true);
+	});
+
+	test('handles null elements and css_variables', () => {
+		const cached: CachedExtraction = {
+			v: 2,
+			content_hash: 'abc',
+			classes: null,
+			explicit_classes: null,
+			diagnostics: null,
+			elements: null,
+			css_variables: null,
+		};
+
+		const result = from_cached_extraction(cached);
+		expect(result.elements).toBeNull();
+		expect(result.css_variables).toBeNull();
+	});
+});
+
+describe('v2 cache fields round-trip', () => {
+	test('saves and loads elements field', async () => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'elements_test.json');
+		const elements = new Set(['button', 'input', 'svg']);
+
+		await save_cached_extraction(cache_path, 'hash', null, null, null, elements, null);
+		const loaded = await load_cached_extraction(cache_path);
+
+		expect(loaded).not.toBeNull();
+		const result = from_cached_extraction(loaded!);
+		expect(result.elements).toBeInstanceOf(Set);
+		expect(result.elements?.size).toBe(3);
+		expect(result.elements?.has('button')).toBe(true);
+		expect(result.elements?.has('input')).toBe(true);
+		expect(result.elements?.has('svg')).toBe(true);
+	});
+
+	test('saves and loads css_variables field', async () => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'css_vars_test.json');
+		const css_variables = new Set(['color_a_5', 'space_md', 'text_color']);
+
+		await save_cached_extraction(cache_path, 'hash', null, null, null, null, css_variables);
+		const loaded = await load_cached_extraction(cache_path);
+
+		expect(loaded).not.toBeNull();
+		const result = from_cached_extraction(loaded!);
+		expect(result.css_variables).toBeInstanceOf(Set);
+		expect(result.css_variables?.size).toBe(3);
+		expect(result.css_variables?.has('color_a_5')).toBe(true);
+		expect(result.css_variables?.has('space_md')).toBe(true);
+		expect(result.css_variables?.has('text_color')).toBe(true);
+	});
+
+	test('saves and loads all v2 fields together', async () => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'all_v2_fields.json');
+		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
+		const explicit_classes = new Set(['explicit_class']);
+		const elements = new Set(['button', 'div']);
+		const css_variables = new Set(['color_a_5']);
+
+		await save_cached_extraction(
+			cache_path,
+			'hash123',
+			classes,
+			explicit_classes,
+			null,
+			elements,
+			css_variables,
+		);
+		const loaded = await load_cached_extraction(cache_path);
+
+		expect(loaded).not.toBeNull();
+		const result = from_cached_extraction(loaded!);
+		expect(result.classes?.has('box')).toBe(true);
+		expect(result.explicit_classes?.has('explicit_class')).toBe(true);
+		expect(result.elements?.has('button')).toBe(true);
+		expect(result.elements?.has('div')).toBe(true);
+		expect(result.css_variables?.has('color_a_5')).toBe(true);
+	});
+
+	test('converts empty elements and css_variables to null', async () => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'empty_v2_fields.json');
+
+		await save_cached_extraction(
+			cache_path,
+			'hash',
+			null,
+			null,
+			null,
+			new Set(), // empty elements
+			new Set(), // empty css_variables
+		);
+		const loaded = await load_cached_extraction(cache_path);
+
+		expect(loaded).not.toBeNull();
+		expect(loaded!.elements).toBeNull();
+		expect(loaded!.css_variables).toBeNull();
 	});
 });

@@ -48,6 +48,10 @@ import {
 } from './css_cache.js';
 import {type FileFilter, filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
+import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
+import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
+import {type ClassVariableIndex, get_default_class_variable_index} from './class_variable_index.js';
+import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
 
 /* eslint-disable no-console */
 
@@ -135,6 +139,34 @@ export interface VitePluginFuzCssOptions {
 	 * @default DEFAULT_CACHE_DIR
 	 */
 	cache_dir?: string;
+	/**
+	 * Whether to include base styles from style.css.
+	 * When enabled, only styles for detected elements are included.
+	 * @default true
+	 */
+	include_base_styles?: boolean;
+	/**
+	 * Whether to include theme variables from the variable graph.
+	 * When enabled, only variables needed by base styles and utility classes are included.
+	 * @default true
+	 */
+	include_theme_styles?: boolean;
+	/**
+	 * Specificity multiplier for theme CSS selectors.
+	 * Value of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
+	 * @default 1
+	 */
+	theme_specificity?: number;
+	/**
+	 * Additional HTML elements to always include styles for.
+	 * Useful for elements generated at runtime.
+	 */
+	include_elements?: Iterable<string>;
+	/**
+	 * Additional CSS variables to always include in theme output.
+	 * Useful for variables referenced dynamically.
+	 */
+	include_variables?: Iterable<string>;
 }
 
 /**
@@ -155,6 +187,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
 		cache_dir = DEFAULT_CACHE_DIR,
+		include_base_styles = true,
+		include_theme_styles = true,
+		theme_specificity = 1,
+		include_elements,
+		include_variables,
 	} = options;
 
 	// Merge class definitions (user definitions take precedence)
@@ -181,6 +218,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let project_root: string | null = null;
 	let hmr_timeout: ReturnType<typeof setTimeout> | null = null;
 	let last_generated_css: string | null = null;
+
+	// Unified CSS resources (loaded eagerly in buildStart when unified mode is enabled)
+	let style_rule_index: StyleRuleIndex | null = null;
+	let variable_graph: VariableDependencyGraph | null = null;
+	let class_variable_index: ClassVariableIndex | null = null;
 
 	/** Logs a warning message (works in both dev and build) */
 	const log_warn = (msg: string): void => {
@@ -223,9 +265,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			all_classes: classes,
 			all_classes_with_locations: locations,
 			explicit_classes,
+			all_elements,
+			all_css_variables,
 		} = css_classes.get_all();
 
-		const result = generate_classes_css({
+		const utility_result = generate_classes_css({
 			class_names: classes,
 			class_definitions: all_class_definitions,
 			interpreters: class_interpreters,
@@ -237,8 +281,42 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		// Collect all diagnostics: extraction + generation
 		const all_diagnostics: Array<Diagnostic> = [
 			...css_classes.get_diagnostics(),
-			...result.diagnostics,
+			...utility_result.diagnostics,
 		];
+
+		// Generate unified CSS if base or theme styles are enabled and resources are loaded
+		let final_css: string;
+		if (
+			(include_base_styles || include_theme_styles) &&
+			style_rule_index &&
+			variable_graph &&
+			class_variable_index
+		) {
+			const resolution = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: all_elements,
+				detected_classes: classes,
+				detected_css_variables: all_css_variables,
+				utility_variables_used: utility_result.variables_used,
+				include_elements,
+				include_variables,
+				theme_specificity,
+			});
+
+			// Add resolution diagnostics
+			all_diagnostics.push(...resolution.diagnostics);
+
+			final_css = generate_unified_css(resolution, utility_result.css, {
+				include_theme: include_theme_styles,
+				include_base: include_base_styles,
+				include_utilities: true,
+			});
+		} else {
+			// Utility-only mode (legacy behavior or resources not loaded yet)
+			final_css = utility_result.css;
+		}
 
 		// Separate errors and warnings
 		const errors = all_diagnostics.filter((d) => d.level === 'error');
@@ -249,7 +327,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (on_warning === 'throw') {
 				throw new CssGenerationError(warnings);
 			} else if (on_warning === 'log') {
-				for (const d of result.diagnostics.filter((d) => d.level === 'warning')) {
+				for (const d of utility_result.diagnostics.filter((d) => d.level === 'warning')) {
 					log_warn(`[fuz_css] ${d.class_name}: ${d.message}`);
 				}
 			}
@@ -262,12 +340,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				throw new CssGenerationError(errors);
 			}
 			// Log errors (extraction diagnostics already logged in transform)
-			for (const d of result.diagnostics.filter((d) => d.level === 'error')) {
+			for (const d of utility_result.diagnostics.filter((d) => d.level === 'error')) {
 				log_error(`[fuz_css] ${d.class_name}: ${d.message}`);
 			}
 		}
 
-		return `${FUZ_CSS_MARKER}\n\n${result.css}\n\n${FUZ_CSS_MARKER}`;
+		return `${FUZ_CSS_MARKER}\n\n${final_css}\n\n${FUZ_CSS_MARKER}`;
 	};
 
 	/**
@@ -354,6 +432,13 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		async buildStart() {
 			// Load CSS properties for validation
 			css_properties = await load_css_properties();
+
+			// Load unified CSS resources if unified mode is enabled
+			if (include_base_styles || include_theme_styles) {
+				style_rule_index = await load_style_rule_index();
+				variable_graph = build_default_variable_graph();
+				class_variable_index = get_default_class_variable_index();
+			}
 		},
 
 		resolveId(id) {
@@ -442,8 +527,9 @@ export {};
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {classes, explicit_classes, diagnostics} = from_cached_extraction(cached);
-					css_classes.add(id, classes, explicit_classes, diagnostics);
+					const {classes, explicit_classes, diagnostics, elements, css_variables} =
+						from_cached_extraction(cached);
+					css_classes.add(id, classes, explicit_classes, diagnostics, elements, css_variables);
 					hashes.set(id, hash);
 
 					if (virtual_module_loaded) {
@@ -474,7 +560,14 @@ export {};
 			}
 
 			// Update CssClasses
-			css_classes.add(id, result.classes, result.explicit_classes, result.diagnostics);
+			css_classes.add(
+				id,
+				result.classes,
+				result.explicit_classes,
+				result.diagnostics,
+				result.elements,
+				result.css_variables,
+			);
 			hashes.set(id, hash);
 
 			// Save to cache (fire and forget - don't block transform)
@@ -487,6 +580,8 @@ export {};
 							result.classes,
 							result.explicit_classes,
 							result.diagnostics,
+							result.elements,
+							result.css_variables,
 						),
 					)
 					.catch(() => {

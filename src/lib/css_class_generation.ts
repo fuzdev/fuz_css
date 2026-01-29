@@ -22,6 +22,7 @@ import {
 } from './css_ruleset_parser.js';
 import {resolve_class_definition} from './css_class_resolution.js';
 import {get_modifier} from './modifiers.js';
+import {extract_css_variables} from './css_variable_utils.js';
 
 //
 // CSS Utilities
@@ -112,6 +113,8 @@ export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
 export interface GenerateClassesCssResult {
 	css: string;
 	diagnostics: Array<GenerationDiagnostic>;
+	/** CSS variables used by the generated classes (without -- prefix) */
+	variables_used: Set<string>;
 }
 
 export interface GenerateClassesCssOptions {
@@ -143,6 +146,7 @@ export const generate_classes_css = (
 	} = options;
 	const interpreter_diagnostics: Array<InterpreterDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
+	const variables_used: Set<string> = new Set();
 
 	// Create interpreter context with access to all class definitions
 	const ctx: CssClassInterpreterContext = {
@@ -285,6 +289,10 @@ export const generate_classes_css = (
 			}
 			if (resolution_result.declaration) {
 				css += `.${escape_css_selector(c)} { ${resolution_result.declaration} }\n`;
+				// Collect variables from the declaration
+				for (const v of extract_css_variables(resolution_result.declaration)) {
+					variables_used.add(v);
+				}
 			}
 		} else if ('ruleset' in v) {
 			// Check for empty ruleset
@@ -302,6 +310,10 @@ export const generate_classes_css = (
 			}
 
 			css += v.ruleset.trim() + '\n';
+			// Collect variables from the ruleset
+			for (const variable of extract_css_variables(v.ruleset)) {
+				variables_used.add(variable);
+			}
 
 			// Validate ruleset and emit warnings
 			try {
@@ -357,5 +369,5 @@ export const generate_classes_css = (
 		// Note: Interpreted types are converted to declaration above, so no else clause needed
 	}
 
-	return {css, diagnostics};
+	return {css, diagnostics, variables_used};
 };

@@ -38,6 +38,18 @@ export class CssClasses {
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
 	#diagnostics_by_id: Map<string, Array<ExtractionDiagnostic>> = new Map();
 
+	/** HTML elements by file id */
+	#elements_by_id: Map<string, Set<string>> = new Map();
+
+	/** CSS variables by file id */
+	#css_variables_by_id: Map<string, Set<string>> = new Map();
+
+	/** Aggregated elements */
+	#all_elements: Set<string> = new Set();
+
+	/** Aggregated CSS variables */
+	#all_css_variables: Set<string> = new Set();
+
 	#dirty = true;
 
 	/**
@@ -62,12 +74,16 @@ export class CssClasses {
 	 * @param classes - Map of class names to their source locations, or null if none
 	 * @param explicit_classes - Classes from @fuz-classes comments, or null if none
 	 * @param diagnostics - Extraction diagnostics from this file, or null if none
+	 * @param elements - HTML elements found in the file, or null if none
+	 * @param css_variables - CSS variables referenced (without -- prefix), or null if none
 	 */
 	add(
 		id: string,
 		classes: Map<string, Array<SourceLocation>> | null,
 		explicit_classes?: Set<string> | null,
 		diagnostics?: Array<ExtractionDiagnostic> | null,
+		elements?: Set<string> | null,
+		css_variables?: Set<string> | null,
 	): void {
 		this.#dirty = true;
 		if (classes) {
@@ -86,6 +102,16 @@ export class CssClasses {
 			// Clear any old diagnostics for this file
 			this.#diagnostics_by_id.delete(id);
 		}
+		if (elements) {
+			this.#elements_by_id.set(id, elements);
+		} else {
+			this.#elements_by_id.delete(id);
+		}
+		if (css_variables) {
+			this.#css_variables_by_id.set(id, css_variables);
+		} else {
+			this.#css_variables_by_id.delete(id);
+		}
 	}
 
 	delete(id: string): void {
@@ -93,6 +119,8 @@ export class CssClasses {
 		this.#by_id.delete(id);
 		this.#explicit_by_id.delete(id);
 		this.#diagnostics_by_id.delete(id);
+		this.#elements_by_id.delete(id);
+		this.#css_variables_by_id.delete(id);
 	}
 
 	/**
@@ -129,6 +157,8 @@ export class CssClasses {
 		all_classes: Set<string>;
 		all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
 		explicit_classes: Set<string> | null;
+		all_elements: Set<string>;
+		all_css_variables: Set<string>;
 	} {
 		if (this.#dirty) {
 			this.#dirty = false;
@@ -138,6 +168,8 @@ export class CssClasses {
 			all_classes: this.#all,
 			all_classes_with_locations: this.#all_with_locations_including_includes,
 			explicit_classes: this.#explicit,
+			all_elements: this.#all_elements,
+			all_css_variables: this.#all_css_variables,
 		};
 	}
 
@@ -157,6 +189,8 @@ export class CssClasses {
 		this.#all_with_locations.clear();
 		this.#all_with_locations_including_includes.clear();
 		this.#explicit = null;
+		this.#all_elements.clear();
+		this.#all_css_variables.clear();
 
 		const exclude = this.#exclude_classes;
 
@@ -194,6 +228,20 @@ export class CssClasses {
 			for (const cls of explicit) {
 				if (exclude?.has(cls)) continue;
 				(this.#explicit ??= new Set()).add(cls);
+			}
+		}
+
+		// Aggregate elements from all files
+		for (const elements of this.#elements_by_id.values()) {
+			for (const element of elements) {
+				this.#all_elements.add(element);
+			}
+		}
+
+		// Aggregate CSS variables from all files
+		for (const css_variables of this.#css_variables_by_id.values()) {
+			for (const css_variable of css_variables) {
+				this.#all_css_variables.add(css_variable);
 			}
 		}
 	}

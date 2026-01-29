@@ -38,6 +38,10 @@ import {
 	from_cached_extraction,
 	compute_hash,
 } from './css_cache.js';
+import {type StyleRuleIndex, load_style_rule_index} from './style_rule_parser.js';
+import {type VariableDependencyGraph, build_default_variable_graph} from './variable_graph.js';
+import {type ClassVariableIndex, get_default_class_variable_index} from './class_variable_index.js';
+import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -175,6 +179,34 @@ export interface GenFuzCssOptions {
 	 * ```
 	 */
 	acorn_plugins?: Array<AcornPlugin>;
+	/**
+	 * Whether to include base styles from style.css.
+	 * When enabled, only styles for detected elements are included.
+	 * @default true
+	 */
+	include_base_styles?: boolean;
+	/**
+	 * Whether to include theme variables from the variable graph.
+	 * When enabled, only variables needed by base styles and utility classes are included.
+	 * @default true
+	 */
+	include_theme_styles?: boolean;
+	/**
+	 * Specificity multiplier for theme CSS selectors.
+	 * Value of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
+	 * @default 1
+	 */
+	theme_specificity?: number;
+	/**
+	 * Additional HTML elements to always include styles for.
+	 * Useful for elements generated at runtime.
+	 */
+	include_elements?: Iterable<string>;
+	/**
+	 * Additional CSS variables to always include in theme output.
+	 * Useful for variables referenced dynamically.
+	 */
+	include_variables?: Iterable<string>;
 }
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
@@ -193,11 +225,42 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 		acorn_plugins,
+		include_base_styles = true,
+		include_theme_styles = true,
+		theme_specificity = 1,
+		include_elements,
+		include_variables,
 	} = options;
 
 	// Convert to Sets for efficient lookup
 	const include_set = include_classes ? new Set(include_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
+
+	// Lazy-load expensive resources for unified CSS generation
+	let style_rule_index: StyleRuleIndex | null = null;
+	let variable_graph: VariableDependencyGraph | null = null;
+	let class_variable_index: ClassVariableIndex | null = null;
+
+	const get_style_index = async (): Promise<StyleRuleIndex> => {
+		if (!style_rule_index) {
+			style_rule_index = await load_style_rule_index();
+		}
+		return style_rule_index;
+	};
+
+	const get_variable_graph = (): VariableDependencyGraph => {
+		if (!variable_graph) {
+			variable_graph = build_default_variable_graph();
+		}
+		return variable_graph;
+	};
+
+	const get_class_variable_index = (): ClassVariableIndex => {
+		if (!class_variable_index) {
+			class_variable_index = get_default_class_variable_index();
+		}
+		return class_variable_index;
+	};
 
 	// Instance-level state for watch mode cleanup
 	let previous_paths: Set<string> | null = null;
@@ -363,7 +426,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			previous_paths = current_paths;
 
 			// Get all classes with locations (already filtered by exclude_classes)
-			const {all_classes, all_classes_with_locations, explicit_classes} = css_classes.get_all();
+			const {
+				all_classes,
+				all_classes_with_locations,
+				explicit_classes,
+				all_elements,
+				all_css_variables,
+			} = css_classes.get_all();
 
 			if (include_stats) {
 				log.info('File statistics:');
@@ -387,7 +456,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					: css_class_definitions
 				: user_class_definitions!;
 
-			const result = generate_classes_css({
+			const utility_result = generate_classes_css({
 				class_names: all_classes,
 				class_definitions: all_class_definitions,
 				interpreters: class_interpreters,
@@ -400,8 +469,49 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			// Collect all diagnostics: extraction + generation
 			const all_diagnostics: Array<Diagnostic> = [
 				...css_classes.get_diagnostics(),
-				...result.diagnostics,
+				...utility_result.diagnostics,
 			];
+
+			// Generate unified CSS if base or theme styles are enabled
+			let final_css: string;
+			if (include_base_styles || include_theme_styles) {
+				const resolution = resolve_css({
+					style_rule_index: await get_style_index(),
+					variable_graph: get_variable_graph(),
+					class_variable_index: get_class_variable_index(),
+					detected_elements: all_elements,
+					detected_classes: all_classes,
+					detected_css_variables: all_css_variables,
+					utility_variables_used: utility_result.variables_used,
+					include_elements,
+					include_variables,
+					theme_specificity,
+					include_stats,
+				});
+
+				// Log resolution stats if requested
+				if (include_stats && resolution.stats) {
+					log.info(
+						`[css_resolution] Elements: ${resolution.stats.element_count} (${resolution.stats.elements.join(', ')})`,
+					);
+					log.info(
+						`[css_resolution] Rules: ${resolution.stats.included_rules} of ${resolution.stats.total_rules}`,
+					);
+					log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
+				}
+
+				// Add resolution diagnostics
+				all_diagnostics.push(...resolution.diagnostics);
+
+				final_css = generate_unified_css(resolution, utility_result.css, {
+					include_theme: include_theme_styles,
+					include_base: include_base_styles,
+					include_utilities: true,
+				});
+			} else {
+				// Utility-only mode (legacy behavior)
+				final_css = utility_result.css;
+			}
 
 			// Separate errors and warnings
 			const errors = all_diagnostics.filter((d) => d.level === 'error');
@@ -448,7 +558,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				content_parts.push(performance_note);
 			}
 
-			content_parts.push(result.css);
+			content_parts.push(final_css);
 			content_parts.push(`/* ${banner} */`);
 
 			return content_parts.join('\n\n');

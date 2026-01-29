@@ -19,6 +19,7 @@ import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
 
 import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
+import {extract_css_variables} from './css_variable_utils.js';
 
 //
 // Types
@@ -48,6 +49,17 @@ export interface ExtractionResult {
 	tracked_vars: Set<string> | null;
 	/** Diagnostics from the extraction phase, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/**
+	 * HTML elements found in the file, or null if none.
+	 * Used for including only the style.css rules needed.
+	 */
+	elements: Set<string> | null;
+	/**
+	 * CSS variables referenced in style attributes/directives, or null if none.
+	 * Used for including only the theme variables needed.
+	 * Variable names are stored without the `--` prefix.
+	 */
+	css_variables: Set<string> | null;
 }
 
 /**
@@ -175,6 +187,10 @@ interface WalkState {
 	source_index: SourceIndex | null;
 	/** Diagnostics collected during extraction */
 	diagnostics: Array<ExtractionDiagnostic>;
+	/** HTML elements found in the file */
+	elements: Set<string>;
+	/** CSS variables referenced in style attributes (without -- prefix) */
+	css_variables: Set<string>;
 }
 
 /**
@@ -200,7 +216,7 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
  *
  * @param source - The Svelte file source code
  * @param file - File path for location tracking
- * @returns Extraction result with classes, tracked variables, and diagnostics
+ * @returns Extraction result with classes, tracked variables, elements, css_variables, and diagnostics
  */
 export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
 	const classes: Map<string, Array<SourceLocation>> = new Map();
@@ -209,6 +225,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 	const class_name_vars: Map<string, unknown> = new Map();
 	const diagnostics: Array<ExtractionDiagnostic> = [];
 	const source_index = new SourceIndex(source);
+	const elements: Set<string> = new Set();
+	const css_variables: Set<string> = new Set();
 
 	let ast: AST.Root;
 	try {
@@ -222,8 +240,15 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 			suggestion: 'Check for syntax errors in the file',
 			location: {file, line: 1, column: 1},
 		});
-		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
+		// Return with diagnostics (all collections empty, so null)
+		return {
+			classes: null,
+			explicit_classes: null,
+			tracked_vars: null,
+			diagnostics,
+			elements: null,
+			css_variables: null,
+		};
 	}
 
 	const state: WalkState = {
@@ -235,6 +260,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		file,
 		source_index,
 		diagnostics,
+		elements,
+		css_variables,
 	};
 
 	// Extract from @fuz-classes comments via AST (Svelte Comment nodes)
@@ -253,6 +280,11 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		walk_script(ast.module.content, state);
 	}
 
+	// Extract CSS variables from style block if present
+	if (ast.css) {
+		extract_css_variables_from_style(source, ast.css, state);
+	}
+
 	// Second pass: extract from tracked variables that weren't already processed
 	if (tracked_vars.size > 0 && (ast.instance || ast.module)) {
 		extract_from_tracked_vars(ast, state);
@@ -264,6 +296,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
 		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
+		elements: elements.size > 0 ? elements : null,
+		css_variables: css_variables.size > 0 ? css_variables : null,
 	};
 };
 
@@ -391,7 +425,7 @@ const extract_fuz_classes_from_script = (
  * @param source - The TS/JS file source code
  * @param file - File path for location tracking
  * @param acorn_plugins - Additional acorn plugins (e.g., acorn-jsx for React)
- * @returns Extraction result with classes, tracked variables, and diagnostics
+ * @returns Extraction result with classes, tracked variables, elements, css_variables, and diagnostics
  */
 export const extract_from_ts = (
 	source: string,
@@ -403,6 +437,8 @@ export const extract_from_ts = (
 	const tracked_vars: Set<string> = new Set();
 	const class_name_vars: Map<string, unknown> = new Map();
 	const diagnostics: Array<ExtractionDiagnostic> = [];
+	const elements: Set<string> = new Set();
+	const css_variables: Set<string> = new Set();
 
 	// Collect comments via acorn's onComment callback
 	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
@@ -437,8 +473,15 @@ export const extract_from_ts = (
 			suggestion: 'Check for syntax errors in the file',
 			location: {file, line: 1, column: 1},
 		});
-		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
+		// Return with diagnostics (all collections empty, so null)
+		return {
+			classes: null,
+			explicit_classes: null,
+			tracked_vars: null,
+			diagnostics,
+			elements: null,
+			css_variables: null,
+		};
 	}
 
 	// Process @fuz-classes comments
@@ -466,6 +509,8 @@ export const extract_from_ts = (
 		file,
 		source_index: null, // Not needed for TS files - acorn provides locations
 		diagnostics,
+		elements,
+		css_variables,
 	};
 
 	walk_script(ast, state);
@@ -482,6 +527,8 @@ export const extract_from_ts = (
 		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
 		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
+		elements: elements.size > 0 ? elements : null,
+		css_variables: css_variables.size > 0 ? css_variables : null,
 	};
 };
 
@@ -534,19 +581,23 @@ export const extract_css_classes_with_locations = (
 // Template AST walking
 
 /**
- * Walks the Svelte template AST to extract class names.
+ * Walks the Svelte template AST to extract class names and element names.
  */
 const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
-		// Handle regular elements and components
+		// Handle regular elements - capture element name
 		RegularElement(node, {state, next}) {
+			// Track HTML element names (not components, not svelte:* elements)
+			state.elements.add(node.name);
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// SvelteElement has dynamic tag, can't statically determine element
 		SvelteElement(node, {state, next}) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// Components are PascalCase - don't add to elements
 		SvelteComponent(node, {state, next}) {
 			process_element_attributes(node.attributes, state);
 			next();
@@ -565,7 +616,7 @@ const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 };
 
 /**
- * Processes attributes on an element to extract class names.
+ * Processes attributes on an element to extract class names and CSS variables.
  */
 const process_element_attributes = (
 	attributes: Array<AST.Attribute | AST.SpreadAttribute | AST.Directive | AST.AttachTag>,
@@ -581,6 +632,131 @@ const process_element_attributes = (
 		if (attr.type === 'ClassDirective') {
 			add_class(state, attr.name, location_from_offset(state, attr.start));
 		}
+
+		// Handle style attribute - extract CSS variables
+		if (attr.type === 'Attribute' && attr.name === 'style') {
+			extract_css_variables_from_style_attribute(attr.value, state);
+		}
+
+		// Handle style: directive - extract CSS variables
+		if (attr.type === 'StyleDirective') {
+			// The value could contain var(--*) references
+			extract_css_variables_from_style_directive(attr, state);
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a style attribute value.
+ */
+const extract_css_variables_from_style_attribute = (
+	value: AST.Attribute['value'],
+	state: WalkState,
+): void => {
+	if (value === true) return;
+
+	if (Array.isArray(value)) {
+		for (const part of value) {
+			if (part.type === 'Text') {
+				// Static text: extract var(--*) references
+				for (const v of extract_css_variables(part.data)) {
+					state.css_variables.add(v);
+				}
+			}
+			// Expression parts could contain var() in strings, but that's less common
+			// We'll focus on static text for now
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a style: directive.
+ */
+const extract_css_variables_from_style_directive = (
+	directive: AST.StyleDirective,
+	state: WalkState,
+): void => {
+	// The directive name itself might be a CSS variable being set (e.g., style:--foo)
+	if (directive.name.startsWith('--')) {
+		// This is setting a variable, not using one
+		// But the value might reference other variables
+	}
+
+	// Check if value is an array of text/expressions
+	if (Array.isArray(directive.value)) {
+		for (const part of directive.value) {
+			if (part.type === 'Text') {
+				for (const v of extract_css_variables(part.data)) {
+					state.css_variables.add(v);
+				}
+			}
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a JSX style attribute.
+ * Handles both string styles and object styles.
+ */
+const extract_css_variables_from_jsx_style = (value: unknown, state: WalkState): void => {
+	const node = value as {
+		type: string;
+		value?: string;
+		expression?: unknown;
+	};
+
+	// String literal style="color: var(--text)"
+	if (node.type === 'Literal' && typeof node.value === 'string') {
+		for (const v of extract_css_variables(node.value)) {
+			state.css_variables.add(v);
+		}
+	}
+	// Object expression style={{ color: 'var(--text)' }}
+	else if (node.type === 'JSXExpressionContainer' && node.expression) {
+		extract_css_variables_from_object_style(node.expression, state);
+	}
+};
+
+/**
+ * Extracts CSS variables from a style object expression.
+ */
+const extract_css_variables_from_object_style = (expr: unknown, state: WalkState): void => {
+	const node = expr as {
+		type: string;
+		properties?: Array<{
+			type: string;
+			value?: {type: string; value?: string};
+		}>;
+	};
+
+	if (node.type === 'ObjectExpression' && node.properties) {
+		for (const prop of node.properties) {
+			if (prop.type === 'Property' && prop.value?.type === 'Literal') {
+				const val = prop.value.value;
+				if (typeof val === 'string') {
+					for (const v of extract_css_variables(val)) {
+						state.css_variables.add(v);
+					}
+				}
+			}
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from the <style> block.
+ */
+const extract_css_variables_from_style = (
+	source: string,
+	css_ast: AST.CSS.StyleSheet,
+	state: WalkState,
+): void => {
+	// Extract the CSS content
+	const css_content = source.slice(css_ast.content.start, css_ast.content.end);
+
+	// Extract all var(--*) references from the CSS
+	for (const v of extract_css_variables(css_content)) {
+		state.css_variables.add(v);
 	}
 };
 
@@ -969,11 +1145,12 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 			next();
 		},
 
-		// JSX elements (React/Preact/Solid) - extract class-related attributes
+		// JSX elements (React/Preact/Solid) - extract class-related attributes and element names
 		// These are only present when acorn-jsx plugin is used
 		JSXElement(node, {state, next}) {
 			const element = node as unknown as {
 				openingElement: {
+					name?: {type: string; name?: string};
 					attributes: Array<{
 						type: string;
 						name?: {type: string; name?: string};
@@ -981,6 +1158,13 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 					}>;
 				};
 			};
+
+			// Track element names (lowercase = HTML element, PascalCase = component)
+			const tag_name = element.openingElement.name?.name;
+			if (tag_name && /^[a-z]/.test(tag_name)) {
+				state.elements.add(tag_name);
+			}
+
 			for (const attr of element.openingElement.attributes) {
 				if (attr.type === 'JSXAttribute' && attr.value) {
 					const attr_name = attr.name?.name;
@@ -991,6 +1175,10 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 					// classList (Solid) - object syntax like classList={{ active: isActive }}
 					else if (attr_name === 'classList') {
 						extract_from_jsx_attribute_value(attr.value, state);
+					}
+					// style attribute - extract CSS variables
+					else if (attr_name === 'style') {
+						extract_css_variables_from_jsx_style(attr.value, state);
 					}
 				}
 			}
