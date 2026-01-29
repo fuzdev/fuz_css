@@ -2926,7 +2926,7 @@
 					{
 						"name": "GenFuzCssOptions",
 						"kind": "type",
-						"source_line": 103,
+						"source_line": 107,
 						"type_signature": "GenFuzCssOptions",
 						"properties": [
 							{
@@ -3052,7 +3052,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 218,
+						"source_line": 222,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [

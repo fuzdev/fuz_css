@@ -95,6 +95,10 @@ interface FileExtraction {
 	explicit_classes: Set<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/** HTML elements found in the file, or null if none */
+	elements: Set<string> | null;
+	/** CSS variables referenced (without -- prefix), or null if none */
+	css_variables: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -388,6 +392,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						classes: result.classes,
 						explicit_classes: result.explicit_classes,
 						diagnostics: result.diagnostics,
+						elements: result.elements,
+						css_variables: result.css_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -396,9 +402,16 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			);
 
 			// Add to CssClasses (null = empty, so use truthiness check)
-			for (const {id, classes, explicit_classes, diagnostics} of extractions) {
-				if (classes || explicit_classes || diagnostics) {
-					css_classes.add(id, classes, explicit_classes, diagnostics);
+			for (const {
+				id,
+				classes,
+				explicit_classes,
+				diagnostics,
+				elements,
+				css_variables,
+			} of extractions) {
+				if (classes || explicit_classes || diagnostics || elements || css_variables) {
+					css_classes.add(id, classes, explicit_classes, diagnostics, elements, css_variables);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -414,13 +427,23 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			if (cache_writes.length > 0) {
 				await each_concurrent(
 					cache_writes,
-					async ({cache_path, content_hash, classes, explicit_classes, diagnostics}) => {
+					async ({
+						cache_path,
+						content_hash,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+					}) => {
 						await save_cached_extraction(
 							cache_path,
 							content_hash,
 							classes,
 							explicit_classes,
 							diagnostics,
+							elements,
+							css_variables,
 						);
 					},
 					cache_io_concurrency,

@@ -1,6 +1,4 @@
 <script lang="ts">
-	import '$lib/style.css';
-	import '$lib/theme.css';
 	import '$routes/fuz.css';
 	import '@fuzdev/fuz_code/theme.css';
 
