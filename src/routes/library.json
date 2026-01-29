@@ -191,7 +191,7 @@
 						"name": "collect_class_variables",
 						"kind": "function",
 						"doc_comment": "Collects all variables used by a set of classes.",
-						"source_line": 95,
+						"source_line": 93,
 						"type_signature": "(index: ClassVariableIndex, class_names: Iterable<string>): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of all variable names used by the classes",
@@ -212,7 +212,7 @@
 						"name": "get_classes_using_variable",
 						"kind": "function",
 						"doc_comment": "Gets all class names that use a specific variable.",
-						"source_line": 120,
+						"source_line": 118,
 						"type_signature": "(index: ClassVariableIndex, variable_name: string): string[]",
 						"return_type": "string[]",
 						"return_description": "Array of class names that use this variable",
@@ -452,6 +452,33 @@
 						"see_also": ["`generate_classes_css`"],
 						"source_line": 49,
 						"type_signature": "Record<string, CssClassDefinition | undefined>"
+					},
+					{
+						"name": "merge_class_definitions",
+						"kind": "function",
+						"doc_comment": "Merges user class definitions with the built-in defaults.\nUser definitions take precedence over defaults with the same name.",
+						"throws": [
+							{
+								"type": "Error",
+								"description": "if `include_defaults` is false and no user definitions provided"
+							}
+						],
+						"source_line": 329,
+						"type_signature": "(user_definitions: Record<string, CssClassDefinition | undefined> | undefined, include_defaults: boolean): Record<string, CssClassDefinition | undefined>",
+						"return_type": "Record<string, CssClassDefinition | undefined>",
+						"return_description": "Merged class definitions",
+						"parameters": [
+							{
+								"name": "user_definitions",
+								"type": "Record<string, CssClassDefinition | undefined> | undefined",
+								"description": "- User-provided class definitions to merge"
+							},
+							{
+								"name": "include_defaults",
+								"type": "boolean",
+								"description": "- Whether to include built-in definitions"
+							}
+						]
 					}
 				],
 				"module_comment": "Built-in CSS class definitions combining token classes and composites.\n\nToken classes map to CSS variables (design tokens).\nFor other CSS properties, use CSS-literal syntax like `display:flex` or `position:absolute`.",

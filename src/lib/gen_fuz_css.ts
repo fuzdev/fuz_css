@@ -26,7 +26,7 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter,
 } from './css_class_generation.js';
-import {css_class_definitions} from './css_class_definitions.js';
+import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
@@ -243,15 +243,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const include_set = include_classes ? new Set(include_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
-	// Validate and compute merged class definitions upfront
-	if (!include_default_definitions && !user_class_definitions) {
-		throw new Error('class_definitions is required when include_default_definitions is false');
-	}
-	const all_class_definitions = include_default_definitions
-		? user_class_definitions
-			? {...css_class_definitions, ...user_class_definitions}
-			: css_class_definitions
-		: user_class_definitions!;
+	// Merge class definitions upfront (validates that definitions exist when needed)
+	const all_class_definitions = merge_class_definitions(
+		user_class_definitions,
+		include_default_definitions,
+	);
 
 	// Lazy-load expensive resources (cached per generator instance)
 	let css_properties: Set<string> | null = null;

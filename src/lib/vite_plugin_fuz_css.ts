@@ -34,7 +34,7 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter,
 } from './css_class_generation.js';
-import {css_class_definitions} from './css_class_definitions.js';
+import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
@@ -201,15 +201,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		include_all_variables,
 	} = options;
 
-	// Merge class definitions (user definitions take precedence)
-	if (!include_default_definitions && !user_class_definitions) {
-		throw new Error('class_definitions is required when include_default_definitions is false');
-	}
-	const all_class_definitions = include_default_definitions
-		? user_class_definitions
-			? {...css_class_definitions, ...user_class_definitions}
-			: css_class_definitions
-		: user_class_definitions!;
+	// Merge class definitions (validates that definitions exist when needed)
+	const all_class_definitions = merge_class_definitions(
+		user_class_definitions,
+		include_default_definitions,
+	);
 
 	// Convert to Sets for efficient lookup
 	const include_set = include_classes ? new Set(include_classes) : null;
