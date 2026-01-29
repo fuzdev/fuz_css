@@ -2,7 +2,7 @@ import {test, expect, describe} from 'vitest';
 
 import {
 	build_variable_graph,
-	build_default_variable_graph,
+	build_variable_graph_from_options,
 	resolve_variables_transitive,
 	generate_theme_css,
 	get_all_variable_names,
@@ -465,9 +465,9 @@ describe('utility functions', () => {
 	});
 });
 
-describe('build_default_variable_graph', () => {
+describe('build_variable_graph_from_options', () => {
 	test('loads actual variables', () => {
-		const graph = build_default_variable_graph();
+		const graph = build_variable_graph_from_options(undefined);
 
 		expect(graph.variables.size).toBeGreaterThan(100);
 
@@ -481,7 +481,7 @@ describe('build_default_variable_graph', () => {
 	});
 
 	test('resolves common patterns', () => {
-		const graph = build_default_variable_graph();
+		const graph = build_variable_graph_from_options(undefined);
 
 		const result = resolve_variables_transitive(graph, ['text_color']);
 
@@ -490,7 +490,7 @@ describe('build_default_variable_graph', () => {
 	});
 
 	test('resolves color chain', () => {
-		const graph = build_default_variable_graph();
+		const graph = build_variable_graph_from_options(undefined);
 
 		const result = resolve_variables_transitive(graph, ['color_a_50']);
 

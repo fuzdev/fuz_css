@@ -80,21 +80,6 @@ export const build_variable_graph = (
 };
 
 /**
- * Builds the default variable graph from the fuz_css default_variables.
- * Uses a cached hash based on the variables array.
- */
-export const build_default_variable_graph = (): VariableDependencyGraph => {
-	// Create a simple hash from the variable names and values
-	// This is deterministic for the same input
-	const content = default_variables
-		.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`)
-		.join('|');
-	const content_hash = compute_hash_sync(content);
-
-	return build_variable_graph(default_variables, content_hash);
-};
-
-/**
  * Result from transitive variable resolution.
  */
 export interface ResolveVariablesResult {
