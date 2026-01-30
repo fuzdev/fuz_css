@@ -1,7 +1,10 @@
 import {expect} from 'vitest';
 
 import type {ExtractionResult} from '$lib/css_class_extractor.js';
-import type {SourceLocation} from '$lib/diagnostics.js';
+import {loc} from './test_helpers.js';
+
+// Re-export loc for consumers that import from this file
+export {loc};
 
 /**
  * Helper to assert extracted class names match expected values.
@@ -23,15 +26,6 @@ export const class_set_equal = (result: Set<string> | null, expected: Array<stri
 	const actual = result ? [...result] : [];
 	expect(actual).toEqual(expected);
 };
-
-/**
- * Factory for SourceLocation.
- */
-export const loc = (file = 'test.ts', line = 1, column = 1): SourceLocation => ({
-	file,
-	line,
-	column,
-});
 
 /**
  * Wrap script content in Svelte template.

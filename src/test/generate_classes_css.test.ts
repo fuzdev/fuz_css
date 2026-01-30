@@ -381,7 +381,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, ['.aaa', '.zzz', '.mmm']);
+			expect_css_order(result.css, '.aaa', '.zzz', '.mmm');
 		});
 
 		test('sorts unknown classes alphabetically at end', () => {
@@ -412,7 +412,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, ['.int-aaa', '.int-bbb', '.int-ccc']);
+			expect_css_order(result.css, '.int-aaa', '.int-bbb', '.int-ccc');
 		});
 	});
 

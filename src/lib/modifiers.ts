@@ -217,10 +217,13 @@ export const extract_balanced_parens = (segment: string, prefix: string): string
 };
 
 /**
- * Known CSS math/value functions that are valid in media query values.
+ * Known CSS functions that are valid in media query values.
  * These don't start with digits but are valid starts for breakpoint values.
+ *
+ * Note: `var()` is intentionally excluded - CSS custom properties are NOT
+ * supported in media queries (they're evaluated before variables resolve).
  */
-const CSS_FUNCTION_PREFIXES = ['calc(', 'clamp(', 'min(', 'max(', 'var('];
+const CSS_FUNCTION_PREFIXES = ['calc(', 'clamp(', 'min(', 'max(', 'env('];
 
 /**
  * Checks if a value is valid for an arbitrary breakpoint.

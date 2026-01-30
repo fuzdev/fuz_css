@@ -178,15 +178,19 @@ export const expect_css_not_contains = (css: string, ...patterns: Array<string>)
 };
 
 /**
- * Asserts that selectors appear in a specific order in the CSS output.
- * Useful for testing cascade/specificity ordering.
+ * Asserts that patterns appear in a specific order in the string.
+ * Useful for testing cascade/specificity ordering in CSS.
+ *
+ * @example
+ * expect_css_order(result.css, '.aaa', '.zzz', '.mmm');
+ * expect_css_order(result.base_css, 'color: blue', 'color: darkblue');
  */
-export const expect_css_order = (css: string, selectors: Array<string>): void => {
-	const indices = selectors.map((s) => ({selector: s, idx: css.indexOf(s)}));
+export const expect_css_order = (css: string, ...patterns: Array<string>): void => {
+	const indices = patterns.map((p) => ({pattern: p, idx: css.indexOf(p)}));
 
-	// First, check all selectors exist
-	for (const {selector, idx} of indices) {
-		expect(idx, `Expected CSS to contain "${selector}"`).toBeGreaterThan(-1);
+	// First, check all patterns exist
+	for (const {pattern, idx} of indices) {
+		expect(idx, `Expected string to contain "${pattern}"`).toBeGreaterThan(-1);
 	}
 
 	// Then check ordering
@@ -195,7 +199,7 @@ export const expect_css_order = (css: string, selectors: Array<string>): void =>
 		const next = indices[i + 1]!;
 		expect(
 			current.idx,
-			`Expected "${current.selector}" to appear before "${next.selector}"`,
+			`Expected "${current.pattern}" to appear before "${next.pattern}"`,
 		).toBeLessThan(next.idx);
 	}
 };

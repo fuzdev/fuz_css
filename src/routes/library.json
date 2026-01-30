@@ -3410,7 +3410,7 @@
 						"examples": [
 							"parse_arbitrary_breakpoint(\"min-width(800px)\") // \"@media (width >= 800px)\"\nparse_arbitrary_breakpoint(\"min-width(calc(100vw - 200px))\") // \"@media (width >= calc(100vw - 200px))\"\nparse_arbitrary_breakpoint(\"min-width(px)\") // null (invalid - no digit or function)"
 						],
-						"source_line": 249,
+						"source_line": 252,
 						"type_signature": "(segment: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The CSS media query or null if not an arbitrary breakpoint",
@@ -3425,7 +3425,7 @@
 						"name": "parse_parameterized_state",
 						"kind": "function",
 						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).",
-						"source_line": 268,
+						"source_line": 271,
 						"type_signature": "(segment: string): { name: string; css: string; type: \"state\"; } | null",
 						"return_type": "{ name: string; css: string; type: \"state\"; } | null",
 						"return_description": "Object with name (including parameter) and CSS, or null if not parameterized",
@@ -3440,7 +3440,7 @@
 						"name": "get_modifier",
 						"kind": "function",
 						"doc_comment": "Gets the modifier definition for a segment.\nHandles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).",
-						"source_line": 316,
+						"source_line": 319,
 						"type_signature": "(segment: string): (ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_type": "(ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_description": "The modifier definition or null if not a known modifier",
@@ -3455,7 +3455,7 @@
 						"name": "get_all_modifier_names",
 						"kind": "function",
 						"doc_comment": "Gets all modifier names for error message suggestions.",
-						"source_line": 358,
+						"source_line": 361,
 						"type_signature": "(): string[]",
 						"return_type": "string[]",
 						"parameters": []

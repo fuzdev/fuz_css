@@ -29,7 +29,7 @@ import {
 	parse_parameterized_state,
 	extract_balanced_parens,
 } from '$lib/modifiers.js';
-import {expect_ok, expect_error} from './test_helpers.js';
+import {assert_result_ok, assert_result_error} from './test_helpers.js';
 
 // CSS properties loaded before tests run
 let css_properties: Set<string>;
@@ -38,29 +38,23 @@ beforeAll(async () => {
 	css_properties = await load_css_properties();
 });
 
-// Specialized helpers for css_literal result types (return typed values for chaining)
-const assert_parse_ok = (
-	result: ReturnType<typeof parse_css_literal>,
-): {parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null} => {
-	expect_ok(result, 'Expected parse result to be ok');
-	return result as {
-		ok: true;
-		parsed: ParsedCssLiteral;
-		diagnostics: Array<InterpreterDiagnostic> | null;
-	};
-};
+// Type aliases for result types - makes helpers more readable
+type ParseOkResult = {parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null};
+type ParseErrorResult = {error: InterpreterDiagnostic};
+type InterpretOkResult = {output: CssLiteralOutput};
 
-const assert_parse_error = (
-	result: ReturnType<typeof parse_css_literal>,
-): {error: InterpreterDiagnostic} => {
-	expect_error(result, 'Expected parse result to be error');
-	return result as {ok: false; error: InterpreterDiagnostic};
-};
+// Specialized helpers using generic assert_result_ok/assert_result_error
+const assert_parse_ok = (result: ReturnType<typeof parse_css_literal>): ParseOkResult =>
+	assert_result_ok<ParseOkResult, ParseErrorResult>(result, 'Expected parse result to be ok');
 
-const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput => {
-	expect_ok(result, 'Expected interpret result to be ok');
-	return (result as {ok: true; output: CssLiteralOutput}).output;
-};
+const assert_parse_error = (result: ReturnType<typeof parse_css_literal>): ParseErrorResult =>
+	assert_result_error<ParseOkResult, ParseErrorResult>(result, 'Expected parse result to be error');
+
+const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput =>
+	assert_result_ok<InterpretOkResult, {error: InterpreterDiagnostic}>(
+		result,
+		'Expected interpret result to be ok',
+	).output;
 
 describe('is_possible_css_literal', () => {
 	test.each([
@@ -620,36 +614,40 @@ describe('generate_css_literal_simple - Unicode', () => {
 // Composition Support Tests
 //
 
+// Type aliases for modifier/literal result types
+type ModOkResult = {modifiers: ExtractedModifiers; remaining: Array<string>};
+type ModErrorResult = {error: InterpreterDiagnostic};
+type LiteralOkResult = {declaration: string; warnings: Array<InterpreterDiagnostic> | null};
+type LiteralErrorResult = {error: InterpreterDiagnostic | null};
+
 // Helper to assert modifier extraction result is ok
-const assert_mod_ok = (
-	result: ModifierExtractionResult,
-): {modifiers: ExtractedModifiers; remaining: Array<string>} => {
-	expect_ok(result, 'Expected modifier extraction to be ok');
-	return result as {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>};
-};
+const assert_mod_ok = (result: ModifierExtractionResult): ModOkResult =>
+	assert_result_ok<ModOkResult, ModErrorResult>(result, 'Expected modifier extraction to be ok');
 
 // Helper to assert literal resolution result is ok
-const assert_literal_ok = (
-	result: LiteralResolutionResult,
-): {declaration: string; warnings: Array<InterpreterDiagnostic> | null} => {
-	expect_ok(result, 'Expected literal resolution to be ok');
-	return result as {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null};
-};
+const assert_literal_ok = (result: LiteralResolutionResult): LiteralOkResult =>
+	assert_result_ok<LiteralOkResult, LiteralErrorResult>(
+		result,
+		'Expected literal resolution to be ok',
+	);
 
 // Helper to assert literal resolution result is not a literal (error with null)
 const assert_literal_not_literal = (result: LiteralResolutionResult): void => {
-	expect_error(result, 'Expected literal resolution to fail');
-	// After expect_error, TypeScript narrows result.ok to false
-	expect((result as {ok: false; error: InterpreterDiagnostic | null}).error).toBeNull();
+	const err = assert_result_error<LiteralOkResult, LiteralErrorResult>(
+		result,
+		'Expected literal resolution to fail',
+	);
+	expect(err.error).toBeNull();
 };
 
 // Helper to assert literal resolution result is error with non-null error
 const assert_literal_has_error = (result: LiteralResolutionResult): InterpreterDiagnostic => {
-	expect_error(result, 'Expected literal resolution to fail');
-	// After expect_error, TypeScript narrows result.ok to false
-	const error_result = result as {ok: false; error: InterpreterDiagnostic | null};
-	expect(error_result.error).not.toBeNull();
-	return error_result.error!;
+	const err = assert_result_error<LiteralOkResult, LiteralErrorResult>(
+		result,
+		'Expected literal resolution to fail',
+	);
+	expect(err.error).not.toBeNull();
+	return err.error!;
 };
 
 describe('has_modifiers', () => {
@@ -805,13 +803,17 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		['min-width()', 'empty value'],
 		['min-width(px)', 'no leading digit'],
 		['min-width(rem)', 'unit without number'],
+		['min-width(.5rem)', 'decimal without leading zero'],
+		['min-width(-100px)', 'negative value'],
 		['min-width(800px', 'unclosed paren'],
 		['min-width)', 'missing opening paren'],
+		['min-width())', 'extra closing paren'],
 		['minwidth(800px)', 'missing hyphen'],
 		['min-Width(800px)', 'wrong case'],
 		['max-width(vh)', 'max-width without number'],
 		['min-width(calc(100vw)', 'unbalanced calc'],
 		['min-width(800px)extra', 'trailing characters'],
+		['min-width(var(--breakpoint))', 'var() not supported in media queries'],
 	] as const)('%s returns null for %s', (input, _desc) => {
 		expect(parse_arbitrary_breakpoint(input)).toBeNull();
 	});
@@ -830,7 +832,7 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		expect(parse_arbitrary_breakpoint(input)).toBe(expected);
 	});
 
-	// Nested parentheses - calc, clamp, min, max
+	// Nested parentheses - calc, clamp, min, max, env
 	test.each([
 		[
 			'min-width(calc(100vw - 200px))',
@@ -850,6 +852,11 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 			'min-width(calc(min(100vw, 1200px) - 2rem))',
 			'@media (width >= calc(min(100vw, 1200px) - 2rem))',
 			'nested functions',
+		],
+		[
+			'min-width(env(safe-area-inset-left))',
+			'@media (width >= env(safe-area-inset-left))',
+			'env function',
 		],
 	] as const)('%s → %s (%s)', (input, expected, _desc) => {
 		expect(parse_arbitrary_breakpoint(input)).toBe(expected);

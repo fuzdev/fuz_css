@@ -13,6 +13,7 @@ import {
 import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
 import {default_fs_operations} from '$lib/operations_defaults.js';
 import {create_mock_fs_state, create_mock_fs_ops} from './fixtures/mock_operations.js';
+import {loc, make_classes, make_extraction_diagnostic as make_diagnostic} from './test_helpers.js';
 
 const ops = default_fs_operations;
 
@@ -23,21 +24,6 @@ const CACHE_DIR = '/tmp/fuz_css_cache_test/project/.fuz/cache/css';
 //
 // Test data factories
 //
-
-const loc = (file = 'test.ts', line = 1, column = 1): SourceLocation => ({file, line, column});
-
-const make_classes = (
-	entries: Array<[string, Array<SourceLocation>]>,
-): Map<string, Array<SourceLocation>> => new Map(entries);
-
-const make_diagnostic = (overrides: Partial<ExtractionDiagnostic> = {}): ExtractionDiagnostic => ({
-	phase: 'extraction',
-	level: 'warning',
-	message: 'test message',
-	suggestion: null,
-	location: loc(),
-	...overrides,
-});
 
 const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtraction => ({
 	v: 2,

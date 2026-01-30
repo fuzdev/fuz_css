@@ -557,7 +557,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, ['.hover\\:border_color_b_50', '.active\\:border_color_a_50']);
+			expect_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
 		});
 
 		test('visited < focus < hover < active ordering', () => {
@@ -568,12 +568,13 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, [
+			expect_css_order(
+				result.css,
 				'.visited\\:p_sm',
 				'.focus\\:p_md',
 				'.hover\\:p_lg',
 				'.active\\:p_xl',
-			]);
+			);
 		});
 
 		test('non-interaction states use alphabetical order', () => {
@@ -585,7 +586,7 @@ describe('modified_class_interpreter', () => {
 			});
 
 			// Alphabetical: even < first < odd
-			expect_css_order(result.css, ['.even\\:p_lg', '.first\\:p_sm', '.odd\\:p_md']);
+			expect_css_order(result.css, '.even\\:p_lg', '.first\\:p_sm', '.odd\\:p_md');
 		});
 	});
 
