@@ -136,11 +136,11 @@
 				"path": "class_variable_index.ts",
 				"declarations": [
 					{
-						"name": "ClassVariableIndex",
+						"name": "CssClassVariableIndex",
 						"kind": "type",
 						"doc_comment": "Index mapping class names to their CSS variable dependencies.",
 						"source_line": 17,
-						"type_signature": "ClassVariableIndex",
+						"type_signature": "CssClassVariableIndex",
 						"properties": [
 							{
 								"name": "by_class",
@@ -155,9 +155,9 @@
 						"kind": "function",
 						"doc_comment": "Builds an index of CSS variables used by each class definition.",
 						"source_line": 28,
-						"type_signature": "(definitions: Record<string, CssClassDefinition | undefined>): ClassVariableIndex",
-						"return_type": "ClassVariableIndex",
-						"return_description": "ClassVariableIndex with variable lookups",
+						"type_signature": "(definitions: Record<string, CssClassDefinition | undefined>): CssClassVariableIndex",
+						"return_type": "CssClassVariableIndex",
+						"return_description": "CssClassVariableIndex with variable lookups",
 						"parameters": [
 							{
 								"name": "definitions",
@@ -171,13 +171,13 @@
 						"kind": "function",
 						"doc_comment": "Gets variables used by a specific class.",
 						"source_line": 81,
-						"type_signature": "(index: ClassVariableIndex, class_name: string): Set<string> | null",
+						"type_signature": "(index: CssClassVariableIndex, class_name: string): Set<string> | null",
 						"return_type": "Set<string> | null",
 						"return_description": "Set of variable names (without -- prefix), or null if class not found",
 						"parameters": [
 							{
 								"name": "index",
-								"type": "ClassVariableIndex",
+								"type": "CssClassVariableIndex",
 								"description": "- The class variable index"
 							},
 							{
@@ -192,13 +192,13 @@
 						"kind": "function",
 						"doc_comment": "Collects all variables used by a set of classes.",
 						"source_line": 93,
-						"type_signature": "(index: ClassVariableIndex, class_names: Iterable<string>): Set<string>",
+						"type_signature": "(index: CssClassVariableIndex, class_names: Iterable<string>): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of all variable names used by the classes",
 						"parameters": [
 							{
 								"name": "index",
-								"type": "ClassVariableIndex",
+								"type": "CssClassVariableIndex",
 								"description": "- The class variable index"
 							},
 							{
@@ -213,13 +213,13 @@
 						"kind": "function",
 						"doc_comment": "Gets all class names that use a specific variable.",
 						"source_line": 118,
-						"type_signature": "(index: ClassVariableIndex, variable_name: string): string[]",
+						"type_signature": "(index: CssClassVariableIndex, variable_name: string): string[]",
 						"return_type": "string[]",
 						"return_description": "Array of class names that use this variable",
 						"parameters": [
 							{
 								"name": "index",
-								"type": "ClassVariableIndex",
+								"type": "CssClassVariableIndex",
 								"description": "- The class variable index"
 							},
 							{
@@ -2009,11 +2009,11 @@
 						"type_signature": "VariablesOption"
 					},
 					{
-						"name": "UnifiedCssOptions",
+						"name": "CssOutputOptions",
 						"kind": "type",
-						"doc_comment": "Options for unified CSS generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
+						"doc_comment": "Options for CSS output generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
 						"source_line": 103,
-						"type_signature": "UnifiedCssOptions",
+						"type_signature": "CssOutputOptions",
 						"properties": [
 							{
 								"name": "base_css",
@@ -2110,7 +2110,7 @@
 						"extends": [
 							"CssExtractionOptions",
 							"CssClassOptions",
-							"UnifiedCssOptions",
+							"CssOutputOptions",
 							"CssDiagnosticsOptions",
 							"CssCacheOptions"
 						],
@@ -2608,7 +2608,7 @@
 							{
 								"name": "class_variable_index",
 								"kind": "variable",
-								"type_signature": "ClassVariableIndex",
+								"type_signature": "CssClassVariableIndex",
 								"doc_comment": "Index mapping classes to variables"
 							},
 							{
@@ -3182,7 +3182,7 @@
 						"name": "GenFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
-						"source_line": 101,
+						"source_line": 97,
 						"type_signature": "GenFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": [
@@ -3215,7 +3215,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 125,
+						"source_line": 121,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -4292,11 +4292,11 @@
 				"path": "variable_graph.ts",
 				"declarations": [
 					{
-						"name": "VariableInfo",
+						"name": "StyleVariableInfo",
 						"kind": "type",
 						"doc_comment": "Information about a single style variable and its dependencies.",
-						"source_line": 26,
-						"type_signature": "VariableInfo",
+						"source_line": 23,
+						"type_signature": "StyleVariableInfo",
 						"properties": [
 							{
 								"name": "name",
@@ -4334,13 +4334,13 @@
 						"name": "VariableDependencyGraph",
 						"kind": "type",
 						"doc_comment": "Dependency graph for style variables.",
-						"source_line": 42,
+						"source_line": 39,
 						"type_signature": "VariableDependencyGraph",
 						"properties": [
 							{
 								"name": "variables",
 								"kind": "variable",
-								"type_signature": "Map<string, VariableInfo>",
+								"type_signature": "Map<string, StyleVariableInfo>",
 								"doc_comment": "Map from variable name to its info"
 							},
 							{
@@ -4355,7 +4355,7 @@
 						"name": "build_variable_graph",
 						"kind": "function",
 						"doc_comment": "Builds a dependency graph from an array of style variables.",
-						"source_line": 56,
+						"source_line": 53,
 						"type_signature": "(variables: { name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[], content_hash: string): VariableDependencyGraph",
 						"return_type": "VariableDependencyGraph",
 						"return_description": "VariableDependencyGraph",
@@ -4376,7 +4376,7 @@
 						"name": "ResolveVariablesResult",
 						"kind": "type",
 						"doc_comment": "Result from transitive variable resolution.",
-						"source_line": 84,
+						"source_line": 81,
 						"type_signature": "ResolveVariablesResult",
 						"properties": [
 							{
@@ -4403,7 +4403,7 @@
 						"name": "resolve_variables_transitive",
 						"kind": "function",
 						"doc_comment": "Resolves variables transitively using DFS with cycle detection.\nWhen a variable is requested, all variables it depends on are included.\nBoth light and dark dependencies are always resolved together.",
-						"source_line": 102,
+						"source_line": 99,
 						"type_signature": "(graph: VariableDependencyGraph, initial_variables: Iterable<string>): ResolveVariablesResult",
 						"return_type": "ResolveVariablesResult",
 						"return_description": "ResolveVariablesResult with all transitive dependencies",
@@ -4424,7 +4424,7 @@
 						"name": "generate_theme_css",
 						"kind": "function",
 						"doc_comment": "Generates theme CSS for the resolved variables.",
-						"source_line": 169,
+						"source_line": 166,
 						"type_signature": "(graph: VariableDependencyGraph, resolved_variables: Set<string>, specificity?: number): { light_css: string; dark_css: string; }",
 						"return_type": "{ light_css: string; dark_css: string; }",
 						"return_description": "Object with light_css and dark_css strings",
@@ -4451,7 +4451,7 @@
 						"name": "get_all_variable_names",
 						"kind": "function",
 						"doc_comment": "Gets all variable names from the graph.",
-						"source_line": 215,
+						"source_line": 212,
 						"type_signature": "(graph: VariableDependencyGraph): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of all variable names in the graph",
@@ -4467,7 +4467,7 @@
 						"name": "has_variable",
 						"kind": "function",
 						"doc_comment": "Checks if a variable exists in the graph.",
-						"source_line": 226,
+						"source_line": 223,
 						"type_signature": "(graph: VariableDependencyGraph, name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if the variable exists in the graph",
@@ -4488,7 +4488,7 @@
 						"name": "find_similar_variable",
 						"kind": "function",
 						"doc_comment": "Finds the most similar variable in the graph to the given name.\nReturns null if no variable exceeds the similarity threshold.",
-						"source_line": 253,
+						"source_line": 250,
 						"type_signature": "(graph: VariableDependencyGraph, name: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The most similar variable name, or null if none are similar enough",
@@ -4509,7 +4509,7 @@
 						"name": "resolve_variables_option",
 						"kind": "function",
 						"doc_comment": "Resolves a variables option to a concrete array of style variables.",
-						"source_line": 277,
+						"source_line": 274,
 						"type_signature": "(variables: VariablesOption): { name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]",
 						"return_type": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]",
 						"return_description": "Resolved array of style variables, or empty array if null",
@@ -4525,7 +4525,7 @@
 						"name": "build_variable_graph_from_options",
 						"kind": "function",
 						"doc_comment": "Builds a variable dependency graph from a variables option.\nHandles all option forms: undefined (defaults), null (disabled), array, or callback.",
-						"source_line": 291,
+						"source_line": 288,
 						"type_signature": "(variables: VariablesOption): VariableDependencyGraph",
 						"return_type": "VariableDependencyGraph",
 						"return_description": "VariableDependencyGraph built from the resolved variables",

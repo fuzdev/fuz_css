@@ -13,7 +13,7 @@ import type {
 	CssGeneratorBaseOptions,
 	CssExtractionOptions,
 	CssClassOptions,
-	UnifiedCssOptions,
+	CssOutputOptions,
 	CssDiagnosticsOptions,
 	CssCacheOptions,
 } from '../lib/css_plugin_options.js';
@@ -33,7 +33,7 @@ describe('shared options interface', () => {
 			class_interpreters: [],
 			additional_classes: ['p_md'],
 			exclude_classes: ['hidden'],
-			// UnifiedCssOptions
+			// CssOutputOptions
 			base_css: undefined,
 			variables: undefined,
 			treeshake_base_css: true,
@@ -98,7 +98,7 @@ describe('shared options interface', () => {
 			exclude_classes: ['test-class'],
 		};
 
-		const unified: UnifiedCssOptions = {
+		const output: CssOutputOptions = {
 			base_css: null, // disabled
 			variables: null, // disabled
 		};
@@ -114,24 +114,24 @@ describe('shared options interface', () => {
 
 		expect(extraction).toBeDefined();
 		expect(class_opts).toBeDefined();
-		expect(unified).toBeDefined();
+		expect(output).toBeDefined();
 		expect(diagnostics).toBeDefined();
 		expect(cache).toBeDefined();
 	});
 
 	test('base_css accepts string | null | undefined', () => {
 		// Test undefined (default behavior)
-		const default_opts: UnifiedCssOptions = {};
+		const default_opts: CssOutputOptions = {};
 		expect(default_opts.base_css).toBeUndefined();
 
 		// Test null (disabled)
-		const disabled_opts: UnifiedCssOptions = {
+		const disabled_opts: CssOutputOptions = {
 			base_css: null,
 		};
 		expect(disabled_opts.base_css).toBeNull();
 
 		// Test string (custom CSS)
-		const custom_opts: UnifiedCssOptions = {
+		const custom_opts: CssOutputOptions = {
 			base_css: 'button { color: red; }',
 		};
 		expect(typeof custom_opts.base_css).toBe('string');
@@ -139,23 +139,23 @@ describe('shared options interface', () => {
 
 	test('variables accepts StyleVariable[] | null | undefined | callback', () => {
 		// Test undefined (default behavior)
-		const default_opts: UnifiedCssOptions = {};
+		const default_opts: CssOutputOptions = {};
 		expect(default_opts.variables).toBeUndefined();
 
 		// Test null (disabled)
-		const disabled_opts: UnifiedCssOptions = {
+		const disabled_opts: CssOutputOptions = {
 			variables: null,
 		};
 		expect(disabled_opts.variables).toBeNull();
 
 		// Test array (custom variables)
-		const custom_opts: UnifiedCssOptions = {
+		const custom_opts: CssOutputOptions = {
 			variables: [{name: 'my_var', light: 'blue', dark: 'lightblue'}],
 		};
 		expect(Array.isArray(custom_opts.variables)).toBe(true);
 
 		// Test callback (modify defaults)
-		const callback_opts: UnifiedCssOptions = {
+		const callback_opts: CssOutputOptions = {
 			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_')),
 		};
 		expect(typeof callback_opts.variables).toBe('function');
@@ -164,7 +164,7 @@ describe('shared options interface', () => {
 	test('treeshake options default to true conceptually', () => {
 		// When undefined, generators should treat treeshake options as true
 		// This test documents the expected behavior
-		const opts: UnifiedCssOptions = {};
+		const opts: CssOutputOptions = {};
 		expect(opts.treeshake_base_css).toBeUndefined();
 		expect(opts.treeshake_variables).toBeUndefined();
 		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts

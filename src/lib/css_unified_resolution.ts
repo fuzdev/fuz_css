@@ -22,7 +22,7 @@ import {
 	get_all_variable_names,
 	find_similar_variable,
 } from './variable_graph.js';
-import {type ClassVariableIndex, collect_class_variables} from './class_variable_index.js';
+import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.js';
 
 /**
  * Statistics from CSS resolution (only included when `include_stats` is true).
@@ -69,7 +69,7 @@ export interface CssResolutionOptions {
 	/** Dependency graph for theme variables */
 	variable_graph: VariableDependencyGraph;
 	/** Index mapping classes to variables */
-	class_variable_index: ClassVariableIndex;
+	class_variable_index: CssClassVariableIndex;
 	/** HTML elements detected in source files */
 	detected_elements: Set<string>;
 	/** CSS classes detected in source files */

@@ -97,10 +97,10 @@ export type VariablesOption =
 	| undefined;
 
 /**
- * Options for unified CSS generation (theme + base + utilities).
+ * Options for CSS output generation (theme + base + utilities).
  * Controls how the three CSS layers are combined.
  */
-export interface UnifiedCssOptions {
+export interface CssOutputOptions {
 	/**
 	 * Base styles (element defaults) configuration.
 	 * - `undefined` (default): Use default style.css
@@ -215,6 +215,6 @@ export interface CssGeneratorBaseOptions
 	extends
 		CssExtractionOptions,
 		CssClassOptions,
-		UnifiedCssOptions,
+		CssOutputOptions,
 		CssDiagnosticsOptions,
 		CssCacheOptions {}

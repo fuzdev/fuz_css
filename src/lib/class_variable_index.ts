@@ -14,7 +14,7 @@ import {extract_css_variables} from './css_variable_utils.js';
 /**
  * Index mapping class names to their CSS variable dependencies.
  */
-export interface ClassVariableIndex {
+export interface CssClassVariableIndex {
 	/** Map from class name to set of variable names (without -- prefix) */
 	by_class: Map<string, Set<string>>;
 }
@@ -23,11 +23,11 @@ export interface ClassVariableIndex {
  * Builds an index of CSS variables used by each class definition.
  *
  * @param definitions - CSS class definitions to index
- * @returns ClassVariableIndex with variable lookups
+ * @returns CssClassVariableIndex with variable lookups
  */
 export const build_class_variable_index = (
 	definitions: Record<string, CssClassDefinition | undefined>,
-): ClassVariableIndex => {
+): CssClassVariableIndex => {
 	const by_class: Map<string, Set<string>> = new Map();
 
 	for (const [class_name, definition] of Object.entries(definitions)) {
@@ -79,7 +79,7 @@ const extract_variables_from_definition = (definition: CssClassDefinition): Set<
  * @returns Set of variable names (without -- prefix), or null if class not found
  */
 export const get_class_variables = (
-	index: ClassVariableIndex,
+	index: CssClassVariableIndex,
 	class_name: string,
 ): Set<string> | null => index.by_class.get(class_name) ?? null;
 
@@ -91,7 +91,7 @@ export const get_class_variables = (
  * @returns Set of all variable names used by the classes
  */
 export const collect_class_variables = (
-	index: ClassVariableIndex,
+	index: CssClassVariableIndex,
 	class_names: Iterable<string>,
 ): Set<string> => {
 	const variables: Set<string> = new Set();
@@ -116,7 +116,7 @@ export const collect_class_variables = (
  * @returns Array of class names that use this variable
  */
 export const get_classes_using_variable = (
-	index: ClassVariableIndex,
+	index: CssClassVariableIndex,
 	variable_name: string,
 ): Array<string> => {
 	const classes: Array<string> = [];

@@ -17,13 +17,10 @@ import {compute_hash_sync} from './hash.js';
 
 import type {VariablesOption} from './css_plugin_options.js';
 
-// Re-export for backwards compatibility
-export type {VariablesOption};
-
 /**
  * Information about a single style variable and its dependencies.
  */
-export interface VariableInfo {
+export interface StyleVariableInfo {
 	/** Variable name (without -- prefix) */
 	name: string;
 	/** Variables referenced in the light value */
@@ -41,7 +38,7 @@ export interface VariableInfo {
  */
 export interface VariableDependencyGraph {
 	/** Map from variable name to its info */
-	variables: Map<string, VariableInfo>;
+	variables: Map<string, StyleVariableInfo>;
 	/** Content hash for cache invalidation */
 	content_hash: string;
 }
@@ -57,7 +54,7 @@ export const build_variable_graph = (
 	variables: Array<StyleVariable>,
 	content_hash: string,
 ): VariableDependencyGraph => {
-	const graph: Map<string, VariableInfo> = new Map();
+	const graph: Map<string, StyleVariableInfo> = new Map();
 
 	for (const v of variables) {
 		const light_deps = v.light ? extract_css_variables(v.light) : new Set<string>();

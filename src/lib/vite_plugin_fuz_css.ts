@@ -52,7 +52,7 @@ import {
 	load_default_style_css,
 } from './style_rule_parser.js';
 import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
-import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
+import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
@@ -146,7 +146,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	// Unified CSS resources (loaded lazily on first CSS generation when unified mode is enabled)
 	let style_rule_index: StyleRuleIndex | null = null;
 	let variable_graph: VariableDependencyGraph | null = null;
-	let class_variable_index: ClassVariableIndex | null = null;
+	let class_variable_index: CssClassVariableIndex | null = null;
 
 	// Promise for in-flight resource loading (prevents duplicate loads)
 	let unified_resources_promise: Promise<void> | null = null;

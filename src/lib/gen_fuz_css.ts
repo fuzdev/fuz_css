@@ -40,14 +40,10 @@ import {
 	create_style_rule_index,
 	load_default_style_css,
 } from './style_rule_parser.js';
-import {
-	type VariableDependencyGraph,
-	type VariablesOption,
-	build_variable_graph_from_options,
-} from './variable_graph.js';
-import {type ClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
+import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
+import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
-import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
+import type {CssGeneratorBaseOptions, VariablesOption} from './css_plugin_options.js';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -166,7 +162,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	let css_properties: Set<string> | null = null;
 	let style_rule_index: StyleRuleIndex | null = null;
 	let variable_graph: VariableDependencyGraph | null = null;
-	let class_variable_index: ClassVariableIndex | null = null;
+	let class_variable_index: CssClassVariableIndex | null = null;
 
 	const get_css_properties = async (): Promise<Set<string>> => {
 		if (!css_properties) {
@@ -200,7 +196,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		return variable_graph;
 	};
 
-	const get_class_variable_index = (): ClassVariableIndex => {
+	const get_class_variable_index = (): CssClassVariableIndex => {
 		if (!class_variable_index) {
 			class_variable_index = build_class_variable_index(all_class_definitions);
 		}
