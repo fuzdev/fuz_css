@@ -61,12 +61,12 @@ This is especially easy to miss for edge values like `_00` and `_100` that may n
 
 **Static extraction only:** Unified CSS generation happens at build time via AST analysis. Elements and classes created dynamically at runtime (`document.createElement()`, `innerHTML`, dynamic frameworks) won't be detected.
 
-**Workaround:** Use `include_elements` and `include_classes` options:
+**Workaround:** Use `additional_elements` and `additional_classes` options:
 
 ```ts
 gen_fuz_css({
-	include_elements: ['dialog', 'details'], // Force include element styles
-	include_classes: ['dynamic-modal'], // Force include utility classes
+	additional_elements: ['dialog', 'details'], // Force include element styles
+	additional_classes: ['dynamic-modal'], // Force include utility classes
 });
 ```
 
@@ -77,7 +77,7 @@ gen_fuz_css({
 - `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`; excludes `.test.*`, `.spec.*`, `.gen.*`, and test directories: `test/`, `tests/`, `__tests__/`, `__mocks__/`)
 - `class_definitions` - Additional definitions to merge with builtins (user takes precedence)
 - `class_interpreters` - Custom interpreters (replaces builtins if provided)
-- `include_classes` - Classes to always include (for dynamic class names)
+- `additional_classes` - Classes to always include (for dynamic class names)
 - `exclude_classes` - Classes to exclude (filter false positives)
 - `acorn_plugins` - Additional acorn plugins (use `acorn-jsx` for React/Preact/Solid)
 - `on_error` - `'log'` (default) or `'throw'` for CSS-literal errors
@@ -221,13 +221,17 @@ gen_fuz_css({
 
 Both generators support these options for unified CSS:
 
-- `base_css` - Base styles: `undefined` (default style.css), `null` (disabled), or custom CSS string
+- `base_css` - Base styles: `undefined` (default style.css), `null` (disabled), custom CSS string, or callback `(default_css) => string` to modify defaults
 - `variables` - Theme variables: `undefined` (defaults), `null` (disabled), `StyleVariable[]` (custom), or callback `(defaults) => StyleVariable[]`
 - `treeshake_base_css` - Tree-shake base styles to detected elements (default: `true`)
 - `treeshake_variables` - Tree-shake theme variables to referenced ones (default: `true`)
 - `theme_specificity` - Specificity multiplier for `:root` selector (default: `1`)
-- `include_elements` - Additional HTML elements to always include styles for
-- `include_variables` - Additional CSS variables to always include in theme output
+- `additional_elements` - Additional HTML elements to always include styles for
+- `additional_variables` - Additional CSS variables to always include in theme output
+
+## Open design questions
+
+- **CSS Cascade Layers (`@layer`)**: Should we add a `use_layers?: boolean` option to wrap output in `@layer theme, base, utility;`? Modern CSS best practice for specificity control, but adds complexity and requires understanding cascade layers.
 
 ## Docs
 

@@ -967,8 +967,8 @@ import 'virtual:fuz.css'; // utilities only`}
 					<code>acorn_plugins</code> - required for JSX frameworks, e.g. <code>acorn-jsx</code>
 				</li>
 				<li>
-					<code>include_classes</code> - classes to always include (for dynamic patterns that can't be
-					statically extracted)
+					<code>additional_classes</code> - classes to always include (for dynamic patterns that can't
+					be statically extracted)
 				</li>
 				<li>
 					<code>exclude_classes</code> - classes to exclude from output
@@ -1188,19 +1188,19 @@ const color = get_dynamic_color();`}
 			</aside>
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
-				<code>include_classes</code>
+				<code>additional_classes</code>
 				produce errors if they can't be resolved. This helps catch typos like
 				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
 			</aside>
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
-					>include_classes</DeclarationLink
+					>additional_classes</DeclarationLink
 				> option in your config to the Vite plugin or Gro generator:
 			</p>
 			<Code
 				lang="ts"
 				content={`vite_plugin_fuz_css({
-	include_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
+	additional_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
 });`}
 			/>
 			<p>
@@ -1222,13 +1222,13 @@ const color = get_dynamic_color();`}
 				framework hydration) won't be detected.
 			</p>
 			<p>
-				Use <DeclarationLink name="GenFuzCssOptions">include_elements</DeclarationLink> to force-include
+				Use <DeclarationLink name="GenFuzCssOptions">additional_elements</DeclarationLink> to force-include
 				element styles for runtime-created elements:
 			</p>
 			<Code
 				lang="ts"
 				content={`vite_plugin_fuz_css({
-	include_elements: ['dialog', 'details', 'datalist'],
+	additional_elements: ['dialog', 'details', 'datalist'],
 });`}
 			/>
 		</TomeSection>
@@ -1366,8 +1366,9 @@ const color = get_dynamic_color();`}
 			</tbody>
 		</table>
 		<p>
-			The <DeclarationLink name="GenFuzCssOptions">include_classes</DeclarationLink> plugin config option
-			is an escape hatch for classes that can't be statically detected. Acorn plugins can be added via
+			The <DeclarationLink name="GenFuzCssOptions">additional_classes</DeclarationLink> plugin config
+			option is an escape hatch for classes that can't be statically detected. Acorn plugins can be added
+			via
 			<DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for additional syntax support
 			like <a href="#React-and-JSX">JSX</a>.
 		</p>
@@ -1398,7 +1399,7 @@ const color = get_dynamic_color();`}
 					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
 					or
-					<code>include_classes</code>)
+					<code>additional_classes</code>)
 				</li>
 				<li>
 					<strong>Svelte 5 runes:</strong> <code>$derived()</code> and <code>$derived.by()</code> for

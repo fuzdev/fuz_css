@@ -14,6 +14,7 @@ import {parseCss, type AST} from 'svelte/compiler';
 import {extract_css_variables} from './css_variable_utils.js';
 import {compute_hash} from './hash.js';
 import type {FsOperations} from './operations.js';
+import type {BaseCssOption} from './css_plugin_options.js';
 
 /**
  * Base fields shared by all style rules.
@@ -522,6 +523,58 @@ export const load_style_rule_index = async (
 export const create_style_rule_index = async (css: string): Promise<StyleRuleIndex> => {
 	const content_hash = await compute_hash(css);
 	return parse_style_css(css, content_hash);
+};
+
+/**
+ * Loads the raw default style.css content.
+ *
+ * @param ops - Filesystem operations for dependency injection
+ * @param style_css_path - Path to style.css (defaults to package's style.css)
+ * @returns Promise resolving to the CSS string
+ */
+export const load_default_style_css = async (
+	ops: FsOperations,
+	style_css_path?: string,
+): Promise<string> => {
+	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
+	const css = await ops.read_text({path});
+	if (css === null) {
+		throw new Error(`Failed to read style.css from ${path}`);
+	}
+	return css;
+};
+
+/**
+ * Resolves a base_css option to a StyleRuleIndex.
+ * Handles all option forms: undefined (defaults), null (disabled), string, or callback.
+ *
+ * @param base_css - The base_css option from generator config
+ * @param ops - Filesystem operations for loading default CSS
+ * @returns Promise resolving to StyleRuleIndex, or null if disabled
+ */
+export const resolve_base_css_option = async (
+	base_css: BaseCssOption,
+	ops: FsOperations,
+): Promise<StyleRuleIndex | null> => {
+	// null = disabled
+	if (base_css === null) {
+		return null;
+	}
+
+	// undefined = use defaults
+	if (base_css === undefined) {
+		return load_style_rule_index(ops);
+	}
+
+	// string = custom CSS (replacement)
+	if (typeof base_css === 'string') {
+		return create_style_rule_index(base_css);
+	}
+
+	// function = callback to modify defaults
+	const default_css = await load_default_style_css(ops);
+	const modified_css = base_css(default_css);
+	return create_style_rule_index(modified_css);
 };
 
 /**

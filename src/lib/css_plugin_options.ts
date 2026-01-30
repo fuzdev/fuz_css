@@ -64,13 +64,23 @@ export interface CssClassOptions {
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.
 	 */
-	include_classes?: Iterable<string>;
+	additional_classes?: Iterable<string>;
 	/**
 	 * Classes to exclude from the output, even if detected.
 	 * Useful for filtering out false positives from extraction.
 	 */
 	exclude_classes?: Iterable<string>;
 }
+
+/**
+ * Type for the base_css option used by CSS generators.
+ * Supports four forms:
+ * - `undefined` - Use default style.css
+ * - `null` - Disable base styles entirely
+ * - `string` - Custom CSS to replace defaults
+ * - `(default_css) => string` - Callback to modify default CSS
+ */
+export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
 
 /**
  * Options for unified CSS generation (theme + base + utilities).
@@ -81,9 +91,19 @@ export interface UnifiedCssOptions {
 	 * Base styles (element defaults) configuration.
 	 * - `undefined` (default): Use default style.css
 	 * - `null`: Disable base styles entirely
-	 * - `string`: Custom CSS to use as base styles
+	 * - `string`: Custom CSS to replace defaults
+	 * - `(default_css) => string`: Callback to modify default CSS
+	 *
+	 * @example
+	 * ```ts
+	 * // Append custom reset
+	 * base_css: (css) => css + '\n\n* { box-sizing: border-box; }'
+	 *
+	 * // Prepend custom styles
+	 * base_css: (css) => '.my-reset { margin: 0; }\n\n' + css
+	 * ```
 	 */
-	base_css?: string | null;
+	base_css?: BaseCssOption;
 	/**
 	 * Theme variables configuration.
 	 * - `undefined` (default): Use default variables from fuz_css
@@ -131,12 +151,12 @@ export interface UnifiedCssOptions {
 	 * Additional HTML elements to always include styles for.
 	 * Useful for elements generated at runtime via `document.createElement()`.
 	 */
-	include_elements?: Iterable<string>;
+	additional_elements?: Iterable<string>;
 	/**
 	 * Additional CSS variables to always include in theme output.
 	 * Useful for variables referenced dynamically.
 	 */
-	include_variables?: Iterable<string>;
+	additional_variables?: Iterable<string>;
 }
 
 /**

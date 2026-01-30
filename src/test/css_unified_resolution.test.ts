@@ -125,7 +125,7 @@ describe('resolve_css', () => {
 			expect(result.base_css).not.toContain('input');
 		});
 
-		test('include_elements option forces inclusion', () => {
+		test('additional_elements option forces inclusion', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: red; }
@@ -139,7 +139,7 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				include_elements: ['button'],
+				additional_elements: ['button'],
 			});
 
 			expect(result.base_css).toContain('color: red');

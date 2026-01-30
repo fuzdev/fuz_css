@@ -209,6 +209,9 @@ export const generate_theme_css = (
 
 /**
  * Gets all variable names from the graph.
+ *
+ * @param graph - The variable dependency graph
+ * @returns Set of all variable names in the graph
  */
 export const get_all_variable_names = (graph: VariableDependencyGraph): Set<string> => {
 	return new Set(graph.variables.keys());
@@ -216,6 +219,10 @@ export const get_all_variable_names = (graph: VariableDependencyGraph): Set<stri
 
 /**
  * Checks if a variable exists in the graph.
+ *
+ * @param graph - The variable dependency graph
+ * @param name - Variable name to check (without -- prefix)
+ * @returns True if the variable exists in the graph
  */
 export const has_variable = (graph: VariableDependencyGraph, name: string): boolean => {
 	return graph.variables.has(name);

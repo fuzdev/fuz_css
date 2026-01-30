@@ -16,14 +16,14 @@ import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
  * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 export class CssClasses {
-	#include_classes: Set<string> | null;
+	#additional_classes: Set<string> | null;
 	#exclude_classes: Set<string> | null;
 
 	#all: Set<string> = new Set();
 
 	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
 
-	/** Combined map with include_classes (null locations) and extracted classes (actual locations) */
+	/** Combined map with additional_classes (null locations) and extracted classes (actual locations) */
 	#all_with_locations_including_includes: Map<string, Array<SourceLocation> | null> = new Map();
 
 	/** Classes by file id (files with no classes are not stored) */
@@ -32,7 +32,7 @@ export class CssClasses {
 	/** Explicit classes (from @fuz-classes) by file id */
 	#explicit_by_id: Map<string, Set<string>> = new Map();
 
-	/** Aggregated explicit classes (from extraction + include_classes, minus exclude_classes) */
+	/** Aggregated explicit classes (from extraction + additional_classes, minus exclude_classes) */
 	#explicit: Set<string> | null = null;
 
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
@@ -55,14 +55,14 @@ export class CssClasses {
 	/**
 	 * Creates a new CssClasses collection.
 	 *
-	 * @param include_classes - Classes to always include (also treated as explicit for warnings)
+	 * @param additional_classes - Classes to always include (also treated as explicit for warnings)
 	 * @param exclude_classes - Classes to exclude from output (also suppresses warnings)
 	 */
 	constructor(
-		include_classes: Set<string> | null = null,
+		additional_classes: Set<string> | null = null,
 		exclude_classes: Set<string> | null = null,
 	) {
-		this.#include_classes = include_classes;
+		this.#additional_classes = additional_classes;
 		this.#exclude_classes = exclude_classes;
 	}
 
@@ -136,7 +136,7 @@ export class CssClasses {
 
 	/**
 	 * Gets all classes with their source locations (with exclude filter applied).
-	 * Locations from include_classes are null.
+	 * Locations from additional_classes are null.
 	 */
 	get_with_locations(): Map<string, Array<SourceLocation> | null> {
 		if (this.#dirty) {
@@ -151,7 +151,7 @@ export class CssClasses {
 	 * More efficient than calling `get()` and `get_with_locations()` separately
 	 * when both are needed (avoids potential double recalculation).
 	 *
-	 * Results have exclude filter applied and explicit_classes includes include_classes.
+	 * Results have exclude filter applied and explicit_classes includes additional_classes.
 	 */
 	get_all(): {
 		all_classes: Set<string>;
@@ -194,13 +194,13 @@ export class CssClasses {
 
 		const exclude = this.#exclude_classes;
 
-		// Add include_classes first (with null locations - no source)
-		if (this.#include_classes) {
-			for (const c of this.#include_classes) {
+		// Add additional_classes first (with null locations - no source)
+		if (this.#additional_classes) {
+			for (const c of this.#additional_classes) {
 				if (exclude?.has(c)) continue;
 				this.#all.add(c);
 				this.#all_with_locations_including_includes.set(c, null);
-				// include_classes are also explicit (user explicitly wants them)
+				// additional_classes are also explicit (user explicitly wants them)
 				(this.#explicit ??= new Set()).add(c);
 			}
 		}
@@ -216,7 +216,7 @@ export class CssClasses {
 				} else {
 					this.#all_with_locations.set(cls, [...locations]);
 				}
-				// Add to combined map only if not already from include_classes
+				// Add to combined map only if not already from additional_classes
 				if (!this.#all_with_locations_including_includes.has(cls)) {
 					this.#all_with_locations_including_includes.set(cls, this.#all_with_locations.get(cls)!);
 				}

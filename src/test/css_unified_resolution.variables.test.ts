@@ -99,7 +99,7 @@ describe('resolve_css variable resolution', () => {
 			expect(result.resolved_variables.has('custom')).toBe(true);
 		});
 
-		test('from include_variables option', () => {
+		test('from additional_variables option', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'forced', light: 'always'},
 			]);
@@ -109,7 +109,7 @@ describe('resolve_css variable resolution', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				include_variables: ['forced'],
+				additional_variables: ['forced'],
 			});
 
 			expect(result.resolved_variables.has('forced')).toBe(true);
@@ -183,7 +183,7 @@ describe('resolve_css variable resolution', () => {
 				detected_classes: new Set(['gap_sm']),
 				detected_css_variables: new Set(['custom']),
 				utility_variables_used: new Set(['space_md']),
-				include_variables: ['forced'],
+				additional_variables: ['forced'],
 			});
 
 			// From style rules
@@ -194,7 +194,7 @@ describe('resolve_css variable resolution', () => {
 			expect(result.resolved_variables.has('space_md')).toBe(true);
 			// From detected_css_variables
 			expect(result.resolved_variables.has('custom')).toBe(true);
-			// From include_variables
+			// From additional_variables
 			expect(result.resolved_variables.has('forced')).toBe(true);
 		});
 	});

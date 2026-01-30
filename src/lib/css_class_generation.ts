@@ -126,7 +126,7 @@ export interface GenerateClassesCssOptions {
 	log?: Logger;
 	class_locations?: Map<string, Array<SourceLocation> | null>;
 	/**
-	 * Classes that were explicitly annotated (via @fuz-classes or include_classes).
+	 * Classes that were explicitly annotated (via @fuz-classes or additional_classes).
 	 * Unresolved explicit classes produce warnings.
 	 */
 	explicit_classes?: Set<string> | null;
@@ -237,7 +237,7 @@ export const generate_classes_css = (
 		}
 
 		if (!v) {
-			// Error if this was an explicitly requested class (via @fuz-classes or include_classes)
+			// Error if this was an explicitly requested class (via @fuz-classes or additional_classes)
 			// but only if no interpreter pattern matched (if one matched but failed, error already reported)
 			if (explicit_classes?.has(c) && !interpreter_matched) {
 				const locations = class_locations?.get(c) ?? null;

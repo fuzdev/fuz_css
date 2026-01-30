@@ -31,7 +31,7 @@ describe('shared options interface', () => {
 			class_definitions: {},
 			include_default_definitions: true,
 			class_interpreters: [],
-			include_classes: ['p_md'],
+			additional_classes: ['p_md'],
 			exclude_classes: ['hidden'],
 			// UnifiedCssOptions
 			base_css: undefined,
@@ -39,8 +39,8 @@ describe('shared options interface', () => {
 			treeshake_base_css: true,
 			treeshake_variables: true,
 			theme_specificity: 1,
-			include_elements: ['dialog'],
-			include_variables: ['hue_a'],
+			additional_elements: ['dialog'],
+			additional_variables: ['hue_a'],
 			// CssDiagnosticsOptions
 			on_error: 'log',
 			on_warning: 'ignore',
@@ -80,7 +80,7 @@ describe('shared options interface', () => {
 			variables: undefined,
 			on_error: 'throw',
 			theme_specificity: 2,
-			include_elements: ['custom-element'],
+			additional_elements: ['custom-element'],
 		};
 
 		expect(vite_options).toBeDefined();
@@ -94,7 +94,7 @@ describe('shared options interface', () => {
 		};
 
 		const class_opts: CssClassOptions = {
-			include_classes: ['box', 'row'],
+			additional_classes: ['box', 'row'],
 			exclude_classes: ['test-class'],
 		};
 

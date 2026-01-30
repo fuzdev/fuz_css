@@ -38,6 +38,7 @@ import {
 	type StyleRuleIndex,
 	load_style_rule_index,
 	create_style_rule_index,
+	load_default_style_css,
 } from './style_rule_parser.js';
 import {
 	type VariableDependencyGraph,
@@ -130,7 +131,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		class_interpreters = css_class_interpreters,
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
-		include_classes,
+		additional_classes,
 		exclude_classes,
 		cache_dir = DEFAULT_CACHE_DIR,
 		project_root: project_root_option,
@@ -142,8 +143,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		treeshake_base_css = true,
 		treeshake_variables = true,
 		theme_specificity = 1,
-		include_elements,
-		include_variables,
+		additional_elements,
+		additional_variables,
 		ops = default_fs_operations,
 	} = options;
 
@@ -152,7 +153,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const include_theme = variables !== null;
 
 	// Convert to Sets for efficient lookup
-	const include_set = include_classes ? new Set(include_classes) : null;
+	const include_set = additional_classes ? new Set(additional_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
 	// Merge class definitions upfront (validates that definitions exist when needed)
@@ -177,10 +178,15 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	const get_style_index = async (): Promise<StyleRuleIndex> => {
 		if (!style_rule_index) {
 			if (typeof base_css === 'string') {
-				// Custom CSS string provided
+				// Custom CSS string provided (replacement)
 				style_rule_index = await create_style_rule_index(base_css);
+			} else if (typeof base_css === 'function') {
+				// Callback to modify default CSS
+				const default_css = await load_default_style_css(ops);
+				const modified_css = base_css(default_css);
+				style_rule_index = await create_style_rule_index(modified_css);
 			} else {
-				// Use default style.css
+				// Use default style.css (undefined or null - null handled by include_base flag)
 				style_rule_index = await load_style_rule_index(ops);
 			}
 		}
@@ -432,8 +438,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					detected_classes: all_classes,
 					detected_css_variables: all_css_variables,
 					utility_variables_used: utility_result.variables_used,
-					include_elements,
-					include_variables,
+					additional_elements,
+					additional_variables,
 					theme_specificity,
 					include_stats,
 					treeshake_base_css,

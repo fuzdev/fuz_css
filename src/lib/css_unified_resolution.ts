@@ -79,9 +79,9 @@ export interface CssResolutionOptions {
 	/** CSS variables used by generated utility classes */
 	utility_variables_used: Set<string>;
 	/** Additional elements to always include */
-	include_elements?: Iterable<string>;
+	additional_elements?: Iterable<string>;
 	/** Additional variables to always include */
-	include_variables?: Iterable<string>;
+	additional_variables?: Iterable<string>;
 	/** Specificity multiplier for theme selector (default 1) */
 	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
@@ -107,9 +107,12 @@ export interface CssResolutionOptions {
  *
  * Algorithm:
  * 1. Collect rules: core rules + element-matching + class-matching
- * 2. Collect variables: from rules, class defs, utility generation, detected vars, include_variables
+ * 2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables
  * 3. Resolve transitive variable dependencies
  * 4. Generate output: theme_css (light+dark), base_css (source order)
+ *
+ * @param options - Resolution options including indexes, detected usage, and config
+ * @returns Resolution result with theme CSS, base CSS, and diagnostics
  */
 export const resolve_css = (options: CssResolutionOptions): CssResolutionResult => {
 	const {
@@ -120,8 +123,8 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		detected_classes,
 		detected_css_variables,
 		utility_variables_used,
-		include_elements,
-		include_variables,
+		additional_elements,
+		additional_variables,
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
@@ -132,12 +135,12 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const diagnostics: Array<GenerationDiagnostic> = [];
 	const included_elements: Set<string> = new Set();
 
-	// Step 1: Collect elements (detected + include_elements)
+	// Step 1: Collect elements (detected + additional_elements)
 	for (const element of detected_elements) {
 		included_elements.add(element);
 	}
-	if (include_elements) {
-		for (const element of include_elements) {
+	if (additional_elements) {
+		for (const element of additional_elements) {
 			included_elements.add(element);
 		}
 	}
@@ -165,7 +168,8 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					phase: 'generation',
 					level: 'warning',
 					message: `No style rules found for element "${element}"`,
-					suggestion: 'Element will use browser defaults. Add to include_elements if intentional.',
+					suggestion:
+						'Element will use browser defaults. Add to additional_elements if intentional.',
 					class_name: element,
 					locations: null,
 				});
@@ -198,9 +202,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		all_variables.add(v);
 	}
 
-	// e) User-specified include_variables
-	if (include_variables) {
-		for (const v of include_variables) {
+	// e) User-specified additional_variables
+	if (additional_variables) {
+		for (const v of additional_variables) {
 			all_variables.add(v);
 		}
 	}

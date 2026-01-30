@@ -53,7 +53,7 @@ export interface GenerationDiagnostic {
 	message: string;
 	suggestion: string | null;
 	class_name: string;
-	/** Source locations where this class was used, or null if from include_classes */
+	/** Source locations where this class was used, or null if from additional_classes */
 	locations: Array<SourceLocation> | null;
 }
 

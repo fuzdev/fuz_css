@@ -49,6 +49,7 @@ import {
 	type StyleRuleIndex,
 	load_style_rule_index,
 	create_style_rule_index,
+	load_default_style_css,
 } from './style_rule_parser.js';
 import {
 	type VariableDependencyGraph,
@@ -104,7 +105,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		class_definitions: user_class_definitions,
 		include_default_definitions = true,
 		class_interpreters = css_class_interpreters,
-		include_classes,
+		additional_classes,
 		exclude_classes,
 		acorn_plugins,
 		on_error = is_ci ? 'throw' : 'log',
@@ -115,8 +116,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		treeshake_base_css = true,
 		treeshake_variables = true,
 		theme_specificity = 1,
-		include_elements,
-		include_variables,
+		additional_elements,
+		additional_variables,
 		ops = default_fs_operations,
 	} = options;
 
@@ -131,7 +132,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	);
 
 	// Convert to Sets for efficient lookup
-	const include_set = include_classes ? new Set(include_classes) : null;
+	const include_set = additional_classes ? new Set(additional_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
 
 	// Plugin state
@@ -164,8 +165,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		unified_resources_promise = (async () => {
 			// Load style rule index based on base_css option
 			if (typeof base_css === 'string') {
+				// Custom CSS string (replacement)
 				style_rule_index = await create_style_rule_index(base_css);
+			} else if (typeof base_css === 'function') {
+				// Callback to modify default CSS
+				const default_css = await load_default_style_css(ops);
+				const modified_css = base_css(default_css);
+				style_rule_index = await create_style_rule_index(modified_css);
 			} else {
+				// Use default style.css (undefined or null)
 				style_rule_index = await load_style_rule_index(ops);
 			}
 
@@ -238,8 +246,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				detected_classes: classes,
 				detected_css_variables: all_css_variables,
 				utility_variables_used: utility_result.variables_used,
-				include_elements,
-				include_variables,
+				additional_elements,
+				additional_variables,
 				theme_specificity,
 				treeshake_base_css,
 				treeshake_variables,
