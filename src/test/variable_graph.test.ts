@@ -349,6 +349,124 @@ describe('resolve_variables_transitive', () => {
 			expect(result.warnings.length).toBeGreaterThan(0);
 			expect(result.warnings.some((w) => w.includes('Circular dependency'))).toBe(true);
 		});
+
+		test('self-reference in both light and dark triggers cycle warning', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'x', light: 'var(--x, 1)', dark: 'var(--x, 2)'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['x']);
+
+			expect(result.variables.has('x')).toBe(true);
+			expect(result.warnings.length).toBeGreaterThan(0);
+			expect(result.warnings.some((w) => w.includes('Circular dependency'))).toBe(true);
+		});
+	});
+
+	describe('deep fallback chains', () => {
+		test('resolves 5-level nested fallbacks', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'a', light: '1'},
+				{name: 'b', light: '2'},
+				{name: 'c', light: '3'},
+				{name: 'd', light: '4'},
+				{name: 'e', light: '5'},
+				{name: 'deep', light: 'var(--a, var(--b, var(--c, var(--d, var(--e)))))'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['deep']);
+
+			for (const v of ['a', 'b', 'c', 'd', 'e', 'deep']) {
+				expect(result.variables.has(v), `Expected "${v}" in result`).toBe(true);
+			}
+			expect(result.missing.size).toBe(0);
+		});
+
+		test('6-level chain with mixed light/dark', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'l1', light: 'white'},
+				{name: 'l2', light: 'var(--l1)'},
+				{name: 'l3', light: 'var(--l2)'},
+				{name: 'd1', dark: 'black'},
+				{name: 'd2', dark: 'var(--d1)'},
+				{name: 'd3', dark: 'var(--d2)'},
+				{name: 'themed', light: 'var(--l3)', dark: 'var(--d3)'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['themed']);
+
+			expect(result.variables.size).toBe(7);
+			expect(result.missing.size).toBe(0);
+			// All light chain variables
+			for (const v of ['l1', 'l2', 'l3']) {
+				expect(result.variables.has(v), `Expected light chain "${v}" in result`).toBe(true);
+			}
+			// All dark chain variables
+			for (const v of ['d1', 'd2', 'd3']) {
+				expect(result.variables.has(v), `Expected dark chain "${v}" in result`).toBe(true);
+			}
+		});
+
+		test('fallback with missing intermediate', () => {
+			// a depends on b which doesn't exist, c is fallback
+			const variables: Array<StyleVariable> = [
+				{name: 'c', light: 'fallback-value'},
+				{name: 'a', light: 'var(--b, var(--c))'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['a']);
+
+			expect(result.variables.has('a')).toBe(true);
+			expect(result.variables.has('b')).toBe(true); // added even though missing
+			expect(result.variables.has('c')).toBe(true);
+			expect(result.missing.has('b')).toBe(true);
+		});
+	});
+
+	describe('calc() with multiple var() references', () => {
+		test('resolves calc with two var references', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'width', light: '100px'},
+				{name: 'padding', light: '20px'},
+				{name: 'content_width', light: 'calc(var(--width) - var(--padding) * 2)'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['content_width']);
+
+			expect(result.variables.has('content_width')).toBe(true);
+			expect(result.variables.has('width')).toBe(true);
+			expect(result.variables.has('padding')).toBe(true);
+			expect(result.variables.size).toBe(3);
+		});
+
+		test('resolves calc with mixed var and fallback', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'base', light: '10px'},
+				{name: 'computed', light: 'calc(var(--base) + var(--missing, 5px))'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['computed']);
+
+			expect(result.variables.has('computed')).toBe(true);
+			expect(result.variables.has('base')).toBe(true);
+			expect(result.variables.has('missing')).toBe(true);
+			expect(result.missing.has('missing')).toBe(true);
+		});
+
+		test('resolves nested calc expressions', () => {
+			const variables: Array<StyleVariable> = [
+				{name: 'a', light: '10'},
+				{name: 'b', light: '20'},
+				{name: 'c', light: '30'},
+				{name: 'nested', light: 'calc(var(--a) + calc(var(--b) * var(--c)))'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			const result = resolve_variables_transitive(graph, ['nested']);
+
+			for (const v of ['a', 'b', 'c', 'nested']) {
+				expect(result.variables.has(v), `Expected "${v}" in result`).toBe(true);
+			}
+		});
 	});
 });
 

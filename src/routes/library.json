@@ -2316,7 +2316,7 @@
 						"examples": [
 							"split_selector_list('.a, .b') → ['.a', '.b']\nsplit_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']\nsplit_selector_list('.a[data-x=\"a,b\"], .c') → ['.a[data-x=\"a,b\"]', '.c']"
 						],
-						"source_line": 290,
+						"source_line": 295,
 						"type_signature": "(selector_group: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -2330,7 +2330,7 @@
 						"name": "find_compound_end",
 						"kind": "function",
 						"doc_comment": "Finds the end position of the compound selector containing the class at class_pos.\nA compound selector is a sequence of simple selectors without combinators.",
-						"source_line": 347,
+						"source_line": 352,
 						"type_signature": "(selector: string, class_pos: number): number",
 						"return_type": "number",
 						"return_description": "Position where state modifiers should be inserted (before any pseudo-element)",
@@ -2354,7 +2354,7 @@
 						"examples": [
 							"modify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'"
 						],
-						"source_line": 436,
+						"source_line": 441,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
 						"return_type": "string",
 						"return_description": "Modified selector",
@@ -2390,7 +2390,7 @@
 						"name": "modify_selector_group",
 						"kind": "function",
 						"doc_comment": "Modifies a selector list (comma-separated selectors) to add modifiers.\nHandles conflicts per-selector: if one selector in a list has a conflict,\nonly that selector skips the modifier; other selectors still get it.",
-						"source_line": 476,
+						"source_line": 481,
 						"type_signature": "(selector_group: string, original_class: string, new_class_escaped: string, states_to_add: string[], pseudo_element_css: string): ModifiedSelectorGroupResult",
 						"return_type": "ModifiedSelectorGroupResult",
 						"return_description": "Result with modified selector list and information about skipped modifiers",
@@ -2426,7 +2426,7 @@
 						"name": "generate_modified_ruleset",
 						"kind": "function",
 						"doc_comment": "Generates CSS for a modified ruleset with applied modifiers.\n\nConflict handling is per-selector within selector lists:\n- For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips\n  the `:hover` addition; `.plain:active` still gets `:hover` appended.\n- For multiple states like `:hover:focus`, each is checked individually; conflicting\n  states are skipped while non-conflicting ones are still applied.",
-						"source_line": 555,
+						"source_line": 560,
 						"type_signature": "(original_ruleset: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string, media_wrapper: string | null, ancestor_wrapper: string | null): ModifiedRulesetResult",
 						"return_type": "ModifiedRulesetResult",
 						"return_description": "Result with generated CSS and information about skipped modifiers",

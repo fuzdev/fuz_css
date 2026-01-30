@@ -1,4 +1,4 @@
-import {test, assert, describe, beforeAll} from 'vitest';
+import {test, expect, describe, beforeAll} from 'vitest';
 
 import {
 	parse_css_literal,
@@ -28,6 +28,7 @@ import {
 	parse_arbitrary_breakpoint,
 	parse_parameterized_state,
 } from '$lib/modifiers.js';
+import {expect_ok, expect_error} from './test_helpers.js';
 
 // CSS properties loaded before tests run
 let css_properties: Set<string>;
@@ -36,11 +37,11 @@ beforeAll(async () => {
 	css_properties = await load_css_properties();
 });
 
-// Helper to assert result is ok and return parsed value
-const assert_ok = (
+// Specialized helpers for css_literal result types (return typed values for chaining)
+const assert_parse_ok = (
 	result: ReturnType<typeof parse_css_literal>,
 ): {parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null} => {
-	assert.isTrue(result.ok, 'Expected parse result to be ok');
+	expect_ok(result, 'Expected parse result to be ok');
 	return result as {
 		ok: true;
 		parsed: ParsedCssLiteral;
@@ -48,17 +49,15 @@ const assert_ok = (
 	};
 };
 
-// Helper to assert result is error
-const assert_error = (
+const assert_parse_error = (
 	result: ReturnType<typeof parse_css_literal>,
 ): {error: InterpreterDiagnostic} => {
-	assert.isFalse(result.ok, 'Expected parse result to be error');
+	expect_error(result, 'Expected parse result to be error');
 	return result as {ok: false; error: InterpreterDiagnostic};
 };
 
-// Helper to assert interpret result is ok and return output
 const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput => {
-	assert.isTrue(result.ok, 'Expected interpret result to be ok');
+	expect_ok(result, 'Expected interpret result to be ok');
 	return (result as {ok: true; output: CssLiteralOutput}).output;
 };
 
@@ -75,7 +74,7 @@ describe('is_possible_css_literal', () => {
 		['nth-child(2n):color:red'],
 		['min-width(800px):display:flex'],
 	])('recognizes "%s" as possible CSS-literal', (input) => {
-		assert.isTrue(is_possible_css_literal(input));
+		expect(is_possible_css_literal(input)).toBe(true);
 	});
 
 	test.each([
@@ -88,7 +87,7 @@ describe('is_possible_css_literal', () => {
 		['display:', 'empty value'],
 		[':flex', 'empty property'],
 	])('rejects "%s" as not CSS-literal (%s)', (input) => {
-		assert.isFalse(is_possible_css_literal(input));
+		expect(is_possible_css_literal(input)).toBe(false);
 	});
 });
 
@@ -103,7 +102,16 @@ describe('extract_segments', () => {
 		['before:content:""', ['before', 'content', '""']],
 		['width:calc(min(100%,500px))', ['width', 'calc(min(100%,500px))']],
 	])('extract_segments("%s") → %j', (input, expected) => {
-		assert.deepEqual(extract_segments(input), expected);
+		expect(extract_segments(input)).toEqual(expected);
+	});
+
+	// Mismatched parentheses - documents graceful degradation behavior
+	test.each<[string, Array<string>]>([
+		['width:calc((100%', ['width', 'calc((100%']], // unclosed - keeps as-is
+		['width:calc(100%))', ['width', 'calc(100%))']], // extra close - keeps as-is
+		['fn((a:b))', ['fn((a:b))']], // colon inside nested parens stays inside
+	])('extract_segments("%s") handles mismatched parens → %j', (input, expected) => {
+		expect(extract_segments(input)).toEqual(expected);
 	});
 });
 
@@ -117,7 +125,17 @@ describe('format_css_value', () => {
 		['0~auto!important', '0 auto !important'],
 		['calc(100%~-~20px)', 'calc(100% - 20px)'],
 	] as const)('format_css_value("%s") → "%s"', (input, expected) => {
-		assert.equal(format_css_value(input), expected);
+		expect(format_css_value(input)).toBe(expected);
+	});
+
+	// Edge cases for tilde handling
+	test.each([
+		['~~~', '   '], // only tildes → only spaces
+		['0~', '0 '], // trailing tilde → trailing space
+		['~0', ' 0'], // leading tilde → leading space
+		['~~', '  '], // consecutive tildes → consecutive spaces
+	] as const)('format_css_value("%s") → "%s" (edge cases)', (input, expected) => {
+		expect(format_css_value(input)).toBe(expected);
 	});
 });
 
@@ -125,7 +143,7 @@ describe('check_calc_expression', () => {
 	test.each([['calc(100%-20px)'], ['calc(50%+10px)'], ['calc(100vh-4rem)']])(
 		'warns about "%s"',
 		(input) => {
-			assert.isNotNull(check_calc_expression(input));
+			expect(check_calc_expression(input)).not.toBeNull();
 		},
 	);
 
@@ -136,7 +154,7 @@ describe('check_calc_expression', () => {
 		['100%', 'not calc'],
 		['flex', 'not calc'],
 	])('does not warn about "%s" (%s)', (input) => {
-		assert.isNull(check_calc_expression(input));
+		expect(check_calc_expression(input)).toBeNull();
 	});
 });
 
@@ -178,11 +196,11 @@ describe('get_modifier', () => {
 	] as const)('get_modifier("%s") → type: %s', (name, expected_type) => {
 		const modifier = get_modifier(name);
 		if (!modifier) throw new Error(`Expected modifier for "${name}"`);
-		assert.equal(modifier.type, expected_type);
+		expect(modifier.type).toBe(expected_type);
 	});
 
 	test.each([['unknown'], ['notamodifier']])('get_modifier("%s") → null', (name) => {
-		assert.isNull(get_modifier(name));
+		expect(get_modifier(name)).toBeNull();
 	});
 });
 
@@ -193,11 +211,11 @@ describe('parse_arbitrary_breakpoint', () => {
 		['min-width(50rem)', '@media (width >= 50rem)'],
 		['max-width(100vw)', '@media (width < 100vw)'],
 	] as const)('parse_arbitrary_breakpoint("%s") → %s', (input, expected) => {
-		assert.equal(parse_arbitrary_breakpoint(input), expected);
+		expect(parse_arbitrary_breakpoint(input)).toBe(expected);
 	});
 
 	test.each([['sm'], ['md'], ['hover']])('parse_arbitrary_breakpoint("%s") → null', (input) => {
-		assert.isNull(parse_arbitrary_breakpoint(input));
+		expect(parse_arbitrary_breakpoint(input)).toBeNull();
 	});
 });
 
@@ -211,11 +229,11 @@ describe('parse_parameterized_state', () => {
 	] as const)('parse_parameterized_state("%s") → css: %s', (input, expected_css) => {
 		const result = parse_parameterized_state(input);
 		if (!result) throw new Error(`Expected result for "${input}"`);
-		assert.equal(result.css, expected_css);
+		expect(result.css).toBe(expected_css);
 	});
 
 	test.each([['hover'], ['first']])('parse_parameterized_state("%s") → null', (input) => {
-		assert.isNull(parse_parameterized_state(input));
+		expect(parse_parameterized_state(input)).toBeNull();
 	});
 });
 
@@ -229,97 +247,105 @@ describe('parse_css_literal - valid cases', () => {
 		['z-index:100', 'z-index', '100'],
 		['--custom-prop:value', '--custom-prop', 'value'],
 	] as const)('parse_css_literal("%s") → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_ok(parse_css_literal(input, css_properties));
-		assert.equal(parsed.property, property);
-		assert.equal(parsed.value, value);
+		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		expect(parsed.property).toBe(property);
+		expect(parsed.value).toBe(value);
 	});
 });
 
 describe('parse_css_literal - with modifiers', () => {
 	test('hover:opacity:80%', () => {
-		const {parsed} = assert_ok(parse_css_literal('hover:opacity:80%', css_properties));
-		assert.isNull(parsed.media);
-		assert.isNull(parsed.ancestor);
-		assert.lengthOf(parsed.states, 1);
-		assert.equal(parsed.states[0]!.name, 'hover');
-		assert.isNull(parsed.pseudo_element);
-		assert.equal(parsed.property, 'opacity');
-		assert.equal(parsed.value, '80%');
+		const {parsed} = assert_parse_ok(parse_css_literal('hover:opacity:80%', css_properties));
+		expect(parsed.media).toBeNull();
+		expect(parsed.ancestor).toBeNull();
+		expect(parsed.states).toHaveLength(1);
+		expect(parsed.states[0]!.name).toBe('hover');
+		expect(parsed.pseudo_element).toBeNull();
+		expect(parsed.property).toBe('opacity');
+		expect(parsed.value).toBe('80%');
 	});
 
 	test('md:display:flex', () => {
-		const {parsed} = assert_ok(parse_css_literal('md:display:flex', css_properties));
+		const {parsed} = assert_parse_ok(parse_css_literal('md:display:flex', css_properties));
 		if (!parsed.media) throw new Error('Expected media');
-		assert.equal(parsed.media.name, 'md');
-		assert.isNull(parsed.ancestor);
-		assert.lengthOf(parsed.states, 0);
-		assert.equal(parsed.property, 'display');
+		expect(parsed.media.name).toBe('md');
+		expect(parsed.ancestor).toBeNull();
+		expect(parsed.states).toHaveLength(0);
+		expect(parsed.property).toBe('display');
 	});
 
 	test('dark:opacity:60%', () => {
-		const {parsed} = assert_ok(parse_css_literal('dark:opacity:60%', css_properties));
-		assert.isNull(parsed.media);
+		const {parsed} = assert_parse_ok(parse_css_literal('dark:opacity:60%', css_properties));
+		expect(parsed.media).toBeNull();
 		if (!parsed.ancestor) throw new Error('Expected ancestor');
-		assert.equal(parsed.ancestor.name, 'dark');
-		assert.equal(parsed.property, 'opacity');
+		expect(parsed.ancestor.name).toBe('dark');
+		expect(parsed.property).toBe('opacity');
 	});
 
 	test('before:content:""', () => {
-		const {parsed} = assert_ok(parse_css_literal('before:content:""', css_properties));
+		const {parsed} = assert_parse_ok(parse_css_literal('before:content:""', css_properties));
 		if (!parsed.pseudo_element) throw new Error('Expected pseudo_element');
-		assert.equal(parsed.pseudo_element.name, 'before');
-		assert.equal(parsed.property, 'content');
+		expect(parsed.pseudo_element.name).toBe('before');
+		expect(parsed.property).toBe('content');
 	});
 
 	test('md:dark:hover:before:opacity:80%', () => {
-		const {parsed} = assert_ok(
+		const {parsed} = assert_parse_ok(
 			parse_css_literal('md:dark:hover:before:opacity:80%', css_properties),
 		);
 		if (!parsed.media) throw new Error('Expected media');
-		assert.equal(parsed.media.name, 'md');
+		expect(parsed.media.name).toBe('md');
 		if (!parsed.ancestor) throw new Error('Expected ancestor');
-		assert.equal(parsed.ancestor.name, 'dark');
-		assert.lengthOf(parsed.states, 1);
-		assert.equal(parsed.states[0]!.name, 'hover');
+		expect(parsed.ancestor.name).toBe('dark');
+		expect(parsed.states).toHaveLength(1);
+		expect(parsed.states[0]!.name).toBe('hover');
 		if (!parsed.pseudo_element) throw new Error('Expected pseudo_element');
-		assert.equal(parsed.pseudo_element.name, 'before');
-		assert.equal(parsed.property, 'opacity');
-		assert.equal(parsed.value, '80%');
+		expect(parsed.pseudo_element.name).toBe('before');
+		expect(parsed.property).toBe('opacity');
+		expect(parsed.value).toBe('80%');
 	});
 
 	test('focus:hover:color:red (alphabetical states)', () => {
-		const {parsed} = assert_ok(parse_css_literal('focus:hover:color:red', css_properties));
-		assert.lengthOf(parsed.states, 2);
-		assert.equal(parsed.states[0]!.name, 'focus');
-		assert.equal(parsed.states[1]!.name, 'hover');
+		const {parsed} = assert_parse_ok(parse_css_literal('focus:hover:color:red', css_properties));
+		expect(parsed.states).toHaveLength(2);
+		expect(parsed.states[0]!.name).toBe('focus');
+		expect(parsed.states[1]!.name).toBe('hover');
 	});
 
 	test('active:focus:hover:opacity:80% (multiple states alphabetical)', () => {
-		const {parsed} = assert_ok(parse_css_literal('active:focus:hover:opacity:80%', css_properties));
-		assert.lengthOf(parsed.states, 3);
-		assert.equal(parsed.states[0]!.name, 'active');
-		assert.equal(parsed.states[1]!.name, 'focus');
-		assert.equal(parsed.states[2]!.name, 'hover');
+		const {parsed} = assert_parse_ok(
+			parse_css_literal('active:focus:hover:opacity:80%', css_properties),
+		);
+		expect(parsed.states).toHaveLength(3);
+		expect(parsed.states[0]!.name).toBe('active');
+		expect(parsed.states[1]!.name).toBe('focus');
+		expect(parsed.states[2]!.name).toBe('hover');
 	});
 
 	test('min-width(800px):display:flex (arbitrary breakpoint)', () => {
-		const {parsed} = assert_ok(parse_css_literal('min-width(800px):display:flex', css_properties));
+		const {parsed} = assert_parse_ok(
+			parse_css_literal('min-width(800px):display:flex', css_properties),
+		);
 		if (!parsed.media) throw new Error('Expected media');
-		assert.equal(parsed.media.css, '@media (width >= 800px)');
+		expect(parsed.media.css).toBe('@media (width >= 800px)');
 	});
 
 	test('nth-child(2n+1):color:red (parameterized state)', () => {
-		const {parsed} = assert_ok(parse_css_literal('nth-child(2n+1):color:red', css_properties));
-		assert.lengthOf(parsed.states, 1);
-		assert.equal(parsed.states[0]!.css, ':nth-child(2n+1)');
+		const {parsed} = assert_parse_ok(
+			parse_css_literal('nth-child(2n+1):color:red', css_properties),
+		);
+		expect(parsed.states).toHaveLength(1);
+		expect(parsed.states[0]!.css).toBe(':nth-child(2n+1)');
 	});
 
 	test('hover:nth-child(2n):color:red (alphabetical with parameterized)', () => {
-		const {parsed} = assert_ok(parse_css_literal('hover:nth-child(2n):color:red', css_properties));
-		assert.lengthOf(parsed.states, 2);
+		const {parsed} = assert_parse_ok(
+			parse_css_literal('hover:nth-child(2n):color:red', css_properties),
+		);
+		expect(parsed.states).toHaveLength(2);
 		// 'hover' < 'nth-child(2n)' alphabetically
-		assert.equal(parsed.states[0]!.name, 'hover');
-		assert.equal(parsed.states[1]!.name, 'nth-child(2n)');
+		expect(parsed.states[0]!.name).toBe('hover');
+		expect(parsed.states[1]!.name).toBe('nth-child(2n)');
 	});
 });
 
@@ -332,8 +358,8 @@ describe('parse_css_literal - error cases', () => {
 			['before:hover:opacity:100%', 'State modifiers must come before'],
 			['nth-child(2n):hover:color:red', 'alphabetical order'],
 		])('%s → error containing "%s"', (input, expected_message) => {
-			const {error} = assert_error(parse_css_literal(input, css_properties));
-			assert.include(error.message, expected_message);
+			const {error} = assert_parse_error(parse_css_literal(input, css_properties));
+			expect(error.message).toContain(expected_message);
 		});
 	});
 
@@ -343,36 +369,38 @@ describe('parse_css_literal - error cases', () => {
 			['sm:md:display:flex', 'Multiple media modifiers'],
 			['before:after:content:""', 'Multiple pseudo-element'],
 		])('%s → error containing "%s"', (input, expected_message) => {
-			const {error} = assert_error(parse_css_literal(input, css_properties));
-			assert.include(error.message, expected_message);
+			const {error} = assert_parse_error(parse_css_literal(input, css_properties));
+			expect(error.message).toContain(expected_message);
 		});
 	});
 
 	test('unknown:color:red (unknown modifier)', () => {
-		const {error} = assert_error(parse_css_literal('unknown:color:red', css_properties));
-		assert.include(error.message, 'Unknown modifier');
+		const {error} = assert_parse_error(parse_css_literal('unknown:color:red', css_properties));
+		expect(error.message).toContain('Unknown modifier');
 	});
 
 	test('hoverr:color:red (typo with suggestion)', () => {
-		const {error} = assert_error(parse_css_literal('hoverr:color:red', css_properties));
-		assert.include(error.message, 'Unknown modifier');
-		assert.isDefined(error.suggestion);
+		const {error} = assert_parse_error(parse_css_literal('hoverr:color:red', css_properties));
+		expect(error.message).toContain('Unknown modifier');
+		expect(error.suggestion).toBeDefined();
 	});
 
 	test('dipslay:flex (typo in property with suggestion)', () => {
-		const {error} = assert_error(parse_css_literal('dipslay:flex', css_properties));
-		assert.include(error.message, 'Unknown CSS property');
-		assert.isDefined(error.suggestion);
-		assert.include(error.suggestion ?? '', 'display');
+		const {error} = assert_parse_error(parse_css_literal('dipslay:flex', css_properties));
+		expect(error.message).toContain('Unknown CSS property');
+		expect(error.suggestion).toBeDefined();
+		expect(error.suggestion ?? '').toContain('display');
 	});
 });
 
 describe('parse_css_literal - warnings', () => {
 	test('width:calc(100%-20px) generates warning', () => {
-		const {diagnostics} = assert_ok(parse_css_literal('width:calc(100%-20px)', css_properties));
-		assert.ok(diagnostics);
-		assert.lengthOf(diagnostics, 1);
-		assert.equal(diagnostics[0]?.level, 'warning');
+		const {diagnostics} = assert_parse_ok(
+			parse_css_literal('width:calc(100%-20px)', css_properties),
+		);
+		expect(diagnostics).toBeTruthy();
+		expect(diagnostics).toHaveLength(1);
+		expect(diagnostics![0]?.level).toBe('warning');
 	});
 });
 
@@ -380,10 +408,10 @@ describe('interpret_css_literal', () => {
 	test('display:flex generates correct output', () => {
 		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
 		const output = assert_interpret_ok(result);
-		assert.equal(output.declaration, 'display: flex;');
-		assert.equal(output.selector, '.display\\:flex');
-		assert.isNull(output.media_wrapper);
-		assert.isNull(output.ancestor_wrapper);
+		expect(output.declaration).toBe('display: flex;');
+		expect(output.selector).toBe('.display\\:flex');
+		expect(output.media_wrapper).toBeNull();
+		expect(output.ancestor_wrapper).toBeNull();
 	});
 
 	test('hover:opacity:80% includes pseudo-class in selector', () => {
@@ -391,8 +419,8 @@ describe('interpret_css_literal', () => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
-		assert.equal(output.declaration, 'opacity: 80%;');
-		assert.include(output.selector, ':hover');
+		expect(output.declaration).toBe('opacity: 80%;');
+		expect(output.selector).toContain(':hover');
 	});
 
 	test('md:display:flex has media wrapper', () => {
@@ -401,8 +429,8 @@ describe('interpret_css_literal', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
-		assert.include(output.media_wrapper, '@media');
-		assert.include(output.media_wrapper, '48rem');
+		expect(output.media_wrapper).toContain('@media');
+		expect(output.media_wrapper).toContain('48rem');
 	});
 
 	test('dark:opacity:60% has ancestor wrapper', () => {
@@ -410,7 +438,7 @@ describe('interpret_css_literal', () => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
-		assert.equal(output.ancestor_wrapper, ':root.dark');
+		expect(output.ancestor_wrapper).toBe(':root.dark');
 	});
 
 	test('before:content:"" includes pseudo-element in selector', () => {
@@ -418,7 +446,7 @@ describe('interpret_css_literal', () => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
-		assert.include(output.selector, '::before');
+		expect(output.selector).toContain('::before');
 	});
 
 	test('md:dark:hover:before:opacity:80% has all components', () => {
@@ -428,8 +456,8 @@ describe('interpret_css_literal', () => {
 		const output = assert_interpret_ok(result);
 		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
 		if (!output.ancestor_wrapper) throw new Error('Expected ancestor_wrapper');
-		assert.include(output.selector, ':hover');
-		assert.include(output.selector, '::before');
+		expect(output.selector).toContain(':hover');
+		expect(output.selector).toContain('::before');
 	});
 });
 
@@ -438,11 +466,11 @@ describe('generate_css_literal_simple', () => {
 		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, '.display\\:flex');
-		assert.include(css, 'display: flex;');
+		expect(css).toContain('.display\\:flex');
+		expect(css).toContain('display: flex;');
 		// Should not have wrappers
-		assert.notInclude(css, '@media');
-		assert.notInclude(css, ':root');
+		expect(css).not.toContain('@media');
+		expect(css).not.toContain(':root');
 	});
 
 	test('hover:opacity:80%', () => {
@@ -451,8 +479,8 @@ describe('generate_css_literal_simple', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, ':hover');
-		assert.include(css, 'opacity: 80%;');
+		expect(css).toContain(':hover');
+		expect(css).toContain('opacity: 80%;');
 	});
 
 	test('md:display:flex has media wrapper', () => {
@@ -461,8 +489,8 @@ describe('generate_css_literal_simple', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, '@media (width >= 48rem)');
-		assert.include(css, 'display: flex;');
+		expect(css).toContain('@media (width >= 48rem)');
+		expect(css).toContain('display: flex;');
 	});
 
 	test('dark:opacity:60% has ancestor wrapper', () => {
@@ -471,8 +499,8 @@ describe('generate_css_literal_simple', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, ':root.dark');
-		assert.include(css, 'opacity: 60%;');
+		expect(css).toContain(':root.dark');
+		expect(css).toContain('opacity: 60%;');
 	});
 
 	test('md:dark:hover:opacity:80% has nested structure', () => {
@@ -481,10 +509,10 @@ describe('generate_css_literal_simple', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, '@media (width >= 48rem)');
-		assert.include(css, ':root.dark');
-		assert.include(css, ':hover');
-		assert.include(css, 'opacity: 80%;');
+		expect(css).toContain('@media (width >= 48rem)');
+		expect(css).toContain(':root.dark');
+		expect(css).toContain(':hover');
+		expect(css).toContain('opacity: 80%;');
 	});
 });
 
@@ -494,11 +522,11 @@ describe('suggest_css_property', () => {
 		['opacty', 'opacity'],
 		['colr', 'color'],
 	] as const)('suggests %s for %s', (typo, expected) => {
-		assert.equal(suggest_css_property(typo, css_properties), expected);
+		expect(suggest_css_property(typo, css_properties)).toBe(expected);
 	});
 
 	test('returns null for very different strings', () => {
-		assert.isNull(suggest_css_property('xyz123', css_properties));
+		expect(suggest_css_property('xyz123', css_properties)).toBeNull();
 	});
 });
 
@@ -510,12 +538,12 @@ describe('parse_css_literal - max breakpoints', () => {
 		['max-xl:gap:0', 'max-xl', 'gap', '0'],
 		['max-2xl:margin:auto', 'max-2xl', 'margin', 'auto'],
 	] as const)('%s parses correctly', (input, media_name, property, value) => {
-		const {parsed} = assert_ok(parse_css_literal(input, css_properties));
+		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
 		if (!parsed.media) throw new Error('Expected media');
-		assert.equal(parsed.media.name, media_name);
-		assert.include(parsed.media.css, 'width <');
-		assert.equal(parsed.property, property);
-		assert.equal(parsed.value, value);
+		expect(parsed.media.name).toBe(media_name);
+		expect(parsed.media.css).toContain('width <');
+		expect(parsed.property).toBe(property);
+		expect(parsed.value).toBe(value);
 	});
 });
 
@@ -528,8 +556,8 @@ describe('generate_css_literal_simple - max breakpoints', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, expected_media);
-		assert.include(css, expected_decl);
+		expect(css).toContain(expected_media);
+		expect(css).toContain(expected_decl);
 	});
 });
 
@@ -540,9 +568,9 @@ describe('parse_css_literal - !important with modifiers', () => {
 		['md:dark:display:block!important', 'display', 'block !important'],
 		['margin:0~auto!important', 'margin', '0 auto !important'],
 	] as const)('%s → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_ok(parse_css_literal(input, css_properties));
-		assert.equal(parsed.property, property);
-		assert.equal(parsed.value, value);
+		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		expect(parsed.property).toBe(property);
+		expect(parsed.value).toBe(value);
 	});
 });
 
@@ -555,8 +583,8 @@ describe('generate_css_literal_simple - !important', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, expected_decl);
-		if (expected_selector) assert.include(css, expected_selector);
+		expect(css).toContain(expected_decl);
+		if (expected_selector) expect(css).toContain(expected_selector);
 	});
 });
 
@@ -567,9 +595,9 @@ describe('parse_css_literal - Unicode values', () => {
 		['before:content:"«"', 'content', '"«"'],
 		['list-style-type:"•"', 'list-style-type', '"•"'],
 	] as const)('%s → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_ok(parse_css_literal(input, css_properties));
-		assert.equal(parsed.property, property);
-		assert.equal(parsed.value, value);
+		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		expect(parsed.property).toBe(property);
+		expect(parsed.value).toBe(value);
 	});
 });
 
@@ -582,8 +610,8 @@ describe('generate_css_literal_simple - Unicode', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		const output = assert_interpret_ok(result);
 		const css = generate_css_literal_simple(output);
-		assert.include(css, expected_decl);
-		if (expected_selector) assert.include(css, expected_selector);
+		expect(css).toContain(expected_decl);
+		if (expected_selector) expect(css).toContain(expected_selector);
 	});
 });
 
@@ -595,7 +623,7 @@ describe('generate_css_literal_simple - Unicode', () => {
 const assert_mod_ok = (
 	result: ModifierExtractionResult,
 ): {modifiers: ExtractedModifiers; remaining: Array<string>} => {
-	assert.isTrue(result.ok, 'Expected modifier extraction to be ok');
+	expect_ok(result, 'Expected modifier extraction to be ok');
 	return result as {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>};
 };
 
@@ -603,53 +631,50 @@ const assert_mod_ok = (
 const assert_literal_ok = (
 	result: LiteralResolutionResult,
 ): {declaration: string; warnings: Array<InterpreterDiagnostic> | null} => {
-	assert.isTrue(result.ok, 'Expected literal resolution to be ok');
+	expect_ok(result, 'Expected literal resolution to be ok');
 	return result as {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null};
 };
 
 // Helper to assert literal resolution result is not a literal (error with null)
 const assert_literal_not_literal = (result: LiteralResolutionResult): void => {
-	assert.isFalse(result.ok, 'Expected literal resolution to fail');
-	// After assert.isFalse, TypeScript narrows result.ok to false
-	assert.isNull(
-		(result as {ok: false; error: InterpreterDiagnostic | null}).error,
-		'Expected error to be null (not a literal)',
-	);
+	expect_error(result, 'Expected literal resolution to fail');
+	// After expect_error, TypeScript narrows result.ok to false
+	expect((result as {ok: false; error: InterpreterDiagnostic | null}).error).toBeNull();
 };
 
 // Helper to assert literal resolution result is error with non-null error
 const assert_literal_has_error = (result: LiteralResolutionResult): InterpreterDiagnostic => {
-	assert.isFalse(result.ok, 'Expected literal resolution to fail');
-	// After assert.isFalse, TypeScript narrows result.ok to false
+	expect_error(result, 'Expected literal resolution to fail');
+	// After expect_error, TypeScript narrows result.ok to false
 	const error_result = result as {ok: false; error: InterpreterDiagnostic | null};
-	assert.isNotNull(error_result.error, 'Expected non-null error');
-	return error_result.error;
+	expect(error_result.error).not.toBeNull();
+	return error_result.error!;
 };
 
 describe('has_modifiers', () => {
 	test('returns false for unmodified literal', () => {
-		const {parsed} = assert_ok(parse_css_literal('display:flex', null));
-		assert.isFalse(has_modifiers(parsed));
+		const {parsed} = assert_parse_ok(parse_css_literal('display:flex', null));
+		expect(has_modifiers(parsed)).toBe(false);
 	});
 
 	test('returns true for media modifier', () => {
-		const {parsed} = assert_ok(parse_css_literal('md:display:flex', null));
-		assert.isTrue(has_modifiers(parsed));
+		const {parsed} = assert_parse_ok(parse_css_literal('md:display:flex', null));
+		expect(has_modifiers(parsed)).toBe(true);
 	});
 
 	test('returns true for state modifier', () => {
-		const {parsed} = assert_ok(parse_css_literal('hover:opacity:80%', null));
-		assert.isTrue(has_modifiers(parsed));
+		const {parsed} = assert_parse_ok(parse_css_literal('hover:opacity:80%', null));
+		expect(has_modifiers(parsed)).toBe(true);
 	});
 
 	test('returns true for ancestor modifier', () => {
-		const {parsed} = assert_ok(parse_css_literal('dark:color:white', null));
-		assert.isTrue(has_modifiers(parsed));
+		const {parsed} = assert_parse_ok(parse_css_literal('dark:color:white', null));
+		expect(has_modifiers(parsed)).toBe(true);
 	});
 
 	test('returns true for pseudo-element modifier', () => {
-		const {parsed} = assert_ok(parse_css_literal('before:content:""', null));
-		assert.isTrue(has_modifiers(parsed));
+		const {parsed} = assert_parse_ok(parse_css_literal('before:content:""', null));
+		expect(has_modifiers(parsed)).toBe(true);
 	});
 });
 
@@ -657,20 +682,20 @@ describe('has_extracted_modifiers', () => {
 	test('returns false for empty modifiers', () => {
 		const segments = extract_segments('box');
 		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'box'));
-		assert.isFalse(has_extracted_modifiers(modifiers));
+		expect(has_extracted_modifiers(modifiers)).toBe(false);
 	});
 
 	test('returns true for media modifier', () => {
 		const segments = extract_segments('md:box');
 		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'md:box'));
-		assert.isTrue(has_extracted_modifiers(modifiers));
+		expect(has_extracted_modifiers(modifiers)).toBe(true);
 	});
 
 	test('returns true for multiple state modifiers', () => {
 		const segments = extract_segments('focus:hover:box');
 		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'focus:hover:box'));
-		assert.isTrue(has_extracted_modifiers(modifiers));
-		assert.lengthOf(modifiers.states, 2);
+		expect(has_extracted_modifiers(modifiers)).toBe(true);
+		expect(modifiers.states).toHaveLength(2);
 	});
 });
 
@@ -679,21 +704,21 @@ describe('try_resolve_literal', () => {
 		const {declaration} = assert_literal_ok(
 			try_resolve_literal('text-align:center', css_properties, 'test'),
 		);
-		assert.equal(declaration, 'text-align: center;');
+		expect(declaration).toBe('text-align: center;');
 	});
 
 	test('resolves literal with ~ space encoding', () => {
 		const {declaration} = assert_literal_ok(
 			try_resolve_literal('margin:0~auto', css_properties, 'test'),
 		);
-		assert.equal(declaration, 'margin: 0 auto;');
+		expect(declaration).toBe('margin: 0 auto;');
 	});
 
 	test('resolves custom property', () => {
 		const {declaration} = assert_literal_ok(
 			try_resolve_literal('--my-color:blue', css_properties, 'test'),
 		);
-		assert.equal(declaration, '--my-color: blue;');
+		expect(declaration).toBe('--my-color: blue;');
 	});
 
 	test('returns null error for non-literal class names', () => {
@@ -704,16 +729,16 @@ describe('try_resolve_literal', () => {
 		const error = assert_literal_has_error(
 			try_resolve_literal('hover:opacity:80%', css_properties, 'test'),
 		);
-		assert.include(error.message, 'cannot be used in composes array');
+		expect(error.message).toContain('cannot be used in composes array');
 	});
 
 	test('returns error for invalid property with suggestion', () => {
 		const error = assert_literal_has_error(
 			try_resolve_literal('disply:flex', css_properties, 'test'),
 		);
-		assert.include(error.message, 'Unknown CSS property');
-		assert.isNotNull(error.suggestion);
-		assert.include(error.suggestion, 'display');
+		expect(error.message).toContain('Unknown CSS property');
+		expect(error.suggestion).not.toBeNull();
+		expect(error.suggestion).toContain('display');
 	});
 
 	test('modifier:token pattern returns property error (detection in resolve_composes)', () => {
@@ -722,7 +747,7 @@ describe('try_resolve_literal', () => {
 		const error = assert_literal_has_error(
 			try_resolve_literal('hover:shadow_lg', css_properties, 'card'),
 		);
-		assert.include(error.message, 'Unknown CSS property');
+		expect(error.message).toContain('Unknown CSS property');
 	});
 
 	test('returns null error for token class without colon', () => {

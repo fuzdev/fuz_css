@@ -184,8 +184,26 @@ describe('modify_single_selector', () => {
 			'underscores and numbers',
 		],
 
-		// Multiple occurrences
+		// Multiple occurrences - only first instance is modified
 		['.foo.foo', 'foo', 'hover\\:foo', ':hover', '', '.hover\\:foo.foo:hover', 'duplicate class'],
+		[
+			'.foo .content .foo',
+			'foo',
+			'hover\\:foo',
+			':hover',
+			'',
+			'.hover\\:foo:hover .content .foo',
+			'class twice - descendant',
+		],
+		[
+			'.foo.bar.foo',
+			'foo',
+			'hover\\:foo',
+			':hover',
+			'',
+			'.hover\\:foo.bar.foo:hover',
+			'class twice - compound',
+		],
 
 		// ::part() and ::slotted() pseudo-elements
 		[
@@ -284,6 +302,98 @@ describe('modify_selector_group', () => {
 			expect(result.skipped_modifiers![0]!.selector).toBe('.plain:hover');
 			expect(result.skipped_modifiers![0]!.reason).toBe('state_conflict');
 			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
+		});
+
+		// Tests for state matching precision (avoid false positives with related states)
+		test('focus modifier applies to selector with :focus-within (no conflict)', () => {
+			const result = modify_selector_group(
+				'.btn:focus-within',
+				'btn',
+				'focus\\:btn',
+				[':focus'],
+				'',
+			);
+			expect(result.selector).toBe('.focus\\:btn:focus-within:focus');
+			expect(result.skipped_modifiers).toBeNull(); // No conflict - different states!
+		});
+
+		test('focus modifier applies to selector with :focus-visible (no conflict)', () => {
+			const result = modify_selector_group(
+				'.btn:focus-visible',
+				'btn',
+				'focus\\:btn',
+				[':focus'],
+				'',
+			);
+			expect(result.selector).toBe('.focus\\:btn:focus-visible:focus');
+			expect(result.skipped_modifiers).toBeNull();
+		});
+
+		test('hover modifier not confused by attribute selector containing hover', () => {
+			const result = modify_selector_group(
+				'.btn[data-hover="true"]',
+				'btn',
+				'hover\\:btn',
+				[':hover'],
+				'',
+			);
+			expect(result.selector).toBe('.hover\\:btn[data-hover="true"]:hover');
+			expect(result.skipped_modifiers).toBeNull();
+		});
+
+		test('focus modifier skipped for selector with exact :focus match', () => {
+			const result = modify_selector_group('.btn:focus', 'btn', 'focus\\:btn', [':focus'], '');
+			expect(result.skipped_modifiers).not.toBeNull();
+			expect(result.skipped_modifiers).toHaveLength(1);
+			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
+		});
+
+		test('focus modifier skipped for :focus in functional pseudo-class', () => {
+			const result = modify_selector_group(
+				'.btn:not(:focus)',
+				'btn',
+				'focus\\:btn',
+				[':focus'],
+				'',
+			);
+			expect(result.skipped_modifiers).not.toBeNull();
+			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
+		});
+
+		test('active modifier skipped for :active in :not(:active)', () => {
+			const result = modify_selector_group(
+				'.btn:not(:active)',
+				'btn',
+				'active\\:btn',
+				[':active'],
+				'',
+			);
+			expect(result.skipped_modifiers).not.toBeNull();
+			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':active');
+		});
+
+		test('hover modifier skipped for deeply nested :not(:is(:focus, :hover))', () => {
+			const result = modify_selector_group(
+				'.btn:not(:is(:focus, :hover))',
+				'btn',
+				'hover\\:btn',
+				[':hover'],
+				'',
+			);
+			expect(result.skipped_modifiers).not.toBeNull();
+			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
+		});
+
+		test('focus modifier skipped for :where(:focus, :active)', () => {
+			const result = modify_selector_group(
+				'.btn:where(:focus, :active)',
+				'btn',
+				'focus\\:btn',
+				[':focus'],
+				'',
+			);
+			expect(result.skipped_modifiers).not.toBeNull();
+			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
 		});
 
 		test('applies non-conflicting states when some conflict', () => {

@@ -7,6 +7,7 @@ import {
 	expect_error,
 	expect_resolved_declaration,
 	expect_resolution_error,
+	count_css_occurrences,
 } from './test_helpers.js';
 
 /**
@@ -572,6 +573,77 @@ describe('resolve_composes', () => {
 			expect_error(result);
 			if (!result.ok) {
 				expect(result.error.message).toContain('ruleset_class');
+			}
+		});
+	});
+
+	describe('deep composition chains', () => {
+		test('resolves 10-level deep chain', () => {
+			const definitions: Record<string, CssClassDefinition> = {
+				l10: {declaration: 'color: red;'},
+				l9: {composes: ['l10']},
+				l8: {composes: ['l9']},
+				l7: {composes: ['l8']},
+				l6: {composes: ['l7']},
+				l5: {composes: ['l6']},
+				l4: {composes: ['l5']},
+				l3: {composes: ['l4']},
+				l2: {composes: ['l3']},
+				l1: {composes: ['l2']},
+			};
+			const result = resolve_composes(['l1'], definitions, new Set(), new Set(), 'test');
+			expect_resolved_declaration(result, 'color: red;');
+		});
+
+		test('error on missing class mid-chain', () => {
+			const definitions: Record<string, CssClassDefinition> = {
+				c: {composes: ['b']},
+				a: {composes: ['c']},
+				// 'b' is missing
+			};
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test');
+			expect_resolution_error(result, 'Unknown class "b"');
+		});
+
+		test('diamond with deep shared node', () => {
+			// a → b,c → d → e → f (f is shared deeply nested)
+			const definitions: Record<string, CssClassDefinition> = {
+				f: {declaration: 'font-size: 16px;'},
+				e: {composes: ['f'], declaration: 'font-weight: bold;'},
+				d: {composes: ['e'], declaration: 'color: blue;'},
+				b: {composes: ['d'], declaration: 'padding: 10px;'},
+				c: {composes: ['d'], declaration: 'margin: 10px;'},
+				a: {composes: ['b', 'c']},
+			};
+			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test');
+
+			expect_ok(result);
+			if (result.ok) {
+				// f, e, d should appear once despite diamond
+				expect(count_css_occurrences(result.declaration, 'font-size')).toBe(1);
+				expect(count_css_occurrences(result.declaration, 'color: blue')).toBe(1);
+			}
+		});
+
+		test('wide diamond with many branches', () => {
+			// 4 branches all depending on a shared base
+			const definitions: Record<string, CssClassDefinition> = {
+				base: {declaration: 'color: red;'},
+				branch1: {composes: ['base'], declaration: 'padding: 1px;'},
+				branch2: {composes: ['base'], declaration: 'padding: 2px;'},
+				branch3: {composes: ['base'], declaration: 'padding: 3px;'},
+				branch4: {composes: ['base'], declaration: 'padding: 4px;'},
+				top: {composes: ['branch1', 'branch2', 'branch3', 'branch4']},
+			};
+			const result = resolve_composes(['top'], definitions, new Set(), new Set(), 'test');
+
+			expect_ok(result);
+			if (result.ok) {
+				// base should only appear once
+				expect(count_css_occurrences(result.declaration, 'color: red')).toBe(1);
+				// all branches should be present
+				expect(result.declaration).toContain('padding: 1px');
+				expect(result.declaration).toContain('padding: 4px');
 			}
 		});
 	});

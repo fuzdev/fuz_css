@@ -269,14 +269,19 @@ const selector_has_pseudo_element = (selector: string): boolean => {
  * Handles functional pseudo-classes like :not(:hover) by checking for the state
  * both as a direct pseudo-class and within functional pseudo-classes.
  *
+ * Uses regex to avoid false positives where a state is a prefix of another state:
+ * - `:focus` should NOT match `:focus-within` or `:focus-visible`
+ * - `:hover` should NOT match `[data-hover="true"]` (attribute value)
+ *
  * @param selector - The CSS selector to check
  * @param state - The state to look for (e.g., ":hover", ":focus")
  * @returns True if the selector already contains this state
  */
 const selector_has_state = (selector: string, state: string): boolean => {
-	// Simple check: does the selector contain the state string?
-	// This catches both direct usage (.foo:hover) and within functional pseudo-classes (.foo:not(:hover))
-	return selector.includes(state);
+	// Match the state exactly, not when followed by word characters or hyphens
+	// e.g., `:focus` matches `:focus` and `:focus)` but not `:focus-within`
+	const pattern = new RegExp(escape_regexp(state) + '(?![\\w-])');
+	return pattern.test(selector);
 };
 
 /**
