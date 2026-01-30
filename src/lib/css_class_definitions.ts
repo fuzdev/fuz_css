@@ -331,7 +331,7 @@ export const merge_class_definitions = (
 	include_defaults: boolean,
 ): Record<string, CssClassDefinition | undefined> => {
 	if (!include_defaults && !user_definitions) {
-		throw new Error('class_definitions is required when include_default_definitions is false');
+		throw new Error('class_definitions is required when include_default_classes is false');
 	}
 	return include_defaults
 		? user_definitions

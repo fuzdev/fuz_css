@@ -127,7 +127,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		filter_file = filter_file_default,
 		include_stats = false,
 		class_definitions: user_class_definitions,
-		include_default_definitions = true,
+		include_default_classes = true,
 		class_interpreters = css_class_interpreters,
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
@@ -159,7 +159,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	// Merge class definitions upfront (validates that definitions exist when needed)
 	const all_class_definitions = merge_class_definitions(
 		user_class_definitions,
-		include_default_definitions,
+		include_default_classes,
 	);
 
 	// Lazy-load expensive resources (cached per generator instance)

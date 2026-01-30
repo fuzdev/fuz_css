@@ -8,7 +8,6 @@ import {
 	get_all_variable_names,
 	has_variable,
 	find_similar_variable,
-	VARIABLE_GRAPH_VERSION,
 } from '../lib/variable_graph.js';
 import type {StyleVariable} from '../lib/variable.js';
 
@@ -22,7 +21,6 @@ describe('build_variable_graph', () => {
 			expect(graph.variables.size).toBe(1);
 			expect(graph.variables.get('color_a')!.light_css).toBe('blue');
 			expect(graph.variables.get('color_a')!.dark_css).toBe('lightblue');
-			expect(graph.version).toBe(VARIABLE_GRAPH_VERSION);
 			expect(graph.content_hash).toBe('test-hash');
 		});
 

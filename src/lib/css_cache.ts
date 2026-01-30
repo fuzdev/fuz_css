@@ -19,7 +19,7 @@ import type {FsOperations} from './operations.js';
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
 
 /**
- * Cache version. Bump when any of these change:
+ * CSS cache version. Bump when any of these change:
  * - `CachedExtraction` schema
  * - `extract_css_classes_with_locations()` logic or output
  * - `ExtractionDiagnostic` or `SourceLocation` structure
@@ -27,7 +27,7 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * v1: Initial version with classes and diagnostics
  * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
  */
-const CACHE_VERSION = 2;
+export const CSS_CACHE_VERSION = 2;
 
 /**
  * Cached extraction result for a single file.
@@ -109,7 +109,7 @@ export const load_cached_extraction = async (
 		const cached = JSON.parse(content) as CachedExtraction;
 
 		// Invalidate if version mismatch
-		if (cached.v !== CACHE_VERSION) {
+		if (cached.v !== CSS_CACHE_VERSION) {
 			return null;
 		}
 
@@ -155,7 +155,7 @@ export const save_cached_extraction = async (
 		css_variables && css_variables.size > 0 ? Array.from(css_variables) : null;
 
 	const data: CachedExtraction = {
-		v: CACHE_VERSION,
+		v: CSS_CACHE_VERSION,
 		content_hash,
 		classes: classes_array,
 		explicit_classes: explicit_array,

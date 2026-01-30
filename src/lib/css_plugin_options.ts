@@ -46,7 +46,7 @@ export interface CssClassOptions {
 	/**
 	 * Additional class definitions to merge with defaults.
 	 * User definitions take precedence over defaults with the same name.
-	 * Required when `include_default_definitions` is `false`.
+	 * Required when `include_default_classes` is `false`.
 	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
 	/**
@@ -54,7 +54,7 @@ export interface CssClassOptions {
 	 * When `false`, `class_definitions` is required.
 	 * @default true
 	 */
-	include_default_definitions?: boolean;
+	include_default_classes?: boolean;
 	/**
 	 * Custom interpreters for dynamic class generation.
 	 * Replaces the builtin interpreters entirely if provided.
@@ -81,6 +81,20 @@ export interface CssClassOptions {
  * - `(default_css) => string` - Callback to modify default CSS
  */
 export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
+
+/**
+ * Type for the variables option used by CSS generators.
+ * Supports four forms:
+ * - `undefined` - Use default variables
+ * - `null` - Disable theme generation entirely
+ * - `Array<StyleVariable>` - Custom variables array (replaces defaults)
+ * - `(defaults) => Array<StyleVariable>` - Callback to modify defaults
+ */
+export type VariablesOption =
+	| Array<StyleVariable>
+	| ((defaults: Array<StyleVariable>) => Array<StyleVariable>)
+	| null
+	| undefined;
 
 /**
  * Options for unified CSS generation (theme + base + utilities).
@@ -125,10 +139,7 @@ export interface UnifiedCssOptions {
 	 * ]
 	 * ```
 	 */
-	variables?:
-		| Array<StyleVariable>
-		| null
-		| ((defaults: Array<StyleVariable>) => Array<StyleVariable>);
+	variables?: VariablesOption;
 	/**
 	 * Whether to tree-shake base styles to only include rules for detected elements.
 	 * When false, includes all rules from the base styles.

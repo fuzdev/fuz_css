@@ -29,7 +29,7 @@ describe('shared options interface', () => {
 			acorn_plugins: [],
 			// CssClassOptions
 			class_definitions: {},
-			include_default_definitions: true,
+			include_default_classes: true,
 			class_interpreters: [],
 			additional_classes: ['p_md'],
 			exclude_classes: ['hidden'],
@@ -178,11 +178,11 @@ describe('options default behavior', () => {
 		expect(minimal).toBeDefined();
 	});
 
-	test('include_default_definitions defaults to true conceptually', () => {
-		// When undefined, generators should treat include_default_definitions as true
+	test('include_default_classes defaults to true conceptually', () => {
+		// When undefined, generators should treat include_default_classes as true
 		// This test documents the expected behavior
 		const opts: CssClassOptions = {};
-		expect(opts.include_default_definitions).toBeUndefined();
+		expect(opts.include_default_classes).toBeUndefined();
 		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts
 	});
 });

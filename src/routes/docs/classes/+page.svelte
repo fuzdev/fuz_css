@@ -979,7 +979,7 @@ import 'virtual:fuz.css'; // utilities only`}
 					<a href="#Composite-classes">composite classes</a>)
 				</li>
 				<li>
-					<code>include_default_definitions</code> - set to <code>false</code> to use only your own
+					<code>include_default_classes</code> - set to <code>false</code> to use only your own
 					<code>class_definitions</code>, excluding all default token and composite classes
 				</li>
 				<li>
@@ -1489,7 +1489,7 @@ const Component = () => <div className={styles} />;`}
 			<ModuleLink module_path="css_class_interpreters.ts">Interpreters</ModuleLink> dynamically generate
 			CSS for class names that aren't in the static definitions (which can be extended via
 			<code>class_definitions</code> or replaced with
-			<code>include_default_definitions: false</code>). The default
+			<code>include_default_classes: false</code>). The default
 			<a href="#Literal-classes">CSS-literal syntax</a> and
 			<a href="#Modifiers">modifier support</a> are both implemented as interpreters, which you can extend
 			or replace.

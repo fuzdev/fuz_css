@@ -79,12 +79,7 @@ export interface StyleRuleIndex {
 	by_class: Map<string, Array<number>>;
 	/** Content hash for cache invalidation */
 	content_hash: string;
-	/** Parser version for cache invalidation */
-	version: number;
 }
-
-/** Current version of the style rule parser. Bump when logic changes. */
-export const STYLE_RULE_PARSER_VERSION = 1;
 
 /**
  * Parses a CSS stylesheet into a StyleRuleIndex.
@@ -163,7 +158,6 @@ export const parse_style_css = (css: string, content_hash: string): StyleRuleInd
 		by_element,
 		by_class,
 		content_hash,
-		version: STYLE_RULE_PARSER_VERSION,
 	};
 };
 

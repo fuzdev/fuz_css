@@ -6,7 +6,6 @@ import {
 	generate_base_css,
 	collect_rule_variables,
 	load_style_rule_index,
-	STYLE_RULE_PARSER_VERSION,
 } from '../lib/style_rule_parser.js';
 import {default_fs_operations} from '../lib/operations_defaults.js';
 
@@ -44,11 +43,10 @@ describe('parse_style_css', () => {
 			expect(index.rules[0]!.elements.has('h3')).toBe(true);
 		});
 
-		test('stores version and hash', () => {
+		test('stores content hash', () => {
 			const css = `button { color: red; }`;
 			const index = parse_style_css(css, 'my-hash');
 
-			expect(index.version).toBe(STYLE_RULE_PARSER_VERSION);
 			expect(index.content_hash).toBe('my-hash');
 		});
 	});

@@ -18,7 +18,7 @@ import {join} from 'node:path';
 import {readdir, readFile} from 'node:fs/promises';
 import {execSync} from 'node:child_process';
 
-import {FUZ_CSS_MARKER} from '$lib/vite_plugin_fuz_css.js';
+import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.js';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
@@ -154,12 +154,12 @@ const read_generated_css = async (example_name: string): Promise<string> => {
  * Returns the CSS between the marker comments.
  */
 const extract_fuz_css = (css: string): string | null => {
-	const start_idx = css.indexOf(FUZ_CSS_MARKER);
-	const end_idx = css.lastIndexOf(FUZ_CSS_MARKER);
+	const start_idx = css.indexOf(FUZ_CSS_BANNER);
+	const end_idx = css.lastIndexOf(FUZ_CSS_BANNER);
 	if (start_idx === -1 || end_idx === -1 || start_idx === end_idx) {
 		return null;
 	}
-	return css.slice(start_idx, end_idx + FUZ_CSS_MARKER.length);
+	return css.slice(start_idx, end_idx + FUZ_CSS_BANNER.length);
 };
 
 /**

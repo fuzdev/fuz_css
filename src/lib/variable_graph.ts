@@ -15,6 +15,11 @@ import type {StyleVariable} from './variable.js';
 import {extract_css_variables} from './css_variable_utils.js';
 import {compute_hash_sync} from './hash.js';
 
+import type {VariablesOption} from './css_plugin_options.js';
+
+// Re-export for backwards compatibility
+export type {VariablesOption};
+
 /**
  * Information about a single style variable and its dependencies.
  */
@@ -39,12 +44,7 @@ export interface VariableDependencyGraph {
 	variables: Map<string, VariableInfo>;
 	/** Content hash for cache invalidation */
 	content_hash: string;
-	/** Graph version for cache invalidation */
-	version: number;
 }
-
-/** Current version of the variable graph builder. Bump when logic changes. */
-export const VARIABLE_GRAPH_VERSION = 1;
 
 /**
  * Builds a dependency graph from an array of style variables.
@@ -75,7 +75,6 @@ export const build_variable_graph = (
 	return {
 		variables: graph,
 		content_hash,
-		version: VARIABLE_GRAPH_VERSION,
 	};
 };
 
@@ -268,20 +267,6 @@ export const find_similar_variable = (
 
 	return best_match;
 };
-
-/**
- * Type for the variables option used by CSS generators.
- * Supports three forms:
- * - `undefined` - Use default variables
- * - `null` - Disable theme generation entirely
- * - `Array<StyleVariable>` - Custom variables array
- * - `(defaults) => Array<StyleVariable>` - Callback to modify defaults
- */
-export type VariablesOption =
-	| Array<StyleVariable>
-	| ((defaults: Array<StyleVariable>) => Array<StyleVariable>)
-	| null
-	| undefined;
 
 /**
  * Resolves a variables option to a concrete array of style variables.

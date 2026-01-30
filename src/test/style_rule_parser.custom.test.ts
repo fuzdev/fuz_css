@@ -134,11 +134,6 @@ describe('create_style_rule_index', () => {
 			// Different content should produce different hashes
 			expect(index1.content_hash).not.toBe(index2.content_hash);
 		});
-
-		test('includes version number', async () => {
-			const index = await create_style_rule_index('button { color: red; }');
-			expect(typeof index.version).toBe('number');
-		});
 	});
 
 	describe('edge cases', () => {
