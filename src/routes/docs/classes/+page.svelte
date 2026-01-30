@@ -947,8 +947,8 @@ import 'virtual:fuz.css';`}
 				lang="ts"
 				content={`// vite.config.ts - utility-only mode
 vite_plugin_fuz_css({
-	include_base_styles: false,
-	include_theme_styles: false,
+	base_css: null,
+	variables: null,
 }),
 
 // +layout.svelte
@@ -1046,8 +1046,8 @@ import './fuz.css';`}
 				lang="ts"
 				content={`// fuz.gen.css.ts - utility-only mode
 export const gen = gen_fuz_css({
-	include_base_styles: false,
-	include_theme_styles: false,
+	base_css: null,
+	variables: null,
 });
 
 // +layout.svelte
