@@ -2,73 +2,68 @@ import {test, expect, describe} from 'vitest';
 
 import {extract_from_svelte, SourceIndex} from '$lib/css_class_extractor.js';
 
+import {
+	loc,
+	assert_class_at_line,
+	assert_class_locations,
+} from './css_class_extractor_test_helpers.js';
+
 describe('SourceIndex', () => {
 	describe('standard LF line endings', () => {
 		const source = 'abc\ndef\nghi';
 
 		const lf_cases = [
-			{offset: 0, line: 1, column: 1, desc: 'start of file'},
-			{offset: 2, line: 1, column: 3, desc: 'within first line'},
-			{offset: 4, line: 2, column: 1, desc: 'start of second line'},
-			{offset: 6, line: 2, column: 3, desc: 'within second line'},
-			{offset: 8, line: 3, column: 1, desc: 'start of third line'},
+			{offset: 0, expected: loc('f', 1, 1), desc: 'start of file'},
+			{offset: 2, expected: loc('f', 1, 3), desc: 'within first line'},
+			{offset: 4, expected: loc('f', 2, 1), desc: 'start of second line'},
+			{offset: 6, expected: loc('f', 2, 3), desc: 'within second line'},
+			{offset: 8, expected: loc('f', 3, 1), desc: 'start of third line'},
 		];
 
-		test.each(lf_cases)('$desc (offset $offset)', ({offset, line, column}) => {
+		test.each(lf_cases)('$desc (offset $offset)', ({offset, expected}) => {
 			const index = new SourceIndex(source);
-			expect(index.get_location(offset, 'f')).toMatchObject({line, column});
+			expect(index.get_location(offset, 'f')).toEqual(expected);
 		});
 	});
 
-	test('handles empty lines', () => {
-		const source = 'abc\n\ndef';
-		const index = new SourceIndex(source);
+	describe('edge cases', () => {
+		test('handles empty lines', () => {
+			const source = 'abc\n\ndef';
+			const index = new SourceIndex(source);
 
-		// First line
-		expect(index.get_location(0, 'f').line).toBe(1);
+			expect(index.get_location(0, 'f')).toEqual(loc('f', 1, 1)); // First line
+			expect(index.get_location(4, 'f')).toEqual(loc('f', 2, 1)); // Empty second line
+			expect(index.get_location(5, 'f')).toEqual(loc('f', 3, 1)); // Third line
+		});
 
-		// Empty second line (offset 4 is the start of the empty line)
-		expect(index.get_location(4, 'f').line).toBe(2);
-		expect(index.get_location(4, 'f').column).toBe(1);
+		test('handles single line source', () => {
+			const source = 'hello world';
+			const index = new SourceIndex(source);
+			expect(index.get_location(6, 'f')).toEqual(loc('f', 1, 7));
+		});
 
-		// Third line
-		expect(index.get_location(5, 'f').line).toBe(3);
-	});
+		test('handles empty source', () => {
+			const source = '';
+			const index = new SourceIndex(source);
+			expect(index.get_location(0, 'f')).toEqual(loc('f', 1, 1));
+		});
 
-	test('handles single line source', () => {
-		const source = 'hello world';
-		const index = new SourceIndex(source);
-		const loc = index.get_location(6, 'f');
-		expect(loc.line).toBe(1);
-		expect(loc.column).toBe(7);
-	});
+		test('handles CRLF line endings', () => {
+			const source = 'abc\r\ndef\r\nghi';
+			const index = new SourceIndex(source);
 
-	test('handles empty source', () => {
-		const source = '';
-		const index = new SourceIndex(source);
-		const loc = index.get_location(0, 'f');
-		expect(loc.line).toBe(1);
-		expect(loc.column).toBe(1);
-	});
+			expect(index.get_location(0, 'f').line).toBe(1); // 'a'
+			expect(index.get_location(3, 'f').line).toBe(1); // 'c'
+			expect(index.get_location(5, 'f').line).toBe(2); // 'd'
+			expect(index.get_location(8, 'f').line).toBe(2); // 'f'
+			expect(index.get_location(10, 'f').line).toBe(3); // 'g'
+		});
 
-	test('handles CRLF line endings', () => {
-		const source = 'abc\r\ndef\r\nghi';
-		const index = new SourceIndex(source);
-		// Line 1: 'abc\r' (4 chars, newline at position 4)
-		expect(index.get_location(0, 'f').line).toBe(1);
-		expect(index.get_location(3, 'f').line).toBe(1); // 'c'
-		// After \r\n we're at line 2
-		expect(index.get_location(5, 'f').line).toBe(2); // 'd'
-		expect(index.get_location(8, 'f').line).toBe(2); // 'f'
-		// Line 3
-		expect(index.get_location(10, 'f').line).toBe(3); // 'g'
-	});
-
-	test('includes file in location', () => {
-		const source = 'abc\ndef\nghi';
-		const index = new SourceIndex(source);
-		const loc = index.get_location(0, 'test.ts');
-		expect(loc.file).toBe('test.ts');
+		test('includes file in location', () => {
+			const source = 'abc\ndef\nghi';
+			const index = new SourceIndex(source);
+			expect(index.get_location(0, 'test.ts').file).toBe('test.ts');
+		});
 	});
 });
 
@@ -76,9 +71,7 @@ describe('source location tracking', () => {
 	test('tracks source locations for classes', () => {
 		const source = `<div class="foo bar"></div>`;
 		const result = extract_from_svelte(source, 'test.svelte');
-		expect(result.classes?.get('foo')).toBeDefined();
-		expect(result.classes?.get('foo')![0]!.file).toBe('test.svelte');
-		expect(result.classes?.get('foo')![0]!.line).toBe(1);
+		assert_class_at_line(result, 'foo', 1, 'test.svelte');
 	});
 
 	test('tracks source locations for multi-line class attributes', () => {
@@ -87,8 +80,8 @@ describe('source location tracking', () => {
 	<p class="line3-class"></p>
 </div>`;
 		const result = extract_from_svelte(source, 'test.svelte');
-		expect(result.classes?.get('line2-class')![0]!.line).toBe(2);
-		expect(result.classes?.get('line3-class')![0]!.line).toBe(3);
+		assert_class_at_line(result, 'line2-class', 2);
+		assert_class_at_line(result, 'line3-class', 3);
 	});
 
 	test('accumulates locations for duplicate class names', () => {
@@ -98,21 +91,15 @@ describe('source location tracking', () => {
 <p class="shared"></p>
 `;
 		const result = extract_from_svelte(source, 'test.svelte');
-		const locations = result.classes?.get('shared');
-		expect(locations).toBeDefined();
-		expect(locations!.length).toBe(3);
-		expect(locations![0]!.line).toBe(2);
-		expect(locations![1]!.line).toBe(3);
-		expect(locations![2]!.line).toBe(4);
+		assert_class_locations(result, 'shared', [2, 3, 4]);
 	});
 
 	test('tracks column positions', () => {
 		const source = `<div class="col-test"></div>`;
 		const result = extract_from_svelte(source, 'test.svelte');
-		const location = result.classes?.get('col-test')?.[0];
-		expect(location).toBeDefined();
-		expect(location!.line).toBe(1);
-		// Column should be somewhere after the opening tag
-		expect(location!.column).toBeGreaterThan(0);
+		const locations = result.classes?.get('col-test');
+		expect(locations).toBeDefined();
+		expect(locations![0]!.line).toBe(1);
+		expect(locations![0]!.column).toBeGreaterThan(0);
 	});
 });
