@@ -3,6 +3,10 @@ import {test, expect, describe} from 'vitest';
 import {extract_css_variables, has_css_variables} from '$lib/css_variable_utils.js';
 
 describe('extract_css_variables', () => {
+	test('returns empty set for empty string', () => {
+		expect(extract_css_variables('')).toEqual(new Set());
+	});
+
 	test('extracts single variable: var(--name)', () => {
 		const result = extract_css_variables('color: var(--text_color);');
 		expect(result).toEqual(new Set(['text_color']));
@@ -88,6 +92,43 @@ describe('extract_css_variables', () => {
 		const result = extract_css_variables(css);
 		expect(result).toEqual(new Set(['text_color', 'bg_color', 'border_color']));
 	});
+
+	test('rejects variable names starting with number (invalid CSS)', () => {
+		// CSS custom property names must start with a letter or underscore
+		// var(--123) is invalid CSS syntax
+		expect(extract_css_variables('color: var(--123invalid);')).toEqual(new Set());
+		expect(extract_css_variables('color: var(--9);')).toEqual(new Set());
+	});
+
+	test('accepts variable names starting with underscore', () => {
+		const result = extract_css_variables('color: var(--_private);');
+		expect(result).toEqual(new Set(['_private']));
+	});
+
+	test('case-sensitive: VAR() uppercase not matched (CSS is case-insensitive)', () => {
+		// Bug: CSS function names are case-insensitive per spec
+		// VAR(--name) is valid CSS but won't be detected
+		expect(extract_css_variables('color: VAR(--primary);')).toEqual(new Set());
+		expect(extract_css_variables('color: Var(--primary);')).toEqual(new Set());
+	});
+
+	test('whitespace inside var() not matched', () => {
+		// CSS allows whitespace: `var( --name )` is valid
+		// Current regex requires `var(--` with no space
+		expect(extract_css_variables('color: var( --spaced );')).toEqual(new Set());
+	});
+
+	test('extracts variables inside calc()', () => {
+		const result = extract_css_variables('width: calc(var(--base) * 2);');
+		expect(result).toEqual(new Set(['base']));
+	});
+
+	test('extracts variables inside other functions', () => {
+		const result = extract_css_variables(
+			'color: hsl(var(--hue) var(--sat) var(--light));',
+		);
+		expect(result).toEqual(new Set(['hue', 'sat', 'light']));
+	});
 });
 
 describe('has_css_variables', () => {
@@ -118,8 +159,21 @@ describe('has_css_variables', () => {
 		expect(has_css_variables('margin: var(--b);')).toBe(true);
 	});
 
-	test('returns false for malformed patterns', () => {
+	test('returns false for malformed patterns without valid name', () => {
 		expect(has_css_variables('color: var();')).toBe(false);
 		expect(has_css_variables('color: var(--);')).toBe(false);
+	});
+
+	test('consistent with extract_css_variables for unclosed var(', () => {
+		// Both functions should agree: var(--name without closing paren still matches
+		const input = 'color: var(--incomplete';
+		expect(has_css_variables(input)).toBe(true);
+		expect(extract_css_variables(input).size).toBeGreaterThan(0);
+	});
+
+	test('case-sensitive: VAR() uppercase not matched', () => {
+		// Same limitation as extract_css_variables
+		expect(has_css_variables('color: VAR(--primary);')).toBe(false);
+		expect(has_css_variables('color: Var(--primary);')).toBe(false);
 	});
 });

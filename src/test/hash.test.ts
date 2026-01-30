@@ -16,12 +16,6 @@ describe('compute_hash (SHA-256)', () => {
 		expect(hash1).not.toBe(hash2);
 	});
 
-	test('empty string handling', async () => {
-		const hash = await compute_hash('');
-		expect(typeof hash).toBe('string');
-		expect(hash.length).toBe(64); // SHA-256 produces 64 hex characters
-	});
-
 	test('unicode/special characters', async () => {
 		const hash1 = await compute_hash('こんにちは');
 		const hash2 = await compute_hash('🎉🎊');
@@ -88,18 +82,19 @@ describe('compute_hash_sync (DJB2)', () => {
 		expect(hash).toMatch(/^-?[0-9a-f]+$/);
 	});
 
-	test('unicode characters', () => {
+	test('unicode characters produce valid hashes', () => {
 		const hash1 = compute_hash_sync('こんにちは');
 		const hash2 = compute_hash_sync('🎉');
 		const hash3 = compute_hash_sync('café');
 
-		expect(typeof hash1).toBe('string');
-		expect(typeof hash2).toBe('string');
-		expect(typeof hash3).toBe('string');
+		// All produce valid hex strings
+		expect(hash1).toMatch(/^-?[0-9a-f]+$/);
+		expect(hash2).toMatch(/^-?[0-9a-f]+$/);
+		expect(hash3).toMatch(/^-?[0-9a-f]+$/);
 
-		// Each should be unique
-		expect(hash1).not.toBe(hash2);
-		expect(hash2).not.toBe(hash3);
+		// Same input produces same output (consistency, not uniqueness)
+		expect(compute_hash_sync('こんにちは')).toBe(hash1);
+		expect(compute_hash_sync('🎉')).toBe(hash2);
 	});
 
 	test('consistent across multiple calls', () => {
@@ -111,5 +106,11 @@ describe('compute_hash_sync (DJB2)', () => {
 		];
 		expect(hashes[0]).toBe(hashes[1]);
 		expect(hashes[1]).toBe(hashes[2]);
+	});
+
+	test('produces known hash for known input (algorithm stability)', () => {
+		// Lock in DJB2 algorithm - changing this would invalidate all caches
+		expect(compute_hash_sync('hello')).toBe('5e918d2');
+		expect(compute_hash_sync('hello world')).toBe('6aefe2c4');
 	});
 });

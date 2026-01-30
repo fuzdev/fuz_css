@@ -68,6 +68,12 @@ describe('filter_file_default', () => {
 			expect(filter_file_default('src/tests/integration.ts')).toBe(false);
 		});
 
+		test('excludes test/ at path start', () => {
+			// /test/ pattern requires slashes, so `test/file.ts` at start won't match
+			// This is current behavior - test/ at start is NOT excluded
+			expect(filter_file_default('test/file.ts')).toBe(true); // Potentially unexpected
+		});
+
 		test('does not exclude .spec.ts files (limitation)', () => {
 			// Note: .spec.ts is a common test convention but not currently filtered
 			expect(filter_file_default('src/lib/utils.spec.ts')).toBe(true);
@@ -89,6 +95,11 @@ describe('filter_file_default', () => {
 	});
 
 	describe('edge cases', () => {
+		test('handles empty string path', () => {
+			// Empty path has no extension, returns false
+			expect(filter_file_default('')).toBe(false);
+		});
+
 		test('handles paths with no extension', () => {
 			expect(filter_file_default('Makefile')).toBe(false);
 		});
@@ -112,14 +123,42 @@ describe('filter_file_default', () => {
 			expect(filter_file_default('src/testing-utils.ts')).toBe(true);
 		});
 
-		test('handles double extensions', () => {
+		test('handles .d.ts declaration files', () => {
+			// Note: .d.ts files are included, though they rarely contain CSS class usage
+			// This is acceptable since they're typically small and won't slow extraction
 			expect(filter_file_default('file.d.ts')).toBe(true);
+		});
+
+		test('handles .svelte.ts files (Svelte 5 runes)', () => {
+			expect(filter_file_default('src/lib/state.svelte.ts')).toBe(true);
+		});
+
+		test('handles module extensions', () => {
+			// .mjs and .cjs are valid JS that could contain class strings
+			expect(filter_file_default('config.mjs')).toBe(false); // Not in allowed list
+			expect(filter_file_default('config.cjs')).toBe(false); // Not in allowed list
 		});
 
 		test('handles Windows-style paths (backslashes not matched by /test/)', () => {
 			// The filter uses forward slashes, so Windows paths would not match /test/
 			// This is a limitation of the current implementation
 			expect(filter_file_default('src\\test\\file.ts')).toBe(true); // Not excluded
+		});
+
+		test('uppercase extensions not matched (case-sensitive)', () => {
+			// Bug on case-insensitive filesystems (macOS, Windows):
+			// .TS files exist but won't be processed
+			expect(filter_file_default('Component.TS')).toBe(false);
+			expect(filter_file_default('App.TSX')).toBe(false);
+			expect(filter_file_default('Page.Svelte')).toBe(false);
+		});
+
+		test('hidden file with extension-like name', () => {
+			// Edge case: `.ts` is a hidden file named "ts", not a TypeScript file
+			// Current behavior: incorrectly returns true
+			// This is arguably a bug - hidden files without real extensions shouldn't match
+			expect(filter_file_default('.ts')).toBe(true); // Potentially unexpected
+			expect(filter_file_default('.svelte')).toBe(true); // Potentially unexpected
 		});
 	});
 });
