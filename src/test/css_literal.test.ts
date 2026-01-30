@@ -39,9 +39,16 @@ beforeAll(async () => {
 });
 
 // Type aliases for result types - makes helpers more readable
-type ParseOkResult = {parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null};
-type ParseErrorResult = {error: InterpreterDiagnostic};
-type InterpretOkResult = {output: CssLiteralOutput};
+interface ParseOkResult {
+	parsed: ParsedCssLiteral;
+	diagnostics: Array<InterpreterDiagnostic> | null;
+}
+interface ParseErrorResult {
+	error: InterpreterDiagnostic;
+}
+interface InterpretOkResult {
+	output: CssLiteralOutput;
+}
 
 // Specialized helpers using generic assert_result_ok/assert_result_error
 const assert_parse_ok = (result: ReturnType<typeof parse_css_literal>): ParseOkResult =>
@@ -615,10 +622,20 @@ describe('generate_css_literal_simple - Unicode', () => {
 //
 
 // Type aliases for modifier/literal result types
-type ModOkResult = {modifiers: ExtractedModifiers; remaining: Array<string>};
-type ModErrorResult = {error: InterpreterDiagnostic};
-type LiteralOkResult = {declaration: string; warnings: Array<InterpreterDiagnostic> | null};
-type LiteralErrorResult = {error: InterpreterDiagnostic | null};
+interface ModOkResult {
+	modifiers: ExtractedModifiers;
+	remaining: Array<string>;
+}
+interface ModErrorResult {
+	error: InterpreterDiagnostic;
+}
+interface LiteralOkResult {
+	declaration: string;
+	warnings: Array<InterpreterDiagnostic> | null;
+}
+interface LiteralErrorResult {
+	error: InterpreterDiagnostic | null;
+}
 
 // Helper to assert modifier extraction result is ok
 const assert_mod_ok = (result: ModifierExtractionResult): ModOkResult =>
