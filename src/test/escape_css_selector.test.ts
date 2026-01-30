@@ -82,3 +82,29 @@ describe('escape_css_selector', () => {
 		expect(escape_css_selector(input)).toBe(expected);
 	});
 });
+
+describe('escape_css_selector - backslash edge cases', () => {
+	// Backslash escaping edge cases - important for Windows paths and escape sequences
+	const backslash_cases: Array<[input: string, expected: string]> = [
+		// Single backslash needs escaping
+		['a\\b', 'a\\\\b'],
+
+		// Backslash before special chars - both need escaping
+		['a\\:b', 'a\\\\\\:b'],
+		['a\\%b', 'a\\\\\\%b'],
+
+		// Multiple consecutive backslashes
+		['a\\\\b', 'a\\\\\\\\b'],
+
+		// Backslash at start/end
+		['\\start', '\\\\start'],
+		['end\\', 'end\\\\'],
+
+		// Backslash with various special characters
+		['path\\to\\file.css', 'path\\\\to\\\\file\\.css'],
+	];
+
+	test.each(backslash_cases)('escapes "%s" to "%s"', (input, expected) => {
+		expect(escape_css_selector(input)).toBe(expected);
+	});
+});

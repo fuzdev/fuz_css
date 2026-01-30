@@ -450,3 +450,60 @@ describe('@fuz-classes comment extraction', () => {
 		assert_no_classes(result);
 	});
 });
+
+describe('template literal edge cases', () => {
+	test('template with multiple expressions extracts no static classes', () => {
+		const source = `<div class={\`\${prefix}-base-\${suffix}\`}></div>`;
+		const result = extract_from_svelte(source);
+		// All parts are incomplete (contain expressions), so no classes extracted
+		assert_no_classes(result);
+	});
+
+	test('template with only expressions extracts no classes', () => {
+		const source = `<div class={\`\${a}\${b}\${c}\`}></div>`;
+		const result = extract_from_svelte(source);
+		assert_no_classes(result);
+	});
+
+	test('template with static prefix and expression suffix', () => {
+		// The static prefix "icon-" is incomplete (not a valid class alone)
+		const source = `<div class={\`icon-\${size}\`}></div>`;
+		const result = extract_from_svelte(source);
+		assert_no_classes(result);
+	});
+
+	test('template with static class followed by expression', () => {
+		// "base" is a complete class, the expression part doesn't affect it
+		const source = `<div class={\`base \${dynamicClass}\`}></div>`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['base']);
+	});
+
+	test('template with expression between static classes', () => {
+		const source = `<div class={\`start \${middle} end\`}></div>`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['start', 'end']);
+	});
+});
+
+describe('Svelte class={{}} computed properties', () => {
+	test('extracts static property names', () => {
+		const source = `<div class={{ active: isActive, "text-lg": true }}></div>`;
+		const result = extract_from_svelte(source);
+		class_names_equal(result, ['active', 'text-lg']);
+	});
+
+	test('skips computed property names (limitation)', () => {
+		const source = `<div class={{ [dynamicClass]: true }}></div>`;
+		const result = extract_from_svelte(source);
+		// Cannot statically extract computed properties
+		assert_no_classes(result);
+	});
+
+	test('extracts static properties alongside computed ones', () => {
+		const source = `<div class={{ static: true, [computed]: false, another: value }}></div>`;
+		const result = extract_from_svelte(source);
+		// Only static property names can be extracted
+		class_names_equal(result, ['static', 'another']);
+	});
+});

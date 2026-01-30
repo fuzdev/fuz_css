@@ -138,6 +138,19 @@ describe('get_cache_path', () => {
 			CACHE_DIR + '/src/lib/Button.svelte.json',
 		);
 	});
+
+	test('produces same result with/without trailing slash', () => {
+		const source = '/tmp/fuz_css_cache_test/project/src/file.ts';
+		const with_slash = get_cache_path(source, CACHE_DIR, '/tmp/fuz_css_cache_test/project/');
+		const without_slash = get_cache_path(source, CACHE_DIR, '/tmp/fuz_css_cache_test/project');
+		expect(with_slash).toBe(without_slash);
+	});
+
+	test('handles deeply nested paths', () => {
+		const source = '/tmp/fuz_css_cache_test/project/a/b/c/d/e/file.svelte';
+		const expected = CACHE_DIR + '/a/b/c/d/e/file.svelte.json';
+		expect(get_cache_path(source, CACHE_DIR, PROJECT_ROOT)).toBe(expected);
+	});
 });
 
 //
@@ -314,6 +327,40 @@ describe('load_cached_extraction', () => {
 		await writeFile(cache_path, content);
 
 		expect(await load_cached_extraction(ops, cache_path)).toBeNull();
+	});
+
+	// Additional corruption recovery tests - all return null gracefully
+	const corruption_cases = [
+		{name: 'binary garbage', content: '\x00\x01\x02\x03'},
+		{name: 'partial JSON with valid start', content: '{"v": 2, "content_hash": "x",'},
+		{name: 'array instead of object', content: '[1, 2, 3]'},
+		{name: 'number instead of object', content: '42'},
+		{name: 'NUL bytes in hash', content: '{"v": 2, "content_hash": "abc\x00123"}'},
+		{name: 'UTF-8 BOM prefix', content: '\ufeff{"v": 2, "content_hash": "hash", "classes": null}'},
+	];
+
+	test.each(corruption_cases)('gracefully handles $name', async ({content}) => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'corrupted.json');
+		await mkdir(CACHE_DIR, {recursive: true});
+		await writeFile(cache_path, content);
+
+		// Should return null rather than throw
+		const result = await load_cached_extraction(ops, cache_path);
+		expect(result).toBeNull();
+	});
+
+	// Some minimal content is valid - documenting current behavior
+	test('parses minimal valid cache (missing content_hash)', async () => {
+		await setup();
+		const cache_path = join(CACHE_DIR, 'minimal.json');
+		await mkdir(CACHE_DIR, {recursive: true});
+		await writeFile(cache_path, '{"v": 2}');
+
+		// Lenient parsing accepts missing content_hash
+		const result = await load_cached_extraction(ops, cache_path);
+		expect(result).not.toBeNull();
+		expect(result!.v).toBe(2);
 	});
 });
 

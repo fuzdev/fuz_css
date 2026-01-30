@@ -157,16 +157,6 @@ export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map
 export const ALL_MODIFIER_NAMES: Set<string> = new Set(MODIFIERS.map((m) => m.name));
 
 /**
- * Pattern for arbitrary min-width breakpoints: `min-width(800px):`
- */
-export const ARBITRARY_MIN_WIDTH_PATTERN = /^min-width\(([^)]+)\)$/;
-
-/**
- * Pattern for arbitrary max-width breakpoints: `max-width(600px):`
- */
-export const ARBITRARY_MAX_WIDTH_PATTERN = /^max-width\(([^)]+)\)$/;
-
-/**
  * Pattern for parameterized nth-child: `nth-child(2n+1):`
  */
 export const NTH_CHILD_PATTERN = /^nth-child\(([^)]+)\)$/;
@@ -187,19 +177,84 @@ export const NTH_OF_TYPE_PATTERN = /^nth-of-type\(([^)]+)\)$/;
 export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
 
 /**
- * Parses an arbitrary breakpoint modifier.
+ * Extracts content from balanced parentheses after a prefix.
+ * Supports nested parens for calc(), clamp(), min(), max(), etc.
  *
- * @returns The CSS media query or null if not an arbitrary breakpoint
+ * @param segment - The full segment to parse (e.g., "min-width(calc(100vw - 200px))")
+ * @param prefix - The prefix before the opening paren (e.g., "min-width")
+ * @returns The content inside the balanced parens, or null if no match/unbalanced
+ *
+ * @example
+ * extract_balanced_parens("min-width(800px)", "min-width") // "800px"
+ * extract_balanced_parens("min-width(calc(100vw - 20px))", "min-width") // "calc(100vw - 20px)"
+ * extract_balanced_parens("min-width(calc(100vw)", "min-width") // null (unbalanced)
  */
-export const parse_arbitrary_breakpoint = (segment: string): string | null => {
-	const min_match = ARBITRARY_MIN_WIDTH_PATTERN.exec(segment);
-	if (min_match) {
-		return `@media (width >= ${min_match[1]})`;
+export const extract_balanced_parens = (segment: string, prefix: string): string | null => {
+	const expected_start = prefix + '(';
+	if (!segment.startsWith(expected_start)) return null;
+
+	let depth = 1;
+	const start = expected_start.length;
+
+	for (let i = start; i < segment.length; i++) {
+		const char = segment[i];
+		if (char === '(') {
+			depth++;
+		} else if (char === ')') {
+			depth--;
+			if (depth === 0) {
+				// Must be at end of string (no trailing characters)
+				if (i !== segment.length - 1) return null;
+				const content = segment.slice(start, i);
+				// Return null for empty content
+				return content || null;
+			}
+		}
 	}
 
-	const max_match = ARBITRARY_MAX_WIDTH_PATTERN.exec(segment);
-	if (max_match) {
-		return `@media (width < ${max_match[1]})`;
+	// Unbalanced - never closed
+	return null;
+};
+
+/**
+ * Known CSS math/value functions that are valid in media query values.
+ * These don't start with digits but are valid starts for breakpoint values.
+ */
+const CSS_FUNCTION_PREFIXES = ['calc(', 'clamp(', 'min(', 'max(', 'var('];
+
+/**
+ * Checks if a value is valid for an arbitrary breakpoint.
+ * Must start with a digit or a known CSS function.
+ */
+const is_valid_breakpoint_value = (value: string): boolean => {
+	if (!value) return false;
+	// Allow values starting with a digit (e.g., "800px", "50rem")
+	if (/^\d/.test(value)) return true;
+	// Allow known CSS functions (e.g., "calc(...)", "clamp(...)")
+	return CSS_FUNCTION_PREFIXES.some((prefix) => value.startsWith(prefix));
+};
+
+/**
+ * Parses an arbitrary breakpoint modifier.
+ * Supports nested parentheses for calc(), clamp(), min(), max(), var().
+ * Requires value to start with a digit or known CSS function to catch obvious mistakes.
+ *
+ * @returns The CSS media query or null if not an arbitrary breakpoint
+ *
+ * @example
+ * parse_arbitrary_breakpoint("min-width(800px)") // "@media (width >= 800px)"
+ * parse_arbitrary_breakpoint("min-width(calc(100vw - 200px))") // "@media (width >= calc(100vw - 200px))"
+ * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no digit or function)
+ */
+export const parse_arbitrary_breakpoint = (segment: string): string | null => {
+	const min_value = extract_balanced_parens(segment, 'min-width');
+	if (min_value !== null && is_valid_breakpoint_value(min_value)) {
+		return `@media (width >= ${min_value})`;
+	}
+
+	const max_value = extract_balanced_parens(segment, 'max-width');
+	if (max_value !== null && is_valid_breakpoint_value(max_value)) {
+		return `@media (width < ${max_value})`;
 	}
 
 	return null;

@@ -27,6 +27,7 @@ import {
 	get_modifier,
 	parse_arbitrary_breakpoint,
 	parse_parameterized_state,
+	extract_balanced_parens,
 } from '$lib/modifiers.js';
 import {expect_ok, expect_error} from './test_helpers.js';
 
@@ -752,5 +753,132 @@ describe('try_resolve_literal', () => {
 
 	test('returns null error for token class without colon', () => {
 		assert_literal_not_literal(try_resolve_literal('box', css_properties, 'test'));
+	});
+});
+
+describe('extract_balanced_parens', () => {
+	// Valid extractions
+	test.each([
+		['min-width(800px)', 'min-width', '800px', 'simple value'],
+		['min-width(50rem)', 'min-width', '50rem', 'rem units'],
+		['max-width(100%)', 'max-width', '100%', 'percentage'],
+		['min-width(calc(100vw - 200px))', 'min-width', 'calc(100vw - 200px)', 'calc with subtraction'],
+		['min-width(calc(50% + 20px))', 'min-width', 'calc(50% + 20px)', 'calc with addition'],
+		[
+			'min-width(clamp(300px, 50%, 800px))',
+			'min-width',
+			'clamp(300px, 50%, 800px)',
+			'clamp function',
+		],
+		['min-width(min(100vw, 1200px))', 'min-width', 'min(100vw, 1200px)', 'min function'],
+		['min-width(max(300px, 20%))', 'min-width', 'max(300px, 20%)', 'max function'],
+		[
+			'min-width(calc(min(100vw, 1200px) - 2rem))',
+			'min-width',
+			'calc(min(100vw, 1200px) - 2rem)',
+			'nested functions',
+		],
+		['foo(bar(baz(qux)))', 'foo', 'bar(baz(qux))', 'deeply nested'],
+	] as const)('%s with prefix "%s" → "%s" (%s)', (input, prefix, expected, _desc) => {
+		expect(extract_balanced_parens(input, prefix)).toBe(expected);
+	});
+
+	// Invalid/null cases
+	test.each([
+		['min-width(800px', 'min-width', 'unclosed paren'],
+		['min-width800px)', 'min-width', 'missing opening paren'],
+		['max-width(800px)', 'min-width', 'wrong prefix'],
+		['min-width(calc(100vw)', 'min-width', 'unbalanced nested'],
+		['min-width()', 'min-width', 'empty parens'],
+		['min-width(800px)trailing', 'min-width', 'trailing characters'],
+		['min-width(a)(b)', 'min-width', 'multiple paren groups'],
+		['', 'min-width', 'empty string'],
+		['min-width', 'min-width', 'no parens at all'],
+	] as const)('%s with prefix "%s" → null (%s)', (input, prefix, _desc) => {
+		expect(extract_balanced_parens(input, prefix)).toBeNull();
+	});
+});
+
+describe('parse_arbitrary_breakpoint - edge cases', () => {
+	// Cases that return null (not recognized as arbitrary breakpoint)
+	test.each([
+		['min-width()', 'empty value'],
+		['min-width(px)', 'no leading digit'],
+		['min-width(rem)', 'unit without number'],
+		['min-width(800px', 'unclosed paren'],
+		['min-width)', 'missing opening paren'],
+		['minwidth(800px)', 'missing hyphen'],
+		['min-Width(800px)', 'wrong case'],
+		['max-width(vh)', 'max-width without number'],
+		['min-width(calc(100vw)', 'unbalanced calc'],
+		['min-width(800px)extra', 'trailing characters'],
+	] as const)('%s returns null for %s', (input, _desc) => {
+		expect(parse_arbitrary_breakpoint(input)).toBeNull();
+	});
+
+	// Valid simple cases - value must start with a digit
+	test.each([
+		['min-width(0)', '@media (width >= 0)', 'zero value'],
+		['min-width(100%)', '@media (width >= 100%)', 'percentage'],
+		['min-width(800px)', '@media (width >= 800px)', 'pixels'],
+		['min-width(50rem)', '@media (width >= 50rem)', 'rem units'],
+		['min-width(100vw)', '@media (width >= 100vw)', 'viewport units'],
+		['min-width(50cqw)', '@media (width >= 50cqw)', 'container query units'],
+		['max-width(50em)', '@media (width < 50em)', 'max-width em units'],
+		['max-width(600px)', '@media (width < 600px)', 'max-width pixels'],
+	] as const)('%s → %s (%s)', (input, expected, _desc) => {
+		expect(parse_arbitrary_breakpoint(input)).toBe(expected);
+	});
+
+	// Nested parentheses - calc, clamp, min, max
+	test.each([
+		[
+			'min-width(calc(100vw - 200px))',
+			'@media (width >= calc(100vw - 200px))',
+			'calc with subtraction',
+		],
+		['min-width(calc(50% + 2rem))', '@media (width >= calc(50% + 2rem))', 'calc with addition'],
+		[
+			'min-width(clamp(300px, 50vw, 800px))',
+			'@media (width >= clamp(300px, 50vw, 800px))',
+			'clamp function',
+		],
+		['min-width(min(100vw, 1200px))', '@media (width >= min(100vw, 1200px))', 'min function'],
+		['min-width(max(300px, 20vw))', '@media (width >= max(300px, 20vw))', 'max function'],
+		['max-width(calc(100% - 4rem))', '@media (width < calc(100% - 4rem))', 'max-width with calc'],
+		[
+			'min-width(calc(min(100vw, 1200px) - 2rem))',
+			'@media (width >= calc(min(100vw, 1200px) - 2rem))',
+			'nested functions',
+		],
+	] as const)('%s → %s (%s)', (input, expected, _desc) => {
+		expect(parse_arbitrary_breakpoint(input)).toBe(expected);
+	});
+});
+
+describe('parse_parameterized_state - edge cases', () => {
+	test.each([
+		['nth-child(-n+3)', ':nth-child(-n+3)', 'negative n formula'],
+		['nth-child(n)', ':nth-child(n)', 'just n'],
+		['nth-last-child(2n)', ':nth-last-child(2n)', 'nth-last-child'],
+		['nth-of-type(even)', ':nth-of-type(even)', 'even keyword'],
+		['nth-of-type(odd)', ':nth-of-type(odd)', 'odd keyword'],
+		['nth-last-of-type(3n+1)', ':nth-last-of-type(3n+1)', 'nth-last-of-type with formula'],
+		['nth-child(3n-1)', ':nth-child(3n-1)', 'negative offset'],
+		['nth-child(5)', ':nth-child(5)', 'simple number'],
+	] as const)('%s → css: %s (%s)', (input, expected_css, _desc) => {
+		const result = parse_parameterized_state(input);
+		expect(result).not.toBeNull();
+		expect(result!.css).toBe(expected_css);
+		expect(result!.type).toBe('state');
+	});
+
+	test.each([
+		['nth-child()', 'empty formula'],
+		['nth-child', 'missing parens'],
+		['child(2n)', 'missing nth- prefix'],
+		['nth(2n)', 'incomplete pattern'],
+	] as const)('%s returns null for %s', (input, _desc) => {
+		expect(parse_parameterized_state(input)).toBeNull();
 	});
 });

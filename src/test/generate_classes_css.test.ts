@@ -633,6 +633,87 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('variables_used tracking', () => {
+		test('tracks variables from declaration classes', () => {
+			const result = generate_classes_css({
+				class_names: ['p_lg'],
+				class_definitions: {
+					p_lg: {declaration: 'padding: var(--space_lg);'},
+				},
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.variables_used.has('space_lg')).toBe(true);
+		});
+
+		test('tracks variables from composed classes', () => {
+			const result = generate_classes_css({
+				class_names: ['card'],
+				class_definitions: {
+					base: {declaration: 'color: var(--color_a_5);'},
+					extended: {composes: ['base'], declaration: 'margin: var(--space_md);'},
+					card: {composes: ['extended']},
+				},
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Should track variables from entire composition chain
+			expect(result.variables_used.has('color_a_5')).toBe(true);
+			expect(result.variables_used.has('space_md')).toBe(true);
+		});
+
+		test('tracks variables from ruleset classes', () => {
+			const result = generate_classes_css({
+				class_names: ['themed'],
+				class_definitions: {
+					themed: {
+						ruleset: `.themed { background: var(--bg_1); color: var(--text_color_1); }`,
+					},
+				},
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.variables_used.has('bg_1')).toBe(true);
+			expect(result.variables_used.has('text_color_1')).toBe(true);
+		});
+
+		test('tracks multiple variables from single declaration', () => {
+			const result = generate_classes_css({
+				class_names: ['multi'],
+				class_definitions: {
+					multi: {
+						declaration: 'padding: var(--space_sm) var(--space_md); margin: var(--space_lg);',
+					},
+				},
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.variables_used.has('space_sm')).toBe(true);
+			expect(result.variables_used.has('space_md')).toBe(true);
+			expect(result.variables_used.has('space_lg')).toBe(true);
+		});
+
+		test('deduplicates variables across classes', () => {
+			const result = generate_classes_css({
+				class_names: ['a', 'b'],
+				class_definitions: {
+					a: {declaration: 'padding: var(--space_md);'},
+					b: {declaration: 'margin: var(--space_md);'},
+				},
+				interpreters: [],
+				css_properties: null,
+			});
+
+			// Set naturally deduplicates
+			expect(result.variables_used.size).toBe(1);
+			expect(result.variables_used.has('space_md')).toBe(true);
+		});
+	});
+
 	describe('interpreter priority', () => {
 		test('static definition takes priority over interpreter', () => {
 			const interpreter: CssClassDefinitionInterpreter = {

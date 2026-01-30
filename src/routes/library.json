@@ -3352,52 +3352,65 @@
 						"type_signature": "Set<string>"
 					},
 					{
-						"name": "ARBITRARY_MIN_WIDTH_PATTERN",
-						"kind": "variable",
-						"doc_comment": "Pattern for arbitrary min-width breakpoints: `min-width(800px):`",
-						"source_line": 162,
-						"type_signature": "RegExp"
-					},
-					{
-						"name": "ARBITRARY_MAX_WIDTH_PATTERN",
-						"kind": "variable",
-						"doc_comment": "Pattern for arbitrary max-width breakpoints: `max-width(600px):`",
-						"source_line": 167,
-						"type_signature": "RegExp"
-					},
-					{
 						"name": "NTH_CHILD_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-child: `nth-child(2n+1):`",
-						"source_line": 172,
+						"source_line": 162,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_LAST_CHILD_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`",
-						"source_line": 177,
+						"source_line": 167,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_OF_TYPE_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-of-type: `nth-of-type(2n):`",
-						"source_line": 182,
+						"source_line": 172,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_LAST_OF_TYPE_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`",
-						"source_line": 187,
+						"source_line": 177,
 						"type_signature": "RegExp"
+					},
+					{
+						"name": "extract_balanced_parens",
+						"kind": "function",
+						"doc_comment": "Extracts content from balanced parentheses after a prefix.\nSupports nested parens for calc(), clamp(), min(), max(), etc.",
+						"examples": [
+							"extract_balanced_parens(\"min-width(800px)\", \"min-width\") // \"800px\"\nextract_balanced_parens(\"min-width(calc(100vw - 20px))\", \"min-width\") // \"calc(100vw - 20px)\"\nextract_balanced_parens(\"min-width(calc(100vw)\", \"min-width\") // null (unbalanced)"
+						],
+						"source_line": 192,
+						"type_signature": "(segment: string, prefix: string): string | null",
+						"return_type": "string | null",
+						"return_description": "The content inside the balanced parens, or null if no match/unbalanced",
+						"parameters": [
+							{
+								"name": "segment",
+								"type": "string",
+								"description": "- The full segment to parse (e.g., \"min-width(calc(100vw - 200px))\")"
+							},
+							{
+								"name": "prefix",
+								"type": "string",
+								"description": "- The prefix before the opening paren (e.g., \"min-width\")"
+							}
+						]
 					},
 					{
 						"name": "parse_arbitrary_breakpoint",
 						"kind": "function",
-						"doc_comment": "Parses an arbitrary breakpoint modifier.",
-						"source_line": 194,
+						"doc_comment": "Parses an arbitrary breakpoint modifier.\nSupports nested parentheses for calc(), clamp(), min(), max(), var().\nRequires value to start with a digit or known CSS function to catch obvious mistakes.",
+						"examples": [
+							"parse_arbitrary_breakpoint(\"min-width(800px)\") // \"@media (width >= 800px)\"\nparse_arbitrary_breakpoint(\"min-width(calc(100vw - 200px))\") // \"@media (width >= calc(100vw - 200px))\"\nparse_arbitrary_breakpoint(\"min-width(px)\") // null (invalid - no digit or function)"
+						],
+						"source_line": 249,
 						"type_signature": "(segment: string): string | null",
 						"return_type": "string | null",
 						"return_description": "The CSS media query or null if not an arbitrary breakpoint",
@@ -3412,7 +3425,7 @@
 						"name": "parse_parameterized_state",
 						"kind": "function",
 						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).",
-						"source_line": 213,
+						"source_line": 268,
 						"type_signature": "(segment: string): { name: string; css: string; type: \"state\"; } | null",
 						"return_type": "{ name: string; css: string; type: \"state\"; } | null",
 						"return_description": "Object with name (including parameter) and CSS, or null if not parameterized",
@@ -3427,7 +3440,7 @@
 						"name": "get_modifier",
 						"kind": "function",
 						"doc_comment": "Gets the modifier definition for a segment.\nHandles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).",
-						"source_line": 261,
+						"source_line": 316,
 						"type_signature": "(segment: string): (ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_type": "(ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_description": "The modifier definition or null if not a known modifier",
@@ -3442,7 +3455,7 @@
 						"name": "get_all_modifier_names",
 						"kind": "function",
 						"doc_comment": "Gets all modifier names for error message suggestions.",
-						"source_line": 303,
+						"source_line": 358,
 						"type_signature": "(): string[]",
 						"return_type": "string[]",
 						"parameters": []
