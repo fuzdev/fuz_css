@@ -10,6 +10,11 @@ import {
 	from_cached_extraction,
 	type CachedExtraction,
 } from '$lib/css_cache.js';
+import {default_fs_operations} from '$lib/operations_defaults.js';
+import {create_mock_fs_state, create_mock_fs_ops} from './fixtures/mock_operations.js';
+
+// Alias for brevity in tests
+const ops = default_fs_operations;
 
 const TEST_DIR = '/tmp/fuz_css_cache_test';
 const PROJECT_ROOT = '/tmp/fuz_css_cache_test/project/';
@@ -61,8 +66,8 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'test.json');
 		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
 
-		await save_cached_extraction(cache_path, 'abc123', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'abc123', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.v).toBe(2);
@@ -85,8 +90,8 @@ describe('save_cached_extraction', () => {
 			['p_md', [{file: 'test.ts', line: 5, column: 8}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash123', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash123', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.content_hash).toBe('hash123');
@@ -113,8 +118,17 @@ describe('save_cached_extraction', () => {
 			},
 		];
 
-		await save_cached_extraction(cache_path, 'hash456', classes, null, diagnostics);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(
+			ops,
+			cache_path,
+			'hash456',
+			classes,
+			null,
+			diagnostics,
+			null,
+			null,
+		);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.classes).toBeNull();
@@ -126,8 +140,8 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'deep/nested/path/file.json');
 		const classes = new Map([['test', [{file: 'x.ts', line: 1, column: 1}]]]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.content_hash).toBe('hash');
@@ -139,8 +153,8 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'empty.json');
 		const classes: Map<string, Array<{file: string; line: number; column: number}>> = new Map();
 
-		await save_cached_extraction(cache_path, 'hash', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.classes).toBeNull();
@@ -152,8 +166,8 @@ describe('save_cached_extraction', () => {
 		const cache_path = join(CACHE_DIR, 'empty_diag.json');
 		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 1}]]]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null, []);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', classes, null, [], null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.diagnostics).toBeNull();
@@ -163,8 +177,8 @@ describe('save_cached_extraction', () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'null_classes.json');
 
-		await save_cached_extraction(cache_path, 'hash', null, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', null, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.v).toBe(2);
@@ -179,9 +193,9 @@ describe('save_cached_extraction', () => {
 		const classes1 = new Map([['old', [{file: 'a.ts', line: 1, column: 1}]]]);
 		const classes2 = new Map([['new', [{file: 'b.ts', line: 2, column: 2}]]]);
 
-		await save_cached_extraction(cache_path, 'hash1', classes1, null, null);
-		await save_cached_extraction(cache_path, 'hash2', classes2, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash1', classes1, null, null, null, null);
+		await save_cached_extraction(ops, cache_path, 'hash2', classes2, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.content_hash).toBe('hash2');
@@ -196,8 +210,8 @@ describe('save_cached_extraction', () => {
 			['日本語', [{file: 'src/中文.ts', line: 5, column: 10}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		const result = from_cached_extraction(loaded!);
@@ -216,8 +230,8 @@ describe('save_cached_extraction', () => {
 			['hover:opacity:80%', [{file: 'test.ts', line: 2, column: 1}]],
 		]);
 
-		await save_cached_extraction(cache_path, 'hash', classes, null, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		const result = from_cached_extraction(loaded!);
@@ -245,8 +259,8 @@ describe('save_cached_extraction', () => {
 			},
 		];
 
-		await save_cached_extraction(cache_path, 'hash', null, null, diagnostics);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', null, null, diagnostics, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.diagnostics).toHaveLength(2);
@@ -257,7 +271,7 @@ describe('save_cached_extraction', () => {
 
 describe('load_cached_extraction', () => {
 	test('returns null for missing file', async () => {
-		const result = await load_cached_extraction('/nonexistent/path.json');
+		const result = await load_cached_extraction(ops, '/nonexistent/path.json');
 		expect(result).toBeNull();
 	});
 
@@ -267,7 +281,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, 'not valid json{{{');
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).toBeNull();
 	});
 
@@ -277,7 +291,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, '{"v": 1, "content_hash": "abc"'); // missing closing brace
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).toBeNull();
 	});
 
@@ -290,7 +304,7 @@ describe('load_cached_extraction', () => {
 			JSON.stringify({v: 999, content_hash: 'x', classes: [], diagnostics: []}),
 		);
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).toBeNull();
 	});
 
@@ -300,7 +314,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, '');
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).toBeNull();
 	});
 
@@ -311,7 +325,7 @@ describe('load_cached_extraction', () => {
 		// Valid JSON but missing required fields
 		await writeFile(cache_path, JSON.stringify({foo: 'bar'}));
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		// Returns null because v field is undefined, not equal to CACHE_VERSION
 		expect(result).toBeNull();
 	});
@@ -322,7 +336,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, 'null');
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		// null.v is undefined, not equal to CACHE_VERSION
 		expect(result).toBeNull();
 	});
@@ -337,7 +351,7 @@ describe('load_cached_extraction', () => {
 			JSON.stringify({v: '2', content_hash: 'x', classes: null, diagnostics: null}),
 		);
 
-		const result = await load_cached_extraction(cache_path);
+		const result = await load_cached_extraction(ops, cache_path);
 		// Strict equality check: "2" !== 2
 		expect(result).toBeNull();
 	});
@@ -353,14 +367,14 @@ describe('delete_cached_extraction', () => {
 		// Verify file exists before deletion
 		await expect(readFile(cache_path, 'utf8')).resolves.toBe('{}');
 
-		await delete_cached_extraction(cache_path);
+		await delete_cached_extraction(ops, cache_path);
 
 		await expect(readFile(cache_path)).rejects.toThrow();
 	});
 
 	test('succeeds for nonexistent file', async () => {
 		// Should not throw - this is the assertion
-		await expect(delete_cached_extraction('/nonexistent/file.json')).resolves.toBeUndefined();
+		await expect(delete_cached_extraction(ops, '/nonexistent/file.json')).resolves.toBeUndefined();
 	});
 });
 
@@ -499,8 +513,8 @@ describe('v2 cache fields round-trip', () => {
 		const cache_path = join(CACHE_DIR, 'elements_test.json');
 		const elements = new Set(['button', 'input', 'svg']);
 
-		await save_cached_extraction(cache_path, 'hash', null, null, null, elements, null);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', null, null, null, elements, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		const result = from_cached_extraction(loaded!);
@@ -516,8 +530,8 @@ describe('v2 cache fields round-trip', () => {
 		const cache_path = join(CACHE_DIR, 'css_vars_test.json');
 		const css_variables = new Set(['color_a_5', 'space_md', 'text_color']);
 
-		await save_cached_extraction(cache_path, 'hash', null, null, null, null, css_variables);
-		const loaded = await load_cached_extraction(cache_path);
+		await save_cached_extraction(ops, cache_path, 'hash', null, null, null, null, css_variables);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		const result = from_cached_extraction(loaded!);
@@ -537,6 +551,7 @@ describe('v2 cache fields round-trip', () => {
 		const css_variables = new Set(['color_a_5']);
 
 		await save_cached_extraction(
+			ops,
 			cache_path,
 			'hash123',
 			classes,
@@ -545,7 +560,7 @@ describe('v2 cache fields round-trip', () => {
 			elements,
 			css_variables,
 		);
-		const loaded = await load_cached_extraction(cache_path);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		const result = from_cached_extraction(loaded!);
@@ -561,6 +576,7 @@ describe('v2 cache fields round-trip', () => {
 		const cache_path = join(CACHE_DIR, 'empty_v2_fields.json');
 
 		await save_cached_extraction(
+			ops,
 			cache_path,
 			'hash',
 			null,
@@ -569,10 +585,62 @@ describe('v2 cache fields round-trip', () => {
 			new Set(), // empty elements
 			new Set(), // empty css_variables
 		);
-		const loaded = await load_cached_extraction(cache_path);
+		const loaded = await load_cached_extraction(ops, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.elements).toBeNull();
 		expect(loaded!.css_variables).toBeNull();
+	});
+});
+
+describe('cache functions with mock ops', () => {
+	test('round-trips with in-memory mock', async () => {
+		const state = create_mock_fs_state();
+		const ops = create_mock_fs_ops(state);
+		const cache_path = '/mock/cache/test.json';
+		const classes = new Map([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
+
+		await save_cached_extraction(ops, cache_path, 'abc123', classes, null, null, null, null);
+		const loaded = await load_cached_extraction(ops, cache_path);
+
+		expect(loaded).not.toBeNull();
+		expect(loaded!.content_hash).toBe('abc123');
+		expect(loaded!.classes).toEqual([['box', [{file: 'test.ts', line: 1, column: 5}]]]);
+	});
+
+	test('load returns null for missing file', async () => {
+		const state = create_mock_fs_state();
+		const ops = create_mock_fs_ops(state);
+
+		const loaded = await load_cached_extraction(ops, '/nonexistent.json');
+		expect(loaded).toBeNull();
+	});
+
+	test('delete removes file from state', async () => {
+		const state = create_mock_fs_state();
+		const ops = create_mock_fs_ops(state);
+		const cache_path = '/mock/cache/delete.json';
+
+		// Save first
+		await save_cached_extraction(ops, cache_path, 'hash', null, null, null, null, null);
+		expect(state.files.has(cache_path)).toBe(true);
+
+		// Delete
+		await delete_cached_extraction(ops, cache_path);
+		expect(state.files.has(cache_path)).toBe(false);
+	});
+
+	test('can inspect raw state for testing', async () => {
+		const state = create_mock_fs_state();
+		const ops = create_mock_fs_ops(state);
+
+		await save_cached_extraction(ops, '/test.json', 'hash', null, null, null, null, null);
+
+		// Direct state inspection - useful for testing
+		const raw = state.files.get('/test.json');
+		expect(raw).toBeDefined();
+		const parsed = JSON.parse(raw!);
+		expect(parsed.v).toBe(2);
+		expect(parsed.content_hash).toBe('hash');
 	});
 });

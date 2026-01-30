@@ -41,6 +41,7 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 } from './css_cache.js';
+import {default_fs_operations} from './operations_defaults.js';
 import {compute_hash} from './hash.js';
 import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
@@ -116,6 +117,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
+		ops = default_fs_operations,
 	} = options;
 
 	// Derive include flags from null check
@@ -164,7 +166,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (typeof base_css === 'string') {
 				style_rule_index = await create_style_rule_index(base_css);
 			} else {
-				style_rule_index = await load_style_rule_index();
+				style_rule_index = await load_style_rule_index(ops);
 			}
 
 			// Build variable graph based on variables option
@@ -361,7 +363,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					// Delete cache file (fire and forget)
 					if (!is_ci && resolved_cache_dir && project_root) {
 						const cache_path = get_file_cache_path(file, resolved_cache_dir, project_root);
-						delete_cached_extraction(cache_path).catch(() => {
+						delete_cached_extraction(ops, cache_path).catch(() => {
 							// Ignore cache deletion errors
 						});
 					}
@@ -480,7 +482,7 @@ export {};
 			// Try cache (if not CI and we have cache dir)
 			if (!is_ci && resolved_cache_dir && project_root) {
 				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				const cached = await load_cached_extraction(cache_path);
+				const cached = await load_cached_extraction(ops, cache_path);
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
@@ -531,6 +533,7 @@ export {};
 			if (!is_ci && resolved_cache_dir && project_root) {
 				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
 				save_cached_extraction(
+					ops,
 					cache_path,
 					hash,
 					result.classes,

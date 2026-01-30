@@ -7,11 +7,11 @@
  * @module
  */
 
-import {mkdir, readFile, writeFile, unlink, rename} from 'node:fs/promises';
-import {dirname, join} from 'node:path';
+import {join} from 'node:path';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 import {compute_hash_sync} from './hash.js';
+import type {FsOperations} from './operations.js';
 
 /**
  * Default cache directory relative to project root.
@@ -95,13 +95,17 @@ export const get_file_cache_path = (
  * Returns `null` if the cache is missing, corrupted, or has a version mismatch.
  * This makes the cache self-healing: any error triggers re-extraction.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  */
 export const load_cached_extraction = async (
+	ops: FsOperations,
 	cache_path: string,
 ): Promise<CachedExtraction | null> => {
 	try {
-		const content = await readFile(cache_path, 'utf8');
+		const content = await ops.read_text({path: cache_path});
+		if (!content) return null;
+
 		const cached = JSON.parse(content) as CachedExtraction;
 
 		// Invalidate if version mismatch
@@ -111,7 +115,7 @@ export const load_cached_extraction = async (
 
 		return cached;
 	} catch {
-		// Handles: file not found, invalid JSON, truncated file, permission errors
+		// Handles: invalid JSON, truncated file
 		// All cases: return null to trigger re-extraction (self-healing)
 		return null;
 	}
@@ -122,6 +126,7 @@ export const load_cached_extraction = async (
  * Uses atomic write (temp file + rename) for crash safety.
  * Converts empty arrays to null to avoid allocation overhead on load.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
  * @param classes - Extracted classes with their locations, or null if none
@@ -131,13 +136,14 @@ export const load_cached_extraction = async (
  * @param css_variables - CSS variables referenced (without -- prefix), or null if none
  */
 export const save_cached_extraction = async (
+	ops: FsOperations,
 	cache_path: string,
 	content_hash: string,
 	classes: Map<string, Array<SourceLocation>> | null,
 	explicit_classes: Set<string> | null,
 	diagnostics: Array<ExtractionDiagnostic> | null,
-	elements?: Set<string> | null,
-	css_variables?: Set<string> | null,
+	elements: Set<string> | null,
+	css_variables: Set<string> | null,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
@@ -158,24 +164,21 @@ export const save_cached_extraction = async (
 		css_variables: css_variables_array,
 	};
 
-	// Atomic write: temp file + rename
-	// Include pid + timestamp to avoid conflicts with concurrent writes
-	await mkdir(dirname(cache_path), {recursive: true});
-	const temp_path = cache_path + '.tmp.' + process.pid + '.' + Date.now();
-	await writeFile(temp_path, JSON.stringify(data));
-	await rename(temp_path, cache_path);
+	await ops.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
 };
 
 /**
  * Deletes a cached extraction file.
  * Silently succeeds if the file doesn't exist.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  */
-export const delete_cached_extraction = async (cache_path: string): Promise<void> => {
-	await unlink(cache_path).catch(() => {
-		// Ignore if already gone
-	});
+export const delete_cached_extraction = async (
+	ops: FsOperations,
+	cache_path: string,
+): Promise<void> => {
+	await ops.unlink({path: cache_path});
 };
 
 /**

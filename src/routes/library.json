@@ -349,10 +349,15 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 100,
-						"type_signature": "(cache_path: string): Promise<CachedExtraction | null>",
+						"source_line": 101,
+						"type_signature": "(ops: FsOperations, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
+							{
+								"name": "ops",
+								"type": "FsOperations",
+								"description": "- Filesystem operations for dependency injection"
+							},
 							{
 								"name": "cache_path",
 								"type": "string",
@@ -364,10 +369,15 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
-						"source_line": 133,
-						"type_signature": "(cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements?: Set<...> | ... 1 more ... | undefined, css_variables?: Set<...> | ... 1 more ... | undefined): Promise<...>",
+						"source_line": 138,
+						"type_signature": "(ops: FsOperations, cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements: Set<...> | null, css_variables: Set<...> | null): Promise<...>",
 						"return_type": "Promise<void>",
 						"parameters": [
+							{
+								"name": "ops",
+								"type": "FsOperations",
+								"description": "- Filesystem operations for dependency injection"
+							},
 							{
 								"name": "cache_path",
 								"type": "string",
@@ -395,14 +405,12 @@
 							},
 							{
 								"name": "elements",
-								"type": "Set<string> | null | undefined",
-								"optional": true,
+								"type": "Set<string> | null",
 								"description": "- HTML elements found in the file, or null if none"
 							},
 							{
 								"name": "css_variables",
-								"type": "Set<string> | null | undefined",
-								"optional": true,
+								"type": "Set<string> | null",
 								"description": "- CSS variables referenced (without -- prefix), or null if none"
 							}
 						]
@@ -411,10 +419,15 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 175,
-						"type_signature": "(cache_path: string): Promise<void>",
+						"source_line": 177,
+						"type_signature": "(ops: FsOperations, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
+							{
+								"name": "ops",
+								"type": "FsOperations",
+								"description": "- Filesystem operations for dependency injection"
+							},
 							{
 								"name": "cache_path",
 								"type": "string",
@@ -426,7 +439,7 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 187,
+						"source_line": 190,
 						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
 						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
 						"parameters": [
@@ -1918,7 +1931,7 @@
 						"name": "CssExtractionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction from source files.\nControls which files to scan and how to parse them.",
-						"source_line": 20,
+						"source_line": 21,
 						"type_signature": "CssExtractionOptions",
 						"properties": [
 							{
@@ -1939,7 +1952,7 @@
 						"name": "CssClassOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class definitions and interpretation.\nControls how classes are defined and how dynamic classes are generated.",
-						"source_line": 44,
+						"source_line": 45,
 						"type_signature": "CssClassOptions",
 						"properties": [
 							{
@@ -1978,7 +1991,7 @@
 						"name": "UnifiedCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for unified CSS generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
-						"source_line": 78,
+						"source_line": 79,
 						"type_signature": "UnifiedCssOptions",
 						"properties": [
 							{
@@ -2029,7 +2042,7 @@
 						"name": "CssDiagnosticsOptions",
 						"kind": "type",
 						"doc_comment": "Options for error and warning handling.",
-						"source_line": 144,
+						"source_line": 145,
 						"type_signature": "CssDiagnosticsOptions",
 						"properties": [
 							{
@@ -2050,7 +2063,7 @@
 						"name": "CssCacheOptions",
 						"kind": "type",
 						"doc_comment": "Options for cache behavior.",
-						"source_line": 165,
+						"source_line": 166,
 						"type_signature": "CssCacheOptions",
 						"properties": [
 							{
@@ -2058,6 +2071,12 @@
 								"kind": "variable",
 								"type_signature": "string",
 								"doc_comment": "Cache directory relative to project root."
+							},
+							{
+								"name": "ops",
+								"kind": "variable",
+								"type_signature": "FsOperations",
+								"doc_comment": "Filesystem operations for cache management.\nDefaults to production implementation. Override for testing."
 							}
 						]
 					},
@@ -2065,7 +2084,7 @@
 						"name": "CssGeneratorBaseOptions",
 						"kind": "type",
 						"doc_comment": "Combined base options shared by both Gro and Vite plugins.\nThese options work identically in both contexts.",
-						"source_line": 177,
+						"source_line": 183,
 						"type_signature": "CssGeneratorBaseOptions",
 						"extends": [
 							"CssExtractionOptions",
@@ -3140,7 +3159,7 @@
 						"name": "GenFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
-						"source_line": 99,
+						"source_line": 100,
 						"type_signature": "GenFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": [
@@ -3173,7 +3192,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 123,
+						"source_line": 124,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -3198,6 +3217,7 @@
 					"css_unified_resolution.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
+					"operations_defaults.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
 				]
@@ -3432,6 +3452,53 @@
 				"dependents": ["css_class_generation.ts", "css_literal.ts"]
 			},
 			{
+				"path": "operations_defaults.ts",
+				"declarations": [
+					{
+						"name": "default_fs_operations",
+						"kind": "variable",
+						"doc_comment": "Default filesystem operations using `node:fs/promises`.",
+						"source_line": 32,
+						"type_signature": "FsOperations"
+					}
+				],
+				"module_comment": "Production implementations of operations interfaces.\n\nProvides real filesystem operations for production use.\nFor interface definitions and dependency injection pattern, see `operations.ts`.",
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+			},
+			{
+				"path": "operations.ts",
+				"declarations": [
+					{
+						"name": "FsOperations",
+						"kind": "type",
+						"doc_comment": "File system operations for cache management.\nAbstracted to enable test isolation from the actual filesystem.",
+						"source_line": 44,
+						"type_signature": "FsOperations",
+						"properties": [
+							{
+								"name": "read_text",
+								"kind": "variable",
+								"type_signature": "(options: {path: string}) => Promise<string | null>",
+								"doc_comment": "Reads a text file.\nReturns `null` if file doesn't exist."
+							},
+							{
+								"name": "write_text_atomic",
+								"kind": "variable",
+								"type_signature": "(options: {\n\t\tpath: string;\n\t\tcontent: string;\n\t}) => Promise<Result<object, {message: string}>>",
+								"doc_comment": "Writes a text file atomically (temp file + rename for crash safety).\nCreates parent directories if they don't exist."
+							},
+							{
+								"name": "unlink",
+								"kind": "variable",
+								"type_signature": "(options: {path: string}) => Promise<Result<object, {message: string}>>",
+								"doc_comment": "Removes a file. Succeeds silently if file doesn't exist."
+							}
+						]
+					}
+				],
+				"module_comment": "Operations interfaces for dependency injection.\n\nThis is the core pattern enabling testability without mocks.\nAll file system side effects are abstracted into interfaces.\n\n**Design principles:**\n- Internal functions take `ops` as a required first parameter\n- Public APIs (plugin options) default to `default_fs_operations`\n- All operations accept a single `options` object parameter\n- All fallible operations return `Result` from `@fuzdev/fuz_util`\n- Never throw `Error` in operations - return `Result` with `ok: false`\n- Use `null` for expected \"not found\" cases (not errors)\n\n**Production usage:**\n```typescript\nimport {default_fs_operations} from './operations_defaults.js';\nconst content = await ops.read_text({path: '/path/to/file.json'});\nif (!content) {\n  // File not found\n}\n```\n\n**Test usage:**\n```typescript\nimport {create_mock_fs_ops, create_mock_fs_state} from '../test/fixtures/mock_operations.js';\nconst state = create_mock_fs_state();\nconst ops = create_mock_fs_ops(state);\n// Use ops in tests - all operations are in-memory\n```\n\nSee `operations_defaults.ts` for real implementations.\nSee `test/fixtures/mock_operations.ts` for mock implementations."
+			},
+			{
 				"path": "style_rule_parser.ts",
 				"declarations": [
 					{
@@ -3598,11 +3665,16 @@
 						"name": "load_style_rule_index",
 						"kind": "function",
 						"doc_comment": "Loads and parses the default style.css file.",
-						"source_line": 501,
-						"type_signature": "(style_css_path?: string | undefined): Promise<StyleRuleIndex>",
+						"source_line": 502,
+						"type_signature": "(ops: FsOperations, style_css_path?: string | undefined): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
 						"return_description": "Promise resolving to StyleRuleIndex",
 						"parameters": [
+							{
+								"name": "ops",
+								"type": "FsOperations",
+								"description": "- Filesystem operations for dependency injection"
+							},
 							{
 								"name": "style_css_path",
 								"type": "string | undefined",
@@ -3615,7 +3687,7 @@
 						"name": "create_style_rule_index",
 						"kind": "function",
 						"doc_comment": "Creates a StyleRuleIndex from a custom CSS string.\nUse this to parse user-provided base styles instead of loading from file.",
-						"source_line": 515,
+						"source_line": 522,
 						"type_signature": "(css: string): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
 						"return_description": "Promise resolving to StyleRuleIndex",
@@ -3631,7 +3703,7 @@
 						"name": "get_matching_rules",
 						"kind": "function",
 						"doc_comment": "Gets rules that should be included based on detected elements and classes.",
-						"source_line": 528,
+						"source_line": 535,
 						"type_signature": "(index: StyleRuleIndex, detected_elements: Set<string>, detected_classes: Set<string>): Set<number>",
 						"return_type": "Set<number>",
 						"return_description": "Set of rule indices to include",
@@ -3657,7 +3729,7 @@
 						"name": "generate_base_css",
 						"kind": "function",
 						"doc_comment": "Generates CSS from a StyleRuleIndex with only the included rules.",
-						"source_line": 572,
+						"source_line": 579,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): string",
 						"return_type": "string",
 						"return_description": "CSS string with only included rules, in original order",
@@ -3678,7 +3750,7 @@
 						"name": "collect_rule_variables",
 						"kind": "function",
 						"doc_comment": "Collects all CSS variables used by the included rules.",
-						"source_line": 591,
+						"source_line": 598,
 						"type_signature": "(index: StyleRuleIndex, included_indices: Set<number>): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of variable names (without -- prefix)",
@@ -6955,14 +7027,14 @@
 						"name": "FUZ_CSS_MARKER",
 						"kind": "variable",
 						"doc_comment": "Marker comment used to delimit generated CSS in the output.",
-						"source_line": 64,
+						"source_line": 65,
 						"type_signature": "\"/* generated by vite_plugin_fuz_css */\""
 					},
 					{
 						"name": "VitePluginFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the fuz_css Vite plugin.\nExtends the shared base options (no additional Vite-specific options currently needed).",
-						"source_line": 92,
+						"source_line": 93,
 						"type_signature": "VitePluginFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": []
@@ -6971,7 +7043,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 100,
+						"source_line": 101,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin$1<any>",
 						"return_type": "Plugin$1<any>",
 						"parameters": [
@@ -6997,6 +7069,7 @@
 					"diagnostics.ts",
 					"file_filter.ts",
 					"hash.ts",
+					"operations_defaults.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
 				]

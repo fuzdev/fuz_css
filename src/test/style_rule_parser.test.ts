@@ -8,6 +8,10 @@ import {
 	load_style_rule_index,
 	STYLE_RULE_PARSER_VERSION,
 } from '../lib/style_rule_parser.js';
+import {default_fs_operations} from '../lib/operations_defaults.js';
+
+// Alias for brevity in tests
+const ops = default_fs_operations;
 
 describe('parse_style_css', () => {
 	describe('basic parsing', () => {
@@ -584,7 +588,7 @@ describe('collect_rule_variables', () => {
 
 describe('load_style_rule_index', () => {
 	test('loads actual style.css', async () => {
-		const index = await load_style_rule_index();
+		const index = await load_style_rule_index(ops);
 
 		expect(index.rules.length).toBeGreaterThan(50);
 

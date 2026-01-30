@@ -35,12 +35,14 @@
 	--border_radius_sm: 1.3rem;
 	--border_radius_xl: 5.5rem;
 	--border_radius_xs: 0.8rem;
+	--border_radius_xs2: 0.5rem;
 	--border_radius_xs3: 0.3rem;
 	--border_style: solid;
 	--border_width: var(--border_width_1);
 	--border_width_1: 1px;
 	--border_width_2: 2px;
 	--border_width_3: 3px;
+	--border_width_4: 4px;
 	--border_width_8: 8px;
 	--button_shadow:
 		var(--shadow_inset_bottom_xs)
@@ -216,6 +218,9 @@
 	--distance_md: 800px;
 	--distance_sm: 320px;
 	--distance_xs: 200px;
+	--duration_1: 0.08s;
+	--duration_2: 0.2s;
+	--duration_3: 0.5s;
 	--fg_00: var(--darken_00);
 	--fg_05: var(--darken_05);
 	--fg_10: var(--darken_10);
@@ -250,6 +255,7 @@
 	--hue_h: 17;
 	--hue_i: 185;
 	--hue_j: 155;
+	--icon_size_lg: 80px;
 	--icon_size_md: 48px;
 	--icon_size_sm: 32px;
 	--input_fill: var(--bg_80);
@@ -282,6 +288,7 @@
 	--outline_width_active: var(--border_width_1);
 	--outline_width_focus: var(--border_width_2);
 	--shade_00: hsl(var(--tint_hue) var(--tint_saturation) 96%);
+	--shade_10: hsl(var(--tint_hue) var(--tint_saturation) 90%);
 	--shade_20: hsl(var(--tint_hue) var(--tint_saturation) 84%);
 	--shade_30: hsl(var(--tint_hue) var(--tint_saturation) 76%);
 	--shade_50: hsl(var(--tint_hue) var(--tint_saturation) 53%);
@@ -561,6 +568,7 @@
 	--fg_95: var(--lighten_95);
 	--link_color: hsl(var(--hue_a) 61% 58%);
 	--shade_00: hsl(var(--tint_hue) var(--tint_saturation) 6%);
+	--shade_10: hsl(var(--tint_hue) var(--tint_saturation) 12%);
 	--shade_20: hsl(var(--tint_hue) var(--tint_saturation) 17%);
 	--shade_30: hsl(var(--tint_hue) var(--tint_saturation) 26%);
 	--shade_50: hsl(var(--tint_hue) var(--tint_saturation) 48%);
@@ -733,6 +741,10 @@ body {
 	text-transform: uppercase;
 }
 
+:where(p) {
+	overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
+}
+
 :where(
 	:is(
 			p,
@@ -753,6 +765,10 @@ body {
 		):not(:last-child):not(.unstyled)
 ) {
 	margin-bottom: var(--space_lg);
+}
+
+:where(section:not(:last-child)) {
+	margin-bottom: var(--space_xl7);
 }
 
 :where(aside:not(.unstyled)) {
@@ -813,9 +829,18 @@ body {
 	flex-direction: column;
 }
 
+:where(fieldset) {
+	/* TODO consider a global border reset */
+	border: 0;
+}
+
 :where(legend:not(.unstyled)) {
 	font-size: var(--font_size_lg);
 	margin-bottom: var(--space_lg);
+}
+
+:where(input, textarea, select) {
+	font: inherit;
 }
 
 :where(:is(input, textarea, select):not(.unstyled)) {
@@ -840,6 +865,10 @@ body {
 	--input_padding_y: var(--space_sm);
 	height: 100px;
 	resize: vertical;
+}
+
+:where(:is(select, option, input[type='color']):not(:disabled)) {
+	cursor: pointer;
 }
 
 :where(option:not(.unstyled)) {
@@ -1206,6 +1235,16 @@ body {
 	--min_height: var(--input_height_sm); /* TODO this increases paragraph line spacing */
 }
 
+:where(small) {
+	font-size: var(--font_size_sm);
+}
+
+:where(img, picture, canvas, svg, video) {
+	display: block;
+	max-width: 100%; /* shrink to fit */
+	height: auto; /* preserve aspect ratio */
+}
+
 :where(summary:not(.unstyled)) {
 	cursor: pointer;
 	padding: var(--space_md);
@@ -1222,6 +1261,49 @@ body {
 
 :where(details[open] summary:not(.unstyled)) {
 	margin-bottom: var(--space_sm);
+}
+
+:where(table) {
+	border-collapse: collapse;
+}
+
+:where(thead) {
+	text-align: left;
+}
+
+:where(th) {
+	font-weight: bold;
+}
+
+:where(th, td) {
+	padding: var(--space_xs3) var(--space_sm);
+}
+
+:where(tr) {
+	border-bottom: 1px solid var(--border_color_10);
+}
+
+:where(tr:hover) {
+	background-color: var(--fg_10);
+}
+
+:where(b, strong) {
+	font-weight: bolder;
+}
+
+:where(sub, sup) {
+	font-size: 75%;
+	line-height: 0;
+	position: relative;
+	vertical-align: baseline;
+}
+
+:where(sub) {
+	bottom: -0.25em;
+}
+
+:where(sup) {
+	top: -0.5em;
 }
 
 /* Utility Classes */

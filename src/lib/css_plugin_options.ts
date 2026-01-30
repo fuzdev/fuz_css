@@ -12,6 +12,7 @@ import type {FileFilter} from './file_filter.js';
 import type {AcornPlugin} from './css_class_extractor.js';
 import type {CssClassDefinition, CssClassDefinitionInterpreter} from './css_class_generation.js';
 import type {StyleVariable} from './variable.js';
+import type {FsOperations} from './operations.js';
 
 /**
  * Options for CSS class extraction from source files.
@@ -168,6 +169,11 @@ export interface CssCacheOptions {
 	 * @default '.fuz/cache/css'
 	 */
 	cache_dir?: string;
+	/**
+	 * Filesystem operations for cache management.
+	 * Defaults to production implementation. Override for testing.
+	 */
+	ops?: FsOperations;
 }
 
 /**

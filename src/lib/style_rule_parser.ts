@@ -9,11 +9,11 @@
  * @module
  */
 
-import {readFile} from 'node:fs/promises';
 import {parseCss, type AST} from 'svelte/compiler';
 
 import {extract_css_variables} from './css_variable_utils.js';
 import {compute_hash} from './hash.js';
+import type {FsOperations} from './operations.js';
 
 /**
  * Base fields shared by all style rules.
@@ -495,12 +495,19 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 /**
  * Loads and parses the default style.css file.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param style_css_path - Path to style.css (defaults to package's style.css)
  * @returns Promise resolving to StyleRuleIndex
  */
-export const load_style_rule_index = async (style_css_path?: string): Promise<StyleRuleIndex> => {
+export const load_style_rule_index = async (
+	ops: FsOperations,
+	style_css_path?: string,
+): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const css = await readFile(path, 'utf8');
+	const css = await ops.read_text({path});
+	if (css === null) {
+		throw new Error(`Failed to read style.css from ${path}`);
+	}
 	const content_hash = await compute_hash(css);
 	return parse_style_css(css, content_hash);
 };

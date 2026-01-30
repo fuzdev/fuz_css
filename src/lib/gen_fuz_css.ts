@@ -33,6 +33,7 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 } from './css_cache.js';
+import {default_fs_operations} from './operations_defaults.js';
 import {
 	type StyleRuleIndex,
 	load_style_rule_index,
@@ -143,6 +144,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		theme_specificity = 1,
 		include_elements,
 		include_variables,
+		ops = default_fs_operations,
 	} = options;
 
 	// Derive include flags from null check
@@ -179,7 +181,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				style_rule_index = await create_style_rule_index(base_css);
 			} else {
 				// Use default style.css
-				style_rule_index = await load_style_rule_index();
+				style_rule_index = await load_style_rule_index(ops);
 			}
 		}
 		return style_rule_index;
@@ -279,7 +281,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 					// Try cache (skip on CI)
 					if (!is_ci) {
-						const cached = await load_cached_extraction(cache_path);
+						const cached = await load_cached_extraction(ops, cache_path);
 						if (cached && cached.content_hash === node.content_hash) {
 							// Cache hit
 							stats.cache_hits++;
@@ -349,6 +351,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						css_variables,
 					}) => {
 						await save_cached_extraction(
+							ops,
 							cache_path,
 							content_hash,
 							classes,
@@ -371,7 +374,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						paths_to_delete,
 						async (path) => {
 							const cache_path = get_file_cache_path(path, resolved_cache_dir, project_root);
-							await delete_cached_extraction(cache_path);
+							await delete_cached_extraction(ops, cache_path);
 						},
 						cache_io_concurrency,
 					).catch(() => {
