@@ -61,7 +61,12 @@ describe('generate_modified_ruleset', () => {
 			':root.dark',
 		);
 
-		expect_css_contains(result.css, '@media (width >= 48rem) {', ':root.dark {', '.md\\:dark\\:chip');
+		expect_css_contains(
+			result.css,
+			'@media (width >= 48rem) {',
+			':root.dark {',
+			'.md\\:dark\\:chip',
+		);
 	});
 
 	test('handles multi-rule ruleset', () => {

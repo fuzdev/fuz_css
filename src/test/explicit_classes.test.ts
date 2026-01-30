@@ -2,11 +2,7 @@ import {test, describe, expect} from 'vitest';
 
 import {generate_classes_css} from '$lib/css_class_generation.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
-import {
-	expect_css_contains,
-	expect_diagnostic,
-	loc,
-} from './test_helpers.js';
+import {expect_css_contains, loc} from './test_helpers.js';
 
 /**
  * Tests for explicit_classes handling in generate_classes_css.

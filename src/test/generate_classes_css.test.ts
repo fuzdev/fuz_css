@@ -10,8 +10,6 @@ import {
 	expect_css_order,
 	expect_diagnostic,
 	expect_no_diagnostic,
-	filter_diagnostics_by_message,
-	count_css_occurrences,
 } from './test_helpers.js';
 
 /**

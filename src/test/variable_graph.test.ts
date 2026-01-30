@@ -281,9 +281,9 @@ describe('resolve_variables_transitive', () => {
 			]);
 
 			expect(result.missing.size).toBe(3);
-			expect(result.missing.has('missing1')).toBe(true);
-			expect(result.missing.has('missing2')).toBe(true);
-			expect(result.missing.has('missing3')).toBe(true);
+			for (const name of ['missing1', 'missing2', 'missing3']) {
+				expect(result.missing.has(name), `Expected "${name}" to be missing`).toBe(true);
+			}
 		});
 
 		test('tracks missing dependencies', () => {
@@ -312,61 +312,42 @@ describe('resolve_variables_transitive', () => {
 	});
 
 	describe('cycle detection', () => {
-		test('detects simple cycle (A→B→A)', () => {
-			const variables: Array<StyleVariable> = [
-				{name: 'a', light: 'var(--b)'},
-				{name: 'b', light: 'var(--a)'},
-			];
+		test.each<[string, Array<StyleVariable>, Array<string>]>([
+			[
+				'simple cycle (A→B→A)',
+				[
+					{name: 'a', light: 'var(--b)'},
+					{name: 'b', light: 'var(--a)'},
+				],
+				['a', 'b'],
+			],
+			[
+				'longer cycle (A→B→C→A)',
+				[
+					{name: 'a', light: 'var(--b)'},
+					{name: 'b', light: 'var(--c)'},
+					{name: 'c', light: 'var(--a)'},
+				],
+				['a', 'b', 'c'],
+			],
+			['self-reference (A→A)', [{name: 'a', light: 'calc(var(--a) + 1px)'}], ['a']],
+			[
+				'cycle in dark mode deps only',
+				[
+					{name: 'a', light: 'blue', dark: 'var(--b)'},
+					{name: 'b', light: 'red', dark: 'var(--a)'},
+				],
+				['a', 'b'],
+			],
+		])('detects %s', (_name, variables, expected_vars) => {
 			const graph = build_variable_graph(variables, 'test-hash');
-
 			const result = resolve_variables_transitive(graph, ['a']);
 
-			expect(result.variables.has('a')).toBe(true);
-			expect(result.variables.has('b')).toBe(true);
+			for (const v of expected_vars) {
+				expect(result.variables.has(v), `Expected "${v}" in result`).toBe(true);
+			}
 			expect(result.warnings.length).toBeGreaterThan(0);
 			expect(result.warnings.some((w) => w.includes('Circular dependency'))).toBe(true);
-		});
-
-		test('detects longer cycle (A→B→C→A)', () => {
-			const variables: Array<StyleVariable> = [
-				{name: 'a', light: 'var(--b)'},
-				{name: 'b', light: 'var(--c)'},
-				{name: 'c', light: 'var(--a)'},
-			];
-			const graph = build_variable_graph(variables, 'test-hash');
-
-			const result = resolve_variables_transitive(graph, ['a']);
-
-			expect(result.variables.has('a')).toBe(true);
-			expect(result.variables.has('b')).toBe(true);
-			expect(result.variables.has('c')).toBe(true);
-			expect(result.warnings.length).toBeGreaterThan(0);
-			expect(result.warnings.some((w) => w.includes('Circular dependency'))).toBe(true);
-		});
-
-		test('detects self-reference (A→A)', () => {
-			const variables: Array<StyleVariable> = [{name: 'a', light: 'calc(var(--a) + 1px)'}];
-			const graph = build_variable_graph(variables, 'test-hash');
-
-			const result = resolve_variables_transitive(graph, ['a']);
-
-			expect(result.variables.has('a')).toBe(true);
-			expect(result.warnings.length).toBeGreaterThan(0);
-			expect(result.warnings.some((w) => w.includes('Circular dependency'))).toBe(true);
-		});
-
-		test('detects cycle in dark mode deps only', () => {
-			const variables: Array<StyleVariable> = [
-				{name: 'a', light: 'blue', dark: 'var(--b)'},
-				{name: 'b', light: 'red', dark: 'var(--a)'},
-			];
-			const graph = build_variable_graph(variables, 'test-hash');
-
-			const result = resolve_variables_transitive(graph, ['a']);
-
-			expect(result.variables.has('a')).toBe(true);
-			expect(result.variables.has('b')).toBe(true);
-			expect(result.warnings.length).toBeGreaterThan(0);
 		});
 	});
 });
@@ -500,52 +481,30 @@ describe('build_variable_graph_from_options', () => {
 });
 
 describe('find_similar_variable', () => {
-	test('finds similar variable for typo (missing character)', () => {
-		const variables: Array<StyleVariable> = [
-			{name: 'color_primary', light: 'blue'},
-			{name: 'color_secondary', light: 'green'},
-		];
-		const graph = build_variable_graph(variables, 'test-hash');
-
-		// Missing 'a' - should match color_primary
-		expect(find_similar_variable(graph, 'color_primry')).toBe('color_primary');
+	describe('finds typos', () => {
+		test.each<[string, string, Array<StyleVariable>, string]>([
+			['color_primry', 'color_primary', [{name: 'color_primary', light: 'blue'}], 'missing char'],
+			['backuground', 'background', [{name: 'background', light: '#fff'}], 'extra char'],
+			['boarder_radius', 'border_radius', [{name: 'border_radius', light: '4px'}], 'swapped chars'],
+		])('%s → %s (%s)', (typo, expected, variables) => {
+			const graph = build_variable_graph(variables, 'test-hash');
+			expect(find_similar_variable(graph, typo)).toBe(expected);
+		});
 	});
 
-	test('finds similar variable for typo (extra character)', () => {
-		const variables: Array<StyleVariable> = [
-			{name: 'background', light: '#fff'},
-			{name: 'foreground', light: '#000'},
-		];
-		const graph = build_variable_graph(variables, 'test-hash');
-
-		// Extra 'u' - should match background
-		expect(find_similar_variable(graph, 'backuground')).toBe('background');
-	});
-
-	test('finds similar variable for typo (swapped characters)', () => {
-		const variables: Array<StyleVariable> = [{name: 'border_radius', light: '4px'}];
-		const graph = build_variable_graph(variables, 'test-hash');
-
-		// 'boarder' instead of 'border' - should match
-		expect(find_similar_variable(graph, 'boarder_radius')).toBe('border_radius');
-	});
-
-	test('returns null for dissimilar variable', () => {
-		const variables: Array<StyleVariable> = [
-			{name: 'color_primary', light: 'blue'},
-			{name: 'spacing_md', light: '16px'},
-		];
-		const graph = build_variable_graph(variables, 'test-hash');
-
-		// Completely different - should return null
-		expect(find_similar_variable(graph, 'fill')).toBeNull();
-		expect(find_similar_variable(graph, 'shadow')).toBeNull();
-		expect(find_similar_variable(graph, 'icon_size')).toBeNull();
+	describe('returns null for dissimilar', () => {
+		test.each([['fill'], ['shadow'], ['icon_size']])('%s has no match', (name) => {
+			const variables: Array<StyleVariable> = [
+				{name: 'color_primary', light: 'blue'},
+				{name: 'spacing_md', light: '16px'},
+			];
+			const graph = build_variable_graph(variables, 'test-hash');
+			expect(find_similar_variable(graph, name)).toBeNull();
+		});
 	});
 
 	test('returns null for empty graph', () => {
 		const graph = build_variable_graph([], 'test-hash');
-
 		expect(find_similar_variable(graph, 'anything')).toBeNull();
 	});
 
@@ -557,7 +516,6 @@ describe('find_similar_variable', () => {
 		];
 		const graph = build_variable_graph(variables, 'test-hash');
 
-		// 'color_a_' should match one of them (closest)
 		const result = find_similar_variable(graph, 'color_a_');
 		expect(result).not.toBeNull();
 		expect(result).toMatch(/^color_a_[123]$/);
@@ -569,8 +527,6 @@ describe('find_similar_variable', () => {
 			{name: 'shadow_sm', light: '2px'},
 		];
 		const graph = build_variable_graph(variables, 'test-hash');
-
-		// 'shadow' alone is too different from 'shadow_xs' (similarity ~0.67)
 		expect(find_similar_variable(graph, 'shadow')).toBeNull();
 	});
 });

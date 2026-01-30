@@ -26,7 +26,12 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:box:hover', 'display: flex', 'flex-direction: column');
+			expect_css_contains(
+				result.css,
+				'.hover\\:box:hover',
+				'display: flex',
+				'flex-direction: column',
+			);
 		});
 
 		test('generates CSS for md:box with media query', () => {
@@ -150,12 +155,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
-				result.css,
-				'.hover\\:row:hover',
-				'display: flex',
-				'flex-direction: row',
-			);
+			expect_css_contains(result.css, '.hover\\:row:hover', 'display: flex', 'flex-direction: row');
 		});
 	});
 
@@ -214,11 +214,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
-				result.css,
-				'.hover\\:chevron:hover',
-				'.hover\\:chevron:hover::before',
-			);
+			expect_css_contains(result.css, '.hover\\:chevron:hover', '.hover\\:chevron:hover::before');
 		});
 
 		test('handles ruleset with element.class: hover:chip', () => {
@@ -561,10 +557,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, [
-				'.hover\\:border_color_b_50',
-				'.active\\:border_color_a_50',
-			]);
+			expect_css_order(result.css, ['.hover\\:border_color_b_50', '.active\\:border_color_a_50']);
 		});
 
 		test('visited < focus < hover < active ordering', () => {

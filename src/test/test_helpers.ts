@@ -101,7 +101,7 @@ export const expect_error = <T extends {ok: boolean}>(result: T, msg?: string): 
  * Useful for tests that need to access properties only available on success.
  */
 export const assert_result_ok = <TOk, TErr>(
-	result: {ok: true} & TOk | {ok: false} & TErr,
+	result: ({ok: true} & TOk) | ({ok: false} & TErr),
 	msg?: string,
 ): TOk & {ok: true} => {
 	expect(result.ok, msg ?? 'Expected result.ok to be true').toBe(true);
@@ -112,7 +112,7 @@ export const assert_result_ok = <TOk, TErr>(
  * Asserts a result is error and returns the narrowed type.
  */
 export const assert_result_error = <TOk, TErr>(
-	result: {ok: true} & TOk | {ok: false} & TErr,
+	result: ({ok: true} & TOk) | ({ok: false} & TErr),
 	msg?: string,
 ): TErr & {ok: false} => {
 	expect(result.ok, msg ?? 'Expected result.ok to be false').toBe(false);
@@ -235,18 +235,13 @@ export const expect_no_diagnostic = (
 ): void => {
 	if (!diagnostics) return;
 	const match = diagnostics.find((d) => d.level === level && d.message.includes(messageContains));
-	expect(
-		match,
-		`Expected no ${level} diagnostic containing "${messageContains}"`,
-	).toBeUndefined();
+	expect(match, `Expected no ${level} diagnostic containing "${messageContains}"`).toBeUndefined();
 };
 
 /**
  * Filters diagnostics by level.
  */
-export const filter_diagnostics_by_level = <
-	T extends GenerationDiagnostic | ExtractionDiagnostic,
->(
+export const filter_diagnostics_by_level = <T extends GenerationDiagnostic | ExtractionDiagnostic>(
 	diagnostics: Array<T> | null,
 	level: 'error' | 'warning',
 ): Array<T> => {
@@ -317,9 +312,10 @@ export const expect_resolution_error = (
 ): void => {
 	expect(result.ok, 'Expected resolution to fail').toBe(false);
 	if (!result.ok && result.error) {
-		expect(result.error.message, `Expected error message to contain "${messageContains}"`).toContain(
-			messageContains,
-		);
+		expect(
+			result.error.message,
+			`Expected error message to contain "${messageContains}"`,
+		).toContain(messageContains);
 	}
 };
 
@@ -334,10 +330,7 @@ export const expect_variable_used = (
 	rule: {variables_used: Set<string>},
 	varName: string,
 ): void => {
-	expect(
-		rule.variables_used.has(varName),
-		`Expected rule to use variable "${varName}"`,
-	).toBe(true);
+	expect(rule.variables_used.has(varName), `Expected rule to use variable "${varName}"`).toBe(true);
 };
 
 /**
@@ -359,9 +352,7 @@ export const expect_rule_elements = (
 	...elements: Array<string>
 ): void => {
 	for (const element of elements) {
-		expect(rule.elements.has(element), `Expected rule to target element "${element}"`).toBe(
-			true,
-		);
+		expect(rule.elements.has(element), `Expected rule to target element "${element}"`).toBe(true);
 	}
 };
 

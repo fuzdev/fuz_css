@@ -238,8 +238,7 @@ describe('parse_ruleset at-rules', () => {
 	});
 
 	test('extracts rules from nested at-rules', () => {
-		const css =
-			'@supports (display: grid) { @media (width >= 48rem) { .box { display: grid; } } }';
+		const css = '@supports (display: grid) { @media (width >= 48rem) { .box { display: grid; } } }';
 		const result = parse_ruleset(css);
 
 		expect(result.rules).toHaveLength(1);

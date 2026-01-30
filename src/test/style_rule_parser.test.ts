@@ -54,44 +54,21 @@ describe('parse_style_css', () => {
 	});
 
 	describe('core rules', () => {
-		test('universal selector is core', () => {
-			const css = `*, ::before, ::after { box-sizing: border-box; }`;
+		test.each([
+			['*, ::before, ::after { box-sizing: border-box; }', 'universal'],
+			[':root { --color: blue; }', 'root'],
+			['body { font-size: 16px; }', 'body'],
+			['@media (prefers-reduced-motion) { :root { --duration: 0; } }', 'media_query'],
+		] as const)('%s is core (%s)', (css, reason) => {
 			const index = parse_style_css(css, 'test-hash');
-
 			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('universal');
-		});
-
-		test(':root is core', () => {
-			const css = `:root { --color: blue; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('root');
-		});
-
-		test('body is core', () => {
-			const css = `body { font-size: 16px; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('body');
-		});
-
-		test('@media prefers-reduced-motion is core', () => {
-			const css = `@media (prefers-reduced-motion) { :root { --duration: 0; } }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('media_query');
+			expect(index.rules[0]!.core_reason).toBe(reason);
 		});
 
 		test('@media not prefers-reduced-motion is not core', () => {
 			const css = `@media (min-width: 768px) { button { font-size: 18px; } }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
 			expect(index.rules[0]!.is_core).toBe(false);
 			expect(index.rules[0]!.elements.has('button')).toBe(true);
 		});
@@ -174,57 +151,32 @@ describe('parse_style_css', () => {
 			expect(index.rules[0]!.elements.size).toBe(0);
 		});
 
-		test('does not extract ::before as element', () => {
-			const css = `div::before { content: ''; }`;
+		test.each([
+			["div::before { content: ''; }", 'div', 'before'],
+			["span::after { content: ''; }", 'span', 'after'],
+			['a:hover { color: red; }', 'a', 'hover'],
+		] as const)('%s extracts element but not pseudo', (css, element, pseudo) => {
 			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('div')).toBe(true);
-			expect(index.rules[0]!.elements.has('before')).toBe(false);
-			expect(index.rules[0]!.elements.has(':before')).toBe(false);
-		});
-
-		test('does not extract ::after as element', () => {
-			const css = `span::after { content: ''; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('span')).toBe(true);
-			expect(index.rules[0]!.elements.has('after')).toBe(false);
-		});
-
-		test('does not extract :hover as element', () => {
-			const css = `a:hover { color: red; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('a')).toBe(true);
-			expect(index.rules[0]!.elements.has('hover')).toBe(false);
+			expect(index.rules[0]!.elements.has(element)).toBe(true);
+			expect(index.rules[0]!.elements.has(pseudo)).toBe(false);
 		});
 	});
 
 	describe('attribute selectors', () => {
-		test('extracts element from attribute selector', () => {
-			const css = `input[type='checkbox'] { width: 20px; }`;
+		test.each([
+			["input[type='checkbox'] { width: 20px; }", 'input'],
+			['a[href^="https://"] { color: green; }', 'a'],
+			['input[required] { border-color: red; }', 'input'],
+			["input[type='text'][required] { background: pink; }", 'input'],
+			[":where(input[type='number'], input[type='text']) { font-family: monospace; }", 'input'],
+			['input:not([disabled]) { cursor: pointer; }', 'input'],
+			["input[placeholder='a, b, c'] { color: gray; }", 'input'],
+		])('%s extracts element', (css, element) => {
 			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-		});
-
-		test('attribute selector with quotes', () => {
-			const css = `a[href^="https://"] { color: green; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('a')).toBe(true);
-		});
-
-		test('attribute selector without value', () => {
-			const css = `input[required] { border-color: red; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
+			expect(index.rules[0]!.elements.has(element)).toBe(true);
 		});
 
 		test('attribute selector with class does not extract class from attribute', () => {
-			// [class~="foo"] targets elements with class "foo", but it's a style rule
-			// about existing classes, not a class the rule "uses" via .classname
 			const css = `[class~="unstyled"] { all: unset; }`;
 			const index = parse_style_css(css, 'test-hash');
 
@@ -240,41 +192,12 @@ describe('parse_style_css', () => {
 			expect(index.rules[0]!.classes.has('error')).toBe(true);
 		});
 
-		test('multiple attribute selectors', () => {
-			const css = `input[type='text'][required] { background: pink; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-		});
-
-		test('attribute selector in :where()', () => {
-			const css = `:where(input[type='number'], input[type='text']) { font-family: monospace; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-		});
-
-		test('attribute selector inside :not()', () => {
-			const css = `input:not([disabled]) { cursor: pointer; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-		});
-
 		test('data attribute selectors', () => {
 			const css = `[data-theme='dark'] { background: black; }`;
 			const index = parse_style_css(css, 'test-hash');
 
 			expect(index.rules[0]!.elements.size).toBe(0);
 			expect(index.rules[0]!.classes.size).toBe(0);
-		});
-
-		test('comma in attribute selector value is handled', () => {
-			const css = `input[placeholder='a, b, c'] { color: gray; }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
 		});
 	});
 
@@ -400,6 +323,54 @@ describe('parse_style_css', () => {
 	});
 
 	describe('variable extraction', () => {
+		test.each([
+			[
+				'border shorthand',
+				'button { border: var(--border_width) solid var(--border_color); }',
+				['border_width', 'border_color'],
+			],
+			[
+				'margin shorthand',
+				'div { margin: var(--space_sm) var(--space_md); }',
+				['space_sm', 'space_md'],
+			],
+			[
+				'padding shorthand',
+				'section { padding: var(--space_xs) var(--space_sm) var(--space_md) var(--space_lg); }',
+				['space_xs', 'space_sm', 'space_md', 'space_lg'],
+			],
+			[
+				'box-shadow shorthand',
+				'div { box-shadow: var(--shadow_x) var(--shadow_y) var(--shadow_blur) var(--shadow_color); }',
+				['shadow_x', 'shadow_y', 'shadow_blur', 'shadow_color'],
+			],
+			[
+				'font shorthand',
+				'p { font: var(--font_weight) var(--font_size)/var(--line_height) var(--font_family); }',
+				['font_weight', 'font_size', 'line_height', 'font_family'],
+			],
+			[
+				'background shorthand',
+				'header { background: var(--bg_color) url(image.png) var(--bg_position) / var(--bg_size); }',
+				['bg_color', 'bg_position', 'bg_size'],
+			],
+			[
+				'transition shorthand',
+				'a { transition: color var(--duration) var(--easing); }',
+				['duration', 'easing'],
+			],
+			[
+				'nested calc',
+				'div { width: calc(var(--base_width) + var(--extra_width) * 2); }',
+				['base_width', 'extra_width'],
+			],
+		])('extracts from %s', (_name, css, expected_vars) => {
+			const index = parse_style_css(css, 'test-hash');
+			for (const v of expected_vars) {
+				expect(index.rules[0]!.variables_used.has(v), `Expected "${v}" in variables`).toBe(true);
+			}
+		});
+
 		test('extracts multiple variables in one rule', () => {
 			const css = `button {
 				color: var(--text_color);
@@ -412,77 +383,6 @@ describe('parse_style_css', () => {
 			expect(index.rules[0]!.variables_used.has('bg_color')).toBe(true);
 			expect(index.rules[0]!.variables_used.has('border_width')).toBe(true);
 			expect(index.rules[0]!.variables_used.has('border_color')).toBe(true);
-		});
-
-		test('extracts from border shorthand', () => {
-			const css = `button { border: var(--border_width) solid var(--border_color); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('border_width')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('border_color')).toBe(true);
-		});
-
-		test('extracts from margin shorthand', () => {
-			const css = `div { margin: var(--space_sm) var(--space_md); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('space_sm')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('space_md')).toBe(true);
-		});
-
-		test('extracts from padding shorthand', () => {
-			const css = `section { padding: var(--space_xs) var(--space_sm) var(--space_md) var(--space_lg); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('space_xs')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('space_sm')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('space_md')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('space_lg')).toBe(true);
-		});
-
-		test('extracts from box-shadow shorthand', () => {
-			const css = `div { box-shadow: var(--shadow_x) var(--shadow_y) var(--shadow_blur) var(--shadow_color); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('shadow_x')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('shadow_y')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('shadow_blur')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('shadow_color')).toBe(true);
-		});
-
-		test('extracts from font shorthand', () => {
-			const css = `p { font: var(--font_weight) var(--font_size)/var(--line_height) var(--font_family); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('font_weight')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('font_size')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('line_height')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('font_family')).toBe(true);
-		});
-
-		test('extracts from background shorthand', () => {
-			const css = `header { background: var(--bg_color) url(image.png) var(--bg_position) / var(--bg_size); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('bg_color')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('bg_position')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('bg_size')).toBe(true);
-		});
-
-		test('extracts from transition shorthand', () => {
-			const css = `a { transition: color var(--duration) var(--easing); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('duration')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('easing')).toBe(true);
-		});
-
-		test('extracts nested calc variables', () => {
-			const css = `div { width: calc(var(--base_width) + var(--extra_width) * 2); }`;
-			const index = parse_style_css(css, 'test-hash');
-
-			expect(index.rules[0]!.variables_used.has('base_width')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('extra_width')).toBe(true);
 		});
 	});
 

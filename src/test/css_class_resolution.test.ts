@@ -479,7 +479,10 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['outer'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_resolution_error(result, 'Cannot reference ruleset class "clickable" in composes array');
+			expect_resolution_error(
+				result,
+				'Cannot reference ruleset class "clickable" in composes array',
+			);
 		});
 	});
 
