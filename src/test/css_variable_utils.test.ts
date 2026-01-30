@@ -23,9 +23,7 @@ describe('extract_css_variables', () => {
 	});
 
 	test('extracts multiple variables from same string', () => {
-		const result = extract_css_variables(
-			'border: var(--border_width) solid var(--border_color);',
-		);
+		const result = extract_css_variables('border: var(--border_width) solid var(--border_color);');
 		expect(result).toEqual(new Set(['border_width', 'border_color']));
 	});
 
@@ -53,9 +51,7 @@ describe('extract_css_variables', () => {
 	});
 
 	test('deduplicates same variable appearing multiple times', () => {
-		const result = extract_css_variables(
-			'color: var(--primary); background: var(--primary);',
-		);
+		const result = extract_css_variables('color: var(--primary); background: var(--primary);');
 		expect(result).toEqual(new Set(['primary']));
 		expect(result.size).toBe(1);
 	});
@@ -112,10 +108,14 @@ describe('extract_css_variables', () => {
 		expect(extract_css_variables('color: Var(--primary);')).toEqual(new Set());
 	});
 
-	test('whitespace inside var() not matched', () => {
-		// CSS allows whitespace: `var( --name )` is valid
-		// Current regex requires `var(--` with no space
-		expect(extract_css_variables('color: var( --spaced );')).toEqual(new Set());
+	test('handles whitespace inside var()', () => {
+		// CSS allows whitespace: `var( --name )` is valid per spec
+		expect(extract_css_variables('color: var( --spaced );')).toEqual(new Set(['spaced']));
+		expect(extract_css_variables('color: var(  --double_space );')).toEqual(
+			new Set(['double_space']),
+		);
+		expect(extract_css_variables('color: var(\t--tabbed );')).toEqual(new Set(['tabbed']));
+		expect(extract_css_variables('color: var(\n--newline );')).toEqual(new Set(['newline']));
 	});
 
 	test('extracts variables inside calc()', () => {
@@ -124,9 +124,7 @@ describe('extract_css_variables', () => {
 	});
 
 	test('extracts variables inside other functions', () => {
-		const result = extract_css_variables(
-			'color: hsl(var(--hue) var(--sat) var(--light));',
-		);
+		const result = extract_css_variables('color: hsl(var(--hue) var(--sat) var(--light));');
 		expect(result).toEqual(new Set(['hue', 'sat', 'light']));
 	});
 });

@@ -74,7 +74,7 @@ gen_fuz_css({
 
 **Shared options (both generators):**
 
-- `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`, excluding tests/gen files)
+- `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`; excludes `.test.*`, `.spec.*`, `.gen.*`, and test directories: `test/`, `tests/`, `__tests__/`, `__mocks__/`)
 - `class_definitions` - Additional definitions to merge with builtins (user takes precedence)
 - `class_interpreters` - Custom interpreters (replaces builtins if provided)
 - `include_classes` - Classes to always include (for dynamic class names)

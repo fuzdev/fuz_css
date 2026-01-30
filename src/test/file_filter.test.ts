@@ -69,14 +69,40 @@ describe('filter_file_default', () => {
 		});
 
 		test('excludes test/ at path start', () => {
-			// /test/ pattern requires slashes, so `test/file.ts` at start won't match
-			// This is current behavior - test/ at start is NOT excluded
-			expect(filter_file_default('test/file.ts')).toBe(true); // Potentially unexpected
+			expect(filter_file_default('test/file.ts')).toBe(false);
+			expect(filter_file_default('test/unit/helpers.ts')).toBe(false);
 		});
 
-		test('does not exclude .spec.ts files (limitation)', () => {
-			// Note: .spec.ts is a common test convention but not currently filtered
-			expect(filter_file_default('src/lib/utils.spec.ts')).toBe(true);
+		test('excludes tests/ at path start', () => {
+			expect(filter_file_default('tests/file.ts')).toBe(false);
+			expect(filter_file_default('tests/integration/app.ts')).toBe(false);
+		});
+
+		test('excludes .spec.ts files', () => {
+			expect(filter_file_default('src/lib/utils.spec.ts')).toBe(false);
+		});
+
+		test('excludes .spec.js files', () => {
+			expect(filter_file_default('src/lib/helpers.spec.js')).toBe(false);
+		});
+
+		test('excludes files in /__tests__/ directory (Jest convention)', () => {
+			expect(filter_file_default('src/__tests__/utils.ts')).toBe(false);
+			expect(filter_file_default('src/lib/__tests__/helpers.ts')).toBe(false);
+		});
+
+		test('excludes __tests__/ at path start', () => {
+			expect(filter_file_default('__tests__/file.ts')).toBe(false);
+			expect(filter_file_default('__tests__/unit/helpers.ts')).toBe(false);
+		});
+
+		test('excludes files in /__mocks__/ directory (Jest convention)', () => {
+			expect(filter_file_default('src/__mocks__/api.ts')).toBe(false);
+			expect(filter_file_default('src/lib/__mocks__/fetch.ts')).toBe(false);
+		});
+
+		test('excludes __mocks__/ at path start', () => {
+			expect(filter_file_default('__mocks__/fs.ts')).toBe(false);
 		});
 	});
 

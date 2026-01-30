@@ -11,13 +11,14 @@
 /**
  * Pattern for matching CSS variable references: `var(--name)` or `var(--name, fallback)`.
  * Captures the variable name without the `--` prefix.
+ * Allows optional whitespace after the opening parenthesis per CSS spec.
  *
  * Examples:
  * - `var(--color_a_50)` → captures `color_a_50`
  * - `var(--font_size_md, 1.6rem)` → captures `font_size_md`
- * - `var(--spacing)` → captures `spacing`
+ * - `var( --spacing )` → captures `spacing`
  */
-const CSS_VARIABLE_PATTERN = /var\(--([a-zA-Z_][a-zA-Z0-9_-]*)/g;
+const CSS_VARIABLE_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)/g;
 
 /**
  * Extracts CSS variable names from a CSS string.

@@ -99,11 +99,7 @@ describe('compute_hash_sync (DJB2)', () => {
 
 	test('consistent across multiple calls', () => {
 		const input = 'test content for consistency';
-		const hashes = [
-			compute_hash_sync(input),
-			compute_hash_sync(input),
-			compute_hash_sync(input),
-		];
+		const hashes = [compute_hash_sync(input), compute_hash_sync(input), compute_hash_sync(input)];
 		expect(hashes[0]).toBe(hashes[1]);
 		expect(hashes[1]).toBe(hashes[2]);
 	});

@@ -2741,7 +2741,7 @@
 						"examples": [
 							"```ts\nextract_css_variables('color: var(--text_color);')\n// → Set { 'text_color' }\n\nextract_css_variables('background: var(--bg_1, var(--bg_2));')\n// → Set { 'bg_1', 'bg_2' }\n\nextract_css_variables('padding: 1rem;')\n// → Set {}\n```"
 						],
-						"source_line": 44,
+						"source_line": 45,
 						"type_signature": "(css: string): Set<string>",
 						"return_type": "Set<string>",
 						"return_description": "Set of variable names (without `--` prefix)",
@@ -2757,7 +2757,7 @@
 						"name": "has_css_variables",
 						"kind": "function",
 						"doc_comment": "Checks if a CSS string contains any CSS variable references.\n\nMore efficient than `extract_css_variables` when you only need\nto know if variables exist, not what they are.",
-						"source_line": 67,
+						"source_line": 68,
 						"type_signature": "(css: string): boolean",
 						"return_type": "boolean",
 						"return_description": "True if the string contains `var(--*)` patterns",
@@ -3137,8 +3137,8 @@
 					{
 						"name": "filter_file_default",
 						"kind": "function",
-						"doc_comment": "Default file filter for CSS class extraction.\nIncludes .svelte, .html, .ts, .js, .tsx, .jsx files.\nExcludes test files and generated files.",
-						"source_line": 17,
+						"doc_comment": "Default file filter for CSS class extraction.\nIncludes .svelte, .html, .ts, .js, .tsx, .jsx files.\nExcludes test files (.test.ts, .spec.ts) and generated files (.gen.ts).\nExcludes files in test directories (/test/, /tests/, /__tests__/, /__mocks__/).",
+						"source_line": 18,
 						"type_signature": "(path: string): boolean",
 						"return_type": "boolean",
 						"parameters": [
