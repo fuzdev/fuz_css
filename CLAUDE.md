@@ -5,7 +5,8 @@ It styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system.
 Early alpha with breaking changes ahead.
 
-For code style, see the `fuz-stack` skill. For UI components (themes, color scheme controls), see `@fuzdev/fuz_ui`.
+For coding conventions, see [`fuz-stack`](../fuz-stack/CLAUDE.md). For UI
+components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
 ## Gro commands
 
