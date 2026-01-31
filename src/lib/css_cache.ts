@@ -8,9 +8,9 @@
  */
 
 import {join} from 'node:path';
+import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-import {compute_hash_sync} from './hash.js';
 import type {FsOperations} from './operations.js';
 
 /**
@@ -87,7 +87,7 @@ export const get_file_cache_path = (
 	const is_internal = file_id.startsWith(project_root);
 	return is_internal
 		? get_cache_path(file_id, cache_dir, project_root)
-		: join(cache_dir, '_external', compute_hash_sync(file_id).slice(0, 16) + '.json');
+		: join(cache_dir, '_external', hash_insecure(file_id).slice(0, 16) + '.json');
 };
 
 /**

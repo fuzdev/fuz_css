@@ -26,6 +26,7 @@
 
 import type {Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
+import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
 import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {type Diagnostic, CssGenerationError} from './diagnostics.js';
@@ -42,7 +43,6 @@ import {
 	from_cached_extraction,
 } from './css_cache.js';
 import {default_fs_operations} from './operations_defaults.js';
-import {compute_hash} from './hash.js';
 import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
 import {
@@ -475,7 +475,7 @@ export {};
 			}
 
 			// Compute content hash
-			const hash = await compute_hash(code);
+			const hash = await hash_secure(code);
 			const existing_hash = hashes.get(id);
 
 			// Check if unchanged

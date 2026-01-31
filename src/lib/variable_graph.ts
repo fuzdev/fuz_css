@@ -9,11 +9,11 @@
  */
 
 import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
+import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import {default_variables} from './variables.js';
 import type {StyleVariable} from './variable.js';
 import {extract_css_variables} from './css_variable_utils.js';
-import {compute_hash_sync} from './hash.js';
 
 import type {VariablesOption} from './css_plugin_options.js';
 
@@ -290,5 +290,5 @@ export const build_variable_graph_from_options = (
 ): VariableDependencyGraph => {
 	const resolved = resolve_variables_option(variables);
 	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');
-	return build_variable_graph(resolved, compute_hash_sync(content));
+	return build_variable_graph(resolved, hash_insecure(content));
 };
