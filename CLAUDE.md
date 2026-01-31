@@ -18,6 +18,9 @@ gro gen       # regenerate theme.css and other .gen files
 gro build     # build the package for production
 ```
 
+IMPORTANT for AI agents: Do NOT run `gro dev` - the developer will manage the
+dev server.
+
 ## Design decisions
 
 ### Two core concepts
@@ -318,3 +321,19 @@ Each demonstrates token, composite, and literal classes with responsive/hover/da
 - [css_ruleset_parser.test.ts](src/test/css_ruleset_parser.test.ts) - Ruleset parsing, selector modification
 - [diagnostics.test.ts](src/test/diagnostics.test.ts) - Diagnostic formatting tests
 - [vite_plugin_examples.test.ts](src/test/vite_plugin_examples.test.ts) - Integration tests building examples (skip with `SKIP_EXAMPLE_TESTS=1`)
+
+## Project standards
+
+- TypeScript strict mode
+- Svelte 5 with runes API (for docs site)
+- Prettier with tabs, 100 char width
+- Node >= 22.15
+- Tests in `src/test/` (not co-located)
+
+## Related projects
+
+- [`fuz_ui`](../fuz_ui/CLAUDE.md) - UI components built on fuz_css (theme controls, etc.)
+- [`fuz_util`](../fuz_util/CLAUDE.md) - utility functions (no CSS dependency)
+- [`fuz_template`](../fuz_template/CLAUDE.md) - starter template using fuz_css
+- [`fuz_blog`](../fuz_blog/CLAUDE.md) - blog template using fuz_css
+- [`fuz_mastodon`](../fuz_mastodon/CLAUDE.md) - Mastodon components using fuz_css
