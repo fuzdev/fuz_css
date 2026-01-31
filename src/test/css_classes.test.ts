@@ -45,7 +45,7 @@ describe('CssClasses', () => {
 		expect(result.has('bar')).toBe(true);
 	});
 
-	test('include_classes always included', () => {
+	test('additional_classes always included', () => {
 		const css_classes = new CssClasses(new Set(['always-included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
@@ -55,7 +55,7 @@ describe('CssClasses', () => {
 		expect(result.has('extracted')).toBe(true);
 	});
 
-	test('get_with_locations returns null for include_classes', () => {
+	test('get_with_locations returns null for additional_classes', () => {
 		const css_classes = new CssClasses(new Set(['included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
@@ -127,7 +127,7 @@ describe('CssClasses', () => {
 		expect(explicit_classes!.has('regular')).toBe(false);
 	});
 
-	test('include_classes are included in explicit_classes', () => {
+	test('additional_classes are included in explicit_classes', () => {
 		const css_classes = new CssClasses(new Set(['included_class']));
 
 		const {explicit_classes} = css_classes.get_all();

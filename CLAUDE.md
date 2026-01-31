@@ -57,12 +57,27 @@ Both output only CSS for classes actually used. Supports Svelte 5.16+ class synt
 
 This is especially easy to miss for edge values like `_00` and `_100` that may not appear in other static usages.
 
+### Limitations
+
+**Static extraction only:** Unified CSS generation happens at build time via AST analysis. Elements and classes created dynamically at runtime (`document.createElement()`, `innerHTML`, dynamic frameworks) won't be detected.
+
+**Workaround:** Use `additional_elements` and `additional_classes` options:
+
+```ts
+gen_fuz_css({
+	additional_elements: ['dialog', 'details'], // Force include element styles
+	additional_classes: ['dynamic-modal'], // Force include utility classes
+});
+```
+
+**SSR/SSG:** Works correctly - CSS is bundled as a static asset before server rendering.
+
 **Shared options (both generators):**
 
-- `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`, excluding tests/gen files)
+- `filter_file` - Which files to extract from (default: `.svelte`, `.html`, `.ts`, `.js`, `.tsx`, `.jsx`; excludes `.test.*`, `.spec.*`, `.gen.*`, and test directories: `test/`, `tests/`, `__tests__/`, `__mocks__/`)
 - `class_definitions` - Additional definitions to merge with builtins (user takes precedence)
 - `class_interpreters` - Custom interpreters (replaces builtins if provided)
-- `include_classes` - Classes to always include (for dynamic class names)
+- `additional_classes` - Classes to always include (for dynamic class names)
 - `exclude_classes` - Classes to exclude (filter false positives)
 - `acorn_plugins` - Additional acorn plugins (use `acorn-jsx` for React/Preact/Solid)
 - `on_error` - `'log'` (default) or `'throw'` for CSS-literal errors
@@ -117,9 +132,17 @@ See [variables.ts](src/lib/variables.ts) for definitions, [variable_data.ts](src
 
 ## Usage
 
-Import [style.css](src/lib/style.css) + [theme.css](src/lib/theme.css) for base styles. Generate utility classes via:
+### Unified mode (default)
 
-**SvelteKit (Gro):** Use [gen_fuz_css()](src/lib/gen_fuz_css.ts) in a `.gen.css.ts` file.
+By default, the generated CSS includes theme variables, base styles, and utility classes in a single output. This is the recommended approach for most projects:
+
+**SvelteKit (Gro):**
+
+```ts
+// src/routes/fuz.gen.css.ts
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+export const gen = gen_fuz_css(); // includes theme + base + utilities
+```
 
 **Vite (Svelte/React/Preact/Solid):**
 
@@ -132,11 +155,83 @@ export default defineConfig({
 	plugins: [vite_plugin_fuz_css({acorn_plugins: [jsx()]})],
 });
 
-// main.ts
-import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own
+// main.ts - single import for everything
 import 'virtual:fuz.css';
 ```
+
+### Utility-only mode
+
+For projects that manage their own theme/base styles, disable the unified output:
+
+```ts
+gen_fuz_css({
+	base_css: null,
+	variables: null,
+});
+// or
+vite_plugin_fuz_css({
+	base_css: null,
+	variables: null,
+});
+
+// Then import separately:
+import '@fuzdev/fuz_css/style.css';
+import '@fuzdev/fuz_css/theme.css';
+import 'virtual:fuz.css'; // or generated fuz.css
+```
+
+### Custom base styles
+
+Provide custom CSS for base element styles:
+
+```ts
+gen_fuz_css({
+	base_css: `
+		button { color: blue; }
+		input { border: 1px solid; }
+	`,
+});
+```
+
+### Custom variables
+
+Override or extend default theme variables:
+
+```ts
+// Override specific variables using callback
+gen_fuz_css({
+	variables: (defaults) =>
+		defaults.map(
+			(v) => (v.name === 'hue_a' ? {...v, light: '30'} : v), // orange primary
+		),
+});
+
+// Add custom variables
+gen_fuz_css({
+	variables: (defaults) => [...defaults, {name: 'my_brand', light: '#ff6600', dark: '#ff8833'}],
+});
+
+// Complete replacement
+gen_fuz_css({
+	variables: my_custom_variables,
+});
+```
+
+### Unified CSS options
+
+Both generators support these options for unified CSS:
+
+- `base_css` - Base styles: `undefined` (default style.css), `null` (disabled), custom CSS string, or callback `(default_css) => string` to modify defaults
+- `variables` - Theme variables: `undefined` (defaults), `null` (disabled), `StyleVariable[]` (custom), or callback `(defaults) => StyleVariable[]`
+- `treeshake_base_css` - Tree-shake base styles to detected elements (default: `true`)
+- `treeshake_variables` - Tree-shake theme variables to referenced ones (default: `true`)
+- `theme_specificity` - Specificity multiplier for `:root` selector (default: `1`)
+- `additional_elements` - Additional HTML elements to always include styles for
+- `additional_variables` - Additional CSS variables to always include in theme output
+
+## Open design questions
+
+- **CSS Cascade Layers (`@layer`)**: Should we add a `use_layers?: boolean` option to wrap output in `@layer theme, base, utility;`? Modern CSS best practice for specificity control, but adds complexity and requires understanding cascade layers.
 
 ## Docs
 
@@ -165,6 +260,8 @@ import 'virtual:fuz.css';
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator API with per-file caching
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin for Svelte/React/Preact/Solid, `virtual:fuz.css` virtual module with HMR
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure (`.fuz/cache/css/`)
+- [hash.ts](src/lib/hash.ts) - Hash utilities for cache invalidation (`compute_hash` async SHA-256, `compute_hash_sync` sync DJB2)
+- [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for transitive resolution of CSS custom properties
 - [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection for tracking classes per-file
 - [css_class_generation.ts](src/lib/css_class_generation.ts) - `CssClassDefinition` types, `generate_classes_css()`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token + composite class registry

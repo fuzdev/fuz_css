@@ -1,0 +1,224 @@
+/**
+ * Diagnostics tests for unified CSS resolution.
+ *
+ * Tests typo detection for variables and unmatched element warnings.
+ *
+ * @module
+ */
+
+import {test, expect, describe} from 'vitest';
+
+import {resolve_css} from '../lib/css_unified_resolution.js';
+import {create_test_fixtures} from './css_unified_resolution_fixtures.js';
+
+describe('resolve_css diagnostics', () => {
+	describe('typo detection for variables', () => {
+		test('emits warning for typo of known variable', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				// 'color_primry' is a typo of 'color_primary' (missing 'a')
+				detected_css_variables: new Set(['color_primary', 'color_primry']),
+				utility_variables_used: new Set(),
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('warning');
+			expect(result.diagnostics[0]!.message).toContain('color_primry');
+			expect(result.diagnostics[0]!.message).toContain('did you mean');
+			expect(result.diagnostics[0]!.message).toContain('color_primary');
+			expect(result.diagnostics[0]!.suggestion).toContain('color_primary');
+		});
+
+		test('emits warning for typo in transitive dep', () => {
+			// Variable references a typo that's similar to another variable
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'main_color', light: 'var(--main_colr)'}, // references typo
+				{name: 'main_colour', light: 'red'}, // similar - will be suggested
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['main_color']),
+				utility_variables_used: new Set(),
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.message).toContain('main_colr');
+			// Should suggest the most similar variable (either main_color or main_colour)
+			expect(result.diagnostics[0]!.message).toContain('did you mean');
+		});
+
+		test('handles multiple typos', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'background_color', light: '#fff'},
+				{name: 'foreground_color', light: '#000'},
+				{name: 'border_radius', light: '4px'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				// All typos of known variables
+				detected_css_variables: new Set([
+					'backgroud_color', // typo of background_color
+					'forground_color', // typo of foreground_color
+					'boarder_radius', // typo of border_radius
+				]),
+				utility_variables_used: new Set(),
+			});
+
+			expect(result.diagnostics.length).toBe(3);
+			const messages = result.diagnostics.map((d) => d.message);
+			expect(messages.some((m) => m.includes('backgroud_color'))).toBe(true);
+			expect(messages.some((m) => m.includes('forground_color'))).toBe(true);
+			expect(messages.some((m) => m.includes('boarder_radius'))).toBe(true);
+		});
+
+		test('no warning for user-defined variables (not similar to theme vars)', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+				{name: 'spacing_md', light: '16px'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				// These are user-defined, not similar to any theme variable
+				detected_css_variables: new Set(['fill', 'shadow', 'icon_size', 'my_custom_var']),
+				utility_variables_used: new Set(),
+			});
+
+			// No warnings because these don't look like typos
+			expect(result.diagnostics.length).toBe(0);
+		});
+
+		test('no diagnostics when all exist', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color', light: 'blue'},
+				{name: 'space', light: '16px'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color', 'space']),
+				utility_variables_used: new Set(),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+	});
+
+	describe('unmatched elements', () => {
+		test('no warning by default', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'custom-element', 'my-widget']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+
+		test('warns when warn_unmatched_elements enabled', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'custom-element']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				warn_unmatched_elements: true,
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('warning');
+			expect(result.diagnostics[0]!.message).toContain('custom-element');
+			expect(result.diagnostics[0]!.message).toContain('No style rules found');
+		});
+
+		test('warns for multiple unmatched', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'my-custom', 'another-custom', 'third-one']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				warn_unmatched_elements: true,
+			});
+
+			expect(result.diagnostics.length).toBe(3);
+			const messages = result.diagnostics.map((d) => d.message);
+			expect(messages.some((m) => m.includes('my-custom'))).toBe(true);
+			expect(messages.some((m) => m.includes('another-custom'))).toBe(true);
+			expect(messages.some((m) => m.includes('third-one'))).toBe(true);
+		});
+
+		test('no warning when all have rules', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					input { border: 1px solid; }
+					a { text-decoration: none; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'input', 'a']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				warn_unmatched_elements: true,
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+	});
+});
