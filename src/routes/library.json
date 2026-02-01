@@ -87,8 +87,8 @@
 			"eslint-plugin-svelte": "^3.13.1",
 			"prettier": "^3.7.4",
 			"prettier-plugin-svelte": "^3.4.1",
-			"svelte": "^5.49.0",
-			"svelte-check": "^4.3.5",
+			"svelte": "^5.49.1",
+			"svelte-check": "^4.3.6",
 			"tslib": "^2.8.1",
 			"typescript": "^5.9.3",
 			"typescript-eslint": "^8.48.1",
@@ -247,15 +247,15 @@
 					{
 						"name": "CSS_CACHE_VERSION",
 						"kind": "variable",
-						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add explicit_classes, elements, css_variables",
-						"source_line": 30,
-						"type_signature": "2"
+						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add explicit_classes, elements, css_variables\nv3: Add explicit_elements, explicit_variables for",
+						"source_line": 31,
+						"type_signature": "3"
 					},
 					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 36,
+						"source_line": 37,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -299,6 +299,18 @@
 								"kind": "variable",
 								"type_signature": "Array<string> | null",
 								"doc_comment": "CSS variables referenced (without -- prefix), or null if none"
+							},
+							{
+								"name": "explicit_elements",
+								"kind": "variable",
+								"type_signature": "Array<string> | null",
+								"doc_comment": "Elements from"
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Array<string> | null",
+								"doc_comment": "CSS variables from"
 							}
 						]
 					},
@@ -306,7 +318,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 61,
+						"source_line": 66,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -331,7 +343,7 @@
 						"name": "get_file_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes cache path for a file, handling both internal and external paths.\nInternal files use relative paths mirroring source tree.\nExternal files (outside project root) use hashed absolute paths in `_external/`.",
-						"source_line": 82,
+						"source_line": 87,
 						"type_signature": "(file_id: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -356,7 +368,7 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 101,
+						"source_line": 106,
 						"type_signature": "(ops: FsOperations, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -376,8 +388,8 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
-						"source_line": 138,
-						"type_signature": "(ops: FsOperations, cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements: Set<...> | null, css_variables: Set<...> | null): Promise<...>",
+						"source_line": 145,
+						"type_signature": "(ops: FsOperations, cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements: Set<...> | null, css_variables: Set<...> | null, explicit_elements: Set<...> | null, explicit_variables: Set<...> | null): Promise<...>",
 						"return_type": "Promise<void>",
 						"parameters": [
 							{
@@ -419,6 +431,16 @@
 								"name": "css_variables",
 								"type": "Set<string> | null",
 								"description": "- CSS variables referenced (without -- prefix), or null if none"
+							},
+							{
+								"name": "explicit_elements",
+								"type": "Set<string> | null",
+								"description": "- Elements from"
+							},
+							{
+								"name": "explicit_variables",
+								"type": "Set<string> | null",
+								"description": "- CSS variables from"
 							}
 						]
 					},
@@ -426,7 +448,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 177,
+						"source_line": 192,
 						"type_signature": "(ops: FsOperations, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -446,9 +468,9 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 190,
-						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
-						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; }",
+						"source_line": 205,
+						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
+						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 						"parameters": [
 							{
 								"name": "cached",
@@ -523,7 +545,7 @@
 						"name": "ExtractionResult",
 						"kind": "type",
 						"doc_comment": "Extraction result with classes mapped to their source locations.\nUses `null` instead of empty collections to avoid allocation overhead.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from  which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
-						"source_line": 37,
+						"source_line": 39,
 						"type_signature": "ExtractionResult",
 						"properties": [
 							{
@@ -561,6 +583,18 @@
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
 								"doc_comment": "CSS variables referenced in style attributes/directives, or null if none.\nUsed for including only the theme variables needed.\nVariable names are stored without the `--` prefix."
+							},
+							{
+								"name": "explicit_elements",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Elements explicitly annotated via `@fuz-elements` comments, or null if none.\nThese should produce errors if they have no matching style rules."
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "CSS variables explicitly annotated via `@fuz-variables` comments, or null if none.\nThese should produce errors if they can't be resolved in the theme.\nVariable names are stored without the `--` prefix."
 							}
 						]
 					},
@@ -568,14 +602,14 @@
 						"name": "AcornPlugin",
 						"kind": "type",
 						"doc_comment": "Acorn plugin type - a function that extends the Parser class.",
-						"source_line": 68,
+						"source_line": 81,
 						"type_signature": "AcornPlugin"
 					},
 					{
 						"name": "ExtractCssClassesOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction.",
-						"source_line": 73,
+						"source_line": 86,
 						"type_signature": "ExtractCssClassesOptions",
 						"properties": [
 							{
@@ -596,7 +630,7 @@
 						"name": "SourceIndex",
 						"kind": "class",
 						"doc_comment": "Helper class for converting character offsets to line/column positions.\nSvelte template nodes (Comment, Text, ExpressionTag) only have char offsets,\nso this class enables efficient conversion.\n\nBuild: O(n) where n = source length\nLookup: O(log m) where m = number of lines (binary search)",
-						"source_line": 104,
+						"source_line": 117,
 						"members": [
 							{
 								"name": "line_starts",
@@ -641,7 +675,7 @@
 						"name": "extract_from_svelte",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 221,
+						"source_line": 238,
 						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, css_variables, and diagnostics",
@@ -663,7 +697,7 @@
 						"name": "extract_from_ts",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a TypeScript/JS file using AST parsing.",
-						"source_line": 430,
+						"source_line": 575,
 						"type_signature": "(source: string, file?: string, acorn_plugins?: AcornPlugin[] | undefined): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, css_variables, and diagnostics",
@@ -691,7 +725,7 @@
 						"name": "extract_css_classes",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set.",
-						"source_line": 543,
+						"source_line": 716,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): Set<string> | null",
 						"return_type": "Set<string> | null",
 						"return_description": "Set of class names, or null if none found",
@@ -713,7 +747,7 @@
 						"name": "extract_css_classes_with_locations",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
-						"source_line": 559,
+						"source_line": 732,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
@@ -732,7 +766,7 @@
 						]
 					}
 				],
-				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes",
+				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes\n- `// @fuz-elements element1 element2` - comment hints for dynamic elements\n- `// @fuz-variables var1 var2` - comment hints for dynamic variables",
 				"dependencies": ["css_variable_utils.ts"],
 				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
@@ -1381,7 +1415,7 @@
 								"name": "add",
 								"kind": "function",
 								"doc_comment": "Adds extraction results for a file.\nReplaces any previous classes and diagnostics for this file.",
-								"type_signature": "(id: string, classes: Map<string, SourceLocation[]> | null, explicit_classes?: Set<string> | null | undefined, diagnostics?: ExtractionDiagnostic[] | null | undefined, elements?: Set<...> | ... 1 more ... | undefined, css_variables?: Set<...> | ... 1 more ... | undefined): void",
+								"type_signature": "(id: string, classes: Map<string, SourceLocation[]> | null, explicit_classes?: Set<string> | null | undefined, diagnostics?: ExtractionDiagnostic[] | null | undefined, elements?: Set<...> | ... 1 more ... | undefined, css_variables?: Set<...> | ... 1 more ... | undefined, explicit_elements?: Set<...> | ... 1 more ... | undefined, explicit_variables?: Set<...> | ... 1 more ... | undefined): void",
 								"return_type": "void",
 								"parameters": [
 									{
@@ -1417,6 +1451,18 @@
 										"type": "Set<string> | null | undefined",
 										"optional": true,
 										"description": "- CSS variables referenced (without -- prefix), or null if none"
+									},
+									{
+										"name": "explicit_elements",
+										"type": "Set<string> | null | undefined",
+										"optional": true,
+										"description": "- Elements from"
+									},
+									{
+										"name": "explicit_variables",
+										"type": "Set<string> | null | undefined",
+										"optional": true,
+										"description": "- Variables from"
 									}
 								]
 							},
@@ -1452,8 +1498,8 @@
 								"name": "get_all",
 								"kind": "function",
 								"doc_comment": "Gets all classes and their locations in a single call.\nMore efficient than calling `get()` and `get_with_locations()` separately\nwhen both are needed (avoids potential double recalculation).\n\nResults have exclude filter applied and explicit_classes includes additional_classes.",
-								"type_signature": "(): { all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; all_css_variables: Set<...>; }",
-								"return_type": "{ all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; all_css_variables: Set<...>; }",
+								"type_signature": "(): { all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; all_css_variables: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
+								"return_type": "{ all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; all_css_variables: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 								"parameters": []
 							},
 							{
@@ -2499,7 +2545,7 @@
 						"name": "CssResolutionStats",
 						"kind": "type",
 						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
-						"source_line": 30,
+						"source_line": 77,
 						"type_signature": "CssResolutionStats",
 						"properties": [
 							{
@@ -2538,7 +2584,7 @@
 						"name": "CssResolutionResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS resolution.",
-						"source_line": 46,
+						"source_line": 93,
 						"type_signature": "CssResolutionResult",
 						"properties": [
 							{
@@ -2589,7 +2635,7 @@
 						"name": "CssResolutionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS resolution.",
-						"source_line": 66,
+						"source_line": 113,
 						"type_signature": "CssResolutionOptions",
 						"properties": [
 							{
@@ -2675,6 +2721,18 @@
 								"kind": "variable",
 								"type_signature": "boolean",
 								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables from the variable graph."
+							},
+							{
+								"name": "explicit_elements",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Elements explicitly annotated via"
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "CSS variables explicitly annotated via"
 							}
 						]
 					},
@@ -2682,7 +2740,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 117,
+						"source_line": 174,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
@@ -2698,7 +2756,7 @@
 						"name": "GenerateUnifiedCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for unified CSS output generation.",
-						"source_line": 288,
+						"source_line": 392,
 						"type_signature": "GenerateUnifiedCssOptions",
 						"properties": [
 							{
@@ -2725,7 +2783,7 @@
 						"name": "generate_unified_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 305,
+						"source_line": 409,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateUnifiedCssOptions): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
@@ -3181,7 +3239,7 @@
 						"name": "GenFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
-						"source_line": 97,
+						"source_line": 101,
 						"type_signature": "GenFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": [
@@ -3214,7 +3272,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 121,
+						"source_line": 125,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -4165,7 +4223,7 @@
 						"name": "BorderWidthVariant",
 						"kind": "type",
 						"source_line": 144,
-						"type_signature": "2 | 4 | 1 | 3 | 5 | 7 | 6 | 8 | 9"
+						"type_signature": "3 | 4 | 1 | 5 | 7 | 6 | 2 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",

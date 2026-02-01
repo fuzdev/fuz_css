@@ -25,6 +25,53 @@ import {
 import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.js';
 
 /**
+ * Threshold for string similarity to suggest typo corrections.
+ */
+const TYPO_SIMILARITY_THRESHOLD = 0.6;
+
+/**
+ * Calculates string similarity using Dice coefficient on bigrams.
+ */
+const string_similarity = (a: string, b: string): number => {
+	if (a === b) return 1;
+	if (a.length < 2 || b.length < 2) return 0;
+
+	const bigrams_a: Set<string> = new Set();
+	for (let i = 0; i < a.length - 1; i++) {
+		bigrams_a.add(a.slice(i, i + 2));
+	}
+
+	let matches = 0;
+	for (let i = 0; i < b.length - 1; i++) {
+		if (bigrams_a.has(b.slice(i, i + 2))) matches++;
+	}
+
+	return (2 * matches) / (a.length - 1 + b.length - 1);
+};
+
+/**
+ * Finds the most similar name from a set of known names.
+ *
+ * @param name - The name to find similar matches for
+ * @param known_names - Set of known valid names
+ * @returns The most similar name, or null if none are similar enough
+ */
+const find_similar_name = (name: string, known_names: Set<string>): string | null => {
+	let best_match: string | null = null;
+	let best_similarity = TYPO_SIMILARITY_THRESHOLD;
+
+	for (const known of known_names) {
+		const similarity = string_similarity(name, known);
+		if (similarity > best_similarity) {
+			best_similarity = similarity;
+			best_match = known;
+		}
+	}
+
+	return best_match;
+};
+
+/**
  * Statistics from CSS resolution (only included when `include_stats` is true).
  */
 export interface CssResolutionStats {
@@ -100,6 +147,16 @@ export interface CssResolutionOptions {
 	 * @default true
 	 */
 	treeshake_variables?: boolean;
+	/**
+	 * Elements explicitly annotated via @fuz-elements comments.
+	 * These produce errors (not warnings) if they have no matching style rules.
+	 */
+	explicit_elements?: Set<string> | null;
+	/**
+	 * CSS variables explicitly annotated via @fuz-variables comments.
+	 * These produce errors (not warnings) if they can't be resolved in the theme.
+	 */
+	explicit_variables?: Set<string> | null;
 }
 
 /**
@@ -130,6 +187,8 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		warn_unmatched_elements = false,
 		treeshake_base_css = true,
 		treeshake_variables = true,
+		explicit_elements,
+		explicit_variables,
 	} = options;
 
 	const diagnostics: Array<GenerationDiagnostic> = [];
@@ -170,6 +229,27 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					message: `No style rules found for element "${element}"`,
 					suggestion:
 						'Element will use browser defaults. Add to additional_elements if intentional.',
+					class_name: element,
+					locations: null,
+				});
+			}
+		}
+	}
+
+	// Step 2c: Error for explicit elements (@fuz-elements) with no matching rules
+	if (explicit_elements) {
+		const known_elements = new Set(style_rule_index.by_element.keys());
+		for (const element of explicit_elements) {
+			const rules = style_rule_index.by_element.get(element);
+			if (!rules || rules.length === 0) {
+				const similar = find_similar_name(element, known_elements);
+				diagnostics.push({
+					phase: 'generation',
+					level: 'error',
+					message: `@fuz-elements: No style rules found for element "${element}"${similar ? ` - did you mean "${similar}"?` : ''}`,
+					suggestion: similar
+						? `Check spelling. Similar element: ${similar}`
+						: 'Element has no fuz_css styles. Remove from @fuz-elements or add custom styles.',
 					class_name: element,
 					locations: null,
 				});
@@ -234,7 +314,11 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 
 	// Add typo warnings for missing variables that look like misspelled theme variables
 	// User-defined variables (not similar to any theme variable) are silently ignored
+	// Skip explicit variables - they'll get errors instead (see below)
 	for (const name of resolution.missing) {
+		// Skip explicit variables - they get errors, not warnings
+		if (explicit_variables?.has(name)) continue;
+
 		const similar = find_similar_variable(variable_graph, name);
 		if (similar) {
 			diagnostics.push({
@@ -247,6 +331,26 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			});
 		}
 		// Variables not similar to any theme variable are assumed to be user-defined
+	}
+
+	// Error for explicit variables (@fuz-variables) that can't be resolved
+	if (explicit_variables) {
+		for (const name of explicit_variables) {
+			// Check if in resolution.missing (not resolved)
+			if (resolution.missing.has(name)) {
+				const similar = find_similar_variable(variable_graph, name);
+				diagnostics.push({
+					phase: 'generation',
+					level: 'error',
+					message: `@fuz-variables: CSS variable "--${name}" not found${similar ? ` - did you mean "--${similar}"?` : ''}`,
+					suggestion: similar
+						? `Check spelling. Similar theme variable: --${similar}`
+						: 'Variable is not defined in the theme. Remove from @fuz-variables or define the variable.',
+					class_name: `var(--${name})`,
+					locations: null,
+				});
+			}
+		}
 	}
 
 	// Step 5: Generate theme CSS

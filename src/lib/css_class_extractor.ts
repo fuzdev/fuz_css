@@ -9,6 +9,8 @@
  * - `clsx('foo', { bar: true })` - class utility function calls
  * - Variables with class-related names
  * - `// @fuz-classes class1 class2` - comment hints for dynamic classes
+ * - `// @fuz-elements element1 element2` - comment hints for dynamic elements
+ * - `// @fuz-variables var1 var2` - comment hints for dynamic variables
  *
  * @module
  */
@@ -60,6 +62,17 @@ export interface ExtractionResult {
 	 * Variable names are stored without the `--` prefix.
 	 */
 	css_variables: Set<string> | null;
+	/**
+	 * Elements explicitly annotated via `@fuz-elements` comments, or null if none.
+	 * These should produce errors if they have no matching style rules.
+	 */
+	explicit_elements: Set<string> | null;
+	/**
+	 * CSS variables explicitly annotated via `@fuz-variables` comments, or null if none.
+	 * These should produce errors if they can't be resolved in the theme.
+	 * Variable names are stored without the `--` prefix.
+	 */
+	explicit_variables: Set<string> | null;
 }
 
 /**
@@ -191,6 +204,10 @@ interface WalkState {
 	elements: Set<string>;
 	/** CSS variables referenced in style attributes (without -- prefix) */
 	css_variables: Set<string>;
+	/** Elements explicitly annotated via @fuz-elements comments */
+	explicit_elements: Set<string>;
+	/** CSS variables explicitly annotated via @fuz-variables comments (without -- prefix) */
+	explicit_variables: Set<string>;
 }
 
 /**
@@ -227,6 +244,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 	const source_index = new SourceIndex(source);
 	const elements: Set<string> = new Set();
 	const css_variables: Set<string> = new Set();
+	const explicit_elements: Set<string> = new Set();
+	const explicit_variables: Set<string> = new Set();
 
 	let ast: AST.Root;
 	try {
@@ -248,6 +267,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 			diagnostics,
 			elements: null,
 			css_variables: null,
+			explicit_elements: null,
+			explicit_variables: null,
 		};
 	}
 
@@ -262,21 +283,23 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		diagnostics,
 		elements,
 		css_variables,
+		explicit_elements,
+		explicit_variables,
 	};
 
-	// Extract from @fuz-classes comments via AST (Svelte Comment nodes)
-	extract_fuz_classes_from_svelte_comments(ast, state);
+	// Extract from @fuz-* comments via AST (Svelte Comment nodes)
+	extract_fuz_comments_from_svelte(ast, state);
 
 	// Walk the template AST
 	walk_template(ast.fragment, state);
 
 	// Walk the script AST (module and instance) including @fuz-classes comments
 	if (ast.instance) {
-		extract_fuz_classes_from_script(ast.instance, source, state);
+		extract_fuz_comments_from_script(ast.instance, source, state);
 		walk_script(ast.instance.content, state);
 	}
 	if (ast.module) {
-		extract_fuz_classes_from_script(ast.module, source, state);
+		extract_fuz_comments_from_script(ast.module, source, state);
 		walk_script(ast.module.content, state);
 	}
 
@@ -298,6 +321,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
 		elements: elements.size > 0 ? elements : null,
 		css_variables: css_variables.size > 0 ? css_variables : null,
+		explicit_elements: explicit_elements.size > 0 ? explicit_elements : null,
+		explicit_variables: explicit_variables.size > 0 ? explicit_variables : null,
 	};
 };
 
@@ -334,18 +359,118 @@ const parse_fuz_classes_comment = (
 };
 
 /**
- * Extracts @fuz-classes from Svelte HTML Comment nodes.
+ * Parses @fuz-elements content from a comment, handling the colon variant.
+ * Returns the list of element names or null if not a @fuz-elements comment.
  */
-const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkState): void => {
+const FUZ_ELEMENTS_PATTERN = /^\s*@fuz-elements(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_elements_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	const match = FUZ_ELEMENTS_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const element_list = match[2]!;
+
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-elements: colon is unnecessary',
+			suggestion: 'Use @fuz-elements without the colon',
+			location,
+		});
+	}
+
+	return element_list.split(/\s+/).filter(Boolean);
+};
+
+/**
+ * Parses @fuz-variables content from a comment, handling the colon variant.
+ * Returns the list of variable names (without -- prefix) or null if not a @fuz-variables comment.
+ * Accepts variables with or without the -- prefix, stripping it if present with a warning.
+ */
+const FUZ_VARIABLES_PATTERN = /^\s*@fuz-variables(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_variables_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	const match = FUZ_VARIABLES_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const variable_list = match[2]!;
+
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-variables: colon is unnecessary',
+			suggestion: 'Use @fuz-variables without the colon',
+			location,
+		});
+	}
+
+	const raw_names = variable_list.split(/\s+/).filter(Boolean);
+	const names: Array<string> = [];
+
+	for (const name of raw_names) {
+		if (name.startsWith('--')) {
+			// Strip -- prefix and warn
+			diagnostics.push({
+				phase: 'extraction',
+				level: 'warning',
+				message: `@fuz-variables: "${name}" should be written without the -- prefix`,
+				suggestion: `Use "${name.slice(2)}" instead of "${name}"`,
+				location,
+			});
+			names.push(name.slice(2));
+		} else {
+			names.push(name);
+		}
+	}
+
+	return names;
+};
+
+/**
+ * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
+ */
+const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	// Walk the fragment looking for Comment nodes
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
 		Comment(node, {state}) {
 			const location = location_from_offset(state, node.start);
+
+			// @fuz-classes
 			const classes = parse_fuz_classes_comment(node.data, location, state.diagnostics);
 			if (classes) {
 				for (const cls of classes) {
 					add_class(state, cls, location);
 					state.explicit_classes.add(cls);
+				}
+			}
+
+			// @fuz-elements
+			const elements = parse_fuz_elements_comment(node.data, location, state.diagnostics);
+			if (elements) {
+				for (const el of elements) {
+					state.elements.add(el);
+					state.explicit_elements.add(el);
+				}
+			}
+
+			// @fuz-variables
+			const variables = parse_fuz_variables_comment(node.data, location, state.diagnostics);
+			if (variables) {
+				for (const v of variables) {
+					state.css_variables.add(v);
+					state.explicit_variables.add(v);
 				}
 			}
 		},
@@ -355,11 +480,11 @@ const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkStat
 };
 
 /**
- * Extracts @fuz-classes from script blocks by re-parsing with acorn.
+ * Extracts @fuz-* comments from script blocks by re-parsing with acorn.
  * Svelte's parser doesn't expose JS comments, so we parse the
  * script source separately to get comments via acorn's onComment callback.
  */
-const extract_fuz_classes_from_script = (
+const extract_fuz_comments_from_script = (
 	script: AST.Script,
 	source: string,
 	state: WalkState,
@@ -402,18 +527,38 @@ const extract_fuz_classes_from_script = (
 		return;
 	}
 
-	// Process @fuz-classes comments
+	// Process @fuz-* comments
 	for (const comment of comments) {
 		const location: SourceLocation = {
 			file: state.file,
 			line: comment.loc.start.line + line_offset,
 			column: comment.loc.start.column + 1,
 		};
+
+		// @fuz-classes
 		const class_list = parse_fuz_classes_comment(comment.value, location, state.diagnostics);
 		if (class_list) {
 			for (const cls of class_list) {
 				add_class(state, cls, location);
 				state.explicit_classes.add(cls);
+			}
+		}
+
+		// @fuz-elements
+		const element_list = parse_fuz_elements_comment(comment.value, location, state.diagnostics);
+		if (element_list) {
+			for (const el of element_list) {
+				state.elements.add(el);
+				state.explicit_elements.add(el);
+			}
+		}
+
+		// @fuz-variables
+		const variable_list = parse_fuz_variables_comment(comment.value, location, state.diagnostics);
+		if (variable_list) {
+			for (const v of variable_list) {
+				state.css_variables.add(v);
+				state.explicit_variables.add(v);
 			}
 		}
 	}
@@ -439,6 +584,8 @@ export const extract_from_ts = (
 	const diagnostics: Array<ExtractionDiagnostic> = [];
 	const elements: Set<string> = new Set();
 	const css_variables: Set<string> = new Set();
+	const explicit_elements: Set<string> = new Set();
+	const explicit_variables: Set<string> = new Set();
 
 	// Collect comments via acorn's onComment callback
 	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
@@ -481,21 +628,43 @@ export const extract_from_ts = (
 			diagnostics,
 			elements: null,
 			css_variables: null,
+			explicit_elements: null,
+			explicit_variables: null,
 		};
 	}
 
-	// Process @fuz-classes comments
+	// Process @fuz-* comments
 	for (const comment of comments) {
 		const location: SourceLocation = {
 			file,
 			line: comment.loc.start.line,
 			column: comment.loc.start.column + 1,
 		};
+
+		// @fuz-classes
 		const class_list = parse_fuz_classes_comment(comment.value, location, diagnostics);
 		if (class_list) {
 			for (const cls of class_list) {
 				add_class_with_location(classes, cls, location);
 				explicit_classes.add(cls);
+			}
+		}
+
+		// @fuz-elements
+		const element_list = parse_fuz_elements_comment(comment.value, location, diagnostics);
+		if (element_list) {
+			for (const el of element_list) {
+				elements.add(el);
+				explicit_elements.add(el);
+			}
+		}
+
+		// @fuz-variables
+		const variable_list = parse_fuz_variables_comment(comment.value, location, diagnostics);
+		if (variable_list) {
+			for (const v of variable_list) {
+				css_variables.add(v);
+				explicit_variables.add(v);
 			}
 		}
 	}
@@ -511,6 +680,8 @@ export const extract_from_ts = (
 		diagnostics,
 		elements,
 		css_variables,
+		explicit_elements,
+		explicit_variables,
 	};
 
 	walk_script(ast, state);
@@ -529,6 +700,8 @@ export const extract_from_ts = (
 		diagnostics: diagnostics.length > 0 ? diagnostics : null,
 		elements: elements.size > 0 ? elements : null,
 		css_variables: css_variables.size > 0 ? css_variables : null,
+		explicit_elements: explicit_elements.size > 0 ? explicit_elements : null,
+		explicit_variables: explicit_variables.size > 0 ? explicit_variables : null,
 	};
 };
 

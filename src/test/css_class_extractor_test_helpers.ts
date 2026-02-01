@@ -1,10 +1,41 @@
 import {expect} from 'vitest';
 
-import type {ExtractionResult} from '$lib/css_class_extractor.js';
+import {
+	type ExtractionResult,
+	type AcornPlugin,
+	extract_from_ts,
+} from '$lib/css_class_extractor.js';
 import {loc} from './test_helpers.js';
 
 // Re-export loc for consumers that import from this file
 export {loc};
+
+/**
+ * Cached JSX plugin to avoid repeated async imports.
+ * Initialized lazily on first use via `create_jsx_extractor()`.
+ */
+let cached_jsx_plugin: AcornPlugin | null = null;
+
+/**
+ * Creates an extractor function pre-configured with acorn-jsx plugin.
+ * Caches the plugin import for efficiency across tests.
+ *
+ * @example
+ * ```ts
+ * const extract_jsx = await create_jsx_extractor();
+ * const result = extract_jsx('const App = () => <div className="foo" />');
+ * ```
+ */
+export const create_jsx_extractor = async (): Promise<
+	(source: string, file?: string) => ExtractionResult
+> => {
+	if (!cached_jsx_plugin) {
+		const jsx_module = await import('acorn-jsx');
+		cached_jsx_plugin = jsx_module.default();
+	}
+	const plugin = cached_jsx_plugin;
+	return (source: string, file = 'test.tsx') => extract_from_ts(source, file, [plugin]);
+};
 
 /**
  * Helper to assert extracted class names match expected values.
@@ -138,4 +169,87 @@ export const assert_class_locations = (
 	for (let i = 0; i < expected_lines.length; i++) {
 		expect(locations![i]!.line).toBe(expected_lines[i]);
 	}
+};
+
+/**
+ * Assert CSS variables were extracted from styles (without -- prefix).
+ * Compares as sorted arrays to ignore extraction order.
+ */
+export const assert_css_variables = (result: ExtractionResult, expected: Array<string>): void => {
+	expect(result.css_variables, 'Expected css_variables to be present').not.toBeNull();
+	const actual = [...result.css_variables!].sort();
+	expect(actual).toEqual([...expected].sort());
+};
+
+/**
+ * Assert no CSS variables were extracted.
+ */
+export const assert_no_css_variables = (result: ExtractionResult): void => {
+	expect(result.css_variables).toBeNull();
+};
+
+/**
+ * Assert CSS variables present/absent (for partial assertions).
+ */
+export const assert_css_variables_include = (
+	result: ExtractionResult,
+	present: Array<string>,
+	absent: Array<string> = [],
+): void => {
+	for (const v of present) {
+		expect(result.css_variables?.has(v), `Expected CSS variable "${v}" present`).toBe(true);
+	}
+	for (const v of absent) {
+		expect(result.css_variables?.has(v), `Expected CSS variable "${v}" absent`).toBe(false);
+	}
+};
+
+/**
+ * Assert explicit classes present.
+ */
+export const assert_explicit_classes = (
+	result: ExtractionResult,
+	expected: Array<string>,
+): void => {
+	expect(result.explicit_classes, 'Expected explicit_classes to be present').not.toBeNull();
+	const actual = [...result.explicit_classes!].sort();
+	expect(actual).toEqual([...expected].sort());
+};
+
+/**
+ * Assert explicit elements present.
+ */
+export const assert_explicit_elements = (
+	result: ExtractionResult,
+	expected: Array<string>,
+): void => {
+	expect(result.explicit_elements, 'Expected explicit_elements to be present').not.toBeNull();
+	const actual = [...result.explicit_elements!].sort();
+	expect(actual).toEqual([...expected].sort());
+};
+
+/**
+ * Assert no explicit elements.
+ */
+export const assert_no_explicit_elements = (result: ExtractionResult): void => {
+	expect(result.explicit_elements).toBeNull();
+};
+
+/**
+ * Assert explicit variables present.
+ */
+export const assert_explicit_variables = (
+	result: ExtractionResult,
+	expected: Array<string>,
+): void => {
+	expect(result.explicit_variables, 'Expected explicit_variables to be present').not.toBeNull();
+	const actual = [...result.explicit_variables!].sort();
+	expect(actual).toEqual([...expected].sort());
+};
+
+/**
+ * Assert no explicit variables.
+ */
+export const assert_no_explicit_variables = (result: ExtractionResult): void => {
+	expect(result.explicit_variables).toBeNull();
 };

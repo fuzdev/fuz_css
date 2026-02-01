@@ -50,6 +50,18 @@ export class CssClasses {
 	/** Aggregated CSS variables */
 	#all_css_variables: Set<string> = new Set();
 
+	/** Explicit elements (from @fuz-elements) by file id */
+	#explicit_elements_by_id: Map<string, Set<string>> = new Map();
+
+	/** Explicit CSS variables (from @fuz-variables) by file id */
+	#explicit_variables_by_id: Map<string, Set<string>> = new Map();
+
+	/** Aggregated explicit elements */
+	#explicit_elements: Set<string> | null = null;
+
+	/** Aggregated explicit CSS variables */
+	#explicit_variables: Set<string> | null = null;
+
 	#dirty = true;
 
 	/**
@@ -76,6 +88,8 @@ export class CssClasses {
 	 * @param diagnostics - Extraction diagnostics from this file, or null if none
 	 * @param elements - HTML elements found in the file, or null if none
 	 * @param css_variables - CSS variables referenced (without -- prefix), or null if none
+	 * @param explicit_elements - Elements from @fuz-elements comments, or null if none
+	 * @param explicit_variables - Variables from @fuz-variables comments (without -- prefix), or null if none
 	 */
 	add(
 		id: string,
@@ -84,6 +98,8 @@ export class CssClasses {
 		diagnostics?: Array<ExtractionDiagnostic> | null,
 		elements?: Set<string> | null,
 		css_variables?: Set<string> | null,
+		explicit_elements?: Set<string> | null,
+		explicit_variables?: Set<string> | null,
 	): void {
 		this.#dirty = true;
 		if (classes) {
@@ -112,6 +128,16 @@ export class CssClasses {
 		} else {
 			this.#css_variables_by_id.delete(id);
 		}
+		if (explicit_elements) {
+			this.#explicit_elements_by_id.set(id, explicit_elements);
+		} else {
+			this.#explicit_elements_by_id.delete(id);
+		}
+		if (explicit_variables) {
+			this.#explicit_variables_by_id.set(id, explicit_variables);
+		} else {
+			this.#explicit_variables_by_id.delete(id);
+		}
 	}
 
 	delete(id: string): void {
@@ -121,6 +147,8 @@ export class CssClasses {
 		this.#diagnostics_by_id.delete(id);
 		this.#elements_by_id.delete(id);
 		this.#css_variables_by_id.delete(id);
+		this.#explicit_elements_by_id.delete(id);
+		this.#explicit_variables_by_id.delete(id);
 	}
 
 	/**
@@ -159,6 +187,8 @@ export class CssClasses {
 		explicit_classes: Set<string> | null;
 		all_elements: Set<string>;
 		all_css_variables: Set<string>;
+		explicit_elements: Set<string> | null;
+		explicit_variables: Set<string> | null;
 	} {
 		if (this.#dirty) {
 			this.#dirty = false;
@@ -170,6 +200,8 @@ export class CssClasses {
 			explicit_classes: this.#explicit,
 			all_elements: this.#all_elements,
 			all_css_variables: this.#all_css_variables,
+			explicit_elements: this.#explicit_elements,
+			explicit_variables: this.#explicit_variables,
 		};
 	}
 
@@ -191,6 +223,8 @@ export class CssClasses {
 		this.#explicit = null;
 		this.#all_elements.clear();
 		this.#all_css_variables.clear();
+		this.#explicit_elements = null;
+		this.#explicit_variables = null;
 
 		const exclude = this.#exclude_classes;
 
@@ -242,6 +276,20 @@ export class CssClasses {
 		for (const css_variables of this.#css_variables_by_id.values()) {
 			for (const css_variable of css_variables) {
 				this.#all_css_variables.add(css_variable);
+			}
+		}
+
+		// Aggregate explicit elements from all files
+		for (const explicit_elements of this.#explicit_elements_by_id.values()) {
+			for (const element of explicit_elements) {
+				(this.#explicit_elements ??= new Set()).add(element);
+			}
+		}
+
+		// Aggregate explicit CSS variables from all files
+		for (const explicit_variables of this.#explicit_variables_by_id.values()) {
+			for (const variable of explicit_variables) {
+				(this.#explicit_variables ??= new Set()).add(variable);
 			}
 		}
 	}

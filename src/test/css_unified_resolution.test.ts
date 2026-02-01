@@ -147,6 +147,94 @@ describe('resolve_css', () => {
 			expect(result.included_elements.has('button')).toBe(true);
 		});
 
+		test('additional_elements with multiple values', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					input { border: 1px solid; }
+					dialog { padding: 16px; }
+					select { appearance: none; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				...empty_detection(),
+				additional_elements: ['button', 'input', 'dialog'],
+			});
+
+			expect(result.base_css).toContain('color: red');
+			expect(result.base_css).toContain('border: 1px solid');
+			expect(result.base_css).toContain('padding: 16px');
+			expect(result.base_css).not.toContain('appearance: none');
+			expect(result.included_elements.has('button')).toBe(true);
+			expect(result.included_elements.has('input')).toBe(true);
+			expect(result.included_elements.has('dialog')).toBe(true);
+			expect(result.included_elements.has('select')).toBe(false);
+		});
+
+		test('additional_elements combined with detected_elements', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					input { border: 1px solid; }
+					a { text-decoration: none; }
+					select { appearance: none; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'a']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				additional_elements: ['input'],
+			});
+
+			// Both detected and additional should be included
+			expect(result.base_css).toContain('color: red');
+			expect(result.base_css).toContain('border: 1px solid');
+			expect(result.base_css).toContain('text-decoration: none');
+			expect(result.base_css).not.toContain('appearance: none');
+			expect(result.included_elements.has('button')).toBe(true);
+			expect(result.included_elements.has('input')).toBe(true);
+			expect(result.included_elements.has('a')).toBe(true);
+		});
+
+		test('additional_elements with overlapping detected_elements', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					input { border: 1px solid; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				additional_elements: ['button', 'input'], // button appears in both
+			});
+
+			// Both should be included, no errors from overlap
+			expect(result.base_css).toContain('color: red');
+			expect(result.base_css).toContain('border: 1px solid');
+			expect(result.included_elements.has('button')).toBe(true);
+			expect(result.included_elements.has('input')).toBe(true);
+		});
+
 		test('handles multiple elements', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
@@ -574,6 +662,155 @@ describe('resolve_css', () => {
 			expect(result.base_css).toContain('margin: 0');
 			expect(result.base_css).not.toContain('button');
 			expect(result.theme_css).toBe('');
+		});
+	});
+
+	describe('additional_variables option', () => {
+		test('additional_variables forces inclusion', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+				{name: 'color_c', light: 'red'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				...empty_detection(),
+				additional_variables: ['color_b'],
+			});
+
+			// Only additional_variables should be included (nothing detected)
+			expect(result.resolved_variables.has('color_a')).toBe(false);
+			expect(result.resolved_variables.has('color_b')).toBe(true);
+			expect(result.resolved_variables.has('color_c')).toBe(false);
+			expect(result.theme_css).toContain('--color_b');
+			expect(result.theme_css).not.toContain('--color_a');
+		});
+
+		test('additional_variables combined with detected_css_variables', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+				{name: 'color_c', light: 'red'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_a']),
+				utility_variables_used: new Set(),
+				additional_variables: ['color_c'],
+			});
+
+			// Both detected and additional should be included
+			expect(result.resolved_variables.has('color_a')).toBe(true);
+			expect(result.resolved_variables.has('color_b')).toBe(false);
+			expect(result.resolved_variables.has('color_c')).toBe(true);
+			expect(result.theme_css).toContain('--color_a');
+			expect(result.theme_css).toContain('--color_c');
+		});
+
+		test('additional_variables with overlapping detected_css_variables', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_a']),
+				utility_variables_used: new Set(),
+				additional_variables: ['color_a', 'color_b'], // color_a in both
+			});
+
+			// Both should be included, no errors from overlap
+			expect(result.resolved_variables.has('color_a')).toBe(true);
+			expect(result.resolved_variables.has('color_b')).toBe(true);
+			expect(result.theme_css).toContain('--color_a');
+			expect(result.theme_css).toContain('--color_b');
+		});
+
+		test('additional_variables with treeshake_variables: false', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				...empty_detection(),
+				additional_variables: ['color_a'],
+				treeshake_variables: false,
+			});
+
+			// With treeshake off, all variables included regardless of additional_variables
+			expect(result.resolved_variables.has('color_a')).toBe(true);
+			expect(result.resolved_variables.has('color_b')).toBe(true);
+		});
+	});
+
+	describe('additional_elements and additional_variables combined', () => {
+		test('both options work together', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: var(--btn_color); }
+					input { border: 1px solid var(--input_border); }
+				`,
+				[
+					{name: 'btn_color', light: 'blue'},
+					{name: 'input_border', light: 'gray'},
+					{name: 'extra_var', light: 'red'},
+				],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				...empty_detection(),
+				additional_elements: ['button'],
+				additional_variables: ['extra_var'],
+			});
+
+			// Button rules included
+			expect(result.base_css).toContain('button');
+			expect(result.base_css).not.toContain('input');
+			// Extra var and transitive deps included
+			expect(result.theme_css).toContain('--extra_var');
+			expect(result.theme_css).toContain('--btn_color'); // transitive from button rule
+		});
+
+		test('additional_elements brings transitive variable dependencies', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: var(--btn_color); }`,
+				[
+					{name: 'btn_color', light: 'var(--base_color)'},
+					{name: 'base_color', light: 'blue'},
+				],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				...empty_detection(),
+				additional_elements: ['button'],
+			});
+
+			// Both btn_color and its dependency base_color should be included
+			expect(result.theme_css).toContain('--btn_color');
+			expect(result.theme_css).toContain('--base_color');
 		});
 	});
 

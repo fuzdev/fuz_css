@@ -92,6 +92,117 @@ describe('create_style_rule_index', () => {
 			expect(index.rules[0]?.variables_used.has('btn_color')).toBe(true);
 			expect(index.rules[0]?.variables_used.has('btn_bg')).toBe(true);
 		});
+
+		test('extracts multiple variables from single property', async () => {
+			const css = `div { box-shadow: var(--shadow_x) var(--shadow_y) var(--shadow_blur) var(--shadow_color); }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.size).toBe(4);
+			expect(index.rules[0]?.variables_used.has('shadow_x')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('shadow_y')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('shadow_blur')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('shadow_color')).toBe(true);
+		});
+
+		test('extracts variables from pseudo-class rules', async () => {
+			const css = `
+				button:hover { background: var(--hover_bg); }
+				button:focus { outline-color: var(--focus_color); }
+			`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('hover_bg')).toBe(true);
+			expect(index.rules[1]?.variables_used.has('focus_color')).toBe(true);
+		});
+
+		test('extracts variables from @media rules', async () => {
+			const css = `
+				@media (min-width: 768px) {
+					button { padding: var(--p_lg); margin: var(--m_lg); }
+				}
+			`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('p_lg')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('m_lg')).toBe(true);
+		});
+
+		test('extracts variables with fallbacks', async () => {
+			const css = `button { color: var(--primary, blue); background: var(--bg, white); }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('primary')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('bg')).toBe(true);
+		});
+
+		test('extracts nested variable fallbacks', async () => {
+			const css = `div { color: var(--a, var(--b, var(--c))); }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('a')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('b')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('c')).toBe(true);
+		});
+
+		test('extracts variables in calc()', async () => {
+			const css = `div { width: calc(100% - var(--sidebar_width) - var(--gap)); }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('sidebar_width')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('gap')).toBe(true);
+		});
+
+		test('deduplicates repeated variables', async () => {
+			const css = `
+				div {
+					border: var(--border_width) solid var(--border_color);
+					outline: var(--border_width) solid var(--border_color);
+				}
+			`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.size).toBe(2);
+			expect(index.rules[0]?.variables_used.has('border_width')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('border_color')).toBe(true);
+		});
+
+		test('returns empty set for rule without variables', async () => {
+			const css = `button { color: red; background: blue; }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.size).toBe(0);
+		});
+
+		test('extracts variables from multiple rules', async () => {
+			const css = `
+				button { color: var(--btn_text); }
+				input { border-color: var(--input_border); }
+				a { color: var(--link_color); }
+			`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('btn_text')).toBe(true);
+			expect(index.rules[1]?.variables_used.has('input_border')).toBe(true);
+			expect(index.rules[2]?.variables_used.has('link_color')).toBe(true);
+		});
+
+		test('handles hyphens and underscores in variable names', async () => {
+			const css = `div { color: var(--my-color); background: var(--my_bg_color); }`;
+
+			const index = await create_style_rule_index(css);
+
+			expect(index.rules[0]?.variables_used.has('my-color')).toBe(true);
+			expect(index.rules[0]?.variables_used.has('my_bg_color')).toBe(true);
+		});
 	});
 
 	describe('tree-shaking integration', () => {

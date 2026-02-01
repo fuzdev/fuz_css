@@ -906,3 +906,132 @@ describe('parse_parameterized_state - edge cases', () => {
 		expect(parse_parameterized_state(input)).toBeNull();
 	});
 });
+
+describe('edge cases and error paths', () => {
+	describe('duplicate modifiers', () => {
+		test('duplicate responsive modifier returns error', () => {
+			// Parser validates and rejects duplicate media modifiers
+			const result = parse_css_literal('md:md:opacity:50%', css_properties);
+			expect(result.ok).toBe(false);
+		});
+
+		test('duplicate state modifier is allowed', () => {
+			// hover:hover may look redundant but actually parses fine
+			const result = parse_css_literal('hover:hover:opacity:50%', css_properties);
+			expect(result.ok).toBe(true);
+		});
+
+		test('duplicate color-scheme modifier returns error', () => {
+			// Parser validates and rejects duplicate ancestor modifiers
+			const result = parse_css_literal('dark:dark:opacity:50%', css_properties);
+			expect(result.ok).toBe(false);
+		});
+	});
+
+	describe('conflicting modifiers', () => {
+		test('dark and light together returns error', () => {
+			// Parser validates conflicting color-scheme modifiers
+			const result = parse_css_literal('dark:light:opacity:50%', css_properties);
+			expect(result.ok).toBe(false);
+		});
+	});
+
+	describe('property edge cases', () => {
+		test('property with leading hyphen parses as CSS custom property', () => {
+			// CSS custom properties (--name) are valid properties
+			const result = parse_css_literal('--custom:value', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.property).toBe('--custom');
+				expect(result.parsed.value).toBe('value');
+			}
+		});
+
+		test('property with numbers', () => {
+			const result = parse_css_literal('z-index:100', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.property).toBe('z-index');
+				expect(result.parsed.value).toBe('100');
+			}
+		});
+	});
+
+	describe('value edge cases', () => {
+		test('value with multiple tildes converts to spaces', () => {
+			const result = parse_css_literal('margin:0~auto~0~auto', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('0 auto 0 auto');
+			}
+		});
+
+		test('value with trailing tilde converts to trailing space', () => {
+			const result = parse_css_literal('margin:0~', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('0 ');
+			}
+		});
+
+		test('value with leading tilde converts to leading space', () => {
+			const result = parse_css_literal('margin:~0', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe(' 0');
+			}
+		});
+	});
+
+	describe('empty and minimal inputs', () => {
+		test('single character property', () => {
+			const result = parse_css_literal('x:1', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.property).toBe('x');
+			}
+		});
+
+		test('single character value', () => {
+			const result = parse_css_literal('opacity:0', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('0');
+			}
+		});
+	});
+
+	describe('special CSS values', () => {
+		test('inherit keyword', () => {
+			const result = parse_css_literal('color:inherit', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('inherit');
+			}
+		});
+
+		test('initial keyword', () => {
+			const result = parse_css_literal('display:initial', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('initial');
+			}
+		});
+
+		test('unset keyword', () => {
+			const result = parse_css_literal('margin:unset', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('unset');
+			}
+		});
+
+		test('revert keyword', () => {
+			const result = parse_css_literal('all:revert', css_properties);
+			expect(result.ok).toBe(true);
+			if (result.ok) {
+				expect(result.parsed.value).toBe('revert');
+			}
+		});
+	});
+});

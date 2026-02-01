@@ -1215,6 +1215,26 @@ const color = get_dynamic_color();`}
 });`}
 			/>
 
+			<h4>Element and variable hints</h4>
+			<p>
+				Similar to <code>@fuz-classes</code>, use <code>@fuz-elements</code> and
+				<code>@fuz-variables</code> to declare elements and CSS variables that should be included even
+				when they can't be statically detected:
+			</p>
+			<Code
+				lang="ts"
+				content={`// @fuz-elements dialog
+const el = document.createElement('dialog');
+
+// @fuz-variables some_custom_color some_other_color
+const style = \`color: var(--\${getColor()})\`;`}
+			/>
+			<aside>
+				Unlike implicit detection, explicit declarations via <code>@fuz-elements</code> and
+				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
+				helping catch typos early. Write variable names without the <code>--</code> prefix.
+			</aside>
+
 			<h4>5. Build-time limitations</h4>
 			<p>
 				Class and element detection happens at build time via static analysis. Content created

@@ -26,8 +26,9 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  *
  * v1: Initial version with classes and diagnostics
  * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
+ * v3: Add explicit_elements, explicit_variables for @fuz-elements/@fuz-variables comments
  */
-export const CSS_CACHE_VERSION = 2;
+export const CSS_CACHE_VERSION = 3;
 
 /**
  * Cached extraction result for a single file.
@@ -48,6 +49,10 @@ export interface CachedExtraction {
 	elements: Array<string> | null;
 	/** CSS variables referenced (without -- prefix), or null if none */
 	css_variables: Array<string> | null;
+	/** Elements from @fuz-elements comments, or null if none */
+	explicit_elements: Array<string> | null;
+	/** CSS variables from @fuz-variables comments (without -- prefix), or null if none */
+	explicit_variables: Array<string> | null;
 }
 
 /**
@@ -134,6 +139,8 @@ export const load_cached_extraction = async (
  * @param diagnostics - Extraction diagnostics, or null if none
  * @param elements - HTML elements found in the file, or null if none
  * @param css_variables - CSS variables referenced (without -- prefix), or null if none
+ * @param explicit_elements - Elements from @fuz-elements comments, or null if none
+ * @param explicit_variables - CSS variables from @fuz-variables comments (without -- prefix), or null if none
  */
 export const save_cached_extraction = async (
 	ops: FsOperations,
@@ -144,6 +151,8 @@ export const save_cached_extraction = async (
 	diagnostics: Array<ExtractionDiagnostic> | null,
 	elements: Set<string> | null,
 	css_variables: Set<string> | null,
+	explicit_elements: Set<string> | null,
+	explicit_variables: Set<string> | null,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
@@ -153,6 +162,10 @@ export const save_cached_extraction = async (
 	const elements_array = elements && elements.size > 0 ? Array.from(elements) : null;
 	const css_variables_array =
 		css_variables && css_variables.size > 0 ? Array.from(css_variables) : null;
+	const explicit_elements_array =
+		explicit_elements && explicit_elements.size > 0 ? Array.from(explicit_elements) : null;
+	const explicit_variables_array =
+		explicit_variables && explicit_variables.size > 0 ? Array.from(explicit_variables) : null;
 
 	const data: CachedExtraction = {
 		v: CSS_CACHE_VERSION,
@@ -162,6 +175,8 @@ export const save_cached_extraction = async (
 		diagnostics: diagnostics_array,
 		elements: elements_array,
 		css_variables: css_variables_array,
+		explicit_elements: explicit_elements_array,
+		explicit_variables: explicit_variables_array,
 	};
 
 	await ops.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
@@ -195,10 +210,14 @@ export const from_cached_extraction = (
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	elements: Set<string> | null;
 	css_variables: Set<string> | null;
+	explicit_elements: Set<string> | null;
+	explicit_variables: Set<string> | null;
 } => ({
 	classes: cached.classes ? new Map(cached.classes) : null,
 	explicit_classes: cached.explicit_classes ? new Set(cached.explicit_classes) : null,
 	diagnostics: cached.diagnostics,
 	elements: cached.elements ? new Set(cached.elements) : null,
 	css_variables: cached.css_variables ? new Set(cached.css_variables) : null,
+	explicit_elements: cached.explicit_elements ? new Set(cached.explicit_elements) : null,
+	explicit_variables: cached.explicit_variables ? new Set(cached.explicit_variables) : null,
 });

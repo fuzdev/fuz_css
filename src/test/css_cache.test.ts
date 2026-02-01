@@ -26,13 +26,15 @@ const CACHE_DIR = '/tmp/fuz_css_cache_test/project/.fuz/cache/css';
 //
 
 const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtraction => ({
-	v: 2,
+	v: 3,
 	content_hash: 'test-hash',
 	classes: null,
 	explicit_classes: null,
 	diagnostics: null,
 	elements: null,
 	css_variables: null,
+	explicit_elements: null,
+	explicit_variables: null,
 	...overrides,
 });
 
@@ -46,6 +48,8 @@ interface SaveAndLoadOptions {
 	diagnostics?: Array<ExtractionDiagnostic> | null;
 	elements?: Set<string> | null;
 	css_variables?: Set<string> | null;
+	explicit_elements?: Set<string> | null;
+	explicit_variables?: Set<string> | null;
 	content_hash?: string;
 }
 
@@ -60,6 +64,8 @@ const save_and_load = async (
 		diagnostics = null,
 		elements = null,
 		css_variables = null,
+		explicit_elements = null,
+		explicit_variables = null,
 		content_hash = 'test-hash',
 	} = options;
 
@@ -72,10 +78,12 @@ const save_and_load = async (
 		diagnostics,
 		elements,
 		css_variables,
+		explicit_elements,
+		explicit_variables,
 	);
 	const loaded = await load_cached_extraction(ops, cache_path);
 	expect(loaded).not.toBeNull();
-	expect(loaded!.v).toBe(2);
+	expect(loaded!.v).toBe(3);
 	return loaded!;
 };
 
@@ -341,12 +349,12 @@ describe('load_cached_extraction', () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'minimal.json');
 		await mkdir(CACHE_DIR, {recursive: true});
-		await writeFile(cache_path, '{"v": 2}');
+		await writeFile(cache_path, '{"v": 3}');
 
 		// Lenient parsing accepts missing content_hash
 		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).not.toBeNull();
-		expect(result!.v).toBe(2);
+		expect(result!.v).toBe(3);
 	});
 });
 
@@ -514,11 +522,22 @@ describe('cache functions with mock ops', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(mock_ops, cache_path, 'abc123', classes, null, null, null, null);
+		await save_cached_extraction(
+			mock_ops,
+			cache_path,
+			'abc123',
+			classes,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+		);
 		const loaded = await load_cached_extraction(mock_ops, cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(2);
+		expect(loaded!.v).toBe(3);
 		expect(loaded!.content_hash).toBe('abc123');
 	});
 
@@ -534,7 +553,18 @@ describe('cache functions with mock ops', () => {
 		const mock_ops = create_mock_fs_ops(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_ops, cache_path, 'hash', null, null, null, null, null);
+		await save_cached_extraction(
+			mock_ops,
+			cache_path,
+			'hash',
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+		);
 		expect(state.files.has(cache_path)).toBe(true);
 
 		await delete_cached_extraction(mock_ops, cache_path);
@@ -545,9 +575,20 @@ describe('cache functions with mock ops', () => {
 		const state = create_mock_fs_state();
 		const mock_ops = create_mock_fs_ops(state);
 
-		await save_cached_extraction(mock_ops, '/test.json', 'hash', null, null, null, null, null);
+		await save_cached_extraction(
+			mock_ops,
+			'/test.json',
+			'hash',
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+			null,
+		);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
-		expect(parsed).toMatchObject({v: 2, content_hash: 'hash'});
+		expect(parsed).toMatchObject({v: 3, content_hash: 'hash'});
 	});
 });

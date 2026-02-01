@@ -85,6 +85,10 @@ interface FileExtraction {
 	elements: Set<string> | null;
 	/** CSS variables referenced (without -- prefix), or null if none */
 	css_variables: Set<string> | null;
+	/** Elements from @fuz-elements comments, or null if none */
+	explicit_elements: Set<string> | null;
+	/** CSS variables from @fuz-variables comments (without -- prefix), or null if none */
+	explicit_variables: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -310,6 +314,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						diagnostics: result.diagnostics,
 						elements: result.elements,
 						css_variables: result.css_variables,
+						explicit_elements: result.explicit_elements,
+						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -325,9 +331,28 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				diagnostics,
 				elements,
 				css_variables,
+				explicit_elements,
+				explicit_variables,
 			} of extractions) {
-				if (classes || explicit_classes || diagnostics || elements || css_variables) {
-					css_classes.add(id, classes, explicit_classes, diagnostics, elements, css_variables);
+				if (
+					classes ||
+					explicit_classes ||
+					diagnostics ||
+					elements ||
+					css_variables ||
+					explicit_elements ||
+					explicit_variables
+				) {
+					css_classes.add(
+						id,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+						explicit_elements,
+						explicit_variables,
+					);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -351,6 +376,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						diagnostics,
 						elements,
 						css_variables,
+						explicit_elements,
+						explicit_variables,
 					}) => {
 						await save_cached_extraction(
 							ops,
@@ -361,6 +388,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 							diagnostics,
 							elements,
 							css_variables,
+							explicit_elements,
+							explicit_variables,
 						);
 					},
 					cache_io_concurrency,
@@ -393,6 +422,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				explicit_classes,
 				all_elements,
 				all_css_variables,
+				explicit_elements,
+				explicit_variables,
 			} = css_classes.get_all();
 
 			if (include_stats) {
@@ -440,6 +471,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					include_stats,
 					treeshake_base_css,
 					treeshake_variables,
+					explicit_elements,
+					explicit_variables,
 				});
 
 				// Log resolution stats if requested

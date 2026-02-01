@@ -209,6 +209,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			explicit_classes,
 			all_elements,
 			all_css_variables,
+			explicit_elements,
+			explicit_variables,
 		} = css_classes.get_all();
 
 		const utility_result = generate_classes_css({
@@ -247,6 +249,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				theme_specificity,
 				treeshake_base_css,
 				treeshake_variables,
+				explicit_elements,
+				explicit_variables,
 			});
 
 			// Add resolution diagnostics
@@ -490,9 +494,25 @@ export {};
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {classes, explicit_classes, diagnostics, elements, css_variables} =
-						from_cached_extraction(cached);
-					css_classes.add(id, classes, explicit_classes, diagnostics, elements, css_variables);
+					const {
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+						explicit_elements,
+						explicit_variables,
+					} = from_cached_extraction(cached);
+					css_classes.add(
+						id,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+						explicit_elements,
+						explicit_variables,
+					);
 					hashes.set(id, hash);
 
 					if (virtual_module_loaded) {
@@ -530,6 +550,8 @@ export {};
 				result.diagnostics,
 				result.elements,
 				result.css_variables,
+				result.explicit_elements,
+				result.explicit_variables,
 			);
 			hashes.set(id, hash);
 
@@ -545,6 +567,8 @@ export {};
 					result.diagnostics,
 					result.elements,
 					result.css_variables,
+					result.explicit_elements,
+					result.explicit_variables,
 				).catch(() => {
 					// Ignore cache errors
 				});

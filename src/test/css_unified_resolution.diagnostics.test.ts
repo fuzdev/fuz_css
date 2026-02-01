@@ -221,4 +221,227 @@ describe('resolve_css diagnostics', () => {
 			expect(result.diagnostics.length).toBe(0);
 		});
 	});
+
+	describe('explicit elements (@fuz-elements)', () => {
+		test('emits error for explicit element with no rules', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'dialog']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_elements: new Set(['dialog']),
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('@fuz-elements');
+			expect(result.diagnostics[0]!.message).toContain('dialog');
+			expect(result.diagnostics[0]!.message).toContain('No style rules found');
+		});
+
+		test('no error when explicit element has rules', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					dialog { padding: 1rem; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'dialog']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_elements: new Set(['dialog']),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+
+		test('suggests similar element for typo', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: red; }
+					dialog { padding: 1rem; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'dilog']), // typo
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_elements: new Set(['dilog']), // typo
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('dilog');
+			expect(result.diagnostics[0]!.message).toContain('did you mean');
+			expect(result.diagnostics[0]!.message).toContain('dialog');
+		});
+
+		test('errors for multiple explicit elements without rules', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'dialog', 'details', 'summary']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_elements: new Set(['dialog', 'details', 'summary']),
+			});
+
+			expect(result.diagnostics.length).toBe(3);
+			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+		});
+	});
+
+	describe('explicit variables (@fuz-variables)', () => {
+		test('emits error for explicit variable not found', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_primary', 'unknown_var']),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['unknown_var']),
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('@fuz-variables');
+			expect(result.diagnostics[0]!.message).toContain('unknown_var');
+			expect(result.diagnostics[0]!.message).toContain('not found');
+		});
+
+		test('no error when explicit variable exists', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+				{name: 'spacing_md', light: '16px'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_primary', 'spacing_md']),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['spacing_md']),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+
+		test('suggests similar variable for typo', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_primry']), // typo
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['color_primry']), // typo
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('color_primry');
+			expect(result.diagnostics[0]!.message).toContain('did you mean');
+			expect(result.diagnostics[0]!.message).toContain('color_primary');
+		});
+
+		test('errors for multiple explicit variables not found', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['unknown_a', 'unknown_b', 'unknown_c']),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['unknown_a', 'unknown_b', 'unknown_c']),
+			});
+
+			expect(result.diagnostics.length).toBe(3);
+			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+		});
+
+		test('explicit variable warning is error, not warning', () => {
+			// Contrast with non-explicit: regular typo detection produces warnings,
+			// but explicit variables produce errors
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_primary', light: 'blue'},
+			]);
+
+			// Non-explicit typo: warning
+			const result1 = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_primry']),
+				utility_variables_used: new Set(),
+				// Not in explicit_variables
+			});
+
+			expect(result1.diagnostics.length).toBe(1);
+			expect(result1.diagnostics[0]!.level).toBe('warning');
+
+			// Explicit typo: error
+			const result2 = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_primry']),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['color_primry']),
+			});
+
+			expect(result2.diagnostics.length).toBe(1);
+			expect(result2.diagnostics[0]!.level).toBe('error');
+		});
+	});
 });
