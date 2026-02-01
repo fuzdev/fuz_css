@@ -27,8 +27,9 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * v1: Initial version with classes and diagnostics
  * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
  * v3: Add explicit_elements, explicit_variables for @fuz-elements/@fuz-variables comments
+ * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`)
  */
-export const CSS_CACHE_VERSION = 3;
+export const CSS_CACHE_VERSION = 4;
 
 /**
  * Cached extraction result for a single file.

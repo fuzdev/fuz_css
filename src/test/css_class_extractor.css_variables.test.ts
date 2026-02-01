@@ -222,6 +222,109 @@ button { color: var(--theme); }
 		});
 	});
 
+	describe('dynamic CSS variables in templates', () => {
+		test('filters incomplete variable from style directive with expression', () => {
+			const source = `<div style:border-width="var(--border_width_{width})"></div>`;
+			const result = extract_from_svelte(source);
+			// Should NOT include 'border_width_' (incomplete)
+			assert_no_css_variables(result);
+		});
+
+		test('extracts complete variable before expression', () => {
+			const source = `<div style:color="var(--color_a_5) var(--width_{n})"></div>`;
+			const result = extract_from_svelte(source);
+			// Should include 'color_a_5' (complete) but not 'width_' (incomplete)
+			assert_css_variables(result, ['color_a_5']);
+		});
+
+		test('extracts variable ending with underscore when no expression follows', () => {
+			// Edge case: variable actually named with trailing underscore (unusual but valid)
+			const source = `<div style="color: var(--my_var_)"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['my_var_']);
+		});
+
+		test('filters multiple incomplete variables', () => {
+			const source = `<div style:background="var(--color_{a}) var(--shade_{b})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('handles nested expressions correctly', () => {
+			const source = `<div style:color="var(--{theme}_color)"></div>`;
+			const result = extract_from_svelte(source);
+			// First text is just 'var(--' which has no complete variable
+			assert_no_css_variables(result);
+		});
+
+		test('style attribute with dynamic variable', () => {
+			const source = `<div style="border: var(--border_{type}) solid"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('extracts complete variable from style attribute before expression', () => {
+			const source = `<div style="color: var(--text_color); width: var(--size_{n})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['text_color']);
+		});
+
+		test('handles variable ending with number not filtered', () => {
+			// Variables ending with a number (not underscore) should be extracted
+			const source = `<div style:color="var(--color_a_5)"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['color_a_5']);
+		});
+
+		test('filters closely-hugging expression with no separator', () => {
+			// var(--b{foo}) - no space/separator before expression = likely mistake
+			const source = `<div style="color: var(--b{foo})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('extracts variable when space before expression', () => {
+			// var(--b {foo}) - space before expression = intentional variable name
+			const source = `<div style="width: var(--b {n}px)"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['b']);
+		});
+
+		test('filters variable with hyphen separator before expression', () => {
+			// var(--color-{shade}) - hyphen separator = dynamic construction
+			const source = `<div style="color: var(--color-{shade})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('filters incomplete variable inside calc()', () => {
+			const source = `<div style="width: calc(var(--size_{n}) * 2)"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('filters variable with multiple expressions', () => {
+			// var(--a_{x}_{y}) - multiple dynamic parts
+			const source = `<div style="color: var(--color_{a}_{b})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_no_css_variables(result);
+		});
+
+		test('extracts variable when tab before expression', () => {
+			// Tab counts as whitespace = intentional separation
+			const source = `<div style="width: var(--size\t{n}px)"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['size']);
+		});
+
+		test('extracts complete variable with dynamic fallback', () => {
+			// Complete var with dynamic fallback - extract the complete one
+			const source = `<div style="color: var(--theme_color, {fallback})"></div>`;
+			const result = extract_from_svelte(source);
+			assert_css_variables(result, ['theme_color']);
+		});
+	});
+
 	describe('edge cases', () => {
 		test('handles empty style attribute', () => {
 			const source = `<div style=""></div>`;

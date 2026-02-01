@@ -8,6 +8,7 @@ import {
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
+	CSS_CACHE_VERSION,
 	type CachedExtraction,
 } from '$lib/css_cache.js';
 import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
@@ -26,7 +27,7 @@ const CACHE_DIR = '/tmp/fuz_css_cache_test/project/.fuz/cache/css';
 //
 
 const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtraction => ({
-	v: 3,
+	v: CSS_CACHE_VERSION,
 	content_hash: 'test-hash',
 	classes: null,
 	explicit_classes: null,
@@ -83,7 +84,7 @@ const save_and_load = async (
 	);
 	const loaded = await load_cached_extraction(ops, cache_path);
 	expect(loaded).not.toBeNull();
-	expect(loaded!.v).toBe(3);
+	expect(loaded!.v).toBe(CSS_CACHE_VERSION);
 	return loaded!;
 };
 
@@ -349,12 +350,12 @@ describe('load_cached_extraction', () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'minimal.json');
 		await mkdir(CACHE_DIR, {recursive: true});
-		await writeFile(cache_path, '{"v": 3}');
+		await writeFile(cache_path, `{"v": ${CSS_CACHE_VERSION}}`);
 
 		// Lenient parsing accepts missing content_hash
 		const result = await load_cached_extraction(ops, cache_path);
 		expect(result).not.toBeNull();
-		expect(result!.v).toBe(3);
+		expect(result!.v).toBe(CSS_CACHE_VERSION);
 	});
 });
 
@@ -537,7 +538,7 @@ describe('cache functions with mock ops', () => {
 		const loaded = await load_cached_extraction(mock_ops, cache_path);
 
 		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(3);
+		expect(loaded!.v).toBe(CSS_CACHE_VERSION);
 		expect(loaded!.content_hash).toBe('abc123');
 	});
 
@@ -589,6 +590,6 @@ describe('cache functions with mock ops', () => {
 		);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
-		expect(parsed).toMatchObject({v: 3, content_hash: 'hash'});
+		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});
 	});
 });

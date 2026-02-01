@@ -533,14 +533,14 @@
 						"name": "CSS_CACHE_VERSION",
 						"kind": "variable",
 						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add explicit_classes, elements, css_variables\nv3: Add explicit_elements, explicit_variables for",
-						"source_line": 31,
-						"type_signature": "3"
+						"source_line": 32,
+						"type_signature": "4"
 					},
 					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 37,
+						"source_line": 38,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -603,7 +603,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 66,
+						"source_line": 67,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -628,7 +628,7 @@
 						"name": "get_file_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes cache path for a file, handling both internal and external paths.\nInternal files use relative paths mirroring source tree.\nExternal files (outside project root) use hashed absolute paths in `_external/`.",
-						"source_line": 87,
+						"source_line": 88,
 						"type_signature": "(file_id: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -653,7 +653,7 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 106,
+						"source_line": 107,
 						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -673,7 +673,7 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
-						"source_line": 145,
+						"source_line": 146,
 						"type_signature": "(ops: CacheOperations, cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements: Set<...> | null, css_variables: Set<...> | null, explicit_elements: Set<...> | null, explicit_variables: Set<...> | null): Promise<...>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -733,7 +733,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 192,
+						"source_line": 193,
 						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -753,7 +753,7 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 205,
+						"source_line": 206,
 						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; css_variables: Set<...> | null; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 						"parameters": [
@@ -830,7 +830,7 @@
 						"name": "ExtractionResult",
 						"kind": "type",
 						"doc_comment": "Extraction result with classes mapped to their source locations.\nUses `null` instead of empty collections to avoid allocation overhead.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from  which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
-						"source_line": 39,
+						"source_line": 83,
 						"type_signature": "ExtractionResult",
 						"properties": [
 							{
@@ -887,14 +887,14 @@
 						"name": "AcornPlugin",
 						"kind": "type",
 						"doc_comment": "Acorn plugin type - a function that extends the Parser class.",
-						"source_line": 81,
+						"source_line": 125,
 						"type_signature": "AcornPlugin"
 					},
 					{
 						"name": "ExtractCssClassesOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction.",
-						"source_line": 86,
+						"source_line": 130,
 						"type_signature": "ExtractCssClassesOptions",
 						"properties": [
 							{
@@ -915,7 +915,7 @@
 						"name": "SourceIndex",
 						"kind": "class",
 						"doc_comment": "Helper class for converting character offsets to line/column positions.\nSvelte template nodes (Comment, Text, ExpressionTag) only have char offsets,\nso this class enables efficient conversion.\n\nBuild: O(n) where n = source length\nLookup: O(log m) where m = number of lines (binary search)",
-						"source_line": 117,
+						"source_line": 161,
 						"members": [
 							{
 								"name": "line_starts",
@@ -960,7 +960,7 @@
 						"name": "extract_from_svelte",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 238,
+						"source_line": 282,
 						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, css_variables, and diagnostics",
@@ -982,7 +982,7 @@
 						"name": "extract_from_ts",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a TypeScript/JS file using AST parsing.",
-						"source_line": 575,
+						"source_line": 619,
 						"type_signature": "(source: string, file?: string, acorn_plugins?: AcornPlugin[] | undefined): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, css_variables, and diagnostics",
@@ -1010,7 +1010,7 @@
 						"name": "extract_css_classes",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set.",
-						"source_line": 716,
+						"source_line": 760,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): Set<string> | null",
 						"return_type": "Set<string> | null",
 						"return_description": "Set of class names, or null if none found",
@@ -1032,7 +1032,7 @@
 						"name": "extract_css_classes_with_locations",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
-						"source_line": 732,
+						"source_line": 776,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
@@ -4247,7 +4247,7 @@
 						"name": "BorderWidthVariant",
 						"kind": "type",
 						"source_line": 144,
-						"type_signature": "3 | 4 | 1 | 5 | 7 | 6 | 2 | 8 | 9"
+						"type_signature": "4 | 1 | 3 | 5 | 7 | 6 | 2 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",

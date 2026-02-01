@@ -24,6 +24,50 @@ import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
 import {extract_css_variables} from './css_variable_utils.js';
 
 //
+// CSS Variable Utilities
+//
+
+/**
+ * Pattern to detect incomplete CSS variable at end of string.
+ * Matches `var(--name` where the var() is unclosed (no `)` before end of string).
+ * When followed by an expression, this indicates dynamic variable construction:
+ * - `var(--prefix_{expr})` → prefix_ is incomplete
+ * - `var(--b{expr})` → b is incomplete
+ * - `var(--color-{expr})` → color- is incomplete
+ */
+const INCOMPLETE_CSS_VAR_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)$/;
+
+/**
+ * Extracts CSS variables, filtering out incomplete names when followed by expression.
+ *
+ * When a Text part in a Svelte template ends with `var(--prefix_` and is immediately
+ * followed by an ExpressionTag, the variable name is being dynamically constructed
+ * (e.g., `var(--border_width_{width})`). We should not extract the incomplete prefix.
+ *
+ * @param text - CSS text to extract from
+ * @param followed_by_expression - True if next AST node is an expression
+ * @returns Set of complete variable names
+ */
+const extract_complete_css_variables = (
+	text: string,
+	followed_by_expression: boolean,
+): Set<string> => {
+	const variables = extract_css_variables(text);
+
+	if (!followed_by_expression || variables.size === 0) {
+		return variables;
+	}
+
+	// Check if text ends with incomplete var pattern
+	const incomplete = INCOMPLETE_CSS_VAR_PATTERN.exec(text);
+	if (incomplete) {
+		variables.delete(incomplete[1]!);
+	}
+
+	return variables;
+};
+
+//
 // Types
 //
 
@@ -847,6 +891,8 @@ const process_element_attributes = (
 
 /**
  * Extracts CSS variables from a style attribute value.
+ * Filters out incomplete variable names when followed by an expression
+ * (e.g., `var(--prefix_{dynamic})` should not extract `prefix_`).
  */
 const extract_css_variables_from_style_attribute = (
 	value: AST.Attribute['value'],
@@ -855,10 +901,13 @@ const extract_css_variables_from_style_attribute = (
 	if (value === true) return;
 
 	if (Array.isArray(value)) {
-		for (const part of value) {
+		for (let i = 0; i < value.length; i++) {
+			const part = value[i]!;
 			if (part.type === 'Text') {
-				// Static text: extract var(--*) references
-				for (const v of extract_css_variables(part.data)) {
+				// Check if next node is an expression (dynamic variable construction)
+				const next = value[i + 1];
+				const followed_by_expression = next?.type === 'ExpressionTag';
+				for (const v of extract_complete_css_variables(part.data, followed_by_expression)) {
 					state.css_variables.add(v);
 				}
 			}
@@ -870,6 +919,8 @@ const extract_css_variables_from_style_attribute = (
 
 /**
  * Extracts CSS variables from a style: directive.
+ * Filters out incomplete variable names when followed by an expression
+ * (e.g., `var(--prefix_{dynamic})` should not extract `prefix_`).
  */
 const extract_css_variables_from_style_directive = (
 	directive: AST.StyleDirective,
@@ -883,9 +934,13 @@ const extract_css_variables_from_style_directive = (
 
 	// Check if value is an array of text/expressions
 	if (Array.isArray(directive.value)) {
-		for (const part of directive.value) {
+		for (let i = 0; i < directive.value.length; i++) {
+			const part = directive.value[i]!;
 			if (part.type === 'Text') {
-				for (const v of extract_css_variables(part.data)) {
+				// Check if next node is an expression (dynamic variable construction)
+				const next = directive.value[i + 1];
+				const followed_by_expression = next?.type === 'ExpressionTag';
+				for (const v of extract_complete_css_variables(part.data, followed_by_expression)) {
 					state.css_variables.add(v);
 				}
 			}
