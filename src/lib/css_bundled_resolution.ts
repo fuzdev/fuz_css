@@ -5,6 +5,11 @@
  * bundled output. Resolves which CSS rules and variables to include based
  * on what elements and classes are actually used in the project.
  *
+ * This module provides low-level CSS resolution for advanced use cases.
+ * Most users should use `gen_fuz_css` (Gro) or `vite_plugin_fuz_css` (Vite)
+ * which handle extraction and caching automatically. See those modules for
+ * reference implementations.
+ *
  * @module
  */
 

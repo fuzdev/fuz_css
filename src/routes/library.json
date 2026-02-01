@@ -241,7 +241,7 @@
 						"name": "CssResolutionStats",
 						"kind": "type",
 						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
-						"source_line": 90,
+						"source_line": 95,
 						"type_signature": "CssResolutionStats",
 						"properties": [
 							{
@@ -280,7 +280,7 @@
 						"name": "CssResolutionResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS resolution.",
-						"source_line": 106,
+						"source_line": 111,
 						"type_signature": "CssResolutionResult",
 						"properties": [
 							{
@@ -331,7 +331,7 @@
 						"name": "CssResolutionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS resolution.",
-						"source_line": 126,
+						"source_line": 131,
 						"type_signature": "CssResolutionOptions",
 						"properties": [
 							{
@@ -448,7 +448,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 197,
+						"source_line": 202,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
@@ -464,7 +464,7 @@
 						"name": "GenerateBundledCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for bundled CSS output generation.",
-						"source_line": 429,
+						"source_line": 434,
 						"type_signature": "GenerateBundledCssOptions",
 						"properties": [
 							{
@@ -491,7 +491,7 @@
 						"name": "generate_bundled_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 446,
+						"source_line": 451,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateBundledCssOptions): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
@@ -515,7 +515,7 @@
 						]
 					}
 				],
-				"module_comment": "CSS resolution algorithm for bundled CSS generation.\n\nCombines theme variables, base styles, and utility classes into a single\nbundled output. Resolves which CSS rules and variables to include based\non what elements and classes are actually used in the project.",
+				"module_comment": "CSS resolution algorithm for bundled CSS generation.\n\nCombines theme variables, base styles, and utility classes into a single\nbundled output. Resolves which CSS rules and variables to include based\non what elements and classes are actually used in the project.\n\nThis module provides low-level CSS resolution for advanced use cases.\nMost users should use `gen_fuz_css` (Gro) or `vite_plugin_fuz_css` (Vite)\nwhich handle extraction and caching automatically. See those modules for\nreference implementations.",
 				"dependencies": ["class_variable_index.ts", "style_rule_parser.ts", "variable_graph.ts"],
 				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
@@ -829,7 +829,7 @@
 					{
 						"name": "ExtractionResult",
 						"kind": "type",
-						"doc_comment": "Extraction result with classes mapped to their source locations.\nUses `null` instead of empty collections to avoid allocation overhead.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from  which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
+						"doc_comment": "Extraction result with classes mapped to their source locations.\nUses `null` instead of empty collections to avoid allocation overhead.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from `CssLiteralParseResult` which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
 						"source_line": 83,
 						"type_signature": "ExtractionResult",
 						"properties": [
@@ -1858,7 +1858,7 @@
 					{
 						"name": "CssLiteralParseResult",
 						"kind": "type",
-						"doc_comment": "Result of parsing a CSS-literal class name.\n\nUses a discriminated union (Result type) because parsing a single class\nis binary: it either succeeds or fails entirely. This differs from\n which uses embedded diagnostics because file\nextraction can partially succeed (some classes extracted, others have errors).\n\nUses `| null` for diagnostics to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.diagnostics) { ... }`",
+						"doc_comment": "Result of parsing a CSS-literal class name.\n\nUses a discriminated union (Result type) because parsing a single class\nis binary: it either succeeds or fails entirely. This differs from\n`ExtractionResult` which uses embedded diagnostics because file\nextraction can partially succeed (some classes extracted, others have errors).\n\nUses `| null` for diagnostics to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.diagnostics) { ... }`",
 						"source_line": 54,
 						"type_signature": "CssLiteralParseResult"
 					},
@@ -2268,7 +2268,7 @@
 						"name": "CssExtractionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction from source files.\nControls which files to scan and how to parse them.",
-						"source_line": 21,
+						"source_line": 32,
 						"type_signature": "CssExtractionOptions",
 						"properties": [
 							{
@@ -2289,7 +2289,7 @@
 						"name": "CssClassOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class definitions and interpretation.\nControls how classes are defined and how dynamic classes are generated.",
-						"source_line": 45,
+						"source_line": 56,
 						"type_signature": "CssClassOptions",
 						"properties": [
 							{
@@ -2315,22 +2315,22 @@
 					{
 						"name": "BaseCssOption",
 						"kind": "type",
-						"doc_comment": "Type for the base_css option used by CSS generators.\nSupports four forms:\n- `undefined` - Use default style.css\n- `null` - Disable base styles entirely\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS",
-						"source_line": 72,
+						"doc_comment": "Type for the base_css option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default style.css (framework defaults)\n- `null` - Disable base styles entirely (explicit opt-out)\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS\n\nSee module documentation for the `undefined` vs `null` convention.",
+						"source_line": 86,
 						"type_signature": "BaseCssOption"
 					},
 					{
 						"name": "VariablesOption",
 						"kind": "type",
-						"doc_comment": "Type for the variables option used by CSS generators.\nSupports four forms:\n- `undefined` - Use default variables\n- `null` - Disable theme generation entirely\n- `Array<StyleVariable>` - Custom variables array (replaces defaults)\n- `(defaults) => Array<StyleVariable>` - Callback to modify defaults",
-						"source_line": 82,
+						"doc_comment": "Type for the variables option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default variables (framework defaults)\n- `null` - Disable theme generation entirely (explicit opt-out)\n- `Array<StyleVariable>` - Custom variables array (replaces defaults)\n- `(defaults) => Array<StyleVariable>` - Callback to modify defaults\n\nSee module documentation for the `undefined` vs `null` convention.",
+						"source_line": 99,
 						"type_signature": "VariablesOption"
 					},
 					{
 						"name": "CssOutputOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS output generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
-						"source_line": 92,
+						"source_line": 109,
 						"type_signature": "CssOutputOptions",
 						"properties": [
 							{
@@ -2405,7 +2405,7 @@
 						"name": "CssDiagnosticsOptions",
 						"kind": "type",
 						"doc_comment": "Options for error and warning handling.",
-						"source_line": 184,
+						"source_line": 201,
 						"type_signature": "CssDiagnosticsOptions",
 						"properties": [
 							{
@@ -2426,7 +2426,7 @@
 						"name": "CssCacheOptions",
 						"kind": "type",
 						"doc_comment": "Options for cache behavior.",
-						"source_line": 205,
+						"source_line": 222,
 						"type_signature": "CssCacheOptions",
 						"properties": [
 							{
@@ -2447,7 +2447,7 @@
 						"name": "CssGeneratorBaseOptions",
 						"kind": "type",
 						"doc_comment": "Combined base options shared by both Gro and Vite plugins.\nThese options work identically in both contexts.",
-						"source_line": 222,
+						"source_line": 239,
 						"type_signature": "CssGeneratorBaseOptions",
 						"extends": [
 							"CssExtractionOptions",
@@ -2459,7 +2459,7 @@
 						"properties": []
 					}
 				],
-				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and bundled CSS.\nThis module provides the shared types to ensure consistency."
+				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and bundled CSS.\nThis module provides the shared types to ensure consistency.\n\n## `undefined` vs `null` Convention\n\nConfiguration options that accept both `undefined` and `null` follow this pattern:\n\n- **`undefined`** - Use framework defaults. The feature is enabled with standard behavior.\n- **`null`** - Explicitly disable the feature. No output is generated for that layer.\n\nThis applies to `BaseCssOption` and `VariablesOption`.\nSetting both to `null` enables \"utility-only mode\" where you manage\nyour own theme and base styles."
 			},
 			{
 				"path": "css_ruleset_parser.ts",

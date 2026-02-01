@@ -45,7 +45,7 @@ export interface ParsedCssLiteral {
  *
  * Uses a discriminated union (Result type) because parsing a single class
  * is binary: it either succeeds or fails entirely. This differs from
- * {@link ExtractionResult} which uses embedded diagnostics because file
+ * `ExtractionResult` which uses embedded diagnostics because file
  * extraction can partially succeed (some classes extracted, others have errors).
  *
  * Uses `| null` for diagnostics to avoid allocating empty arrays.

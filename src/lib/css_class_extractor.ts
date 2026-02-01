@@ -77,7 +77,7 @@ const extract_complete_css_variables = (
  *
  * Uses embedded diagnostics (rather than a Result type) because file extraction
  * can partially succeed: some classes may be extracted while others produce errors.
- * This differs from {@link CssLiteralParseResult} which uses a discriminated union
+ * This differs from `CssLiteralParseResult` which uses a discriminated union
  * because single-class parsing is binary success/failure.
  */
 export interface ExtractionResult {

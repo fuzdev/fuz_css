@@ -5,6 +5,17 @@
  * the same core options for extraction, generation, and bundled CSS.
  * This module provides the shared types to ensure consistency.
  *
+ * ## `undefined` vs `null` Convention
+ *
+ * Configuration options that accept both `undefined` and `null` follow this pattern:
+ *
+ * - **`undefined`** - Use framework defaults. The feature is enabled with standard behavior.
+ * - **`null`** - Explicitly disable the feature. No output is generated for that layer.
+ *
+ * This applies to `BaseCssOption` and `VariablesOption`.
+ * Setting both to `null` enables "utility-only mode" where you manage
+ * your own theme and base styles.
+ *
  * @module
  */
 
@@ -63,21 +74,27 @@ export interface CssClassOptions {
 
 /**
  * Type for the base_css option used by CSS generators.
+ *
  * Supports four forms:
- * - `undefined` - Use default style.css
- * - `null` - Disable base styles entirely
+ * - `undefined` - Use default style.css (framework defaults)
+ * - `null` - Disable base styles entirely (explicit opt-out)
  * - `string` - Custom CSS to replace defaults
  * - `(default_css) => string` - Callback to modify default CSS
+ *
+ * See module documentation for the `undefined` vs `null` convention.
  */
 export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
 
 /**
  * Type for the variables option used by CSS generators.
+ *
  * Supports four forms:
- * - `undefined` - Use default variables
- * - `null` - Disable theme generation entirely
+ * - `undefined` - Use default variables (framework defaults)
+ * - `null` - Disable theme generation entirely (explicit opt-out)
  * - `Array<StyleVariable>` - Custom variables array (replaces defaults)
  * - `(defaults) => Array<StyleVariable>` - Callback to modify defaults
+ *
+ * See module documentation for the `undefined` vs `null` convention.
  */
 export type VariablesOption =
 	| Array<StyleVariable>
