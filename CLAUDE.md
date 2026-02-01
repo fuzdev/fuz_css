@@ -159,7 +159,7 @@ import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
 export const gen = gen_fuz_css();
 ```
 
-Then import the generated file in your layout: `import './fuz.gen.css';`
+Then import the generated file in your layout: `import './fuz.css';`
 
 **Vite (Svelte/React/Preact/Solid):**
 
@@ -296,8 +296,6 @@ update all others with equivalent changes.
   progress
 - **CSS Cascade Layers** - `@layer` support under consideration but not yet
   implemented
-- **Error inspection** - `CssGenerationError` includes `diagnostics` array for
-  programmatic access to individual errors
 
 ## Project standards
 
