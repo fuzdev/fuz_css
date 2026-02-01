@@ -1,5 +1,12 @@
 # @fuzdev/fuz_css
 
+## 0.46.0
+
+### Minor Changes
+
+- bundle theme variables and base styles into generated `fuz.css` output ([#75](https://github.com/fuzdev/fuz_css/pull/75))
+- rename treeshake*\* to include_all*\*, add exclude_elements/exclude_variables, move additional_classes/exclude_classes to CssOutputOptions ([#75](https://github.com/fuzdev/fuz_css/pull/75))
+
 ## 0.45.0
 
 ### Minor Changes
