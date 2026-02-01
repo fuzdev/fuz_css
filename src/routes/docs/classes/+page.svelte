@@ -86,6 +86,383 @@
 		<code>&lt;style&gt;</code>
 		are simpler and avoid generating class definitions, which can bloat your builds when overused.
 	</p>
+
+	<TomeSection>
+		<TomeSectionHeader text="Usage" />
+		<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
+		<p>
+			Use the <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> or
+			<ModuleLink module_path="gen_fuz_css.ts">Gro generator</ModuleLink> to generate bundled CSS that
+			includes theme variables, base styles, and utility classes:
+		</p>
+
+		<TomeSection>
+			<TomeSectionHeader text="Vite plugin" tag="h3" />
+			<p>
+				The <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> extracts classes
+				and generates CSS on-demand. It works with Svelte and plain HTML/TS/JS out of the box. JSX frameworks
+				(React, Preact, Solid) require the
+				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
+				<a href="#React-and-JSX">React and JSX</a> below.
+			</p>
+			<Code
+				lang="ts"
+				content={`// vite.config.ts
+import {defineConfig} from 'vite';
+import {sveltekit} from '@sveltejs/kit/vite';
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+
+export default defineConfig({
+  plugins: [sveltekit(), vite_plugin_fuz_css()],
+});`}
+			/>
+			<p>
+				Import the virtual module in your entry file, <code>src/routes/+layout.svelte</code> for SvelteKit:
+			</p>
+			<Code
+				lang="ts"
+				content={`// +layout.svelte - bundled mode (recommended, default config)
+// includes only used base styles, variables, and utilities
+import 'virtual:fuz.css';`}
+			/>
+			<p>
+				For projects managing their own theme or base styles, disable them and import separately:
+			</p>
+			<Code
+				lang="ts"
+				content={`// vite.config.ts - utility-only mode
+vite_plugin_fuz_css({
+	base_css: null,
+	variables: null,
+}),
+
+// +layout.svelte - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import 'virtual:fuz.css';`}
+			/>
+			<p>
+				The plugin extracts classes from files as Vite processes them, including from
+				<code>node_modules</code> dependencies. It supports HMR -- changes to classes in your code trigger
+				automatic CSS updates.
+			</p>
+			<h4>Plugin options</h4>
+			<ul>
+				<li>
+					<code>acorn_plugins</code> - required for JSX frameworks, e.g. <code>acorn-jsx</code>
+				</li>
+				<li>
+					<code>additional_classes</code> - classes to always include (for dynamic patterns that can't
+					be statically extracted)
+				</li>
+				<li>
+					<code>exclude_classes</code> - classes to exclude from output
+				</li>
+				<li>
+					<code>class_definitions</code> - custom class definitions to merge with defaults; can
+					define new classes or override existing ones (see
+					<a href="#Composite-classes">composite classes</a>)
+				</li>
+				<li>
+					<code>include_default_classes</code> - set to <code>false</code> to use only your own
+					<code>class_definitions</code>, excluding all default token and composite classes
+				</li>
+				<li>
+					<code>class_interpreters</code> - <a href="#Custom-interpreters">custom interpreters</a> for
+					dynamic class generation; replaces the default interpreters entirely if provided (most users
+					don't need this)
+				</li>
+				<li>
+					<code>filter_file</code> - custom filter for which files to process. Receives
+					<code>(id: string)</code> and returns <code>boolean</code>, e.g.
+					<Code inline lang="ts" content="(id) => !id.includes('/fixtures/')" />
+				</li>
+				<li>
+					<code>on_error</code> - <code>'log'</code> or <code>'throw'</code>; defaults to
+					<code>'throw'</code> in CI, <code>'log'</code> otherwise
+				</li>
+				<li>
+					<code>on_warning</code> - <code>'log'</code>, <code>'throw'</code>, or
+					<code>'ignore'</code>; defaults to <code>'log'</code>
+				</li>
+				<li>
+					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
+				</li>
+				<li>
+					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for utility-only
+					mode, or provide a callback to modify defaults
+				</li>
+				<li>
+					<code>variables</code> - customize or disable theme variables; set to <code>null</code> for
+					utility-only mode, or provide a callback to modify defaults
+				</li>
+				<li>
+					<code>include_all_base_css</code> - include all base styles, not just detected (default:
+					<code>false</code>)
+				</li>
+				<li>
+					<code>include_all_variables</code> - include all variables, not just detected (default:
+					<code>false</code>)
+				</li>
+				<li>
+					<code>additional_elements</code> - elements to always include styles for (for runtime-created
+					elements)
+				</li>
+				<li>
+					<code>additional_variables</code> - variables to always include in theme output
+				</li>
+			</ul>
+			<h4>TypeScript setup</h4>
+			<p>Add the virtual module declaration, like to <code>vite-env.d.ts</code>:</p>
+			<Code
+				lang="ts"
+				content={`/// <reference types="vite/client" />
+
+declare module 'virtual:fuz.css' {
+  const css: string;
+  export default css;
+}`}
+			/>
+		</TomeSection>
+
+		<TomeSection>
+			<TomeSectionHeader text="Gro generator" tag="h3" />
+			<p>
+				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, the <ModuleLink
+					module_path="gen_fuz_css.ts"
+				/> generator creates a <code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
+			</p>
+			<Code
+				lang="ts"
+				content={`// src/routes/fuz.gen.css.ts for SvelteKit, or src/fuz.gen.css.ts, etc.
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+
+export const gen = gen_fuz_css();`}
+			/>
+			<p>
+				Then import the generated file, in <code>src/routes/+layout.svelte</code> for SvelteKit:
+			</p>
+			<Code
+				lang="ts"
+				content={`// +layout.svelte - bundled mode (recommended, default config)
+// includes only used base styles, variables, and utilities
+import './fuz.css';`}
+			/>
+			<p>
+				For projects managing their own theme or base styles, disable them and import separately:
+			</p>
+			<Code
+				lang="ts"
+				content={`// fuz.gen.css.ts - utility-only mode
+export const gen = gen_fuz_css({
+	base_css: null,
+	variables: null,
+});
+
+// +layout.svelte - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import './fuz.css';`}
+			/>
+			<h4>Generator options</h4>
+			<p>
+				The Gro generator accepts the same options as the <a href="#Vite-plugin">Vite plugin</a>,
+				plus additional options for batch processing:
+			</p>
+			<ul>
+				<li>
+					<code>include_stats</code> - include file statistics in output (file counts, cache hits/misses,
+					class counts)
+				</li>
+				<li>
+					<code>project_root</code> - project root directory; defaults to <code>process.cwd()</code>
+				</li>
+				<li>
+					<code>concurrency</code> - max concurrent file processing for cache reads and extraction; defaults
+					to 8
+				</li>
+				<li>
+					<code>cache_io_concurrency</code> - max concurrent cache writes and deletes; defaults to 50
+				</li>
+			</ul>
+		</TomeSection>
+
+		<TomeSection>
+			<TomeSectionHeader text="Class detection" tag="h3" />
+			<p>
+				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> scans your source
+				files and extracts class names using three automatic mechanisms, plus manual hints for edge cases:
+			</p>
+
+			<h4>1. Direct extraction from class attributes</h4>
+			<p>String literals and expressions in class contexts are extracted directly:</p>
+			<ul>
+				<li><code>class="..."</code> - static strings</li>
+				<li>
+					<code>{'class={[...]}'}</code> - array syntax (for clsx-compatible frameworks like Svelte)
+				</li>
+				<li>
+					<code>{'class={{...}}'}</code> - object syntax (for clsx-compatible frameworks like Svelte)
+				</li>
+				<li><code>{"class={cond ? 'a' : 'b'}"}</code> - ternary expressions</li>
+				<li><code>{"class={(cond && 'a') || 'b'}"}</code> - logical expressions</li>
+				<li><code>class:name</code> - class directives (Svelte)</li>
+				<li>
+					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> - utility
+					function calls
+				</li>
+			</ul>
+
+			<h4>2. Naming convention</h4>
+			<p>
+				Variables ending with <code>class</code>, <code>classes</code>, <code>className</code>,
+				<code>classNames</code>, <code>class_name</code>, or <code>class_names</code> (case-insensitive)
+				are always extracted, regardless of where they're used:
+			</p>
+			<Code
+				lang="ts"
+				content={`// extracted because of naming convention
+const buttonClasses = 'color_d font_size_lg';
+const buttonClass = active ? 'active' : null;
+const snake_class = 'snake';
+const turtle_class_name = 'turtle';`}
+			/>
+
+			<h4>3. Usage tracking</h4>
+			<p>
+				Variables used in class attributes are tracked back to their definitions, even if they don't
+				follow the naming convention:
+			</p>
+			<!-- eslint-disable-next-line no-useless-concat -->
+			<Code
+				lang="svelte"
+				content={'<' +
+					`script>
+	const styles = 'some-class';   // tracked from class={styles}
+	const variant = 'other-class'; // tracked from clsx()
+</script>
+
+<div class={styles}></div>
+<button class={clsx('color_d', variant)}></button>`}
+			/>
+			<p>
+				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
+				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls outside
+				class attributes don't trigger tracking -- use the naming convention for those cases.
+			</p>
+			<aside>
+				Currently, tracking is single-file only. Cross-module analysis and more sophisticated
+				inference are potential future improvements. <a
+					href="https://github.com/fuzdev/fuz_css/discussions">Discussion</a
+				> is appreciated here.
+			</aside>
+
+			<h4>4. Manual hints</h4>
+			<p>
+				For dynamically constructed classes that can't be statically analyzed, use the <code
+					>@fuz-classes</code
+				> comment:
+			</p>
+			<Code
+				lang="ts"
+				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
+const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
+
+/* @fuz-classes color_a_50 color_b_50 color_c_50 */
+const color = get_dynamic_color();`}
+			/>
+			<p>
+				A common case is iterating over variant arrays to generate demos or UI. The extractor sees
+				<code>class="shadow_alpha_{'{'}variant}"</code>
+				but can't resolve what <code>variant</code> will be at runtime:
+			</p>
+			<!-- eslint-disable-next-line no-useless-concat -->
+			<Code
+				lang="svelte"
+				content={'<' +
+					`script>
+	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.js';
+
+	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
+</script>
+
+{#each shadow_alpha_variants as variant}
+	<div class="shadow_alpha_{variant}">...</div>
+{/each}`}
+			/>
+			<aside>
+				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -- they're
+				generally not used directly in your code (they exist mainly for programmatic usage ergonomics),
+				so the class won't be generated unless you hint it.
+			</aside>
+			<aside>
+				Classes annotated with <code>@fuz-classes</code> and configured with
+				<code>additional_classes</code>
+				produce errors if they can't be resolved. This helps catch typos like
+				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
+			</aside>
+			<p>
+				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
+					>additional_classes</DeclarationLink
+				> option in your config to the Vite plugin or Gro generator:
+			</p>
+			<Code
+				lang="ts"
+				content={`vite_plugin_fuz_css({
+	additional_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
+});`}
+			/>
+			<p>
+				Use <DeclarationLink name="GenFuzCssOptions">exclude_classes</DeclarationLink> to filter out false
+				positives from extraction. This also suppresses warnings for these classes, even if they were
+				explicitly annotated:
+			</p>
+			<Code
+				lang="ts"
+				content={`vite_plugin_fuz_css({
+	exclude_classes: ['some:false:positive'],
+});`}
+			/>
+
+			<h4>Element and variable hints</h4>
+			<p>
+				Similar to <code>@fuz-classes</code>, use <code>@fuz-elements</code> and
+				<code>@fuz-variables</code> to declare elements and CSS variables that should be included even
+				when they can't be statically detected:
+			</p>
+			<Code
+				lang="ts"
+				content={`// @fuz-elements dialog
+const el = document.createElement('dialog');
+
+// @fuz-variables some_custom_color some_other_color
+const style = \`color: var(--\${getColor()})\`;`}
+			/>
+			<aside>
+				Like <code>@fuz-classes</code>, explicit declarations via <code>@fuz-elements</code> and
+				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
+				helping catch typos early. Write variable names without the <code>--</code> prefix.
+			</aside>
+
+			<h4>5. Build-time limitations</h4>
+			<p>
+				Class and element detection happens at build time via static analysis. Content created
+				dynamically at runtime (<code>document.createElement()</code>, <code>innerHTML</code>,
+				framework hydration) won't be detected.
+			</p>
+			<p>
+				Use <DeclarationLink name="GenFuzCssOptions">additional_elements</DeclarationLink> to force-include
+				element styles for runtime-created elements:
+			</p>
+			<Code
+				lang="ts"
+				content={`vite_plugin_fuz_css({
+	additional_elements: ['dialog', 'details', 'datalist'],
+});`}
+			/>
+		</TomeSection>
+	</TomeSection>
+
 	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
 		<TomeSection>
@@ -899,382 +1276,6 @@ export const gen = gen_fuz_css({
     opacity: 83%;
   }
 }`}
-			/>
-		</TomeSection>
-	</TomeSection>
-
-	<TomeSection>
-		<TomeSectionHeader text="Usage" />
-		<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
-		<p>
-			Use the <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> or
-			<ModuleLink module_path="gen_fuz_css.ts">Gro generator</ModuleLink> to generate bundled CSS that
-			includes theme variables, base styles, and utility classes:
-		</p>
-
-		<TomeSection>
-			<TomeSectionHeader text="Vite plugin" tag="h3" />
-			<p>
-				The <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> extracts classes
-				and generates CSS on-demand. It works with Svelte and plain HTML/TS/JS out of the box. JSX frameworks
-				(React, Preact, Solid) require the
-				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
-				<a href="#React-and-JSX">React and JSX</a> below.
-			</p>
-			<Code
-				lang="ts"
-				content={`// vite.config.ts
-import {defineConfig} from 'vite';
-import {sveltekit} from '@sveltejs/kit/vite';
-import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
-
-export default defineConfig({
-  plugins: [sveltekit(), vite_plugin_fuz_css()],
-});`}
-			/>
-			<p>
-				Import the virtual module in your entry file, <code>src/routes/+layout.svelte</code> for SvelteKit:
-			</p>
-			<Code
-				lang="ts"
-				content={`// +layout.svelte - bundled mode (recommended, default config)
-// includes only used base styles, variables, and utilities
-import 'virtual:fuz.css';`}
-			/>
-			<p>
-				For projects managing their own theme or base styles, disable them and import separately:
-			</p>
-			<Code
-				lang="ts"
-				content={`// vite.config.ts - utility-only mode
-vite_plugin_fuz_css({
-	base_css: null,
-	variables: null,
-}),
-
-// +layout.svelte - full package CSS, only used utilities
-import '@fuzdev/fuz_css/style.css'; // all base styles
-import '@fuzdev/fuz_css/theme.css'; // all variables
-import 'virtual:fuz.css';`}
-			/>
-			<p>
-				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR -- changes to classes in your code trigger
-				automatic CSS updates.
-			</p>
-			<h4>Plugin options</h4>
-			<ul>
-				<li>
-					<code>acorn_plugins</code> - required for JSX frameworks, e.g. <code>acorn-jsx</code>
-				</li>
-				<li>
-					<code>additional_classes</code> - classes to always include (for dynamic patterns that can't
-					be statically extracted)
-				</li>
-				<li>
-					<code>exclude_classes</code> - classes to exclude from output
-				</li>
-				<li>
-					<code>class_definitions</code> - custom class definitions to merge with defaults; can
-					define new classes or override existing ones (see
-					<a href="#Composite-classes">composite classes</a>)
-				</li>
-				<li>
-					<code>include_default_classes</code> - set to <code>false</code> to use only your own
-					<code>class_definitions</code>, excluding all default token and composite classes
-				</li>
-				<li>
-					<code>class_interpreters</code> - <a href="#Custom-interpreters">custom interpreters</a> for
-					dynamic class generation; replaces the default interpreters entirely if provided (most users
-					don't need this)
-				</li>
-				<li>
-					<code>filter_file</code> - custom filter for which files to process. Receives
-					<code>(id: string)</code> and returns <code>boolean</code>, e.g.
-					<Code inline lang="ts" content="(id) => !id.includes('/fixtures/')" />
-				</li>
-				<li>
-					<code>on_error</code> - <code>'log'</code> or <code>'throw'</code>; defaults to
-					<code>'throw'</code> in CI, <code>'log'</code> otherwise
-				</li>
-				<li>
-					<code>on_warning</code> - <code>'log'</code>, <code>'throw'</code>, or
-					<code>'ignore'</code>; defaults to <code>'log'</code>
-				</li>
-				<li>
-					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
-				</li>
-				<li>
-					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for utility-only
-					mode, or provide a callback to modify defaults
-				</li>
-				<li>
-					<code>variables</code> - customize or disable theme variables; set to <code>null</code> for
-					utility-only mode, or provide a callback to modify defaults
-				</li>
-				<li>
-					<code>include_all_base_css</code> - include all base styles, not just detected (default:
-					<code>false</code>)
-				</li>
-				<li>
-					<code>include_all_variables</code> - include all variables, not just detected (default:
-					<code>false</code>)
-				</li>
-				<li>
-					<code>additional_elements</code> - elements to always include styles for (for runtime-created
-					elements)
-				</li>
-				<li>
-					<code>additional_variables</code> - variables to always include in theme output
-				</li>
-			</ul>
-			<h4>TypeScript setup</h4>
-			<p>Add the virtual module declaration, like to <code>vite-env.d.ts</code>:</p>
-			<Code
-				lang="ts"
-				content={`/// <reference types="vite/client" />
-
-declare module 'virtual:fuz.css' {
-  const css: string;
-  export default css;
-}`}
-			/>
-		</TomeSection>
-
-		<TomeSection>
-			<TomeSectionHeader text="Gro generator" tag="h3" />
-			<p>
-				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, the <ModuleLink
-					module_path="gen_fuz_css.ts"
-				/> generator creates a <code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
-			</p>
-			<Code
-				lang="ts"
-				content={`// src/routes/fuz.gen.css.ts for SvelteKit, or src/fuz.gen.css.ts, etc.
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
-
-export const gen = gen_fuz_css();`}
-			/>
-			<p>
-				Then import the generated file, in <code>src/routes/+layout.svelte</code> for SvelteKit:
-			</p>
-			<Code
-				lang="ts"
-				content={`// +layout.svelte - bundled mode (recommended, default config)
-// includes only used base styles, variables, and utilities
-import './fuz.css';`}
-			/>
-			<p>
-				For projects managing their own theme or base styles, disable them and import separately:
-			</p>
-			<Code
-				lang="ts"
-				content={`// fuz.gen.css.ts - utility-only mode
-export const gen = gen_fuz_css({
-	base_css: null,
-	variables: null,
-});
-
-// +layout.svelte - full package CSS, only used utilities
-import '@fuzdev/fuz_css/style.css'; // all base styles
-import '@fuzdev/fuz_css/theme.css'; // all variables
-import './fuz.css';`}
-			/>
-			<h4>Generator options</h4>
-			<p>
-				The Gro generator accepts the same options as the <a href="#Vite-plugin">Vite plugin</a>,
-				plus additional options for batch processing:
-			</p>
-			<ul>
-				<li>
-					<code>include_stats</code> - include file statistics in output (file counts, cache hits/misses,
-					class counts)
-				</li>
-				<li>
-					<code>project_root</code> - project root directory; defaults to <code>process.cwd()</code>
-				</li>
-				<li>
-					<code>concurrency</code> - max concurrent file processing for cache reads and extraction; defaults
-					to 8
-				</li>
-				<li>
-					<code>cache_io_concurrency</code> - max concurrent cache writes and deletes; defaults to 50
-				</li>
-			</ul>
-		</TomeSection>
-
-		<TomeSection>
-			<TomeSectionHeader text="Class detection" tag="h3" />
-			<p>
-				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> scans your source
-				files and extracts class names using three automatic mechanisms, plus manual hints for edge cases:
-			</p>
-
-			<h4>1. Direct extraction from class attributes</h4>
-			<p>String literals and expressions in class contexts are extracted directly:</p>
-			<ul>
-				<li><code>class="..."</code> - static strings</li>
-				<li>
-					<code>{'class={[...]}'}</code> - array syntax (for clsx-compatible frameworks like Svelte)
-				</li>
-				<li>
-					<code>{'class={{...}}'}</code> - object syntax (for clsx-compatible frameworks like Svelte)
-				</li>
-				<li><code>{"class={cond ? 'a' : 'b'}"}</code> - ternary expressions</li>
-				<li><code>{"class={(cond && 'a') || 'b'}"}</code> - logical expressions</li>
-				<li><code>class:name</code> - class directives (Svelte)</li>
-				<li>
-					<code>clsx()</code>, <code>cn()</code>, <code>cx()</code>, <code>classNames()</code> - utility
-					function calls
-				</li>
-			</ul>
-
-			<h4>2. Naming convention</h4>
-			<p>
-				Variables ending with <code>class</code>, <code>classes</code>, <code>className</code>,
-				<code>classNames</code>, <code>class_name</code>, or <code>class_names</code> (case-insensitive)
-				are always extracted, regardless of where they're used:
-			</p>
-			<Code
-				lang="ts"
-				content={`// extracted because of naming convention
-const buttonClasses = 'color_d font_size_lg';
-const buttonClass = active ? 'active' : null;
-const snake_class = 'snake';
-const turtle_class_name = 'turtle';`}
-			/>
-
-			<h4>3. Usage tracking</h4>
-			<p>
-				Variables used in class attributes are tracked back to their definitions, even if they don't
-				follow the naming convention:
-			</p>
-			<!-- eslint-disable-next-line no-useless-concat -->
-			<Code
-				lang="svelte"
-				content={'<' +
-					`script>
-	const styles = 'some-class';   // tracked from class={styles}
-	const variant = 'other-class'; // tracked from clsx()
-</script>
-
-<div class={styles}></div>
-<button class={clsx('color_d', variant)}></button>`}
-			/>
-			<p>
-				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
-				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls outside
-				class attributes don't trigger tracking -- use the naming convention for those cases.
-			</p>
-			<aside>
-				Currently, tracking is single-file only. Cross-module analysis and more sophisticated
-				inference are potential future improvements. <a
-					href="https://github.com/fuzdev/fuz_css/discussions">Discussion</a
-				> is appreciated here.
-			</aside>
-
-			<h4>4. Manual hints</h4>
-			<p>
-				For dynamically constructed classes that can't be statically analyzed, use the <code
-					>@fuz-classes</code
-				> comment:
-			</p>
-			<Code
-				lang="ts"
-				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
-const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
-
-/* @fuz-classes color_a_50 color_b_50 color_c_50 */
-const color = get_dynamic_color();`}
-			/>
-			<p>
-				A common case is iterating over variant arrays to generate demos or UI. The extractor sees
-				<code>class="shadow_alpha_{'{'}variant}"</code>
-				but can't resolve what <code>variant</code> will be at runtime:
-			</p>
-			<!-- eslint-disable-next-line no-useless-concat -->
-			<Code
-				lang="svelte"
-				content={'<' +
-					`script>
-	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.js';
-
-	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
-</script>
-
-{#each shadow_alpha_variants as variant}
-	<div class="shadow_alpha_{variant}">...</div>
-{/each}`}
-			/>
-			<aside>
-				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -- they're
-				generally not used directly in your code (they exist mainly for programmatic usage ergonomics),
-				so the class won't be generated unless you hint it.
-			</aside>
-			<aside>
-				Classes annotated with <code>@fuz-classes</code> and configured with
-				<code>additional_classes</code>
-				produce errors if they can't be resolved. This helps catch typos like
-				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
-			</aside>
-			<p>
-				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
-					>additional_classes</DeclarationLink
-				> option in your config to the Vite plugin or Gro generator:
-			</p>
-			<Code
-				lang="ts"
-				content={`vite_plugin_fuz_css({
-	additional_classes: ['opacity:50%', 'opacity:75%', 'opacity:100%'],
-});`}
-			/>
-			<p>
-				Use <DeclarationLink name="GenFuzCssOptions">exclude_classes</DeclarationLink> to filter out false
-				positives from extraction. This also suppresses warnings for these classes, even if they were
-				explicitly annotated:
-			</p>
-			<Code
-				lang="ts"
-				content={`vite_plugin_fuz_css({
-	exclude_classes: ['some:false:positive'],
-});`}
-			/>
-
-			<h4>Element and variable hints</h4>
-			<p>
-				Similar to <code>@fuz-classes</code>, use <code>@fuz-elements</code> and
-				<code>@fuz-variables</code> to declare elements and CSS variables that should be included even
-				when they can't be statically detected:
-			</p>
-			<Code
-				lang="ts"
-				content={`// @fuz-elements dialog
-const el = document.createElement('dialog');
-
-// @fuz-variables some_custom_color some_other_color
-const style = \`color: var(--\${getColor()})\`;`}
-			/>
-			<aside>
-				Like <code>@fuz-classes</code>, explicit declarations via <code>@fuz-elements</code> and
-				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
-				helping catch typos early. Write variable names without the <code>--</code> prefix.
-			</aside>
-
-			<h4>5. Build-time limitations</h4>
-			<p>
-				Class and element detection happens at build time via static analysis. Content created
-				dynamically at runtime (<code>document.createElement()</code>, <code>innerHTML</code>,
-				framework hydration) won't be detected.
-			</p>
-			<p>
-				Use <DeclarationLink name="GenFuzCssOptions">additional_elements</DeclarationLink> to force-include
-				element styles for runtime-created elements:
-			</p>
-			<Code
-				lang="ts"
-				content={`vite_plugin_fuz_css({
-	additional_elements: ['dialog', 'details', 'datalist'],
-});`}
 			/>
 		</TomeSection>
 	</TomeSection>
