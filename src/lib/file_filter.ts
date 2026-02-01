@@ -13,7 +13,7 @@ export type FileFilter = (path: string) => boolean;
  * Default file filter for CSS class extraction.
  * Includes .svelte, .html, .ts, .js, .tsx, .jsx files.
  * Excludes test files (.test.ts, .spec.ts) and generated files (.gen.ts).
- * Excludes files in test directories (/test/, /tests/, /__tests__/, /__mocks__/).
+ * Excludes files in test directories (`/test/`, `/tests/`, `/__tests__/`, `/__mocks__/`).
  */
 export const filter_file_default: FileFilter = (path) => {
 	if (

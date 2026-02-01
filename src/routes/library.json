@@ -3241,7 +3241,7 @@
 					{
 						"name": "filter_file_default",
 						"kind": "function",
-						"doc_comment": "Default file filter for CSS class extraction.\nIncludes .svelte, .html, .ts, .js, .tsx, .jsx files.\nExcludes test files (.test.ts, .spec.ts) and generated files (.gen.ts).\nExcludes files in test directories (/test/, /tests/, /__tests__/, /__mocks__/).",
+						"doc_comment": "Default file filter for CSS class extraction.\nIncludes .svelte, .html, .ts, .js, .tsx, .jsx files.\nExcludes test files (.test.ts, .spec.ts) and generated files (.gen.ts).\nExcludes files in test directories (`/test/`, `/tests/`, `/__tests__/`, `/__mocks__/`).",
 						"source_line": 18,
 						"type_signature": "(path: string): boolean",
 						"return_type": "boolean",
