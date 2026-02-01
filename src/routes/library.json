@@ -230,9 +230,282 @@
 						]
 					}
 				],
-				"module_comment": "Class-to-variable index for unified CSS generation.\n\nBuilds an index mapping CSS class names to the CSS variables they use.\nThis enables the unified generator to include theme variables needed\nby the utility classes actually used in the project.",
+				"module_comment": "Class-to-variable index for bundled CSS generation.\n\nBuilds an index mapping CSS class names to the CSS variables they use.\nThis enables the bundled generator to include theme variables needed\nby the utility classes actually used in the project.",
 				"dependencies": ["css_variable_utils.ts"],
-				"dependents": ["css_unified_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+			},
+			{
+				"path": "css_bundled_resolution.ts",
+				"declarations": [
+					{
+						"name": "CssResolutionStats",
+						"kind": "type",
+						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
+						"source_line": 77,
+						"type_signature": "CssResolutionStats",
+						"properties": [
+							{
+								"name": "element_count",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Number of HTML elements included"
+							},
+							{
+								"name": "elements",
+								"kind": "variable",
+								"type_signature": "Array<string>",
+								"doc_comment": "List of HTML element names included"
+							},
+							{
+								"name": "included_rules",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Number of rules included from style.css"
+							},
+							{
+								"name": "total_rules",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Total number of rules in style.css"
+							},
+							{
+								"name": "variable_count",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Number of CSS variables resolved (including transitive deps)"
+							}
+						]
+					},
+					{
+						"name": "CssResolutionResult",
+						"kind": "type",
+						"doc_comment": "Result from CSS resolution.",
+						"source_line": 93,
+						"type_signature": "CssResolutionResult",
+						"properties": [
+							{
+								"name": "theme_css",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "CSS for theme variables (light and dark)"
+							},
+							{
+								"name": "base_css",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "CSS for base styles (from style.css)"
+							},
+							{
+								"name": "resolved_variables",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "All resolved variable names (including transitive deps)"
+							},
+							{
+								"name": "included_rule_indices",
+								"kind": "variable",
+								"type_signature": "Set<number>",
+								"doc_comment": "Indices of rules included from the style index"
+							},
+							{
+								"name": "included_elements",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "Element names that were matched"
+							},
+							{
+								"name": "diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<GenerationDiagnostic>",
+								"doc_comment": "Diagnostics from resolution"
+							},
+							{
+								"name": "stats",
+								"kind": "variable",
+								"type_signature": "CssResolutionStats",
+								"doc_comment": "Resolution statistics (only when include_stats is true)"
+							}
+						]
+					},
+					{
+						"name": "CssResolutionOptions",
+						"kind": "type",
+						"doc_comment": "Options for CSS resolution.",
+						"source_line": 113,
+						"type_signature": "CssResolutionOptions",
+						"properties": [
+							{
+								"name": "style_rule_index",
+								"kind": "variable",
+								"type_signature": "StyleRuleIndex",
+								"doc_comment": "Index of style.css rules"
+							},
+							{
+								"name": "variable_graph",
+								"kind": "variable",
+								"type_signature": "VariableDependencyGraph",
+								"doc_comment": "Dependency graph for theme variables"
+							},
+							{
+								"name": "class_variable_index",
+								"kind": "variable",
+								"type_signature": "CssClassVariableIndex",
+								"doc_comment": "Index mapping classes to variables"
+							},
+							{
+								"name": "detected_elements",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "HTML elements detected in source files"
+							},
+							{
+								"name": "detected_classes",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "CSS classes detected in source files"
+							},
+							{
+								"name": "detected_css_variables",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "CSS variables directly referenced in source files"
+							},
+							{
+								"name": "utility_variables_used",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "CSS variables used by generated utility classes"
+							},
+							{
+								"name": "additional_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Additional elements to always include"
+							},
+							{
+								"name": "additional_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Additional variables to always include"
+							},
+							{
+								"name": "theme_specificity",
+								"kind": "variable",
+								"type_signature": "number",
+								"doc_comment": "Specificity multiplier for theme selector (default 1)"
+							},
+							{
+								"name": "include_stats",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to include resolution statistics in result"
+							},
+							{
+								"name": "warn_unmatched_elements",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Warn when detected elements have no matching style rules (default false)"
+							},
+							{
+								"name": "treeshake_base_css",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the style index."
+							},
+							{
+								"name": "treeshake_variables",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables from the variable graph."
+							},
+							{
+								"name": "explicit_elements",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Elements explicitly annotated via"
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "CSS variables explicitly annotated via"
+							}
+						]
+					},
+					{
+						"name": "resolve_css",
+						"kind": "function",
+						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
+						"source_line": 174,
+						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
+						"return_type": "CssResolutionResult",
+						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
+						"parameters": [
+							{
+								"name": "options",
+								"type": "CssResolutionOptions",
+								"description": "- Resolution options including indexes, detected usage, and config"
+							}
+						]
+					},
+					{
+						"name": "GenerateBundledCssOptions",
+						"kind": "type",
+						"doc_comment": "Options for bundled CSS output generation.",
+						"source_line": 392,
+						"type_signature": "GenerateBundledCssOptions",
+						"properties": [
+							{
+								"name": "include_theme",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include theme variables section."
+							},
+							{
+								"name": "include_base",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include base styles section."
+							},
+							{
+								"name": "include_utilities",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Include utility classes section."
+							}
+						]
+					},
+					{
+						"name": "generate_bundled_css",
+						"kind": "function",
+						"doc_comment": "Generates combined CSS output from resolution result.",
+						"source_line": 409,
+						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateBundledCssOptions): string",
+						"return_type": "string",
+						"return_description": "Combined CSS string",
+						"parameters": [
+							{
+								"name": "result",
+								"type": "CssResolutionResult",
+								"description": "- Resolution result from resolve_css"
+							},
+							{
+								"name": "utility_css",
+								"type": "string",
+								"description": "- Generated utility CSS (from generate_classes_css)"
+							},
+							{
+								"name": "options",
+								"type": "GenerateBundledCssOptions",
+								"description": "- Output options",
+								"default_value": "{}"
+							}
+						]
+					}
+				],
+				"module_comment": "CSS resolution algorithm for bundled CSS generation.\n\nCombines theme variables, base styles, and utility classes into a single\nbundled output. Resolves which CSS rules and variables to include based\non what elements and classes are actually used in the project.",
+				"dependencies": ["class_variable_index.ts", "style_rule_parser.ts", "variable_graph.ts"],
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_cache.ts",
@@ -2162,7 +2435,7 @@
 						"properties": []
 					}
 				],
-				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and unified CSS.\nThis module provides the shared types to ensure consistency."
+				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and bundled CSS.\nThis module provides the shared types to ensure consistency."
 			},
 			{
 				"path": "css_ruleset_parser.ts",
@@ -2537,279 +2810,6 @@
 				],
 				"module_comment": "CSS ruleset parser using Svelte's CSS parser.\n\nParses CSS rulesets to extract selectors and declarations with position information.\nUsed for:\n- Phase 0a: Detecting single-selector rulesets that could be converted to declaration format\n- Phase 2: Modifying selectors for modifier support on composite classes",
 				"dependents": ["css_class_generation.ts", "css_class_interpreters.ts"]
-			},
-			{
-				"path": "css_unified_resolution.ts",
-				"declarations": [
-					{
-						"name": "CssResolutionStats",
-						"kind": "type",
-						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
-						"source_line": 77,
-						"type_signature": "CssResolutionStats",
-						"properties": [
-							{
-								"name": "element_count",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Number of HTML elements included"
-							},
-							{
-								"name": "elements",
-								"kind": "variable",
-								"type_signature": "Array<string>",
-								"doc_comment": "List of HTML element names included"
-							},
-							{
-								"name": "included_rules",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Number of rules included from style.css"
-							},
-							{
-								"name": "total_rules",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Total number of rules in style.css"
-							},
-							{
-								"name": "variable_count",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Number of CSS variables resolved (including transitive deps)"
-							}
-						]
-					},
-					{
-						"name": "CssResolutionResult",
-						"kind": "type",
-						"doc_comment": "Result from CSS resolution.",
-						"source_line": 93,
-						"type_signature": "CssResolutionResult",
-						"properties": [
-							{
-								"name": "theme_css",
-								"kind": "variable",
-								"type_signature": "string",
-								"doc_comment": "CSS for theme variables (light and dark)"
-							},
-							{
-								"name": "base_css",
-								"kind": "variable",
-								"type_signature": "string",
-								"doc_comment": "CSS for base styles (from style.css)"
-							},
-							{
-								"name": "resolved_variables",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "All resolved variable names (including transitive deps)"
-							},
-							{
-								"name": "included_rule_indices",
-								"kind": "variable",
-								"type_signature": "Set<number>",
-								"doc_comment": "Indices of rules included from the style index"
-							},
-							{
-								"name": "included_elements",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "Element names that were matched"
-							},
-							{
-								"name": "diagnostics",
-								"kind": "variable",
-								"type_signature": "Array<GenerationDiagnostic>",
-								"doc_comment": "Diagnostics from resolution"
-							},
-							{
-								"name": "stats",
-								"kind": "variable",
-								"type_signature": "CssResolutionStats",
-								"doc_comment": "Resolution statistics (only when include_stats is true)"
-							}
-						]
-					},
-					{
-						"name": "CssResolutionOptions",
-						"kind": "type",
-						"doc_comment": "Options for CSS resolution.",
-						"source_line": 113,
-						"type_signature": "CssResolutionOptions",
-						"properties": [
-							{
-								"name": "style_rule_index",
-								"kind": "variable",
-								"type_signature": "StyleRuleIndex",
-								"doc_comment": "Index of style.css rules"
-							},
-							{
-								"name": "variable_graph",
-								"kind": "variable",
-								"type_signature": "VariableDependencyGraph",
-								"doc_comment": "Dependency graph for theme variables"
-							},
-							{
-								"name": "class_variable_index",
-								"kind": "variable",
-								"type_signature": "CssClassVariableIndex",
-								"doc_comment": "Index mapping classes to variables"
-							},
-							{
-								"name": "detected_elements",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "HTML elements detected in source files"
-							},
-							{
-								"name": "detected_classes",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "CSS classes detected in source files"
-							},
-							{
-								"name": "detected_css_variables",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "CSS variables directly referenced in source files"
-							},
-							{
-								"name": "utility_variables_used",
-								"kind": "variable",
-								"type_signature": "Set<string>",
-								"doc_comment": "CSS variables used by generated utility classes"
-							},
-							{
-								"name": "additional_elements",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional elements to always include"
-							},
-							{
-								"name": "additional_variables",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Additional variables to always include"
-							},
-							{
-								"name": "theme_specificity",
-								"kind": "variable",
-								"type_signature": "number",
-								"doc_comment": "Specificity multiplier for theme selector (default 1)"
-							},
-							{
-								"name": "include_stats",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to include resolution statistics in result"
-							},
-							{
-								"name": "warn_unmatched_elements",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Warn when detected elements have no matching style rules (default false)"
-							},
-							{
-								"name": "treeshake_base_css",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the style index."
-							},
-							{
-								"name": "treeshake_variables",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables from the variable graph."
-							},
-							{
-								"name": "explicit_elements",
-								"kind": "variable",
-								"type_signature": "Set<string> | null",
-								"doc_comment": "Elements explicitly annotated via"
-							},
-							{
-								"name": "explicit_variables",
-								"kind": "variable",
-								"type_signature": "Set<string> | null",
-								"doc_comment": "CSS variables explicitly annotated via"
-							}
-						]
-					},
-					{
-						"name": "resolve_css",
-						"kind": "function",
-						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 174,
-						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
-						"return_type": "CssResolutionResult",
-						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
-						"parameters": [
-							{
-								"name": "options",
-								"type": "CssResolutionOptions",
-								"description": "- Resolution options including indexes, detected usage, and config"
-							}
-						]
-					},
-					{
-						"name": "GenerateUnifiedCssOptions",
-						"kind": "type",
-						"doc_comment": "Options for unified CSS output generation.",
-						"source_line": 392,
-						"type_signature": "GenerateUnifiedCssOptions",
-						"properties": [
-							{
-								"name": "include_theme",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include theme variables section."
-							},
-							{
-								"name": "include_base",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include base styles section."
-							},
-							{
-								"name": "include_utilities",
-								"kind": "variable",
-								"type_signature": "boolean",
-								"doc_comment": "Include utility classes section."
-							}
-						]
-					},
-					{
-						"name": "generate_unified_css",
-						"kind": "function",
-						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 409,
-						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateUnifiedCssOptions): string",
-						"return_type": "string",
-						"return_description": "Combined CSS string",
-						"parameters": [
-							{
-								"name": "result",
-								"type": "CssResolutionResult",
-								"description": "- Resolution result from resolve_css"
-							},
-							{
-								"name": "utility_css",
-								"type": "string",
-								"description": "- Generated utility CSS (from generate_classes_css)"
-							},
-							{
-								"name": "options",
-								"type": "GenerateUnifiedCssOptions",
-								"description": "- Output options",
-								"default_value": "{}"
-							}
-						]
-					}
-				],
-				"module_comment": "CSS resolution algorithm for unified CSS generation.\n\nCombines theme variables, base styles, and utility classes into a single\nunified output. Resolves which CSS rules and variables to include based\non what elements and classes are actually used in the project.",
-				"dependencies": ["class_variable_index.ts", "style_rule_parser.ts", "variable_graph.ts"],
-				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_variable_utils.ts",
@@ -3287,6 +3287,7 @@
 				"module_comment": "[Gro generator](https://github.com/ryanatkn/gro) for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
 				"dependencies": [
 					"class_variable_index.ts",
+					"css_bundled_resolution.ts",
 					"css_cache.ts",
 					"css_class_definitions.ts",
 					"css_class_extractor.ts",
@@ -3294,7 +3295,6 @@
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts",
-					"css_unified_resolution.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
 					"operations_defaults.ts",
@@ -3847,9 +3847,9 @@
 						]
 					}
 				],
-				"module_comment": "Style.css rule parser for unified CSS generation.\n\nParses the fuz_css style.css file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe unified CSS generator to include only the rules needed for\nelements actually used in the project.",
+				"module_comment": "Style.css rule parser for bundled CSS generation.\n\nParses the fuz_css style.css file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe bundled CSS generator to include only the rules needed for\nelements actually used in the project.",
 				"dependencies": ["css_variable_utils.ts"],
-				"dependents": ["css_unified_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "theme.gen.css.ts",
@@ -4551,9 +4551,9 @@
 						]
 					}
 				],
-				"module_comment": "Variable dependency graph for unified CSS generation.\n\nBuilds a dependency graph from style variables to enable transitive\nresolution of CSS custom properties. When a variable is needed,\nall variables it depends on are also included.",
+				"module_comment": "Variable dependency graph for bundled CSS generation.\n\nBuilds a dependency graph from style variables to enable transitive\nresolution of CSS custom properties. When a variable is needed,\nall variables it depends on are also included.",
 				"dependencies": ["css_variable_utils.ts", "variables.ts"],
-				"dependents": ["css_unified_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "variable.ts",
@@ -7122,6 +7122,7 @@
 				"module_comment": "Vite plugin for fuz_css utility class generation.\n\nUses Vite's transform hook to extract CSS classes from source files\nas they're processed, including node_modules dependencies.\nGenerates CSS on-demand via virtual module with HMR support.\n\n@example\n```ts\n// vite.config.ts\nimport {defineConfig} from 'vite';\nimport jsx from 'acorn-jsx';\nimport {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';\n\nexport default defineConfig({\n  plugins: [\n    vite_plugin_fuz_css({\n      acorn_plugins: [jsx()],\n    }),\n  ],\n});\n```",
 				"dependencies": [
 					"class_variable_index.ts",
+					"css_bundled_resolution.ts",
 					"css_cache.ts",
 					"css_class_definitions.ts",
 					"css_class_extractor.ts",
@@ -7129,7 +7130,6 @@
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts",
-					"css_unified_resolution.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
 					"operations_defaults.ts",

@@ -908,7 +908,7 @@ export const gen = gen_fuz_css({
 		<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 		<p>
 			Use the <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> or
-			<ModuleLink module_path="gen_fuz_css.ts">Gro generator</ModuleLink> to generate unified CSS that
+			<ModuleLink module_path="gen_fuz_css.ts">Gro generator</ModuleLink> to generate bundled CSS that
 			includes theme variables, base styles, and utility classes:
 		</p>
 
@@ -937,7 +937,7 @@ export default defineConfig({
 			</p>
 			<Code
 				lang="ts"
-				content={`// Unified mode (recommended) - single import includes everything
+				content={`// Bundled mode (recommended) - single import includes everything
 import 'virtual:fuz.css';`}
 			/>
 			<p>
@@ -1036,7 +1036,7 @@ export const gen = gen_fuz_css();`}
 			</p>
 			<Code
 				lang="ts"
-				content={`// Unified mode (recommended) - single import includes everything
+				content={`// Bundled mode (recommended) - single import includes everything
 import './fuz.css';`}
 			/>
 			<p>

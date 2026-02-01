@@ -23,12 +23,12 @@
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
 				Use the <TomeLink name="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-				<TomeLink name="classes" hash="Gro-generator">Gro generator</TomeLink> for unified CSS that includes
+				<TomeLink name="classes" hash="Gro-generator">Gro generator</TomeLink> for bundled CSS that includes
 				theme variables, base styles, and utility classes in a single import:
 			</p>
 			<Code
 				lang="ts"
-				content={`// Unified mode (recommended) - single import includes everything
+				content={`// Bundled mode (recommended) - single import includes everything
 import 'virtual:fuz.css'; // Vite plugin
 // or
 import './fuz.css'; // Gro generator`}

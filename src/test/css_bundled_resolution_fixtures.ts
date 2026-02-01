@@ -1,5 +1,5 @@
 /**
- * Shared test fixtures and helpers for CSS unified resolution tests.
+ * Shared test fixtures and helpers for CSS bundled resolution tests.
  *
  * @module
  */

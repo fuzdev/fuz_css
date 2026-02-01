@@ -1,5 +1,5 @@
 /**
- * Variable dependency graph for unified CSS generation.
+ * Variable dependency graph for bundled CSS generation.
  *
  * Builds a dependency graph from style variables to enable transitive
  * resolution of CSS custom properties. When a variable is needed,

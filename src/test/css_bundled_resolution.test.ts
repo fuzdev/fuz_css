@@ -1,5 +1,5 @@
 /**
- * Core tests for unified CSS resolution.
+ * Core tests for bundled CSS resolution.
  *
  * Tests the basic resolution algorithm for core rules, element matching,
  * and class matching.
@@ -9,12 +9,12 @@
 
 import {test, expect, describe} from 'vitest';
 
-import {resolve_css} from '../lib/css_unified_resolution.js';
+import {resolve_css} from '../lib/css_bundled_resolution.js';
 import {
 	create_test_fixtures,
 	assert_order,
 	empty_detection,
-} from './css_unified_resolution_fixtures.js';
+} from './css_bundled_resolution_fixtures.js';
 
 /**
  * Core rules that should always be included regardless of detected elements.

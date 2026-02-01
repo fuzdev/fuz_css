@@ -163,8 +163,8 @@ const extract_fuz_css = (css: string): string | null => {
 };
 
 /**
- * Extracts just the utility classes section from the unified CSS.
- * The unified output has sections: Theme Variables, Base Styles, Utility Classes.
+ * Extracts just the utility classes section from the bundled CSS.
+ * The bundled output has sections: Theme Variables, Base Styles, Utility Classes.
  */
 const extract_utility_section = (css: string): string => {
 	const utility_marker = '/* Utility Classes */';
@@ -210,7 +210,7 @@ const create_example_tests = (example_name: string, app_file: string): void => {
 			build_example(example_name);
 			css = await read_generated_css(example_name);
 			fuz_css = extract_fuz_css(css);
-			// Extract only utility classes section for comparison (unified mode includes base styles)
+			// Extract only utility classes section for comparison (bundled mode includes base styles)
 			const utility_css = fuz_css ? extract_utility_section(fuz_css) : '';
 			extracted_classes = utility_css ? extract_class_names(utility_css) : [];
 			// Store for cross-example comparison

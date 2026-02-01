@@ -1,8 +1,8 @@
 /**
- * Class-to-variable index for unified CSS generation.
+ * Class-to-variable index for bundled CSS generation.
  *
  * Builds an index mapping CSS class names to the CSS variables they use.
- * This enables the unified generator to include theme variables needed
+ * This enables the bundled generator to include theme variables needed
  * by the utility classes actually used in the project.
  *
  * @module

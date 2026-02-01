@@ -2,4 +2,4 @@
 '@fuzdev/fuz_css': minor
 ---
 
-optimize and unify `fuz.css`
+bundle theme variables and base styles into generated `fuz.css` output

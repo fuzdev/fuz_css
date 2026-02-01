@@ -1,8 +1,8 @@
 /**
- * CSS resolution algorithm for unified CSS generation.
+ * CSS resolution algorithm for bundled CSS generation.
  *
  * Combines theme variables, base styles, and utility classes into a single
- * unified output. Resolves which CSS rules and variables to include based
+ * bundled output. Resolves which CSS rules and variables to include based
  * on what elements and classes are actually used in the project.
  *
  * @module
@@ -387,9 +387,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 };
 
 /**
- * Options for unified CSS output generation.
+ * Options for bundled CSS output generation.
  */
-export interface GenerateUnifiedCssOptions {
+export interface GenerateBundledCssOptions {
 	/** Include theme variables section. @default true */
 	include_theme?: boolean;
 	/** Include base styles section. @default true */
@@ -406,10 +406,10 @@ export interface GenerateUnifiedCssOptions {
  * @param options - Output options
  * @returns Combined CSS string
  */
-export const generate_unified_css = (
+export const generate_bundled_css = (
 	result: CssResolutionResult,
 	utility_css: string,
-	options: GenerateUnifiedCssOptions = {},
+	options: GenerateBundledCssOptions = {},
 ): string => {
 	const {include_theme = true, include_base = true, include_utilities = true} = options;
 

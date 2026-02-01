@@ -1,5 +1,5 @@
 /**
- * Tests for generate_unified_css function.
+ * Tests for generate_bundled_css function.
  *
  * Tests the CSS output assembly including section ordering, exclusion options,
  * and empty handling.
@@ -9,11 +9,11 @@
 
 import {test, expect, describe} from 'vitest';
 
-import {generate_unified_css, type CssResolutionResult} from '../lib/css_unified_resolution.js';
-import {assert_order} from './css_unified_resolution_fixtures.js';
+import {generate_bundled_css, type CssResolutionResult} from '../lib/css_bundled_resolution.js';
+import {assert_order} from './css_bundled_resolution_fixtures.js';
 
 /**
- * Creates a mock resolution result for testing generate_unified_css.
+ * Creates a mock resolution result for testing generate_bundled_css.
  */
 const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssResolutionResult => ({
 	theme_css: ':root { --color: blue; }',
@@ -25,29 +25,29 @@ const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssRe
 	...overrides,
 });
 
-describe('generate_unified_css', () => {
+describe('generate_bundled_css', () => {
 	describe('section ordering', () => {
 		test('theme before base before utilities', () => {
 			const result = create_mock_result();
-			const combined = generate_unified_css(result, '.p_md { padding: 16px; }');
+			const combined = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
 			assert_order(combined, '/* Theme Variables */', '/* Base Styles */', '/* Utility Classes */');
 		});
 
 		test('includes section comments', () => {
 			const result = create_mock_result();
-			const unified = generate_unified_css(result, '.p_md { padding: 16px; }');
+			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
-			expect(unified).toContain('/* Theme Variables */');
-			expect(unified).toContain('/* Base Styles */');
-			expect(unified).toContain('/* Utility Classes */');
+			expect(bundled).toContain('/* Theme Variables */');
+			expect(bundled).toContain('/* Base Styles */');
+			expect(bundled).toContain('/* Utility Classes */');
 		});
 	});
 
 	describe('exclusion options', () => {
 		test('include_theme: false excludes theme', () => {
 			const result = create_mock_result();
-			const no_theme = generate_unified_css(result, '.p_md {}', {include_theme: false});
+			const no_theme = generate_bundled_css(result, '.p_md {}', {include_theme: false});
 
 			expect(no_theme).not.toContain('/* Theme Variables */');
 			expect(no_theme).not.toContain('--color');
@@ -57,7 +57,7 @@ describe('generate_unified_css', () => {
 
 		test('include_base: false excludes base', () => {
 			const result = create_mock_result();
-			const no_base = generate_unified_css(result, '.p_md {}', {include_base: false});
+			const no_base = generate_bundled_css(result, '.p_md {}', {include_base: false});
 
 			expect(no_base).toContain('/* Theme Variables */');
 			expect(no_base).not.toContain('/* Base Styles */');
@@ -67,7 +67,7 @@ describe('generate_unified_css', () => {
 
 		test('include_utilities: false excludes utilities', () => {
 			const result = create_mock_result();
-			const no_utility = generate_unified_css(result, '.p_md { padding: 16px; }', {
+			const no_utility = generate_bundled_css(result, '.p_md { padding: 16px; }', {
 				include_utilities: false,
 			});
 
@@ -84,11 +84,11 @@ describe('generate_unified_css', () => {
 				theme_css: '',
 				resolved_variables: new Set<string>(),
 			});
-			const unified = generate_unified_css(result, '.p_md {}');
+			const bundled = generate_bundled_css(result, '.p_md {}');
 
-			expect(unified).not.toContain('/* Theme Variables */');
-			expect(unified).toContain('/* Base Styles */');
-			expect(unified).toContain('/* Utility Classes */');
+			expect(bundled).not.toContain('/* Theme Variables */');
+			expect(bundled).toContain('/* Base Styles */');
+			expect(bundled).toContain('/* Utility Classes */');
 		});
 
 		test('empty base produces no section', () => {
@@ -97,20 +97,20 @@ describe('generate_unified_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>(),
 			});
-			const unified = generate_unified_css(result, '.p_md {}');
+			const bundled = generate_bundled_css(result, '.p_md {}');
 
-			expect(unified).toContain('/* Theme Variables */');
-			expect(unified).not.toContain('/* Base Styles */');
-			expect(unified).toContain('/* Utility Classes */');
+			expect(bundled).toContain('/* Theme Variables */');
+			expect(bundled).not.toContain('/* Base Styles */');
+			expect(bundled).toContain('/* Utility Classes */');
 		});
 
 		test('empty utilities produces no section', () => {
 			const result = create_mock_result();
-			const unified = generate_unified_css(result, '');
+			const bundled = generate_bundled_css(result, '');
 
-			expect(unified).toContain('/* Theme Variables */');
-			expect(unified).toContain('/* Base Styles */');
-			expect(unified).not.toContain('/* Utility Classes */');
+			expect(bundled).toContain('/* Theme Variables */');
+			expect(bundled).toContain('/* Base Styles */');
+			expect(bundled).not.toContain('/* Utility Classes */');
 		});
 
 		test('all empty produces empty string', () => {
@@ -121,9 +121,9 @@ describe('generate_unified_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>(),
 			});
-			const unified = generate_unified_css(result, '');
+			const bundled = generate_bundled_css(result, '');
 
-			expect(unified).toBe('');
+			expect(bundled).toBe('');
 		});
 
 		test('only theme generates single section', () => {
@@ -132,11 +132,11 @@ describe('generate_unified_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>(),
 			});
-			const unified = generate_unified_css(result, '');
+			const bundled = generate_bundled_css(result, '');
 
-			expect(unified).toContain('/* Theme Variables */');
-			expect(unified).not.toContain('/* Base Styles */');
-			expect(unified).not.toContain('/* Utility Classes */');
+			expect(bundled).toContain('/* Theme Variables */');
+			expect(bundled).not.toContain('/* Base Styles */');
+			expect(bundled).not.toContain('/* Utility Classes */');
 		});
 	});
 });

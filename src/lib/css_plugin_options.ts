@@ -2,7 +2,7 @@
  * Shared options for CSS generation plugins (Gro and Vite).
  *
  * Both `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share
- * the same core options for extraction, generation, and unified CSS.
+ * the same core options for extraction, generation, and bundled CSS.
  * This module provides the shared types to ensure consistency.
  *
  * @module

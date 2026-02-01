@@ -42,7 +42,7 @@ import {
 } from './style_rule_parser.js';
 import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
 import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
-import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
+import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /**
@@ -454,7 +454,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				...utility_result.diagnostics,
 			];
 
-			// Generate unified CSS if base or theme are enabled
+			// Generate bundled CSS if base or theme are enabled
 			let final_css: string;
 			if (include_base || include_theme) {
 				const resolution = resolve_css({
@@ -489,7 +489,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				// Add resolution diagnostics
 				all_diagnostics.push(...resolution.diagnostics);
 
-				final_css = generate_unified_css(resolution, utility_result.css, {
+				final_css = generate_bundled_css(resolution, utility_result.css, {
 					include_theme,
 					include_base,
 					include_utilities: true,

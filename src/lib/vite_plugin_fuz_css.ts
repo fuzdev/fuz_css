@@ -53,7 +53,7 @@ import {
 } from './style_rule_parser.js';
 import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
 import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
-import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
+import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /* eslint-disable no-console */
@@ -143,22 +143,22 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let last_generated_css: string | null = null;
 	let pending_css: string | null = null; // CSS generated during HMR, reused by load()
 
-	// Unified CSS resources (loaded lazily on first CSS generation when unified mode is enabled)
+	// Bundled CSS resources (loaded lazily on first CSS generation when bundled mode is enabled)
 	let style_rule_index: StyleRuleIndex | null = null;
 	let variable_graph: VariableDependencyGraph | null = null;
 	let class_variable_index: CssClassVariableIndex | null = null;
 
 	// Promise for in-flight resource loading (prevents duplicate loads)
-	let unified_resources_promise: Promise<void> | null = null;
+	let bundled_resources_promise: Promise<void> | null = null;
 
-	/** Ensures unified CSS resources are loaded. Safe to call multiple times. */
-	const ensure_unified_resources = async (): Promise<void> => {
+	/** Ensures bundled CSS resources are loaded. Safe to call multiple times. */
+	const ensure_bundled_resources = async (): Promise<void> => {
 		if (style_rule_index !== null) return; // Already loaded
-		if (unified_resources_promise) {
-			await unified_resources_promise; // Wait for in-flight loading
+		if (bundled_resources_promise) {
+			await bundled_resources_promise; // Wait for in-flight loading
 			return;
 		}
-		unified_resources_promise = (async () => {
+		bundled_resources_promise = (async () => {
 			// Load style rule index based on base_css option
 			if (typeof base_css === 'string') {
 				// Custom CSS string (replacement)
@@ -178,7 +178,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 			class_variable_index = build_class_variable_index(all_class_definitions);
 		})();
-		await unified_resources_promise;
+		await bundled_resources_promise;
 	};
 
 	/** Logs a warning message (works in both dev and build) */
@@ -228,7 +228,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			...utility_result.diagnostics,
 		];
 
-		// Generate unified CSS if base or theme are enabled and resources are loaded
+		// Generate bundled CSS if base or theme are enabled and resources are loaded
 		let final_css: string;
 		if (
 			(include_base || include_theme) &&
@@ -256,7 +256,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			// Add resolution diagnostics
 			all_diagnostics.push(...resolution.diagnostics);
 
-			final_css = generate_unified_css(resolution, utility_result.css, {
+			final_css = generate_bundled_css(resolution, utility_result.css, {
 				include_theme,
 				include_base,
 				include_utilities: true,
@@ -304,7 +304,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	const invalidate_virtual_module = (): void => {
 		if (!server) return;
 
-		// Skip HMR if unified resources aren't loaded yet
+		// Skip HMR if bundled resources aren't loaded yet
 		// (will be loaded on first load() call, CSS regenerated then)
 		if ((include_base || include_theme) && style_rule_index === null) {
 			return;
@@ -394,8 +394,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		async buildStart() {
 			// Load CSS properties for validation (needed for transform())
 			css_properties = await load_css_properties();
-			// Note: Unified CSS resources (style_rule_index, variable_graph, class_variable_index)
-			// are loaded lazily on first load() call via ensure_unified_resources()
+			// Note: Bundled CSS resources (style_rule_index, variable_graph, class_variable_index)
+			// are loaded lazily on first load() call via ensure_bundled_resources()
 		},
 
 		resolveId(id) {
@@ -413,7 +413,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				virtual_module_loaded = true;
 				// Defer resource loading to first virtual module access
 				if (include_base || include_theme) {
-					await ensure_unified_resources();
+					await ensure_bundled_resources();
 				}
 				// Use pending CSS from HMR if available, avoiding redundant generation
 				const css = pending_css ?? generate_css();
@@ -444,7 +444,7 @@ export {};
 				virtual_module_loaded = true;
 				// Defer resource loading to first virtual module access
 				if (include_base || include_theme) {
-					await ensure_unified_resources();
+					await ensure_bundled_resources();
 				}
 				// Return empty CSS for build - generateBundle will append the complete CSS
 				return '/* fuz_css placeholder */';

@@ -132,7 +132,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 
 ## Usage
 
-### Unified mode (default)
+### Bundled mode (default)
 
 Generated CSS includes theme variables, base styles, and utility classes:
 

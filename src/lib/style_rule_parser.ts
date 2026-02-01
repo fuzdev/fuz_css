@@ -1,9 +1,9 @@
 /**
- * Style.css rule parser for unified CSS generation.
+ * Style.css rule parser for bundled CSS generation.
  *
  * Parses the fuz_css style.css file into a structured index that maps
  * CSS rules to the HTML elements and classes they style. This enables
- * the unified CSS generator to include only the rules needed for
+ * the bundled CSS generator to include only the rules needed for
  * elements actually used in the project.
  *
  * @module

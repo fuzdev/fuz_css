@@ -1,5 +1,5 @@
 /**
- * Variable resolution tests for unified CSS resolution.
+ * Variable resolution tests for bundled CSS resolution.
  *
  * Tests variable collection from multiple sources, transitive resolution,
  * cycle handling, and theme CSS generation.
@@ -9,13 +9,13 @@
 
 import {test, expect, describe} from 'vitest';
 
-import {resolve_css} from '../lib/css_unified_resolution.js';
+import {resolve_css} from '../lib/css_bundled_resolution.js';
 import type {CssClassDefinition} from '../lib/css_class_generation.js';
 import {
 	create_test_fixtures,
 	assert_order,
 	empty_detection,
-} from './css_unified_resolution_fixtures.js';
+} from './css_bundled_resolution_fixtures.js';
 
 describe('resolve_css variable resolution', () => {
 	describe('source collection', () => {

@@ -1,5 +1,5 @@
 /**
- * Diagnostics tests for unified CSS resolution.
+ * Diagnostics tests for bundled CSS resolution.
  *
  * Tests typo detection for variables and unmatched element warnings.
  *
@@ -8,8 +8,8 @@
 
 import {test, expect, describe} from 'vitest';
 
-import {resolve_css} from '../lib/css_unified_resolution.js';
-import {create_test_fixtures} from './css_unified_resolution_fixtures.js';
+import {resolve_css} from '../lib/css_bundled_resolution.js';
+import {create_test_fixtures} from './css_bundled_resolution_fixtures.js';
 
 describe('resolve_css diagnostics', () => {
 	describe('typo detection for variables', () => {
