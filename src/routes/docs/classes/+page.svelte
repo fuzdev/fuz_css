@@ -937,7 +937,8 @@ export default defineConfig({
 			</p>
 			<Code
 				lang="ts"
-				content={`// Bundled mode (recommended) - single import includes everything
+				content={`// +layout.svelte - bundled mode (recommended, default config)
+// includes only used base styles, variables, and utilities
 import 'virtual:fuz.css';`}
 			/>
 			<p>
@@ -951,10 +952,10 @@ vite_plugin_fuz_css({
 	variables: null,
 }),
 
-// +layout.svelte
-import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own
-import 'virtual:fuz.css'; // utilities only`}
+// +layout.svelte - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import 'virtual:fuz.css';`}
 			/>
 			<p>
 				The plugin extracts classes from files as Vite processes them, including from
@@ -1003,6 +1004,29 @@ import 'virtual:fuz.css'; // utilities only`}
 				<li>
 					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
 				</li>
+				<li>
+					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for utility-only
+					mode, or provide a callback to modify defaults
+				</li>
+				<li>
+					<code>variables</code> - customize or disable theme variables; set to <code>null</code> for
+					utility-only mode, or provide a callback to modify defaults
+				</li>
+				<li>
+					<code>include_all_base_css</code> - include all base styles, not just detected (default:
+					<code>false</code>)
+				</li>
+				<li>
+					<code>include_all_variables</code> - include all variables, not just detected (default:
+					<code>false</code>)
+				</li>
+				<li>
+					<code>additional_elements</code> - elements to always include styles for (for runtime-created
+					elements)
+				</li>
+				<li>
+					<code>additional_variables</code> - variables to always include in theme output
+				</li>
 			</ul>
 			<h4>TypeScript setup</h4>
 			<p>Add the virtual module declaration, like to <code>vite-env.d.ts</code>:</p>
@@ -1036,7 +1060,8 @@ export const gen = gen_fuz_css();`}
 			</p>
 			<Code
 				lang="ts"
-				content={`// Bundled mode (recommended) - single import includes everything
+				content={`// +layout.svelte - bundled mode (recommended, default config)
+// includes only used base styles, variables, and utilities
 import './fuz.css';`}
 			/>
 			<p>
@@ -1050,10 +1075,10 @@ export const gen = gen_fuz_css({
 	variables: null,
 });
 
-// +layout.svelte
-import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own
-import './fuz.css'; // utilities only`}
+// +layout.svelte - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import './fuz.css';`}
 			/>
 			<h4>Generator options</h4>
 			<p>
@@ -1230,7 +1255,7 @@ const el = document.createElement('dialog');
 const style = \`color: var(--\${getColor()})\`;`}
 			/>
 			<aside>
-				Unlike implicit detection, explicit declarations via <code>@fuz-elements</code> and
+				Like <code>@fuz-classes</code>, explicit declarations via <code>@fuz-elements</code> and
 				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
 				helping catch typos early. Write variable names without the <code>--</code> prefix.
 			</aside>

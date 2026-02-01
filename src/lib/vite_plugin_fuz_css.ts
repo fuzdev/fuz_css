@@ -275,7 +275,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				include_utilities: true,
 			});
 		} else {
-			// Utility-only mode (legacy behavior or resources not loaded yet)
+			// utility-only mode (legacy behavior or resources not loaded yet)
 			final_css = utility_result.css;
 		}
 

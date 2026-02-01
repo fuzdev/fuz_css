@@ -5,6 +5,14 @@
  * the same core options for extraction, generation, and bundled CSS.
  * This module provides the shared types to ensure consistency.
  *
+ * ## Bundled mode (default)
+ *
+ * By default, the generated CSS (`virtual:fuz.css` or `./fuz.css`) includes
+ * only the content your code uses from all three layers:
+ * - Base styles (element defaults)
+ * - Theme variables (CSS custom properties)
+ * - Utility classes
+ *
  * ## `undefined` vs `null` Convention
  *
  * Configuration options that accept both `undefined` and `null` follow this pattern:
@@ -14,7 +22,8 @@
  *
  * This applies to `BaseCssOption` and `VariablesOption`.
  * Setting both to `null` enables "utility-only mode" where you manage
- * your own theme and base styles.
+ * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
+ * and `theme.css`, which include all content).
  *
  * @module
  */

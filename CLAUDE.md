@@ -34,8 +34,8 @@ dev server.
 fuz_css is a **CSS framework and design system**:
 
 - Semantic HTML styling without classes
-- 250+ design tokens as CSS custom properties
-- Smart utility class generation (tree-shaken)
+- Design tokens as CSS custom properties
+- Smart utility class generation (includes only used)
 - Two generators: Gro (SvelteKit) and Vite plugin (React/Preact/Solid)
 
 ### What fuz_css does NOT include
@@ -59,11 +59,13 @@ fuz_css is a **CSS framework and design system**:
 
 ### 3-layer architecture
 
-1. [style.css](src/lib/style.css) - Reset stylesheet with semantic defaults
-2. [theme.css](src/lib/theme.css) - Style variables as CSS custom properties
-   (~250+), generated from TypeScript
-3. `fuz.css` - Utility classes (optional, generated per-project, only includes
-   used classes)
+1. **Base styles** - Reset stylesheet with semantic defaults
+2. **Theme variables** - Style variables as CSS custom properties
+3. **Utility classes** - Generated per-project, only includes used classes
+
+In bundled mode (`virtual:fuz.css` or `./fuz.css`), all three layers are
+combined and only used content is included. In utility-only mode, import
+`style.css` and `theme.css` from the package separately (full content).
 
 ### Style variables as source of truth
 
@@ -88,16 +90,13 @@ syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
 **Comment hints for static extraction:** The AST extractor cannot detect dynamic
 class names, elements, or variables. Use comment hints to explicitly include them:
 
-- `// @fuz-classes box row p_md` - Classes to include (produces **warnings** if
-  invalid)
+- `// @fuz-classes box row p_md` - Classes to include
 - `// @fuz-elements button input` - Elements to include base styles for
-  (produces **errors** if no matching rules)
-- `// @fuz-variables hue_a color_a_5` - Variables to include in theme (produces
-  **errors** if not found)
+- `// @fuz-variables hue_a color_a_5` - Variables to include in theme
 
-The error/warning distinction: `@fuz-classes` warnings allow graceful handling of
-custom classes, while `@fuz-elements` and `@fuz-variables` errors catch typos in
-explicit annotations where the user expects specific framework resources.
+All three produce **errors** if the specified item can't be resolved, helping
+catch typos early. Implicitly detected classes that can't be resolved are
+silently skipped (they may belong to other CSS frameworks).
 
 See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
@@ -144,7 +143,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 
 ### Bundled mode (default)
 
-Generated CSS includes theme variables, base styles, and utility classes:
+Generated CSS includes only the theme variables, base styles, and utility classes
+your code uses:
 
 **SvelteKit (Gro):**
 
@@ -168,7 +168,8 @@ import 'virtual:fuz.css';
 ### Utility-only mode
 
 For projects managing their own theme/base styles, set `base_css: null` and
-`variables: null` in generator options, then import stylesheets separately.
+`variables: null` in generator options, then import package CSS separately
+(`@fuzdev/fuz_css/style.css` and `theme.css` include everything).
 
 ### Customization
 
@@ -176,8 +177,8 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles or callback to modify defaults
 - `variables` - Custom theme variables or callback to modify defaults
-- `include_all_base_css` - Include all base styles (default: false, tree-shakes)
-- `include_all_variables` - Include all variables (default: false, tree-shakes)
+- `include_all_base_css` - Include all base styles (default: false, only used)
+- `include_all_variables` - Include all variables (default: false, only used)
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include styles for
 - `additional_variables` - Variables to always include
@@ -198,7 +199,7 @@ typography, borders, shading, shadows, layout. See
 
 **Variables & themes:**
 
-- [variables.ts](src/lib/variables.ts) - All style variable definitions (~250+)
+- [variables.ts](src/lib/variables.ts) - All style variable definitions
 - [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
 - [variable_data.ts](src/lib/variable_data.ts) - Size, color, border variants
 - [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type
@@ -234,8 +235,8 @@ typography, borders, shading, shadows, layout. See
   base style tree-shaking
 - [css_class_generation.ts](src/lib/css_class_generation.ts) -
   `CssClassDefinition` types, `generate_classes_css()`
-- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token
-  + composite class registry
+- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
+  composite class registry
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
 - [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints,
   states, pseudo-elements)
@@ -244,11 +245,10 @@ typography, borders, shading, shadows, layout. See
 - [operations_defaults.ts](src/lib/operations_defaults.ts) - Default filesystem
   implementations
 
-**Stylesheets:**
+**Stylesheets (for utility-only mode or direct import):**
 
-- [style.css](src/lib/style.css) - CSS reset and element defaults (uses
-  `.unstyled` for opt-out)
-- [theme.css](src/lib/theme.css) - Generated base theme variables
+- [style.css](src/lib/style.css) - CSS reset and element defaults (all rules)
+- [theme.css](src/lib/theme.css) - Generated base theme variables (all variables)
 
 ### Examples - [examples/](examples/)
 

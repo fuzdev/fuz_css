@@ -1,12 +1,17 @@
 /*
 
-A CSS fuz_css theme file like `@fuzdev/fuz_css/theme.css`
-is expected to be imported alongside this one
-containing the base variable declarations.
-By default that's the `'base'` theme's variables,
-which is generated from the default values in `@fuzdev/fuz_css/variables.js`.
+For optimized output that includes only what your code uses, use the Vite plugin
+or Gro generator instead of importing this file directly:
 
-Some notes:
+  import 'virtual:fuz.css';  // Vite plugin - recommended
+  import './fuz.css';        // Gro generator
+
+Direct import is for utility-only mode (with theme.css) or non-bundled usage.
+See: https://css.fuz.dev/docs/classes
+
+---
+
+Notes:
 
 - acts as a CSS reset and also sets minimal defaults for elements with themable variables
 - uses `:where` on all selectors with more specificity than a single tag/class

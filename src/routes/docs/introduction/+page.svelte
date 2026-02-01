@@ -28,21 +28,22 @@
 			</p>
 			<Code
 				lang="ts"
-				content={`// Bundled mode (recommended) - single import includes everything
+				content={`// bundled mode (recommended)
+// includes only used base styles, variables, and utilities
 import 'virtual:fuz.css'; // Vite plugin
 // or
 import './fuz.css'; // Gro generator`}
 			/>
 			<p>
-				Alternatively, for projects managing their own theme or base styles, use utility-only mode
-				with separate imports:
+				For projects managing their own theme or base styles, use utility-only mode with separate
+				imports:
 			</p>
 			<Code
 				lang="ts"
-				content={`// Utility-only mode - manage theme/base separately
-import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own
-import 'virtual:fuz.css'; // utilities only`}
+				content={`// utility-only mode - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import 'virtual:fuz.css'; // with base_css: null, variables: null`}
 			/>
 			<p>
 				See the <TomeLink name="classes" /> reference for setup details and configuration options.

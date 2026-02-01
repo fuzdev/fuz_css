@@ -88,7 +88,7 @@ export interface ExtractionResult {
 	classes: Map<string, Array<SourceLocation>> | null;
 	/**
 	 * Classes explicitly annotated via `@fuz-classes` comments, or null if none.
-	 * These should produce warnings if they can't be resolved during generation.
+	 * These produce errors if they can't be resolved during generation.
 	 */
 	explicit_classes: Set<string> | null;
 	/** Variables that were used in class contexts, or null if none */

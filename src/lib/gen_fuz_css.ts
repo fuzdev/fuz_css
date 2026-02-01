@@ -499,7 +499,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					include_utilities: true,
 				});
 			} else {
-				// Utility-only mode (legacy behavior)
+				// utility-only mode (legacy behavior)
 				final_css = utility_result.css;
 			}
 

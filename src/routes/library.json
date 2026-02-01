@@ -843,7 +843,7 @@
 								"name": "explicit_classes",
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
-								"doc_comment": "Classes explicitly annotated via `@fuz-classes` comments, or null if none.\nThese should produce warnings if they can't be resolved during generation."
+								"doc_comment": "Classes explicitly annotated via `@fuz-classes` comments, or null if none.\nThese produce errors if they can't be resolved during generation."
 							},
 							{
 								"name": "tracked_vars",
@@ -2268,7 +2268,7 @@
 						"name": "CssExtractionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction from source files.\nControls which files to scan and how to parse them.",
-						"source_line": 32,
+						"source_line": 41,
 						"type_signature": "CssExtractionOptions",
 						"properties": [
 							{
@@ -2289,7 +2289,7 @@
 						"name": "CssClassOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class definitions and interpretation.\nControls how classes are defined and how dynamic classes are generated.",
-						"source_line": 56,
+						"source_line": 65,
 						"type_signature": "CssClassOptions",
 						"properties": [
 							{
@@ -2316,21 +2316,21 @@
 						"name": "BaseCssOption",
 						"kind": "type",
 						"doc_comment": "Type for the base_css option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default style.css (framework defaults)\n- `null` - Disable base styles entirely (explicit opt-out)\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS\n\nSee module documentation for the `undefined` vs `null` convention.",
-						"source_line": 86,
+						"source_line": 95,
 						"type_signature": "BaseCssOption"
 					},
 					{
 						"name": "VariablesOption",
 						"kind": "type",
 						"doc_comment": "Type for the variables option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default variables (framework defaults)\n- `null` - Disable theme generation entirely (explicit opt-out)\n- `Array<StyleVariable>` - Custom variables array (replaces defaults)\n- `(defaults) => Array<StyleVariable>` - Callback to modify defaults\n\nSee module documentation for the `undefined` vs `null` convention.",
-						"source_line": 99,
+						"source_line": 108,
 						"type_signature": "VariablesOption"
 					},
 					{
 						"name": "CssOutputOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS output generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
-						"source_line": 109,
+						"source_line": 118,
 						"type_signature": "CssOutputOptions",
 						"properties": [
 							{
@@ -2405,7 +2405,7 @@
 						"name": "CssDiagnosticsOptions",
 						"kind": "type",
 						"doc_comment": "Options for error and warning handling.",
-						"source_line": 201,
+						"source_line": 210,
 						"type_signature": "CssDiagnosticsOptions",
 						"properties": [
 							{
@@ -2426,7 +2426,7 @@
 						"name": "CssCacheOptions",
 						"kind": "type",
 						"doc_comment": "Options for cache behavior.",
-						"source_line": 222,
+						"source_line": 231,
 						"type_signature": "CssCacheOptions",
 						"properties": [
 							{
@@ -2447,7 +2447,7 @@
 						"name": "CssGeneratorBaseOptions",
 						"kind": "type",
 						"doc_comment": "Combined base options shared by both Gro and Vite plugins.\nThese options work identically in both contexts.",
-						"source_line": 239,
+						"source_line": 248,
 						"type_signature": "CssGeneratorBaseOptions",
 						"extends": [
 							"CssExtractionOptions",
@@ -2459,7 +2459,7 @@
 						"properties": []
 					}
 				],
-				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and bundled CSS.\nThis module provides the shared types to ensure consistency.\n\n## `undefined` vs `null` Convention\n\nConfiguration options that accept both `undefined` and `null` follow this pattern:\n\n- **`undefined`** - Use framework defaults. The feature is enabled with standard behavior.\n- **`null`** - Explicitly disable the feature. No output is generated for that layer.\n\nThis applies to `BaseCssOption` and `VariablesOption`.\nSetting both to `null` enables \"utility-only mode\" where you manage\nyour own theme and base styles."
+				"module_comment": "Shared options for CSS generation plugins (Gro and Vite).\n\nBoth `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share\nthe same core options for extraction, generation, and bundled CSS.\nThis module provides the shared types to ensure consistency.\n\n## Bundled mode (default)\n\nBy default, the generated CSS (`virtual:fuz.css` or `./fuz.css`) includes\nonly the content your code uses from all three layers:\n- Base styles (element defaults)\n- Theme variables (CSS custom properties)\n- Utility classes\n\n## `undefined` vs `null` Convention\n\nConfiguration options that accept both `undefined` and `null` follow this pattern:\n\n- **`undefined`** - Use framework defaults. The feature is enabled with standard behavior.\n- **`null`** - Explicitly disable the feature. No output is generated for that layer.\n\nThis applies to `BaseCssOption` and `VariablesOption`.\nSetting both to `null` enables \"utility-only mode\" where you manage\nyour own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`\nand `theme.css`, which include all content)."
 			},
 			{
 				"path": "css_ruleset_parser.ts",
