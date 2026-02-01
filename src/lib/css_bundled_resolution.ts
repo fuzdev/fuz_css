@@ -136,17 +136,27 @@ export interface CssResolutionOptions {
 	/** Warn when detected elements have no matching style rules (default false) */
 	warn_unmatched_elements?: boolean;
 	/**
-	 * Whether to tree-shake base styles to only include rules for detected elements.
-	 * When false, includes all rules from the style index.
-	 * @default true
+	 * Whether to include all base styles regardless of detection.
+	 * When false (default), only rules for detected elements are included.
+	 * When true, includes all rules from the style index.
+	 * @default false
 	 */
-	treeshake_base_css?: boolean;
+	include_all_base_css?: boolean;
 	/**
-	 * Whether to tree-shake theme variables to only include those referenced.
-	 * When false, includes all variables from the variable graph.
-	 * @default true
+	 * Whether to include all theme variables regardless of detection.
+	 * When false (default), only referenced variables are included.
+	 * When true, includes all variables from the variable graph.
+	 * @default false
 	 */
-	treeshake_variables?: boolean;
+	include_all_variables?: boolean;
+	/**
+	 * Elements to exclude from base CSS output, even if detected.
+	 */
+	exclude_elements?: Iterable<string>;
+	/**
+	 * CSS variables to exclude from theme output, even if referenced.
+	 */
+	exclude_variables?: Iterable<string>;
 	/**
 	 * Elements explicitly annotated via @fuz-elements comments.
 	 * These produce errors (not warnings) if they have no matching style rules.
@@ -185,8 +195,10 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
-		treeshake_base_css = true,
-		treeshake_variables = true,
+		include_all_base_css = false,
+		include_all_variables = false,
+		exclude_elements,
+		exclude_variables,
 		explicit_elements,
 		explicit_variables,
 	} = options;
@@ -194,7 +206,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const diagnostics: Array<GenerationDiagnostic> = [];
 	const included_elements: Set<string> = new Set();
 
-	// Step 1: Collect elements (detected + additional_elements)
+	// Step 1: Collect elements (detected + additional_elements - exclude_elements)
 	for (const element of detected_elements) {
 		included_elements.add(element);
 	}
@@ -203,19 +215,24 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			included_elements.add(element);
 		}
 	}
+	if (exclude_elements) {
+		for (const element of exclude_elements) {
+			included_elements.delete(element);
+		}
+	}
 
 	// Step 2: Get matching rules from style.css
 	let included_rule_indices: Set<number>;
-	if (treeshake_base_css) {
+	if (include_all_base_css) {
+		// Include ALL rules (no tree-shaking)
+		included_rule_indices = new Set(style_rule_index.rules.map((_, i) => i));
+	} else {
 		// Only include rules matching detected elements and classes
 		included_rule_indices = get_matching_rules(
 			style_rule_index,
 			included_elements,
 			detected_classes,
 		);
-	} else {
-		// Include ALL rules (no tree-shaking)
-		included_rule_indices = new Set(style_rule_index.rules.map((_, i) => i));
 	}
 
 	// Step 2b: Warn about elements with no matching style rules
@@ -289,10 +306,17 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		}
 	}
 
-	// f) Include all variables if tree-shaking is disabled
-	if (!treeshake_variables) {
+	// f) Include all variables if include_all_variables is enabled
+	if (include_all_variables) {
 		for (const v of get_all_variable_names(variable_graph)) {
 			all_variables.add(v);
+		}
+	}
+
+	// g) Remove excluded variables
+	if (exclude_variables) {
+		for (const v of exclude_variables) {
+			all_variables.delete(v);
 		}
 	}
 

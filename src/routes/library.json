@@ -407,16 +407,28 @@
 								"doc_comment": "Warn when detected elements have no matching style rules (default false)"
 							},
 							{
-								"name": "treeshake_base_css",
+								"name": "include_all_base_css",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the style index."
+								"doc_comment": "Whether to include all base styles regardless of detection.\nWhen false (default), only rules for detected elements are included.\nWhen true, includes all rules from the style index."
 							},
 							{
-								"name": "treeshake_variables",
+								"name": "include_all_variables",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables from the variable graph."
+								"doc_comment": "Whether to include all theme variables regardless of detection.\nWhen false (default), only referenced variables are included.\nWhen true, includes all variables from the variable graph."
+							},
+							{
+								"name": "exclude_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Elements to exclude from base CSS output, even if detected."
+							},
+							{
+								"name": "exclude_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "CSS variables to exclude from theme output, even if referenced."
 							},
 							{
 								"name": "explicit_elements",
@@ -436,7 +448,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 174,
+						"source_line": 184,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
@@ -452,7 +464,7 @@
 						"name": "GenerateBundledCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for bundled CSS output generation.",
-						"source_line": 392,
+						"source_line": 416,
 						"type_signature": "GenerateBundledCssOptions",
 						"properties": [
 							{
@@ -479,7 +491,7 @@
 						"name": "generate_bundled_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 409,
+						"source_line": 433,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateBundledCssOptions): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
@@ -2297,18 +2309,6 @@
 								"kind": "variable",
 								"type_signature": "Array<CssClassDefinitionInterpreter>",
 								"doc_comment": "Custom interpreters for dynamic class generation.\nReplaces the builtin interpreters entirely if provided."
-							},
-							{
-								"name": "additional_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to always include in the output, regardless of detection.\nUseful for dynamically generated class names that can't be statically extracted."
-							},
-							{
-								"name": "exclude_classes",
-								"kind": "variable",
-								"type_signature": "Iterable<string>",
-								"doc_comment": "Classes to exclude from the output, even if detected.\nUseful for filtering out false positives from extraction."
 							}
 						]
 					},
@@ -2316,21 +2316,21 @@
 						"name": "BaseCssOption",
 						"kind": "type",
 						"doc_comment": "Type for the base_css option used by CSS generators.\nSupports four forms:\n- `undefined` - Use default style.css\n- `null` - Disable base styles entirely\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS",
-						"source_line": 83,
+						"source_line": 72,
 						"type_signature": "BaseCssOption"
 					},
 					{
 						"name": "VariablesOption",
 						"kind": "type",
 						"doc_comment": "Type for the variables option used by CSS generators.\nSupports four forms:\n- `undefined` - Use default variables\n- `null` - Disable theme generation entirely\n- `Array<StyleVariable>` - Custom variables array (replaces defaults)\n- `(defaults) => Array<StyleVariable>` - Callback to modify defaults",
-						"source_line": 93,
+						"source_line": 82,
 						"type_signature": "VariablesOption"
 					},
 					{
 						"name": "CssOutputOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS output generation (theme + base + utilities).\nControls how the three CSS layers are combined.",
-						"source_line": 103,
+						"source_line": 92,
 						"type_signature": "CssOutputOptions",
 						"properties": [
 							{
@@ -2346,22 +2346,28 @@
 								"doc_comment": "Theme variables configuration.\n- `undefined` (default): Use default variables from fuz_css\n- `null`: Disable theme entirely\n- `Array<StyleVariable>`: Custom variable definitions (replaces defaults)\n- `(defaults) => Array<StyleVariable>`: Callback to modify default variables"
 							},
 							{
-								"name": "treeshake_base_css",
+								"name": "include_all_base_css",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake base styles to only include rules for detected elements.\nWhen false, includes all rules from the base styles."
+								"doc_comment": "Whether to include all base styles regardless of detection.\nWhen false (default), only rules for detected elements are included.\nWhen true, includes all rules from the base styles."
 							},
 							{
-								"name": "treeshake_variables",
+								"name": "include_all_variables",
 								"kind": "variable",
 								"type_signature": "boolean",
-								"doc_comment": "Whether to tree-shake theme variables to only include those referenced.\nWhen false, includes all variables."
+								"doc_comment": "Whether to include all theme variables regardless of detection.\nWhen false (default), only referenced variables are included.\nWhen true, includes all variables."
 							},
 							{
 								"name": "theme_specificity",
 								"kind": "variable",
 								"type_signature": "number",
-								"doc_comment": "Specificity multiplier for theme CSS selectors.\nValue of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`)."
+								"doc_comment": "Specificity multiplier for theme CSS selectors.\nDefaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`)."
+							},
+							{
+								"name": "additional_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to always include in the output, regardless of detection.\nUseful for dynamically generated class names that can't be statically extracted."
 							},
 							{
 								"name": "additional_elements",
@@ -2374,6 +2380,24 @@
 								"kind": "variable",
 								"type_signature": "Iterable<string>",
 								"doc_comment": "Additional CSS variables to always include in theme output.\nUseful for variables referenced dynamically."
+							},
+							{
+								"name": "exclude_classes",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Classes to exclude from the output, even if detected.\nUseful for filtering out false positives from extraction."
+							},
+							{
+								"name": "exclude_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "Elements to exclude from base CSS output, even if detected.\nUseful for filtering out elements you don't want styles for."
+							},
+							{
+								"name": "exclude_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string>",
+								"doc_comment": "CSS variables to exclude from theme output, even if referenced.\nUseful for filtering out variables you don't want in the theme."
 							}
 						]
 					},
@@ -2381,7 +2405,7 @@
 						"name": "CssDiagnosticsOptions",
 						"kind": "type",
 						"doc_comment": "Options for error and warning handling.",
-						"source_line": 176,
+						"source_line": 184,
 						"type_signature": "CssDiagnosticsOptions",
 						"properties": [
 							{
@@ -2402,7 +2426,7 @@
 						"name": "CssCacheOptions",
 						"kind": "type",
 						"doc_comment": "Options for cache behavior.",
-						"source_line": 197,
+						"source_line": 205,
 						"type_signature": "CssCacheOptions",
 						"properties": [
 							{
@@ -2423,7 +2447,7 @@
 						"name": "CssGeneratorBaseOptions",
 						"kind": "type",
 						"doc_comment": "Combined base options shared by both Gro and Vite plugins.\nThese options work identically in both contexts.",
-						"source_line": 214,
+						"source_line": 222,
 						"type_signature": "CssGeneratorBaseOptions",
 						"extends": [
 							"CssExtractionOptions",

@@ -739,7 +739,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).toContain('--color_b');
 		});
 
-		test('additional_variables with treeshake_variables: false', () => {
+		test('additional_variables with include_all_variables: true', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -751,10 +751,10 @@ describe('resolve_css', () => {
 				class_variable_index,
 				...empty_detection(),
 				additional_variables: ['color_a'],
-				treeshake_variables: false,
+				include_all_variables: true,
 			});
 
-			// With treeshake off, all variables included regardless of additional_variables
+			// With include_all on, all variables included regardless of additional_variables
 			expect(result.resolved_variables.has('color_a')).toBe(true);
 			expect(result.resolved_variables.has('color_b')).toBe(true);
 		});
@@ -814,8 +814,8 @@ describe('resolve_css', () => {
 		});
 	});
 
-	describe('treeshake options', () => {
-		test('treeshake_base_css: false includes all rules', () => {
+	describe('include_all options', () => {
+		test('include_all_base_css: true includes all rules', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: blue; }
@@ -833,7 +833,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				treeshake_base_css: false, // Disable tree-shaking
+				include_all_base_css: true, // Include all rules
 			});
 
 			// Should include ALL rules, not just button
@@ -842,7 +842,7 @@ describe('resolve_css', () => {
 			expect(result.base_css).toContain('a { color: purple');
 		});
 
-		test('treeshake_base_css: true (default) only includes matching rules', () => {
+		test('include_all_base_css: false (default) only includes matching rules', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: blue; }
@@ -860,7 +860,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				// treeshake_base_css defaults to true
+				// include_all_base_css defaults to false
 			});
 
 			// Should only include button
@@ -869,7 +869,7 @@ describe('resolve_css', () => {
 			expect(result.base_css).not.toContain('a { color: purple');
 		});
 
-		test('treeshake_variables: false includes all variables', () => {
+		test('include_all_variables: true includes all variables', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -884,7 +884,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']), // Only detect color_a
 				utility_variables_used: new Set(),
-				treeshake_variables: false, // Disable tree-shaking
+				include_all_variables: true, // Include all variables
 			});
 
 			// Should include ALL variables, not just color_a
@@ -896,7 +896,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).toContain('--color_c');
 		});
 
-		test('treeshake_variables: true (default) only includes used variables', () => {
+		test('include_all_variables: false (default) only includes used variables', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -911,7 +911,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
-				// treeshake_variables defaults to true
+				// include_all_variables defaults to false
 			});
 
 			// Should only include color_a
@@ -923,7 +923,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).not.toContain('--color_c');
 		});
 
-		test('both treeshake options false includes everything', () => {
+		test('both include_all options true includes everything', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
@@ -940,8 +940,8 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				treeshake_base_css: false,
-				treeshake_variables: false,
+				include_all_base_css: true,
+				include_all_variables: true,
 			});
 
 			// All rules included
@@ -950,6 +950,121 @@ describe('resolve_css', () => {
 			// All variables included
 			expect(result.theme_css).toContain('--btn_color');
 			expect(result.theme_css).toContain('--unused');
+		});
+	});
+
+	describe('exclude options', () => {
+		test('exclude_elements filters from included elements', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: blue; }
+					input { color: green; }
+					a { color: purple; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'input', 'a']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				exclude_elements: ['input'],
+			});
+
+			// button and a included, input excluded
+			expect(result.base_css).toContain('button');
+			expect(result.base_css).not.toContain('input');
+			expect(result.base_css).toContain('a { color: purple');
+			expect(result.included_elements.has('button')).toBe(true);
+			expect(result.included_elements.has('input')).toBe(false);
+			expect(result.included_elements.has('a')).toBe(true);
+		});
+
+		test('exclude_elements combined with additional_elements', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`
+					button { color: blue; }
+					input { color: green; }
+					a { color: purple; }
+				`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				additional_elements: ['input', 'a'],
+				exclude_elements: ['input'], // Exclude even though it's in additional
+			});
+
+			// button and a included, input excluded
+			expect(result.base_css).toContain('button');
+			expect(result.base_css).not.toContain('input');
+			expect(result.base_css).toContain('a { color: purple');
+		});
+
+		test('exclude_variables filters from resolved variables', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+				{name: 'color_c', light: 'red'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_a', 'color_b', 'color_c']),
+				utility_variables_used: new Set(),
+				exclude_variables: ['color_b'],
+			});
+
+			// color_a and color_c included, color_b excluded
+			expect(result.resolved_variables.has('color_a')).toBe(true);
+			expect(result.resolved_variables.has('color_b')).toBe(false);
+			expect(result.resolved_variables.has('color_c')).toBe(true);
+			expect(result.theme_css).toContain('--color_a');
+			expect(result.theme_css).not.toContain('--color_b');
+			expect(result.theme_css).toContain('--color_c');
+		});
+
+		test('exclude_variables combined with additional_variables', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a', light: 'blue'},
+				{name: 'color_b', light: 'green'},
+				{name: 'color_c', light: 'red'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['color_a']),
+				utility_variables_used: new Set(),
+				additional_variables: ['color_b', 'color_c'],
+				exclude_variables: ['color_b'], // Exclude even though it's in additional
+			});
+
+			// color_a and color_c included, color_b excluded
+			expect(result.resolved_variables.has('color_a')).toBe(true);
+			expect(result.resolved_variables.has('color_b')).toBe(false);
+			expect(result.resolved_variables.has('color_c')).toBe(true);
+			expect(result.theme_css).toContain('--color_a');
+			expect(result.theme_css).not.toContain('--color_b');
+			expect(result.theme_css).toContain('--color_c');
 		});
 	});
 });

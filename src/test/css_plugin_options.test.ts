@@ -31,16 +31,18 @@ describe('shared options interface', () => {
 			class_definitions: {},
 			include_default_classes: true,
 			class_interpreters: [],
-			additional_classes: ['p_md'],
 			exclude_classes: ['hidden'],
 			// CssOutputOptions
 			base_css: undefined,
 			variables: undefined,
-			treeshake_base_css: true,
-			treeshake_variables: true,
+			include_all_base_css: false,
+			include_all_variables: false,
 			theme_specificity: 1,
+			additional_classes: ['p_md'],
 			additional_elements: ['dialog'],
 			additional_variables: ['hue_a'],
+			exclude_elements: ['custom-element'],
+			exclude_variables: ['unused_var'],
 			// CssDiagnosticsOptions
 			on_error: 'log',
 			on_warning: 'ignore',
@@ -94,8 +96,7 @@ describe('shared options interface', () => {
 		};
 
 		const class_opts: CssClassOptions = {
-			additional_classes: ['box', 'row'],
-			exclude_classes: ['test-class'],
+			include_default_classes: true,
 		};
 
 		const output: CssOutputOptions = {
@@ -161,12 +162,12 @@ describe('shared options interface', () => {
 		expect(typeof callback_opts.variables).toBe('function');
 	});
 
-	test('treeshake options default to true conceptually', () => {
-		// When undefined, generators should treat treeshake options as true
+	test('include_all options default to false conceptually', () => {
+		// When undefined, generators should treat include_all options as false
 		// This test documents the expected behavior
 		const opts: CssOutputOptions = {};
-		expect(opts.treeshake_base_css).toBeUndefined();
-		expect(opts.treeshake_variables).toBeUndefined();
+		expect(opts.include_all_base_css).toBeUndefined();
+		expect(opts.include_all_variables).toBeUndefined();
 		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts
 	});
 });

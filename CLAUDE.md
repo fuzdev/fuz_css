@@ -166,8 +166,14 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles or callback to modify defaults
 - `variables` - Custom theme variables or callback to modify defaults
+- `include_all_base_css` - Include all base styles (default: false, tree-shakes)
+- `include_all_variables` - Include all variables (default: false, tree-shakes)
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include styles for
+- `additional_variables` - Variables to always include
+- `exclude_classes` - Classes to exclude from output
+- `exclude_elements` - Elements to exclude from base CSS
+- `exclude_variables` - Variables to exclude from theme
 
 ## Docs
 

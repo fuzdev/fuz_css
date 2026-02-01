@@ -109,11 +109,13 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		cache_dir = DEFAULT_CACHE_DIR,
 		base_css,
 		variables,
-		treeshake_base_css = true,
-		treeshake_variables = true,
+		include_all_base_css = false,
+		include_all_variables = false,
 		theme_specificity = 1,
 		additional_elements,
 		additional_variables,
+		exclude_elements,
+		exclude_variables,
 		ops = default_fs_operations,
 	} = options;
 
@@ -247,8 +249,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				additional_elements,
 				additional_variables,
 				theme_specificity,
-				treeshake_base_css,
-				treeshake_variables,
+				include_all_base_css,
+				include_all_variables,
+				exclude_elements,
+				exclude_variables,
 				explicit_elements,
 				explicit_variables,
 			});

@@ -52,7 +52,6 @@ export interface CssClassOptions {
 	/**
 	 * Whether to include default class definitions (token and composite classes).
 	 * When `false`, `class_definitions` is required.
-	 * @default true
 	 */
 	include_default_classes?: boolean;
 	/**
@@ -60,16 +59,6 @@ export interface CssClassOptions {
 	 * Replaces the builtin interpreters entirely if provided.
 	 */
 	class_interpreters?: Array<CssClassDefinitionInterpreter>;
-	/**
-	 * Classes to always include in the output, regardless of detection.
-	 * Useful for dynamically generated class names that can't be statically extracted.
-	 */
-	additional_classes?: Iterable<string>;
-	/**
-	 * Classes to exclude from the output, even if detected.
-	 * Useful for filtering out false positives from extraction.
-	 */
-	exclude_classes?: Iterable<string>;
 }
 
 /**
@@ -141,23 +130,27 @@ export interface CssOutputOptions {
 	 */
 	variables?: VariablesOption;
 	/**
-	 * Whether to tree-shake base styles to only include rules for detected elements.
-	 * When false, includes all rules from the base styles.
-	 * @default true
+	 * Whether to include all base styles regardless of detection.
+	 * When false (default), only rules for detected elements are included.
+	 * When true, includes all rules from the base styles.
 	 */
-	treeshake_base_css?: boolean;
+	include_all_base_css?: boolean;
 	/**
-	 * Whether to tree-shake theme variables to only include those referenced.
-	 * When false, includes all variables.
-	 * @default true
+	 * Whether to include all theme variables regardless of detection.
+	 * When false (default), only referenced variables are included.
+	 * When true, includes all variables.
 	 */
-	treeshake_variables?: boolean;
+	include_all_variables?: boolean;
 	/**
 	 * Specificity multiplier for theme CSS selectors.
-	 * Value of 1 generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
-	 * @default 1
+	 * Defaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
 	 */
 	theme_specificity?: number;
+	/**
+	 * Classes to always include in the output, regardless of detection.
+	 * Useful for dynamically generated class names that can't be statically extracted.
+	 */
+	additional_classes?: Iterable<string>;
 	/**
 	 * Additional HTML elements to always include styles for.
 	 * Useful for elements generated at runtime via `document.createElement()`.
@@ -168,6 +161,21 @@ export interface CssOutputOptions {
 	 * Useful for variables referenced dynamically.
 	 */
 	additional_variables?: Iterable<string>;
+	/**
+	 * Classes to exclude from the output, even if detected.
+	 * Useful for filtering out false positives from extraction.
+	 */
+	exclude_classes?: Iterable<string>;
+	/**
+	 * Elements to exclude from base CSS output, even if detected.
+	 * Useful for filtering out elements you don't want styles for.
+	 */
+	exclude_elements?: Iterable<string>;
+	/**
+	 * CSS variables to exclude from theme output, even if referenced.
+	 * Useful for filtering out variables you don't want in the theme.
+	 */
+	exclude_variables?: Iterable<string>;
 }
 
 /**
