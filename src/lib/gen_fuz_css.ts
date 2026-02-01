@@ -43,7 +43,7 @@ import {
 import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
 import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_unified_css} from './css_unified_resolution.js';
-import type {CssGeneratorBaseOptions, VariablesOption} from './css_plugin_options.js';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
