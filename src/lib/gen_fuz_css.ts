@@ -191,7 +191,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 	const get_variable_graph = (): VariableDependencyGraph => {
 		if (!variable_graph) {
-			variable_graph = build_variable_graph_from_options(variables as VariablesOption);
+			variable_graph = build_variable_graph_from_options(variables);
 		}
 		return variable_graph;
 	};
