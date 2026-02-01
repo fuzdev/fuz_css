@@ -10,7 +10,7 @@
 import {readFile, writeFile, mkdir, unlink, rename} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
-import type {FsOperations} from './operations.js';
+import type {CacheOperations} from './operations.js';
 
 /**
  * Wraps an async function that returns void, converting exceptions to Result.
@@ -29,7 +29,7 @@ const wrap_void = async (
 /**
  * Default filesystem operations using `node:fs/promises`.
  */
-export const default_fs_operations: FsOperations = {
+export const default_cache_operations: CacheOperations = {
 	read_text: async ({path}) => {
 		try {
 			return await readFile(path, 'utf8');

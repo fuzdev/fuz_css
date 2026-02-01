@@ -13,7 +13,7 @@ import {parseCss, type AST} from 'svelte/compiler';
 import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
 import {extract_css_variables} from './css_variable_utils.js';
-import type {FsOperations} from './operations.js';
+import type {CacheOperations} from './operations.js';
 import type {BaseCssOption} from './css_plugin_options.js';
 
 /**
@@ -495,7 +495,7 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
  * @returns Promise resolving to StyleRuleIndex
  */
 export const load_style_rule_index = async (
-	ops: FsOperations,
+	ops: CacheOperations,
 	style_css_path?: string,
 ): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
@@ -527,7 +527,7 @@ export const create_style_rule_index = async (css: string): Promise<StyleRuleInd
  * @returns Promise resolving to the CSS string
  */
 export const load_default_style_css = async (
-	ops: FsOperations,
+	ops: CacheOperations,
 	style_css_path?: string,
 ): Promise<string> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
@@ -548,7 +548,7 @@ export const load_default_style_css = async (
  */
 export const resolve_base_css_option = async (
 	base_css: BaseCssOption,
-	ops: FsOperations,
+	ops: CacheOperations,
 ): Promise<StyleRuleIndex | null> => {
 	// null = disabled
 	if (base_css === null) {

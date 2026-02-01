@@ -42,7 +42,7 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 } from './css_cache.js';
-import {default_fs_operations} from './operations_defaults.js';
+import {default_cache_operations} from './operations_defaults.js';
 import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
 import {
@@ -83,6 +83,15 @@ const RESOLVED_VIRTUAL_ID_CSS = '\0virtual:fuz.css';
 const is_ci = !!process.env.CI;
 
 /**
+ * Debounce delay for HMR updates in milliseconds.
+ *
+ * Short delay to batch rapid file changes (e.g., save-all, rename operations)
+ * into a single CSS regeneration. 10ms is enough to catch rapid sequential
+ * saves while being imperceptible to users.
+ */
+const HMR_DEBOUNCE_MS = 10;
+
+/**
  * Options for the fuz_css Vite plugin.
  * Extends the shared base options (no additional Vite-specific options currently needed).
  */
@@ -116,7 +125,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		ops = default_fs_operations,
+		ops = default_cache_operations,
 	} = options;
 
 	// Derive include flags from null check
@@ -314,7 +323,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			return;
 		}
 
-		// Debounce: wait 10ms for more changes before triggering HMR
 		if (hmr_timeout) {
 			clearTimeout(hmr_timeout);
 		}
@@ -349,7 +357,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					],
 				});
 			}
-		}, 10);
+		}, HMR_DEBOUNCE_MS);
 	};
 
 	return {

@@ -11,7 +11,7 @@ import {join} from 'node:path';
 import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-import type {FsOperations} from './operations.js';
+import type {CacheOperations} from './operations.js';
 
 /**
  * Default cache directory relative to project root.
@@ -104,7 +104,7 @@ export const get_file_cache_path = (
  * @param cache_path - Absolute path to the cache file
  */
 export const load_cached_extraction = async (
-	ops: FsOperations,
+	ops: CacheOperations,
 	cache_path: string,
 ): Promise<CachedExtraction | null> => {
 	try {
@@ -143,7 +143,7 @@ export const load_cached_extraction = async (
  * @param explicit_variables - CSS variables from @fuz-variables comments (without -- prefix), or null if none
  */
 export const save_cached_extraction = async (
-	ops: FsOperations,
+	ops: CacheOperations,
 	cache_path: string,
 	content_hash: string,
 	classes: Map<string, Array<SourceLocation>> | null,
@@ -190,7 +190,7 @@ export const save_cached_extraction = async (
  * @param cache_path - Absolute path to the cache file
  */
 export const delete_cached_extraction = async (
-	ops: FsOperations,
+	ops: CacheOperations,
 	cache_path: string,
 ): Promise<void> => {
 	await ops.unlink({path: cache_path});

@@ -226,6 +226,13 @@ export const has_variable = (graph: VariableDependencyGraph, name: string): bool
 
 /**
  * Computes normalized string similarity (0-1, where 1 = identical).
+ *
+ * Uses Levenshtein distance (rather than Dice coefficient in css_bundled_resolution.ts)
+ * because variable names are longer and follow consistent naming patterns
+ * (e.g., "color_a_50", "border_radius_md"). Levenshtein is better at detecting
+ * single-character insertions/deletions in these longer, structured names.
+ *
+ * See css_bundled_resolution.ts for the Dice-based approach used for elements.
  */
 const string_similarity = (a: string, b: string): number => {
 	const max_len = Math.max(a.length, b.length);
@@ -233,9 +240,14 @@ const string_similarity = (a: string, b: string): number => {
 	return 1 - levenshtein_distance(a, b) / max_len;
 };
 
-/** Minimum similarity threshold to consider a variable name a likely typo.
- * Set to 0.85 to catch single-character typos while avoiding false positives
- * for user variables that are prefixes of theme variables (e.g., border_radius vs border_radius_xs).
+/**
+ * Minimum similarity threshold to consider a variable name a likely typo.
+ *
+ * Set to 0.85 (higher than css_bundled_resolution.ts's 0.6) because:
+ * - Variable names are longer, so small edit distances are more significant
+ * - Many variables share prefixes (color_a_1, color_a_2, etc.) so a lower
+ *   threshold would suggest unrelated variables
+ * - User-defined variables shouldn't trigger false "did you mean?" suggestions
  */
 const TYPO_SIMILARITY_THRESHOLD = 0.85;
 

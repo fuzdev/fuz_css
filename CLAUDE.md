@@ -85,9 +85,19 @@ Two generators available, both using AST-based extraction and per-file caching:
 Both output only CSS for classes actually used. Supports Svelte 5.16+ class
 syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
 
-**Dynamic class names:** When iterating over variant arrays to generate class
-names dynamically, the AST extractor cannot statically detect the full class
-names. Use `// @fuz-classes` comments to list all possible values.
+**Comment hints for static extraction:** The AST extractor cannot detect dynamic
+class names, elements, or variables. Use comment hints to explicitly include them:
+
+- `// @fuz-classes box row p_md` - Classes to include (produces **warnings** if
+  invalid)
+- `// @fuz-elements button input` - Elements to include base styles for
+  (produces **errors** if no matching rules)
+- `// @fuz-variables hue_a color_a_5` - Variables to include in theme (produces
+  **errors** if not found)
+
+The error/warning distinction: `@fuz-classes` warnings allow graceful handling of
+custom classes, while `@fuz-elements` and `@fuz-variables` errors catch typos in
+explicit annotations where the user expects specific framework resources.
 
 See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
@@ -208,10 +218,20 @@ typography, borders, shading, shadows, layout. See
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin with
   HMR via `virtual:fuz.css`
+- [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
+  for Gro/Vite generators
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
   validation, atomic writes, CI skip
+- [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
+  CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
   transitive resolution
+- [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
+  extraction utilities
+- [class_variable_index.ts](src/lib/class_variable_index.ts) - Class to variable
+  mapping for dependency resolution
+- [style_rule_parser.ts](src/lib/style_rule_parser.ts) - CSS rule parsing for
+  base style tree-shaking
 - [css_class_generation.ts](src/lib/css_class_generation.ts) -
   `CssClassDefinition` types, `generate_classes_css()`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Combined token
@@ -219,6 +239,10 @@ typography, borders, shading, shadows, layout. See
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
 - [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints,
   states, pseudo-elements)
+- [operations.ts](src/lib/operations.ts) - `CacheOperations` interface for
+  dependency injection
+- [operations_defaults.ts](src/lib/operations_defaults.ts) - Default filesystem
+  implementations
 
 **Stylesheets:**
 

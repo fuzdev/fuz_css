@@ -33,7 +33,7 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 } from './css_cache.js';
-import {default_fs_operations} from './operations_defaults.js';
+import {default_cache_operations} from './operations_defaults.js';
 import {
 	type StyleRuleIndex,
 	load_style_rule_index,
@@ -147,7 +147,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		ops = default_fs_operations,
+		ops = default_cache_operations,
 	} = options;
 
 	// Derive include flags from null check

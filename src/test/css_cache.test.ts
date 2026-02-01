@@ -11,11 +11,11 @@ import {
 	type CachedExtraction,
 } from '$lib/css_cache.js';
 import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
-import {default_fs_operations} from '$lib/operations_defaults.js';
-import {create_mock_fs_state, create_mock_fs_ops} from './fixtures/mock_operations.js';
+import {default_cache_operations} from '$lib/operations_defaults.js';
+import {create_mock_fs_state, create_mock_cache_ops} from './fixtures/mock_operations.js';
 import {loc, make_classes, make_extraction_diagnostic as make_diagnostic} from './test_helpers.js';
 
-const ops = default_fs_operations;
+const ops = default_cache_operations;
 
 const TEST_DIR = '/tmp/fuz_css_cache_test';
 const PROJECT_ROOT = '/tmp/fuz_css_cache_test/project/';
@@ -518,7 +518,7 @@ describe('v2 cache fields round-trip', () => {
 describe('cache functions with mock ops', () => {
 	test('round-trips with in-memory mock', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_fs_ops(state);
+		const mock_ops = create_mock_cache_ops(state);
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
@@ -543,14 +543,14 @@ describe('cache functions with mock ops', () => {
 
 	test('load returns null for missing file', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_fs_ops(state);
+		const mock_ops = create_mock_cache_ops(state);
 
 		expect(await load_cached_extraction(mock_ops, '/nonexistent.json')).toBeNull();
 	});
 
 	test('delete removes file from state', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_fs_ops(state);
+		const mock_ops = create_mock_cache_ops(state);
 		const cache_path = '/mock/cache/delete.json';
 
 		await save_cached_extraction(
@@ -573,7 +573,7 @@ describe('cache functions with mock ops', () => {
 
 	test('can inspect raw state for testing', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_fs_ops(state);
+		const mock_ops = create_mock_cache_ops(state);
 
 		await save_cached_extraction(
 			mock_ops,

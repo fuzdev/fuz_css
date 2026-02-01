@@ -6,7 +6,7 @@
  *
  * **Design principles:**
  * - Internal functions take `ops` as a required first parameter
- * - Public APIs (plugin options) default to `default_fs_operations`
+ * - Public APIs (plugin options) default to `default_cache_operations`
  * - All operations accept a single `options` object parameter
  * - All fallible operations return `Result` from `@fuzdev/fuz_util`
  * - Never throw `Error` in operations - return `Result` with `ok: false`
@@ -14,7 +14,7 @@
  *
  * **Production usage:**
  * ```typescript
- * import {default_fs_operations} from './operations_defaults.js';
+ * import {default_cache_operations} from './operations_defaults.js';
  * const content = await ops.read_text({path: '/path/to/file.json'});
  * if (!content) {
  *   // File not found
@@ -23,9 +23,9 @@
  *
  * **Test usage:**
  * ```typescript
- * import {create_mock_fs_ops, create_mock_fs_state} from '../test/fixtures/mock_operations.js';
+ * import {create_mock_cache_ops, create_mock_fs_state} from '../test/fixtures/mock_operations.js';
  * const state = create_mock_fs_state();
- * const ops = create_mock_fs_ops(state);
+ * const ops = create_mock_cache_ops(state);
  * // Use ops in tests - all operations are in-memory
  * ```
  *
@@ -38,10 +38,14 @@
 import type {Result} from '@fuzdev/fuz_util/result.js';
 
 /**
- * File system operations for cache management.
+ * Cache-related file system operations.
  * Abstracted to enable test isolation from the actual filesystem.
+ *
+ * Named `CacheOperations` (not `FsOperations`) because it only covers
+ * the specific operations needed for cache management, not general
+ * filesystem access.
  */
-export interface FsOperations {
+export interface CacheOperations {
 	/**
 	 * Reads a text file.
 	 * Returns `null` if file doesn't exist.

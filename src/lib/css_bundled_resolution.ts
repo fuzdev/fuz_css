@@ -26,11 +26,24 @@ import {type CssClassVariableIndex, collect_class_variables} from './class_varia
 
 /**
  * Threshold for string similarity to suggest typo corrections.
+ *
+ * Uses 0.6 (lower than variable_graph.ts's 0.85) because element names are
+ * shorter and more diverse (e.g., "div", "span", "button"). A lower threshold
+ * catches more potential typos while still avoiding false positives for
+ * completely unrelated names.
  */
 const TYPO_SIMILARITY_THRESHOLD = 0.6;
 
 /**
  * Calculates string similarity using Dice coefficient on bigrams.
+ *
+ * Uses Dice coefficient (rather than Levenshtein in variable_graph.ts) because:
+ * - Element names are short (often 3-6 chars) where single-char differences
+ *   have outsized impact on Levenshtein distance
+ * - Bigram matching is more forgiving of transpositions ("buton" vs "button")
+ * - Faster for the typically small element name sets
+ *
+ * See variable_graph.ts for the Levenshtein-based approach used for variables.
  */
 const string_similarity = (a: string, b: string): number => {
 	if (a === b) return 1;

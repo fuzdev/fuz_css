@@ -7,10 +7,10 @@ import {
 	collect_rule_variables,
 	load_style_rule_index,
 } from '../lib/style_rule_parser.js';
-import {default_fs_operations} from '../lib/operations_defaults.js';
+import {default_cache_operations} from '../lib/operations_defaults.js';
 
 // Alias for brevity in tests
-const ops = default_fs_operations;
+const ops = default_cache_operations;
 
 describe('parse_style_css', () => {
 	describe('basic parsing', () => {

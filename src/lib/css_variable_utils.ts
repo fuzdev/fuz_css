@@ -44,17 +44,17 @@ const CSS_VARIABLE_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)/g;
  */
 export const extract_css_variables = (css: string): Set<string> => {
 	const variables: Set<string> = new Set();
-	let match;
-
-	// Reset lastIndex since we're reusing the global regex
-	CSS_VARIABLE_PATTERN.lastIndex = 0;
-
-	while ((match = CSS_VARIABLE_PATTERN.exec(css)) !== null) {
+	for (const match of css.matchAll(CSS_VARIABLE_PATTERN)) {
 		variables.add(match[1]!);
 	}
-
 	return variables;
 };
+
+/**
+ * Non-global pattern for checking if CSS contains variable references.
+ * Uses a separate non-global regex to avoid lastIndex state issues with test().
+ */
+const CSS_VARIABLE_CHECK_PATTERN = /var\(\s*--[a-zA-Z_][a-zA-Z0-9_-]*/;
 
 /**
  * Checks if a CSS string contains any CSS variable references.
@@ -66,6 +66,5 @@ export const extract_css_variables = (css: string): Set<string> => {
  * @returns True if the string contains `var(--*)` patterns
  */
 export const has_css_variables = (css: string): boolean => {
-	CSS_VARIABLE_PATTERN.lastIndex = 0;
-	return CSS_VARIABLE_PATTERN.test(css);
+	return CSS_VARIABLE_CHECK_PATTERN.test(css);
 };
