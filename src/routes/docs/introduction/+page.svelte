@@ -21,15 +21,32 @@
 		<TomeSection>
 			<TomeSectionHeader text="Usage" />
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
-			<p>Import the two required stylesheets:</p>
+			<p>
+				Use the <TomeLink name="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
+				<TomeLink name="classes" hash="Gro-generator">Gro generator</TomeLink> for bundled CSS that includes
+				theme variables, base styles, and utility classes in a single import:
+			</p>
 			<Code
 				lang="ts"
-				content={`import '@fuzdev/fuz_css/style.css';
-import '@fuzdev/fuz_css/theme.css'; // or bring your own`}
+				content={`// bundled mode (recommended)
+// includes only used base styles, variables, and utilities
+import 'virtual:fuz.css'; // Vite plugin
+// or
+import './fuz.css'; // Gro generator`}
 			/>
 			<p>
-				For utility classes, see the <TomeLink name="classes" /> reference which covers the Vite plugin
-				and alternative Gro generator.
+				For projects managing their own theme or base styles, use utility-only mode with separate
+				imports:
+			</p>
+			<Code
+				lang="ts"
+				content={`// utility-only mode - full package CSS, only used utilities
+import '@fuzdev/fuz_css/style.css'; // all base styles
+import '@fuzdev/fuz_css/theme.css'; // all variables
+import 'virtual:fuz.css'; // with base_css: null, variables: null`}
+			/>
+			<p>
+				See the <TomeLink name="classes" /> reference for setup details and configuration options.
 			</p>
 		</TomeSection>
 		<TomeSection>

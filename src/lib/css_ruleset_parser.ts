@@ -6,15 +6,11 @@
  * - Phase 0a: Detecting single-selector rulesets that could be converted to declaration format
  * - Phase 2: Modifying selectors for modifier support on composite classes
  *
- * NOTE: We wrap CSS in a `<style>` tag for Svelte's parser. This adds an offset to positions.
- * Line numbers in parser errors will be offset by 1. This is acceptable - Fuz will have
- * its own CSS parser in the future.
- *
  * @module
  */
 
 import {escape_regexp} from '@fuzdev/fuz_util/regexp.js';
-import {parse, type AST} from 'svelte/compiler';
+import {parseCss, type AST} from 'svelte/compiler';
 
 //
 // Parsing
@@ -26,7 +22,7 @@ import {parse, type AST} from 'svelte/compiler';
 export interface ParsedRule {
 	/** Full selector string (e.g., ".box", ".selectable:hover") */
 	selector: string;
-	/** Start position of selector in original CSS (0-indexed, relative to style wrapper) */
+	/** Start position of selector in original CSS (0-indexed) */
 	selector_start: number;
 	/** End position of selector in original CSS */
 	selector_end: number;
@@ -44,12 +40,7 @@ export interface ParsedRule {
 export interface ParsedRuleset {
 	/** All rules in the ruleset */
 	rules: Array<ParsedRule>;
-	/** The offset added by the <style> wrapper (characters before actual CSS) */
-	wrapper_offset: number;
 }
-
-const STYLE_WRAPPER_PREFIX = '<style>';
-const STYLE_WRAPPER_SUFFIX = '</style>';
 
 /**
  * Parses a CSS ruleset string using Svelte's CSS parser.
@@ -58,20 +49,13 @@ const STYLE_WRAPPER_SUFFIX = '</style>';
  * @returns ParsedRuleset with structured rule data and positions
  */
 export const parse_ruleset = (css: string): ParsedRuleset => {
-	const wrapper_offset = STYLE_WRAPPER_PREFIX.length;
-	const wrapped = `${STYLE_WRAPPER_PREFIX}${css}${STYLE_WRAPPER_SUFFIX}`;
-
-	const ast = parse(wrapped, {modern: true});
+	const ast = parseCss(css);
 	const rules: Array<ParsedRule> = [];
 
-	if (!ast.css) {
-		return {rules, wrapper_offset};
-	}
-
 	// Walk the CSS AST to find rules
-	walk_css_children(ast.css, css, wrapper_offset, rules);
+	walk_css_children(ast, css, rules);
 
-	return {rules, wrapper_offset};
+	return {rules};
 };
 
 /**
@@ -79,20 +63,19 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
  * @mutates rules - Pushes extracted rules to the array
  */
 const walk_css_children = (
-	node: AST.CSS.StyleSheet | AST.CSS.Atrule,
+	node: Omit<AST.CSS.StyleSheet, 'attributes' | 'content'> | AST.CSS.Atrule,
 	original_css: string,
-	wrapper_offset: number,
 	rules: Array<ParsedRule>,
 ): void => {
 	const children = 'children' in node ? node.children : [];
 
 	for (const child of children) {
 		if (child.type === 'Rule') {
-			extract_rule(child, original_css, wrapper_offset, rules);
+			extract_rule(child, original_css, rules);
 			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		} else if (child.type === 'Atrule' && child.block) {
 			// Recurse into at-rules (like @media) - rules are in block.children
-			walk_css_block(child.block, original_css, wrapper_offset, rules);
+			walk_css_block(child.block, original_css, rules);
 		}
 	}
 };
@@ -104,15 +87,14 @@ const walk_css_children = (
 const walk_css_block = (
 	block: AST.CSS.Block,
 	original_css: string,
-	wrapper_offset: number,
 	rules: Array<ParsedRule>,
 ): void => {
 	for (const child of block.children) {
 		if (child.type === 'Rule') {
-			extract_rule(child, original_css, wrapper_offset, rules);
+			extract_rule(child, original_css, rules);
 		} else if (child.type === 'Atrule' && child.block) {
 			// Handle nested at-rules
-			walk_css_block(child.block, original_css, wrapper_offset, rules);
+			walk_css_block(child.block, original_css, rules);
 		}
 	}
 };
@@ -121,23 +103,18 @@ const walk_css_block = (
  * Extracts a single rule from the AST.
  * @mutates rules - Pushes the extracted rule to the array
  */
-const extract_rule = (
-	rule: AST.CSS.Rule,
-	original_css: string,
-	wrapper_offset: number,
-	rules: Array<ParsedRule>,
-): void => {
+const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<ParsedRule>): void => {
 	const prelude = rule.prelude;
 
 	// Get the full selector text from the original CSS
-	const selector_start = prelude.start - wrapper_offset;
-	const selector_end = prelude.end - wrapper_offset;
+	const selector_start = prelude.start;
+	const selector_end = prelude.end;
 	const selector = original_css.slice(selector_start, selector_end);
 
 	// Get declarations from the block
 	const block = rule.block;
-	const block_start = block.start - wrapper_offset;
-	const block_end = block.end - wrapper_offset;
+	const block_start = block.start;
+	const block_end = block.end;
 
 	// Extract just the declarations (content between braces)
 	const block_content = original_css.slice(block_start, block_end);
@@ -148,8 +125,8 @@ const extract_rule = (
 		selector_start,
 		selector_end,
 		declarations,
-		rule_start: rule.start - wrapper_offset,
-		rule_end: rule.end - wrapper_offset,
+		rule_start: rule.start,
+		rule_end: rule.end,
 	});
 };
 
@@ -292,14 +269,19 @@ const selector_has_pseudo_element = (selector: string): boolean => {
  * Handles functional pseudo-classes like :not(:hover) by checking for the state
  * both as a direct pseudo-class and within functional pseudo-classes.
  *
+ * Uses regex to avoid false positives where a state is a prefix of another state:
+ * - `:focus` should NOT match `:focus-within` or `:focus-visible`
+ * - `:hover` should NOT match `[data-hover="true"]` (attribute value)
+ *
  * @param selector - The CSS selector to check
  * @param state - The state to look for (e.g., ":hover", ":focus")
  * @returns True if the selector already contains this state
  */
 const selector_has_state = (selector: string, state: string): boolean => {
-	// Simple check: does the selector contain the state string?
-	// This catches both direct usage (.foo:hover) and within functional pseudo-classes (.foo:not(:hover))
-	return selector.includes(state);
+	// Match the state exactly, not when followed by word characters or hyphens
+	// e.g., `:focus` matches `:focus` and `:focus)` but not `:focus-within`
+	const pattern = new RegExp(escape_regexp(state) + '(?![\\w-])');
+	return pattern.test(selector);
 };
 
 /**

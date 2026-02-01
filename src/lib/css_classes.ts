@@ -16,14 +16,14 @@ import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
  * Uses `null` instead of empty collections to avoid allocation overhead.
  */
 export class CssClasses {
-	#include_classes: Set<string> | null;
+	#additional_classes: Set<string> | null;
 	#exclude_classes: Set<string> | null;
 
 	#all: Set<string> = new Set();
 
 	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
 
-	/** Combined map with include_classes (null locations) and extracted classes (actual locations) */
+	/** Combined map with additional_classes (null locations) and extracted classes (actual locations) */
 	#all_with_locations_including_includes: Map<string, Array<SourceLocation> | null> = new Map();
 
 	/** Classes by file id (files with no classes are not stored) */
@@ -32,25 +32,49 @@ export class CssClasses {
 	/** Explicit classes (from @fuz-classes) by file id */
 	#explicit_by_id: Map<string, Set<string>> = new Map();
 
-	/** Aggregated explicit classes (from extraction + include_classes, minus exclude_classes) */
+	/** Aggregated explicit classes (from extraction + additional_classes, minus exclude_classes) */
 	#explicit: Set<string> | null = null;
 
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
 	#diagnostics_by_id: Map<string, Array<ExtractionDiagnostic>> = new Map();
+
+	/** HTML elements by file id */
+	#elements_by_id: Map<string, Set<string>> = new Map();
+
+	/** CSS variables by file id */
+	#css_variables_by_id: Map<string, Set<string>> = new Map();
+
+	/** Aggregated elements */
+	#all_elements: Set<string> = new Set();
+
+	/** Aggregated CSS variables */
+	#all_css_variables: Set<string> = new Set();
+
+	/** Explicit elements (from @fuz-elements) by file id */
+	#explicit_elements_by_id: Map<string, Set<string>> = new Map();
+
+	/** Explicit CSS variables (from @fuz-variables) by file id */
+	#explicit_variables_by_id: Map<string, Set<string>> = new Map();
+
+	/** Aggregated explicit elements */
+	#explicit_elements: Set<string> | null = null;
+
+	/** Aggregated explicit CSS variables */
+	#explicit_variables: Set<string> | null = null;
 
 	#dirty = true;
 
 	/**
 	 * Creates a new CssClasses collection.
 	 *
-	 * @param include_classes - Classes to always include (also treated as explicit for warnings)
+	 * @param additional_classes - Classes to always include (also treated as explicit for warnings)
 	 * @param exclude_classes - Classes to exclude from output (also suppresses warnings)
 	 */
 	constructor(
-		include_classes: Set<string> | null = null,
+		additional_classes: Set<string> | null = null,
 		exclude_classes: Set<string> | null = null,
 	) {
-		this.#include_classes = include_classes;
+		this.#additional_classes = additional_classes;
 		this.#exclude_classes = exclude_classes;
 	}
 
@@ -62,12 +86,20 @@ export class CssClasses {
 	 * @param classes - Map of class names to their source locations, or null if none
 	 * @param explicit_classes - Classes from @fuz-classes comments, or null if none
 	 * @param diagnostics - Extraction diagnostics from this file, or null if none
+	 * @param elements - HTML elements found in the file, or null if none
+	 * @param css_variables - CSS variables referenced (without -- prefix), or null if none
+	 * @param explicit_elements - Elements from @fuz-elements comments, or null if none
+	 * @param explicit_variables - Variables from @fuz-variables comments (without -- prefix), or null if none
 	 */
 	add(
 		id: string,
 		classes: Map<string, Array<SourceLocation>> | null,
 		explicit_classes?: Set<string> | null,
 		diagnostics?: Array<ExtractionDiagnostic> | null,
+		elements?: Set<string> | null,
+		css_variables?: Set<string> | null,
+		explicit_elements?: Set<string> | null,
+		explicit_variables?: Set<string> | null,
 	): void {
 		this.#dirty = true;
 		if (classes) {
@@ -86,6 +118,26 @@ export class CssClasses {
 			// Clear any old diagnostics for this file
 			this.#diagnostics_by_id.delete(id);
 		}
+		if (elements) {
+			this.#elements_by_id.set(id, elements);
+		} else {
+			this.#elements_by_id.delete(id);
+		}
+		if (css_variables) {
+			this.#css_variables_by_id.set(id, css_variables);
+		} else {
+			this.#css_variables_by_id.delete(id);
+		}
+		if (explicit_elements) {
+			this.#explicit_elements_by_id.set(id, explicit_elements);
+		} else {
+			this.#explicit_elements_by_id.delete(id);
+		}
+		if (explicit_variables) {
+			this.#explicit_variables_by_id.set(id, explicit_variables);
+		} else {
+			this.#explicit_variables_by_id.delete(id);
+		}
 	}
 
 	delete(id: string): void {
@@ -93,6 +145,10 @@ export class CssClasses {
 		this.#by_id.delete(id);
 		this.#explicit_by_id.delete(id);
 		this.#diagnostics_by_id.delete(id);
+		this.#elements_by_id.delete(id);
+		this.#css_variables_by_id.delete(id);
+		this.#explicit_elements_by_id.delete(id);
+		this.#explicit_variables_by_id.delete(id);
 	}
 
 	/**
@@ -108,7 +164,7 @@ export class CssClasses {
 
 	/**
 	 * Gets all classes with their source locations (with exclude filter applied).
-	 * Locations from include_classes are null.
+	 * Locations from additional_classes are null.
 	 */
 	get_with_locations(): Map<string, Array<SourceLocation> | null> {
 		if (this.#dirty) {
@@ -123,12 +179,16 @@ export class CssClasses {
 	 * More efficient than calling `get()` and `get_with_locations()` separately
 	 * when both are needed (avoids potential double recalculation).
 	 *
-	 * Results have exclude filter applied and explicit_classes includes include_classes.
+	 * Results have exclude filter applied and explicit_classes includes additional_classes.
 	 */
 	get_all(): {
 		all_classes: Set<string>;
 		all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
 		explicit_classes: Set<string> | null;
+		all_elements: Set<string>;
+		all_css_variables: Set<string>;
+		explicit_elements: Set<string> | null;
+		explicit_variables: Set<string> | null;
 	} {
 		if (this.#dirty) {
 			this.#dirty = false;
@@ -138,6 +198,10 @@ export class CssClasses {
 			all_classes: this.#all,
 			all_classes_with_locations: this.#all_with_locations_including_includes,
 			explicit_classes: this.#explicit,
+			all_elements: this.#all_elements,
+			all_css_variables: this.#all_css_variables,
+			explicit_elements: this.#explicit_elements,
+			explicit_variables: this.#explicit_variables,
 		};
 	}
 
@@ -157,16 +221,20 @@ export class CssClasses {
 		this.#all_with_locations.clear();
 		this.#all_with_locations_including_includes.clear();
 		this.#explicit = null;
+		this.#all_elements.clear();
+		this.#all_css_variables.clear();
+		this.#explicit_elements = null;
+		this.#explicit_variables = null;
 
 		const exclude = this.#exclude_classes;
 
-		// Add include_classes first (with null locations - no source)
-		if (this.#include_classes) {
-			for (const c of this.#include_classes) {
+		// Add additional_classes first (with null locations - no source)
+		if (this.#additional_classes) {
+			for (const c of this.#additional_classes) {
 				if (exclude?.has(c)) continue;
 				this.#all.add(c);
 				this.#all_with_locations_including_includes.set(c, null);
-				// include_classes are also explicit (user explicitly wants them)
+				// additional_classes are also explicit (user explicitly wants them)
 				(this.#explicit ??= new Set()).add(c);
 			}
 		}
@@ -182,7 +250,7 @@ export class CssClasses {
 				} else {
 					this.#all_with_locations.set(cls, [...locations]);
 				}
-				// Add to combined map only if not already from include_classes
+				// Add to combined map only if not already from additional_classes
 				if (!this.#all_with_locations_including_includes.has(cls)) {
 					this.#all_with_locations_including_includes.set(cls, this.#all_with_locations.get(cls)!);
 				}
@@ -194,6 +262,34 @@ export class CssClasses {
 			for (const cls of explicit) {
 				if (exclude?.has(cls)) continue;
 				(this.#explicit ??= new Set()).add(cls);
+			}
+		}
+
+		// Aggregate elements from all files
+		for (const elements of this.#elements_by_id.values()) {
+			for (const element of elements) {
+				this.#all_elements.add(element);
+			}
+		}
+
+		// Aggregate CSS variables from all files
+		for (const css_variables of this.#css_variables_by_id.values()) {
+			for (const css_variable of css_variables) {
+				this.#all_css_variables.add(css_variable);
+			}
+		}
+
+		// Aggregate explicit elements from all files
+		for (const explicit_elements of this.#explicit_elements_by_id.values()) {
+			for (const element of explicit_elements) {
+				(this.#explicit_elements ??= new Set()).add(element);
+			}
+		}
+
+		// Aggregate explicit CSS variables from all files
+		for (const explicit_variables of this.#explicit_variables_by_id.values()) {
+			for (const variable of explicit_variables) {
+				(this.#explicit_variables ??= new Set()).add(variable);
 			}
 		}
 	}

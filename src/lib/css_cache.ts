@@ -7,25 +7,11 @@
  * @module
  */
 
-import {mkdir, readFile, writeFile, unlink, rename} from 'node:fs/promises';
-import {dirname, join} from 'node:path';
+import {join} from 'node:path';
+import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-
-/**
- * Computes SHA-256 hash of content using Web Crypto API.
- */
-export const compute_hash = async (content: string): Promise<string> => {
-	const encoder = new TextEncoder();
-	const buffer = encoder.encode(content);
-	const digested = await crypto.subtle.digest('SHA-256', buffer);
-	const bytes = Array.from(new Uint8Array(digested));
-	let hex = '';
-	for (const h of bytes) {
-		hex += h.toString(16).padStart(2, '0');
-	}
-	return hex;
-};
+import type {CacheOperations} from './operations.js';
 
 /**
  * Default cache directory relative to project root.
@@ -33,15 +19,17 @@ export const compute_hash = async (content: string): Promise<string> => {
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
 
 /**
- * Cache version. Bump when any of these change:
+ * CSS cache version. Bump when any of these change:
  * - `CachedExtraction` schema
  * - `extract_css_classes_with_locations()` logic or output
  * - `ExtractionDiagnostic` or `SourceLocation` structure
  *
- * v2: Use null instead of empty arrays for classes/diagnostics
- * v3: Add explicit_classes for @fuz-classes warnings
+ * v1: Initial version with classes and diagnostics
+ * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
+ * v3: Add explicit_elements, explicit_variables for @fuz-elements/@fuz-variables comments
+ * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`)
  */
-const CACHE_VERSION = 1;
+export const CSS_CACHE_VERSION = 4;
 
 /**
  * Cached extraction result for a single file.
@@ -58,6 +46,14 @@ export interface CachedExtraction {
 	explicit_classes: Array<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/** HTML elements found in the file, or null if none */
+	elements: Array<string> | null;
+	/** CSS variables referenced (without -- prefix), or null if none */
+	css_variables: Array<string> | null;
+	/** Elements from @fuz-elements comments, or null if none */
+	explicit_elements: Array<string> | null;
+	/** CSS variables from @fuz-variables comments (without -- prefix), or null if none */
+	explicit_variables: Array<string> | null;
 }
 
 /**
@@ -81,27 +77,51 @@ export const get_cache_path = (
 };
 
 /**
+ * Computes cache path for a file, handling both internal and external paths.
+ * Internal files use relative paths mirroring source tree.
+ * External files (outside project root) use hashed absolute paths in `_external/`.
+ *
+ * @param file_id - Absolute path to the source file
+ * @param cache_dir - Absolute path to the cache directory
+ * @param project_root - Normalized project root (must end with `/`)
+ */
+export const get_file_cache_path = (
+	file_id: string,
+	cache_dir: string,
+	project_root: string,
+): string => {
+	const is_internal = file_id.startsWith(project_root);
+	return is_internal
+		? get_cache_path(file_id, cache_dir, project_root)
+		: join(cache_dir, '_external', hash_insecure(file_id).slice(0, 16) + '.json');
+};
+
+/**
  * Loads a cached extraction result from disk.
  * Returns `null` if the cache is missing, corrupted, or has a version mismatch.
  * This makes the cache self-healing: any error triggers re-extraction.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  */
 export const load_cached_extraction = async (
+	ops: CacheOperations,
 	cache_path: string,
 ): Promise<CachedExtraction | null> => {
 	try {
-		const content = await readFile(cache_path, 'utf8');
+		const content = await ops.read_text({path: cache_path});
+		if (!content) return null;
+
 		const cached = JSON.parse(content) as CachedExtraction;
 
 		// Invalidate if version mismatch
-		if (cached.v !== CACHE_VERSION) {
+		if (cached.v !== CSS_CACHE_VERSION) {
 			return null;
 		}
 
 		return cached;
 	} catch {
-		// Handles: file not found, invalid JSON, truncated file, permission errors
+		// Handles: invalid JSON, truncated file
 		// All cases: return null to trigger re-extraction (self-healing)
 		return null;
 	}
@@ -112,51 +132,69 @@ export const load_cached_extraction = async (
  * Uses atomic write (temp file + rename) for crash safety.
  * Converts empty arrays to null to avoid allocation overhead on load.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
  * @param classes - Extracted classes with their locations, or null if none
  * @param explicit_classes - Classes from @fuz-classes comments, or null if none
  * @param diagnostics - Extraction diagnostics, or null if none
+ * @param elements - HTML elements found in the file, or null if none
+ * @param css_variables - CSS variables referenced (without -- prefix), or null if none
+ * @param explicit_elements - Elements from @fuz-elements comments, or null if none
+ * @param explicit_variables - CSS variables from @fuz-variables comments (without -- prefix), or null if none
  */
 export const save_cached_extraction = async (
+	ops: CacheOperations,
 	cache_path: string,
 	content_hash: string,
 	classes: Map<string, Array<SourceLocation>> | null,
 	explicit_classes: Set<string> | null,
 	diagnostics: Array<ExtractionDiagnostic> | null,
+	elements: Set<string> | null,
+	css_variables: Set<string> | null,
+	explicit_elements: Set<string> | null,
+	explicit_variables: Set<string> | null,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
 	const explicit_array =
 		explicit_classes && explicit_classes.size > 0 ? Array.from(explicit_classes) : null;
 	const diagnostics_array = diagnostics && diagnostics.length > 0 ? diagnostics : null;
+	const elements_array = elements && elements.size > 0 ? Array.from(elements) : null;
+	const css_variables_array =
+		css_variables && css_variables.size > 0 ? Array.from(css_variables) : null;
+	const explicit_elements_array =
+		explicit_elements && explicit_elements.size > 0 ? Array.from(explicit_elements) : null;
+	const explicit_variables_array =
+		explicit_variables && explicit_variables.size > 0 ? Array.from(explicit_variables) : null;
 
 	const data: CachedExtraction = {
-		v: CACHE_VERSION,
+		v: CSS_CACHE_VERSION,
 		content_hash,
 		classes: classes_array,
 		explicit_classes: explicit_array,
 		diagnostics: diagnostics_array,
+		elements: elements_array,
+		css_variables: css_variables_array,
+		explicit_elements: explicit_elements_array,
+		explicit_variables: explicit_variables_array,
 	};
 
-	// Atomic write: temp file + rename
-	// Include pid + timestamp to avoid conflicts with concurrent writes
-	await mkdir(dirname(cache_path), {recursive: true});
-	const temp_path = cache_path + '.tmp.' + process.pid + '.' + Date.now();
-	await writeFile(temp_path, JSON.stringify(data));
-	await rename(temp_path, cache_path);
+	await ops.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
 };
 
 /**
  * Deletes a cached extraction file.
  * Silently succeeds if the file doesn't exist.
  *
+ * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  */
-export const delete_cached_extraction = async (cache_path: string): Promise<void> => {
-	await unlink(cache_path).catch(() => {
-		// Ignore if already gone
-	});
+export const delete_cached_extraction = async (
+	ops: CacheOperations,
+	cache_path: string,
+): Promise<void> => {
+	await ops.unlink({path: cache_path});
 };
 
 /**
@@ -171,8 +209,16 @@ export const from_cached_extraction = (
 	classes: Map<string, Array<SourceLocation>> | null;
 	explicit_classes: Set<string> | null;
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	elements: Set<string> | null;
+	css_variables: Set<string> | null;
+	explicit_elements: Set<string> | null;
+	explicit_variables: Set<string> | null;
 } => ({
 	classes: cached.classes ? new Map(cached.classes) : null,
 	explicit_classes: cached.explicit_classes ? new Set(cached.explicit_classes) : null,
 	diagnostics: cached.diagnostics,
+	elements: cached.elements ? new Set(cached.elements) : null,
+	css_variables: cached.css_variables ? new Set(cached.css_variables) : null,
+	explicit_elements: cached.explicit_elements ? new Set(cached.explicit_elements) : null,
+	explicit_variables: cached.explicit_variables ? new Set(cached.explicit_variables) : null,
 });

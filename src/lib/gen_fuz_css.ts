@@ -11,8 +11,8 @@ import {join} from 'node:path';
 import type {Gen} from '@ryanatkn/gro/gen.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
-import {type FileFilter, filter_file_default} from './file_filter.js';
-import {extract_css_classes_with_locations, type AcornPlugin} from './css_class_extractor.js';
+import {filter_file_default} from './file_filter.js';
+import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {
 	type SourceLocation,
 	type ExtractionDiagnostic,
@@ -21,23 +21,29 @@ import {
 	CssGenerationError,
 } from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
-import {
-	generate_classes_css,
-	type CssClassDefinition,
-	type CssClassDefinitionInterpreter,
-} from './css_class_generation.js';
-import {css_class_definitions} from './css_class_definitions.js';
+import {generate_classes_css} from './css_class_generation.js';
+import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
 	DEFAULT_CACHE_DIR,
-	get_cache_path,
+	get_file_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
-	compute_hash,
 } from './css_cache.js';
+import {default_cache_operations} from './operations_defaults.js';
+import {
+	type StyleRuleIndex,
+	load_style_rule_index,
+	create_style_rule_index,
+	load_default_style_css,
+} from './style_rule_parser.js';
+import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
+import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
+import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -63,22 +69,6 @@ const DEFAULT_CONCURRENCY = 8;
 const DEFAULT_CACHE_IO_CONCURRENCY = 50;
 
 /**
- * Computes cache path for a file.
- * Internal files use relative paths mirroring source tree.
- * External files (outside project root) use hashed absolute paths in `_external/`.
- */
-const get_file_cache_path = async (
-	file_id: string,
-	cache_dir: string,
-	project_root: string,
-): Promise<string> => {
-	const is_internal = file_id.startsWith(project_root);
-	return is_internal
-		? get_cache_path(file_id, cache_dir, project_root)
-		: join(cache_dir, '_external', (await compute_hash(file_id)).slice(0, 16) + '.json');
-};
-
-/**
  * Result from extracting CSS classes from a single file.
  * Used internally during parallel extraction with caching.
  * Uses `null` instead of empty collections to avoid allocation overhead.
@@ -91,61 +81,29 @@ interface FileExtraction {
 	explicit_classes: Set<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/** HTML elements found in the file, or null if none */
+	elements: Set<string> | null;
+	/** CSS variables referenced (without -- prefix), or null if none */
+	css_variables: Set<string> | null;
+	/** Elements from @fuz-elements comments, or null if none */
+	explicit_elements: Set<string> | null;
+	/** CSS variables from @fuz-variables comments (without -- prefix), or null if none */
+	explicit_variables: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
 }
 
-export interface GenFuzCssOptions {
-	filter_file?: FileFilter;
+/**
+ * Options for the Gro CSS generator.
+ * Extends the shared base options with Gro-specific settings.
+ */
+export interface GenFuzCssOptions extends CssGeneratorBaseOptions {
+	/**
+	 * Whether to include file and resolution statistics in the output.
+	 * @default false
+	 */
 	include_stats?: boolean;
-	/**
-	 * Additional class definitions to merge with defaults.
-	 * User definitions take precedence over defaults with the same name.
-	 * Required when `include_default_definitions` is `false`.
-	 */
-	class_definitions?: Record<string, CssClassDefinition | undefined>;
-	/**
-	 * Whether to include default class definitions (token and composite classes).
-	 * When `false`, `class_definitions` is required.
-	 * @default true
-	 */
-	include_default_definitions?: boolean;
-	/**
-	 * Custom interpreters for dynamic class generation.
-	 * Replaces the builtin interpreters entirely if provided.
-	 */
-	class_interpreters?: Array<CssClassDefinitionInterpreter>;
-	/**
-	 * How to handle CSS-literal errors during generation.
-	 * - 'log': Log errors, skip invalid classes, continue
-	 * - 'throw': Throw on first error, fail the build
-	 * @default 'throw' in CI, 'log' otherwise
-	 */
-	on_error?: 'log' | 'throw';
-	/**
-	 * How to handle warnings during generation.
-	 * - 'log': Log warnings, continue
-	 * - 'throw': Throw on first warning, fail the build
-	 * - 'ignore': Suppress warnings entirely
-	 * @default 'log'
-	 */
-	on_warning?: 'log' | 'throw' | 'ignore';
-	/**
-	 * Classes to always include in the output, regardless of whether they're detected in source files.
-	 * Useful for dynamically generated class names that can't be statically extracted.
-	 */
-	include_classes?: Iterable<string>;
-	/**
-	 * Classes to exclude from the output, even if they're detected in source files.
-	 * Useful for filtering out false positives from extraction.
-	 */
-	exclude_classes?: Iterable<string>;
-	/**
-	 * Cache directory relative to project_root.
-	 * @default DEFAULT_CACHE_DIR
-	 */
-	cache_dir?: string;
 	/**
 	 * Project root directory. Source paths must be under this directory.
 	 * @default process.cwd()
@@ -162,19 +120,6 @@ export interface GenFuzCssOptions {
 	 * @default 50
 	 */
 	cache_io_concurrency?: number;
-	/**
-	 * Additional acorn plugins to use when parsing TS/JS files.
-	 * Useful for adding JSX support via `acorn-jsx` for React projects.
-	 *
-	 * @example
-	 * ```ts
-	 * import jsx from 'acorn-jsx';
-	 * export const gen = gen_fuz_css({
-	 *   acorn_plugins: [jsx()],
-	 * });
-	 * ```
-	 */
-	acorn_plugins?: Array<AcornPlugin>;
 }
 
 export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
@@ -182,22 +127,87 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		filter_file = filter_file_default,
 		include_stats = false,
 		class_definitions: user_class_definitions,
-		include_default_definitions = true,
+		include_default_classes = true,
 		class_interpreters = css_class_interpreters,
 		on_error = is_ci ? 'throw' : 'log',
 		on_warning = 'log',
-		include_classes,
+		additional_classes,
 		exclude_classes,
 		cache_dir = DEFAULT_CACHE_DIR,
 		project_root: project_root_option,
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 		acorn_plugins,
+		base_css,
+		variables,
+		include_all_base_css = false,
+		include_all_variables = false,
+		theme_specificity = 1,
+		additional_elements,
+		additional_variables,
+		exclude_elements,
+		exclude_variables,
+		ops = default_cache_operations,
 	} = options;
 
+	// Derive include flags from null check
+	const include_base = base_css !== null;
+	const include_theme = variables !== null;
+
 	// Convert to Sets for efficient lookup
-	const include_set = include_classes ? new Set(include_classes) : null;
+	const include_set = additional_classes ? new Set(additional_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
+
+	// Merge class definitions upfront (validates that definitions exist when needed)
+	const all_class_definitions = merge_class_definitions(
+		user_class_definitions,
+		include_default_classes,
+	);
+
+	// Lazy-load expensive resources (cached per generator instance)
+	let css_properties: Set<string> | null = null;
+	let style_rule_index: StyleRuleIndex | null = null;
+	let variable_graph: VariableDependencyGraph | null = null;
+	let class_variable_index: CssClassVariableIndex | null = null;
+
+	const get_css_properties = async (): Promise<Set<string>> => {
+		if (!css_properties) {
+			css_properties = await load_css_properties();
+		}
+		return css_properties;
+	};
+
+	const get_style_index = async (): Promise<StyleRuleIndex> => {
+		if (!style_rule_index) {
+			if (typeof base_css === 'string') {
+				// Custom CSS string provided (replacement)
+				style_rule_index = await create_style_rule_index(base_css);
+			} else if (typeof base_css === 'function') {
+				// Callback to modify default CSS
+				const default_css = await load_default_style_css(ops);
+				const modified_css = base_css(default_css);
+				style_rule_index = await create_style_rule_index(modified_css);
+			} else {
+				// Use default style.css (undefined or null - null handled by include_base flag)
+				style_rule_index = await load_style_rule_index(ops);
+			}
+		}
+		return style_rule_index;
+	};
+
+	const get_variable_graph = (): VariableDependencyGraph => {
+		if (!variable_graph) {
+			variable_graph = build_variable_graph_from_options(variables);
+		}
+		return variable_graph;
+	};
+
+	const get_class_variable_index = (): CssClassVariableIndex => {
+		if (!class_variable_index) {
+			class_variable_index = build_class_variable_index(all_class_definitions);
+		}
+		return class_variable_index;
+	};
 
 	// Instance-level state for watch mode cleanup
 	let previous_paths: Set<string> | null = null;
@@ -214,8 +224,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		generate: async ({filer, log, origin_path}) => {
 			log.info('generating fuz_css classes...');
 
-			// Load CSS properties for validation before generation
-			const css_properties = await load_css_properties();
+			// Load CSS properties for validation (cached per instance)
+			const cached_css_properties = await get_css_properties();
 
 			await filer.init();
 
@@ -275,11 +285,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				nodes,
 				async (node): Promise<FileExtraction> => {
 					current_paths.add(node.id);
-					const cache_path = await get_file_cache_path(node.id, resolved_cache_dir, project_root);
+					const cache_path = get_file_cache_path(node.id, resolved_cache_dir, project_root);
 
 					// Try cache (skip on CI)
 					if (!is_ci) {
-						const cached = await load_cached_extraction(cache_path);
+						const cached = await load_cached_extraction(ops, cache_path);
 						if (cached && cached.content_hash === node.content_hash) {
 							// Cache hit
 							stats.cache_hits++;
@@ -304,6 +314,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						classes: result.classes,
 						explicit_classes: result.explicit_classes,
 						diagnostics: result.diagnostics,
+						elements: result.elements,
+						css_variables: result.css_variables,
+						explicit_elements: result.explicit_elements,
+						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -312,9 +326,35 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			);
 
 			// Add to CssClasses (null = empty, so use truthiness check)
-			for (const {id, classes, explicit_classes, diagnostics} of extractions) {
-				if (classes || explicit_classes || diagnostics) {
-					css_classes.add(id, classes, explicit_classes, diagnostics);
+			for (const {
+				id,
+				classes,
+				explicit_classes,
+				diagnostics,
+				elements,
+				css_variables,
+				explicit_elements,
+				explicit_variables,
+			} of extractions) {
+				if (
+					classes ||
+					explicit_classes ||
+					diagnostics ||
+					elements ||
+					css_variables ||
+					explicit_elements ||
+					explicit_variables
+				) {
+					css_classes.add(
+						id,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+						explicit_elements,
+						explicit_variables,
+					);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -330,13 +370,28 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			if (cache_writes.length > 0) {
 				await each_concurrent(
 					cache_writes,
-					async ({cache_path, content_hash, classes, explicit_classes, diagnostics}) => {
+					async ({
+						cache_path,
+						content_hash,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						css_variables,
+						explicit_elements,
+						explicit_variables,
+					}) => {
 						await save_cached_extraction(
+							ops,
 							cache_path,
 							content_hash,
 							classes,
 							explicit_classes,
 							diagnostics,
+							elements,
+							css_variables,
+							explicit_elements,
+							explicit_variables,
 						);
 					},
 					cache_io_concurrency,
@@ -351,8 +406,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					await each_concurrent(
 						paths_to_delete,
 						async (path) => {
-							const cache_path = await get_file_cache_path(path, resolved_cache_dir, project_root);
-							await delete_cached_extraction(cache_path);
+							const cache_path = get_file_cache_path(path, resolved_cache_dir, project_root);
+							await delete_cached_extraction(ops, cache_path);
 						},
 						cache_io_concurrency,
 					).catch(() => {
@@ -363,7 +418,15 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			previous_paths = current_paths;
 
 			// Get all classes with locations (already filtered by exclude_classes)
-			const {all_classes, all_classes_with_locations, explicit_classes} = css_classes.get_all();
+			const {
+				all_classes,
+				all_classes_with_locations,
+				explicit_classes,
+				all_elements,
+				all_css_variables,
+				explicit_elements,
+				explicit_variables,
+			} = css_classes.get_all();
 
 			if (include_stats) {
 				log.info('File statistics:');
@@ -377,21 +440,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			// Merge class definitions (user definitions take precedence)
-			if (!include_default_definitions && !user_class_definitions) {
-				throw new Error('class_definitions is required when include_default_definitions is false');
-			}
-			const all_class_definitions = include_default_definitions
-				? user_class_definitions
-					? {...css_class_definitions, ...user_class_definitions}
-					: css_class_definitions
-				: user_class_definitions!;
-
-			const result = generate_classes_css({
+			const utility_result = generate_classes_css({
 				class_names: all_classes,
 				class_definitions: all_class_definitions,
 				interpreters: class_interpreters,
-				css_properties,
+				css_properties: cached_css_properties,
 				log,
 				class_locations: all_classes_with_locations,
 				explicit_classes,
@@ -400,8 +453,55 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			// Collect all diagnostics: extraction + generation
 			const all_diagnostics: Array<Diagnostic> = [
 				...css_classes.get_diagnostics(),
-				...result.diagnostics,
+				...utility_result.diagnostics,
 			];
+
+			// Generate bundled CSS if base or theme are enabled
+			let final_css: string;
+			if (include_base || include_theme) {
+				const resolution = resolve_css({
+					style_rule_index: await get_style_index(),
+					variable_graph: get_variable_graph(),
+					class_variable_index: get_class_variable_index(),
+					detected_elements: all_elements,
+					detected_classes: all_classes,
+					detected_css_variables: all_css_variables,
+					utility_variables_used: utility_result.variables_used,
+					additional_elements,
+					additional_variables,
+					theme_specificity,
+					include_stats,
+					include_all_base_css,
+					include_all_variables,
+					exclude_elements,
+					exclude_variables,
+					explicit_elements,
+					explicit_variables,
+				});
+
+				// Log resolution stats if requested
+				if (include_stats && resolution.stats) {
+					log.info(
+						`[css_resolution] Elements: ${resolution.stats.element_count} (${resolution.stats.elements.join(', ')})`,
+					);
+					log.info(
+						`[css_resolution] Rules: ${resolution.stats.included_rules} of ${resolution.stats.total_rules}`,
+					);
+					log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
+				}
+
+				// Add resolution diagnostics
+				all_diagnostics.push(...resolution.diagnostics);
+
+				final_css = generate_bundled_css(resolution, utility_result.css, {
+					include_theme,
+					include_base,
+					include_utilities: true,
+				});
+			} else {
+				// utility-only mode (legacy behavior)
+				final_css = utility_result.css;
+			}
 
 			// Separate errors and warnings
 			const errors = all_diagnostics.filter((d) => d.level === 'error');
@@ -448,7 +548,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				content_parts.push(performance_note);
 			}
 
-			content_parts.push(result.css);
+			content_parts.push(final_css);
 			content_parts.push(`/* ${banner} */`);
 
 			return content_parts.join('\n\n');

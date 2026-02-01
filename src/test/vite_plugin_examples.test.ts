@@ -18,7 +18,7 @@ import {join} from 'node:path';
 import {readdir, readFile} from 'node:fs/promises';
 import {execSync} from 'node:child_process';
 
-import {FUZ_CSS_MARKER} from '$lib/vite_plugin_fuz_css.js';
+import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.js';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
@@ -154,12 +154,26 @@ const read_generated_css = async (example_name: string): Promise<string> => {
  * Returns the CSS between the marker comments.
  */
 const extract_fuz_css = (css: string): string | null => {
-	const start_idx = css.indexOf(FUZ_CSS_MARKER);
-	const end_idx = css.lastIndexOf(FUZ_CSS_MARKER);
+	const start_idx = css.indexOf(FUZ_CSS_BANNER);
+	const end_idx = css.lastIndexOf(FUZ_CSS_BANNER);
 	if (start_idx === -1 || end_idx === -1 || start_idx === end_idx) {
 		return null;
 	}
-	return css.slice(start_idx, end_idx + FUZ_CSS_MARKER.length);
+	return css.slice(start_idx, end_idx + FUZ_CSS_BANNER.length);
+};
+
+/**
+ * Extracts just the utility classes section from the bundled CSS.
+ * The bundled output has sections: Theme Variables, Base Styles, Utility Classes.
+ */
+const extract_utility_section = (css: string): string => {
+	const utility_marker = '/* Utility Classes */';
+	const idx = css.indexOf(utility_marker);
+	if (idx === -1) {
+		// No utility section marker - return as-is (utility-only mode)
+		return css;
+	}
+	return css.slice(idx);
 };
 
 /**
@@ -196,7 +210,9 @@ const create_example_tests = (example_name: string, app_file: string): void => {
 			build_example(example_name);
 			css = await read_generated_css(example_name);
 			fuz_css = extract_fuz_css(css);
-			extracted_classes = fuz_css ? extract_class_names(fuz_css) : [];
+			// Extract only utility classes section for comparison (bundled mode includes base styles)
+			const utility_css = fuz_css ? extract_utility_section(fuz_css) : '';
+			extracted_classes = utility_css ? extract_class_names(utility_css) : [];
 			// Store for cross-example comparison
 			example_results.set(example_name, extracted_classes);
 		}, 120_000); // 2 minute timeout for install + build

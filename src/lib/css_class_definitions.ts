@@ -316,3 +316,26 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_property_classes('column-gap', space_variants, format_spacing_value),
 	...generate_property_classes('row-gap', space_variants, format_spacing_value),
 };
+
+/**
+ * Merges user class definitions with the built-in defaults.
+ * User definitions take precedence over defaults with the same name.
+ *
+ * @param user_definitions - User-provided class definitions to merge
+ * @param include_defaults - Whether to include built-in definitions
+ * @returns Merged class definitions
+ * @throws Error if `include_defaults` is false and no user definitions provided
+ */
+export const merge_class_definitions = (
+	user_definitions: Record<string, CssClassDefinition | undefined> | undefined,
+	include_defaults: boolean,
+): Record<string, CssClassDefinition | undefined> => {
+	if (!include_defaults && !user_definitions) {
+		throw new Error('class_definitions is required when include_default_classes is false');
+	}
+	return include_defaults
+		? user_definitions
+			? {...css_class_definitions, ...user_definitions}
+			: css_class_definitions
+		: user_definitions!;
+};

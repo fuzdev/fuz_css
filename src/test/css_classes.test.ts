@@ -45,7 +45,7 @@ describe('CssClasses', () => {
 		expect(result.has('bar')).toBe(true);
 	});
 
-	test('include_classes always included', () => {
+	test('additional_classes always included', () => {
 		const css_classes = new CssClasses(new Set(['always-included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
@@ -55,7 +55,7 @@ describe('CssClasses', () => {
 		expect(result.has('extracted')).toBe(true);
 	});
 
-	test('get_with_locations returns null for include_classes', () => {
+	test('get_with_locations returns null for additional_classes', () => {
 		const css_classes = new CssClasses(new Set(['included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
@@ -127,7 +127,7 @@ describe('CssClasses', () => {
 		expect(explicit_classes!.has('regular')).toBe(false);
 	});
 
-	test('include_classes are included in explicit_classes', () => {
+	test('additional_classes are included in explicit_classes', () => {
 		const css_classes = new CssClasses(new Set(['included_class']));
 
 		const {explicit_classes} = css_classes.get_all();
@@ -172,5 +172,87 @@ describe('CssClasses', () => {
 		const {explicit_classes} = css_classes.get_all();
 		// Should be filtered out by exclude
 		expect(explicit_classes).toBeNull();
+	});
+});
+
+describe('additional_classes with file data (simulating cache behavior)', () => {
+	test('additional_classes merged with file data', () => {
+		const css_classes = new CssClasses(new Set(['additional_a', 'additional_b']));
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		// Simulate adding file data (could be from cache or fresh extraction)
+		css_classes.add('file1.svelte', new Map([['extracted_class', [loc]]]));
+
+		const result = css_classes.get();
+		// Both additional and extracted should be present
+		expect(result.has('additional_a')).toBe(true);
+		expect(result.has('additional_b')).toBe(true);
+		expect(result.has('extracted_class')).toBe(true);
+	});
+
+	test('exclude_classes filters additional_classes', () => {
+		const include = new Set(['keep_me', 'exclude_me']);
+		const exclude = new Set(['exclude_me']);
+		const css_classes = new CssClasses(include, exclude);
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+
+		const result = css_classes.get();
+		expect(result.has('keep_me')).toBe(true);
+		expect(result.has('exclude_me')).toBe(false);
+		expect(result.has('extracted')).toBe(true);
+	});
+
+	test('multiple files combined with additional_classes', () => {
+		const css_classes = new CssClasses(new Set(['always_included']));
+		const loc1: SourceLocation = {file: 'file1.svelte', line: 1, column: 1};
+		const loc2: SourceLocation = {file: 'file2.svelte', line: 5, column: 10};
+
+		// Add multiple files (simulating cache-restored data)
+		css_classes.add('file1.svelte', new Map([['from_file1', [loc1]]]));
+		css_classes.add('file2.svelte', new Map([['from_file2', [loc2]]]));
+
+		const result = css_classes.get();
+		expect(result.has('always_included')).toBe(true);
+		expect(result.has('from_file1')).toBe(true);
+		expect(result.has('from_file2')).toBe(true);
+	});
+
+	test('empty additional_classes has no effect on file data', () => {
+		const css_classes = new CssClasses(null);
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+
+		const result = css_classes.get();
+		expect(result.size).toBe(1);
+		expect(result.has('extracted')).toBe(true);
+	});
+
+	test('additional_classes appear in explicit_classes for warning tracking', () => {
+		const css_classes = new CssClasses(new Set(['additional_class']));
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', new Map([['regular', [loc]]]));
+
+		const {explicit_classes} = css_classes.get_all();
+		// additional_classes should be in explicit_classes
+		expect(explicit_classes?.has('additional_class')).toBe(true);
+		// Regular extracted classes are not explicit unless via @fuz-classes
+		expect(explicit_classes?.has('regular')).toBe(false);
+	});
+
+	test('file explicit classes combined with additional_classes in explicit_classes', () => {
+		const css_classes = new CssClasses(new Set(['additional']));
+		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
+		const file_explicit = new Set(['from_fuz_classes_annotation']);
+
+		css_classes.add('file1.ts', new Map([['regular', [loc]]]), file_explicit);
+
+		const {explicit_classes} = css_classes.get_all();
+		expect(explicit_classes?.has('additional')).toBe(true);
+		expect(explicit_classes?.has('from_fuz_classes_annotation')).toBe(true);
+		expect(explicit_classes?.has('regular')).toBe(false);
 	});
 });

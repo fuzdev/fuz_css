@@ -9,6 +9,8 @@
  * - `clsx('foo', { bar: true })` - class utility function calls
  * - Variables with class-related names
  * - `// @fuz-classes class1 class2` - comment hints for dynamic classes
+ * - `// @fuz-elements element1 element2` - comment hints for dynamic elements
+ * - `// @fuz-variables var1 var2` - comment hints for dynamic variables
  *
  * @module
  */
@@ -19,6 +21,51 @@ import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
 
 import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
+import {extract_css_variables} from './css_variable_utils.js';
+
+//
+// CSS Variable Utilities
+//
+
+/**
+ * Pattern to detect incomplete CSS variable at end of string.
+ * Matches `var(--name` where the var() is unclosed (no `)` before end of string).
+ * When followed by an expression, this indicates dynamic variable construction:
+ * - `var(--prefix_{expr})` → prefix_ is incomplete
+ * - `var(--b{expr})` → b is incomplete
+ * - `var(--color-{expr})` → color- is incomplete
+ */
+const INCOMPLETE_CSS_VAR_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)$/;
+
+/**
+ * Extracts CSS variables, filtering out incomplete names when followed by expression.
+ *
+ * When a Text part in a Svelte template ends with `var(--prefix_` and is immediately
+ * followed by an ExpressionTag, the variable name is being dynamically constructed
+ * (e.g., `var(--border_width_{width})`). We should not extract the incomplete prefix.
+ *
+ * @param text - CSS text to extract from
+ * @param followed_by_expression - True if next AST node is an expression
+ * @returns Set of complete variable names
+ */
+const extract_complete_css_variables = (
+	text: string,
+	followed_by_expression: boolean,
+): Set<string> => {
+	const variables = extract_css_variables(text);
+
+	if (!followed_by_expression || variables.size === 0) {
+		return variables;
+	}
+
+	// Check if text ends with incomplete var pattern
+	const incomplete = INCOMPLETE_CSS_VAR_PATTERN.exec(text);
+	if (incomplete) {
+		variables.delete(incomplete[1]!);
+	}
+
+	return variables;
+};
 
 //
 // Types
@@ -30,7 +77,7 @@ import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
  *
  * Uses embedded diagnostics (rather than a Result type) because file extraction
  * can partially succeed: some classes may be extracted while others produce errors.
- * This differs from {@link CssLiteralParseResult} which uses a discriminated union
+ * This differs from `CssLiteralParseResult` which uses a discriminated union
  * because single-class parsing is binary success/failure.
  */
 export interface ExtractionResult {
@@ -41,13 +88,35 @@ export interface ExtractionResult {
 	classes: Map<string, Array<SourceLocation>> | null;
 	/**
 	 * Classes explicitly annotated via `@fuz-classes` comments, or null if none.
-	 * These should produce warnings if they can't be resolved during generation.
+	 * These produce errors if they can't be resolved during generation.
 	 */
 	explicit_classes: Set<string> | null;
 	/** Variables that were used in class contexts, or null if none */
 	tracked_vars: Set<string> | null;
 	/** Diagnostics from the extraction phase, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
+	/**
+	 * HTML elements found in the file, or null if none.
+	 * Used for including only the style.css rules needed.
+	 */
+	elements: Set<string> | null;
+	/**
+	 * CSS variables referenced in style attributes/directives, or null if none.
+	 * Used for including only the theme variables needed.
+	 * Variable names are stored without the `--` prefix.
+	 */
+	css_variables: Set<string> | null;
+	/**
+	 * Elements explicitly annotated via `@fuz-elements` comments, or null if none.
+	 * These should produce errors if they have no matching style rules.
+	 */
+	explicit_elements: Set<string> | null;
+	/**
+	 * CSS variables explicitly annotated via `@fuz-variables` comments, or null if none.
+	 * These should produce errors if they can't be resolved in the theme.
+	 * Variable names are stored without the `--` prefix.
+	 */
+	explicit_variables: Set<string> | null;
 }
 
 /**
@@ -175,7 +244,62 @@ interface WalkState {
 	source_index: SourceIndex | null;
 	/** Diagnostics collected during extraction */
 	diagnostics: Array<ExtractionDiagnostic>;
+	/** HTML elements found in the file */
+	elements: Set<string>;
+	/** CSS variables referenced in style attributes (without -- prefix) */
+	css_variables: Set<string>;
+	/** Elements explicitly annotated via @fuz-elements comments */
+	explicit_elements: Set<string>;
+	/** CSS variables explicitly annotated via @fuz-variables comments (without -- prefix) */
+	explicit_variables: Set<string>;
 }
+
+/**
+ * Creates a fresh WalkState for extraction.
+ */
+const create_walk_state = (file: string, source_index: SourceIndex | null): WalkState => ({
+	classes: new Map(),
+	explicit_classes: new Set(),
+	tracked_vars: new Set(),
+	class_name_vars: new Map(),
+	in_class_context: false,
+	file,
+	source_index,
+	diagnostics: [],
+	elements: new Set(),
+	css_variables: new Set(),
+	explicit_elements: new Set(),
+	explicit_variables: new Set(),
+});
+
+/**
+ * Converts WalkState to ExtractionResult, converting empty collections to null.
+ */
+const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
+	classes: state.classes.size > 0 ? state.classes : null,
+	explicit_classes: state.explicit_classes.size > 0 ? state.explicit_classes : null,
+	tracked_vars: state.tracked_vars.size > 0 ? state.tracked_vars : null,
+	diagnostics: state.diagnostics.length > 0 ? state.diagnostics : null,
+	elements: state.elements.size > 0 ? state.elements : null,
+	css_variables: state.css_variables.size > 0 ? state.css_variables : null,
+	explicit_elements: state.explicit_elements.size > 0 ? state.explicit_elements : null,
+	explicit_variables: state.explicit_variables.size > 0 ? state.explicit_variables : null,
+});
+
+/**
+ * Creates an empty ExtractionResult with only diagnostics.
+ * Used when parsing fails early.
+ */
+const empty_extraction_result = (diagnostics: Array<ExtractionDiagnostic>): ExtractionResult => ({
+	classes: null,
+	explicit_classes: null,
+	tracked_vars: null,
+	diagnostics: diagnostics.length > 0 ? diagnostics : null,
+	elements: null,
+	css_variables: null,
+	explicit_elements: null,
+	explicit_variables: null,
+});
 
 /**
  * Adds a class to the state with a location.
@@ -200,71 +324,55 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
  *
  * @param source - The Svelte file source code
  * @param file - File path for location tracking
- * @returns Extraction result with classes, tracked variables, and diagnostics
+ * @returns Extraction result with classes, tracked variables, elements, css_variables, and diagnostics
  */
 export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
-	const classes: Map<string, Array<SourceLocation>> = new Map();
-	const explicit_classes: Set<string> = new Set();
-	const tracked_vars: Set<string> = new Set();
-	const class_name_vars: Map<string, unknown> = new Map();
-	const diagnostics: Array<ExtractionDiagnostic> = [];
 	const source_index = new SourceIndex(source);
 
 	let ast: AST.Root;
 	try {
 		ast = parse_svelte(source, {modern: true});
 	} catch (err) {
-		// Emit diagnostic about parse failure
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
-			suggestion: 'Check for syntax errors in the file',
-			location: {file, line: 1, column: 1},
-		});
-		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
+		return empty_extraction_result([
+			{
+				phase: 'extraction',
+				level: 'warning',
+				message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				suggestion: 'Check for syntax errors in the file',
+				location: {file, line: 1, column: 1},
+			},
+		]);
 	}
 
-	const state: WalkState = {
-		classes,
-		explicit_classes,
-		tracked_vars,
-		class_name_vars,
-		in_class_context: false,
-		file,
-		source_index,
-		diagnostics,
-	};
+	const state = create_walk_state(file, source_index);
 
-	// Extract from @fuz-classes comments via AST (Svelte Comment nodes)
-	extract_fuz_classes_from_svelte_comments(ast, state);
+	// Extract from @fuz-* comments via AST (Svelte Comment nodes)
+	extract_fuz_comments_from_svelte(ast, state);
 
 	// Walk the template AST
 	walk_template(ast.fragment, state);
 
 	// Walk the script AST (module and instance) including @fuz-classes comments
 	if (ast.instance) {
-		extract_fuz_classes_from_script(ast.instance, source, state);
+		extract_fuz_comments_from_script(ast.instance, source, state);
 		walk_script(ast.instance.content, state);
 	}
 	if (ast.module) {
-		extract_fuz_classes_from_script(ast.module, source, state);
+		extract_fuz_comments_from_script(ast.module, source, state);
 		walk_script(ast.module.content, state);
 	}
 
+	// Extract CSS variables from style block if present
+	if (ast.css) {
+		extract_css_variables_from_style(source, ast.css, state);
+	}
+
 	// Second pass: extract from tracked variables that weren't already processed
-	if (tracked_vars.size > 0 && (ast.instance || ast.module)) {
+	if (state.tracked_vars.size > 0 && (ast.instance || ast.module)) {
 		extract_from_tracked_vars(ast, state);
 	}
 
-	// Convert empty to null
-	return {
-		classes: classes.size > 0 ? classes : null,
-		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
-		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
-		diagnostics: diagnostics.length > 0 ? diagnostics : null,
-	};
+	return finalize_extraction_result(state);
 };
 
 /**
@@ -300,32 +408,136 @@ const parse_fuz_classes_comment = (
 };
 
 /**
- * Extracts @fuz-classes from Svelte HTML Comment nodes.
+ * Parses @fuz-elements content from a comment, handling the colon variant.
+ * Returns the list of element names or null if not a @fuz-elements comment.
  */
-const extract_fuz_classes_from_svelte_comments = (ast: AST.Root, state: WalkState): void => {
-	// Walk the fragment looking for Comment nodes
+const FUZ_ELEMENTS_PATTERN = /^\s*@fuz-elements(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_elements_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	const match = FUZ_ELEMENTS_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const element_list = match[2]!;
+
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-elements: colon is unnecessary',
+			suggestion: 'Use @fuz-elements without the colon',
+			location,
+		});
+	}
+
+	return element_list.split(/\s+/).filter(Boolean);
+};
+
+/**
+ * Parses @fuz-variables content from a comment, handling the colon variant.
+ * Returns the list of variable names (without -- prefix) or null if not a @fuz-variables comment.
+ * Accepts variables with or without the -- prefix, stripping it if present with a warning.
+ */
+const FUZ_VARIABLES_PATTERN = /^\s*@fuz-variables(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_variables_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	const match = FUZ_VARIABLES_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const variable_list = match[2]!;
+
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-variables: colon is unnecessary',
+			suggestion: 'Use @fuz-variables without the colon',
+			location,
+		});
+	}
+
+	const raw_names = variable_list.split(/\s+/).filter(Boolean);
+	const names: Array<string> = [];
+
+	for (const name of raw_names) {
+		if (name.startsWith('--')) {
+			// Strip -- prefix and warn
+			diagnostics.push({
+				phase: 'extraction',
+				level: 'warning',
+				message: `@fuz-variables: "${name}" should be written without the -- prefix`,
+				suggestion: `Use "${name.slice(2)}" instead of "${name}"`,
+				location,
+			});
+			names.push(name.slice(2));
+		} else {
+			names.push(name);
+		}
+	}
+
+	return names;
+};
+
+/**
+ * Processes a comment for @fuz-classes, @fuz-elements, and @fuz-variables annotations.
+ * Adds found items to the appropriate state collections.
+ */
+const process_fuz_comment = (content: string, location: SourceLocation, state: WalkState): void => {
+	// @fuz-classes
+	const class_list = parse_fuz_classes_comment(content, location, state.diagnostics);
+	if (class_list) {
+		for (const cls of class_list) {
+			add_class(state, cls, location);
+			state.explicit_classes.add(cls);
+		}
+	}
+
+	// @fuz-elements
+	const element_list = parse_fuz_elements_comment(content, location, state.diagnostics);
+	if (element_list) {
+		for (const el of element_list) {
+			state.elements.add(el);
+			state.explicit_elements.add(el);
+		}
+	}
+
+	// @fuz-variables
+	const variable_list = parse_fuz_variables_comment(content, location, state.diagnostics);
+	if (variable_list) {
+		for (const v of variable_list) {
+			state.css_variables.add(v);
+			state.explicit_variables.add(v);
+		}
+	}
+};
+
+/**
+ * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
+ */
+const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
 		Comment(node, {state}) {
-			const location = location_from_offset(state, node.start);
-			const classes = parse_fuz_classes_comment(node.data, location, state.diagnostics);
-			if (classes) {
-				for (const cls of classes) {
-					add_class(state, cls, location);
-					state.explicit_classes.add(cls);
-				}
-			}
+			process_fuz_comment(node.data, location_from_offset(state, node.start), state);
 		},
 	};
-
 	walk(ast.fragment as AST.SvelteNode, state, visitors);
 };
 
 /**
- * Extracts @fuz-classes from script blocks by re-parsing with acorn.
+ * Extracts @fuz-* comments from script blocks by re-parsing with acorn.
  * Svelte's parser doesn't expose JS comments, so we parse the
  * script source separately to get comments via acorn's onComment callback.
  */
-const extract_fuz_classes_from_script = (
+const extract_fuz_comments_from_script = (
 	script: AST.Script,
 	source: string,
 	state: WalkState,
@@ -368,20 +580,14 @@ const extract_fuz_classes_from_script = (
 		return;
 	}
 
-	// Process @fuz-classes comments
+	// Process @fuz-* comments
 	for (const comment of comments) {
 		const location: SourceLocation = {
 			file: state.file,
 			line: comment.loc.start.line + line_offset,
 			column: comment.loc.start.column + 1,
 		};
-		const class_list = parse_fuz_classes_comment(comment.value, location, state.diagnostics);
-		if (class_list) {
-			for (const cls of class_list) {
-				add_class(state, cls, location);
-				state.explicit_classes.add(cls);
-			}
-		}
+		process_fuz_comment(comment.value, location, state);
 	}
 };
 
@@ -391,19 +597,13 @@ const extract_fuz_classes_from_script = (
  * @param source - The TS/JS file source code
  * @param file - File path for location tracking
  * @param acorn_plugins - Additional acorn plugins (e.g., acorn-jsx for React)
- * @returns Extraction result with classes, tracked variables, and diagnostics
+ * @returns Extraction result with classes, tracked variables, elements, css_variables, and diagnostics
  */
 export const extract_from_ts = (
 	source: string,
 	file = '<unknown>',
 	acorn_plugins?: Array<AcornPlugin>,
 ): ExtractionResult => {
-	const classes: Map<string, Array<SourceLocation>> = new Map();
-	const explicit_classes: Set<string> = new Set();
-	const tracked_vars: Set<string> = new Set();
-	const class_name_vars: Map<string, unknown> = new Map();
-	const diagnostics: Array<ExtractionDiagnostic> = [];
-
 	// Collect comments via acorn's onComment callback
 	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
 
@@ -429,60 +629,38 @@ export const extract_from_ts = (
 			},
 		});
 	} catch (err) {
-		// Emit diagnostic about parse failure
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
-			suggestion: 'Check for syntax errors in the file',
-			location: {file, line: 1, column: 1},
-		});
-		// Return with diagnostics (classes/tracked_vars empty, so null)
-		return {classes: null, explicit_classes: null, tracked_vars: null, diagnostics};
+		return empty_extraction_result([
+			{
+				phase: 'extraction',
+				level: 'warning',
+				message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				suggestion: 'Check for syntax errors in the file',
+				location: {file, line: 1, column: 1},
+			},
+		]);
 	}
 
-	// Process @fuz-classes comments
+	const state = create_walk_state(file, null); // null source_index - acorn provides locations
+
+	// Process @fuz-* comments
 	for (const comment of comments) {
 		const location: SourceLocation = {
 			file,
 			line: comment.loc.start.line,
 			column: comment.loc.start.column + 1,
 		};
-		const class_list = parse_fuz_classes_comment(comment.value, location, diagnostics);
-		if (class_list) {
-			for (const cls of class_list) {
-				add_class_with_location(classes, cls, location);
-				explicit_classes.add(cls);
-			}
-		}
+		process_fuz_comment(comment.value, location, state);
 	}
-
-	const state: WalkState = {
-		classes,
-		explicit_classes,
-		tracked_vars,
-		class_name_vars,
-		in_class_context: false,
-		file,
-		source_index: null, // Not needed for TS files - acorn provides locations
-		diagnostics,
-	};
 
 	walk_script(ast, state);
 
 	// Second pass: extract from tracked variables that weren't already processed
 	// This handles JSX patterns where className={foo} is encountered after const foo = '...'
-	if (tracked_vars.size > 0) {
+	if (state.tracked_vars.size > 0) {
 		extract_from_tracked_vars_in_script(ast, state);
 	}
 
-	// Convert empty to null
-	return {
-		classes: classes.size > 0 ? classes : null,
-		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
-		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
-		diagnostics: diagnostics.length > 0 ? diagnostics : null,
-	};
+	return finalize_extraction_result(state);
 };
 
 /**
@@ -491,14 +669,14 @@ export const extract_from_ts = (
  *
  * @param source - The file source code
  * @param options - Extraction options
- * @returns Set of class names
+ * @returns Set of class names, or null if none found
  */
 export const extract_css_classes = (
 	source: string,
 	options: ExtractCssClassesOptions = {},
-): Set<string> => {
+): Set<string> | null => {
 	const result = extract_css_classes_with_locations(source, options);
-	return result.classes ? new Set(result.classes.keys()) : new Set();
+	return result.classes ? new Set(result.classes.keys()) : null;
 };
 
 /**
@@ -534,19 +712,23 @@ export const extract_css_classes_with_locations = (
 // Template AST walking
 
 /**
- * Walks the Svelte template AST to extract class names.
+ * Walks the Svelte template AST to extract class names and element names.
  */
 const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
-		// Handle regular elements and components
+		// Handle regular elements - capture element name
 		RegularElement(node, {state, next}) {
+			// Track HTML element names (not components, not svelte:* elements)
+			state.elements.add(node.name);
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// SvelteElement has dynamic tag, can't statically determine element
 		SvelteElement(node, {state, next}) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// Components are PascalCase - don't add to elements
 		SvelteComponent(node, {state, next}) {
 			process_element_attributes(node.attributes, state);
 			next();
@@ -559,13 +741,39 @@ const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
+		// SvelteHead injects children into document <head> - walk its fragment
+		SvelteHead(_node, {next}) {
+			next();
+		},
+		// TitleElement is a special element type for <title> inside svelte:head
+		TitleElement(node, {state, next}) {
+			state.elements.add(node.name);
+			process_element_attributes(node.attributes, state);
+			next();
+		},
+		// SlotElement is <slot> - can have fallback content with elements
+		SlotElement(node, {state, next}) {
+			state.elements.add(node.name);
+			process_element_attributes(node.attributes, state);
+			next();
+		},
+		// SvelteBody, SvelteWindow, SvelteDocument don't have element children
+		SvelteBody(_node, {next}) {
+			next();
+		},
+		SvelteWindow(_node, {next}) {
+			next();
+		},
+		SvelteDocument(_node, {next}) {
+			next();
+		},
 	};
 
 	walk(fragment as AST.SvelteNode, state, visitors);
 };
 
 /**
- * Processes attributes on an element to extract class names.
+ * Processes attributes on an element to extract class names and CSS variables.
  */
 const process_element_attributes = (
 	attributes: Array<AST.Attribute | AST.SpreadAttribute | AST.Directive | AST.AttachTag>,
@@ -581,6 +789,142 @@ const process_element_attributes = (
 		if (attr.type === 'ClassDirective') {
 			add_class(state, attr.name, location_from_offset(state, attr.start));
 		}
+
+		// Handle style attribute - extract CSS variables
+		if (attr.type === 'Attribute' && attr.name === 'style') {
+			extract_css_variables_from_style_attribute(attr.value, state);
+		}
+
+		// Handle style: directive - extract CSS variables
+		if (attr.type === 'StyleDirective') {
+			// The value could contain var(--*) references
+			extract_css_variables_from_style_directive(attr, state);
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a style attribute value.
+ * Filters out incomplete variable names when followed by an expression
+ * (e.g., `var(--prefix_{dynamic})` should not extract `prefix_`).
+ */
+const extract_css_variables_from_style_attribute = (
+	value: AST.Attribute['value'],
+	state: WalkState,
+): void => {
+	if (value === true) return;
+
+	if (Array.isArray(value)) {
+		for (let i = 0; i < value.length; i++) {
+			const part = value[i]!;
+			if (part.type === 'Text') {
+				// Check if next node is an expression (dynamic variable construction)
+				const next = value[i + 1];
+				const followed_by_expression = next?.type === 'ExpressionTag';
+				for (const v of extract_complete_css_variables(part.data, followed_by_expression)) {
+					state.css_variables.add(v);
+				}
+			}
+			// Expression parts could contain var() in strings, but that's less common
+			// We'll focus on static text for now
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a style: directive.
+ * Filters out incomplete variable names when followed by an expression
+ * (e.g., `var(--prefix_{dynamic})` should not extract `prefix_`).
+ */
+const extract_css_variables_from_style_directive = (
+	directive: AST.StyleDirective,
+	state: WalkState,
+): void => {
+	// The directive name itself might be a CSS variable being set (e.g., style:--foo)
+	if (directive.name.startsWith('--')) {
+		// This is setting a variable, not using one
+		// But the value might reference other variables
+	}
+
+	// Check if value is an array of text/expressions
+	if (Array.isArray(directive.value)) {
+		for (let i = 0; i < directive.value.length; i++) {
+			const part = directive.value[i]!;
+			if (part.type === 'Text') {
+				// Check if next node is an expression (dynamic variable construction)
+				const next = directive.value[i + 1];
+				const followed_by_expression = next?.type === 'ExpressionTag';
+				for (const v of extract_complete_css_variables(part.data, followed_by_expression)) {
+					state.css_variables.add(v);
+				}
+			}
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from a JSX style attribute.
+ * Handles both string styles and object styles.
+ */
+const extract_css_variables_from_jsx_style = (value: unknown, state: WalkState): void => {
+	const node = value as {
+		type: string;
+		value?: string;
+		expression?: unknown;
+	};
+
+	// String literal style="color: var(--text)"
+	if (node.type === 'Literal' && typeof node.value === 'string') {
+		for (const v of extract_css_variables(node.value)) {
+			state.css_variables.add(v);
+		}
+	}
+	// Object expression style={{ color: 'var(--text)' }}
+	else if (node.type === 'JSXExpressionContainer' && node.expression) {
+		extract_css_variables_from_object_style(node.expression, state);
+	}
+};
+
+/**
+ * Extracts CSS variables from a style object expression.
+ */
+const extract_css_variables_from_object_style = (expr: unknown, state: WalkState): void => {
+	const node = expr as {
+		type: string;
+		properties?: Array<{
+			type: string;
+			value?: {type: string; value?: string};
+		}>;
+	};
+
+	if (node.type === 'ObjectExpression' && node.properties) {
+		for (const prop of node.properties) {
+			if (prop.type === 'Property' && prop.value?.type === 'Literal') {
+				const val = prop.value.value;
+				if (typeof val === 'string') {
+					for (const v of extract_css_variables(val)) {
+						state.css_variables.add(v);
+					}
+				}
+			}
+		}
+	}
+};
+
+/**
+ * Extracts CSS variables from the <style> block.
+ */
+const extract_css_variables_from_style = (
+	source: string,
+	css_ast: AST.CSS.StyleSheet,
+	state: WalkState,
+): void => {
+	// Extract the CSS content
+	const css_content = source.slice(css_ast.content.start, css_ast.content.end);
+
+	// Extract all var(--*) references from the CSS
+	for (const v of extract_css_variables(css_content)) {
+		state.css_variables.add(v);
 	}
 };
 
@@ -969,11 +1313,12 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 			next();
 		},
 
-		// JSX elements (React/Preact/Solid) - extract class-related attributes
+		// JSX elements (React/Preact/Solid) - extract class-related attributes and element names
 		// These are only present when acorn-jsx plugin is used
 		JSXElement(node, {state, next}) {
 			const element = node as unknown as {
 				openingElement: {
+					name?: {type: string; name?: string};
 					attributes: Array<{
 						type: string;
 						name?: {type: string; name?: string};
@@ -981,6 +1326,13 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 					}>;
 				};
 			};
+
+			// Track element names (lowercase = HTML element, PascalCase = component)
+			const tag_name = element.openingElement.name?.name;
+			if (tag_name && /^[a-z]/.test(tag_name)) {
+				state.elements.add(tag_name);
+			}
+
 			for (const attr of element.openingElement.attributes) {
 				if (attr.type === 'JSXAttribute' && attr.value) {
 					const attr_name = attr.name?.name;
@@ -991,6 +1343,10 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 					// classList (Solid) - object syntax like classList={{ active: isActive }}
 					else if (attr_name === 'classList') {
 						extract_from_jsx_attribute_value(attr.value, state);
+					}
+					// style attribute - extract CSS variables
+					else if (attr_name === 'style') {
+						extract_css_variables_from_jsx_style(attr.value, state);
 					}
 				}
 			}

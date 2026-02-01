@@ -48,7 +48,7 @@ describe('format_diagnostic', () => {
 		expect(result).toBe('  - src/App.svelte:5:12: invalid:value: unknown CSS property');
 	});
 
-	test('formats generation diagnostic without location (from include_classes)', () => {
+	test('formats generation diagnostic without location (from additional_classes)', () => {
 		const diagnostic: GenerationDiagnostic = {
 			phase: 'generation',
 			level: 'error',
