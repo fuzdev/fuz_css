@@ -255,6 +255,53 @@ interface WalkState {
 }
 
 /**
+ * Creates a fresh WalkState for extraction.
+ */
+const create_walk_state = (file: string, source_index: SourceIndex | null): WalkState => ({
+	classes: new Map(),
+	explicit_classes: new Set(),
+	tracked_vars: new Set(),
+	class_name_vars: new Map(),
+	in_class_context: false,
+	file,
+	source_index,
+	diagnostics: [],
+	elements: new Set(),
+	css_variables: new Set(),
+	explicit_elements: new Set(),
+	explicit_variables: new Set(),
+});
+
+/**
+ * Converts WalkState to ExtractionResult, converting empty collections to null.
+ */
+const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
+	classes: state.classes.size > 0 ? state.classes : null,
+	explicit_classes: state.explicit_classes.size > 0 ? state.explicit_classes : null,
+	tracked_vars: state.tracked_vars.size > 0 ? state.tracked_vars : null,
+	diagnostics: state.diagnostics.length > 0 ? state.diagnostics : null,
+	elements: state.elements.size > 0 ? state.elements : null,
+	css_variables: state.css_variables.size > 0 ? state.css_variables : null,
+	explicit_elements: state.explicit_elements.size > 0 ? state.explicit_elements : null,
+	explicit_variables: state.explicit_variables.size > 0 ? state.explicit_variables : null,
+});
+
+/**
+ * Creates an empty ExtractionResult with only diagnostics.
+ * Used when parsing fails early.
+ */
+const empty_extraction_result = (diagnostics: Array<ExtractionDiagnostic>): ExtractionResult => ({
+	classes: null,
+	explicit_classes: null,
+	tracked_vars: null,
+	diagnostics: diagnostics.length > 0 ? diagnostics : null,
+	elements: null,
+	css_variables: null,
+	explicit_elements: null,
+	explicit_variables: null,
+});
+
+/**
  * Adds a class to the state with a location.
  */
 const add_class = (state: WalkState, class_name: string, location: SourceLocation): void => {
@@ -280,56 +327,24 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
  * @returns Extraction result with classes, tracked variables, elements, css_variables, and diagnostics
  */
 export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
-	const classes: Map<string, Array<SourceLocation>> = new Map();
-	const explicit_classes: Set<string> = new Set();
-	const tracked_vars: Set<string> = new Set();
-	const class_name_vars: Map<string, unknown> = new Map();
-	const diagnostics: Array<ExtractionDiagnostic> = [];
 	const source_index = new SourceIndex(source);
-	const elements: Set<string> = new Set();
-	const css_variables: Set<string> = new Set();
-	const explicit_elements: Set<string> = new Set();
-	const explicit_variables: Set<string> = new Set();
 
 	let ast: AST.Root;
 	try {
 		ast = parse_svelte(source, {modern: true});
 	} catch (err) {
-		// Emit diagnostic about parse failure
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
-			suggestion: 'Check for syntax errors in the file',
-			location: {file, line: 1, column: 1},
-		});
-		// Return with diagnostics (all collections empty, so null)
-		return {
-			classes: null,
-			explicit_classes: null,
-			tracked_vars: null,
-			diagnostics,
-			elements: null,
-			css_variables: null,
-			explicit_elements: null,
-			explicit_variables: null,
-		};
+		return empty_extraction_result([
+			{
+				phase: 'extraction',
+				level: 'warning',
+				message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				suggestion: 'Check for syntax errors in the file',
+				location: {file, line: 1, column: 1},
+			},
+		]);
 	}
 
-	const state: WalkState = {
-		classes,
-		explicit_classes,
-		tracked_vars,
-		class_name_vars,
-		in_class_context: false,
-		file,
-		source_index,
-		diagnostics,
-		elements,
-		css_variables,
-		explicit_elements,
-		explicit_variables,
-	};
+	const state = create_walk_state(file, source_index);
 
 	// Extract from @fuz-* comments via AST (Svelte Comment nodes)
 	extract_fuz_comments_from_svelte(ast, state);
@@ -353,21 +368,11 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 	}
 
 	// Second pass: extract from tracked variables that weren't already processed
-	if (tracked_vars.size > 0 && (ast.instance || ast.module)) {
+	if (state.tracked_vars.size > 0 && (ast.instance || ast.module)) {
 		extract_from_tracked_vars(ast, state);
 	}
 
-	// Convert empty to null
-	return {
-		classes: classes.size > 0 ? classes : null,
-		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
-		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
-		diagnostics: diagnostics.length > 0 ? diagnostics : null,
-		elements: elements.size > 0 ? elements : null,
-		css_variables: css_variables.size > 0 ? css_variables : null,
-		explicit_elements: explicit_elements.size > 0 ? explicit_elements : null,
-		explicit_variables: explicit_variables.size > 0 ? explicit_variables : null,
-	};
+	return finalize_extraction_result(state);
 };
 
 /**
@@ -483,43 +488,47 @@ const parse_fuz_variables_comment = (
 };
 
 /**
+ * Processes a comment for @fuz-classes, @fuz-elements, and @fuz-variables annotations.
+ * Adds found items to the appropriate state collections.
+ */
+const process_fuz_comment = (content: string, location: SourceLocation, state: WalkState): void => {
+	// @fuz-classes
+	const class_list = parse_fuz_classes_comment(content, location, state.diagnostics);
+	if (class_list) {
+		for (const cls of class_list) {
+			add_class(state, cls, location);
+			state.explicit_classes.add(cls);
+		}
+	}
+
+	// @fuz-elements
+	const element_list = parse_fuz_elements_comment(content, location, state.diagnostics);
+	if (element_list) {
+		for (const el of element_list) {
+			state.elements.add(el);
+			state.explicit_elements.add(el);
+		}
+	}
+
+	// @fuz-variables
+	const variable_list = parse_fuz_variables_comment(content, location, state.diagnostics);
+	if (variable_list) {
+		for (const v of variable_list) {
+			state.css_variables.add(v);
+			state.explicit_variables.add(v);
+		}
+	}
+};
+
+/**
  * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
  */
 const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
-	// Walk the fragment looking for Comment nodes
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
 		Comment(node, {state}) {
-			const location = location_from_offset(state, node.start);
-
-			// @fuz-classes
-			const classes = parse_fuz_classes_comment(node.data, location, state.diagnostics);
-			if (classes) {
-				for (const cls of classes) {
-					add_class(state, cls, location);
-					state.explicit_classes.add(cls);
-				}
-			}
-
-			// @fuz-elements
-			const elements = parse_fuz_elements_comment(node.data, location, state.diagnostics);
-			if (elements) {
-				for (const el of elements) {
-					state.elements.add(el);
-					state.explicit_elements.add(el);
-				}
-			}
-
-			// @fuz-variables
-			const variables = parse_fuz_variables_comment(node.data, location, state.diagnostics);
-			if (variables) {
-				for (const v of variables) {
-					state.css_variables.add(v);
-					state.explicit_variables.add(v);
-				}
-			}
+			process_fuz_comment(node.data, location_from_offset(state, node.start), state);
 		},
 	};
-
 	walk(ast.fragment as AST.SvelteNode, state, visitors);
 };
 
@@ -578,33 +587,7 @@ const extract_fuz_comments_from_script = (
 			line: comment.loc.start.line + line_offset,
 			column: comment.loc.start.column + 1,
 		};
-
-		// @fuz-classes
-		const class_list = parse_fuz_classes_comment(comment.value, location, state.diagnostics);
-		if (class_list) {
-			for (const cls of class_list) {
-				add_class(state, cls, location);
-				state.explicit_classes.add(cls);
-			}
-		}
-
-		// @fuz-elements
-		const element_list = parse_fuz_elements_comment(comment.value, location, state.diagnostics);
-		if (element_list) {
-			for (const el of element_list) {
-				state.elements.add(el);
-				state.explicit_elements.add(el);
-			}
-		}
-
-		// @fuz-variables
-		const variable_list = parse_fuz_variables_comment(comment.value, location, state.diagnostics);
-		if (variable_list) {
-			for (const v of variable_list) {
-				state.css_variables.add(v);
-				state.explicit_variables.add(v);
-			}
-		}
+		process_fuz_comment(comment.value, location, state);
 	}
 };
 
@@ -621,16 +604,6 @@ export const extract_from_ts = (
 	file = '<unknown>',
 	acorn_plugins?: Array<AcornPlugin>,
 ): ExtractionResult => {
-	const classes: Map<string, Array<SourceLocation>> = new Map();
-	const explicit_classes: Set<string> = new Set();
-	const tracked_vars: Set<string> = new Set();
-	const class_name_vars: Map<string, unknown> = new Map();
-	const diagnostics: Array<ExtractionDiagnostic> = [];
-	const elements: Set<string> = new Set();
-	const css_variables: Set<string> = new Set();
-	const explicit_elements: Set<string> = new Set();
-	const explicit_variables: Set<string> = new Set();
-
 	// Collect comments via acorn's onComment callback
 	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
 
@@ -656,26 +629,18 @@ export const extract_from_ts = (
 			},
 		});
 	} catch (err) {
-		// Emit diagnostic about parse failure
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
-			suggestion: 'Check for syntax errors in the file',
-			location: {file, line: 1, column: 1},
-		});
-		// Return with diagnostics (all collections empty, so null)
-		return {
-			classes: null,
-			explicit_classes: null,
-			tracked_vars: null,
-			diagnostics,
-			elements: null,
-			css_variables: null,
-			explicit_elements: null,
-			explicit_variables: null,
-		};
+		return empty_extraction_result([
+			{
+				phase: 'extraction',
+				level: 'warning',
+				message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				suggestion: 'Check for syntax errors in the file',
+				location: {file, line: 1, column: 1},
+			},
+		]);
 	}
+
+	const state = create_walk_state(file, null); // null source_index - acorn provides locations
 
 	// Process @fuz-* comments
 	for (const comment of comments) {
@@ -684,69 +649,18 @@ export const extract_from_ts = (
 			line: comment.loc.start.line,
 			column: comment.loc.start.column + 1,
 		};
-
-		// @fuz-classes
-		const class_list = parse_fuz_classes_comment(comment.value, location, diagnostics);
-		if (class_list) {
-			for (const cls of class_list) {
-				add_class_with_location(classes, cls, location);
-				explicit_classes.add(cls);
-			}
-		}
-
-		// @fuz-elements
-		const element_list = parse_fuz_elements_comment(comment.value, location, diagnostics);
-		if (element_list) {
-			for (const el of element_list) {
-				elements.add(el);
-				explicit_elements.add(el);
-			}
-		}
-
-		// @fuz-variables
-		const variable_list = parse_fuz_variables_comment(comment.value, location, diagnostics);
-		if (variable_list) {
-			for (const v of variable_list) {
-				css_variables.add(v);
-				explicit_variables.add(v);
-			}
-		}
+		process_fuz_comment(comment.value, location, state);
 	}
-
-	const state: WalkState = {
-		classes,
-		explicit_classes,
-		tracked_vars,
-		class_name_vars,
-		in_class_context: false,
-		file,
-		source_index: null, // Not needed for TS files - acorn provides locations
-		diagnostics,
-		elements,
-		css_variables,
-		explicit_elements,
-		explicit_variables,
-	};
 
 	walk_script(ast, state);
 
 	// Second pass: extract from tracked variables that weren't already processed
 	// This handles JSX patterns where className={foo} is encountered after const foo = '...'
-	if (tracked_vars.size > 0) {
+	if (state.tracked_vars.size > 0) {
 		extract_from_tracked_vars_in_script(ast, state);
 	}
 
-	// Convert empty to null
-	return {
-		classes: classes.size > 0 ? classes : null,
-		explicit_classes: explicit_classes.size > 0 ? explicit_classes : null,
-		tracked_vars: tracked_vars.size > 0 ? tracked_vars : null,
-		diagnostics: diagnostics.length > 0 ? diagnostics : null,
-		elements: elements.size > 0 ? elements : null,
-		css_variables: css_variables.size > 0 ? css_variables : null,
-		explicit_elements: explicit_elements.size > 0 ? explicit_elements : null,
-		explicit_variables: explicit_variables.size > 0 ? explicit_variables : null,
-	};
+	return finalize_extraction_result(state);
 };
 
 /**
