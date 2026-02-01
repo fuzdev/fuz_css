@@ -26,7 +26,9 @@ dev server.
 
 - Svelte 5 - component framework (for docs site only)
 - SvelteKit - application framework (for docs site only)
-- acorn - AST parsing for class extraction
+- @sveltejs/acorn-typescript, acorn-jsx, zimmerframe - AST parsing and walking
+- zod - schema validation
+- @webref/css - CSS property validation
 - fuz_util (@fuzdev/fuz_util) - utility functions
 
 ## Scope
@@ -81,6 +83,7 @@ combined and only used content is included. In utility-only mode, import
 Two generators available, both using AST-based extraction and per-file caching:
 
 1. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) for SvelteKit
+   projects using Gro
 2. **Vite plugin** - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
    for Svelte/React/Preact/Solid via `virtual:fuz.css`
 
@@ -118,7 +121,9 @@ Literal classes use `property:value` syntax that maps 1:1 to CSS:
 - `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers
 
 Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary
-breakpoints via `min-width(800px):` and `max-width(600px):`.
+breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
+variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
+`motion-safe:`, `contrast-more:`, etc.) are also available.
 
 ## Variable naming
 
@@ -153,6 +158,8 @@ your code uses:
 import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
 export const gen = gen_fuz_css();
 ```
+
+Then import the generated file in your layout: `import './fuz.gen.css';`
 
 **Vite (Svelte/React/Preact/Solid):**
 
@@ -189,7 +196,7 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 ## Docs
 
 [src/routes/docs/](src/routes/docs/) has pages for: introduction, api, examples,
-semantic, themes, variables, classes, colors, buttons, elements, forms,
+semantic, themes, variables, classes, colors, buttons, chips, elements, forms,
 typography, borders, shading, shadows, layout. See
 [tomes.ts](src/routes/docs/tomes.ts) for structure.
 
@@ -237,6 +244,17 @@ typography, borders, shading, shadows, layout. See
   `CssClassDefinition` types, `generate_classes_css()`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
   composite class registry
+- [css_classes.ts](src/lib/css_classes.ts) - CssClasses collection for tracking
+  classes per-file
+- [css_class_generators.ts](src/lib/css_class_generators.ts) - Token class
+  template generators
+- [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite class
+  definitions
+- [css_class_resolution.ts](src/lib/css_class_resolution.ts) - Class resolution
+  and cycle detection
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Modified
+  class and literal interpreters
+- [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
 - [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints,
   states, pseudo-elements)
@@ -278,7 +296,7 @@ update all others with equivalent changes.
   progress
 - **CSS Cascade Layers** - `@layer` support under consideration but not yet
   implemented
-- **Error handling** - `CssGenerationError` includes `diagnostics` array for
+- **Error inspection** - `CssGenerationError` includes `diagnostics` array for
   programmatic access to individual errors
 
 ## Project standards
