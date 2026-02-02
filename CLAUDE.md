@@ -91,15 +91,19 @@ Both output only CSS for classes actually used. Supports Svelte 5.16+ class
 syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
 
 **Comment hints for static extraction:** The AST extractor cannot detect dynamic
-class names, elements, or variables. Use comment hints to explicitly include them:
+class names or elements. Use comment hints to explicitly include them:
 
 - `// @fuz-classes box row p_md` - Classes to include
 - `// @fuz-elements button input` - Elements to include base styles for
-- `// @fuz-variables hue_a color_a_5` - Variables to include in theme
 
-All three produce **errors** if the specified item can't be resolved, helping
-catch typos early. Implicitly detected classes that can't be resolved are
-silently skipped (they may belong to other CSS frameworks).
+Both produce **errors** if the specified item can't be resolved, helping catch
+typos early. Implicitly detected classes that can't be resolved are silently
+skipped (they may belong to other CSS frameworks).
+
+**CSS variable detection:** Variables are detected via simple regex scan of
+`var(--name` patterns in source files. Only theme variables are included;
+unknown variables are silently ignored. This catches usage in component props
+like `size="var(--icon_size_xs)"` that AST-based extraction would miss.
 
 See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
@@ -184,11 +188,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles or callback to modify defaults
 - `variables` - Custom theme variables or callback to modify defaults
-- `include_all_base_css` - Include all base styles (default: false, only used)
-- `include_all_variables` - Include all variables (default: false, only used)
 - `additional_classes` - Classes to always include (for dynamic names)
-- `additional_elements` - Elements to always include styles for
-- `additional_variables` - Variables to always include
+- `additional_elements` - Elements to always include, or `'all'` for all base styles
+- `additional_variables` - Variables to always include, or `'all'` for all theme vars
 - `exclude_classes` - Classes to exclude from output
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme

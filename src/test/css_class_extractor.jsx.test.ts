@@ -2,12 +2,7 @@ import {test, expect, describe, beforeAll} from 'vitest';
 
 import type {ExtractionResult} from '$lib/css_class_extractor.js';
 
-import {
-	class_names_equal,
-	create_jsx_extractor,
-	assert_css_variables,
-	assert_no_css_variables,
-} from './css_class_extractor_test_helpers.js';
+import {class_names_equal, create_jsx_extractor} from './css_class_extractor_test_helpers.js';
 
 /**
  * JSX extractor with acorn-jsx plugin pre-configured.
@@ -491,111 +486,5 @@ const App = () => (
 		const result = extract_jsx(source);
 		// No lowercase elements, so elements should be null
 		expect(result.elements).toBeNull();
-	});
-});
-
-describe('JSX CSS variable extraction', () => {
-	describe('string style attribute', () => {
-		test('extracts single variable from style="..."', () => {
-			const source = `const Box = () => <div style="color: var(--text_color)" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['text_color']);
-		});
-
-		test('extracts multiple variables from style string', () => {
-			const source = `const Box = () => <div style="color: var(--fg); background: var(--bg)" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['fg', 'bg']);
-		});
-
-		test('extracts variable with fallback', () => {
-			const source = `const Box = () => <div style="color: var(--primary, blue)" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['primary']);
-		});
-
-		test('extracts nested variable fallbacks', () => {
-			const source = `const Box = () => <div style="color: var(--a, var(--b, var(--c)))" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['a', 'b', 'c']);
-		});
-
-		test('extracts variable in calc()', () => {
-			const source = `const Box = () => <div style="width: calc(100% - var(--sidebar))" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['sidebar']);
-		});
-
-		test('deduplicates repeated variables', () => {
-			const source = `const Box = () => <div style="color: var(--theme); background: var(--theme)" />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['theme']);
-		});
-	});
-
-	describe('object style attribute', () => {
-		test('extracts single variable from style={{ }}', () => {
-			const source = `const Box = () => <div style={{ color: 'var(--text_color)' }} />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['text_color']);
-		});
-
-		test('extracts multiple variables from object style', () => {
-			const source = `const Box = () => <div style={{ color: 'var(--fg)', background: 'var(--bg)' }} />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['fg', 'bg']);
-		});
-
-		test('extracts variable with fallback in object style', () => {
-			const source = `const Box = () => <div style={{ color: 'var(--primary, red)' }} />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['primary']);
-		});
-
-		test('extracts from camelCase CSS properties', () => {
-			const source = `const Box = () => <div style={{ backgroundColor: 'var(--bg)', borderColor: 'var(--border)' }} />;`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['bg', 'border']);
-		});
-	});
-
-	describe('edge cases', () => {
-		test('no variables in empty style', () => {
-			const source = `const Box = () => <div style="" />;`;
-			const result = extract_jsx(source);
-			assert_no_css_variables(result);
-		});
-
-		test('no variables in style without var()', () => {
-			const source = `const Box = () => <div style="color: red" />;`;
-			const result = extract_jsx(source);
-			assert_no_css_variables(result);
-		});
-
-		test('no variables in object style without var()', () => {
-			const source = `const Box = () => <div style={{ color: 'red' }} />;`;
-			const result = extract_jsx(source);
-			assert_no_css_variables(result);
-		});
-
-		test('extracts from multiple elements', () => {
-			const source = `
-const App = () => (
-	<>
-		<div style="color: var(--a)" />
-		<span style={{ background: 'var(--b)' }} />
-	</>
-);
-`;
-			const result = extract_jsx(source);
-			assert_css_variables(result, ['a', 'b']);
-		});
-
-		test('combines classes and CSS variables extraction', () => {
-			const source = `const Box = () => <div className="p_md" style="color: var(--text)" />;`;
-			const result = extract_jsx(source);
-			class_names_equal(result, ['p_md']);
-			assert_css_variables(result, ['text']);
-		});
 	});
 });

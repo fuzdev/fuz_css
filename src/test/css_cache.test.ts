@@ -33,9 +33,7 @@ const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtractio
 	explicit_classes: null,
 	diagnostics: null,
 	elements: null,
-	css_variables: null,
 	explicit_elements: null,
-	explicit_variables: null,
 	...overrides,
 });
 
@@ -48,9 +46,7 @@ interface SaveAndLoadOptions {
 	explicit_classes?: Set<string> | null;
 	diagnostics?: Array<ExtractionDiagnostic> | null;
 	elements?: Set<string> | null;
-	css_variables?: Set<string> | null;
 	explicit_elements?: Set<string> | null;
-	explicit_variables?: Set<string> | null;
 	content_hash?: string;
 }
 
@@ -64,9 +60,7 @@ const save_and_load = async (
 		explicit_classes = null,
 		diagnostics = null,
 		elements = null,
-		css_variables = null,
 		explicit_elements = null,
-		explicit_variables = null,
 		content_hash = 'test-hash',
 	} = options;
 
@@ -78,9 +72,7 @@ const save_and_load = async (
 		explicit_classes,
 		diagnostics,
 		elements,
-		css_variables,
 		explicit_elements,
-		explicit_variables,
 	);
 	const loaded = await load_cached_extraction(ops, cache_path);
 	expect(loaded).not.toBeNull();
@@ -219,11 +211,6 @@ describe('save_cached_extraction', () => {
 			name: 'stores empty elements Set as null',
 			input: {elements: new Set<string>()},
 			field: 'elements',
-		},
-		{
-			name: 'stores empty css_variables Set as null',
-			input: {css_variables: new Set<string>()},
-			field: 'css_variables',
 		},
 	] as const;
 
@@ -432,18 +419,10 @@ describe('from_cached_extraction', () => {
 			},
 		},
 		{
-			name: 'converts css_variables array to Set',
-			input: make_cached({css_variables: ['color_a', 'space_md']}),
-			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.css_variables).toEqual(new Set(['color_a', 'space_md']));
-			},
-		},
-		{
-			name: 'preserves null elements and css_variables',
+			name: 'preserves null elements',
 			input: make_cached(),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				expect(r.elements).toBeNull();
-				expect(r.css_variables).toBeNull();
 			},
 		},
 	];
@@ -460,19 +439,17 @@ describe('from_cached_extraction', () => {
 // v2 fields round-trip
 //
 
-describe('v2 cache fields round-trip', () => {
-	test('saves and loads all v2 fields together', async () => {
+describe('cache fields round-trip', () => {
+	test('saves and loads all fields together', async () => {
 		await setup();
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 		const explicit_classes = new Set(['explicit_class']);
 		const elements = new Set(['button', 'div']);
-		const css_variables = new Set(['color_a_5']);
 
-		const loaded = await save_and_load(join(CACHE_DIR, 'all_v2_fields.json'), {
+		const loaded = await save_and_load(join(CACHE_DIR, 'all_fields.json'), {
 			classes,
 			explicit_classes,
 			elements,
-			css_variables,
 			content_hash: 'hash123',
 		});
 		const result = from_cached_extraction(loaded);
@@ -480,7 +457,6 @@ describe('v2 cache fields round-trip', () => {
 		expect(result.classes?.has('box')).toBe(true);
 		expect(result.explicit_classes).toEqual(explicit_classes);
 		expect(result.elements).toEqual(elements);
-		expect(result.css_variables).toEqual(css_variables);
 	});
 
 	// Individual field round-trips
@@ -490,12 +466,6 @@ describe('v2 cache fields round-trip', () => {
 			input: {elements: new Set(['button', 'input', 'svg'])},
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
 				expect(r.elements).toEqual(new Set(['button', 'input', 'svg'])),
-		},
-		{
-			name: 'css_variables',
-			input: {css_variables: new Set(['color_a_5', 'space_md'])},
-			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				expect(r.css_variables).toEqual(new Set(['color_a_5', 'space_md'])),
 		},
 		{
 			name: 'explicit_classes',
@@ -523,18 +493,7 @@ describe('cache functions with mock ops', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(
-			mock_ops,
-			cache_path,
-			'abc123',
-			classes,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		await save_cached_extraction(mock_ops, cache_path, 'abc123', classes, null, null, null, null);
 		const loaded = await load_cached_extraction(mock_ops, cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -554,18 +513,7 @@ describe('cache functions with mock ops', () => {
 		const mock_ops = create_mock_cache_ops(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(
-			mock_ops,
-			cache_path,
-			'hash',
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		await save_cached_extraction(mock_ops, cache_path, 'hash', null, null, null, null, null);
 		expect(state.files.has(cache_path)).toBe(true);
 
 		await delete_cached_extraction(mock_ops, cache_path);
@@ -576,18 +524,7 @@ describe('cache functions with mock ops', () => {
 		const state = create_mock_fs_state();
 		const mock_ops = create_mock_cache_ops(state);
 
-		await save_cached_extraction(
-			mock_ops,
-			'/test.json',
-			'hash',
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		await save_cached_extraction(mock_ops, '/test.json', 'hash', null, null, null, null, null);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});

@@ -51,7 +51,12 @@ import {
 	create_style_rule_index,
 	load_default_style_css,
 } from './style_rule_parser.js';
-import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
+import {
+	type VariableDependencyGraph,
+	build_variable_graph_from_options,
+	get_all_variable_names,
+} from './variable_graph.js';
+import {extract_css_variables} from './css_variable_utils.js';
 import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
@@ -118,8 +123,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		cache_dir = DEFAULT_CACHE_DIR,
 		base_css,
 		variables,
-		include_all_base_css = false,
-		include_all_variables = false,
 		theme_specificity = 1,
 		additional_elements,
 		additional_variables,
@@ -145,6 +148,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	// Plugin state
 	const css_classes = new CssClasses(include_set, exclude_set);
 	const hashes: Map<string, string> = new Map();
+	/** CSS variables detected per file via simple regex scan (filtered against theme) */
+	const detected_variables_by_file: Map<string, Set<string>> = new Map();
 	let virtual_module_loaded = false;
 	let server: ViteDevServer | null = null;
 	let css_properties: Set<string> | null = null;
@@ -153,6 +158,26 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let hmr_timeout: ReturnType<typeof setTimeout> | null = null;
 	let last_generated_css: string | null = null;
 	let pending_css: string | null = null; // CSS generated during HMR, reused by load()
+
+	/**
+	 * Updates detected CSS variables for a file via regex scan against theme variables.
+	 * Variables not in the theme are silently ignored (may be user-defined).
+	 */
+	const update_detected_variables = (id: string, code: string): void => {
+		if (!variable_graph) return;
+		const theme_var_names = get_all_variable_names(variable_graph);
+		const file_vars: Set<string> = new Set();
+		for (const name of extract_css_variables(code)) {
+			if (theme_var_names.has(name)) {
+				file_vars.add(name);
+			}
+		}
+		if (file_vars.size > 0) {
+			detected_variables_by_file.set(id, file_vars);
+		} else {
+			detected_variables_by_file.delete(id);
+		}
+	};
 
 	// Bundled CSS resources (loaded lazily on first CSS generation when bundled mode is enabled)
 	let style_rule_index: StyleRuleIndex | null = null;
@@ -219,9 +244,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			all_classes_with_locations: locations,
 			explicit_classes,
 			all_elements,
-			all_css_variables,
 			explicit_elements,
-			explicit_variables,
 		} = css_classes.get_all();
 
 		const utility_result = generate_classes_css({
@@ -247,23 +270,28 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			variable_graph &&
 			class_variable_index
 		) {
+			// Aggregate detected CSS variables from all files
+			const detected_css_variables: Set<string> = new Set();
+			for (const vars of detected_variables_by_file.values()) {
+				for (const v of vars) {
+					detected_css_variables.add(v);
+				}
+			}
+
 			const resolution = resolve_css({
 				style_rule_index,
 				variable_graph,
 				class_variable_index,
 				detected_elements: all_elements,
 				detected_classes: classes,
-				detected_css_variables: all_css_variables,
+				detected_css_variables,
 				utility_variables_used: utility_result.variables_used,
 				additional_elements,
 				additional_variables,
 				theme_specificity,
-				include_all_base_css,
-				include_all_variables,
 				exclude_elements,
 				exclude_variables,
 				explicit_elements,
-				explicit_variables,
 			});
 
 			// Add resolution diagnostics
@@ -379,6 +407,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				if (hashes.has(file)) {
 					css_classes.delete(file);
 					hashes.delete(file);
+					detected_variables_by_file.delete(file);
 
 					// Delete cache file (fire and forget)
 					if (!is_ci && resolved_cache_dir && project_root) {
@@ -506,25 +535,10 @@ export {};
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						css_variables,
-						explicit_elements,
-						explicit_variables,
-					} = from_cached_extraction(cached);
-					css_classes.add(
-						id,
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						css_variables,
-						explicit_elements,
-						explicit_variables,
-					);
+					const {classes, explicit_classes, diagnostics, elements, explicit_elements} =
+						from_cached_extraction(cached);
+					css_classes.add(id, classes, explicit_classes, diagnostics, elements, explicit_elements);
+					update_detected_variables(id, code);
 					hashes.set(id, hash);
 
 					if (virtual_module_loaded) {
@@ -561,10 +575,9 @@ export {};
 				result.explicit_classes,
 				result.diagnostics,
 				result.elements,
-				result.css_variables,
 				result.explicit_elements,
-				result.explicit_variables,
 			);
+			update_detected_variables(id, code);
 			hashes.set(id, hash);
 
 			// Save to cache (fire and forget - don't block transform)
@@ -578,9 +591,7 @@ export {};
 					result.explicit_classes,
 					result.diagnostics,
 					result.elements,
-					result.css_variables,
 					result.explicit_elements,
-					result.explicit_variables,
 				).catch(() => {
 					// Ignore cache errors
 				});

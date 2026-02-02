@@ -156,18 +156,6 @@ export interface CssOutputOptions {
 	 */
 	variables?: VariablesOption;
 	/**
-	 * Whether to include all base styles regardless of detection.
-	 * When false (default), only rules for detected elements are included.
-	 * When true, includes all rules from the base styles.
-	 */
-	include_all_base_css?: boolean;
-	/**
-	 * Whether to include all theme variables regardless of detection.
-	 * When false (default), only referenced variables are included.
-	 * When true, includes all variables.
-	 */
-	include_all_variables?: boolean;
-	/**
 	 * Specificity multiplier for theme CSS selectors.
 	 * Defaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
 	 */
@@ -178,15 +166,17 @@ export interface CssOutputOptions {
 	 */
 	additional_classes?: Iterable<string>;
 	/**
-	 * Additional HTML elements to always include styles for.
+	 * Additional HTML elements to always include base styles for.
+	 * Use `'all'` to include all base styles regardless of detection.
 	 * Useful for elements generated at runtime via `document.createElement()`.
 	 */
-	additional_elements?: Iterable<string>;
+	additional_elements?: Iterable<string> | 'all';
 	/**
 	 * Additional CSS variables to always include in theme output.
+	 * Use `'all'` to include all theme variables regardless of detection.
 	 * Useful for variables referenced dynamically.
 	 */
-	additional_variables?: Iterable<string>;
+	additional_variables?: Iterable<string> | 'all';
 	/**
 	 * Classes to exclude from the output, even if detected.
 	 * Useful for filtering out false positives from extraction.

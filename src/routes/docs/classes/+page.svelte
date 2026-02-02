@@ -197,19 +197,12 @@ import 'virtual:fuz.css';`}
 					utility-only mode, or provide a callback to modify defaults
 				</li>
 				<li>
-					<code>include_all_base_css</code> - include all base styles, not just detected (default:
-					<code>false</code>)
+					<code>additional_elements</code> - elements to always include styles for (for
+					runtime-created elements), or <code>'all'</code> to include all base styles
 				</li>
 				<li>
-					<code>include_all_variables</code> - include all variables, not just detected (default:
-					<code>false</code>)
-				</li>
-				<li>
-					<code>additional_elements</code> - elements to always include styles for (for runtime-created
-					elements)
-				</li>
-				<li>
-					<code>additional_variables</code> - variables to always include in theme output
+					<code>additional_variables</code> - variables to always include in theme output, or
+					<code>'all'</code> to include all theme variables
 				</li>
 			</ul>
 			<h4>TypeScript setup</h4>
@@ -424,25 +417,29 @@ const color = get_dynamic_color();`}
 });`}
 			/>
 
-			<h4>Element and variable hints</h4>
+			<h4>Element hints</h4>
 			<p>
-				Similar to <code>@fuz-classes</code>, use <code>@fuz-elements</code> and
-				<code>@fuz-variables</code> to declare elements and CSS variables that should be included even
-				when they can't be statically detected:
+				Similar to <code>@fuz-classes</code>, use <code>@fuz-elements</code> to declare elements that
+				should be included even when they can't be statically detected:
 			</p>
 			<Code
 				lang="ts"
 				content={`// @fuz-elements dialog
-const el = document.createElement('dialog');
-
-// @fuz-variables some_custom_color some_other_color
-const style = \`color: var(--\${getColor()})\`;`}
+const el = document.createElement('dialog');`}
 			/>
 			<aside>
-				Like <code>@fuz-classes</code>, explicit declarations via <code>@fuz-elements</code> and
-				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
-				helping catch typos early. Write variable names without the <code>--</code> prefix.
+				Like <code>@fuz-classes</code>, explicit declarations via <code>@fuz-elements</code>
+				produce <strong>errors</strong> if they can't be resolved, helping catch typos early.
 			</aside>
+
+			<h4>CSS variable detection</h4>
+			<p>
+				CSS variables are detected via simple regex scan of <code>var(--name</code> patterns in all
+				source files. Only theme variables are included; unknown variables are silently ignored.
+				This approach catches usage in component props like
+				<!-- eslint-disable-next-line svelte/no-useless-mustaches -->
+				<code>{'size="var(--icon_size_xs)"'}</code> that AST-based extraction would miss.
+			</p>
 
 			<h4>5. Build-time limitations</h4>
 			<p>
