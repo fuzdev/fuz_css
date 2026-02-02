@@ -172,39 +172,6 @@ export const assert_class_locations = (
 };
 
 /**
- * Assert CSS variables were extracted from styles (without -- prefix).
- * Compares as sorted arrays to ignore extraction order.
- */
-export const assert_css_variables = (result: ExtractionResult, expected: Array<string>): void => {
-	expect(result.css_variables, 'Expected css_variables to be present').not.toBeNull();
-	const actual = [...result.css_variables!].sort();
-	expect(actual).toEqual([...expected].sort());
-};
-
-/**
- * Assert no CSS variables were extracted.
- */
-export const assert_no_css_variables = (result: ExtractionResult): void => {
-	expect(result.css_variables).toBeNull();
-};
-
-/**
- * Assert CSS variables present/absent (for partial assertions).
- */
-export const assert_css_variables_include = (
-	result: ExtractionResult,
-	present: Array<string>,
-	absent: Array<string> = [],
-): void => {
-	for (const v of present) {
-		expect(result.css_variables?.has(v), `Expected CSS variable "${v}" present`).toBe(true);
-	}
-	for (const v of absent) {
-		expect(result.css_variables?.has(v), `Expected CSS variable "${v}" absent`).toBe(false);
-	}
-};
-
-/**
  * Assert explicit classes present.
  */
 export const assert_explicit_classes = (
@@ -233,23 +200,4 @@ export const assert_explicit_elements = (
  */
 export const assert_no_explicit_elements = (result: ExtractionResult): void => {
 	expect(result.explicit_elements).toBeNull();
-};
-
-/**
- * Assert explicit variables present.
- */
-export const assert_explicit_variables = (
-	result: ExtractionResult,
-	expected: Array<string>,
-): void => {
-	expect(result.explicit_variables, 'Expected explicit_variables to be present').not.toBeNull();
-	const actual = [...result.explicit_variables!].sort();
-	expect(actual).toEqual([...expected].sort());
-};
-
-/**
- * Assert no explicit variables.
- */
-export const assert_no_explicit_variables = (result: ExtractionResult): void => {
-	expect(result.explicit_variables).toBeNull();
 };

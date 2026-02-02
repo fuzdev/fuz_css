@@ -35,8 +35,6 @@ describe('shared options interface', () => {
 			// CssOutputOptions
 			base_css: undefined,
 			variables: undefined,
-			include_all_base_css: false,
-			include_all_variables: false,
 			theme_specificity: 1,
 			additional_classes: ['p_md'],
 			additional_elements: ['dialog'],
@@ -160,15 +158,6 @@ describe('shared options interface', () => {
 			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_')),
 		};
 		expect(typeof callback_opts.variables).toBe('function');
-	});
-
-	test('include_all options default to false conceptually', () => {
-		// When undefined, generators should treat include_all options as false
-		// This test documents the expected behavior
-		const opts: CssOutputOptions = {};
-		expect(opts.include_all_base_css).toBeUndefined();
-		expect(opts.include_all_variables).toBeUndefined();
-		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts
 	});
 });
 

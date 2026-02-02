@@ -40,7 +40,12 @@ import {
 	create_style_rule_index,
 	load_default_style_css,
 } from './style_rule_parser.js';
-import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
+import {
+	type VariableDependencyGraph,
+	build_variable_graph_from_options,
+	get_all_variable_names,
+} from './variable_graph.js';
+import {extract_css_variables} from './css_variable_utils.js';
 import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
 import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
@@ -83,12 +88,8 @@ interface FileExtraction {
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	/** HTML elements found in the file, or null if none */
 	elements: Set<string> | null;
-	/** CSS variables referenced (without -- prefix), or null if none */
-	css_variables: Set<string> | null;
 	/** Elements from @fuz-elements comments, or null if none */
 	explicit_elements: Set<string> | null;
-	/** CSS variables from @fuz-variables comments (without -- prefix), or null if none */
-	explicit_variables: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -140,8 +141,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		acorn_plugins,
 		base_css,
 		variables,
-		include_all_base_css = false,
-		include_all_variables = false,
 		theme_specificity = 1,
 		additional_elements,
 		additional_variables,
@@ -315,9 +314,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						explicit_classes: result.explicit_classes,
 						diagnostics: result.diagnostics,
 						elements: result.elements,
-						css_variables: result.css_variables,
 						explicit_elements: result.explicit_elements,
-						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -332,29 +329,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				explicit_classes,
 				diagnostics,
 				elements,
-				css_variables,
 				explicit_elements,
-				explicit_variables,
 			} of extractions) {
-				if (
-					classes ||
-					explicit_classes ||
-					diagnostics ||
-					elements ||
-					css_variables ||
-					explicit_elements ||
-					explicit_variables
-				) {
-					css_classes.add(
-						id,
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						css_variables,
-						explicit_elements,
-						explicit_variables,
-					);
+				if (classes || explicit_classes || diagnostics || elements || explicit_elements) {
+					css_classes.add(id, classes, explicit_classes, diagnostics, elements, explicit_elements);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -377,9 +355,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						explicit_classes,
 						diagnostics,
 						elements,
-						css_variables,
 						explicit_elements,
-						explicit_variables,
 					}) => {
 						await save_cached_extraction(
 							ops,
@@ -389,9 +365,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 							explicit_classes,
 							diagnostics,
 							elements,
-							css_variables,
 							explicit_elements,
-							explicit_variables,
 						);
 					},
 					cache_io_concurrency,
@@ -423,9 +397,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				all_classes_with_locations,
 				explicit_classes,
 				all_elements,
-				all_css_variables,
 				explicit_elements,
-				explicit_variables,
 			} = css_classes.get_all();
 
 			if (include_stats) {
@@ -459,24 +431,33 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			// Generate bundled CSS if base or theme are enabled
 			let final_css: string;
 			if (include_base || include_theme) {
+				// Detect CSS variables via simple regex scan of all file contents
+				// Filter against theme variables - only include known theme vars
+				const theme_var_names = get_all_variable_names(get_variable_graph());
+				const detected_css_variables: Set<string> = new Set();
+				for (const node of nodes) {
+					for (const name of extract_css_variables(node.contents)) {
+						if (theme_var_names.has(name)) {
+							detected_css_variables.add(name);
+						}
+					}
+				}
+
 				const resolution = resolve_css({
 					style_rule_index: await get_style_index(),
 					variable_graph: get_variable_graph(),
 					class_variable_index: get_class_variable_index(),
 					detected_elements: all_elements,
 					detected_classes: all_classes,
-					detected_css_variables: all_css_variables,
+					detected_css_variables,
 					utility_variables_used: utility_result.variables_used,
 					additional_elements,
 					additional_variables,
 					theme_specificity,
 					include_stats,
-					include_all_base_css,
-					include_all_variables,
 					exclude_elements,
 					exclude_variables,
 					explicit_elements,
-					explicit_variables,
 				});
 
 				// Log resolution stats if requested

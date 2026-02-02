@@ -143,30 +143,16 @@ export interface CssResolutionOptions {
 	detected_css_variables: Set<string>;
 	/** CSS variables used by generated utility classes */
 	utility_variables_used: Set<string>;
-	/** Additional elements to always include */
-	additional_elements?: Iterable<string>;
-	/** Additional variables to always include */
-	additional_variables?: Iterable<string>;
+	/** Additional elements to always include, or 'all' to include all base styles */
+	additional_elements?: Iterable<string> | 'all';
+	/** Additional variables to always include, or 'all' to include all theme variables */
+	additional_variables?: Iterable<string> | 'all';
 	/** Specificity multiplier for theme selector (default 1) */
 	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
 	include_stats?: boolean;
 	/** Warn when detected elements have no matching style rules (default false) */
 	warn_unmatched_elements?: boolean;
-	/**
-	 * Whether to include all base styles regardless of detection.
-	 * When false (default), only rules for detected elements are included.
-	 * When true, includes all rules from the style index.
-	 * @default false
-	 */
-	include_all_base_css?: boolean;
-	/**
-	 * Whether to include all theme variables regardless of detection.
-	 * When false (default), only referenced variables are included.
-	 * When true, includes all variables from the variable graph.
-	 * @default false
-	 */
-	include_all_variables?: boolean;
 	/**
 	 * Elements to exclude from base CSS output, even if detected.
 	 */
@@ -180,11 +166,6 @@ export interface CssResolutionOptions {
 	 * These produce errors (not warnings) if they have no matching style rules.
 	 */
 	explicit_elements?: Set<string> | null;
-	/**
-	 * CSS variables explicitly annotated via @fuz-variables comments.
-	 * These produce errors (not warnings) if they can't be resolved in the theme.
-	 */
-	explicit_variables?: Set<string> | null;
 }
 
 /**
@@ -213,22 +194,23 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
-		include_all_base_css = false,
-		include_all_variables = false,
 		exclude_elements,
 		exclude_variables,
 		explicit_elements,
-		explicit_variables,
 	} = options;
 
 	const diagnostics: Array<GenerationDiagnostic> = [];
 	const included_elements: Set<string> = new Set();
 
+	// Check if we should include all elements/base CSS
+	const include_all_base_css = additional_elements === 'all';
+	const include_all_variables = additional_variables === 'all';
+
 	// Step 1: Collect elements (detected + additional_elements - exclude_elements)
 	for (const element of detected_elements) {
 		included_elements.add(element);
 	}
-	if (additional_elements) {
+	if (additional_elements && additional_elements !== 'all') {
 		for (const element of additional_elements) {
 			included_elements.add(element);
 		}
@@ -317,16 +299,13 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		all_variables.add(v);
 	}
 
-	// e) User-specified additional_variables
-	if (additional_variables) {
-		for (const v of additional_variables) {
-			all_variables.add(v);
-		}
-	}
-
-	// f) Include all variables if include_all_variables is enabled
+	// e) User-specified additional_variables (or all if 'all')
 	if (include_all_variables) {
 		for (const v of get_all_variable_names(variable_graph)) {
+			all_variables.add(v);
+		}
+	} else if (additional_variables && additional_variables !== 'all') {
+		for (const v of additional_variables) {
 			all_variables.add(v);
 		}
 	}
@@ -356,11 +335,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 
 	// Add typo warnings for missing variables that look like misspelled theme variables
 	// User-defined variables (not similar to any theme variable) are silently ignored
-	// Skip explicit variables - they'll get errors instead (see below)
 	for (const name of resolution.missing) {
-		// Skip explicit variables - they get errors, not warnings
-		if (explicit_variables?.has(name)) continue;
-
 		const similar = find_similar_variable(variable_graph, name);
 		if (similar) {
 			diagnostics.push({
@@ -373,26 +348,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			});
 		}
 		// Variables not similar to any theme variable are assumed to be user-defined
-	}
-
-	// Error for explicit variables (@fuz-variables) that can't be resolved
-	if (explicit_variables) {
-		for (const name of explicit_variables) {
-			// Check if in resolution.missing (not resolved)
-			if (resolution.missing.has(name)) {
-				const similar = find_similar_variable(variable_graph, name);
-				diagnostics.push({
-					phase: 'generation',
-					level: 'error',
-					message: `@fuz-variables: CSS variable "--${name}" not found${similar ? ` - did you mean "--${similar}"?` : ''}`,
-					suggestion: similar
-						? `Check spelling. Similar theme variable: --${similar}`
-						: 'Variable is not defined in the theme. Remove from @fuz-variables or define the variable.',
-					class_name: `var(--${name})`,
-					locations: null,
-				});
-			}
-		}
 	}
 
 	// Step 5: Generate theme CSS

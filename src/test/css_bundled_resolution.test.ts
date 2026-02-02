@@ -739,7 +739,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).toContain('--color_b');
 		});
 
-		test('additional_variables with include_all_variables: true', () => {
+		test('additional_variables: "all" includes all variables', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -750,11 +750,10 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_variables: ['color_a'],
-				include_all_variables: true,
+				additional_variables: 'all',
 			});
 
-			// With include_all on, all variables included regardless of additional_variables
+			// With 'all', all variables included
 			expect(result.resolved_variables.has('color_a')).toBe(true);
 			expect(result.resolved_variables.has('color_b')).toBe(true);
 		});
@@ -814,8 +813,8 @@ describe('resolve_css', () => {
 		});
 	});
 
-	describe('include_all options', () => {
-		test('include_all_base_css: true includes all rules', () => {
+	describe('additional_elements and additional_variables "all" option', () => {
+		test('additional_elements: "all" includes all rules', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: blue; }
@@ -833,7 +832,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				include_all_base_css: true, // Include all rules
+				additional_elements: 'all', // Include all rules
 			});
 
 			// Should include ALL rules, not just button
@@ -842,7 +841,7 @@ describe('resolve_css', () => {
 			expect(result.base_css).toContain('a { color: purple');
 		});
 
-		test('include_all_base_css: false (default) only includes matching rules', () => {
+		test('default behavior only includes matching rules', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: blue; }
@@ -860,7 +859,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				// include_all_base_css defaults to false
+				// no additional_elements
 			});
 
 			// Should only include button
@@ -869,7 +868,7 @@ describe('resolve_css', () => {
 			expect(result.base_css).not.toContain('a { color: purple');
 		});
 
-		test('include_all_variables: true includes all variables', () => {
+		test('additional_variables: "all" includes all variables', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -884,7 +883,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']), // Only detect color_a
 				utility_variables_used: new Set(),
-				include_all_variables: true, // Include all variables
+				additional_variables: 'all', // Include all variables
 			});
 
 			// Should include ALL variables, not just color_a
@@ -896,7 +895,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).toContain('--color_c');
 		});
 
-		test('include_all_variables: false (default) only includes used variables', () => {
+		test('default behavior only includes used variables', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -911,7 +910,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
-				// include_all_variables defaults to false
+				// no additional_variables
 			});
 
 			// Should only include color_a
@@ -923,7 +922,7 @@ describe('resolve_css', () => {
 			expect(result.theme_css).not.toContain('--color_c');
 		});
 
-		test('both include_all options true includes everything', () => {
+		test('both "all" options includes everything', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
@@ -940,8 +939,8 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				include_all_base_css: true,
-				include_all_variables: true,
+				additional_elements: 'all',
+				additional_variables: 'all',
 			});
 
 			// All rules included

@@ -115,7 +115,7 @@ describe('resolve_css variable resolution', () => {
 			expect(result.resolved_variables.has('forced')).toBe(true);
 		});
 
-		test('include_all_variables: true includes every variable', () => {
+		test('additional_variables: "all" includes every variable', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color_a', light: 'blue'},
 				{name: 'color_b', light: 'green'},
@@ -129,7 +129,7 @@ describe('resolve_css variable resolution', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				include_all_variables: true,
+				additional_variables: 'all',
 			});
 
 			// All 5 variables should be included
@@ -141,7 +141,7 @@ describe('resolve_css variable resolution', () => {
 			expect(result.resolved_variables.has('space_md')).toBe(true);
 		});
 
-		test('include_all_variables: true includes transitive deps', () => {
+		test('additional_variables: "all" includes transitive deps', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'base', light: '10'},
 				{name: 'derived', light: 'calc(var(--base) * 2)'},
@@ -152,7 +152,7 @@ describe('resolve_css variable resolution', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				include_all_variables: true,
+				additional_variables: 'all',
 			});
 
 			expect(result.resolved_variables.has('base')).toBe(true);
