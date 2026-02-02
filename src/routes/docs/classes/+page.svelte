@@ -434,7 +434,7 @@ const el = document.createElement('dialog');`}
 
 			<h4>CSS variable detection</h4>
 			<p>
-				CSS variables are detected via simple regex scan of <code>var(--name)</code> patterns in all
+				CSS variables are detected via simple regex scan of <code>var(--name</code> patterns in all
 				source files. Only theme variables are included; unknown variables are silently ignored.
 				This approach catches usage in component props like
 				<!-- eslint-disable-next-line svelte/no-useless-mustaches -->

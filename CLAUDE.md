@@ -101,7 +101,7 @@ typos early. Implicitly detected classes that can't be resolved are silently
 skipped (they may belong to other CSS frameworks).
 
 **CSS variable detection:** Variables are detected via simple regex scan of
-`var(--name)` patterns in source files. Only theme variables are included;
+`var(--name` patterns in source files. Only theme variables are included;
 unknown variables are silently ignored. This catches usage in component props
 like `size="var(--icon_size_xs)"` that AST-based extraction would miss.
 
