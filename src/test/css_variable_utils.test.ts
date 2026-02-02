@@ -127,6 +127,21 @@ describe('extract_css_variables', () => {
 		const result = extract_css_variables('color: hsl(var(--hue) var(--sat) var(--light));');
 		expect(result).toEqual(new Set(['hue', 'sat', 'light']));
 	});
+
+	test('extracts variables from component props (motivating use case)', () => {
+		// This is why we use simple regex scanning instead of AST-based extraction:
+		// variables in component props like <MdnLink size="var(--icon_size_xs)" />
+		// aren't in style attributes but still reference theme variables
+		const svelte_component = `<MdnLink size="var(--icon_size_xs)" color="var(--color_a_5)" />`;
+		const result = extract_css_variables(svelte_component);
+		expect(result).toEqual(new Set(['icon_size_xs', 'color_a_5']));
+	});
+
+	test('extracts variables from JSX props', () => {
+		const jsx_component = `<Icon size={styles.size || "var(--icon_size_md)"} />`;
+		const result = extract_css_variables(jsx_component);
+		expect(result).toEqual(new Set(['icon_size_md']));
+	});
 });
 
 describe('has_css_variables', () => {
