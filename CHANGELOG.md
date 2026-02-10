@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.48.0
+
+### Minor Changes
+
+- remove margin from the children of semantic flex containers ([#77](https://github.com/fuzdev/fuz_css/pull/77))
+
 ## 0.47.0
 
 ### Minor Changes
