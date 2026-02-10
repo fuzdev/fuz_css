@@ -109,7 +109,7 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
 ### Three class types
 
-- **Token classes** - Map to style variables: `p_md`, `color_a_5`, `gap_lg`
+- **Token classes** - Map to style variables: `p_md`, `color_a_50`, `gap_lg`
 - **Composite classes** - Multi-property shortcuts: `box`, `row`, `ellipsis`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
@@ -140,11 +140,13 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (error/red), `d` (secondary/purple), `e` (tertiary/yellow), `f` (muted/brown),
   `g` (decorative/pink), `h` (caution/orange), `i` (info/cyan), `j`
   (flourish/teal)
-- Intensities 1-9: `color_a_1` (lightest) through `color_a_9` (darkest), with
-  `_5` as the base
+- 13 intensity stops: `color_a_00` (lightest) through `color_a_100` (darkest),
+  with `_50` as the base (steps: 00, 05, 10, 20, 30, 40, 50, 60, 70, 80, 90,
+  95, 100)
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
-- `text_color_*` - opaque text colors (alpha avoided for performance)
+- `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
+  performance)
 
 **Size variants:** `xs5` → `xs` → `sm` → `md` → `lg` → `xl` → `xl15`
 
