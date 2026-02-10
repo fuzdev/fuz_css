@@ -222,8 +222,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	margin-bottom: var(--space_xl7);
 }
 
-/* Flex layout containers reset flow margins on direct children.
-Spacing should use gap utilities instead of flow margins. */
+/* Flex layout containers reset flow margins on direct children; prefer .gap_ utilities. */
 :where(.row, .box, .column) > * {
 	margin: 0;
 }
