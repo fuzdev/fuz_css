@@ -1,6 +1,6 @@
 {
 	"name": "@fuzdev/fuz_css",
-	"version": "0.47.0",
+	"version": "0.48.0",
 	"description": "CSS framework and design system for semantic HTML",
 	"motto": "CSS with more utility",
 	"glyph": "🪴",
@@ -60,7 +60,7 @@
 	"devDependencies": {
 		"@changesets/changelog-git": "^0.2.1",
 		"@fuzdev/fuz_code": "^0.44.1",
-		"@fuzdev/fuz_ui": "^0.182.0",
+		"@fuzdev/fuz_ui": "^0.182.1",
 		"@fuzdev/fuz_util": "^0.50.1",
 		"@jridgewell/trace-mapping": "^0.3.31",
 		"@ryanatkn/eslint-config": "^0.9.0",
