@@ -104,8 +104,8 @@
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
 			The layout composites <code>.row</code>, <code>.box</code>, and <code>.column</code>
-			reset margins on their direct children. Flow margins don't make sense in flex layout — use
-			<code>gap</code> utilities like <code>.gap_md</code> for spacing instead.
+			reset margins on their direct children. Flow margins make less sense in flex layout — use gap utilities
+			like <code>.gap_md</code> and <code>var(--gap_sm)</code> for spacing instead.
 		</p>
 		<Code
 			lang="css"
