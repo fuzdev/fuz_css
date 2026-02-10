@@ -73,7 +73,7 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="Document flow" />
+		<TomeSectionHeader text="Document flow by default" />
 		<p>
 			Block elements get <code>margin-bottom</code> via <code>:not(:last-child)</code>, creating
 			natural vertical rhythm without trailing margins.
@@ -98,6 +98,21 @@
 			div. Perhaps the better global optimum is to omit the last child exception? This would add
 			unwanted margin in many cases, but perhaps that's better overall; <code>mb_0</code> removes it.
 		</aside>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="Flex containers reset flow margins" />
+		<p>
+			The layout composites <code>.row</code>, <code>.box</code>, and <code>.column</code>
+			reset margins on their direct children. Flow margins don't make sense in flex layout — use
+			<code>gap</code> utilities like <code>.gap_md</code> for spacing instead.
+		</p>
+		<Code
+			lang="css"
+			content={`:where(.row, .box, .column) > * {
+  margin: 0;
+}`}
+		/>
 	</TomeSection>
 
 	<TomeSection>
