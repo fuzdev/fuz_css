@@ -1,4 +1,4 @@
-import type {Gen} from '@ryanatkn/gro';
+import type {Gen} from '@fuzdev/gro';
 
 import {css_class_definitions} from '$lib/css_class_definitions.js';
 

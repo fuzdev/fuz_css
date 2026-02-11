@@ -42,6 +42,8 @@
 		},
 		"peerDependencies": {
 			"@fuzdev/fuz_util": ">=0.45.3",
+			"@fuzdev/gro": ">=0.192.1",
+			"@ryanatkn/gro": ">=0.191.0",
 			"@sveltejs/acorn-typescript": "^1",
 			"@webref/css": "^8",
 			"acorn-jsx": "^5",
@@ -50,6 +52,12 @@
 		},
 		"peerDependenciesMeta": {
 			"@fuzdev/fuz_util": {
+				"optional": true
+			},
+			"@fuzdev/gro": {
+				"optional": true
+			},
+			"@ryanatkn/gro": {
 				"optional": true
 			},
 			"@sveltejs/acorn-typescript": {
@@ -70,9 +78,10 @@
 		},
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
-			"@fuzdev/fuz_code": "^0.44.1",
+			"@fuzdev/fuz_code": "^0.45.0",
 			"@fuzdev/fuz_ui": "^0.182.1",
 			"@fuzdev/fuz_util": "^0.50.1",
+			"@fuzdev/gro": "^0.192.1",
 			"@jridgewell/trace-mapping": "^0.3.31",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@ryanatkn/gro": "^0.191.0",
@@ -3237,7 +3246,7 @@
 						]
 					}
 				],
-				"module_comment": "[Gro generator](https://github.com/ryanatkn/gro) for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
+				"module_comment": "[Gro generator](https://github.com/fuzdev/gro) for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
 				"dependencies": [
 					"class_variable_index.ts",
 					"css_bundled_resolution.ts",

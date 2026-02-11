@@ -1,4 +1,4 @@
-import type {Gen} from '@ryanatkn/gro';
+import type {Gen} from '@fuzdev/gro';
 
 import {default_themes} from './themes.js';
 import {render_theme_style} from './theme.js';

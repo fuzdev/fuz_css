@@ -221,7 +221,7 @@ declare module 'virtual:fuz.css' {
 		<TomeSection>
 			<TomeSectionHeader text="Gro generator" tag="h3" />
 			<p>
-				For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, the <ModuleLink
+				For projects using <a href="https://github.com/fuzdev/gro">Gro</a>, the <ModuleLink
 					module_path="gen_fuz_css.ts"
 				/> generator creates a <code>*.gen.css.ts</code> file anywhere in <code>src/</code>:
 			</p>

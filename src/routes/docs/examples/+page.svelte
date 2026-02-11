@@ -25,7 +25,7 @@
 			<li><a href="{GITHUB_EXAMPLES}/vite-solid">vite-solid</a> - Solid</li>
 		</ul>
 		<p>
-			For projects using <a href="https://github.com/ryanatkn/gro">Gro</a>, see
+			For projects using <a href="https://github.com/fuzdev/gro">Gro</a>, see
 			<a href="https://github.com/fuzdev/fuz_template">fuz_template</a> for integration with
 			<ModuleLink module_path="gen_fuz_css.ts" />.
 		</p>
