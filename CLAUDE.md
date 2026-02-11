@@ -1,4 +1,4 @@
-# fuz_css framework and design system
+# fuz_css
 
 > CSS framework and design system for semantic HTML
 
@@ -38,12 +38,11 @@ fuz_css is a **CSS framework and design system**:
 - Semantic HTML styling without classes
 - Design tokens as CSS custom properties
 - Smart utility class generation (includes only used)
-- Two generators: Gro (SvelteKit) and Vite plugin (React/Preact/Solid)
 
 ### What fuz_css does NOT include
 
 - UI components (use fuz_ui)
-- JavaScript runtime - pure CSS output
+- JavaScript runtime - all output is pure CSS
 - Animation utilities (planned)
 - Full Tailwind compatibility
 
@@ -54,7 +53,9 @@ fuz_css is a **CSS framework and design system**:
 1. **Semantic styles** - The reset stylesheet styles HTML elements (buttons,
    inputs, links, headings, forms, tables) without adding classes. Uses
    low-specificity `:where()` selectors so your styles easily override the
-   defaults. Uses `.unstyled` escape hatch.
+   defaults. Add `class="unstyled"` to any element to opt out of opinionated
+   styling (colors, borders, decorative properties) while keeping
+   normalizations (font inheritance, border-collapse).
 2. **Style variables** - Design tokens as CSS custom properties that enable
    customization and runtime theming. Each variable provides values for light
    and/or dark color-schemes.
@@ -110,7 +111,9 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 ### Three class types
 
 - **Token classes** - Map to style variables: `p_md`, `color_a_50`, `gap_lg`
-- **Composite classes** - Multi-property shortcuts: `box`, `row`, `ellipsis`
+- **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
+  `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
+  `panel`, `icon_button`, `plain`, `menu_item`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
@@ -124,6 +127,7 @@ Literal classes use `property:value` syntax that maps 1:1 to CSS:
 - `hover:opacity:80%` → `:hover { opacity: 80%; }`
 - `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers
 
+Modifier ordering is `[media:][ancestor:][state...:][pseudo-element:]property:value`.
 Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary
 breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
 variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
@@ -146,9 +150,17 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
 - `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
-  performance)
+  performance). `text_min`/`text_max` for untinted extremes (pure black/white).
+- `shade_*` - shade scale (`shade_00`–`shade_100`), plus `shade_min`/`shade_max`
 
-**Size variants:** `xs5` → `xs` → `sm` → `md` → `lg` → `xl` → `xl15`
+**Size variants:** Core pattern is `xs` → `sm` → `md` → `lg` → `xl`, with
+extended ranges varying by family:
+
+- Spaces: `xs5`...`xs` → `sm` → `md` → `lg` → `xl`...`xl15` (21 steps)
+- Font sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl9` (13 steps)
+- Icon sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl3` (7 steps)
+- Border radii: `xs3`...`xs` → `sm` → `md` → `lg` → `xl` (7 steps)
+- Distances, shadows, line heights: `xs` → `sm` → `md` → `lg` → `xl` (5 steps)
 
 ## Usage
 
@@ -177,6 +189,9 @@ export default defineConfig({plugins: [vite_plugin_fuz_css()]});
 // main.ts
 import 'virtual:fuz.css';
 ```
+
+The Vite plugin supports HMR - changes to source files automatically trigger
+CSS regeneration during development.
 
 ### Utility-only mode
 
@@ -215,6 +230,8 @@ typography, borders, shading, shadows, layout. See
 - [variable_data.ts](src/lib/variable_data.ts) - Size, color, border variants
 - [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type
 - [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
+- [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
+  `theme.css`
 
 **CSS extraction:**
 
@@ -266,6 +283,8 @@ typography, borders, shading, shadows, layout. See
   dependency injection
 - [operations_defaults.ts](src/lib/operations_defaults.ts) - Default filesystem
   implementations
+- [example_class_utilities.ts](src/lib/example_class_utilities.ts) - Example
+  classes for Vite plugin integration tests
 
 **Stylesheets (for utility-only mode or direct import):**
 
@@ -282,13 +301,21 @@ update all others with equivalent changes.
 
 ### Tests - [src/test/](src/test/)
 
-- `variable*.test.ts` - StyleVariable type and consistency tests
-- `css_classes.test.ts` - CssClasses collection tests
-- `css_cache.test.ts` - Cache save/load, version invalidation, atomic writes
-- `css_class_*.test.ts` - Generation, resolution, extraction tests
-- `css_literal.test.ts` - CSS-literal parsing and validation
-- `vite_plugin_examples.test.ts` - Integration tests (skip with
-  `SKIP_EXAMPLE_TESTS=1`)
+Tests use dot-separated aspect splitting. Major test suites:
+
+- `css_class_extractor.{test,elements,expressions,jsx,locations,tracked_vars,typescript,utilities}.test.ts`
+- `css_bundled_resolution.{test,diagnostics,variables}.test.ts`
+- `css_ruleset_parser.{test,generation,modifiers,parse,selectors}.test.ts`
+- `css_class_resolution.{test,literals}.test.ts`
+- `style_rule_parser.{test,custom}.test.ts`
+
+Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
+`variables`, `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
+`themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
+`fuz_comments`, `generate_bundled_css`, `generate_classes_css`, and more.
+
+Integration: `vite_plugin_examples.test.ts` (skip with
+`SKIP_EXAMPLE_TESTS=1`).
 
 ## Known limitations
 
