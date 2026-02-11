@@ -1381,6 +1381,17 @@ body {
 	border-radius: var(--border_radius_xs);
 	background-color: var(--fg_10);
 }
+/* Reduces visual density by overriding sizing variables. Works on individual elements or as a container class whose children inherit the denser sizing. */
+.compact {
+	--font_size: var(--font_size_sm);
+	--input_height: var(--space_xl3);
+	--input_height_sm: var(--space_xl2);
+	--input_padding_x: var(--space_sm);
+	--min_height: var(--space_xl3);
+	--border_radius: var(--border_radius_xs2);
+	--icon_size: var(--icon_size_sm);
+	--menu_item_padding: var(--space_xs4) var(--space_xs3);
+}
 /*
 TODO other button variants?
 TODO this is slightly strange that it doesn't use --icon_size.
@@ -2705,6 +2716,9 @@ a.chip {
 }
 .gap_xs {
 	gap: var(--space_xs);
+}
+.gap_sm {
+	gap: var(--space_sm);
 }
 .gap_md {
 	gap: var(--space_md);

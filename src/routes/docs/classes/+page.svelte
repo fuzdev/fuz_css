@@ -1032,6 +1032,7 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
+				<li><code>.compact</code> - reduced density (smaller fonts, inputs, padding, radii)</li>
 			</ul>
 			<p>
 				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):

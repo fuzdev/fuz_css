@@ -223,4 +223,35 @@
 		/>
 		<button type="button" class="plain icon_button selected deselectable">+</button>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
+		<p>
+			<code>.compact</code> reduces density by overriding sizing variables. Apply directly or on a container
+			to cascade to children.
+		</p>
+		<Code content={`<button class="compact">compact</button>`} />
+		<button type="button" class="compact" class:mb_xs>compact</button>
+		<button type="button" class:mb_xs>normal</button>
+		<Code
+			content={`<button class="compact plain">+</button>\n<button class="compact icon_button">+</button>\n<button class="compact plain icon_button">+</button>`}
+		/>
+		<div class="row gap_sm mb_lg">
+			<button type="button" class="compact plain">+</button>
+			<button type="button" class="compact icon_button">+</button>
+			<button type="button" class="compact plain icon_button">+</button>
+		</div>
+		<Code content={`<button class="compact color_a">color_a</button>`} />
+		<button type="button" class="compact color_a mb_lg">color_a</button>
+		<Code
+			content={`<!-- container usage: all children inherit compact sizing -->\n<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">two</button>\n\t<button class="color_a">three</button>\n</div>`}
+		/>
+		<div class="compact row gap_sm">
+			<button type="button">one</button>
+			<button type="button" class="plain">two</button>
+			<button type="button" class="color_a">three</button>
+		</div>
+	</TomeSection>
 </TomeContent>
