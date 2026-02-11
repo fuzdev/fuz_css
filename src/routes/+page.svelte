@@ -16,7 +16,7 @@
 	<section class="box">
 		<h1 class="mb_sm" style:margin-top={MAIN_HEADER_MARGIN_TOP}>fuz_css</h1>
 		<Svg data={logo_fuz_css} size="var(--icon_size_xl2)" />
-		<div class="p_xl mt_lg border_radius_lg shadow_inset_bottom_xs">
+		<div class="px_xl py_md mt_lg border_radius_lg shadow_inset_bottom_xs">
 			<div class="panel p_md shadow_inset_top_xs">CSS with more utility 🪴</div>
 		</div>
 	</section>
