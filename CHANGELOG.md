@@ -1,5 +1,12 @@
 # @fuzdev/fuz_css
 
+## 0.50.0
+
+### Minor Changes
+
+- revert zeroing of margin-bottom for .box and .column ([07ec817](https://github.com/fuzdev/fuz_css/commit/07ec817))
+- upgrade @fuzdev/fuz_util ([07ec817](https://github.com/fuzdev/fuz_css/commit/07ec817))
+
 ## 0.49.1
 
 ### Patch Changes
