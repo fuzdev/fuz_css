@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.49.0
+
+### Minor Changes
+
+- upgrade gro after fuzdev transfer ([1174e4a](https://github.com/fuzdev/fuz_css/commit/1174e4a))
+
 ## 0.48.0
 
 ### Minor Changes
