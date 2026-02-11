@@ -1,6 +1,6 @@
 {
 	"name": "@fuzdev/fuz_css",
-	"version": "0.49.0",
+	"version": "0.49.1",
 	"description": "CSS framework and design system for semantic HTML",
 	"motto": "CSS with more utility",
 	"glyph": "🪴",
@@ -32,7 +32,6 @@
 	"peerDependencies": {
 		"@fuzdev/fuz_util": ">=0.45.3",
 		"@fuzdev/gro": ">=0.192.1",
-		"@ryanatkn/gro": ">=0.191.0",
 		"@sveltejs/acorn-typescript": "^1",
 		"@webref/css": "^8",
 		"acorn-jsx": "^5",
@@ -44,9 +43,6 @@
 			"optional": true
 		},
 		"@fuzdev/gro": {
-			"optional": true
-		},
-		"@ryanatkn/gro": {
 			"optional": true
 		},
 		"@sveltejs/acorn-typescript": {
@@ -73,7 +69,6 @@
 		"@fuzdev/gro": "^0.192.1",
 		"@jridgewell/trace-mapping": "^0.3.31",
 		"@ryanatkn/eslint-config": "^0.9.0",
-		"@ryanatkn/gro": "^0.191.0",
 		"@sveltejs/acorn-typescript": "^1.0.8",
 		"@sveltejs/adapter-static": "^3.0.10",
 		"@sveltejs/kit": "^2.50.1",
