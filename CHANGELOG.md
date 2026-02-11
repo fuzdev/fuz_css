@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.49.1
+
+### Patch Changes
+
+- remove @ryanatkn/gro from deps to finish migration to @fuzdev/gro ([d4a14cc](https://github.com/fuzdev/fuz_css/commit/d4a14cc))
+
 ## 0.49.0
 
 ### Minor Changes
