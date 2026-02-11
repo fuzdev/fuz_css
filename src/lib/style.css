@@ -222,8 +222,8 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	margin-bottom: var(--space_xl7);
 }
 
-/* Flex layout containers reset flow margins on direct children; prefer .gap_ utilities. */
-:where(.row, .box, .column) > * {
+/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
+:where(.row > *) {
 	margin: 0;
 }
 
