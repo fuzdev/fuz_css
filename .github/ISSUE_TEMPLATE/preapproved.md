@@ -2,7 +2,7 @@
 name: For Maintainers Only
 title: wait stop, read the text below
 about: |-
-  Do note use. Only for approved topics from the GitHub discussions.
+  Do not use. Only for approved topics from the GitHub discussions.
 ---
 
 **WAIT STOP!!** Read below:
