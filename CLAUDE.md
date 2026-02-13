@@ -6,7 +6,7 @@ fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system.
 Early alpha with breaking changes ahead.
 
-For coding conventions, see Skill(fuz_stack). For UI
+For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
 ## Gro commands
