@@ -222,6 +222,99 @@ describe('resolve_css diagnostics', () => {
 		});
 	});
 
+	describe('explicit variables (@fuz-variables)', () => {
+		test('emits error for explicit variable not in theme', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a_50', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['nonexistent_var']),
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('@fuz-variables');
+			expect(result.diagnostics[0]!.message).toContain('nonexistent_var');
+			expect(result.diagnostics[0]!.message).toContain('No theme variable found');
+		});
+
+		test('no error when explicit variable exists in theme', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a_50', light: 'blue'},
+				{name: 'shade_40', light: '#ccc'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['color_a_50', 'shade_40']),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+		});
+
+		test('suggests similar variable for typo', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'shade_40', light: '#ccc'},
+				{name: 'shade_50', light: '#999'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['shade_4']), // typo
+			});
+
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('shade_4');
+			expect(result.diagnostics[0]!.message).toContain('did you mean');
+		});
+
+		test('errors for multiple explicit variables with mix of valid and invalid', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a_50', light: 'blue'},
+				{name: 'shade_40', light: '#ccc'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2']),
+			});
+
+			// Only the 2 invalid variables produce errors
+			expect(result.diagnostics.length).toBe(2);
+			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+			const messages = result.diagnostics.map((d) => d.message);
+			expect(messages.some((m) => m.includes('bad_var_1'))).toBe(true);
+			expect(messages.some((m) => m.includes('bad_var_2'))).toBe(true);
+		});
+	});
+
 	describe('explicit elements (@fuz-elements)', () => {
 		test('emits error for explicit element with no rules', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
