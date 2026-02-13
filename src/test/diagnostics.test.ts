@@ -40,7 +40,7 @@ describe('format_diagnostic', () => {
 			level: 'error',
 			message: 'unknown CSS property',
 			suggestion: null,
-			class_name: 'invalid:value',
+			identifier: 'invalid:value',
 			locations: [{file: 'src/App.svelte', line: 5, column: 12}],
 		};
 
@@ -54,7 +54,7 @@ describe('format_diagnostic', () => {
 			level: 'error',
 			message: 'invalid class',
 			suggestion: null,
-			class_name: 'bad_class',
+			identifier: 'bad_class',
 			locations: null,
 		};
 
@@ -68,7 +68,7 @@ describe('format_diagnostic', () => {
 			level: 'warning',
 			message: 'unknown property',
 			suggestion: 'did you mean "color"?',
-			class_name: 'colour:red',
+			identifier: 'colour:red',
 			locations: [{file: 'test.ts', line: 1, column: 1}],
 		};
 
@@ -82,7 +82,7 @@ describe('format_diagnostic', () => {
 			level: 'error',
 			message: 'test error',
 			suggestion: null,
-			class_name: 'test_class',
+			identifier: 'test_class',
 			locations: [],
 		};
 
@@ -99,7 +99,7 @@ describe('CssGenerationError', () => {
 				level: 'error',
 				message: 'unknown property',
 				suggestion: null,
-				class_name: 'bad:class',
+				identifier: 'bad:class',
 				locations: [{file: 'app.ts', line: 1, column: 1}],
 			},
 		];
@@ -119,7 +119,7 @@ describe('CssGenerationError', () => {
 				level: 'error',
 				message: 'error one',
 				suggestion: null,
-				class_name: 'class_a',
+				identifier: 'class_a',
 				locations: null,
 			},
 			{
@@ -127,7 +127,7 @@ describe('CssGenerationError', () => {
 				level: 'error',
 				message: 'error two',
 				suggestion: null,
-				class_name: 'class_b',
+				identifier: 'class_b',
 				locations: null,
 			},
 		];
@@ -146,7 +146,7 @@ describe('CssGenerationError', () => {
 				level: 'error',
 				message: 'this is an error',
 				suggestion: null,
-				class_name: 'error_class',
+				identifier: 'error_class',
 				locations: null,
 			},
 			{
@@ -154,7 +154,7 @@ describe('CssGenerationError', () => {
 				level: 'warning',
 				message: 'this is a warning',
 				suggestion: null,
-				class_name: 'warning_class',
+				identifier: 'warning_class',
 				locations: null,
 			},
 		];
@@ -182,7 +182,7 @@ describe('CssGenerationError', () => {
 				level: 'error' as const,
 				message: 'generation error',
 				suggestion: null,
-				class_name: 'gen_class',
+				identifier: 'gen_class',
 				locations: null,
 			},
 		];
@@ -207,7 +207,7 @@ describe('CssGenerationError', () => {
 				level: 'warning',
 				message: 'just a warning',
 				suggestion: null,
-				class_name: 'warn_class',
+				identifier: 'warn_class',
 				locations: null,
 			},
 		];

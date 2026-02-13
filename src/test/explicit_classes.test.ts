@@ -24,7 +24,7 @@ describe('explicit_classes diagnostics', () => {
 		expect(result.css).toBe('');
 		expect(result.diagnostics).toHaveLength(1);
 		expect(result.diagnostics[0]!.level).toBe('error');
-		expect(result.diagnostics[0]!.class_name).toBe('unknown_class');
+		expect(result.diagnostics[0]!.identifier).toBe('unknown_class');
 		expect(result.diagnostics[0]!.message).toContain('No matching class definition');
 	});
 
@@ -64,7 +64,7 @@ describe('explicit_classes diagnostics', () => {
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
 							level: 'error',
-							class_name: 'invalid-property:value',
+							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
 							suggestion: null,
 						});
@@ -91,7 +91,7 @@ describe('explicit_classes diagnostics', () => {
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
 							level: 'error',
-							class_name: 'invalid-property:value',
+							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
 							suggestion: null,
 						});
@@ -121,7 +121,7 @@ describe('explicit_classes diagnostics', () => {
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
 							level: 'error',
-							class_name: 'some-class:value',
+							identifier: 'some-class:value',
 							message: 'Circular reference detected',
 							suggestion: null,
 						});

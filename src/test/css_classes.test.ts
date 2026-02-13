@@ -11,7 +11,7 @@ describe('CssClasses', () => {
 			['foo', [loc]],
 			['bar', [loc]],
 		]);
-		css_classes.add('file1.svelte', classes);
+		css_classes.add('file1.svelte', {classes});
 
 		const result = css_classes.get();
 		expect(result.has('foo')).toBe(true);
@@ -23,8 +23,8 @@ describe('CssClasses', () => {
 		const loc1: SourceLocation = {file: 'file1.svelte', line: 1, column: 1};
 		const loc2: SourceLocation = {file: 'file2.svelte', line: 5, column: 10};
 
-		css_classes.add('file1.svelte', new Map([['foo', [loc1]]]));
-		css_classes.add('file2.svelte', new Map([['bar', [loc2]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['foo', [loc1]]])});
+		css_classes.add('file2.svelte', {classes: new Map([['bar', [loc2]]])});
 
 		const result = css_classes.get();
 		expect(result.has('foo')).toBe(true);
@@ -35,8 +35,8 @@ describe('CssClasses', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['foo', [loc]]]));
-		css_classes.add('file2.svelte', new Map([['bar', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['foo', [loc]]])});
+		css_classes.add('file2.svelte', {classes: new Map([['bar', [loc]]])});
 
 		css_classes.delete('file1.svelte');
 
@@ -48,7 +48,7 @@ describe('CssClasses', () => {
 	test('additional_classes always included', () => {
 		const css_classes = new CssClasses(new Set(['always-included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
-		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['extracted', [loc]]])});
 
 		const result = css_classes.get();
 		expect(result.has('always-included')).toBe(true);
@@ -58,7 +58,7 @@ describe('CssClasses', () => {
 	test('get_with_locations returns null for additional_classes', () => {
 		const css_classes = new CssClasses(new Set(['included']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
-		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['extracted', [loc]]])});
 
 		const result = css_classes.get_with_locations();
 		expect(result.get('included')).toBeNull();
@@ -70,8 +70,8 @@ describe('CssClasses', () => {
 		const loc1: SourceLocation = {file: 'file1.svelte', line: 1, column: 1};
 		const loc2: SourceLocation = {file: 'file2.svelte', line: 5, column: 10};
 
-		css_classes.add('file1.svelte', new Map([['shared', [loc1]]]));
-		css_classes.add('file2.svelte', new Map([['shared', [loc2]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['shared', [loc1]]])});
+		css_classes.add('file2.svelte', {classes: new Map([['shared', [loc2]]])});
 
 		const result = css_classes.get_with_locations();
 		const locations = result.get('shared');
@@ -93,7 +93,7 @@ describe('CssClasses', () => {
 			},
 		];
 
-		css_classes.add('file1.svelte', new Map(), null, diagnostics);
+		css_classes.add('file1.svelte', {classes: new Map(), diagnostics});
 
 		const result = css_classes.get_diagnostics();
 		expect(result).toHaveLength(1);
@@ -104,12 +104,12 @@ describe('CssClasses', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['foo', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['foo', [loc]]])});
 		const result1 = css_classes.get();
 		expect(result1.has('foo')).toBe(true);
 
 		// Add more classes
-		css_classes.add('file2.svelte', new Map([['bar', [loc]]]));
+		css_classes.add('file2.svelte', {classes: new Map([['bar', [loc]]])});
 		const result2 = css_classes.get();
 		expect(result2.has('bar')).toBe(true);
 	});
@@ -119,7 +119,7 @@ describe('CssClasses', () => {
 		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
 		const explicit = new Set(['annotated_class']);
 
-		css_classes.add('file1.ts', new Map([['regular', [loc]]]), explicit);
+		css_classes.add('file1.ts', {classes: new Map([['regular', [loc]]]), explicit_classes: explicit});
 
 		const {explicit_classes} = css_classes.get_all();
 		expect(explicit_classes).not.toBeNull();
@@ -139,13 +139,12 @@ describe('CssClasses', () => {
 		const css_classes = new CssClasses(null, new Set(['excluded']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add(
-			'file1.svelte',
-			new Map([
+		css_classes.add('file1.svelte', {
+			classes: new Map([
 				['kept', [loc]],
 				['excluded', [loc]],
 			]),
-		);
+		});
 
 		const {all_classes} = css_classes.get_all();
 		expect(all_classes.has('kept')).toBe(true);
@@ -167,7 +166,7 @@ describe('CssClasses', () => {
 		const css_classes = new CssClasses(null, exclude);
 		const explicit = new Set(['annotated_but_excluded']);
 
-		css_classes.add('file1.ts', new Map(), explicit);
+		css_classes.add('file1.ts', {classes: new Map(), explicit_classes: explicit});
 
 		const {explicit_classes} = css_classes.get_all();
 		// Should be filtered out by exclude
@@ -181,15 +180,10 @@ describe('explicit_variables (@fuz-variables)', () => {
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 		const explicit_vars = new Set(['shade_40', 'text_50']);
 
-		css_classes.add(
-			'file1.svelte',
-			new Map([['foo', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			explicit_vars,
-		);
+		css_classes.add('file1.svelte', {
+			classes: new Map([['foo', [loc]]]),
+			explicit_variables: explicit_vars,
+		});
 
 		const {explicit_variables} = css_classes.get_all();
 		expect(explicit_variables).not.toBeNull();
@@ -201,24 +195,14 @@ describe('explicit_variables (@fuz-variables)', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add(
-			'file1.svelte',
-			new Map([['a', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['shade_40']),
-		);
-		css_classes.add(
-			'file2.svelte',
-			new Map([['b', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['text_50']),
-		);
+		css_classes.add('file1.svelte', {
+			classes: new Map([['a', [loc]]]),
+			explicit_variables: new Set(['shade_40']),
+		});
+		css_classes.add('file2.svelte', {
+			classes: new Map([['b', [loc]]]),
+			explicit_variables: new Set(['text_50']),
+		});
 
 		const {explicit_variables} = css_classes.get_all();
 		expect(explicit_variables).not.toBeNull();
@@ -230,24 +214,14 @@ describe('explicit_variables (@fuz-variables)', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add(
-			'file1.svelte',
-			new Map([['a', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['shade_40']),
-		);
-		css_classes.add(
-			'file2.svelte',
-			new Map([['b', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['text_50']),
-		);
+		css_classes.add('file1.svelte', {
+			classes: new Map([['a', [loc]]]),
+			explicit_variables: new Set(['shade_40']),
+		});
+		css_classes.add('file2.svelte', {
+			classes: new Map([['b', [loc]]]),
+			explicit_variables: new Set(['text_50']),
+		});
 
 		css_classes.delete('file1.svelte');
 
@@ -261,26 +235,16 @@ describe('explicit_variables (@fuz-variables)', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add(
-			'file1.svelte',
-			new Map([['a', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['shade_40']),
-		);
+		css_classes.add('file1.svelte', {
+			classes: new Map([['a', [loc]]]),
+			explicit_variables: new Set(['shade_40']),
+		});
 
 		// Re-add with different variables
-		css_classes.add(
-			'file1.svelte',
-			new Map([['a', [loc]]]),
-			null,
-			null,
-			null,
-			null,
-			new Set(['text_50']),
-		);
+		css_classes.add('file1.svelte', {
+			classes: new Map([['a', [loc]]]),
+			explicit_variables: new Set(['text_50']),
+		});
 
 		const {explicit_variables} = css_classes.get_all();
 		expect(explicit_variables).not.toBeNull();
@@ -292,7 +256,7 @@ describe('explicit_variables (@fuz-variables)', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['a', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['a', [loc]]])});
 
 		const {explicit_variables} = css_classes.get_all();
 		expect(explicit_variables).toBeNull();
@@ -305,7 +269,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
 		// Simulate adding file data (could be from cache or fresh extraction)
-		css_classes.add('file1.svelte', new Map([['extracted_class', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['extracted_class', [loc]]])});
 
 		const result = css_classes.get();
 		// Both additional and extracted should be present
@@ -320,7 +284,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const css_classes = new CssClasses(include, exclude);
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['extracted', [loc]]])});
 
 		const result = css_classes.get();
 		expect(result.has('keep_me')).toBe(true);
@@ -334,8 +298,8 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const loc2: SourceLocation = {file: 'file2.svelte', line: 5, column: 10};
 
 		// Add multiple files (simulating cache-restored data)
-		css_classes.add('file1.svelte', new Map([['from_file1', [loc1]]]));
-		css_classes.add('file2.svelte', new Map([['from_file2', [loc2]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['from_file1', [loc1]]])});
+		css_classes.add('file2.svelte', {classes: new Map([['from_file2', [loc2]]])});
 
 		const result = css_classes.get();
 		expect(result.has('always_included')).toBe(true);
@@ -347,7 +311,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const css_classes = new CssClasses(null);
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['extracted', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['extracted', [loc]]])});
 
 		const result = css_classes.get();
 		expect(result.size).toBe(1);
@@ -358,7 +322,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const css_classes = new CssClasses(new Set(['additional_class']));
 		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
 
-		css_classes.add('file1.svelte', new Map([['regular', [loc]]]));
+		css_classes.add('file1.svelte', {classes: new Map([['regular', [loc]]])});
 
 		const {explicit_classes} = css_classes.get_all();
 		// additional_classes should be in explicit_classes
@@ -372,7 +336,10 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
 		const file_explicit = new Set(['from_fuz_classes_annotation']);
 
-		css_classes.add('file1.ts', new Map([['regular', [loc]]]), file_explicit);
+		css_classes.add('file1.ts', {
+			classes: new Map([['regular', [loc]]]),
+			explicit_classes: file_explicit,
+		});
 
 		const {explicit_classes} = css_classes.get_all();
 		expect(explicit_classes?.has('additional')).toBe(true);

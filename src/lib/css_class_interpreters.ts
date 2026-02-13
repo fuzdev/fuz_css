@@ -122,14 +122,14 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 					if (skipped.reason === 'pseudo_element_conflict') {
 						ctx.diagnostics.push({
 							level: 'warning',
-							class_name,
+							identifier: class_name,
 							message: `Rule "${skipped.selector}" already contains a pseudo-element; "${skipped.conflicting_modifier}" modifier was not applied`,
 							suggestion: `The rule is included with just the class renamed`,
 						});
 					} else {
 						ctx.diagnostics.push({
 							level: 'warning',
-							class_name,
+							identifier: class_name,
 							message: `Rule "${skipped.selector}" already contains "${skipped.conflicting_modifier}"; modifier was not applied to avoid redundancy`,
 							suggestion: `The rule is included with just the class renamed`,
 						});

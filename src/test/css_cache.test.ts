@@ -67,17 +67,14 @@ const save_and_load = async (
 		content_hash = 'test-hash',
 	} = options;
 
-	await save_cached_extraction(
-		ops,
-		cache_path,
-		content_hash,
+	await save_cached_extraction(ops, cache_path, content_hash, {
 		classes,
 		explicit_classes,
 		diagnostics,
 		elements,
 		explicit_elements,
 		explicit_variables,
-	);
+	});
 	const loaded = await load_cached_extraction(ops, cache_path);
 	expect(loaded).not.toBeNull();
 	expect(loaded!.v).toBe(CSS_CACHE_VERSION);
@@ -517,17 +514,14 @@ describe('cache functions with mock ops', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(
-			mock_ops,
-			cache_path,
-			'abc123',
+		await save_cached_extraction(mock_ops, cache_path, 'abc123', {
 			classes,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+			explicit_classes: null,
+			diagnostics: null,
+			elements: null,
+			explicit_elements: null,
+			explicit_variables: null,
+		});
 		const loaded = await load_cached_extraction(mock_ops, cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -547,7 +541,14 @@ describe('cache functions with mock ops', () => {
 		const mock_ops = create_mock_cache_ops(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_ops, cache_path, 'hash', null, null, null, null, null, null);
+		await save_cached_extraction(mock_ops, cache_path, 'hash', {
+			classes: null,
+			explicit_classes: null,
+			diagnostics: null,
+			elements: null,
+			explicit_elements: null,
+			explicit_variables: null,
+		});
 		expect(state.files.has(cache_path)).toBe(true);
 
 		await delete_cached_extraction(mock_ops, cache_path);
@@ -558,17 +559,14 @@ describe('cache functions with mock ops', () => {
 		const state = create_mock_fs_state();
 		const mock_ops = create_mock_cache_ops(state);
 
-		await save_cached_extraction(
-			mock_ops,
-			'/test.json',
-			'hash',
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		await save_cached_extraction(mock_ops, '/test.json', 'hash', {
+			classes: null,
+			explicit_classes: null,
+			diagnostics: null,
+			elements: null,
+			explicit_elements: null,
+			explicit_variables: null,
+		});
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});

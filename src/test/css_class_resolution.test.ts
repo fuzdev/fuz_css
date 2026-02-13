@@ -159,7 +159,7 @@ describe('resolve_composes', () => {
 			if (!result.ok) {
 				expect(result.error.level).toBe('error');
 				expect(result.error.message).toContain('Unknown class "unknown_class" in composes array');
-				expect(result.error.class_name).toBe('test_class');
+				expect(result.error.identifier).toBe('test_class');
 			}
 		});
 
@@ -506,7 +506,7 @@ describe('resolve_composes', () => {
 				expect(result.warnings).not.toBe(null);
 				expect(result.warnings?.[0]?.level).toBe('warning');
 				expect(result.warnings?.[0]?.message).toContain('empty declaration');
-				expect(result.warnings?.[0]?.class_name).toBe('empty_decl');
+				expect(result.warnings?.[0]?.identifier).toBe('empty_decl');
 			}
 		});
 
@@ -528,7 +528,7 @@ describe('resolve_composes', () => {
 				expect(result.declaration).toBe('color: red;');
 				expect(result.warnings).not.toBe(null);
 				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.class_name).toBe('empty');
+				expect(result.warnings?.[0]?.identifier).toBe('empty');
 			}
 		});
 
@@ -550,8 +550,8 @@ describe('resolve_composes', () => {
 			if (result.ok) {
 				expect(result.declaration).toBe('color: red;');
 				expect(result.warnings?.length).toBe(2);
-				expect(result.warnings?.[0]?.class_name).toBe('empty1');
-				expect(result.warnings?.[1]?.class_name).toBe('empty2');
+				expect(result.warnings?.[0]?.identifier).toBe('empty1');
+				expect(result.warnings?.[1]?.identifier).toBe('empty2');
 			}
 		});
 	});

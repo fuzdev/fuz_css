@@ -317,7 +317,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Multiple media modifiers not allowed`,
-							class_name,
+							identifier: class_name,
 							suggestion: null,
 						},
 					};
@@ -328,7 +328,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Media modifier must come before ancestor modifier`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${ancestor.name}"`,
 						},
 					};
@@ -339,7 +339,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Media modifier must come before state modifiers`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${states[0]!.name}"`,
 						},
 					};
@@ -350,7 +350,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Media modifier must come before pseudo-element`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
 						},
 					};
@@ -366,7 +366,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Modifiers "${ancestor.name}" and "${segment}" are mutually exclusive`,
-							class_name,
+							identifier: class_name,
 							suggestion: null,
 						},
 					};
@@ -377,7 +377,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Ancestor modifier must come before state modifiers`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${states[0]!.name}"`,
 						},
 					};
@@ -388,7 +388,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Ancestor modifier must come before pseudo-element`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
 						},
 					};
@@ -404,7 +404,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `State modifiers must come before pseudo-element`,
-							class_name,
+							identifier: class_name,
 							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
 						},
 					};
@@ -418,7 +418,7 @@ export const extract_and_validate_modifiers = (
 							error: {
 								level: 'error',
 								message: `State modifiers must be in alphabetical order: "${prev.name}:${segment}" should be "${segment}:${prev.name}"`,
-								class_name,
+								identifier: class_name,
 								suggestion: `Reorder to: ...${segment}:${prev.name}:...`,
 							},
 						};
@@ -435,7 +435,7 @@ export const extract_and_validate_modifiers = (
 						error: {
 							level: 'error',
 							message: `Multiple pseudo-element modifiers not allowed`,
-							class_name,
+							identifier: class_name,
 							suggestion: null,
 						},
 					};
@@ -473,7 +473,7 @@ export const parse_css_literal = (
 			error: {
 				level: 'error',
 				message: `Invalid CSS-literal syntax: expected "property:value" format`,
-				class_name,
+				identifier: class_name,
 				suggestion: null,
 			},
 		};
@@ -504,7 +504,7 @@ export const parse_css_literal = (
 			error: {
 				level: 'error',
 				message: `Unknown modifier "${unknown}"`,
-				class_name,
+				identifier: class_name,
 				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
 			},
 		};
@@ -520,7 +520,7 @@ export const parse_css_literal = (
 			error: {
 				level: 'error',
 				message: `Unknown CSS property "${property}"`,
-				class_name,
+				identifier: class_name,
 				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
 			},
 		};
@@ -535,7 +535,7 @@ export const parse_css_literal = (
 		(diagnostics ??= []).push({
 			level: 'warning',
 			message: calc_warning,
-			class_name,
+			identifier: class_name,
 			suggestion: `Use ~ for spaces in calc expressions`,
 		});
 	}
@@ -704,7 +704,7 @@ export const try_resolve_literal = (
 			ok: false,
 			error: {
 				level: 'error',
-				class_name: context_class_name,
+				identifier: context_class_name,
 				message: `Modified class "${class_name}" cannot be used in composes array`,
 				suggestion: 'Apply modified classes directly in markup, not in composes arrays',
 			},
@@ -727,7 +727,7 @@ const contextualize_error = (
 	context_class_name: string,
 ): InterpreterDiagnostic => ({
 	...error,
-	class_name: context_class_name,
+	identifier: context_class_name,
 });
 
 /**

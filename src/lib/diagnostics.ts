@@ -52,7 +52,8 @@ export interface GenerationDiagnostic {
 	level: 'error' | 'warning';
 	message: string;
 	suggestion: string | null;
-	class_name: string;
+	/** The class name, element name, or variable name this diagnostic refers to */
+	identifier: string;
 	/** Source locations where this class was used, or null if from additional_classes */
 	locations: Array<SourceLocation> | null;
 }
@@ -69,7 +70,8 @@ export type Diagnostic = ExtractionDiagnostic | GenerationDiagnostic;
 export interface InterpreterDiagnostic {
 	level: 'error' | 'warning';
 	message: string;
-	class_name: string;
+	/** The class name, element name, or variable name this diagnostic refers to */
+	identifier: string;
 	suggestion: string | null;
 }
 
@@ -90,7 +92,7 @@ export const create_generation_diagnostic = (
 	phase: 'generation',
 	level: diagnostic.level,
 	message: diagnostic.message,
-	class_name: diagnostic.class_name,
+	identifier: diagnostic.identifier,
 	suggestion: diagnostic.suggestion ?? null,
 	locations,
 });
@@ -105,7 +107,7 @@ export const format_diagnostic = (d: Diagnostic): string => {
 	}
 	const loc = d.locations?.[0];
 	const location_str = loc ? `${loc.file}:${loc.line}:${loc.column}: ` : '';
-	return `  - ${location_str}${d.class_name}: ${d.message}${suggestion}`;
+	return `  - ${location_str}${d.identifier}: ${d.message}${suggestion}`;
 };
 
 /**

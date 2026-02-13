@@ -8,6 +8,7 @@
  */
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
+import type {ExtractionData} from './css_class_extractor.js';
 
 /**
  * Collection of CSS classes extracted from source files.
@@ -77,51 +78,38 @@ export class CssClasses {
 	 * Replaces any previous classes and diagnostics for this file.
 	 *
 	 * @param id - File identifier
-	 * @param classes - Map of class names to their source locations, or null if none
-	 * @param explicit_classes - Classes from @fuz-classes comments, or null if none
-	 * @param diagnostics - Extraction diagnostics from this file, or null if none
-	 * @param elements - HTML elements found in the file, or null if none
-	 * @param explicit_elements - Elements from @fuz-elements comments, or null if none
-	 * @param explicit_variables - Variables from @fuz-variables comments, or null if none
+	 * @param data - Extraction data fields to store for this file
 	 */
-	add(
-		id: string,
-		classes: Map<string, Array<SourceLocation>> | null,
-		explicit_classes?: Set<string> | null,
-		diagnostics?: Array<ExtractionDiagnostic> | null,
-		elements?: Set<string> | null,
-		explicit_elements?: Set<string> | null,
-		explicit_variables?: Set<string> | null,
-	): void {
+	add(id: string, data: Partial<ExtractionData>): void {
 		this.#dirty = true;
-		if (classes) {
-			this.#by_id.set(id, classes);
+		if (data.classes) {
+			this.#by_id.set(id, data.classes);
 		} else {
 			this.#by_id.delete(id);
 		}
-		if (explicit_classes) {
-			this.#explicit_by_id.set(id, explicit_classes);
+		if (data.explicit_classes) {
+			this.#explicit_by_id.set(id, data.explicit_classes);
 		} else {
 			this.#explicit_by_id.delete(id);
 		}
-		if (diagnostics) {
-			this.#diagnostics_by_id.set(id, diagnostics);
+		if (data.diagnostics) {
+			this.#diagnostics_by_id.set(id, data.diagnostics);
 		} else {
 			// Clear any old diagnostics for this file
 			this.#diagnostics_by_id.delete(id);
 		}
-		if (elements) {
-			this.#elements_by_id.set(id, elements);
+		if (data.elements) {
+			this.#elements_by_id.set(id, data.elements);
 		} else {
 			this.#elements_by_id.delete(id);
 		}
-		if (explicit_elements) {
-			this.#explicit_elements_by_id.set(id, explicit_elements);
+		if (data.explicit_elements) {
+			this.#explicit_elements_by_id.set(id, data.explicit_elements);
 		} else {
 			this.#explicit_elements_by_id.delete(id);
 		}
-		if (explicit_variables) {
-			this.#explicit_variables_by_id.set(id, explicit_variables);
+		if (data.explicit_variables) {
+			this.#explicit_variables_by_id.set(id, data.explicit_variables);
 		} else {
 			this.#explicit_variables_by_id.delete(id);
 		}
