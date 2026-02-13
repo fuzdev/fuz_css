@@ -465,7 +465,8 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					}
 				}
 
-				// Add explicit variables from @fuz-variables comments
+				// Add explicit variables from @fuz-variables comments to detected set for inclusion,
+				// and pass as explicit_variables to resolve_css for error reporting on typos
 				if (explicit_variables) {
 					for (const v of explicit_variables) {
 						detected_css_variables.add(v);
