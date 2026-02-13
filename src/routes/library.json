@@ -1678,7 +1678,7 @@
 								"name": "add",
 								"kind": "function",
 								"doc_comment": "Adds extraction results for a file.\nReplaces any previous classes and diagnostics for this file.",
-								"type_signature": "(id: string, data: Partial<ExtractionData>): void",
+								"type_signature": "(id: string, data: ExtractionData): void",
 								"return_type": "void",
 								"parameters": [
 									{
@@ -1688,7 +1688,7 @@
 									},
 									{
 										"name": "data",
-										"type": "Partial<ExtractionData>",
+										"type": "ExtractionData",
 										"description": "- Extraction data fields to store for this file"
 									}
 								]

@@ -280,9 +280,15 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						if (cached && cached.content_hash === node.content_hash) {
 							// Cache hit
 							stats.cache_hits++;
+							const cached_data = from_cached_extraction(cached);
 							return {
 								id: node.id,
-								...from_cached_extraction(cached),
+								classes: cached_data.classes,
+								explicit_classes: cached_data.explicit_classes,
+								diagnostics: cached_data.diagnostics,
+								elements: cached_data.elements,
+								explicit_elements: cached_data.explicit_elements,
+								explicit_variables: cached_data.explicit_variables,
 								cache_path: null,
 								content_hash: node.content_hash,
 							};
@@ -291,17 +297,19 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 					// Cache miss - extract
 					stats.cache_misses++;
-					const {tracked_vars: _, ...extraction_data} = extract_css_classes_with_locations(
-						node.contents,
-						{
-							filename: node.id,
-							acorn_plugins,
-						},
-					);
+					const result = extract_css_classes_with_locations(node.contents, {
+						filename: node.id,
+						acorn_plugins,
+					});
 
 					return {
 						id: node.id,
-						...extraction_data,
+						classes: result.classes,
+						explicit_classes: result.explicit_classes,
+						diagnostics: result.diagnostics,
+						elements: result.elements,
+						explicit_elements: result.explicit_elements,
+						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};

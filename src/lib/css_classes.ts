@@ -80,7 +80,7 @@ export class CssClasses {
 	 * @param id - File identifier
 	 * @param data - Extraction data fields to store for this file
 	 */
-	add(id: string, data: Partial<ExtractionData>): void {
+	add(id: string, data: ExtractionData): void {
 		this.#dirty = true;
 		if (data.classes) {
 			this.#by_id.set(id, data.classes);
