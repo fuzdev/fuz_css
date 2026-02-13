@@ -27,15 +27,10 @@ import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
 //
 
 /**
- * Extraction result with classes mapped to their source locations.
+ * Cacheable extraction data fields shared between extraction and caching layers.
  * Uses `null` instead of empty collections to avoid allocation overhead.
- *
- * Uses embedded diagnostics (rather than a Result type) because file extraction
- * can partially succeed: some classes may be extracted while others produce errors.
- * This differs from `CssLiteralParseResult` which uses a discriminated union
- * because single-class parsing is binary success/failure.
  */
-export interface ExtractionResult {
+export interface ExtractionData {
 	/**
 	 * Map from class name to locations where it was used, or null if none.
 	 * Keys = unique classes, values = locations for diagnostics/IDE integration.
@@ -46,8 +41,6 @@ export interface ExtractionResult {
 	 * These produce errors if they can't be resolved during generation.
 	 */
 	explicit_classes: Set<string> | null;
-	/** Variables that were used in class contexts, or null if none */
-	tracked_vars: Set<string> | null;
 	/** Diagnostics from the extraction phase, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	/**
@@ -65,6 +58,33 @@ export interface ExtractionResult {
 	 * These produce errors if they can't be resolved to theme variables.
 	 */
 	explicit_variables: Set<string> | null;
+}
+
+/**
+ * Returns true if the extraction data has any non-null fields.
+ */
+export const has_extraction_data = (data: ExtractionData): boolean =>
+	!!(
+		data.classes ||
+		data.explicit_classes ||
+		data.diagnostics ||
+		data.elements ||
+		data.explicit_elements ||
+		data.explicit_variables
+	);
+
+/**
+ * Extraction result with classes mapped to their source locations.
+ * Extends `ExtractionData` with `tracked_vars` which is internal to AST walking.
+ *
+ * Uses embedded diagnostics (rather than a Result type) because file extraction
+ * can partially succeed: some classes may be extracted while others produce errors.
+ * This differs from `CssLiteralParseResult` which uses a discriminated union
+ * because single-class parsing is binary success/failure.
+ */
+export interface ExtractionResult extends ExtractionData {
+	/** Variables that were used in class contexts, or null if none */
+	tracked_vars: Set<string> | null;
 }
 
 /**
@@ -314,96 +334,37 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 };
 
 /**
- * Parses @fuz-classes content from a comment, handling the colon variant.
- * Returns the list of class names or null if not a @fuz-classes comment.
+ * Creates a parser for `@fuz-{tag}` comment annotations.
+ * Each parser matches `@fuz-{tag}` with optional colon, warns on colon usage,
+ * and returns the space-separated list of names.
  */
-const FUZ_CLASSES_PATTERN = /^\s*@fuz-classes(:?)\s+(.+?)\s*$/;
-
-const parse_fuz_classes_comment = (
+const create_fuz_comment_parser = (
+	tag: string,
+): ((
 	content: string,
 	location: SourceLocation,
 	diagnostics: Array<ExtractionDiagnostic>,
-): Array<string> | null => {
-	// Match @fuz-classes with optional colon
-	const match = FUZ_CLASSES_PATTERN.exec(content);
-	if (!match) return null;
-
-	const has_colon = match[1] === ':';
-	const class_list = match[2]!;
-
-	// Emit warning if colon was used (unnecessary but supported)
-	if (has_colon) {
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: '@fuz-classes: colon is unnecessary',
-			suggestion: 'Use @fuz-classes without the colon',
-			location,
-		});
-	}
-
-	return class_list.split(/\s+/).filter(Boolean);
+) => Array<string> | null) => {
+	const pattern = new RegExp(`^\\s*@fuz-${tag}(:?)\\s+(.+?)\\s*$`);
+	return (content, location, diagnostics) => {
+		const match = pattern.exec(content);
+		if (!match) return null;
+		if (match[1] === ':') {
+			diagnostics.push({
+				phase: 'extraction',
+				level: 'warning',
+				message: `@fuz-${tag}: colon is unnecessary`,
+				suggestion: `Use @fuz-${tag} without the colon`,
+				location,
+			});
+		}
+		return match[2]!.split(/\s+/).filter(Boolean);
+	};
 };
 
-/**
- * Parses @fuz-elements content from a comment, handling the colon variant.
- * Returns the list of element names or null if not a @fuz-elements comment.
- */
-const FUZ_ELEMENTS_PATTERN = /^\s*@fuz-elements(:?)\s+(.+?)\s*$/;
-
-const parse_fuz_elements_comment = (
-	content: string,
-	location: SourceLocation,
-	diagnostics: Array<ExtractionDiagnostic>,
-): Array<string> | null => {
-	const match = FUZ_ELEMENTS_PATTERN.exec(content);
-	if (!match) return null;
-
-	const has_colon = match[1] === ':';
-	const element_list = match[2]!;
-
-	if (has_colon) {
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: '@fuz-elements: colon is unnecessary',
-			suggestion: 'Use @fuz-elements without the colon',
-			location,
-		});
-	}
-
-	return element_list.split(/\s+/).filter(Boolean);
-};
-
-/**
- * Parses @fuz-variables content from a comment, handling the colon variant.
- * Returns the list of variable names or null if not a @fuz-variables comment.
- */
-const FUZ_VARIABLES_PATTERN = /^\s*@fuz-variables(:?)\s+(.+?)\s*$/;
-
-const parse_fuz_variables_comment = (
-	content: string,
-	location: SourceLocation,
-	diagnostics: Array<ExtractionDiagnostic>,
-): Array<string> | null => {
-	const match = FUZ_VARIABLES_PATTERN.exec(content);
-	if (!match) return null;
-
-	const has_colon = match[1] === ':';
-	const variable_list = match[2]!;
-
-	if (has_colon) {
-		diagnostics.push({
-			phase: 'extraction',
-			level: 'warning',
-			message: '@fuz-variables: colon is unnecessary',
-			suggestion: 'Use @fuz-variables without the colon',
-			location,
-		});
-	}
-
-	return variable_list.split(/\s+/).filter(Boolean);
-};
+const parse_fuz_classes_comment = create_fuz_comment_parser('classes');
+const parse_fuz_elements_comment = create_fuz_comment_parser('elements');
+const parse_fuz_variables_comment = create_fuz_comment_parser('variables');
 
 /**
  * Processes a comment for @fuz-classes, @fuz-elements, and @fuz-variables annotations.

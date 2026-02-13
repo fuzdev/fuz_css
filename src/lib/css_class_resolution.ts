@@ -70,7 +70,7 @@ export const resolve_class_definition = (
 				warnings = result.warnings ? [...result.warnings] : [];
 				warnings.push({
 					level: 'warning',
-					class_name,
+					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
 					suggestion: 'Remove the empty declaration property or add CSS',
 				});
@@ -89,7 +89,7 @@ export const resolve_class_definition = (
 			warnings = [
 				{
 					level: 'warning',
-					class_name,
+					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
 					suggestion: 'Remove the empty declaration property or add CSS',
 				},
@@ -145,7 +145,7 @@ export const resolve_composes = (
 				ok: false,
 				error: {
 					level: 'error',
-					class_name: original_class_name,
+					identifier: original_class_name,
 					message: `Circular reference detected: ${cycle_path}`,
 					suggestion: 'Remove the circular dependency from composes arrays',
 				},
@@ -159,7 +159,7 @@ export const resolve_composes = (
 				warnings ??= [];
 				warnings.push({
 					level: 'warning',
-					class_name: original_class_name,
+					identifier: original_class_name,
 					message: `Class "${name}" is redundant`,
 					suggestion: 'Already included by another class in this definition',
 				});
@@ -186,7 +186,7 @@ export const resolve_composes = (
 							ok: false,
 							error: {
 								level: 'error',
-								class_name: original_class_name,
+								identifier: original_class_name,
 								message: `Modified class "${name}" cannot be used in composes array`,
 								suggestion: 'Apply modified classes directly in markup, not in composes arrays',
 							},
@@ -197,7 +197,7 @@ export const resolve_composes = (
 							ok: false,
 							error: {
 								level: 'error',
-								class_name: original_class_name,
+								identifier: original_class_name,
 								message: `Unknown class "${base_name}" in composes array`,
 								suggestion: `Check that "${base_name}" is defined in class_definitions`,
 							},
@@ -238,7 +238,7 @@ export const resolve_composes = (
 								ok: false,
 								error: {
 									level: 'error',
-									class_name: original_class_name,
+									identifier: original_class_name,
 									message: `Unknown modifier "${failed_prop}" with class "${potential_class}"`,
 									suggestion: `Did you mean "${corrected}"? Note: modified classes cannot be used in composes`,
 								},
@@ -253,7 +253,7 @@ export const resolve_composes = (
 				ok: false,
 				error: {
 					level: 'error',
-					class_name: original_class_name,
+					identifier: original_class_name,
 					message: `Unknown class "${name}" in composes array`,
 					suggestion: `Check that "${name}" is defined in class_definitions`,
 				},
@@ -266,7 +266,7 @@ export const resolve_composes = (
 				ok: false,
 				error: {
 					level: 'error',
-					class_name: original_class_name,
+					identifier: original_class_name,
 					message: `Cannot reference interpreter pattern "${name}" in composes array`,
 					suggestion: 'Only static class definitions can be referenced',
 				},
@@ -279,7 +279,7 @@ export const resolve_composes = (
 				ok: false,
 				error: {
 					level: 'error',
-					class_name: original_class_name,
+					identifier: original_class_name,
 					message: `Cannot reference ruleset class "${name}" in composes array`,
 					suggestion: 'Ruleset classes have multiple selectors and cannot be inlined',
 				},
@@ -321,7 +321,7 @@ export const resolve_composes = (
 				warnings ??= [];
 				warnings.push({
 					level: 'warning',
-					class_name: name,
+					identifier: name,
 					message: `Class "${name}" has an empty declaration`,
 					suggestion: 'Remove the empty declaration property or add CSS',
 				});

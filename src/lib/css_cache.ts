@@ -11,6 +11,7 @@ import {join} from 'node:path';
 import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
+import type {ExtractionData} from './css_class_extractor.js';
 import type {CacheOperations} from './operations.js';
 
 /**
@@ -130,39 +131,40 @@ export const load_cached_extraction = async (
 /**
  * Saves an extraction result to the cache.
  * Uses atomic write (temp file + rename) for crash safety.
- * Converts empty arrays to null to avoid allocation overhead on load.
+ * Normalizes empty collections to null to avoid allocation overhead on load.
  *
  * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
- * @param classes - Extracted classes with their locations, or null if none
- * @param explicit_classes - Classes from @fuz-classes comments, or null if none
- * @param diagnostics - Extraction diagnostics, or null if none
- * @param elements - HTML elements found in the file, or null if none
- * @param explicit_elements - Elements from @fuz-elements comments, or null if none
- * @param explicit_variables - Variables from @fuz-variables comments, or null if none
+ * @param extraction - Extraction data to cache
  */
 export const save_cached_extraction = async (
 	ops: CacheOperations,
 	cache_path: string,
 	content_hash: string,
-	classes: Map<string, Array<SourceLocation>> | null,
-	explicit_classes: Set<string> | null,
-	diagnostics: Array<ExtractionDiagnostic> | null,
-	elements: Set<string> | null,
-	explicit_elements: Set<string> | null,
-	explicit_variables: Set<string> | null,
+	extraction: ExtractionData,
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
-	const classes_array = classes && classes.size > 0 ? Array.from(classes.entries()) : null;
+	const classes_array =
+		extraction.classes && extraction.classes.size > 0
+			? Array.from(extraction.classes.entries())
+			: null;
 	const explicit_array =
-		explicit_classes && explicit_classes.size > 0 ? Array.from(explicit_classes) : null;
-	const diagnostics_array = diagnostics && diagnostics.length > 0 ? diagnostics : null;
-	const elements_array = elements && elements.size > 0 ? Array.from(elements) : null;
+		extraction.explicit_classes && extraction.explicit_classes.size > 0
+			? Array.from(extraction.explicit_classes)
+			: null;
+	const diagnostics_array =
+		extraction.diagnostics && extraction.diagnostics.length > 0 ? extraction.diagnostics : null;
+	const elements_array =
+		extraction.elements && extraction.elements.size > 0 ? Array.from(extraction.elements) : null;
 	const explicit_elements_array =
-		explicit_elements && explicit_elements.size > 0 ? Array.from(explicit_elements) : null;
+		extraction.explicit_elements && extraction.explicit_elements.size > 0
+			? Array.from(extraction.explicit_elements)
+			: null;
 	const explicit_variables_array =
-		explicit_variables && explicit_variables.size > 0 ? Array.from(explicit_variables) : null;
+		extraction.explicit_variables && extraction.explicit_variables.size > 0
+			? Array.from(extraction.explicit_variables)
+			: null;
 
 	const data: CachedExtraction = {
 		v: CSS_CACHE_VERSION,
@@ -198,16 +200,7 @@ export const delete_cached_extraction = async (
  *
  * @param cached - Cached extraction data
  */
-export const from_cached_extraction = (
-	cached: CachedExtraction,
-): {
-	classes: Map<string, Array<SourceLocation>> | null;
-	explicit_classes: Set<string> | null;
-	diagnostics: Array<ExtractionDiagnostic> | null;
-	elements: Set<string> | null;
-	explicit_elements: Set<string> | null;
-	explicit_variables: Set<string> | null;
-} => ({
+export const from_cached_extraction = (cached: CachedExtraction): ExtractionData => ({
 	classes: cached.classes ? new Map(cached.classes) : null,
 	explicit_classes: cached.explicit_classes ? new Set(cached.explicit_classes) : null,
 	diagnostics: cached.diagnostics,

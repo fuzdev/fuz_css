@@ -228,8 +228,8 @@ export const generate_classes_css = (
 		// Structural errors (circular refs, unknown composes) remain errors regardless
 		for (let i = diag_count_before; i < interpreter_diagnostics.length; i++) {
 			const diag = interpreter_diagnostics[i]!;
-			const locations = class_locations?.get(diag.class_name) ?? null;
-			const is_explicit = explicit_classes?.has(diag.class_name) ?? false;
+			const locations = class_locations?.get(diag.identifier) ?? null;
+			const is_explicit = explicit_classes?.has(diag.identifier) ?? false;
 			const is_css_property_error =
 				diag.level === 'error' && diag.message.startsWith('Unknown CSS property');
 			const level = is_css_property_error && !is_explicit ? 'warning' : diag.level;
@@ -245,7 +245,7 @@ export const generate_classes_css = (
 					phase: 'generation',
 					level: 'error',
 					message: 'No matching class definition found',
-					class_name: c,
+					identifier: c,
 					suggestion: 'Check spelling or add a custom class definition',
 					locations,
 				});
@@ -275,7 +275,7 @@ export const generate_classes_css = (
 					phase: 'generation',
 					level: 'error',
 					message: resolution_result.error.message,
-					class_name: c,
+					identifier: c,
 					suggestion: resolution_result.error.suggestion,
 					locations: class_locations?.get(c) ?? null,
 				});
@@ -302,7 +302,7 @@ export const generate_classes_css = (
 					phase: 'generation',
 					level: 'warning',
 					message: `Ruleset "${c}" is empty`,
-					class_name: c,
+					identifier: c,
 					suggestion: `Add CSS rules or remove the empty ruleset definition`,
 					locations: class_locations?.get(c) ?? null,
 				});
@@ -327,7 +327,7 @@ export const generate_classes_css = (
 						phase: 'generation',
 						level: 'warning',
 						message: `Ruleset "${c}" has no selectors containing ".${c}"`,
-						class_name: c,
+						identifier: c,
 						suggestion: `Ensure at least one selector uses ".${c}" so the class works when applied`,
 						locations: class_locations?.get(c) ?? null,
 					});
@@ -348,7 +348,7 @@ export const generate_classes_css = (
 						phase: 'generation',
 						level: 'warning',
 						message: `Ruleset "${c}" has a single selector and could be converted to declaration format for modifier support`,
-						class_name: c,
+						identifier: c,
 						suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations.replace(/\s+/g, ' ').trim()}' }`,
 						locations: class_locations?.get(c) ?? null,
 					});
@@ -360,7 +360,7 @@ export const generate_classes_css = (
 					phase: 'generation',
 					level: 'warning',
 					message: `Failed to parse ruleset for "${c}": ${error_message}`,
-					class_name: c,
+					identifier: c,
 					suggestion: 'Check for CSS syntax errors in the ruleset',
 					locations: class_locations?.get(c) ?? null,
 				});

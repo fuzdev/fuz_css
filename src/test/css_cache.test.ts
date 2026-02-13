@@ -14,7 +14,12 @@ import {
 import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
 import {default_cache_operations} from '$lib/operations_defaults.js';
 import {create_mock_fs_state, create_mock_cache_ops} from './fixtures/mock_operations.js';
-import {loc, make_classes, make_extraction_diagnostic as make_diagnostic} from './test_helpers.js';
+import {
+	loc,
+	make_classes,
+	make_extraction_diagnostic as make_diagnostic,
+	EMPTY_EXTRACTION,
+} from './test_helpers.js';
 
 const ops = default_cache_operations;
 
@@ -67,17 +72,14 @@ const save_and_load = async (
 		content_hash = 'test-hash',
 	} = options;
 
-	await save_cached_extraction(
-		ops,
-		cache_path,
-		content_hash,
+	await save_cached_extraction(ops, cache_path, content_hash, {
 		classes,
 		explicit_classes,
 		diagnostics,
 		elements,
 		explicit_elements,
 		explicit_variables,
-	);
+	});
 	const loaded = await load_cached_extraction(ops, cache_path);
 	expect(loaded).not.toBeNull();
 	expect(loaded!.v).toBe(CSS_CACHE_VERSION);
@@ -517,17 +519,10 @@ describe('cache functions with mock ops', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(
-			mock_ops,
-			cache_path,
-			'abc123',
+		await save_cached_extraction(mock_ops, cache_path, 'abc123', {
+			...EMPTY_EXTRACTION,
 			classes,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		});
 		const loaded = await load_cached_extraction(mock_ops, cache_path);
 
 		expect(loaded).not.toBeNull();
@@ -547,7 +542,7 @@ describe('cache functions with mock ops', () => {
 		const mock_ops = create_mock_cache_ops(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_ops, cache_path, 'hash', null, null, null, null, null, null);
+		await save_cached_extraction(mock_ops, cache_path, 'hash', EMPTY_EXTRACTION);
 		expect(state.files.has(cache_path)).toBe(true);
 
 		await delete_cached_extraction(mock_ops, cache_path);
@@ -558,17 +553,7 @@ describe('cache functions with mock ops', () => {
 		const state = create_mock_fs_state();
 		const mock_ops = create_mock_cache_ops(state);
 
-		await save_cached_extraction(
-			mock_ops,
-			'/test.json',
-			'hash',
-			null,
-			null,
-			null,
-			null,
-			null,
-			null,
-		);
+		await save_cached_extraction(mock_ops, '/test.json', 'hash', EMPTY_EXTRACTION);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});

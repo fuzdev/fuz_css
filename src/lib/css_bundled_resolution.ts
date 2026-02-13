@@ -256,7 +256,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					message: `No style rules found for element "${element}"`,
 					suggestion:
 						'Element will use browser defaults. Add to additional_elements if intentional.',
-					class_name: element,
+					identifier: element,
 					locations: null,
 				});
 			}
@@ -278,7 +278,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					suggestion: similar
 						? `Check spelling. Similar element: ${similar}`
 						: 'Element has no fuz_css styles. Remove from @fuz-elements or add custom styles.',
-					class_name: element,
+					identifier: element,
 					locations: null,
 				});
 			}
@@ -299,7 +299,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					suggestion: similar
 						? `Check spelling. Similar variable: ${similar}`
 						: 'Variable does not exist in the theme. Remove from @fuz-variables.',
-					class_name: variable,
+					identifier: variable,
 					locations: null,
 				});
 			}
@@ -360,7 +360,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			level: 'warning',
 			message: warning,
 			suggestion: null,
-			class_name: 'variable_resolution',
+			identifier: 'variable_resolution',
 			locations: null,
 		});
 	}
@@ -375,7 +375,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				level: 'warning',
 				message: `CSS variable "--${name}" not found - did you mean "--${similar}"?`,
 				suggestion: `Check spelling. Similar theme variable: --${similar}`,
-				class_name: `var(--${name})`,
+				identifier: `var(--${name})`,
 				locations: null,
 			});
 		}

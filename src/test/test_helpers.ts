@@ -9,6 +9,7 @@ import {expect} from 'vitest';
 
 import type {SourceLocation, ExtractionDiagnostic, GenerationDiagnostic} from '$lib/diagnostics.js';
 import type {CssClassDefinition} from '$lib/css_class_generation.js';
+import type {ExtractionData} from '$lib/css_class_extractor.js';
 
 //
 // Factory Helpers
@@ -53,6 +54,26 @@ export const make_composes_with_declaration_def = (
  */
 export const make_ruleset_def = (ruleset: string): CssClassDefinition => ({
 	ruleset,
+});
+
+/**
+ * An `ExtractionData` with all fields set to `null`.
+ */
+export const EMPTY_EXTRACTION: ExtractionData = {
+	classes: null,
+	explicit_classes: null,
+	diagnostics: null,
+	elements: null,
+	explicit_elements: null,
+	explicit_variables: null,
+};
+
+/**
+ * Creates an `ExtractionData` with null defaults, overridden by the provided fields.
+ */
+export const make_extraction_data = (overrides: Partial<ExtractionData> = {}): ExtractionData => ({
+	...EMPTY_EXTRACTION,
+	...overrides,
 });
 
 /**

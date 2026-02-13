@@ -601,7 +601,7 @@ describe('modified_class_interpreter', () => {
 
 			expect(result.diagnostics.length).toBeGreaterThan(0);
 			const warning = result.diagnostics.find(
-				(d) => d.class_name === 'before:chevron' && d.message.includes('pseudo-element'),
+				(d) => d.identifier === 'before:chevron' && d.message.includes('pseudo-element'),
 			);
 			expect(warning).toBeDefined();
 			expect(warning!.level).toBe('warning');
@@ -618,7 +618,7 @@ describe('modified_class_interpreter', () => {
 			});
 
 			const hover_warnings = filter_diagnostics_by_message(result.diagnostics, ':hover').filter(
-				(d) => d.class_name === 'hover:selectable',
+				(d) => d.identifier === 'hover:selectable',
 			);
 			expect(hover_warnings.length).toBeGreaterThan(0);
 
@@ -637,7 +637,7 @@ describe('modified_class_interpreter', () => {
 			});
 
 			const focus_warning = result.diagnostics.find(
-				(d) => d.class_name === 'focus:clickable' && d.message.includes(':focus'),
+				(d) => d.identifier === 'focus:clickable' && d.message.includes(':focus'),
 			);
 			expect(focus_warning).toBeDefined();
 			expect(focus_warning!.message).toContain('.clickable:focus');

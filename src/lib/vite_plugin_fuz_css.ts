@@ -29,7 +29,7 @@ import {join} from 'node:path';
 import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
 import {extract_css_classes_with_locations} from './css_class_extractor.js';
-import {type Diagnostic, CssGenerationError} from './diagnostics.js';
+import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
 import {generate_classes_css} from './css_class_generation.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
@@ -326,8 +326,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (on_warning === 'throw') {
 				throw new CssGenerationError(warnings);
 			} else if (on_warning === 'log') {
-				for (const d of utility_result.diagnostics.filter((d) => d.level === 'warning')) {
-					log_warn(`[fuz_css] ${d.class_name}: ${d.message}`);
+				for (const warning of warnings) {
+					log_warn(`[fuz_css] ${format_diagnostic(warning)}`);
 				}
 			}
 			// 'ignore' - do nothing
@@ -338,9 +338,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (on_error === 'throw') {
 				throw new CssGenerationError(errors);
 			}
-			// Log errors (extraction diagnostics already logged in transform)
-			for (const d of utility_result.diagnostics.filter((d) => d.level === 'error')) {
-				log_error(`[fuz_css] ${d.class_name}: ${d.message}`);
+			for (const error of errors) {
+				log_error(`[fuz_css] ${format_diagnostic(error)}`);
 			}
 		}
 
@@ -545,23 +544,7 @@ export {};
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						explicit_elements,
-						explicit_variables: cached_explicit_variables,
-					} = from_cached_extraction(cached);
-					css_classes.add(
-						id,
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						explicit_elements,
-						cached_explicit_variables,
-					);
+					css_classes.add(id, from_cached_extraction(cached));
 					update_detected_variables(id, code);
 					hashes.set(id, hash);
 
@@ -593,32 +576,14 @@ export {};
 			}
 
 			// Update CssClasses
-			css_classes.add(
-				id,
-				result.classes,
-				result.explicit_classes,
-				result.diagnostics,
-				result.elements,
-				result.explicit_elements,
-				result.explicit_variables,
-			);
+			css_classes.add(id, result);
 			update_detected_variables(id, code);
 			hashes.set(id, hash);
 
 			// Save to cache (fire and forget - don't block transform)
 			if (!is_ci && resolved_cache_dir && project_root) {
 				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				save_cached_extraction(
-					ops,
-					cache_path,
-					hash,
-					result.classes,
-					result.explicit_classes,
-					result.diagnostics,
-					result.elements,
-					result.explicit_elements,
-					result.explicit_variables,
-				).catch(() => {
+				save_cached_extraction(ops, cache_path, hash, result).catch(() => {
 					// Ignore cache errors
 				});
 			}
