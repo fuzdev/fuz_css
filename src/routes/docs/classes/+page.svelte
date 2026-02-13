@@ -441,8 +441,9 @@ const el = document.createElement('dialog');`}
 				<code>{'size="var(--icon_size_xs)"'}</code> that AST-based extraction would miss.
 			</p>
 			<p>
-				When variable names are constructed at runtime (e.g. with template literals),
-				use <code>@fuz-variables</code> to explicitly include them:
+				When variable names are constructed at runtime (e.g. with template literals), use <code
+					>@fuz-variables</code
+				> to explicitly include them:
 			</p>
 			<Code
 				lang="svelte"
@@ -459,8 +460,8 @@ const el = document.createElement('dialog');`}
 			/>
 			<aside>
 				Like <code>@fuz-classes</code> and <code>@fuz-elements</code>, explicit declarations via
-				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
-				helping catch typos early.
+				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved, helping
+				catch typos early.
 			</aside>
 
 			<h4>5. Build-time limitations</h4>
