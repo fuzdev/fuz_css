@@ -440,6 +440,28 @@ const el = document.createElement('dialog');`}
 				<!-- eslint-disable-next-line svelte/no-useless-mustaches -->
 				<code>{'size="var(--icon_size_xs)"'}</code> that AST-based extraction would miss.
 			</p>
+			<p>
+				When variable names are constructed at runtime (e.g. with template literals),
+				use <code>@fuz-variables</code> to explicitly include them:
+			</p>
+			<Code
+				lang="svelte"
+				content={'<' +
+					`script>
+	import {shade_scale_variants} from '@fuzdev/fuz_css/variable_data.js';
+
+	// @fuz-variables shade_min shade_00 shade_05 shade_10 ... shade_100 shade_max
+</script>
+
+{#each shade_scale_variants as variant}
+	<div style:background="var(--shade_{variant})">...</div>
+{/each}`}
+			/>
+			<aside>
+				Like <code>@fuz-classes</code> and <code>@fuz-elements</code>, explicit declarations via
+				<code>@fuz-variables</code> produce <strong>errors</strong> if they can't be resolved,
+				helping catch typos early.
+			</aside>
 
 			<h4>5. Build-time limitations</h4>
 			<p>
