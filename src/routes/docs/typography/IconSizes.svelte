@@ -4,8 +4,6 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {icon_sizes} from '$lib/variable_data.js';
-
-	// @fuz-variables icon_size_xs icon_size_sm icon_size_md icon_size_lg icon_size_xl icon_size_xl2 icon_size_xl3
 </script>
 
 <TomeSection>

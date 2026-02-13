@@ -37,9 +37,6 @@
 	let selected_size = $state(3);
 
 	// @fuz-classes font_family_sans font_family_serif font_family_mono
-	// @fuz-variables font_size_xs font_size_sm font_size_md font_size_lg font_size_xl font_size_xl2 font_size_xl3 font_size_xl4 font_size_xl5 font_size_xl6 font_size_xl7 font_size_xl8 font_size_xl9
-	// @fuz-variables text_min text_00 text_05 text_10 text_20 text_30 text_40 text_50 text_60 text_70 text_80 text_90 text_95 text_100 text_max
-	// @fuz-variables line_height_xs line_height_sm line_height_md line_height_lg line_height_xl
 </script>
 
 <TomeContent {tome}>

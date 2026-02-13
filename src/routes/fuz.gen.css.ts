@@ -1,3 +1,3 @@
 import {gen_fuz_css} from '../lib/gen_fuz_css.js';
 
-export const gen = gen_fuz_css();
+export const gen = gen_fuz_css({additional_variables: 'all'});

@@ -15,7 +15,6 @@
 	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
 	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100
 	// @fuz-classes shade_50
-	// @fuz-variables shade_min shade_00 shade_05 shade_10 shade_20 shade_30 shade_40 shade_50 shade_60 shade_70 shade_80 shade_90 shade_95 shade_100 shade_max
 	// @fuz-classes darken_00 darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95 darken_100
 	// @fuz-classes lighten_00 lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95 lighten_100
 	const LIBRARY_ITEM_NAME = 'shading';
