@@ -16,6 +16,8 @@
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
 	// TODO width/height classes
+	// @fuz-variables space_xs5 space_xs4 space_xs3 space_xs2 space_xs space_sm space_md space_lg space_xl space_xl2 space_xl3 space_xl4 space_xl5 space_xl6 space_xl7 space_xl8 space_xl9 space_xl10 space_xl11 space_xl12 space_xl13 space_xl14 space_xl15
+	// @fuz-variables distance_xs distance_sm distance_md distance_lg distance_xl
 </script>
 
 <TomeContent {tome}>

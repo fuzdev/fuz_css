@@ -201,3 +201,22 @@ export const assert_explicit_elements = (
 export const assert_no_explicit_elements = (result: ExtractionResult): void => {
 	expect(result.explicit_elements).toBeNull();
 };
+
+/**
+ * Assert explicit variables present.
+ */
+export const assert_explicit_variables = (
+	result: ExtractionResult,
+	expected: Array<string>,
+): void => {
+	expect(result.explicit_variables, 'Expected explicit_variables to be present').not.toBeNull();
+	const actual = [...result.explicit_variables!].sort();
+	expect(actual).toEqual([...expected].sort());
+};
+
+/**
+ * Assert no explicit variables.
+ */
+export const assert_no_explicit_variables = (result: ExtractionResult): void => {
+	expect(result.explicit_variables).toBeNull();
+};

@@ -90,6 +90,8 @@ interface FileExtraction {
 	elements: Set<string> | null;
 	/** Elements from @fuz-elements comments, or null if none */
 	explicit_elements: Set<string> | null;
+	/** Variables from @fuz-variables comments, or null if none */
+	explicit_variables: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -315,6 +317,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						diagnostics: result.diagnostics,
 						elements: result.elements,
 						explicit_elements: result.explicit_elements,
+						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -330,9 +333,25 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				diagnostics,
 				elements,
 				explicit_elements,
+				explicit_variables,
 			} of extractions) {
-				if (classes || explicit_classes || diagnostics || elements || explicit_elements) {
-					css_classes.add(id, classes, explicit_classes, diagnostics, elements, explicit_elements);
+				if (
+					classes ||
+					explicit_classes ||
+					diagnostics ||
+					elements ||
+					explicit_elements ||
+					explicit_variables
+				) {
+					css_classes.add(
+						id,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						explicit_elements,
+						explicit_variables,
+					);
 					if (classes) {
 						stats.files_with_classes++;
 					}
@@ -356,6 +375,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						diagnostics,
 						elements,
 						explicit_elements,
+						explicit_variables,
 					}) => {
 						await save_cached_extraction(
 							ops,
@@ -366,6 +386,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 							diagnostics,
 							elements,
 							explicit_elements,
+							explicit_variables,
 						);
 					},
 					cache_io_concurrency,
@@ -398,6 +419,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				explicit_classes,
 				all_elements,
 				explicit_elements,
+				explicit_variables,
 			} = css_classes.get_all();
 
 			if (include_stats) {
@@ -443,6 +465,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					}
 				}
 
+				// Add explicit variables from @fuz-variables comments
+				if (explicit_variables) {
+					for (const v of explicit_variables) {
+						detected_css_variables.add(v);
+					}
+				}
+
 				const resolution = resolve_css({
 					style_rule_index: await get_style_index(),
 					variable_graph: get_variable_graph(),
@@ -458,6 +487,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					exclude_elements,
 					exclude_variables,
 					explicit_elements,
+					explicit_variables,
 				});
 
 				// Log resolution stats if requested
