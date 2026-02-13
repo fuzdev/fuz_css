@@ -12,6 +12,8 @@ import {
 	assert_elements,
 	assert_explicit_elements,
 	assert_no_explicit_elements,
+	assert_explicit_variables,
+	assert_no_explicit_variables,
 	assert_diagnostic,
 	svelte_script,
 	create_jsx_extractor,
@@ -128,6 +130,103 @@ const App = () => <div>Hello</div>;
 });
 
 //
+// @fuz-variables extraction
+//
+
+describe('@fuz-variables comment extraction', () => {
+	test('extracts variables from HTML comment', () => {
+		const result = extract_from_svelte(`
+<!-- @fuz-variables shade_40 shade_50 shade_60 -->
+<div>content</div>
+`);
+		assert_explicit_variables(result, ['shade_40', 'shade_50', 'shade_60']);
+	});
+
+	test('extracts variables from script comment', () => {
+		const result = extract_from_svelte(
+			svelte_script(`
+// @fuz-variables font_size_xl4 font_size_xl5
+const x = 1;
+`),
+		);
+		assert_explicit_variables(result, ['font_size_xl4', 'font_size_xl5']);
+	});
+
+	test('extracts variables from block comment', () => {
+		const result = extract_from_svelte(
+			svelte_script(`
+/* @fuz-variables text_min text_max */
+const x = 1;
+`),
+		);
+		assert_explicit_variables(result, ['text_min', 'text_max']);
+	});
+
+	test('handles multiple @fuz-variables comments', () => {
+		const result = extract_from_svelte(`
+<!-- @fuz-variables shade_40 -->
+<!-- @fuz-variables shade_60 shade_70 -->
+<div></div>
+`);
+		assert_explicit_variables(result, ['shade_40', 'shade_60', 'shade_70']);
+	});
+
+	test('emits warning for colon variant', () => {
+		const result = extract_from_svelte(`
+<!-- @fuz-variables: shade_40 -->
+<div></div>
+`);
+		assert_explicit_variables(result, ['shade_40']);
+		assert_diagnostic(result, 'warning', 'colon is unnecessary');
+	});
+
+	test('no explicit variables when none declared', () => {
+		const result = extract_from_svelte(`<div></div>`);
+		assert_no_explicit_variables(result);
+	});
+});
+
+describe('@fuz-variables in TypeScript', () => {
+	test('extracts variables from TS file', () => {
+		const result = extract_from_ts(
+			`
+// @fuz-variables space_xl8 distance_lg
+const x = 1;
+`,
+			'test.ts',
+		);
+		assert_explicit_variables(result, ['space_xl8', 'distance_lg']);
+	});
+
+	test('extracts variables from block comment', () => {
+		const result = extract_from_ts(
+			`
+/* @fuz-variables icon_size_xl3 */
+export const x = 1;
+`,
+			'test.ts',
+		);
+		assert_explicit_variables(result, ['icon_size_xl3']);
+	});
+});
+
+describe('@fuz-variables in JSX', () => {
+	let extract_jsx: Awaited<ReturnType<typeof create_jsx_extractor>>;
+
+	beforeAll(async () => {
+		extract_jsx = await create_jsx_extractor();
+	});
+
+	test('extracts variables from JSX file', () => {
+		const result = extract_jsx(`
+// @fuz-variables border_width_5 border_width_6
+const App = () => <div>Hello</div>;
+`);
+		assert_explicit_variables(result, ['border_width_5', 'border_width_6']);
+	});
+});
+
+//
 // Combined @fuz-* comments
 //
 
@@ -152,5 +251,17 @@ const x = 1;
 		);
 		expect(result.explicit_classes).toEqual(new Set(['dynamic_class']));
 		assert_explicit_elements(result, ['dialog']);
+	});
+
+	test('extracts classes, elements, and variables together', () => {
+		const result = extract_from_svelte(`
+<!-- @fuz-classes box row -->
+<!-- @fuz-elements dialog -->
+<!-- @fuz-variables shade_40 shade_50 -->
+<div class="foo"></div>
+`);
+		expect(result.explicit_classes).toEqual(new Set(['box', 'row']));
+		assert_explicit_elements(result, ['dialog']);
+		assert_explicit_variables(result, ['shade_40', 'shade_50']);
 	});
 });

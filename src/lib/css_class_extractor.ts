@@ -10,6 +10,7 @@
  * - Variables with class-related names
  * - `// @fuz-classes class1 class2` - comment hints for dynamic classes
  * - `// @fuz-elements element1 element2` - comment hints for dynamic elements
+ * - `// @fuz-variables var1 var2` - comment hints for dynamic CSS variables
  *
  * @module
  */
@@ -59,6 +60,11 @@ export interface ExtractionResult {
 	 * These should produce errors if they have no matching style rules.
 	 */
 	explicit_elements: Set<string> | null;
+	/**
+	 * Variables explicitly annotated via `@fuz-variables` comments, or null if none.
+	 * These produce errors if they can't be resolved to theme variables.
+	 */
+	explicit_variables: Set<string> | null;
 }
 
 /**
@@ -190,6 +196,8 @@ interface WalkState {
 	elements: Set<string>;
 	/** Elements explicitly annotated via @fuz-elements comments */
 	explicit_elements: Set<string>;
+	/** Variables explicitly annotated via @fuz-variables comments */
+	explicit_variables: Set<string>;
 }
 
 /**
@@ -206,6 +214,7 @@ const create_walk_state = (file: string, source_index: SourceIndex | null): Walk
 	diagnostics: [],
 	elements: new Set(),
 	explicit_elements: new Set(),
+	explicit_variables: new Set(),
 });
 
 /**
@@ -218,6 +227,7 @@ const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
 	diagnostics: state.diagnostics.length > 0 ? state.diagnostics : null,
 	elements: state.elements.size > 0 ? state.elements : null,
 	explicit_elements: state.explicit_elements.size > 0 ? state.explicit_elements : null,
+	explicit_variables: state.explicit_variables.size > 0 ? state.explicit_variables : null,
 });
 
 /**
@@ -231,6 +241,7 @@ const empty_extraction_result = (diagnostics: Array<ExtractionDiagnostic>): Extr
 	diagnostics: diagnostics.length > 0 ? diagnostics : null,
 	elements: null,
 	explicit_elements: null,
+	explicit_variables: null,
 });
 
 /**
@@ -365,7 +376,37 @@ const parse_fuz_elements_comment = (
 };
 
 /**
- * Processes a comment for @fuz-classes and @fuz-elements annotations.
+ * Parses @fuz-variables content from a comment, handling the colon variant.
+ * Returns the list of variable names or null if not a @fuz-variables comment.
+ */
+const FUZ_VARIABLES_PATTERN = /^\s*@fuz-variables(:?)\s+(.+?)\s*$/;
+
+const parse_fuz_variables_comment = (
+	content: string,
+	location: SourceLocation,
+	diagnostics: Array<ExtractionDiagnostic>,
+): Array<string> | null => {
+	const match = FUZ_VARIABLES_PATTERN.exec(content);
+	if (!match) return null;
+
+	const has_colon = match[1] === ':';
+	const variable_list = match[2]!;
+
+	if (has_colon) {
+		diagnostics.push({
+			phase: 'extraction',
+			level: 'warning',
+			message: '@fuz-variables: colon is unnecessary',
+			suggestion: 'Use @fuz-variables without the colon',
+			location,
+		});
+	}
+
+	return variable_list.split(/\s+/).filter(Boolean);
+};
+
+/**
+ * Processes a comment for @fuz-classes, @fuz-elements, and @fuz-variables annotations.
  * Adds found items to the appropriate state collections.
  */
 const process_fuz_comment = (content: string, location: SourceLocation, state: WalkState): void => {
@@ -376,6 +417,7 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 			add_class(state, cls, location);
 			state.explicit_classes.add(cls);
 		}
+		return;
 	}
 
 	// @fuz-elements
@@ -385,11 +427,20 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 			state.elements.add(el);
 			state.explicit_elements.add(el);
 		}
+		return;
+	}
+
+	// @fuz-variables
+	const variable_list = parse_fuz_variables_comment(content, location, state.diagnostics);
+	if (variable_list) {
+		for (const v of variable_list) {
+			state.explicit_variables.add(v);
+		}
 	}
 };
 
 /**
- * Extracts @fuz-classes and @fuz-elements from Svelte HTML Comment nodes.
+ * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
  */
 const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {

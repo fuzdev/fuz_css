@@ -166,6 +166,11 @@ export interface CssResolutionOptions {
 	 * These produce errors (not warnings) if they have no matching style rules.
 	 */
 	explicit_elements?: Set<string> | null;
+	/**
+	 * Variables explicitly annotated via @fuz-variables comments.
+	 * These produce errors (not warnings) if they don't exist in the theme.
+	 */
+	explicit_variables?: Set<string> | null;
 }
 
 /**
@@ -194,13 +199,18 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
-		exclude_elements,
-		exclude_variables,
+		exclude_elements: raw_exclude_elements,
+		exclude_variables: raw_exclude_variables,
 		explicit_elements,
+		explicit_variables,
 	} = options;
 
 	const diagnostics: Array<GenerationDiagnostic> = [];
 	const included_elements: Set<string> = new Set();
+
+	// Convert to Sets once for safe re-iteration and O(1) lookup
+	const exclude_elements = raw_exclude_elements ? new Set(raw_exclude_elements) : null;
+	const exclude_variables = raw_exclude_variables ? new Set(raw_exclude_variables) : null;
 
 	// Check if we should include all elements/base CSS
 	const include_all_base_css = additional_elements === 'all';
@@ -257,6 +267,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	if (explicit_elements) {
 		const known_elements = new Set(style_rule_index.by_element.keys());
 		for (const element of explicit_elements) {
+			if (exclude_elements?.has(element)) continue;
 			const rules = style_rule_index.by_element.get(element);
 			if (!rules || rules.length === 0) {
 				const similar = find_similar_name(element, known_elements);
@@ -268,6 +279,27 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 						? `Check spelling. Similar element: ${similar}`
 						: 'Element has no fuz_css styles. Remove from @fuz-elements or add custom styles.',
 					class_name: element,
+					locations: null,
+				});
+			}
+		}
+	}
+
+	// Step 2d: Error for explicit variables (@fuz-variables) with no matching theme variable
+	if (explicit_variables) {
+		const all_var_names = get_all_variable_names(variable_graph);
+		for (const variable of explicit_variables) {
+			if (exclude_variables?.has(variable)) continue;
+			if (!all_var_names.has(variable)) {
+				const similar = find_similar_variable(variable_graph, variable);
+				diagnostics.push({
+					phase: 'generation',
+					level: 'error',
+					message: `@fuz-variables: No theme variable found for "${variable}"${similar ? ` - did you mean "${similar}"?` : ''}`,
+					suggestion: similar
+						? `Check spelling. Similar variable: ${similar}`
+						: 'Variable does not exist in the theme. Remove from @fuz-variables.',
+					class_name: variable,
 					locations: null,
 				});
 			}

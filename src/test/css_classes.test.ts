@@ -175,6 +175,130 @@ describe('CssClasses', () => {
 	});
 });
 
+describe('explicit_variables (@fuz-variables)', () => {
+	test('add with explicit_variables returns them from get_all', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+		const explicit_vars = new Set(['shade_40', 'text_50']);
+
+		css_classes.add(
+			'file1.svelte',
+			new Map([['foo', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			explicit_vars,
+		);
+
+		const {explicit_variables} = css_classes.get_all();
+		expect(explicit_variables).not.toBeNull();
+		expect(explicit_variables!.has('shade_40')).toBe(true);
+		expect(explicit_variables!.has('text_50')).toBe(true);
+	});
+
+	test('multiple files contributing explicit_variables are aggregated', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			new Map([['a', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['shade_40']),
+		);
+		css_classes.add(
+			'file2.svelte',
+			new Map([['b', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['text_50']),
+		);
+
+		const {explicit_variables} = css_classes.get_all();
+		expect(explicit_variables).not.toBeNull();
+		expect(explicit_variables!.has('shade_40')).toBe(true);
+		expect(explicit_variables!.has('text_50')).toBe(true);
+	});
+
+	test('delete removes file explicit_variables', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			new Map([['a', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['shade_40']),
+		);
+		css_classes.add(
+			'file2.svelte',
+			new Map([['b', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['text_50']),
+		);
+
+		css_classes.delete('file1.svelte');
+
+		const {explicit_variables} = css_classes.get_all();
+		expect(explicit_variables).not.toBeNull();
+		expect(explicit_variables!.has('shade_40')).toBe(false);
+		expect(explicit_variables!.has('text_50')).toBe(true);
+	});
+
+	test('re-adding a file replaces old explicit_variables', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			new Map([['a', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['shade_40']),
+		);
+
+		// Re-add with different variables
+		css_classes.add(
+			'file1.svelte',
+			new Map([['a', [loc]]]),
+			null,
+			null,
+			null,
+			null,
+			new Set(['text_50']),
+		);
+
+		const {explicit_variables} = css_classes.get_all();
+		expect(explicit_variables).not.toBeNull();
+		expect(explicit_variables!.has('shade_40')).toBe(false);
+		expect(explicit_variables!.has('text_50')).toBe(true);
+	});
+
+	test('explicit_variables is null when no files have them', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', new Map([['a', [loc]]]));
+
+		const {explicit_variables} = css_classes.get_all();
+		expect(explicit_variables).toBeNull();
+	});
+});
+
 describe('additional_classes with file data (simulating cache behavior)', () => {
 	test('additional_classes merged with file data', () => {
 		const css_classes = new CssClasses(new Set(['additional_a', 'additional_b']));

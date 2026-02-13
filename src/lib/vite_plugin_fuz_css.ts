@@ -245,6 +245,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			explicit_classes,
 			all_elements,
 			explicit_elements,
+			explicit_variables,
 		} = css_classes.get_all();
 
 		const utility_result = generate_classes_css({
@@ -278,6 +279,14 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				}
 			}
 
+			// Add explicit variables from @fuz-variables comments to detected set for inclusion,
+			// and pass as explicit_variables to resolve_css for error reporting on typos
+			if (explicit_variables) {
+				for (const v of explicit_variables) {
+					detected_css_variables.add(v);
+				}
+			}
+
 			const resolution = resolve_css({
 				style_rule_index,
 				variable_graph,
@@ -292,6 +301,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				exclude_elements,
 				exclude_variables,
 				explicit_elements,
+				explicit_variables,
 			});
 
 			// Add resolution diagnostics
@@ -535,9 +545,23 @@ export {};
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
-					const {classes, explicit_classes, diagnostics, elements, explicit_elements} =
-						from_cached_extraction(cached);
-					css_classes.add(id, classes, explicit_classes, diagnostics, elements, explicit_elements);
+					const {
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						explicit_elements,
+						explicit_variables: cached_explicit_variables,
+					} = from_cached_extraction(cached);
+					css_classes.add(
+						id,
+						classes,
+						explicit_classes,
+						diagnostics,
+						elements,
+						explicit_elements,
+						cached_explicit_variables,
+					);
 					update_detected_variables(id, code);
 					hashes.set(id, hash);
 
@@ -576,6 +600,7 @@ export {};
 				result.diagnostics,
 				result.elements,
 				result.explicit_elements,
+				result.explicit_variables,
 			);
 			update_detected_variables(id, code);
 			hashes.set(id, hash);
@@ -592,6 +617,7 @@ export {};
 					result.diagnostics,
 					result.elements,
 					result.explicit_elements,
+					result.explicit_variables,
 				).catch(() => {
 					// Ignore cache errors
 				});
