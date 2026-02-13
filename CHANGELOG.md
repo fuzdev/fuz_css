@@ -1,5 +1,17 @@
 # @fuzdev/fuz_css
 
+## 0.51.0
+
+### Minor Changes
+
+- refactor extraction pipeline APIs and diagnostics ([#80](https://github.com/fuzdev/fuz_css/pull/80))
+  - replace positional parameters with `ExtractionData` object in `CssClasses.add()` and `save_cached_extraction()`
+  - rename `GenerationDiagnostic.class_name` and `InterpreterDiagnostic.class_name` to `identifier`
+  - deduplicate three identical `parse_fuz_*_comment` functions into `create_fuz_comment_parser` factory
+  - vite plugin warning/error logs now use `format_diagnostic()` with location info and suggestions
+
+- add `@fuz-variables` comment hints for explicitly bundling theme variables ([#79](https://github.com/fuzdev/fuz_css/pull/79))
+
 ## 0.50.0
 
 ### Minor Changes
