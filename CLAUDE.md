@@ -6,7 +6,7 @@ fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system.
 Early alpha with breaking changes ahead.
 
-For coding conventions, see [`fuz-stack`](../fuz-stack/CLAUDE.md). For UI
+For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
 ## Gro commands
@@ -96,6 +96,7 @@ class names or elements. Use comment hints to explicitly include them:
 
 - `// @fuz-classes box row p_md` - Classes to include
 - `// @fuz-elements button input` - Elements to include base styles for
+- `// @fuz-variables shade_40 text_50` - CSS variables to include in theme
 
 Both produce **errors** if the specified item can't be resolved, helping catch
 typos early. Implicitly detected classes that can't be resolved are silently

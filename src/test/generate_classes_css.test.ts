@@ -101,7 +101,7 @@ describe('generate_classes_css', () => {
 					ctx.diagnostics.push({
 						level: 'warning',
 						message: 'test warning',
-						class_name: matched[0],
+						identifier: matched[0],
 						suggestion: null,
 					});
 					return `color: ${matched[1]};`;

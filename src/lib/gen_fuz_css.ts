@@ -12,14 +12,12 @@ import type {Gen} from '@fuzdev/gro/gen.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
 import {filter_file_default} from './file_filter.js';
-import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {
-	type SourceLocation,
-	type ExtractionDiagnostic,
-	type Diagnostic,
-	format_diagnostic,
-	CssGenerationError,
-} from './diagnostics.js';
+	type ExtractionData,
+	has_extraction_data,
+	extract_css_classes_with_locations,
+} from './css_class_extractor.js';
+import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
 import {generate_classes_css} from './css_class_generation.js';
 import {merge_class_definitions} from './css_class_definitions.js';
@@ -78,18 +76,8 @@ const DEFAULT_CACHE_IO_CONCURRENCY = 50;
  * Used internally during parallel extraction with caching.
  * Uses `null` instead of empty collections to avoid allocation overhead.
  */
-interface FileExtraction {
+interface FileExtraction extends ExtractionData {
 	id: string;
-	/** Extracted classes, or null if none */
-	classes: Map<string, Array<SourceLocation>> | null;
-	/** Classes from @fuz-classes comments, or null if none */
-	explicit_classes: Set<string> | null;
-	/** Extraction diagnostics, or null if none */
-	diagnostics: Array<ExtractionDiagnostic> | null;
-	/** HTML elements found in the file, or null if none */
-	elements: Set<string> | null;
-	/** Elements from @fuz-elements comments, or null if none */
-	explicit_elements: Set<string> | null;
 	/** Cache path to write to, or null if no write needed (cache hit or CI) */
 	cache_path: string | null;
 	content_hash: string;
@@ -292,9 +280,15 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						if (cached && cached.content_hash === node.content_hash) {
 							// Cache hit
 							stats.cache_hits++;
+							const cached_data = from_cached_extraction(cached);
 							return {
 								id: node.id,
-								...from_cached_extraction(cached),
+								classes: cached_data.classes,
+								explicit_classes: cached_data.explicit_classes,
+								diagnostics: cached_data.diagnostics,
+								elements: cached_data.elements,
+								explicit_elements: cached_data.explicit_elements,
+								explicit_variables: cached_data.explicit_variables,
 								cache_path: null,
 								content_hash: node.content_hash,
 							};
@@ -315,6 +309,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						diagnostics: result.diagnostics,
 						elements: result.elements,
 						explicit_elements: result.explicit_elements,
+						explicit_variables: result.explicit_variables,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -322,18 +317,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				concurrency,
 			);
 
-			// Add to CssClasses (null = empty, so use truthiness check)
-			for (const {
-				id,
-				classes,
-				explicit_classes,
-				diagnostics,
-				elements,
-				explicit_elements,
-			} of extractions) {
-				if (classes || explicit_classes || diagnostics || elements || explicit_elements) {
-					css_classes.add(id, classes, explicit_classes, diagnostics, elements, explicit_elements);
-					if (classes) {
+			// Add to CssClasses (skip files with all-null extraction data)
+			for (const extraction of extractions) {
+				if (has_extraction_data(extraction)) {
+					css_classes.add(extraction.id, extraction);
+					if (extraction.classes) {
 						stats.files_with_classes++;
 					}
 				}
@@ -348,24 +336,12 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			if (cache_writes.length > 0) {
 				await each_concurrent(
 					cache_writes,
-					async ({
-						cache_path,
-						content_hash,
-						classes,
-						explicit_classes,
-						diagnostics,
-						elements,
-						explicit_elements,
-					}) => {
+					async (extraction) => {
 						await save_cached_extraction(
 							ops,
-							cache_path,
-							content_hash,
-							classes,
-							explicit_classes,
-							diagnostics,
-							elements,
-							explicit_elements,
+							extraction.cache_path,
+							extraction.content_hash,
+							extraction,
 						);
 					},
 					cache_io_concurrency,
@@ -398,6 +374,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				explicit_classes,
 				all_elements,
 				explicit_elements,
+				explicit_variables,
 			} = css_classes.get_all();
 
 			if (include_stats) {
@@ -443,6 +420,14 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					}
 				}
 
+				// Add explicit variables from @fuz-variables comments to detected set for inclusion,
+				// and pass as explicit_variables to resolve_css for error reporting on typos
+				if (explicit_variables) {
+					for (const v of explicit_variables) {
+						detected_css_variables.add(v);
+					}
+				}
+
 				const resolution = resolve_css({
 					style_rule_index: await get_style_index(),
 					variable_graph: get_variable_graph(),
@@ -458,6 +443,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					exclude_elements,
 					exclude_variables,
 					explicit_elements,
+					explicit_variables,
 				});
 
 				// Log resolution stats if requested
