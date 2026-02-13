@@ -2,4 +2,4 @@
 '@fuzdev/fuz_css': patch
 ---
 
-fix var detection
+add support for explicit variables
