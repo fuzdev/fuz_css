@@ -1,6 +1,6 @@
 {
 	"name": "@fuzdev/fuz_css",
-	"version": "0.50.0",
+	"version": "0.51.0",
 	"description": "CSS framework and design system for semantic HTML",
 	"motto": "CSS with more utility",
 	"glyph": "🪴",
@@ -63,10 +63,10 @@
 	},
 	"devDependencies": {
 		"@changesets/changelog-git": "^0.2.1",
-		"@fuzdev/fuz_code": "^0.45.0",
+		"@fuzdev/fuz_code": "^0.45.1",
 		"@fuzdev/fuz_ui": "^0.183.1",
-		"@fuzdev/fuz_util": "^0.50.1",
-		"@fuzdev/gro": "^0.192.1",
+		"@fuzdev/fuz_util": "^0.51.0",
+		"@fuzdev/gro": "^0.194.0",
 		"@jridgewell/trace-mapping": "^0.3.31",
 		"@ryanatkn/eslint-config": "^0.9.0",
 		"@sveltejs/acorn-typescript": "^1.0.8",

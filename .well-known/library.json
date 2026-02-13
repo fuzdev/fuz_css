@@ -11,7 +11,7 @@
 	"published": true,
 	"package_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.50.0",
+		"version": "0.51.0",
 		"description": "CSS framework and design system for semantic HTML",
 		"motto": "CSS with more utility",
 		"glyph": "🪴",
@@ -74,10 +74,10 @@
 		},
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
-			"@fuzdev/fuz_code": "^0.45.0",
+			"@fuzdev/fuz_code": "^0.45.1",
 			"@fuzdev/fuz_ui": "^0.183.1",
-			"@fuzdev/fuz_util": "^0.50.1",
-			"@fuzdev/gro": "^0.192.1",
+			"@fuzdev/fuz_util": "^0.51.0",
+			"@fuzdev/gro": "^0.194.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@sveltejs/acorn-typescript": "^1.0.8",
@@ -148,7 +148,7 @@
 	},
 	"source_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.50.0",
+		"version": "0.51.0",
 		"modules": [
 			{
 				"path": "class_variable_index.ts",
@@ -447,6 +447,12 @@
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
 								"doc_comment": "Elements explicitly annotated via"
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Variables explicitly annotated via"
 							}
 						]
 					},
@@ -454,7 +460,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 183,
+						"source_line": 188,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"return_description": "Resolution result with theme CSS, base CSS, and diagnostics",
@@ -470,7 +476,7 @@
 						"name": "GenerateBundledCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for bundled CSS output generation.",
-						"source_line": 389,
+						"source_line": 421,
 						"type_signature": "GenerateBundledCssOptions",
 						"properties": [
 							{
@@ -497,7 +503,7 @@
 						"name": "generate_bundled_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 406,
+						"source_line": 438,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateBundledCssOptions): string",
 						"return_type": "string",
 						"return_description": "Combined CSS string",
@@ -539,21 +545,21 @@
 						"name": "DEFAULT_CACHE_DIR",
 						"kind": "variable",
 						"doc_comment": "Default cache directory relative to project root.",
-						"source_line": 19,
+						"source_line": 20,
 						"type_signature": "\".fuz/cache/css\""
 					},
 					{
 						"name": "CSS_CACHE_VERSION",
 						"kind": "variable",
 						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add explicit_classes, elements, css_variables\nv3: Add explicit_elements, explicit_variables for",
-						"source_line": 33,
-						"type_signature": "5"
+						"source_line": 35,
+						"type_signature": "6"
 					},
 					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 39,
+						"source_line": 41,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -597,6 +603,12 @@
 								"kind": "variable",
 								"type_signature": "Array<string> | null",
 								"doc_comment": "Elements from"
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Array<string> | null",
+								"doc_comment": "Variables from"
 							}
 						]
 					},
@@ -604,7 +616,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 64,
+						"source_line": 68,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -629,7 +641,7 @@
 						"name": "get_file_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes cache path for a file, handling both internal and external paths.\nInternal files use relative paths mirroring source tree.\nExternal files (outside project root) use hashed absolute paths in `_external/`.",
-						"source_line": 85,
+						"source_line": 89,
 						"type_signature": "(file_id: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -654,7 +666,7 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 104,
+						"source_line": 108,
 						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -673,9 +685,9 @@
 					{
 						"name": "save_cached_extraction",
 						"kind": "function",
-						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nConverts empty arrays to null to avoid allocation overhead on load.",
+						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nNormalizes empty collections to null to avoid allocation overhead on load.",
 						"source_line": 141,
-						"type_signature": "(ops: CacheOperations, cache_path: string, content_hash: string, classes: Map<string, SourceLocation[]> | null, explicit_classes: Set<string> | null, diagnostics: ExtractionDiagnostic[] | null, elements: Set<...> | null, explicit_elements: Set<...> | null): Promise<...>",
+						"type_signature": "(ops: CacheOperations, cache_path: string, content_hash: string, extraction: ExtractionData): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
 							{
@@ -694,29 +706,9 @@
 								"description": "- SHA-256 hash of the source file contents"
 							},
 							{
-								"name": "classes",
-								"type": "Map<string, SourceLocation[]> | null",
-								"description": "- Extracted classes with their locations, or null if none"
-							},
-							{
-								"name": "explicit_classes",
-								"type": "Set<string> | null",
-								"description": "- Classes from"
-							},
-							{
-								"name": "diagnostics",
-								"type": "ExtractionDiagnostic[] | null",
-								"description": "- Extraction diagnostics, or null if none"
-							},
-							{
-								"name": "elements",
-								"type": "Set<string> | null",
-								"description": "- HTML elements found in the file, or null if none"
-							},
-							{
-								"name": "explicit_elements",
-								"type": "Set<string> | null",
-								"description": "- Elements from"
+								"name": "extraction",
+								"type": "ExtractionData",
+								"description": "- Extraction data to cache"
 							}
 						]
 					},
@@ -724,7 +716,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 180,
+						"source_line": 190,
 						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -744,9 +736,9 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 193,
-						"type_signature": "(cached: CachedExtraction): { classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; explicit_elements: Set<...> | null; }",
-						"return_type": "{ classes: Map<string, SourceLocation[]> | null; explicit_classes: Set<string> | null; diagnostics: ExtractionDiagnostic[] | null; elements: Set<...> | null; explicit_elements: Set<...> | null; }",
+						"source_line": 203,
+						"type_signature": "(cached: CachedExtraction): ExtractionData",
+						"return_type": "ExtractionData",
 						"parameters": [
 							{
 								"name": "cached",
@@ -832,11 +824,11 @@
 				"path": "css_class_extractor.ts",
 				"declarations": [
 					{
-						"name": "ExtractionResult",
+						"name": "ExtractionData",
 						"kind": "type",
-						"doc_comment": "Extraction result with classes mapped to their source locations.\nUses `null` instead of empty collections to avoid allocation overhead.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from `CssLiteralParseResult` which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
-						"source_line": 37,
-						"type_signature": "ExtractionResult",
+						"doc_comment": "Cacheable extraction data fields shared between extraction and caching layers.\nUses `null` instead of empty collections to avoid allocation overhead.",
+						"source_line": 33,
+						"type_signature": "ExtractionData",
 						"properties": [
 							{
 								"name": "classes",
@@ -849,12 +841,6 @@
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
 								"doc_comment": "Classes explicitly annotated via `@fuz-classes` comments, or null if none.\nThese produce errors if they can't be resolved during generation."
-							},
-							{
-								"name": "tracked_vars",
-								"kind": "variable",
-								"type_signature": "Set<string> | null",
-								"doc_comment": "Variables that were used in class contexts, or null if none"
 							},
 							{
 								"name": "diagnostics",
@@ -873,6 +859,44 @@
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
 								"doc_comment": "Elements explicitly annotated via `@fuz-elements` comments, or null if none.\nThese should produce errors if they have no matching style rules."
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Variables explicitly annotated via `@fuz-variables` comments, or null if none.\nThese produce errors if they can't be resolved to theme variables."
+							}
+						]
+					},
+					{
+						"name": "has_extraction_data",
+						"kind": "function",
+						"doc_comment": "Returns true if the extraction data has any non-null fields.",
+						"source_line": 66,
+						"type_signature": "(data: ExtractionData): boolean",
+						"return_type": "boolean",
+						"parameters": [
+							{
+								"name": "data",
+								"type": "ExtractionData"
+							}
+						]
+					},
+					{
+						"name": "ExtractionResult",
+						"kind": "type",
+						"doc_comment": "Extraction result with classes mapped to their source locations.\nExtends `ExtractionData` with `tracked_vars` which is internal to AST walking.\n\nUses embedded diagnostics (rather than a Result type) because file extraction\ncan partially succeed: some classes may be extracted while others produce errors.\nThis differs from `CssLiteralParseResult` which uses a discriminated union\nbecause single-class parsing is binary success/failure.",
+						"source_line": 85,
+						"type_signature": "ExtractionResult",
+						"extends": [
+							"ExtractionData"
+						],
+						"properties": [
+							{
+								"name": "tracked_vars",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Variables that were used in class contexts, or null if none"
 							}
 						]
 					},
@@ -880,14 +904,14 @@
 						"name": "AcornPlugin",
 						"kind": "type",
 						"doc_comment": "Acorn plugin type - a function that extends the Parser class.",
-						"source_line": 67,
+						"source_line": 93,
 						"type_signature": "AcornPlugin"
 					},
 					{
 						"name": "ExtractCssClassesOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS class extraction.",
-						"source_line": 72,
+						"source_line": 98,
 						"type_signature": "ExtractCssClassesOptions",
 						"properties": [
 							{
@@ -908,7 +932,7 @@
 						"name": "SourceIndex",
 						"kind": "class",
 						"doc_comment": "Helper class for converting character offsets to line/column positions.\nSvelte template nodes (Comment, Text, ExpressionTag) only have char offsets,\nso this class enables efficient conversion.\n\nBuild: O(n) where n = source length\nLookup: O(log m) where m = number of lines (binary search)",
-						"source_line": 103,
+						"source_line": 129,
 						"members": [
 							{
 								"name": "line_starts",
@@ -955,7 +979,7 @@
 						"name": "extract_from_svelte",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a Svelte file using AST parsing.",
-						"source_line": 261,
+						"source_line": 292,
 						"type_signature": "(source: string, file?: string): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, and diagnostics",
@@ -977,7 +1001,7 @@
 						"name": "extract_from_ts",
 						"kind": "function",
 						"doc_comment": "Extracts CSS classes from a TypeScript/JS file using AST parsing.",
-						"source_line": 470,
+						"source_line": 482,
 						"type_signature": "(source: string, file?: string, acorn_plugins?: AcornPlugin[] | undefined): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Extraction result with classes, tracked variables, elements, and diagnostics",
@@ -1005,7 +1029,7 @@
 						"name": "extract_css_classes",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns just the class names as a Set.",
-						"source_line": 542,
+						"source_line": 554,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): Set<string> | null",
 						"return_type": "Set<string> | null",
 						"return_description": "Set of class names, or null if none found",
@@ -1027,7 +1051,7 @@
 						"name": "extract_css_classes_with_locations",
 						"kind": "function",
 						"doc_comment": "Unified extraction function that auto-detects file type.\nReturns full extraction result with locations and diagnostics.",
-						"source_line": 558,
+						"source_line": 570,
 						"type_signature": "(source: string, options?: ExtractCssClassesOptions): ExtractionResult",
 						"return_type": "ExtractionResult",
 						"return_description": "Full extraction result with classes, tracked variables, and diagnostics",
@@ -1046,7 +1070,7 @@
 						]
 					}
 				],
-				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes\n- `// @fuz-elements element1 element2` - comment hints for dynamic elements",
+				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes\n- `// @fuz-elements element1 element2` - comment hints for dynamic elements\n- `// @fuz-variables var1 var2` - comment hints for dynamic CSS variables",
 				"dependents": [
 					"gen_fuz_css.ts",
 					"vite_plugin_fuz_css.ts"
@@ -1693,7 +1717,7 @@
 						"name": "CssClasses",
 						"kind": "class",
 						"doc_comment": "Collection of CSS classes extracted from source files.\nTracks classes per-file for efficient incremental updates.\nHandles include/exclude filtering and explicit class tracking.\nUses `null` instead of empty collections to avoid allocation overhead.",
-						"source_line": 18,
+						"source_line": 19,
 						"members": [
 							{
 								"name": "constructor",
@@ -1719,7 +1743,7 @@
 								"name": "add",
 								"kind": "function",
 								"doc_comment": "Adds extraction results for a file.\nReplaces any previous classes and diagnostics for this file.",
-								"type_signature": "(id: string, classes: Map<string, SourceLocation[]> | null, explicit_classes?: Set<string> | null | undefined, diagnostics?: ExtractionDiagnostic[] | null | undefined, elements?: Set<...> | ... 1 more ... | undefined, explicit_elements?: Set<...> | ... 1 more ... | undefined): void",
+								"type_signature": "(id: string, data: ExtractionData): void",
 								"return_type": "void",
 								"parameters": [
 									{
@@ -1728,33 +1752,9 @@
 										"description": "- File identifier"
 									},
 									{
-										"name": "classes",
-										"type": "Map<string, SourceLocation[]> | null",
-										"description": "- Map of class names to their source locations, or null if none"
-									},
-									{
-										"name": "explicit_classes",
-										"type": "Set<string> | null | undefined",
-										"optional": true,
-										"description": "- Classes from"
-									},
-									{
-										"name": "diagnostics",
-										"type": "ExtractionDiagnostic[] | null | undefined",
-										"optional": true,
-										"description": "- Extraction diagnostics from this file, or null if none"
-									},
-									{
-										"name": "elements",
-										"type": "Set<string> | null | undefined",
-										"optional": true,
-										"description": "- HTML elements found in the file, or null if none"
-									},
-									{
-										"name": "explicit_elements",
-										"type": "Set<string> | null | undefined",
-										"optional": true,
-										"description": "- Elements from"
+										"name": "data",
+										"type": "ExtractionData",
+										"description": "- Extraction data fields to store for this file"
 									}
 								]
 							},
@@ -1790,8 +1790,8 @@
 								"name": "get_all",
 								"kind": "function",
 								"doc_comment": "Gets all classes and their locations in a single call.\nMore efficient than calling `get()` and `get_with_locations()` separately\nwhen both are needed (avoids potential double recalculation).\n\nResults have exclude filter applied and explicit_classes includes additional_classes.",
-								"type_signature": "(): { all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; }",
-								"return_type": "{ all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; }",
+								"type_signature": "(): { all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
+								"return_type": "{ all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 								"parameters": []
 							},
 							{
@@ -2990,9 +2990,10 @@
 								"type_signature": "string | null"
 							},
 							{
-								"name": "class_name",
+								"name": "identifier",
 								"kind": "variable",
-								"type_signature": "string"
+								"type_signature": "string",
+								"doc_comment": "The class name, element name, or variable name this diagnostic refers to"
 							},
 							{
 								"name": "locations",
@@ -3006,14 +3007,14 @@
 						"name": "Diagnostic",
 						"kind": "type",
 						"doc_comment": "Union of all diagnostic types.",
-						"source_line": 63,
+						"source_line": 64,
 						"type_signature": "Diagnostic"
 					},
 					{
 						"name": "InterpreterDiagnostic",
 						"kind": "type",
-						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to GenerationDiagnostic with locations.",
-						"source_line": 69,
+						"doc_comment": "Diagnostic from CSS class interpretation.\nUsed internally by interpreters; converted to `GenerationDiagnostic` with locations.",
+						"source_line": 70,
 						"type_signature": "InterpreterDiagnostic",
 						"properties": [
 							{
@@ -3027,9 +3028,10 @@
 								"type_signature": "string"
 							},
 							{
-								"name": "class_name",
+								"name": "identifier",
 								"kind": "variable",
-								"type_signature": "string"
+								"type_signature": "string",
+								"doc_comment": "The class name, element name, or variable name this diagnostic refers to"
 							},
 							{
 								"name": "suggestion",
@@ -3041,8 +3043,8 @@
 					{
 						"name": "create_generation_diagnostic",
 						"kind": "function",
-						"doc_comment": "Converts a InterpreterDiagnostic to a GenerationDiagnostic with locations.",
-						"source_line": 86,
+						"doc_comment": "Converts an `InterpreterDiagnostic` to a `GenerationDiagnostic` with locations.",
+						"source_line": 88,
 						"type_signature": "(diagnostic: InterpreterDiagnostic, locations: SourceLocation[] | null): GenerationDiagnostic",
 						"return_type": "GenerationDiagnostic",
 						"parameters": [
@@ -3062,7 +3064,7 @@
 						"name": "format_diagnostic",
 						"kind": "function",
 						"doc_comment": "Formats a diagnostic for display.",
-						"source_line": 101,
+						"source_line": 103,
 						"type_signature": "(d: Diagnostic): string",
 						"return_type": "string",
 						"parameters": [
@@ -3076,7 +3078,7 @@
 						"name": "CssGenerationError",
 						"kind": "class",
 						"doc_comment": "Error thrown when CSS generation encounters errors or warnings\n(depending on `on_error` and `on_warning` settings).\nContains the full diagnostics array for programmatic access.",
-						"source_line": 116,
+						"source_line": 118,
 						"extends": [
 							"Error"
 						],
@@ -3278,7 +3280,7 @@
 						"name": "GenFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
-						"source_line": 102,
+						"source_line": 90,
 						"type_signature": "GenFuzCssOptions",
 						"extends": [
 							"CssGeneratorBaseOptions"
@@ -3313,7 +3315,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 126,
+						"source_line": 114,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -4294,7 +4296,7 @@
 						"name": "BorderWidthVariant",
 						"kind": "type",
 						"source_line": 144,
-						"type_signature": "5 | 4 | 1 | 3 | 7 | 6 | 2 | 8 | 9"
+						"type_signature": "6 | 4 | 1 | 3 | 5 | 7 | 2 | 8 | 9"
 					},
 					{
 						"name": "border_width_variants",
