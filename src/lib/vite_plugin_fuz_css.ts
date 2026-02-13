@@ -29,7 +29,7 @@ import {join} from 'node:path';
 import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
 import {extract_css_classes_with_locations} from './css_class_extractor.js';
-import {type Diagnostic, CssGenerationError} from './diagnostics.js';
+import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
 import {generate_classes_css} from './css_class_generation.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
@@ -326,8 +326,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (on_warning === 'throw') {
 				throw new CssGenerationError(warnings);
 			} else if (on_warning === 'log') {
-				for (const d of utility_result.diagnostics.filter((d) => d.level === 'warning')) {
-					log_warn(`[fuz_css] ${d.identifier}: ${d.message}`);
+				for (const warning of warnings) {
+					log_warn(`[fuz_css] ${format_diagnostic(warning)}`);
 				}
 			}
 			// 'ignore' - do nothing
@@ -338,9 +338,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (on_error === 'throw') {
 				throw new CssGenerationError(errors);
 			}
-			// Log errors (extraction diagnostics already logged in transform)
-			for (const d of utility_result.diagnostics.filter((d) => d.level === 'error')) {
-				log_error(`[fuz_css] ${d.identifier}: ${d.message}`);
+			for (const error of errors) {
+				log_error(`[fuz_css] ${format_diagnostic(error)}`);
 			}
 		}
 

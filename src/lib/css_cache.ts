@@ -131,7 +131,7 @@ export const load_cached_extraction = async (
 /**
  * Saves an extraction result to the cache.
  * Uses atomic write (temp file + rename) for crash safety.
- * Converts empty arrays to null to avoid allocation overhead on load.
+ * Normalizes empty collections to null to avoid allocation overhead on load.
  *
  * @param ops - Filesystem operations for dependency injection
  * @param cache_path - Absolute path to the cache file
@@ -156,9 +156,7 @@ export const save_cached_extraction = async (
 	const diagnostics_array =
 		extraction.diagnostics && extraction.diagnostics.length > 0 ? extraction.diagnostics : null;
 	const elements_array =
-		extraction.elements && extraction.elements.size > 0
-			? Array.from(extraction.elements)
-			: null;
+		extraction.elements && extraction.elements.size > 0 ? Array.from(extraction.elements) : null;
 	const explicit_elements_array =
 		extraction.explicit_elements && extraction.explicit_elements.size > 0
 			? Array.from(extraction.explicit_elements)

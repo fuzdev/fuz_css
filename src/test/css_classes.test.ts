@@ -119,7 +119,10 @@ describe('CssClasses', () => {
 		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
 		const explicit = new Set(['annotated_class']);
 
-		css_classes.add('file1.ts', {classes: new Map([['regular', [loc]]]), explicit_classes: explicit});
+		css_classes.add('file1.ts', {
+			classes: new Map([['regular', [loc]]]),
+			explicit_classes: explicit,
+		});
 
 		const {explicit_classes} = css_classes.get_all();
 		expect(explicit_classes).not.toBeNull();

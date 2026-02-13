@@ -12,7 +12,11 @@ import type {Gen} from '@fuzdev/gro/gen.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
 import {filter_file_default} from './file_filter.js';
-import {type ExtractionData, extract_css_classes_with_locations} from './css_class_extractor.js';
+import {
+	type ExtractionData,
+	has_extraction_data,
+	extract_css_classes_with_locations,
+} from './css_class_extractor.js';
 import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
 import {generate_classes_css} from './css_class_generation.js';
@@ -287,19 +291,17 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 					// Cache miss - extract
 					stats.cache_misses++;
-					const result = extract_css_classes_with_locations(node.contents, {
-						filename: node.id,
-						acorn_plugins,
-					});
+					const {tracked_vars: _, ...extraction_data} = extract_css_classes_with_locations(
+						node.contents,
+						{
+							filename: node.id,
+							acorn_plugins,
+						},
+					);
 
 					return {
 						id: node.id,
-						classes: result.classes,
-						explicit_classes: result.explicit_classes,
-						diagnostics: result.diagnostics,
-						elements: result.elements,
-						explicit_elements: result.explicit_elements,
-						explicit_variables: result.explicit_variables,
+						...extraction_data,
 						cache_path: is_ci ? null : cache_path,
 						content_hash: node.content_hash,
 					};
@@ -307,16 +309,9 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				concurrency,
 			);
 
-			// Add to CssClasses (null = empty, so use truthiness check)
+			// Add to CssClasses (skip files with all-null extraction data)
 			for (const extraction of extractions) {
-				if (
-					extraction.classes ||
-					extraction.explicit_classes ||
-					extraction.diagnostics ||
-					extraction.elements ||
-					extraction.explicit_elements ||
-					extraction.explicit_variables
-				) {
+				if (has_extraction_data(extraction)) {
 					css_classes.add(extraction.id, extraction);
 					if (extraction.classes) {
 						stats.files_with_classes++;

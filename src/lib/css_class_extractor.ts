@@ -61,6 +61,19 @@ export interface ExtractionData {
 }
 
 /**
+ * Returns true if the extraction data has any non-null fields.
+ */
+export const has_extraction_data = (data: ExtractionData): boolean =>
+	!!(
+		data.classes ||
+		data.explicit_classes ||
+		data.diagnostics ||
+		data.elements ||
+		data.explicit_elements ||
+		data.explicit_variables
+	);
+
+/**
  * Extraction result with classes mapped to their source locations.
  * Extends `ExtractionData` with `tracked_vars` which is internal to AST walking.
  *
