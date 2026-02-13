@@ -244,6 +244,7 @@ describe('resolve_css diagnostics', () => {
 			expect(result.diagnostics[0]!.message).toContain('@fuz-variables');
 			expect(result.diagnostics[0]!.message).toContain('nonexistent_var');
 			expect(result.diagnostics[0]!.message).toContain('No theme variable found');
+			expect(result.diagnostics[0]!.suggestion).toContain('Remove from @fuz-variables');
 		});
 
 		test('no error when explicit variable exists in theme', () => {
@@ -252,18 +253,22 @@ describe('resolve_css diagnostics', () => {
 				{name: 'shade_40', light: '#ccc'},
 			]);
 
+			// Callers (gen_fuz_css/vite_plugin) add explicit_variables to detected_css_variables
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(),
+				detected_css_variables: new Set(['color_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
 				explicit_variables: new Set(['color_a_50', 'shade_40']),
 			});
 
 			expect(result.diagnostics.length).toBe(0);
+			// Valid explicit variables should be resolved
+			expect(result.resolved_variables.has('color_a_50')).toBe(true);
+			expect(result.resolved_variables.has('shade_40')).toBe(true);
 		});
 
 		test('suggests similar variable for typo', () => {
@@ -287,6 +292,7 @@ describe('resolve_css diagnostics', () => {
 			expect(result.diagnostics[0]!.level).toBe('error');
 			expect(result.diagnostics[0]!.message).toContain('shade_4');
 			expect(result.diagnostics[0]!.message).toContain('did you mean');
+			expect(result.diagnostics[0]!.suggestion).toContain('Check spelling');
 		});
 
 		test('errors for multiple explicit variables with mix of valid and invalid', () => {
@@ -301,7 +307,7 @@ describe('resolve_css diagnostics', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(),
+				detected_css_variables: new Set(['color_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
 				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2']),
 			});
@@ -312,6 +318,54 @@ describe('resolve_css diagnostics', () => {
 			const messages = result.diagnostics.map((d) => d.message);
 			expect(messages.some((m) => m.includes('bad_var_1'))).toBe(true);
 			expect(messages.some((m) => m.includes('bad_var_2'))).toBe(true);
+			// Valid variables should still be resolved
+			expect(result.resolved_variables.has('color_a_50')).toBe(true);
+			expect(result.resolved_variables.has('shade_40')).toBe(true);
+		});
+
+		test('explicit variable resolves transitive dependencies', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'base_hue', light: '210'},
+				{name: 'derived_color', light: 'hsl(var(--base_hue) 50% 50%)'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(['derived_color']),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['derived_color']),
+			});
+
+			expect(result.diagnostics.length).toBe(0);
+			expect(result.resolved_variables.has('derived_color')).toBe(true);
+			expect(result.resolved_variables.has('base_hue')).toBe(true);
+		});
+
+		test('exclude_variables suppresses explicit_variables error', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'color_a_50', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_variables: new Set(['nonexistent_var', 'also_missing']),
+				exclude_variables: ['nonexistent_var'],
+			});
+
+			// Only 'also_missing' errors — 'nonexistent_var' is suppressed by exclude_variables
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('also_missing');
 		});
 	});
 
@@ -409,6 +463,30 @@ describe('resolve_css diagnostics', () => {
 
 			expect(result.diagnostics.length).toBe(3);
 			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+		});
+
+		test('exclude_elements suppresses explicit_elements error', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: red; }`,
+				[],
+			);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button', 'dialog', 'details']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set(),
+				explicit_elements: new Set(['dialog', 'details']),
+				exclude_elements: ['dialog'],
+			});
+
+			// Only 'details' errors — 'dialog' is suppressed by exclude_elements
+			expect(result.diagnostics.length).toBe(1);
+			expect(result.diagnostics[0]!.level).toBe('error');
+			expect(result.diagnostics[0]!.message).toContain('details');
 		});
 	});
 });

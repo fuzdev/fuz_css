@@ -417,6 +417,7 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 			add_class(state, cls, location);
 			state.explicit_classes.add(cls);
 		}
+		return;
 	}
 
 	// @fuz-elements
@@ -426,6 +427,7 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 			state.elements.add(el);
 			state.explicit_elements.add(el);
 		}
+		return;
 	}
 
 	// @fuz-variables
@@ -438,7 +440,7 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 };
 
 /**
- * Extracts @fuz-classes and @fuz-elements from Svelte HTML Comment nodes.
+ * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
  */
 const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
