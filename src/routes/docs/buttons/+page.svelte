@@ -229,8 +229,8 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> reduces density by overriding sizing variables. Apply directly or on a container
-			to cascade to children.
+			<code>.compact</code> provides tighter sizing -- smaller fonts, inputs, padding, and border radii.
+			Apply directly or on a container to cascade to children.
 		</p>
 		<Code content={`<button class="compact">compact</button>`} />
 		<button type="button" class="compact" class:mb_xs>compact</button>

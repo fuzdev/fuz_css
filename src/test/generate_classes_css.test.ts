@@ -758,6 +758,33 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('composite fallback patterns', () => {
+		test.each(['chip', 'pane', 'panel'])(
+			'%s uses var(--border_radius, var(--border_radius_xs))',
+			(name) => {
+				const result = generate_classes_css({
+					class_names: [name],
+					class_definitions: css_class_composites,
+					interpreters: [],
+					css_properties: null,
+				});
+
+				expect_css_contains(result.css, 'var(--border_radius, var(--border_radius_xs))');
+			},
+		);
+
+		test('chip uses var(--font_size, inherit)', () => {
+			const result = generate_classes_css({
+				class_names: ['chip'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect_css_contains(result.css, 'font-size: var(--font_size, inherit)');
+		});
+	});
+
 	describe('interpreter priority', () => {
 		test('static definition takes priority over interpreter', () => {
 			const interpreter: CssClassDefinitionInterpreter = {
