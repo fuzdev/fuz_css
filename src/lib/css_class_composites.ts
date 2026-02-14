@@ -98,14 +98,28 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: `
 			background-color: var(--shade_00);
 			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
-			border-radius: var(--border_radius_xs);
+			border-radius: var(--border_radius, var(--border_radius_xs));
 		`,
 	},
 	panel: {
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
-			border-radius: var(--border_radius_xs);
+			border-radius: var(--border_radius, var(--border_radius_xs));
 			background-color: var(--fg_10);
+		`,
+	},
+	compact: {
+		comment:
+			'Tighter sizing by overriding sizing variables. Works on individual elements or as a container class whose children inherit the smaller sizing.',
+		declaration: `
+			--font_size: var(--font_size_sm);
+			--input_height: var(--space_xl3);
+			--input_height_sm: var(--space_xl2);
+			--input_padding_x: var(--space_sm);
+			--min_height: var(--space_xl3);
+			--border_radius: var(--border_radius_xs2);
+			--icon_size: var(--icon_size_sm);
+			--menu_item_padding: var(--space_xs4) var(--space_xs3);
 		`,
 	},
 	icon_button: {
@@ -218,10 +232,11 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		ruleset: `
 			.chip {
 				font-weight: 500;
+				font-size: var(--font_size, inherit);
 				padding-left: var(--space_xs);
 				padding-right: var(--space_xs);
 				background-color: var(--fg_10);
-				border-radius: var(--border_radius_xs);
+				border-radius: var(--border_radius, var(--border_radius_xs));
 			}
 			a.chip {
 				font-weight: 600;

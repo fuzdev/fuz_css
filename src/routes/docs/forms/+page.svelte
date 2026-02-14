@@ -202,4 +202,92 @@
 			</fieldset>
 		</form>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
+		<p>
+			<code>.compact</code> provides tighter sizing -- smaller inputs, padding, and border radii. Apply
+			on a container to cascade to all form elements.
+		</p>
+		<Code
+			content={`<form class="compact">
+	<fieldset>
+		<label>
+			<div class="title">name</div>
+			<input placeholder=">" />
+		</label>
+		<label>
+			<div class="title">notes</div>
+			<textarea placeholder="..."></textarea>
+		</label>
+		<label>
+			<div class="title">option</div>
+			<select>...</select>
+		</label>
+		<div class="row">
+			<button>submit</button>
+			<button class="icon_button plain">+</button>
+		</div>
+	</fieldset>
+</form>`}
+		/>
+		<div class="row gap_lg">
+			<div class="width_atmost_sm">
+				<form class="compact">
+					<fieldset>
+						<legend>compact</legend>
+						<label>
+							<div class="title">name</div>
+							<input placeholder=">" />
+						</label>
+						<label>
+							<div class="title">notes</div>
+							<textarea placeholder="..."></textarea>
+						</label>
+						<label>
+							<div class="title">option</div>
+							<select>
+								{#each faces as face (face)}
+									<option value={face}>{face}</option>
+								{/each}
+							</select>
+						</label>
+						<div class="row">
+							<button type="button">submit</button>
+							<button type="button" class="icon_button plain">+</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<div class="width_atmost_sm">
+				<form>
+					<fieldset>
+						<legend>normal</legend>
+						<label>
+							<div class="title">name</div>
+							<input placeholder=">" />
+						</label>
+						<label>
+							<div class="title">notes</div>
+							<textarea placeholder="..."></textarea>
+						</label>
+						<label>
+							<div class="title">option</div>
+							<select>
+								{#each faces as face (face)}
+									<option value={face}>{face}</option>
+								{/each}
+							</select>
+						</label>
+						<div class="row">
+							<button type="button">submit</button>
+							<button type="button" class="icon_button plain">+</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</TomeSection>
 </TomeContent>
