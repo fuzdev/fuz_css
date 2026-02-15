@@ -1055,36 +1055,8 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
-				<li><code>.compact</code> - tighter sizing (smaller fonts, inputs, padding, radii)</li>
+				<li><code>.compact</code> - tighter sizing</li>
 			</ul>
-			<h5><code>.compact</code></h5>
-			<p>
-				Tighter sizing by overriding sizing variables. Apply directly to an element or on a
-				container to cascade to children. Overrides:
-			</p>
-			<ul>
-				<li><code>--font_size</code> &rarr; <code>--font_size_sm</code></li>
-				<li><code>--input_height</code> &rarr; <code>--space_xl3</code></li>
-				<li><code>--input_height_sm</code> &rarr; <code>--space_xl2</code></li>
-				<li><code>--input_padding_x</code> &rarr; <code>--space_sm</code></li>
-				<li><code>--min_height</code> &rarr; <code>--space_xl3</code></li>
-				<li><code>--border_radius</code> &rarr; <code>--border_radius_xs2</code></li>
-				<li><code>--icon_size</code> &rarr; <code>--icon_size_sm</code></li>
-				<li>
-					<code>--menu_item_padding</code> &rarr; <code>--space_xs4</code> <code>--space_xs3</code>
-				</li>
-			</ul>
-			<Code
-				lang="svelte"
-				content={`<!-- direct -->
-<button class="compact">compact</button>
-
-<!-- container -->
-<div class="compact">
-	<button>inherits compact</button>
-	<input placeholder="also compact" />
-</div>`}
-			/>
 			<p>
 				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):
 			</p>
