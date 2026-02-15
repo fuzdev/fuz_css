@@ -285,10 +285,13 @@ describe('generate_border_radius_corners', () => {
 	});
 
 	test('applies formatter', () => {
-		const result = generate_border_radius_corners(['lg'], (v) => `var(--radius_${v})`);
+		const result = generate_border_radius_corners(
+			['lg'],
+			(v) => `var(--test_border_top_left_radius_${v})`,
+		);
 
 		expect(get_declaration(result['border_top_left_radius_lg'])).toBe(
-			'border-top-left-radius: var(--radius_lg);',
+			'border-top-left-radius: var(--test_border_top_left_radius_lg);',
 		);
 	});
 
