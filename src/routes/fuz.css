@@ -1146,7 +1146,6 @@ body {
 	border-left-width: var(--border_width_8);
 	padding: var(--space_md);
 	color: var(--text_color);
-	background-color: var(--fg_10);
 }
 
 :where(code:not(.unstyled)) {
