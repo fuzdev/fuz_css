@@ -259,9 +259,7 @@
 			<button type="button" class="compact color_d selected">color_d</button>
 		</div>
 		<p>
-			The <code>.compact</code>
-			<TomeLink name="classes" hash="Composite-classes">composite class</TomeLink> sets custom properties
-			to variables, so children inherit the compact sizing:
+			<code>.compact</code> sets custom properties to variables, so children inherit the compact sizing:
 		</p>
 		<Code
 			content={`<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">two</button>\n\t<button class="color_a">three</button>\n</div>`}
