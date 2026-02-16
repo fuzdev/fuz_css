@@ -625,7 +625,7 @@ TODO think through these patterns to get somewhere consistent
 	outline: none;
 }
 :where(button:not(.unstyled).selected) {
-	--button_text_color: var(--text_10);
+	--button_text_color: var(--text_05);
 	--button_fill: var(--fill, var(--shade_50));
 	--button_fill_hover: var(--fill, var(--shade_50));
 	--button_fill_active: var(--fill, var(--shade_50));
