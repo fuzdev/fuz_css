@@ -233,8 +233,10 @@
 			Apply directly or on a container to cascade to children.
 		</p>
 		<Code content={`<button class="compact">compact</button>`} />
-		<button type="button" class="compact" class:mb_xs>compact</button>
-		<button type="button" class:mb_xs>normal</button>
+		<div class="row gap_xs mb_lg">
+			<button type="button" class="compact">compact</button>
+			<button type="button">normal</button>
+		</div>
 		<Code
 			content={`<button class="compact plain">+</button>\n<button class="compact icon_button">+</button>\n<button class="compact plain icon_button">+</button>`}
 		/>
@@ -244,7 +246,9 @@
 			<button type="button" class="compact plain icon_button">+</button>
 		</div>
 		<Code content={`<button class="compact color_a">color_a</button>`} />
-		<button type="button" class="compact color_a mb_lg">color_a</button>
+		<div class="row gap_xs mb_lg">
+			<button type="button" class="compact color_a">color_a</button>
+		</div>
 		<Code
 			content={`<!-- container usage: all children inherit compact sizing -->\n<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">two</button>\n\t<button class="color_a">three</button>\n</div>`}
 		/>

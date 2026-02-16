@@ -108,6 +108,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			background-color: var(--fg_10);
 		`,
 	},
+	// TODO consider `.loose`/`.spacious` counterpart
 	compact: {
 		comment:
 			'Tighter sizing by overriding sizing variables. Works on individual elements or as a container class whose children inherit the smaller sizing.',

@@ -227,8 +227,8 @@
 			<select>...</select>
 		</label>
 		<div class="row">
-			<button>submit</button>
-			<button class="icon_button plain">+</button>
+			<button type="button">submit</button>
+			<button type="button" class="icon_button plain">+</button>
 		</div>
 	</fieldset>
 </form>`}

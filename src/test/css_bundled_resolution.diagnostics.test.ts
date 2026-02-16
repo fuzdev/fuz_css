@@ -362,7 +362,7 @@ describe('resolve_css diagnostics', () => {
 				exclude_variables: ['nonexistent_var'],
 			});
 
-			// Only 'also_missing' errors — 'nonexistent_var' is suppressed by exclude_variables
+			// Only 'also_missing' errors - 'nonexistent_var' is suppressed by exclude_variables
 			expect(result.diagnostics.length).toBe(1);
 			expect(result.diagnostics[0]!.level).toBe('error');
 			expect(result.diagnostics[0]!.message).toContain('also_missing');
@@ -483,7 +483,7 @@ describe('resolve_css diagnostics', () => {
 				exclude_elements: ['dialog'],
 			});
 
-			// Only 'details' errors — 'dialog' is suppressed by exclude_elements
+			// Only 'details' errors - 'dialog' is suppressed by exclude_elements
 			expect(result.diagnostics.length).toBe(1);
 			expect(result.diagnostics[0]!.level).toBe('error');
 			expect(result.diagnostics[0]!.message).toContain('details');
