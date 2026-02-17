@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': patch
 ---
 
-add `.compact` composite class for tighter sizing by overriding sizing variables
+add `.compact` composite class for tighter sizing by overriding variables, cascading to children
 
 - update `.chip`, `.pane`, and `.panel` to use `var(--border_radius, var(--border_radius_xs))` fallback pattern so container overrides cascade
 - add `font-size: var(--font_size, inherit)` to `.chip` so font-size overrides cascade
