@@ -120,8 +120,8 @@
 		<TomeSection>
 			<TomeSectionHeader tag="h3" text="Absolute colors" />
 			<p>
-				Sometimes you need a color that <em>doesn't</em> adapt -- logos, charts, color-coded data, or
-				elements that must match across screenshots. Every adaptive color has two absolute variants:
+				Sometimes you need a color that <em>doesn't</em> adapt, like logos, charts, color-coded data,
+				or elements that must match across screenshots. Every adaptive color has two absolute variants:
 			</p>
 			<ul>
 				<li><code>color_a_50_light</code> - the value used in light mode</li>
