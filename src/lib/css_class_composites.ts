@@ -124,6 +124,14 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_md);
 		`,
 	},
+	mb_flow: {
+		comment: 'Flow-aware margin-bottom that responds to --flow_margin overrides like .compact.',
+		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));',
+	},
+	mt_flow: {
+		comment: 'Flow-aware margin-top that responds to --flow_margin overrides like .compact.',
+		declaration: 'margin-top: var(--flow_margin, var(--space_lg));',
+	},
 	icon_button: {
 		comment: `
 			TODO other button variants?

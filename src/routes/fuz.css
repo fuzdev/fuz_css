@@ -559,10 +559,10 @@
 	--lighten_80: #ffffffe3;
 	--lighten_90: #fffffff5;
 	--lighten_95: #fffffffa;
-	--line_height_lg: 1.6;
-	--line_height_md: 1.4;
+	--line_height_lg: 1.8;
+	--line_height_md: 1.5;
 	--line_height_sm: 1.2;
-	--line_height_xl: 2;
+	--line_height_xl: 2.2;
 	--line_height_xs: 1;
 	--link_color: hsl(var(--hue_a) 61% 35%);
 	--link_color_selected: var(--text_color);
@@ -1055,44 +1055,44 @@ body {
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
 	font-weight: 300;
-	margin-bottom: var(--flow_margin, var(--space_xl5));
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
 	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
-	/* margin-top: var(--space_xl7); */
+	/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.31); */
 }
 
 :where(h2:not(.unstyled)) {
 	--font_size: var(--font_size_xl2);
 	font-weight: 400;
-	margin-bottom: var(--flow_margin, var(--space_xl4));
-	margin-top: var(--flow_margin, var(--space_xl6));
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2.54);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 4.15);
 }
 
 :where(h3:not(.unstyled)) {
 	--font_size: var(--font_size_xl);
 	font-weight: 500;
-	margin-bottom: var(--flow_margin, var(--space_xl3));
-	margin-top: var(--flow_margin, var(--space_xl5));
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 3.23);
 }
 
 :where(h4:not(.unstyled)) {
 	--font_size: var(--font_size_lg);
 	font-weight: 700;
-	margin-bottom: var(--flow_margin, var(--space_xl2));
-	margin-top: var(--flow_margin, var(--space_xl4));
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.62);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2.54);
 }
 
 :where(h5:not(.unstyled)) {
 	--font_size: var(--font_size_md);
 	font-weight: 900;
-	margin-bottom: var(--flow_margin, var(--space_xl));
-	margin-top: var(--flow_margin, var(--space_xl3));
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.23);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2);
 }
 
 :where(h6:not(.unstyled)) {
 	--font_size: var(--font_size_sm);
 	font-weight: 600;
 	margin-bottom: var(--flow_margin, var(--space_lg));
-	margin-top: var(--flow_margin, var(--space_xl2));
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
 	text-transform: uppercase;
 }
 

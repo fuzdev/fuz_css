@@ -735,6 +735,7 @@ describe('generate_classes_css', () => {
 				'--border_radius: var(--border_radius_xs2);',
 				'--icon_size: var(--icon_size_sm);',
 				'--menu_item_padding: var(--space_xs4) var(--space_xs3);',
+				'--flow_margin: var(--space_md);',
 			);
 			expect(result.diagnostics).toHaveLength(0);
 		});
@@ -755,6 +756,52 @@ describe('generate_classes_css', () => {
 			expect(result.variables_used.has('icon_size_sm')).toBe(true);
 			expect(result.variables_used.has('space_xs4')).toBe(true);
 			expect(result.variables_used.has('space_xs3')).toBe(true);
+			expect(result.variables_used.has('space_md')).toBe(true);
+		});
+	});
+
+	describe('flow margin composites', () => {
+		test('mb_flow generates flow-aware margin-bottom', () => {
+			const result = generate_classes_css({
+				class_names: ['mb_flow'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect_css_contains(
+				result.css,
+				'.mb_flow {',
+				'margin-bottom: var(--flow_margin, var(--space_lg));',
+			);
+			expect(result.diagnostics).toHaveLength(0);
+		});
+
+		test('mt_flow generates flow-aware margin-top', () => {
+			const result = generate_classes_css({
+				class_names: ['mt_flow'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect_css_contains(
+				result.css,
+				'.mt_flow {',
+				'margin-top: var(--flow_margin, var(--space_lg));',
+			);
+			expect(result.diagnostics).toHaveLength(0);
+		});
+
+		test('mb_flow tracks space_lg variable', () => {
+			const result = generate_classes_css({
+				class_names: ['mb_flow'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.variables_used.has('space_lg')).toBe(true);
 		});
 	});
 

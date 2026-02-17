@@ -86,13 +86,18 @@
   :is(p, ul, ...[many others])
     :not(:last-child):not(.unstyled)
 ) {
-  margin-bottom: var(--space_lg);
+  margin-bottom: var(--flow_margin, var(--space_lg));
 }`}
 		/>
 		<p>
-			This eliminates bottom margins on terminal elements. Edge cases can be fixed with <code
-				>.mb_lg</code
-			> or similar utility classes.
+			The <code>--flow_margin</code> variable is unset by default, falling back to
+			<code>var(--space_lg)</code>. Override classes like <code>.compact</code> set
+			<code>--flow_margin</code> to tighten vertical rhythm for all flow elements and headings.
+		</p>
+		<p>
+			For elements not in the flow list, use the <code>.mb_flow</code> and <code>.mt_flow</code>
+			composite classes to get the same compact-responsive spacing. Use <code>.mb_lg</code> when you
+			want a fixed value that ignores <code>.compact</code>.
 		</p>
 		<aside>
 			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to
