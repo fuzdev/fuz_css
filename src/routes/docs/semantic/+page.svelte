@@ -49,8 +49,10 @@
 	<TomeSection>
 		<TomeSectionHeader text=".unstyled escape hatch" />
 		<p>
-			Add <code>.unstyled</code> to opt out of decorative styling while keeping reset normalizations.
-			Works for both decorative containers and interactive elements like links, buttons, inputs, and summary.
+			Add the <code>.unstyled</code>
+			<TomeLink name="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of decorative
+			styling while keeping reset normalizations. Works for both decorative containers and interactive
+			elements like links, buttons, inputs, and summary.
 		</p>
 		<Code
 			lang="svelte"

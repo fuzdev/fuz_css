@@ -213,7 +213,7 @@
 		<Code
 			content={`<div class="compact">\n\t<h3>compact heading</h3>\n\t<p>compact paragraph</p>\n\t<p>compact paragraph</p>\n</div>`}
 		/>
-		<div class="display:flex align-items:start gap_lg">
+		<div class="display:flex align-items:start gap_lg mb_lg">
 			<div class="panel p_md compact">
 				<h4>compact</h4>
 				<p>Paragraph in a compact container with tighter flow margins between elements.</p>
@@ -233,6 +233,7 @@
 				</ul>
 			</div>
 		</div>
+		<aside>TODO improve rhythm for headers</aside>
 	</TomeSection>
 </TomeContent>
 
