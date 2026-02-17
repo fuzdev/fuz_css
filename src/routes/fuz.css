@@ -1055,7 +1055,7 @@ body {
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
 	font-weight: 300;
-	margin-bottom: var(--space_xl5);
+	margin-bottom: var(--flow_margin, var(--space_xl5));
 	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
 	/* margin-top: var(--space_xl7); */
 }
@@ -1063,35 +1063,35 @@ body {
 :where(h2:not(.unstyled)) {
 	--font_size: var(--font_size_xl2);
 	font-weight: 400;
-	margin-bottom: var(--space_xl4);
+	margin-bottom: var(--flow_margin, var(--space_xl4));
 	margin-top: var(--space_xl6);
 }
 
 :where(h3:not(.unstyled)) {
 	--font_size: var(--font_size_xl);
 	font-weight: 500;
-	margin-bottom: var(--space_xl3);
+	margin-bottom: var(--flow_margin, var(--space_xl3));
 	margin-top: var(--space_xl5);
 }
 
 :where(h4:not(.unstyled)) {
 	--font_size: var(--font_size_lg);
 	font-weight: 700;
-	margin-bottom: var(--space_xl2);
+	margin-bottom: var(--flow_margin, var(--space_xl2));
 	margin-top: var(--space_xl4);
 }
 
 :where(h5:not(.unstyled)) {
 	--font_size: var(--font_size_md);
 	font-weight: 900;
-	margin-bottom: var(--space_xl);
+	margin-bottom: var(--flow_margin, var(--space_xl));
 	margin-top: var(--space_xl3);
 }
 
 :where(h6:not(.unstyled)) {
 	--font_size: var(--font_size_sm);
 	font-weight: 600;
-	margin-bottom: var(--space_lg);
+	margin-bottom: var(--flow_margin, var(--space_lg));
 	margin-top: var(--space_xl2);
 	text-transform: uppercase;
 }
@@ -1116,10 +1116,11 @@ body {
 			pre,
 			blockquote,
 			aside,
-			nav
+			nav,
+			legend
 		):not(:last-child):not(.unstyled)
 ) {
-	margin-bottom: var(--space_lg);
+	margin-bottom: var(--flow_margin, var(--space_lg));
 }
 
 :where(section:not(:last-child)) {
@@ -1194,7 +1195,6 @@ body {
 
 :where(legend:not(.unstyled)) {
 	font-size: var(--font_size_lg);
-	margin-bottom: var(--space_lg);
 }
 
 :where(input, textarea, select) {
@@ -1733,7 +1733,7 @@ body {
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	background-color: var(--fg_10);
 }
-/* Tighter sizing by overriding variables, cascading to children. Works on individual elements or as a container class whose children inherit the smaller sizing. */
+/* Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers. */
 .compact {
 	--font_size: var(--font_size_sm);
 	--input_height: var(--space_xl3);
@@ -1743,6 +1743,7 @@ body {
 	--border_radius: var(--border_radius_xs2);
 	--icon_size: var(--icon_size_sm);
 	--menu_item_padding: var(--space_xs4) var(--space_xs3);
+	--flow_margin: var(--space_md);
 }
 /*
 TODO other button variants?

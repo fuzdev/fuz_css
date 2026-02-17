@@ -32,8 +32,8 @@
 		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
 	},
 	"compact": {
-		"comment": "Tighter sizing by overriding variables, cascading to children. Works on individual elements or as a container class whose children inherit the smaller sizing.",
-		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_sm: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--min_height: var(--space_xl3);\n\t\t\t--border_radius: var(--border_radius_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menu_item_padding: var(--space_xs4) var(--space_xs3);\n\t\t"
+		"comment": "Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.",
+		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_sm: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--min_height: var(--space_xl3);\n\t\t\t--border_radius: var(--border_radius_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menu_item_padding: var(--space_xs4) var(--space_xs3);\n\t\t\t--flow_margin: var(--space_md);\n\t\t"
 	},
 	"icon_button": {
 		"comment": "\n\t\t\tTODO other button variants?\n\t\t\tTODO this is slightly strange that it doesn't use --icon_size.\n\t\t\tThese are used as modifiers to buttons.\n\t\t",

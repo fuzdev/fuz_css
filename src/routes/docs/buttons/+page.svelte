@@ -229,8 +229,8 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing with smaller fonts, inputs, padding, and border radii.
-			Apply directly or on a container to cascade to children.
+			The <code>.compact</code> <a href="#Composite-classes">composite class</a> sizes things more tightly
+			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
 		<Code content={`<button class="compact">compact</button>`} />
 		<div class="row gap_xs mb_lg">
@@ -258,7 +258,7 @@
 			<button type="button" class="compact color_d selected">color_d</button>
 		</div>
 		<p>
-			<code>.compact</code> overrides custom properties, so children inherit the compact sizing:
+			<code>.compact</code> overrides custom properties, so children inherit compactness:
 		</p>
 		<Code
 			content={`<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}

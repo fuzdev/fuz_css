@@ -66,8 +66,8 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing -- smaller fonts, inputs, padding, and border radii.
-			Apply directly or on a container to cascade to children.
+			The <code>.compact</code> <a href="#Composite-classes">composite class</a> provides tighter sizing
+			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
 		<Code content={`<span class="chip compact">compact</span>`} />
 		<div class="row gap_sm mb_lg">
@@ -82,8 +82,11 @@
 			<span class="chip compact color_b">color_b</span>
 			<span class="chip compact color_c">color_c</span>
 		</div>
+		<p>
+			<code>.compact</code> overrides custom properties, so children are compact too:
+		</p>
 		<Code
-			content={`<!-- container usage -->\n<div class="compact row gap_sm">\n\t<span class="chip">one</span>\n\t<span class="chip color_d">two</span>\n\t<a class="chip color_e">three</a>\n</div>`}
+			content={`<div class="compact row gap_sm">\n\t<span class="chip">one</span>\n\t<span class="chip color_d">two</span>\n\t<a class="chip color_e">three</a>\n</div>`}
 		/>
 		<div class="compact row gap_sm">
 			<span class="chip">one</span>

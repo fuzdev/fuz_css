@@ -208,7 +208,7 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing -- smaller fonts, inputs, padding, and border radii.
+			<code>.compact</code> provides tighter sizing with smaller fonts, inputs, padding, border radii, and flow margins.
 			Apply directly or on a container to cascade to children.
 		</p>
 		<Code
@@ -233,11 +233,11 @@
 	</fieldset>
 </form>`}
 		/>
-		<div class="row gap_lg">
+		<div class="display:flex gap_lg">
 			<div class="width_atmost_sm">
 				<form class="compact">
 					<fieldset>
-						<legend>compact</legend>
+						<legend>.compact</legend>
 						<label>
 							<div class="title">name</div>
 							<input placeholder=">" />

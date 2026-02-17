@@ -111,7 +111,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	// TODO consider `.loose`/`.spacious` counterpart
 	compact: {
 		comment:
-			'Tighter sizing by overriding variables, cascading to children. Works on individual elements or as a container class whose children inherit the smaller sizing.',
+			'Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_sm);
 			--input_height: var(--space_xl3);
@@ -121,6 +121,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--border_radius: var(--border_radius_xs2);
 			--icon_size: var(--icon_size_sm);
 			--menu_item_padding: var(--space_xs4) var(--space_xs3);
+			--flow_margin: var(--space_md);
 		`,
 	},
 	icon_button: {

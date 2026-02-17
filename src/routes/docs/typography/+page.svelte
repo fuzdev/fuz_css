@@ -76,6 +76,38 @@
 		</Details>
 	</section>
 	<TomeSection>
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
+		<p>
+			<code>.compact</code> provides tighter sizing with smaller fonts, inputs, padding, border radii, and flow margins.
+			Apply on a container to cascade to children.
+		</p>
+		<Code
+			content={`<div class="compact">\n\t<h3>compact heading</h3>\n\t<p>compact paragraph</p>\n\t<p>compact paragraph</p>\n</div>`}
+		/>
+		<div class="row gap_lg">
+			<section class="compact">
+				<h4>compact</h4>
+				<p>Paragraph in a compact container with tighter flow margins between elements.</p>
+				<p>Another paragraph showing the reduced spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</section>
+			<section>
+				<h4>normal</h4>
+				<p>Paragraph in a normal container with default flow margins between elements.</p>
+				<p>Another paragraph showing the default spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</section>
+		</div>
+	</TomeSection>
+	<TomeSection>
 		<TomeSectionHeader text="Font families" />
 		<div>
 			{#each font_family_variants as font_family (font_family)}
