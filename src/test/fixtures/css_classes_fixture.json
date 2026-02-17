@@ -25,11 +25,23 @@
 	},
 	"pane": {
 		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
-		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t"
+		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t"
 	},
 	"panel": {
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
-		"declaration": "\n\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
+		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
+	},
+	"compact": {
+		"comment": "Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.",
+		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_sm: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--min_height: var(--space_xl3);\n\t\t\t--border_radius: var(--border_radius_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menu_item_padding: var(--space_xs4) var(--space_xs3);\n\t\t\t--flow_margin: var(--space_md);\n\t\t"
+	},
+	"mb_flow": {
+		"comment": "Flow-aware margin-bottom that responds to --flow_margin overrides like .compact.",
+		"declaration": "margin-bottom: var(--flow_margin, var(--space_lg));"
+	},
+	"mt_flow": {
+		"comment": "Flow-aware margin-top that responds to --flow_margin overrides like .compact.",
+		"declaration": "margin-top: var(--flow_margin, var(--space_lg));"
 	},
 	"icon_button": {
 		"comment": "\n\t\t\tTODO other button variants?\n\t\t\tTODO this is slightly strange that it doesn't use --icon_size.\n\t\t\tThese are used as modifiers to buttons.\n\t\t",
@@ -46,7 +58,7 @@
 		"ruleset": "\n\t\t\t.chevron {\n\t\t\t\tposition: relative;\n\t\t\t\theight: 8px;\n\t\t\t}\n\t\t\t.chevron::before {\n\t\t\t\tdisplay: block;\n\t\t\t\tcontent: '';\n\t\t\t\tborder: 4px solid transparent;\n\t\t\t\tborder-left-color: var(--text_70);\n\t\t\t}\n\t\t"
 	},
 	"chip": {
-		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tpadding-left: var(--space_xs);\n\t\t\t\tpadding-right: var(--space_xs);\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tborder-radius: var(--border_radius_xs);\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.color_a {\n\t\t\t\tcolor: var(--color_a_50);\n\t\t\t\tbackground-color: var(--color_a_10);\n\t\t\t}\n\t\t\t.chip.color_b {\n\t\t\t\tcolor: var(--color_b_50);\n\t\t\t\tbackground-color: var(--color_b_10);\n\t\t\t}\n\t\t\t.chip.color_c {\n\t\t\t\tcolor: var(--color_c_50);\n\t\t\t\tbackground-color: var(--color_c_10);\n\t\t\t}\n\t\t\t.chip.color_d {\n\t\t\t\tcolor: var(--color_d_50);\n\t\t\t\tbackground-color: var(--color_d_10);\n\t\t\t}\n\t\t\t.chip.color_e {\n\t\t\t\tcolor: var(--color_e_50);\n\t\t\t\tbackground-color: var(--color_e_10);\n\t\t\t}\n\t\t\t.chip.color_f {\n\t\t\t\tcolor: var(--color_f_50);\n\t\t\t\tbackground-color: var(--color_f_10);\n\t\t\t}\n\t\t\t.chip.color_g {\n\t\t\t\tcolor: var(--color_g_50);\n\t\t\t\tbackground-color: var(--color_g_10);\n\t\t\t}\n\t\t\t.chip.color_h {\n\t\t\t\tcolor: var(--color_h_50);\n\t\t\t\tbackground-color: var(--color_h_10);\n\t\t\t}\n\t\t\t.chip.color_i {\n\t\t\t\tcolor: var(--color_i_50);\n\t\t\t\tbackground-color: var(--color_i_10);\n\t\t\t}\n\t\t\t.chip.color_j {\n\t\t\t\tcolor: var(--color_j_50);\n\t\t\t\tbackground-color: var(--color_j_10);\n\t\t\t}\n\t\t"
+		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tfont-size: var(--font_size, inherit);\n\t\t\t\tpadding-left: var(--space_xs);\n\t\t\t\tpadding-right: var(--space_xs);\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.color_a {\n\t\t\t\tcolor: var(--color_a_50);\n\t\t\t\tbackground-color: var(--color_a_10);\n\t\t\t}\n\t\t\t.chip.color_b {\n\t\t\t\tcolor: var(--color_b_50);\n\t\t\t\tbackground-color: var(--color_b_10);\n\t\t\t}\n\t\t\t.chip.color_c {\n\t\t\t\tcolor: var(--color_c_50);\n\t\t\t\tbackground-color: var(--color_c_10);\n\t\t\t}\n\t\t\t.chip.color_d {\n\t\t\t\tcolor: var(--color_d_50);\n\t\t\t\tbackground-color: var(--color_d_10);\n\t\t\t}\n\t\t\t.chip.color_e {\n\t\t\t\tcolor: var(--color_e_50);\n\t\t\t\tbackground-color: var(--color_e_10);\n\t\t\t}\n\t\t\t.chip.color_f {\n\t\t\t\tcolor: var(--color_f_50);\n\t\t\t\tbackground-color: var(--color_f_10);\n\t\t\t}\n\t\t\t.chip.color_g {\n\t\t\t\tcolor: var(--color_g_50);\n\t\t\t\tbackground-color: var(--color_g_10);\n\t\t\t}\n\t\t\t.chip.color_h {\n\t\t\t\tcolor: var(--color_h_50);\n\t\t\t\tbackground-color: var(--color_h_10);\n\t\t\t}\n\t\t\t.chip.color_i {\n\t\t\t\tcolor: var(--color_i_50);\n\t\t\t\tbackground-color: var(--color_i_10);\n\t\t\t}\n\t\t\t.chip.color_j {\n\t\t\t\tcolor: var(--color_j_50);\n\t\t\t\tbackground-color: var(--color_j_10);\n\t\t\t}\n\t\t"
 	},
 	"font_family_sans": {"declaration": "font-family: var(--font_family_sans);"},
 	"font_family_serif": {"declaration": "font-family: var(--font_family_serif);"},

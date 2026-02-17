@@ -148,42 +148,45 @@ Respects `hidden="until-found"` for find-in-page support.
 	overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
 }
 
+/* heading margins use calc multipliers on --flow_margin so they scale proportionally
+   with .compact while preserving hierarchy. multipliers are derived from the space
+   scale (sqrt(GR) ≈ 1.272 per step). margin-top is 2 steps above margin-bottom. */
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
 	font-weight: 300;
-	margin-bottom: var(--space_xl5);
-	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
-	/* margin-top: var(--space_xl7); */
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
+	/* somewhat strange to omit only this one, but generally seems to be the desired behavior */
+	/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.28); */
 }
 :where(h2:not(.unstyled)) {
 	--font_size: var(--font_size_xl2);
 	font-weight: 400;
-	margin-bottom: var(--space_xl4);
-	margin-top: var(--space_xl6);
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2.54);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 4.15);
 }
 :where(h3:not(.unstyled)) {
 	--font_size: var(--font_size_xl);
 	font-weight: 500;
-	margin-bottom: var(--space_xl3);
-	margin-top: var(--space_xl5);
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 3.23);
 }
 :where(h4:not(.unstyled)) {
 	--font_size: var(--font_size_lg);
 	font-weight: 700;
-	margin-bottom: var(--space_xl2);
-	margin-top: var(--space_xl4);
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.62);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2.54);
 }
 :where(h5:not(.unstyled)) {
 	--font_size: var(--font_size_md);
 	font-weight: 900;
-	margin-bottom: var(--space_xl);
-	margin-top: var(--space_xl3);
+	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.23);
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2);
 }
 :where(h6:not(.unstyled)) {
 	--font_size: var(--font_size_sm);
 	font-weight: 600;
-	margin-bottom: var(--space_lg);
-	margin-top: var(--space_xl2);
+	margin-bottom: var(--flow_margin, var(--space_lg));
+	margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
 	text-transform: uppercase;
 }
 
@@ -213,10 +216,11 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 			pre,
 			blockquote,
 			aside,
-			nav
+			nav,
+			legend
 		):not(:last-child):not(.unstyled)
 ) {
-	margin-bottom: var(--space_lg);
+	margin-bottom: var(--flow_margin, var(--space_lg));
 }
 :where(section:not(:last-child)) {
 	margin-bottom: var(--space_xl7);
@@ -243,7 +247,6 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	border-left-width: var(--border_width_8);
 	padding: var(--space_md);
 	color: var(--text_color);
-	background-color: var(--fg_10);
 }
 
 :where(code:not(.unstyled)) {
@@ -291,7 +294,6 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 :where(legend:not(.unstyled)) {
 	font-size: var(--font_size_lg);
-	margin-bottom: var(--space_lg);
 }
 
 /* normalization - keep font inheritance even for unstyled */
@@ -626,7 +628,7 @@ TODO think through these patterns to get somewhere consistent
 	outline: none;
 }
 :where(button:not(.unstyled).selected) {
-	--button_text_color: var(--text_10);
+	--button_text_color: var(--text_05);
 	--button_fill: var(--fill, var(--shade_50));
 	--button_fill_hover: var(--fill, var(--shade_50));
 	--button_fill_active: var(--fill, var(--shade_50));

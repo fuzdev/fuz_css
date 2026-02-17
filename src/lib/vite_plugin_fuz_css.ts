@@ -24,7 +24,7 @@
  * @module
  */
 
-import type {Plugin, ViteDevServer} from 'vite';
+import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
 import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
@@ -151,7 +151,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	/** CSS variables detected per file via simple regex scan (filtered against theme) */
 	const detected_variables_by_file: Map<string, Set<string>> = new Map();
 	let virtual_module_loaded = false;
+	let is_dev = false;
 	let server: ViteDevServer | null = null;
+	let logger: ViteLogger | null = null;
 	let css_properties: Set<string> | null = null;
 	let resolved_cache_dir: string | null = null;
 	let project_root: string | null = null;
@@ -217,19 +219,17 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		await bundled_resources_promise;
 	};
 
-	/** Logs a warning message (works in both dev and build) */
 	const log_warn = (msg: string): void => {
-		if (server) {
-			server.config.logger.warn(msg);
+		if (logger) {
+			logger.warn(msg);
 		} else {
 			console.warn(msg);
 		}
 	};
 
-	/** Logs an error message (works in both dev and build) */
 	const log_error = (msg: string): void => {
-		if (server) {
-			server.config.logger.error(msg);
+		if (logger) {
+			logger.error(msg);
 		} else {
 			console.error(msg);
 		}
@@ -381,8 +381,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				// modules. Using `mod.url` doesn't work (it's `\0virtual:fuz.css.js`). Could break
 				// if Vite changes their encoding scheme. Is there a proper API for this?
 				const hmr_path = '/@id/__x00__virtual:fuz.css.js';
-				const hot = server?.hot ?? server!.ws;
-				hot.send({
+				server!.hot.send({
 					type: 'update',
 					updates: [
 						{
@@ -406,11 +405,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			const root = resolved_config.root;
 			project_root = root.endsWith('/') ? root : root + '/';
 			resolved_cache_dir = join(root, cache_dir);
+			logger = resolved_config.logger;
+			is_dev = resolved_config.command === 'serve';
 		},
 
 		configureServer(dev_server) {
 			server = dev_server;
-
 			// Handle file deletion - watcher 'unlink' event
 			dev_server.watcher.on('unlink', (file) => {
 				if (hashes.has(file)) {
@@ -452,7 +452,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (id === VIRTUAL_ID) {
 				// In dev mode, resolve to .js for HMR support
 				// In build mode, resolve to .css for proper bundling
-				return server ? RESOLVED_VIRTUAL_ID_JS : RESOLVED_VIRTUAL_ID_CSS;
+				return is_dev ? RESOLVED_VIRTUAL_ID_JS : RESOLVED_VIRTUAL_ID_CSS;
 			}
 			return undefined;
 		},

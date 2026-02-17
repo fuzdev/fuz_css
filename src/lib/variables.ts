@@ -1287,9 +1287,9 @@ export const font_size_xl9: StyleVariable = {name: 'font_size_xl9', light: '17.7
 
 export const line_height_xs: StyleVariable = {name: 'line_height_xs', light: '1'};
 export const line_height_sm: StyleVariable = {name: 'line_height_sm', light: '1.2'};
-export const line_height_md: StyleVariable = {name: 'line_height_md', light: '1.4'};
-export const line_height_lg: StyleVariable = {name: 'line_height_lg', light: '1.6'};
-export const line_height_xl: StyleVariable = {name: 'line_height_xl', light: '2'};
+export const line_height_md: StyleVariable = {name: 'line_height_md', light: '1.5'};
+export const line_height_lg: StyleVariable = {name: 'line_height_lg', light: '1.8'};
+export const line_height_xl: StyleVariable = {name: 'line_height_xl', light: '2.2'};
 
 /* links */
 export const link_color: StyleVariable = {

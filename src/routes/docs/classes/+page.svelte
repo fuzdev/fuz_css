@@ -1055,9 +1055,12 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
+				<li><code>.compact</code> - tighter sizing, cascading to children</li>
+				<li><code>.mb_flow</code> - flow-aware margin-bottom</li>
+				<li><code>.mt_flow</code> - flow-aware margin-top</li>
 			</ul>
 			<p>
-				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):
+				<strong>Ruleset-based</strong> (multi-selector, cannot be used in <code>composes</code> arrays):
 			</p>
 			<ul>
 				<li><code>.selectable</code> - selectable element styling</li>

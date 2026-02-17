@@ -37,15 +37,22 @@
 	let selected_size = $state(3);
 
 	// @fuz-classes font_family_sans font_family_serif font_family_mono
+
+	/* eslint-disable svelte/no-useless-mustaches */
 </script>
 
 <TomeContent {tome}>
 	<section>
 		<h1 title="--font_size_xl3">h1</h1>
+		<p>paragraph</p>
 		<h2 title="--font_size_xl2">h2</h2>
+		<p>paragraph</p>
 		<h3 title="--font_size_xl">h3</h3>
+		<p>paragraph</p>
 		<h4 title="--font_size_lg">h4</h4>
+		<p>paragraph</p>
 		<h5 title="--font_size_md">h5</h5>
+		<p>paragraph</p>
 		<h6 title="--font_size_sm">h6</h6>
 		<p>paragraphs</p>
 		<p>paragraphs</p>
@@ -198,6 +205,41 @@
 		</div>
 	</TomeSection>
 	<IconSizes />
+	<TomeSection>
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.compact</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> makes sizing tighter
+			with smaller fonts, inputs, padding, border radii, and flow margins. Apply on a container to cascade
+			to children.
+		</p>
+		<Code
+			content={`<div class="compact">\n\t<h3>compact heading</h3>\n\t<p>compact paragraph</p>\n\t<p>compact paragraph</p>\n</div>`}
+		/>
+		<div class="display:flex align-items:start gap_lg mb_lg">
+			<div class="panel p_md compact">
+				<h4>compact</h4>
+				<p>Paragraph in a compact container with tighter flow margins between elements.</p>
+				<p>Another paragraph showing the reduced spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</div>
+			<div class="panel p_md">
+				<h4>normal</h4>
+				<p>Paragraph in a normal container with default flow margins between elements.</p>
+				<p>Another paragraph showing the default spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</div>
+		</div>
+		<aside>TODO improve rhythm for headers</aside>
+	</TomeSection>
 </TomeContent>
 
 <style>

@@ -6,6 +6,7 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import {color_variants} from '$lib/variable_data.js';
 
@@ -222,5 +223,52 @@
 </button>`}
 		/>
 		<button type="button" class="plain icon_button selected deselectable">+</button>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.compact</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things more
+			tightly with smaller fonts, inputs, padding, border radii, and flow margins.
+		</p>
+		<Code content={`<button class="compact">compact</button>`} />
+		<div class="row gap_xs mb_lg">
+			<button type="button" class="compact">compact</button>
+			<button type="button">normal</button>
+		</div>
+		<p><code>.compact</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
+		<Code
+			content={`<button>+++</button>\n<button class="compact">+++</button>\n<button class="compact plain">+++</button>\n<button class="compact icon_button">+++</button>\n<button class="compact plain icon_button">+++</button>`}
+		/>
+		<div class="row gap_sm mb_lg">
+			<button type="button">+++</button>
+			<button type="button" class="compact">+++</button>
+			<button type="button" class="compact plain">+++</button>
+			<button type="button" class="compact icon_button">+++</button>
+			<button type="button" class="compact plain icon_button">+++</button>
+		</div>
+		<p><code>.compact</code> with colors:</p>
+		<Code
+			content={`<button class="compact color_h">color_h</button>\n<button class="compact color_g">color_g</button>\n<button class="compact color_d selected">color_d</button>`}
+		/>
+		<div class="row gap_xs mb_lg">
+			<button type="button" class="compact color_h">color_h</button>
+			<button type="button" class="compact color_g">color_g</button>
+			<button type="button" class="compact color_d selected">color_d</button>
+		</div>
+		<p>
+			<code>.compact</code> overrides custom properties, so children inherit compactness:
+		</p>
+		<Code
+			content={`<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}
+		/>
+		<div class="compact row gap_sm">
+			<button type="button">one</button>
+			<button type="button" class="plain">to</button>
+			<button type="button" class="color_a">3</button>
+		</div>
 	</TomeSection>
 </TomeContent>

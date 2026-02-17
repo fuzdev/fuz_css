@@ -93,11 +93,11 @@
 		<p>Each color exists in two forms:</p>
 		<ul>
 			<li>
-				<strong>Adaptive</strong> (<code>color_a_50</code>) — switches between light and dark values
-				based on color scheme. Use for most UI work.
+				<strong>Adaptive</strong> (<code>color_a_50</code>) -- switches between light and dark
+				values based on color scheme. Use for most UI work.
 			</li>
 			<li>
-				<strong>Absolute</strong> (<code>color_a_50_light</code>, <code>color_a_50_dark</code>) —
+				<strong>Absolute</strong> (<code>color_a_50_light</code>, <code>color_a_50_dark</code>) --
 				stable values that never change. Use when you need a pinned color.
 			</li>
 		</ul>
@@ -120,12 +120,12 @@
 		<TomeSection>
 			<TomeSectionHeader tag="h3" text="Absolute colors" />
 			<p>
-				Sometimes you need a color that <em>doesn't</em> adapt — logos, charts, color-coded data, or elements
-				that must match across screenshots. Every adaptive color has two absolute variants:
+				Sometimes you need a color that <em>doesn't</em> adapt, like logos, charts, color-coded data,
+				or elements that must match across screenshots. Every adaptive color has two absolute variants:
 			</p>
 			<ul>
-				<li><code>color_a_50_light</code> — the value used in light mode</li>
-				<li><code>color_a_50_dark</code> — the value used in dark mode</li>
+				<li><code>color_a_50_light</code> - the value used in light mode</li>
+				<li><code>color_a_50_dark</code> - the value used in dark mode</li>
 			</ul>
 			<p>
 				These are stable regardless of color scheme. Light and dark variants are tuned independently

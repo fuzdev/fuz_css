@@ -49,8 +49,10 @@
 	<TomeSection>
 		<TomeSectionHeader text=".unstyled escape hatch" />
 		<p>
-			Add <code>.unstyled</code> to opt out of decorative styling while keeping reset normalizations.
-			Works for both decorative containers and interactive elements like links, buttons, inputs, and summary.
+			Add the <code>.unstyled</code>
+			<TomeLink name="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of decorative
+			styling while keeping reset normalizations. Works for both decorative containers and interactive
+			elements like links, buttons, inputs, and summary.
 		</p>
 		<Code
 			lang="svelte"
@@ -84,13 +86,18 @@
   :is(p, ul, ...[many others])
     :not(:last-child):not(.unstyled)
 ) {
-  margin-bottom: var(--space_lg);
+  margin-bottom: var(--flow_margin, var(--space_lg));
 }`}
 		/>
 		<p>
-			This eliminates bottom margins on terminal elements. Edge cases can be fixed with <code
-				>.mb_lg</code
-			> or similar utility classes.
+			The <code>--flow_margin</code> variable is unset by default, falling back to
+			<code>var(--space_lg)</code>. Override classes like <code>.compact</code> set
+			<code>--flow_margin</code> to tighten vertical rhythm for all flow elements and headings.
+		</p>
+		<p>
+			For elements not in the flow list, use the <code>.mb_flow</code> and <code>.mt_flow</code>
+			composite classes to get the same compact-responsive spacing. Use <code>.mb_lg</code> when you
+			want a fixed value that ignores <code>.compact</code>.
 		</p>
 		<aside>
 			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to
@@ -104,7 +111,7 @@
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
 			The layout composites <code>.row</code>, <code>.box</code>, and <code>.column</code>
-			reset margins on their direct children. Flow margins make less sense in flex layout — for spacing
+			reset margins on their direct children. Flow margins make less sense in flex layout -- for spacing
 			prefer gap utilities like <code>.gap_md</code> and <code>var(--gap_sm)</code> instead.
 		</p>
 		<Code

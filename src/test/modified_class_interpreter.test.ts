@@ -491,6 +491,26 @@ describe('modified_class_interpreter', () => {
 			expect(colorMatches?.length).toBe(1);
 			expect(result.diagnostics).toHaveLength(0);
 		});
+
+		test('md:compact generates media query with density overrides', () => {
+			const result = generate_classes_css({
+				class_names: ['md:compact'],
+				class_definitions: css_class_composites,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			expect_css_contains(
+				result.css,
+				'@media (width >= 48rem)',
+				'.md\\:compact',
+				'--font_size: var(--font_size_sm);',
+				'--input_height: var(--space_xl3);',
+				'--border_radius: var(--border_radius_xs2);',
+				'--icon_size: var(--icon_size_sm);',
+			);
+			expect(result.diagnostics).toHaveLength(0);
+		});
 	});
 
 	describe('error propagation', () => {
