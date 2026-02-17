@@ -6,6 +6,7 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import {color_variants} from '$lib/variable_data.js';
 
@@ -229,8 +230,9 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.compact</code> <a href="#Composite-classes">composite class</a> sizes things more tightly
-			with smaller fonts, inputs, padding, border radii, and flow margins.
+			The <code>.compact</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things more
+			tightly with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
 		<Code content={`<button class="compact">compact</button>`} />
 		<div class="row gap_xs mb_lg">
