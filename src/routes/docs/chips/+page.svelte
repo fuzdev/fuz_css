@@ -62,10 +62,12 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="Compact chips" />
+		<TomeSectionHeader text="With .compact">
+			With <code>.compact</code>
+		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing -- smaller fonts and border radii. Apply directly
-			or on a container to cascade to children.
+			<code>.compact</code> provides tighter sizing -- smaller fonts, inputs, padding, and border radii.
+			Apply directly or on a container to cascade to children.
 		</p>
 		<Code content={`<span class="chip compact">compact</span>`} />
 		<div class="row gap_sm mb_lg">

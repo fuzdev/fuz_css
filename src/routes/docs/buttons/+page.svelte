@@ -258,7 +258,7 @@
 			<button type="button" class="compact color_d selected">color_d</button>
 		</div>
 		<p>
-			<code>.compact</code> sets custom properties to variables, so children inherit the compact sizing:
+			<code>.compact</code> overrides custom properties, so children inherit the compact sizing:
 		</p>
 		<Code
 			content={`<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}

@@ -208,8 +208,8 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing -- smaller inputs, padding, and border radii. Apply
-			on a container to cascade to all form elements.
+			<code>.compact</code> provides tighter sizing -- smaller fonts, inputs, padding, and border radii.
+			Apply directly or on a container to cascade to children.
 		</p>
 		<Code
 			content={`<form class="compact">
