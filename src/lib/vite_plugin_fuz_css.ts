@@ -381,8 +381,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				// modules. Using `mod.url` doesn't work (it's `\0virtual:fuz.css.js`). Could break
 				// if Vite changes their encoding scheme. Is there a proper API for this?
 				const hmr_path = '/@id/__x00__virtual:fuz.css.js';
-				const hot = server?.hot ?? server!.ws;
-				hot.send({
+				server!.hot.send({
 					type: 'update',
 					updates: [
 						{
