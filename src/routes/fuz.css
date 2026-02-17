@@ -1056,8 +1056,8 @@ body {
 	--font_size: var(--font_size_xl3);
 	font-weight: 300;
 	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
-	/* TODO strange to omit only this one, but seems to be generally my desired behavior */
-	/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.31); */
+	/* somewhat strange to omit only this one, but generally seems to be the desired behavior */
+	/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.28); */
 }
 
 :where(h2:not(.unstyled)) {

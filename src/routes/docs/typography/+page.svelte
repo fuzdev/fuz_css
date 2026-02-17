@@ -44,10 +44,15 @@
 <TomeContent {tome}>
 	<section>
 		<h1 title="--font_size_xl3">h1</h1>
+		<p>paragraph</p>
 		<h2 title="--font_size_xl2">h2</h2>
+		<p>paragraph</p>
 		<h3 title="--font_size_xl">h3</h3>
+		<p>paragraph</p>
 		<h4 title="--font_size_lg">h4</h4>
+		<p>paragraph</p>
 		<h5 title="--font_size_md">h5</h5>
+		<p>paragraph</p>
 		<h6 title="--font_size_sm">h6</h6>
 		<p>paragraphs</p>
 		<p>paragraphs</p>
