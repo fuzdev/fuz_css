@@ -1060,7 +1060,7 @@ export const gen = gen_fuz_css({
 				<li><code>.mt_flow</code> - flow-aware margin-top</li>
 			</ul>
 			<p>
-				<strong>Ruleset-based</strong> (multi-selector, apply directly in markup):
+				<strong>Ruleset-based</strong> (multi-selector, cannot be used in <code>composes</code> arrays):
 			</p>
 			<ul>
 				<li><code>.selectable</code> - selectable element styling</li>

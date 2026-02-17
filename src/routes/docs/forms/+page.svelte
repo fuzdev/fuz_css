@@ -7,6 +7,7 @@
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -208,29 +209,14 @@
 			With <code>.compact</code>
 		</TomeSectionHeader>
 		<p>
-			<code>.compact</code> provides tighter sizing with smaller fonts, inputs, padding, border radii, and flow margins.
-			Apply directly or on a container to cascade to children.
+			The <code>.compact</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
+			with smaller fonts, inputs, padding, border radii, and flow margins. Apply directly or on a container
+			to cascade to children.
 		</p>
 		<Code
 			content={`<form class="compact">
-	<fieldset>
-		<label>
-			<div class="title">name</div>
-			<input placeholder=">" />
-		</label>
-		<label>
-			<div class="title">notes</div>
-			<textarea placeholder="..."></textarea>
-		</label>
-		<label>
-			<div class="title">option</div>
-			<select>...</select>
-		</label>
-		<div class="row">
-			<button type="button">submit</button>
-			<button type="button" class="icon_button plain">+</button>
-		</div>
-	</fieldset>
+	...
 </form>`}
 		/>
 		<div class="display:flex gap_lg">
