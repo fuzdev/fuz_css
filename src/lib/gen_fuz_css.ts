@@ -270,6 +270,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			// Parallel extraction with cache check
 			const extractions: Array<FileExtraction> = await map_concurrent(
 				nodes,
+				concurrency,
 				async (node): Promise<FileExtraction> => {
 					current_paths.add(node.id);
 					const cache_path = get_file_cache_path(node.id, resolved_cache_dir, project_root);
@@ -314,7 +315,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						content_hash: node.content_hash,
 					};
 				},
-				concurrency,
 			);
 
 			// Add to CssClasses (skip files with all-null extraction data)
@@ -336,6 +336,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			if (cache_writes.length > 0) {
 				await each_concurrent(
 					cache_writes,
+					cache_io_concurrency,
 					async (extraction) => {
 						await save_cached_extraction(
 							ops,
@@ -344,7 +345,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 							extraction,
 						);
 					},
-					cache_io_concurrency,
 				).catch((err) => log.warn('Cache write error:', err));
 			}
 
@@ -355,11 +355,11 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				if (paths_to_delete.length > 0) {
 					await each_concurrent(
 						paths_to_delete,
+						cache_io_concurrency,
 						async (path) => {
 							const cache_path = get_file_cache_path(path, resolved_cache_dir, project_root);
 							await delete_cached_extraction(ops, cache_path);
 						},
-						cache_io_concurrency,
 					).catch(() => {
 						// Ignore deletion errors
 					});
