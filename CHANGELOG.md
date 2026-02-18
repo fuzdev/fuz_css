@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.53.0
+
+### Minor Changes
+
+- upgrade `fuz_util` and `gro` ([#81](https://github.com/fuzdev/fuz_css/pull/81))
+
 ## 0.52.0
 
 ### Minor Changes
