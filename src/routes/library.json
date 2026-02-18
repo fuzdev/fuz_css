@@ -41,8 +41,8 @@
 			"node": ">=22.15"
 		},
 		"peerDependencies": {
-			"@fuzdev/fuz_util": ">=0.50.1",
-			"@fuzdev/gro": ">=0.192.1",
+			"@fuzdev/fuz_util": ">=0.52.0",
+			"@fuzdev/gro": ">=0.195.0",
 			"@sveltejs/acorn-typescript": "^1",
 			"@webref/css": "^8",
 			"acorn-jsx": "^5",
@@ -76,8 +76,8 @@
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/fuz_code": "^0.45.1",
 			"@fuzdev/fuz_ui": "^0.183.1",
-			"@fuzdev/fuz_util": "^0.51.0",
-			"@fuzdev/gro": "^0.194.0",
+			"@fuzdev/fuz_util": "^0.52.0",
+			"@fuzdev/gro": "^0.195.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@sveltejs/acorn-typescript": "^1.0.8",
