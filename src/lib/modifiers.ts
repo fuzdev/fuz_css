@@ -185,9 +185,11 @@ export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
  * @returns The content inside the balanced parens, or null if no match/unbalanced
  *
  * @example
+ * ```ts
  * extract_balanced_parens("min-width(800px)", "min-width") // "800px"
  * extract_balanced_parens("min-width(calc(100vw - 20px))", "min-width") // "calc(100vw - 20px)"
  * extract_balanced_parens("min-width(calc(100vw)", "min-width") // null (unbalanced)
+ * ```
  */
 export const extract_balanced_parens = (segment: string, prefix: string): string | null => {
 	const expected_start = prefix + '(';
@@ -245,9 +247,11 @@ const is_valid_breakpoint_value = (value: string): boolean => {
  * @returns The CSS media query or null if not an arbitrary breakpoint
  *
  * @example
+ * ```ts
  * parse_arbitrary_breakpoint("min-width(800px)") // "@media (width >= 800px)"
  * parse_arbitrary_breakpoint("min-width(calc(100vw - 200px))") // "@media (width >= calc(100vw - 200px))"
  * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no digit or function)
+ * ```
  */
 export const parse_arbitrary_breakpoint = (segment: string): string | null => {
 	const min_value = extract_balanced_parens(segment, 'min-width');

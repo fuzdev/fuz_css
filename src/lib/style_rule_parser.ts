@@ -62,7 +62,7 @@ export interface NonCoreStyleRule extends StyleRuleBase {
 
 /**
  * A parsed style rule with metadata for filtering.
- * Discriminated union: check `is_core` to narrow to CoreStyleRule or NonCoreStyleRule.
+ * Discriminated union: check `is_core` to narrow to `CoreStyleRule` or `NonCoreStyleRule`.
  * All rules have a consistent shape - `core_reason` is null for non-core rules.
  */
 export type StyleRule = CoreStyleRule | NonCoreStyleRule;
@@ -82,11 +82,11 @@ export interface StyleRuleIndex {
 }
 
 /**
- * Parses a CSS stylesheet into a StyleRuleIndex.
+ * Parses a CSS stylesheet into a `StyleRuleIndex`.
  *
- * @param css - Raw CSS string (e.g., contents of style.css)
- * @param content_hash - Hash of the CSS for cache invalidation
- * @returns StyleRuleIndex with rules and lookup maps
+ * @param css - raw CSS string (e.g., contents of style.css)
+ * @param content_hash - hash of the CSS for cache invalidation
+ * @returns `StyleRuleIndex` with rules and lookup maps
  */
 export const parse_style_css = (css: string, content_hash: string): StyleRuleIndex => {
 	const ast = parseCss(css);
@@ -490,9 +490,9 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 /**
  * Loads and parses the default style.css file.
  *
- * @param ops - Filesystem operations for dependency injection
- * @param style_css_path - Path to style.css (defaults to package's style.css)
- * @returns Promise resolving to StyleRuleIndex
+ * @param ops - filesystem operations for dependency injection
+ * @param style_css_path - path to style.css (defaults to package's style.css)
+ * @returns promise resolving to `StyleRuleIndex`
  */
 export const load_style_rule_index = async (
 	ops: CacheOperations,
@@ -508,11 +508,11 @@ export const load_style_rule_index = async (
 };
 
 /**
- * Creates a StyleRuleIndex from a custom CSS string.
+ * Creates a `StyleRuleIndex` from a custom CSS string.
  * Use this to parse user-provided base styles instead of loading from file.
  *
- * @param css - Raw CSS string to parse
- * @returns Promise resolving to StyleRuleIndex
+ * @param css - raw CSS string to parse
+ * @returns promise resolving to `StyleRuleIndex`
  */
 export const create_style_rule_index = async (css: string): Promise<StyleRuleIndex> => {
 	const content_hash = await hash_secure(css);
@@ -522,9 +522,9 @@ export const create_style_rule_index = async (css: string): Promise<StyleRuleInd
 /**
  * Loads the raw default style.css content.
  *
- * @param ops - Filesystem operations for dependency injection
- * @param style_css_path - Path to style.css (defaults to package's style.css)
- * @returns Promise resolving to the CSS string
+ * @param ops - filesystem operations for dependency injection
+ * @param style_css_path - path to style.css (defaults to package's style.css)
+ * @returns promise resolving to the CSS string
  */
 export const load_default_style_css = async (
 	ops: CacheOperations,
@@ -539,12 +539,12 @@ export const load_default_style_css = async (
 };
 
 /**
- * Resolves a base_css option to a StyleRuleIndex.
+ * Resolves a `base_css` option to a `StyleRuleIndex`.
  * Handles all option forms: undefined (defaults), null (disabled), string, or callback.
  *
- * @param base_css - The base_css option from generator config
- * @param ops - Filesystem operations for loading default CSS
- * @returns Promise resolving to StyleRuleIndex, or null if disabled
+ * @param base_css - the `base_css` option from generator config
+ * @param ops - filesystem operations for loading default CSS
+ * @returns promise resolving to `StyleRuleIndex`, or null if disabled
  */
 export const resolve_base_css_option = async (
 	base_css: BaseCssOption,
@@ -574,10 +574,10 @@ export const resolve_base_css_option = async (
 /**
  * Gets rules that should be included based on detected elements and classes.
  *
- * @param index - The StyleRuleIndex to query
- * @param detected_elements - Set of HTML element names found in source
- * @param detected_classes - Set of CSS class names found in source
- * @returns Set of rule indices to include
+ * @param index - the `StyleRuleIndex` to query
+ * @param detected_elements - set of HTML element names found in source
+ * @param detected_classes - set of CSS class names found in source
+ * @returns set of rule indices to include
  */
 export const get_matching_rules = (
 	index: StyleRuleIndex,
@@ -617,10 +617,10 @@ export const get_matching_rules = (
 };
 
 /**
- * Generates CSS from a StyleRuleIndex with only the included rules.
+ * Generates CSS from a `StyleRuleIndex` with only the included rules.
  *
- * @param index - The StyleRuleIndex
- * @param included_indices - Set of rule indices to include
+ * @param index - the `StyleRuleIndex`
+ * @param included_indices - set of rule indices to include
  * @returns CSS string with only included rules, in original order
  */
 export const generate_base_css = (index: StyleRuleIndex, included_indices: Set<number>): string => {
@@ -638,9 +638,9 @@ export const generate_base_css = (index: StyleRuleIndex, included_indices: Set<n
 /**
  * Collects all CSS variables used by the included rules.
  *
- * @param index - The StyleRuleIndex
- * @param included_indices - Set of rule indices to include
- * @returns Set of variable names (without -- prefix)
+ * @param index - the `StyleRuleIndex`
+ * @param included_indices - set of rule indices to include
+ * @returns set of variable names (without -- prefix)
  */
 export const collect_rule_variables = (
 	index: StyleRuleIndex,

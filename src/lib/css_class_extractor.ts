@@ -141,7 +141,7 @@ export class SourceIndex {
 	 *
 	 * @param offset - 0-based character offset in the source
 	 * @param file - File path for the location
-	 * @returns SourceLocation with 1-based line and column
+	 * @returns `SourceLocation` with 1-based line and column
 	 */
 	get_location(offset: number, file: string): SourceLocation {
 		// Binary search for line

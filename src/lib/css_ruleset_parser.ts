@@ -46,7 +46,7 @@ export interface ParsedRuleset {
  * Parses a CSS ruleset string using Svelte's CSS parser.
  *
  * @param css - Raw CSS string (e.g., ".box { display: flex; }")
- * @returns ParsedRuleset with structured rule data and positions
+ * @returns `ParsedRuleset` with structured rule data and positions
  */
 export const parse_ruleset = (css: string): ParsedRuleset => {
 	const ast = parseCss(css);
@@ -288,9 +288,11 @@ const selector_has_state = (selector: string, state: string): boolean => {
  * Splits a selector list by commas, respecting parentheses, brackets, and quoted strings.
  *
  * @example
- * split_selector_list('.a, .b') → ['.a', '.b']
- * split_selector_list('.a:not(.b), .c') → ['.a:not(.b)', '.c']
- * split_selector_list('.a[data-x="a,b"], .c') → ['.a[data-x="a,b"]', '.c']
+ * ```ts
+ * split_selector_list('.a, .b') // → ['.a', '.b']
+ * split_selector_list('.a:not(.b), .c') // → ['.a:not(.b)', '.c']
+ * split_selector_list('.a[data-x="a,b"], .c') // → ['.a[data-x="a,b"]', '.c']
+ * ```
  */
 export const split_selector_list = (selector_group: string): Array<string> => {
 	const selectors: Array<string> = [];
@@ -429,6 +431,7 @@ export const find_compound_end = (selector: string, class_pos: number): number =
  * @returns Modified selector
  *
  * @example
+ * ```ts
  * modify_single_selector('.menu_item', 'menu_item', 'hover\\:menu_item', ':hover', '')
  * // → '.hover\\:menu_item:hover'
  *
@@ -437,6 +440,7 @@ export const find_compound_end = (selector: string, class_pos: number): number =
  *
  * modify_single_selector('.menu_item.selected', 'menu_item', 'hover\\:menu_item', ':hover', '')
  * // → '.hover\\:menu_item.selected:hover'
+ * ```
  */
 export const modify_single_selector = (
 	selector: string,

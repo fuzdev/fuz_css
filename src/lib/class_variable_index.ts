@@ -23,7 +23,7 @@ export interface CssClassVariableIndex {
  * Builds an index of CSS variables used by each class definition.
  *
  * @param definitions - CSS class definitions to index
- * @returns CssClassVariableIndex with variable lookups
+ * @returns `CssClassVariableIndex` with variable lookups
  */
 export const build_class_variable_index = (
 	definitions: Record<string, CssClassDefinition | undefined>,

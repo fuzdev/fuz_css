@@ -20,19 +20,23 @@ export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
  * @param tertiary - Optional third dimension for even more combinations
  *
  * @example
+ * ```ts
  * // Simple list
  * generate_classes(
  *   v => ({ name: `position_${v}`, css: `position: ${v};` }),
  *   ['static', 'relative', 'absolute']
  * )
+ * ```
  *
  * @example
+ * ```ts
  * // Two dimensions (multiplicative)
  * generate_classes(
  *   (dir, size) => ({ name: `m${dir}_${size}`, css: `margin-${dir}: ${size};` }),
  *   ['top', 'bottom'],
  *   ['0', '1px', '2px']
  * )
+ * ```
  */
 export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	template: ClassTemplateFn<T1, T2, T3>,

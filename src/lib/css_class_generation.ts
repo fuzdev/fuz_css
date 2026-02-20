@@ -33,9 +33,11 @@ import {extract_css_variables} from './css_variable_utils.js';
  * CSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.
  *
  * @example
+ * ```ts
  * escape_css_selector('display:flex') // 'display\\:flex'
  * escape_css_selector('opacity:80%') // 'opacity\\:80\\%'
  * escape_css_selector('nth-child(2n)') // 'nth-child\\(2n\\)'
+ * ```
  */
 export const escape_css_selector = (name: string): string => {
 	return name.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');

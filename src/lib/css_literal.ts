@@ -92,7 +92,7 @@ export type InterpretCssLiteralResult =
 //
 
 /**
- * Loads CSS properties from @webref/css.
+ * Loads CSS properties from `@webref/css`.
  * Returns a fresh Set each time - callers should cache the result if needed.
  */
 export const load_css_properties = async (): Promise<Set<string>> => {
@@ -246,9 +246,11 @@ export const is_possible_css_literal = (class_name: string): boolean => {
  * Parenthesized content (like function arguments) is kept intact.
  *
  * @example
- * extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']
- * extract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']
- * extract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']
+ * ```ts
+ * extract_segments('md:hover:display:flex') // → ['md', 'hover', 'display', 'flex']
+ * extract_segments('nth-child(2n+1):color:red') // → ['nth-child(2n+1)', 'color', 'red']
+ * extract_segments('width:calc(100%-20px)') // → ['width', 'calc(100%-20px)']
+ * ```
  */
 export const extract_segments = (class_name: string): Array<string> => {
 	const segments: Array<string> = [];
@@ -287,7 +289,7 @@ export const extract_segments = (class_name: string): Array<string> => {
  *
  * @param segments - Array of colon-separated segments
  * @param class_name - Original class name for error messages
- * @returns ModifierExtractionResult with modifiers and remaining segments, or error
+ * @returns `ModifierExtractionResult` with modifiers and remaining segments, or error
  */
 export const extract_and_validate_modifiers = (
 	segments: Array<string>,
@@ -459,7 +461,7 @@ export const extract_and_validate_modifiers = (
  * @param class_name - The class name to parse
  * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
  *                         Pass `null` to skip property validation.
- * @returns CssLiteralParseResult with parsed data or error
+ * @returns `CssLiteralParseResult` with parsed data or error
  */
 export const parse_css_literal = (
 	class_name: string,
