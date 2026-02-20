@@ -100,8 +100,8 @@ const get_sort_index = (
 const get_state_modifier_order = (class_name: string): number => {
 	const parts = class_name.split(':');
 	let max_order = 0;
-	for (const part of parts.slice(0, -1)) {
-		const modifier = get_modifier(part);
+	for (let i = 0; i < parts.length - 1; i++) {
+		const modifier = get_modifier(parts[i]!);
 		if (modifier?.type === 'state' && modifier.order !== undefined) {
 			max_order = Math.max(max_order, modifier.order);
 		}
@@ -354,8 +354,8 @@ export const generate_classes_css = (
 			if (resolution_result.declaration) {
 				css += `.${escape_css_selector(c)} { ${resolution_result.declaration} }\n`;
 				// Collect variables from the declaration
-				for (const v of extract_css_variables(resolution_result.declaration)) {
-					variables_used.add(v);
+				for (const variable of extract_css_variables(resolution_result.declaration)) {
+					variables_used.add(variable);
 				}
 			}
 		} else if ('ruleset' in v) {
