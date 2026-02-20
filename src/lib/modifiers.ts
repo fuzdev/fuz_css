@@ -134,27 +134,23 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 // Generated lookup maps for efficient access
 
 /** Map of media modifier names to their CSS output */
-export const MEDIA_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'media').map((m) => [m.name, m]),
-);
-
+export const MEDIA_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of ancestor modifier names to their CSS output */
-export const ANCESTOR_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'ancestor').map((m) => [m.name, m]),
-);
-
+export const ANCESTOR_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of state modifier names to their CSS output */
-export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'state').map((m) => [m.name, m]),
-);
-
+export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of pseudo-element modifier names to their CSS output */
-export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'pseudo-element').map((m) => [m.name, m]),
-);
-
+export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** All modifier names for quick lookup */
-export const ALL_MODIFIER_NAMES: Set<string> = new Set(MODIFIERS.map((m) => m.name));
+export const ALL_MODIFIER_NAMES: Set<string> = new Set();
+
+for (const m of MODIFIERS) {
+	ALL_MODIFIER_NAMES.add(m.name);
+	if (m.type === 'media') MEDIA_MODIFIERS.set(m.name, m);
+	else if (m.type === 'ancestor') ANCESTOR_MODIFIERS.set(m.name, m);
+	else if (m.type === 'state') STATE_MODIFIERS.set(m.name, m);
+	else PSEUDO_ELEMENT_MODIFIERS.set(m.name, m);
+}
 
 /**
  * Pattern for parameterized nth-child: `nth-child(2n+1):`

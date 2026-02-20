@@ -3338,56 +3338,56 @@
 						"name": "ANCESTOR_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of ancestor modifier names to their CSS output",
-						"source_line": 142,
+						"source_line": 139,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "STATE_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of state modifier names to their CSS output",
-						"source_line": 147,
+						"source_line": 141,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "PSEUDO_ELEMENT_MODIFIERS",
 						"kind": "variable",
 						"doc_comment": "Map of pseudo-element modifier names to their CSS output",
-						"source_line": 152,
+						"source_line": 143,
 						"type_signature": "Map<string, ModifierDefinition>"
 					},
 					{
 						"name": "ALL_MODIFIER_NAMES",
 						"kind": "variable",
 						"doc_comment": "All modifier names for quick lookup",
-						"source_line": 157,
+						"source_line": 145,
 						"type_signature": "Set<string>"
 					},
 					{
 						"name": "NTH_CHILD_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-child: `nth-child(2n+1):`",
-						"source_line": 162,
+						"source_line": 158,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_LAST_CHILD_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`",
-						"source_line": 167,
+						"source_line": 163,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_OF_TYPE_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-of-type: `nth-of-type(2n):`",
-						"source_line": 172,
+						"source_line": 168,
 						"type_signature": "RegExp"
 					},
 					{
 						"name": "NTH_LAST_OF_TYPE_PATTERN",
 						"kind": "variable",
 						"doc_comment": "Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`",
-						"source_line": 177,
+						"source_line": 173,
 						"type_signature": "RegExp"
 					},
 					{
@@ -3397,7 +3397,7 @@
 						"examples": [
 							"```ts\nextract_balanced_parens(\"min-width(800px)\", \"min-width\") // \"800px\"\nextract_balanced_parens(\"min-width(calc(100vw - 20px))\", \"min-width\") // \"calc(100vw - 20px)\"\nextract_balanced_parens(\"min-width(calc(100vw)\", \"min-width\") // null (unbalanced)\n```"
 						],
-						"source_line": 194,
+						"source_line": 190,
 						"type_signature": "(segment: string, prefix: string): string | null",
 						"return_type": "string | null",
 						"return_description": "the content inside the balanced parens, or null if no match/unbalanced",
@@ -3421,7 +3421,7 @@
 						"examples": [
 							"```ts\nparse_arbitrary_breakpoint(\"min-width(800px)\") // \"@media (width >= 800px)\"\nparse_arbitrary_breakpoint(\"min-width(calc(100vw - 200px))\") // \"@media (width >= calc(100vw - 200px))\"\nparse_arbitrary_breakpoint(\"min-width(px)\") // null (invalid - no digit or function)\n```"
 						],
-						"source_line": 256,
+						"source_line": 252,
 						"type_signature": "(segment: string): string | null",
 						"return_type": "string | null",
 						"return_description": "the CSS media query or null if not an arbitrary breakpoint",
@@ -3436,7 +3436,7 @@
 						"name": "parse_parameterized_state",
 						"kind": "function",
 						"doc_comment": "Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).",
-						"source_line": 275,
+						"source_line": 271,
 						"type_signature": "(segment: string): { name: string; css: string; type: \"state\"; } | null",
 						"return_type": "{ name: string; css: string; type: \"state\"; } | null",
 						"return_description": "object with name (including parameter) and CSS, or null if not parameterized",
@@ -3451,7 +3451,7 @@
 						"name": "get_modifier",
 						"kind": "function",
 						"doc_comment": "Gets the modifier definition for a segment.\nHandles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).",
-						"source_line": 323,
+						"source_line": 319,
 						"type_signature": "(segment: string): (ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_type": "(ModifierDefinition & { is_arbitrary?: boolean | undefined; }) | null",
 						"return_description": "the modifier definition or null if not a known modifier",
@@ -3466,7 +3466,7 @@
 						"name": "get_all_modifier_names",
 						"kind": "function",
 						"doc_comment": "Gets all modifier names for error message suggestions.",
-						"source_line": 365,
+						"source_line": 361,
 						"type_signature": "(): string[]",
 						"return_type": "string[]",
 						"parameters": []
