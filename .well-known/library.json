@@ -75,7 +75,7 @@
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/fuz_code": "^0.45.1",
-			"@fuzdev/fuz_ui": "^0.183.1",
+			"@fuzdev/fuz_ui": "^0.185.1",
 			"@fuzdev/fuz_util": "^0.52.0",
 			"@fuzdev/gro": "^0.195.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
@@ -180,7 +180,7 @@
 							{
 								"name": "definitions",
 								"type": "Record<string, CssClassDefinition | undefined>",
-								"description": "- CSS class definitions to index"
+								"description": "CSS class definitions to index"
 							}
 						]
 					},
@@ -196,12 +196,12 @@
 							{
 								"name": "index",
 								"type": "CssClassVariableIndex",
-								"description": "- The class variable index"
+								"description": "The class variable index"
 							},
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- Name of the class to lookup"
+								"description": "Name of the class to lookup"
 							}
 						]
 					},
@@ -217,12 +217,12 @@
 							{
 								"name": "index",
 								"type": "CssClassVariableIndex",
-								"description": "- The class variable index"
+								"description": "The class variable index"
 							},
 							{
 								"name": "class_names",
 								"type": "Iterable<string>",
-								"description": "- Class names to collect variables from"
+								"description": "Class names to collect variables from"
 							}
 						]
 					},
@@ -238,12 +238,12 @@
 							{
 								"name": "index",
 								"type": "CssClassVariableIndex",
-								"description": "- The class variable index"
+								"description": "The class variable index"
 							},
 							{
 								"name": "variable_name",
 								"type": "string",
-								"description": "- Variable name to search for (without -- prefix)"
+								"description": "Variable name to search for (without -- prefix)"
 							}
 						]
 					}
@@ -468,7 +468,7 @@
 							{
 								"name": "options",
 								"type": "CssResolutionOptions",
-								"description": "- Resolution options including indexes, detected usage, and config"
+								"description": "Resolution options including indexes, detected usage, and config"
 							}
 						]
 					},
@@ -511,17 +511,17 @@
 							{
 								"name": "result",
 								"type": "CssResolutionResult",
-								"description": "- Resolution result from resolve_css"
+								"description": "Resolution result from resolve_css"
 							},
 							{
 								"name": "utility_css",
 								"type": "string",
-								"description": "- Generated utility CSS (from generate_classes_css)"
+								"description": "Generated utility CSS (from generate_classes_css)"
 							},
 							{
 								"name": "options",
 								"type": "GenerateBundledCssOptions",
-								"description": "- Output options",
+								"description": "Output options",
 								"default_value": "{}"
 							}
 						]
@@ -623,17 +623,17 @@
 							{
 								"name": "source_path",
 								"type": "string",
-								"description": "- Absolute path to the source file"
+								"description": "Absolute path to the source file"
 							},
 							{
 								"name": "cache_dir",
 								"type": "string",
-								"description": "- Absolute path to the cache directory"
+								"description": "Absolute path to the cache directory"
 							},
 							{
 								"name": "project_root",
 								"type": "string",
-								"description": "- Normalized project root (must end with `/`)"
+								"description": "Normalized project root (must end with `/`)"
 							}
 						]
 					},
@@ -648,17 +648,17 @@
 							{
 								"name": "file_id",
 								"type": "string",
-								"description": "- Absolute path to the source file"
+								"description": "Absolute path to the source file"
 							},
 							{
 								"name": "cache_dir",
 								"type": "string",
-								"description": "- Absolute path to the cache directory"
+								"description": "Absolute path to the cache directory"
 							},
 							{
 								"name": "project_root",
 								"type": "string",
-								"description": "- Normalized project root (must end with `/`)"
+								"description": "Normalized project root (must end with `/`)"
 							}
 						]
 					},
@@ -673,12 +673,12 @@
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for dependency injection"
+								"description": "Filesystem operations for dependency injection"
 							},
 							{
 								"name": "cache_path",
 								"type": "string",
-								"description": "- Absolute path to the cache file"
+								"description": "Absolute path to the cache file"
 							}
 						]
 					},
@@ -693,22 +693,22 @@
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for dependency injection"
+								"description": "Filesystem operations for dependency injection"
 							},
 							{
 								"name": "cache_path",
 								"type": "string",
-								"description": "- Absolute path to the cache file"
+								"description": "Absolute path to the cache file"
 							},
 							{
 								"name": "content_hash",
 								"type": "string",
-								"description": "- SHA-256 hash of the source file contents"
+								"description": "SHA-256 hash of the source file contents"
 							},
 							{
 								"name": "extraction",
 								"type": "ExtractionData",
-								"description": "- Extraction data to cache"
+								"description": "Extraction data to cache"
 							}
 						]
 					},
@@ -723,12 +723,12 @@
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for dependency injection"
+								"description": "Filesystem operations for dependency injection"
 							},
 							{
 								"name": "cache_path",
 								"type": "string",
-								"description": "- Absolute path to the cache file"
+								"description": "Absolute path to the cache file"
 							}
 						]
 					},
@@ -743,7 +743,7 @@
 							{
 								"name": "cached",
 								"type": "CachedExtraction",
-								"description": "- Cached extraction data"
+								"description": "Cached extraction data"
 							}
 						]
 					}
@@ -799,12 +799,12 @@
 							{
 								"name": "user_definitions",
 								"type": "Record<string, CssClassDefinition | undefined> | undefined",
-								"description": "- User-provided class definitions to merge"
+								"description": "User-provided class definitions to merge"
 							},
 							{
 								"name": "include_defaults",
 								"type": "boolean",
-								"description": "- Whether to include built-in definitions"
+								"description": "Whether to include built-in definitions"
 							}
 						]
 					}
@@ -964,12 +964,12 @@
 									{
 										"name": "offset",
 										"type": "number",
-										"description": "- 0-based character offset in the source"
+										"description": "0-based character offset in the source"
 									},
 									{
 										"name": "file",
 										"type": "string",
-										"description": "- File path for the location"
+										"description": "File path for the location"
 									}
 								]
 							}
@@ -987,12 +987,12 @@
 							{
 								"name": "source",
 								"type": "string",
-								"description": "- The Svelte file source code"
+								"description": "The Svelte file source code"
 							},
 							{
 								"name": "file",
 								"type": "string",
-								"description": "- File path for location tracking",
+								"description": "File path for location tracking",
 								"default_value": "'<unknown>'"
 							}
 						]
@@ -1009,19 +1009,19 @@
 							{
 								"name": "source",
 								"type": "string",
-								"description": "- The TS/JS file source code"
+								"description": "The TS/JS file source code"
 							},
 							{
 								"name": "file",
 								"type": "string",
-								"description": "- File path for location tracking",
+								"description": "File path for location tracking",
 								"default_value": "'<unknown>'"
 							},
 							{
 								"name": "acorn_plugins",
 								"type": "AcornPlugin[] | undefined",
 								"optional": true,
-								"description": "- Additional acorn plugins (e.g., acorn-jsx for React)"
+								"description": "Additional acorn plugins (e.g., acorn-jsx for React)"
 							}
 						]
 					},
@@ -1037,12 +1037,12 @@
 							{
 								"name": "source",
 								"type": "string",
-								"description": "- The file source code"
+								"description": "The file source code"
 							},
 							{
 								"name": "options",
 								"type": "ExtractCssClassesOptions",
-								"description": "- Extraction options",
+								"description": "Extraction options",
 								"default_value": "{}"
 							}
 						]
@@ -1059,12 +1059,12 @@
 							{
 								"name": "source",
 								"type": "string",
-								"description": "- The file source code"
+								"description": "The file source code"
 							},
 							{
 								"name": "options",
 								"type": "ExtractCssClassesOptions",
-								"description": "- Extraction options",
+								"description": "Extraction options",
 								"default_value": "{}"
 							}
 						]
@@ -1402,24 +1402,24 @@
 							{
 								"name": "template",
 								"type": "ClassTemplateFn<T1, T2, T3>",
-								"description": "- Function that generates CSS from values, can return null to skip"
+								"description": "Function that generates CSS from values, can return null to skip"
 							},
 							{
 								"name": "values",
 								"type": "Iterable<T1>",
-								"description": "- Primary iterable of values"
+								"description": "Primary iterable of values"
 							},
 							{
 								"name": "secondary",
 								"type": "Iterable<T2> | undefined",
 								"optional": true,
-								"description": "- Optional second dimension (makes it multiplicative)"
+								"description": "Optional second dimension (makes it multiplicative)"
 							},
 							{
 								"name": "tertiary",
 								"type": "Iterable<T3> | undefined",
 								"optional": true,
-								"description": "- Optional third dimension for even more combinations"
+								"description": "Optional third dimension for even more combinations"
 							}
 						]
 					},
@@ -1487,23 +1487,23 @@
 							{
 								"name": "property",
 								"type": "string",
-								"description": "- The CSS property name (e.g. 'font-size', 'gap')"
+								"description": "The CSS property name (e.g. 'font-size', 'gap')"
 							},
 							{
 								"name": "values",
 								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
+								"description": "The values to generate classes for"
 							},
 							{
 								"name": "formatter",
 								"type": "((value: string) => string) | undefined",
 								"optional": true,
-								"description": "- Optional function to format values (e.g. v => `var(--space_${v})`)"
+								"description": "Optional function to format values (e.g. v => `var(--space_${v})`)"
 							},
 							{
 								"name": "prefix",
 								"type": "string",
-								"description": "- Optional class name prefix (defaults to property with dashes replaced by underscores)",
+								"description": "Optional class name prefix (defaults to property with dashes replaced by underscores)",
 								"default_value": "format_variable_name(property)"
 							}
 						]
@@ -1519,18 +1519,18 @@
 							{
 								"name": "property",
 								"type": "string",
-								"description": "- The base CSS property name (e.g. 'margin', 'padding')"
+								"description": "The base CSS property name (e.g. 'margin', 'padding')"
 							},
 							{
 								"name": "values",
 								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
+								"description": "The values to generate classes for"
 							},
 							{
 								"name": "formatter",
 								"type": "((v: string) => string) | undefined",
 								"optional": true,
-								"description": "- Optional function to format values (defaults to identity)"
+								"description": "Optional function to format values (defaults to identity)"
 							}
 						]
 					},
@@ -1545,13 +1545,13 @@
 							{
 								"name": "values",
 								"type": "Iterable<string>",
-								"description": "- The values to generate classes for"
+								"description": "The values to generate classes for"
 							},
 							{
 								"name": "formatter",
 								"type": "((value: string) => string) | undefined",
 								"optional": true,
-								"description": "- Optional function to format values"
+								"description": "Optional function to format values"
 							}
 						]
 					},
@@ -1566,12 +1566,12 @@
 							{
 								"name": "sizes",
 								"type": "Iterable<string>",
-								"description": "- The shadow size variants (xs, sm, md, lg, xl)"
+								"description": "The shadow size variants (xs, sm, md, lg, xl)"
 							},
 							{
 								"name": "alpha_mapping",
 								"type": "Record<string, string>",
-								"description": "- Mapping of sizes to alpha numbers (1-5)"
+								"description": "Mapping of sizes to alpha numbers (1-5)"
 							}
 						]
 					}
@@ -1638,22 +1638,22 @@
 							{
 								"name": "def",
 								"type": "CssClassDefinitionStatic",
-								"description": "- The class definition to resolve"
+								"description": "The class definition to resolve"
 							},
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- The name of the class being resolved (for error messages)"
+								"description": "The name of the class being resolved (for error messages)"
 							},
 							{
 								"name": "definitions",
 								"type": "Record<string, CssClassDefinition | undefined>",
-								"description": "- Record of all known class definitions"
+								"description": "Record of all known class definitions"
 							},
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties for literal validation, or null to skip",
+								"description": "Set of valid CSS properties for literal validation, or null to skip",
 								"default_value": "null"
 							}
 						]
@@ -1670,32 +1670,32 @@
 							{
 								"name": "class_names",
 								"type": "string[]",
-								"description": "- Array of class names to resolve"
+								"description": "Array of class names to resolve"
 							},
 							{
 								"name": "definitions",
 								"type": "Record<string, CssClassDefinition | undefined>",
-								"description": "- Record of all known class definitions"
+								"description": "Record of all known class definitions"
 							},
 							{
 								"name": "resolution_stack",
 								"type": "Set<string>",
-								"description": "- Set of class names currently being resolved (for cycle detection)"
+								"description": "Set of class names currently being resolved (for cycle detection)"
 							},
 							{
 								"name": "visited",
 								"type": "Set<string>",
-								"description": "- Set of all class names already resolved (for deduplication)"
+								"description": "Set of all class names already resolved (for deduplication)"
 							},
 							{
 								"name": "original_class_name",
 								"type": "string",
-								"description": "- The class name being defined (for error messages)"
+								"description": "The class name being defined (for error messages)"
 							},
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties for literal validation, or null to skip",
+								"description": "Set of valid CSS properties for literal validation, or null to skip",
 								"default_value": "null"
 							}
 						]
@@ -1728,13 +1728,13 @@
 									{
 										"name": "additional_classes",
 										"type": "Set<string> | null",
-										"description": "- Classes to always include (also treated as explicit for warnings)",
+										"description": "Classes to always include (also treated as explicit for warnings)",
 										"default_value": "null"
 									},
 									{
 										"name": "exclude_classes",
 										"type": "Set<string> | null",
-										"description": "- Classes to exclude from output (also suppresses warnings)",
+										"description": "Classes to exclude from output (also suppresses warnings)",
 										"default_value": "null"
 									}
 								]
@@ -1749,12 +1749,12 @@
 									{
 										"name": "id",
 										"type": "string",
-										"description": "- File identifier"
+										"description": "File identifier"
 									},
 									{
 										"name": "data",
 										"type": "ExtractionData",
-										"description": "- Extraction data fields to store for this file"
+										"description": "Extraction data fields to store for this file"
 									}
 								]
 							},
@@ -1940,12 +1940,12 @@
 							{
 								"name": "property",
 								"type": "string",
-								"description": "- The CSS property name to validate"
+								"description": "The CSS property name to validate"
 							},
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip validation."
 							}
 						]
 					},
@@ -1961,12 +1961,12 @@
 							{
 								"name": "typo",
 								"type": "string",
-								"description": "- The mistyped property name"
+								"description": "The mistyped property name"
 							},
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip suggestions."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip suggestions."
 							}
 						]
 					},
@@ -1982,7 +1982,7 @@
 							{
 								"name": "typo",
 								"type": "string",
-								"description": "- The mistyped modifier name"
+								"description": "The mistyped modifier name"
 							}
 						]
 					},
@@ -1998,7 +1998,7 @@
 							{
 								"name": "value",
 								"type": "string",
-								"description": "- Raw value from class name"
+								"description": "Raw value from class name"
 							}
 						]
 					},
@@ -2014,7 +2014,7 @@
 							{
 								"name": "value",
 								"type": "string",
-								"description": "- The formatted CSS value"
+								"description": "The formatted CSS value"
 							}
 						]
 					},
@@ -2030,7 +2030,7 @@
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- The class name to check"
+								"description": "The class name to check"
 							}
 						]
 					},
@@ -2063,12 +2063,12 @@
 							{
 								"name": "segments",
 								"type": "string[]",
-								"description": "- Array of colon-separated segments"
+								"description": "Array of colon-separated segments"
 							},
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- Original class name for error messages"
+								"description": "Original class name for error messages"
 							}
 						]
 					},
@@ -2084,12 +2084,12 @@
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- The class name to parse"
+								"description": "The class name to parse"
 							},
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
 							}
 						]
 					},
@@ -2170,17 +2170,17 @@
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- The class name to interpret"
+								"description": "The class name to interpret"
 							},
 							{
 								"name": "escaped_class_name",
 								"type": "string",
-								"description": "- The CSS-escaped version of the class name"
+								"description": "The CSS-escaped version of the class name"
 							},
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
 							}
 						]
 					},
@@ -2231,17 +2231,17 @@
 							{
 								"name": "class_name",
 								"type": "string",
-								"description": "- The class name to try resolving"
+								"description": "The class name to try resolving"
 							},
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "- Set of valid CSS properties, or null to skip validation"
+								"description": "Set of valid CSS properties, or null to skip validation"
 							},
 							{
 								"name": "context_class_name",
 								"type": "string",
-								"description": "- The class being defined (for error messages)"
+								"description": "The class being defined (for error messages)"
 							}
 						]
 					},
@@ -2257,7 +2257,7 @@
 							{
 								"name": "output",
 								"type": "CssLiteralOutput",
-								"description": "- The CSS-literal output info"
+								"description": "The CSS-literal output info"
 							}
 						]
 					}
@@ -2536,7 +2536,7 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- Raw CSS string (e.g., \".box { display: flex; }\")"
+								"description": "Raw CSS string (e.g., \".box { display: flex; }\")"
 							}
 						]
 					},
@@ -2552,12 +2552,12 @@
 							{
 								"name": "rules",
 								"type": "ParsedRule[]",
-								"description": "- Parsed rules from the ruleset"
+								"description": "Parsed rules from the ruleset"
 							},
 							{
 								"name": "escaped_class_name",
 								"type": "string",
-								"description": "- The CSS-escaped class name (e.g., \"box\" or \"hover\\\\:card\")"
+								"description": "The CSS-escaped class name (e.g., \"box\" or \"hover\\\\:card\")"
 							}
 						]
 					},
@@ -2573,12 +2573,12 @@
 							{
 								"name": "rules",
 								"type": "ParsedRule[]",
-								"description": "- Parsed rules from the ruleset"
+								"description": "Parsed rules from the ruleset"
 							},
 							{
 								"name": "escaped_class_name",
 								"type": "string",
-								"description": "- The CSS-escaped class name (e.g., \"clickable\" or \"hover\\\\:card\")"
+								"description": "The CSS-escaped class name (e.g., \"clickable\" or \"hover\\\\:card\")"
 							}
 						]
 					},
@@ -2594,12 +2594,12 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- Raw CSS string"
+								"description": "Raw CSS string"
 							},
 							{
 								"name": "rules",
 								"type": "ParsedRule[]",
-								"description": "- Parsed rules"
+								"description": "Parsed rules"
 							}
 						]
 					},
@@ -2701,12 +2701,12 @@
 							{
 								"name": "selector",
 								"type": "string",
-								"description": "- The CSS selector string"
+								"description": "The CSS selector string"
 							},
 							{
 								"name": "class_pos",
 								"type": "number",
-								"description": "- Position of the `.` in `.class_name`"
+								"description": "Position of the `.` in `.class_name`"
 							}
 						]
 					},
@@ -2725,27 +2725,27 @@
 							{
 								"name": "selector",
 								"type": "string",
-								"description": "- A single CSS selector (not a selector list)"
+								"description": "A single CSS selector (not a selector list)"
 							},
 							{
 								"name": "original_class",
 								"type": "string",
-								"description": "- The base class name (e.g., \"menu_item\")"
+								"description": "The base class name (e.g., \"menu_item\")"
 							},
 							{
 								"name": "new_class_escaped",
 								"type": "string",
-								"description": "- The escaped new class name (e.g., \"hover\\\\:menu_item\")"
+								"description": "The escaped new class name (e.g., \"hover\\\\:menu_item\")"
 							},
 							{
 								"name": "state_css",
 								"type": "string",
-								"description": "- State modifier CSS to insert (e.g., \":hover\")"
+								"description": "State modifier CSS to insert (e.g., \":hover\")"
 							},
 							{
 								"name": "pseudo_element_css",
 								"type": "string",
-								"description": "- Pseudo-element modifier CSS to insert (e.g., \"::before\")"
+								"description": "Pseudo-element modifier CSS to insert (e.g., \"::before\")"
 							}
 						]
 					},
@@ -2761,27 +2761,27 @@
 							{
 								"name": "selector_group",
 								"type": "string",
-								"description": "- CSS selector list (may contain commas)"
+								"description": "CSS selector list (may contain commas)"
 							},
 							{
 								"name": "original_class",
 								"type": "string",
-								"description": "- The base class name"
+								"description": "The base class name"
 							},
 							{
 								"name": "new_class_escaped",
 								"type": "string",
-								"description": "- The escaped new class name"
+								"description": "The escaped new class name"
 							},
 							{
 								"name": "states_to_add",
 								"type": "string[]",
-								"description": "- Individual state modifiers (e.g., [\":hover\", \":focus\"])"
+								"description": "Individual state modifiers (e.g., [\":hover\", \":focus\"])"
 							},
 							{
 								"name": "pseudo_element_css",
 								"type": "string",
-								"description": "- Pseudo-element modifier CSS to insert (e.g., \"::before\")"
+								"description": "Pseudo-element modifier CSS to insert (e.g., \"::before\")"
 							}
 						]
 					},
@@ -2797,37 +2797,37 @@
 							{
 								"name": "original_ruleset",
 								"type": "string",
-								"description": "- The original CSS ruleset string"
+								"description": "The original CSS ruleset string"
 							},
 							{
 								"name": "original_class",
 								"type": "string",
-								"description": "- The base class name"
+								"description": "The base class name"
 							},
 							{
 								"name": "new_class_escaped",
 								"type": "string",
-								"description": "- The escaped new class name with modifiers"
+								"description": "The escaped new class name with modifiers"
 							},
 							{
 								"name": "state_css",
 								"type": "string",
-								"description": "- State modifier CSS (e.g., \":hover\" or \":hover:focus\")"
+								"description": "State modifier CSS (e.g., \":hover\" or \":hover:focus\")"
 							},
 							{
 								"name": "pseudo_element_css",
 								"type": "string",
-								"description": "- Pseudo-element modifier CSS (e.g., \"::before\")"
+								"description": "Pseudo-element modifier CSS (e.g., \"::before\")"
 							},
 							{
 								"name": "media_wrapper",
 								"type": "string | null",
-								"description": "- Media query wrapper (e.g., \"@media (width >= 48rem)\")"
+								"description": "Media query wrapper (e.g., \"@media (width >= 48rem)\")"
 							},
 							{
 								"name": "ancestor_wrapper",
 								"type": "string | null",
-								"description": "- Ancestor wrapper (e.g., \":root.dark\")"
+								"description": "Ancestor wrapper (e.g., \":root.dark\")"
 							}
 						]
 					}
@@ -2856,7 +2856,7 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- CSS string potentially containing `var(--*)` references"
+								"description": "CSS string potentially containing `var(--*)` references"
 							}
 						]
 					},
@@ -2872,7 +2872,7 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- CSS string to check"
+								"description": "CSS string to check"
 							}
 						]
 					}
@@ -3051,12 +3051,12 @@
 							{
 								"name": "diagnostic",
 								"type": "InterpreterDiagnostic",
-								"description": "- Interpreter diagnostic to convert"
+								"description": "Interpreter diagnostic to convert"
 							},
 							{
 								"name": "locations",
 								"type": "SourceLocation[] | null",
-								"description": "- Source locations where the class was used"
+								"description": "Source locations where the class was used"
 							}
 						]
 					},
@@ -3474,12 +3474,12 @@
 							{
 								"name": "segment",
 								"type": "string",
-								"description": "- The full segment to parse (e.g., \"min-width(calc(100vw - 200px))\")"
+								"description": "The full segment to parse (e.g., \"min-width(calc(100vw - 200px))\")"
 							},
 							{
 								"name": "prefix",
 								"type": "string",
-								"description": "- The prefix before the opening paren (e.g., \"min-width\")"
+								"description": "The prefix before the opening paren (e.g., \"min-width\")"
 							}
 						]
 					},
@@ -3742,12 +3742,12 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- Raw CSS string (e.g., contents of style.css)"
+								"description": "Raw CSS string (e.g., contents of style.css)"
 							},
 							{
 								"name": "content_hash",
 								"type": "string",
-								"description": "- Hash of the CSS for cache invalidation"
+								"description": "Hash of the CSS for cache invalidation"
 							}
 						]
 					},
@@ -3763,13 +3763,13 @@
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for dependency injection"
+								"description": "Filesystem operations for dependency injection"
 							},
 							{
 								"name": "style_css_path",
 								"type": "string | undefined",
 								"optional": true,
-								"description": "- Path to style.css (defaults to package's style.css)"
+								"description": "Path to style.css (defaults to package's style.css)"
 							}
 						]
 					},
@@ -3785,7 +3785,7 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "- Raw CSS string to parse"
+								"description": "Raw CSS string to parse"
 							}
 						]
 					},
@@ -3801,13 +3801,13 @@
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for dependency injection"
+								"description": "Filesystem operations for dependency injection"
 							},
 							{
 								"name": "style_css_path",
 								"type": "string | undefined",
 								"optional": true,
-								"description": "- Path to style.css (defaults to package's style.css)"
+								"description": "Path to style.css (defaults to package's style.css)"
 							}
 						]
 					},
@@ -3823,12 +3823,12 @@
 							{
 								"name": "base_css",
 								"type": "BaseCssOption",
-								"description": "- The base_css option from generator config"
+								"description": "The base_css option from generator config"
 							},
 							{
 								"name": "ops",
 								"type": "CacheOperations",
-								"description": "- Filesystem operations for loading default CSS"
+								"description": "Filesystem operations for loading default CSS"
 							}
 						]
 					},
@@ -3844,17 +3844,17 @@
 							{
 								"name": "index",
 								"type": "StyleRuleIndex",
-								"description": "- The StyleRuleIndex to query"
+								"description": "The StyleRuleIndex to query"
 							},
 							{
 								"name": "detected_elements",
 								"type": "Set<string>",
-								"description": "- Set of HTML element names found in source"
+								"description": "Set of HTML element names found in source"
 							},
 							{
 								"name": "detected_classes",
 								"type": "Set<string>",
-								"description": "- Set of CSS class names found in source"
+								"description": "Set of CSS class names found in source"
 							}
 						]
 					},
@@ -3870,12 +3870,12 @@
 							{
 								"name": "index",
 								"type": "StyleRuleIndex",
-								"description": "- The StyleRuleIndex"
+								"description": "The StyleRuleIndex"
 							},
 							{
 								"name": "included_indices",
 								"type": "Set<number>",
-								"description": "- Set of rule indices to include"
+								"description": "Set of rule indices to include"
 							}
 						]
 					},
@@ -3891,12 +3891,12 @@
 							{
 								"name": "index",
 								"type": "StyleRuleIndex",
-								"description": "- The StyleRuleIndex"
+								"description": "The StyleRuleIndex"
 							},
 							{
 								"name": "included_indices",
 								"type": "Set<number>",
-								"description": "- Set of rule indices to include"
+								"description": "Set of rule indices to include"
 							}
 						]
 					}
@@ -4452,12 +4452,12 @@
 							{
 								"name": "variables",
 								"type": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]",
-								"description": "- Array of StyleVariable objects"
+								"description": "Array of StyleVariable objects"
 							},
 							{
 								"name": "content_hash",
 								"type": "string",
-								"description": "- Hash of the source for cache invalidation"
+								"description": "Hash of the source for cache invalidation"
 							}
 						]
 					},
@@ -4500,12 +4500,12 @@
 							{
 								"name": "graph",
 								"type": "VariableDependencyGraph",
-								"description": "- The variable dependency graph"
+								"description": "The variable dependency graph"
 							},
 							{
 								"name": "initial_variables",
 								"type": "Iterable<string>",
-								"description": "- Initial set of variable names to resolve"
+								"description": "Initial set of variable names to resolve"
 							}
 						]
 					},
@@ -4521,17 +4521,17 @@
 							{
 								"name": "graph",
 								"type": "VariableDependencyGraph",
-								"description": "- The variable dependency graph"
+								"description": "The variable dependency graph"
 							},
 							{
 								"name": "resolved_variables",
 								"type": "Set<string>",
-								"description": "- Set of variable names to include"
+								"description": "Set of variable names to include"
 							},
 							{
 								"name": "specificity",
 								"type": "number",
-								"description": "- Number of times to repeat the selector (default 1)",
+								"description": "Number of times to repeat the selector (default 1)",
 								"default_value": "1"
 							}
 						]
@@ -4548,7 +4548,7 @@
 							{
 								"name": "graph",
 								"type": "VariableDependencyGraph",
-								"description": "- The variable dependency graph"
+								"description": "The variable dependency graph"
 							}
 						]
 					},
@@ -4564,12 +4564,12 @@
 							{
 								"name": "graph",
 								"type": "VariableDependencyGraph",
-								"description": "- The variable dependency graph"
+								"description": "The variable dependency graph"
 							},
 							{
 								"name": "name",
 								"type": "string",
-								"description": "- Variable name to check (without -- prefix)"
+								"description": "Variable name to check (without -- prefix)"
 							}
 						]
 					},
@@ -4585,12 +4585,12 @@
 							{
 								"name": "graph",
 								"type": "VariableDependencyGraph",
-								"description": "- The variable dependency graph"
+								"description": "The variable dependency graph"
 							},
 							{
 								"name": "name",
 								"type": "string",
-								"description": "- The variable name to find similar matches for"
+								"description": "The variable name to find similar matches for"
 							}
 						]
 					},
@@ -4606,7 +4606,7 @@
 							{
 								"name": "variables",
 								"type": "VariablesOption",
-								"description": "- The variables option (undefined, null, array, or callback)"
+								"description": "The variables option (undefined, null, array, or callback)"
 							}
 						]
 					},
@@ -4622,7 +4622,7 @@
 							{
 								"name": "variables",
 								"type": "VariablesOption",
-								"description": "- The variables option from generator config"
+								"description": "The variables option from generator config"
 							}
 						]
 					}
