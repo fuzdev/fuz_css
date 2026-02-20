@@ -149,7 +149,7 @@ for (const m of MODIFIERS) {
 	if (m.type === 'media') MEDIA_MODIFIERS.set(m.name, m);
 	else if (m.type === 'ancestor') ANCESTOR_MODIFIERS.set(m.name, m);
 	else if (m.type === 'state') STATE_MODIFIERS.set(m.name, m);
-	else PSEUDO_ELEMENT_MODIFIERS.set(m.name, m);
+	else if (m.type === 'pseudo-element') PSEUDO_ELEMENT_MODIFIERS.set(m.name, m); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
 }
 
 /**

@@ -80,14 +80,18 @@ const get_sort_index = (
 
 	// Try extracting the CSS property from a literal-style class name
 	// and mapping it to the corresponding token class family's index.
-	// Skips modifier prefixes to handle e.g. hover:border-radius:0.
+	// Walk segments (excluding the last, which is the value) left to right:
+	// - `continue` skips known modifier prefixes (e.g. `hover`, `sm`)
+	// - `break` bails once the first non-modifier segment is reached, since
+	//   that segment is the CSS property (if known) or an unrecognized prefix
+	//   that can't be sorted by property — no point scanning further.
 	const segments = class_name.split(':');
 	for (let i = 0; i < segments.length - 1; i++) {
 		const segment = segments[i]!;
-		if (get_modifier(segment)) continue; // skip modifier prefixes
+		if (get_modifier(segment)) continue; // skip modifier prefixes like `hover:`, `sm:`
 		const property_index = property_to_last_index.get(segment);
 		if (property_index !== undefined) return property_index + 0.5;
-		break; // first non-modifier segment that isn't a known property
+		break; // unrecognized non-modifier prefix — can't determine property sort order
 	}
 
 	return Number.MAX_VALUE;
