@@ -415,6 +415,104 @@ describe('generate_classes_css', () => {
 
 			expect_css_order(result.css, '.int-aaa', '.int-bbb', '.int-ccc');
 		});
+
+		test('literal shorthand sorts before token longhand', () => {
+			const interpreter: CssClassDefinitionInterpreter = {
+				pattern: /^.+:.+$/,
+				interpret: (matched) => {
+					const [prop, val] = matched[0].split(':');
+					return `${prop}: ${val};`;
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['border_top_right_radius_sm', 'border-radius:0'],
+				class_definitions: {
+					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+					border_top_right_radius_sm: {
+						declaration: 'border-top-right-radius: var(--border_radius_sm);',
+					},
+				},
+				interpreters: [interpreter],
+				css_properties: null,
+			});
+
+			expect_css_order(result.css, 'border-radius\\:0', 'border_top_right_radius_sm');
+		});
+
+		test('literal longhand sorts after token shorthand', () => {
+			const interpreter: CssClassDefinitionInterpreter = {
+				pattern: /^.+:.+$/,
+				interpret: (matched) => {
+					const [prop, val] = matched[0].split(':');
+					return `${prop}: ${val};`;
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['border-top-right-radius:5px', 'border_radius_sm'],
+				class_definitions: {
+					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+					border_top_right_radius_sm: {
+						declaration: 'border-top-right-radius: var(--border_radius_sm);',
+					},
+				},
+				interpreters: [interpreter],
+				css_properties: null,
+			});
+
+			expect_css_order(result.css, 'border_radius_sm', 'border-top-right-radius\\:5px');
+		});
+
+		test('both literal shorthand and longhand sort correctly', () => {
+			const interpreter: CssClassDefinitionInterpreter = {
+				pattern: /^.+:.+$/,
+				interpret: (matched) => {
+					const [prop, val] = matched[0].split(':');
+					return `${prop}: ${val};`;
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['border-top-right-radius:5px', 'border-radius:0'],
+				class_definitions: {
+					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+					border_top_right_radius_sm: {
+						declaration: 'border-top-right-radius: var(--border_radius_sm);',
+					},
+				},
+				interpreters: [interpreter],
+				css_properties: null,
+			});
+
+			expect_css_order(result.css, 'border-radius\\:0', 'border-top-right-radius\\:5px');
+		});
+
+		test('modified literal shorthand sorts before token longhand', () => {
+			const interpreter: CssClassDefinitionInterpreter = {
+				pattern: /^.+:.+$/,
+				interpret: (matched) => {
+					const parts = matched[0].split(':');
+					const prop = parts.at(-2);
+					const val = parts.at(-1);
+					return `${prop}: ${val};`;
+				},
+			};
+
+			const result = generate_classes_css({
+				class_names: ['border_top_right_radius_sm', 'hover:border-radius:0'],
+				class_definitions: {
+					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+					border_top_right_radius_sm: {
+						declaration: 'border-top-right-radius: var(--border_radius_sm);',
+					},
+				},
+				interpreters: [interpreter],
+				css_properties: null,
+			});
+
+			expect_css_order(result.css, 'hover\\:border-radius\\:0', 'border_top_right_radius_sm');
+		});
 	});
 
 	describe('composes property', () => {

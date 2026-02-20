@@ -41,6 +41,23 @@ export const escape_css_selector = (name: string): string => {
 	return name.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
 };
 
+/**
+ * Extracts the CSS property name from a single-property declaration string.
+ * Returns `null` for multi-property declarations (composites with multiple semicolons).
+ *
+ * @example
+ * extract_primary_property('border-radius: var(--border_radius_sm);') // 'border-radius'
+ * extract_primary_property('display: flex; align-items: center;') // null
+ */
+export const extract_primary_property = (declaration: string): string | null => {
+	const trimmed = declaration.trim();
+	// Strip trailing semicolon, then check for multiple declarations
+	const without_trailing = trimmed.endsWith(';') ? trimmed.slice(0, -1) : trimmed;
+	if (without_trailing.includes(';')) return null;
+	const match = /^(-?[a-zA-Z][\w-]*)\s*:/.exec(trimmed);
+	return match?.[1]?.toLowerCase() ?? null;
+};
+
 //
 // Class Definitions
 //
@@ -163,6 +180,47 @@ export const generate_classes_css = (
 		indexes.set(keys[i]!, i);
 	}
 
+	// Build a map from CSS property name to the last definition index using that property.
+	// Literal classes use this + 0.5 to sort after all token variants for their property
+	// but before the next property family, ensuring CSS shorthands appear before longhands.
+	const property_to_last_index: Map<string, number> = new Map();
+	for (let i = 0; i < keys.length; i++) {
+		const def = class_definitions[keys[i]!];
+		if (def && 'declaration' in def && def.declaration) {
+			const property = extract_primary_property(def.declaration);
+			if (property) {
+				property_to_last_index.set(property, i);
+			}
+		}
+	}
+
+	// Resolve a sort index for classes not in the static definitions.
+	// Extracts the CSS property from literal-style class names
+	// (border-radius:0 → after border_radius_* family) so that
+	// CSS shorthands sort before their corresponding longhands.
+	// Uses last_index + 0.5 so literals appear after all token variants
+	// for their property but before the next property family.
+	// Modified token classes (hover:p_md) intentionally stay at MAX_VALUE
+	// so the state modifier ordering tier handles their cascade correctly.
+	const get_sort_index = (class_name: string): number => {
+		const direct = indexes.get(class_name);
+		if (direct !== undefined) return direct;
+
+		// Try extracting the CSS property from a literal-style class name
+		// and mapping it to the corresponding token class family's index.
+		// Skips modifier prefixes to handle e.g. hover:border-radius:0.
+		const segments = class_name.split(':');
+		for (let i = 0; i < segments.length - 1; i++) {
+			const segment = segments[i]!;
+			if (get_modifier(segment)) continue; // skip modifier prefixes
+			const property_index = property_to_last_index.get(segment);
+			if (property_index !== undefined) return property_index + 0.5;
+			break; // first non-modifier segment that isn't a known property
+		}
+
+		return Number.MAX_VALUE;
+	};
+
 	// Helper to get the maximum state modifier order from a class name
 	// This ensures proper cascade: hover (5) comes before active (6)
 	const get_state_modifier_order = (class_name: string): number => {
@@ -178,11 +236,11 @@ export const generate_classes_css = (
 		return max_order;
 	};
 
-	// Sort classes: first by definition index, then by state modifier order, then alphabetically
+	// Sort classes: first by property-aware index, then by state modifier order, then alphabetically
 	const sorted_classes = (Array.isArray(class_names) ? class_names : Array.from(class_names)).sort(
 		(a, b) => {
-			const index_a = indexes.get(a) ?? Number.MAX_VALUE;
-			const index_b = indexes.get(b) ?? Number.MAX_VALUE;
+			const index_a = get_sort_index(a);
+			const index_b = get_sort_index(b);
 			if (index_a !== index_b) return index_a - index_b;
 			// For classes with modifiers, sort by state modifier order (for proper cascade)
 			const order_a = get_state_modifier_order(a);
