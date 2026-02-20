@@ -46,8 +46,10 @@ export const escape_css_selector = (name: string): string => {
  * Returns `null` for multi-property declarations (composites with multiple semicolons).
  *
  * @example
+ * ```ts
  * extract_primary_property('border-radius: var(--border_radius_sm);') // 'border-radius'
  * extract_primary_property('display: flex; align-items: center;') // null
+ * ```
  */
 export const extract_primary_property = (declaration: string): string | null => {
 	const trimmed = declaration.trim();

@@ -1058,9 +1058,9 @@
 						"kind": "function",
 						"doc_comment": "Extracts the CSS property name from a single-property declaration string.\nReturns `null` for multi-property declarations (composites with multiple semicolons).",
 						"examples": [
-							"extract_primary_property('border-radius: var(--border_radius_sm);') // 'border-radius'\nextract_primary_property('display: flex; align-items: center;') // null"
+							"```ts\nextract_primary_property('border-radius: var(--border_radius_sm);') // 'border-radius'\nextract_primary_property('display: flex; align-items: center;') // null\n```"
 						],
-						"source_line": 52,
+						"source_line": 54,
 						"type_signature": "(declaration: string): string | null",
 						"return_type": "string | null",
 						"parameters": [
@@ -1073,7 +1073,7 @@
 					{
 						"name": "CssClassDefinitionBase",
 						"kind": "type",
-						"source_line": 65,
+						"source_line": 67,
 						"type_signature": "CssClassDefinitionBase",
 						"properties": [
 							{
@@ -1087,7 +1087,7 @@
 						"name": "CssClassDefinitionComposition",
 						"kind": "type",
 						"doc_comment": "Pure utility composition (composes only).",
-						"source_line": 70,
+						"source_line": 72,
 						"type_signature": "CssClassDefinitionComposition",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1112,7 +1112,7 @@
 						"name": "CssClassDefinitionDeclaration",
 						"kind": "type",
 						"doc_comment": "Custom CSS declaration (optionally seeded with composes).",
-						"source_line": 77,
+						"source_line": 79,
 						"type_signature": "CssClassDefinitionDeclaration",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1137,7 +1137,7 @@
 						"name": "CssClassDefinitionRuleset",
 						"kind": "type",
 						"doc_comment": "Full ruleset with selectors.",
-						"source_line": 84,
+						"source_line": 86,
 						"type_signature": "CssClassDefinitionRuleset",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1162,21 +1162,21 @@
 						"name": "CssClassDefinitionStatic",
 						"kind": "type",
 						"doc_comment": "Static definitions (not interpreter-based).",
-						"source_line": 91,
+						"source_line": 93,
 						"type_signature": "CssClassDefinitionStatic"
 					},
 					{
 						"name": "CssClassDefinition",
 						"kind": "type",
 						"doc_comment": "Full union including interpreters.",
-						"source_line": 97,
+						"source_line": 99,
 						"type_signature": "CssClassDefinition"
 					},
 					{
 						"name": "CssClassInterpreterContext",
 						"kind": "type",
 						"doc_comment": "Context passed to CSS class interpreters.\nProvides access to logging, diagnostics collection, and the class registry.",
-						"source_line": 103,
+						"source_line": 105,
 						"type_signature": "CssClassInterpreterContext",
 						"properties": [
 							{
@@ -1209,7 +1209,7 @@
 						"name": "CssClassDefinitionInterpreter",
 						"kind": "type",
 						"doc_comment": "Interpreter for dynamic CSS class generation based on pattern matching.",
-						"source_line": 115,
+						"source_line": 117,
 						"type_signature": "CssClassDefinitionInterpreter",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1230,7 +1230,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 130,
+						"source_line": 132,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -1254,7 +1254,7 @@
 					{
 						"name": "GenerateClassesCssOptions",
 						"kind": "type",
-						"source_line": 137,
+						"source_line": 139,
 						"type_signature": "GenerateClassesCssOptions",
 						"properties": [
 							{
@@ -1299,7 +1299,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 152,
+						"source_line": 154,
 						"type_signature": "(options: GenerateClassesCssOptions): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
