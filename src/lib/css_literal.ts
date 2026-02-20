@@ -123,6 +123,19 @@ export const is_valid_css_property = (
 	return properties.has(property);
 };
 
+const find_closest_match = (typo: string, candidates: Iterable<string>): string | null => {
+	let best_match: string | null = null;
+	let best_distance = 3; // Only suggest if distance <= 2
+	for (const candidate of candidates) {
+		const distance = levenshtein_distance(typo, candidate);
+		if (distance < best_distance) {
+			best_distance = distance;
+			best_match = candidate;
+		}
+	}
+	return best_match;
+};
+
 /**
  * Suggests a correct property name for a typo using Levenshtein distance.
  *
@@ -134,22 +147,7 @@ export const is_valid_css_property = (
 export const suggest_css_property = (
 	typo: string,
 	properties: Set<string> | null,
-): string | null => {
-	if (!properties) return null;
-
-	let best_match: string | null = null;
-	let best_distance = 3; // Only suggest if distance <= 2
-
-	for (const prop of properties) {
-		const distance = levenshtein_distance(typo, prop);
-		if (distance < best_distance) {
-			best_distance = distance;
-			best_match = prop;
-		}
-	}
-
-	return best_match;
-};
+): string | null => (properties ? find_closest_match(typo, properties) : null);
 
 /**
  * Suggests a correct modifier name for a typo using Levenshtein distance.
@@ -157,21 +155,8 @@ export const suggest_css_property = (
  * @param typo - the mistyped modifier name
  * @returns the suggested modifier or null if no close match (Levenshtein distance > 2)
  */
-export const suggest_modifier = (typo: string): string | null => {
-	const all_names = get_all_modifier_names();
-	let best_match: string | null = null;
-	let best_distance = 3;
-
-	for (const name of all_names) {
-		const distance = levenshtein_distance(typo, name);
-		if (distance < best_distance) {
-			best_distance = distance;
-			best_match = name;
-		}
-	}
-
-	return best_match;
-};
+export const suggest_modifier = (typo: string): string | null =>
+	find_closest_match(typo, get_all_modifier_names());
 
 //
 // Value Formatting

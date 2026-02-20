@@ -250,7 +250,7 @@
 						"name": "CssResolutionStats",
 						"kind": "type",
 						"doc_comment": "Statistics from CSS resolution (only included when `include_stats` is true).",
-						"source_line": 95,
+						"source_line": 98,
 						"type_signature": "CssResolutionStats",
 						"properties": [
 							{
@@ -289,7 +289,7 @@
 						"name": "CssResolutionResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS resolution.",
-						"source_line": 111,
+						"source_line": 114,
 						"type_signature": "CssResolutionResult",
 						"properties": [
 							{
@@ -340,7 +340,7 @@
 						"name": "CssResolutionOptions",
 						"kind": "type",
 						"doc_comment": "Options for CSS resolution.",
-						"source_line": 131,
+						"source_line": 134,
 						"type_signature": "CssResolutionOptions",
 						"properties": [
 							{
@@ -445,7 +445,7 @@
 						"name": "resolve_css",
 						"kind": "function",
 						"doc_comment": "Resolves which CSS to include based on detected usage.\n\nAlgorithm:\n1. Collect rules: core rules + element-matching + class-matching\n2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables\n3. Resolve transitive variable dependencies\n4. Generate output: theme_css (light+dark), base_css (source order)",
-						"source_line": 188,
+						"source_line": 191,
 						"type_signature": "(options: CssResolutionOptions): CssResolutionResult",
 						"return_type": "CssResolutionResult",
 						"return_description": "resolution result with theme CSS, base CSS, and diagnostics",
@@ -461,7 +461,7 @@
 						"name": "GenerateBundledCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for bundled CSS output generation.",
-						"source_line": 421,
+						"source_line": 424,
 						"type_signature": "GenerateBundledCssOptions",
 						"properties": [
 							{
@@ -488,7 +488,7 @@
 						"name": "generate_bundled_css",
 						"kind": "function",
 						"doc_comment": "Generates combined CSS output from resolution result.",
-						"source_line": 438,
+						"source_line": 441,
 						"type_signature": "(result: CssResolutionResult, utility_css: string, options?: GenerateBundledCssOptions): string",
 						"return_type": "string",
 						"return_description": "combined CSS string",
@@ -1388,19 +1388,19 @@
 					{
 						"name": "CSS_DIRECTIONS",
 						"kind": "variable",
-						"source_line": 77,
+						"source_line": 75,
 						"type_signature": "readonly [\"top\", \"right\", \"bottom\", \"left\"]"
 					},
 					{
 						"name": "CssDirection",
 						"kind": "type",
-						"source_line": 78,
+						"source_line": 76,
 						"type_signature": "\"top\" | \"right\" | \"bottom\" | \"left\""
 					},
 					{
 						"name": "format_variable_name",
 						"kind": "function",
-						"source_line": 81,
+						"source_line": 79,
 						"type_signature": "(str: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -1414,7 +1414,7 @@
 						"name": "format_spacing_value",
 						"kind": "function",
 						"doc_comment": "Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).\nUsed by margin, padding, gap, inset, top/right/bottom/left, etc.",
-						"source_line": 87,
+						"source_line": 85,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -1428,7 +1428,7 @@
 						"name": "format_dimension_value",
 						"kind": "function",
 						"doc_comment": "Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).\nUsed by width and height properties.",
-						"source_line": 99,
+						"source_line": 97,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -1442,7 +1442,7 @@
 						"name": "generate_property_classes",
 						"kind": "function",
 						"doc_comment": "Generate classes for a single CSS property with various values.",
-						"source_line": 123,
+						"source_line": 121,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((value: string) => string) | undefined, prefix?: string): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -1474,7 +1474,7 @@
 						"name": "generate_directional_classes",
 						"kind": "function",
 						"doc_comment": "Generate directional classes for properties like margin and padding.\nCreates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).",
-						"source_line": 146,
+						"source_line": 144,
 						"type_signature": "(property: string, values: Iterable<string>, formatter?: ((v: string) => string) | undefined): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -1500,7 +1500,7 @@
 						"name": "generate_border_radius_corners",
 						"kind": "function",
 						"doc_comment": "Generate border radius corner classes for all four corners.\nCreates classes for top-left, top-right, bottom-left, bottom-right corners.",
-						"source_line": 200,
+						"source_line": 198,
 						"type_signature": "(values: Iterable<string>, formatter?: ((value: string) => string) | undefined): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -1521,7 +1521,7 @@
 						"name": "generate_shadow_classes",
 						"kind": "function",
 						"doc_comment": "Generate shadow classes for various shadow types and sizes.\nCreates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.\nEach shadow uses color-mix with alpha values for transparency.",
-						"source_line": 229,
+						"source_line": 227,
 						"type_signature": "(sizes: Iterable<string>, alpha_mapping: Record<string, string>): Record<string, CssClassDefinition>",
 						"return_type": "Record<string, CssClassDefinition>",
 						"parameters": [
@@ -1902,7 +1902,7 @@
 						"name": "suggest_css_property",
 						"kind": "function",
 						"doc_comment": "Suggests a correct property name for a typo using Levenshtein distance.",
-						"source_line": 134,
+						"source_line": 147,
 						"type_signature": "(typo: string, properties: Set<string> | null): string | null",
 						"return_type": "string | null",
 						"return_description": "the suggested property or null if no close match (Levenshtein distance > 2)",
@@ -1923,7 +1923,7 @@
 						"name": "suggest_modifier",
 						"kind": "function",
 						"doc_comment": "Suggests a correct modifier name for a typo using Levenshtein distance.",
-						"source_line": 160,
+						"source_line": 158,
 						"type_signature": "(typo: string): string | null",
 						"return_type": "string | null",
 						"return_description": "the suggested modifier or null if no close match (Levenshtein distance > 2)",
@@ -1939,7 +1939,7 @@
 						"name": "format_css_value",
 						"kind": "function",
 						"doc_comment": "Formats a CSS-literal value for CSS output.\n- Replaces `~` with space\n- Ensures space before `!important`",
-						"source_line": 188,
+						"source_line": 173,
 						"type_signature": "(value: string): string",
 						"return_type": "string",
 						"return_description": "formatted CSS value",
@@ -1955,7 +1955,7 @@
 						"name": "check_calc_expression",
 						"kind": "function",
 						"doc_comment": "Checks if a value contains a possibly invalid calc expression.",
-						"source_line": 206,
+						"source_line": 191,
 						"type_signature": "(value: string): string | null",
 						"return_type": "string | null",
 						"return_description": "warning message if suspicious, null otherwise",
@@ -1971,7 +1971,7 @@
 						"name": "is_possible_css_literal",
 						"kind": "function",
 						"doc_comment": "Checks if a class name could be a CSS-literal class.\nQuick check before attempting full parse.",
-						"source_line": 224,
+						"source_line": 209,
 						"type_signature": "(class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "true if it could be CSS-literal syntax",
@@ -1990,7 +1990,7 @@
 						"examples": [
 							"```ts\nextract_segments('md:hover:display:flex') // → ['md', 'hover', 'display', 'flex']\nextract_segments('nth-child(2n+1):color:red') // → ['nth-child(2n+1)', 'color', 'red']\nextract_segments('width:calc(100%-20px)') // → ['width', 'calc(100%-20px)']\n```"
 						],
-						"source_line": 255,
+						"source_line": 240,
 						"type_signature": "(class_name: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -2004,7 +2004,7 @@
 						"name": "extract_and_validate_modifiers",
 						"kind": "function",
 						"doc_comment": "Extracts and validates modifiers from the beginning of a segments array.\nModifiers are consumed from the front until a non-modifier segment is found.\n\nUsed by both CSS-literal parsing and modified class interpretation.",
-						"source_line": 294,
+						"source_line": 279,
 						"type_signature": "(segments: string[], class_name: string): ModifierExtractionResult",
 						"return_type": "ModifierExtractionResult",
 						"return_description": "`ModifierExtractionResult` with modifiers and remaining segments, or error",
@@ -2025,7 +2025,7 @@
 						"name": "parse_css_literal",
 						"kind": "function",
 						"doc_comment": "Parses a CSS-literal class name into its components.",
-						"source_line": 466,
+						"source_line": 451,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null): CssLiteralParseResult",
 						"return_type": "CssLiteralParseResult",
 						"return_description": "`CssLiteralParseResult` with parsed data or error",
@@ -2046,7 +2046,7 @@
 						"name": "generate_selector",
 						"kind": "function",
 						"doc_comment": "Generates the CSS selector for a parsed CSS-literal class.\nIncludes state pseudo-classes and pseudo-element in the selector.",
-						"source_line": 568,
+						"source_line": 553,
 						"type_signature": "(escaped_class_name: string, parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -2064,7 +2064,7 @@
 						"name": "generate_declaration",
 						"kind": "function",
 						"doc_comment": "Generates the CSS declaration for a parsed CSS-literal class.",
-						"source_line": 587,
+						"source_line": 572,
 						"type_signature": "(parsed: ParsedCssLiteral): string",
 						"return_type": "string",
 						"parameters": [
@@ -2078,7 +2078,7 @@
 						"name": "CssLiteralOutput",
 						"kind": "type",
 						"doc_comment": "Information needed to generate CSS output for a CSS-literal class.",
-						"source_line": 594,
+						"source_line": 579,
 						"type_signature": "CssLiteralOutput",
 						"properties": [
 							{
@@ -2111,7 +2111,7 @@
 						"name": "interpret_css_literal",
 						"kind": "function",
 						"doc_comment": "Interprets a CSS-literal class and returns CSS generation info.\n\nCallers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.",
-						"source_line": 616,
+						"source_line": 601,
 						"type_signature": "(class_name: string, escaped_class_name: string, css_properties: Set<string> | null): InterpretCssLiteralResult",
 						"return_type": "InterpretCssLiteralResult",
 						"return_description": "result with output and warnings on success, or error on failure",
@@ -2137,14 +2137,14 @@
 						"name": "LiteralResolutionResult",
 						"kind": "type",
 						"doc_comment": "Result of attempting to resolve a CSS literal for composition.",
-						"source_line": 648,
+						"source_line": 633,
 						"type_signature": "LiteralResolutionResult"
 					},
 					{
 						"name": "has_modifiers",
 						"kind": "function",
 						"doc_comment": "Checks if a parsed CSS literal has any modifiers.",
-						"source_line": 655,
+						"source_line": 640,
 						"type_signature": "(parsed: ParsedCssLiteral): boolean",
 						"return_type": "boolean",
 						"parameters": [
@@ -2158,7 +2158,7 @@
 						"name": "has_extracted_modifiers",
 						"kind": "function",
 						"doc_comment": "Checks if extracted modifiers contain any modifier.\nUseful for tooling that needs to detect modified classes.",
-						"source_line": 663,
+						"source_line": 648,
 						"type_signature": "(modifiers: ExtractedModifiers): boolean",
 						"return_type": "boolean",
 						"parameters": [
@@ -2172,7 +2172,7 @@
 						"name": "try_resolve_literal",
 						"kind": "function",
 						"doc_comment": "Attempts to resolve a class name as an unmodified CSS literal for composition.\n\nUsed by `resolve_composes` to support literals in `composes` arrays.\nReturns the declaration if successful, null if not a literal, or an error\nif it's a literal with issues (modifiers, invalid property, etc.).",
-						"source_line": 684,
+						"source_line": 669,
 						"type_signature": "(class_name: string, css_properties: Set<string> | null, context_class_name: string): LiteralResolutionResult",
 						"return_type": "LiteralResolutionResult",
 						"return_description": "resolution result with declaration, or error, or null if not a literal",
@@ -2198,7 +2198,7 @@
 						"name": "generate_css_literal_simple",
 						"kind": "function",
 						"doc_comment": "Generates simple CSS for a CSS-literal class (without grouping).\nUsed by the interpreter for basic output.",
-						"source_line": 742,
+						"source_line": 727,
 						"type_signature": "(output: CssLiteralOutput): string",
 						"return_type": "string",
 						"return_description": "CSS string for this class",

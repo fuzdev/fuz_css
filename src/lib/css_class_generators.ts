@@ -46,27 +46,25 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 ): Record<string, CssClassDefinition> => {
 	const result: Record<string, CssClassDefinition> = {};
 
-	for (const v1 of values) {
-		if (secondary) {
-			for (const v2 of secondary) {
-				if (tertiary) {
-					for (const v3 of tertiary) {
-						const generated = (template as any)(v1, v2, v3);
-						if (generated) {
-							result[generated.name] = {declaration: generated.css};
-						}
-					}
-				} else {
-					const generated = (template as any)(v1, v2);
-					if (generated) {
-						result[generated.name] = {declaration: generated.css};
-					}
-				}
-			}
-		} else {
+	if (!secondary) {
+		for (const v1 of values) {
 			const generated = (template as any)(v1);
-			if (generated) {
-				result[generated.name] = {declaration: generated.css};
+			if (generated) result[generated.name] = {declaration: generated.css};
+		}
+	} else if (!tertiary) {
+		for (const v1 of values) {
+			for (const v2 of secondary) {
+				const generated = (template as any)(v1, v2);
+				if (generated) result[generated.name] = {declaration: generated.css};
+			}
+		}
+	} else {
+		for (const v1 of values) {
+			for (const v2 of secondary) {
+				for (const v3 of tertiary) {
+					const generated = (template as any)(v1, v2, v3);
+					if (generated) result[generated.name] = {declaration: generated.css};
+				}
 			}
 		}
 	}
