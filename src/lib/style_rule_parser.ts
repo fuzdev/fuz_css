@@ -306,8 +306,8 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
  * Parses a selector list and extracts element names and class names.
  *
  * @param selector_css - CSS selector string (may contain commas)
- * @param elements - Set to add element names to
- * @param classes - Set to add class names to
+ * @param elements - set to add element names to
+ * @param classes - set to add class names to
  * @mutates elements, classes
  */
 const parse_selector_list = (
@@ -366,9 +366,9 @@ const split_selector_list = (selector_group: string): Array<string> => {
  * Extracts the content of a functional pseudo-class starting at the given position.
  * Handles arbitrarily nested parentheses.
  *
- * @param selector - The full selector string
- * @param start - Position after the opening parenthesis
- * @returns The inner content and the end position (after closing paren), or null if unbalanced
+ * @param selector - the full selector string
+ * @param start - position after the opening parenthesis
+ * @returns the inner content and the end position (after closing paren), or null if unbalanced
  */
 const extract_functional_content = (
 	selector: string,

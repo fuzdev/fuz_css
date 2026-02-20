@@ -140,7 +140,7 @@ export class SourceIndex {
 	 * Converts a character offset to a source location.
 	 *
 	 * @param offset - 0-based character offset in the source
-	 * @param file - File path for the location
+	 * @param file - file path for the location
 	 * @returns `SourceLocation` with 1-based line and column
 	 */
 	get_location(offset: number, file: string): SourceLocation {
@@ -159,10 +159,10 @@ export class SourceIndex {
 /**
  * Adds a class with its location to the extraction result.
  *
- * @param classes - Map of classes to locations
- * @param class_name - Class name to add
- * @param location - Source location where the class was found
- * @mutates classes - Adds or appends to the map entry
+ * @param classes - map of classes to locations
+ * @param class_name - class name to add
+ * @param location - source location where the class was found
+ * @mutates classes - adds or appends to the map entry
  */
 const add_class_with_location = (
 	classes: Map<string, Array<SourceLocation>>,
@@ -285,9 +285,9 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
 /**
  * Extracts CSS classes from a Svelte file using AST parsing.
  *
- * @param source - The Svelte file source code
- * @param file - File path for location tracking
- * @returns Extraction result with classes, tracked variables, elements, and diagnostics
+ * @param source - the Svelte file source code
+ * @param file - file path for location tracking
+ * @returns extraction result with classes, tracked variables, elements, and diagnostics
  */
 export const extract_from_svelte = (source: string, file = '<unknown>'): ExtractionResult => {
 	const source_index = new SourceIndex(source);
@@ -474,10 +474,10 @@ const extract_fuz_comments_from_script = (
 /**
  * Extracts CSS classes from a TypeScript/JS file using AST parsing.
  *
- * @param source - The TS/JS file source code
- * @param file - File path for location tracking
- * @param acorn_plugins - Additional acorn plugins (e.g., acorn-jsx for React)
- * @returns Extraction result with classes, tracked variables, elements, and diagnostics
+ * @param source - the TS/JS file source code
+ * @param file - file path for location tracking
+ * @param acorn_plugins - additional acorn plugins (e.g., acorn-jsx for React)
+ * @returns extraction result with classes, tracked variables, elements, and diagnostics
  */
 export const extract_from_ts = (
 	source: string,
@@ -547,9 +547,9 @@ export const extract_from_ts = (
  * Unified extraction function that auto-detects file type.
  * Returns just the class names as a Set.
  *
- * @param source - The file source code
- * @param options - Extraction options
- * @returns Set of class names, or null if none found
+ * @param source - the file source code
+ * @param options - extraction options
+ * @returns set of class names, or null if none found
  */
 export const extract_css_classes = (
 	source: string,
@@ -563,9 +563,9 @@ export const extract_css_classes = (
  * Unified extraction function that auto-detects file type.
  * Returns full extraction result with locations and diagnostics.
  *
- * @param source - The file source code
- * @param options - Extraction options
- * @returns Full extraction result with classes, tracked variables, and diagnostics
+ * @param source - the file source code
+ * @param options - extraction options
+ * @returns full extraction result with classes, tracked variables, and diagnostics
  */
 export const extract_css_classes_with_locations = (
 	source: string,

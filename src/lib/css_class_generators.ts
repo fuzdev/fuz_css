@@ -14,10 +14,10 @@ export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
  * Generates CSS class declarations from templates.
  * Supports up to 3 dimensions of multiplicative combinations.
  *
- * @param template - Function that generates CSS from values, can return null to skip
- * @param values - Primary iterable of values
- * @param secondary - Optional second dimension (makes it multiplicative)
- * @param tertiary - Optional third dimension for even more combinations
+ * @param template - function that generates CSS from values, can return null to skip
+ * @param values - primary iterable of values
+ * @param secondary - optional second dimension (makes it multiplicative)
+ * @param tertiary - optional third dimension for even more combinations
  *
  * @example
  * ```ts
@@ -115,10 +115,10 @@ export const format_dimension_value = (value: string): string => {
 /**
  * Generate classes for a single CSS property with various values.
  *
- * @param property - The CSS property name (e.g. 'font-size', 'gap')
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values (e.g. v => `var(--space_${v})`)
- * @param prefix - Optional class name prefix (defaults to property with dashes replaced by underscores)
+ * @param property - the CSS property name (e.g. 'font-size', 'gap')
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values (e.g. v => `var(--space_${v})`)
+ * @param prefix - optional class name prefix (defaults to property with dashes replaced by underscores)
  */
 export const generate_property_classes = (
 	property: string,
@@ -139,9 +139,9 @@ export const generate_property_classes = (
  * Generate directional classes for properties like margin and padding.
  * Creates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).
  *
- * @param property - The base CSS property name (e.g. 'margin', 'padding')
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values (defaults to identity)
+ * @param property - the base CSS property name (e.g. 'margin', 'padding')
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values (defaults to identity)
  */
 export const generate_directional_classes = (
 	property: string,
@@ -194,8 +194,8 @@ export const generate_directional_classes = (
  * Generate border radius corner classes for all four corners.
  * Creates classes for top-left, top-right, bottom-left, bottom-right corners.
  *
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values
  */
 export const generate_border_radius_corners = (
 	values: Iterable<string>,
@@ -223,8 +223,8 @@ export const generate_border_radius_corners = (
  * Creates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.
  * Each shadow uses color-mix with alpha values for transparency.
  *
- * @param sizes - The shadow size variants (xs, sm, md, lg, xl)
- * @param alpha_mapping - Mapping of sizes to alpha numbers (1-5)
+ * @param sizes - the shadow size variants (xs, sm, md, lg, xl)
+ * @param alpha_mapping - mapping of sizes to alpha numbers (1-5)
  */
 export const generate_shadow_classes = (
 	sizes: Iterable<string>,

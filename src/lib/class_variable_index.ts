@@ -74,9 +74,9 @@ const extract_variables_from_definition = (definition: CssClassDefinition): Set<
 /**
  * Gets variables used by a specific class.
  *
- * @param index - The class variable index
- * @param class_name - Name of the class to lookup
- * @returns Set of variable names (without -- prefix), or null if class not found
+ * @param index - the class variable index
+ * @param class_name - name of the class to lookup
+ * @returns set of variable names (without -- prefix), or null if class not found
  */
 export const get_class_variables = (
 	index: CssClassVariableIndex,
@@ -86,9 +86,9 @@ export const get_class_variables = (
 /**
  * Collects all variables used by a set of classes.
  *
- * @param index - The class variable index
- * @param class_names - Class names to collect variables from
- * @returns Set of all variable names used by the classes
+ * @param index - the class variable index
+ * @param class_names - class names to collect variables from
+ * @returns set of all variable names used by the classes
  */
 export const collect_class_variables = (
 	index: CssClassVariableIndex,
@@ -111,9 +111,9 @@ export const collect_class_variables = (
 /**
  * Gets all class names that use a specific variable.
  *
- * @param index - The class variable index
- * @param variable_name - Variable name to search for (without -- prefix)
- * @returns Array of class names that use this variable
+ * @param index - the class variable index
+ * @param variable_name - variable name to search for (without -- prefix)
+ * @returns array of class names that use this variable
  */
 export const get_classes_using_variable = (
 	index: CssClassVariableIndex,

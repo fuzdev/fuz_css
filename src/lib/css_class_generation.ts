@@ -119,7 +119,7 @@ export interface CssClassInterpreterContext {
 export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
 	pattern: RegExp;
 	/**
-	 * @mutates ctx.diagnostics - Implementations push errors/warnings to the diagnostics array
+	 * @mutates ctx.diagnostics - implementations push errors/warnings to the diagnostics array
 	 */
 	interpret: (matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null;
 }

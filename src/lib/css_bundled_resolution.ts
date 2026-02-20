@@ -70,9 +70,9 @@ const string_similarity = (a: string, b: string): number => {
 /**
  * Finds the most similar name from a set of known names.
  *
- * @param name - The name to find similar matches for
- * @param known_names - Set of known valid names
- * @returns The most similar name, or null if none are similar enough
+ * @param name - the name to find similar matches for
+ * @param known_names - set of known valid names
+ * @returns the most similar name, or null if none are similar enough
  */
 const find_similar_name = (name: string, known_names: Set<string>): string | null => {
 	let best_match: string | null = null;
@@ -182,8 +182,8 @@ export interface CssResolutionOptions {
  * 3. Resolve transitive variable dependencies
  * 4. Generate output: theme_css (light+dark), base_css (source order)
  *
- * @param options - Resolution options including indexes, detected usage, and config
- * @returns Resolution result with theme CSS, base CSS, and diagnostics
+ * @param options - resolution options including indexes, detected usage, and config
+ * @returns resolution result with theme CSS, base CSS, and diagnostics
  */
 export const resolve_css = (options: CssResolutionOptions): CssResolutionResult => {
 	const {
@@ -430,10 +430,10 @@ export interface GenerateBundledCssOptions {
 /**
  * Generates combined CSS output from resolution result.
  *
- * @param result - Resolution result from resolve_css
- * @param utility_css - Generated utility CSS (from generate_classes_css)
- * @param options - Output options
- * @returns Combined CSS string
+ * @param result - resolution result from `resolve_css`
+ * @param utility_css - generated utility CSS (from `generate_classes_css`)
+ * @param options - output options
+ * @returns combined CSS string
  */
 export const generate_bundled_css = (
 	result: CssResolutionResult,

@@ -321,9 +321,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
  * Merges user class definitions with the built-in defaults.
  * User definitions take precedence over defaults with the same name.
  *
- * @param user_definitions - User-provided class definitions to merge
- * @param include_defaults - Whether to include built-in definitions
- * @returns Merged class definitions
+ * @param user_definitions - user-provided class definitions to merge
+ * @param include_defaults - whether to include built-in definitions
+ * @returns merged class definitions
  * @throws Error if `include_defaults` is false and no user definitions provided
  */
 export const merge_class_definitions = (

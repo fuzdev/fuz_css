@@ -180,9 +180,9 @@ export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
  * Extracts content from balanced parentheses after a prefix.
  * Supports nested parens for calc(), clamp(), min(), max(), etc.
  *
- * @param segment - The full segment to parse (e.g., "min-width(calc(100vw - 200px))")
- * @param prefix - The prefix before the opening paren (e.g., "min-width")
- * @returns The content inside the balanced parens, or null if no match/unbalanced
+ * @param segment - the full segment to parse (e.g., "min-width(calc(100vw - 200px))")
+ * @param prefix - the prefix before the opening paren (e.g., "min-width")
+ * @returns the content inside the balanced parens, or null if no match/unbalanced
  *
  * @example
  * ```ts
@@ -244,7 +244,7 @@ const is_valid_breakpoint_value = (value: string): boolean => {
  * Supports nested parentheses for calc(), clamp(), min(), max(), var().
  * Requires value to start with a digit or known CSS function to catch obvious mistakes.
  *
- * @returns The CSS media query or null if not an arbitrary breakpoint
+ * @returns the CSS media query or null if not an arbitrary breakpoint
  *
  * @example
  * ```ts
@@ -270,7 +270,7 @@ export const parse_arbitrary_breakpoint = (segment: string): string | null => {
 /**
  * Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).
  *
- * @returns Object with name (including parameter) and CSS, or null if not parameterized
+ * @returns object with name (including parameter) and CSS, or null if not parameterized
  */
 export const parse_parameterized_state = (
 	segment: string,
@@ -318,7 +318,7 @@ export const parse_parameterized_state = (
  * Gets the modifier definition for a segment.
  * Handles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).
  *
- * @returns The modifier definition or null if not a known modifier
+ * @returns the modifier definition or null if not a known modifier
  */
 export const get_modifier = (
 	segment: string,

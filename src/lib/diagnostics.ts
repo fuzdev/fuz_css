@@ -82,8 +82,8 @@ export interface InterpreterDiagnostic {
 /**
  * Converts an `InterpreterDiagnostic` to a `GenerationDiagnostic` with locations.
  *
- * @param diagnostic - Interpreter diagnostic to convert
- * @param locations - Source locations where the class was used
+ * @param diagnostic - interpreter diagnostic to convert
+ * @param locations - source locations where the class was used
  */
 export const create_generation_diagnostic = (
 	diagnostic: InterpreterDiagnostic,

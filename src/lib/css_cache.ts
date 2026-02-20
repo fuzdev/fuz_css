@@ -61,9 +61,9 @@ export interface CachedExtraction {
  * Computes the cache file path for a source file.
  * Cache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`
  *
- * @param source_path - Absolute path to the source file
- * @param cache_dir - Absolute path to the cache directory
- * @param project_root - Normalized project root (must end with `/`)
+ * @param source_path - absolute path to the source file
+ * @param cache_dir - absolute path to the cache directory
+ * @param project_root - normalized project root (must end with `/`)
  */
 export const get_cache_path = (
 	source_path: string,
@@ -82,9 +82,9 @@ export const get_cache_path = (
  * Internal files use relative paths mirroring source tree.
  * External files (outside project root) use hashed absolute paths in `_external/`.
  *
- * @param file_id - Absolute path to the source file
- * @param cache_dir - Absolute path to the cache directory
- * @param project_root - Normalized project root (must end with `/`)
+ * @param file_id - absolute path to the source file
+ * @param cache_dir - absolute path to the cache directory
+ * @param project_root - normalized project root (must end with `/`)
  */
 export const get_file_cache_path = (
 	file_id: string,
@@ -102,8 +102,8 @@ export const get_file_cache_path = (
  * Returns `null` if the cache is missing, corrupted, or has a version mismatch.
  * This makes the cache self-healing: any error triggers re-extraction.
  *
- * @param ops - Filesystem operations for dependency injection
- * @param cache_path - Absolute path to the cache file
+ * @param ops - filesystem operations for dependency injection
+ * @param cache_path - absolute path to the cache file
  */
 export const load_cached_extraction = async (
 	ops: CacheOperations,
@@ -133,10 +133,10 @@ export const load_cached_extraction = async (
  * Uses atomic write (temp file + rename) for crash safety.
  * Normalizes empty collections to null to avoid allocation overhead on load.
  *
- * @param ops - Filesystem operations for dependency injection
- * @param cache_path - Absolute path to the cache file
+ * @param ops - filesystem operations for dependency injection
+ * @param cache_path - absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
- * @param extraction - Extraction data to cache
+ * @param extraction - extraction data to cache
  */
 export const save_cached_extraction = async (
 	ops: CacheOperations,
@@ -184,8 +184,8 @@ export const save_cached_extraction = async (
  * Deletes a cached extraction file.
  * Silently succeeds if the file doesn't exist.
  *
- * @param ops - Filesystem operations for dependency injection
- * @param cache_path - Absolute path to the cache file
+ * @param ops - filesystem operations for dependency injection
+ * @param cache_path - absolute path to the cache file
  */
 export const delete_cached_extraction = async (
 	ops: CacheOperations,
@@ -198,7 +198,7 @@ export const delete_cached_extraction = async (
  * Converts a cached extraction back to the runtime format.
  * Preserves null semantics (null = empty).
  *
- * @param cached - Cached extraction data
+ * @param cached - cached extraction data
  */
 export const from_cached_extraction = (cached: CachedExtraction): ExtractionData => ({
 	classes: cached.classes ? new Map(cached.classes) : null,

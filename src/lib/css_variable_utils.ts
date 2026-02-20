@@ -28,7 +28,7 @@ const CSS_VARIABLE_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)/g;
  * only the primary variable reference.
  *
  * @param css - CSS string potentially containing `var(--*)` references
- * @returns Set of variable names (without `--` prefix)
+ * @returns set of variable names (without `--` prefix)
  *
  * @example
  * ```ts
@@ -63,7 +63,7 @@ const CSS_VARIABLE_CHECK_PATTERN = /var\(\s*--[a-zA-Z_][a-zA-Z0-9_-]*/;
  * to know if variables exist, not what they are.
  *
  * @param css - CSS string to check
- * @returns True if the string contains `var(--*)` patterns
+ * @returns true if the string contains `var(--*)` patterns
  */
 export const has_css_variables = (css: string): boolean => {
 	return CSS_VARIABLE_CHECK_PATTERN.test(css);

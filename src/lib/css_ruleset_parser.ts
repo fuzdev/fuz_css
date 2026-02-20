@@ -45,7 +45,7 @@ export interface ParsedRuleset {
 /**
  * Parses a CSS ruleset string using Svelte's CSS parser.
  *
- * @param css - Raw CSS string (e.g., ".box { display: flex; }")
+ * @param css - raw CSS string (e.g., ".box { display: flex; }")
  * @returns `ParsedRuleset` with structured rule data and positions
  */
 export const parse_ruleset = (css: string): ParsedRuleset => {
@@ -60,7 +60,7 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
 
 /**
  * Walks CSS AST children to extract rules.
- * @mutates rules - Pushes extracted rules to the array
+ * @mutates rules - pushes extracted rules to the array
  */
 const walk_css_children = (
 	node: Omit<AST.CSS.StyleSheet, 'attributes' | 'content'> | AST.CSS.Atrule,
@@ -82,7 +82,7 @@ const walk_css_children = (
 
 /**
  * Walks a CSS block (from an at-rule) to extract rules.
- * @mutates rules - Pushes extracted rules to the array
+ * @mutates rules - pushes extracted rules to the array
  */
 const walk_css_block = (
 	block: AST.CSS.Block,
@@ -101,7 +101,7 @@ const walk_css_block = (
 
 /**
  * Extracts a single rule from the AST.
- * @mutates rules - Pushes the extracted rule to the array
+ * @mutates rules - pushes the extracted rule to the array
  */
 const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<ParsedRule>): void => {
 	const prelude = rule.prelude;
@@ -134,9 +134,9 @@ const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<Par
  * Checks if a ruleset has only a single simple selector (just the class name).
  * Used to detect rulesets that could be converted to declaration format.
  *
- * @param rules - Parsed rules from the ruleset
- * @param escaped_class_name - The CSS-escaped class name (e.g., "box" or "hover\\:card")
- * @returns True if there's exactly one rule with selector ".class_name"
+ * @param rules - parsed rules from the ruleset
+ * @param escaped_class_name - the CSS-escaped class name (e.g., "box" or "hover\\:card")
+ * @returns true if there's exactly one rule with selector ".class_name"
  */
 export const is_single_selector_ruleset = (
 	rules: Array<ParsedRule>,
@@ -157,9 +157,9 @@ export const is_single_selector_ruleset = (
  * Checks if any selector in the ruleset contains the expected class name.
  * Used to validate that ruleset definitions match their key.
  *
- * @param rules - Parsed rules from the ruleset
- * @param escaped_class_name - The CSS-escaped class name (e.g., "clickable" or "hover\\:card")
- * @returns True if at least one selector contains ".class_name"
+ * @param rules - parsed rules from the ruleset
+ * @param escaped_class_name - the CSS-escaped class name (e.g., "clickable" or "hover\\:card")
+ * @returns true if at least one selector contains ".class_name"
  */
 export const ruleset_contains_class = (
 	rules: Array<ParsedRule>,
@@ -174,9 +174,9 @@ export const ruleset_contains_class = (
  * Extracts the CSS comment from a ruleset (if any).
  * Looks for comments before the first rule.
  *
- * @param css - Raw CSS string
- * @param rules - Parsed rules
- * @returns Comment text without delimiters, or null if no comment
+ * @param css - raw CSS string
+ * @param rules - parsed rules
+ * @returns comment text without delimiters, or null if no comment
  */
 export const extract_css_comment = (css: string, rules: Array<ParsedRule>): string | null => {
 	if (rules.length === 0) return null;
@@ -240,7 +240,7 @@ export interface ModifiedRulesetResult {
 /**
  * Skips an identifier (class name, pseudo-class name, etc.) starting at `start`.
  *
- * @returns New position after the identifier
+ * @returns new position after the identifier
  */
 const skip_identifier = (selector: string, start: number): number => {
 	let pos = start;
@@ -273,9 +273,9 @@ const selector_has_pseudo_element = (selector: string): boolean => {
  * - `:focus` should NOT match `:focus-within` or `:focus-visible`
  * - `:hover` should NOT match `[data-hover="true"]` (attribute value)
  *
- * @param selector - The CSS selector to check
- * @param state - The state to look for (e.g., ":hover", ":focus")
- * @returns True if the selector already contains this state
+ * @param selector - the CSS selector to check
+ * @param state - the state to look for (e.g., ":hover", ":focus")
+ * @returns true if the selector already contains this state
  */
 const selector_has_state = (selector: string, state: string): boolean => {
 	// Match the state exactly, not when followed by word characters or hyphens
@@ -347,9 +347,9 @@ export const split_selector_list = (selector_group: string): Array<string> => {
  * Finds the end position of the compound selector containing the class at class_pos.
  * A compound selector is a sequence of simple selectors without combinators.
  *
- * @param selector - The CSS selector string
- * @param class_pos - Position of the `.` in `.class_name`
- * @returns Position where state modifiers should be inserted (before any pseudo-element)
+ * @param selector - the CSS selector string
+ * @param class_pos - position of the `.` in `.class_name`
+ * @returns position where state modifiers should be inserted (before any pseudo-element)
  */
 export const find_compound_end = (selector: string, class_pos: number): number => {
 	let pos = class_pos + 1; // Skip the dot
@@ -423,12 +423,12 @@ export const find_compound_end = (selector: string, class_pos: number): number =
 /**
  * Modifies a single CSS selector to add modifiers.
  *
- * @param selector - A single CSS selector (not a selector list)
- * @param original_class - The base class name (e.g., "menu_item")
- * @param new_class_escaped - The escaped new class name (e.g., "hover\\:menu_item")
- * @param state_css - State modifier CSS to insert (e.g., ":hover")
- * @param pseudo_element_css - Pseudo-element modifier CSS to insert (e.g., "::before")
- * @returns Modified selector
+ * @param selector - a single CSS selector (not a selector list)
+ * @param original_class - the base class name (e.g., "menu_item")
+ * @param new_class_escaped - the escaped new class name (e.g., "hover\\:menu_item")
+ * @param state_css - state modifier CSS to insert (e.g., ":hover")
+ * @param pseudo_element_css - pseudo-element modifier CSS to insert (e.g., "::before")
+ * @returns modified selector
  *
  * @example
  * ```ts
@@ -476,11 +476,11 @@ export const modify_single_selector = (
  * only that selector skips the modifier; other selectors still get it.
  *
  * @param selector_group - CSS selector list (may contain commas)
- * @param original_class - The base class name
- * @param new_class_escaped - The escaped new class name
- * @param states_to_add - Individual state modifiers (e.g., [":hover", ":focus"])
- * @param pseudo_element_css - Pseudo-element modifier CSS to insert (e.g., "::before")
- * @returns Result with modified selector list and information about skipped modifiers
+ * @param original_class - the base class name
+ * @param new_class_escaped - the escaped new class name
+ * @param states_to_add - individual state modifiers (e.g., [":hover", ":focus"])
+ * @param pseudo_element_css - pseudo-element modifier CSS to insert (e.g., "::before")
+ * @returns result with modified selector list and information about skipped modifiers
  */
 export const modify_selector_group = (
 	selector_group: string,
@@ -552,14 +552,14 @@ export const modify_selector_group = (
  * - For multiple states like `:hover:focus`, each is checked individually; conflicting
  *   states are skipped while non-conflicting ones are still applied.
  *
- * @param original_ruleset - The original CSS ruleset string
- * @param original_class - The base class name
- * @param new_class_escaped - The escaped new class name with modifiers
- * @param state_css - State modifier CSS (e.g., ":hover" or ":hover:focus")
- * @param pseudo_element_css - Pseudo-element modifier CSS (e.g., "::before")
- * @param media_wrapper - Media query wrapper (e.g., "@media (width >= 48rem)")
- * @param ancestor_wrapper - Ancestor wrapper (e.g., ":root.dark")
- * @returns Result with generated CSS and information about skipped modifiers
+ * @param original_ruleset - the original CSS ruleset string
+ * @param original_class - the base class name
+ * @param new_class_escaped - the escaped new class name with modifiers
+ * @param state_css - state modifier CSS (e.g., ":hover" or ":hover:focus")
+ * @param pseudo_element_css - pseudo-element modifier CSS (e.g., "::before")
+ * @param media_wrapper - media query wrapper (e.g., "@media (width >= 48rem)")
+ * @param ancestor_wrapper - ancestor wrapper (e.g., ":root.dark")
+ * @returns result with generated CSS and information about skipped modifiers
  */
 export const generate_modified_ruleset = (
 	original_ruleset: string,
