@@ -1,7 +1,8 @@
-import {test, describe, expect} from 'vitest';
+import {test, describe, expect, assert} from 'vitest';
 
 import {
 	generate_classes_css,
+	extract_primary_property,
 	type CssClassDefinitionInterpreter,
 } from '$lib/css_class_generation.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
@@ -21,6 +22,21 @@ const COMMON_DEFS = {
 	m_md: {declaration: 'margin: var(--space_md);'},
 	rounded: {declaration: 'border-radius: var(--border_radius_md);'},
 	shadow_md: {declaration: 'box-shadow: var(--shadow_md);'},
+};
+
+const BORDER_RADIUS_DEFS = {
+	border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+	border_top_right_radius_sm: {
+		declaration: 'border-top-right-radius: var(--border_radius_sm);',
+	},
+};
+
+const SIMPLE_LITERAL_INTERPRETER: CssClassDefinitionInterpreter = {
+	pattern: /^.+:.+$/,
+	interpret: (matched) => {
+		const [prop, val] = matched[0].split(':');
+		return `${prop}: ${val};`;
+	},
 };
 
 describe('generate_classes_css', () => {
@@ -417,23 +433,10 @@ describe('generate_classes_css', () => {
 		});
 
 		test('literal shorthand sorts before token longhand', () => {
-			const interpreter: CssClassDefinitionInterpreter = {
-				pattern: /^.+:.+$/,
-				interpret: (matched) => {
-					const [prop, val] = matched[0].split(':');
-					return `${prop}: ${val};`;
-				},
-			};
-
 			const result = generate_classes_css({
 				class_names: ['border_top_right_radius_sm', 'border-radius:0'],
-				class_definitions: {
-					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
-					border_top_right_radius_sm: {
-						declaration: 'border-top-right-radius: var(--border_radius_sm);',
-					},
-				},
-				interpreters: [interpreter],
+				class_definitions: BORDER_RADIUS_DEFS,
+				interpreters: [SIMPLE_LITERAL_INTERPRETER],
 				css_properties: null,
 			});
 
@@ -441,23 +444,10 @@ describe('generate_classes_css', () => {
 		});
 
 		test('literal longhand sorts after token shorthand', () => {
-			const interpreter: CssClassDefinitionInterpreter = {
-				pattern: /^.+:.+$/,
-				interpret: (matched) => {
-					const [prop, val] = matched[0].split(':');
-					return `${prop}: ${val};`;
-				},
-			};
-
 			const result = generate_classes_css({
 				class_names: ['border-top-right-radius:5px', 'border_radius_sm'],
-				class_definitions: {
-					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
-					border_top_right_radius_sm: {
-						declaration: 'border-top-right-radius: var(--border_radius_sm);',
-					},
-				},
-				interpreters: [interpreter],
+				class_definitions: BORDER_RADIUS_DEFS,
+				interpreters: [SIMPLE_LITERAL_INTERPRETER],
 				css_properties: null,
 			});
 
@@ -465,23 +455,10 @@ describe('generate_classes_css', () => {
 		});
 
 		test('both literal shorthand and longhand sort correctly', () => {
-			const interpreter: CssClassDefinitionInterpreter = {
-				pattern: /^.+:.+$/,
-				interpret: (matched) => {
-					const [prop, val] = matched[0].split(':');
-					return `${prop}: ${val};`;
-				},
-			};
-
 			const result = generate_classes_css({
 				class_names: ['border-top-right-radius:5px', 'border-radius:0'],
-				class_definitions: {
-					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
-					border_top_right_radius_sm: {
-						declaration: 'border-top-right-radius: var(--border_radius_sm);',
-					},
-				},
-				interpreters: [interpreter],
+				class_definitions: BORDER_RADIUS_DEFS,
+				interpreters: [SIMPLE_LITERAL_INTERPRETER],
 				css_properties: null,
 			});
 
@@ -489,7 +466,7 @@ describe('generate_classes_css', () => {
 		});
 
 		test('modified literal shorthand sorts before token longhand', () => {
-			const interpreter: CssClassDefinitionInterpreter = {
+			const modified_literal_interpreter: CssClassDefinitionInterpreter = {
 				pattern: /^.+:.+$/,
 				interpret: (matched) => {
 					const parts = matched[0].split(':');
@@ -501,17 +478,33 @@ describe('generate_classes_css', () => {
 
 			const result = generate_classes_css({
 				class_names: ['border_top_right_radius_sm', 'hover:border-radius:0'],
-				class_definitions: {
-					border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
-					border_top_right_radius_sm: {
-						declaration: 'border-top-right-radius: var(--border_radius_sm);',
-					},
-				},
-				interpreters: [interpreter],
+				class_definitions: BORDER_RADIUS_DEFS,
+				interpreters: [modified_literal_interpreter],
 				css_properties: null,
 			});
 
 			expect_css_order(result.css, 'hover\\:border-radius\\:0', 'border_top_right_radius_sm');
+		});
+
+		test('modified token class sorts alphabetically, not by property', () => {
+			// hover:p_md: segments ['hover', 'p_md'] — the loop runs i < 1 (i.e. only i=0),
+			// 'hover' is skipped as a modifier, loop ends, returns MAX_VALUE.
+			// p_md has a finite index, so it sorts before hover:p_md.
+			const catch_all_interpreter: CssClassDefinitionInterpreter = {
+				pattern: /./,
+				interpret: (matched) => `content: "${matched[0]}";`,
+			};
+
+			const result = generate_classes_css({
+				class_names: ['hover:p_md', 'p_md'],
+				class_definitions: {
+					p_md: {declaration: 'padding: var(--space_md);'},
+				},
+				interpreters: [catch_all_interpreter],
+				css_properties: null,
+			});
+
+			expect_css_order(result.css, 'p_md', 'hover\\:p_md');
 		});
 	});
 
@@ -988,5 +981,35 @@ describe('generate_classes_css', () => {
 
 			expect_css_contains(result.css, 'second: true;');
 		});
+	});
+});
+
+describe('extract_primary_property', () => {
+	test('returns property name for single-property declaration', () => {
+		assert.strictEqual(
+			extract_primary_property('border-radius: var(--border_radius_sm);'),
+			'border-radius',
+		);
+	});
+
+	test('returns null for multi-property declaration', () => {
+		assert.strictEqual(extract_primary_property('display: flex; align-items: center;'), null);
+	});
+
+	test('works without trailing semicolon', () => {
+		assert.strictEqual(extract_primary_property('border-radius: 0'), 'border-radius');
+	});
+
+	test('lowercases the property name', () => {
+		assert.strictEqual(extract_primary_property('Border-Radius: 0;'), 'border-radius');
+	});
+
+	test('returns null for CSS custom property declaration', () => {
+		// Custom properties (--foo) start with two dashes; the regex requires [a-zA-Z] after optional single `-`
+		assert.strictEqual(extract_primary_property('--foo: 1;'), null);
+	});
+
+	test('handles trailing whitespace as single-property', () => {
+		assert.strictEqual(extract_primary_property('padding: var(--space_md);\n'), 'padding');
 	});
 });
