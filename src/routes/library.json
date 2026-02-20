@@ -1073,7 +1073,7 @@
 					{
 						"name": "CssClassDefinitionBase",
 						"kind": "type",
-						"source_line": 116,
+						"source_line": 120,
 						"type_signature": "CssClassDefinitionBase",
 						"properties": [
 							{
@@ -1087,7 +1087,7 @@
 						"name": "CssClassDefinitionComposition",
 						"kind": "type",
 						"doc_comment": "Pure utility composition (composes only).",
-						"source_line": 121,
+						"source_line": 125,
 						"type_signature": "CssClassDefinitionComposition",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1112,7 +1112,7 @@
 						"name": "CssClassDefinitionDeclaration",
 						"kind": "type",
 						"doc_comment": "Custom CSS declaration (optionally seeded with composes).",
-						"source_line": 128,
+						"source_line": 132,
 						"type_signature": "CssClassDefinitionDeclaration",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1137,7 +1137,7 @@
 						"name": "CssClassDefinitionRuleset",
 						"kind": "type",
 						"doc_comment": "Full ruleset with selectors.",
-						"source_line": 135,
+						"source_line": 139,
 						"type_signature": "CssClassDefinitionRuleset",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1162,21 +1162,21 @@
 						"name": "CssClassDefinitionStatic",
 						"kind": "type",
 						"doc_comment": "Static definitions (not interpreter-based).",
-						"source_line": 142,
+						"source_line": 146,
 						"type_signature": "CssClassDefinitionStatic"
 					},
 					{
 						"name": "CssClassDefinition",
 						"kind": "type",
 						"doc_comment": "Full union including interpreters.",
-						"source_line": 148,
+						"source_line": 152,
 						"type_signature": "CssClassDefinition"
 					},
 					{
 						"name": "CssClassInterpreterContext",
 						"kind": "type",
 						"doc_comment": "Context passed to CSS class interpreters.\nProvides access to logging, diagnostics collection, and the class registry.",
-						"source_line": 154,
+						"source_line": 158,
 						"type_signature": "CssClassInterpreterContext",
 						"properties": [
 							{
@@ -1209,7 +1209,7 @@
 						"name": "CssClassDefinitionInterpreter",
 						"kind": "type",
 						"doc_comment": "Interpreter for dynamic CSS class generation based on pattern matching.",
-						"source_line": 166,
+						"source_line": 170,
 						"type_signature": "CssClassDefinitionInterpreter",
 						"extends": ["CssClassDefinitionBase"],
 						"properties": [
@@ -1230,7 +1230,7 @@
 						"name": "GenerateClassesCssResult",
 						"kind": "type",
 						"doc_comment": "Result from CSS class generation.",
-						"source_line": 181,
+						"source_line": 185,
 						"type_signature": "GenerateClassesCssResult",
 						"properties": [
 							{
@@ -1254,7 +1254,7 @@
 					{
 						"name": "GenerateClassesCssOptions",
 						"kind": "type",
-						"source_line": 188,
+						"source_line": 192,
 						"type_signature": "GenerateClassesCssOptions",
 						"properties": [
 							{
@@ -1299,7 +1299,7 @@
 					{
 						"name": "generate_classes_css",
 						"kind": "function",
-						"source_line": 203,
+						"source_line": 207,
 						"type_signature": "(options: GenerateClassesCssOptions): GenerateClassesCssResult",
 						"return_type": "GenerateClassesCssResult",
 						"parameters": [
