@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.53.1
+
+### Patch Changes
+
+- improve generated style sorting ([#82](https://github.com/fuzdev/fuz_css/pull/82))
+
 ## 0.53.0
 
 ### Minor Changes
