@@ -134,27 +134,23 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 // Generated lookup maps for efficient access
 
 /** Map of media modifier names to their CSS output */
-export const MEDIA_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'media').map((m) => [m.name, m]),
-);
-
+export const MEDIA_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of ancestor modifier names to their CSS output */
-export const ANCESTOR_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'ancestor').map((m) => [m.name, m]),
-);
-
+export const ANCESTOR_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of state modifier names to their CSS output */
-export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'state').map((m) => [m.name, m]),
-);
-
+export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of pseudo-element modifier names to their CSS output */
-export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map(
-	MODIFIERS.filter((m) => m.type === 'pseudo-element').map((m) => [m.name, m]),
-);
-
+export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** All modifier names for quick lookup */
-export const ALL_MODIFIER_NAMES: Set<string> = new Set(MODIFIERS.map((m) => m.name));
+export const ALL_MODIFIER_NAMES: Set<string> = new Set();
+
+for (const m of MODIFIERS) {
+	ALL_MODIFIER_NAMES.add(m.name);
+	if (m.type === 'media') MEDIA_MODIFIERS.set(m.name, m);
+	else if (m.type === 'ancestor') ANCESTOR_MODIFIERS.set(m.name, m);
+	else if (m.type === 'state') STATE_MODIFIERS.set(m.name, m);
+	else if (m.type === 'pseudo-element') PSEUDO_ELEMENT_MODIFIERS.set(m.name, m); // eslint-disable-line @typescript-eslint/no-unnecessary-condition
+}
 
 /**
  * Pattern for parameterized nth-child: `nth-child(2n+1):`
@@ -180,14 +176,16 @@ export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
  * Extracts content from balanced parentheses after a prefix.
  * Supports nested parens for calc(), clamp(), min(), max(), etc.
  *
- * @param segment - The full segment to parse (e.g., "min-width(calc(100vw - 200px))")
- * @param prefix - The prefix before the opening paren (e.g., "min-width")
- * @returns The content inside the balanced parens, or null if no match/unbalanced
+ * @param segment - the full segment to parse (e.g., "min-width(calc(100vw - 200px))")
+ * @param prefix - the prefix before the opening paren (e.g., "min-width")
+ * @returns the content inside the balanced parens, or null if no match/unbalanced
  *
  * @example
+ * ```ts
  * extract_balanced_parens("min-width(800px)", "min-width") // "800px"
  * extract_balanced_parens("min-width(calc(100vw - 20px))", "min-width") // "calc(100vw - 20px)"
  * extract_balanced_parens("min-width(calc(100vw)", "min-width") // null (unbalanced)
+ * ```
  */
 export const extract_balanced_parens = (segment: string, prefix: string): string | null => {
 	const expected_start = prefix + '(';
@@ -242,12 +240,14 @@ const is_valid_breakpoint_value = (value: string): boolean => {
  * Supports nested parentheses for calc(), clamp(), min(), max(), var().
  * Requires value to start with a digit or known CSS function to catch obvious mistakes.
  *
- * @returns The CSS media query or null if not an arbitrary breakpoint
+ * @returns the CSS media query or null if not an arbitrary breakpoint
  *
  * @example
+ * ```ts
  * parse_arbitrary_breakpoint("min-width(800px)") // "@media (width >= 800px)"
  * parse_arbitrary_breakpoint("min-width(calc(100vw - 200px))") // "@media (width >= calc(100vw - 200px))"
  * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no digit or function)
+ * ```
  */
 export const parse_arbitrary_breakpoint = (segment: string): string | null => {
 	const min_value = extract_balanced_parens(segment, 'min-width');
@@ -266,7 +266,7 @@ export const parse_arbitrary_breakpoint = (segment: string): string | null => {
 /**
  * Parses a parameterized state modifier (nth-child, nth-last-child, nth-of-type, nth-last-of-type).
  *
- * @returns Object with name (including parameter) and CSS, or null if not parameterized
+ * @returns object with name (including parameter) and CSS, or null if not parameterized
  */
 export const parse_parameterized_state = (
 	segment: string,
@@ -314,7 +314,7 @@ export const parse_parameterized_state = (
  * Gets the modifier definition for a segment.
  * Handles both static modifiers and dynamic patterns (arbitrary breakpoints, parameterized states).
  *
- * @returns The modifier definition or null if not a known modifier
+ * @returns the modifier definition or null if not a known modifier
  */
 export const get_modifier = (
 	segment: string,

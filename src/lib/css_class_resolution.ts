@@ -33,11 +33,11 @@ export type ResolveComposesResult =
  * and combines with any explicit `declaration`. If no `composes`, returns the
  * explicit `declaration` directly.
  *
- * @param def - The class definition to resolve
- * @param class_name - The name of the class being resolved (for error messages)
- * @param definitions - Record of all known class definitions
- * @param css_properties - Set of valid CSS properties for literal validation, or null to skip
- * @returns Combined declaration or an error
+ * @param def - the class definition to resolve
+ * @param class_name - the name of the class being resolved (for error messages)
+ * @param definitions - record of all known class definitions
+ * @param css_properties - set of valid CSS properties for literal validation, or null to skip
+ * @returns combined declaration or an error
  */
 export const resolve_class_definition = (
 	def: CssClassDefinitionStatic,
@@ -113,15 +113,15 @@ export const resolve_class_definition = (
  * - Diamond dependencies (class reached via different composition branches) are silently skipped
  * - Redundant listings (class already included by an earlier sibling in this array) emit a warning
  *
- * @param class_names - Array of class names to resolve
- * @param definitions - Record of all known class definitions
- * @param resolution_stack - Set of class names currently being resolved (for cycle detection)
- * @param visited - Set of all class names already resolved (for deduplication)
- * @param original_class_name - The class name being defined (for error messages)
- * @param css_properties - Set of valid CSS properties for literal validation, or null to skip
- * @returns Combined declarations or an error
- * @mutates resolution_stack - Temporarily adds/removes names during recursion
- * @mutates visited - Adds resolved class names for deduplication
+ * @param class_names - array of class names to resolve
+ * @param definitions - record of all known class definitions
+ * @param resolution_stack - set of class names currently being resolved (for cycle detection)
+ * @param visited - set of all class names already resolved (for deduplication)
+ * @param original_class_name - the class name being defined (for error messages)
+ * @param css_properties - set of valid CSS properties for literal validation, or null to skip
+ * @returns combined declarations or an error
+ * @mutates resolution_stack - temporarily adds/removes names during recursion
+ * @mutates visited - adds resolved class names for deduplication
  */
 export const resolve_composes = (
 	class_names: Array<string>,

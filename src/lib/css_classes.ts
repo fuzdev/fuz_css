@@ -60,10 +60,10 @@ export class CssClasses {
 	#dirty = true;
 
 	/**
-	 * Creates a new CssClasses collection.
+	 * Creates a new `CssClasses` collection.
 	 *
-	 * @param additional_classes - Classes to always include (also treated as explicit for warnings)
-	 * @param exclude_classes - Classes to exclude from output (also suppresses warnings)
+	 * @param additional_classes - classes to always include (also treated as explicit for warnings)
+	 * @param exclude_classes - classes to exclude from output (also suppresses warnings)
 	 */
 	constructor(
 		additional_classes: Set<string> | null = null,
@@ -77,8 +77,8 @@ export class CssClasses {
 	 * Adds extraction results for a file.
 	 * Replaces any previous classes and diagnostics for this file.
 	 *
-	 * @param id - File identifier
-	 * @param data - Extraction data fields to store for this file
+	 * @param id - file identifier
+	 * @param data - extraction data fields to store for this file
 	 */
 	add(id: string, data: ExtractionData): void {
 		this.#dirty = true;

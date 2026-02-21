@@ -46,9 +46,9 @@ export interface VariableDependencyGraph {
 /**
  * Builds a dependency graph from an array of style variables.
  *
- * @param variables - Array of StyleVariable objects
- * @param content_hash - Hash of the source for cache invalidation
- * @returns VariableDependencyGraph
+ * @param variables - array of `StyleVariable` objects
+ * @param content_hash - hash of the source for cache invalidation
+ * @returns `VariableDependencyGraph`
  */
 export const build_variable_graph = (
 	variables: Array<StyleVariable>,
@@ -92,9 +92,9 @@ export interface ResolveVariablesResult {
  * When a variable is requested, all variables it depends on are included.
  * Both light and dark dependencies are always resolved together.
  *
- * @param graph - The variable dependency graph
- * @param initial_variables - Initial set of variable names to resolve
- * @returns ResolveVariablesResult with all transitive dependencies
+ * @param graph - the variable dependency graph
+ * @param initial_variables - initial set of variable names to resolve
+ * @returns `ResolveVariablesResult` with all transitive dependencies
  */
 export const resolve_variables_transitive = (
 	graph: VariableDependencyGraph,
@@ -158,10 +158,10 @@ export const resolve_variables_transitive = (
 /**
  * Generates theme CSS for the resolved variables.
  *
- * @param graph - The variable dependency graph
- * @param resolved_variables - Set of variable names to include
- * @param specificity - Number of times to repeat the selector (default 1)
- * @returns Object with light_css and dark_css strings
+ * @param graph - the variable dependency graph
+ * @param resolved_variables - set of variable names to include
+ * @param specificity - number of times to repeat the selector (default 1)
+ * @returns object with `light_css` and `dark_css` strings
  */
 export const generate_theme_css = (
 	graph: VariableDependencyGraph,
@@ -206,8 +206,8 @@ export const generate_theme_css = (
 /**
  * Gets all variable names from the graph.
  *
- * @param graph - The variable dependency graph
- * @returns Set of all variable names in the graph
+ * @param graph - the variable dependency graph
+ * @returns set of all variable names in the graph
  */
 export const get_all_variable_names = (graph: VariableDependencyGraph): Set<string> => {
 	return new Set(graph.variables.keys());
@@ -216,9 +216,9 @@ export const get_all_variable_names = (graph: VariableDependencyGraph): Set<stri
 /**
  * Checks if a variable exists in the graph.
  *
- * @param graph - The variable dependency graph
- * @param name - Variable name to check (without -- prefix)
- * @returns True if the variable exists in the graph
+ * @param graph - the variable dependency graph
+ * @param name - variable name to check (without -- prefix)
+ * @returns true if the variable exists in the graph
  */
 export const has_variable = (graph: VariableDependencyGraph, name: string): boolean => {
 	return graph.variables.has(name);
@@ -255,9 +255,9 @@ const TYPO_SIMILARITY_THRESHOLD = 0.85;
  * Finds the most similar variable in the graph to the given name.
  * Returns null if no variable exceeds the similarity threshold.
  *
- * @param graph - The variable dependency graph
- * @param name - The variable name to find similar matches for
- * @returns The most similar variable name, or null if none are similar enough
+ * @param graph - the variable dependency graph
+ * @param name - the variable name to find similar matches for
+ * @returns the most similar variable name, or null if none are similar enough
  */
 export const find_similar_variable = (
 	graph: VariableDependencyGraph,
@@ -280,8 +280,8 @@ export const find_similar_variable = (
 /**
  * Resolves a variables option to a concrete array of style variables.
  *
- * @param variables - The variables option (undefined, null, array, or callback)
- * @returns Resolved array of style variables, or empty array if null
+ * @param variables - the variables option (undefined, null, array, or callback)
+ * @returns resolved array of style variables, or empty array if null
  */
 export const resolve_variables_option = (variables: VariablesOption): Array<StyleVariable> => {
 	if (variables === null) return [];
@@ -294,8 +294,8 @@ export const resolve_variables_option = (variables: VariablesOption): Array<Styl
  * Builds a variable dependency graph from a variables option.
  * Handles all option forms: undefined (defaults), null (disabled), array, or callback.
  *
- * @param variables - The variables option from generator config
- * @returns VariableDependencyGraph built from the resolved variables
+ * @param variables - the variables option from generator config
+ * @returns `VariableDependencyGraph` built from the resolved variables
  */
 export const build_variable_graph_from_options = (
 	variables: VariablesOption,

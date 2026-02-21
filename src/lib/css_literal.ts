@@ -92,7 +92,7 @@ export type InterpretCssLiteralResult =
 //
 
 /**
- * Loads CSS properties from @webref/css.
+ * Loads CSS properties from `@webref/css`.
  * Returns a fresh Set each time - callers should cache the result if needed.
  */
 export const load_css_properties = async (): Promise<Set<string>> => {
@@ -105,10 +105,10 @@ export const load_css_properties = async (): Promise<Set<string>> => {
  * Checks if a property name is a valid CSS property.
  * Custom properties (--*) always return true.
  *
- * @param property - The CSS property name to validate
- * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param property - the CSS property name to validate
+ * @param properties - set of valid CSS properties from `load_css_properties()`.
  *                     Pass `null` to skip validation.
- * @returns True if valid CSS property or custom property
+ * @returns true if valid CSS property or custom property
  */
 export const is_valid_css_property = (
 	property: string,
@@ -123,55 +123,40 @@ export const is_valid_css_property = (
 	return properties.has(property);
 };
 
+const find_closest_match = (typo: string, candidates: Iterable<string>): string | null => {
+	let best_match: string | null = null;
+	let best_distance = 3; // Only suggest if distance <= 2
+	for (const candidate of candidates) {
+		const distance = levenshtein_distance(typo, candidate);
+		if (distance < best_distance) {
+			best_distance = distance;
+			best_match = candidate;
+		}
+	}
+	return best_match;
+};
+
 /**
  * Suggests a correct property name for a typo using Levenshtein distance.
  *
- * @param typo - The mistyped property name
- * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param typo - the mistyped property name
+ * @param properties - set of valid CSS properties from `load_css_properties()`.
  *                     Pass `null` to skip suggestions.
- * @returns The suggested property or null if no close match (Levenshtein distance > 2)
+ * @returns the suggested property or null if no close match (Levenshtein distance > 2)
  */
 export const suggest_css_property = (
 	typo: string,
 	properties: Set<string> | null,
-): string | null => {
-	if (!properties) return null;
-
-	let best_match: string | null = null;
-	let best_distance = 3; // Only suggest if distance <= 2
-
-	for (const prop of properties) {
-		const distance = levenshtein_distance(typo, prop);
-		if (distance < best_distance) {
-			best_distance = distance;
-			best_match = prop;
-		}
-	}
-
-	return best_match;
-};
+): string | null => (properties ? find_closest_match(typo, properties) : null);
 
 /**
  * Suggests a correct modifier name for a typo using Levenshtein distance.
  *
- * @param typo - The mistyped modifier name
- * @returns The suggested modifier or null if no close match (Levenshtein distance > 2)
+ * @param typo - the mistyped modifier name
+ * @returns the suggested modifier or null if no close match (Levenshtein distance > 2)
  */
-export const suggest_modifier = (typo: string): string | null => {
-	const all_names = get_all_modifier_names();
-	let best_match: string | null = null;
-	let best_distance = 3;
-
-	for (const name of all_names) {
-		const distance = levenshtein_distance(typo, name);
-		if (distance < best_distance) {
-			best_distance = distance;
-			best_match = name;
-		}
-	}
-
-	return best_match;
-};
+export const suggest_modifier = (typo: string): string | null =>
+	find_closest_match(typo, get_all_modifier_names());
 
 //
 // Value Formatting
@@ -182,8 +167,8 @@ export const suggest_modifier = (typo: string): string | null => {
  * - Replaces `~` with space
  * - Ensures space before `!important`
  *
- * @param value - Raw value from class name
- * @returns Formatted CSS value
+ * @param value - raw value from class name
+ * @returns formatted CSS value
  */
 export const format_css_value = (value: string): string => {
 	let result = value.replace(/~/g, ' ');
@@ -200,8 +185,8 @@ const CALC_MISSING_SPACE_PATTERN = /calc\([^)]*\d+[%a-z]*[+-]\d/i;
 /**
  * Checks if a value contains a possibly invalid calc expression.
  *
- * @param value - The formatted CSS value
- * @returns Warning message if suspicious, null otherwise
+ * @param value - the formatted CSS value
+ * @returns warning message if suspicious, null otherwise
  */
 export const check_calc_expression = (value: string): string | null => {
 	if (CALC_MISSING_SPACE_PATTERN.test(value)) {
@@ -218,8 +203,8 @@ export const check_calc_expression = (value: string): string | null => {
  * Checks if a class name could be a CSS-literal class.
  * Quick check before attempting full parse.
  *
- * @param class_name - The class name to check
- * @returns True if it could be CSS-literal syntax
+ * @param class_name - the class name to check
+ * @returns true if it could be CSS-literal syntax
  */
 export const is_possible_css_literal = (class_name: string): boolean => {
 	// Must contain at least one colon
@@ -246,9 +231,11 @@ export const is_possible_css_literal = (class_name: string): boolean => {
  * Parenthesized content (like function arguments) is kept intact.
  *
  * @example
- * extract_segments('md:hover:display:flex') → ['md', 'hover', 'display', 'flex']
- * extract_segments('nth-child(2n+1):color:red') → ['nth-child(2n+1)', 'color', 'red']
- * extract_segments('width:calc(100%-20px)') → ['width', 'calc(100%-20px)']
+ * ```ts
+ * extract_segments('md:hover:display:flex') // → ['md', 'hover', 'display', 'flex']
+ * extract_segments('nth-child(2n+1):color:red') // → ['nth-child(2n+1)', 'color', 'red']
+ * extract_segments('width:calc(100%-20px)') // → ['width', 'calc(100%-20px)']
+ * ```
  */
 export const extract_segments = (class_name: string): Array<string> => {
 	const segments: Array<string> = [];
@@ -285,9 +272,9 @@ export const extract_segments = (class_name: string): Array<string> => {
  *
  * Used by both CSS-literal parsing and modified class interpretation.
  *
- * @param segments - Array of colon-separated segments
- * @param class_name - Original class name for error messages
- * @returns ModifierExtractionResult with modifiers and remaining segments, or error
+ * @param segments - array of colon-separated segments
+ * @param class_name - original class name for error messages
+ * @returns `ModifierExtractionResult` with modifiers and remaining segments, or error
  */
 export const extract_and_validate_modifiers = (
 	segments: Array<string>,
@@ -456,10 +443,10 @@ export const extract_and_validate_modifiers = (
 /**
  * Parses a CSS-literal class name into its components.
  *
- * @param class_name - The class name to parse
- * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param class_name - the class name to parse
+ * @param css_properties - set of valid CSS properties from `load_css_properties()`.
  *                         Pass `null` to skip property validation.
- * @returns CssLiteralParseResult with parsed data or error
+ * @returns `CssLiteralParseResult` with parsed data or error
  */
 export const parse_css_literal = (
 	class_name: string,
@@ -605,11 +592,11 @@ export interface CssLiteralOutput {
  *
  * Callers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.
  *
- * @param class_name - The class name to interpret
- * @param escaped_class_name - The CSS-escaped version of the class name
- * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param class_name - the class name to interpret
+ * @param escaped_class_name - the CSS-escaped version of the class name
+ * @param css_properties - set of valid CSS properties from `load_css_properties()`.
  *                         Pass `null` to skip property validation.
- * @returns Result with output and warnings on success, or error on failure
+ * @returns result with output and warnings on success, or error on failure
  */
 export const interpret_css_literal = (
 	class_name: string,
@@ -674,10 +661,10 @@ export const has_extracted_modifiers = (modifiers: ExtractedModifiers): boolean 
  * Returns the declaration if successful, null if not a literal, or an error
  * if it's a literal with issues (modifiers, invalid property, etc.).
  *
- * @param class_name - The class name to try resolving
- * @param css_properties - Set of valid CSS properties, or null to skip validation
- * @param context_class_name - The class being defined (for error messages)
- * @returns Resolution result with declaration, or error, or null if not a literal
+ * @param class_name - the class name to try resolving
+ * @param css_properties - set of valid CSS properties, or null to skip validation
+ * @param context_class_name - the class being defined (for error messages)
+ * @returns resolution result with declaration, or error, or null if not a literal
  */
 export const try_resolve_literal = (
 	class_name: string,
@@ -734,7 +721,7 @@ const contextualize_error = (
  * Generates simple CSS for a CSS-literal class (without grouping).
  * Used by the interpreter for basic output.
  *
- * @param output - The CSS-literal output info
+ * @param output - the CSS-literal output info
  * @returns CSS string for this class
  */
 export const generate_css_literal_simple = (output: CssLiteralOutput): string => {

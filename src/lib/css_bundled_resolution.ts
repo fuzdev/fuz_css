@@ -50,36 +50,39 @@ const TYPO_SIMILARITY_THRESHOLD = 0.6;
  *
  * See variable_graph.ts for the Levenshtein-based approach used for variables.
  */
-const string_similarity = (a: string, b: string): number => {
-	if (a === b) return 1;
-	if (a.length < 2 || b.length < 2) return 0;
-
-	const bigrams_a: Set<string> = new Set();
-	for (let i = 0; i < a.length - 1; i++) {
-		bigrams_a.add(a.slice(i, i + 2));
+const build_bigrams = (str: string): Set<string> => {
+	const bigrams: Set<string> = new Set();
+	for (let i = 0; i < str.length - 1; i++) {
+		bigrams.add(str.slice(i, i + 2));
 	}
+	return bigrams;
+};
 
+const string_similarity = (bigrams_a: Set<string>, len_a: number, b: string): number => {
+	if (len_a < 2 || b.length < 2) return 0;
 	let matches = 0;
 	for (let i = 0; i < b.length - 1; i++) {
 		if (bigrams_a.has(b.slice(i, i + 2))) matches++;
 	}
-
-	return (2 * matches) / (a.length - 1 + b.length - 1);
+	return (2 * matches) / (len_a - 1 + b.length - 1);
 };
 
 /**
  * Finds the most similar name from a set of known names.
  *
- * @param name - The name to find similar matches for
- * @param known_names - Set of known valid names
- * @returns The most similar name, or null if none are similar enough
+ * @param name - the name to find similar matches for
+ * @param known_names - set of known valid names
+ * @returns the most similar name, or null if none are similar enough
  */
 const find_similar_name = (name: string, known_names: Set<string>): string | null => {
+	if (name === '') return null;
+	const bigrams_a = build_bigrams(name);
 	let best_match: string | null = null;
 	let best_similarity = TYPO_SIMILARITY_THRESHOLD;
 
 	for (const known of known_names) {
-		const similarity = string_similarity(name, known);
+		if (name === known) return known; // exact match fast path
+		const similarity = string_similarity(bigrams_a, name.length, known);
 		if (similarity > best_similarity) {
 			best_similarity = similarity;
 			best_match = known;
@@ -182,8 +185,8 @@ export interface CssResolutionOptions {
  * 3. Resolve transitive variable dependencies
  * 4. Generate output: theme_css (light+dark), base_css (source order)
  *
- * @param options - Resolution options including indexes, detected usage, and config
- * @returns Resolution result with theme CSS, base CSS, and diagnostics
+ * @param options - resolution options including indexes, detected usage, and config
+ * @returns resolution result with theme CSS, base CSS, and diagnostics
  */
 export const resolve_css = (options: CssResolutionOptions): CssResolutionResult => {
 	const {
@@ -430,10 +433,10 @@ export interface GenerateBundledCssOptions {
 /**
  * Generates combined CSS output from resolution result.
  *
- * @param result - Resolution result from resolve_css
- * @param utility_css - Generated utility CSS (from generate_classes_css)
- * @param options - Output options
- * @returns Combined CSS string
+ * @param result - resolution result from `resolve_css`
+ * @param utility_css - generated utility CSS (from `generate_classes_css`)
+ * @param options - output options
+ * @returns combined CSS string
  */
 export const generate_bundled_css = (
 	result: CssResolutionResult,

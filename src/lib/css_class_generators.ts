@@ -14,25 +14,29 @@ export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
  * Generates CSS class declarations from templates.
  * Supports up to 3 dimensions of multiplicative combinations.
  *
- * @param template - Function that generates CSS from values, can return null to skip
- * @param values - Primary iterable of values
- * @param secondary - Optional second dimension (makes it multiplicative)
- * @param tertiary - Optional third dimension for even more combinations
+ * @param template - function that generates CSS from values, can return null to skip
+ * @param values - primary iterable of values
+ * @param secondary - optional second dimension (makes it multiplicative)
+ * @param tertiary - optional third dimension for even more combinations
  *
  * @example
+ * ```ts
  * // Simple list
  * generate_classes(
  *   v => ({ name: `position_${v}`, css: `position: ${v};` }),
  *   ['static', 'relative', 'absolute']
  * )
+ * ```
  *
  * @example
+ * ```ts
  * // Two dimensions (multiplicative)
  * generate_classes(
  *   (dir, size) => ({ name: `m${dir}_${size}`, css: `margin-${dir}: ${size};` }),
  *   ['top', 'bottom'],
  *   ['0', '1px', '2px']
  * )
+ * ```
  */
 export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	template: ClassTemplateFn<T1, T2, T3>,
@@ -42,27 +46,25 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 ): Record<string, CssClassDefinition> => {
 	const result: Record<string, CssClassDefinition> = {};
 
-	for (const v1 of values) {
-		if (secondary) {
-			for (const v2 of secondary) {
-				if (tertiary) {
-					for (const v3 of tertiary) {
-						const generated = (template as any)(v1, v2, v3);
-						if (generated) {
-							result[generated.name] = {declaration: generated.css};
-						}
-					}
-				} else {
-					const generated = (template as any)(v1, v2);
-					if (generated) {
-						result[generated.name] = {declaration: generated.css};
-					}
-				}
-			}
-		} else {
+	if (!secondary) {
+		for (const v1 of values) {
 			const generated = (template as any)(v1);
-			if (generated) {
-				result[generated.name] = {declaration: generated.css};
+			if (generated) result[generated.name] = {declaration: generated.css};
+		}
+	} else if (!tertiary) {
+		for (const v1 of values) {
+			for (const v2 of secondary) {
+				const generated = (template as any)(v1, v2);
+				if (generated) result[generated.name] = {declaration: generated.css};
+			}
+		}
+	} else {
+		for (const v1 of values) {
+			for (const v2 of secondary) {
+				for (const v3 of tertiary) {
+					const generated = (template as any)(v1, v2, v3);
+					if (generated) result[generated.name] = {declaration: generated.css};
+				}
 			}
 		}
 	}
@@ -111,10 +113,10 @@ export const format_dimension_value = (value: string): string => {
 /**
  * Generate classes for a single CSS property with various values.
  *
- * @param property - The CSS property name (e.g. 'font-size', 'gap')
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values (e.g. v => `var(--space_${v})`)
- * @param prefix - Optional class name prefix (defaults to property with dashes replaced by underscores)
+ * @param property - the CSS property name (e.g. 'font-size', 'gap')
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values (e.g. v => `var(--space_${v})`)
+ * @param prefix - optional class name prefix (defaults to property with dashes replaced by underscores)
  */
 export const generate_property_classes = (
 	property: string,
@@ -135,9 +137,9 @@ export const generate_property_classes = (
  * Generate directional classes for properties like margin and padding.
  * Creates classes for all directions: base, top, right, bottom, left, x (horizontal), y (vertical).
  *
- * @param property - The base CSS property name (e.g. 'margin', 'padding')
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values (defaults to identity)
+ * @param property - the base CSS property name (e.g. 'margin', 'padding')
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values (defaults to identity)
  */
 export const generate_directional_classes = (
 	property: string,
@@ -190,8 +192,8 @@ export const generate_directional_classes = (
  * Generate border radius corner classes for all four corners.
  * Creates classes for top-left, top-right, bottom-left, bottom-right corners.
  *
- * @param values - The values to generate classes for
- * @param formatter - Optional function to format values
+ * @param values - the values to generate classes for
+ * @param formatter - optional function to format values
  */
 export const generate_border_radius_corners = (
 	values: Iterable<string>,
@@ -219,8 +221,8 @@ export const generate_border_radius_corners = (
  * Creates classes for regular, top, bottom, inset, inset-top, and inset-bottom shadows.
  * Each shadow uses color-mix with alpha values for transparency.
  *
- * @param sizes - The shadow size variants (xs, sm, md, lg, xl)
- * @param alpha_mapping - Mapping of sizes to alpha numbers (1-5)
+ * @param sizes - the shadow size variants (xs, sm, md, lg, xl)
+ * @param alpha_mapping - mapping of sizes to alpha numbers (1-5)
  */
 export const generate_shadow_classes = (
 	sizes: Iterable<string>,
