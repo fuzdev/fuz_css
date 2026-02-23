@@ -10,11 +10,8 @@
 import {test, expect, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
-import {
-	create_test_fixtures,
-	assert_order,
-	empty_detection,
-} from './css_bundled_resolution_fixtures.js';
+import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
+import {expect_css_order} from './test_helpers.ts';
 
 /**
  * Core rules that should always be included regardless of detected elements.
@@ -282,7 +279,7 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			assert_order(result.base_css, 'color: blue', 'color: darkblue', 'color: navy');
+			expect_css_order(result.base_css, 'color: blue', 'color: darkblue', 'color: navy');
 		});
 	});
 
@@ -405,7 +402,7 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			assert_order(result.base_css, 'padding: 5px', 'background: gray', 'outline: none');
+			expect_css_order(result.base_css, 'padding: 5px', 'background: gray', 'outline: none');
 		});
 
 		test('includes @media rules for elements', () => {

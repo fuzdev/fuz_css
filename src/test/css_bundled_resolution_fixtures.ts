@@ -9,10 +9,6 @@ import {build_variable_graph} from '../lib/variable_graph.js';
 import {build_class_variable_index} from '../lib/class_variable_index.js';
 import type {StyleVariable} from '../lib/variable.js';
 import type {CssClassDefinition} from '../lib/css_class_generation.js';
-import {expect_css_order} from './test_helpers.js';
-
-// Re-export expect_css_order as assert_order for backwards compatibility
-export {expect_css_order as assert_order};
 
 /**
  * Helper to create minimal test fixtures for CSS resolution tests.

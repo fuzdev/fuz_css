@@ -10,7 +10,7 @@
 import {test, expect, describe} from 'vitest';
 
 import {generate_bundled_css, type CssResolutionResult} from '../lib/css_bundled_resolution.js';
-import {assert_order} from './css_bundled_resolution_fixtures.js';
+import {expect_css_order} from './test_helpers.ts';
 
 /**
  * Creates a mock resolution result for testing generate_bundled_css.
@@ -31,7 +31,12 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result();
 			const combined = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
-			assert_order(combined, '/* Theme Variables */', '/* Base Styles */', '/* Utility Classes */');
+			expect_css_order(
+				combined,
+				'/* Theme Variables */',
+				'/* Base Styles */',
+				'/* Utility Classes */',
+			);
 		});
 
 		test('includes section comments', () => {

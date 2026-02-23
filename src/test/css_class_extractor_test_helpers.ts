@@ -5,10 +5,6 @@ import {
 	type AcornPlugin,
 	extract_from_ts,
 } from '$lib/css_class_extractor.js';
-import {loc} from './test_helpers.js';
-
-// Re-export loc for consumers that import from this file
-export {loc};
 
 /**
  * Cached JSX plugin to avoid repeated async imports.

@@ -2,11 +2,8 @@ import {test, expect, describe} from 'vitest';
 
 import {extract_from_svelte, SourceIndex} from '$lib/css_class_extractor.js';
 
-import {
-	loc,
-	assert_class_at_line,
-	assert_class_locations,
-} from './css_class_extractor_test_helpers.js';
+import {assert_class_at_line, assert_class_locations} from './css_class_extractor_test_helpers.ts';
+import {loc} from './test_helpers.ts';
 
 describe('SourceIndex', () => {
 	describe('standard LF line endings', () => {

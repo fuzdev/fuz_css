@@ -11,11 +11,8 @@ import {test, expect, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
 import type {CssClassDefinition} from '../lib/css_class_generation.js';
-import {
-	create_test_fixtures,
-	assert_order,
-	empty_detection,
-} from './css_bundled_resolution_fixtures.js';
+import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
+import {expect_css_order} from './test_helpers.ts';
 
 describe('resolve_css variable resolution', () => {
 	describe('source collection', () => {
@@ -463,7 +460,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			assert_order(result.theme_css, '--alpha', '--mid', '--zebra');
+			expect_css_order(result.theme_css, '--alpha', '--mid', '--zebra');
 		});
 
 		test('theme_specificity multiplies :root', () => {
