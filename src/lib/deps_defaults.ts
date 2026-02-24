@@ -1,8 +1,8 @@
 /**
- * Production implementations of operations interfaces.
+ * Production implementations of deps interfaces.
  *
- * Provides real filesystem operations for production use.
- * For interface definitions and dependency injection pattern, see `operations.ts`.
+ * Provides real filesystem deps for production use.
+ * For interface definitions and dependency injection pattern, see `deps.ts`.
  *
  * @module
  */
@@ -10,7 +10,7 @@
 import {readFile, writeFile, mkdir, unlink, rename} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
-import type {CacheOperations} from './operations.js';
+import type {CacheDeps} from './deps.js';
 
 /**
  * Wraps an async function that returns void, converting exceptions to Result.
@@ -27,9 +27,9 @@ const wrap_void = async (
 };
 
 /**
- * Default filesystem operations using `node:fs/promises`.
+ * Default filesystem deps using `node:fs/promises`.
  */
-export const default_cache_operations: CacheOperations = {
+export const default_cache_deps: CacheDeps = {
 	read_text: async ({path}) => {
 		try {
 			return await readFile(path, 'utf8');

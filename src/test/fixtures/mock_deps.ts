@@ -1,15 +1,15 @@
 /**
- * Mock filesystem operations for testing.
+ * Mock filesystem deps for testing.
  *
- * Provides in-memory implementations of `CacheOperations` for isolated unit tests.
+ * Provides in-memory implementations of `CacheDeps` for isolated unit tests.
  *
  * @module
  */
 
-import type {CacheOperations} from '$lib/operations.js';
+import type {CacheDeps} from '$lib/deps.js';
 
 /**
- * In-memory filesystem state for mock operations.
+ * In-memory filesystem state for mock deps.
  */
 export interface MockFsState {
 	/** Map of file paths to their contents */
@@ -24,11 +24,11 @@ export const create_mock_fs_state = (): MockFsState => ({
 });
 
 /**
- * Creates mock filesystem operations backed by in-memory state.
+ * Creates mock filesystem deps backed by in-memory state.
  *
  * @param state - The mock filesystem state to use
  */
-export const create_mock_cache_ops = (state: MockFsState): CacheOperations => ({
+export const create_mock_cache_deps = (state: MockFsState): CacheDeps => ({
 	read_text: async ({path}) => {
 		return state.files.get(path) ?? null;
 	},

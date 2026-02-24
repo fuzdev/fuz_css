@@ -12,8 +12,8 @@ import {
 	type CachedExtraction,
 } from '$lib/css_cache.js';
 import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
-import {default_cache_operations} from '$lib/operations_defaults.js';
-import {create_mock_fs_state, create_mock_cache_ops} from './fixtures/mock_operations.js';
+import {default_cache_deps} from '$lib/deps_defaults.js';
+import {create_mock_fs_state, create_mock_cache_deps} from './fixtures/mock_deps.js';
 import {
 	loc,
 	make_classes,
@@ -21,7 +21,7 @@ import {
 	EMPTY_EXTRACTION,
 } from './test_helpers.js';
 
-const ops = default_cache_operations;
+const deps = default_cache_deps;
 
 const TEST_DIR = '/tmp/fuz_css_cache_test';
 const PROJECT_ROOT = '/tmp/fuz_css_cache_test/project/';
@@ -72,7 +72,7 @@ const save_and_load = async (
 		content_hash = 'test-hash',
 	} = options;
 
-	await save_cached_extraction(ops, cache_path, content_hash, {
+	await save_cached_extraction(deps, cache_path, content_hash, {
 		classes,
 		explicit_classes,
 		diagnostics,
@@ -80,7 +80,7 @@ const save_and_load = async (
 		explicit_elements,
 		explicit_variables,
 	});
-	const loaded = await load_cached_extraction(ops, cache_path);
+	const loaded = await load_cached_extraction(deps, cache_path);
 	expect(loaded).not.toBeNull();
 	expect(loaded!.v).toBe(CSS_CACHE_VERSION);
 	return loaded!;
@@ -305,7 +305,7 @@ describe('load_cached_extraction', () => {
 	];
 
 	test('returns null for missing file', async () => {
-		expect(await load_cached_extraction(ops, '/nonexistent/path.json')).toBeNull();
+		expect(await load_cached_extraction(deps, '/nonexistent/path.json')).toBeNull();
 	});
 
 	test.each(invalid_cache_cases)('returns null for $name', async ({content}) => {
@@ -314,7 +314,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, content);
 
-		expect(await load_cached_extraction(ops, cache_path)).toBeNull();
+		expect(await load_cached_extraction(deps, cache_path)).toBeNull();
 	});
 
 	// Additional corruption recovery tests - all return null gracefully
@@ -334,7 +334,7 @@ describe('load_cached_extraction', () => {
 		await writeFile(cache_path, content);
 
 		// Should return null rather than throw
-		const result = await load_cached_extraction(ops, cache_path);
+		const result = await load_cached_extraction(deps, cache_path);
 		expect(result).toBeNull();
 	});
 
@@ -346,7 +346,7 @@ describe('load_cached_extraction', () => {
 		await writeFile(cache_path, `{"v": ${CSS_CACHE_VERSION}}`);
 
 		// Lenient parsing accepts missing content_hash
-		const result = await load_cached_extraction(ops, cache_path);
+		const result = await load_cached_extraction(deps, cache_path);
 		expect(result).not.toBeNull();
 		expect(result!.v).toBe(CSS_CACHE_VERSION);
 	});
@@ -364,12 +364,12 @@ describe('delete_cached_extraction', () => {
 		await writeFile(cache_path, '{}');
 
 		await expect(readFile(cache_path, 'utf8')).resolves.toBe('{}');
-		await delete_cached_extraction(ops, cache_path);
+		await delete_cached_extraction(deps, cache_path);
 		await expect(readFile(cache_path)).rejects.toThrow();
 	});
 
 	test('succeeds for nonexistent file', async () => {
-		await expect(delete_cached_extraction(ops, '/nonexistent/file.json')).resolves.toBeUndefined();
+		await expect(delete_cached_extraction(deps, '/nonexistent/file.json')).resolves.toBeUndefined();
 	});
 });
 
@@ -509,21 +509,21 @@ describe('cache fields round-trip', () => {
 });
 
 //
-// Mock ops integration
+// Mock deps integration
 //
 
-describe('cache functions with mock ops', () => {
+describe('cache functions with mock deps', () => {
 	test('round-trips with in-memory mock', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_cache_ops(state);
+		const mock_deps = create_mock_cache_deps(state);
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(mock_ops, cache_path, 'abc123', {
+		await save_cached_extraction(mock_deps, cache_path, 'abc123', {
 			...EMPTY_EXTRACTION,
 			classes,
 		});
-		const loaded = await load_cached_extraction(mock_ops, cache_path);
+		const loaded = await load_cached_extraction(mock_deps, cache_path);
 
 		expect(loaded).not.toBeNull();
 		expect(loaded!.v).toBe(CSS_CACHE_VERSION);
@@ -532,28 +532,28 @@ describe('cache functions with mock ops', () => {
 
 	test('load returns null for missing file', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_cache_ops(state);
+		const mock_deps = create_mock_cache_deps(state);
 
-		expect(await load_cached_extraction(mock_ops, '/nonexistent.json')).toBeNull();
+		expect(await load_cached_extraction(mock_deps, '/nonexistent.json')).toBeNull();
 	});
 
 	test('delete removes file from state', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_cache_ops(state);
+		const mock_deps = create_mock_cache_deps(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_ops, cache_path, 'hash', EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, cache_path, 'hash', EMPTY_EXTRACTION);
 		expect(state.files.has(cache_path)).toBe(true);
 
-		await delete_cached_extraction(mock_ops, cache_path);
+		await delete_cached_extraction(mock_deps, cache_path);
 		expect(state.files.has(cache_path)).toBe(false);
 	});
 
 	test('can inspect raw state for testing', async () => {
 		const state = create_mock_fs_state();
-		const mock_ops = create_mock_cache_ops(state);
+		const mock_deps = create_mock_cache_deps(state);
 
-		await save_cached_extraction(mock_ops, '/test.json', 'hash', EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, '/test.json', 'hash', EMPTY_EXTRACTION);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});

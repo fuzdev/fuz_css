@@ -12,7 +12,7 @@ import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
 
 import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
 import type {ExtractionData} from './css_class_extractor.js';
-import type {CacheOperations} from './operations.js';
+import type {CacheDeps} from './deps.js';
 
 /**
  * Default cache directory relative to project root.
@@ -102,15 +102,15 @@ export const get_file_cache_path = (
  * Returns `null` if the cache is missing, corrupted, or has a version mismatch.
  * This makes the cache self-healing: any error triggers re-extraction.
  *
- * @param ops - filesystem operations for dependency injection
+ * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
  */
 export const load_cached_extraction = async (
-	ops: CacheOperations,
+	deps: CacheDeps,
 	cache_path: string,
 ): Promise<CachedExtraction | null> => {
 	try {
-		const content = await ops.read_text({path: cache_path});
+		const content = await deps.read_text({path: cache_path});
 		if (!content) return null;
 
 		const cached = JSON.parse(content) as CachedExtraction;
@@ -133,13 +133,13 @@ export const load_cached_extraction = async (
  * Uses atomic write (temp file + rename) for crash safety.
  * Normalizes empty collections to null to avoid allocation overhead on load.
  *
- * @param ops - filesystem operations for dependency injection
+ * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
  * @param content_hash - SHA-256 hash of the source file contents
  * @param extraction - extraction data to cache
  */
 export const save_cached_extraction = async (
-	ops: CacheOperations,
+	deps: CacheDeps,
 	cache_path: string,
 	content_hash: string,
 	extraction: ExtractionData,
@@ -177,21 +177,21 @@ export const save_cached_extraction = async (
 		explicit_variables: explicit_variables_array,
 	};
 
-	await ops.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
+	await deps.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
 };
 
 /**
  * Deletes a cached extraction file.
  * Silently succeeds if the file doesn't exist.
  *
- * @param ops - filesystem operations for dependency injection
+ * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
  */
 export const delete_cached_extraction = async (
-	ops: CacheOperations,
+	deps: CacheDeps,
 	cache_path: string,
 ): Promise<void> => {
-	await ops.unlink({path: cache_path});
+	await deps.unlink({path: cache_path});
 };
 
 /**

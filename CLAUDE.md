@@ -281,9 +281,8 @@ typography, borders, shading, shadows, layout. See
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
 - [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints,
   states, pseudo-elements)
-- [operations.ts](src/lib/operations.ts) - `CacheOperations` interface for
-  dependency injection
-- [operations_defaults.ts](src/lib/operations_defaults.ts) - Default filesystem
+- [deps.ts](src/lib/deps.ts) - `CacheDeps` interface for dependency injection
+- [deps_defaults.ts](src/lib/deps_defaults.ts) - Default filesystem
   implementations
 - [example_class_utilities.ts](src/lib/example_class_utilities.ts) - Example
   classes for Vite plugin integration tests

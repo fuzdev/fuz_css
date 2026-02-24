@@ -13,7 +13,7 @@ import {parseCss, type AST} from 'svelte/compiler';
 import {hash_secure} from '@fuzdev/fuz_util/hash.js';
 
 import {extract_css_variables} from './css_variable_utils.js';
-import type {CacheOperations} from './operations.js';
+import type {CacheDeps} from './deps.js';
 import type {BaseCssOption} from './css_plugin_options.js';
 
 /**
@@ -490,16 +490,16 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 /**
  * Loads and parses the default style.css file.
  *
- * @param ops - filesystem operations for dependency injection
+ * @param deps - filesystem deps for dependency injection
  * @param style_css_path - path to style.css (defaults to package's style.css)
  * @returns promise resolving to `StyleRuleIndex`
  */
 export const load_style_rule_index = async (
-	ops: CacheOperations,
+	deps: CacheDeps,
 	style_css_path?: string,
 ): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const css = await ops.read_text({path});
+	const css = await deps.read_text({path});
 	if (css === null) {
 		throw new Error(`Failed to read style.css from ${path}`);
 	}
@@ -522,16 +522,16 @@ export const create_style_rule_index = async (css: string): Promise<StyleRuleInd
 /**
  * Loads the raw default style.css content.
  *
- * @param ops - filesystem operations for dependency injection
+ * @param deps - filesystem deps for dependency injection
  * @param style_css_path - path to style.css (defaults to package's style.css)
  * @returns promise resolving to the CSS string
  */
 export const load_default_style_css = async (
-	ops: CacheOperations,
+	deps: CacheDeps,
 	style_css_path?: string,
 ): Promise<string> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const css = await ops.read_text({path});
+	const css = await deps.read_text({path});
 	if (css === null) {
 		throw new Error(`Failed to read style.css from ${path}`);
 	}
@@ -543,12 +543,12 @@ export const load_default_style_css = async (
  * Handles all option forms: undefined (defaults), null (disabled), string, or callback.
  *
  * @param base_css - the `base_css` option from generator config
- * @param ops - filesystem operations for loading default CSS
+ * @param deps - filesystem deps for loading default CSS
  * @returns promise resolving to `StyleRuleIndex`, or null if disabled
  */
 export const resolve_base_css_option = async (
 	base_css: BaseCssOption,
-	ops: CacheOperations,
+	deps: CacheDeps,
 ): Promise<StyleRuleIndex | null> => {
 	// null = disabled
 	if (base_css === null) {
@@ -557,7 +557,7 @@ export const resolve_base_css_option = async (
 
 	// undefined = use defaults
 	if (base_css === undefined) {
-		return load_style_rule_index(ops);
+		return load_style_rule_index(deps);
 	}
 
 	// string = custom CSS (replacement)
@@ -566,7 +566,7 @@ export const resolve_base_css_option = async (
 	}
 
 	// function = callback to modify defaults
-	const default_css = await load_default_style_css(ops);
+	const default_css = await load_default_style_css(deps);
 	const modified_css = base_css(default_css);
 	return create_style_rule_index(modified_css);
 };

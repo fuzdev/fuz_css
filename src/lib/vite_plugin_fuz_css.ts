@@ -42,7 +42,7 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 } from './css_cache.js';
-import {default_cache_operations} from './operations_defaults.js';
+import {default_cache_deps} from './deps_defaults.js';
 import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
 import {
@@ -128,7 +128,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		ops = default_cache_operations,
+		deps = default_cache_deps,
 	} = options;
 
 	// Derive include flags from null check
@@ -203,12 +203,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				style_rule_index = await create_style_rule_index(base_css);
 			} else if (typeof base_css === 'function') {
 				// Callback to modify default CSS
-				const default_css = await load_default_style_css(ops);
+				const default_css = await load_default_style_css(deps);
 				const modified_css = base_css(default_css);
 				style_rule_index = await create_style_rule_index(modified_css);
 			} else {
 				// Use default style.css (undefined or null)
-				style_rule_index = await load_style_rule_index(ops);
+				style_rule_index = await load_style_rule_index(deps);
 			}
 
 			// Build variable graph based on variables option
@@ -421,7 +421,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					// Delete cache file (fire and forget)
 					if (!is_ci && resolved_cache_dir && project_root) {
 						const cache_path = get_file_cache_path(file, resolved_cache_dir, project_root);
-						delete_cached_extraction(ops, cache_path).catch(() => {
+						delete_cached_extraction(deps, cache_path).catch(() => {
 							// Ignore cache deletion errors
 						});
 					}
@@ -540,7 +540,7 @@ export {};
 			// Try cache (if not CI and we have cache dir)
 			if (!is_ci && resolved_cache_dir && project_root) {
 				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				const cached = await load_cached_extraction(ops, cache_path);
+				const cached = await load_cached_extraction(deps, cache_path);
 
 				if (cached?.content_hash === hash) {
 					// Cache hit
@@ -583,7 +583,7 @@ export {};
 			// Save to cache (fire and forget - don't block transform)
 			if (!is_ci && resolved_cache_dir && project_root) {
 				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				save_cached_extraction(ops, cache_path, hash, result).catch(() => {
+				save_cached_extraction(deps, cache_path, hash, result).catch(() => {
 					// Ignore cache errors
 				});
 			}

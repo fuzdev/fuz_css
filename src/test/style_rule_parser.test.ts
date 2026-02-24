@@ -7,10 +7,10 @@ import {
 	collect_rule_variables,
 	load_style_rule_index,
 } from '../lib/style_rule_parser.js';
-import {default_cache_operations} from '../lib/operations_defaults.js';
+import {default_cache_deps} from '../lib/deps_defaults.js';
 
 // Alias for brevity in tests
-const ops = default_cache_operations;
+const deps = default_cache_deps;
 
 describe('parse_style_css', () => {
 	describe('basic parsing', () => {
@@ -486,7 +486,7 @@ describe('collect_rule_variables', () => {
 
 describe('load_style_rule_index', () => {
 	test('loads actual style.css', async () => {
-		const index = await load_style_rule_index(ops);
+		const index = await load_style_rule_index(deps);
 
 		expect(index.rules.length).toBeGreaterThan(50);
 

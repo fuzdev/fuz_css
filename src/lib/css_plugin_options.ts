@@ -32,7 +32,7 @@ import type {FileFilter} from './file_filter.js';
 import type {AcornPlugin} from './css_class_extractor.js';
 import type {CssClassDefinition, CssClassDefinitionInterpreter} from './css_class_generation.js';
 import type {StyleVariable} from './variable.js';
-import type {CacheOperations} from './operations.js';
+import type {CacheDeps} from './deps.js';
 
 /**
  * Options for CSS class extraction from source files.
@@ -225,10 +225,10 @@ export interface CssCacheOptions {
 	 */
 	cache_dir?: string;
 	/**
-	 * Filesystem operations for cache management.
+	 * Filesystem deps for cache management.
 	 * Defaults to production implementation. Override for testing.
 	 */
-	ops?: CacheOperations;
+	deps?: CacheDeps;
 }
 
 /**
