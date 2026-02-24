@@ -11,7 +11,7 @@
 	"published": true,
 	"package_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.53.1",
+		"version": "0.54.0",
 		"description": "CSS framework and design system for semantic HTML",
 		"motto": "CSS with more utility",
 		"glyph": "🪴",
@@ -76,8 +76,8 @@
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/fuz_code": "^0.45.1",
 			"@fuzdev/fuz_ui": "^0.185.2",
-			"@fuzdev/fuz_util": "^0.52.0",
-			"@fuzdev/gro": "^0.195.1",
+			"@fuzdev/fuz_util": "^0.52.1",
+			"@fuzdev/gro": "^0.196.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
 			"@ryanatkn/eslint-config": "^0.9.0",
 			"@sveltejs/acorn-typescript": "^1.0.8",
@@ -148,7 +148,7 @@
 	},
 	"source_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.53.1",
+		"version": "0.54.0",
 		"modules": [
 			{
 				"path": "class_variable_index.ts",
@@ -667,13 +667,13 @@
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
 						"source_line": 108,
-						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<CachedExtraction | null>",
+						"type_signature": "(deps: CacheDeps, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for dependency injection"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for dependency injection"
 							},
 							{
 								"name": "cache_path",
@@ -687,13 +687,13 @@
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nNormalizes empty collections to null to avoid allocation overhead on load.",
 						"source_line": 141,
-						"type_signature": "(ops: CacheOperations, cache_path: string, content_hash: string, extraction: ExtractionData): Promise<void>",
+						"type_signature": "(deps: CacheDeps, cache_path: string, content_hash: string, extraction: ExtractionData): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for dependency injection"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for dependency injection"
 							},
 							{
 								"name": "cache_path",
@@ -717,13 +717,13 @@
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
 						"source_line": 190,
-						"type_signature": "(ops: CacheOperations, cache_path: string): Promise<void>",
+						"type_signature": "(deps: CacheDeps, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for dependency injection"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for dependency injection"
 							},
 							{
 								"name": "cache_path",
@@ -2453,10 +2453,10 @@
 								"doc_comment": "Cache directory relative to project root."
 							},
 							{
-								"name": "ops",
+								"name": "deps",
 								"kind": "variable",
-								"type_signature": "CacheOperations",
-								"doc_comment": "Filesystem operations for cache management.\nDefaults to production implementation. Override for testing."
+								"type_signature": "CacheDeps",
+								"doc_comment": "Filesystem deps for cache management.\nDefaults to production implementation. Override for testing."
 							}
 						]
 					},
@@ -2903,6 +2903,56 @@
 					"variable_graph.ts",
 					"vite_plugin_fuz_css.ts"
 				]
+			},
+			{
+				"path": "deps_defaults.ts",
+				"declarations": [
+					{
+						"name": "default_cache_deps",
+						"kind": "variable",
+						"doc_comment": "Default filesystem deps using `node:fs/promises`.",
+						"source_line": 32,
+						"type_signature": "CacheDeps"
+					}
+				],
+				"module_comment": "Production implementations of deps interfaces.\n\nProvides real filesystem deps for production use.\nFor interface definitions and dependency injection pattern, see `deps.ts`.",
+				"dependents": [
+					"gen_fuz_css.ts",
+					"vite_plugin_fuz_css.ts"
+				]
+			},
+			{
+				"path": "deps.ts",
+				"declarations": [
+					{
+						"name": "CacheDeps",
+						"kind": "type",
+						"doc_comment": "Cache-related file system deps.\nAbstracted to enable test isolation from the actual filesystem.\n\nNamed `CacheDeps` (not `FsDeps`) because it only covers\nthe specific deps needed for cache management, not general\nfilesystem access.",
+						"source_line": 48,
+						"type_signature": "CacheDeps",
+						"properties": [
+							{
+								"name": "read_text",
+								"kind": "variable",
+								"type_signature": "(options: {path: string}) => Promise<string | null>",
+								"doc_comment": "Reads a text file.\nReturns `null` if file doesn't exist."
+							},
+							{
+								"name": "write_text_atomic",
+								"kind": "variable",
+								"type_signature": "(options: {\n\t\tpath: string;\n\t\tcontent: string;\n\t}) => Promise<Result<object, {message: string}>>",
+								"doc_comment": "Writes a text file atomically (temp file + rename for crash safety).\nCreates parent directories if they don't exist."
+							},
+							{
+								"name": "unlink",
+								"kind": "variable",
+								"type_signature": "(options: {path: string}) => Promise<Result<object, {message: string}>>",
+								"doc_comment": "Removes a file. Succeeds silently if file doesn't exist."
+							}
+						]
+					}
+				],
+				"module_comment": "Deps interfaces for dependency injection.\n\nThis is the core pattern enabling testability without mocks.\nAll file system side effects are abstracted into interfaces.\n\n**Design principles:**\n- Internal functions take `deps` as a required first parameter\n- Public APIs (plugin options) default to `default_cache_deps`\n- All deps accept a single `options` object parameter\n- All fallible deps return `Result` from `@fuzdev/fuz_util`\n- Never throw `Error` in deps - return `Result` with `ok: false`\n- Use `null` for expected \"not found\" cases (not errors)\n\n**Production usage:**\n```typescript\nimport {default_cache_deps} from './deps_defaults.js';\nconst content = await deps.read_text({path: '/path/to/file.json'});\nif (!content) {\n  // File not found\n}\n```\n\n**Test usage:**\n```typescript\nimport {create_mock_cache_deps, create_mock_fs_state} from '../test/fixtures/mock_deps.js';\nconst state = create_mock_fs_state();\nconst deps = create_mock_cache_deps(state);\n// Use deps in tests - all operations are in-memory\n```\n\nSee `deps_defaults.ts` for real implementations.\nSee `test/fixtures/mock_deps.ts` for mock implementations."
 			},
 			{
 				"path": "diagnostics.ts",
@@ -3356,9 +3406,9 @@
 					"css_classes.ts",
 					"css_literal.ts",
 					"css_variable_utils.ts",
+					"deps_defaults.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
-					"operations_defaults.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
 				]
@@ -3565,56 +3615,6 @@
 				]
 			},
 			{
-				"path": "operations_defaults.ts",
-				"declarations": [
-					{
-						"name": "default_cache_operations",
-						"kind": "variable",
-						"doc_comment": "Default filesystem operations using `node:fs/promises`.",
-						"source_line": 32,
-						"type_signature": "CacheOperations"
-					}
-				],
-				"module_comment": "Production implementations of operations interfaces.\n\nProvides real filesystem operations for production use.\nFor interface definitions and dependency injection pattern, see `operations.ts`.",
-				"dependents": [
-					"gen_fuz_css.ts",
-					"vite_plugin_fuz_css.ts"
-				]
-			},
-			{
-				"path": "operations.ts",
-				"declarations": [
-					{
-						"name": "CacheOperations",
-						"kind": "type",
-						"doc_comment": "Cache-related file system operations.\nAbstracted to enable test isolation from the actual filesystem.\n\nNamed `CacheOperations` (not `FsOperations`) because it only covers\nthe specific operations needed for cache management, not general\nfilesystem access.",
-						"source_line": 48,
-						"type_signature": "CacheOperations",
-						"properties": [
-							{
-								"name": "read_text",
-								"kind": "variable",
-								"type_signature": "(options: {path: string}) => Promise<string | null>",
-								"doc_comment": "Reads a text file.\nReturns `null` if file doesn't exist."
-							},
-							{
-								"name": "write_text_atomic",
-								"kind": "variable",
-								"type_signature": "(options: {\n\t\tpath: string;\n\t\tcontent: string;\n\t}) => Promise<Result<object, {message: string}>>",
-								"doc_comment": "Writes a text file atomically (temp file + rename for crash safety).\nCreates parent directories if they don't exist."
-							},
-							{
-								"name": "unlink",
-								"kind": "variable",
-								"type_signature": "(options: {path: string}) => Promise<Result<object, {message: string}>>",
-								"doc_comment": "Removes a file. Succeeds silently if file doesn't exist."
-							}
-						]
-					}
-				],
-				"module_comment": "Operations interfaces for dependency injection.\n\nThis is the core pattern enabling testability without mocks.\nAll file system side effects are abstracted into interfaces.\n\n**Design principles:**\n- Internal functions take `ops` as a required first parameter\n- Public APIs (plugin options) default to `default_cache_operations`\n- All operations accept a single `options` object parameter\n- All fallible operations return `Result` from `@fuzdev/fuz_util`\n- Never throw `Error` in operations - return `Result` with `ok: false`\n- Use `null` for expected \"not found\" cases (not errors)\n\n**Production usage:**\n```typescript\nimport {default_cache_operations} from './operations_defaults.js';\nconst content = await ops.read_text({path: '/path/to/file.json'});\nif (!content) {\n  // File not found\n}\n```\n\n**Test usage:**\n```typescript\nimport {create_mock_cache_ops, create_mock_fs_state} from '../test/fixtures/mock_operations.js';\nconst state = create_mock_fs_state();\nconst ops = create_mock_cache_ops(state);\n// Use ops in tests - all operations are in-memory\n```\n\nSee `operations_defaults.ts` for real implementations.\nSee `test/fixtures/mock_operations.ts` for mock implementations."
-			},
-			{
 				"path": "style_rule_parser.ts",
 				"declarations": [
 					{
@@ -3773,14 +3773,14 @@
 						"kind": "function",
 						"doc_comment": "Loads and parses the default style.css file.",
 						"source_line": 497,
-						"type_signature": "(ops: CacheOperations, style_css_path?: string | undefined): Promise<StyleRuleIndex>",
+						"type_signature": "(deps: CacheDeps, style_css_path?: string | undefined): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
 						"return_description": "promise resolving to `StyleRuleIndex`",
 						"parameters": [
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for dependency injection"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for dependency injection"
 							},
 							{
 								"name": "style_css_path",
@@ -3811,14 +3811,14 @@
 						"kind": "function",
 						"doc_comment": "Loads the raw default style.css content.",
 						"source_line": 529,
-						"type_signature": "(ops: CacheOperations, style_css_path?: string | undefined): Promise<string>",
+						"type_signature": "(deps: CacheDeps, style_css_path?: string | undefined): Promise<string>",
 						"return_type": "Promise<string>",
 						"return_description": "promise resolving to the CSS string",
 						"parameters": [
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for dependency injection"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for dependency injection"
 							},
 							{
 								"name": "style_css_path",
@@ -3833,7 +3833,7 @@
 						"kind": "function",
 						"doc_comment": "Resolves a `base_css` option to a `StyleRuleIndex`.\nHandles all option forms: undefined (defaults), null (disabled), string, or callback.",
 						"source_line": 549,
-						"type_signature": "(base_css: BaseCssOption, ops: CacheOperations): Promise<StyleRuleIndex | null>",
+						"type_signature": "(base_css: BaseCssOption, deps: CacheDeps): Promise<StyleRuleIndex | null>",
 						"return_type": "Promise<StyleRuleIndex | null>",
 						"return_description": "promise resolving to `StyleRuleIndex`, or null if disabled",
 						"parameters": [
@@ -3843,9 +3843,9 @@
 								"description": "the `base_css` option from generator config"
 							},
 							{
-								"name": "ops",
-								"type": "CacheOperations",
-								"description": "filesystem operations for loading default CSS"
+								"name": "deps",
+								"type": "CacheDeps",
+								"description": "filesystem deps for loading default CSS"
 							}
 						]
 					},
@@ -7238,9 +7238,9 @@
 					"css_classes.ts",
 					"css_literal.ts",
 					"css_variable_utils.ts",
+					"deps_defaults.ts",
 					"diagnostics.ts",
 					"file_filter.ts",
-					"operations_defaults.ts",
 					"style_rule_parser.ts",
 					"variable_graph.ts"
 				]
