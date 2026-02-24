@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.54.0
+
+### Minor Changes
+
+- migrate to "deps" pattern from "ops" ([607d04b](https://github.com/fuzdev/fuz_css/commit/607d04b))
+
 ## 0.53.1
 
 ### Patch Changes
