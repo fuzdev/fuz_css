@@ -63,7 +63,7 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
  * @mutates rules - pushes extracted rules to the array
  */
 const walk_css_children = (
-	node: Omit<AST.CSS.StyleSheet, 'attributes' | 'content'> | AST.CSS.Atrule,
+	node: Omit<AST.CSS.StyleSheetFile, 'attributes' | 'content'> | AST.CSS.Atrule,
 	original_css: string,
 	rules: Array<ParsedRule>,
 ): void => {
@@ -72,7 +72,6 @@ const walk_css_children = (
 	for (const child of children) {
 		if (child.type === 'Rule') {
 			extract_rule(child, original_css, rules);
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		} else if (child.type === 'Atrule' && child.block) {
 			// Recurse into at-rules (like @media) - rules are in block.children
 			walk_css_block(child.block, original_css, rules);

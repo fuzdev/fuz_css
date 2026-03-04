@@ -26,7 +26,7 @@
 
 import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
-import {hash_secure} from '@fuzdev/fuz_util/hash.js';
+import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
 
 import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
@@ -200,12 +200,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			// Load style rule index based on base_css option
 			if (typeof base_css === 'string') {
 				// Custom CSS string (replacement)
-				style_rule_index = await create_style_rule_index(base_css);
+				style_rule_index = create_style_rule_index(base_css);
 			} else if (typeof base_css === 'function') {
 				// Callback to modify default CSS
 				const default_css = await load_default_style_css(deps);
 				const modified_css = base_css(default_css);
-				style_rule_index = await create_style_rule_index(modified_css);
+				style_rule_index = create_style_rule_index(modified_css);
 			} else {
 				// Use default style.css (undefined or null)
 				style_rule_index = await load_style_rule_index(deps);
@@ -529,7 +529,7 @@ export {};
 			}
 
 			// Compute content hash
-			const hash = await hash_secure(code);
+			const hash = hash_blake3(code);
 			const existing_hash = hashes.get(id);
 
 			// Check if unchanged
