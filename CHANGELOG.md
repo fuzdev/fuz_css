@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.55.0
+
+### Minor Changes
+
+- switch to blake3 hashing, add optional peer dep `@fuzdev/blake3_wasm` ([#83](https://github.com/fuzdev/fuz_css/pull/83))
+
 ## 0.54.0
 
 ### Minor Changes
