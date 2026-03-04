@@ -168,12 +168,12 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		if (!style_rule_index) {
 			if (typeof base_css === 'string') {
 				// Custom CSS string provided (replacement)
-				style_rule_index = await create_style_rule_index(base_css);
+				style_rule_index = create_style_rule_index(base_css);
 			} else if (typeof base_css === 'function') {
 				// Callback to modify default CSS
 				const default_css = await load_default_style_css(deps);
 				const modified_css = base_css(default_css);
-				style_rule_index = await create_style_rule_index(modified_css);
+				style_rule_index = create_style_rule_index(modified_css);
 			} else {
 				// Use default style.css (undefined or null - null handled by include_base flag)
 				style_rule_index = await load_style_rule_index(deps);

@@ -512,9 +512,9 @@ export const load_style_rule_index = async (
  * Use this to parse user-provided base styles instead of loading from file.
  *
  * @param css - raw CSS string to parse
- * @returns promise resolving to `StyleRuleIndex`
+ * @returns `StyleRuleIndex`
  */
-export const create_style_rule_index = async (css: string): Promise<StyleRuleIndex> => {
+export const create_style_rule_index = (css: string): StyleRuleIndex => {
 	const content_hash = hash_blake3(css);
 	return parse_style_css(css, content_hash);
 };
