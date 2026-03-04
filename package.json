@@ -30,6 +30,7 @@
     "node": ">=22.15"
   },
   "peerDependencies": {
+    "@fuzdev/blake3_wasm": "^0.1.0",
     "@fuzdev/fuz_util": ">=0.52.0",
     "@fuzdev/gro": ">=0.195.0",
     "@sveltejs/acorn-typescript": "^1",
@@ -39,6 +40,9 @@
     "zod": "^4"
   },
   "peerDependenciesMeta": {
+    "@fuzdev/blake3_wasm": {
+      "optional": true
+    },
     "@fuzdev/fuz_util": {
       "optional": true
     },
