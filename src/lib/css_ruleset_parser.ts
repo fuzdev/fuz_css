@@ -72,6 +72,7 @@ const walk_css_children = (
 	for (const child of children) {
 		if (child.type === 'Rule') {
 			extract_rule(child, original_css, rules);
+			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		} else if (child.type === 'Atrule' && child.block) {
 			// Recurse into at-rules (like @media) - rules are in block.children
 			walk_css_block(child.block, original_css, rules);

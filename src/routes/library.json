@@ -82,9 +82,9 @@
 			"@fuzdev/fuz_code": "^0.45.1",
 			"@fuzdev/fuz_ui": "^0.185.2",
 			"@fuzdev/fuz_util": "^0.53.0",
-			"@fuzdev/gro": "^0.196.0",
+			"@fuzdev/gro": "^0.197.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
-			"@ryanatkn/eslint-config": "^0.9.0",
+			"@ryanatkn/eslint-config": "^0.10.0",
 			"@sveltejs/acorn-typescript": "^1.0.9",
 			"@sveltejs/adapter-static": "^3.0.10",
 			"@sveltejs/kit": "^2.53.4",
@@ -2496,7 +2496,7 @@
 						"name": "is_single_selector_ruleset",
 						"kind": "function",
 						"doc_comment": "Checks if a ruleset has only a single simple selector (just the class name).\nUsed to detect rulesets that could be converted to declaration format.",
-						"source_line": 140,
+						"source_line": 141,
 						"type_signature": "(rules: ParsedRule[], escaped_class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "true if there's exactly one rule with selector \".class_name\"",
@@ -2517,7 +2517,7 @@
 						"name": "ruleset_contains_class",
 						"kind": "function",
 						"doc_comment": "Checks if any selector in the ruleset contains the expected class name.\nUsed to validate that ruleset definitions match their key.",
-						"source_line": 163,
+						"source_line": 164,
 						"type_signature": "(rules: ParsedRule[], escaped_class_name: string): boolean",
 						"return_type": "boolean",
 						"return_description": "true if at least one selector contains \".class_name\"",
@@ -2538,7 +2538,7 @@
 						"name": "extract_css_comment",
 						"kind": "function",
 						"doc_comment": "Extracts the CSS comment from a ruleset (if any).\nLooks for comments before the first rule.",
-						"source_line": 180,
+						"source_line": 181,
 						"type_signature": "(css: string, rules: ParsedRule[]): string | null",
 						"return_type": "string | null",
 						"return_description": "comment text without delimiters, or null if no comment",
@@ -2559,7 +2559,7 @@
 						"name": "SkippedModifierInfo",
 						"kind": "type",
 						"doc_comment": "Information about a modifier that was skipped for a selector during ruleset modification.\nThe selector is still included in output, just without the conflicting modifier applied.",
-						"source_line": 204,
+						"source_line": 205,
 						"type_signature": "SkippedModifierInfo",
 						"properties": [
 							{
@@ -2586,7 +2586,7 @@
 						"name": "ModifiedSelectorGroupResult",
 						"kind": "type",
 						"doc_comment": "Result from modifying a selector group with conflict detection.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
-						"source_line": 219,
+						"source_line": 220,
 						"type_signature": "ModifiedSelectorGroupResult",
 						"properties": [
 							{
@@ -2607,7 +2607,7 @@
 						"name": "ModifiedRulesetResult",
 						"kind": "type",
 						"doc_comment": "Result from generating a modified ruleset.\n\nUses `| null` for skipped_modifiers to avoid allocating empty arrays.\nCallers should use a guard pattern: `if (result.skipped_modifiers) { ... }`",
-						"source_line": 232,
+						"source_line": 233,
 						"type_signature": "ModifiedRulesetResult",
 						"properties": [
 							{
@@ -2631,7 +2631,7 @@
 						"examples": [
 							"```ts\nsplit_selector_list('.a, .b') // → ['.a', '.b']\nsplit_selector_list('.a:not(.b), .c') // → ['.a:not(.b)', '.c']\nsplit_selector_list('.a[data-x=\"a,b\"], .c') // → ['.a[data-x=\"a,b\"]', '.c']\n```"
 						],
-						"source_line": 296,
+						"source_line": 297,
 						"type_signature": "(selector_group: string): string[]",
 						"return_type": "string[]",
 						"parameters": [
@@ -2645,7 +2645,7 @@
 						"name": "find_compound_end",
 						"kind": "function",
 						"doc_comment": "Finds the end position of the compound selector containing the class at class_pos.\nA compound selector is a sequence of simple selectors without combinators.",
-						"source_line": 353,
+						"source_line": 354,
 						"type_signature": "(selector: string, class_pos: number): number",
 						"return_type": "number",
 						"return_description": "position where state modifiers should be inserted (before any pseudo-element)",
@@ -2669,7 +2669,7 @@
 						"examples": [
 							"```ts\nmodify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'\n```"
 						],
-						"source_line": 444,
+						"source_line": 445,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
 						"return_type": "string",
 						"return_description": "modified selector",
@@ -2705,7 +2705,7 @@
 						"name": "modify_selector_group",
 						"kind": "function",
 						"doc_comment": "Modifies a selector list (comma-separated selectors) to add modifiers.\nHandles conflicts per-selector: if one selector in a list has a conflict,\nonly that selector skips the modifier; other selectors still get it.",
-						"source_line": 484,
+						"source_line": 485,
 						"type_signature": "(selector_group: string, original_class: string, new_class_escaped: string, states_to_add: string[], pseudo_element_css: string): ModifiedSelectorGroupResult",
 						"return_type": "ModifiedSelectorGroupResult",
 						"return_description": "result with modified selector list and information about skipped modifiers",
@@ -2741,7 +2741,7 @@
 						"name": "generate_modified_ruleset",
 						"kind": "function",
 						"doc_comment": "Generates CSS for a modified ruleset with applied modifiers.\n\nConflict handling is per-selector within selector lists:\n- For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips\n  the `:hover` addition; `.plain:active` still gets `:hover` appended.\n- For multiple states like `:hover:focus`, each is checked individually; conflicting\n  states are skipped while non-conflicting ones are still applied.",
-						"source_line": 563,
+						"source_line": 564,
 						"type_signature": "(original_ruleset: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string, media_wrapper: string | null, ancestor_wrapper: string | null): ModifiedRulesetResult",
 						"return_type": "ModifiedRulesetResult",
 						"return_description": "result with generated CSS and information about skipped modifiers",
