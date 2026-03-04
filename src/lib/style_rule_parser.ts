@@ -10,7 +10,7 @@
  */
 
 import {parseCss, type AST} from 'svelte/compiler';
-import {hash_secure} from '@fuzdev/fuz_util/hash.js';
+import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
 
 import {extract_css_variables} from './css_variable_utils.js';
 import type {CacheDeps} from './deps.js';
@@ -503,7 +503,7 @@ export const load_style_rule_index = async (
 	if (css === null) {
 		throw new Error(`Failed to read style.css from ${path}`);
 	}
-	const content_hash = await hash_secure(css);
+	const content_hash = hash_blake3(css);
 	return parse_style_css(css, content_hash);
 };
 
@@ -515,7 +515,7 @@ export const load_style_rule_index = async (
  * @returns promise resolving to `StyleRuleIndex`
  */
 export const create_style_rule_index = async (css: string): Promise<StyleRuleIndex> => {
-	const content_hash = await hash_secure(css);
+	const content_hash = hash_blake3(css);
 	return parse_style_css(css, content_hash);
 };
 

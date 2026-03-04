@@ -26,7 +26,7 @@
 
 import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
-import {hash_secure} from '@fuzdev/fuz_util/hash.js';
+import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
 
 import {extract_css_classes_with_locations} from './css_class_extractor.js';
 import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
@@ -529,7 +529,7 @@ export {};
 			}
 
 			// Compute content hash
-			const hash = await hash_secure(code);
+			const hash = hash_blake3(code);
 			const existing_hash = hashes.get(id);
 
 			// Check if unchanged
