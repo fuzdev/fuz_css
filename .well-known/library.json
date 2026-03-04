@@ -11,7 +11,7 @@
 	"published": true,
 	"package_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.54.0",
+		"version": "0.55.0",
 		"description": "CSS framework and design system for semantic HTML",
 		"motto": "CSS with more utility",
 		"glyph": "🪴",
@@ -41,6 +41,7 @@
 			"node": ">=22.15"
 		},
 		"peerDependencies": {
+			"@fuzdev/blake3_wasm": "^0.1.0",
 			"@fuzdev/fuz_util": ">=0.52.0",
 			"@fuzdev/gro": ">=0.195.0",
 			"@sveltejs/acorn-typescript": "^1",
@@ -50,6 +51,9 @@
 			"zod": "^4"
 		},
 		"peerDependenciesMeta": {
+			"@fuzdev/blake3_wasm": {
+				"optional": true
+			},
 			"@fuzdev/fuz_util": {
 				"optional": true
 			},
@@ -74,15 +78,16 @@
 		},
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
+			"@fuzdev/blake3_wasm": "^0.1.0",
 			"@fuzdev/fuz_code": "^0.45.1",
 			"@fuzdev/fuz_ui": "^0.185.2",
-			"@fuzdev/fuz_util": "^0.52.1",
-			"@fuzdev/gro": "^0.196.0",
+			"@fuzdev/fuz_util": "^0.53.0",
+			"@fuzdev/gro": "^0.197.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
-			"@ryanatkn/eslint-config": "^0.9.0",
-			"@sveltejs/acorn-typescript": "^1.0.8",
+			"@ryanatkn/eslint-config": "^0.10.0",
+			"@sveltejs/acorn-typescript": "^1.0.9",
 			"@sveltejs/adapter-static": "^3.0.10",
-			"@sveltejs/kit": "^2.50.1",
+			"@sveltejs/kit": "^2.53.4",
 			"@sveltejs/package": "^2.5.7",
 			"@sveltejs/vite-plugin-svelte": "^6.2.4",
 			"@types/estree": "^1.0.8",
@@ -95,9 +100,9 @@
 			"magic-string": "^0.30.21",
 			"prettier": "^3.7.4",
 			"prettier-plugin-svelte": "^3.4.1",
-			"svelte": "^5.49.1",
-			"svelte-check": "^4.3.6",
-			"svelte2tsx": "^0.7.47",
+			"svelte": "^5.53.7",
+			"svelte-check": "^4.4.4",
+			"svelte2tsx": "^0.7.51",
 			"tslib": "^2.8.1",
 			"typescript": "^5.9.3",
 			"typescript-eslint": "^8.48.1",
@@ -148,7 +153,7 @@
 	},
 	"source_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.54.0",
+		"version": "0.55.0",
 		"modules": [
 			{
 				"path": "class_variable_index.ts",
@@ -3795,9 +3800,9 @@
 						"kind": "function",
 						"doc_comment": "Creates a `StyleRuleIndex` from a custom CSS string.\nUse this to parse user-provided base styles instead of loading from file.",
 						"source_line": 517,
-						"type_signature": "(css: string): Promise<StyleRuleIndex>",
-						"return_type": "Promise<StyleRuleIndex>",
-						"return_description": "promise resolving to `StyleRuleIndex`",
+						"type_signature": "(css: string): StyleRuleIndex",
+						"return_type": "StyleRuleIndex",
+						"return_description": "`StyleRuleIndex`",
 						"parameters": [
 							{
 								"name": "css",
