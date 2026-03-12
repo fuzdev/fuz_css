@@ -80,7 +80,7 @@ import 'virtual:fuz.css'; // with base_css: null, variables: null`}
 					Svelte, JSX, and TypeScript/JS -- see the utility class
 					<TomeLink name="classes" hash="Framework-support">framework support</TomeLink>, and for
 					the companion Svelte integration see
-					<a href="https://ui.fuz.dev/docs/Themed"><code>Themed</code></a> in
+					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in
 					<a href="https://ui.fuz.dev/">fuz_ui</a>
 				</li>
 				<li>

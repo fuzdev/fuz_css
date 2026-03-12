@@ -1,6 +1,6 @@
 <script lang="ts">
 	import {hsl_to_hex_string, hsl_to_rgb, parse_hsl_string} from '@fuzdev/fuz_util/colors.js';
-	import {themer_context} from '@fuzdev/fuz_ui/themer.svelte.js';
+	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.js';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	const {
@@ -15,13 +15,14 @@
 		suffix?: 'light' | 'dark';
 	} = $props();
 
-	const themer = themer_context.get();
+	const get_theme_state = theme_state_context.get();
+	const theme_state = $derived(get_theme_state());
 
 	const name = $derived(`color_${color_name}_${intensity}` + (suffix ? `_${suffix}` : ''));
 	const value = $derived.by(() => {
 		// handle the user switching between light/dark mode
 		// TODO could refactor to a class for variables
-		themer.color_scheme;
+		theme_state.color_scheme;
 		return computed_styles?.getPropertyValue('--' + name);
 	});
 	const hsl = $derived(value && parse_hsl_string(value));

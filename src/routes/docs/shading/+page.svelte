@@ -4,7 +4,7 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
-	import {themer_context} from '@fuzdev/fuz_ui/themer.svelte.js';
+	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -21,9 +21,10 @@
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
-	const themer = themer_context.get();
+	const get_theme_state = theme_state_context.get();
+	const theme_state = $derived(get_theme_state());
 	const toggle_color_scheme = () => {
-		themer.color_scheme = themer.color_scheme === 'light' ? 'dark' : 'light';
+		theme_state.color_scheme = theme_state.color_scheme === 'light' ? 'dark' : 'light';
 	};
 </script>
 

@@ -4,7 +4,7 @@
 
 	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 	import type {Snippet} from 'svelte';
-	import Themed from '@fuzdev/fuz_ui/Themed.svelte';
+	import ThemeRoot from '@fuzdev/fuz_ui/ThemeRoot.svelte';
 	import Spiders from '@fuzdev/fuz_ui/Spiders.svelte';
 
 	import {library_json} from '$routes/library.js';
@@ -29,7 +29,7 @@
 	<title>fuz_css - CSS with more utility</title>
 </svelte:head>
 
-<Themed>
+<ThemeRoot>
 	<!-- TODO add all of this and fixed scoped, so the docs examples work as expected,
 		or maybe disable this main contextmenu when in the docs -->
 	<!-- <ContextmenuRoot> -->
@@ -43,7 +43,7 @@
 			</div>
 		</Dialog>
 	{/if} -->
-</Themed>
+</ThemeRoot>
 
 <!-- <svelte:body
 	{@attach contextmenu_attachment([

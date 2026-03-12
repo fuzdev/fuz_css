@@ -6,7 +6,7 @@ import {render_theme_style} from './theme.js';
 // TODO maybe this should be `base_theme.css` or `base.css` or something,
 // and we could also generate and publish the other themes --
 // that would allow them to be staticly used,
-// currently you'd have to pass a dynamic `theme` to `Themed`
+// currently you'd have to pass a dynamic `theme` to `ThemeRoot`
 
 /** @nodocs */
 export const gen: Gen = ({origin_path}) => {
