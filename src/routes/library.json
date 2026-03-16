@@ -80,7 +80,7 @@
 			"@changesets/changelog-git": "^0.2.1",
 			"@fuzdev/blake3_wasm": "^0.1.0",
 			"@fuzdev/fuz_code": "^0.45.1",
-			"@fuzdev/fuz_ui": "^0.189.0",
+			"@fuzdev/fuz_ui": "^0.190.0",
 			"@fuzdev/fuz_util": "^0.54.0",
 			"@fuzdev/gro": "^0.197.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
