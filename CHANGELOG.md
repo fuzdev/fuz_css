@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.56.0
+
+### Minor Changes
+
+- rename `menuitem` from `menu_item` ([48f9f70](https://github.com/fuzdev/fuz_css/commit/48f9f70))
+
 ## 0.55.0
 
 ### Minor Changes
