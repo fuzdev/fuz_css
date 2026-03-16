@@ -92,7 +92,7 @@
 	<div class="content">
 		<div class="variables">
 			{#each new_variables as variable (variable.name)}
-				<button type="button" class="variable menu_item" onclick={(e) => edit_variable(e, variable)}
+				<button type="button" class="variable menuitem" onclick={(e) => edit_variable(e, variable)}
 					>--{variable.name}</button
 				>
 			{/each}

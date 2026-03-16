@@ -189,9 +189,9 @@ describe('modified_class_interpreter', () => {
 			);
 		});
 
-		test('handles ruleset with descendant selectors: hover:menu_item', () => {
+		test('handles ruleset with descendant selectors: hover:menuitem', () => {
 			const result = generate_classes_css({
-				class_names: ['hover:menu_item'],
+				class_names: ['hover:menuitem'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,
@@ -199,10 +199,10 @@ describe('modified_class_interpreter', () => {
 
 			expect_css_contains(
 				result.css,
-				'.hover\\:menu_item:hover',
-				'.hover\\:menu_item:hover .content',
-				'.hover\\:menu_item:hover .icon',
-				'.hover\\:menu_item:hover .title',
+				'.hover\\:menuitem:hover',
+				'.hover\\:menuitem:hover .content',
+				'.hover\\:menuitem:hover .icon',
+				'.hover\\:menuitem:hover .title',
 			);
 		});
 

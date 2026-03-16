@@ -424,22 +424,22 @@ export const find_compound_end = (selector: string, class_pos: number): number =
  * Modifies a single CSS selector to add modifiers.
  *
  * @param selector - a single CSS selector (not a selector list)
- * @param original_class - the base class name (e.g., "menu_item")
- * @param new_class_escaped - the escaped new class name (e.g., "hover\\:menu_item")
+ * @param original_class - the base class name (e.g., "menuitem")
+ * @param new_class_escaped - the escaped new class name (e.g., "hover\\:menuitem")
  * @param state_css - state modifier CSS to insert (e.g., ":hover")
  * @param pseudo_element_css - pseudo-element modifier CSS to insert (e.g., "::before")
  * @returns modified selector
  *
  * @example
  * ```ts
- * modify_single_selector('.menu_item', 'menu_item', 'hover\\:menu_item', ':hover', '')
- * // → '.hover\\:menu_item:hover'
+ * modify_single_selector('.menuitem', 'menuitem', 'hover\\:menuitem', ':hover', '')
+ * // → '.hover\\:menuitem:hover'
  *
- * modify_single_selector('.menu_item .icon', 'menu_item', 'hover\\:menu_item', ':hover', '')
- * // → '.hover\\:menu_item:hover .icon'
+ * modify_single_selector('.menuitem .icon', 'menuitem', 'hover\\:menuitem', ':hover', '')
+ * // → '.hover\\:menuitem:hover .icon'
  *
- * modify_single_selector('.menu_item.selected', 'menu_item', 'hover\\:menu_item', ':hover', '')
- * // → '.hover\\:menu_item.selected:hover'
+ * modify_single_selector('.menuitem.selected', 'menuitem', 'hover\\:menuitem', ':hover', '')
+ * // → '.hover\\:menuitem.selected:hover'
  * ```
  */
 export const modify_single_selector = (

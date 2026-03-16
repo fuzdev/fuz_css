@@ -327,13 +327,13 @@
 
 ### Patch Changes
 
-- add cursor styles to `.menu_item` ([c1e71ea](https://github.com/ryanatkn/moss/commit/c1e71ea))
+- add cursor styles to `.menuitem` ([c1e71ea](https://github.com/ryanatkn/moss/commit/c1e71ea))
 
 ## 0.24.1
 
 ### Patch Changes
 
-- add `.menu_item` styles ([455199c](https://github.com/ryanatkn/moss/commit/455199c))
+- add `.menuitem` styles ([455199c](https://github.com/ryanatkn/moss/commit/455199c))
 
 ## 0.24.0
 

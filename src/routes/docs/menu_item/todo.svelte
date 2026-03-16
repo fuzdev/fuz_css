@@ -30,38 +30,38 @@
 	<TomeSection>
 		<section>
 			<TomeSectionHeader text=".menu-item CSS class">
-				<code>.menu_item</code> CSS class
+				<code>.menuitem</code> CSS class
 			</TomeSectionHeader>
 			<blockquote>This is experimental and may change or be removed.</blockquote>
 		</section>
 		<section>
 			<ul class="unstyled">
 				<li role="none">
-					<div class="menu_item">
+					<div class="menuitem">
 						<div class="content">
 							<div class="icon">1</div>
 							<div class="title">
-								<span class="text"><Code content={`<div class="menu_item">`} /></span>
+								<span class="text"><Code content={`<div class="menuitem">`} /></span>
 							</div>
 						</div>
 					</div>
 				</li>
 				<li role="none">
-					<div class="menu_item">
+					<div class="menuitem">
 						<div class="content">
 							<div class="icon">2</div>
 							<div class="title">
-								<span class="text"><Code content={`<div class="menu_item">`} /></span>
+								<span class="text"><Code content={`<div class="menuitem">`} /></span>
 							</div>
 						</div>
 					</div>
 				</li>
 				<li role="none">
-					<div class="menu_item selected">
+					<div class="menuitem selected">
 						<div class="content">
 							<div class="icon">3</div>
 							<div class="title">
-								<span class="text"><Code content={`<div class="menu_item selected">`} /></span>
+								<span class="text"><Code content={`<div class="menuitem selected">`} /></span>
 							</div>
 						</div>
 					</div>
@@ -72,7 +72,7 @@
 			<ul class="unstyled">
 				<li role="none">
 					<div
-						class="menu_item selectable"
+						class="menuitem selectable"
 						class:selected={clicked === 'a'}
 						tabindex="0"
 						role="menuitem"
@@ -84,7 +84,7 @@
 							<div class="title">
 								<span class="text"
 									><Code
-										content={`<div class="menu_item selectable${
+										content={`<div class="menuitem selectable${
 											clicked === 'a' ? ' selected' : ''
 										}">`}
 									/></span
@@ -95,7 +95,7 @@
 				</li>
 				<li role="none">
 					<div
-						class="menu_item selectable"
+						class="menuitem selectable"
 						class:selected={clicked === 'b'}
 						tabindex="0"
 						role="menuitem"
@@ -107,7 +107,7 @@
 							<div class="title">
 								<span class="text"
 									><Code
-										content={`<div class="menu_item selectable${
+										content={`<div class="menuitem selectable${
 											clicked === 'b' ? ' selected' : ''
 										}">`}
 									/></span
@@ -118,7 +118,7 @@
 				</li>
 				<li role="none">
 					<div
-						class="menu_item selectable"
+						class="menuitem selectable"
 						class:selected={clicked === 'c'}
 						tabindex="0"
 						role="menuitem"
@@ -130,7 +130,7 @@
 							<div class="title">
 								<span class="text"
 									><Code
-										content={`<div class="menu_item selectable${
+										content={`<div class="menuitem selectable${
 											clicked === 'c' ? ' selected' : ''
 										}">`}
 									/></span

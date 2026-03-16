@@ -35,9 +35,9 @@ describe('find_compound_end', () => {
 	// Table-driven test cases: [selector, startPos, expected]
 	const cases: Array<[string, number, number, string]> = [
 		// Basic cases
-		['.menu_item', 0, 10, 'simple class'],
-		['.menu_item .content', 0, 10, 'descendant combinator'],
-		['.menu_item.selected', 0, 19, 'compound selector'],
+		['.menuitem', 0, 9, 'simple class'],
+		['.menuitem .content', 0, 9, 'descendant combinator'],
+		['.menuitem.selected', 0, 18, 'compound selector'],
 		['.chevron::before', 0, 8, 'pseudo-element'],
 		['.selectable:hover', 0, 17, 'pseudo-class'],
 		['.plain:not(:hover)', 0, 18, 'functional pseudo-class'],

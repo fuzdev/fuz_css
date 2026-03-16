@@ -120,7 +120,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--min_height: var(--space_xl3);
 			--border_radius: var(--border_radius_xs2);
 			--icon_size: var(--icon_size_sm);
-			--menu_item_padding: var(--space_xs4) var(--space_xs3);
+			--menuitem_padding: var(--space_xs4) var(--space_xs3);
 			--flow_margin: var(--space_md);
 		`,
 	},
@@ -163,9 +163,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 		`,
 	},
-	menu_item: {
+	menuitem: {
 		ruleset: `
-			.menu_item {
+			.menuitem {
 				--border_radius: 0;
 				--border_color: var(--border_color_30);
 				position: relative;
@@ -176,45 +176,45 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
-				padding: var(--menu_item_padding, var(--space_xs3) var(--space_xs));
+				padding: var(--menuitem_padding, var(--space_xs3) var(--space_xs));
 			}
-			.menu_item.selected {
+			.menuitem.selected {
 				/* TODO different patterns for border and surface? */
 				--border_color: var(--color_a_50);
 				background-color: var(--fg_10);
 				z-index: 1;
 				cursor: default;
 			}
-			.menu_item.selected.deselectable:not(:disabled) {
+			.menuitem.selected.deselectable:not(:disabled) {
 				cursor: pointer;
 			}
-			.menu_item:hover {
+			.menuitem:hover {
 				--border_color: var(--border_color_30);
 				background-color: var(--fg_10);
 			}
-			.menu_item:active,
-			.menu_item.selected:hover {
+			.menuitem:active,
+			.menuitem.selected:hover {
 				--border_color: var(--border_color_30);
 				background-color: var(--fg_20);
 			}
-			.menu_item.plain {
+			.menuitem.plain {
 				border: none;
 			}
-			.menu_item .content {
+			.menuitem .content {
 				display: flex;
 				align-items: center;
 				flex: 1;
 				/* allows the flex children to shrink */
 				min-width: 0;
 			}
-			.menu_item .icon {
+			.menuitem .icon {
 				width: var(--icon_size, var(--icon_size_md));
 				margin-right: var(--space_sm);
 				flex-shrink: 0;
 				text-align: center;
 				font-weight: 900;
 			}
-			.menu_item .title {
+			.menuitem .title {
 				margin-right: var(--space_lg);
 				flex-shrink: 1;
 				overflow: hidden;

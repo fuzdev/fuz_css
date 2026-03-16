@@ -10,30 +10,30 @@ describe('modify_single_selector', () => {
 	const cases: Array<[string, string, string, string, string, string, string]> = [
 		// Basic state modifications
 		[
-			'.menu_item',
-			'menu_item',
-			'hover\\:menu_item',
+			'.menuitem',
+			'menuitem',
+			'hover\\:menuitem',
 			':hover',
 			'',
-			'.hover\\:menu_item:hover',
+			'.hover\\:menuitem:hover',
 			'simple selector',
 		],
 		[
-			'.menu_item .content',
-			'menu_item',
-			'hover\\:menu_item',
+			'.menuitem .content',
+			'menuitem',
+			'hover\\:menuitem',
 			':hover',
 			'',
-			'.hover\\:menu_item:hover .content',
+			'.hover\\:menuitem:hover .content',
 			'descendant',
 		],
 		[
-			'.menu_item.selected',
-			'menu_item',
-			'hover\\:menu_item',
+			'.menuitem.selected',
+			'menuitem',
+			'hover\\:menuitem',
 			':hover',
 			'',
-			'.hover\\:menu_item.selected:hover',
+			'.hover\\:menuitem.selected:hover',
 			'compound',
 		],
 		[
@@ -91,7 +91,7 @@ describe('modify_single_selector', () => {
 		],
 
 		// No match cases
-		['.other', 'menu_item', 'hover\\:menu_item', ':hover', '', '.other', 'no match'],
+		['.other', 'menuitem', 'hover\\:menuitem', ':hover', '', '.other', 'no match'],
 		['.boxed', 'box', 'hover\\:box', ':hover', '', '.boxed', 'prefix no match'],
 		['.checkbox', 'box', 'hover\\:box', ':hover', '', '.checkbox', 'suffix no match'],
 

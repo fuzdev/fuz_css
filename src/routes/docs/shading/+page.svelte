@@ -178,7 +178,7 @@
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
 				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
-				<code>.menu_item</code> use <code>fg_10</code> for this stacking behavior.
+				<code>.menuitem</code> use <code>fg_10</code> for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -260,7 +260,7 @@ border-color: var(--shade_30);
 background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
-			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menu_item</code>) use
+			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
 			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque base.
 		</p>
 	</TomeSection>

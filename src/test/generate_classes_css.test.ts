@@ -825,7 +825,7 @@ describe('generate_classes_css', () => {
 				'--min_height: var(--space_xl3);',
 				'--border_radius: var(--border_radius_xs2);',
 				'--icon_size: var(--icon_size_sm);',
-				'--menu_item_padding: var(--space_xs4) var(--space_xs3);',
+				'--menuitem_padding: var(--space_xs4) var(--space_xs3);',
 				'--flow_margin: var(--space_md);',
 			);
 			expect(result.diagnostics).toHaveLength(0);

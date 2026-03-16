@@ -96,10 +96,10 @@ describe('parse_ruleset', () => {
 	});
 
 	test('handles descendant selectors', () => {
-		const result = parse_ruleset('.menu_item .content { display: flex; }');
+		const result = parse_ruleset('.menuitem .content { display: flex; }');
 
 		expect(result.rules).toHaveLength(1);
-		expect(result.rules[0]!.selector).toBe('.menu_item .content');
+		expect(result.rules[0]!.selector).toBe('.menuitem .content');
 	});
 
 	describe('real-world composite classes', () => {
@@ -336,8 +336,8 @@ describe('ruleset_contains_class', () => {
 	});
 
 	test('returns true for class in descendant selector', () => {
-		const result = parse_ruleset('.menu_item .content { display: flex; }');
-		expect(ruleset_contains_class(result.rules, 'menu_item')).toBe(true);
+		const result = parse_ruleset('.menuitem .content { display: flex; }');
+		expect(ruleset_contains_class(result.rules, 'menuitem')).toBe(true);
 	});
 
 	test('returns true for element.class selector', () => {

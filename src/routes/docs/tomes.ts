@@ -17,7 +17,7 @@ import layout from '$routes/docs/layout/+page.svelte';
 import shading from '$routes/docs/shading/+page.svelte';
 import shadows from '$routes/docs/shadows/+page.svelte';
 import borders from '$routes/docs/borders/+page.svelte';
-// import menu_item from '$routes/docs/menu_item/+page.svelte';
+// import menuitem from '$routes/docs/menuitem/+page.svelte';
 
 // TODO maybe decouple `related` from `Tome` to get bidirectionality for free
 
@@ -162,7 +162,7 @@ export const tomes: Array<Tome> = [
 	// {
 	// 	name: 'menu item',
 	// 	category: 'styles',
-	// Component: menu_item,
+	// Component: menuitem,
 	// 	related_tomes: [],
 	// related_modules: [],
 	// related_declarations: [],

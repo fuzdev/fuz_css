@@ -1066,7 +1066,7 @@ export const gen = gen_fuz_css({
 				<li><code>.selectable</code> - selectable element styling</li>
 				<li><code>.clickable</code> - clickable element styling</li>
 				<li><code>.plain</code> - plain/reset styling</li>
-				<li><code>.menu_item</code> - menu item styling</li>
+				<li><code>.menuitem</code> - menu item styling</li>
 				<li><code>.chevron</code> - chevron indicator</li>
 				<li><code>.chip</code> - chip/tag styling</li>
 			</ul>

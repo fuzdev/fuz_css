@@ -118,14 +118,14 @@ describe('generate_modified_ruleset', () => {
 
 	test('handles descendant selectors', () => {
 		const ruleset = `
-			.menu_item { display: flex; }
-			.menu_item .content { flex: 1; }
-			.menu_item .icon { width: 24px; }
+			.menuitem { display: flex; }
+			.menuitem .content { flex: 1; }
+			.menuitem .icon { width: 24px; }
 		`;
 		const result = generate_modified_ruleset(
 			ruleset,
-			'menu_item',
-			'hover\\:menu_item',
+			'menuitem',
+			'hover\\:menuitem',
 			':hover',
 			'',
 			null,
@@ -134,9 +134,9 @@ describe('generate_modified_ruleset', () => {
 
 		expect_css_contains(
 			result.css,
-			'.hover\\:menu_item:hover',
-			'.hover\\:menu_item:hover .content',
-			'.hover\\:menu_item:hover .icon',
+			'.hover\\:menuitem:hover',
+			'.hover\\:menuitem:hover .content',
+			'.hover\\:menuitem:hover .icon',
 		);
 	});
 

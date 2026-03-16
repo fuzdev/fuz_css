@@ -2668,7 +2668,7 @@
 						"kind": "function",
 						"doc_comment": "Modifies a single CSS selector to add modifiers.",
 						"examples": [
-							"```ts\nmodify_single_selector('.menu_item', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover'\n\nmodify_single_selector('.menu_item .icon', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item:hover .icon'\n\nmodify_single_selector('.menu_item.selected', 'menu_item', 'hover\\\\:menu_item', ':hover', '')\n// → '.hover\\\\:menu_item.selected:hover'\n```"
+							"```ts\nmodify_single_selector('.menuitem', 'menuitem', 'hover\\\\:menuitem', ':hover', '')\n// → '.hover\\\\:menuitem:hover'\n\nmodify_single_selector('.menuitem .icon', 'menuitem', 'hover\\\\:menuitem', ':hover', '')\n// → '.hover\\\\:menuitem:hover .icon'\n\nmodify_single_selector('.menuitem.selected', 'menuitem', 'hover\\\\:menuitem', ':hover', '')\n// → '.hover\\\\:menuitem.selected:hover'\n```"
 						],
 						"source_line": 445,
 						"type_signature": "(selector: string, original_class: string, new_class_escaped: string, state_css: string, pseudo_element_css: string): string",
@@ -2683,12 +2683,12 @@
 							{
 								"name": "original_class",
 								"type": "string",
-								"description": "the base class name (e.g., \"menu_item\")"
+								"description": "the base class name (e.g., \"menuitem\")"
 							},
 							{
 								"name": "new_class_escaped",
 								"type": "string",
-								"description": "the escaped new class name (e.g., \"hover\\\\:menu_item\")"
+								"description": "the escaped new class name (e.g., \"hover\\\\:menuitem\")"
 							},
 							{
 								"name": "state_css",

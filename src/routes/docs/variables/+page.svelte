@@ -81,7 +81,7 @@ export interface StyleVariable {
 		<!-- TODO add info through the contextmenu or dialog -->
 		<div class="variables">
 			{#each variables as variable (variable.name)}
-				<StyleVariableButton name={variable.name} class="menu_item" />
+				<StyleVariableButton name={variable.name} class="menuitem" />
 			{/each}
 		</div>
 	</TomeSection>
