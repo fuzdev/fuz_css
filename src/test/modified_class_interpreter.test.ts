@@ -492,9 +492,9 @@ describe('modified_class_interpreter', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('md:compact generates media query with density overrides', () => {
+		test('md:sm generates media query with density overrides', () => {
 			const result = generate_classes_css({
-				class_names: ['md:compact'],
+				class_names: ['md:sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,
@@ -503,7 +503,7 @@ describe('modified_class_interpreter', () => {
 			expect_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
-				'.md\\:compact',
+				'.md\\:sm',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl3);',
 				'--border_radius: var(--border_radius_xs2);',

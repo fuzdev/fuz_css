@@ -806,10 +806,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('compact composite', () => {
-		test('generates compact class with density overrides', () => {
+	describe('sm composite', () => {
+		test('generates sm class with density overrides', () => {
 			const result = generate_classes_css({
-				class_names: ['compact'],
+				class_names: ['sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null,
@@ -817,7 +817,7 @@ describe('generate_classes_css', () => {
 
 			expect_css_contains(
 				result.css,
-				'.compact {',
+				'.sm {',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl3);',
 				'--input_height_sm: var(--space_xl2);',
@@ -831,9 +831,9 @@ describe('generate_classes_css', () => {
 			expect(result.diagnostics).toHaveLength(0);
 		});
 
-		test('compact tracks used variables', () => {
+		test('sm tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['compact'],
+				class_names: ['sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null,
@@ -848,6 +848,50 @@ describe('generate_classes_css', () => {
 			expect(result.variables_used.has('space_xs4')).toBe(true);
 			expect(result.variables_used.has('space_xs3')).toBe(true);
 			expect(result.variables_used.has('space_md')).toBe(true);
+		});
+	});
+
+	describe('md composite', () => {
+		test('generates md class with default sizing', () => {
+			const result = generate_classes_css({
+				class_names: ['md'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect_css_contains(
+				result.css,
+				'.md {',
+				'--font_size: var(--font_size_md);',
+				'--input_height: var(--space_xl5);',
+				'--input_height_sm: var(--space_xl4);',
+				'--input_padding_x: var(--space_lg);',
+				'--min_height: var(--input_height);',
+				'--border_radius: var(--border_radius_sm);',
+				'--icon_size: var(--icon_size_md);',
+				'--menuitem_padding: var(--space_xs3) var(--space_xs);',
+				'--flow_margin: var(--space_lg);',
+			);
+			expect(result.diagnostics).toHaveLength(0);
+		});
+
+		test('md tracks used variables', () => {
+			const result = generate_classes_css({
+				class_names: ['md'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			expect(result.variables_used.has('font_size_md')).toBe(true);
+			expect(result.variables_used.has('space_xl5')).toBe(true);
+			expect(result.variables_used.has('space_xl4')).toBe(true);
+			expect(result.variables_used.has('space_lg')).toBe(true);
+			expect(result.variables_used.has('border_radius_sm')).toBe(true);
+			expect(result.variables_used.has('icon_size_md')).toBe(true);
+			expect(result.variables_used.has('space_xs3')).toBe(true);
+			expect(result.variables_used.has('space_xs')).toBe(true);
 		});
 	});
 

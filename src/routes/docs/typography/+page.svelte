@@ -206,22 +206,22 @@
 	</TomeSection>
 	<IconSizes />
 	<TomeSection>
-		<TomeSectionHeader text="With .compact">
-			With <code>.compact</code>
+		<TomeSectionHeader text="With .sm">
+			With <code>.sm</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.compact</code>
+			The <code>.sm</code>
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> makes sizing tighter
 			with smaller fonts, inputs, padding, border radii, and flow margins. Apply on a container to cascade
 			to children.
 		</p>
 		<Code
-			content={`<div class="compact">\n\t<h3>compact heading</h3>\n\t<p>compact paragraph</p>\n\t<p>compact paragraph</p>\n</div>`}
+			content={`<div class="sm">\n\t<h3>sm heading</h3>\n\t<p>sm paragraph</p>\n\t<p>sm paragraph</p>\n</div>`}
 		/>
 		<div class="display:flex align-items:start gap_lg mb_lg">
-			<div class="panel p_md compact">
-				<h4>compact</h4>
-				<p>Paragraph in a compact container with tighter flow margins between elements.</p>
+			<div class="panel p_md sm">
+				<h4>sm</h4>
+				<p>Paragraph in a sm container with tighter flow margins between elements.</p>
 				<p>Another paragraph showing the reduced spacing.</p>
 				<ul>
 					<li>list item one</li>

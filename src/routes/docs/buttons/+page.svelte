@@ -226,46 +226,46 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .compact">
-			With <code>.compact</code>
+		<TomeSectionHeader text="With .sm">
+			With <code>.sm</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.compact</code>
+			The <code>.sm</code>
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things more
 			tightly with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
-		<Code content={`<button class="compact">compact</button>`} />
+		<Code content={`<button class="sm">sm</button>`} />
 		<div class="row gap_xs mb_lg">
-			<button type="button" class="compact">compact</button>
+			<button type="button" class="sm">sm</button>
 			<button type="button">normal</button>
 		</div>
-		<p><code>.compact</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
+		<p><code>.sm</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
 		<Code
-			content={`<button>+++</button>\n<button class="compact">+++</button>\n<button class="compact plain">+++</button>\n<button class="compact icon_button">+++</button>\n<button class="compact plain icon_button">+++</button>`}
+			content={`<button>+++</button>\n<button class="sm">+++</button>\n<button class="sm plain">+++</button>\n<button class="sm icon_button">+++</button>\n<button class="sm plain icon_button">+++</button>`}
 		/>
 		<div class="row gap_sm mb_lg">
 			<button type="button">+++</button>
-			<button type="button" class="compact">+++</button>
-			<button type="button" class="compact plain">+++</button>
-			<button type="button" class="compact icon_button">+++</button>
-			<button type="button" class="compact plain icon_button">+++</button>
+			<button type="button" class="sm">+++</button>
+			<button type="button" class="sm plain">+++</button>
+			<button type="button" class="sm icon_button">+++</button>
+			<button type="button" class="sm plain icon_button">+++</button>
 		</div>
-		<p><code>.compact</code> with colors:</p>
+		<p><code>.sm</code> with colors:</p>
 		<Code
-			content={`<button class="compact color_h">color_h</button>\n<button class="compact color_g">color_g</button>\n<button class="compact color_d selected">color_d</button>`}
+			content={`<button class="sm color_h">color_h</button>\n<button class="sm color_g">color_g</button>\n<button class="sm color_d selected">color_d</button>`}
 		/>
 		<div class="row gap_xs mb_lg">
-			<button type="button" class="compact color_h">color_h</button>
-			<button type="button" class="compact color_g">color_g</button>
-			<button type="button" class="compact color_d selected">color_d</button>
+			<button type="button" class="sm color_h">color_h</button>
+			<button type="button" class="sm color_g">color_g</button>
+			<button type="button" class="sm color_d selected">color_d</button>
 		</div>
 		<p>
-			<code>.compact</code> overrides custom properties, so children inherit compactness:
+			<code>.sm</code> overrides custom properties, so children inherit the sizing:
 		</p>
 		<Code
-			content={`<div class="compact row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}
+			content={`<div class="sm row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}
 		/>
-		<div class="compact row gap_sm">
+		<div class="sm row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
 			<button type="button" class="color_a">3</button>

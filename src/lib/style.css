@@ -149,7 +149,7 @@ Respects `hidden="until-found"` for find-in-page support.
 }
 
 /* heading margins use calc multipliers on --flow_margin so they scale proportionally
-   with .compact while preserving hierarchy. multipliers are derived from the space
+   with .sm while preserving hierarchy. multipliers are derived from the space
    scale (sqrt(GR) ≈ 1.272 per step). margin-top is 2 steps above margin-bottom. */
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);

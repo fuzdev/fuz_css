@@ -91,13 +91,13 @@
 		/>
 		<p>
 			The <code>--flow_margin</code> variable is unset by default, falling back to
-			<code>var(--space_lg)</code>. Override classes like <code>.compact</code> set
+			<code>var(--space_lg)</code>. Size composite classes like <code>.sm</code> set
 			<code>--flow_margin</code> to tighten vertical rhythm for all flow elements and headings.
 		</p>
 		<p>
 			For elements not in the flow list, use the <code>.mb_flow</code> and <code>.mt_flow</code>
-			composite classes to get the same compact-responsive spacing. Use <code>.mb_lg</code> when you
-			want a fixed value that ignores <code>.compact</code>.
+			composite classes to get the same size-responsive spacing. Use <code>.mb_lg</code> when you
+			want a fixed value that ignores <code>.sm</code>.
 		</p>
 		<aside>
 			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to
