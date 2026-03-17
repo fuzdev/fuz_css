@@ -552,6 +552,37 @@ describe('modified_class_interpreter', () => {
 			);
 			expect(result.diagnostics).toHaveLength(0);
 		});
+
+		test('lg:md generates lg breakpoint with default sizing reset', () => {
+			const result = generate_classes_css({
+				class_names: ['lg:md'],
+				class_definitions: css_class_composites,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			expect_css_contains(
+				result.css,
+				'@media (width >= 64rem)',
+				'.lg\\:md',
+				'--font_size: var(--font_size_md);',
+				'--icon_size: var(--icon_size_md);',
+			);
+			expect(result.diagnostics).toHaveLength(0);
+		});
+
+		test('sm and md together generate both classes', () => {
+			const result = generate_classes_css({
+				class_names: ['sm', 'md'],
+				class_definitions: css_class_composites,
+				interpreters: [modified_class_interpreter],
+				css_properties: null,
+			});
+
+			expect_css_contains(result.css, '.sm {', '--font_size: var(--font_size_sm);');
+			expect_css_contains(result.css, '.md {', '--font_size: var(--font_size_md);');
+			expect(result.diagnostics).toHaveLength(0);
+		});
 	});
 
 	describe('error propagation', () => {

@@ -216,12 +216,12 @@
 			to children.
 		</p>
 		<Code
-			content={`<div class="sm">\n\t<h3>sm heading</h3>\n\t<p>sm paragraph</p>\n\t<p>sm paragraph</p>\n</div>`}
+			content={`<div class="sm">\n\t<h3>small heading</h3>\n\t<p>small paragraph</p>\n\t<p>small paragraph</p>\n</div>`}
 		/>
 		<div class="display:flex align-items:start gap_lg mb_lg">
 			<div class="panel p_md sm">
-				<h4>sm</h4>
-				<p>Paragraph in a sm container with tighter flow margins between elements.</p>
+				<h4>small</h4>
+				<p>Paragraph in a small container with tighter flow margins between elements.</p>
 				<p>Another paragraph showing the reduced spacing.</p>
 				<ul>
 					<li>list item one</li>
@@ -239,6 +239,30 @@
 			</div>
 		</div>
 		<aside>TODO improve rhythm for headers</aside>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="Reset with .md">
+			Reset with <code>.md</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.md</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
+			defaults. Use it inside a sized container to restore normal sizing for a subtree.
+		</p>
+		<Code
+			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}
+		/>
+		<div class="display:flex align-items:start gap_lg mb_lg">
+			<div class="panel p_md sm">
+				<h4>small region</h4>
+				<p>Everything here is small.</p>
+				<div class="panel p_md md">
+					<h4>normal nested inside</h4>
+					<p>This region is back to default sizing despite the parent being small.</p>
+				</div>
+			</div>
+		</div>
 	</TomeSection>
 </TomeContent>
 

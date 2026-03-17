@@ -71,9 +71,9 @@
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
 			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
-		<Code content={`<span class="chip sm">sm</span>`} />
+		<Code content={`<span class="chip sm">small</span>`} />
 		<div class="row gap_sm mb_lg">
-			<span class="chip sm">sm</span>
+			<span class="chip sm">small</span>
 			<span class="chip">normal</span>
 		</div>
 		<Code
