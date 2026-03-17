@@ -205,25 +205,25 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .compact">
-			With <code>.compact</code>
+		<TomeSectionHeader text="With .sm">
+			With <code>.sm</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.compact</code>
+			The <code>.sm</code>
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
 			with smaller fonts, inputs, padding, border radii, and flow margins. Apply directly or on a container
 			to cascade to children.
 		</p>
 		<Code
-			content={`<form class="compact">
+			content={`<form class="sm">
 	...
 </form>`}
 		/>
 		<div class="display:flex gap_lg">
 			<div class="width_atmost_sm">
-				<form class="compact">
+				<form class="sm">
 					<fieldset>
-						<legend>.compact</legend>
+						<legend>.sm</legend>
 						<label>
 							<div class="title">name</div>
 							<input placeholder=">" />

@@ -106,7 +106,7 @@ export const load_css_properties = async (): Promise<Set<string>> => {
  * Custom properties (--*) always return true.
  *
  * @param property - the CSS property name to validate
- * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param properties - Set of valid CSS properties from `load_css_properties()`
  *                     Pass `null` to skip validation.
  * @returns true if valid CSS property or custom property
  */
@@ -140,7 +140,7 @@ const find_closest_match = (typo: string, candidates: Iterable<string>): string 
  * Suggests a correct property name for a typo using Levenshtein distance.
  *
  * @param typo - the mistyped property name
- * @param properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param properties - Set of valid CSS properties from `load_css_properties()`
  *                     Pass `null` to skip suggestions.
  * @returns the suggested property or null if no close match (Levenshtein distance > 2)
  */
@@ -444,7 +444,7 @@ export const extract_and_validate_modifiers = (
  * Parses a CSS-literal class name into its components.
  *
  * @param class_name - the class name to parse
- * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param css_properties - Set of valid CSS properties from `load_css_properties()`
  *                         Pass `null` to skip property validation.
  * @returns `CssLiteralParseResult` with parsed data or error
  */
@@ -594,7 +594,7 @@ export interface CssLiteralOutput {
  *
  * @param class_name - the class name to interpret
  * @param escaped_class_name - the CSS-escaped version of the class name
- * @param css_properties - Set of valid CSS properties from `load_css_properties()`.
+ * @param css_properties - Set of valid CSS properties from `load_css_properties()`
  *                         Pass `null` to skip property validation.
  * @returns result with output and warnings on success, or error on failure
  */

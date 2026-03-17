@@ -1560,14 +1560,14 @@
 						"name": "css_literal_interpreter",
 						"kind": "variable",
 						"doc_comment": "Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).\nGenerates full CSS rulesets including any modifier wrappers.",
-						"source_line": 151,
+						"source_line": 156,
 						"type_signature": "CssClassDefinitionInterpreter"
 					},
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
 						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: modified_class_interpreter runs first to handle `hover:box` before\ncss_literal_interpreter tries to interpret it as `hover:box` (property:value).",
-						"source_line": 188,
+						"source_line": 193,
 						"type_signature": "CssClassDefinitionInterpreter[]"
 					}
 				],
@@ -1900,7 +1900,7 @@
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`\n  Pass `null` to skip validation."
 							}
 						]
 					},
@@ -1921,7 +1921,7 @@
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip suggestions."
+								"description": "Set of valid CSS properties from `load_css_properties()`\n  Pass `null` to skip suggestions."
 							}
 						]
 					},
@@ -2044,7 +2044,7 @@
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`\n  Pass `null` to skip property validation."
 							}
 						]
 					},
@@ -2135,7 +2135,7 @@
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`\n  Pass `null` to skip property validation."
 							}
 						]
 					},

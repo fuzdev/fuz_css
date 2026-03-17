@@ -108,8 +108,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			background-color: var(--fg_10);
 		`,
 	},
-	// TODO consider `.loose`/`.spacious` counterpart
-	compact: {
+	sm: {
 		comment:
 			'Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -118,18 +117,30 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--input_height_sm: var(--space_xl2);
 			--input_padding_x: var(--space_sm);
 			--min_height: var(--space_xl3);
-			--border_radius: var(--border_radius_xs2);
 			--icon_size: var(--icon_size_sm);
 			--menuitem_padding: var(--space_xs4) var(--space_xs3);
 			--flow_margin: var(--space_md);
 		`,
 	},
+	md: {
+		comment: 'Explicit default sizing, useful as a cascade reset within a sized parent like .sm.',
+		declaration: `
+			--font_size: var(--font_size_md);
+			--input_height: var(--space_xl5);
+			--input_height_sm: var(--space_xl4);
+			--input_padding_x: var(--space_lg);
+			--min_height: var(--input_height);
+			--icon_size: var(--icon_size_md);
+			--menuitem_padding: var(--space_xs3) var(--space_xs);
+			--flow_margin: var(--space_lg);
+		`,
+	},
 	mb_flow: {
-		comment: 'Flow-aware margin-bottom that responds to --flow_margin overrides like .compact.',
+		comment: 'Flow-aware margin-bottom that responds to --flow_margin overrides like .sm.',
 		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));',
 	},
 	mt_flow: {
-		comment: 'Flow-aware margin-top that responds to --flow_margin overrides like .compact.',
+		comment: 'Flow-aware margin-top that responds to --flow_margin overrides like .sm.',
 		declaration: 'margin-top: var(--flow_margin, var(--space_lg));',
 	},
 	icon_button: {
@@ -166,8 +177,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	menuitem: {
 		ruleset: `
 			.menuitem {
-				--border_radius: 0;
 				--border_color: var(--border_color_30);
+				border-radius: 0;
 				position: relative;
 				z-index: 2;
 				cursor: pointer;

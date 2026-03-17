@@ -63,34 +63,35 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .compact">
-			With <code>.compact</code>
+		<TomeSectionHeader text="With .sm">
+			With <code>.sm</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.compact</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
+			The <code>.sm</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> applies tighter sizing
 			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
-		<Code content={`<span class="chip compact">compact</span>`} />
+		<Code content={`<span class="chip">normal</span>\n<span class="chip sm">small</span>`} />
 		<div class="row gap_sm mb_lg">
-			<span class="chip compact">compact</span>
 			<span class="chip">normal</span>
+			<span class="chip sm">small</span>
 		</div>
 		<Code
-			content={`<span class="chip compact color_a">color_a</span>\n<span class="chip compact color_b">color_b</span>\n<span class="chip compact color_c">color_c</span>`}
+			content={`<span class="chip color_a">normal</span>\n<span class="chip sm color_a">color_a</span>\n<span class="chip sm color_b">color_b</span>\n<span class="chip sm color_c">color_c</span>`}
 		/>
 		<div class="row gap_sm mb_lg">
-			<span class="chip compact color_a">color_a</span>
-			<span class="chip compact color_b">color_b</span>
-			<span class="chip compact color_c">color_c</span>
+			<span class="chip color_a">normal</span>
+			<span class="chip color_a sm">color_a</span>
+			<span class="chip color_b sm">color_b</span>
+			<span class="chip color_c sm">color_c</span>
 		</div>
 		<p>
-			<code>.compact</code> overrides custom properties, so children are compact too:
+			<code>.sm</code> overrides custom properties, so children inherit the sizing:
 		</p>
 		<Code
-			content={`<div class="compact row gap_sm">\n\t<span class="chip">one</span>\n\t<span class="chip color_d">two</span>\n\t<a class="chip color_e">three</a>\n</div>`}
+			content={`<div class="sm row gap_sm">\n\t<span class="chip">one</span>\n\t<span class="chip color_d">two</span>\n\t<a class="chip color_e">three</a>\n</div>`}
 		/>
-		<div class="compact row gap_sm">
+		<div class="sm row gap_sm">
 			<span class="chip">one</span>
 			<span class="chip color_d">two</span>
 			<!-- svelte-ignore a11y_missing_attribute -->

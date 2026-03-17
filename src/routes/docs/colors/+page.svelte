@@ -26,13 +26,13 @@
 		'primary',
 		'success',
 		'error/danger',
-		'secondary/accent',
-		'tertiary/highlight',
-		'quaternary/muted',
-		'quinary/decorative',
-		'senary/caution',
-		'septenary/info',
-		'octonary/flourish',
+		'accent/secondary',
+		'highlight/tertiary',
+		'muted/quaternary',
+		'decorative/quinary',
+		'caution/senary',
+		'info/septenary',
+		'flourish/octonary',
 	];
 </script>
 

@@ -149,7 +149,7 @@ Respects `hidden="until-found"` for find-in-page support.
 }
 
 /* heading margins use calc multipliers on --flow_margin so they scale proportionally
-   with .compact while preserving hierarchy. multipliers are derived from the space
+   with .sm while preserving hierarchy. multipliers are derived from the space
    scale (sqrt(GR) ≈ 1.272 per step). margin-top is 2 steps above margin-bottom. */
 :where(h1:not(.unstyled)) {
 	--font_size: var(--font_size_xl3);
@@ -255,7 +255,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	-webkit-hyphens: none;
 	hyphens: none;
 	color: var(--text_color);
-	background-color: var(--fg_10);
+	background-color: var(--fg_05);
 	padding: 0 var(--space_xs2);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }
@@ -348,7 +348,7 @@ so for consistent visuals we opt to include no active state */
 	height: var(--input_height_sm);
 	min-width: var(--input_height_sm);
 	min-height: var(--input_height_sm);
-	--border_radius: var(--border_radius_xs);
+	border-radius: var(--border_radius, var(--border_radius_xs));
 	--input_padding_x: 0;
 	--checkbox_content: var(--checkbox_content_empty, '');
 }
