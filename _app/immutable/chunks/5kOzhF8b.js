@@ -1,0 +1,1 @@
+import{l as o,w as v,k as y,x as l,y as T,z as f,q as p,B as A,o as i,A as m,v as R}from"./Mqh-ueRR.js";function k(d,_,e){var s;o&&(s=R,v());var r=new A(d);y(()=>{var a=_()??null;if(o){var h=T(s),c=h===m,u=a!==null;if(c!==u){var t=f();p(t),r.anchor=t,i(!1),r.ensure(a,a&&(n=>e(n,a))),i(!0);return}}r.ensure(a,a&&(n=>e(n,a)))},l)}export{k as c};
