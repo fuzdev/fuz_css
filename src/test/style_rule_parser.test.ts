@@ -473,14 +473,14 @@ describe('collect_rule_variables', () => {
 	test('collects from included rules', () => {
 		const css = `
 			a { color: var(--color_a); }
-			b { color: var(--color_b); background: var(--bg); }
+			b { color: var(--color_b); background: var(--shade_00); }
 		`;
 		const index = parse_style_css(css, 'test-hash');
 
 		const vars = collect_rule_variables(index, new Set([1]));
 		expect(vars.has('color_a')).toBe(false);
 		expect(vars.has('color_b')).toBe(true);
-		expect(vars.has('bg')).toBe(true);
+		expect(vars.has('shade_00')).toBe(true);
 	});
 });
 
