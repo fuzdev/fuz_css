@@ -234,10 +234,10 @@
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things more
 			tightly with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
-		<Code content={`<button class="sm">sm</button>`} />
+		<Code content={`<button>normal</button>\n<button class="sm">sm</button>`} />
 		<div class="row gap_xs mb_lg">
-			<button type="button" class="sm">sm</button>
 			<button type="button">normal</button>
+			<button type="button" class="sm">sm</button>
 		</div>
 		<p><code>.sm</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
 		<Code
@@ -268,7 +268,7 @@
 		<div class="sm row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
-			<button type="button" class="color_a">3</button>
+			<button type="button" class="color_j">3</button>
 		</div>
 	</TomeSection>
 </TomeContent>
