@@ -1900,7 +1900,7 @@
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip validation."
 							}
 						]
 					},
@@ -1921,7 +1921,7 @@
 							{
 								"name": "properties",
 								"type": "Set<string> | null",
-								"description": "set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip suggestions."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip suggestions."
 							}
 						]
 					},
@@ -2044,7 +2044,7 @@
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
 							}
 						]
 					},
@@ -2135,7 +2135,7 @@
 							{
 								"name": "css_properties",
 								"type": "Set<string> | null",
-								"description": "set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
+								"description": "Set of valid CSS properties from `load_css_properties()`.\n  Pass `null` to skip property validation."
 							}
 						]
 					},
