@@ -1244,7 +1244,7 @@ body {
 	height: var(--input_height_sm);
 	min-width: var(--input_height_sm);
 	min-height: var(--input_height_sm);
-	--border_radius: var(--border_radius_xs);
+	border-radius: var(--border_radius, var(--border_radius_xs));
 	--input_padding_x: 0;
 	--checkbox_content: var(--checkbox_content_empty, '');
 }
@@ -1781,8 +1781,8 @@ These are used as modifiers to buttons.
 	--border_color: transparent;
 }
 .menuitem {
-	--border_radius: 0;
 	--border_color: var(--border_color_30);
+	border-radius: 0;
 	position: relative;
 	z-index: 2;
 	cursor: pointer;

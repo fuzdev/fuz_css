@@ -177,8 +177,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	menuitem: {
 		ruleset: `
 			.menuitem {
-				--border_radius: 0;
 				--border_color: var(--border_color_30);
+				border-radius: 0;
 				position: relative;
 				z-index: 2;
 				cursor: pointer;

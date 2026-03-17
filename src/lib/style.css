@@ -348,7 +348,7 @@ so for consistent visuals we opt to include no active state */
 	height: var(--input_height_sm);
 	min-width: var(--input_height_sm);
 	min-height: var(--input_height_sm);
-	--border_radius: var(--border_radius_xs);
+	border-radius: var(--border_radius, var(--border_radius_xs));
 	--input_padding_x: 0;
 	--checkbox_content: var(--checkbox_content_empty, '');
 }
