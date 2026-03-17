@@ -1,5 +1,15 @@
 # @fuzdev/fuz_css
 
+## 0.57.0
+
+### Minor Changes
+
+- feat: replace `.compact` with `.sm` and add `.xs-.xl` ([#84](https://github.com/fuzdev/fuz_css/pull/84))
+
+### Patch Changes
+
+- fix: bug with interpreter disallowing class names matching modifiers ([#84](https://github.com/fuzdev/fuz_css/pull/84))
+
 ## 0.56.0
 
 ### Minor Changes
