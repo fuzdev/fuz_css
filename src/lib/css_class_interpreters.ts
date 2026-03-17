@@ -23,8 +23,15 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		const class_name = matched[0];
 		const segments = extract_segments(class_name);
 
-		// Extract modifiers from the front
-		const result = extract_and_validate_modifiers(segments, class_name);
+		// The last segment is always the base class name — only preceding segments
+		// can be modifiers. This avoids ambiguity when a class name collides with
+		// a modifier name (e.g., `sm` and `md` are both breakpoint modifiers and
+		// size composite classes).
+		const base_class_name = segments[segments.length - 1]!;
+		const modifier_segments = segments.slice(0, -1);
+
+		// Extract modifiers from the preceding segments
+		const result = extract_and_validate_modifiers(modifier_segments, class_name);
 
 		if (!result.ok) {
 			// Modifier validation error - let css_literal_interpreter try
@@ -33,12 +40,10 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 
 		const {modifiers, remaining} = result;
 
-		// Must have exactly one remaining segment (the base class name)
-		if (remaining.length !== 1) {
+		// All preceding segments must be valid modifiers (none left over)
+		if (remaining.length !== 0) {
 			return null;
 		}
-
-		const base_class_name = remaining[0]!;
 
 		// Check if the base class is known
 		const base_class = ctx.class_definitions[base_class_name];

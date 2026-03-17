@@ -124,8 +124,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`,
 	},
 	md: {
-		comment:
-			'Explicit default sizing, useful as a cascade reset within a sized parent like .sm.',
+		comment: 'Explicit default sizing, useful as a cascade reset within a sized parent like .sm.',
 		declaration: `
 			--font_size: var(--font_size_md);
 			--input_height: var(--space_xl5);
