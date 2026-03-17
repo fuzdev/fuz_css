@@ -68,7 +68,7 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.sm</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> applies tighter sizing
 			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
 		<Code content={`<span class="chip">normal</span>\n<span class="chip sm">small</span>`} />

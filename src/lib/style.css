@@ -255,7 +255,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	-webkit-hyphens: none;
 	hyphens: none;
 	color: var(--text_color);
-	background-color: var(--fg_10);
+	background-color: var(--fg_05);
 	padding: 0 var(--space_xs2);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 }

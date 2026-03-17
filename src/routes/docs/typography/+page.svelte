@@ -19,6 +19,7 @@
 		text_scale_variants,
 		font_family_variants,
 	} from '$lib/variable_data.js';
+	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'typography';
 
@@ -256,13 +257,19 @@
 		<div class="display:flex align-items:start gap_lg mb_lg">
 			<div class="panel p_md sm">
 				<h4 class="mt_0">small region</h4>
-				<p>Everything here is small.</p>
+				<p>Everything here is <span class="chip">small</span>.</p>
 				<div class="panel p_md md">
 					<h4 class="mt_0">normal nested inside</h4>
-					<p>This region is back to default sizing despite the parent being small.</p>
+					<p>
+						This region is back to <span class="chip">default sizing</span> despite the parent
+						having <code>.sm</code>.
+					</p>
 				</div>
 			</div>
 		</div>
+		<UnfinishedImplementationWarning
+			>Paragraph text currently doesn't respond to <code>.sm</code>, but should it? Headings?</UnfinishedImplementationWarning
+		>
 	</TomeSection>
 </TomeContent>
 
