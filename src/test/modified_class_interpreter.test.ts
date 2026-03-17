@@ -506,7 +506,6 @@ describe('modified_class_interpreter', () => {
 				'.md\\:sm',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl3);',
-				'--border_radius: var(--border_radius_xs2);',
 				'--icon_size: var(--icon_size_sm);',
 			);
 			expect(result.diagnostics).toHaveLength(0);

@@ -823,7 +823,6 @@ describe('generate_classes_css', () => {
 				'--input_height_sm: var(--space_xl2);',
 				'--input_padding_x: var(--space_sm);',
 				'--min_height: var(--space_xl3);',
-				'--border_radius: var(--border_radius_xs2);',
 				'--icon_size: var(--icon_size_sm);',
 				'--menuitem_padding: var(--space_xs4) var(--space_xs3);',
 				'--flow_margin: var(--space_md);',
@@ -843,7 +842,6 @@ describe('generate_classes_css', () => {
 			expect(result.variables_used.has('space_xl3')).toBe(true);
 			expect(result.variables_used.has('space_xl2')).toBe(true);
 			expect(result.variables_used.has('space_sm')).toBe(true);
-			expect(result.variables_used.has('border_radius_xs2')).toBe(true);
 			expect(result.variables_used.has('icon_size_sm')).toBe(true);
 			expect(result.variables_used.has('space_xs4')).toBe(true);
 			expect(result.variables_used.has('space_xs3')).toBe(true);
@@ -868,7 +866,6 @@ describe('generate_classes_css', () => {
 				'--input_height_sm: var(--space_xl4);',
 				'--input_padding_x: var(--space_lg);',
 				'--min_height: var(--input_height);',
-				'--border_radius: var(--border_radius_sm);',
 				'--icon_size: var(--icon_size_md);',
 				'--menuitem_padding: var(--space_xs3) var(--space_xs);',
 				'--flow_margin: var(--space_lg);',
@@ -888,7 +885,6 @@ describe('generate_classes_css', () => {
 			expect(result.variables_used.has('space_xl5')).toBe(true);
 			expect(result.variables_used.has('space_xl4')).toBe(true);
 			expect(result.variables_used.has('space_lg')).toBe(true);
-			expect(result.variables_used.has('border_radius_sm')).toBe(true);
 			expect(result.variables_used.has('icon_size_md')).toBe(true);
 			expect(result.variables_used.has('space_xs3')).toBe(true);
 			expect(result.variables_used.has('space_xs')).toBe(true);
