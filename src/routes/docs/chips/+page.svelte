@@ -71,18 +71,19 @@
 			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
 			with smaller fonts, inputs, padding, border radii, and flow margins.
 		</p>
-		<Code content={`<span class="chip sm">small</span>`} />
+		<Code content={`<span class="chip">normal</span>\n<span class="chip sm">small</span>`} />
 		<div class="row gap_sm mb_lg">
-			<span class="chip sm">small</span>
 			<span class="chip">normal</span>
+			<span class="chip sm">small</span>
 		</div>
 		<Code
-			content={`<span class="chip sm color_a">color_a</span>\n<span class="chip sm color_b">color_b</span>\n<span class="chip sm color_c">color_c</span>`}
+			content={`<span class="chip color_a">normal</span>\n<span class="chip sm color_a">color_a</span>\n<span class="chip sm color_b">color_b</span>\n<span class="chip sm color_c">color_c</span>`}
 		/>
 		<div class="row gap_sm mb_lg">
-			<span class="chip sm color_a">color_a</span>
-			<span class="chip sm color_b">color_b</span>
-			<span class="chip sm color_c">color_c</span>
+			<span class="chip color_a">normal</span>
+			<span class="chip color_a sm">color_a</span>
+			<span class="chip color_b sm">color_b</span>
+			<span class="chip color_c sm">color_c</span>
 		</div>
 		<p>
 			<code>.sm</code> overrides custom properties, so children inherit the sizing:

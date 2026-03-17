@@ -220,7 +220,7 @@
 		/>
 		<div class="display:flex align-items:start gap_lg mb_lg">
 			<div class="panel p_md sm">
-				<h4>small</h4>
+				<h4 class="mt_0">small</h4>
 				<p>Paragraph in a small container with tighter flow margins between elements.</p>
 				<p>Another paragraph showing the reduced spacing.</p>
 				<ul>
@@ -229,7 +229,7 @@
 				</ul>
 			</div>
 			<div class="panel p_md">
-				<h4>normal</h4>
+				<h4 class="mt_0">normal</h4>
 				<p>Paragraph in a normal container with default flow margins between elements.</p>
 				<p>Another paragraph showing the default spacing.</p>
 				<ul>
@@ -255,10 +255,10 @@
 		/>
 		<div class="display:flex align-items:start gap_lg mb_lg">
 			<div class="panel p_md sm">
-				<h4>small region</h4>
+				<h4 class="mt_0">small region</h4>
 				<p>Everything here is small.</p>
 				<div class="panel p_md md">
-					<h4>normal nested inside</h4>
+					<h4 class="mt_0">normal nested inside</h4>
 					<p>This region is back to default sizing despite the parent being small.</p>
 				</div>
 			</div>
