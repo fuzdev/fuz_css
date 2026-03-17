@@ -223,7 +223,7 @@
 			<div class="panel p_md sm">
 				<h4 class="mt_0">small</h4>
 				<p>Paragraph in a small container with tighter flow margins between elements.</p>
-				<p>Another paragraph showing the reduced spacing.</p>
+				<p>Another paragraph with the reduced spacing.</p>
 				<ul>
 					<li>list item one</li>
 					<li>list item two</li>
@@ -232,7 +232,7 @@
 			<div class="panel p_md">
 				<h4 class="mt_0">normal</h4>
 				<p>Paragraph in a normal container with default flow margins between elements.</p>
-				<p>Another paragraph showing the default spacing.</p>
+				<p>Another paragraph with the default spacing.</p>
 				<ul>
 					<li>list item one</li>
 					<li>list item two</li>
