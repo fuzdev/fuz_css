@@ -13,7 +13,7 @@ import {dirname} from 'node:path';
 import type {CacheDeps} from './deps.js';
 
 /**
- * Wraps an async function that returns void, converting exceptions to Result.
+ * Wraps an async function that returns void, converting exceptions to `Result`.
  */
 const wrap_void = async (
 	fn: () => Promise<unknown>,

@@ -14,7 +14,7 @@ import {resolve_class_definition} from './css_class_resolution.js';
  * Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).
  * Applies modifiers to existing declaration-based or ruleset-based classes.
  *
- * This interpreter must run BEFORE css_literal_interpreter to handle cases like `hover:box`
+ * This interpreter must run BEFORE `css_literal_interpreter` to handle cases like `hover:box`
  * where `box` is a known class (not a CSS property).
  */
 export const modified_class_interpreter: CssClassDefinitionInterpreter = {
@@ -187,8 +187,8 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 
 /**
  * Collection of all builtin interpreters for dynamic CSS class generation.
- * Order matters: modified_class_interpreter runs first to handle `hover:box` before
- * css_literal_interpreter tries to interpret it as `hover:box` (property:value).
+ * Order matters: `modified_class_interpreter` runs first to handle `hover:box` before
+ * `css_literal_interpreter` tries to interpret it as `hover:box` (property:value).
  */
 export const css_class_interpreters: Array<CssClassDefinitionInterpreter> = [
 	modified_class_interpreter,

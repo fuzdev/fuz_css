@@ -45,7 +45,7 @@ export interface ExtractionData {
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	/**
 	 * HTML elements found in the file, or null if none.
-	 * Used for including only the style.css rules needed.
+	 * Used for including only the `style.css` rules needed.
 	 */
 	elements: Set<string> | null;
 	/**
@@ -162,7 +162,7 @@ export class SourceIndex {
  * @param classes - map of classes to locations
  * @param class_name - class name to add
  * @param location - source location where the class was found
- * @mutates classes - adds or appends to the map entry
+ * @mutates `classes` - adds or appends to the map entry
  */
 const add_class_with_location = (
 	classes: Map<string, Array<SourceLocation>>,
@@ -198,7 +198,7 @@ const CLASS_NAME_PATTERN = /(class|classes|class_?names?|class_?lists?)$/i;
 interface WalkState {
 	/** Map from class name to locations */
 	classes: Map<string, Array<SourceLocation>>;
-	/** Classes explicitly annotated via @fuz-classes comments */
+	/** Classes explicitly annotated via `@fuz-classes` comments */
 	explicit_classes: Set<string>;
 	/** Variables used in class contexts */
 	tracked_vars: Set<string>;
@@ -214,14 +214,14 @@ interface WalkState {
 	diagnostics: Array<ExtractionDiagnostic>;
 	/** HTML elements found in the file */
 	elements: Set<string>;
-	/** Elements explicitly annotated via @fuz-elements comments */
+	/** Elements explicitly annotated via `@fuz-elements` comments */
 	explicit_elements: Set<string>;
-	/** Variables explicitly annotated via @fuz-variables comments */
+	/** Variables explicitly annotated via `@fuz-variables` comments */
 	explicit_variables: Set<string>;
 }
 
 /**
- * Creates a fresh WalkState for extraction.
+ * Creates a fresh `WalkState` for extraction.
  */
 const create_walk_state = (file: string, source_index: SourceIndex | null): WalkState => ({
 	classes: new Map(),
@@ -238,7 +238,7 @@ const create_walk_state = (file: string, source_index: SourceIndex | null): Walk
 });
 
 /**
- * Converts WalkState to ExtractionResult, converting empty collections to null.
+ * Converts `WalkState` to `ExtractionResult`, converting empty collections to null.
  */
 const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
 	classes: state.classes.size > 0 ? state.classes : null,
@@ -251,7 +251,7 @@ const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
 });
 
 /**
- * Creates an empty ExtractionResult with only diagnostics.
+ * Creates an empty `ExtractionResult` with only diagnostics.
  * Used when parsing fails early.
  */
 const empty_extraction_result = (diagnostics: Array<ExtractionDiagnostic>): ExtractionResult => ({
@@ -367,7 +367,7 @@ const parse_fuz_elements_comment = create_fuz_comment_parser('elements');
 const parse_fuz_variables_comment = create_fuz_comment_parser('variables');
 
 /**
- * Processes a comment for @fuz-classes, @fuz-elements, and @fuz-variables annotations.
+ * Processes a comment for `@fuz-classes`, `@fuz-elements`, and `@fuz-variables` annotations.
  * Adds found items to the appropriate state collections.
  */
 const process_fuz_comment = (content: string, location: SourceLocation, state: WalkState): void => {
@@ -401,7 +401,7 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
 };
 
 /**
- * Extracts @fuz-classes, @fuz-elements, and @fuz-variables from Svelte HTML Comment nodes.
+ * Extracts `@fuz-classes`, `@fuz-elements`, and `@fuz-variables` from Svelte HTML Comment nodes.
  */
 const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
@@ -413,7 +413,7 @@ const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void
 };
 
 /**
- * Extracts @fuz-* comments from script blocks by re-parsing with acorn.
+ * Extracts `@fuz-*` comments from script blocks by re-parsing with acorn.
  * Svelte's parser doesn't expose JS comments, so we parse the
  * script source separately to get comments via acorn's onComment callback.
  */

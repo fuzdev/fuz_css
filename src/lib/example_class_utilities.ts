@@ -5,12 +5,12 @@
  * dependencies in node_modules. The exports test specific extraction patterns
  * that require being in a separate module.
  *
- * **Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.
+ * **Important:** Variable names must match `CLASS_NAME_PATTERN` in `css_class_extractor.ts`.
  * Supported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`
  * (also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).
  *
  * **Patterns demonstrated:**
- * - Naming patterns: All CLASS_NAME_PATTERN suffix variants
+ * - Naming patterns: All `CLASS_NAME_PATTERN` suffix variants
  * - Expression patterns: Ternary, logical AND, arrays
  * - Comment hints: `@fuz-classes` directive
  *
@@ -87,7 +87,7 @@ export const objectClasses = {mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3'};
 
 // @fuz-classes shadow_lg
 /**
- * Comment hint - extracted via @fuz-classes, NOT via variable name pattern.
+ * Comment hint - extracted via `@fuz-classes`, NOT via variable name pattern.
  * Variable name `fromComment` doesn't end in class/classes/className.
  */
 export const fromComment = 'shadow_lg';

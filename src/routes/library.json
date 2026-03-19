@@ -275,13 +275,13 @@
 								"name": "included_rules",
 								"kind": "variable",
 								"type_signature": "number",
-								"doc_comment": "Number of rules included from style.css"
+								"doc_comment": "Number of rules included from `style.css`"
 							},
 							{
 								"name": "total_rules",
 								"kind": "variable",
 								"type_signature": "number",
-								"doc_comment": "Total number of rules in style.css"
+								"doc_comment": "Total number of rules in `style.css`"
 							},
 							{
 								"name": "variable_count",
@@ -308,7 +308,7 @@
 								"name": "base_css",
 								"kind": "variable",
 								"type_signature": "string",
-								"doc_comment": "CSS for base styles (from style.css)"
+								"doc_comment": "CSS for base styles (from `style.css`)"
 							},
 							{
 								"name": "resolved_variables",
@@ -338,7 +338,7 @@
 								"name": "stats",
 								"kind": "variable",
 								"type_signature": "CssResolutionStats",
-								"doc_comment": "Resolution statistics (only when include_stats is true)"
+								"doc_comment": "Resolution statistics (only when `include_stats` is true)"
 							}
 						]
 					},
@@ -353,7 +353,7 @@
 								"name": "style_rule_index",
 								"kind": "variable",
 								"type_signature": "StyleRuleIndex",
-								"doc_comment": "Index of style.css rules"
+								"doc_comment": "Index of `style.css` rules"
 							},
 							{
 								"name": "variable_graph",
@@ -437,13 +437,13 @@
 								"name": "explicit_elements",
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
-								"doc_comment": "Elements explicitly annotated via"
+								"doc_comment": "Elements explicitly annotated via `@fuz-elements` comments.\nThese produce errors (not warnings) if they have no matching style rules."
 							},
 							{
 								"name": "explicit_variables",
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
-								"doc_comment": "Variables explicitly annotated via"
+								"doc_comment": "Variables explicitly annotated via `@fuz-variables` comments.\nThese produce errors (not warnings) if they don't exist in the theme."
 							}
 						]
 					},
@@ -535,7 +535,7 @@
 					{
 						"name": "CSS_CACHE_VERSION",
 						"kind": "variable",
-						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add explicit_classes, elements, css_variables\nv3: Add explicit_elements, explicit_variables for",
+						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add `explicit_classes`, `elements`, `css_variables`.\nv3: Add `explicit_elements`, `explicit_variables` for `@fuz-elements`/`@fuz-variables` comments.\nv4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).\nv5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).\nv6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).",
 						"source_line": 35,
 						"type_signature": "6"
 					},
@@ -568,7 +568,7 @@
 								"name": "explicit_classes",
 								"kind": "variable",
 								"type_signature": "Array<string> | null",
-								"doc_comment": "Classes from"
+								"doc_comment": "Classes from `@fuz-classes` comments, or null if none"
 							},
 							{
 								"name": "diagnostics",
@@ -586,13 +586,13 @@
 								"name": "explicit_elements",
 								"kind": "variable",
 								"type_signature": "Array<string> | null",
-								"doc_comment": "Elements from"
+								"doc_comment": "Elements from `@fuz-elements` comments, or null if none"
 							},
 							{
 								"name": "explicit_variables",
 								"kind": "variable",
 								"type_signature": "Array<string> | null",
-								"doc_comment": "Variables from"
+								"doc_comment": "Variables from `@fuz-variables` comments, or null if none"
 							}
 						]
 					},
@@ -822,7 +822,7 @@
 								"name": "elements",
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
-								"doc_comment": "HTML elements found in the file, or null if none.\nUsed for including only the style.css rules needed."
+								"doc_comment": "HTML elements found in the file, or null if none.\nUsed for including only the `style.css` rules needed."
 							},
 							{
 								"name": "explicit_elements",
@@ -1298,7 +1298,7 @@
 								"name": "explicit_classes",
 								"kind": "variable",
 								"type_signature": "Set<string> | null",
-								"doc_comment": "Classes that were explicitly annotated (via"
+								"doc_comment": "Classes that were explicitly annotated (via `@fuz-classes` or `additional_classes`).\nUnresolved explicit classes produce warnings."
 							}
 						]
 					},
@@ -1552,7 +1552,7 @@
 					{
 						"name": "modified_class_interpreter",
 						"kind": "variable",
-						"doc_comment": "Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).\nApplies modifiers to existing declaration-based or ruleset-based classes.\n\nThis interpreter must run BEFORE css_literal_interpreter to handle cases like `hover:box`\nwhere `box` is a known class (not a CSS property).",
+						"doc_comment": "Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).\nApplies modifiers to existing declaration-based or ruleset-based classes.\n\nThis interpreter must run BEFORE `css_literal_interpreter` to handle cases like `hover:box`\nwhere `box` is a known class (not a CSS property).",
 						"source_line": 20,
 						"type_signature": "CssClassDefinitionInterpreter"
 					},
@@ -1566,7 +1566,7 @@
 					{
 						"name": "css_class_interpreters",
 						"kind": "variable",
-						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: modified_class_interpreter runs first to handle `hover:box` before\ncss_literal_interpreter tries to interpret it as `hover:box` (property:value).",
+						"doc_comment": "Collection of all builtin interpreters for dynamic CSS class generation.\nOrder matters: `modified_class_interpreter` runs first to handle `hover:box` before\n`css_literal_interpreter` tries to interpret it as `hover:box` (property:value).",
 						"source_line": 193,
 						"type_signature": "CssClassDefinitionInterpreter[]"
 					}
@@ -1739,7 +1739,7 @@
 							{
 								"name": "get_with_locations",
 								"kind": "function",
-								"doc_comment": "Gets all classes with their source locations (with exclude filter applied).\nLocations from additional_classes are null.",
+								"doc_comment": "Gets all classes with their source locations (with exclude filter applied).\nLocations from `additional_classes` are null.",
 								"type_signature": "(): Map<string, SourceLocation[] | null>",
 								"return_type": "Map<string, SourceLocation[] | null>",
 								"parameters": []
@@ -1747,7 +1747,7 @@
 							{
 								"name": "get_all",
 								"kind": "function",
-								"doc_comment": "Gets all classes and their locations in a single call.\nMore efficient than calling `get()` and `get_with_locations()` separately\nwhen both are needed (avoids potential double recalculation).\n\nResults have exclude filter applied and explicit_classes includes additional_classes.",
+								"doc_comment": "Gets all classes and their locations in a single call.\nMore efficient than calling `get()` and `get_with_locations()` separately\nwhen both are needed (avoids potential double recalculation).\n\nResults have exclude filter applied and `explicit_classes` includes `additional_classes`.",
 								"type_signature": "(): { all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 								"return_type": "{ all_classes: Set<string>; all_classes_with_locations: Map<string, SourceLocation[] | null>; explicit_classes: Set<string> | null; all_elements: Set<...>; explicit_elements: Set<...> | null; explicit_variables: Set<...> | null; }",
 								"parameters": []
@@ -2280,7 +2280,7 @@
 					{
 						"name": "BaseCssOption",
 						"kind": "type",
-						"doc_comment": "Type for the base_css option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default style.css (framework defaults)\n- `null` - Disable base styles entirely (explicit opt-out)\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS\n\nSee module documentation for the `undefined` vs `null` convention.",
+						"doc_comment": "Type for the base_css option used by CSS generators.\n\nSupports four forms:\n- `undefined` - Use default `style.css` (framework defaults)\n- `null` - Disable base styles entirely (explicit opt-out)\n- `string` - Custom CSS to replace defaults\n- `(default_css) => string` - Callback to modify default CSS\n\nSee module documentation for the `undefined` vs `null` convention.",
 						"source_line": 95,
 						"type_signature": "BaseCssOption"
 					},
@@ -2994,7 +2994,7 @@
 								"name": "locations",
 								"kind": "variable",
 								"type_signature": "Array<SourceLocation> | null",
-								"doc_comment": "Source locations where this class was used, or null if from additional_classes"
+								"doc_comment": "Source locations where this class was used, or null if from `additional_classes`"
 							}
 						]
 					},
@@ -3224,12 +3224,12 @@
 					{
 						"name": "fromComment",
 						"kind": "variable",
-						"doc_comment": "Comment hint - extracted via",
+						"doc_comment": "Comment hint - extracted via `@fuz-classes`, NOT via variable name pattern.\nVariable name `fromComment` doesn't end in class/classes/className.",
 						"source_line": 93,
 						"type_signature": "\"shadow_lg\""
 					}
 				],
-				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. The exports test specific extraction patterns\nthat require being in a separate module.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in css_class_extractor.ts.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Patterns demonstrated:**\n- Naming patterns: All CLASS_NAME_PATTERN suffix variants\n- Expression patterns: Ternary, logical AND, arrays\n- Comment hints: `@fuz-classes` directive\n\nToken, composite, and literal classes are demonstrated inline in the examples\nsince they don't require special extraction testing."
+				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. The exports test specific extraction patterns\nthat require being in a separate module.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in `css_class_extractor.ts`.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Patterns demonstrated:**\n- Naming patterns: All `CLASS_NAME_PATTERN` suffix variants\n- Expression patterns: Ternary, logical AND, arrays\n- Comment hints: `@fuz-classes` directive\n\nToken, composite, and literal classes are demonstrated inline in the examples\nsince they don't require special extraction testing."
 			},
 			{
 				"path": "file_filter.ts",
@@ -3566,7 +3566,7 @@
 								"name": "order",
 								"kind": "variable",
 								"type_signature": "number",
-								"doc_comment": "Original order in style.css (for preserving cascade)"
+								"doc_comment": "Original order in `style.css` (for preserving cascade)"
 							}
 						]
 					},
@@ -3669,7 +3669,7 @@
 							{
 								"name": "css",
 								"type": "string",
-								"description": "raw CSS string (e.g., contents of style.css)"
+								"description": "raw CSS string (e.g., contents of `style.css`)"
 							},
 							{
 								"name": "content_hash",
@@ -3681,7 +3681,7 @@
 					{
 						"name": "load_style_rule_index",
 						"kind": "function",
-						"doc_comment": "Loads and parses the default style.css file.",
+						"doc_comment": "Loads and parses the default `style.css` file.",
 						"source_line": 497,
 						"type_signature": "(deps: CacheDeps, style_css_path?: string | undefined): Promise<StyleRuleIndex>",
 						"return_type": "Promise<StyleRuleIndex>",
@@ -3696,7 +3696,7 @@
 								"name": "style_css_path",
 								"type": "string | undefined",
 								"optional": true,
-								"description": "path to style.css (defaults to package's style.css)"
+								"description": "path to `style.css` (defaults to package's `style.css`)"
 							}
 						]
 					},
@@ -3719,7 +3719,7 @@
 					{
 						"name": "load_default_style_css",
 						"kind": "function",
-						"doc_comment": "Loads the raw default style.css content.",
+						"doc_comment": "Loads the raw default `style.css` content.",
 						"source_line": 529,
 						"type_signature": "(deps: CacheDeps, style_css_path?: string | undefined): Promise<string>",
 						"return_type": "Promise<string>",
@@ -3734,7 +3734,7 @@
 								"name": "style_css_path",
 								"type": "string | undefined",
 								"optional": true,
-								"description": "path to style.css (defaults to package's style.css)"
+								"description": "path to `style.css` (defaults to package's `style.css`)"
 							}
 						]
 					},
@@ -3828,7 +3828,7 @@
 						]
 					}
 				],
-				"module_comment": "Style.css rule parser for bundled CSS generation.\n\nParses the fuz_css style.css file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe bundled CSS generator to include only the rules needed for\nelements actually used in the project.",
+				"module_comment": "Style.css rule parser for bundled CSS generation.\n\nParses the fuz_css `style.css` file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe bundled CSS generator to include only the rules needed for\nelements actually used in the project.",
 				"dependencies": ["css_variable_utils.ts"],
 				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},

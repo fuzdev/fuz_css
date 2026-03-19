@@ -54,7 +54,7 @@ export interface GenerationDiagnostic {
 	suggestion: string | null;
 	/** The class name, element name, or variable name this diagnostic refers to */
 	identifier: string;
-	/** Source locations where this class was used, or null if from additional_classes */
+	/** Source locations where this class was used, or null if from `additional_classes` */
 	locations: Array<SourceLocation> | null;
 }
 

@@ -1,7 +1,7 @@
 /**
  * Style.css rule parser for bundled CSS generation.
  *
- * Parses the fuz_css style.css file into a structured index that maps
+ * Parses the fuz_css `style.css` file into a structured index that maps
  * CSS rules to the HTML elements and classes they style. This enables
  * the bundled CSS generator to include only the rules needed for
  * elements actually used in the project.
@@ -28,7 +28,7 @@ export interface StyleRuleBase {
 	classes: Set<string>;
 	/** CSS variables referenced in declarations */
 	variables_used: Set<string>;
-	/** Original order in style.css (for preserving cascade) */
+	/** Original order in `style.css` (for preserving cascade) */
 	order: number;
 }
 
@@ -84,7 +84,7 @@ export interface StyleRuleIndex {
 /**
  * Parses a CSS stylesheet into a `StyleRuleIndex`.
  *
- * @param css - raw CSS string (e.g., contents of style.css)
+ * @param css - raw CSS string (e.g., contents of `style.css`)
  * @param content_hash - hash of the CSS for cache invalidation
  * @returns `StyleRuleIndex` with rules and lookup maps
  */
@@ -308,7 +308,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
  * @param selector_css - CSS selector string (may contain commas)
  * @param elements - set to add element names to
  * @param classes - set to add class names to
- * @mutates elements, classes
+ * @mutates `elements`, `classes` - adds parsed names to the sets
  */
 const parse_selector_list = (
 	selector_css: string,
@@ -488,10 +488,10 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 };
 
 /**
- * Loads and parses the default style.css file.
+ * Loads and parses the default `style.css` file.
  *
  * @param deps - filesystem deps for dependency injection
- * @param style_css_path - path to style.css (defaults to package's style.css)
+ * @param style_css_path - path to `style.css` (defaults to package's `style.css`)
  * @returns promise resolving to `StyleRuleIndex`
  */
 export const load_style_rule_index = async (
@@ -520,10 +520,10 @@ export const create_style_rule_index = (css: string): StyleRuleIndex => {
 };
 
 /**
- * Loads the raw default style.css content.
+ * Loads the raw default `style.css` content.
  *
  * @param deps - filesystem deps for dependency injection
- * @param style_css_path - path to style.css (defaults to package's style.css)
+ * @param style_css_path - path to `style.css` (defaults to package's `style.css`)
  * @returns promise resolving to the CSS string
  */
 export const load_default_style_css = async (

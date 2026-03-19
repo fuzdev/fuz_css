@@ -32,7 +32,7 @@ import {type CssClassVariableIndex, collect_class_variables} from './class_varia
 /**
  * Threshold for string similarity to suggest typo corrections.
  *
- * Uses 0.6 (lower than variable_graph.ts's 0.85) because element names are
+ * Uses 0.6 (lower than `variable_graph.ts`'s 0.85) because element names are
  * shorter and more diverse (e.g., "div", "span", "button"). A lower threshold
  * catches more potential typos while still avoiding false positives for
  * completely unrelated names.
@@ -42,13 +42,13 @@ const TYPO_SIMILARITY_THRESHOLD = 0.6;
 /**
  * Calculates string similarity using Dice coefficient on bigrams.
  *
- * Uses Dice coefficient (rather than Levenshtein in variable_graph.ts) because:
+ * Uses Dice coefficient (rather than Levenshtein in `variable_graph.ts`) because:
  * - Element names are short (often 3-6 chars) where single-char differences
  *   have outsized impact on Levenshtein distance
  * - Bigram matching is more forgiving of transpositions ("buton" vs "button")
  * - Faster for the typically small element name sets
  *
- * See variable_graph.ts for the Levenshtein-based approach used for variables.
+ * See `variable_graph.ts` for the Levenshtein-based approach used for variables.
  */
 const build_bigrams = (str: string): Set<string> => {
 	const bigrams: Set<string> = new Set();
@@ -100,9 +100,9 @@ export interface CssResolutionStats {
 	element_count: number;
 	/** List of HTML element names included */
 	elements: Array<string>;
-	/** Number of rules included from style.css */
+	/** Number of rules included from `style.css` */
 	included_rules: number;
-	/** Total number of rules in style.css */
+	/** Total number of rules in `style.css` */
 	total_rules: number;
 	/** Number of CSS variables resolved (including transitive deps) */
 	variable_count: number;
@@ -114,7 +114,7 @@ export interface CssResolutionStats {
 export interface CssResolutionResult {
 	/** CSS for theme variables (light and dark) */
 	theme_css: string;
-	/** CSS for base styles (from style.css) */
+	/** CSS for base styles (from `style.css`) */
 	base_css: string;
 	/** All resolved variable names (including transitive deps) */
 	resolved_variables: Set<string>;
@@ -124,7 +124,7 @@ export interface CssResolutionResult {
 	included_elements: Set<string>;
 	/** Diagnostics from resolution */
 	diagnostics: Array<GenerationDiagnostic>;
-	/** Resolution statistics (only when include_stats is true) */
+	/** Resolution statistics (only when `include_stats` is true) */
 	stats?: CssResolutionStats;
 }
 
@@ -132,7 +132,7 @@ export interface CssResolutionResult {
  * Options for CSS resolution.
  */
 export interface CssResolutionOptions {
-	/** Index of style.css rules */
+	/** Index of `style.css` rules */
 	style_rule_index: StyleRuleIndex;
 	/** Dependency graph for theme variables */
 	variable_graph: VariableDependencyGraph;
@@ -165,12 +165,12 @@ export interface CssResolutionOptions {
 	 */
 	exclude_variables?: Iterable<string>;
 	/**
-	 * Elements explicitly annotated via @fuz-elements comments.
+	 * Elements explicitly annotated via `@fuz-elements` comments.
 	 * These produce errors (not warnings) if they have no matching style rules.
 	 */
 	explicit_elements?: Set<string> | null;
 	/**
-	 * Variables explicitly annotated via @fuz-variables comments.
+	 * Variables explicitly annotated via `@fuz-variables` comments.
 	 * These produce errors (not warnings) if they don't exist in the theme.
 	 */
 	explicit_variables?: Set<string> | null;

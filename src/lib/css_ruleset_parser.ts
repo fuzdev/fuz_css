@@ -60,7 +60,7 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
 
 /**
  * Walks CSS AST children to extract rules.
- * @mutates rules - pushes extracted rules to the array
+ * @mutates `rules` - pushes extracted rules to the array
  */
 const walk_css_children = (
 	node: Omit<AST.CSS.StyleSheetFile, 'attributes' | 'content'> | AST.CSS.Atrule,
@@ -82,7 +82,7 @@ const walk_css_children = (
 
 /**
  * Walks a CSS block (from an at-rule) to extract rules.
- * @mutates rules - pushes extracted rules to the array
+ * @mutates `rules` - pushes extracted rules to the array
  */
 const walk_css_block = (
 	block: AST.CSS.Block,
@@ -101,7 +101,7 @@ const walk_css_block = (
 
 /**
  * Extracts a single rule from the AST.
- * @mutates rules - pushes the extracted rule to the array
+ * @mutates `rules` - pushes the extracted rule to the array
  */
 const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<ParsedRule>): void => {
 	const prelude = rule.prelude;

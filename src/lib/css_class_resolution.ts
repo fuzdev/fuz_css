@@ -120,8 +120,8 @@ export const resolve_class_definition = (
  * @param original_class_name - the class name being defined (for error messages)
  * @param css_properties - set of valid CSS properties for literal validation, or null to skip
  * @returns combined declarations or an error
- * @mutates resolution_stack - temporarily adds/removes names during recursion
- * @mutates visited - adds resolved class names for deduplication
+ * @mutates `resolution_stack` - temporarily adds/removes names during recursion
+ * @mutates `visited` - adds resolved class names for deduplication
  */
 export const resolve_composes = (
 	class_names: Array<string>,

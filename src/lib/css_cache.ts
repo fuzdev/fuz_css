@@ -26,11 +26,11 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * - `ExtractionDiagnostic` or `SourceLocation` structure
  *
  * v1: Initial version with classes and diagnostics
- * v2: Use null instead of empty arrays, add explicit_classes, elements, css_variables
- * v3: Add explicit_elements, explicit_variables for @fuz-elements/@fuz-variables comments
- * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`)
- * v5: Remove css_variables and explicit_variables (now detected via simple regex scan)
- * v6: Re-add explicit_variables for @fuz-variables comments (regex scan misses dynamic templates)
+ * v2: Use null instead of empty arrays, add `explicit_classes`, `elements`, `css_variables`.
+ * v3: Add `explicit_elements`, `explicit_variables` for `@fuz-elements`/`@fuz-variables` comments.
+ * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).
+ * v5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).
+ * v6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).
  */
 export const CSS_CACHE_VERSION = 6;
 
@@ -45,15 +45,15 @@ export interface CachedExtraction {
 	content_hash: string;
 	/** Classes as [name, locations] tuples, or null if none */
 	classes: Array<[string, Array<SourceLocation>]> | null;
-	/** Classes from @fuz-classes comments, or null if none */
+	/** Classes from `@fuz-classes` comments, or null if none */
 	explicit_classes: Array<string> | null;
 	/** Extraction diagnostics, or null if none */
 	diagnostics: Array<ExtractionDiagnostic> | null;
 	/** HTML elements found in the file, or null if none */
 	elements: Array<string> | null;
-	/** Elements from @fuz-elements comments, or null if none */
+	/** Elements from `@fuz-elements` comments, or null if none */
 	explicit_elements: Array<string> | null;
-	/** Variables from @fuz-variables comments, or null if none */
+	/** Variables from `@fuz-variables` comments, or null if none */
 	explicit_variables: Array<string> | null;
 }
 

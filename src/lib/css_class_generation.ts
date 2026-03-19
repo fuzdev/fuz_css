@@ -170,7 +170,7 @@ export interface CssClassInterpreterContext {
 export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
 	pattern: RegExp;
 	/**
-	 * @mutates ctx.diagnostics - implementations push errors/warnings to the diagnostics array
+	 * @mutates `ctx.diagnostics` - implementations push errors/warnings to the diagnostics array
 	 */
 	interpret: (matched: RegExpMatchArray, ctx: CssClassInterpreterContext) => string | null;
 }
@@ -198,7 +198,7 @@ export interface GenerateClassesCssOptions {
 	log?: Logger;
 	class_locations?: Map<string, Array<SourceLocation> | null>;
 	/**
-	 * Classes that were explicitly annotated (via @fuz-classes or additional_classes).
+	 * Classes that were explicitly annotated (via `@fuz-classes` or `additional_classes`).
 	 * Unresolved explicit classes produce warnings.
 	 */
 	explicit_classes?: Set<string> | null;

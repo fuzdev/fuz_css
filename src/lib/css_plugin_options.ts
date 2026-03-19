@@ -85,7 +85,7 @@ export interface CssClassOptions {
  * Type for the base_css option used by CSS generators.
  *
  * Supports four forms:
- * - `undefined` - Use default style.css (framework defaults)
+ * - `undefined` - Use default `style.css` (framework defaults)
  * - `null` - Disable base styles entirely (explicit opt-out)
  * - `string` - Custom CSS to replace defaults
  * - `(default_css) => string` - Callback to modify default CSS

@@ -24,16 +24,16 @@ export class CssClasses {
 
 	#all_with_locations: Map<string, Array<SourceLocation>> = new Map();
 
-	/** Combined map with additional_classes (null locations) and extracted classes (actual locations) */
+	/** Combined map with `additional_classes` (null locations) and extracted classes (actual locations) */
 	#all_with_locations_including_includes: Map<string, Array<SourceLocation> | null> = new Map();
 
 	/** Classes by file id (files with no classes are not stored) */
 	#by_id: Map<string, Map<string, Array<SourceLocation>>> = new Map();
 
-	/** Explicit classes (from @fuz-classes) by file id */
+	/** Explicit classes (from `@fuz-classes`) by file id */
 	#explicit_by_id: Map<string, Set<string>> = new Map();
 
-	/** Aggregated explicit classes (from extraction + additional_classes, minus exclude_classes) */
+	/** Aggregated explicit classes (from extraction + `additional_classes`, minus `exclude_classes`) */
 	#explicit: Set<string> | null = null;
 
 	/** Diagnostics stored per-file so they're replaced when a file is updated */
@@ -45,13 +45,13 @@ export class CssClasses {
 	/** Aggregated elements */
 	#all_elements: Set<string> = new Set();
 
-	/** Explicit elements (from @fuz-elements) by file id */
+	/** Explicit elements (from `@fuz-elements`) by file id */
 	#explicit_elements_by_id: Map<string, Set<string>> = new Map();
 
 	/** Aggregated explicit elements */
 	#explicit_elements: Set<string> | null = null;
 
-	/** Explicit variables (from @fuz-variables) by file id */
+	/** Explicit variables (from `@fuz-variables`) by file id */
 	#explicit_variables_by_id: Map<string, Set<string>> = new Map();
 
 	/** Aggregated explicit variables */
@@ -138,7 +138,7 @@ export class CssClasses {
 
 	/**
 	 * Gets all classes with their source locations (with exclude filter applied).
-	 * Locations from additional_classes are null.
+	 * Locations from `additional_classes` are null.
 	 */
 	get_with_locations(): Map<string, Array<SourceLocation> | null> {
 		if (this.#dirty) {
@@ -153,7 +153,7 @@ export class CssClasses {
 	 * More efficient than calling `get()` and `get_with_locations()` separately
 	 * when both are needed (avoids potential double recalculation).
 	 *
-	 * Results have exclude filter applied and explicit_classes includes additional_classes.
+	 * Results have exclude filter applied and `explicit_classes` includes `additional_classes`.
 	 */
 	get_all(): {
 		all_classes: Set<string>;
