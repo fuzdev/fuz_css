@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.58.0
+
+### Minor Changes
+
+- fix: make `label` blocks by default ([498a930](https://github.com/fuzdev/fuz_css/commit/498a930))
+
 ## 0.57.0
 
 ### Minor Changes
