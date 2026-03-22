@@ -483,6 +483,7 @@ see https://caniuse.com/css-has
 /* TODO could improve this with the coming `:has` selector
 for disabled colors without needing a wrapper .disabled class */
 :where(label:not(.unstyled)) {
+	display: block;
 	color: var(--text_color);
 	cursor: pointer;
 }
