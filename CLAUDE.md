@@ -158,7 +158,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 **Size variants:** Core pattern is `xs` → `sm` → `md` → `lg` → `xl`, with
 extended ranges varying by family:
 
-- Spaces: `xs5`...`xs` → `sm` → `md` → `lg` → `xl`...`xl15` (21 steps)
+- Spaces: `xs5`...`xs` → `sm` → `md` → `lg` → `xl`...`xl15` (23 steps)
 - Font sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl9` (13 steps)
 - Icon sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl3` (7 steps)
 - Border radii: `xs3`...`xs` → `sm` → `md` → `lg` → `xl` (7 steps)
