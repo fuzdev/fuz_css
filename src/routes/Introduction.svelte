@@ -10,7 +10,7 @@
 	Svelte-first but works with plain HTML/JS/TS, React, Preact, Solid, and other JSX frameworks. For
 	more see the
 	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support</a> docs, and for
-	the companion Svelte components, see <a href="https://ui.fuz.dev/">fuz_ui</a>.
+	the companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.
 </p>
 <p>
 	The only required parts are a reset stylesheet with the semantic defaults and a replaceable theme

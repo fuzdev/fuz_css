@@ -43,7 +43,7 @@ import './fuz.css'; // Gro generator`}
 				content={`// utility-only mode - full package CSS, only used utilities
 import '@fuzdev/fuz_css/style.css'; // all base styles
 import '@fuzdev/fuz_css/theme.css'; // all variables
-import 'virtual:fuz.css'; // with base_css: null, variables: null`}
+import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\``}
 			/>
 			<p>
 				See the <TomeLink name="classes" /> reference for setup details and configuration options.
