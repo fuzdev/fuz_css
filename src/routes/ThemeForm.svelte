@@ -40,7 +40,7 @@
 	const light_count = $derived(new_variables.reduce((c, v) => (v.light ? c + 1 : c), 0));
 	const dark_count = $derived(new_variables.reduce((c, v) => (v.dark ? c + 1 : c), 0));
 
-	let selected_variable: StyleVariable | null = $state(null);
+	let selected_variable: StyleVariable | null = $state.raw(null);
 
 	const save = (): void => {
 		if (!changed) return;

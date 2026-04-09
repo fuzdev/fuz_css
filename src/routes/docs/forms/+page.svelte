@@ -18,19 +18,19 @@
 	// TODO extract this to where? (where is it used in the css? check all @keyframe)
 	const ANIMATION_DURATION_FAST = 91; // ms
 
-	let created_account = $state(false);
+	let created_account = $state.raw(false);
 
 	const faces = ['😊', '😑', '🤔', '😉'];
 
-	let username = $state('');
-	let password = $state('');
-	let lifestory = $state('');
+	let username = $state.raw('');
+	let password = $state.raw('');
+	let lifestory = $state.raw('');
 
 	const radio_items = ['a radio input', 'another radio input'];
-	let selected_radio_item = $state(radio_items[0]);
+	let selected_radio_item = $state.raw(radio_items[0]);
 
-	let checked1 = $state(false);
-	let checked2 = $state(true);
+	let checked1 = $state.raw(false);
+	let checked2 = $state.raw(true);
 </script>
 
 <!-- eslint-disable svelte/no-useless-mustaches -->

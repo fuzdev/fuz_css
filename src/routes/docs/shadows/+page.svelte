@@ -22,7 +22,7 @@
 
 	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
 
-	let selected_intensity: IntensityVariant = $state('60');
+	let selected_intensity: IntensityVariant = $state.raw('60');
 
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95 shadow_alpha_100

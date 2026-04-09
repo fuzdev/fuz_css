@@ -34,8 +34,8 @@
 	const computed_styles =
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
-	let selected_font_weight = $state(400);
-	let selected_size = $state(3);
+	let selected_font_weight = $state.raw(400);
+	let selected_size = $state.raw(3);
 
 	// @fuz-classes font_family_sans font_family_serif font_family_mono
 

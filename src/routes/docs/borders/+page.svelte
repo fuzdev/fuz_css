@@ -44,7 +44,7 @@
 		'border_bottom_left_radius_md border_bottom_right_radius_xl',
 	];
 
-	let selected_intensity: IntensityVariant = $state('50');
+	let selected_intensity: IntensityVariant = $state.raw('50');
 
 	// @fuz-classes outline_width_focus outline_width_active
 	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
