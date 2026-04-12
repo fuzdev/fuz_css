@@ -1,14 +1,14 @@
-import {test, describe, expect} from 'vitest';
+import {test, describe, assert} from 'vitest';
 
 import {generate_classes_css} from '$lib/css_class_generation.js';
 import {modified_class_interpreter} from '$lib/css_class_interpreters.js';
 import {css_class_definitions} from '$lib/css_class_definitions.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
 import {
-	expect_css_contains,
-	expect_css_not_contains,
-	expect_css_order,
-	expect_diagnostic,
+	assert_css_contains,
+	assert_css_not_contains,
+	assert_css_order,
+	assert_diagnostic,
 	filter_diagnostics_by_message,
 } from './test_helpers.js';
 
@@ -26,7 +26,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:box:hover',
 				'display: flex',
@@ -42,7 +42,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '@media (width >= 48rem)', '.md\\:box', 'display: flex');
+			assert_css_contains(result.css, '@media (width >= 48rem)', '.md\\:box', 'display: flex');
 		});
 
 		test('generates CSS for dark:panel with ancestor wrapper', () => {
@@ -53,7 +53,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, ':root.dark', '.dark\\:panel', 'border-radius');
+			assert_css_contains(result.css, ':root.dark', '.dark\\:panel', 'border-radius');
 		});
 
 		test('handles multiple modifiers md:dark:hover:box', () => {
@@ -64,7 +64,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				':root.dark',
@@ -80,7 +80,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
 				':root.dark',
@@ -96,7 +96,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:p_md:hover', 'padding');
+			assert_css_contains(result.css, '.hover\\:p_md:hover', 'padding');
 		});
 
 		test('returns null for unknown base class', () => {
@@ -107,7 +107,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, 'hover:unknown_class');
+			assert_css_not_contains(result.css, 'hover:unknown_class');
 		});
 
 		test('returns null for class without modifiers', () => {
@@ -118,7 +118,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.box');
+			assert_css_not_contains(result.css, '.box');
 		});
 	});
 
@@ -131,7 +131,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.before\\:box::before', 'display: flex');
+			assert_css_contains(result.css, '.before\\:box::before', 'display: flex');
 		});
 
 		test('handles combined state and pseudo-element', () => {
@@ -142,7 +142,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:before\\:ellipsis:hover::before');
+			assert_css_contains(result.css, '.hover\\:before\\:ellipsis:hover::before');
 		});
 	});
 
@@ -155,7 +155,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:row:hover', 'display: flex', 'flex-direction: row');
+			assert_css_contains(result.css, '.hover\\:row:hover', 'display: flex', 'flex-direction: row');
 		});
 	});
 
@@ -168,8 +168,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:selectable:hover', 'cursor: pointer');
-			expect_css_not_contains(result.css, ':hover:hover');
+			assert_css_contains(result.css, '.hover\\:selectable:hover', 'cursor: pointer');
+			assert_css_not_contains(result.css, ':hover:hover');
 		});
 
 		test('handles ruleset class with media: md:selectable', () => {
@@ -180,7 +180,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				'.md\\:selectable',
@@ -197,7 +197,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:menuitem:hover',
 				'.hover\\:menuitem:hover .content',
@@ -214,7 +214,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:chevron:hover', '.hover\\:chevron:hover::before');
+			assert_css_contains(result.css, '.hover\\:chevron:hover', '.hover\\:chevron:hover::before');
 		});
 
 		test('handles ruleset with element.class: hover:chip', () => {
@@ -225,7 +225,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:chip:hover',
 				'a.hover\\:chip:hover',
@@ -242,7 +242,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				':root.dark',
@@ -258,7 +258,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.focus\\:plain:not(:hover):focus',
 				'.focus\\:plain:hover:focus',
@@ -274,7 +274,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				'.md\\:clickable',
@@ -292,13 +292,13 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.before\\:chevron::before',
 				'position: relative',
 				'border-left-color',
 			);
-			expect_css_not_contains(result.css, '::before::before');
+			assert_css_not_contains(result.css, '::before::before');
 		});
 
 		test('applies pseudo-element to simple ruleset: before:chip', () => {
@@ -309,7 +309,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.before\\:chip::before',
 				'a.before\\:chip::before',
@@ -328,13 +328,13 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:selectable:hover',
 				'cursor: pointer',
 				'.hover\\:selectable.selected:hover',
 			);
-			expect_css_not_contains(result.css, ':hover:hover');
+			assert_css_not_contains(result.css, ':hover:hover');
 		});
 
 		test('hover:selectable keeps .selectable:active rule (different state)', () => {
@@ -345,7 +345,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, ':active:hover');
+			assert_css_contains(result.css, ':active:hover');
 		});
 
 		test('focus:clickable skips .clickable:focus rule', () => {
@@ -356,8 +356,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.focus\\:clickable:focus', ':hover:focus', ':active:focus');
-			expect_css_not_contains(result.css, ':focus:focus');
+			assert_css_contains(result.css, '.focus\\:clickable:focus', ':hover:focus', ':active:focus');
+			assert_css_not_contains(result.css, ':focus:focus');
 		});
 
 		test('active:clickable skips .clickable:active rule', () => {
@@ -368,8 +368,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, ':active:active');
-			expect_css_contains(result.css, ':hover:active', ':focus:active');
+			assert_css_not_contains(result.css, ':active:active');
+			assert_css_contains(result.css, ':hover:active', ':focus:active');
 		});
 
 		test('hover:plain includes all rules, skipping redundant :hover additions', () => {
@@ -380,15 +380,15 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:plain',
 				'.hover\\:plain:not(:hover)',
 				'.hover\\:plain:hover',
 				'.hover\\:plain:active',
 			);
-			expect_css_not_contains(result.css, ':hover:hover');
-			expect(result.diagnostics.length).toBeGreaterThan(0);
+			assert_css_not_contains(result.css, ':hover:hover');
+			assert.isAbove(result.diagnostics.length, 0);
 		});
 	});
 
@@ -407,13 +407,13 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:card:hover {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on composes + declaration composite', () => {
@@ -430,14 +430,14 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:card:hover {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 				'--card-bg: blue;',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on nested composes composition', () => {
@@ -454,14 +454,14 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				'.md\\:panel_base',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on diamond dependency deduplicates silently', () => {
@@ -479,7 +479,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:diamond:hover',
 				'color: red;',
@@ -488,8 +488,8 @@ describe('modified_class_interpreter', () => {
 			);
 			// Should not have duplicate "color: red;" - only appears once
 			const colorMatches = result.css.match(/color: red;/g);
-			expect(colorMatches?.length).toBe(1);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.strictEqual(colorMatches?.length, 1);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('md:sm generates media query with density overrides', () => {
@@ -500,7 +500,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				'.md\\:sm',
@@ -508,7 +508,7 @@ describe('modified_class_interpreter', () => {
 				'--input_height: var(--space_xl3);',
 				'--icon_size: var(--icon_size_sm);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('hover:sm applies hover state to sm composite', () => {
@@ -519,8 +519,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:sm:hover', '--font_size: var(--font_size_sm);');
-			expect(result.diagnostics).toHaveLength(0);
+			assert_css_contains(result.css, '.hover\\:sm:hover', '--font_size: var(--font_size_sm);');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('hover:md applies hover state to md composite', () => {
@@ -531,8 +531,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.hover\\:md:hover', '--font_size: var(--font_size_md);');
-			expect(result.diagnostics).toHaveLength(0);
+			assert_css_contains(result.css, '.hover\\:md:hover', '--font_size: var(--font_size_md);');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('lg:sm generates lg breakpoint with sm sizing', () => {
@@ -543,13 +543,13 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
 				'.lg\\:sm',
 				'--font_size: var(--font_size_sm);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('lg:md generates lg breakpoint with default sizing reset', () => {
@@ -560,14 +560,14 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
 				'.lg\\:md',
 				'--font_size: var(--font_size_md);',
 				'--icon_size: var(--icon_size_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('sm and md together generate both classes', () => {
@@ -578,9 +578,9 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.sm {', '--font_size: var(--font_size_sm);');
-			expect_css_contains(result.css, '.md {', '--font_size: var(--font_size_md);');
-			expect(result.diagnostics).toHaveLength(0);
+			assert_css_contains(result.css, '.sm {', '--font_size: var(--font_size_sm);');
+			assert_css_contains(result.css, '.md {', '--font_size: var(--font_size_md);');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 	});
 
@@ -597,8 +597,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.hover\\:card');
-			expect_diagnostic(
+			assert_css_not_contains(result.css, '.hover\\:card');
+			assert_diagnostic(
 				result.diagnostics,
 				'error',
 				'Unknown class "unknown_class" in composes array',
@@ -618,8 +618,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.hover\\:a');
-			expect_diagnostic(result.diagnostics, 'error', 'Circular reference');
+			assert_css_not_contains(result.css, '.hover\\:a');
+			assert_diagnostic(result.diagnostics, 'error', 'Circular reference');
 		});
 
 		test('modifier on empty composes array produces no output', () => {
@@ -634,8 +634,8 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect(result.css).toBe('');
-			expect(result.diagnostics).toHaveLength(0);
+			assert.strictEqual(result.css, '');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 	});
 
@@ -648,7 +648,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
+			assert_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
 		});
 
 		test('visited < focus < hover < active ordering', () => {
@@ -659,7 +659,7 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(
+			assert_css_order(
 				result.css,
 				'.visited\\:p_sm',
 				'.focus\\:p_md',
@@ -677,7 +677,7 @@ describe('modified_class_interpreter', () => {
 			});
 
 			// Alphabetical: even < first < odd
-			expect_css_order(result.css, '.even\\:p_lg', '.first\\:p_sm', '.odd\\:p_md');
+			assert_css_order(result.css, '.even\\:p_lg', '.first\\:p_sm', '.odd\\:p_md');
 		});
 	});
 
@@ -690,14 +690,14 @@ describe('modified_class_interpreter', () => {
 				css_properties: null,
 			});
 
-			expect(result.diagnostics.length).toBeGreaterThan(0);
+			assert.isAbove(result.diagnostics.length, 0);
 			const warning = result.diagnostics.find(
 				(d) => d.identifier === 'before:chevron' && d.message.includes('pseudo-element'),
 			);
-			expect(warning).toBeDefined();
-			expect(warning!.level).toBe('warning');
-			expect(warning!.message).toContain('.chevron::before');
-			expect(warning!.message).toContain('::before');
+			assert.isDefined(warning);
+			assert.strictEqual(warning.level, 'warning');
+			assert.include(warning.message, '.chevron::before');
+			assert.include(warning.message, '::before');
 		});
 
 		test('hover:selectable emits warnings for skipped :hover rules', () => {
@@ -711,11 +711,11 @@ describe('modified_class_interpreter', () => {
 			const hover_warnings = filter_diagnostics_by_message(result.diagnostics, ':hover').filter(
 				(d) => d.identifier === 'hover:selectable',
 			);
-			expect(hover_warnings.length).toBeGreaterThan(0);
+			assert.isAbove(hover_warnings.length, 0);
 
 			for (const warning of hover_warnings) {
-				expect(warning.level).toBe('warning');
-				expect(warning.message).toContain('redundancy');
+				assert.strictEqual(warning.level, 'warning');
+				assert.include(warning.message, 'redundancy');
 			}
 		});
 
@@ -730,9 +730,9 @@ describe('modified_class_interpreter', () => {
 			const focus_warning = result.diagnostics.find(
 				(d) => d.identifier === 'focus:clickable' && d.message.includes(':focus'),
 			);
-			expect(focus_warning).toBeDefined();
-			expect(focus_warning!.message).toContain('.clickable:focus');
-			expect(focus_warning!.message).toContain('redundancy');
+			assert.isDefined(focus_warning);
+			assert.include(focus_warning.message, '.clickable:focus');
+			assert.include(focus_warning.message, 'redundancy');
 		});
 	});
 });

@@ -1,4 +1,4 @@
-import {test, expect, describe, beforeAll} from 'vitest';
+import {test, assert, describe, beforeAll} from 'vitest';
 
 import type {ExtractionResult} from '$lib/css_class_extractor.js';
 
@@ -279,9 +279,9 @@ const Component = ({ opacity }) => (
 		const {extract_from_ts} = await import('$lib/css_class_extractor.js');
 		const source = `const Button = () => <button className="btn">Click</button>;`;
 		const result = extract_from_ts(source, 'component.tsx');
-		expect(result.classes).toBeNull();
-		expect(result.diagnostics).not.toBeNull();
-		expect(result.diagnostics?.[0]?.level).toBe('warning');
+		assert.isNull(result.classes);
+		assert.isNotNull(result.diagnostics);
+		assert.strictEqual(result.diagnostics[0]!.level, 'warning');
 	});
 });
 
@@ -293,7 +293,7 @@ const Component = () => <div className={foo} />;
 `;
 		const result = extract_jsx(source);
 		class_names_equal(result, ['my-class']);
-		expect(result.tracked_vars?.has('foo')).toBe(true);
+		assert.isTrue(result.tracked_vars!.has('foo'));
 	});
 
 	test('tracks variable in class={foo} (Preact style)', () => {
@@ -303,7 +303,7 @@ const Component = () => <div class={foo} />;
 `;
 		const result = extract_jsx(source);
 		class_names_equal(result, ['my-class']);
-		expect(result.tracked_vars?.has('foo')).toBe(true);
+		assert.isTrue(result.tracked_vars!.has('foo'));
 	});
 
 	test('tracks multiple variables in className={clsx(foo, bar)}', () => {
@@ -314,8 +314,8 @@ const Component = () => <div className={clsx(foo, bar)} />;
 `;
 		const result = extract_jsx(source);
 		class_names_equal(result, ['foo-class', 'bar-class']);
-		expect(result.tracked_vars?.has('foo')).toBe(true);
-		expect(result.tracked_vars?.has('bar')).toBe(true);
+		assert.isTrue(result.tracked_vars!.has('foo'));
+		assert.isTrue(result.tracked_vars!.has('bar'));
 	});
 
 	test('tracks variables in ternary className={cond ? foo : bar}', () => {
@@ -326,8 +326,8 @@ const Component = () => <div className={cond ? foo : bar} />;
 `;
 		const result = extract_jsx(source);
 		class_names_equal(result, ['foo-class', 'bar-class']);
-		expect(result.tracked_vars?.has('foo')).toBe(true);
-		expect(result.tracked_vars?.has('bar')).toBe(true);
+		assert.isTrue(result.tracked_vars!.has('foo'));
+		assert.isTrue(result.tracked_vars!.has('bar'));
 	});
 
 	test('tracks variable in logical AND className={cond && foo}', () => {
@@ -337,7 +337,7 @@ const Component = () => <div className={isActive && foo} />;
 `;
 		const result = extract_jsx(source);
 		class_names_equal(result, ['conditional-class']);
-		expect(result.tracked_vars?.has('foo')).toBe(true);
+		assert.isTrue(result.tracked_vars!.has('foo'));
 	});
 
 	test('tracks variable with array value in className', () => {
@@ -373,10 +373,10 @@ const Layout = () => (
 );
 `;
 		const result = extract_jsx(source);
-		expect(result.elements?.has('div')).toBe(true);
-		expect(result.elements?.has('header')).toBe(true);
-		expect(result.elements?.has('main')).toBe(true);
-		expect(result.elements?.has('footer')).toBe(true);
+		assert.isTrue(result.elements!.has('div'));
+		assert.isTrue(result.elements!.has('header'));
+		assert.isTrue(result.elements!.has('main'));
+		assert.isTrue(result.elements!.has('footer'));
 	});
 
 	test('filters out PascalCase components from elements', () => {
@@ -395,12 +395,12 @@ const App = () => (
 `;
 		const result = extract_jsx(source);
 		// Lowercase elements should be detected
-		expect(result.elements?.has('div')).toBe(true);
-		expect(result.elements?.has('span')).toBe(true);
+		assert.isTrue(result.elements!.has('div'));
+		assert.isTrue(result.elements!.has('span'));
 		// PascalCase components should NOT be detected as elements
-		expect(result.elements?.has('Button')).toBe(false);
-		expect(result.elements?.has('Card')).toBe(false);
-		expect(result.elements?.has('App')).toBe(false);
+		assert.isFalse(result.elements!.has('Button'));
+		assert.isFalse(result.elements!.has('Card'));
+		assert.isFalse(result.elements!.has('App'));
 	});
 
 	test('handles JSX fragments', () => {
@@ -415,8 +415,8 @@ const List = () => (
 );
 `;
 		const result = extract_jsx(source);
-		expect(result.elements?.has('ul')).toBe(true);
-		expect(result.elements?.has('li')).toBe(true);
+		assert.isTrue(result.elements!.has('ul'));
+		assert.isTrue(result.elements!.has('li'));
 		// Fragments don't have a tag name
 	});
 
@@ -430,9 +430,9 @@ const Icon = () => (
 );
 `;
 		const result = extract_jsx(source);
-		expect(result.elements?.has('svg')).toBe(true);
-		expect(result.elements?.has('circle')).toBe(true);
-		expect(result.elements?.has('path')).toBe(true);
+		assert.isTrue(result.elements!.has('svg'));
+		assert.isTrue(result.elements!.has('circle'));
+		assert.isTrue(result.elements!.has('path'));
 	});
 
 	test('detects custom elements with dashes in JSX', () => {
@@ -445,9 +445,9 @@ const App = () => (
 );
 `;
 		const result = extract_jsx(source);
-		expect(result.elements?.has('div')).toBe(true);
-		expect(result.elements?.has('my-button')).toBe(true);
-		expect(result.elements?.has('custom-card')).toBe(true);
+		assert.isTrue(result.elements!.has('div'));
+		assert.isTrue(result.elements!.has('my-button'));
+		assert.isTrue(result.elements!.has('custom-card'));
 	});
 
 	test('distinguishes HTML elements from React built-ins', () => {
@@ -464,11 +464,11 @@ const App = () => (
 `;
 		const result = extract_jsx(source);
 		// Lowercase elements are detected
-		expect(result.elements?.has('div')).toBe(true);
-		expect(result.elements?.has('section')).toBe(true);
+		assert.isTrue(result.elements!.has('div'));
+		assert.isTrue(result.elements!.has('section'));
 		// PascalCase React built-ins are NOT detected
-		expect(result.elements?.has('Suspense')).toBe(false);
-		expect(result.elements?.has('Fragment')).toBe(false);
+		assert.isFalse(result.elements!.has('Suspense'));
+		assert.isFalse(result.elements!.has('Fragment'));
 	});
 
 	test('returns null elements when no HTML elements present', () => {
@@ -485,6 +485,6 @@ const App = () => (
 `;
 		const result = extract_jsx(source);
 		// No lowercase elements, so elements should be null
-		expect(result.elements).toBeNull();
+		assert.isNull(result.elements);
 	});
 });

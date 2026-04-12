@@ -1,4 +1,4 @@
-import {test, describe, expect, assert} from 'vitest';
+import {test, describe, assert} from 'vitest';
 
 import {
 	generate_classes_css,
@@ -7,11 +7,11 @@ import {
 } from '$lib/css_class_generation.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
 import {
-	expect_css_contains,
-	expect_css_not_contains,
-	expect_css_order,
-	expect_diagnostic,
-	expect_no_diagnostic,
+	assert_css_contains,
+	assert_css_not_contains,
+	assert_css_order,
+	assert_diagnostic,
+	assert_no_diagnostic,
 } from './test_helpers.js';
 
 /**
@@ -52,9 +52,9 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.display\\:flex { display: flex; }');
-			expect_css_contains(result.css, '.opacity\\:80\\% { opacity: 80%; }');
-			expect_css_not_contains(result.css, '.display:flex {', '.opacity:80% {');
+			assert_css_contains(result.css, '.display\\:flex { display: flex; }');
+			assert_css_contains(result.css, '.opacity\\:80\\% { opacity: 80%; }');
+			assert_css_not_contains(result.css, '.display:flex {', '.opacity:80% {');
 		});
 
 		test('escapes complex CSS-literal class names', () => {
@@ -68,7 +68,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.hover\\:opacity\\:80\\%',
 				'.nth-child\\(2n\\)\\:color\\:red',
@@ -90,7 +90,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.test-value', 'test-prop: value;');
+			assert_css_contains(result.css, '.test-value', 'test-prop: value;');
 		});
 
 		test('interpreter can return full ruleset', () => {
@@ -107,7 +107,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '@media (min-width: 800px)', 'display: flex;');
+			assert_css_contains(result.css, '@media (min-width: 800px)', 'display: flex;');
 		});
 
 		test('collects interpreter diagnostics', () => {
@@ -131,9 +131,9 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.diagnostics).toHaveLength(1);
-			expect(result.diagnostics[0]!.message).toBe('test warning');
-			expect(result.diagnostics[0]!.phase).toBe('generation');
+			assert.lengthOf(result.diagnostics, 1);
+			assert.strictEqual(result.diagnostics[0]!.message, 'test warning');
+			assert.strictEqual(result.diagnostics[0]!.phase, 'generation');
 		});
 	});
 
@@ -148,7 +148,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '/* Single line comment */');
+			assert_css_contains(result.css, '/* Single line comment */');
 		});
 
 		test('renders multi-line comment as block', () => {
@@ -161,7 +161,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '/*\nLine 1\nLine 2\n*/');
+			assert_css_contains(result.css, '/*\nLine 1\nLine 2\n*/');
 		});
 
 		test('renders comment on composes-based composite', () => {
@@ -175,7 +175,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '/* Card component */', '.card {');
+			assert_css_contains(result.css, '/* Card component */', '.card {');
 		});
 	});
 
@@ -190,8 +190,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.simple { color: red; }');
-			expect_diagnostic(result.diagnostics, 'warning', 'could be converted to declaration format');
+			assert_css_contains(result.css, '.simple { color: red; }');
+			assert_diagnostic(result.diagnostics, 'warning', 'could be converted to declaration format');
 		});
 
 		test('does not warn for multi-selector ruleset', () => {
@@ -207,8 +207,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.multi { color: red; }');
-			expect_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
+			assert_css_contains(result.css, '.multi { color: red; }');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
 		});
 
 		test('warns when ruleset selectors do not contain expected class', () => {
@@ -221,8 +221,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, '.foobar { cursor: pointer; }');
-			expect_diagnostic(result.diagnostics, 'warning', 'no selectors containing ".clickable"');
+			assert_css_contains(result.css, '.foobar { cursor: pointer; }');
+			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing ".clickable"');
 		});
 
 		test('does not warn when ruleset contains expected class', () => {
@@ -238,7 +238,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('warns for partial class name match', () => {
@@ -251,7 +251,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('warns for completely unrelated selectors', () => {
@@ -269,7 +269,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('matches class followed by attribute selector', () => {
@@ -282,7 +282,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('skips single-selector warning for ruleset with comment before at-rule', () => {
@@ -297,7 +297,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
 		});
 
 		test('skips single-selector warning for nested at-rules', () => {
@@ -312,7 +312,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
 		});
 
 		test('warns for empty ruleset', () => {
@@ -325,8 +325,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.css).toBe('');
-			expect_diagnostic(result.diagnostics, 'warning', 'is empty');
+			assert.strictEqual(result.css, '');
+			assert_diagnostic(result.diagnostics, 'warning', 'is empty');
 		});
 
 		test('warns for whitespace-only ruleset', () => {
@@ -339,8 +339,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.css).toBe('');
-			expect_diagnostic(result.diagnostics, 'warning', 'is empty');
+			assert.strictEqual(result.css, '');
+			assert_diagnostic(result.diagnostics, 'warning', 'is empty');
 		});
 
 		test('handles comment-only ruleset', () => {
@@ -353,7 +353,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('warns for static ruleset with special chars in class name', () => {
@@ -366,7 +366,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 
 		test('no warning for static ruleset with special chars when selector matches', () => {
@@ -379,7 +379,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
+			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
 		});
 	});
 
@@ -398,7 +398,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, '.aaa', '.zzz', '.mmm');
+			assert_css_order(result.css, '.aaa', '.zzz', '.mmm');
 		});
 
 		test('sorts unknown classes alphabetically at end', () => {
@@ -412,8 +412,8 @@ describe('generate_classes_css', () => {
 			});
 
 			// known should be present, unknown classes without interpreter produce no output
-			expect_css_contains(result.css, '.known');
-			expect_css_not_contains(result.css, '.unknown-a', '.unknown-b');
+			assert_css_contains(result.css, '.known');
+			assert_css_not_contains(result.css, '.unknown-a', '.unknown-b');
 		});
 
 		test('sorts interpreted classes alphabetically', () => {
@@ -429,7 +429,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, '.int-aaa', '.int-bbb', '.int-ccc');
+			assert_css_order(result.css, '.int-aaa', '.int-bbb', '.int-ccc');
 		});
 
 		test('literal shorthand sorts before token longhand', () => {
@@ -440,7 +440,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, 'border-radius\\:0', 'border_top_right_radius_sm');
+			assert_css_order(result.css, 'border-radius\\:0', 'border_top_right_radius_sm');
 		});
 
 		test('literal longhand sorts after token shorthand', () => {
@@ -451,7 +451,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, 'border_radius_sm', 'border-top-right-radius\\:5px');
+			assert_css_order(result.css, 'border_radius_sm', 'border-top-right-radius\\:5px');
 		});
 
 		test('both literal shorthand and longhand sort correctly', () => {
@@ -462,7 +462,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, 'border-radius\\:0', 'border-top-right-radius\\:5px');
+			assert_css_order(result.css, 'border-radius\\:0', 'border-top-right-radius\\:5px');
 		});
 
 		test('modified literal shorthand sorts before token longhand', () => {
@@ -483,7 +483,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, 'hover\\:border-radius\\:0', 'border_top_right_radius_sm');
+			assert_css_order(result.css, 'hover\\:border-radius\\:0', 'border_top_right_radius_sm');
 		});
 
 		test('modified token class sorts alphabetically, not by property', () => {
@@ -504,7 +504,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_order(result.css, 'p_md', 'hover\\:p_md');
+			assert_css_order(result.css, 'p_md', 'hover\\:p_md');
 		});
 	});
 
@@ -520,13 +520,13 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.card {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('composes + declaration composite', () => {
@@ -540,14 +540,14 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.card {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 				'--card-bg: var(--shade_10);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('nested composes composition', () => {
@@ -562,14 +562,14 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.panel {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
 				'box-shadow: var(--shadow_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('unknown class in composes array produces error', () => {
@@ -583,8 +583,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.card');
-			expect_diagnostic(
+			assert_css_not_contains(result.css, '.card');
+			assert_diagnostic(
 				result.diagnostics,
 				'error',
 				'Unknown class "unknown_class" in composes array',
@@ -602,8 +602,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.a');
-			expect_diagnostic(result.diagnostics, 'error', 'Circular reference');
+			assert_css_not_contains(result.css, '.a');
+			assert_diagnostic(result.diagnostics, 'error', 'Circular reference');
 		});
 
 		test('ruleset class in composes array produces error', () => {
@@ -620,8 +620,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.card');
-			expect_diagnostic(result.diagnostics, 'error', 'Cannot reference ruleset class');
+			assert_css_not_contains(result.css, '.card');
+			assert_diagnostic(result.diagnostics, 'error', 'Cannot reference ruleset class');
 		});
 
 		test('self-referencing class produces error', () => {
@@ -634,8 +634,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.self_ref');
-			expect_diagnostic(result.diagnostics, 'error', 'Circular reference');
+			assert_css_not_contains(result.css, '.self_ref');
+			assert_diagnostic(result.diagnostics, 'error', 'Circular reference');
 		});
 
 		test('empty composes array produces no CSS output', () => {
@@ -648,8 +648,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.css).toBe('');
-			expect(result.diagnostics).toHaveLength(0);
+			assert.strictEqual(result.css, '');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('diamond dependency pattern deduplicates silently', () => {
@@ -665,14 +665,14 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.diamond {',
 				'color: red;',
 				'font-size: 1rem;',
 				'font-weight: bold;',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('longer cycle (a → b → c → a) produces error', () => {
@@ -687,9 +687,9 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_not_contains(result.css, '.a');
-			expect_diagnostic(result.diagnostics, 'error', 'Circular reference');
-			expect(result.diagnostics[0]!.message).toContain('a → b → c → a');
+			assert_css_not_contains(result.css, '.a');
+			assert_diagnostic(result.diagnostics, 'error', 'Circular reference');
+			assert.include(result.diagnostics[0]!.message, 'a → b → c → a');
 		});
 	});
 
@@ -706,8 +706,8 @@ describe('generate_classes_css', () => {
 				class_locations: new Map([['card', [loc]]]),
 			});
 
-			expect(result.diagnostics).toHaveLength(1);
-			expect(result.diagnostics[0]!.locations).toEqual([loc]);
+			assert.lengthOf(result.diagnostics, 1);
+			assert.deepEqual(result.diagnostics[0]!.locations, [loc]);
 		});
 
 		test('diagnostics have null locations when not provided', () => {
@@ -720,8 +720,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.diagnostics).toHaveLength(1);
-			expect(result.diagnostics[0]!.locations).toBeNull();
+			assert.lengthOf(result.diagnostics, 1);
+			assert.isNull(result.diagnostics[0]!.locations);
 		});
 	});
 
@@ -736,7 +736,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('space_lg')).toBe(true);
+			assert.isTrue(result.variables_used.has('space_lg'));
 		});
 
 		test('tracks variables from composed classes', () => {
@@ -752,8 +752,8 @@ describe('generate_classes_css', () => {
 			});
 
 			// Should track variables from entire composition chain
-			expect(result.variables_used.has('color_a_5')).toBe(true);
-			expect(result.variables_used.has('space_md')).toBe(true);
+			assert.isTrue(result.variables_used.has('color_a_5'));
+			assert.isTrue(result.variables_used.has('space_md'));
 		});
 
 		test('tracks variables from ruleset classes', () => {
@@ -768,8 +768,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('bg_1')).toBe(true);
-			expect(result.variables_used.has('text_color_1')).toBe(true);
+			assert.isTrue(result.variables_used.has('bg_1'));
+			assert.isTrue(result.variables_used.has('text_color_1'));
 		});
 
 		test('tracks multiple variables from single declaration', () => {
@@ -784,9 +784,9 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('space_sm')).toBe(true);
-			expect(result.variables_used.has('space_md')).toBe(true);
-			expect(result.variables_used.has('space_lg')).toBe(true);
+			assert.isTrue(result.variables_used.has('space_sm'));
+			assert.isTrue(result.variables_used.has('space_md'));
+			assert.isTrue(result.variables_used.has('space_lg'));
 		});
 
 		test('deduplicates variables across classes', () => {
@@ -801,8 +801,8 @@ describe('generate_classes_css', () => {
 			});
 
 			// Set naturally deduplicates
-			expect(result.variables_used.size).toBe(1);
-			expect(result.variables_used.has('space_md')).toBe(true);
+			assert.strictEqual(result.variables_used.size, 1);
+			assert.isTrue(result.variables_used.has('space_md'));
 		});
 	});
 
@@ -815,7 +815,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.sm {',
 				'--font_size: var(--font_size_sm);',
@@ -827,7 +827,7 @@ describe('generate_classes_css', () => {
 				'--menuitem_padding: var(--space_xs4) var(--space_xs3);',
 				'--flow_margin: var(--space_md);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('sm tracks used variables', () => {
@@ -838,14 +838,14 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('font_size_sm')).toBe(true);
-			expect(result.variables_used.has('space_xl3')).toBe(true);
-			expect(result.variables_used.has('space_xl2')).toBe(true);
-			expect(result.variables_used.has('space_sm')).toBe(true);
-			expect(result.variables_used.has('icon_size_sm')).toBe(true);
-			expect(result.variables_used.has('space_xs4')).toBe(true);
-			expect(result.variables_used.has('space_xs3')).toBe(true);
-			expect(result.variables_used.has('space_md')).toBe(true);
+			assert.isTrue(result.variables_used.has('font_size_sm'));
+			assert.isTrue(result.variables_used.has('space_xl3'));
+			assert.isTrue(result.variables_used.has('space_xl2'));
+			assert.isTrue(result.variables_used.has('space_sm'));
+			assert.isTrue(result.variables_used.has('icon_size_sm'));
+			assert.isTrue(result.variables_used.has('space_xs4'));
+			assert.isTrue(result.variables_used.has('space_xs3'));
+			assert.isTrue(result.variables_used.has('space_md'));
 		});
 	});
 
@@ -858,7 +858,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.md {',
 				'--font_size: var(--font_size_md);',
@@ -870,7 +870,7 @@ describe('generate_classes_css', () => {
 				'--menuitem_padding: var(--space_xs3) var(--space_xs);',
 				'--flow_margin: var(--space_lg);',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('md tracks used variables', () => {
@@ -881,13 +881,13 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('font_size_md')).toBe(true);
-			expect(result.variables_used.has('space_xl5')).toBe(true);
-			expect(result.variables_used.has('space_xl4')).toBe(true);
-			expect(result.variables_used.has('space_lg')).toBe(true);
-			expect(result.variables_used.has('icon_size_md')).toBe(true);
-			expect(result.variables_used.has('space_xs3')).toBe(true);
-			expect(result.variables_used.has('space_xs')).toBe(true);
+			assert.isTrue(result.variables_used.has('font_size_md'));
+			assert.isTrue(result.variables_used.has('space_xl5'));
+			assert.isTrue(result.variables_used.has('space_xl4'));
+			assert.isTrue(result.variables_used.has('space_lg'));
+			assert.isTrue(result.variables_used.has('icon_size_md'));
+			assert.isTrue(result.variables_used.has('space_xs3'));
+			assert.isTrue(result.variables_used.has('space_xs'));
 		});
 	});
 
@@ -900,12 +900,12 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.mb_flow {',
 				'margin-bottom: var(--flow_margin, var(--space_lg));',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('mt_flow generates flow-aware margin-top', () => {
@@ -916,12 +916,12 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(
+			assert_css_contains(
 				result.css,
 				'.mt_flow {',
 				'margin-top: var(--flow_margin, var(--space_lg));',
 			);
-			expect(result.diagnostics).toHaveLength(0);
+			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('mb_flow tracks space_lg variable', () => {
@@ -932,7 +932,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect(result.variables_used.has('space_lg')).toBe(true);
+			assert.isTrue(result.variables_used.has('space_lg'));
 		});
 	});
 
@@ -947,7 +947,7 @@ describe('generate_classes_css', () => {
 					css_properties: null,
 				});
 
-				expect_css_contains(result.css, 'var(--border_radius, var(--border_radius_xs))');
+				assert_css_contains(result.css, 'var(--border_radius, var(--border_radius_xs))');
 			},
 		);
 
@@ -959,7 +959,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, 'font-size: var(--font_size, inherit)');
+			assert_css_contains(result.css, 'font-size: var(--font_size, inherit)');
 		});
 	});
 
@@ -977,8 +977,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, 'from-static: true;');
-			expect_css_not_contains(result.css, 'from-interpreter');
+			assert_css_contains(result.css, 'from-static: true;');
+			assert_css_not_contains(result.css, 'from-interpreter');
 		});
 
 		test('first matching interpreter wins', () => {
@@ -998,8 +998,8 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, 'first: true;');
-			expect_css_not_contains(result.css, 'second');
+			assert_css_contains(result.css, 'first: true;');
+			assert_css_not_contains(result.css, 'second');
 		});
 
 		test('interpreter returning null falls through to next', () => {
@@ -1019,7 +1019,7 @@ describe('generate_classes_css', () => {
 				css_properties: null,
 			});
 
-			expect_css_contains(result.css, 'second: true;');
+			assert_css_contains(result.css, 'second: true;');
 		});
 	});
 });

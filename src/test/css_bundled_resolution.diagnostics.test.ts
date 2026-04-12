@@ -6,7 +6,7 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
 import {create_test_fixtures} from './css_bundled_resolution_fixtures.js';
@@ -29,12 +29,12 @@ describe('resolve_css diagnostics', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('warning');
-			expect(result.diagnostics[0]!.message).toContain('color_primry');
-			expect(result.diagnostics[0]!.message).toContain('did you mean');
-			expect(result.diagnostics[0]!.message).toContain('color_primary');
-			expect(result.diagnostics[0]!.suggestion).toContain('color_primary');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+			assert.include(result.diagnostics[0]!.message, 'color_primry');
+			assert.include(result.diagnostics[0]!.message, 'did you mean');
+			assert.include(result.diagnostics[0]!.message, 'color_primary');
+			assert.include(result.diagnostics[0]!.suggestion!, 'color_primary');
 		});
 
 		test('emits warning for typo in transitive dep', () => {
@@ -54,10 +54,10 @@ describe('resolve_css diagnostics', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.message).toContain('main_colr');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.include(result.diagnostics[0]!.message, 'main_colr');
 			// Should suggest the most similar variable (either main_color or main_colour)
-			expect(result.diagnostics[0]!.message).toContain('did you mean');
+			assert.include(result.diagnostics[0]!.message, 'did you mean');
 		});
 
 		test('handles multiple typos', () => {
@@ -82,11 +82,11 @@ describe('resolve_css diagnostics', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBe(3);
+			assert.strictEqual(result.diagnostics.length, 3);
 			const messages = result.diagnostics.map((d) => d.message);
-			expect(messages.some((m) => m.includes('backgroud_color'))).toBe(true);
-			expect(messages.some((m) => m.includes('forground_color'))).toBe(true);
-			expect(messages.some((m) => m.includes('boarder_radius'))).toBe(true);
+			assert.isTrue(messages.some((m) => m.includes('backgroud_color')));
+			assert.isTrue(messages.some((m) => m.includes('forground_color')));
+			assert.isTrue(messages.some((m) => m.includes('boarder_radius')));
 		});
 
 		test('no warning for user-defined variables (not similar to theme vars)', () => {
@@ -107,7 +107,7 @@ describe('resolve_css diagnostics', () => {
 			});
 
 			// No warnings because these don't look like typos
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('no diagnostics when all exist', () => {
@@ -126,7 +126,7 @@ describe('resolve_css diagnostics', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 	});
 
@@ -147,7 +147,7 @@ describe('resolve_css diagnostics', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('warns when warn_unmatched_elements enabled', () => {
@@ -167,10 +167,10 @@ describe('resolve_css diagnostics', () => {
 				warn_unmatched_elements: true,
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('warning');
-			expect(result.diagnostics[0]!.message).toContain('custom-element');
-			expect(result.diagnostics[0]!.message).toContain('No style rules found');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+			assert.include(result.diagnostics[0]!.message, 'custom-element');
+			assert.include(result.diagnostics[0]!.message, 'No style rules found');
 		});
 
 		test('warns for multiple unmatched', () => {
@@ -190,11 +190,11 @@ describe('resolve_css diagnostics', () => {
 				warn_unmatched_elements: true,
 			});
 
-			expect(result.diagnostics.length).toBe(3);
+			assert.strictEqual(result.diagnostics.length, 3);
 			const messages = result.diagnostics.map((d) => d.message);
-			expect(messages.some((m) => m.includes('my-custom'))).toBe(true);
-			expect(messages.some((m) => m.includes('another-custom'))).toBe(true);
-			expect(messages.some((m) => m.includes('third-one'))).toBe(true);
+			assert.isTrue(messages.some((m) => m.includes('my-custom')));
+			assert.isTrue(messages.some((m) => m.includes('another-custom')));
+			assert.isTrue(messages.some((m) => m.includes('third-one')));
 		});
 
 		test('no warning when all have rules', () => {
@@ -218,7 +218,7 @@ describe('resolve_css diagnostics', () => {
 				warn_unmatched_elements: true,
 			});
 
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 	});
 
@@ -239,12 +239,12 @@ describe('resolve_css diagnostics', () => {
 				explicit_variables: new Set(['nonexistent_var']),
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('@fuz-variables');
-			expect(result.diagnostics[0]!.message).toContain('nonexistent_var');
-			expect(result.diagnostics[0]!.message).toContain('No theme variable found');
-			expect(result.diagnostics[0]!.suggestion).toContain('Remove from @fuz-variables');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, '@fuz-variables');
+			assert.include(result.diagnostics[0]!.message, 'nonexistent_var');
+			assert.include(result.diagnostics[0]!.message, 'No theme variable found');
+			assert.include(result.diagnostics[0]!.suggestion!, 'Remove from @fuz-variables');
 		});
 
 		test('no error when explicit variable exists in theme', () => {
@@ -265,10 +265,10 @@ describe('resolve_css diagnostics', () => {
 				explicit_variables: new Set(['color_a_50', 'shade_40']),
 			});
 
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 			// Valid explicit variables should be resolved
-			expect(result.resolved_variables.has('color_a_50')).toBe(true);
-			expect(result.resolved_variables.has('shade_40')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
 		test('suggests similar variable for typo', () => {
@@ -288,11 +288,11 @@ describe('resolve_css diagnostics', () => {
 				explicit_variables: new Set(['shade_4']), // typo
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('shade_4');
-			expect(result.diagnostics[0]!.message).toContain('did you mean');
-			expect(result.diagnostics[0]!.suggestion).toContain('Check spelling');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, 'shade_4');
+			assert.include(result.diagnostics[0]!.message, 'did you mean');
+			assert.include(result.diagnostics[0]!.suggestion!, 'Check spelling');
 		});
 
 		test('errors for multiple explicit variables with mix of valid and invalid', () => {
@@ -313,14 +313,14 @@ describe('resolve_css diagnostics', () => {
 			});
 
 			// Only the 2 invalid variables produce errors
-			expect(result.diagnostics.length).toBe(2);
-			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+			assert.strictEqual(result.diagnostics.length, 2);
+			assert.isTrue(result.diagnostics.every((d) => d.level === 'error'));
 			const messages = result.diagnostics.map((d) => d.message);
-			expect(messages.some((m) => m.includes('bad_var_1'))).toBe(true);
-			expect(messages.some((m) => m.includes('bad_var_2'))).toBe(true);
+			assert.isTrue(messages.some((m) => m.includes('bad_var_1')));
+			assert.isTrue(messages.some((m) => m.includes('bad_var_2')));
 			// Valid variables should still be resolved
-			expect(result.resolved_variables.has('color_a_50')).toBe(true);
-			expect(result.resolved_variables.has('shade_40')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
 		test('explicit variable resolves transitive dependencies', () => {
@@ -340,9 +340,9 @@ describe('resolve_css diagnostics', () => {
 				explicit_variables: new Set(['derived_color']),
 			});
 
-			expect(result.diagnostics.length).toBe(0);
-			expect(result.resolved_variables.has('derived_color')).toBe(true);
-			expect(result.resolved_variables.has('base_hue')).toBe(true);
+			assert.strictEqual(result.diagnostics.length, 0);
+			assert.isTrue(result.resolved_variables.has('derived_color'));
+			assert.isTrue(result.resolved_variables.has('base_hue'));
 		});
 
 		test('exclude_variables suppresses explicit_variables error', () => {
@@ -363,9 +363,9 @@ describe('resolve_css diagnostics', () => {
 			});
 
 			// Only 'also_missing' errors - 'nonexistent_var' is suppressed by exclude_variables
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('also_missing');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, 'also_missing');
 		});
 	});
 
@@ -387,11 +387,11 @@ describe('resolve_css diagnostics', () => {
 				explicit_elements: new Set(['dialog']),
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('@fuz-elements');
-			expect(result.diagnostics[0]!.message).toContain('dialog');
-			expect(result.diagnostics[0]!.message).toContain('No style rules found');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, '@fuz-elements');
+			assert.include(result.diagnostics[0]!.message, 'dialog');
+			assert.include(result.diagnostics[0]!.message, 'No style rules found');
 		});
 
 		test('no error when explicit element has rules', () => {
@@ -414,7 +414,7 @@ describe('resolve_css diagnostics', () => {
 				explicit_elements: new Set(['dialog']),
 			});
 
-			expect(result.diagnostics.length).toBe(0);
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('suggests similar element for typo', () => {
@@ -437,11 +437,11 @@ describe('resolve_css diagnostics', () => {
 				explicit_elements: new Set(['dilog']), // typo
 			});
 
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('dilog');
-			expect(result.diagnostics[0]!.message).toContain('did you mean');
-			expect(result.diagnostics[0]!.message).toContain('dialog');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, 'dilog');
+			assert.include(result.diagnostics[0]!.message, 'did you mean');
+			assert.include(result.diagnostics[0]!.message, 'dialog');
 		});
 
 		test('errors for multiple explicit elements without rules', () => {
@@ -461,8 +461,8 @@ describe('resolve_css diagnostics', () => {
 				explicit_elements: new Set(['dialog', 'details', 'summary']),
 			});
 
-			expect(result.diagnostics.length).toBe(3);
-			expect(result.diagnostics.every((d) => d.level === 'error')).toBe(true);
+			assert.strictEqual(result.diagnostics.length, 3);
+			assert.isTrue(result.diagnostics.every((d) => d.level === 'error'));
 		});
 
 		test('exclude_elements suppresses explicit_elements error', () => {
@@ -484,9 +484,9 @@ describe('resolve_css diagnostics', () => {
 			});
 
 			// Only 'details' errors - 'dialog' is suppressed by exclude_elements
-			expect(result.diagnostics.length).toBe(1);
-			expect(result.diagnostics[0]!.level).toBe('error');
-			expect(result.diagnostics[0]!.message).toContain('details');
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'error');
+			assert.include(result.diagnostics[0]!.message, 'details');
 		});
 	});
 });

@@ -7,7 +7,7 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import type {
 	CssGeneratorBaseOptions,
@@ -48,7 +48,7 @@ describe('shared options interface', () => {
 			cache_dir: '.cache',
 		};
 
-		expect(base_options).toBeDefined();
+		assert.isDefined(base_options);
 	});
 
 	test('GenFuzCssOptions extends CssGeneratorBaseOptions', () => {
@@ -66,9 +66,9 @@ describe('shared options interface', () => {
 			cache_io_concurrency: 100,
 		};
 
-		expect(gro_options).toBeDefined();
-		expect(gro_options.include_stats).toBe(true);
-		expect(gro_options.project_root).toBe('/path/to/project');
+		assert.isDefined(gro_options);
+		assert.isTrue(gro_options.include_stats);
+		assert.strictEqual(gro_options.project_root, '/path/to/project');
 	});
 
 	test('VitePluginFuzCssOptions extends CssGeneratorBaseOptions', () => {
@@ -83,8 +83,8 @@ describe('shared options interface', () => {
 			additional_elements: ['custom-element'],
 		};
 
-		expect(vite_options).toBeDefined();
-		expect(vite_options.theme_specificity).toBe(2);
+		assert.isDefined(vite_options);
+		assert.strictEqual(vite_options.theme_specificity, 2);
 	});
 
 	test('options interfaces are assignable', () => {
@@ -111,53 +111,53 @@ describe('shared options interface', () => {
 			cache_dir: '.custom-cache',
 		};
 
-		expect(extraction).toBeDefined();
-		expect(class_opts).toBeDefined();
-		expect(output).toBeDefined();
-		expect(diagnostics).toBeDefined();
-		expect(cache).toBeDefined();
+		assert.isDefined(extraction);
+		assert.isDefined(class_opts);
+		assert.isDefined(output);
+		assert.isDefined(diagnostics);
+		assert.isDefined(cache);
 	});
 
 	test('base_css accepts string | null | undefined', () => {
 		// Test undefined (default behavior)
 		const default_opts: CssOutputOptions = {};
-		expect(default_opts.base_css).toBeUndefined();
+		assert.isUndefined(default_opts.base_css);
 
 		// Test null (disabled)
 		const disabled_opts: CssOutputOptions = {
 			base_css: null,
 		};
-		expect(disabled_opts.base_css).toBeNull();
+		assert.isNull(disabled_opts.base_css);
 
 		// Test string (custom CSS)
 		const custom_opts: CssOutputOptions = {
 			base_css: 'button { color: red; }',
 		};
-		expect(typeof custom_opts.base_css).toBe('string');
+		assert.strictEqual(typeof custom_opts.base_css, 'string');
 	});
 
 	test('variables accepts StyleVariable[] | null | undefined | callback', () => {
 		// Test undefined (default behavior)
 		const default_opts: CssOutputOptions = {};
-		expect(default_opts.variables).toBeUndefined();
+		assert.isUndefined(default_opts.variables);
 
 		// Test null (disabled)
 		const disabled_opts: CssOutputOptions = {
 			variables: null,
 		};
-		expect(disabled_opts.variables).toBeNull();
+		assert.isNull(disabled_opts.variables);
 
 		// Test array (custom variables)
 		const custom_opts: CssOutputOptions = {
 			variables: [{name: 'my_var', light: 'blue', dark: 'lightblue'}],
 		};
-		expect(Array.isArray(custom_opts.variables)).toBe(true);
+		assert.isTrue(Array.isArray(custom_opts.variables));
 
 		// Test callback (modify defaults)
 		const callback_opts: CssOutputOptions = {
 			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_')),
 		};
-		expect(typeof callback_opts.variables).toBe('function');
+		assert.strictEqual(typeof callback_opts.variables, 'function');
 	});
 });
 
@@ -165,14 +165,14 @@ describe('options default behavior', () => {
 	test('all options have sensible defaults in type', () => {
 		// Empty object should be valid - all options are optional
 		const minimal: CssGeneratorBaseOptions = {};
-		expect(minimal).toBeDefined();
+		assert.isDefined(minimal);
 	});
 
 	test('include_default_classes defaults to true conceptually', () => {
 		// When undefined, generators should treat include_default_classes as true
 		// This test documents the expected behavior
 		const opts: CssClassOptions = {};
-		expect(opts.include_default_classes).toBeUndefined();
+		assert.isUndefined(opts.include_default_classes);
 		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts
 	});
 });

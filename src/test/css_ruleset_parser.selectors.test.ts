@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {split_selector_list, find_compound_end} from '$lib/css_ruleset_parser.js';
 
@@ -27,7 +27,7 @@ describe('split_selector_list', () => {
 	];
 
 	test.each(cases)('split_selector_list("%s") → %j', (input, expected) => {
-		expect(split_selector_list(input)).toEqual(expected);
+		assert.deepEqual(split_selector_list(input), expected);
 	});
 });
 
@@ -65,6 +65,6 @@ describe('find_compound_end', () => {
 	];
 
 	test.each(cases)('find_compound_end("%s", %d) → %d (%s)', (selector, startPos, expected) => {
-		expect(find_compound_end(selector, startPos)).toBe(expected);
+		assert.strictEqual(find_compound_end(selector, startPos), expected);
 	});
 });

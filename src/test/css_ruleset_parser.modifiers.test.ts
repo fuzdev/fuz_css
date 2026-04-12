@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {modify_single_selector, modify_selector_group} from '$lib/css_ruleset_parser.js';
 
@@ -250,7 +250,8 @@ describe('modify_single_selector', () => {
 	test.each(cases)(
 		'modifies "%s" (%s)',
 		(selector, className, newClassName, state, pseudo, expected, _desc) => {
-			expect(modify_single_selector(selector, className, newClassName, state, pseudo)).toBe(
+			assert.strictEqual(
+				modify_single_selector(selector, className, newClassName, state, pseudo),
 				expected,
 			);
 		},
@@ -267,10 +268,11 @@ describe('modify_selector_group', () => {
 			'',
 		);
 
-		expect(result.selector).toBe(
+		assert.strictEqual(
+			result.selector,
 			'.hover\\:selectable.selected:hover,\n.hover\\:selectable:active:hover',
 		);
-		expect(result.skipped_modifiers).toBeNull();
+		assert.isNull(result.skipped_modifiers);
 	});
 
 	test('handles functional pseudo-classes in group', () => {
@@ -282,8 +284,11 @@ describe('modify_selector_group', () => {
 			'',
 		);
 
-		expect(result.selector).toBe('.focus\\:plain:not(:hover):focus,\n.focus\\:plain:active:focus');
-		expect(result.skipped_modifiers).toBeNull();
+		assert.strictEqual(
+			result.selector,
+			'.focus\\:plain:not(:hover):focus,\n.focus\\:plain:active:focus',
+		);
+		assert.isNull(result.skipped_modifiers);
 	});
 
 	describe('per-selector conflict detection', () => {
@@ -296,12 +301,12 @@ describe('modify_selector_group', () => {
 				'',
 			);
 
-			expect(result.selector).toBe('.hover\\:plain:hover,\n.hover\\:plain:active:hover');
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers).toHaveLength(1);
-			expect(result.skipped_modifiers![0]!.selector).toBe('.plain:hover');
-			expect(result.skipped_modifiers![0]!.reason).toBe('state_conflict');
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
+			assert.strictEqual(result.selector, '.hover\\:plain:hover,\n.hover\\:plain:active:hover');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.lengthOf(result.skipped_modifiers, 1);
+			assert.strictEqual(result.skipped_modifiers[0]!.selector, '.plain:hover');
+			assert.strictEqual(result.skipped_modifiers[0]!.reason, 'state_conflict');
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':hover');
 		});
 
 		// Tests for state matching precision (avoid false positives with related states)
@@ -313,8 +318,8 @@ describe('modify_selector_group', () => {
 				[':focus'],
 				'',
 			);
-			expect(result.selector).toBe('.focus\\:btn:focus-within:focus');
-			expect(result.skipped_modifiers).toBeNull(); // No conflict - different states!
+			assert.strictEqual(result.selector, '.focus\\:btn:focus-within:focus');
+			assert.isNull(result.skipped_modifiers); // No conflict - different states!
 		});
 
 		test('focus modifier applies to selector with :focus-visible (no conflict)', () => {
@@ -325,8 +330,8 @@ describe('modify_selector_group', () => {
 				[':focus'],
 				'',
 			);
-			expect(result.selector).toBe('.focus\\:btn:focus-visible:focus');
-			expect(result.skipped_modifiers).toBeNull();
+			assert.strictEqual(result.selector, '.focus\\:btn:focus-visible:focus');
+			assert.isNull(result.skipped_modifiers);
 		});
 
 		test('hover modifier not confused by attribute selector containing hover', () => {
@@ -337,15 +342,15 @@ describe('modify_selector_group', () => {
 				[':hover'],
 				'',
 			);
-			expect(result.selector).toBe('.hover\\:btn[data-hover="true"]:hover');
-			expect(result.skipped_modifiers).toBeNull();
+			assert.strictEqual(result.selector, '.hover\\:btn[data-hover="true"]:hover');
+			assert.isNull(result.skipped_modifiers);
 		});
 
 		test('focus modifier skipped for selector with exact :focus match', () => {
 			const result = modify_selector_group('.btn:focus', 'btn', 'focus\\:btn', [':focus'], '');
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers).toHaveLength(1);
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.lengthOf(result.skipped_modifiers, 1);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':focus');
 		});
 
 		test('focus modifier skipped for :focus in functional pseudo-class', () => {
@@ -356,8 +361,8 @@ describe('modify_selector_group', () => {
 				[':focus'],
 				'',
 			);
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':focus');
 		});
 
 		test('active modifier skipped for :active in :not(:active)', () => {
@@ -368,8 +373,8 @@ describe('modify_selector_group', () => {
 				[':active'],
 				'',
 			);
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':active');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':active');
 		});
 
 		test('hover modifier skipped for deeply nested :not(:is(:focus, :hover))', () => {
@@ -380,8 +385,8 @@ describe('modify_selector_group', () => {
 				[':hover'],
 				'',
 			);
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':hover');
 		});
 
 		test('focus modifier skipped for :where(:focus, :active)', () => {
@@ -392,8 +397,8 @@ describe('modify_selector_group', () => {
 				[':focus'],
 				'',
 			);
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':focus');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':focus');
 		});
 
 		test('applies non-conflicting states when some conflict', () => {
@@ -405,10 +410,10 @@ describe('modify_selector_group', () => {
 				'',
 			);
 
-			expect(result.selector).toBe('.hover\\:focus\\:selectable:hover:focus');
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers).toHaveLength(1);
-			expect(result.skipped_modifiers![0]!.conflicting_modifier).toBe(':hover');
+			assert.strictEqual(result.selector, '.hover\\:focus\\:selectable:hover:focus');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.lengthOf(result.skipped_modifiers, 1);
+			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':hover');
 		});
 
 		test('handles pseudo-element conflict per-selector', () => {
@@ -420,11 +425,11 @@ describe('modify_selector_group', () => {
 				'::before',
 			);
 
-			expect(result.selector).toBe('.before\\:chevron::before,\n.before\\:chevron::before');
-			expect(result.skipped_modifiers).not.toBeNull();
-			expect(result.skipped_modifiers).toHaveLength(1);
-			expect(result.skipped_modifiers![0]!.selector).toBe('.chevron::before');
-			expect(result.skipped_modifiers![0]!.reason).toBe('pseudo_element_conflict');
+			assert.strictEqual(result.selector, '.before\\:chevron::before,\n.before\\:chevron::before');
+			assert.isNotNull(result.skipped_modifiers);
+			assert.lengthOf(result.skipped_modifiers, 1);
+			assert.strictEqual(result.skipped_modifiers[0]!.selector, '.chevron::before');
+			assert.strictEqual(result.skipped_modifiers[0]!.reason, 'pseudo_element_conflict');
 		});
 	});
 });

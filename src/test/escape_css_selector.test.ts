@@ -1,4 +1,4 @@
-import {test, describe, expect} from 'vitest';
+import {test, describe, assert} from 'vitest';
 
 import {escape_css_selector} from '$lib/css_class_generation.js';
 
@@ -79,7 +79,7 @@ describe('escape_css_selector', () => {
 	];
 
 	test.each(escape_cases)('escapes "%s" to "%s"', (input, expected) => {
-		expect(escape_css_selector(input)).toBe(expected);
+		assert.strictEqual(escape_css_selector(input), expected);
 	});
 });
 
@@ -105,6 +105,6 @@ describe('escape_css_selector - backslash edge cases', () => {
 	];
 
 	test.each(backslash_cases)('escapes "%s" to "%s"', (input, expected) => {
-		expect(escape_css_selector(input)).toBe(expected);
+		assert.strictEqual(escape_css_selector(input), expected);
 	});
 });

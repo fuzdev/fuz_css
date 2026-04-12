@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 import {join} from 'node:path';
 import {mkdir, rm, writeFile, readFile} from 'node:fs/promises';
 
@@ -81,9 +81,9 @@ const save_and_load = async (
 		explicit_variables,
 	});
 	const loaded = await load_cached_extraction(deps, cache_path);
-	expect(loaded).not.toBeNull();
-	expect(loaded!.v).toBe(CSS_CACHE_VERSION);
-	return loaded!;
+	assert.isNotNull(loaded);
+	assert.strictEqual(loaded.v, CSS_CACHE_VERSION);
+	return loaded;
 };
 
 const setup = async (): Promise<void> => {
@@ -115,19 +115,21 @@ describe('get_cache_path', () => {
 	];
 
 	test.each(cases)('$name', ({source, expected}) => {
-		expect(get_cache_path(source, CACHE_DIR, PROJECT_ROOT)).toBe(expected);
+		assert.strictEqual(get_cache_path(source, CACHE_DIR, PROJECT_ROOT), expected);
 	});
 
 	test('throws for paths outside project root', () => {
-		expect(() => get_cache_path('/other/file.ts', CACHE_DIR, PROJECT_ROOT)).toThrow(
-			'Source path "/other/file.ts" is not under project root',
+		assert.throws(
+			() => get_cache_path('/other/file.ts', CACHE_DIR, PROJECT_ROOT),
+			/Source path "\/other\/file.ts" is not under project root/,
 		);
 	});
 
 	test('handles project root without trailing slash', () => {
 		const source = '/tmp/fuz_css_cache_test/project/src/lib/Button.svelte';
 		const root_no_slash = '/tmp/fuz_css_cache_test/project';
-		expect(get_cache_path(source, CACHE_DIR, root_no_slash)).toBe(
+		assert.strictEqual(
+			get_cache_path(source, CACHE_DIR, root_no_slash),
 			CACHE_DIR + '/src/lib/Button.svelte.json',
 		);
 	});
@@ -136,13 +138,13 @@ describe('get_cache_path', () => {
 		const source = '/tmp/fuz_css_cache_test/project/src/file.ts';
 		const with_slash = get_cache_path(source, CACHE_DIR, '/tmp/fuz_css_cache_test/project/');
 		const without_slash = get_cache_path(source, CACHE_DIR, '/tmp/fuz_css_cache_test/project');
-		expect(with_slash).toBe(without_slash);
+		assert.strictEqual(with_slash, without_slash);
 	});
 
 	test('handles deeply nested paths', () => {
 		const source = '/tmp/fuz_css_cache_test/project/a/b/c/d/e/file.svelte';
 		const expected = CACHE_DIR + '/a/b/c/d/e/file.svelte.json';
-		expect(get_cache_path(source, CACHE_DIR, PROJECT_ROOT)).toBe(expected);
+		assert.strictEqual(get_cache_path(source, CACHE_DIR, PROJECT_ROOT), expected);
 	});
 });
 
@@ -160,9 +162,9 @@ describe('save_cached_extraction', () => {
 			content_hash: 'abc123',
 		});
 
-		expect(loaded.content_hash).toBe('abc123');
-		expect(loaded.classes).toEqual([['box', [loc('test.ts', 1, 5)]]]);
-		expect(loaded.diagnostics).toBeNull();
+		assert.strictEqual(loaded.content_hash, 'abc123');
+		assert.deepEqual(loaded.classes, [['box', [loc('test.ts', 1, 5)]]]);
+		assert.isNull(loaded.diagnostics);
 	});
 
 	test('preserves multiple classes with multiple locations', async () => {
@@ -175,9 +177,9 @@ describe('save_cached_extraction', () => {
 		const loaded = await save_and_load(join(CACHE_DIR, 'multi.json'), {classes});
 		const result = from_cached_extraction(loaded);
 
-		expect(result.classes?.size).toBe(2);
-		expect(result.classes?.get('box')).toEqual([loc('test.ts', 1, 5), loc('test.ts', 10, 3)]);
-		expect(result.classes?.get('p_md')).toEqual([loc('test.ts', 5, 8)]);
+		assert.strictEqual(result.classes?.size, 2);
+		assert.deepEqual(result.classes?.get('box'), [loc('test.ts', 1, 5), loc('test.ts', 10, 3)]);
+		assert.deepEqual(result.classes?.get('p_md'), [loc('test.ts', 5, 8)]);
 	});
 
 	test('preserves diagnostics', async () => {
@@ -192,8 +194,8 @@ describe('save_cached_extraction', () => {
 
 		const loaded = await save_and_load(join(CACHE_DIR, 'diag.json'), {diagnostics});
 
-		expect(loaded.classes).toBeNull();
-		expect(loaded.diagnostics).toEqual(diagnostics);
+		assert.isNull(loaded.classes);
+		assert.deepEqual(loaded.diagnostics, diagnostics);
 	});
 
 	test('creates nested directories', async () => {
@@ -202,7 +204,7 @@ describe('save_cached_extraction', () => {
 
 		const loaded = await save_and_load(join(CACHE_DIR, 'deep/nested/path/file.json'), {classes});
 
-		expect(loaded.classes).toEqual([['test', [loc('x.ts')]]]);
+		assert.deepEqual(loaded.classes, [['test', [loc('x.ts')]]]);
 	});
 
 	// Null/empty handling
@@ -223,7 +225,7 @@ describe('save_cached_extraction', () => {
 	test.each(null_handling_cases)('$name', async ({input, field}) => {
 		await setup();
 		const loaded = await save_and_load(join(CACHE_DIR, `${field}_empty.json`), input);
-		expect(loaded[field]).toBeNull();
+		assert.isNull(loaded[field]);
 	});
 
 	test('overwrites existing file', async () => {
@@ -239,8 +241,8 @@ describe('save_cached_extraction', () => {
 			content_hash: 'hash2',
 		});
 
-		expect(loaded.content_hash).toBe('hash2');
-		expect(loaded.classes).toEqual([['new', [loc('b.ts', 2, 2)]]]);
+		assert.strictEqual(loaded.content_hash, 'hash2');
+		assert.deepEqual(loaded.classes, [['new', [loc('b.ts', 2, 2)]]]);
 	});
 
 	// Special character preservation
@@ -268,7 +270,7 @@ describe('save_cached_extraction', () => {
 		const loaded = await save_and_load(join(CACHE_DIR, 'special.json'), {classes});
 		const result = from_cached_extraction(loaded);
 
-		expect(new Set(result.classes?.keys())).toEqual(new Set(expected_keys));
+		assert.deepEqual(new Set(result.classes?.keys()), new Set(expected_keys));
 	});
 
 	test('preserves multiple diagnostics with different levels', async () => {
@@ -280,9 +282,9 @@ describe('save_cached_extraction', () => {
 
 		const loaded = await save_and_load(join(CACHE_DIR, 'multi_diag.json'), {diagnostics});
 
-		expect(loaded.diagnostics).toHaveLength(2);
-		expect(loaded.diagnostics![0]!.level).toBe('warning');
-		expect(loaded.diagnostics![1]!.level).toBe('error');
+		assert.lengthOf(loaded.diagnostics!, 2);
+		assert.strictEqual(loaded.diagnostics![0]!.level, 'warning');
+		assert.strictEqual(loaded.diagnostics![1]!.level, 'error');
 	});
 });
 
@@ -305,7 +307,7 @@ describe('load_cached_extraction', () => {
 	];
 
 	test('returns null for missing file', async () => {
-		expect(await load_cached_extraction(deps, '/nonexistent/path.json')).toBeNull();
+		assert.isNull(await load_cached_extraction(deps, '/nonexistent/path.json'));
 	});
 
 	test.each(invalid_cache_cases)('returns null for $name', async ({content}) => {
@@ -314,7 +316,7 @@ describe('load_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, content);
 
-		expect(await load_cached_extraction(deps, cache_path)).toBeNull();
+		assert.isNull(await load_cached_extraction(deps, cache_path));
 	});
 
 	// Additional corruption recovery tests - all return null gracefully
@@ -335,7 +337,7 @@ describe('load_cached_extraction', () => {
 
 		// Should return null rather than throw
 		const result = await load_cached_extraction(deps, cache_path);
-		expect(result).toBeNull();
+		assert.isNull(result);
 	});
 
 	// Some minimal content is valid - documenting current behavior
@@ -347,8 +349,8 @@ describe('load_cached_extraction', () => {
 
 		// Lenient parsing accepts missing content_hash
 		const result = await load_cached_extraction(deps, cache_path);
-		expect(result).not.toBeNull();
-		expect(result!.v).toBe(CSS_CACHE_VERSION);
+		assert.isNotNull(result);
+		assert.strictEqual(result.v, CSS_CACHE_VERSION);
 	});
 });
 
@@ -363,13 +365,18 @@ describe('delete_cached_extraction', () => {
 		await mkdir(CACHE_DIR, {recursive: true});
 		await writeFile(cache_path, '{}');
 
-		await expect(readFile(cache_path, 'utf8')).resolves.toBe('{}');
+		assert.strictEqual(await readFile(cache_path, 'utf8'), '{}');
 		await delete_cached_extraction(deps, cache_path);
-		await expect(readFile(cache_path)).rejects.toThrow();
+		try {
+			await readFile(cache_path);
+			assert.fail('Expected to throw');
+		} catch {
+			/* expected */
+		}
 	});
 
 	test('succeeds for nonexistent file', async () => {
-		await expect(delete_cached_extraction(deps, '/nonexistent/file.json')).resolves.toBeUndefined();
+		await delete_cached_extraction(deps, '/nonexistent/file.json');
 	});
 });
 
@@ -384,24 +391,24 @@ describe('from_cached_extraction', () => {
 			name: 'converts class tuples to Map',
 			input: make_cached({classes: [['box', [loc()]]]}),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.classes).toBeInstanceOf(Map);
-				expect(r.classes?.size).toBe(1);
-				expect(r.classes?.get('box')).toEqual([loc()]);
+				assert.instanceOf(r.classes, Map);
+				assert.strictEqual(r.classes.size, 1);
+				assert.deepEqual(r.classes.get('box'), [loc()]);
 			},
 		},
 		{
 			name: 'preserves null classes',
 			input: make_cached({classes: null}),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.classes).toBeNull();
+				assert.isNull(r.classes);
 			},
 		},
 		{
 			name: 'converts empty classes array to empty Map',
 			input: make_cached({classes: []}),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.classes).toBeInstanceOf(Map);
-				expect(r.classes?.size).toBe(0);
+				assert.instanceOf(r.classes, Map);
+				assert.strictEqual(r.classes.size, 0);
 			},
 		},
 		{
@@ -414,35 +421,35 @@ describe('from_cached_extraction', () => {
 				r: ReturnType<typeof from_cached_extraction>,
 				input: {diagnostics: Array<ExtractionDiagnostic>},
 			) => {
-				expect(r.diagnostics).toBe(input.diagnostics);
+				assert.strictEqual(r.diagnostics, input.diagnostics);
 			},
 		},
 		{
 			name: 'converts elements array to Set',
 			input: make_cached({elements: ['button', 'div']}),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.elements).toEqual(new Set(['button', 'div']));
+				assert.deepEqual(r.elements, new Set(['button', 'div']));
 			},
 		},
 		{
 			name: 'preserves null elements',
 			input: make_cached(),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.elements).toBeNull();
+				assert.isNull(r.elements);
 			},
 		},
 		{
 			name: 'converts explicit_variables array to Set',
 			input: make_cached({explicit_variables: ['shade_40', 'text_50']}),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.explicit_variables).toEqual(new Set(['shade_40', 'text_50']));
+				assert.deepEqual(r.explicit_variables, new Set(['shade_40', 'text_50']));
 			},
 		},
 		{
 			name: 'preserves null explicit_variables',
 			input: make_cached(),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
-				expect(r.explicit_variables).toBeNull();
+				assert.isNull(r.explicit_variables);
 			},
 		},
 	];
@@ -474,9 +481,9 @@ describe('cache fields round-trip', () => {
 		});
 		const result = from_cached_extraction(loaded);
 
-		expect(result.classes?.has('box')).toBe(true);
-		expect(result.explicit_classes).toEqual(explicit_classes);
-		expect(result.elements).toEqual(elements);
+		assert.isTrue(result.classes?.has('box'));
+		assert.deepEqual(result.explicit_classes, explicit_classes);
+		assert.deepEqual(result.elements, elements);
 	});
 
 	// Individual field round-trips
@@ -485,19 +492,19 @@ describe('cache fields round-trip', () => {
 			name: 'elements',
 			input: {elements: new Set(['button', 'input', 'svg'])},
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				expect(r.elements).toEqual(new Set(['button', 'input', 'svg'])),
+				assert.deepEqual(r.elements, new Set(['button', 'input', 'svg'])),
 		},
 		{
 			name: 'explicit_classes',
 			input: {explicit_classes: new Set(['force_include'])},
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				expect(r.explicit_classes).toEqual(new Set(['force_include'])),
+				assert.deepEqual(r.explicit_classes, new Set(['force_include'])),
 		},
 		{
 			name: 'explicit_variables',
 			input: {explicit_variables: new Set(['shade_40', 'text_50'])},
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				expect(r.explicit_variables).toEqual(new Set(['shade_40', 'text_50'])),
+				assert.deepEqual(r.explicit_variables, new Set(['shade_40', 'text_50'])),
 		},
 	];
 
@@ -525,16 +532,16 @@ describe('cache functions with mock deps', () => {
 		});
 		const loaded = await load_cached_extraction(mock_deps, cache_path);
 
-		expect(loaded).not.toBeNull();
-		expect(loaded!.v).toBe(CSS_CACHE_VERSION);
-		expect(loaded!.content_hash).toBe('abc123');
+		assert.isNotNull(loaded);
+		assert.strictEqual(loaded.v, CSS_CACHE_VERSION);
+		assert.strictEqual(loaded.content_hash, 'abc123');
 	});
 
 	test('load returns null for missing file', async () => {
 		const state = create_mock_fs_state();
 		const mock_deps = create_mock_cache_deps(state);
 
-		expect(await load_cached_extraction(mock_deps, '/nonexistent.json')).toBeNull();
+		assert.isNull(await load_cached_extraction(mock_deps, '/nonexistent.json'));
 	});
 
 	test('delete removes file from state', async () => {
@@ -543,10 +550,10 @@ describe('cache functions with mock deps', () => {
 		const cache_path = '/mock/cache/delete.json';
 
 		await save_cached_extraction(mock_deps, cache_path, 'hash', EMPTY_EXTRACTION);
-		expect(state.files.has(cache_path)).toBe(true);
+		assert.isTrue(state.files.has(cache_path));
 
 		await delete_cached_extraction(mock_deps, cache_path);
-		expect(state.files.has(cache_path)).toBe(false);
+		assert.isFalse(state.files.has(cache_path));
 	});
 
 	test('can inspect raw state for testing', async () => {
@@ -556,6 +563,7 @@ describe('cache functions with mock deps', () => {
 		await save_cached_extraction(mock_deps, '/test.json', 'hash', EMPTY_EXTRACTION);
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
-		expect(parsed).toMatchObject({v: CSS_CACHE_VERSION, content_hash: 'hash'});
+		assert.strictEqual(parsed.v, CSS_CACHE_VERSION);
+		assert.strictEqual(parsed.content_hash, 'hash');
 	});
 });

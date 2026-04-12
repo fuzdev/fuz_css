@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {MODIFIERS} from '$lib/modifiers.js';
 
@@ -34,7 +34,7 @@ describe('MODIFIERS', () => {
 		test('modifier names are unique', () => {
 			const names: Set<string> = new Set();
 			for (const m of MODIFIERS) {
-				expect(names.has(m.name), `modifier name "${m.name}" is duplicated`).toBe(false);
+				assert.isFalse(names.has(m.name), `modifier name "${m.name}" is duplicated`);
 				names.add(m.name);
 			}
 		});
@@ -59,10 +59,11 @@ describe('MODIFIERS', () => {
 				}
 			}
 
-			expect(
+			assert.strictEqual(
 				failures.length,
+				0,
 				`The following modifiers are not in the CSS spec:\n  ${failures.join('\n  ')}`,
-			).toBe(0);
+			);
 		});
 	});
 
@@ -70,10 +71,10 @@ describe('MODIFIERS', () => {
 		test('media modifiers start with @media', () => {
 			for (const m of MODIFIERS) {
 				if (m.type === 'media') {
-					expect(
+					assert.isTrue(
 						m.css.startsWith('@media '),
 						`media modifier "${m.name}" should start with "@media "`,
-					).toBe(true);
+					);
 				}
 			}
 		});
@@ -81,10 +82,10 @@ describe('MODIFIERS', () => {
 		test('ancestor modifiers start with :root.', () => {
 			for (const m of MODIFIERS) {
 				if (m.type === 'ancestor') {
-					expect(
+					assert.isTrue(
 						m.css.startsWith(':root.'),
 						`ancestor modifier "${m.name}" should start with ":root."`,
-					).toBe(true);
+					);
 				}
 			}
 		});
@@ -92,13 +93,11 @@ describe('MODIFIERS', () => {
 		test('state modifiers start with : but not ::', () => {
 			for (const m of MODIFIERS) {
 				if (m.type === 'state') {
-					expect(m.css.startsWith(':'), `state modifier "${m.name}" should start with ":"`).toBe(
-						true,
-					);
-					expect(
+					assert.isTrue(m.css.startsWith(':'), `state modifier "${m.name}" should start with ":"`);
+					assert.isFalse(
 						m.css.startsWith('::'),
 						`state modifier "${m.name}" should not start with "::"`,
-					).toBe(false);
+					);
 				}
 			}
 		});
@@ -106,10 +105,10 @@ describe('MODIFIERS', () => {
 		test('pseudo-element modifiers start with ::', () => {
 			for (const m of MODIFIERS) {
 				if (m.type === 'pseudo-element') {
-					expect(
+					assert.isTrue(
 						m.css.startsWith('::'),
 						`pseudo-element modifier "${m.name}" should start with "::"`,
-					).toBe(true);
+					);
 				}
 			}
 		});

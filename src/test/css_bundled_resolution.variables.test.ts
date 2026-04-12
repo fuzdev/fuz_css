@@ -7,12 +7,12 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
 import type {CssClassDefinition} from '../lib/css_class_generation.js';
 import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
-import {expect_css_order} from './test_helpers.ts';
+import {assert_css_order} from './test_helpers.js';
 
 describe('resolve_css variable resolution', () => {
 	describe('source collection', () => {
@@ -32,7 +32,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('btn_color')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('btn_color'));
 		});
 
 		test('from class definitions (via class_variable_index)', () => {
@@ -55,7 +55,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('space_md')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('space_md'));
 		});
 
 		test('from utility_variables_used', () => {
@@ -74,8 +74,8 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(['space_md']),
 			});
 
-			expect(result.resolved_variables.has('space_md')).toBe(true);
-			expect(result.resolved_variables.has('unused')).toBe(false);
+			assert.isTrue(result.resolved_variables.has('space_md'));
+			assert.isFalse(result.resolved_variables.has('unused'));
 		});
 
 		test('from detected_css_variables', () => {
@@ -93,7 +93,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('custom')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('custom'));
 		});
 
 		test('from additional_variables option', () => {
@@ -109,7 +109,7 @@ describe('resolve_css variable resolution', () => {
 				additional_variables: ['forced'],
 			});
 
-			expect(result.resolved_variables.has('forced')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('forced'));
 		});
 
 		test('additional_variables: "all" includes every variable', () => {
@@ -130,12 +130,12 @@ describe('resolve_css variable resolution', () => {
 			});
 
 			// All 5 variables should be included
-			expect(result.resolved_variables.size).toBe(5);
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(true);
-			expect(result.resolved_variables.has('color_c')).toBe(true);
-			expect(result.resolved_variables.has('space_sm')).toBe(true);
-			expect(result.resolved_variables.has('space_md')).toBe(true);
+			assert.strictEqual(result.resolved_variables.size, 5);
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isTrue(result.resolved_variables.has('color_b'));
+			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.isTrue(result.resolved_variables.has('space_sm'));
+			assert.isTrue(result.resolved_variables.has('space_md'));
 		});
 
 		test('additional_variables: "all" includes transitive deps', () => {
@@ -152,8 +152,8 @@ describe('resolve_css variable resolution', () => {
 				additional_variables: 'all',
 			});
 
-			expect(result.resolved_variables.has('base')).toBe(true);
-			expect(result.resolved_variables.has('derived')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('base'));
+			assert.isTrue(result.resolved_variables.has('derived'));
 		});
 
 		test('combines all sources', () => {
@@ -184,15 +184,15 @@ describe('resolve_css variable resolution', () => {
 			});
 
 			// From style rules
-			expect(result.resolved_variables.has('btn_color')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('btn_color'));
 			// From class definitions
-			expect(result.resolved_variables.has('space_sm')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('space_sm'));
 			// From utility_variables_used
-			expect(result.resolved_variables.has('space_md')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('space_md'));
 			// From detected_css_variables
-			expect(result.resolved_variables.has('custom')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('custom'));
 			// From additional_variables
-			expect(result.resolved_variables.has('forced')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('forced'));
 		});
 	});
 
@@ -216,8 +216,8 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('color')).toBe(true);
-			expect(result.resolved_variables.has('hue')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('color'));
+			assert.isTrue(result.resolved_variables.has('hue'));
 		});
 
 		test('resolves deep chains (A→B→C→D)', () => {
@@ -238,10 +238,10 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('level_3')).toBe(true);
-			expect(result.resolved_variables.has('level_2')).toBe(true);
-			expect(result.resolved_variables.has('level_1')).toBe(true);
-			expect(result.resolved_variables.has('base')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('level_3'));
+			assert.isTrue(result.resolved_variables.has('level_2'));
+			assert.isTrue(result.resolved_variables.has('level_1'));
+			assert.isTrue(result.resolved_variables.has('base'));
 		});
 
 		test('resolves diamond dependencies (A→{B,C}→D)', () => {
@@ -262,12 +262,12 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('combined')).toBe(true);
-			expect(result.resolved_variables.has('branch_a')).toBe(true);
-			expect(result.resolved_variables.has('branch_b')).toBe(true);
-			expect(result.resolved_variables.has('base')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('combined'));
+			assert.isTrue(result.resolved_variables.has('branch_a'));
+			assert.isTrue(result.resolved_variables.has('branch_b'));
+			assert.isTrue(result.resolved_variables.has('base'));
 			// Should have exactly 4 variables (no duplicates)
-			expect(result.resolved_variables.size).toBe(4);
+			assert.strictEqual(result.resolved_variables.size, 4);
 		});
 
 		test('resolves both light and dark deps', () => {
@@ -287,9 +287,9 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.resolved_variables.has('themed')).toBe(true);
-			expect(result.resolved_variables.has('light_base')).toBe(true);
-			expect(result.resolved_variables.has('dark_base')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('themed'));
+			assert.isTrue(result.resolved_variables.has('light_base'));
+			assert.isTrue(result.resolved_variables.has('dark_base'));
 		});
 
 		test('handles empty initial set', () => {
@@ -304,7 +304,7 @@ describe('resolve_css variable resolution', () => {
 				...empty_detection(),
 			});
 
-			expect(result.resolved_variables.size).toBe(0);
+			assert.strictEqual(result.resolved_variables.size, 0);
 		});
 	});
 
@@ -326,10 +326,10 @@ describe('resolve_css variable resolution', () => {
 			});
 
 			// Should still resolve both
-			expect(result.resolved_variables.has('a')).toBe(true);
-			expect(result.resolved_variables.has('b')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('a'));
+			assert.isTrue(result.resolved_variables.has('b'));
 			// Should warn about the cycle
-			expect(result.diagnostics.some((d) => d.message.includes('Circular dependency'))).toBe(true);
+			assert.isTrue(result.diagnostics.some((d) => d.message.includes('Circular dependency')));
 		});
 
 		test('detects longer cycle (A→B→C→A)', () => {
@@ -349,7 +349,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.some((d) => d.message.includes('Circular dependency'))).toBe(true);
+			assert.isTrue(result.diagnostics.some((d) => d.message.includes('Circular dependency')));
 		});
 
 		test('propagates warnings to diagnostics', () => {
@@ -368,9 +368,9 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.diagnostics.length).toBeGreaterThan(0);
-			expect(result.diagnostics[0]!.level).toBe('warning');
-			expect(result.diagnostics[0]!.phase).toBe('generation');
+			assert.isAbove(result.diagnostics.length, 0);
+			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+			assert.strictEqual(result.diagnostics[0]!.phase, 'generation');
 		});
 	});
 
@@ -391,10 +391,10 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.theme_css).toContain(':root {');
-			expect(result.theme_css).toContain('--space_sm: 8px;');
-			expect(result.theme_css).toContain('--space_md: 16px;');
-			expect(result.theme_css).not.toContain(':root.dark');
+			assert.include(result.theme_css, ':root {');
+			assert.include(result.theme_css, '--space_sm: 8px;');
+			assert.include(result.theme_css, '--space_md: 16px;');
+			assert.notInclude(result.theme_css, ':root.dark');
 		});
 
 		test('dark-only variables produce :root.dark block', () => {
@@ -412,9 +412,9 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.theme_css).not.toMatch(/^:root\s*\{/);
-			expect(result.theme_css).toContain(':root.dark {');
-			expect(result.theme_css).toContain('--shadow_color: rgba(0,0,0,0.5);');
+			assert.notMatch(result.theme_css, /^:root\s*\{/);
+			assert.include(result.theme_css, ':root.dark {');
+			assert.include(result.theme_css, '--shadow_color: rgba(0,0,0,0.5);');
 		});
 
 		test('both produce separate blocks', () => {
@@ -433,14 +433,14 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.theme_css).toContain(':root {');
-			expect(result.theme_css).toContain(':root.dark {');
+			assert.include(result.theme_css, ':root {');
+			assert.include(result.theme_css, ':root.dark {');
 			// Light values
-			expect(result.theme_css).toContain('--text_color: black;');
-			expect(result.theme_css).toContain('--bg_color: white;');
+			assert.include(result.theme_css, '--text_color: black;');
+			assert.include(result.theme_css, '--bg_color: white;');
 			// Dark values
-			expect(result.theme_css).toContain('--text_color: white;');
-			expect(result.theme_css).toContain('--bg_color: black;');
+			assert.include(result.theme_css, '--text_color: white;');
+			assert.include(result.theme_css, '--bg_color: black;');
 		});
 
 		test('variables sorted alphabetically', () => {
@@ -460,7 +460,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect_css_order(result.theme_css, '--alpha', '--mid', '--zebra');
+			assert_css_order(result.theme_css, '--alpha', '--mid', '--zebra');
 		});
 
 		test('theme_specificity multiplies :root', () => {
@@ -479,8 +479,8 @@ describe('resolve_css variable resolution', () => {
 				theme_specificity: 3,
 			});
 
-			expect(result.theme_css).toContain(':root:root:root {');
-			expect(result.theme_css).toContain(':root:root:root.dark {');
+			assert.include(result.theme_css, ':root:root:root {');
+			assert.include(result.theme_css, ':root:root:root.dark {');
 		});
 
 		test('empty variables produce empty string', () => {
@@ -499,7 +499,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.theme_css).toBe('');
+			assert.strictEqual(result.theme_css, '');
 		});
 	});
 });

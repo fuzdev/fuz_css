@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {
 	parse_style_css,
@@ -18,36 +18,36 @@ describe('parse_style_css', () => {
 			const css = `button { color: red; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
-			expect(index.rules[0]!.classes.size).toBe(0);
-			expect(index.rules[0]!.is_core).toBe(false);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
+			assert.strictEqual(index.rules[0]!.classes.size, 0);
+			assert.isFalse(index.rules[0]!.is_core);
 		});
 
 		test('parses rule with class', () => {
 			const css = `button.selected { color: blue; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
-			expect(index.rules[0]!.classes.has('selected')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
+			assert.isTrue(index.rules[0]!.classes.has('selected'));
 		});
 
 		test('parses multiple selectors', () => {
 			const css = `h1, h2, h3 { font-weight: bold; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('h1')).toBe(true);
-			expect(index.rules[0]!.elements.has('h2')).toBe(true);
-			expect(index.rules[0]!.elements.has('h3')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.elements.has('h1'));
+			assert.isTrue(index.rules[0]!.elements.has('h2'));
+			assert.isTrue(index.rules[0]!.elements.has('h3'));
 		});
 
 		test('stores content hash', () => {
 			const css = `button { color: red; }`;
 			const index = parse_style_css(css, 'my-hash');
 
-			expect(index.content_hash).toBe('my-hash');
+			assert.strictEqual(index.content_hash, 'my-hash');
 		});
 	});
 
@@ -59,16 +59,16 @@ describe('parse_style_css', () => {
 			['@media (prefers-reduced-motion) { :root { --duration: 0; } }', 'media_query'],
 		] as const)('%s is core (%s)', (css, reason) => {
 			const index = parse_style_css(css, 'test-hash');
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe(reason);
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, reason);
 		});
 
 		test('@media not prefers-reduced-motion is not core', () => {
 			const css = `@media (min-width: 768px) { button { font-size: 18px; } }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.is_core).toBe(false);
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
+			assert.isFalse(index.rules[0]!.is_core);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
 		});
 	});
 
@@ -77,47 +77,47 @@ describe('parse_style_css', () => {
 			const css = `:where(button:not(.unstyled)) { color: var(--text_color); }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
-			expect(index.rules[0]!.classes.has('unstyled')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('text_color')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
+			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
+			assert.isTrue(index.rules[0]!.variables_used.has('text_color'));
 		});
 
 		test('complex :is selector', () => {
 			const css = `:where(:is(input, textarea, select):not(.unstyled)) { display: block; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-			expect(index.rules[0]!.elements.has('textarea')).toBe(true);
-			expect(index.rules[0]!.elements.has('select')).toBe(true);
-			expect(index.rules[0]!.classes.has('unstyled')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('input'));
+			assert.isTrue(index.rules[0]!.elements.has('textarea'));
+			assert.isTrue(index.rules[0]!.elements.has('select'));
+			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
 		});
 
 		test('nested :is in :where', () => {
 			const css = `:where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) { font-family: serif; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('h1')).toBe(true);
-			expect(index.rules[0]!.elements.has('h6')).toBe(true);
-			expect(index.rules[0]!.classes.has('heading')).toBe(true);
-			expect(index.rules[0]!.classes.has('unstyled')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('h1'));
+			assert.isTrue(index.rules[0]!.elements.has('h6'));
+			assert.isTrue(index.rules[0]!.classes.has('heading'));
+			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
 		});
 
 		test('deeply nested :where(:not(:has(...)))', () => {
 			const css = `:where(:not(:has(button.disabled))) { opacity: 1; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
-			expect(index.rules[0]!.classes.has('disabled')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
+			assert.isTrue(index.rules[0]!.classes.has('disabled'));
 		});
 
 		test('triple nested functional pseudo-classes', () => {
 			const css = `:where(:is(:not(.hidden):has(span.icon))) { display: flex; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('span')).toBe(true);
-			expect(index.rules[0]!.classes.has('hidden')).toBe(true);
-			expect(index.rules[0]!.classes.has('icon')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('span'));
+			assert.isTrue(index.rules[0]!.classes.has('hidden'));
+			assert.isTrue(index.rules[0]!.classes.has('icon'));
 		});
 	});
 
@@ -126,17 +126,17 @@ describe('parse_style_css', () => {
 			const css = `ul > li { list-style: none; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('ul')).toBe(true);
-			expect(index.rules[0]!.elements.has('li')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('ul'));
+			assert.isTrue(index.rules[0]!.elements.has('li'));
 		});
 
 		test('sibling combinators', () => {
 			const css = `h1 + p, h2 ~ p { margin-top: 0; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('h1')).toBe(true);
-			expect(index.rules[0]!.elements.has('h2')).toBe(true);
-			expect(index.rules[0]!.elements.has('p')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('h1'));
+			assert.isTrue(index.rules[0]!.elements.has('h2'));
+			assert.isTrue(index.rules[0]!.elements.has('p'));
 		});
 	});
 
@@ -145,8 +145,8 @@ describe('parse_style_css', () => {
 			const css = `::selection { background: blue; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.size).toBe(0);
+			assert.strictEqual(index.rules.length, 1);
+			assert.strictEqual(index.rules[0]!.elements.size, 0);
 		});
 
 		test.each([
@@ -155,8 +155,8 @@ describe('parse_style_css', () => {
 			['a:hover { color: red; }', 'a', 'hover'],
 		] as const)('%s extracts element but not pseudo', (css, element, pseudo) => {
 			const index = parse_style_css(css, 'test-hash');
-			expect(index.rules[0]!.elements.has(element)).toBe(true);
-			expect(index.rules[0]!.elements.has(pseudo)).toBe(false);
+			assert.isTrue(index.rules[0]!.elements.has(element));
+			assert.isFalse(index.rules[0]!.elements.has(pseudo));
 		});
 	});
 
@@ -171,31 +171,31 @@ describe('parse_style_css', () => {
 			["input[placeholder='a, b, c'] { color: gray; }", 'input'],
 		])('%s extracts element', (css, element) => {
 			const index = parse_style_css(css, 'test-hash');
-			expect(index.rules[0]!.elements.has(element)).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has(element));
 		});
 
 		test('attribute selector with class does not extract class from attribute', () => {
 			const css = `[class~="unstyled"] { all: unset; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.classes.has('unstyled')).toBe(false);
-			expect(index.rules[0]!.elements.size).toBe(0);
+			assert.isFalse(index.rules[0]!.classes.has('unstyled'));
+			assert.strictEqual(index.rules[0]!.elements.size, 0);
 		});
 
 		test('class selector alongside attribute selector', () => {
 			const css = `input.error[type='text'] { border: 2px solid red; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.has('input')).toBe(true);
-			expect(index.rules[0]!.classes.has('error')).toBe(true);
+			assert.isTrue(index.rules[0]!.elements.has('input'));
+			assert.isTrue(index.rules[0]!.classes.has('error'));
 		});
 
 		test('data attribute selectors', () => {
 			const css = `[data-theme='dark'] { background: black; }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.size).toBe(0);
-			expect(index.rules[0]!.classes.size).toBe(0);
+			assert.strictEqual(index.rules[0]!.elements.size, 0);
+			assert.strictEqual(index.rules[0]!.classes.size, 0);
 		});
 	});
 
@@ -204,26 +204,26 @@ describe('parse_style_css', () => {
 			const css = `@supports (display: grid) { .grid { display: grid; } }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.classes.has('grid')).toBe(true);
-			expect(index.rules[0]!.is_core).toBe(false);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.classes.has('grid'));
+			assert.isFalse(index.rules[0]!.is_core);
 		});
 
 		test('@container rule', () => {
 			const css = `@container (min-width: 400px) { .card { padding: var(--space_lg); } }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.classes.has('card')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('space_lg')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.classes.has('card'));
+			assert.isTrue(index.rules[0]!.variables_used.has('space_lg'));
 		});
 
 		test('@layer rule', () => {
 			const css = `@layer base { button { color: blue; } }`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.has('button')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.elements.has('button'));
 		});
 
 		test('@keyframes rule', () => {
@@ -233,10 +233,10 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.elements.size).toBe(0);
-			expect(index.rules[0]!.classes.size).toBe(0);
-			expect(index.rules[0]!.is_core).toBe(false);
+			assert.strictEqual(index.rules.length, 1);
+			assert.strictEqual(index.rules[0]!.elements.size, 0);
+			assert.strictEqual(index.rules[0]!.classes.size, 0);
+			assert.isFalse(index.rules[0]!.is_core);
 		});
 
 		test('@keyframes with variables', () => {
@@ -246,8 +246,8 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.variables_used.has('scale_min')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('scale_max')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('scale_min'));
+			assert.isTrue(index.rules[0]!.variables_used.has('scale_max'));
 		});
 
 		test('@supports containing nested rules', () => {
@@ -256,8 +256,8 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.classes.has('flex')).toBe(true);
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.classes.has('flex'));
 		});
 	});
 
@@ -269,9 +269,9 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(1);
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('font_face');
+			assert.strictEqual(index.rules.length, 1);
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'font_face');
 		});
 
 		test('does not target elements or classes', () => {
@@ -281,8 +281,8 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.elements.size).toBe(0);
-			expect(index.rules[0]!.classes.size).toBe(0);
+			assert.strictEqual(index.rules[0]!.elements.size, 0);
+			assert.strictEqual(index.rules[0]!.classes.size, 0);
 		});
 
 		test('extracts variables', () => {
@@ -293,9 +293,9 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.variables_used.has('font_family_name')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('font_path')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('font_display')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('font_family_name'));
+			assert.isTrue(index.rules[0]!.variables_used.has('font_path'));
+			assert.isTrue(index.rules[0]!.variables_used.has('font_display'));
 		});
 
 		test('multiple @font-face rules', () => {
@@ -312,11 +312,11 @@ describe('parse_style_css', () => {
 			`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules.length).toBe(2);
-			expect(index.rules[0]!.is_core).toBe(true);
-			expect(index.rules[0]!.core_reason).toBe('font_face');
-			expect(index.rules[1]!.is_core).toBe(true);
-			expect(index.rules[1]!.core_reason).toBe('font_face');
+			assert.strictEqual(index.rules.length, 2);
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'font_face');
+			assert.isTrue(index.rules[1]!.is_core);
+			assert.strictEqual(index.rules[1]!.core_reason, 'font_face');
 		});
 	});
 
@@ -365,7 +365,7 @@ describe('parse_style_css', () => {
 		])('extracts from %s', (_name, css, expected_vars) => {
 			const index = parse_style_css(css, 'test-hash');
 			for (const v of expected_vars) {
-				expect(index.rules[0]!.variables_used.has(v), `Expected "${v}" in variables`).toBe(true);
+				assert.isTrue(index.rules[0]!.variables_used.has(v), `Expected "${v}" in variables`);
 			}
 		});
 
@@ -377,10 +377,10 @@ describe('parse_style_css', () => {
 			}`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.rules[0]!.variables_used.has('text_color')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('bg_color')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('border_width')).toBe(true);
-			expect(index.rules[0]!.variables_used.has('border_color')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('text_color'));
+			assert.isTrue(index.rules[0]!.variables_used.has('bg_color'));
+			assert.isTrue(index.rules[0]!.variables_used.has('border_width'));
+			assert.isTrue(index.rules[0]!.variables_used.has('border_color'));
 		});
 	});
 
@@ -393,9 +393,9 @@ describe('parse_style_css', () => {
 			`;
 			const index = parse_style_css(css, 'test-hash');
 
-			expect(index.by_element.get('button')).toEqual([0, 2]);
-			expect(index.by_element.get('input')).toEqual([1]);
-			expect(index.by_class.get('selected')).toEqual([2]);
+			assert.deepEqual(index.by_element.get('button'), [0, 2]);
+			assert.deepEqual(index.by_element.get('input'), [1]);
+			assert.deepEqual(index.by_class.get('selected'), [2]);
 		});
 	});
 });
@@ -409,8 +409,8 @@ describe('get_matching_rules', () => {
 		const index = parse_style_css(css, 'test-hash');
 
 		const included = get_matching_rules(index, new Set(), new Set());
-		expect(included.has(0)).toBe(true);
-		expect(included.has(1)).toBe(false);
+		assert.isTrue(included.has(0));
+		assert.isFalse(included.has(1));
 	});
 
 	test('matches elements', () => {
@@ -421,8 +421,8 @@ describe('get_matching_rules', () => {
 		const index = parse_style_css(css, 'test-hash');
 
 		const included = get_matching_rules(index, new Set(['button']), new Set());
-		expect(included.has(0)).toBe(true);
-		expect(included.has(1)).toBe(false);
+		assert.isTrue(included.has(0));
+		assert.isFalse(included.has(1));
 	});
 
 	test('matches classes', () => {
@@ -433,8 +433,8 @@ describe('get_matching_rules', () => {
 		const index = parse_style_css(css, 'test-hash');
 
 		const included = get_matching_rules(index, new Set(), new Set(['foo']));
-		expect(included.has(0)).toBe(true);
-		expect(included.has(1)).toBe(false);
+		assert.isTrue(included.has(0));
+		assert.isFalse(included.has(1));
 	});
 
 	test('includes @font-face when no elements detected', () => {
@@ -449,8 +449,8 @@ describe('get_matching_rules', () => {
 
 		const included = get_matching_rules(index, new Set(), new Set());
 
-		expect(included.has(0)).toBe(true);
-		expect(included.has(1)).toBe(false);
+		assert.isTrue(included.has(0));
+		assert.isFalse(included.has(1));
 	});
 });
 
@@ -465,7 +465,7 @@ c { color: green; }
 
 		const result = generate_base_css(index, new Set([2, 0]));
 
-		expect(result.indexOf('red')).toBeLessThan(result.indexOf('green'));
+		assert.isBelow(result.indexOf('red'), result.indexOf('green'));
 	});
 });
 
@@ -478,9 +478,9 @@ describe('collect_rule_variables', () => {
 		const index = parse_style_css(css, 'test-hash');
 
 		const vars = collect_rule_variables(index, new Set([1]));
-		expect(vars.has('color_a')).toBe(false);
-		expect(vars.has('color_b')).toBe(true);
-		expect(vars.has('shade_00')).toBe(true);
+		assert.isFalse(vars.has('color_a'));
+		assert.isTrue(vars.has('color_b'));
+		assert.isTrue(vars.has('shade_00'));
 	});
 });
 
@@ -488,15 +488,15 @@ describe('load_style_rule_index', () => {
 	test('loads actual style.css', async () => {
 		const index = await load_style_rule_index(deps);
 
-		expect(index.rules.length).toBeGreaterThan(50);
+		assert.isAbove(index.rules.length, 50);
 
 		const core_rules = index.rules.filter((r) => r.is_core);
-		expect(core_rules.length).toBeGreaterThan(0);
+		assert.isAbove(core_rules.length, 0);
 
-		expect(index.by_element.has('button')).toBe(true);
-		expect(index.by_element.has('input')).toBe(true);
-		expect(index.by_element.has('a')).toBe(true);
+		assert.isTrue(index.by_element.has('button'));
+		assert.isTrue(index.by_element.has('input'));
+		assert.isTrue(index.by_element.has('a'));
 
-		expect(index.by_class.has('unstyled')).toBe(true);
+		assert.isTrue(index.by_class.has('unstyled'));
 	});
 });

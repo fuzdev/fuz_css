@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {
 	build_class_variable_index,
@@ -17,7 +17,7 @@ describe('build_class_variable_index', () => {
 
 		const index = build_class_variable_index(definitions);
 
-		expect(index.by_class.get('text_lg')?.has('font_size_lg')).toBe(true);
+		assert.isTrue(index.by_class.get('text_lg')?.has('font_size_lg'));
 	});
 
 	test('declaration with multiple variables', () => {
@@ -31,9 +31,9 @@ describe('build_class_variable_index', () => {
 		const index = build_class_variable_index(definitions);
 		const vars = index.by_class.get('button')!;
 
-		expect(vars.has('text_color')).toBe(true);
-		expect(vars.has('bg_color')).toBe(true);
-		expect(vars.has('border_width')).toBe(true);
+		assert.isTrue(vars.has('text_color'));
+		assert.isTrue(vars.has('bg_color'));
+		assert.isTrue(vars.has('border_width'));
 	});
 
 	test('declaration without variables', () => {
@@ -44,7 +44,7 @@ describe('build_class_variable_index', () => {
 		const index = build_class_variable_index(definitions);
 
 		// Should not have an entry (no variables)
-		expect(index.by_class.has('flex')).toBe(false);
+		assert.isFalse(index.by_class.has('flex'));
 	});
 
 	test('ruleset with variables', () => {
@@ -57,8 +57,8 @@ describe('build_class_variable_index', () => {
 		const index = build_class_variable_index(definitions);
 		const vars = index.by_class.get('card')!;
 
-		expect(vars.has('space_md')).toBe(true);
-		expect(vars.has('border_color')).toBe(true);
+		assert.isTrue(vars.has('space_md'));
+		assert.isTrue(vars.has('border_color'));
 	});
 
 	test('composes-only definition', () => {
@@ -70,7 +70,7 @@ describe('build_class_variable_index', () => {
 
 		// Composes-only definitions don't have direct variables
 		// (composed classes' variables are resolved at generation time)
-		expect(index.by_class.has('box')).toBe(false);
+		assert.isFalse(index.by_class.has('box'));
 	});
 
 	test('undefined definition', () => {
@@ -81,25 +81,25 @@ describe('build_class_variable_index', () => {
 
 		const index = build_class_variable_index(definitions);
 
-		expect(index.by_class.has('exists')).toBe(true);
-		expect(index.by_class.has('missing')).toBe(false);
+		assert.isTrue(index.by_class.has('exists'));
+		assert.isFalse(index.by_class.has('missing'));
 	});
 
 	test('with default definitions', () => {
 		const index = build_class_variable_index(css_class_definitions);
 
 		// Should have many classes
-		expect(index.by_class.size).toBeGreaterThan(50);
+		assert.isAbove(index.by_class.size, 50);
 
 		// Common classes should have expected variables
 		const p_md_vars = index.by_class.get('p_md');
-		expect(p_md_vars).toBeDefined();
-		expect(p_md_vars!.has('space_md')).toBe(true);
+		assert.isDefined(p_md_vars);
+		assert.isTrue(p_md_vars.has('space_md'));
 
 		// Font size classes should reference font_size_* variables
 		const font_size_lg_vars = index.by_class.get('font_size_lg');
-		expect(font_size_lg_vars).toBeDefined();
-		expect(font_size_lg_vars!.has('font_size_lg')).toBe(true);
+		assert.isDefined(font_size_lg_vars);
+		assert.isTrue(font_size_lg_vars.has('font_size_lg'));
 	});
 
 	test('color classes', () => {
@@ -109,7 +109,7 @@ describe('build_class_variable_index', () => {
 		const index = build_class_variable_index(definitions);
 
 		const vars = index.by_class.get('color_a_50')!;
-		expect(vars.has('color_a_50')).toBe(true);
+		assert.isTrue(vars.has('color_a_50'));
 	});
 
 	test('nested var fallback', () => {
@@ -119,8 +119,8 @@ describe('build_class_variable_index', () => {
 		const index = build_class_variable_index(definitions);
 
 		const vars = index.by_class.get('custom')!;
-		expect(vars.has('custom')).toBe(true);
-		expect(vars.has('fallback')).toBe(true);
+		assert.isTrue(vars.has('custom'));
+		assert.isTrue(vars.has('fallback'));
 	});
 });
 
@@ -133,8 +133,8 @@ describe('get_class_variables', () => {
 
 		const vars = get_class_variables(index, 'p_md');
 
-		expect(vars).not.toBeNull();
-		expect(vars!.has('space_md')).toBe(true);
+		assert.isNotNull(vars);
+		assert.isTrue(vars.has('space_md'));
 	});
 
 	test('missing class returns null', () => {
@@ -142,7 +142,7 @@ describe('get_class_variables', () => {
 
 		const vars = get_class_variables(index, 'nonexistent');
 
-		expect(vars).toBeNull();
+		assert.isNull(vars);
 	});
 });
 
@@ -157,9 +157,9 @@ describe('collect_class_variables', () => {
 
 		const vars = collect_class_variables(index, ['p_md', 'm_lg']);
 
-		expect(vars.has('space_md')).toBe(true);
-		expect(vars.has('space_lg')).toBe(true);
-		expect(vars.has('font_size_sm')).toBe(false);
+		assert.isTrue(vars.has('space_md'));
+		assert.isTrue(vars.has('space_lg'));
+		assert.isFalse(vars.has('font_size_sm'));
 	});
 
 	test('with unknown classes', () => {
@@ -170,8 +170,8 @@ describe('collect_class_variables', () => {
 
 		const vars = collect_class_variables(index, ['known', 'unknown']);
 
-		expect(vars.has('text')).toBe(true);
-		expect(vars.size).toBe(1);
+		assert.isTrue(vars.has('text'));
+		assert.strictEqual(vars.size, 1);
 	});
 });
 
@@ -186,9 +186,9 @@ describe('get_classes_using_variable', () => {
 
 		const classes = get_classes_using_variable(index, 'space_md');
 
-		expect(classes).toContain('p_md');
-		expect(classes).toContain('m_md');
-		expect(classes).not.toContain('text_lg');
+		assert.include(classes, 'p_md');
+		assert.include(classes, 'm_md');
+		assert.notInclude(classes, 'text_lg');
 	});
 
 	test('unused variable returns empty array', () => {
@@ -199,6 +199,6 @@ describe('get_classes_using_variable', () => {
 
 		const classes = get_classes_using_variable(index, 'unused_variable');
 
-		expect(classes.length).toBe(0);
+		assert.strictEqual(classes.length, 0);
 	});
 });

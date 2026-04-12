@@ -7,10 +7,10 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {generate_bundled_css, type CssResolutionResult} from '../lib/css_bundled_resolution.js';
-import {expect_css_order} from './test_helpers.ts';
+import {assert_css_order} from './test_helpers.js';
 
 /**
  * Creates a mock resolution result for testing generate_bundled_css.
@@ -31,7 +31,7 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result();
 			const combined = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
-			expect_css_order(
+			assert_css_order(
 				combined,
 				'/* Theme Variables */',
 				'/* Base Styles */',
@@ -43,9 +43,9 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result();
 			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
-			expect(bundled).toContain('/* Theme Variables */');
-			expect(bundled).toContain('/* Base Styles */');
-			expect(bundled).toContain('/* Utility Classes */');
+			assert.include(bundled, '/* Theme Variables */');
+			assert.include(bundled, '/* Base Styles */');
+			assert.include(bundled, '/* Utility Classes */');
 		});
 	});
 
@@ -54,20 +54,20 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result();
 			const no_theme = generate_bundled_css(result, '.p_md {}', {include_theme: false});
 
-			expect(no_theme).not.toContain('/* Theme Variables */');
-			expect(no_theme).not.toContain('--color');
-			expect(no_theme).toContain('/* Base Styles */');
-			expect(no_theme).toContain('/* Utility Classes */');
+			assert.notInclude(no_theme, '/* Theme Variables */');
+			assert.notInclude(no_theme, '--color');
+			assert.include(no_theme, '/* Base Styles */');
+			assert.include(no_theme, '/* Utility Classes */');
 		});
 
 		test('include_base: false excludes base', () => {
 			const result = create_mock_result();
 			const no_base = generate_bundled_css(result, '.p_md {}', {include_base: false});
 
-			expect(no_base).toContain('/* Theme Variables */');
-			expect(no_base).not.toContain('/* Base Styles */');
-			expect(no_base).not.toContain('button { color');
-			expect(no_base).toContain('/* Utility Classes */');
+			assert.include(no_base, '/* Theme Variables */');
+			assert.notInclude(no_base, '/* Base Styles */');
+			assert.notInclude(no_base, 'button { color');
+			assert.include(no_base, '/* Utility Classes */');
 		});
 
 		test('include_utilities: false excludes utilities', () => {
@@ -76,10 +76,10 @@ describe('generate_bundled_css', () => {
 				include_utilities: false,
 			});
 
-			expect(no_utility).toContain('/* Theme Variables */');
-			expect(no_utility).toContain('/* Base Styles */');
-			expect(no_utility).not.toContain('/* Utility Classes */');
-			expect(no_utility).not.toContain('.p_md');
+			assert.include(no_utility, '/* Theme Variables */');
+			assert.include(no_utility, '/* Base Styles */');
+			assert.notInclude(no_utility, '/* Utility Classes */');
+			assert.notInclude(no_utility, '.p_md');
 		});
 	});
 
@@ -91,9 +91,9 @@ describe('generate_bundled_css', () => {
 			});
 			const bundled = generate_bundled_css(result, '.p_md {}');
 
-			expect(bundled).not.toContain('/* Theme Variables */');
-			expect(bundled).toContain('/* Base Styles */');
-			expect(bundled).toContain('/* Utility Classes */');
+			assert.notInclude(bundled, '/* Theme Variables */');
+			assert.include(bundled, '/* Base Styles */');
+			assert.include(bundled, '/* Utility Classes */');
 		});
 
 		test('empty base produces no section', () => {
@@ -104,18 +104,18 @@ describe('generate_bundled_css', () => {
 			});
 			const bundled = generate_bundled_css(result, '.p_md {}');
 
-			expect(bundled).toContain('/* Theme Variables */');
-			expect(bundled).not.toContain('/* Base Styles */');
-			expect(bundled).toContain('/* Utility Classes */');
+			assert.include(bundled, '/* Theme Variables */');
+			assert.notInclude(bundled, '/* Base Styles */');
+			assert.include(bundled, '/* Utility Classes */');
 		});
 
 		test('empty utilities produces no section', () => {
 			const result = create_mock_result();
 			const bundled = generate_bundled_css(result, '');
 
-			expect(bundled).toContain('/* Theme Variables */');
-			expect(bundled).toContain('/* Base Styles */');
-			expect(bundled).not.toContain('/* Utility Classes */');
+			assert.include(bundled, '/* Theme Variables */');
+			assert.include(bundled, '/* Base Styles */');
+			assert.notInclude(bundled, '/* Utility Classes */');
 		});
 
 		test('all empty produces empty string', () => {
@@ -128,7 +128,7 @@ describe('generate_bundled_css', () => {
 			});
 			const bundled = generate_bundled_css(result, '');
 
-			expect(bundled).toBe('');
+			assert.strictEqual(bundled, '');
 		});
 
 		test('only theme generates single section', () => {
@@ -139,9 +139,9 @@ describe('generate_bundled_css', () => {
 			});
 			const bundled = generate_bundled_css(result, '');
 
-			expect(bundled).toContain('/* Theme Variables */');
-			expect(bundled).not.toContain('/* Base Styles */');
-			expect(bundled).not.toContain('/* Utility Classes */');
+			assert.include(bundled, '/* Theme Variables */');
+			assert.notInclude(bundled, '/* Base Styles */');
+			assert.notInclude(bundled, '/* Utility Classes */');
 		});
 	});
 });

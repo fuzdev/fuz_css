@@ -1,13 +1,8 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {resolve_composes} from '$lib/css_class_resolution.js';
 import type {CssClassDefinition} from '$lib/css_class_generation.js';
-import {
-	expect_ok,
-	expect_error,
-	expect_resolved_declaration,
-	expect_resolution_error,
-} from './test_helpers.js';
+import {assert_resolved_declaration, assert_resolution_error} from './test_helpers.js';
 
 /**
  * Tests for CSS literal class handling in resolve_composes.
@@ -33,10 +28,8 @@ describe('resolve_composes with CSS literals', () => {
 
 		test.each(success_cases)('resolves %j → "%s" (%s)', (composes, expectedDeclaration) => {
 			const result = resolve_composes(composes, {}, new Set(), new Set(), 'test', css_properties);
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe(expectedDeclaration);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, expectedDeclaration);
 		});
 	});
 
@@ -54,7 +47,7 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_resolved_declaration(result, 'padding: var(--space_lg); text-align: center;');
+			assert_resolved_declaration(result, 'padding: var(--space_lg); text-align: center;');
 		});
 
 		test('resolves literal in nested composes resolution', () => {
@@ -71,11 +64,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toContain('text-align: center;');
-				expect(result.declaration).toContain('padding: 1rem;');
-			}
+			assert.ok(result.ok);
+			assert.include(result.declaration, 'text-align: center;');
+			assert.include(result.declaration, 'padding: 1rem;');
 		});
 	});
 
@@ -90,7 +81,7 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_resolution_error(result, 'cannot be used in composes array');
+			assert_resolution_error(result, 'cannot be used in composes array');
 		});
 
 		test('modified known class gives clear error', () => {
@@ -106,11 +97,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('cannot be used in composes array');
-				expect(result.error.suggestion).toContain('directly in markup');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'cannot be used in composes array');
+			assert.include(result.error.suggestion, 'directly in markup');
 		});
 
 		test('modified token class (md:p_lg) gives clear error', () => {
@@ -126,11 +115,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Modified class "md:p_lg"');
-				expect(result.error.message).toContain('cannot be used in composes array');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Modified class "md:p_lg"');
+			assert.include(result.error.message, 'cannot be used in composes array');
 		});
 	});
 
@@ -148,11 +135,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Unknown class "bx"');
-				expect(result.error.suggestion).toContain('bx');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Unknown class "bx"');
+			assert.include(result.error.suggestion, 'bx');
 		});
 
 		test('modifier typo with known class suggests correction', () => {
@@ -168,12 +153,10 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Unknown modifier "hovr"');
-				expect(result.error.suggestion).toContain('hover:box');
-				expect(result.error.suggestion).toContain('cannot be used in composes');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Unknown modifier "hovr"');
+			assert.include(result.error.suggestion, 'hover:box');
+			assert.include(result.error.suggestion, 'cannot be used in composes');
 		});
 
 		test('modifier typo in middle of chain suggests correction', () => {
@@ -189,11 +172,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Unknown modifier "hovr"');
-				expect(result.error.suggestion).toContain('md:hover:box');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Unknown modifier "hovr"');
+			assert.include(result.error.suggestion, 'md:hover:box');
 		});
 
 		test('non-typo unknown prefix falls back to property error', () => {
@@ -209,7 +190,7 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_resolution_error(result, 'Unknown CSS property "xyz"');
+			assert_resolution_error(result, 'Unknown CSS property "xyz"');
 		});
 	});
 
@@ -224,7 +205,7 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_resolution_error(result, 'Unknown class');
+			assert_resolution_error(result, 'Unknown class');
 		});
 
 		test('invalid CSS property with suggestion', () => {
@@ -237,11 +218,9 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Unknown CSS property');
-				expect(result.error.suggestion).toContain('display');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Unknown CSS property');
+			assert.include(result.error.suggestion, 'display');
 		});
 	});
 
@@ -256,12 +235,10 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('text-align: center;');
-				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.message).toBe('Class "text-align:center" is redundant');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'text-align: center;');
+			assert.strictEqual(result.warnings?.length, 1);
+			assert.strictEqual(result.warnings?.[0]?.message, 'Class "text-align:center" is redundant');
 		});
 
 		test('diamond dependency with literals deduplicated silently', () => {
@@ -280,12 +257,10 @@ describe('resolve_composes with CSS literals', () => {
 				css_properties,
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('text-align: center; padding: 10px; margin: 10px;');
-				// No warning for diamond dependencies
-				expect(result.warnings).toBe(null);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'text-align: center; padding: 10px; margin: 10px;');
+			// No warning for diamond dependencies
+			assert.strictEqual(result.warnings, null);
 		});
 	});
 });

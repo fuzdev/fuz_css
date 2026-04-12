@@ -7,11 +7,11 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
 import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
-import {expect_css_order} from './test_helpers.ts';
+import {assert_css_order} from './test_helpers.js';
 
 /**
  * Core rules that should always be included regardless of detected elements.
@@ -64,9 +64,9 @@ describe('resolve_css', () => {
 				...empty_detection(),
 			});
 
-			expect(result.base_css).toContain(expected);
+			assert.include(result.base_css, expected);
 			if (not_expected) {
-				expect(result.base_css).not.toContain(not_expected);
+				assert.notInclude(result.base_css, not_expected);
 			}
 		});
 	});
@@ -92,9 +92,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('color: blue');
-			expect(result.base_css).not.toContain('color: green');
-			expect(result.included_elements.has('button')).toBe(true);
+			assert.include(result.base_css, 'color: blue');
+			assert.notInclude(result.base_css, 'color: green');
+			assert.isTrue(result.included_elements.has('button'));
 		});
 
 		test('excludes rules for undetected elements', () => {
@@ -117,9 +117,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('button { padding: 10px; }');
-			expect(result.base_css).toContain('a { text-decoration: none; }');
-			expect(result.base_css).not.toContain('input');
+			assert.include(result.base_css, 'button { padding: 10px; }');
+			assert.include(result.base_css, 'a { text-decoration: none; }');
+			assert.notInclude(result.base_css, 'input');
 		});
 
 		test('additional_elements option forces inclusion', () => {
@@ -139,9 +139,9 @@ describe('resolve_css', () => {
 				additional_elements: ['button'],
 			});
 
-			expect(result.base_css).toContain('color: red');
-			expect(result.base_css).not.toContain('border');
-			expect(result.included_elements.has('button')).toBe(true);
+			assert.include(result.base_css, 'color: red');
+			assert.notInclude(result.base_css, 'border');
+			assert.isTrue(result.included_elements.has('button'));
 		});
 
 		test('additional_elements with multiple values', () => {
@@ -163,14 +163,14 @@ describe('resolve_css', () => {
 				additional_elements: ['button', 'input', 'dialog'],
 			});
 
-			expect(result.base_css).toContain('color: red');
-			expect(result.base_css).toContain('border: 1px solid');
-			expect(result.base_css).toContain('padding: 16px');
-			expect(result.base_css).not.toContain('appearance: none');
-			expect(result.included_elements.has('button')).toBe(true);
-			expect(result.included_elements.has('input')).toBe(true);
-			expect(result.included_elements.has('dialog')).toBe(true);
-			expect(result.included_elements.has('select')).toBe(false);
+			assert.include(result.base_css, 'color: red');
+			assert.include(result.base_css, 'border: 1px solid');
+			assert.include(result.base_css, 'padding: 16px');
+			assert.notInclude(result.base_css, 'appearance: none');
+			assert.isTrue(result.included_elements.has('button'));
+			assert.isTrue(result.included_elements.has('input'));
+			assert.isTrue(result.included_elements.has('dialog'));
+			assert.isFalse(result.included_elements.has('select'));
 		});
 
 		test('additional_elements combined with detected_elements', () => {
@@ -196,13 +196,13 @@ describe('resolve_css', () => {
 			});
 
 			// Both detected and additional should be included
-			expect(result.base_css).toContain('color: red');
-			expect(result.base_css).toContain('border: 1px solid');
-			expect(result.base_css).toContain('text-decoration: none');
-			expect(result.base_css).not.toContain('appearance: none');
-			expect(result.included_elements.has('button')).toBe(true);
-			expect(result.included_elements.has('input')).toBe(true);
-			expect(result.included_elements.has('a')).toBe(true);
+			assert.include(result.base_css, 'color: red');
+			assert.include(result.base_css, 'border: 1px solid');
+			assert.include(result.base_css, 'text-decoration: none');
+			assert.notInclude(result.base_css, 'appearance: none');
+			assert.isTrue(result.included_elements.has('button'));
+			assert.isTrue(result.included_elements.has('input'));
+			assert.isTrue(result.included_elements.has('a'));
 		});
 
 		test('additional_elements with overlapping detected_elements', () => {
@@ -226,10 +226,10 @@ describe('resolve_css', () => {
 			});
 
 			// Both should be included, no errors from overlap
-			expect(result.base_css).toContain('color: red');
-			expect(result.base_css).toContain('border: 1px solid');
-			expect(result.included_elements.has('button')).toBe(true);
-			expect(result.included_elements.has('input')).toBe(true);
+			assert.include(result.base_css, 'color: red');
+			assert.include(result.base_css, 'border: 1px solid');
+			assert.isTrue(result.included_elements.has('button'));
+			assert.isTrue(result.included_elements.has('input'));
 		});
 
 		test('handles multiple elements', () => {
@@ -253,10 +253,10 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).toContain('input');
-			expect(result.base_css).toContain('a { text-decoration');
-			expect(result.base_css).not.toContain('select');
+			assert.include(result.base_css, 'button');
+			assert.include(result.base_css, 'input');
+			assert.include(result.base_css, 'a { text-decoration');
+			assert.notInclude(result.base_css, 'select');
 		});
 
 		test('preserves cascade order', () => {
@@ -279,7 +279,7 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect_css_order(result.base_css, 'color: blue', 'color: darkblue', 'color: navy');
+			assert_css_order(result.base_css, 'color: blue', 'color: darkblue', 'color: navy');
 		});
 	});
 
@@ -304,9 +304,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('button.selected');
-			expect(result.base_css).toContain('.hidden');
-			expect(result.base_css).not.toContain('disabled');
+			assert.include(result.base_css, 'button.selected');
+			assert.include(result.base_css, '.hidden');
+			assert.notInclude(result.base_css, 'disabled');
 		});
 
 		test('excludes rules for undetected classes', () => {
@@ -328,8 +328,8 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('color: green');
-			expect(result.base_css).not.toContain('color: gray');
+			assert.include(result.base_css, 'color: green');
+			assert.notInclude(result.base_css, 'color: gray');
 		});
 
 		test('combines element and class matching', () => {
@@ -352,9 +352,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('button { padding');
-			expect(result.base_css).toContain('button.primary');
-			expect(result.base_css).toContain('.warning');
+			assert.include(result.base_css, 'button { padding');
+			assert.include(result.base_css, 'button.primary');
+			assert.include(result.base_css, '.warning');
 		});
 	});
 
@@ -378,8 +378,8 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('button { padding: 10px; }');
-			expect(result.base_css).not.toContain('input');
+			assert.include(result.base_css, 'button { padding: 10px; }');
+			assert.notInclude(result.base_css, 'input');
 		});
 
 		test('preserves original order', () => {
@@ -402,7 +402,7 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect_css_order(result.base_css, 'padding: 5px', 'background: gray', 'outline: none');
+			assert_css_order(result.base_css, 'padding: 5px', 'background: gray', 'outline: none');
 		});
 
 		test('includes @media rules for elements', () => {
@@ -424,9 +424,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('font-size: 14px');
-			expect(result.base_css).toContain('@media (min-width: 768px)');
-			expect(result.base_css).toContain('font-size: 16px');
+			assert.include(result.base_css, 'font-size: 14px');
+			assert.include(result.base_css, '@media (min-width: 768px)');
+			assert.include(result.base_css, 'font-size: 16px');
 		});
 
 		test('includes @supports rules for elements', () => {
@@ -448,9 +448,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('display: block');
-			expect(result.base_css).toContain('@supports (display: grid)');
-			expect(result.base_css).toContain('display: grid');
+			assert.include(result.base_css, 'display: block');
+			assert.include(result.base_css, '@supports (display: grid)');
+			assert.include(result.base_css, 'display: grid');
 		});
 
 		test('includes @container rules for elements', () => {
@@ -472,9 +472,9 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toContain('padding: 8px');
-			expect(result.base_css).toContain('@container (min-width: 400px)');
-			expect(result.base_css).toContain('padding: 16px');
+			assert.include(result.base_css, 'padding: 8px');
+			assert.include(result.base_css, '@container (min-width: 400px)');
+			assert.include(result.base_css, 'padding: 16px');
 		});
 	});
 
@@ -495,7 +495,7 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.stats).toBeUndefined();
+			assert.isUndefined(result.stats);
 		});
 
 		test('included when include_stats true', () => {
@@ -519,12 +519,12 @@ describe('resolve_css', () => {
 				include_stats: true,
 			});
 
-			expect(result.stats).toBeDefined();
-			expect(result.stats?.element_count).toBe(1);
-			expect(result.stats?.elements).toContain('button');
-			expect(result.stats?.included_rules).toBeGreaterThan(0);
-			expect(result.stats?.total_rules).toBe(3);
-			expect(result.stats?.variable_count).toBe(1);
+			assert.isDefined(result.stats);
+			assert.strictEqual(result.stats.element_count, 1);
+			assert.include(result.stats.elements as unknown as string, 'button');
+			assert.isAbove(result.stats.included_rules, 0);
+			assert.strictEqual(result.stats.total_rules, 3);
+			assert.strictEqual(result.stats.variable_count, 1);
 		});
 
 		test('reflects actual counts', () => {
@@ -552,13 +552,13 @@ describe('resolve_css', () => {
 				include_stats: true,
 			});
 
-			expect(result.stats!.element_count).toBe(2);
-			expect(result.stats!.elements).toContain('button');
-			expect(result.stats!.elements).toContain('a');
-			expect(result.stats!.elements).not.toContain('input');
-			expect(result.stats!.included_rules).toBe(3); // * + button + a
-			expect(result.stats!.total_rules).toBe(4);
-			expect(result.stats!.variable_count).toBe(1);
+			assert.strictEqual(result.stats!.element_count, 2);
+			assert.include(result.stats!.elements as unknown as string, 'button');
+			assert.include(result.stats!.elements as unknown as string, 'a');
+			assert.notInclude(result.stats!.elements as unknown as string, 'input');
+			assert.strictEqual(result.stats!.included_rules, 3); // * + button + a
+			assert.strictEqual(result.stats!.total_rules, 4);
+			assert.strictEqual(result.stats!.variable_count, 1);
 		});
 	});
 
@@ -589,15 +589,15 @@ describe('resolve_css', () => {
 			});
 
 			// Core rules should still be included
-			expect(result.base_css).toContain('box-sizing: border-box');
-			expect(result.base_css).toContain('font-size: 16px');
-			expect(result.base_css).toContain('margin: 0');
+			assert.include(result.base_css, 'box-sizing: border-box');
+			assert.include(result.base_css, 'font-size: 16px');
+			assert.include(result.base_css, 'margin: 0');
 			// Non-core element rules should NOT be included
-			expect(result.base_css).not.toContain('button');
-			expect(result.base_css).not.toContain('input');
+			assert.notInclude(result.base_css, 'button');
+			assert.notInclude(result.base_css, 'input');
 			// Theme CSS should work
-			expect(result.theme_css).toContain('--text_color: black');
-			expect(result.theme_css).toContain('--bg_color: white');
+			assert.include(result.theme_css, '--text_color: black');
+			assert.include(result.theme_css, '--bg_color: white');
 		});
 
 		test('empty style_rule_index', () => {
@@ -615,8 +615,8 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.base_css).toBe('');
-			expect(result.theme_css).toContain('--color: blue');
+			assert.strictEqual(result.base_css, '');
+			assert.include(result.theme_css, '--color: blue');
 		});
 
 		test('empty variable_graph', () => {
@@ -635,8 +635,8 @@ describe('resolve_css', () => {
 				utility_variables_used: new Set(),
 			});
 
-			expect(result.theme_css).toBe('');
-			expect(result.base_css).toContain('button');
+			assert.strictEqual(result.theme_css, '');
+			assert.include(result.base_css, 'button');
 		});
 
 		test('empty detected sets', () => {
@@ -656,9 +656,9 @@ describe('resolve_css', () => {
 			});
 
 			// Should only include core rules
-			expect(result.base_css).toContain('margin: 0');
-			expect(result.base_css).not.toContain('button');
-			expect(result.theme_css).toBe('');
+			assert.include(result.base_css, 'margin: 0');
+			assert.notInclude(result.base_css, 'button');
+			assert.strictEqual(result.theme_css, '');
 		});
 	});
 
@@ -679,11 +679,11 @@ describe('resolve_css', () => {
 			});
 
 			// Only additional_variables should be included (nothing detected)
-			expect(result.resolved_variables.has('color_a')).toBe(false);
-			expect(result.resolved_variables.has('color_b')).toBe(true);
-			expect(result.resolved_variables.has('color_c')).toBe(false);
-			expect(result.theme_css).toContain('--color_b');
-			expect(result.theme_css).not.toContain('--color_a');
+			assert.isFalse(result.resolved_variables.has('color_a'));
+			assert.isTrue(result.resolved_variables.has('color_b'));
+			assert.isFalse(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_b');
+			assert.notInclude(result.theme_css, '--color_a');
 		});
 
 		test('additional_variables combined with detected_css_variables', () => {
@@ -705,11 +705,11 @@ describe('resolve_css', () => {
 			});
 
 			// Both detected and additional should be included
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(false);
-			expect(result.resolved_variables.has('color_c')).toBe(true);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).toContain('--color_c');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isFalse(result.resolved_variables.has('color_b'));
+			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_a');
+			assert.include(result.theme_css, '--color_c');
 		});
 
 		test('additional_variables with overlapping detected_css_variables', () => {
@@ -730,10 +730,10 @@ describe('resolve_css', () => {
 			});
 
 			// Both should be included, no errors from overlap
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(true);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).toContain('--color_b');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isTrue(result.resolved_variables.has('color_b'));
+			assert.include(result.theme_css, '--color_a');
+			assert.include(result.theme_css, '--color_b');
 		});
 
 		test('additional_variables: "all" includes all variables', () => {
@@ -751,8 +751,8 @@ describe('resolve_css', () => {
 			});
 
 			// With 'all', all variables included
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(true);
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isTrue(result.resolved_variables.has('color_b'));
 		});
 	});
 
@@ -780,11 +780,11 @@ describe('resolve_css', () => {
 			});
 
 			// Button rules included
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).not.toContain('input');
+			assert.include(result.base_css, 'button');
+			assert.notInclude(result.base_css, 'input');
 			// Extra var and transitive deps included
-			expect(result.theme_css).toContain('--extra_var');
-			expect(result.theme_css).toContain('--btn_color'); // transitive from button rule
+			assert.include(result.theme_css, '--extra_var');
+			assert.include(result.theme_css, '--btn_color'); // transitive from button rule
 		});
 
 		test('additional_elements brings transitive variable dependencies', () => {
@@ -805,8 +805,8 @@ describe('resolve_css', () => {
 			});
 
 			// Both btn_color and its dependency base_color should be included
-			expect(result.theme_css).toContain('--btn_color');
-			expect(result.theme_css).toContain('--base_color');
+			assert.include(result.theme_css, '--btn_color');
+			assert.include(result.theme_css, '--base_color');
 		});
 	});
 
@@ -833,9 +833,9 @@ describe('resolve_css', () => {
 			});
 
 			// Should include ALL rules, not just button
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).toContain('input');
-			expect(result.base_css).toContain('a { color: purple');
+			assert.include(result.base_css, 'button');
+			assert.include(result.base_css, 'input');
+			assert.include(result.base_css, 'a { color: purple');
 		});
 
 		test('default behavior only includes matching rules', () => {
@@ -860,9 +860,9 @@ describe('resolve_css', () => {
 			});
 
 			// Should only include button
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).not.toContain('input');
-			expect(result.base_css).not.toContain('a { color: purple');
+			assert.include(result.base_css, 'button');
+			assert.notInclude(result.base_css, 'input');
+			assert.notInclude(result.base_css, 'a { color: purple');
 		});
 
 		test('additional_variables: "all" includes all variables', () => {
@@ -884,12 +884,12 @@ describe('resolve_css', () => {
 			});
 
 			// Should include ALL variables, not just color_a
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(true);
-			expect(result.resolved_variables.has('color_c')).toBe(true);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).toContain('--color_b');
-			expect(result.theme_css).toContain('--color_c');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isTrue(result.resolved_variables.has('color_b'));
+			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_a');
+			assert.include(result.theme_css, '--color_b');
+			assert.include(result.theme_css, '--color_c');
 		});
 
 		test('default behavior only includes used variables', () => {
@@ -911,12 +911,12 @@ describe('resolve_css', () => {
 			});
 
 			// Should only include color_a
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(false);
-			expect(result.resolved_variables.has('color_c')).toBe(false);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).not.toContain('--color_b');
-			expect(result.theme_css).not.toContain('--color_c');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isFalse(result.resolved_variables.has('color_b'));
+			assert.isFalse(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_a');
+			assert.notInclude(result.theme_css, '--color_b');
+			assert.notInclude(result.theme_css, '--color_c');
 		});
 
 		test('both "all" options includes everything', () => {
@@ -941,11 +941,11 @@ describe('resolve_css', () => {
 			});
 
 			// All rules included
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).toContain('input');
+			assert.include(result.base_css, 'button');
+			assert.include(result.base_css, 'input');
 			// All variables included
-			expect(result.theme_css).toContain('--btn_color');
-			expect(result.theme_css).toContain('--unused');
+			assert.include(result.theme_css, '--btn_color');
+			assert.include(result.theme_css, '--unused');
 		});
 	});
 
@@ -972,12 +972,12 @@ describe('resolve_css', () => {
 			});
 
 			// button and a included, input excluded
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).not.toContain('input');
-			expect(result.base_css).toContain('a { color: purple');
-			expect(result.included_elements.has('button')).toBe(true);
-			expect(result.included_elements.has('input')).toBe(false);
-			expect(result.included_elements.has('a')).toBe(true);
+			assert.include(result.base_css, 'button');
+			assert.notInclude(result.base_css, 'input');
+			assert.include(result.base_css, 'a { color: purple');
+			assert.isTrue(result.included_elements.has('button'));
+			assert.isFalse(result.included_elements.has('input'));
+			assert.isTrue(result.included_elements.has('a'));
 		});
 
 		test('exclude_elements combined with additional_elements', () => {
@@ -1003,9 +1003,9 @@ describe('resolve_css', () => {
 			});
 
 			// button and a included, input excluded
-			expect(result.base_css).toContain('button');
-			expect(result.base_css).not.toContain('input');
-			expect(result.base_css).toContain('a { color: purple');
+			assert.include(result.base_css, 'button');
+			assert.notInclude(result.base_css, 'input');
+			assert.include(result.base_css, 'a { color: purple');
 		});
 
 		test('exclude_variables filters from resolved variables', () => {
@@ -1027,12 +1027,12 @@ describe('resolve_css', () => {
 			});
 
 			// color_a and color_c included, color_b excluded
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(false);
-			expect(result.resolved_variables.has('color_c')).toBe(true);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).not.toContain('--color_b');
-			expect(result.theme_css).toContain('--color_c');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isFalse(result.resolved_variables.has('color_b'));
+			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_a');
+			assert.notInclude(result.theme_css, '--color_b');
+			assert.include(result.theme_css, '--color_c');
 		});
 
 		test('exclude_variables combined with additional_variables', () => {
@@ -1055,12 +1055,12 @@ describe('resolve_css', () => {
 			});
 
 			// color_a and color_c included, color_b excluded
-			expect(result.resolved_variables.has('color_a')).toBe(true);
-			expect(result.resolved_variables.has('color_b')).toBe(false);
-			expect(result.resolved_variables.has('color_c')).toBe(true);
-			expect(result.theme_css).toContain('--color_a');
-			expect(result.theme_css).not.toContain('--color_b');
-			expect(result.theme_css).toContain('--color_c');
+			assert.isTrue(result.resolved_variables.has('color_a'));
+			assert.isFalse(result.resolved_variables.has('color_b'));
+			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.include(result.theme_css, '--color_a');
+			assert.notInclude(result.theme_css, '--color_b');
+			assert.include(result.theme_css, '--color_c');
 		});
 	});
 });

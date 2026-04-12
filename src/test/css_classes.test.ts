@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {CssClasses} from '$lib/css_classes.js';
 import {type ExtractionDiagnostic, type SourceLocation} from '$lib/diagnostics.js';
@@ -15,8 +15,8 @@ describe('CssClasses', () => {
 		css_classes.add('file1.svelte', make_extraction_data({classes}));
 
 		const result = css_classes.get();
-		expect(result.has('foo')).toBe(true);
-		expect(result.has('bar')).toBe(true);
+		assert.isTrue(result.has('foo'));
+		assert.isTrue(result.has('bar'));
 	});
 
 	test('merges classes from multiple files', () => {
@@ -28,8 +28,8 @@ describe('CssClasses', () => {
 		css_classes.add('file2.svelte', make_extraction_data({classes: new Map([['bar', [loc2]]])}));
 
 		const result = css_classes.get();
-		expect(result.has('foo')).toBe(true);
-		expect(result.has('bar')).toBe(true);
+		assert.isTrue(result.has('foo'));
+		assert.isTrue(result.has('bar'));
 	});
 
 	test('delete removes file classes', () => {
@@ -42,8 +42,8 @@ describe('CssClasses', () => {
 		css_classes.delete('file1.svelte');
 
 		const result = css_classes.get();
-		expect(result.has('foo')).toBe(false);
-		expect(result.has('bar')).toBe(true);
+		assert.isFalse(result.has('foo'));
+		assert.isTrue(result.has('bar'));
 	});
 
 	test('additional_classes always included', () => {
@@ -55,8 +55,8 @@ describe('CssClasses', () => {
 		);
 
 		const result = css_classes.get();
-		expect(result.has('always-included')).toBe(true);
-		expect(result.has('extracted')).toBe(true);
+		assert.isTrue(result.has('always-included'));
+		assert.isTrue(result.has('extracted'));
 	});
 
 	test('get_with_locations returns null for additional_classes', () => {
@@ -68,8 +68,8 @@ describe('CssClasses', () => {
 		);
 
 		const result = css_classes.get_with_locations();
-		expect(result.get('included')).toBeNull();
-		expect(result.get('extracted')).toEqual([loc]);
+		assert.isNull(result.get('included'));
+		assert.deepEqual(result.get('extracted'), [loc]);
 	});
 
 	test('get_with_locations merges locations from multiple files', () => {
@@ -82,9 +82,9 @@ describe('CssClasses', () => {
 
 		const result = css_classes.get_with_locations();
 		const locations = result.get('shared');
-		expect(locations).toHaveLength(2);
-		expect(locations).toContainEqual(loc1);
-		expect(locations).toContainEqual(loc2);
+		assert.lengthOf(locations!, 2);
+		assert.deepInclude(locations!, loc1);
+		assert.deepInclude(locations!, loc2);
 	});
 
 	test('get_diagnostics returns extraction diagnostics', () => {
@@ -103,8 +103,8 @@ describe('CssClasses', () => {
 		css_classes.add('file1.svelte', make_extraction_data({classes: new Map(), diagnostics}));
 
 		const result = css_classes.get_diagnostics();
-		expect(result).toHaveLength(1);
-		expect(result[0]!.message).toBe('test warning');
+		assert.lengthOf(result, 1);
+		assert.strictEqual(result[0]!.message, 'test warning');
 	});
 
 	test('dirty flag triggers recalculation', () => {
@@ -113,12 +113,12 @@ describe('CssClasses', () => {
 
 		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['foo', [loc]]])}));
 		const result1 = css_classes.get();
-		expect(result1.has('foo')).toBe(true);
+		assert.isTrue(result1.has('foo'));
 
 		// Add more classes
 		css_classes.add('file2.svelte', make_extraction_data({classes: new Map([['bar', [loc]]])}));
 		const result2 = css_classes.get();
-		expect(result2.has('bar')).toBe(true);
+		assert.isTrue(result2.has('bar'));
 	});
 
 	test('explicit_classes tracks @fuz-classes annotations', () => {
@@ -135,17 +135,17 @@ describe('CssClasses', () => {
 		);
 
 		const {explicit_classes} = css_classes.get_all();
-		expect(explicit_classes).not.toBeNull();
-		expect(explicit_classes!.has('annotated_class')).toBe(true);
-		expect(explicit_classes!.has('regular')).toBe(false);
+		assert.isNotNull(explicit_classes);
+		assert.isTrue(explicit_classes.has('annotated_class'));
+		assert.isFalse(explicit_classes.has('regular'));
 	});
 
 	test('additional_classes are included in explicit_classes', () => {
 		const css_classes = new CssClasses(new Set(['included_class']));
 
 		const {explicit_classes} = css_classes.get_all();
-		expect(explicit_classes).not.toBeNull();
-		expect(explicit_classes!.has('included_class')).toBe(true);
+		assert.isNotNull(explicit_classes);
+		assert.isTrue(explicit_classes.has('included_class'));
 	});
 
 	test('exclude_classes filters from all_classes', () => {
@@ -163,8 +163,8 @@ describe('CssClasses', () => {
 		);
 
 		const {all_classes} = css_classes.get_all();
-		expect(all_classes.has('kept')).toBe(true);
-		expect(all_classes.has('excluded')).toBe(false);
+		assert.isTrue(all_classes.has('kept'));
+		assert.isFalse(all_classes.has('excluded'));
 	});
 
 	test('exclude_classes filters from explicit_classes', () => {
@@ -174,7 +174,7 @@ describe('CssClasses', () => {
 
 		const {explicit_classes} = css_classes.get_all();
 		// included_explicit is in both include and exclude, so it should be excluded
-		expect(explicit_classes).toBeNull();
+		assert.isNull(explicit_classes);
 	});
 
 	test('exclude_classes suppresses @fuz-classes warnings', () => {
@@ -189,7 +189,7 @@ describe('CssClasses', () => {
 
 		const {explicit_classes} = css_classes.get_all();
 		// Should be filtered out by exclude
-		expect(explicit_classes).toBeNull();
+		assert.isNull(explicit_classes);
 	});
 });
 
@@ -208,9 +208,9 @@ describe('explicit_variables (@fuz-variables)', () => {
 		);
 
 		const {explicit_variables} = css_classes.get_all();
-		expect(explicit_variables).not.toBeNull();
-		expect(explicit_variables!.has('shade_40')).toBe(true);
-		expect(explicit_variables!.has('text_50')).toBe(true);
+		assert.isNotNull(explicit_variables);
+		assert.isTrue(explicit_variables.has('shade_40'));
+		assert.isTrue(explicit_variables.has('text_50'));
 	});
 
 	test('multiple files contributing explicit_variables are aggregated', () => {
@@ -233,9 +233,9 @@ describe('explicit_variables (@fuz-variables)', () => {
 		);
 
 		const {explicit_variables} = css_classes.get_all();
-		expect(explicit_variables).not.toBeNull();
-		expect(explicit_variables!.has('shade_40')).toBe(true);
-		expect(explicit_variables!.has('text_50')).toBe(true);
+		assert.isNotNull(explicit_variables);
+		assert.isTrue(explicit_variables.has('shade_40'));
+		assert.isTrue(explicit_variables.has('text_50'));
 	});
 
 	test('delete removes file explicit_variables', () => {
@@ -260,9 +260,9 @@ describe('explicit_variables (@fuz-variables)', () => {
 		css_classes.delete('file1.svelte');
 
 		const {explicit_variables} = css_classes.get_all();
-		expect(explicit_variables).not.toBeNull();
-		expect(explicit_variables!.has('shade_40')).toBe(false);
-		expect(explicit_variables!.has('text_50')).toBe(true);
+		assert.isNotNull(explicit_variables);
+		assert.isFalse(explicit_variables.has('shade_40'));
+		assert.isTrue(explicit_variables.has('text_50'));
 	});
 
 	test('re-adding a file replaces old explicit_variables', () => {
@@ -287,9 +287,9 @@ describe('explicit_variables (@fuz-variables)', () => {
 		);
 
 		const {explicit_variables} = css_classes.get_all();
-		expect(explicit_variables).not.toBeNull();
-		expect(explicit_variables!.has('shade_40')).toBe(false);
-		expect(explicit_variables!.has('text_50')).toBe(true);
+		assert.isNotNull(explicit_variables);
+		assert.isFalse(explicit_variables.has('shade_40'));
+		assert.isTrue(explicit_variables.has('text_50'));
 	});
 
 	test('explicit_variables is null when no files have them', () => {
@@ -299,7 +299,7 @@ describe('explicit_variables (@fuz-variables)', () => {
 		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['a', [loc]]])}));
 
 		const {explicit_variables} = css_classes.get_all();
-		expect(explicit_variables).toBeNull();
+		assert.isNull(explicit_variables);
 	});
 });
 
@@ -316,9 +316,9 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 
 		const result = css_classes.get();
 		// Both additional and extracted should be present
-		expect(result.has('additional_a')).toBe(true);
-		expect(result.has('additional_b')).toBe(true);
-		expect(result.has('extracted_class')).toBe(true);
+		assert.isTrue(result.has('additional_a'));
+		assert.isTrue(result.has('additional_b'));
+		assert.isTrue(result.has('extracted_class'));
 	});
 
 	test('exclude_classes filters additional_classes', () => {
@@ -333,9 +333,9 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		);
 
 		const result = css_classes.get();
-		expect(result.has('keep_me')).toBe(true);
-		expect(result.has('exclude_me')).toBe(false);
-		expect(result.has('extracted')).toBe(true);
+		assert.isTrue(result.has('keep_me'));
+		assert.isFalse(result.has('exclude_me'));
+		assert.isTrue(result.has('extracted'));
 	});
 
 	test('multiple files combined with additional_classes', () => {
@@ -354,9 +354,9 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		);
 
 		const result = css_classes.get();
-		expect(result.has('always_included')).toBe(true);
-		expect(result.has('from_file1')).toBe(true);
-		expect(result.has('from_file2')).toBe(true);
+		assert.isTrue(result.has('always_included'));
+		assert.isTrue(result.has('from_file1'));
+		assert.isTrue(result.has('from_file2'));
 	});
 
 	test('empty additional_classes has no effect on file data', () => {
@@ -369,8 +369,8 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		);
 
 		const result = css_classes.get();
-		expect(result.size).toBe(1);
-		expect(result.has('extracted')).toBe(true);
+		assert.strictEqual(result.size, 1);
+		assert.isTrue(result.has('extracted'));
 	});
 
 	test('additional_classes appear in explicit_classes for warning tracking', () => {
@@ -381,9 +381,9 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 
 		const {explicit_classes} = css_classes.get_all();
 		// additional_classes should be in explicit_classes
-		expect(explicit_classes?.has('additional_class')).toBe(true);
+		assert.isTrue(explicit_classes!.has('additional_class'));
 		// Regular extracted classes are not explicit unless via @fuz-classes
-		expect(explicit_classes?.has('regular')).toBe(false);
+		assert.isFalse(explicit_classes!.has('regular'));
 	});
 
 	test('file explicit classes combined with additional_classes in explicit_classes', () => {
@@ -400,8 +400,8 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 		);
 
 		const {explicit_classes} = css_classes.get_all();
-		expect(explicit_classes?.has('additional')).toBe(true);
-		expect(explicit_classes?.has('from_fuz_classes_annotation')).toBe(true);
-		expect(explicit_classes?.has('regular')).toBe(false);
+		assert.isTrue(explicit_classes!.has('additional'));
+		assert.isTrue(explicit_classes!.has('from_fuz_classes_annotation'));
+		assert.isFalse(explicit_classes!.has('regular'));
 	});
 });

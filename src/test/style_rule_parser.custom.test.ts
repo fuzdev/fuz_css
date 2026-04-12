@@ -6,7 +6,7 @@
  * @module
  */
 
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {
 	create_style_rule_index,
@@ -24,9 +24,9 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules.length).toBe(2);
-			expect(index.by_element.has('button')).toBe(true);
-			expect(index.by_element.has('input')).toBe(true);
+			assert.strictEqual(index.rules.length, 2);
+			assert.isTrue(index.by_element.has('button'));
+			assert.isTrue(index.by_element.has('input'));
 		});
 
 		test('indexes by element name', () => {
@@ -38,7 +38,7 @@ describe('create_style_rule_index', () => {
 			const index = create_style_rule_index(css);
 
 			const button_rules = index.by_element.get('button');
-			expect(button_rules?.length).toBe(2);
+			assert.strictEqual(button_rules?.length, 2);
 		});
 
 		test('indexes by class name', () => {
@@ -49,8 +49,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.by_class.has('active')).toBe(true);
-			expect(index.by_class.has('primary')).toBe(true);
+			assert.isTrue(index.by_class.has('active'));
+			assert.isTrue(index.by_class.has('primary'));
 		});
 	});
 
@@ -60,8 +60,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.is_core).toBe(true);
-			expect(index.rules[0]?.core_reason).toBe('universal');
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'universal');
 		});
 
 		test('marks :root rules as core', () => {
@@ -69,8 +69,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.is_core).toBe(true);
-			expect(index.rules[0]?.core_reason).toBe('root');
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'root');
 		});
 
 		test('marks body rules as core', () => {
@@ -78,8 +78,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.is_core).toBe(true);
-			expect(index.rules[0]?.core_reason).toBe('body');
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'body');
 		});
 	});
 
@@ -89,8 +89,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('btn_color')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('btn_bg')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('btn_color'));
+			assert.isTrue(index.rules[0]!.variables_used.has('btn_bg'));
 		});
 
 		test('extracts multiple variables from single property', () => {
@@ -98,11 +98,11 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.size).toBe(4);
-			expect(index.rules[0]?.variables_used.has('shadow_x')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('shadow_y')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('shadow_blur')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('shadow_color')).toBe(true);
+			assert.strictEqual(index.rules[0]!.variables_used.size, 4);
+			assert.isTrue(index.rules[0]!.variables_used.has('shadow_x'));
+			assert.isTrue(index.rules[0]!.variables_used.has('shadow_y'));
+			assert.isTrue(index.rules[0]!.variables_used.has('shadow_blur'));
+			assert.isTrue(index.rules[0]!.variables_used.has('shadow_color'));
 		});
 
 		test('extracts variables from pseudo-class rules', () => {
@@ -113,8 +113,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('hover_bg')).toBe(true);
-			expect(index.rules[1]?.variables_used.has('focus_color')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('hover_bg'));
+			assert.isTrue(index.rules[1]!.variables_used.has('focus_color'));
 		});
 
 		test('extracts variables from @media rules', () => {
@@ -126,8 +126,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('p_lg')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('m_lg')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('p_lg'));
+			assert.isTrue(index.rules[0]!.variables_used.has('m_lg'));
 		});
 
 		test('extracts variables with fallbacks', () => {
@@ -135,8 +135,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('primary')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('bg')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('primary'));
+			assert.isTrue(index.rules[0]!.variables_used.has('bg'));
 		});
 
 		test('extracts nested variable fallbacks', () => {
@@ -144,9 +144,9 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('a')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('b')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('c')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('a'));
+			assert.isTrue(index.rules[0]!.variables_used.has('b'));
+			assert.isTrue(index.rules[0]!.variables_used.has('c'));
 		});
 
 		test('extracts variables in calc()', () => {
@@ -154,8 +154,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('sidebar_width')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('gap')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('sidebar_width'));
+			assert.isTrue(index.rules[0]!.variables_used.has('gap'));
 		});
 
 		test('deduplicates repeated variables', () => {
@@ -168,9 +168,9 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.size).toBe(2);
-			expect(index.rules[0]?.variables_used.has('border_width')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('border_color')).toBe(true);
+			assert.strictEqual(index.rules[0]!.variables_used.size, 2);
+			assert.isTrue(index.rules[0]!.variables_used.has('border_width'));
+			assert.isTrue(index.rules[0]!.variables_used.has('border_color'));
 		});
 
 		test('returns empty set for rule without variables', () => {
@@ -178,7 +178,7 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.size).toBe(0);
+			assert.strictEqual(index.rules[0]!.variables_used.size, 0);
 		});
 
 		test('extracts variables from multiple rules', () => {
@@ -190,9 +190,9 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('btn_text')).toBe(true);
-			expect(index.rules[1]?.variables_used.has('input_border')).toBe(true);
-			expect(index.rules[2]?.variables_used.has('link_color')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('btn_text'));
+			assert.isTrue(index.rules[1]!.variables_used.has('input_border'));
+			assert.isTrue(index.rules[2]!.variables_used.has('link_color'));
 		});
 
 		test('handles hyphens and underscores in variable names', () => {
@@ -200,8 +200,8 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 
-			expect(index.rules[0]?.variables_used.has('my-color')).toBe(true);
-			expect(index.rules[0]?.variables_used.has('my_bg_color')).toBe(true);
+			assert.isTrue(index.rules[0]!.variables_used.has('my-color'));
+			assert.isTrue(index.rules[0]!.variables_used.has('my_bg_color'));
 		});
 	});
 
@@ -216,7 +216,7 @@ describe('create_style_rule_index', () => {
 			const index = create_style_rule_index(css);
 			const matched = get_matching_rules(index, new Set(['button']), new Set());
 
-			expect(matched.size).toBe(1);
+			assert.strictEqual(matched.size, 1);
 		});
 
 		test('generate_base_css outputs only matched rules', () => {
@@ -229,8 +229,8 @@ describe('create_style_rule_index', () => {
 			const matched = get_matching_rules(index, new Set(['button']), new Set());
 			const output = generate_base_css(index, matched);
 
-			expect(output).toContain('button { color: blue; }');
-			expect(output).not.toContain('input');
+			assert.include(output, 'button { color: blue; }');
+			assert.notInclude(output, 'input');
 		});
 	});
 
@@ -243,14 +243,14 @@ describe('create_style_rule_index', () => {
 			const index2 = create_style_rule_index(css2);
 
 			// Different content should produce different hashes
-			expect(index1.content_hash).not.toBe(index2.content_hash);
+			assert.notStrictEqual(index1.content_hash, index2.content_hash);
 		});
 	});
 
 	describe('edge cases', () => {
 		test('handles empty CSS', () => {
 			const index = create_style_rule_index('');
-			expect(index.rules.length).toBe(0);
+			assert.strictEqual(index.rules.length, 0);
 		});
 
 		test('handles CSS with comments', () => {
@@ -260,7 +260,7 @@ describe('create_style_rule_index', () => {
 			`;
 
 			const index = create_style_rule_index(css);
-			expect(index.rules.length).toBe(1);
+			assert.strictEqual(index.rules.length, 1);
 		});
 
 		test('handles @media rules', () => {
@@ -272,7 +272,7 @@ describe('create_style_rule_index', () => {
 			const index = create_style_rule_index(css);
 
 			// Both rules should be indexed under button
-			expect(index.by_element.get('button')?.length).toBe(2);
+			assert.strictEqual(index.by_element.get('button')?.length, 2);
 		});
 	});
 });

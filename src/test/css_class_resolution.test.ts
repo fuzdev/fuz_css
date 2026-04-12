@@ -1,12 +1,10 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {resolve_composes, resolve_class_definition} from '$lib/css_class_resolution.js';
 import type {CssClassDefinition, CssClassDefinitionStatic} from '$lib/css_class_generation.js';
 import {
-	expect_ok,
-	expect_error,
-	expect_resolved_declaration,
-	expect_resolution_error,
+	assert_resolved_declaration,
+	assert_resolution_error,
 	count_css_occurrences,
 } from './test_helpers.js';
 
@@ -25,10 +23,9 @@ describe('resolve_composes', () => {
 	describe('simple token class references', () => {
 		test('resolves a single token class', () => {
 			const result = resolve_composes(['p_lg'], BASE_DEFS, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(result, 'padding: var(--space_lg);');
-			if (result.ok) {
-				expect(result.warnings).toBe(null);
-			}
+			assert_resolved_declaration(result, 'padding: var(--space_lg);');
+			assert.ok(result.ok);
+			assert.strictEqual(result.warnings, null);
 		});
 
 		test('resolves multiple token classes', () => {
@@ -39,7 +36,7 @@ describe('resolve_composes', () => {
 				new Set(),
 				'test_class',
 			);
-			expect_resolved_declaration(
+			assert_resolved_declaration(
 				result,
 				'padding: var(--space_lg); margin: var(--space_md); gap: var(--space_sm);',
 			);
@@ -52,7 +49,7 @@ describe('resolve_composes', () => {
 				box: {declaration: 'display: flex; flex-direction: column;'},
 			};
 			const result = resolve_composes(['box'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(result, 'display: flex; flex-direction: column;');
+			assert_resolved_declaration(result, 'display: flex; flex-direction: column;');
 		});
 	});
 
@@ -69,7 +66,7 @@ describe('resolve_composes', () => {
 				new Set(),
 				'test_class',
 			);
-			expect_resolved_declaration(
+			assert_resolved_declaration(
 				result,
 				'padding: var(--space_lg); border-radius: var(--border_radius_md);',
 			);
@@ -82,7 +79,7 @@ describe('resolve_composes', () => {
 				panel: {composes: ['panel_base', 'shadow_md']},
 			};
 			const result = resolve_composes(['panel'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(
+			assert_resolved_declaration(
 				result,
 				'padding: var(--space_lg); border-radius: var(--border_radius_md); box-shadow: var(--shadow_md);',
 			);
@@ -96,7 +93,7 @@ describe('resolve_composes', () => {
 				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);'},
 			};
 			const result = resolve_composes(['card'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(
+			assert_resolved_declaration(
 				result,
 				'padding: var(--space_lg); border-radius: var(--border_radius_md); --card-bg: var(--shade_10);',
 			);
@@ -136,12 +133,10 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain('Circular reference detected');
-				expect(result.error.message).toContain(expectedMessage);
-			}
+			assert.ok(!result.ok);
+			assert.strictEqual(result.error.level, 'error');
+			assert.include(result.error.message, 'Circular reference detected');
+			assert.include(result.error.message, expectedMessage);
 		});
 	});
 
@@ -155,12 +150,10 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain('Unknown class "unknown_class" in composes array');
-				expect(result.error.identifier).toBe('test_class');
-			}
+			assert.ok(!result.ok);
+			assert.strictEqual(result.error.level, 'error');
+			assert.include(result.error.message, 'Unknown class "unknown_class" in composes array');
+			assert.strictEqual(result.error.identifier, 'test_class');
 		});
 
 		test('returns error for unknown nested composes', () => {
@@ -169,7 +162,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['wrapper'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_resolution_error(result, 'Unknown class "nonexistent" in composes array');
+			assert_resolution_error(result, 'Unknown class "nonexistent" in composes array');
 		});
 	});
 
@@ -189,14 +182,13 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.level).toBe('error');
-				expect(result.error.message).toContain(
-					'Cannot reference ruleset class "clickable" in composes array',
-				);
-				expect(result.error.suggestion).toContain('multiple selectors');
-			}
+			assert.ok(!result.ok);
+			assert.strictEqual(result.error.level, 'error');
+			assert.include(
+				result.error.message,
+				'Cannot reference ruleset class "clickable" in composes array',
+			);
+			assert.include(result.error.suggestion, 'multiple selectors');
 		});
 	});
 
@@ -210,7 +202,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['hover:*'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_resolution_error(result, 'Cannot reference interpreter pattern');
+			assert_resolution_error(result, 'Cannot reference interpreter pattern');
 		});
 	});
 
@@ -218,11 +210,9 @@ describe('resolve_composes', () => {
 		test('handles empty composes array', () => {
 			const result = resolve_composes([], {}, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('');
-				expect(result.warnings).toBe(null);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, '');
+			assert.strictEqual(result.warnings, null);
 		});
 	});
 
@@ -239,7 +229,7 @@ describe('resolve_composes', () => {
 				new Set(),
 				'test_class',
 			);
-			expect_resolved_declaration(result, 'padding: var(--space_lg);');
+			assert_resolved_declaration(result, 'padding: var(--space_lg);');
 		});
 	});
 
@@ -254,11 +244,9 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red; padding: 10px; margin: 10px;');
-				expect(result.warnings).toBe(null);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red; padding: 10px; margin: 10px;');
+			assert.strictEqual(result.warnings, null);
 		});
 
 		test('deduplicates deeper diamond silently', () => {
@@ -270,11 +258,9 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['c'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('font-size: 16px; color: blue; color: green;');
-				expect(result.warnings).toBe(null);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'font-size: 16px; color: blue; color: green;');
+			assert.strictEqual(result.warnings, null);
 		});
 
 		test('warns on redundant class included by sibling', () => {
@@ -286,15 +272,14 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red; padding: 10px;');
-				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.message).toBe('Class "d" is redundant');
-				expect(result.warnings?.[0]?.suggestion).toBe(
-					'Already included by another class in this definition',
-				);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red; padding: 10px;');
+			assert.strictEqual(result.warnings?.length, 1);
+			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
+			assert.strictEqual(
+				result.warnings?.[0]?.suggestion,
+				'Already included by another class in this definition',
+			);
 		});
 
 		test('warns on all redundant classes', () => {
@@ -305,13 +290,11 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red; padding: 10px;');
-				expect(result.warnings?.length).toBe(2);
-				expect(result.warnings?.[0]?.message).toBe('Class "d" is redundant');
-				expect(result.warnings?.[1]?.message).toBe('Class "b" is redundant');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red; padding: 10px;');
+			assert.strictEqual(result.warnings?.length, 2);
+			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
+			assert.strictEqual(result.warnings?.[1]?.message, 'Class "b" is redundant');
 		});
 
 		test('warns on explicit duplicate in composes array', () => {
@@ -321,12 +304,10 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['dup'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('padding: var(--space_lg);');
-				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.message).toBe('Class "p_lg" is redundant');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'padding: var(--space_lg);');
+			assert.strictEqual(result.warnings?.length, 1);
+			assert.strictEqual(result.warnings?.[0]?.message, 'Class "p_lg" is redundant');
 		});
 
 		test('warns on explicit class after diamond deps include it', () => {
@@ -338,12 +319,10 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red; padding: 10px; margin: 10px;');
-				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.message).toBe('Class "d" is redundant');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red; padding: 10px; margin: 10px;');
+			assert.strictEqual(result.warnings?.length, 1);
+			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
 		});
 	});
 
@@ -360,10 +339,8 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, '');
 		});
 
 		test('handles class with empty composes array and declaration', () => {
@@ -377,7 +354,7 @@ describe('resolve_composes', () => {
 				new Set(),
 				'test_class',
 			);
-			expect_resolved_declaration(result, 'color: blue;');
+			assert_resolved_declaration(result, 'color: blue;');
 		});
 	});
 
@@ -389,7 +366,7 @@ describe('resolve_composes', () => {
 				a: {composes: ['b'], declaration: 'margin: 20px;'},
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(result, 'color: red; padding: 10px; margin: 20px;');
+			assert_resolved_declaration(result, 'color: red; padding: 10px; margin: 20px;');
 		});
 	});
 
@@ -406,7 +383,7 @@ describe('resolve_composes', () => {
 				new Set(),
 				'test_class',
 			);
-			expect_resolved_declaration(result, 'padding: 10px; padding: 20px;');
+			assert_resolved_declaration(result, 'padding: 10px; padding: 20px;');
 		});
 	});
 
@@ -416,7 +393,7 @@ describe('resolve_composes', () => {
 				spaced: {declaration: '  padding: 10px;  '},
 			};
 			const result = resolve_composes(['spaced'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(result, 'padding: 10px;');
+			assert_resolved_declaration(result, 'padding: 10px;');
 		});
 
 		test('joins declarations with single space', () => {
@@ -425,7 +402,7 @@ describe('resolve_composes', () => {
 				b: {declaration: 'padding: 10px;'},
 			};
 			const result = resolve_composes(['a', 'b'], definitions, new Set(), new Set(), 'test_class');
-			expect_resolved_declaration(result, 'color: red; padding: 10px;');
+			assert_resolved_declaration(result, 'color: red; padding: 10px;');
 		});
 
 		test('trims whitespace-only declarations and warns', () => {
@@ -440,12 +417,10 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('');
-				expect(result.warnings).not.toBe(null);
-				expect(result.warnings?.[0]?.message).toContain('empty declaration');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, '');
+			assert.notStrictEqual(result.warnings, null);
+			assert.include(result.warnings?.[0]?.message, 'empty declaration');
 		});
 	});
 
@@ -463,11 +438,9 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('Circular reference detected');
-				expect(result.error.message).toContain('outer');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'Circular reference detected');
+			assert.include(result.error.message, 'outer');
 		});
 	});
 
@@ -480,7 +453,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['outer'], definitions, new Set(), new Set(), 'test_class');
 
-			expect_resolution_error(
+			assert_resolution_error(
 				result,
 				'Cannot reference ruleset class "clickable" in composes array',
 			);
@@ -500,14 +473,12 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('');
-				expect(result.warnings).not.toBe(null);
-				expect(result.warnings?.[0]?.level).toBe('warning');
-				expect(result.warnings?.[0]?.message).toContain('empty declaration');
-				expect(result.warnings?.[0]?.identifier).toBe('empty_decl');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, '');
+			assert.notStrictEqual(result.warnings, null);
+			assert.strictEqual(result.warnings?.[0]?.level, 'warning');
+			assert.include(result.warnings?.[0]?.message, 'empty declaration');
+			assert.strictEqual(result.warnings?.[0]?.identifier, 'empty_decl');
 		});
 
 		test('skips empty declarations when joining and warns', () => {
@@ -523,13 +494,11 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red;');
-				expect(result.warnings).not.toBe(null);
-				expect(result.warnings?.length).toBe(1);
-				expect(result.warnings?.[0]?.identifier).toBe('empty');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red;');
+			assert.notStrictEqual(result.warnings, null);
+			assert.strictEqual(result.warnings?.length, 1);
+			assert.strictEqual(result.warnings?.[0]?.identifier, 'empty');
 		});
 
 		test('collects multiple empty declaration warnings', () => {
@@ -546,13 +515,11 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red;');
-				expect(result.warnings?.length).toBe(2);
-				expect(result.warnings?.[0]?.identifier).toBe('empty1');
-				expect(result.warnings?.[1]?.identifier).toBe('empty2');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red;');
+			assert.strictEqual(result.warnings?.length, 2);
+			assert.strictEqual(result.warnings?.[0]?.identifier, 'empty1');
+			assert.strictEqual(result.warnings?.[1]?.identifier, 'empty2');
 		});
 	});
 
@@ -570,10 +537,8 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			expect_error(result);
-			if (!result.ok) {
-				expect(result.error.message).toContain('ruleset_class');
-			}
+			assert.ok(!result.ok);
+			assert.include(result.error.message, 'ruleset_class');
 		});
 	});
 
@@ -592,7 +557,7 @@ describe('resolve_composes', () => {
 				l1: {composes: ['l2']},
 			};
 			const result = resolve_composes(['l1'], definitions, new Set(), new Set(), 'test');
-			expect_resolved_declaration(result, 'color: red;');
+			assert_resolved_declaration(result, 'color: red;');
 		});
 
 		test('error on missing class mid-chain', () => {
@@ -602,7 +567,7 @@ describe('resolve_composes', () => {
 				// 'b' is missing
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test');
-			expect_resolution_error(result, 'Unknown class "b"');
+			assert_resolution_error(result, 'Unknown class "b"');
 		});
 
 		test('diamond with deep shared node', () => {
@@ -617,12 +582,10 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test');
 
-			expect_ok(result);
-			if (result.ok) {
-				// f, e, d should appear once despite diamond
-				expect(count_css_occurrences(result.declaration, 'font-size')).toBe(1);
-				expect(count_css_occurrences(result.declaration, 'color: blue')).toBe(1);
-			}
+			assert.ok(result.ok);
+			// f, e, d should appear once despite diamond
+			assert.strictEqual(count_css_occurrences(result.declaration, 'font-size'), 1);
+			assert.strictEqual(count_css_occurrences(result.declaration, 'color: blue'), 1);
 		});
 
 		test('wide diamond with many branches', () => {
@@ -637,14 +600,12 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['top'], definitions, new Set(), new Set(), 'test');
 
-			expect_ok(result);
-			if (result.ok) {
-				// base should only appear once
-				expect(count_css_occurrences(result.declaration, 'color: red')).toBe(1);
-				// all branches should be present
-				expect(result.declaration).toContain('padding: 1px');
-				expect(result.declaration).toContain('padding: 4px');
-			}
+			assert.ok(result.ok);
+			// base should only appear once
+			assert.strictEqual(count_css_occurrences(result.declaration, 'color: red'), 1);
+			// all branches should be present
+			assert.include(result.declaration, 'padding: 1px');
+			assert.include(result.declaration, 'padding: 4px');
 		});
 	});
 });
@@ -655,29 +616,25 @@ describe('resolve_class_definition', () => {
 			const def: CssClassDefinitionStatic = {declaration: 'color: red;'};
 			const result = resolve_class_definition(def, 'test', {});
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('color: red;');
-				expect(result.warnings).toBe(null);
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'color: red;');
+			assert.strictEqual(result.warnings, null);
 		});
 
 		test('trims declaration whitespace', () => {
 			const def: CssClassDefinitionStatic = {declaration: '  color: red;  '};
 			const result = resolve_class_definition(def, 'test', {});
-			expect_resolved_declaration(result, 'color: red;');
+			assert_resolved_declaration(result, 'color: red;');
 		});
 
 		test('warns about empty declaration', () => {
 			const def: CssClassDefinitionStatic = {declaration: ''};
 			const result = resolve_class_definition(def, 'test', {});
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('');
-				expect(result.warnings).not.toBe(null);
-				expect(result.warnings?.[0]?.message).toContain('empty declaration');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, '');
+			assert.notStrictEqual(result.warnings, null);
+			assert.include(result.warnings?.[0]?.message, 'empty declaration');
 		});
 	});
 
@@ -688,7 +645,7 @@ describe('resolve_class_definition', () => {
 			};
 			const def: CssClassDefinitionStatic = {composes: ['p_lg']};
 			const result = resolve_class_definition(def, 'test', definitions);
-			expect_resolved_declaration(result, 'padding: var(--space_lg);');
+			assert_resolved_declaration(result, 'padding: var(--space_lg);');
 		});
 	});
 
@@ -702,7 +659,7 @@ describe('resolve_class_definition', () => {
 				declaration: 'margin: 10px;',
 			};
 			const result = resolve_class_definition(def, 'test', definitions);
-			expect_resolved_declaration(result, 'padding: var(--space_lg); margin: 10px;');
+			assert_resolved_declaration(result, 'padding: var(--space_lg); margin: 10px;');
 		});
 
 		test('trims declaration in combined output', () => {
@@ -714,7 +671,7 @@ describe('resolve_class_definition', () => {
 				declaration: '  margin: 10px;  ',
 			};
 			const result = resolve_class_definition(def, 'test', definitions);
-			expect_resolved_declaration(result, 'padding: var(--space_lg); margin: 10px;');
+			assert_resolved_declaration(result, 'padding: var(--space_lg); margin: 10px;');
 		});
 
 		test('warns about empty declaration with composes', () => {
@@ -727,12 +684,10 @@ describe('resolve_class_definition', () => {
 			};
 			const result = resolve_class_definition(def, 'test', definitions);
 
-			expect_ok(result);
-			if (result.ok) {
-				expect(result.declaration).toBe('padding: var(--space_lg);');
-				expect(result.warnings).not.toBe(null);
-				expect(result.warnings?.[0]?.message).toContain('empty declaration');
-			}
+			assert.ok(result.ok);
+			assert.strictEqual(result.declaration, 'padding: var(--space_lg);');
+			assert.notStrictEqual(result.warnings, null);
+			assert.include(result.warnings?.[0]?.message, 'empty declaration');
 		});
 	});
 
@@ -740,7 +695,7 @@ describe('resolve_class_definition', () => {
 		test('returns empty declaration for ruleset', () => {
 			const def: CssClassDefinitionStatic = {ruleset: '.test { color: red; }'};
 			const result = resolve_class_definition(def, 'test', {});
-			expect_resolved_declaration(result, '');
+			assert_resolved_declaration(result, '');
 		});
 	});
 
@@ -752,7 +707,7 @@ describe('resolve_class_definition', () => {
 			const def: CssClassDefinitionStatic = {composes: ['self_ref']};
 			const result = resolve_class_definition(def, 'self_ref', definitions);
 
-			expect_resolution_error(result, 'Circular reference');
+			assert_resolution_error(result, 'Circular reference');
 		});
 	});
 
@@ -761,7 +716,7 @@ describe('resolve_class_definition', () => {
 			const def: CssClassDefinitionStatic = {composes: ['nonexistent']};
 			const result = resolve_class_definition(def, 'test', {});
 
-			expect_resolution_error(result, 'Unknown class "nonexistent" in composes array');
+			assert_resolution_error(result, 'Unknown class "nonexistent" in composes array');
 		});
 	});
 });

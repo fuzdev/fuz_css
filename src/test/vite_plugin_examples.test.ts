@@ -13,7 +13,7 @@
  * @module
  */
 
-import {test, expect, describe, beforeAll} from 'vitest';
+import {test, assert, describe, beforeAll} from 'vitest';
 import {join} from 'node:path';
 import {readdir, readFile} from 'node:fs/promises';
 import {execSync} from 'node:child_process';
@@ -218,23 +218,23 @@ const create_example_tests = (example_name: string, app_file: string): void => {
 		}, 120_000); // 2 minute timeout for install + build
 
 		test('generates fuz_css section', () => {
-			expect(fuz_css, 'CSS should contain fuz_css marker comments').not.toBeNull();
+			assert.isNotNull(fuz_css, 'CSS should contain fuz_css marker comments');
 		});
 
 		test(`extracts all expected classes from ${app_file} and dependencies`, () => {
 			const missing = EXPECTED_CLASSES.filter((cls) => !extracted_classes.includes(cls));
-			expect(missing, `Missing classes: ${missing.join(', ')}`).toEqual([]);
+			assert.deepEqual(missing, [], `Missing classes: ${missing.join(', ')}`);
 		});
 
 		test('does not generate unexpected classes', () => {
 			const extra = extracted_classes.filter((cls) => !EXPECTED_CLASSES.includes(cls));
-			expect(extra, `Unexpected classes: ${extra.join(', ')}`).toEqual([]);
+			assert.deepEqual(extra, [], `Unexpected classes: ${extra.join(', ')}`);
 		});
 
 		test('generates valid CSS without errors', () => {
-			expect(css).not.toContain('undefined');
-			expect(css).not.toContain('[object Object]');
-			expect(css).not.toContain('NaN');
+			assert.notInclude(css, 'undefined');
+			assert.notInclude(css, '[object Object]');
+			assert.notInclude(css, 'NaN');
 		});
 	});
 };
@@ -249,15 +249,17 @@ create_example_tests('vite-svelte', 'App.svelte');
 describe.skipIf(SKIP)('cross-example consistency', () => {
 	test('all examples produce the same classes', () => {
 		const examples = [...example_results.keys()];
-		expect(examples.length, 'Should have results from all 4 examples').toBe(4);
+		assert.strictEqual(examples.length, 4, 'Should have results from all 4 examples');
 
 		const first_example = examples[0]!;
 		const first_classes = example_results.get(first_example)!;
 
 		for (const example of examples.slice(1)) {
 			const classes = example_results.get(example)!;
-			expect(classes, `${example} should produce same classes as ${first_example}`).toEqual(
+			assert.deepEqual(
+				classes,
 				first_classes,
+				`${example} should produce same classes as ${first_example}`,
 			);
 		}
 	});

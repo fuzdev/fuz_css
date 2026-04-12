@@ -1,4 +1,4 @@
-import {expect} from 'vitest';
+import {assert} from 'vitest';
 
 import {
 	type ExtractionResult,
@@ -42,7 +42,7 @@ export const class_names_equal = (
 	expected: Array<string>,
 ): void => {
 	const actual = result.classes ? [...result.classes.keys()] : [];
-	expect(actual).toEqual(expected);
+	assert.deepEqual(actual, expected);
 };
 
 /**
@@ -51,7 +51,7 @@ export const class_names_equal = (
  */
 export const class_set_equal = (result: Set<string> | null, expected: Array<string>): void => {
 	const actual = result ? [...result] : [];
-	expect(actual).toEqual(expected);
+	assert.deepEqual(actual, expected);
 };
 
 /**
@@ -64,7 +64,7 @@ export const svelte_script = (script: string, template = '<div></div>'): string 
  * Assert no classes extracted.
  */
 export const assert_no_classes = (result: {classes: Map<string, unknown> | null}): void => {
-	expect(result.classes).toBeNull();
+	assert.isNull(result.classes);
 };
 
 /**
@@ -76,10 +76,10 @@ export const assert_elements = (
 	absent: Array<string> = [],
 ): void => {
 	for (const el of present) {
-		expect(result.elements?.has(el), `Expected "${el}" present`).toBe(true);
+		assert.isTrue(result.elements?.has(el) ?? false, `Expected "${el}" present`);
 	}
 	for (const el of absent) {
-		expect(result.elements?.has(el), `Expected "${el}" absent`).toBe(false);
+		assert.isFalse(result.elements?.has(el) ?? false, `Expected "${el}" absent`);
 	}
 };
 
@@ -92,11 +92,11 @@ export const assert_diagnostic = (
 	contains: string,
 	file?: string,
 ): void => {
-	expect(result.diagnostics, 'Expected diagnostics array').not.toBeNull();
-	const match = result.diagnostics!.find((d) => d.level === level && d.message.includes(contains));
-	expect(match, `Expected ${level} containing "${contains}"`).toBeDefined();
+	assert.isNotNull(result.diagnostics, 'Expected diagnostics array');
+	const match = result.diagnostics.find((d) => d.level === level && d.message.includes(contains));
+	assert.isDefined(match, `Expected ${level} containing "${contains}"`);
 	if (file) {
-		expect(match!.location.file).toBe(file);
+		assert.strictEqual(match.location.file, file);
 	}
 };
 
@@ -104,7 +104,7 @@ export const assert_diagnostic = (
  * Assert no diagnostics were emitted.
  */
 export const assert_no_diagnostics = (result: ExtractionResult): void => {
-	expect(result.diagnostics).toBeNull();
+	assert.isNull(result.diagnostics);
 };
 
 /**
@@ -112,9 +112,9 @@ export const assert_no_diagnostics = (result: ExtractionResult): void => {
  */
 export const assert_diagnostic_count = (result: ExtractionResult, count: number): void => {
 	if (count === 0) {
-		expect(result.diagnostics).toBeNull();
+		assert.isNull(result.diagnostics);
 	} else {
-		expect(result.diagnostics?.length, `Expected ${count} diagnostics`).toBe(count);
+		assert.strictEqual(result.diagnostics?.length, count, `Expected ${count} diagnostics`);
 	}
 };
 
@@ -122,16 +122,14 @@ export const assert_diagnostic_count = (result: ExtractionResult, count: number)
  * Assert a variable is tracked.
  */
 export const assert_tracked_var = (result: ExtractionResult, name: string): void => {
-	expect(result.tracked_vars?.has(name), `Expected "${name}" to be tracked`).toBe(true);
+	assert.isTrue(result.tracked_vars?.has(name) ?? false, `Expected "${name}" to be tracked`);
 };
 
 /**
  * Assert a variable is not tracked.
  */
 export const assert_not_tracked_var = (result: ExtractionResult, name: string): void => {
-	expect(result.tracked_vars?.has(name) ?? false, `Expected "${name}" to not be tracked`).toBe(
-		false,
-	);
+	assert.isFalse(result.tracked_vars?.has(name) ?? false, `Expected "${name}" to not be tracked`);
 };
 
 /**
@@ -144,10 +142,10 @@ export const assert_class_at_line = (
 	file?: string,
 ): void => {
 	const locations = result.classes?.get(class_name);
-	expect(locations, `Expected class "${class_name}" to exist`).toBeDefined();
-	expect(locations![0]!.line).toBe(line);
+	assert.isDefined(locations, `Expected class "${class_name}" to exist`);
+	assert.strictEqual(locations[0]!.line, line);
 	if (file) {
-		expect(locations![0]!.file).toBe(file);
+		assert.strictEqual(locations[0]!.file, file);
 	}
 };
 
@@ -160,10 +158,10 @@ export const assert_class_locations = (
 	expected_lines: Array<number>,
 ): void => {
 	const locations = result.classes?.get(class_name);
-	expect(locations, `Expected class "${class_name}" to exist`).toBeDefined();
-	expect(locations!.length).toBe(expected_lines.length);
+	assert.isDefined(locations, `Expected class "${class_name}" to exist`);
+	assert.strictEqual(locations.length, expected_lines.length);
 	for (let i = 0; i < expected_lines.length; i++) {
-		expect(locations![i]!.line).toBe(expected_lines[i]);
+		assert.strictEqual(locations[i]!.line, expected_lines[i]);
 	}
 };
 
@@ -174,9 +172,9 @@ export const assert_explicit_classes = (
 	result: ExtractionResult,
 	expected: Array<string>,
 ): void => {
-	expect(result.explicit_classes, 'Expected explicit_classes to be present').not.toBeNull();
-	const actual = [...result.explicit_classes!].sort();
-	expect(actual).toEqual([...expected].sort());
+	assert.isNotNull(result.explicit_classes, 'Expected explicit_classes to be present');
+	const actual = [...result.explicit_classes].sort();
+	assert.deepEqual(actual, [...expected].sort());
 };
 
 /**
@@ -186,16 +184,16 @@ export const assert_explicit_elements = (
 	result: ExtractionResult,
 	expected: Array<string>,
 ): void => {
-	expect(result.explicit_elements, 'Expected explicit_elements to be present').not.toBeNull();
-	const actual = [...result.explicit_elements!].sort();
-	expect(actual).toEqual([...expected].sort());
+	assert.isNotNull(result.explicit_elements, 'Expected explicit_elements to be present');
+	const actual = [...result.explicit_elements].sort();
+	assert.deepEqual(actual, [...expected].sort());
 };
 
 /**
  * Assert no explicit elements.
  */
 export const assert_no_explicit_elements = (result: ExtractionResult): void => {
-	expect(result.explicit_elements).toBeNull();
+	assert.isNull(result.explicit_elements);
 };
 
 /**
@@ -205,14 +203,14 @@ export const assert_explicit_variables = (
 	result: ExtractionResult,
 	expected: Array<string>,
 ): void => {
-	expect(result.explicit_variables, 'Expected explicit_variables to be present').not.toBeNull();
-	const actual = [...result.explicit_variables!].sort();
-	expect(actual).toEqual([...expected].sort());
+	assert.isNotNull(result.explicit_variables, 'Expected explicit_variables to be present');
+	const actual = [...result.explicit_variables].sort();
+	assert.deepEqual(actual, [...expected].sort());
 };
 
 /**
  * Assert no explicit variables.
  */
 export const assert_no_explicit_variables = (result: ExtractionResult): void => {
-	expect(result.explicit_variables).toBeNull();
+	assert.isNull(result.explicit_variables);
 };

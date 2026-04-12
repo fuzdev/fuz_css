@@ -5,7 +5,7 @@
  * to reduce duplication and improve test readability.
  */
 
-import {expect} from 'vitest';
+import {assert} from 'vitest';
 
 import type {SourceLocation, ExtractionDiagnostic, GenerationDiagnostic} from '$lib/diagnostics.js';
 import type {CssClassDefinition} from '$lib/css_class_generation.js';
@@ -98,82 +98,39 @@ export const make_extraction_diagnostic = (
 });
 
 //
-// Result Assertion Helpers
-//
-
-/**
- * Asserts that a result with an `ok` property is successful.
- * Provides a clear failure message.
- */
-export const expect_ok = <T extends {ok: boolean}>(result: T, msg?: string): void => {
-	expect(result.ok, msg ?? 'Expected result.ok to be true').toBe(true);
-};
-
-/**
- * Asserts that a result with an `ok` property failed.
- * Provides a clear failure message.
- */
-export const expect_error = <T extends {ok: boolean}>(result: T, msg?: string): void => {
-	expect(result.ok, msg ?? 'Expected result.ok to be false').toBe(false);
-};
-
-/**
- * Asserts a result is ok and returns the narrowed type.
- * Useful for tests that need to access properties only available on success.
- */
-export const assert_result_ok = <TOk, TErr>(
-	result: ({ok: true} & TOk) | ({ok: false} & TErr),
-	msg?: string,
-): TOk & {ok: true} => {
-	expect(result.ok, msg ?? 'Expected result.ok to be true').toBe(true);
-	return result as TOk & {ok: true};
-};
-
-/**
- * Asserts a result is error and returns the narrowed type.
- */
-export const assert_result_error = <TOk, TErr>(
-	result: ({ok: true} & TOk) | ({ok: false} & TErr),
-	msg?: string,
-): TErr & {ok: false} => {
-	expect(result.ok, msg ?? 'Expected result.ok to be false').toBe(false);
-	return result as TErr & {ok: false};
-};
-
-//
 // Set Membership Helpers
 //
 
 /**
  * Asserts that a Set contains a specific value.
  */
-export const expect_has = <T>(set: Set<T>, value: T, label?: string): void => {
+export const assert_has = <T>(set: Set<T>, value: T, label?: string): void => {
 	const name = label ?? String(value);
-	expect(set.has(value), `Expected set to contain "${name}"`).toBe(true);
+	assert.isTrue(set.has(value), `Expected set to contain "${name}"`);
 };
 
 /**
  * Asserts that a Set does not contain a specific value.
  */
-export const expect_not_has = <T>(set: Set<T>, value: T, label?: string): void => {
+export const assert_not_has = <T>(set: Set<T>, value: T, label?: string): void => {
 	const name = label ?? String(value);
-	expect(set.has(value), `Expected set NOT to contain "${name}"`).toBe(false);
+	assert.isFalse(set.has(value), `Expected set NOT to contain "${name}"`);
 };
 
 /**
  * Asserts that a Map has a specific key.
  */
-export const expect_map_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
+export const assert_map_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
 	const name = label ?? String(key);
-	expect(map.has(key), `Expected map to have key "${name}"`).toBe(true);
+	assert.isTrue(map.has(key), `Expected map to have key "${name}"`);
 };
 
 /**
  * Asserts that a Map does not have a specific key.
  */
-export const expect_map_not_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
+export const assert_map_not_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
 	const name = label ?? String(key);
-	expect(map.has(key), `Expected map NOT to have key "${name}"`).toBe(false);
+	assert.isFalse(map.has(key), `Expected map NOT to have key "${name}"`);
 };
 
 //
@@ -183,18 +140,18 @@ export const expect_map_not_has = <K, V>(map: Map<K, V>, key: K, label?: string)
 /**
  * Asserts that a CSS string contains all specified patterns.
  */
-export const expect_css_contains = (css: string, ...patterns: Array<string>): void => {
+export const assert_css_contains = (css: string, ...patterns: Array<string>): void => {
 	for (const pattern of patterns) {
-		expect(css, `Expected CSS to contain "${pattern}"`).toContain(pattern);
+		assert.include(css, pattern, `Expected CSS to contain "${pattern}"`);
 	}
 };
 
 /**
  * Asserts that a CSS string does not contain any of the specified patterns.
  */
-export const expect_css_not_contains = (css: string, ...patterns: Array<string>): void => {
+export const assert_css_not_contains = (css: string, ...patterns: Array<string>): void => {
 	for (const pattern of patterns) {
-		expect(css, `Expected CSS NOT to contain "${pattern}"`).not.toContain(pattern);
+		assert.notInclude(css, pattern, `Expected CSS NOT to contain "${pattern}"`);
 	}
 };
 
@@ -203,25 +160,26 @@ export const expect_css_not_contains = (css: string, ...patterns: Array<string>)
  * Useful for testing cascade/specificity ordering in CSS.
  *
  * @example
- * expect_css_order(result.css, '.aaa', '.zzz', '.mmm');
- * expect_css_order(result.base_css, 'color: blue', 'color: darkblue');
+ * assert_css_order(result.css, '.aaa', '.zzz', '.mmm');
+ * assert_css_order(result.base_css, 'color: blue', 'color: darkblue');
  */
-export const expect_css_order = (css: string, ...patterns: Array<string>): void => {
+export const assert_css_order = (css: string, ...patterns: Array<string>): void => {
 	const indices = patterns.map((p) => ({pattern: p, idx: css.indexOf(p)}));
 
 	// First, check all patterns exist
 	for (const {pattern, idx} of indices) {
-		expect(idx, `Expected string to contain "${pattern}"`).toBeGreaterThan(-1);
+		assert.isAbove(idx, -1, `Expected string to contain "${pattern}"`);
 	}
 
 	// Then check ordering
 	for (let i = 0; i < indices.length - 1; i++) {
 		const current = indices[i]!;
 		const next = indices[i + 1]!;
-		expect(
+		assert.isBelow(
 			current.idx,
+			next.idx,
 			`Expected "${current.pattern}" to appear before "${next.pattern}"`,
-		).toBeLessThan(next.idx);
+		);
 	}
 };
 
@@ -240,27 +198,27 @@ export const count_css_occurrences = (css: string, pattern: string): number => {
 /**
  * Asserts that diagnostics array contains a diagnostic matching the criteria.
  */
-export const expect_diagnostic = (
+export const assert_diagnostic = (
 	diagnostics: Array<GenerationDiagnostic> | Array<ExtractionDiagnostic> | null,
 	level: 'error' | 'warning',
 	messageContains: string,
 ): void => {
-	expect(diagnostics, 'Expected diagnostics array to exist').not.toBeNull();
-	const match = diagnostics!.find((d) => d.level === level && d.message.includes(messageContains));
-	expect(match, `Expected ${level} diagnostic containing "${messageContains}"`).toBeDefined();
+	assert.isNotNull(diagnostics, 'Expected diagnostics array to exist');
+	const match = diagnostics.find((d) => d.level === level && d.message.includes(messageContains));
+	assert.isDefined(match, `Expected ${level} diagnostic containing "${messageContains}"`);
 };
 
 /**
  * Asserts that no diagnostics match the criteria.
  */
-export const expect_no_diagnostic = (
+export const assert_no_diagnostic = (
 	diagnostics: Array<GenerationDiagnostic> | Array<ExtractionDiagnostic> | null,
 	level: 'error' | 'warning',
 	messageContains: string,
 ): void => {
 	if (!diagnostics) return;
 	const match = diagnostics.find((d) => d.level === level && d.message.includes(messageContains));
-	expect(match, `Expected no ${level} diagnostic containing "${messageContains}"`).toBeUndefined();
+	assert.isUndefined(match, `Expected no ${level} diagnostic containing "${messageContains}"`);
 };
 
 /**
@@ -294,21 +252,21 @@ export const filter_diagnostics_by_message = <
 /**
  * Asserts that a variable exists in a graph's variable set.
  */
-export const expect_variable_exists = (
+export const assert_variable_exists = (
 	variables: Map<string, unknown> | Set<string>,
 	varName: string,
 ): void => {
 	const exists = variables instanceof Set ? variables.has(varName) : variables.has(varName);
-	expect(exists, `Expected variable "${varName}" to exist`).toBe(true);
+	assert.isTrue(exists, `Expected variable "${varName}" to exist`);
 };
 
 /**
  * Asserts that a warning array contains a cyclic dependency warning.
  */
-export const expect_cyclic_warning = (warnings: Array<string>): void => {
-	expect(warnings.length, 'Expected at least one warning').toBeGreaterThan(0);
+export const assert_cyclic_warning = (warnings: Array<string>): void => {
+	assert.isAbove(warnings.length, 0, 'Expected at least one warning');
 	const hasCyclic = warnings.some((w) => w.includes('Circular dependency'));
-	expect(hasCyclic, 'Expected a "Circular dependency" warning').toBe(true);
+	assert.isTrue(hasCyclic, 'Expected a "Circular dependency" warning');
 };
 
 //
@@ -318,30 +276,28 @@ export const expect_cyclic_warning = (warnings: Array<string>): void => {
 /**
  * Asserts resolution result is ok and has expected declaration.
  */
-export const expect_resolved_declaration = (
+export const assert_resolved_declaration = (
 	result: {ok: boolean; declaration?: string},
 	expected: string,
 ): void => {
-	expect(result.ok, 'Expected resolution to succeed').toBe(true);
-	if (result.ok) {
-		expect(result.declaration).toBe(expected);
-	}
+	assert.isTrue(result.ok, 'Expected resolution to succeed');
+	assert.strictEqual(result.declaration, expected);
 };
 
 /**
  * Asserts resolution result is error with message containing text.
  */
-export const expect_resolution_error = (
+export const assert_resolution_error = (
 	result: {ok: boolean; error?: {message: string}},
 	messageContains: string,
 ): void => {
-	expect(result.ok, 'Expected resolution to fail').toBe(false);
-	if (!result.ok && result.error) {
-		expect(
-			result.error.message,
-			`Expected error message to contain "${messageContains}"`,
-		).toContain(messageContains);
-	}
+	assert.isFalse(result.ok, 'Expected resolution to fail');
+	assert.isDefined(result.error);
+	assert.include(
+		result.error.message,
+		messageContains,
+		`Expected error message to contain "${messageContains}"`,
+	);
 };
 
 //
@@ -351,44 +307,44 @@ export const expect_resolution_error = (
 /**
  * Asserts that a parsed rule's variables_used set contains the variable.
  */
-export const expect_variable_used = (
+export const assert_variable_used = (
 	rule: {variables_used: Set<string>},
 	varName: string,
 ): void => {
-	expect(rule.variables_used.has(varName), `Expected rule to use variable "${varName}"`).toBe(true);
+	assert.isTrue(rule.variables_used.has(varName), `Expected rule to use variable "${varName}"`);
 };
 
 /**
  * Asserts that a parsed rule is a core rule with a specific reason.
  */
-export const expect_core_rule = (
+export const assert_core_rule = (
 	rule: {is_core: boolean; core_reason?: string},
 	reason: string,
 ): void => {
-	expect(rule.is_core, 'Expected rule to be a core rule').toBe(true);
-	expect(rule.core_reason).toBe(reason);
+	assert.isTrue(rule.is_core, 'Expected rule to be a core rule');
+	assert.strictEqual(rule.core_reason, reason);
 };
 
 /**
  * Asserts that a parsed rule extracts specific elements.
  */
-export const expect_rule_elements = (
+export const assert_rule_elements = (
 	rule: {elements: Set<string>},
 	...elements: Array<string>
 ): void => {
 	for (const element of elements) {
-		expect(rule.elements.has(element), `Expected rule to target element "${element}"`).toBe(true);
+		assert.isTrue(rule.elements.has(element), `Expected rule to target element "${element}"`);
 	}
 };
 
 /**
  * Asserts that a parsed rule extracts specific classes.
  */
-export const expect_rule_classes = (
+export const assert_rule_classes = (
 	rule: {classes: Set<string>},
 	...classes: Array<string>
 ): void => {
 	for (const cls of classes) {
-		expect(rule.classes.has(cls), `Expected rule to reference class "${cls}"`).toBe(true);
+		assert.isTrue(rule.classes.has(cls), `Expected rule to reference class "${cls}"`);
 	}
 };

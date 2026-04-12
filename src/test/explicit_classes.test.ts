@@ -1,8 +1,8 @@
-import {test, describe, expect} from 'vitest';
+import {test, describe, assert} from 'vitest';
 
 import {generate_classes_css} from '$lib/css_class_generation.js';
 import {css_class_composites} from '$lib/css_class_composites.js';
-import {expect_css_contains, loc} from './test_helpers.js';
+import {assert_css_contains, loc} from './test_helpers.js';
 
 /**
  * Tests for explicit_classes handling in generate_classes_css.
@@ -21,11 +21,11 @@ describe('explicit_classes diagnostics', () => {
 			explicit_classes: new Set(['unknown_class']),
 		});
 
-		expect(result.css).toBe('');
-		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.level).toBe('error');
-		expect(result.diagnostics[0]!.identifier).toBe('unknown_class');
-		expect(result.diagnostics[0]!.message).toContain('No matching class definition');
+		assert.strictEqual(result.css, '');
+		assert.lengthOf(result.diagnostics, 1);
+		assert.strictEqual(result.diagnostics[0]!.level, 'error');
+		assert.strictEqual(result.diagnostics[0]!.identifier, 'unknown_class');
+		assert.include(result.diagnostics[0]!.message, 'No matching class definition');
 	});
 
 	test('no diagnostic for non-explicit unresolved class without colon', () => {
@@ -37,8 +37,8 @@ describe('explicit_classes diagnostics', () => {
 			// Not in explicit_classes
 		});
 
-		expect(result.css).toBe('');
-		expect(result.diagnostics).toHaveLength(0);
+		assert.strictEqual(result.css, '');
+		assert.lengthOf(result.diagnostics, 0);
 	});
 
 	test('no diagnostic when explicit class resolves to definition', () => {
@@ -50,8 +50,8 @@ describe('explicit_classes diagnostics', () => {
 			explicit_classes: new Set(['box']),
 		});
 
-		expect_css_contains(result.css, '.box');
-		expect(result.diagnostics).toHaveLength(0);
+		assert_css_contains(result.css, '.box');
+		assert.lengthOf(result.diagnostics, 0);
 	});
 
 	test('error when interpreter pattern matches but returns error for explicit class', () => {
@@ -76,9 +76,9 @@ describe('explicit_classes diagnostics', () => {
 			explicit_classes: new Set(['invalid-property:value']),
 		});
 
-		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.level).toBe('error');
-		expect(result.diagnostics[0]!.message).toBe('Unknown CSS property "invalid-property"');
+		assert.lengthOf(result.diagnostics, 1);
+		assert.strictEqual(result.diagnostics[0]!.level, 'error');
+		assert.strictEqual(result.diagnostics[0]!.message, 'Unknown CSS property "invalid-property"');
 	});
 
 	test('warning when CSS property error for non-explicit class', () => {
@@ -104,9 +104,9 @@ describe('explicit_classes diagnostics', () => {
 		});
 
 		// Should have interpreter diagnostic but downgraded to warning
-		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.level).toBe('warning');
-		expect(result.diagnostics[0]!.message).toBe('Unknown CSS property "invalid-property"');
+		assert.lengthOf(result.diagnostics, 1);
+		assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+		assert.strictEqual(result.diagnostics[0]!.message, 'Unknown CSS property "invalid-property"');
 	});
 
 	test('structural errors remain errors for non-explicit classes', () => {
@@ -134,9 +134,9 @@ describe('explicit_classes diagnostics', () => {
 		});
 
 		// Structural errors should NOT be downgraded
-		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.level).toBe('error');
-		expect(result.diagnostics[0]!.message).toBe('Circular reference detected');
+		assert.lengthOf(result.diagnostics, 1);
+		assert.strictEqual(result.diagnostics[0]!.level, 'error');
+		assert.strictEqual(result.diagnostics[0]!.message, 'Circular reference detected');
 	});
 
 	test('error includes locations when provided', () => {
@@ -150,7 +150,7 @@ describe('explicit_classes diagnostics', () => {
 			class_locations: new Map([['unknown_class', [source_loc]]]),
 		});
 
-		expect(result.diagnostics).toHaveLength(1);
-		expect(result.diagnostics[0]!.locations).toEqual([source_loc]);
+		assert.lengthOf(result.diagnostics, 1);
+		assert.deepEqual(result.diagnostics[0]!.locations, [source_loc]);
 	});
 });

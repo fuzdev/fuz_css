@@ -5,7 +5,7 @@
  * similar to how @fuz-classes works for dynamic class names.
  */
 
-import {test, describe, beforeAll, expect} from 'vitest';
+import {test, describe, beforeAll, assert} from 'vitest';
 
 import {extract_from_svelte, extract_from_ts} from '$lib/css_class_extractor.js';
 import {
@@ -237,7 +237,7 @@ describe('combined @fuz-* comments', () => {
 <!-- @fuz-elements dialog -->
 <div class="foo"></div>
 `);
-		expect(result.explicit_classes).toEqual(new Set(['box', 'row']));
+		assert.deepEqual(result.explicit_classes, new Set(['box', 'row']));
 		assert_explicit_elements(result, ['dialog']);
 	});
 
@@ -249,7 +249,7 @@ describe('combined @fuz-* comments', () => {
 const x = 1;
 `),
 		);
-		expect(result.explicit_classes).toEqual(new Set(['dynamic_class']));
+		assert.deepEqual(result.explicit_classes, new Set(['dynamic_class']));
 		assert_explicit_elements(result, ['dialog']);
 	});
 
@@ -260,7 +260,7 @@ const x = 1;
 <!-- @fuz-variables shade_40 shade_50 -->
 <div class="foo"></div>
 `);
-		expect(result.explicit_classes).toEqual(new Set(['box', 'row']));
+		assert.deepEqual(result.explicit_classes, new Set(['box', 'row']));
 		assert_explicit_elements(result, ['dialog']);
 		assert_explicit_variables(result, ['shade_40', 'shade_50']);
 	});

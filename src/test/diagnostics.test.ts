@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {
 	format_diagnostic,
@@ -18,7 +18,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe('  - src/lib/Button.svelte:10:5: test warning message');
+		assert.strictEqual(result, '  - src/lib/Button.svelte:10:5: test warning message');
 	});
 
 	test('formats extraction diagnostic with suggestion', () => {
@@ -31,7 +31,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe('  - app.ts:1:1: deprecated syntax (use the new syntax instead)');
+		assert.strictEqual(result, '  - app.ts:1:1: deprecated syntax (use the new syntax instead)');
 	});
 
 	test('formats generation diagnostic with location', () => {
@@ -45,7 +45,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe('  - src/App.svelte:5:12: invalid:value: unknown CSS property');
+		assert.strictEqual(result, '  - src/App.svelte:5:12: invalid:value: unknown CSS property');
 	});
 
 	test('formats generation diagnostic without location (from additional_classes)', () => {
@@ -59,7 +59,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe('  - bad_class: invalid class');
+		assert.strictEqual(result, '  - bad_class: invalid class');
 	});
 
 	test('formats generation diagnostic with suggestion', () => {
@@ -73,7 +73,10 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe(`  - test.ts:1:1: colour:red: unknown property (did you mean "color"?)`);
+		assert.strictEqual(
+			result,
+			`  - test.ts:1:1: colour:red: unknown property (did you mean "color"?)`,
+		);
 	});
 
 	test('formats generation diagnostic with empty locations array', () => {
@@ -87,7 +90,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		expect(result).toBe('  - test_class: test error');
+		assert.strictEqual(result, '  - test_class: test error');
 	});
 });
 
@@ -106,10 +109,10 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.name).toBe('CssGenerationError');
-		expect(error.diagnostics).toBe(diagnostics);
-		expect(error.message).toContain('CSS generation failed with 1 error');
-		expect(error.message).toContain('bad:class');
+		assert.strictEqual(error.name, 'CssGenerationError');
+		assert.strictEqual(error.diagnostics, diagnostics);
+		assert.include(error.message, 'CSS generation failed with 1 error');
+		assert.include(error.message, 'bad:class');
 	});
 
 	test('creates error with multiple error diagnostics', () => {
@@ -134,9 +137,9 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.message).toContain('CSS generation failed with 2 errors');
-		expect(error.message).toContain('class_a');
-		expect(error.message).toContain('class_b');
+		assert.include(error.message, 'CSS generation failed with 2 errors');
+		assert.include(error.message, 'class_a');
+		assert.include(error.message, 'class_b');
 	});
 
 	test('includes both errors and warnings in message', () => {
@@ -161,11 +164,11 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.message).toContain('1 error');
-		expect(error.message).toContain('1 warning');
-		expect(error.message).toContain('error_class');
-		expect(error.message).toContain('warning_class');
-		expect(error.diagnostics).toHaveLength(2);
+		assert.include(error.message, '1 error');
+		assert.include(error.message, '1 warning');
+		assert.include(error.message, 'error_class');
+		assert.include(error.message, 'warning_class');
+		assert.lengthOf(error.diagnostics, 2);
 	});
 
 	test('handles mixed extraction and generation diagnostics', () => {
@@ -189,15 +192,15 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.message).toContain('2 errors');
-		expect(error.message).toContain('extraction error');
-		expect(error.message).toContain('gen_class');
+		assert.include(error.message, '2 errors');
+		assert.include(error.message, 'extraction error');
+		assert.include(error.message, 'gen_class');
 	});
 
 	test('is instanceof Error', () => {
 		const error = new CssGenerationError([]);
-		expect(error).toBeInstanceOf(Error);
-		expect(error).toBeInstanceOf(CssGenerationError);
+		assert.instanceOf(error, Error);
+		assert.instanceOf(error, CssGenerationError);
 	});
 
 	test('handles warnings-only (for on_warning throw)', () => {
@@ -214,16 +217,16 @@ describe('CssGenerationError', () => {
 
 		const error = new CssGenerationError(diagnostics);
 
-		expect(error.message).toContain('1 warning');
-		expect(error.message).not.toContain('error');
-		expect(error.message).toContain('warn_class');
-		expect(error.diagnostics).toHaveLength(1);
+		assert.include(error.message, '1 warning');
+		assert.notInclude(error.message, 'error');
+		assert.include(error.message, 'warn_class');
+		assert.lengthOf(error.diagnostics, 1);
 	});
 
 	test('handles empty diagnostics', () => {
 		const error = new CssGenerationError([]);
 
-		expect(error.message).toContain('0 issues');
-		expect(error.diagnostics).toHaveLength(0);
+		assert.include(error.message, '0 issues');
+		assert.lengthOf(error.diagnostics, 0);
 	});
 });

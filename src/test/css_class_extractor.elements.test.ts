@@ -1,4 +1,4 @@
-import {test, expect, describe} from 'vitest';
+import {test, assert, describe} from 'vitest';
 
 import {extract_from_svelte} from '$lib/css_class_extractor.js';
 
@@ -155,7 +155,7 @@ describe('element detection', () => {
 </script>
 `;
 		const result = extract_from_svelte(source);
-		expect(result.elements).toBeNull();
+		assert.isNull(result.elements);
 	});
 
 	test('classes from svelte:element are still extracted', () => {
@@ -166,7 +166,7 @@ describe('element detection', () => {
 <svelte:element this={tag} class="dynamic">Content</svelte:element>
 `;
 		const result = extract_from_svelte(source);
-		expect(result.classes?.has('dynamic')).toBe(true);
+		assert.isTrue(result.classes?.has('dynamic'));
 	});
 
 	test('classes from slot fallback content are extracted', () => {
@@ -178,6 +178,6 @@ describe('element detection', () => {
 </slot>
 `;
 		const result = extract_from_svelte(source);
-		expect(result.classes?.has('default-header')).toBe(true);
+		assert.isTrue(result.classes?.has('default-header'));
 	});
 });
