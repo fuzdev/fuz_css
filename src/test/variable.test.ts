@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {StyleVariable} from '$lib/variable.js';
+import {StyleVariable, StyleVariableName} from '$lib/variable.js';
 
 describe('StyleVariable', () => {
 	describe('valid schemas', () => {
@@ -32,5 +32,23 @@ describe('StyleVariable', () => {
 			assert.isFalse(result.success);
 			assert.isTrue(result.error.issues.some((i) => i.message.includes('must differ')));
 		});
+	});
+});
+
+describe('StyleVariableName', () => {
+	test.each(['foo', 'shade_40', 'color_a_50', 'a1', 'x'])('accepts valid name "%s"', (name) => {
+		assert.isTrue(StyleVariableName.safeParse(name).success);
+	});
+
+	test.each([
+		['Uppercase', 'starts with uppercase'],
+		['_leading', 'starts with underscore'],
+		['trailing_', 'ends with underscore'],
+		['123abc', 'starts with digit'],
+		['foo-bar', 'contains hyphen'],
+		['', 'empty string'],
+		['foo bar', 'contains space'],
+	])('rejects invalid name "%s" (%s)', (name) => {
+		assert.isFalse(StyleVariableName.safeParse(name).success);
 	});
 });

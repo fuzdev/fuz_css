@@ -13,6 +13,7 @@ import {
 	has_modifiers,
 	has_extracted_modifiers,
 	try_resolve_literal,
+	suggest_modifier,
 	extract_and_validate_modifiers,
 	type ParsedCssLiteral,
 	type InterpretCssLiteralResult,
@@ -178,6 +179,14 @@ describe('format_css_value', () => {
 		['~0', ' 0'], // leading tilde → leading space
 		['~~', '  '], // consecutive tildes → consecutive spaces
 	] as const)('format_css_value("%s") → "%s" (edge cases)', (input, expected) => {
+		assert.strictEqual(format_css_value(input), expected);
+	});
+
+	// !important edge cases
+	test.each([
+		['flex~!important', 'flex !important'], // tilde before !important normalizes to single space
+		['0~auto~!important', '0 auto !important'], // multiple tildes before !important
+	] as const)('format_css_value("%s") → "%s" (!important edge cases)', (input, expected) => {
 		assert.strictEqual(format_css_value(input), expected);
 	});
 });
@@ -502,6 +511,24 @@ describe('interpret_css_literal', () => {
 		assert.include(output.selector, ':hover');
 		assert.include(output.selector, '::before');
 	});
+
+	test('returns error for invalid property', () => {
+		const class_name = 'dipslay:flex';
+		const escaped = escape_css_selector(class_name);
+		const result = interpret_css_literal(class_name, escaped, css_properties);
+		assert.isFalse(result.ok);
+		assert.include(
+			(result as {ok: false; error: {message: string}}).error.message,
+			'Unknown CSS property',
+		);
+	});
+
+	test('returns ok when css_properties is null (skip validation)', () => {
+		const class_name = 'unknown_property:value';
+		const escaped = escape_css_selector(class_name);
+		const result = interpret_css_literal(class_name, escaped, null);
+		assert.isTrue(result.ok);
+	});
 });
 
 describe('generate_css_literal_simple', () => {
@@ -570,6 +597,20 @@ describe('suggest_css_property', () => {
 
 	test('returns null for very different strings', () => {
 		assert.isNull(suggest_css_property('xyz123', css_properties));
+	});
+});
+
+describe('suggest_modifier', () => {
+	test.each([
+		['hovr', 'hover'],
+		['focis', 'focus'],
+		['actve', 'active'],
+	] as const)('suggests "%s" → "%s"', (typo, expected) => {
+		assert.strictEqual(suggest_modifier(typo), expected);
+	});
+
+	test('returns null for very different strings', () => {
+		assert.isNull(suggest_modifier('xyz123'));
 	});
 });
 

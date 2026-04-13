@@ -172,7 +172,7 @@ export const suggest_modifier = (typo: string): string | null =>
  */
 export const format_css_value = (value: string): string => {
 	let result = value.replace(/~/g, ' ');
-	result = result.replace(/!important$/, ' !important');
+	result = result.replace(/\s*!important$/, ' !important');
 	return result;
 };
 

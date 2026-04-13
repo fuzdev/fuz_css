@@ -50,10 +50,14 @@ describe('SourceIndex', () => {
 			const index = new SourceIndex(source);
 
 			assert.strictEqual(index.get_location(0, 'f').line, 1); // 'a'
-			assert.strictEqual(index.get_location(3, 'f').line, 1); // 'c'
+			assert.strictEqual(index.get_location(0, 'f').column, 1);
+			assert.strictEqual(index.get_location(3, 'f').line, 1); // '\r'
+			assert.strictEqual(index.get_location(3, 'f').column, 4);
 			assert.strictEqual(index.get_location(5, 'f').line, 2); // 'd'
-			assert.strictEqual(index.get_location(8, 'f').line, 2); // 'f'
+			assert.strictEqual(index.get_location(5, 'f').column, 1);
+			assert.strictEqual(index.get_location(8, 'f').line, 2); // '\r'
 			assert.strictEqual(index.get_location(10, 'f').line, 3); // 'g'
+			assert.strictEqual(index.get_location(10, 'f').column, 1);
 		});
 
 		test('includes file in location', () => {
@@ -97,7 +101,8 @@ describe('source location tracking', () => {
 		const locations = result.classes?.get('col-test');
 		assert.isDefined(locations);
 		assert.strictEqual(locations[0]!.line, 1);
-		assert.isAbove(locations[0]!.column, 0);
+		// 'col-test' starts at column 13: <div class="col-test">
+		assert.strictEqual(locations[0]!.column, 13);
 	});
 });
 

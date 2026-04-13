@@ -24,7 +24,7 @@ describe('resolve_composes', () => {
 		test('resolves a single token class', () => {
 			const result = resolve_composes(['p_lg'], BASE_DEFS, new Set(), new Set(), 'test_class');
 			assert_resolved_declaration(result, 'padding: var(--space_lg);');
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.warnings, null);
 		});
 
@@ -133,7 +133,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(!result.ok);
+			assert.isFalse(result.ok);
 			assert.strictEqual(result.error.level, 'error');
 			assert.include(result.error.message, 'Circular reference detected');
 			assert.include(result.error.message, expectedMessage);
@@ -150,7 +150,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(!result.ok);
+			assert.isFalse(result.ok);
 			assert.strictEqual(result.error.level, 'error');
 			assert.include(result.error.message, 'Unknown class "unknown_class" in composes array');
 			assert.strictEqual(result.error.identifier, 'test_class');
@@ -182,7 +182,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(!result.ok);
+			assert.isFalse(result.ok);
 			assert.strictEqual(result.error.level, 'error');
 			assert.include(
 				result.error.message,
@@ -210,7 +210,7 @@ describe('resolve_composes', () => {
 		test('handles empty composes array', () => {
 			const result = resolve_composes([], {}, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, '');
 			assert.strictEqual(result.warnings, null);
 		});
@@ -244,7 +244,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red; padding: 10px; margin: 10px;');
 			assert.strictEqual(result.warnings, null);
 		});
@@ -258,7 +258,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['c'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'font-size: 16px; color: blue; color: green;');
 			assert.strictEqual(result.warnings, null);
 		});
@@ -272,7 +272,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red; padding: 10px;');
 			assert.strictEqual(result.warnings?.length, 1);
 			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
@@ -290,7 +290,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red; padding: 10px;');
 			assert.strictEqual(result.warnings?.length, 2);
 			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
@@ -304,7 +304,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['dup'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'padding: var(--space_lg);');
 			assert.strictEqual(result.warnings?.length, 1);
 			assert.strictEqual(result.warnings?.[0]?.message, 'Class "p_lg" is redundant');
@@ -319,7 +319,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test_class');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red; padding: 10px; margin: 10px;');
 			assert.strictEqual(result.warnings?.length, 1);
 			assert.strictEqual(result.warnings?.[0]?.message, 'Class "d" is redundant');
@@ -339,7 +339,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, '');
 		});
 
@@ -417,7 +417,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, '');
 			assert.notStrictEqual(result.warnings, null);
 			assert.include(result.warnings?.[0]?.message, 'empty declaration');
@@ -438,7 +438,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(!result.ok);
+			assert.isFalse(result.ok);
 			assert.include(result.error.message, 'Circular reference detected');
 			assert.include(result.error.message, 'outer');
 		});
@@ -473,7 +473,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, '');
 			assert.notStrictEqual(result.warnings, null);
 			assert.strictEqual(result.warnings?.[0]?.level, 'warning');
@@ -494,7 +494,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red;');
 			assert.notStrictEqual(result.warnings, null);
 			assert.strictEqual(result.warnings?.length, 1);
@@ -515,7 +515,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red;');
 			assert.strictEqual(result.warnings?.length, 2);
 			assert.strictEqual(result.warnings?.[0]?.identifier, 'empty1');
@@ -537,7 +537,7 @@ describe('resolve_composes', () => {
 				'test_class',
 			);
 
-			assert.ok(!result.ok);
+			assert.isFalse(result.ok);
 			assert.include(result.error.message, 'ruleset_class');
 		});
 	});
@@ -582,7 +582,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['a'], definitions, new Set(), new Set(), 'test');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			// f, e, d should appear once despite diamond
 			assert.strictEqual(count_css_occurrences(result.declaration, 'font-size'), 1);
 			assert.strictEqual(count_css_occurrences(result.declaration, 'color: blue'), 1);
@@ -600,7 +600,7 @@ describe('resolve_composes', () => {
 			};
 			const result = resolve_composes(['top'], definitions, new Set(), new Set(), 'test');
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			// base should only appear once
 			assert.strictEqual(count_css_occurrences(result.declaration, 'color: red'), 1);
 			// all branches should be present
@@ -616,7 +616,7 @@ describe('resolve_class_definition', () => {
 			const def: CssClassDefinitionStatic = {declaration: 'color: red;'};
 			const result = resolve_class_definition(def, 'test', {});
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'color: red;');
 			assert.strictEqual(result.warnings, null);
 		});
@@ -631,7 +631,7 @@ describe('resolve_class_definition', () => {
 			const def: CssClassDefinitionStatic = {declaration: ''};
 			const result = resolve_class_definition(def, 'test', {});
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, '');
 			assert.notStrictEqual(result.warnings, null);
 			assert.include(result.warnings?.[0]?.message, 'empty declaration');
@@ -684,7 +684,7 @@ describe('resolve_class_definition', () => {
 			};
 			const result = resolve_class_definition(def, 'test', definitions);
 
-			assert.ok(result.ok);
+			assert.isTrue(result.ok);
 			assert.strictEqual(result.declaration, 'padding: var(--space_lg);');
 			assert.notStrictEqual(result.warnings, null);
 			assert.include(result.warnings?.[0]?.message, 'empty declaration');

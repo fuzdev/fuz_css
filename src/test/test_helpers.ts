@@ -8,7 +8,6 @@
 import {assert} from 'vitest';
 
 import type {SourceLocation, ExtractionDiagnostic, GenerationDiagnostic} from '$lib/diagnostics.js';
-import type {CssClassDefinition} from '$lib/css_class_generation.js';
 import type {ExtractionData} from '$lib/css_class_extractor.js';
 
 //
@@ -22,38 +21,6 @@ export const loc = (file = 'test.ts', line = 1, column = 1): SourceLocation => (
 	file,
 	line,
 	column,
-});
-
-/**
- * Creates a basic CssClassDefinition with just a declaration.
- */
-export const make_declaration_def = (declaration: string): CssClassDefinition => ({
-	declaration,
-});
-
-/**
- * Creates a CssClassDefinition with composes array (no declaration).
- */
-export const make_composes_def = (composes: Array<string>): CssClassDefinition => ({
-	composes,
-});
-
-/**
- * Creates a CssClassDefinition with composes array and declaration.
- */
-export const make_composes_with_declaration_def = (
-	composes: Array<string>,
-	declaration: string,
-): CssClassDefinition => ({
-	composes,
-	declaration,
-});
-
-/**
- * Creates a CssClassDefinition with a ruleset.
- */
-export const make_ruleset_def = (ruleset: string): CssClassDefinition => ({
-	ruleset,
 });
 
 /**
@@ -96,42 +63,6 @@ export const make_extraction_diagnostic = (
 	location: loc(),
 	...overrides,
 });
-
-//
-// Set Membership Helpers
-//
-
-/**
- * Asserts that a Set contains a specific value.
- */
-export const assert_has = <T>(set: Set<T>, value: T, label?: string): void => {
-	const name = label ?? String(value);
-	assert.isTrue(set.has(value), `Expected set to contain "${name}"`);
-};
-
-/**
- * Asserts that a Set does not contain a specific value.
- */
-export const assert_not_has = <T>(set: Set<T>, value: T, label?: string): void => {
-	const name = label ?? String(value);
-	assert.isFalse(set.has(value), `Expected set NOT to contain "${name}"`);
-};
-
-/**
- * Asserts that a Map has a specific key.
- */
-export const assert_map_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
-	const name = label ?? String(key);
-	assert.isTrue(map.has(key), `Expected map to have key "${name}"`);
-};
-
-/**
- * Asserts that a Map does not have a specific key.
- */
-export const assert_map_not_has = <K, V>(map: Map<K, V>, key: K, label?: string): void => {
-	const name = label ?? String(key);
-	assert.isFalse(map.has(key), `Expected map NOT to have key "${name}"`);
-};
 
 //
 // CSS Output Helpers
@@ -246,30 +177,6 @@ export const filter_diagnostics_by_message = <
 };
 
 //
-// Variable/Graph Helpers
-//
-
-/**
- * Asserts that a variable exists in a graph's variable set.
- */
-export const assert_variable_exists = (
-	variables: Map<string, unknown> | Set<string>,
-	varName: string,
-): void => {
-	const exists = variables instanceof Set ? variables.has(varName) : variables.has(varName);
-	assert.isTrue(exists, `Expected variable "${varName}" to exist`);
-};
-
-/**
- * Asserts that a warning array contains a cyclic dependency warning.
- */
-export const assert_cyclic_warning = (warnings: Array<string>): void => {
-	assert.isAbove(warnings.length, 0, 'Expected at least one warning');
-	const hasCyclic = warnings.some((w) => w.includes('Circular dependency'));
-	assert.isTrue(hasCyclic, 'Expected a "Circular dependency" warning');
-};
-
-//
 // CSS Class Resolution Helpers
 //
 
@@ -298,53 +205,4 @@ export const assert_resolution_error = (
 		messageContains,
 		`Expected error message to contain "${messageContains}"`,
 	);
-};
-
-//
-// Style Rule Parser Helpers
-//
-
-/**
- * Asserts that a parsed rule's variables_used set contains the variable.
- */
-export const assert_variable_used = (
-	rule: {variables_used: Set<string>},
-	varName: string,
-): void => {
-	assert.isTrue(rule.variables_used.has(varName), `Expected rule to use variable "${varName}"`);
-};
-
-/**
- * Asserts that a parsed rule is a core rule with a specific reason.
- */
-export const assert_core_rule = (
-	rule: {is_core: boolean; core_reason?: string},
-	reason: string,
-): void => {
-	assert.isTrue(rule.is_core, 'Expected rule to be a core rule');
-	assert.strictEqual(rule.core_reason, reason);
-};
-
-/**
- * Asserts that a parsed rule extracts specific elements.
- */
-export const assert_rule_elements = (
-	rule: {elements: Set<string>},
-	...elements: Array<string>
-): void => {
-	for (const element of elements) {
-		assert.isTrue(rule.elements.has(element), `Expected rule to target element "${element}"`);
-	}
-};
-
-/**
- * Asserts that a parsed rule extracts specific classes.
- */
-export const assert_rule_classes = (
-	rule: {classes: Set<string>},
-	...classes: Array<string>
-): void => {
-	for (const cls of classes) {
-		assert.isTrue(rule.classes.has(cls), `Expected rule to reference class "${cls}"`);
-	}
 };

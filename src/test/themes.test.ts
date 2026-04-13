@@ -1,6 +1,7 @@
 import {test, assert, describe} from 'vitest';
 
 import {default_themes, DEFAULT_THEME} from '$lib/themes.js';
+import {default_variables} from '$lib/variables.js';
 import {StyleVariable} from '$lib/variable.js';
 
 describe('default_themes', () => {
@@ -54,5 +55,17 @@ describe('default_themes', () => {
 
 	test('DEFAULT_THEME has name "base"', () => {
 		assert.strictEqual(DEFAULT_THEME.name, 'base');
+	});
+
+	test('theme variable names exist in default_variables', () => {
+		const known_names = new Set(default_variables.map((v) => v.name));
+		for (const theme of default_themes) {
+			for (const variable of theme.variables) {
+				assert.isTrue(
+					known_names.has(variable.name),
+					`Theme "${theme.name}" overrides unknown variable "${variable.name}"`,
+				);
+			}
+		}
 	});
 });

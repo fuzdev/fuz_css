@@ -56,6 +56,8 @@ describe('parse_style_css', () => {
 			['*, ::before, ::after { box-sizing: border-box; }', 'universal'],
 			[':root { --color: blue; }', 'root'],
 			['body { font-size: 16px; }', 'body'],
+			['html { font-size: 16px; }', 'html'],
+			[':host { display: block; }', 'host'],
 			['@media (prefers-reduced-motion) { :root { --duration: 0; } }', 'media_query'],
 		] as const)('%s is core (%s)', (css, reason) => {
 			const index = parse_style_css(css, 'test-hash');
@@ -466,6 +468,7 @@ c { color: green; }
 		const result = generate_base_css(index, new Set([2, 0]));
 
 		assert.isBelow(result.indexOf('red'), result.indexOf('green'));
+		assert.notInclude(result, 'blue');
 	});
 });
 
@@ -481,6 +484,13 @@ describe('collect_rule_variables', () => {
 		assert.isFalse(vars.has('color_a'));
 		assert.isTrue(vars.has('color_b'));
 		assert.isTrue(vars.has('shade_00'));
+	});
+
+	test('returns empty set for empty included_rules', () => {
+		const css = `a { color: var(--color_a); }`;
+		const index = parse_style_css(css, 'test-hash');
+		const vars = collect_rule_variables(index, new Set());
+		assert.strictEqual(vars.size, 0);
 	});
 });
 

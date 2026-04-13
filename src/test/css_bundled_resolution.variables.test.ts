@@ -368,7 +368,7 @@ describe('resolve_css variable resolution', () => {
 				utility_variables_used: new Set(),
 			});
 
-			assert.isAbove(result.diagnostics.length, 0);
+			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
 			assert.strictEqual(result.diagnostics[0]!.phase, 'generation');
 		});

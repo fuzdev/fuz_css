@@ -521,7 +521,7 @@ describe('resolve_css', () => {
 
 			assert.isDefined(result.stats);
 			assert.strictEqual(result.stats.element_count, 1);
-			assert.include(result.stats.elements as unknown as string, 'button');
+			assert.include(result.stats.elements, 'button');
 			assert.isAbove(result.stats.included_rules, 0);
 			assert.strictEqual(result.stats.total_rules, 3);
 			assert.strictEqual(result.stats.variable_count, 1);
@@ -553,9 +553,9 @@ describe('resolve_css', () => {
 			});
 
 			assert.strictEqual(result.stats!.element_count, 2);
-			assert.include(result.stats!.elements as unknown as string, 'button');
-			assert.include(result.stats!.elements as unknown as string, 'a');
-			assert.notInclude(result.stats!.elements as unknown as string, 'input');
+			assert.include(result.stats!.elements, 'button');
+			assert.include(result.stats!.elements, 'a');
+			assert.notInclude(result.stats!.elements, 'input');
 			assert.strictEqual(result.stats!.included_rules, 3); // * + button + a
 			assert.strictEqual(result.stats!.total_rules, 4);
 			assert.strictEqual(result.stats!.variable_count, 1);
@@ -734,25 +734,6 @@ describe('resolve_css', () => {
 			assert.isTrue(result.resolved_variables.has('color_b'));
 			assert.include(result.theme_css, '--color_a');
 			assert.include(result.theme_css, '--color_b');
-		});
-
-		test('additional_variables: "all" includes all variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-			]);
-
-			const result = resolve_css({
-				style_rule_index,
-				variable_graph,
-				class_variable_index,
-				...empty_detection(),
-				additional_variables: 'all',
-			});
-
-			// With 'all', all variables included
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isTrue(result.resolved_variables.has('color_b'));
 		});
 	});
 

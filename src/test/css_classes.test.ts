@@ -121,6 +121,28 @@ describe('CssClasses', () => {
 		assert.isTrue(result2.has('bar'));
 	});
 
+	test('cache returns same object when not dirty', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['foo', [loc]]])}));
+
+		const result1 = css_classes.get();
+		const result2 = css_classes.get();
+		assert.strictEqual(result1, result2);
+	});
+
+	test('re-adding same file replaces classes', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['old', [loc]]])}));
+		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['new', [loc]]])}));
+
+		const result = css_classes.get();
+		assert.isFalse(result.has('old'));
+		assert.isTrue(result.has('new'));
+	});
+
 	test('explicit_classes tracks @fuz-classes annotations', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = {file: 'test.ts', line: 1, column: 1};
@@ -190,6 +212,105 @@ describe('CssClasses', () => {
 		const {explicit_classes} = css_classes.get_all();
 		// Should be filtered out by exclude
 		assert.isNull(explicit_classes);
+	});
+});
+
+describe('elements', () => {
+	test('all_elements aggregates elements from files', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({
+				classes: new Map([['foo', [loc]]]),
+				elements: new Set(['button', 'input']),
+			}),
+		);
+		css_classes.add(
+			'file2.svelte',
+			make_extraction_data({
+				classes: new Map([['bar', [loc]]]),
+				elements: new Set(['a', 'button']),
+			}),
+		);
+
+		const {all_elements} = css_classes.get_all();
+		assert.isTrue(all_elements.has('button'));
+		assert.isTrue(all_elements.has('input'));
+		assert.isTrue(all_elements.has('a'));
+		assert.strictEqual(all_elements.size, 3);
+	});
+
+	test('all_elements is empty when no files have elements', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['foo', [loc]]])}));
+
+		const {all_elements} = css_classes.get_all();
+		assert.strictEqual(all_elements.size, 0);
+	});
+
+	test('explicit_elements aggregates from @fuz-elements annotations', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({
+				classes: new Map([['foo', [loc]]]),
+				explicit_elements: new Set(['button']),
+			}),
+		);
+		css_classes.add(
+			'file2.svelte',
+			make_extraction_data({
+				classes: new Map([['bar', [loc]]]),
+				explicit_elements: new Set(['input']),
+			}),
+		);
+
+		const {explicit_elements} = css_classes.get_all();
+		assert.isNotNull(explicit_elements);
+		assert.isTrue(explicit_elements.has('button'));
+		assert.isTrue(explicit_elements.has('input'));
+	});
+
+	test('explicit_elements is null when no files have them', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+		css_classes.add('file1.svelte', make_extraction_data({classes: new Map([['foo', [loc]]])}));
+
+		const {explicit_elements} = css_classes.get_all();
+		assert.isNull(explicit_elements);
+	});
+
+	test('delete removes file elements', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = {file: 'test.svelte', line: 1, column: 1};
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({
+				classes: new Map([['foo', [loc]]]),
+				elements: new Set(['button']),
+				explicit_elements: new Set(['button']),
+			}),
+		);
+		css_classes.add(
+			'file2.svelte',
+			make_extraction_data({
+				classes: new Map([['bar', [loc]]]),
+				elements: new Set(['input']),
+			}),
+		);
+
+		css_classes.delete('file1.svelte');
+
+		const {all_elements, explicit_elements} = css_classes.get_all();
+		assert.isFalse(all_elements.has('button'));
+		assert.isTrue(all_elements.has('input'));
+		assert.isNull(explicit_elements);
 	});
 });
 
