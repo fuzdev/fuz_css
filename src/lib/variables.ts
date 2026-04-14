@@ -1421,7 +1421,6 @@ export const input_height_compact: StyleVariable = {
 	name: 'input_height_compact',
 	light: 'var(--space_xl4)',
 };
-export const input_height_lg: StyleVariable = {name: 'input_height_lg', light: 'var(--space_xl6)'};
 
 /*
 
@@ -2226,7 +2225,6 @@ export const default_variables: Array<StyleVariable> = [
 	input_width_min,
 	input_height,
 	input_height_compact,
-	input_height_lg,
 
 	/* shadows and glows */
 	shadow_xs,

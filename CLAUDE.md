@@ -115,7 +115,7 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, `sm` (tighter sizing), `md` (default sizing / cascade reset),
-  `icon_button`, `plain`, `menuitem`, `chevron`, `chip`
+  `lg` (larger sizing), `icon_button`, `plain`, `menuitem`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
