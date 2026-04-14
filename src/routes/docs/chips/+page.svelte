@@ -98,4 +98,35 @@
 			<a class="chip color_e">three</a>
 		</div>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .lg">
+			With <code>.lg</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.lg</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> applies larger sizing
+			with bigger fonts, inputs, padding, and flow margins.
+		</p>
+		<Code content={`<span class="chip">normal</span>\n<span class="chip lg">large</span>`} />
+		<div class="row gap_sm mb_lg">
+			<span class="chip">normal</span>
+			<span class="chip lg">large</span>
+		</div>
+		<div class="row gap_sm mb_lg">
+			<span class="chip color_a">normal</span>
+			<span class="chip color_a lg">color_a</span>
+			<span class="chip color_b lg">color_b</span>
+			<span class="chip color_c lg">color_c</span>
+		</div>
+		<p>
+			<code>.lg</code> overrides custom properties, so children inherit the sizing:
+		</p>
+		<div class="lg row gap_sm">
+			<span class="chip">one</span>
+			<span class="chip color_d">two</span>
+			<!-- svelte-ignore a11y_missing_attribute -->
+			<a class="chip color_e">three</a>
+		</div>
+	</TomeSection>
 </TomeContent>

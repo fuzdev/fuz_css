@@ -1754,6 +1754,16 @@ body {
 	--menuitem_padding: var(--space_xs3) var(--space_xs);
 	--flow_margin: var(--space_lg);
 }
+/* Larger sizing by overriding variables, cascading to children. Works on individual elements or containers. */
+.lg {
+	--font_size: var(--font_size_lg);
+	--input_height: var(--space_xl6);
+	--input_height_compact: var(--space_xl5);
+	--input_padding_x: var(--space_xl);
+	--icon_size: var(--icon_size_lg);
+	--menuitem_padding: var(--space_xs2) var(--space_sm);
+	--flow_margin: var(--space_xl);
+}
 /*
 TODO other button variants?
 TODO this is slightly strange that it doesn't use --icon_size.

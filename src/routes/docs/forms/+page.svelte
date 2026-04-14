@@ -276,4 +276,77 @@
 			</div>
 		</div>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .lg">
+			With <code>.lg</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.lg</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides larger sizing
+			with bigger fonts, inputs, padding, and flow margins. Apply directly or on a container to cascade
+			to children.
+		</p>
+		<Code
+			content={`<form class="lg">
+	...
+</form>`}
+		/>
+		<div class="display:flex gap_lg">
+			<div class="width_atmost_sm">
+				<form class="lg">
+					<fieldset>
+						<legend>.lg</legend>
+						<label>
+							<div class="title">name</div>
+							<input placeholder=">" />
+						</label>
+						<label>
+							<div class="title">notes</div>
+							<textarea placeholder="..."></textarea>
+						</label>
+						<label>
+							<div class="title">option</div>
+							<select>
+								{#each faces as face (face)}
+									<option value={face}>{face}</option>
+								{/each}
+							</select>
+						</label>
+						<div class="row">
+							<button type="button">submit</button>
+							<button type="button" class="icon_button plain">+</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+			<div class="width_atmost_sm">
+				<form>
+					<fieldset>
+						<legend>normal</legend>
+						<label>
+							<div class="title">name</div>
+							<input placeholder=">" />
+						</label>
+						<label>
+							<div class="title">notes</div>
+							<textarea placeholder="..."></textarea>
+						</label>
+						<label>
+							<div class="title">option</div>
+							<select>
+								{#each faces as face (face)}
+									<option value={face}>{face}</option>
+								{/each}
+							</select>
+						</label>
+						<div class="row">
+							<button type="button">submit</button>
+							<button type="button" class="icon_button plain">+</button>
+						</div>
+					</fieldset>
+				</form>
+			</div>
+		</div>
+	</TomeSection>
 </TomeContent>
