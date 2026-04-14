@@ -1422,10 +1422,6 @@ export const input_height_compact: StyleVariable = {
 	light: 'var(--space_xl4)',
 };
 export const input_height_lg: StyleVariable = {name: 'input_height_lg', light: 'var(--space_xl6)'};
-export const input_height_inner: StyleVariable = {
-	name: 'input_height_inner',
-	light: 'calc(var(--input_height) - 2 * var(--border_width) - 2 * var(--input_padding_y))',
-};
 
 /*
 
@@ -2231,7 +2227,6 @@ export const default_variables: Array<StyleVariable> = [
 	input_height,
 	input_height_compact,
 	input_height_lg,
-	input_height_inner,
 
 	/* shadows and glows */
 	shadow_xs,
