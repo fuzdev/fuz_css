@@ -344,10 +344,10 @@ but not for the identical user action of clicking the track,
 so for consistent visuals we opt to include no active state */
 :where(input[type='checkbox']:not(.unstyled)) {
 	cursor: pointer;
-	width: var(--input_height_sm);
-	height: var(--input_height_sm);
-	min-width: var(--input_height_sm);
-	min-height: var(--input_height_sm);
+	width: var(--input_height_compact);
+	height: var(--input_height_compact);
+	min-width: var(--input_height_compact);
+	min-height: var(--input_height_compact);
 	border-radius: var(--border_radius, var(--border_radius_xs));
 	--input_padding_x: 0;
 	--checkbox_content: var(--checkbox_content_empty, '');
@@ -374,11 +374,11 @@ so for consistent visuals we opt to include no active state */
 
 :where(input[type='radio']:not(.unstyled)) {
 	cursor: pointer;
-	width: var(--input_height_sm);
-	height: var(--input_height_sm);
+	width: var(--input_height_compact);
+	height: var(--input_height_compact);
 	border-radius: 50%;
-	min-width: var(--input_height_sm);
-	min-height: var(--input_height_sm);
+	min-width: var(--input_height_compact);
+	min-height: var(--input_height_compact);
 	--input_padding_x: 0;
 }
 :where(input[type='radio']:not(.unstyled):checked)::before {
@@ -517,7 +517,6 @@ TODO think through these patterns to get somewhere consistent
 
 */
 :where(button:not(.unstyled)) {
-	--min_height: var(--input_height);
 	--text_color: var(--text_70);
 	--button_text_color: var(--text_color);
 	--button_fill: color-mix(in hsl, var(--fill, var(--shade_50)) 8%, transparent);
@@ -539,7 +538,7 @@ TODO think through these patterns to get somewhere consistent
 	font-size: var(--font_size, inherit);
 	font-weight: 700;
 	line-height: normal;
-	min-height: var(--min_height);
+	min-height: var(--input_height);
 	padding: 0 var(--input_padding_x);
 	box-shadow: var(--shadow, var(--button_shadow));
 	border-width: var(--border_width);
@@ -681,7 +680,7 @@ TODO think through these patterns to get somewhere consistent
 
 :where(button:not(.unstyled).inline, p button:not(.unstyled)) {
 	display: inline-block;
-	--min_height: var(--input_height_sm); /* TODO this increases paragraph line spacing */
+	min-height: var(--input_height_compact); /* TODO this increases paragraph line spacing */
 }
 
 :where(small) {

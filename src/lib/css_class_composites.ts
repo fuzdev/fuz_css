@@ -114,9 +114,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: `
 			--font_size: var(--font_size_sm);
 			--input_height: var(--space_xl3);
-			--input_height_sm: var(--space_xl2);
+			--input_height_compact: var(--space_xl2);
 			--input_padding_x: var(--space_sm);
-			--min_height: var(--space_xl3);
 			--icon_size: var(--icon_size_sm);
 			--menuitem_padding: var(--space_xs4) var(--space_xs3);
 			--flow_margin: var(--space_md);
@@ -127,12 +126,24 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: `
 			--font_size: var(--font_size_md);
 			--input_height: var(--space_xl5);
-			--input_height_sm: var(--space_xl4);
+			--input_height_compact: var(--space_xl4);
 			--input_padding_x: var(--space_lg);
-			--min_height: var(--input_height);
 			--icon_size: var(--icon_size_md);
 			--menuitem_padding: var(--space_xs3) var(--space_xs);
 			--flow_margin: var(--space_lg);
+		`,
+	},
+	lg: {
+		comment:
+			'Larger sizing by overriding variables, cascading to children. Works on individual elements or containers.',
+		declaration: `
+			--font_size: var(--font_size_lg);
+			--input_height: var(--space_xl6);
+			--input_height_compact: var(--space_xl5);
+			--input_padding_x: var(--space_xl);
+			--icon_size: var(--icon_size_lg);
+			--menuitem_padding: var(--space_xs2) var(--space_sm);
+			--flow_margin: var(--space_xl);
 		`,
 	},
 	mb_flow: {
@@ -183,7 +194,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				z-index: 2;
 				cursor: pointer;
 				width: 100%;
-				min-height: var(--min_height, var(--icon_size_sm));
+				min-height: var(--input_height_compact);
 				display: flex;
 				justify-content: space-between;
 				align-items: center;

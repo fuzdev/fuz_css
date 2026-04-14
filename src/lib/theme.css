@@ -649,7 +649,8 @@
 	--input_padding_x: var(--space_lg);
 	--input_width_min: 100px;
 	--input_height: var(--space_xl5);
-	--input_height_sm: var(--space_xl4);
+	--input_height_compact: var(--space_xl4);
+	--input_height_lg: var(--space_xl6);
 	--input_height_inner: calc(
 		var(--input_height) - 2 * var(--border_width) - 2 * var(--input_padding_y)
 	);

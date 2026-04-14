@@ -284,10 +284,10 @@ background-color: var(--shade_min);`}
 		grid-auto-flow: row;
 	}
 	.color {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 	}
 	small {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -301,7 +301,7 @@ background-color: var(--shade_min);`}
 		border-radius: var(--border_radius_xs2);
 	}
 	.overlay_color {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 	}
 	.stacking_demo {
 		padding: var(--space_md);

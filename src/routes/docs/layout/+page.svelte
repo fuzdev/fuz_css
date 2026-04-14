@@ -69,7 +69,7 @@
 <style>
 	.layout_example {
 		position: relative;
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 		display: flex;
 		align-items: center;
 	}

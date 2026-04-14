@@ -6670,395 +6670,401 @@
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
-						"name": "input_height_sm",
+						"name": "input_height_compact",
 						"kind": "variable",
 						"source_line": 1420,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
+						"name": "input_height_lg",
+						"kind": "variable",
+						"source_line": 1424,
+						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
+					},
+					{
 						"name": "input_height_inner",
 						"kind": "variable",
-						"source_line": 1421,
+						"source_line": 1425,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_xs",
 						"kind": "variable",
-						"source_line": 1441,
+						"source_line": 1445,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_top_xs",
 						"kind": "variable",
-						"source_line": 1445,
+						"source_line": 1449,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_bottom_xs",
 						"kind": "variable",
-						"source_line": 1449,
+						"source_line": 1453,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_xs",
 						"kind": "variable",
-						"source_line": 1453,
+						"source_line": 1457,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_top_xs",
 						"kind": "variable",
-						"source_line": 1457,
+						"source_line": 1461,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_bottom_xs",
 						"kind": "variable",
-						"source_line": 1461,
+						"source_line": 1465,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_sm",
 						"kind": "variable",
-						"source_line": 1465,
+						"source_line": 1469,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_top_sm",
 						"kind": "variable",
-						"source_line": 1469,
+						"source_line": 1473,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_bottom_sm",
 						"kind": "variable",
-						"source_line": 1473,
+						"source_line": 1477,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_sm",
 						"kind": "variable",
-						"source_line": 1477,
+						"source_line": 1481,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_top_sm",
 						"kind": "variable",
-						"source_line": 1481,
+						"source_line": 1485,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_bottom_sm",
 						"kind": "variable",
-						"source_line": 1485,
+						"source_line": 1489,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_md",
 						"kind": "variable",
-						"source_line": 1489,
+						"source_line": 1493,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_top_md",
 						"kind": "variable",
-						"source_line": 1493,
+						"source_line": 1497,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_bottom_md",
 						"kind": "variable",
-						"source_line": 1497,
+						"source_line": 1501,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_md",
 						"kind": "variable",
-						"source_line": 1501,
+						"source_line": 1505,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_top_md",
 						"kind": "variable",
-						"source_line": 1505,
+						"source_line": 1509,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_bottom_md",
 						"kind": "variable",
-						"source_line": 1509,
+						"source_line": 1513,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_lg",
 						"kind": "variable",
-						"source_line": 1513,
+						"source_line": 1517,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_top_lg",
 						"kind": "variable",
-						"source_line": 1517,
+						"source_line": 1521,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_bottom_lg",
 						"kind": "variable",
-						"source_line": 1521,
+						"source_line": 1525,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_lg",
 						"kind": "variable",
-						"source_line": 1525,
+						"source_line": 1529,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_top_lg",
 						"kind": "variable",
-						"source_line": 1529,
+						"source_line": 1533,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_bottom_lg",
 						"kind": "variable",
-						"source_line": 1533,
+						"source_line": 1537,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_xl",
 						"kind": "variable",
-						"source_line": 1537,
+						"source_line": 1541,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_top_xl",
 						"kind": "variable",
-						"source_line": 1541,
+						"source_line": 1545,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_bottom_xl",
 						"kind": "variable",
-						"source_line": 1545,
+						"source_line": 1549,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_xl",
 						"kind": "variable",
-						"source_line": 1549,
+						"source_line": 1553,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_top_xl",
 						"kind": "variable",
-						"source_line": 1553,
+						"source_line": 1557,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_inset_bottom_xl",
 						"kind": "variable",
-						"source_line": 1557,
+						"source_line": 1561,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_color_umbra",
 						"kind": "variable",
-						"source_line": 1562,
+						"source_line": 1566,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_color_highlight",
 						"kind": "variable",
-						"source_line": 1567,
+						"source_line": 1571,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_color_glow",
 						"kind": "variable",
-						"source_line": 1572,
+						"source_line": 1576,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_color_shroud",
 						"kind": "variable",
-						"source_line": 1577,
+						"source_line": 1581,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_00",
 						"kind": "variable",
-						"source_line": 1585,
+						"source_line": 1589,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_05",
 						"kind": "variable",
-						"source_line": 1586,
+						"source_line": 1590,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_10",
 						"kind": "variable",
-						"source_line": 1587,
+						"source_line": 1591,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_20",
 						"kind": "variable",
-						"source_line": 1588,
+						"source_line": 1592,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_30",
 						"kind": "variable",
-						"source_line": 1589,
+						"source_line": 1593,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_40",
 						"kind": "variable",
-						"source_line": 1590,
+						"source_line": 1594,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_50",
 						"kind": "variable",
-						"source_line": 1591,
+						"source_line": 1595,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_60",
 						"kind": "variable",
-						"source_line": 1592,
+						"source_line": 1596,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_70",
 						"kind": "variable",
-						"source_line": 1593,
+						"source_line": 1597,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_80",
 						"kind": "variable",
-						"source_line": 1594,
+						"source_line": 1598,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_90",
 						"kind": "variable",
-						"source_line": 1595,
+						"source_line": 1599,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_95",
 						"kind": "variable",
-						"source_line": 1596,
+						"source_line": 1600,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "shadow_alpha_100",
 						"kind": "variable",
-						"source_line": 1597,
+						"source_line": 1601,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_xs",
 						"kind": "variable",
-						"source_line": 1602,
+						"source_line": 1606,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_sm",
 						"kind": "variable",
-						"source_line": 1606,
+						"source_line": 1610,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_md",
 						"kind": "variable",
-						"source_line": 1610,
+						"source_line": 1614,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_lg",
 						"kind": "variable",
-						"source_line": 1614,
+						"source_line": 1618,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_xl",
 						"kind": "variable",
-						"source_line": 1618,
+						"source_line": 1622,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_xl2",
 						"kind": "variable",
-						"source_line": 1622,
+						"source_line": 1626,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "icon_size_xl3",
 						"kind": "variable",
-						"source_line": 1626,
+						"source_line": 1630,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_1",
 						"kind": "variable",
-						"source_line": 1634,
+						"source_line": 1638,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_2",
 						"kind": "variable",
-						"source_line": 1635,
+						"source_line": 1639,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_3",
 						"kind": "variable",
-						"source_line": 1636,
+						"source_line": 1640,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_4",
 						"kind": "variable",
-						"source_line": 1637,
+						"source_line": 1641,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_5",
 						"kind": "variable",
-						"source_line": 1638,
+						"source_line": 1642,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "duration_6",
 						"kind": "variable",
-						"source_line": 1639,
+						"source_line": 1643,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "disabled_opacity",
 						"kind": "variable",
-						"source_line": 1641,
+						"source_line": 1645,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }"
 					},
 					{
 						"name": "absolute_color_variables",
 						"kind": "variable",
 						"doc_comment": "Absolute color variants for all hues and intensities.\nNon-adaptive: these don't change between light and dark color schemes.",
-						"source_line": 1832,
+						"source_line": 1836,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]"
 					},
 					{
 						"name": "default_variables",
 						"kind": "variable",
 						"doc_comment": "These are implicitly the variables for the `base` theme.\nSee also the empty `variables` array of the `base` theme above.",
-						"source_line": 1838,
+						"source_line": 1842,
 						"type_signature": "{ name: string; light?: string | undefined; dark?: string | undefined; summary?: string | undefined; }[]"
 					}
 				],
