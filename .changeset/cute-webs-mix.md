@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': minor
 ---
 
-add `.lg` size composite class, rename `input_height_sm` to `input_height_compact`, add `input_height_lg`, remove `--min_height`
+add `.lg` size composite class, rename `input_height_sm` to `input_height_compact`, remove `--min_height`
 
 **Breaking changes:**
 
