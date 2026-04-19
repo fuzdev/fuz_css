@@ -348,5 +348,10 @@
 				</form>
 			</div>
 		</div>
+		<UnfinishedImplementationWarning>
+			Table cell padding doesn't yet respond to size composites. A
+			<code>.lg</code> region containing a table will scale inputs and buttons but leave cells at their
+			default padding. Planned in the semantic variable chains migration.
+		</UnfinishedImplementationWarning>
 	</TomeSection>
 </TomeContent>

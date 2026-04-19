@@ -116,6 +116,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--input_height: var(--space_xl3);
 			--input_height_compact: var(--space_xl2);
 			--input_padding_x: var(--space_sm);
+			--chip_padding_x: var(--space_xs2);
 			--icon_size: var(--icon_size_sm);
 			--menuitem_padding: var(--space_xs4) var(--space_xs3);
 			--flow_margin: var(--space_md);
@@ -128,6 +129,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--input_height: var(--space_xl5);
 			--input_height_compact: var(--space_xl4);
 			--input_padding_x: var(--space_lg);
+			--chip_padding_x: var(--space_xs);
 			--icon_size: var(--icon_size_md);
 			--menuitem_padding: var(--space_xs3) var(--space_xs);
 			--flow_margin: var(--space_lg);
@@ -141,6 +143,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--input_height: var(--space_xl6);
 			--input_height_compact: var(--space_xl5);
 			--input_padding_x: var(--space_xl);
+			--chip_padding_x: var(--space_sm);
 			--icon_size: var(--icon_size_lg);
 			--menuitem_padding: var(--space_xs2) var(--space_sm);
 			--flow_margin: var(--space_xl);
@@ -194,7 +197,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				z-index: 2;
 				cursor: pointer;
 				width: 100%;
-				min-height: var(--input_height_compact);
+				min-height: var(--menuitem_min_height, var(--input_height_compact));
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -265,8 +268,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.chip {
 				font-weight: 500;
 				font-size: var(--font_size, inherit);
-				padding-left: var(--space_xs);
-				padding-right: var(--space_xs);
+				padding-left: var(--chip_padding_x, var(--space_xs));
+				padding-right: var(--chip_padding_x, var(--space_xs));
 				background-color: var(--fg_10);
 				border-radius: var(--border_radius, var(--border_radius_xs));
 			}
