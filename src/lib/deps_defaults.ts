@@ -11,7 +11,7 @@ import {readFile, writeFile, mkdir, unlink, rename} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
 import type {Result} from '@fuzdev/fuz_util/result.js';
-import {classify_fs_error, type FsError} from '@fuzdev/fuz_util/fs.js';
+import {fs_classify_error, type FsError} from '@fuzdev/fuz_util/fs.js';
 
 import type {CacheDeps} from './deps.js';
 
@@ -23,7 +23,7 @@ const wrap_void = async (fn: () => Promise<unknown>): Promise<Result<object, FsE
 		await fn();
 		return {ok: true};
 	} catch (error) {
-		return {ok: false, ...classify_fs_error(error)};
+		return {ok: false, ...fs_classify_error(error)};
 	}
 };
 
@@ -35,7 +35,7 @@ export const default_cache_deps: CacheDeps = {
 		try {
 			return {ok: true, value: await readFile(path, 'utf8')};
 		} catch (error) {
-			return {ok: false, ...classify_fs_error(error)};
+			return {ok: false, ...fs_classify_error(error)};
 		}
 	},
 
