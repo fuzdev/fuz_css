@@ -11,7 +11,7 @@
 	"published": true,
 	"package_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.58.0",
+		"version": "0.59.0",
 		"description": "CSS framework and design system for semantic HTML",
 		"tagline": "CSS with more utility",
 		"glyph": "🪴",
@@ -42,7 +42,7 @@
 		},
 		"peerDependencies": {
 			"@fuzdev/blake3_wasm": "^0.1.0",
-			"@fuzdev/fuz_util": ">=0.52.0",
+			"@fuzdev/fuz_util": ">=0.57.0",
 			"@fuzdev/gro": ">=0.195.0",
 			"@sveltejs/acorn-typescript": "^1",
 			"@webref/css": "^8",
@@ -78,13 +78,13 @@
 		},
 		"devDependencies": {
 			"@changesets/changelog-git": "^0.2.1",
-			"@fuzdev/blake3_wasm": "^0.1.0",
+			"@fuzdev/blake3_wasm": "^0.1.1",
 			"@fuzdev/fuz_code": "^0.45.1",
-			"@fuzdev/fuz_ui": "^0.191.3",
-			"@fuzdev/fuz_util": "^0.55.0",
-			"@fuzdev/gro": "^0.197.2",
+			"@fuzdev/fuz_ui": "^0.191.4",
+			"@fuzdev/fuz_util": "^0.57.0",
+			"@fuzdev/gro": "^0.198.0",
 			"@jridgewell/trace-mapping": "^0.3.31",
-			"@ryanatkn/eslint-config": "^0.10.1",
+			"@ryanatkn/eslint-config": "^0.11.0",
 			"@sveltejs/acorn-typescript": "^1.0.9",
 			"@sveltejs/adapter-static": "^3.0.10",
 			"@sveltejs/kit": "^2.53.4",
@@ -154,7 +154,7 @@
 	},
 	"source_json": {
 		"name": "@fuzdev/fuz_css",
-		"version": "0.58.0",
+		"version": "0.59.0",
 		"modules": [
 			{
 				"path": "class_variable_index.ts",
@@ -2917,7 +2917,7 @@
 						"name": "default_cache_deps",
 						"kind": "variable",
 						"doc_comment": "Default filesystem deps using `node:fs/promises`.",
-						"source_line": 32,
+						"source_line": 33,
 						"type_signature": "CacheDeps"
 					}
 				],
@@ -2934,31 +2934,31 @@
 						"name": "CacheDeps",
 						"kind": "type",
 						"doc_comment": "Cache-related file system deps.\nAbstracted to enable test isolation from the actual filesystem.\n\nNamed `CacheDeps` (not `FsDeps`) because it only covers\nthe specific deps needed for cache management, not general\nfilesystem access.",
-						"source_line": 48,
+						"source_line": 54,
 						"type_signature": "CacheDeps",
 						"properties": [
 							{
 								"name": "read_text",
 								"kind": "variable",
-								"type_signature": "(options: {path: string}) => Promise<string | null>",
-								"doc_comment": "Reads a text file.\nReturns `null` if file doesn't exist."
+								"type_signature": "(options: {path: string}) => Promise<Result<{value: string}, FsError>>",
+								"doc_comment": "Reads a text file.\nReturns a `not_found` error if the file doesn't exist."
 							},
 							{
 								"name": "write_text_atomic",
 								"kind": "variable",
-								"type_signature": "(options: {\n\t\tpath: string;\n\t\tcontent: string;\n\t}) => Promise<Result<object, {message: string}>>",
+								"type_signature": "(options: {path: string; content: string}) => Promise<Result<object, FsError>>",
 								"doc_comment": "Writes a text file atomically (temp file + rename for crash safety).\nCreates parent directories if they don't exist."
 							},
 							{
 								"name": "unlink",
 								"kind": "variable",
-								"type_signature": "(options: {path: string}) => Promise<Result<object, {message: string}>>",
-								"doc_comment": "Removes a file. Succeeds silently if file doesn't exist."
+								"type_signature": "(options: {path: string}) => Promise<Result<object, FsError>>",
+								"doc_comment": "Removes a file. Returns a `not_found` error if the file doesn't exist —\ncallers that want `rm -f` semantics should ignore that kind explicitly."
 							}
 						]
 					}
 				],
-				"module_comment": "Deps interfaces for dependency injection.\n\nThis is the core pattern enabling testability without mocks.\nAll file system side effects are abstracted into interfaces.\n\n**Design principles:**\n- Internal functions take `deps` as a required first parameter\n- Public APIs (plugin options) default to `default_cache_deps`\n- All deps accept a single `options` object parameter\n- All fallible deps return `Result` from `@fuzdev/fuz_util`\n- Never throw `Error` in deps - return `Result` with `ok: false`\n- Use `null` for expected \"not found\" cases (not errors)\n\n**Production usage:**\n```typescript\nimport {default_cache_deps} from './deps_defaults.js';\nconst content = await deps.read_text({path: '/path/to/file.json'});\nif (!content) {\n  // File not found\n}\n```\n\n**Test usage:**\n```typescript\nimport {create_mock_cache_deps, create_mock_fs_state} from '../test/fixtures/mock_deps.js';\nconst state = create_mock_fs_state();\nconst deps = create_mock_cache_deps(state);\n// Use deps in tests - all operations are in-memory\n```\n\nSee `deps_defaults.ts` for real implementations.\nSee `test/fixtures/mock_deps.ts` for mock implementations."
+				"module_comment": "Deps interfaces for dependency injection.\n\nThis is the core pattern enabling testability without mocks.\nAll file system side effects are abstracted into interfaces.\n\n**Design principles:**\n- Internal functions take `deps` as a required first parameter\n- Public APIs (plugin options) default to `default_cache_deps`\n- All deps accept a single `options` object parameter\n- All fallible deps return `Result<{value: T}, FsError>` from `@fuzdev/fuz_util`\n- Errors carry a discriminated `kind` so callers branch without string matching\n\n**Production usage:**\n```typescript\nimport {default_cache_deps} from './deps_defaults.js';\nconst r = await deps.read_text({path: '/path/to/file.json'});\nif (!r.ok) {\n  if (r.kind === 'not_found') {\n    // file missing\n  }\n  return;\n}\nconst content = r.value;\n```\n\n**Test usage:**\n```typescript\nimport {create_mock_cache_deps, create_mock_fs_state} from '../test/fixtures/mock_deps.js';\nconst state = create_mock_fs_state();\nconst deps = create_mock_cache_deps(state);\n// Use deps in tests - all operations are in-memory\n```\n\nSee `deps_defaults.ts` for real implementations.\nSee `test/fixtures/mock_deps.ts` for mock implementations."
 			},
 			{
 				"path": "diagnostics.ts",
