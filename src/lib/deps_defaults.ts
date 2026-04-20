@@ -10,19 +10,20 @@
 import {readFile, writeFile, mkdir, unlink, rename} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
+import type {Result} from '@fuzdev/fuz_util/result.js';
+import {fs_classify_error, type FsError} from '@fuzdev/fuz_util/fs.js';
+
 import type {CacheDeps} from './deps.js';
 
 /**
- * Wraps an async function that returns void, converting exceptions to `Result`.
+ * Wraps an async void-returning function, converting thrown errors to typed `FsError`.
  */
-const wrap_void = async (
-	fn: () => Promise<unknown>,
-): Promise<{ok: true} | {ok: false; message: string}> => {
+const wrap_void = async (fn: () => Promise<unknown>): Promise<Result<object, FsError>> => {
 	try {
 		await fn();
 		return {ok: true};
 	} catch (error) {
-		return {ok: false, message: error instanceof Error ? error.message : String(error)};
+		return {ok: false, ...fs_classify_error(error)};
 	}
 };
 
@@ -32,9 +33,9 @@ const wrap_void = async (
 export const default_cache_deps: CacheDeps = {
 	read_text: async ({path}) => {
 		try {
-			return await readFile(path, 'utf8');
-		} catch {
-			return null;
+			return {ok: true, value: await readFile(path, 'utf8')};
+		} catch (error) {
+			return {ok: false, ...fs_classify_error(error)};
 		}
 	},
 
@@ -49,11 +50,5 @@ export const default_cache_deps: CacheDeps = {
 		});
 	},
 
-	unlink: async ({path}) => {
-		return wrap_void(async () => {
-			await unlink(path).catch(() => {
-				// Ignore if already gone
-			});
-		});
-	},
+	unlink: async ({path}) => wrap_void(() => unlink(path)),
 };

@@ -8,17 +8,20 @@
  * - Internal functions take `deps` as a required first parameter
  * - Public APIs (plugin options) default to `default_cache_deps`
  * - All deps accept a single `options` object parameter
- * - All fallible deps return `Result` from `@fuzdev/fuz_util`
- * - Never throw `Error` in deps - return `Result` with `ok: false`
- * - Use `null` for expected "not found" cases (not errors)
+ * - All fallible deps return `Result<{value: T}, FsError>` from `@fuzdev/fuz_util`
+ * - Errors carry a discriminated `kind` so callers branch without string matching
  *
  * **Production usage:**
  * ```typescript
  * import {default_cache_deps} from './deps_defaults.js';
- * const content = await deps.read_text({path: '/path/to/file.json'});
- * if (!content) {
- *   // File not found
+ * const r = await deps.read_text({path: '/path/to/file.json'});
+ * if (!r.ok) {
+ *   if (r.kind === 'not_found') {
+ *     // file missing
+ *   }
+ *   return;
  * }
+ * const content = r.value;
  * ```
  *
  * **Test usage:**
@@ -36,6 +39,9 @@
  */
 
 import type {Result} from '@fuzdev/fuz_util/result.js';
+import type {FsError} from '@fuzdev/fuz_util/fs.js';
+
+export type {FsError};
 
 /**
  * Cache-related file system deps.
@@ -48,21 +54,19 @@ import type {Result} from '@fuzdev/fuz_util/result.js';
 export interface CacheDeps {
 	/**
 	 * Reads a text file.
-	 * Returns `null` if file doesn't exist.
+	 * Returns a `not_found` error if the file doesn't exist.
 	 */
-	read_text: (options: {path: string}) => Promise<string | null>;
+	read_text: (options: {path: string}) => Promise<Result<{value: string}, FsError>>;
 
 	/**
 	 * Writes a text file atomically (temp file + rename for crash safety).
 	 * Creates parent directories if they don't exist.
 	 */
-	write_text_atomic: (options: {
-		path: string;
-		content: string;
-	}) => Promise<Result<object, {message: string}>>;
+	write_text_atomic: (options: {path: string; content: string}) => Promise<Result<object, FsError>>;
 
 	/**
-	 * Removes a file. Succeeds silently if file doesn't exist.
+	 * Removes a file. Returns a `not_found` error if the file doesn't exist —
+	 * callers that want `rm -f` semantics should ignore that kind explicitly.
 	 */
-	unlink: (options: {path: string}) => Promise<Result<object, {message: string}>>;
+	unlink: (options: {path: string}) => Promise<Result<object, FsError>>;
 }

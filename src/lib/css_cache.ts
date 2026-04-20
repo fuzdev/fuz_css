@@ -110,10 +110,10 @@ export const load_cached_extraction = async (
 	cache_path: string,
 ): Promise<CachedExtraction | null> => {
 	try {
-		const content = await deps.read_text({path: cache_path});
-		if (!content) return null;
+		const r = await deps.read_text({path: cache_path});
+		if (!r.ok) return null;
 
-		const cached = JSON.parse(content) as CachedExtraction;
+		const cached = JSON.parse(r.value) as CachedExtraction;
 
 		// Invalidate if version mismatch
 		if (cached.v !== CSS_CACHE_VERSION) {
