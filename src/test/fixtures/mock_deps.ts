@@ -30,7 +30,9 @@ export const create_mock_fs_state = (): MockFsState => ({
  */
 export const create_mock_cache_deps = (state: MockFsState): CacheDeps => ({
 	read_text: async ({path}) => {
-		return state.files.get(path) ?? null;
+		const value = state.files.get(path);
+		if (value === undefined) return {ok: false, kind: 'not_found', message: `not found: ${path}`};
+		return {ok: true, value};
 	},
 
 	write_text_atomic: async ({path, content}) => {
@@ -39,6 +41,9 @@ export const create_mock_cache_deps = (state: MockFsState): CacheDeps => ({
 	},
 
 	unlink: async ({path}) => {
+		if (!state.files.has(path)) {
+			return {ok: false, kind: 'not_found', message: `not found: ${path}`};
+		}
 		state.files.delete(path);
 		return {ok: true};
 	},

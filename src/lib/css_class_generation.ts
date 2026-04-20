@@ -364,7 +364,6 @@ export const generate_classes_css = (
 			}
 		} else if ('ruleset' in v) {
 			// Check for empty ruleset
-			// eslint-disable-next-line @typescript-eslint/prefer-optional-chain
 			if (!v.ruleset || !v.ruleset.trim()) {
 				diagnostics.push({
 					phase: 'generation',
