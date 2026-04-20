@@ -499,12 +499,12 @@ export const load_style_rule_index = async (
 	style_css_path?: string,
 ): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const css = await deps.read_text({path});
-	if (css === null) {
-		throw new Error(`Failed to read style.css from ${path}`);
+	const r = await deps.read_text({path});
+	if (!r.ok) {
+		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
 	}
-	const content_hash = hash_blake3(css);
-	return parse_style_css(css, content_hash);
+	const content_hash = hash_blake3(r.value);
+	return parse_style_css(r.value, content_hash);
 };
 
 /**
@@ -531,11 +531,11 @@ export const load_default_style_css = async (
 	style_css_path?: string,
 ): Promise<string> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const css = await deps.read_text({path});
-	if (css === null) {
-		throw new Error(`Failed to read style.css from ${path}`);
+	const r = await deps.read_text({path});
+	if (!r.ok) {
+		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
 	}
-	return css;
+	return r.value;
 };
 
 /**
