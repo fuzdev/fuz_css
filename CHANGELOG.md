@@ -1,5 +1,15 @@
 # @fuzdev/fuz_css
 
+## 0.59.0
+
+### Minor Changes
+
+- upgrade fuz_util ([#86](https://github.com/fuzdev/fuz_css/pull/86))
+
+### Patch Changes
+
+- fix: trim whitespace before `!important` ([349322d](https://github.com/fuzdev/fuz_css/commit/349322d))
+
 ## 0.58.0
 
 ### Minor Changes
