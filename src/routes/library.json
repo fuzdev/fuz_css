@@ -38,7 +38,7 @@
 		},
 		"type": "module",
 		"engines": {
-			"node": ">=22.15"
+			"node": ">=24.14"
 		},
 		"peerDependencies": {
 			"@fuzdev/blake3_wasm": "^0.1.0",
