@@ -1417,10 +1417,9 @@ export const input_padding_y: StyleVariable = {name: 'input_padding_y', light: '
 export const input_padding_x: StyleVariable = {name: 'input_padding_x', light: 'var(--space_lg)'};
 export const input_width_min: StyleVariable = {name: 'input_width_min', light: '100px'};
 export const input_height: StyleVariable = {name: 'input_height', light: 'var(--space_xl5)'};
-export const input_height_sm: StyleVariable = {name: 'input_height_sm', light: 'var(--space_xl4)'};
-export const input_height_inner: StyleVariable = {
-	name: 'input_height_inner',
-	light: 'calc(var(--input_height) - 2 * var(--border_width) - 2 * var(--input_padding_y))',
+export const input_height_compact: StyleVariable = {
+	name: 'input_height_compact',
+	light: 'var(--space_xl4)',
 };
 
 /*
@@ -2225,8 +2224,7 @@ export const default_variables: Array<StyleVariable> = [
 	input_padding_x,
 	input_width_min,
 	input_height,
-	input_height_sm,
-	input_height_inner,
+	input_height_compact,
 
 	/* shadows and glows */
 	shadow_xs,

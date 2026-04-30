@@ -1057,6 +1057,7 @@ export const gen = gen_fuz_css({
 				<li><code>.circular</code> - 50% border-radius</li>
 				<li><code>.sm</code> - tighter sizing, cascading to children</li>
 				<li><code>.md</code> - default sizing, cascade reset</li>
+				<li><code>.lg</code> - larger sizing, cascading to children</li>
 				<li><code>.mb_flow</code> - flow-aware margin-bottom</li>
 				<li><code>.mt_flow</code> - flow-aware margin-top</li>
 			</ul>

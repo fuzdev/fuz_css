@@ -271,6 +271,40 @@
 			>Paragraph text currently doesn't respond to <code>.sm</code>, but should it? Headings?</UnfinishedImplementationWarning
 		>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .lg">
+			With <code>.lg</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.lg</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> makes sizing larger
+			with bigger fonts and flow margins. Apply on a container to cascade to children.
+		</p>
+		<Code
+			content={`<div class="lg">\n\t<h3>large heading</h3>\n\t<p>large paragraph</p>\n\t<p>large paragraph</p>\n</div>`}
+		/>
+		<div class="display:flex align-items:start gap_lg mb_lg">
+			<div class="panel p_md lg">
+				<h4 class="mt_0">large</h4>
+				<p>Paragraph in a large container with more spacious flow margins between elements.</p>
+				<p>Another paragraph with the increased spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</div>
+			<div class="panel p_md">
+				<h4 class="mt_0">normal</h4>
+				<p>Paragraph in a normal container with default flow margins between elements.</p>
+				<p>Another paragraph with the default spacing.</p>
+				<ul>
+					<li>list item one</li>
+					<li>list item two</li>
+				</ul>
+			</div>
+		</div>
+	</TomeSection>
 </TomeContent>
 
 <style>

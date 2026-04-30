@@ -271,4 +271,34 @@
 			<button type="button" class="color_j">3</button>
 		</div>
 	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="With .lg">
+			With <code>.lg</code>
+		</TomeSectionHeader>
+		<p>
+			The <code>.lg</code>
+			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things larger
+			with bigger fonts, inputs, padding, and flow margins.
+		</p>
+		<Code content={`<button>normal</button>\n<button class="lg">lg</button>`} />
+		<div class="row gap_xs mb_lg">
+			<button type="button">normal</button>
+			<button type="button" class="lg">lg</button>
+		</div>
+		<p><code>.lg</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
+		<div class="row gap_sm mb_lg">
+			<button type="button">+++</button>
+			<button type="button" class="lg">+++</button>
+			<button type="button" class="lg plain">+++</button>
+			<button type="button" class="lg icon_button">+++</button>
+			<button type="button" class="lg plain icon_button">+++</button>
+		</div>
+		<p><code>.lg</code> overrides custom properties, so children inherit the sizing:</p>
+		<div class="lg row gap_sm">
+			<button type="button">one</button>
+			<button type="button" class="plain">to</button>
+			<button type="button" class="color_j">3</button>
+		</div>
+	</TomeSection>
 </TomeContent>
