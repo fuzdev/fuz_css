@@ -9,6 +9,11 @@ Early alpha with breaking changes ahead.
 For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
+## Committing
+
+`git add` and `git commit` are denied by `.claude/settings.local.json` in
+this repo — make the edits and stop, the user commits.
+
 ## Gro commands
 
 ```bash
@@ -216,14 +221,14 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 ## Docs
 
-[src/routes/docs/](src/routes/docs/) has pages for: introduction, api, examples,
+./src/routes/docs/ has pages for: introduction, api, examples,
 semantic, themes, variables, classes, colors, buttons, chips, elements, forms,
 typography, borders, shading, shadows, layout. See
 [tomes.ts](src/routes/docs/tomes.ts) for structure.
 
 ## File organization
 
-### Library - [src/lib/](src/lib/)
+### Library - ./src/lib/
 
 **Variables & themes:**
 
@@ -292,7 +297,7 @@ typography, borders, shading, shadows, layout. See
 - [style.css](src/lib/style.css) - CSS reset and element defaults (all rules)
 - [theme.css](src/lib/theme.css) - Generated base theme variables (all variables)
 
-### Examples - [examples/](examples/)
+### Examples - ./examples/
 
 Vite plugin examples for Svelte, React, Preact, and Solid. Each demonstrates
 token, composite, and literal classes with modifiers.
@@ -300,7 +305,7 @@ token, composite, and literal classes with modifiers.
 **Important:** All 4 example App files must be kept in sync. When updating one,
 update all others with equivalent changes.
 
-### Tests - [src/test/](src/test/)
+### Tests - ./src/test/
 
 Tests use dot-separated aspect splitting. Major test suites:
 
