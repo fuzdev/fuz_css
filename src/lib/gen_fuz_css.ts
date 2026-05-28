@@ -12,40 +12,24 @@ import type {Gen} from '@fuzdev/gro/gen.js';
 import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
 
 import {filter_file_default} from './file_filter.js';
-import {
-	type ExtractionData,
-	has_extraction_data,
-	extract_css_classes_with_locations,
-} from './css_class_extractor.js';
-import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
+import {type ExtractionData, has_extraction_data} from './css_class_extractor.js';
+import {format_diagnostic, CssGenerationError} from './diagnostics.js';
 import {CssClasses} from './css_classes.js';
-import {generate_classes_css} from './css_class_generation.js';
+import {generate_css} from './generate_css.js';
+import {create_bundled_resources, type BundledCssResources} from './bundled_resources.js';
+import {extract_file_cached} from './extract_file_cached.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
-	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
-	from_cached_extraction,
 } from './css_cache.js';
 import {default_cache_deps} from './deps_defaults.js';
-import {
-	type StyleRuleIndex,
-	load_style_rule_index,
-	create_style_rule_index,
-	load_default_style_css,
-} from './style_rule_parser.js';
-import {
-	type VariableDependencyGraph,
-	build_variable_graph_from_options,
-	get_all_variable_names,
-} from './variable_graph.js';
+import {get_all_variable_names} from './variable_graph.js';
 import {extract_css_variables} from './css_variable_utils.js';
-import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
-import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /**
@@ -151,11 +135,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		include_default_classes,
 	);
 
-	// Lazy-load expensive resources (cached per generator instance)
+	// Lazy-load expensive resources, cached per generator instance so watch-mode
+	// rebuilds don't re-parse style.css or rebuild the graphs.
 	let css_properties: Set<string> | null = null;
-	let style_rule_index: StyleRuleIndex | null = null;
-	let variable_graph: VariableDependencyGraph | null = null;
-	let class_variable_index: CssClassVariableIndex | null = null;
+	let bundled_resources: BundledCssResources | null = null;
 
 	const get_css_properties = async (): Promise<Set<string>> => {
 		if (!css_properties) {
@@ -164,36 +147,16 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		return css_properties;
 	};
 
-	const get_style_index = async (): Promise<StyleRuleIndex> => {
-		if (!style_rule_index) {
-			if (typeof base_css === 'string') {
-				// Custom CSS string provided (replacement)
-				style_rule_index = create_style_rule_index(base_css);
-			} else if (typeof base_css === 'function') {
-				// Callback to modify default CSS
-				const default_css = await load_default_style_css(deps);
-				const modified_css = base_css(default_css);
-				style_rule_index = create_style_rule_index(modified_css);
-			} else {
-				// Use default style.css (undefined or null - null handled by include_base flag)
-				style_rule_index = await load_style_rule_index(deps);
-			}
+	const get_bundled_resources = async (): Promise<BundledCssResources> => {
+		if (!bundled_resources) {
+			bundled_resources = await create_bundled_resources({
+				base_css,
+				variables,
+				class_definitions: all_class_definitions,
+				deps,
+			});
 		}
-		return style_rule_index;
-	};
-
-	const get_variable_graph = (): VariableDependencyGraph => {
-		if (!variable_graph) {
-			variable_graph = build_variable_graph_from_options(variables);
-		}
-		return variable_graph;
-	};
-
-	const get_class_variable_index = (): CssClassVariableIndex => {
-		if (!class_variable_index) {
-			class_variable_index = build_class_variable_index(all_class_definitions);
-		}
-		return class_variable_index;
+		return bundled_resources;
 	};
 
 	// Instance-level state for watch mode cleanup
@@ -273,45 +236,34 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				concurrency,
 				async (node): Promise<FileExtraction> => {
 					current_paths.add(node.id);
-					const cache_path = get_file_cache_path(node.id, resolved_cache_dir, project_root);
+					const cache_path = is_ci
+						? null
+						: get_file_cache_path(node.id, resolved_cache_dir, project_root);
 
-					// Try cache (skip on CI)
-					if (!is_ci) {
-						const cached = await load_cached_extraction(deps, cache_path);
-						if (cached && cached.content_hash === node.content_hash) {
-							// Cache hit
-							stats.cache_hits++;
-							const cached_data = from_cached_extraction(cached);
-							return {
-								id: node.id,
-								classes: cached_data.classes,
-								explicit_classes: cached_data.explicit_classes,
-								diagnostics: cached_data.diagnostics,
-								elements: cached_data.elements,
-								explicit_elements: cached_data.explicit_elements,
-								explicit_variables: cached_data.explicit_variables,
-								cache_path: null,
-								content_hash: node.content_hash,
-							};
-						}
-					}
-
-					// Cache miss - extract
-					stats.cache_misses++;
-					const result = extract_css_classes_with_locations(node.contents, {
+					const {extraction, from_cache, cache_path_to_write} = await extract_file_cached({
+						deps,
+						content: node.contents,
+						content_hash: node.content_hash,
+						cache_path,
 						filename: node.id,
 						acorn_plugins,
 					});
 
+					if (from_cache) {
+						stats.cache_hits++;
+					} else {
+						stats.cache_misses++;
+					}
+
 					return {
 						id: node.id,
-						classes: result.classes,
-						explicit_classes: result.explicit_classes,
-						diagnostics: result.diagnostics,
-						elements: result.elements,
-						explicit_elements: result.explicit_elements,
-						explicit_variables: result.explicit_variables,
-						cache_path: is_ci ? null : cache_path,
+						classes: extraction.classes,
+						explicit_classes: extraction.explicit_classes,
+						diagnostics: extraction.diagnostics,
+						elements: extraction.elements,
+						explicit_elements: extraction.explicit_elements,
+						explicit_variables: extraction.explicit_variables,
+						cache_path: cache_path_to_write,
 						content_hash: node.content_hash,
 					};
 				},
@@ -381,29 +333,14 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				log.info(`  Unique CSS classes found: ${all_classes.size}`);
 			}
 
-			const utility_result = generate_classes_css({
-				class_names: all_classes,
-				class_definitions: all_class_definitions,
-				interpreters: class_interpreters,
-				css_properties: cached_css_properties,
-				log,
-				class_locations: all_classes_with_locations,
-				explicit_classes,
-			});
+			// Build bundled resources once when base/theme output is enabled.
+			const resources = include_base || include_theme ? await get_bundled_resources() : null;
 
-			// Collect all diagnostics: extraction + generation
-			const all_diagnostics: Array<Diagnostic> = [
-				...css_classes.get_diagnostics(),
-				...utility_result.diagnostics,
-			];
-
-			// Generate bundled CSS if base or theme are enabled
-			let final_css: string;
-			if (include_base || include_theme) {
-				// Detect CSS variables via simple regex scan of all file contents
-				// Filter against theme variables - only include known theme vars
-				const theme_var_names = get_all_variable_names(get_variable_graph());
-				const detected_css_variables: Set<string> = new Set();
+			// Detect CSS variables via simple regex scan of all file contents,
+			// filtered against theme variables (only known theme vars are kept).
+			const detected_css_variables: Set<string> = new Set();
+			if (resources) {
+				const theme_var_names = get_all_variable_names(resources.variable_graph);
 				for (const node of nodes) {
 					for (const name of extract_css_variables(node.contents)) {
 						if (theme_var_names.has(name)) {
@@ -411,56 +348,31 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						}
 					}
 				}
-
-				// Add explicit variables from @fuz-variables comments to detected set for inclusion,
-				// and pass as explicit_variables to resolve_css for error reporting on typos
-				if (explicit_variables) {
-					for (const v of explicit_variables) {
-						detected_css_variables.add(v);
-					}
-				}
-
-				const resolution = resolve_css({
-					style_rule_index: await get_style_index(),
-					variable_graph: get_variable_graph(),
-					class_variable_index: get_class_variable_index(),
-					detected_elements: all_elements,
-					detected_classes: all_classes,
-					detected_css_variables,
-					utility_variables_used: utility_result.variables_used,
-					additional_elements,
-					additional_variables,
-					theme_specificity,
-					include_stats,
-					exclude_elements,
-					exclude_variables,
-					explicit_elements,
-					explicit_variables,
-				});
-
-				// Log resolution stats if requested
-				if (include_stats && resolution.stats) {
-					log.info(
-						`[css_resolution] Elements: ${resolution.stats.element_count} (${resolution.stats.elements.join(', ')})`,
-					);
-					log.info(
-						`[css_resolution] Rules: ${resolution.stats.included_rules} of ${resolution.stats.total_rules}`,
-					);
-					log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
-				}
-
-				// Add resolution diagnostics
-				all_diagnostics.push(...resolution.diagnostics);
-
-				final_css = generate_bundled_css(resolution, utility_result.css, {
-					include_theme,
-					include_base,
-					include_utilities: true,
-				});
-			} else {
-				// utility-only mode (legacy behavior)
-				final_css = utility_result.css;
 			}
+
+			const {css: final_css, diagnostics: all_diagnostics} = generate_css({
+				all_classes,
+				all_classes_with_locations,
+				explicit_classes,
+				all_elements,
+				explicit_elements,
+				explicit_variables,
+				extraction_diagnostics: css_classes.get_diagnostics(),
+				detected_css_variables,
+				class_definitions: all_class_definitions,
+				interpreters: class_interpreters,
+				css_properties: cached_css_properties,
+				include_base,
+				include_theme,
+				resources,
+				additional_elements,
+				additional_variables,
+				exclude_elements,
+				exclude_variables,
+				theme_specificity,
+				log,
+				include_stats,
+			});
 
 			// Separate errors and warnings
 			const errors = all_diagnostics.filter((d) => d.level === 'error');
