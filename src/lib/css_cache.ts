@@ -32,6 +32,11 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * v5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).
  * v6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).
  */
+// TODO: the cache key is `content_hash` + `CSS_CACHE_VERSION`, but extraction output
+// also depends on `acorn_plugins` (e.g. acorn-jsx), which isn't part of the key.
+// Changing that config without editing a file yields a stale cache hit. Acorn plugin
+// instances aren't stably serializable across processes, so a clean fingerprint isn't
+// cheap; revisit if config-change staleness bites (workaround: clear `.fuz/cache/css`).
 export const CSS_CACHE_VERSION = 6;
 
 /**

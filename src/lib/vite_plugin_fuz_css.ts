@@ -28,37 +28,26 @@ import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
 import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
 
-import {extract_css_classes_with_locations} from './css_class_extractor.js';
-import {type Diagnostic, format_diagnostic, CssGenerationError} from './diagnostics.js';
-import {generate_classes_css} from './css_class_generation.js';
+import {format_diagnostic, CssGenerationError} from './diagnostics.js';
+import {generate_css} from './generate_css.js';
+import {create_bundled_resources} from './bundled_resources.js';
+import {extract_file_cached} from './extract_file_cached.js';
 import {merge_class_definitions} from './css_class_definitions.js';
 import {css_class_interpreters} from './css_class_interpreters.js';
 import {load_css_properties} from './css_literal.js';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
-	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
-	from_cached_extraction,
 } from './css_cache.js';
 import {default_cache_deps} from './deps_defaults.js';
 import {filter_file_default} from './file_filter.js';
 import {CssClasses} from './css_classes.js';
-import {
-	type StyleRuleIndex,
-	load_style_rule_index,
-	create_style_rule_index,
-	load_default_style_css,
-} from './style_rule_parser.js';
-import {
-	type VariableDependencyGraph,
-	build_variable_graph_from_options,
-	get_all_variable_names,
-} from './variable_graph.js';
+import type {StyleRuleIndex} from './style_rule_parser.js';
+import {type VariableDependencyGraph, get_all_variable_names} from './variable_graph.js';
 import {extract_css_variables} from './css_variable_utils.js';
-import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
-import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
+import type {CssClassVariableIndex} from './class_variable_index.js';
 import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
 
 /* eslint-disable no-console */
@@ -160,6 +149,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let hmr_timeout: ReturnType<typeof setTimeout> | null = null;
 	let last_generated_css: string | null = null;
 	let pending_css: string | null = null; // CSS generated during HMR, reused by load()
+	/**
+	 * Per-file epoch guarding against a deletion (or newer transform) racing an
+	 * in-flight transform. `transform()` awaits the disk cache read; an `unlink`
+	 * arriving during that await deletes the entry, but the resolved await would
+	 * otherwise re-add it and resurrect the deleted file. Captured before the
+	 * await, re-checked after.
+	 */
+	const transform_epochs: Map<string, number> = new Map();
+	let epoch_seq = 0;
 
 	/**
 	 * Updates detected CSS variables for a file via regex scan against theme variables.
@@ -197,24 +195,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			return;
 		}
 		bundled_resources_promise = (async () => {
-			// Load style rule index based on base_css option
-			if (typeof base_css === 'string') {
-				// Custom CSS string (replacement)
-				style_rule_index = create_style_rule_index(base_css);
-			} else if (typeof base_css === 'function') {
-				// Callback to modify default CSS
-				const default_css = await load_default_style_css(deps);
-				const modified_css = base_css(default_css);
-				style_rule_index = create_style_rule_index(modified_css);
-			} else {
-				// Use default style.css (undefined or null)
-				style_rule_index = await load_style_rule_index(deps);
-			}
-
-			// Build variable graph based on variables option
-			variable_graph = build_variable_graph_from_options(variables);
-
-			class_variable_index = build_class_variable_index(all_class_definitions);
+			const resources = await create_bundled_resources({
+				base_css,
+				variables,
+				class_definitions: all_class_definitions,
+				deps,
+			});
+			style_rule_index = resources.style_rule_index;
+			variable_graph = resources.variable_graph;
+			class_variable_index = resources.class_variable_index;
 		})();
 		await bundled_resources_promise;
 	};
@@ -236,86 +225,53 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	};
 
 	/**
-	 * Generates CSS from the current classes.
+	 * Generates banner-wrapped CSS from the current classes, dispatching
+	 * diagnostics per the `on_error`/`on_warning` settings.
 	 */
-	const generate_css = (): string => {
+	const render_css = (): string => {
 		const {
-			all_classes: classes,
-			all_classes_with_locations: locations,
+			all_classes,
+			all_classes_with_locations,
 			explicit_classes,
 			all_elements,
 			explicit_elements,
 			explicit_variables,
 		} = css_classes.get_all();
 
-		const utility_result = generate_classes_css({
-			class_names: classes,
+		// Aggregate per-file detected CSS variables (already theme-filtered);
+		// `generate_css` merges in `explicit_variables`.
+		const detected_css_variables: Set<string> = new Set();
+		for (const vars of detected_variables_by_file.values()) {
+			for (const v of vars) {
+				detected_css_variables.add(v);
+			}
+		}
+
+		const {css: final_css, diagnostics: all_diagnostics} = generate_css({
+			all_classes,
+			all_classes_with_locations,
+			explicit_classes,
+			all_elements,
+			explicit_elements,
+			explicit_variables,
+			extraction_diagnostics: css_classes.get_diagnostics(),
+			detected_css_variables,
 			class_definitions: all_class_definitions,
 			interpreters: class_interpreters,
 			css_properties,
-			class_locations: locations,
-			explicit_classes,
+			include_base,
+			include_theme,
+			// Resources load lazily; null until ready falls back to utility-only.
+			resources:
+				style_rule_index && variable_graph && class_variable_index
+					? {style_rule_index, variable_graph, class_variable_index}
+					: null,
+			additional_elements,
+			additional_variables,
+			exclude_elements,
+			exclude_variables,
+			theme_specificity,
 		});
-
-		// Collect all diagnostics: extraction + generation
-		const all_diagnostics: Array<Diagnostic> = [
-			...css_classes.get_diagnostics(),
-			...utility_result.diagnostics,
-		];
-
-		// Generate bundled CSS if base or theme are enabled and resources are loaded
-		let final_css: string;
-		if (
-			(include_base || include_theme) &&
-			style_rule_index &&
-			variable_graph &&
-			class_variable_index
-		) {
-			// Aggregate detected CSS variables from all files
-			const detected_css_variables: Set<string> = new Set();
-			for (const vars of detected_variables_by_file.values()) {
-				for (const v of vars) {
-					detected_css_variables.add(v);
-				}
-			}
-
-			// Add explicit variables from @fuz-variables comments to detected set for inclusion,
-			// and pass as explicit_variables to resolve_css for error reporting on typos
-			if (explicit_variables) {
-				for (const v of explicit_variables) {
-					detected_css_variables.add(v);
-				}
-			}
-
-			const resolution = resolve_css({
-				style_rule_index,
-				variable_graph,
-				class_variable_index,
-				detected_elements: all_elements,
-				detected_classes: classes,
-				detected_css_variables,
-				utility_variables_used: utility_result.variables_used,
-				additional_elements,
-				additional_variables,
-				theme_specificity,
-				exclude_elements,
-				exclude_variables,
-				explicit_elements,
-				explicit_variables,
-			});
-
-			// Add resolution diagnostics
-			all_diagnostics.push(...resolution.diagnostics);
-
-			final_css = generate_bundled_css(resolution, utility_result.css, {
-				include_theme,
-				include_base,
-				include_utilities: true,
-			});
-		} else {
-			// utility-only mode (legacy behavior or resources not loaded yet)
-			final_css = utility_result.css;
-		}
 
 		// Separate errors and warnings
 		const errors = all_diagnostics.filter((d) => d.level === 'error');
@@ -367,7 +323,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			hmr_timeout = null;
 
 			// Check if CSS actually changed
-			const new_css = generate_css();
+			const new_css = render_css();
 			if (new_css === last_generated_css) {
 				return; // No change, skip HMR
 			}
@@ -413,6 +369,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			server = dev_server;
 			// Handle file deletion - watcher 'unlink' event
 			dev_server.watcher.on('unlink', (file) => {
+				// Invalidate any in-flight transform for this file so its post-await
+				// re-add can't resurrect the deleted entry.
+				transform_epochs.delete(file);
 				if (hashes.has(file)) {
 					css_classes.delete(file);
 					hashes.delete(file);
@@ -466,7 +425,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					await ensure_bundled_resources();
 				}
 				// Use pending CSS from HMR if available, avoiding redundant generation
-				const css = pending_css ?? generate_css();
+				const css = pending_css ?? render_css();
 				pending_css = null;
 				last_generated_css = css; // Track for HMR diffing
 				const escaped_css = JSON.stringify(css);
@@ -505,7 +464,7 @@ export {};
 		generateBundle(_options, bundle) {
 			// Regenerate CSS with all extracted classes and append to the CSS asset
 			// This runs after all transforms are complete, so all classes are available
-			const generated_css = generate_css();
+			const generated_css = render_css();
 
 			// Find the main CSS asset and append our generated CSS
 			// Vite combines all CSS into one or more asset files
@@ -528,42 +487,41 @@ export {};
 				return null;
 			}
 
-			// Compute content hash
+			// Compute content hash; skip if unchanged
 			const hash = hash_blake3(code);
-			const existing_hash = hashes.get(id);
-
-			// Check if unchanged
-			if (existing_hash === hash) {
+			if (hashes.get(id) === hash) {
 				return null;
 			}
 
-			// Try cache (if not CI and we have cache dir)
-			if (!is_ci && resolved_cache_dir && project_root) {
-				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				const cached = await load_cached_extraction(deps, cache_path);
+			const cache_path =
+				!is_ci && resolved_cache_dir && project_root
+					? get_file_cache_path(id, resolved_cache_dir, project_root)
+					: null;
 
-				if (cached?.content_hash === hash) {
-					// Cache hit
-					css_classes.add(id, from_cached_extraction(cached));
-					update_detected_variables(id, code);
-					hashes.set(id, hash);
+			// Capture an epoch before the (awaiting) cache read so a deletion or
+			// newer transform racing the await can be detected after it resolves.
+			const epoch = ++epoch_seq;
+			transform_epochs.set(id, epoch);
 
-					if (virtual_module_loaded) {
-						invalidate_virtual_module();
-					}
-					return null;
-				}
-			}
-
-			// Extract classes
-			const result = extract_css_classes_with_locations(code, {
+			const {extraction, from_cache, cache_path_to_write} = await extract_file_cached({
+				deps,
+				content: code,
+				content_hash: hash,
+				cache_path,
 				filename: id,
 				acorn_plugins,
 			});
 
-			// Log extraction diagnostics
-			if (result.diagnostics) {
-				for (const d of result.diagnostics) {
+			// Bail if the file was deleted or re-transformed during the cache read;
+			// re-adding here would resurrect a deleted or stale entry.
+			if (transform_epochs.get(id) !== epoch) {
+				return null;
+			}
+
+			// Log extraction diagnostics (only when freshly parsed; cached diagnostics
+			// were already logged on the miss that produced them).
+			if (!from_cache && extraction.diagnostics) {
+				for (const d of extraction.diagnostics) {
 					const loc = `${d.location.file}:${d.location.line}:${d.location.column}`;
 					const msg = `[fuz_css] ${loc}: ${d.message}`;
 					if (d.level === 'error') {
@@ -576,14 +534,13 @@ export {};
 			}
 
 			// Update CssClasses
-			css_classes.add(id, result);
+			css_classes.add(id, extraction);
 			update_detected_variables(id, code);
 			hashes.set(id, hash);
 
 			// Save to cache (fire and forget - don't block transform)
-			if (!is_ci && resolved_cache_dir && project_root) {
-				const cache_path = get_file_cache_path(id, resolved_cache_dir, project_root);
-				save_cached_extraction(deps, cache_path, hash, result).catch(() => {
+			if (cache_path_to_write) {
+				save_cached_extraction(deps, cache_path_to_write, hash, extraction).catch(() => {
 					// Ignore cache errors
 				});
 			}

@@ -148,6 +148,84 @@
 		"version": "0.59.0",
 		"modules": [
 			{
+				"path": "bundled_resources.ts",
+				"declarations": [
+					{
+						"name": "BundledCssResources",
+						"kind": "type",
+						"doc_comment": "Bundled CSS resources needed to emit base styles and theme variables.\nBuild via `create_bundled_resources`; pass `null` for utility-only output.",
+						"source_line": 29,
+						"type_signature": "BundledCssResources",
+						"properties": [
+							{
+								"name": "style_rule_index",
+								"kind": "variable",
+								"type_signature": "StyleRuleIndex"
+							},
+							{
+								"name": "variable_graph",
+								"kind": "variable",
+								"type_signature": "VariableDependencyGraph"
+							},
+							{
+								"name": "class_variable_index",
+								"kind": "variable",
+								"type_signature": "CssClassVariableIndex"
+							}
+						]
+					},
+					{
+						"name": "CreateBundledResourcesOptions",
+						"kind": "type",
+						"source_line": 35,
+						"type_signature": "CreateBundledResourcesOptions",
+						"properties": [
+							{
+								"name": "base_css",
+								"kind": "variable",
+								"type_signature": "BaseCssOption",
+								"doc_comment": "Base CSS source: custom string, callback over the default, or default."
+							},
+							{
+								"name": "variables",
+								"kind": "variable",
+								"type_signature": "VariablesOption",
+								"doc_comment": "Theme variables source."
+							},
+							{
+								"name": "class_definitions",
+								"kind": "variable",
+								"type_signature": "Record<string, CssClassDefinition | undefined>",
+								"doc_comment": "Merged class definitions, indexed to their referenced variables."
+							},
+							{
+								"name": "deps",
+								"kind": "variable",
+								"type_signature": "CacheDeps",
+								"doc_comment": "Filesystem deps for loading the default `style.css`."
+							}
+						]
+					},
+					{
+						"name": "create_bundled_resources",
+						"kind": "function",
+						"doc_comment": "Builds the bundled CSS resources from generator options. The `style.css`\nindex is always built (even when only theme output is enabled), matching the\ngenerators' prior behavior.",
+						"source_line": 51,
+						"type_signature": "(options: CreateBundledResourcesOptions): Promise<BundledCssResources>",
+						"return_type": "Promise<BundledCssResources>",
+						"parameters": [
+							{
+								"name": "options",
+								"type": "CreateBundledResourcesOptions"
+							}
+						]
+					}
+				],
+				"module_comment": "Construction of the bundled CSS resources (style-rule index, variable graph,\nclass→variable index) shared by the Gro generator and the Vite plugin.\n\nThe two generators consume these differently — the Gro generator caches one\nbundle per instance, the Vite plugin loads lazily on first virtual-module\naccess — but build them identically from the same options. This keeps that\nconstruction in one place.",
+				"dependencies": ["class_variable_index.ts", "style_rule_parser.ts", "variable_graph.ts"],
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+			},
+			{
 				"path": "class_variable_index.ts",
 				"declarations": [
 					{
@@ -247,7 +325,7 @@
 				],
 				"module_comment": "Class-to-variable index for bundled CSS generation.\n\nBuilds an index mapping CSS class names to the CSS variables they use.\nThis enables the bundled generator to include theme variables needed\nby the utility classes actually used in the project.",
 				"dependencies": ["css_variable_utils.ts"],
-				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["bundled_resources.ts", "css_bundled_resolution.ts"]
 			},
 			{
 				"path": "css_bundled_resolution.ts",
@@ -520,7 +598,7 @@
 				],
 				"module_comment": "CSS resolution algorithm for bundled CSS generation.\n\nCombines theme variables, base styles, and utility classes into a single\nbundled output. Resolves which CSS rules and variables to include based\non what elements and classes are actually used in the project.\n\nThis module provides low-level CSS resolution for advanced use cases.\nMost users should use `gen_fuz_css` (Gro) or `vite_plugin_fuz_css` (Vite)\nwhich handle extraction and caching automatically. See those modules for\nreference implementations.",
 				"dependencies": ["class_variable_index.ts", "style_rule_parser.ts", "variable_graph.ts"],
-				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["generate_css.ts"]
 			},
 			{
 				"path": "css_cache.ts",
@@ -536,14 +614,14 @@
 						"name": "CSS_CACHE_VERSION",
 						"kind": "variable",
 						"doc_comment": "CSS cache version. Bump when any of these change:\n- `CachedExtraction` schema\n- `extract_css_classes_with_locations()` logic or output\n- `ExtractionDiagnostic` or `SourceLocation` structure\n\nv1: Initial version with classes and diagnostics\nv2: Use null instead of empty arrays, add `explicit_classes`, `elements`, `css_variables`.\nv3: Add `explicit_elements`, `explicit_variables` for `@fuz-elements`/`@fuz-variables` comments.\nv4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).\nv5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).\nv6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).",
-						"source_line": 35,
+						"source_line": 40,
 						"type_signature": "6"
 					},
 					{
 						"name": "CachedExtraction",
 						"kind": "type",
 						"doc_comment": "Cached extraction result for a single file.\nUses `null` instead of empty arrays to avoid allocation overhead.",
-						"source_line": 41,
+						"source_line": 46,
 						"type_signature": "CachedExtraction",
 						"properties": [
 							{
@@ -600,7 +678,7 @@
 						"name": "get_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes the cache file path for a source file.\nCache structure mirrors source tree: `src/lib/Foo.svelte` → `.fuz/cache/css/src/lib/Foo.svelte.json`",
-						"source_line": 68,
+						"source_line": 73,
 						"type_signature": "(source_path: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -625,7 +703,7 @@
 						"name": "get_file_cache_path",
 						"kind": "function",
 						"doc_comment": "Computes cache path for a file, handling both internal and external paths.\nInternal files use relative paths mirroring source tree.\nExternal files (outside project root) use hashed absolute paths in `_external/`.",
-						"source_line": 89,
+						"source_line": 94,
 						"type_signature": "(file_id: string, cache_dir: string, project_root: string): string",
 						"return_type": "string",
 						"parameters": [
@@ -650,7 +728,7 @@
 						"name": "load_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Loads a cached extraction result from disk.\nReturns `null` if the cache is missing, corrupted, or has a version mismatch.\nThis makes the cache self-healing: any error triggers re-extraction.",
-						"source_line": 108,
+						"source_line": 113,
 						"type_signature": "(deps: CacheDeps, cache_path: string): Promise<CachedExtraction | null>",
 						"return_type": "Promise<CachedExtraction | null>",
 						"parameters": [
@@ -670,7 +748,7 @@
 						"name": "save_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Saves an extraction result to the cache.\nUses atomic write (temp file + rename) for crash safety.\nNormalizes empty collections to null to avoid allocation overhead on load.",
-						"source_line": 141,
+						"source_line": 146,
 						"type_signature": "(deps: CacheDeps, cache_path: string, content_hash: string, extraction: ExtractionData): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -700,7 +778,7 @@
 						"name": "delete_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Deletes a cached extraction file.\nSilently succeeds if the file doesn't exist.",
-						"source_line": 190,
+						"source_line": 195,
 						"type_signature": "(deps: CacheDeps, cache_path: string): Promise<void>",
 						"return_type": "Promise<void>",
 						"parameters": [
@@ -720,7 +798,7 @@
 						"name": "from_cached_extraction",
 						"kind": "function",
 						"doc_comment": "Converts a cached extraction back to the runtime format.\nPreserves null semantics (null = empty).",
-						"source_line": 203,
+						"source_line": 208,
 						"type_signature": "(cached: CachedExtraction): ExtractionData",
 						"return_type": "ExtractionData",
 						"parameters": [
@@ -733,7 +811,7 @@
 					}
 				],
 				"module_comment": "Cache infrastructure for incremental CSS class extraction.\n\nProvides per-file caching with content hash validation to avoid\nre-extracting classes from unchanged files.",
-				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["extract_file_cached.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_composites.ts",
@@ -1037,7 +1115,7 @@
 					}
 				],
 				"module_comment": "AST-based CSS class extraction for Svelte and TypeScript files.\n\nReplaces regex-based extraction with proper parsing to handle:\n- `class=\"display:flex\"` - string attributes\n- `class={{ active, disabled: !enabled }}` - object attributes (Svelte 5.16+)\n- `class={[cond && 'box', 'display:flex']}` - array attributes (Svelte 5.16+)\n- `class:active={cond}` - class directives\n- `clsx('foo', { bar: true })` - class utility function calls\n- Variables with class-related names\n- `// @fuz-classes class1 class2` - comment hints for dynamic classes\n- `// @fuz-elements element1 element2` - comment hints for dynamic elements\n- `// @fuz-variables var1 var2` - comment hints for dynamic CSS variables",
-				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["extract_file_cached.ts", "gen_fuz_css.ts"]
 			},
 			{
 				"path": "css_class_generation.ts",
@@ -1324,7 +1402,7 @@
 					"diagnostics.ts",
 					"modifiers.ts"
 				],
-				"dependents": ["css_class_interpreters.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["css_class_interpreters.ts", "generate_css.ts"]
 			},
 			{
 				"path": "css_class_generators.ts",
@@ -3232,6 +3310,95 @@
 				"module_comment": "Example CSS class exports demonstrating node_modules extraction.\n\nThis module exists to verify that the Vite plugin extracts classes from\ndependencies in node_modules. The exports test specific extraction patterns\nthat require being in a separate module.\n\n**Important:** Variable names must match `CLASS_NAME_PATTERN` in `css_class_extractor.ts`.\nSupported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`\n(also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).\n\n**Patterns demonstrated:**\n- Naming patterns: All `CLASS_NAME_PATTERN` suffix variants\n- Expression patterns: Ternary, logical AND, arrays\n- Comment hints: `@fuz-classes` directive\n\nToken, composite, and literal classes are demonstrated inline in the examples\nsince they don't require special extraction testing."
 			},
 			{
+				"path": "extract_file_cached.ts",
+				"declarations": [
+					{
+						"name": "ExtractFileCachedOptions",
+						"kind": "type",
+						"source_line": 21,
+						"type_signature": "ExtractFileCachedOptions",
+						"properties": [
+							{
+								"name": "deps",
+								"kind": "variable",
+								"type_signature": "CacheDeps"
+							},
+							{
+								"name": "content",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Source file contents."
+							},
+							{
+								"name": "content_hash",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Content hash to validate the cache against."
+							},
+							{
+								"name": "cache_path",
+								"kind": "variable",
+								"type_signature": "string | null",
+								"doc_comment": "Cache file path, or null to skip the cache (CI or caching disabled)."
+							},
+							{
+								"name": "filename",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "File path, for parser selection and diagnostic locations."
+							},
+							{
+								"name": "acorn_plugins",
+								"kind": "variable",
+								"type_signature": "Array<AcornPlugin>"
+							}
+						]
+					},
+					{
+						"name": "ExtractFileCachedResult",
+						"kind": "type",
+						"source_line": 34,
+						"type_signature": "ExtractFileCachedResult",
+						"properties": [
+							{
+								"name": "extraction",
+								"kind": "variable",
+								"type_signature": "ExtractionData"
+							},
+							{
+								"name": "from_cache",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether the extraction came from cache."
+							},
+							{
+								"name": "cache_path_to_write",
+								"kind": "variable",
+								"type_signature": "string | null",
+								"doc_comment": "Cache file to write (miss with caching enabled), or null."
+							}
+						]
+					},
+					{
+						"name": "extract_file_cached",
+						"kind": "function",
+						"doc_comment": "Loads the cached extraction when its content hash matches, otherwise extracts\nfresh. On a miss with caching enabled, `cache_path_to_write` carries the path\nthe caller should write.",
+						"source_line": 47,
+						"type_signature": "(options: ExtractFileCachedOptions): Promise<ExtractFileCachedResult>",
+						"return_type": "Promise<ExtractFileCachedResult>",
+						"parameters": [
+							{
+								"name": "options",
+								"type": "ExtractFileCachedOptions"
+							}
+						]
+					}
+				],
+				"module_comment": "Cache-aware single-file class extraction shared by the Gro generator and the\nVite plugin. Returns extraction sourced from cache when the content hash\nmatches, else freshly parsed, plus the cache path to write on a miss.\n\nCallers own everything around this — in-memory hash short-circuits, the Vite\ndeletion-race guard, diagnostic logging, stats counting, and how/when to\nwrite the cache (fire-and-forget vs. batched).",
+				"dependencies": ["css_cache.ts", "css_class_extractor.ts"],
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+			},
+			{
 				"path": "file_filter.ts",
 				"declarations": [
 					{
@@ -3266,7 +3433,7 @@
 						"name": "GenFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the Gro CSS generator.\nExtends the shared base options with Gro-specific settings.",
-						"source_line": 90,
+						"source_line": 74,
 						"type_signature": "GenFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": [
@@ -3299,7 +3466,7 @@
 					{
 						"name": "gen_fuz_css",
 						"kind": "function",
-						"source_line": 114,
+						"source_line": 98,
 						"type_signature": "(options?: GenFuzCssOptions): Gen",
 						"return_type": "Gen",
 						"parameters": [
@@ -3313,22 +3480,189 @@
 				],
 				"module_comment": "[Gro generator](https://github.com/fuzdev/gro) for creating optimized utility CSS from extracted class names.\nScans source files, extracts CSS classes with AST-based parsing, and generates\nonly the CSS for classes actually used. Includes per-file caching with content\nhash validation for fast incremental rebuilds.",
 				"dependencies": [
-					"class_variable_index.ts",
-					"css_bundled_resolution.ts",
+					"bundled_resources.ts",
 					"css_cache.ts",
 					"css_class_definitions.ts",
 					"css_class_extractor.ts",
-					"css_class_generation.ts",
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts",
 					"css_variable_utils.ts",
 					"deps_defaults.ts",
 					"diagnostics.ts",
+					"extract_file_cached.ts",
 					"file_filter.ts",
-					"style_rule_parser.ts",
+					"generate_css.ts",
 					"variable_graph.ts"
 				]
+			},
+			{
+				"path": "generate_css.ts",
+				"declarations": [
+					{
+						"name": "GenerateCssOptions",
+						"kind": "type",
+						"doc_comment": "Inputs to `generate_css`. The first group mirrors the shape returned by\n`CssClasses.get_all()` plus its diagnostics, so callers can forward it\ndirectly.",
+						"source_line": 29,
+						"type_signature": "GenerateCssOptions",
+						"properties": [
+							{
+								"name": "all_classes",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "All detected class names, already exclude-filtered."
+							},
+							{
+								"name": "all_classes_with_locations",
+								"kind": "variable",
+								"type_signature": "Map<string, Array<SourceLocation> | null>",
+								"doc_comment": "Source locations per class, for diagnostics."
+							},
+							{
+								"name": "explicit_classes",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Classes from `@fuz-classes`/`additional_classes`; unresolved ones error."
+							},
+							{
+								"name": "all_elements",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "All detected HTML element names."
+							},
+							{
+								"name": "explicit_elements",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Elements from `@fuz-elements`; unresolved ones error."
+							},
+							{
+								"name": "explicit_variables",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Variables from `@fuz-variables`; unresolved ones error."
+							},
+							{
+								"name": "extraction_diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<Diagnostic>",
+								"doc_comment": "Diagnostics accumulated during extraction."
+							},
+							{
+								"name": "detected_css_variables",
+								"kind": "variable",
+								"type_signature": "Set<string>",
+								"doc_comment": "CSS variables referenced in source, already filtered to known theme\nvariables by the caller. `@fuz-variables` are merged in here automatically."
+							},
+							{
+								"name": "class_definitions",
+								"kind": "variable",
+								"type_signature": "Record<string, CssClassDefinition | undefined>"
+							},
+							{
+								"name": "interpreters",
+								"kind": "variable",
+								"type_signature": "Array<CssClassDefinitionInterpreter>"
+							},
+							{
+								"name": "css_properties",
+								"kind": "variable",
+								"type_signature": "Set<string> | null",
+								"doc_comment": "Valid CSS properties for literal validation, or null to skip."
+							},
+							{
+								"name": "include_base",
+								"kind": "variable",
+								"type_signature": "boolean"
+							},
+							{
+								"name": "include_theme",
+								"kind": "variable",
+								"type_signature": "boolean"
+							},
+							{
+								"name": "resources",
+								"kind": "variable",
+								"type_signature": "BundledCssResources | null",
+								"doc_comment": "Bundled resources, or null for utility-only mode."
+							},
+							{
+								"name": "additional_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string> | 'all'"
+							},
+							{
+								"name": "additional_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string> | 'all'"
+							},
+							{
+								"name": "exclude_elements",
+								"kind": "variable",
+								"type_signature": "Iterable<string>"
+							},
+							{
+								"name": "exclude_variables",
+								"kind": "variable",
+								"type_signature": "Iterable<string>"
+							},
+							{
+								"name": "theme_specificity",
+								"kind": "variable",
+								"type_signature": "number"
+							},
+							{
+								"name": "log",
+								"kind": "variable",
+								"type_signature": "Logger",
+								"doc_comment": "Optional logger; only used to emit resolution stats when `include_stats`."
+							},
+							{
+								"name": "include_stats",
+								"kind": "variable",
+								"type_signature": "boolean",
+								"doc_comment": "Whether to compute and log resolution statistics."
+							}
+						]
+					},
+					{
+						"name": "GenerateCssResult",
+						"kind": "type",
+						"source_line": 72,
+						"type_signature": "GenerateCssResult",
+						"properties": [
+							{
+								"name": "css",
+								"kind": "variable",
+								"type_signature": "string",
+								"doc_comment": "Final CSS without banner comments — callers add their own."
+							},
+							{
+								"name": "diagnostics",
+								"kind": "variable",
+								"type_signature": "Array<Diagnostic>",
+								"doc_comment": "Extraction + generation + resolution diagnostics, unfiltered."
+							}
+						]
+					},
+					{
+						"name": "generate_css",
+						"kind": "function",
+						"doc_comment": "Runs the full CSS-generation pipeline: utility classes via\n`generate_classes_css`, then — when base or theme output is enabled and\nbundled `resources` are available — base styles and theme variables via\n`resolve_css` + `generate_bundled_css`. Returns the combined CSS and every\ndiagnostic produced along the way.",
+						"source_line": 86,
+						"type_signature": "(options: GenerateCssOptions): GenerateCssResult",
+						"return_type": "GenerateCssResult",
+						"parameters": [
+							{
+								"name": "options",
+								"type": "GenerateCssOptions"
+							}
+						]
+					}
+				],
+				"module_comment": "Shared CSS-generation pipeline for the Gro generator and the Vite plugin.\n\nBoth consumers extract classes from source files their own way (batch via the\nGro filer, incrementally via Vite's transform hook), then funnel the\naggregated result through this single function so their CSS output stays\nidentical. Callers own banner wrapping and error/warning dispatch (those\ndiffer by logger), this owns the generate → resolve → bundle pipeline.",
+				"dependencies": ["css_bundled_resolution.ts", "css_class_generation.ts"],
+				"dependents": ["gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
 			},
 			{
 				"path": "modifiers.ts",
@@ -3830,7 +4164,7 @@
 				],
 				"module_comment": "Style.css rule parser for bundled CSS generation.\n\nParses the fuz_css `style.css` file into a structured index that maps\nCSS rules to the HTML elements and classes they style. This enables\nthe bundled CSS generator to include only the rules needed for\nelements actually used in the project.",
 				"dependencies": ["css_variable_utils.ts"],
-				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": ["bundled_resources.ts", "css_bundled_resolution.ts"]
 			},
 			{
 				"path": "theme.gen.css.ts",
@@ -4534,7 +4868,12 @@
 				],
 				"module_comment": "Variable dependency graph for bundled CSS generation.\n\nBuilds a dependency graph from style variables to enable transitive\nresolution of CSS custom properties. When a variable is needed,\nall variables it depends on are also included.",
 				"dependencies": ["css_variable_utils.ts", "variables.ts"],
-				"dependents": ["css_bundled_resolution.ts", "gen_fuz_css.ts", "vite_plugin_fuz_css.ts"]
+				"dependents": [
+					"bundled_resources.ts",
+					"css_bundled_resolution.ts",
+					"gen_fuz_css.ts",
+					"vite_plugin_fuz_css.ts"
+				]
 			},
 			{
 				"path": "variable.ts",
@@ -7066,14 +7405,14 @@
 						"name": "FUZ_CSS_BANNER",
 						"kind": "variable",
 						"doc_comment": "Banner comment at the top and bottom of generated CSS output.",
-						"source_line": 67,
+						"source_line": 56,
 						"type_signature": "\"/* generated by vite_plugin_fuz_css */\""
 					},
 					{
 						"name": "VitePluginFuzCssOptions",
 						"kind": "type",
 						"doc_comment": "Options for the fuz_css Vite plugin.\nExtends the shared base options (no additional Vite-specific options currently needed).",
-						"source_line": 104,
+						"source_line": 93,
 						"type_signature": "VitePluginFuzCssOptions",
 						"extends": ["CssGeneratorBaseOptions"],
 						"properties": []
@@ -7082,7 +7421,7 @@
 						"name": "vite_plugin_fuz_css",
 						"kind": "function",
 						"doc_comment": "Creates the fuz_css Vite plugin.\n\nExtracts CSS classes from source files during Vite's transform phase\nand generates optimized CSS via the `virtual:fuz.css` virtual module.",
-						"source_line": 112,
+						"source_line": 101,
 						"type_signature": "(options?: VitePluginFuzCssOptions): Plugin<any>",
 						"return_type": "Plugin<any>",
 						"parameters": [
@@ -7096,20 +7435,18 @@
 				],
 				"module_comment": "Vite plugin for fuz_css utility class generation.\n\nUses Vite's transform hook to extract CSS classes from source files\nas they're processed, including node_modules dependencies.\nGenerates CSS on-demand via virtual module with HMR support.\n\n@example\n```ts\n// vite.config.ts\nimport {defineConfig} from 'vite';\nimport jsx from 'acorn-jsx';\nimport {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';\n\nexport default defineConfig({\n  plugins: [\n    vite_plugin_fuz_css({\n      acorn_plugins: [jsx()],\n    }),\n  ],\n});\n```",
 				"dependencies": [
-					"class_variable_index.ts",
-					"css_bundled_resolution.ts",
+					"bundled_resources.ts",
 					"css_cache.ts",
 					"css_class_definitions.ts",
-					"css_class_extractor.ts",
-					"css_class_generation.ts",
 					"css_class_interpreters.ts",
 					"css_classes.ts",
 					"css_literal.ts",
 					"css_variable_utils.ts",
 					"deps_defaults.ts",
 					"diagnostics.ts",
+					"extract_file_cached.ts",
 					"file_filter.ts",
-					"style_rule_parser.ts",
+					"generate_css.ts",
 					"variable_graph.ts"
 				]
 			}
