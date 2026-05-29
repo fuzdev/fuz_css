@@ -539,9 +539,10 @@
 	--text_100: hsl(var(--tint_hue) var(--tint_saturation) 4%);
 	--text_disabled: var(--text_50);
 	--font_family_sans:
-		system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'; /* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
-	--font_family_serif: 'DM Serif Display', Georgia, serif; /* @source https://svelte.dev/ */
-	--font_family_mono: ui-monospace, 'Fira Mono', monospace;
+		-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
+		'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+	--font_family_serif: Georgia, serif;
+	--font_family_mono: ui-monospace, monospace;
 	--font_size_xs: 1rem;
 	--font_size_sm: 1.3rem;
 	--font_size_md: 1.6rem;

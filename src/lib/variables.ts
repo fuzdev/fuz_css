@@ -1256,18 +1256,16 @@ export const text_disabled: StyleVariable = {
 /* fonts */
 export const font_family_sans: StyleVariable = {
 	name: 'font_family_sans',
-	light: "system-ui, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
-	summary:
-		'@source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/',
+	light:
+		"-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'",
 };
 export const font_family_serif: StyleVariable = {
 	name: 'font_family_serif',
-	light: "'DM Serif Display', Georgia, serif",
-	summary: '@source https://svelte.dev/',
+	light: 'Georgia, serif',
 };
 export const font_family_mono: StyleVariable = {
 	name: 'font_family_mono',
-	light: "ui-monospace, 'Fira Mono', monospace",
+	light: 'ui-monospace, monospace',
 };
 
 /* sizes like font-size */
