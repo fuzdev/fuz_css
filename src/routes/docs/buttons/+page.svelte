@@ -244,6 +244,7 @@
 		</div>
 		<p>They compose with other classes like <code>.plain</code> and <code>.icon_button</code>:</p>
 		<div class="row align-items:center gap_sm mb_lg">
+			<button type="button" class="xs icon_button plain">+</button>
 			<button type="button" class="sm icon_button plain">+</button>
 			<button type="button" class="icon_button plain">+</button>
 			<button type="button" class="lg icon_button plain">+</button>
