@@ -2,9 +2,9 @@
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 
-	const tome = get_tome_by_name('examples');
+	const tome = tome_get_by_slug('examples');
 
 	const GITHUB_EXAMPLES = 'https://github.com/fuzdev/fuz_css/tree/main/examples';
 </script>
@@ -12,7 +12,7 @@
 <TomeContent {tome}>
 	<section class="column gap_md">
 		<p>
-			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the <TomeLink name="classes" /> system
+			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the <TomeLink slug="classes" /> system
 			using the
 			<a href="https://github.com/fuzdev/fuz_css/blob/main/src/lib/vite_plugin_fuz_css.ts"
 				>Vite plugin</a

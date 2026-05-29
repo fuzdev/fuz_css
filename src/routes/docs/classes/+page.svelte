@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -29,7 +29,7 @@
 
 	const LIBRARY_ITEM_NAME = 'classes';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 </script>
 
 {#snippet variant_range<T>(arr: ReadonlyArray<T>)}
@@ -45,8 +45,8 @@
 		integration.
 	</p>
 	<p>
-		Utility classes complement <TomeLink name="semantic">semantic styles</TomeLink> and
-		<TomeLink name="variables">style variables</TomeLink>. Use them to compose styles across
+		Utility classes complement <TomeLink slug="semantic">semantic styles</TomeLink> and
+		<TomeLink slug="variables">style variables</TomeLink>. Use them to compose styles across
 		component boundaries, or when you prefer classes to the <code>&lt;style&gt;</code> tag and
 		<code>style</code> attribute. They're optional and generated on-demand to include only what you use.
 	</p>
@@ -489,7 +489,7 @@ const el = document.createElement('dialog');`}
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
 				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
-				close relationship to <TomeLink name="variables">style variables</TomeLink> -- each maps design
+				close relationship to <TomeLink slug="variables">style variables</TomeLink> -- each maps design
 				tokens to CSS properties. They're generated programmatically from variant data, making them predictable
 				and systematic. The composites documented
 				<a href="#Composite-classes">below</a>
@@ -507,7 +507,7 @@ const el = document.createElement('dialog');`}
 				<a href="#Literal-classes">literal classes</a>; we find this improves readability.
 			</p>
 			<h4>Spacing</h4>
-			<p>See <TomeLink name="layout" />.</p>
+			<p>See <TomeLink slug="layout" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -626,7 +626,7 @@ const el = document.createElement('dialog');`}
 				raw values.
 			</aside>
 			<h4>Sizing</h4>
-			<p>See <TomeLink name="layout" />.</p>
+			<p>See <TomeLink slug="layout" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"><code>.width_{@render variant_range(space_variants)}</code></span
@@ -652,8 +652,8 @@ const el = document.createElement('dialog');`}
 			</ul>
 			<h4>Colors</h4>
 			<p>
-				See <TomeLink name="colors" />, <TomeLink name="shading" />, and <TomeLink
-					name="typography"
+				See <TomeLink slug="colors" />, <TomeLink slug="shading" />, and <TomeLink
+					slug="typography"
 					hash="Text-colors"
 				/>.
 			</p>
@@ -714,7 +714,7 @@ const el = document.createElement('dialog');`}
 				modes: low numbers are subtle, high numbers are strong.
 			</aside>
 			<h4>Typography</h4>
-			<p>See <TomeLink name="typography" />.</p>
+			<p>See <TomeLink slug="typography" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -739,7 +739,7 @@ const el = document.createElement('dialog');`}
 				</li>
 			</ul>
 			<h4>Borders</h4>
-			<p>See <TomeLink name="borders" />.</p>
+			<p>See <TomeLink slug="borders" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -813,7 +813,7 @@ const el = document.createElement('dialog');`}
 				</li>
 			</ul>
 			<h4>Shadows</h4>
-			<p>See <TomeLink name="shadows" />.</p>
+			<p>See <TomeLink slug="shadows" />.</p>
 			<ul class="unstyled">
 				<li class="mb_md">
 					<span class="code_chips"
@@ -1055,8 +1055,11 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
-				<li><code>.sm</code> - tighter sizing, cascading to children</li>
+				<li><code>.xs</code> - smallest sizing, cascading to children</li>
+				<li><code>.sm</code> - smaller sizing, cascading to children</li>
 				<li><code>.md</code> - default sizing, cascade reset</li>
+				<li><code>.lg</code> - larger sizing, cascading to children</li>
+				<li><code>.xl</code> - largest sizing, cascading to children</li>
 				<li><code>.mb_flow</code> - flow-aware margin-bottom</li>
 				<li><code>.mt_flow</code> - flow-aware margin-top</li>
 			</ul>
@@ -1308,7 +1311,7 @@ export const gen = gen_fuz_css({
 		<TomeSectionHeader text="Builtin classes" />
 		<p>
 			fuz_css's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
-			HTML elements using <TomeLink name="variables">style variables</TomeLink>, acting as a modern
+			HTML elements using <TomeLink slug="variables">style variables</TomeLink>, acting as a modern
 			CSS reset that adapts to dark mode. It includes CSS classes that provide common generic
 			functionality -- these are called builtin classes.
 		</p>
@@ -1360,20 +1363,20 @@ export const gen = gen_fuz_css({
 
 		<h4>Other builtin classes</h4>
 		<ul>
-			<li><code>.selected</code> - see <TomeLink name="buttons" />, <TomeLink name="forms" /></li>
-			<li><code>.disabled</code> - see <TomeLink name="forms" /></li>
-			<li><code>.deselectable</code> - see <TomeLink name="buttons" /></li>
-			<li><code>.inline</code> - see <TomeLink name="buttons" />, <TomeLink name="forms" /></li>
-			<li><code>.heading</code> - see <TomeLink name="typography" /></li>
-			<li><code>.title</code> - see <TomeLink name="forms" /></li>
-			<li><code>.row</code> - see <TomeLink name="layout" />, <TomeLink name="forms" /></li>
+			<li><code>.selected</code> - see <TomeLink slug="buttons" />, <TomeLink slug="forms" /></li>
+			<li><code>.disabled</code> - see <TomeLink slug="forms" /></li>
+			<li><code>.deselectable</code> - see <TomeLink slug="buttons" /></li>
+			<li><code>.inline</code> - see <TomeLink slug="buttons" />, <TomeLink slug="forms" /></li>
+			<li><code>.heading</code> - see <TomeLink slug="typography" /></li>
+			<li><code>.title</code> - see <TomeLink slug="forms" /></li>
+			<li><code>.row</code> - see <TomeLink slug="layout" />, <TomeLink slug="forms" /></li>
 			<li>
-				<code>.color_a</code> through <code>.color_j</code> - see <TomeLink name="buttons" />,
-				<TomeLink name="colors" />
+				<code>.color_a</code> through <code>.color_j</code> - see <TomeLink slug="buttons" />,
+				<TomeLink slug="colors" />
 			</li>
 			<li>
 				<code>.dark</code>, <code>.light</code> on <code>:root</code> - see <TomeLink
-					name="themes"
+					slug="themes"
 				/>
 			</li>
 		</ul>
@@ -1700,8 +1703,9 @@ vite_plugin_fuz_css({
 	<hr />
 	<section>
 		<p>
-			<code>fuz_css</code> is still early in development. Your input is welcome in the
-			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>!
+			<code>fuz_css</code> is still early in development. Your input and feedback is appreciated in
+			the GitHub issues for bugs and
+			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> for everything else.
 		</p>
 	</section>
 </TomeContent>

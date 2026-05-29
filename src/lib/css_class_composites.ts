@@ -108,39 +108,88 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			background-color: var(--fg_10);
 		`,
 	},
+	/*
+	Size composites scale a region up or down on the fuz_css scales. Each variable
+	is offset a fixed number of steps from its `.md` default on the variable's own
+	scale: `.xs` two steps down, `.sm` one down, `.lg` one up, `.xl` two up. `.md`
+	restates the defaults so it works as a cascade reset inside a sized parent.
+	*/
+	xs: {
+		comment:
+			'Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.',
+		declaration: `
+			--font_size: var(--font_size_xs);
+			--input_height: var(--space_xl3);
+			--input_height_compact: var(--space_xl2);
+			--input_padding_x: var(--space_sm);
+			--chip_padding_x: var(--space_xs3);
+			--icon_size: var(--icon_size_xs);
+			--menuitem_padding: var(--space_xs5) var(--space_xs3);
+			--flow_margin: var(--space_sm);
+		`,
+	},
 	sm: {
 		comment:
-			'Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.',
+			'Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_sm);
-			--input_height: var(--space_xl3);
-			--input_height_sm: var(--space_xl2);
-			--input_padding_x: var(--space_sm);
-			--min_height: var(--space_xl3);
+			--input_height: var(--space_xl4);
+			--input_height_compact: var(--space_xl3);
+			--input_padding_x: var(--space_md);
+			--chip_padding_x: var(--space_xs2);
 			--icon_size: var(--icon_size_sm);
-			--menuitem_padding: var(--space_xs4) var(--space_xs3);
+			--menuitem_padding: var(--space_xs4) var(--space_xs2);
 			--flow_margin: var(--space_md);
 		`,
 	},
 	md: {
-		comment: 'Explicit default sizing, useful as a cascade reset within a sized parent like .sm.',
+		comment: 'Default sizing restated explicitly, useful as a cascade reset within a sized parent.',
 		declaration: `
 			--font_size: var(--font_size_md);
 			--input_height: var(--space_xl5);
-			--input_height_sm: var(--space_xl4);
+			--input_height_compact: var(--space_xl4);
 			--input_padding_x: var(--space_lg);
-			--min_height: var(--input_height);
+			--chip_padding_x: var(--space_xs);
 			--icon_size: var(--icon_size_md);
 			--menuitem_padding: var(--space_xs3) var(--space_xs);
 			--flow_margin: var(--space_lg);
 		`,
 	},
+	lg: {
+		comment:
+			'Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.',
+		declaration: `
+			--font_size: var(--font_size_lg);
+			--input_height: var(--space_xl6);
+			--input_height_compact: var(--space_xl5);
+			--input_padding_x: var(--space_xl);
+			--chip_padding_x: var(--space_sm);
+			--icon_size: var(--icon_size_lg);
+			--menuitem_padding: var(--space_xs2) var(--space_sm);
+			--flow_margin: var(--space_xl);
+		`,
+	},
+	xl: {
+		comment:
+			'Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.',
+		declaration: `
+			--font_size: var(--font_size_xl);
+			--input_height: var(--space_xl7);
+			--input_height_compact: var(--space_xl6);
+			--input_padding_x: var(--space_xl2);
+			--chip_padding_x: var(--space_md);
+			--icon_size: var(--icon_size_xl);
+			--menuitem_padding: var(--space_xs) var(--space_md);
+			--flow_margin: var(--space_xl2);
+		`,
+	},
 	mb_flow: {
-		comment: 'Flow-aware margin-bottom that responds to --flow_margin overrides like .sm.',
+		comment:
+			'Flow-aware margin-bottom that responds to --flow_margin overrides from size composites.',
 		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));',
 	},
 	mt_flow: {
-		comment: 'Flow-aware margin-top that responds to --flow_margin overrides like .sm.',
+		comment: 'Flow-aware margin-top that responds to --flow_margin overrides from size composites.',
 		declaration: 'margin-top: var(--flow_margin, var(--space_lg));',
 	},
 	icon_button: {
@@ -183,7 +232,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				z-index: 2;
 				cursor: pointer;
 				width: 100%;
-				min-height: var(--min_height, var(--icon_size_sm));
+				min-height: var(--menuitem_min_height, var(--input_height_compact));
 				display: flex;
 				justify-content: space-between;
 				align-items: center;
@@ -254,8 +303,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.chip {
 				font-weight: 500;
 				font-size: var(--font_size, inherit);
-				padding-left: var(--space_xs);
-				padding-right: var(--space_xs);
+				padding-left: var(--chip_padding_x, var(--space_xs));
+				padding-right: var(--chip_padding_x, var(--space_xs));
 				background-color: var(--fg_10);
 				border-radius: var(--border_radius, var(--border_radius_xs));
 			}

@@ -1,13 +1,9 @@
 <script lang="ts">
-	import type {Snippet} from 'svelte';
+	import type {SvelteHTMLElements} from 'svelte/elements';
 
-	const {
-		children,
-	}: {
-		children?: Snippet;
-	} = $props();
+	const {children, ...rest}: SvelteHTMLElements['aside'] = $props();
 </script>
 
-<aside>
+<aside {...rest}>
 	⚠️ {#if children}{@render children()}{:else}This is unfinished and will change.{/if}
 </aside>

@@ -20,7 +20,7 @@
  * @module
  */
 
-/* eslint-disable no-constant-condition, @typescript-eslint/no-unnecessary-condition, no-constant-binary-expression */
+/* eslint-disable no-constant-condition, no-constant-binary-expression */
 
 //
 // Naming patterns - all CLASS_NAME_PATTERN suffix variants (mb_* + ml_* for plurals)

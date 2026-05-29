@@ -3,7 +3,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -23,7 +23,7 @@
 
 	const LIBRARY_ITEM_NAME = 'typography';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	// TODO refactor, also maybe add `950`?
 	const font_weights = [100, 200, 300, 400, 500, 600, 700, 800, 900, 950, 234, 555, 997];
@@ -38,8 +38,7 @@
 	let selected_size = $state.raw(3);
 
 	// @fuz-classes font_family_sans font_family_serif font_family_mono
-
-	/* eslint-disable svelte/no-useless-mustaches */
+	// @fuz-classes xs sm md lg xl
 </script>
 
 <TomeContent {tome}>
@@ -130,7 +129,7 @@
 		<p>Font weight values can be any integer from 1 to 1000.</p>
 		<p>
 			There are no variables for <MdnLink path="Web/CSS/font-weight" /> but there are
-			<TomeLink name="classes" hash="Utility-class-types">utility classes</TomeLink>.
+			<TomeLink slug="classes" hash="Utility-class-types">utility classes</TomeLink>.
 		</p>
 		<form>
 			<FontSizeControl bind:selected_size />
@@ -152,7 +151,7 @@
 			The text scale (<code>text_00</code> through <code>text_100</code>) provides tinted neutral
 			colors optimized for text legibility. The scale uses "prominence" semantics for light and dark
 			modes: low numbers are subtle, high numbers are strong. This matches the
-			<TomeLink name="shading">shade scale</TomeLink> pattern.
+			<TomeLink slug="shading">shade scale</TomeLink> pattern.
 		</p>
 		<ul>
 			<li><code>text_00</code> - surface-side endpoint: essentially invisible on surface</li>
@@ -207,39 +206,33 @@
 	</TomeSection>
 	<IconSizes />
 	<TomeSection>
-		<TomeSectionHeader text="With .sm">
-			With <code>.sm</code>
-		</TomeSectionHeader>
+		<TomeSectionHeader text="Size composites" />
 		<p>
-			The <code>.sm</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> makes sizing tighter
-			with smaller fonts, inputs, padding, border radii, and flow margins. Apply on a container to cascade
-			to children.
+			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
+			set
+			<code>--flow_margin</code>, scaling the vertical spacing between flow elements and headings.
+			Apply on a container to cascade to children.
 		</p>
 		<Code
-			content={`<div class="sm">\n\t<h3>small heading</h3>\n\t<p>small paragraph</p>\n\t<p>small paragraph</p>\n</div>`}
+			content={`<div class="lg">\n\t<h3>heading</h3>\n\t<p>paragraph</p>\n\t<p>paragraph</p>\n</div>`}
 		/>
-		<div class="display:flex align-items:start gap_lg mb_lg">
-			<div class="panel p_md sm">
-				<h4 class="mt_0">small</h4>
-				<p>Paragraph in a small container with tighter flow margins between elements.</p>
-				<p>Another paragraph with the reduced spacing.</p>
-				<ul>
-					<li>list item one</li>
-					<li>list item two</li>
-				</ul>
-			</div>
-			<div class="panel p_md">
-				<h4 class="mt_0">normal</h4>
-				<p>Paragraph in a normal container with default flow margins between elements.</p>
-				<p>Another paragraph with the default spacing.</p>
-				<ul>
-					<li>list item one</li>
-					<li>list item two</li>
-				</ul>
-			</div>
+		<div class="display:flex align-items:start flex-wrap:wrap gap_lg mb_lg">
+			{#each ['xs', 'sm', 'md', 'lg', 'xl'] as size (size)}
+				<div class="panel p_md {size} width_atmost_sm">
+					<h4 class="mt_0">.{size}</h4>
+					<p>Paragraph with size-composite flow margins between elements.</p>
+					<p>Another paragraph with the matching spacing.</p>
+				</div>
+			{/each}
 		</div>
-		<aside>TODO improve rhythm for headers</aside>
+		<UnfinishedImplementationWarning>
+			Here, size composites adjust the vertical rhythm by setting <code>--flow_margin</code>, not
+			the text size. Paragraph text keeps its fixed size, and headings keep their own sizes to
+			preserve hierarchy; only controls like buttons and chips read the composite's
+			<code>--font_size</code>. Scaling headers and prose with size composites is under
+			consideration, design feedback is welcome.
+		</UnfinishedImplementationWarning>
 	</TomeSection>
 
 	<TomeSection>
@@ -248,7 +241,7 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.md</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
+			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
 			defaults. Use it inside a sized container to restore normal sizing for a subtree.
 		</p>
 		<Code
@@ -267,9 +260,6 @@
 				</div>
 			</div>
 		</div>
-		<UnfinishedImplementationWarning
-			>Paragraph text currently doesn't respond to <code>.sm</code>, but should it? Headings?</UnfinishedImplementationWarning
-		>
 	</TomeSection>
 </TomeContent>
 

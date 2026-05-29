@@ -27,5 +27,7 @@
 
 <UnfinishedImplementationWarning>
 	fuz_css is in early alpha with breaking changes ahead. Your input and feedback is appreciated in
-	the GitHub <a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
+	the GitHub issues for bugs and <a href="https://github.com/fuzdev/fuz_css/discussions"
+		>discussions</a
+	> for everything else.
 </UnfinishedImplementationWarning>

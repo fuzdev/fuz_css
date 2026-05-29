@@ -4,7 +4,7 @@
 	import Alert from '@fuzdev/fuz_ui/Alert.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -13,7 +13,7 @@
 
 	const LIBRARY_ITEM_NAME = 'forms';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	// TODO extract this to where? (where is it used in the css? check all @keyframe)
 	const ANIMATION_DURATION_FAST = 91; // ms
@@ -21,6 +21,8 @@
 	let created_account = $state.raw(false);
 
 	const faces = ['😊', '😑', '🤔', '😉'];
+
+	// @fuz-classes xs sm md lg xl
 
 	let username = $state.raw('');
 	let password = $state.raw('');
@@ -205,75 +207,47 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .sm">
-			With <code>.sm</code>
-		</TomeSectionHeader>
+		<TomeSectionHeader text="Size composites" />
 		<p>
-			The <code>.sm</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> provides tighter sizing
-			with smaller fonts, inputs, padding, border radii, and flow margins. Apply directly or on a container
-			to cascade to children.
+			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
+			inputs and buttons, adjusting height and padding. Apply directly or on a container to cascade to
+			children.
 		</p>
 		<Code
-			content={`<form class="sm">
-	...
-</form>`}
+			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}
 		/>
-		<div class="display:flex gap_lg">
-			<div class="width_atmost_sm">
-				<form class="sm">
-					<fieldset>
-						<legend>.sm</legend>
-						<label>
-							<div class="title">name</div>
-							<input placeholder=">" />
-						</label>
-						<label>
-							<div class="title">notes</div>
-							<textarea placeholder="..."></textarea>
-						</label>
-						<label>
-							<div class="title">option</div>
-							<select>
-								{#each faces as face (face)}
-									<option value={face}>{face}</option>
-								{/each}
-							</select>
-						</label>
-						<div class="row">
-							<button type="button">submit</button>
-							<button type="button" class="icon_button plain">+</button>
-						</div>
-					</fieldset>
-				</form>
-			</div>
-			<div class="width_atmost_sm">
-				<form>
-					<fieldset>
-						<legend>normal</legend>
-						<label>
-							<div class="title">name</div>
-							<input placeholder=">" />
-						</label>
-						<label>
-							<div class="title">notes</div>
-							<textarea placeholder="..."></textarea>
-						</label>
-						<label>
-							<div class="title">option</div>
-							<select>
-								{#each faces as face (face)}
-									<option value={face}>{face}</option>
-								{/each}
-							</select>
-						</label>
-						<div class="row">
-							<button type="button">submit</button>
-							<button type="button" class="icon_button plain">+</button>
-						</div>
-					</fieldset>
-				</form>
-			</div>
+		<div class="column gap_sm mb_lg width_atmost_sm">
+			{#each ['xs', 'sm', 'md', 'lg', 'xl'] as size (size)}
+				<div class="row align-items:center gap_sm">
+					<input class={size} placeholder={size} />
+					<button type="button" class={size}>{size}</button>
+				</div>
+			{/each}
 		</div>
+		<p>Set on a container and children inherit the sizing:</p>
+		<Code content={`<form class="xs">...</form>`} />
+		<div class="width_atmost_sm">
+			<form class="xs">
+				<fieldset>
+					<label>
+						<div class="title">inherits .xs</div>
+						<select>
+							{#each faces as face (face)}
+								<option value={face}>{face}</option>
+							{/each}
+						</select>
+					</label>
+					<div class="row">
+						<button type="button">submit</button>
+					</div>
+				</fieldset>
+			</form>
+		</div>
+		<UnfinishedImplementationWarning class="mt_lg">
+			Table cell padding doesn't yet respond to size composites. A size-composite region containing
+			a table will scale inputs and buttons but leave cells at their default padding. Planned in the
+			semantic variable chains migration.
+		</UnfinishedImplementationWarning>
 	</TomeSection>
 </TomeContent>

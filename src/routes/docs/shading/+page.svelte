@@ -3,7 +3,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
@@ -19,7 +19,7 @@
 	// @fuz-classes lighten_00 lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95 lighten_100
 	const LIBRARY_ITEM_NAME = 'shading';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const get_theme_state = theme_state_context.get();
 	const theme_state = $derived(get_theme_state());
@@ -34,7 +34,7 @@
 			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
 			<MdnLink path="Web/CSS/color-scheme" />. Adaptive means the underlying values change between
 			light and dark modes to maintain consistent prominence -- low numbers stay subtle, high
-			numbers stay strong. Each <TomeLink name="themes">theme</TomeLink> can implement light mode, dark
+			numbers stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode, dark
 			mode, or both.
 		</p>
 		<p>
@@ -267,7 +267,7 @@ background-color: var(--shade_min);`}
 	<TomeSection>
 		<TomeSectionHeader text="Text colors" />
 		<p>
-			For text colors, see the <TomeLink name="typography" hash="Text-colors">text scale</TomeLink>
+			For text colors, see the <TomeLink slug="typography" hash="Text-colors">text scale</TomeLink>
 			(<code>text_00</code> through <code>text_100</code>). Both scales use the same "prominence"
 			semantics for light and dark modes: low numbers are subtle, high numbers are strong. They're
 			separate scales because text and backgrounds have different contrast requirements.
@@ -284,10 +284,10 @@ background-color: var(--shade_min);`}
 		grid-auto-flow: row;
 	}
 	.color {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 	}
 	small {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 		display: flex;
 		justify-content: center;
 		align-items: center;
@@ -301,7 +301,7 @@ background-color: var(--shade_min);`}
 		border-radius: var(--border_radius_xs2);
 	}
 	.overlay_color {
-		height: var(--input_height_sm);
+		height: var(--input_height_compact);
 	}
 	.stacking_demo {
 		padding: var(--space_md);

@@ -37,6 +37,6 @@
 <style>
 	ul {
 		width: 100%;
-		margin-bottom: var(--input_height_sm);
+		margin-bottom: var(--input_height_compact);
 	}
 </style>

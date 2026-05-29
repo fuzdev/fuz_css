@@ -122,7 +122,6 @@ export const parse_style_css = (css: string, content_hash: string): StyleRuleInd
 					by_class.set(cls, [index]);
 				}
 			}
-			// eslint-disable-next-line @typescript-eslint/no-unnecessary-condition
 		} else if (child.type === 'Atrule') {
 			// Handle @media and other at-rules
 			const rule = extract_atrule(child, css, order++);

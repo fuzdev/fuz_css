@@ -505,7 +505,7 @@ describe('modified_class_interpreter', () => {
 				'@media (width >= 48rem)',
 				'.md\\:sm',
 				'--font_size: var(--font_size_sm);',
-				'--input_height: var(--space_xl3);',
+				'--input_height: var(--space_xl4);',
 				'--icon_size: var(--icon_size_sm);',
 			);
 			assert.lengthOf(result.diagnostics, 0);

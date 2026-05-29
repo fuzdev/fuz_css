@@ -3,7 +3,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
@@ -14,7 +14,7 @@
 
 	const LIBRARY_ITEM_NAME = 'variables';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const variables = default_variables.slice().sort((a, b) => a.name.localeCompare(b.name));
 
@@ -26,7 +26,7 @@
 		<p>
 			Style variables, or just "variables" in fuz_css, are <MdnLink
 				path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*">CSS custom properties</MdnLink
-			> that can be grouped into a <TomeLink name="themes">theme</TomeLink>. Each variable can have
+			> that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable can have
 			values for light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>.
 			They're design tokens with an API.
 		</p>

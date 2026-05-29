@@ -3,7 +3,7 @@
 	import {resolve} from '$app/paths';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -13,7 +13,7 @@
 
 	const LIBRARY_ITEM_NAME = 'elements';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	// TODO consider a generated table that shows all of the computed styles like `block` and `inline`
 
@@ -27,7 +27,7 @@
 		<p>
 			fuz_css applies default styles to semantic HTML elements in its <SourceFileLink
 				path="style.css">reset stylesheet</SourceFileLink
-			>. The styles use <TomeLink name="variables" /> and include appropriate spacing, so plain HTML gets
+			>. The styles use <TomeLink slug="variables" /> and include appropriate spacing, so plain HTML gets
 			user-friendly styling and theme integration automatically. The defaults are low specificity using
 			<code>:where</code>
 			so they're easy to override, and you can opt out by adding

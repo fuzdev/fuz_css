@@ -44,7 +44,7 @@
 		display: flex;
 		align-items: stretch;
 		font-family: var(--font_family_mono);
-		min-height: var(--input_height_sm);
+		min-height: var(--input_height_compact);
 	}
 	li:hover {
 		background-color: var(--shade_00);

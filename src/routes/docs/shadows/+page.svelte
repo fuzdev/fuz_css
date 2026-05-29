@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -20,7 +20,7 @@
 
 	const LIBRARY_ITEM_NAME = 'shadows';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	let selected_intensity: IntensityVariant = $state.raw('60');
 
@@ -49,7 +49,7 @@
 	<section>
 		<p>
 			fuz_css provides four semantic shadow types that build on the light model in the
-			<TomeLink name="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
+			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
 			light emphasis, and shroud for dark overlays.
 		</p>
 	</section>

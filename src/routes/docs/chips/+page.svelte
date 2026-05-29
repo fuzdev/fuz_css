@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -11,7 +11,7 @@
 
 	const LIBRARY_ITEM_NAME = 'chips';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const mb_xs = true;
 </script>
@@ -63,35 +63,25 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .sm">
-			With <code>.sm</code>
-		</TomeSectionHeader>
+		<TomeSectionHeader text="Size composites" />
 		<p>
-			The <code>.sm</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> applies tighter sizing
-			with smaller fonts, inputs, padding, border radii, and flow margins.
-		</p>
-		<Code content={`<span class="chip">normal</span>\n<span class="chip sm">small</span>`} />
-		<div class="row gap_sm mb_lg">
-			<span class="chip">normal</span>
-			<span class="chip sm">small</span>
-		</div>
-		<Code
-			content={`<span class="chip color_a">normal</span>\n<span class="chip sm color_a">color_a</span>\n<span class="chip sm color_b">color_b</span>\n<span class="chip sm color_c">color_c</span>`}
-		/>
-		<div class="row gap_sm mb_lg">
-			<span class="chip color_a">normal</span>
-			<span class="chip color_a sm">color_a</span>
-			<span class="chip color_b sm">color_b</span>
-			<span class="chip color_c sm">color_c</span>
-		</div>
-		<p>
-			<code>.sm</code> overrides custom properties, so children inherit the sizing:
+			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
+			chips up and down, adjusting font and padding.
 		</p>
 		<Code
-			content={`<div class="sm row gap_sm">\n\t<span class="chip">one</span>\n\t<span class="chip color_d">two</span>\n\t<a class="chip color_e">three</a>\n</div>`}
+			content={`<span class="chip xs">xs</span>\n<span class="chip sm">sm</span>\n<span class="chip">md</span>\n<span class="chip lg">lg</span>\n<span class="chip xl">xl</span>`}
 		/>
-		<div class="sm row gap_sm">
+		<div class="row align-items:center flex-wrap:wrap gap_sm mb_lg">
+			<span class="chip xs">xs</span>
+			<span class="chip sm">sm</span>
+			<span class="chip">md</span>
+			<span class="chip lg">lg</span>
+			<span class="chip xl">xl</span>
+		</div>
+		<p>Set on a container and children inherit the sizing:</p>
+		<Code content={`<div class="xs">...</div>`} />
+		<div class="xs row gap_sm">
 			<span class="chip">one</span>
 			<span class="chip color_d">two</span>
 			<!-- svelte-ignore a11y_missing_attribute -->

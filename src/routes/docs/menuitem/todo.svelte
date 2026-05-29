@@ -1,13 +1,13 @@
 <script lang="ts">
 	import {swallow} from '@fuzdev/fuz_util/dom.js';
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
-	const LIBRARY_ITEM_NAME = 'menu item';
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const LIBRARY_ITEM_NAME = 'menuitem';
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	// TODO this is currently not being displayed
 
