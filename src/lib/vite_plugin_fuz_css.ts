@@ -89,7 +89,7 @@ const HMR_DEBOUNCE_MS = 10;
  * Options for the fuz_css Vite plugin.
  * Extends the shared base options (no additional Vite-specific options currently needed).
  */
-// eslint-disable-next-line @typescript-eslint/no-empty-object-type
+
 export interface VitePluginFuzCssOptions extends CssGeneratorBaseOptions {}
 
 /**

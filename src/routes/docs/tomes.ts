@@ -23,7 +23,7 @@ import borders from '$routes/docs/borders/+page.svelte';
 
 export const tomes: Array<Tome> = [
 	{
-		name: 'introduction',
+		slug: 'introduction',
 		category: 'guide',
 		Component: introduction,
 		related_tomes: ['api'],
@@ -31,7 +31,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'api',
+		slug: 'api',
 		category: 'guide',
 		Component: api,
 		related_tomes: [],
@@ -39,7 +39,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'examples',
+		slug: 'examples',
 		category: 'guide',
 		Component: examples,
 		related_tomes: ['classes'],
@@ -47,7 +47,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'semantic',
+		slug: 'semantic',
 		category: 'systems',
 		Component: semantic,
 		related_tomes: ['buttons', 'elements', 'forms', 'typography'],
@@ -55,7 +55,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'themes',
+		slug: 'themes',
 		category: 'systems',
 		Component: themes,
 		related_tomes: ['variables', 'colors', 'typography'],
@@ -63,7 +63,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'variables',
+		slug: 'variables',
 		category: 'systems',
 		Component: variables,
 		related_tomes: ['themes'],
@@ -71,7 +71,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'classes',
+		slug: 'classes',
 		category: 'systems',
 		Component: classes,
 		related_tomes: ['chips', 'elements'],
@@ -79,7 +79,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'colors',
+		slug: 'colors',
 		category: 'styles',
 		Component: colors,
 		related_tomes: ['themes', 'buttons', 'chips', 'borders', 'shading', 'shadows'],
@@ -87,7 +87,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'shading',
+		slug: 'shading',
 		category: 'styles',
 		Component: shading,
 		related_tomes: ['colors', 'borders', 'shadows', 'typography'],
@@ -95,7 +95,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'buttons',
+		slug: 'buttons',
 		category: 'styles',
 		Component: buttons,
 		related_tomes: ['colors', 'chips', 'elements', 'forms', 'borders'],
@@ -103,7 +103,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'chips',
+		slug: 'chips',
 		category: 'styles',
 		Component: chips,
 		related_tomes: ['colors', 'buttons', 'classes'],
@@ -111,7 +111,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'elements',
+		slug: 'elements',
 		category: 'styles',
 		Component: elements,
 		related_tomes: ['buttons', 'forms', 'classes', 'typography', 'borders', 'layout'],
@@ -119,7 +119,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'forms',
+		slug: 'forms',
 		category: 'styles',
 		Component: forms,
 		related_tomes: ['buttons', 'elements', 'borders'],
@@ -127,7 +127,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'typography',
+		slug: 'typography',
 		category: 'styles',
 		Component: typography,
 		related_tomes: ['themes', 'shading', 'elements'],
@@ -135,7 +135,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'borders',
+		slug: 'borders',
 		category: 'styles',
 		Component: borders,
 		related_tomes: ['colors', 'shading', 'buttons', 'elements', 'forms', 'shadows'],
@@ -143,7 +143,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'shadows',
+		slug: 'shadows',
 		category: 'styles',
 		Component: shadows,
 		related_tomes: ['colors', 'shading', 'borders'],
@@ -151,7 +151,7 @@ export const tomes: Array<Tome> = [
 		related_declarations: [],
 	},
 	{
-		name: 'layout',
+		slug: 'layout',
 		category: 'styles',
 		Component: layout,
 		related_tomes: ['elements'],
@@ -160,7 +160,7 @@ export const tomes: Array<Tome> = [
 	},
 	// TODO maybe? or do styles like this belong elsewhere? classes? problem is we'll have a classes page for the variables
 	// {
-	// 	name: 'menu item',
+	// 	slug: 'menuitem',
 	// 	category: 'styles',
 	// Component: menuitem,
 	// 	related_tomes: [],

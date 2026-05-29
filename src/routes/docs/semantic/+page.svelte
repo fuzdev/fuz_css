@@ -3,7 +3,7 @@
 	import {resolve} from '$app/paths';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
@@ -11,7 +11,7 @@
 
 	const LIBRARY_ITEM_NAME = 'semantic';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 </script>
 
 <TomeContent {tome}>
@@ -50,7 +50,7 @@
 		<TomeSectionHeader text=".unstyled escape hatch" />
 		<p>
 			Add the <code>.unstyled</code>
-			<TomeLink name="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of decorative
+			<TomeLink slug="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of decorative
 			styling while keeping reset normalizations. Works for both decorative containers and interactive
 			elements like links, buttons, inputs, and summary.
 		</p>
@@ -127,10 +127,10 @@
 		<TomeSectionHeader text="Element-specific docs" />
 		<p>See the related docs for specifics:</p>
 		<ul>
-			<li><TomeLink name="buttons" /> - button states, colors, variants</li>
-			<li><TomeLink name="elements" /> - links, lists, tables, code, details</li>
-			<li><TomeLink name="forms" /> - inputs, labels, checkboxes, selects</li>
-			<li><TomeLink name="typography" /> - headings, fonts, text styles</li>
+			<li><TomeLink slug="buttons" /> - button states, colors, variants</li>
+			<li><TomeLink slug="elements" /> - links, lists, tables, code, details</li>
+			<li><TomeLink slug="forms" /> - inputs, labels, checkboxes, selects</li>
+			<li><TomeLink slug="typography" /> - headings, fonts, text styles</li>
 		</ul>
 	</TomeSection>
 </TomeContent>

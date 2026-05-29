@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
@@ -17,7 +17,7 @@
 
 	const LIBRARY_ITEM_NAME = 'themes';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const themes = default_themes.slice();
 
@@ -30,7 +30,7 @@
 		<p>
 			fuz_css supports both the browser's
 			<MdnLink path="Web/CSS/color-scheme" />
-			and custom themes based on <TomeLink name="variables" />, which use
+			and custom themes based on <TomeLink slug="variables" />, which use
 			<MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink>.
 		</p>
 		<p>
@@ -69,7 +69,7 @@
 			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
 		>
 		<p>
-			A theme is a simple JSON collection of <TomeLink name="variables" /> that can be transformed into
+			A theme is a simple JSON collection of <TomeLink slug="variables" /> that can be transformed into
 			CSS that set custom properties. Each variable can have values for light and/or dark color schemes.
 			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -21,7 +21,7 @@
 
 	const LIBRARY_ITEM_NAME = 'borders';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const computed_styles =
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
@@ -64,7 +64,7 @@
 
 	<section>
 		<p>
-			Border variables integrate with the <TomeLink name="themes">theme</TomeLink> system and adapt to
+			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt to
 			color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha because
 			light-on-dark has lower perceived contrast.
 		</p>
@@ -104,7 +104,7 @@
 				>We may want to add <code>border_shade_NN</code> utility classes for opaque borders.</UnfinishedImplementationWarning
 			>
 			<p>
-				For opaque borders, use <TomeLink name="shading">shade</TomeLink> variables directly. This avoids
+				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This avoids
 				alpha transparency but requires inline styles or custom classes:
 			</p>
 			<Code
@@ -213,7 +213,7 @@ border-color: var(--shade_30);
 	<TomeSection>
 		<TomeSectionHeader text="Border radius" />
 		<p>
-			Border variables with <TomeLink name="classes" hash="Token-classes">token classes</TomeLink>:
+			Border variables with <TomeLink slug="classes" hash="Token-classes">token classes</TomeLink>:
 		</p>
 		<div class="border_examples border_radii">
 			{#each border_radius_variants as radius (radius)}
@@ -246,7 +246,7 @@ border-color: var(--shade_30);
 		<TomeSection>
 			<TomeSectionHeader tag="h4" text="Custom values" />
 			<p>
-				Border <TomeLink name="classes" hash="Literal-classes">literal classes</TomeLink> for open-ended
+				Border <TomeLink slug="classes" hash="Literal-classes">literal classes</TomeLink> for open-ended
 				values:
 			</p>
 			<div class="border_examples border_radii">

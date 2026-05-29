@@ -31,24 +31,32 @@
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
 		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
 	},
+	"xs": {
+		"comment": "Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.",
+		"declaration": "\n\t\t\t--font_size: var(--font_size_xs);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_compact: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--chip_padding_x: var(--space_xs3);\n\t\t\t--icon_size: var(--icon_size_xs);\n\t\t\t--menuitem_padding: var(--space_xs5) var(--space_xs3);\n\t\t\t--flow_margin: var(--space_sm);\n\t\t"
+	},
 	"sm": {
-		"comment": "Tighter sizing by overriding variables, cascading to children. Works on individual elements or containers.",
-		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_compact: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--chip_padding_x: var(--space_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menuitem_padding: var(--space_xs4) var(--space_xs3);\n\t\t\t--flow_margin: var(--space_md);\n\t\t"
+		"comment": "Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.",
+		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl4);\n\t\t\t--input_height_compact: var(--space_xl3);\n\t\t\t--input_padding_x: var(--space_md);\n\t\t\t--chip_padding_x: var(--space_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menuitem_padding: var(--space_xs4) var(--space_xs2);\n\t\t\t--flow_margin: var(--space_md);\n\t\t"
 	},
 	"md": {
-		"comment": "Explicit default sizing, useful as a cascade reset within a sized parent like .sm.",
+		"comment": "Default sizing restated explicitly, useful as a cascade reset within a sized parent.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_md);\n\t\t\t--input_height: var(--space_xl5);\n\t\t\t--input_height_compact: var(--space_xl4);\n\t\t\t--input_padding_x: var(--space_lg);\n\t\t\t--chip_padding_x: var(--space_xs);\n\t\t\t--icon_size: var(--icon_size_md);\n\t\t\t--menuitem_padding: var(--space_xs3) var(--space_xs);\n\t\t\t--flow_margin: var(--space_lg);\n\t\t"
 	},
 	"lg": {
-		"comment": "Larger sizing by overriding variables, cascading to children. Works on individual elements or containers.",
+		"comment": "Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_lg);\n\t\t\t--input_height: var(--space_xl6);\n\t\t\t--input_height_compact: var(--space_xl5);\n\t\t\t--input_padding_x: var(--space_xl);\n\t\t\t--chip_padding_x: var(--space_sm);\n\t\t\t--icon_size: var(--icon_size_lg);\n\t\t\t--menuitem_padding: var(--space_xs2) var(--space_sm);\n\t\t\t--flow_margin: var(--space_xl);\n\t\t"
 	},
+	"xl": {
+		"comment": "Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.",
+		"declaration": "\n\t\t\t--font_size: var(--font_size_xl);\n\t\t\t--input_height: var(--space_xl7);\n\t\t\t--input_height_compact: var(--space_xl6);\n\t\t\t--input_padding_x: var(--space_xl2);\n\t\t\t--chip_padding_x: var(--space_md);\n\t\t\t--icon_size: var(--icon_size_xl);\n\t\t\t--menuitem_padding: var(--space_xs) var(--space_md);\n\t\t\t--flow_margin: var(--space_xl2);\n\t\t"
+	},
 	"mb_flow": {
-		"comment": "Flow-aware margin-bottom that responds to --flow_margin overrides like .sm.",
+		"comment": "Flow-aware margin-bottom that responds to --flow_margin overrides from size composites.",
 		"declaration": "margin-bottom: var(--flow_margin, var(--space_lg));"
 	},
 	"mt_flow": {
-		"comment": "Flow-aware margin-top that responds to --flow_margin overrides like .sm.",
+		"comment": "Flow-aware margin-top that responds to --flow_margin overrides from size composites.",
 		"declaration": "margin-top: var(--flow_margin, var(--space_lg));"
 	},
 	"icon_button": {

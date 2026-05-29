@@ -806,6 +806,47 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('xs composite', () => {
+		test('generates xs class two steps down', () => {
+			const result = generate_classes_css({
+				class_names: ['xs'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert_css_contains(
+				result.css,
+				'.xs {',
+				'--font_size: var(--font_size_xs);',
+				'--input_height: var(--space_xl3);',
+				'--input_height_compact: var(--space_xl2);',
+				'--input_padding_x: var(--space_sm);',
+				'--icon_size: var(--icon_size_xs);',
+				'--menuitem_padding: var(--space_xs5) var(--space_xs3);',
+				'--flow_margin: var(--space_sm);',
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('xs tracks used variables', () => {
+			const result = generate_classes_css({
+				class_names: ['xs'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert.isTrue(result.variables_used.has('font_size_xs'));
+			assert.isTrue(result.variables_used.has('space_xl3'));
+			assert.isTrue(result.variables_used.has('space_xl2'));
+			assert.isTrue(result.variables_used.has('space_sm'));
+			assert.isTrue(result.variables_used.has('icon_size_xs'));
+			assert.isTrue(result.variables_used.has('space_xs5'));
+			assert.isTrue(result.variables_used.has('space_xs3'));
+		});
+	});
+
 	describe('sm composite', () => {
 		test('generates sm class with density overrides', () => {
 			const result = generate_classes_css({
@@ -819,11 +860,11 @@ describe('generate_classes_css', () => {
 				result.css,
 				'.sm {',
 				'--font_size: var(--font_size_sm);',
-				'--input_height: var(--space_xl3);',
-				'--input_height_compact: var(--space_xl2);',
-				'--input_padding_x: var(--space_sm);',
+				'--input_height: var(--space_xl4);',
+				'--input_height_compact: var(--space_xl3);',
+				'--input_padding_x: var(--space_md);',
 				'--icon_size: var(--icon_size_sm);',
-				'--menuitem_padding: var(--space_xs4) var(--space_xs3);',
+				'--menuitem_padding: var(--space_xs4) var(--space_xs2);',
 				'--flow_margin: var(--space_md);',
 			);
 			assert.lengthOf(result.diagnostics, 0);
@@ -838,13 +879,12 @@ describe('generate_classes_css', () => {
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_sm'));
+			assert.isTrue(result.variables_used.has('space_xl4'));
 			assert.isTrue(result.variables_used.has('space_xl3'));
-			assert.isTrue(result.variables_used.has('space_xl2'));
-			assert.isTrue(result.variables_used.has('space_sm'));
+			assert.isTrue(result.variables_used.has('space_md'));
 			assert.isTrue(result.variables_used.has('icon_size_sm'));
 			assert.isTrue(result.variables_used.has('space_xs4'));
-			assert.isTrue(result.variables_used.has('space_xs3'));
-			assert.isTrue(result.variables_used.has('space_md'));
+			assert.isTrue(result.variables_used.has('space_xs2'));
 		});
 	});
 
@@ -886,6 +926,88 @@ describe('generate_classes_css', () => {
 			assert.isTrue(result.variables_used.has('icon_size_md'));
 			assert.isTrue(result.variables_used.has('space_xs3'));
 			assert.isTrue(result.variables_used.has('space_xs'));
+		});
+	});
+
+	describe('lg composite', () => {
+		test('generates lg class one step up', () => {
+			const result = generate_classes_css({
+				class_names: ['lg'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert_css_contains(
+				result.css,
+				'.lg {',
+				'--font_size: var(--font_size_lg);',
+				'--input_height: var(--space_xl6);',
+				'--input_height_compact: var(--space_xl5);',
+				'--input_padding_x: var(--space_xl);',
+				'--icon_size: var(--icon_size_lg);',
+				'--menuitem_padding: var(--space_xs2) var(--space_sm);',
+				'--flow_margin: var(--space_xl);',
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('lg tracks used variables', () => {
+			const result = generate_classes_css({
+				class_names: ['lg'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert.isTrue(result.variables_used.has('font_size_lg'));
+			assert.isTrue(result.variables_used.has('space_xl6'));
+			assert.isTrue(result.variables_used.has('space_xl5'));
+			assert.isTrue(result.variables_used.has('space_xl'));
+			assert.isTrue(result.variables_used.has('icon_size_lg'));
+			assert.isTrue(result.variables_used.has('space_xs2'));
+			assert.isTrue(result.variables_used.has('space_sm'));
+		});
+	});
+
+	describe('xl composite', () => {
+		test('generates xl class two steps up', () => {
+			const result = generate_classes_css({
+				class_names: ['xl'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert_css_contains(
+				result.css,
+				'.xl {',
+				'--font_size: var(--font_size_xl);',
+				'--input_height: var(--space_xl7);',
+				'--input_height_compact: var(--space_xl6);',
+				'--input_padding_x: var(--space_xl2);',
+				'--icon_size: var(--icon_size_xl);',
+				'--menuitem_padding: var(--space_xs) var(--space_md);',
+				'--flow_margin: var(--space_xl2);',
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('xl tracks used variables', () => {
+			const result = generate_classes_css({
+				class_names: ['xl'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null,
+			});
+
+			assert.isTrue(result.variables_used.has('font_size_xl'));
+			assert.isTrue(result.variables_used.has('space_xl7'));
+			assert.isTrue(result.variables_used.has('space_xl6'));
+			assert.isTrue(result.variables_used.has('space_xl2'));
+			assert.isTrue(result.variables_used.has('icon_size_xl'));
+			assert.isTrue(result.variables_used.has('space_xs'));
+			assert.isTrue(result.variables_used.has('space_md'));
 		});
 	});
 

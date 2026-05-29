@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
@@ -13,7 +13,7 @@
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const computed_styles =
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
@@ -39,9 +39,9 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css provides color <TomeLink name="variables" /> that adapt to the
+			fuz_css provides color <TomeLink slug="variables" /> that adapt to the
 			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each
-			<TomeLink name="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity variants
+			<TomeLink slug="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity variants
 			(00-100).
 		</p>
 		<p>
@@ -82,11 +82,11 @@
 		<p>
 			There are 13 intensity variants per hue (00, 05, 10, 20, ..., 80, 90, 95, 100), from subtle to
 			bold. The 50 variant of each color is used as the base for things like
-			<TomeLink name="buttons" />.
+			<TomeLink slug="buttons" />.
 		</p>
 		<p>
-			Unlike the <TomeLink name="shading">shade</TomeLink> and
-			<TomeLink name="typography" hash="Text-colors">text</TomeLink> scales (which are separate), color
+			Unlike the <TomeLink slug="shading">shade</TomeLink> and
+			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate), color
 			variables can be used for both text and backgrounds via utility classes:
 			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>

@@ -2,7 +2,7 @@
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import {slide} from 'svelte/transition';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {get_tome_by_name} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -12,7 +12,7 @@
 
 	const LIBRARY_ITEM_NAME = 'buttons';
 
-	const tome = get_tome_by_name(LIBRARY_ITEM_NAME);
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	let clicked_button = $state.raw(false);
 
@@ -226,75 +226,30 @@
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="With .sm">
-			With <code>.sm</code>
-		</TomeSectionHeader>
+		<TomeSectionHeader text="Size composites" />
 		<p>
-			The <code>.sm</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things more
-			tightly with smaller fonts, inputs, padding, border radii, and flow margins.
+			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
+			buttons up and down — font, height, and padding — by overriding custom properties.
 		</p>
-		<Code content={`<button>normal</button>\n<button class="sm">sm</button>`} />
-		<div class="row gap_xs mb_lg">
-			<button type="button">normal</button>
+		<Code
+			content={`<button class="xs">xs</button>\n<button class="sm">sm</button>\n<button>md</button>\n<button class="lg">lg</button>\n<button class="xl">xl</button>`}
+		/>
+		<div class="row align-items:center flex-wrap:wrap gap_sm mb_lg">
+			<button type="button" class="xs">xs</button>
 			<button type="button" class="sm">sm</button>
-		</div>
-		<p><code>.sm</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
-		<Code
-			content={`<button>+++</button>\n<button class="sm">+++</button>\n<button class="sm plain">+++</button>\n<button class="sm icon_button">+++</button>\n<button class="sm plain icon_button">+++</button>`}
-		/>
-		<div class="row gap_sm mb_lg">
-			<button type="button">+++</button>
-			<button type="button" class="sm">+++</button>
-			<button type="button" class="sm plain">+++</button>
-			<button type="button" class="sm icon_button">+++</button>
-			<button type="button" class="sm plain icon_button">+++</button>
-		</div>
-		<p><code>.sm</code> with colors:</p>
-		<Code
-			content={`<button class="sm color_h">color_h</button>\n<button class="sm color_g">color_g</button>\n<button class="sm color_d selected">color_d</button>`}
-		/>
-		<div class="row gap_xs mb_lg">
-			<button type="button" class="sm color_h">color_h</button>
-			<button type="button" class="sm color_g">color_g</button>
-			<button type="button" class="sm color_d selected">color_d</button>
-		</div>
-		<p>
-			<code>.sm</code> overrides custom properties, so children inherit the sizing:
-		</p>
-		<Code
-			content={`<div class="sm row gap_sm">\n\t<button>one</button>\n\t<button class="plain">to</button>\n\t<button class="color_a">3</button>\n</div>`}
-		/>
-		<div class="sm row gap_sm">
-			<button type="button">one</button>
-			<button type="button" class="plain">to</button>
-			<button type="button" class="color_j">3</button>
-		</div>
-	</TomeSection>
-
-	<TomeSection>
-		<TomeSectionHeader text="With .lg">
-			With <code>.lg</code>
-		</TomeSectionHeader>
-		<p>
-			The <code>.lg</code>
-			<TomeLink name="classes" hash="#Composite-classes">composite class</TomeLink> sizes things larger
-			with bigger fonts, inputs, padding, and flow margins.
-		</p>
-		<Code content={`<button>normal</button>\n<button class="lg">lg</button>`} />
-		<div class="row gap_xs mb_lg">
-			<button type="button">normal</button>
+			<button type="button">md</button>
 			<button type="button" class="lg">lg</button>
+			<button type="button" class="xl">xl</button>
 		</div>
-		<p><code>.lg</code> with <code>.plain</code> and <code>.icon_button</code>:</p>
-		<div class="row gap_sm mb_lg">
-			<button type="button">+++</button>
-			<button type="button" class="lg">+++</button>
-			<button type="button" class="lg plain">+++</button>
-			<button type="button" class="lg icon_button">+++</button>
-			<button type="button" class="lg plain icon_button">+++</button>
+		<p>They compose with other classes like <code>.plain</code> and <code>.icon_button</code>:</p>
+		<div class="row align-items:center gap_sm mb_lg">
+			<button type="button" class="sm icon_button plain">+</button>
+			<button type="button" class="icon_button plain">+</button>
+			<button type="button" class="lg icon_button plain">+</button>
+			<button type="button" class="xl icon_button plain">+</button>
 		</div>
-		<p><code>.lg</code> overrides custom properties, so children inherit the sizing:</p>
+		<p>Set on a container, children inherit the sizing:</p>
 		<div class="lg row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
