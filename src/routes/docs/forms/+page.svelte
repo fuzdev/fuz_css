@@ -211,7 +211,8 @@
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
 			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			inputs and buttons — height and padding. Apply directly or on a container to cascade to children.
+			inputs and buttons, adjusting height and padding. Apply directly or on a container to cascade to
+			children.
 		</p>
 		<Code
 			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}
@@ -225,18 +226,14 @@
 			{/each}
 		</div>
 		<p>
-			Set on a <code>&lt;form&gt;</code> (or any container), everything inside inherits the sizing:
+			Set on a container like a <code>&lt;form&gt;</code> and everything inside inherits the sizing:
 		</p>
+		<Code content={`<form class="xs">...</form>`} />
 		<div class="width_atmost_sm">
-			<form class="lg">
+			<form class="xs">
 				<fieldset>
-					<legend>.lg</legend>
 					<label>
-						<div class="title">name</div>
-						<input placeholder=">" />
-					</label>
-					<label>
-						<div class="title">option</div>
+						<div class="title">inherits .xs</div>
 						<select>
 							{#each faces as face (face)}
 								<option value={face}>{face}</option>
@@ -245,12 +242,11 @@
 					</label>
 					<div class="row">
 						<button type="button">submit</button>
-						<button type="button" class="icon_button plain">+</button>
 					</div>
 				</fieldset>
 			</form>
 		</div>
-		<UnfinishedImplementationWarning>
+		<UnfinishedImplementationWarning class="mt_lg">
 			Table cell padding doesn't yet respond to size composites. A size-composite region containing
 			a table will scale inputs and buttons but leave cells at their default padding. Planned in the
 			semantic variable chains migration.

@@ -230,7 +230,7 @@
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
 			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			buttons up and down — font, height, and padding — by overriding custom properties.
+			buttons up and down by overriding custom properties for font, height, and padding.
 		</p>
 		<Code
 			content={`<button class="xs">xs</button>\n<button class="sm">sm</button>\n<button>md</button>\n<button class="lg">lg</button>\n<button class="xl">xl</button>`}
@@ -251,7 +251,8 @@
 			<button type="button" class="xl icon_button plain">+</button>
 		</div>
 		<p>Set on a container, children inherit the sizing:</p>
-		<div class="lg row gap_sm">
+		<Code content={`<div class="xs">...</div>`} />
+		<div class="xs row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
 			<button type="button" class="color_j">3</button>

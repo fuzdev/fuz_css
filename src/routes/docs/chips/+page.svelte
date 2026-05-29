@@ -67,7 +67,7 @@
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
 			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			chips up and down — font and padding.
+			chips up and down, adjusting font and padding.
 		</p>
 		<Code
 			content={`<span class="chip xs">xs</span>\n<span class="chip sm">sm</span>\n<span class="chip">md</span>\n<span class="chip lg">lg</span>\n<span class="chip xl">xl</span>`}
@@ -80,7 +80,8 @@
 			<span class="chip xl">xl</span>
 		</div>
 		<p>Set on a container, children inherit the sizing:</p>
-		<div class="lg row gap_sm">
+		<Code content={`<div class="xs">...</div>`} />
+		<div class="xs row gap_sm">
 			<span class="chip">one</span>
 			<span class="chip color_d">two</span>
 			<!-- svelte-ignore a11y_missing_attribute -->

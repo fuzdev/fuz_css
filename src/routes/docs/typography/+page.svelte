@@ -226,6 +226,13 @@
 				</div>
 			{/each}
 		</div>
+		<UnfinishedImplementationWarning>
+			Here, size composites adjust the vertical rhythm by setting <code>--flow_margin</code>, not
+			the text size. Paragraph text keeps its fixed size, and headings keep their own sizes to
+			preserve hierarchy; only controls like buttons and chips read the composite's
+			<code>--font_size</code>. Scaling headers and prose with size composites is under
+			consideration, design feedback is welcome.
+		</UnfinishedImplementationWarning>
 	</TomeSection>
 
 	<TomeSection>
@@ -253,9 +260,6 @@
 				</div>
 			</div>
 		</div>
-		<UnfinishedImplementationWarning
-			>Paragraph text currently doesn't respond to <code>.sm</code>, but should it? Headings?</UnfinishedImplementationWarning
-		>
 	</TomeSection>
 </TomeContent>
 
