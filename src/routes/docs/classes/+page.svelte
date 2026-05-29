@@ -1703,8 +1703,9 @@ vite_plugin_fuz_css({
 	<hr />
 	<section>
 		<p>
-			<code>fuz_css</code> is still early in development. Your input is welcome in the
-			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>!
+			<code>fuz_css</code> is still early in development. Your input and feedback is appreciated in
+			the GitHub issues for bugs and
+			<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> for everything else.
 		</p>
 	</section>
 </TomeContent>
