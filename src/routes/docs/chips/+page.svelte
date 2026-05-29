@@ -79,7 +79,7 @@
 			<span class="chip lg">lg</span>
 			<span class="chip xl">xl</span>
 		</div>
-		<p>Set on a container, children inherit the sizing:</p>
+		<p>Set on a container and children inherit the sizing:</p>
 		<Code content={`<div class="xs">...</div>`} />
 		<div class="xs row gap_sm">
 			<span class="chip">one</span>

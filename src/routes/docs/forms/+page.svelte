@@ -225,9 +225,7 @@
 				</div>
 			{/each}
 		</div>
-		<p>
-			Set on a container like a <code>&lt;form&gt;</code> and everything inside inherits the sizing:
-		</p>
+		<p>Set on a container and children inherit the sizing:</p>
 		<Code content={`<form class="xs">...</form>`} />
 		<div class="width_atmost_sm">
 			<form class="xs">

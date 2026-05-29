@@ -250,7 +250,7 @@
 			<button type="button" class="lg icon_button plain">+</button>
 			<button type="button" class="xl icon_button plain">+</button>
 		</div>
-		<p>Set on a container, children inherit the sizing:</p>
+		<p>Set on a container and children inherit the sizing:</p>
 		<Code content={`<div class="xs">...</div>`} />
 		<div class="xs row gap_sm">
 			<button type="button">one</button>
