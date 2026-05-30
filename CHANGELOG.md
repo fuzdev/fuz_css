@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.61.1
+
+### Patch Changes
+
+- fix: vite plugin emission ([a3dda84](https://github.com/fuzdev/fuz_css/commit/a3dda84))
+
 ## 0.61.0
 
 ### Minor Changes
