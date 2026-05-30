@@ -88,10 +88,11 @@ combined and only used content is included. In utility-only mode, import
 
 Two generators available, both using AST-based extraction and per-file caching:
 
-1. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) for SvelteKit
-   projects using Gro
-2. **Vite plugin** - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
-   for Svelte/React/Preact/Solid via `virtual:fuz.css`
+1. **Vite plugin** (preferred) - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
+   exposes the generated CSS as `virtual:fuz.css` with HMR; works across
+   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file
+2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
+   alternative that writes a `fuz.css` genfile
 
 Both output only CSS for classes actually used. Supports Svelte 5.16+ class
 syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
@@ -189,7 +190,15 @@ import 'virtual:fuz.css';
 ```
 
 The Vite plugin supports HMR - changes to source files automatically trigger
-CSS regeneration during development.
+CSS regeneration during development. For TypeScript consumers, declare the
+module's type once (e.g. in `src/app.d.ts`):
+
+```ts
+declare module 'virtual:fuz.css' {
+	const css: string;
+	export default css;
+}
+```
 
 **Gro generator (SvelteKit alternative):**
 
@@ -252,9 +261,9 @@ typography, borders, shading, shadows, layout. See
 
 **CSS generation:**
 
+- [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
+  (preferred) with HMR via `virtual:fuz.css`
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
-- [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin with
-  HMR via `virtual:fuz.css`
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
   for Gro/Vite generators
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
