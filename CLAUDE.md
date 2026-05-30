@@ -177,7 +177,21 @@ extended ranges varying by family:
 Generated CSS includes only the theme variables, base styles, and utility classes
 your code uses:
 
-**SvelteKit (Gro):**
+**Vite (SvelteKit/Svelte/React/Preact/Solid):**
+
+```ts
+// vite.config.ts
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+export default defineConfig({plugins: [vite_plugin_fuz_css()]});
+
+// main.ts (or your SvelteKit root layout)
+import 'virtual:fuz.css';
+```
+
+The Vite plugin supports HMR - changes to source files automatically trigger
+CSS regeneration during development.
+
+**Gro generator (SvelteKit alternative):**
 
 ```ts
 // src/routes/fuz.gen.css.ts
@@ -186,20 +200,6 @@ export const gen = gen_fuz_css();
 ```
 
 Then import the generated file in your layout: `import './fuz.css';`
-
-**Vite (Svelte/React/Preact/Solid):**
-
-```ts
-// vite.config.ts
-import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
-export default defineConfig({plugins: [vite_plugin_fuz_css()]});
-
-// main.ts
-import 'virtual:fuz.css';
-```
-
-The Vite plugin supports HMR - changes to source files automatically trigger
-CSS regeneration during development.
 
 ### Utility-only mode
 

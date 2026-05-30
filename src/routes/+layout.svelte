@@ -1,5 +1,5 @@
 <script lang="ts">
-	import '$routes/fuz.css';
+	import 'virtual:fuz.css';
 	import '@fuzdev/fuz_code/theme.css';
 
 	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
