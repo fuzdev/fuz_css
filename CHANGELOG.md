@@ -1,12 +1,18 @@
 # @fuzdev/fuz_css
 
+## 0.61.0
+
+### Minor Changes
+
+- feat: migrate to `svelte-docinfo` ([218140a](https://github.com/fuzdev/fuz_css/commit/218140a))
+
 ## 0.60.0
 
 ### Minor Changes
 
 - feat: `.xs`–`.xl` size composites classes ([#85](https://github.com/fuzdev/fuz_css/pull/85))
 - bump node@24.14 ([#85](https://github.com/fuzdev/fuz_css/pull/85))
-- refactor: share the CSS generation pipeline between the Gro generator and Vite plugin ([ab4e857](https://github.com/fuzdev/fuz_css/commit/ab4e857))
+- share the CSS generation pipeline between the Gro generator and Vite plugin ([ab4e857](https://github.com/fuzdev/fuz_css/commit/ab4e857)) ([refactor](https://github.com/fuzdev/fuz_css/commit/refactor))
   - add `generate_css` (generate → resolve → bundle), called by both `gen_fuz_css` and `vite_plugin_fuz_css`
   - add `create_bundled_resources` and `extract_file_cached`, shared by both generators
   - fix the Vite transform resurrecting a file deleted during its in-flight cache read
