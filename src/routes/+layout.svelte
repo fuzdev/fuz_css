@@ -2,14 +2,12 @@
 	import 'virtual:fuz.css';
 	import '@fuzdev/fuz_code/theme.css';
 
-	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
-	import {library_json_from_modules} from '@fuzdev/fuz_util/library_json.js';
-	import {modules} from 'virtual:svelte-docinfo';
+	import {SiteState, site_context} from '@fuzdev/fuz_ui/site.svelte.js';
+	import {logo_fuz_css} from '@fuzdev/fuz_ui/logos.js';
 	import type {Snippet} from 'svelte';
 	import ThemeRoot from '@fuzdev/fuz_ui/ThemeRoot.svelte';
 	import Spiders from '@fuzdev/fuz_ui/Spiders.svelte';
 
-	import package_json from '../../package.json' with {type: 'json'};
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '$lib/ContextmenuRoot.svelte';
 	// import Dialog from '$lib/Dialog.svelte';
@@ -22,9 +20,13 @@
 		children: Snippet;
 	} = $props();
 
-	const library_json = library_json_from_modules(package_json, modules);
-
-	library_context.set(new Library(library_json));
+	site_context.set(
+		new SiteState({
+			icon: logo_fuz_css,
+			glyph: '🪴',
+			repo_url: 'https://github.com/fuzdev/fuz_css',
+		}),
+	);
 
 	// let show_settings = $state.raw(false);
 </script>

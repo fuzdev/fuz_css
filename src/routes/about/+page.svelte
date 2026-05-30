@@ -1,15 +1,17 @@
 <script lang="ts">
 	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
+	import {site_context} from '@fuzdev/fuz_ui/site.svelte.js';
+	import {FUZ_DEV_URL} from '@fuzdev/fuz_ui/constants.js';
 	import LibraryDetail from '@fuzdev/fuz_ui/LibraryDetail.svelte';
 	import EcosystemLinksPanel from '@fuzdev/fuz_ui/EcosystemLinksPanel.svelte';
 	import Breadcrumb from '@fuzdev/fuz_ui/Breadcrumb.svelte';
-	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {logo_fuz} from '@fuzdev/fuz_ui/logos.js';
-	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
+	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {MAIN_HEADER_MARGIN_TOP} from '$routes/constants.js';
+	import {library_json} from '$routes/library.js';
 
-	const library = library_context.get();
+	const library = library_context.set(new Library(library_json));
+	const site = site_context.get();
 
 	// TODO standardize
 </script>
@@ -21,7 +23,7 @@
 				{library.repo_name}
 			</h1>
 		</header>
-		<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
+		<Breadcrumb />
 	</section>
 	<section>
 		<div class="panel p_md width_atmost_md">
@@ -30,9 +32,9 @@
 	</section>
 	<EcosystemLinksPanel />
 	<section class="box mb_xl7">
-		<DocsFooter {library} root_url="https://www.fuz.dev/">
+		<DocsFooter repo_url={site.repo_url} root_url={FUZ_DEV_URL}>
 			<div class="mb_xl5">
-				<Breadcrumb><Svg data={logo_fuz} size="var(--icon_size_sm)" /></Breadcrumb>
+				<Breadcrumb />
 			</div>
 		</DocsFooter>
 	</section>

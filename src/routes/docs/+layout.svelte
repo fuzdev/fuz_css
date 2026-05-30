@@ -2,12 +2,11 @@
 	import type {Snippet} from 'svelte';
 	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
-	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
-	import {logo_fuz} from '@fuzdev/fuz_ui/logos.js';
-	import {library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 	import {selected_variable_context} from '@fuzdev/fuz_ui/style_variable_helpers.svelte.js';
+	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
 	import {tomes} from '$routes/docs/tomes.js';
+	import {library_json} from '$routes/library.js';
 	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -17,23 +16,12 @@
 		children: Snippet;
 	} = $props();
 
-	const selected_variable = selected_variable_context.set();
+	library_context.set(new Library(library_json));
 
-	const library = library_context.get();
+	const selected_variable = selected_variable_context.set();
 </script>
 
-<Docs {tomes} {library}>
-	{#snippet breadcrumb_children(is_primary_nav)}
-		{#if is_primary_nav}
-			<div class="icon row">
-				<Svg data={logo_fuz} size="var(--icon_size_sm)" /> <span class="ml_sm">fuz_css</span>
-			</div>
-		{:else}
-			<Svg data={logo_fuz} size="var(--icon_size_sm)" />
-		{/if}
-	{/snippet}
-	{@render children()}
-</Docs>
+<Docs {tomes}>{@render children()}</Docs>
 
 {#if selected_variable.value}
 	<Dialog onclose={() => (selected_variable.value = null)}>
