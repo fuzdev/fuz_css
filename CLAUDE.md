@@ -29,7 +29,8 @@ dev server.
 
 ## Key dependencies
 
-- Svelte 5 - component framework (for docs site only)
+- Svelte 5 - `svelte/compiler` parses CSS and Svelte source in the extractor
+  (optional peer); the component framework also powers the docs site
 - SvelteKit - application framework (for docs site only)
 - @sveltejs/acorn-typescript, acorn-jsx, zimmerframe - AST parsing and walking
 - zod - schema validation
