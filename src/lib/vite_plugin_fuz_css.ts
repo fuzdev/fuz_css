@@ -74,20 +74,27 @@ const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*1\s*;?/g;
 const FUZ_CSS_PLACEHOLDER_EMPTY_ROOT_RE = /:root\s*\{\s*\}/;
 
 const VIRTUAL_ID = 'virtual:fuz.css';
-// In dev mode, resolve to .js so Vite treats it as JS (for HMR handling)
-// In build mode, resolve to .css for proper CSS bundling
-const RESOLVED_VIRTUAL_ID_JS = '\0virtual:fuz.css.js';
-const RESOLVED_VIRTUAL_ID_CSS = '\0virtual:fuz.css';
-
-// TODO investigate: Dev mode uses a JS wrapper that injects CSS and self-accepts HMR.
-// We couldn't get plain CSS with `css-update` to work for virtual modules - there's a
-// mismatch between `data-vite-dev-id` (set to `\0virtual:fuz.css`) and the importable
-// URL (`/@id/__x00__virtual:fuz.css`). UnoCSS uses `js-update` with `mod.url` for plain
-// CSS but that broke all HMR when we tried it. Areas to investigate:
-// - How does Vite's CSS HMR actually resolve virtual module URLs?
-// - Why does UnoCSS's approach work for them but not here?
-// - Is there a way to control what `data-vite-dev-id` gets set to?
-// The current JS wrapper approach works reliably, but plain CSS would be cleaner.
+/**
+ * Resolved id of the virtual module, in both dev and build — a leading-slash
+ * path ending in `.css`, deliberately *not* a `\0`-prefixed virtual id.
+ *
+ * Two properties matter:
+ * - The `.css` extension makes Vite and frameworks treat the module as CSS
+ *   (it passes Vite's `isCSSRequest`). In dev, Vite's CSS pipeline injects it
+ *   client-side with HMR, and SvelteKit's dev FOUC-prevention inlines it into
+ *   the SSR'd `<head>` so the first paint is already styled.
+ * - The plain URL (no `\0`) is what makes that inlining actually happen. A
+ *   `\0` id is encoded as `/@id/__x00__virtual:fuz.css` in the import graph,
+ *   and SvelteKit looks deps up by URL via `moduleGraph.getModuleByUrl()`,
+ *   which can't resolve the `__x00__`-encoded form back to its node — so a `\0`
+ *   id is silently skipped and the page flashes unstyled on every refresh.
+ *
+ * This mirrors UnoCSS's `/__uno.css`. `resolveId` claims both the
+ * `virtual:fuz.css` specifier and this resolved id (so re-resolution of
+ * `?inline`/`?direct` query variants stays ours rather than hitting the
+ * filesystem).
+ */
+const RESOLVED_VIRTUAL_ID = '/__fuz.css';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -348,20 +355,19 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			last_generated_css = new_css;
 			pending_css = new_css; // Store for reuse in load() to avoid regenerating
 
-			const mod = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID_JS);
+			const mod = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
 			if (mod) {
 				server!.moduleGraph.invalidateModule(mod);
-				// TODO investigate: This hardcoded path matches Vite's URL encoding for virtual
-				// modules. Using `mod.url` doesn't work (it's `\0virtual:fuz.css.js`). Could break
-				// if Vite changes their encoding scheme. Is there a proper API for this?
-				const hmr_path = '/@id/__x00__virtual:fuz.css.js';
+				// Vite wraps the CSS module so it self-accepts (`import.meta.hot.accept()`),
+				// re-running `updateStyle` with fresh content on a `js-update`. The module's
+				// plain URL is its own id (no `\0` encoding), so it doubles as the HMR path.
 				server!.hot.send({
 					type: 'update',
 					updates: [
 						{
 							type: 'js-update',
-							path: hmr_path,
-							acceptedPath: hmr_path,
+							path: RESOLVED_VIRTUAL_ID,
+							acceptedPath: RESOLVED_VIRTUAL_ID,
 							timestamp: Date.now(),
 						},
 					],
@@ -427,63 +433,42 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 
 		resolveId(id) {
 			if (id === VIRTUAL_ID) {
-				// In dev mode, resolve to .js for HMR support
-				// In build mode, resolve to .css for proper bundling
-				return is_dev ? RESOLVED_VIRTUAL_ID_JS : RESOLVED_VIRTUAL_ID_CSS;
+				return RESOLVED_VIRTUAL_ID;
+			}
+			// Claim the resolved id (and its `?inline`/`?direct`/`?used` query
+			// variants) so re-resolution stays ours instead of hitting the
+			// filesystem — SvelteKit's dev SSR inlining loads `/__fuz.css?inline`.
+			if (id.split('?', 1)[0] === RESOLVED_VIRTUAL_ID) {
+				return id;
 			}
 			return undefined;
 		},
 
 		async load(id) {
-			// Dev mode: JS module that injects CSS and handles HMR
-			if (id === RESOLVED_VIRTUAL_ID_JS) {
-				virtual_module_loaded = true;
-				// Defer resource loading to first virtual module access
-				if (include_base || include_theme) {
-					await ensure_bundled_resources();
-				}
-				// Use pending CSS from HMR if available, avoiding redundant generation
+			// Match the base id and any query variant (`?inline`, `?direct`, `?used`)
+			// Vite or SvelteKit appends — SvelteKit's dev SSR inlining loads `?inline`.
+			if (id.split('?', 1)[0] !== RESOLVED_VIRTUAL_ID) {
+				return undefined;
+			}
+			virtual_module_loaded = true;
+			// Defer resource loading to first virtual module access
+			if (include_base || include_theme) {
+				await ensure_bundled_resources();
+			}
+			if (is_dev) {
+				// Dev: return real CSS. Vite's CSS pipeline wraps it for client-side
+				// injection with HMR, and SvelteKit's dev SSR inlines it into the
+				// document `<head>` so the first paint is styled (no FOUC on refresh).
+				// Reuse CSS computed during an HMR pass when available.
 				const css = pending_css ?? render_css();
 				pending_css = null;
 				last_generated_css = css; // Track for HMR diffing
-				const escaped_css = JSON.stringify(css);
-				return `
-const css = ${escaped_css};
-
-// Inject CSS on the client only. During SSR (SvelteKit dev prerenders the
-// layout that imports this module) document is undefined, so this is a no-op
-// on the server; Vite applies styles client-side after hydration.
-if (typeof document !== 'undefined') {
-  // Find existing style tag or create new one
-  let style = document.querySelector('style[data-fuz-css]');
-  if (!style) {
-    style = document.createElement('style');
-    style.setAttribute('data-fuz-css', '');
-    document.head.appendChild(style);
-  }
-  style.textContent = css;
-}
-
-if (import.meta.hot) {
-  import.meta.hot.accept();
-}
-
-export {};
-`;
+				return css;
 			}
-			// Build mode: plain CSS
-			if (id === RESOLVED_VIRTUAL_ID_CSS) {
-				virtual_module_loaded = true;
-				// Defer resource loading to first virtual module access
-				if (include_base || include_theme) {
-					await ensure_bundled_resources();
-				}
-				// Emit a marker rule (not a comment — comments are minified away) so
-				// generateBundle can find the importer's CSS asset (loaded on every
-				// page) and splice the full generated CSS in there.
-				return `:root{${FUZ_CSS_PLACEHOLDER}:1}`;
-			}
-			return undefined;
+			// Build: emit a marker rule (not a comment — comments are minified away)
+			// so generateBundle can find the importer's CSS asset (loaded on every
+			// page) and splice the full generated CSS in there.
+			return `:root{${FUZ_CSS_PLACEHOLDER}:1}`;
 		},
 
 		generateBundle(_options, bundle) {
