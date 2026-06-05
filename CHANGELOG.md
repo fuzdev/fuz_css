@@ -1,5 +1,13 @@
 # @fuzdev/fuz_css
 
+## 0.62.0
+
+### Minor Changes
+
+- chore: fix peer deps ([727ed77](https://github.com/fuzdev/fuz_css/commit/727ed77))
+- bump peer deps ([79447f8](https://github.com/fuzdev/fuz_css/commit/79447f8))
+- fix: vite plugin FOUC in dev ([#87](https://github.com/fuzdev/fuz_css/pull/87))
+
 ## 0.61.1
 
 ### Patch Changes
