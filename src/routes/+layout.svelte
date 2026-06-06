@@ -7,6 +7,7 @@
 	import type {Snippet} from 'svelte';
 	import ThemeRoot from '@fuzdev/fuz_ui/ThemeRoot.svelte';
 	import Spiders from '@fuzdev/fuz_ui/Spiders.svelte';
+	import pkg_json from 'virtual:pkg.json';
 
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '$lib/ContextmenuRoot.svelte';
@@ -20,13 +21,7 @@
 		children: Snippet;
 	} = $props();
 
-	site_context.set(
-		new SiteState({
-			icon: logo_fuz_css,
-			glyph: '🪴',
-			repo_url: 'https://github.com/fuzdev/fuz_css',
-		}),
-	);
+	site_context.set(new SiteState({icon: logo_fuz_css, pkg_json}));
 
 	// let show_settings = $state.raw(false);
 </script>
