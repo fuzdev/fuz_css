@@ -9,7 +9,7 @@
 import {test, assert, describe} from 'vitest';
 
 import {resolve_css} from '../lib/css_bundled_resolution.js';
-import {create_test_fixtures} from './css_bundled_resolution_fixtures.js';
+import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
 
 describe('resolve_css diagnostics', () => {
 	describe('typo detection for variables', () => {
@@ -487,6 +487,106 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'error');
 			assert.include(result.diagnostics[0]!.message, 'details');
+		});
+	});
+
+	describe('exclude_variables footgun', () => {
+		test('warns when an excluded variable is referenced by an included rule', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: var(--brand); }`,
+				[{name: 'brand', light: 'blue'}],
+			);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				exclude_variables: ['brand'],
+			});
+
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+			assert.include(result.diagnostics[0]!.message, 'brand');
+			assert.include(result.diagnostics[0]!.message, 'exclude_variables');
+			// and it's actually dropped from the output
+			assert.isFalse(result.resolved_variables.has('brand'));
+		});
+
+		test('warns when an excluded variable is referenced directly in source', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'brand', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_css_variables: new Set(['brand']),
+				exclude_variables: ['brand'],
+			});
+
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.include(result.diagnostics[0]!.message, 'brand');
+		});
+
+		test('no warning when the excluded variable is unused', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				`button { color: var(--brand); }`,
+				[
+					{name: 'brand', light: 'blue'},
+					{name: 'unused', light: 'red'},
+				],
+			);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				exclude_variables: ['unused'],
+			});
+
+			assert.strictEqual(result.diagnostics.length, 0);
+		});
+
+		test('no warning when force-included via additional_variables then excluded', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'brand', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				// force-included, not referenced by any shipped CSS — exclude is a clean override
+				additional_variables: ['brand'],
+				exclude_variables: ['brand'],
+			});
+
+			assert.strictEqual(result.diagnostics.length, 0);
+		});
+
+		test('no warning when the excluded name is not a theme variable', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
+				{name: 'brand', light: 'blue'},
+			]);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				// referenced in source but user-defined (not a known theme variable)
+				detected_css_variables: new Set(['my_custom']),
+				exclude_variables: ['my_custom'],
+			});
+
+			assert.strictEqual(result.diagnostics.length, 0);
 		});
 	});
 });

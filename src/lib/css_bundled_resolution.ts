@@ -311,27 +311,36 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 
 	// Step 3: Collect all variables from multiple sources
 	const all_variables: Set<string> = new Set();
+	// Subset of `all_variables` actually referenced by shipped CSS (matched rules, generated
+	// classes, utilities, source `var()`), as opposed to force-included via additional_variables.
+	// Excluding a referenced variable dangles its references; excluding a force-included-only one
+	// is a harmless override. Tracking them apart keeps the exclude warning precise.
+	const referenced_variables: Set<string> = new Set();
 
 	// a) Variables from matched style rules
 	const rule_variables = collect_rule_variables(style_rule_index, included_rule_indices);
 	for (const v of rule_variables) {
 		all_variables.add(v);
+		referenced_variables.add(v);
 	}
 
 	// b) Variables from class definitions (static classes that will be generated)
 	const class_variables = collect_class_variables(class_variable_index, detected_classes);
 	for (const v of class_variables) {
 		all_variables.add(v);
+		referenced_variables.add(v);
 	}
 
 	// c) Variables from utility class generation (collected during generation)
 	for (const v of utility_variables_used) {
 		all_variables.add(v);
+		referenced_variables.add(v);
 	}
 
 	// d) Variables directly referenced in source files
 	for (const v of detected_css_variables) {
 		all_variables.add(v);
+		referenced_variables.add(v);
 	}
 
 	// e) User-specified additional_variables (or all if 'all')
@@ -345,9 +354,22 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		}
 	}
 
-	// g) Remove excluded variables
+	// g) Remove excluded variables. Warn when an excluded variable is actually referenced by
+	// shipped CSS — its `var()` would resolve to nothing. Force-included-only variables and
+	// unknown (non-theme) names are dropped silently, since neither leaves a dangling reference.
 	if (exclude_variables) {
+		const known_var_names = get_all_variable_names(variable_graph);
 		for (const v of exclude_variables) {
+			if (referenced_variables.has(v) && known_var_names.has(v)) {
+				diagnostics.push({
+					phase: 'generation',
+					level: 'warning',
+					message: `Variable "--${v}" is referenced by included styles but excluded via exclude_variables - references to it will be undefined`,
+					suggestion: 'Remove it from exclude_variables, or define the variable elsewhere.',
+					identifier: v,
+					locations: null,
+				});
+			}
 			all_variables.delete(v);
 		}
 	}

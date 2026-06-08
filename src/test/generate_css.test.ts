@@ -166,5 +166,49 @@ describe('generate_css', () => {
 
 			assert.deepEqual([...detected], ['space_lg']);
 		});
+
+		test('warns when base styles are enabled but theme variables are disabled', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				'button { color: var(--text_color); }',
+				VARIABLES,
+			);
+
+			const result = generate_css(
+				make_options({
+					all_elements: new Set(['button']),
+					include_base: true,
+					include_theme: false, // variables: null, but base styles stay on
+					resources: {style_rule_index, variable_graph, class_variable_index},
+				}),
+			);
+
+			const warning = result.diagnostics.find(
+				(d) => d.level === 'warning' && d.message.includes('theme variables are disabled'),
+			);
+			assert.ok(warning, 'expected a warning about disabled theme variables');
+			// base rule still emitted, but the theme variables section is not
+			assert_css_contains(result.css, 'button');
+			assert_css_not_contains(result.css, 'Theme Variables');
+		});
+
+		test('no theme-disabled warning when both base and theme are enabled', () => {
+			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+				'button { color: var(--text_color); }',
+				VARIABLES,
+			);
+
+			const result = generate_css(
+				make_options({
+					all_elements: new Set(['button']),
+					include_base: true,
+					include_theme: true,
+					resources: {style_rule_index, variable_graph, class_variable_index},
+				}),
+			);
+
+			assert.isUndefined(
+				result.diagnostics.find((d) => d.message.includes('theme variables are disabled')),
+			);
+		});
 	});
 });

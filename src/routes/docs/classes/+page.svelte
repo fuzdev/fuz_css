@@ -484,6 +484,100 @@ const el = document.createElement('dialog');`}
 	</TomeSection>
 
 	<TomeSection>
+		<TomeSectionHeader text="What gets included" />
+		<p>
+			Detection finds the classes, elements, and variables your source uses (see
+			<a href="#Class-detection">class detection</a> above), and resolution turns that into CSS.
+			Bundled mode -- the default for the <a href="#Vite-plugin">Vite plugin</a> and
+			<a href="#Gro-generator">Gro generator</a> -- combines three layers into a single output, each trimmed
+			to what your code uses:
+		</p>
+		<ol>
+			<li>
+				<strong><TomeLink slug="variables">style variables</TomeLink></strong> as
+				<code>:root</code> custom properties (the full version of which is <ModuleLink
+					module_path="theme.css"
+				/>)
+			</li>
+			<li>
+				the reset stylesheet's <strong><TomeLink slug="semantic">base styles</TomeLink></strong> for
+				the HTML elements you use (the full version of which is <ModuleLink
+					module_path="style.css"
+				/>)
+			</li>
+			<li>used utility classes (always generated on demand; there's no full version)</li>
+		</ol>
+		<p>
+			Layers are emitted in that order, so variable definitions precede their use and utilities land
+			last to win over the low-specificity <code>:where()</code> reset.
+		</p>
+
+		<h4>Base styles</h4>
+		<p>
+			A rule from the reset stylesheet is kept when any element or class in its selector is
+			detected. Kept rules are emitted in source order, tree-shaking unused rules.
+		</p>
+		<p>
+			Some rules are always included regardless of detection: the universal reset (<code>*</code>),
+			<code>:root</code>
+			and <code>:host</code>, <code>html</code>,
+			<code>body</code>, <code>@font-face</code>, and the <code>prefers-reduced-motion</code> block.
+		</p>
+		<p>
+			For apps that use dynamic HTML patterns, element detection may have false negatives, omitting
+			styles that you actually need. The reliable fix is to ship the full reset with <code
+				>additional_elements: 'all'</code
+			>. Reach for an explicit <DeclarationLink name="CssGeneratorBaseOptions"
+				>additional_elements</DeclarationLink
+			> list only when you want to keep the base CSS minimal and know exactly which extra tags appear
+			at runtime.
+		</p>
+		<Code
+			lang="ts"
+			content={`// ship the full base reset, not just detected tags
+vite_plugin_fuz_css({
+	additional_elements: 'all',
+});`}
+		/>
+
+		<h4>Variables</h4>
+		<p>A style variable is included when:</p>
+		<ul>
+			<li>a kept base-style rule uses it,</li>
+			<li>a generated utility class uses it,</li>
+			<li>
+				your source references <code>var(--name)</code> directly, e.g. in a <code>style</code>
+				attribute or <code>&lt;style&gt;</code> block, or
+			</li>
+			<li>
+				it's force-included via <DeclarationLink name="CssGeneratorBaseOptions"
+					>additional_variables</DeclarationLink
+				>.
+			</li>
+		</ul>
+		<p>
+			Dependencies resolve transitively, so pulling in a variable also pulls in any it's built from
+			via
+			<code>var()</code>, and both <TomeLink slug="themes">light and dark</TomeLink> values are kept together,
+			so switching color-scheme at runtime never hits a missing variable. The complete set ships in
+			<ModuleLink module_path="theme.css" /> for utility-only mode and direct imports; bundled mode trims
+			it to what you use.
+		</p>
+
+		<h4>Forcing and excluding</h4>
+		<p>
+			When static analysis can't see something, or sees too much, override resolution with the
+			<DeclarationLink name="CssGeneratorBaseOptions" />: <code>additional_classes</code>,
+			<code>additional_elements</code>, and
+			<code>additional_variables</code> force-include (the element and variable options also accept
+			<code>'all'</code>), while <code>exclude_classes</code>, <code>exclude_elements</code>, and
+			<code>exclude_variables</code> drop items from the output. Excluding a variable that's still
+			referenced by included styles logs a warning, since the dropped <code>var(--name)</code> would otherwise
+			resolve to nothing.
+		</p>
+	</TomeSection>
+
+	<TomeSection>
 		<TomeSectionHeader text="Utility class types" />
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />

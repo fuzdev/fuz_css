@@ -1,8 +1,10 @@
 /**
- * Vite plugin for fuz_css utility class generation.
+ * Vite plugin for fuz_css CSS generation.
  *
  * Uses Vite's transform hook to extract CSS classes from source files
- * as they're processed, including node_modules dependencies.
+ * as they're processed, including node_modules dependencies. In bundled
+ * mode (the default) it also resolves the base reset and theme variables,
+ * emitting only the rules, elements, and variables the source actually uses.
  * Generates CSS on-demand via virtual module with HMR support.
  *
  * @example

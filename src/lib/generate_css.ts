@@ -19,6 +19,7 @@ import {
 	type CssClassDefinitionInterpreter,
 } from './css_class_generation.js';
 import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
+import {get_all_variable_names} from './variable_graph.js';
 import type {BundledCssResources} from './bundled_resources.js';
 
 /**
@@ -160,6 +161,28 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		}
 
 		diagnostics.push(...resolution.diagnostics);
+
+		// Footgun guard: base styles on, theme off (`variables: null`). The kept base rules and
+		// utility classes still reference fuz_css theme variables, but the disabled theme output
+		// won't define them — every such `var()` dangles. Utility-only mode (both off) never reaches
+		// this branch; the legitimate escape is importing `theme.css` separately.
+		if (include_base && !include_theme) {
+			const theme_var_names = get_all_variable_names(resources.variable_graph);
+			const references_theme_var = [...resolution.resolved_variables].some((v) =>
+				theme_var_names.has(v),
+			);
+			if (references_theme_var) {
+				diagnostics.push({
+					phase: 'generation',
+					level: 'warning',
+					message:
+						'Base styles are enabled but theme variables are disabled (variables: null); emitted styles reference theme variables that will be undefined',
+					suggestion: 'Import theme.css separately, or set base_css: null for utility-only mode.',
+					identifier: 'theme_variables_disabled',
+					locations: null,
+				});
+			}
+		}
 
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
