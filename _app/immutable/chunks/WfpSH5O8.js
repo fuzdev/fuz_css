@@ -1,1 +1,0 @@
-import{l as y,m as o,H as u,E as _,n as t,o as g,C as m,q as l,v as i,w as n,x as p}from"./CEPkCrt1.js";function C(d,r){let s=null,E=t;var a;if(t){s=p;for(var e=g(document.head);e!==null&&(e.nodeType!==m||e.data!==d);)e=l(e);if(e===null)i(!1);else{var f=l(e);e.remove(),n(f)}}t||(a=document.head.appendChild(y()));try{o(()=>r(a),u|_)}finally{E&&(i(!0),n(s))}}export{C as h};
