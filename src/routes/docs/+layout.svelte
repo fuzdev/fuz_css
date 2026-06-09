@@ -2,6 +2,7 @@
 	import type {Snippet} from 'svelte';
 	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
+	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 	import {selected_variable_context} from '@fuzdev/fuz_ui/style_variable_helpers.svelte.js';
 	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
 
@@ -25,12 +26,12 @@
 
 {#if selected_variable.value}
 	<Dialog onclose={() => (selected_variable.value = null)}>
-		{#snippet children(close)}
-			<div class="pane p_xl width_atmost_md mx_auto">
+		<DialogContent>
+			{#snippet children({close})}
 				<StyleVariableDetail variable={selected_variable.value} />
 				<UnfinishedImplementationWarning />
 				<button type="button" onclick={close}>ok</button>
-			</div>
-		{/snippet}
+			{/snippet}
+		</DialogContent>
 	</Dialog>
 {/if}

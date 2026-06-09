@@ -3,6 +3,7 @@
 	import {swallow} from '@fuzdev/fuz_util/dom.js';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
+	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 
 	import {render_theme_style, type Theme} from '$lib/theme.js';
 	import type {StyleVariable} from '$lib/variable.js';
@@ -109,15 +110,15 @@
 </div>
 {#if selected_variable}
 	<Dialog onclose={() => (selected_variable = null)}>
-		{#snippet children(close)}
-			<div class="pane p_md width_atmost_md mx_auto">
+		<DialogContent>
+			{#snippet children({close})}
 				<div class="panel p_lg box">
 					<StyleVariableDetail variable={selected_variable} />
 					<UnfinishedImplementationWarning />
 					<button type="button" onclick={close}>ok</button>
 				</div>
-			</div>
-		{/snippet}
+			{/snippet}
+		</DialogContent>
 	</Dialog>
 {/if}
 

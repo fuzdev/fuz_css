@@ -1,6 +1,7 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
+	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -21,7 +22,6 @@
 
 	const themes = default_themes.slice();
 
-	// let show_create_theme_dialog = false;
 	let editing_theme: null | Theme = $state.raw(null);
 </script>
 
@@ -82,45 +82,19 @@
 		<div class="width_atmost_xs mb_lg">
 			<ThemeInput {themes} enable_editing onedit={(t) => (editing_theme = t)} />
 		</div>
-		<!-- <button class="mb_lg" onclick={() => (show_create_theme_dialog = true)} disabled
-				>create a new theme (todo)</button
-			> -->
 	</TomeSection>
 </TomeContent>
 
-<!-- TODO enable creating themes -->
-<!-- {#if show_create_theme_dialog}
-	<Dialog onclose={() => (show_create_theme_dialog = false)} let:close>
-		<div class="pane p_md width_atmost_md mx_auto">
-			<div class="theme_editor_wrapper panel">
-				<ThemeForm
-					oncreate={(theme) => {
-						themes = themes.concat(theme);
-						close();
-					}}
-				/>
-			</div>
-		</div>
-	</Dialog>
-{/if} -->
 {#if editing_theme}
 	<Dialog onclose={() => (editing_theme = null)}>
-		<div class="pane p_md width_atmost_md mx_auto">
-			<div class="theme_editor_wrapper">
-				<ThemeForm
-					theme={editing_theme}
-					onsave={(theme) => {
-						console.log(`update theme`, theme); // eslint-disable-line no-console
-						alert('todo'); // eslint-disable-line no-alert
-					}}
-				/>
-			</div>
-		</div>
+		<DialogContent>
+			<ThemeForm
+				theme={editing_theme}
+				onsave={(theme) => {
+					console.log(`update theme`, theme); // eslint-disable-line no-console
+					alert('todo'); // eslint-disable-line no-alert
+				}}
+			/>
+		</DialogContent>
 	</Dialog>
 {/if}
-
-<style>
-	.theme_editor_wrapper {
-		padding: var(--space_lg);
-	}
-</style>
