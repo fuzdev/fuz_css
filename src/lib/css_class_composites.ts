@@ -229,7 +229,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				--border_color: var(--border_color_30);
 				border-radius: 0;
 				position: relative;
-				z-index: 2;
 				cursor: pointer;
 				width: 100%;
 				min-height: var(--menuitem_min_height, var(--input_height_compact));
@@ -242,7 +241,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				/* TODO different patterns for border and surface? */
 				--border_color: var(--color_a_50);
 				background-color: var(--fg_10);
-				z-index: 1;
 				cursor: default;
 			}
 			.menuitem.selected.deselectable:not(:disabled) {
