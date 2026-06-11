@@ -17,7 +17,8 @@
 		children: Snippet;
 	} = $props();
 
-	library_context.set(new Library(library_json));
+	const library = new Library(library_json);
+	library_context.set(() => library);
 
 	const selected_variable = selected_variable_context.set();
 </script>

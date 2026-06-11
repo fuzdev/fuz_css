@@ -1,6 +1,9 @@
 <script lang="ts">
 	import type {Snippet} from 'svelte';
 	import type {SvelteHTMLElements} from 'svelte/elements';
+	import {icon_create_file} from '@fuzdev/fuz_ui/icons.js';
+	import type {SvgData} from '@fuzdev/fuz_ui/svg.js';
+	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
 
 	// TODO upstream?
 
@@ -10,7 +13,7 @@
 		base_path = 'https://github.com/fuzdev/fuz_css/blob/main/',
 		unstyled = false,
 		attrs,
-		icon = '🗎', // TODO temporary, should be an svg
+		icon = icon_create_file,
 		children,
 	}: {
 		path: string;
@@ -21,7 +24,7 @@
 		base_path?: string;
 		unstyled?: boolean;
 		attrs?: SvelteHTMLElements['a'];
-		icon?: Snippet | string;
+		icon?: SvgData | Snippet | string;
 		children?: Snippet;
 	} = $props();
 
@@ -32,6 +35,8 @@
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a {...attrs} {href} class:chip={!unstyled} class:white-space:nowrap={true}
-	>{#if typeof icon === 'string'}{icon}{:else}{@render icon()}{/if}
+	>{#if typeof icon === 'string'}{icon}{:else if typeof icon === 'function'}{@render icon()}{:else}<Svg
+			data={icon}
+		/>{/if}
 	{#if children}{@render children()}{:else}{final_path}{/if}</a
 >

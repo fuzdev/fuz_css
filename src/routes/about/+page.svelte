@@ -10,7 +10,8 @@
 	import {MAIN_HEADER_MARGIN_TOP} from '$routes/constants.js';
 	import {library_json} from '$routes/library.js';
 
-	const library = library_context.set(new Library(library_json));
+	const library = new Library(library_json);
+	library_context.set(() => library);
 	const site = site_context.get();
 
 	// TODO standardize
