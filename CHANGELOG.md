@@ -1,5 +1,12 @@
 # @fuzdev/fuz_css
 
+## 0.63.0
+
+### Minor Changes
+
+- feat: warn on bundled-CSS configs that leave dangling `var()` references ([d89d3da](https://github.com/fuzdev/fuz_css/commit/d89d3da))
+- fix: remove z-index from `menuitem` ([6622420](https://github.com/fuzdev/fuz_css/commit/6622420))
+
 ## 0.62.0
 
 ### Minor Changes
