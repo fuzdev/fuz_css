@@ -196,18 +196,18 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	let epoch_seq = 0;
 
 	/**
-	 * Updates detected CSS variables for a file via regex scan against theme variables.
-	 * Variables not in the theme are silently ignored (may be user-defined).
+	 * Records every `var(--*)` reference in a file via regex scan. Stored unfiltered;
+	 * `render_css` narrows to theme variables once `variable_graph` is loaded.
+	 *
+	 * Filtering here (the old behavior) silently dropped detections from any file
+	 * transformed before the graph loads — and the graph loads lazily on the first
+	 * `load()`. In SvelteKit dev, route nodes (e.g. `+page.svelte`) are resolved, and
+	 * thus transformed, during SSR *before* the layout's `virtual:fuz.css` import
+	 * triggers that first `load()`; a theme `var()` used only there was dropped, and
+	 * the cached content hash meant it never re-scanned until the file was edited.
 	 */
 	const update_detected_variables = (id: string, code: string): void => {
-		if (!variable_graph) return;
-		const theme_var_names = get_all_variable_names(variable_graph);
-		const file_vars: Set<string> = new Set();
-		for (const name of extract_css_variables(code)) {
-			if (theme_var_names.has(name)) {
-				file_vars.add(name);
-			}
-		}
+		const file_vars = extract_css_variables(code);
 		if (file_vars.size > 0) {
 			detected_variables_by_file.set(id, file_vars);
 		} else {
@@ -274,12 +274,21 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			explicit_variables,
 		} = css_classes.get_all();
 
-		// Aggregate per-file detected CSS variables (already theme-filtered);
-		// `generate_css` merges in `explicit_variables`.
+		// Aggregate per-file `var(--*)` references (stored unfiltered by
+		// `update_detected_variables`) and narrow to theme variables — non-theme refs
+		// may be user-defined and have no definition to emit. The graph is loaded at
+		// every render-time call site (`load()`/HMR/`generateBundle` all run after
+		// `ensure_bundled_resources`); when it isn't (utility-only mode), variables
+		// aren't emitted anyway. `generate_css` merges in `explicit_variables`.
+		const theme_var_names = variable_graph ? get_all_variable_names(variable_graph) : null;
 		const detected_css_variables: Set<string> = new Set();
-		for (const vars of detected_variables_by_file.values()) {
-			for (const v of vars) {
-				detected_css_variables.add(v);
+		if (theme_var_names) {
+			for (const vars of detected_variables_by_file.values()) {
+				for (const v of vars) {
+					if (theme_var_names.has(v)) {
+						detected_css_variables.add(v);
+					}
+				}
 			}
 		}
 
