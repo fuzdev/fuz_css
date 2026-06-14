@@ -167,6 +167,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	/** CSS variables detected per file via simple regex scan (filtered against theme) */
 	const detected_variables_by_file: Map<string, Set<string>> = new Map();
 	let virtual_module_loaded = false;
+	/**
+	 * Every resolved virtual-module id `load()` has served — the bare
+	 * `/__fuz.css` plus each query variant (`?inline`/`?direct`/`?used`). HMR must
+	 * invalidate *all* of them: SvelteKit's dev SSR FOUC-inlining reads
+	 * `/__fuz.css?inline`, a module Vite caches separately from the bare id, so
+	 * invalidating only the bare id leaves the inlined `<head>` CSS frozen at its
+	 * first read and reloads keep serving stale styles.
+	 */
+	const loaded_virtual_ids: Set<string> = new Set();
 	let is_dev = false;
 	let server: ViteDevServer | null = null;
 	let logger: ViteLogger | null = null;
@@ -357,9 +366,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			last_generated_css = new_css;
 			pending_css = new_css; // Store for reuse in load() to avoid regenerating
 
-			const mod = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
-			if (mod) {
-				server!.moduleGraph.invalidateModule(mod);
+			// Invalidate every served variant, not just the bare id. The bare
+			// `/__fuz.css` backs the client `<style>` and gets a `js-update` so Vite
+			// re-runs `updateStyle` with fresh content live. The `?inline`/`?direct`/
+			// `?used` variants have no client HMR boundary — they're read fresh by the
+			// next SSR render — so invalidating their cached module is enough; without
+			// it, SvelteKit keeps inlining stale `<head>` CSS on every reload.
+			const bare = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
+			if (bare) {
+				server!.moduleGraph.invalidateModule(bare);
 				// Vite wraps the CSS module so it self-accepts (`import.meta.hot.accept()`),
 				// re-running `updateStyle` with fresh content on a `js-update`. The module's
 				// plain URL is its own id (no `\0` encoding), so it doubles as the HMR path.
@@ -374,6 +389,13 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 						},
 					],
 				});
+			}
+			for (const vid of loaded_virtual_ids) {
+				if (vid === RESOLVED_VIRTUAL_ID) continue; // bare handled above
+				const variant = server!.moduleGraph.getModuleById(vid);
+				if (variant) {
+					server!.moduleGraph.invalidateModule(variant);
+				}
 			}
 		}, HMR_DEBOUNCE_MS);
 	};
@@ -453,6 +475,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				return undefined;
 			}
 			virtual_module_loaded = true;
+			loaded_virtual_ids.add(id); // bare + each `?inline`/`?direct`/`?used` variant, for HMR invalidation
 			// Defer resource loading to first virtual module access
 			if (include_base || include_theme) {
 				await ensure_bundled_resources();
