@@ -1,5 +1,17 @@
 # @fuzdev/fuz_css
 
+## 0.63.1
+
+### Patch Changes
+
+- fix: invalidate dev SSR-inlined CSS variants on HMR ([0bbc764](https://github.com/fuzdev/fuz_css/commit/0bbc764))
+
+  The Vite plugin only invalidated the bare `virtual:fuz.css` module on HMR, but
+  SvelteKit's dev FOUC-inlining reads the `?inline` variant — a separately cached
+  module. Once cached, it was never refreshed, so SSR reloads kept serving stale
+  inlined `<head>` CSS (e.g. a theme `var()` used in a single route staying
+  undefined). HMR now invalidates every served virtual-module variant.
+
 ## 0.63.0
 
 ### Minor Changes
