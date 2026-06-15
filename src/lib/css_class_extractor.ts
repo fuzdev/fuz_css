@@ -19,6 +19,7 @@ import {parse as parse_svelte, type AST} from 'svelte/compiler';
 import {walk, type Visitors} from 'zimmerframe';
 import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
+import {to_error_message} from '@fuzdev/fuz_util/error.js';
 
 import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
 
@@ -300,7 +301,7 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 			{
 				phase: 'extraction',
 				level: 'warning',
-				message: `Failed to parse Svelte file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				message: `Failed to parse Svelte file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',
 				location: {file, line: 1, column: 1},
 			},
@@ -513,7 +514,7 @@ export const extract_from_ts = (
 			{
 				phase: 'extraction',
 				level: 'warning',
-				message: `Failed to parse TypeScript/JS file: ${err instanceof Error ? err.message : 'unknown error'}`,
+				message: `Failed to parse TypeScript/JS file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',
 				location: {file, line: 1, column: 1},
 			},

@@ -8,6 +8,7 @@
  */
 
 import type {Logger} from '@fuzdev/fuz_util/log.js';
+import {to_error_message} from '@fuzdev/fuz_util/error.js';
 
 import {
 	type SourceLocation,
@@ -422,7 +423,7 @@ export const generate_classes_css = (
 				}
 			} catch (e) {
 				// Warn about parse errors so users can investigate
-				const error_message = e instanceof Error ? e.message : String(e);
+				const error_message = to_error_message(e);
 				diagnostics.push({
 					phase: 'generation',
 					level: 'warning',

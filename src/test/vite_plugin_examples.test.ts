@@ -17,6 +17,7 @@ import {test, assert, describe, beforeAll} from 'vitest';
 import {join} from 'node:path';
 import {readdir, readFile} from 'node:fs/promises';
 import {execSync} from 'node:child_process';
+import {to_error_message} from '@fuzdev/fuz_util/error.js';
 
 import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.js';
 
@@ -132,7 +133,7 @@ const build_example = (example_name: string): void => {
 		execSync('npm install', {cwd: example_dir, stdio: 'pipe'});
 		execSync('npm run build', {cwd: example_dir, stdio: 'pipe'});
 	} catch (err) {
-		const message = err instanceof Error ? err.message : String(err);
+		const message = to_error_message(err);
 		throw new Error(`Failed to build ${example_name}: ${message}`);
 	}
 };
