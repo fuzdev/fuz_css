@@ -17,8 +17,8 @@ import {
 	format_spacing_value,
 	format_dimension_value,
 	format_variable_name,
-} from '$lib/css_class_generators.js';
-import type {CssClassDefinition} from '$lib/css_class_generation.js';
+} from '$lib/css_class_generators.ts';
+import type {CssClassDefinition} from '$lib/css_class_generation.ts';
 
 /* eslint-disable @typescript-eslint/dot-notation -- dynamic keys require bracket notation */
 

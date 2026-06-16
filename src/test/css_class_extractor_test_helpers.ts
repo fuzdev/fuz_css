@@ -4,7 +4,7 @@ import {
 	type ExtractionResult,
 	type AcornPlugin,
 	extract_from_ts,
-} from '$lib/css_class_extractor.js';
+} from '$lib/css_class_extractor.ts';
 
 /**
  * Cached JSX plugin to avoid repeated async imports.

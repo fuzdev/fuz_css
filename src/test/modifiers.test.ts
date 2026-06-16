@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {MODIFIERS} from '$lib/modifiers.js';
+import {MODIFIERS} from '$lib/modifiers.ts';
 
 /**
  * Loads CSS selectors from @webref/css for validation.

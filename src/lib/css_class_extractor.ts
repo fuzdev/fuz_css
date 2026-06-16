@@ -19,9 +19,9 @@ import {parse as parse_svelte, type AST} from 'svelte/compiler';
 import {walk, type Visitors} from 'zimmerframe';
 import {Parser, type Node} from 'acorn';
 import {tsPlugin} from '@sveltejs/acorn-typescript';
-import {to_error_message} from '@fuzdev/fuz_util/error.js';
+import {to_error_message} from '@fuzdev/fuz_util/error.ts';
 
-import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.js';
+import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.ts';
 
 //
 // Types

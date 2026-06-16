@@ -1,8 +1,8 @@
 import {test, describe} from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.js';
+import {extract_from_svelte} from '$lib/css_class_extractor.ts';
 
-import {class_names_equal, assert_no_classes} from './css_class_extractor_test_helpers.js';
+import {class_names_equal, assert_no_classes} from './css_class_extractor_test_helpers.ts';
 
 describe('clsx/cn function calls', () => {
 	const clsx_cases = [

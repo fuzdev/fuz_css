@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {extract_css_variables, has_css_variables} from '$lib/css_variable_utils.js';
+import {extract_css_variables, has_css_variables} from '$lib/css_variable_utils.ts';
 
 describe('extract_css_variables', () => {
 	test('returns empty set for empty string', () => {

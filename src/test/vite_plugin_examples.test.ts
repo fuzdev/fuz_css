@@ -17,9 +17,9 @@ import {test, assert, describe, beforeAll} from 'vitest';
 import {join} from 'node:path';
 import {readdir, readFile} from 'node:fs/promises';
 import {execSync} from 'node:child_process';
-import {to_error_message} from '@fuzdev/fuz_util/error.js';
+import {to_error_message} from '@fuzdev/fuz_util/error.ts';
 
-import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.js';
+import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.ts';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
@@ -28,8 +28,14 @@ const EXAMPLES_DIR = join(process.cwd(), 'examples');
 
 // Build the package before running example tests so examples get fresh dist/
 if (!SKIP) {
-	beforeAll(() => {
+	beforeAll(async () => {
 		execSync('npx svelte-package', {cwd: process.cwd(), stdio: 'pipe'});
+		// `svelte-package` leaves relative `.ts` specifiers in `dist`; with
+		// `rewriteRelativeImportExtensions: false` tsc no longer rewrites them, so the
+		// gro dist-rewrite pass (which `gro build` runs after svelte-package) must run
+		// here too — otherwise the examples can't resolve the freshly-packaged dist.
+		const {rewrite_dist_imports} = await import('@fuzdev/gro/dist_rewrite_imports.ts');
+		await rewrite_dist_imports(join(process.cwd(), 'dist'));
 	}, 60_000); // 1 minute timeout for package build
 }
 

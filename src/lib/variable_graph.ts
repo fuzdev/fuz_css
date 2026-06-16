@@ -8,14 +8,14 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
-import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
+import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
+import {hash_insecure} from '@fuzdev/fuz_util/hash.ts';
 
-import {default_variables} from './variables.js';
-import type {StyleVariable} from './variable.js';
-import {extract_css_variables} from './css_variable_utils.js';
+import {default_variables} from './variables.ts';
+import type {StyleVariable} from './variable.ts';
+import {extract_css_variables} from './css_variable_utils.ts';
 
-import type {VariablesOption} from './css_plugin_options.js';
+import type {VariablesOption} from './css_plugin_options.ts';
 
 /**
  * Information about a single style variable and its dependencies.

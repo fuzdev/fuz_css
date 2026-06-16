@@ -1,4 +1,4 @@
-import {escape_css_selector, type CssClassDefinitionInterpreter} from './css_class_generation.js';
+import {escape_css_selector, type CssClassDefinitionInterpreter} from './css_class_generation.ts';
 import {
 	is_possible_css_literal,
 	interpret_css_literal,
@@ -6,9 +6,9 @@ import {
 	extract_segments,
 	extract_and_validate_modifiers,
 	type CssLiteralOutput,
-} from './css_literal.js';
-import {generate_modified_ruleset} from './css_ruleset_parser.js';
-import {resolve_class_definition} from './css_class_resolution.js';
+} from './css_literal.ts';
+import {generate_modified_ruleset} from './css_ruleset_parser.ts';
+import {resolve_class_definition} from './css_class_resolution.ts';
 
 /**
  * Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import type {ComponentProps} from 'svelte';
 
-	import FileLink from '$routes/FileLink.svelte';
+	import FileLink from './FileLink.svelte';
 
 	// TODO upstream?
 

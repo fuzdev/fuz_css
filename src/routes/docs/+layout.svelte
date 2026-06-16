@@ -3,13 +3,13 @@
 	import Docs from '@fuzdev/fuz_ui/Docs.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
-	import {selected_variable_context} from '@fuzdev/fuz_ui/style_variable_helpers.svelte.js';
-	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.js';
+	import {selected_variable_context} from '@fuzdev/fuz_ui/style_variable_helpers.svelte.ts';
+	import {Library, library_context} from '@fuzdev/fuz_ui/library.svelte.ts';
 
-	import {tomes} from '$routes/docs/tomes.js';
-	import {library_json} from '$routes/library.js';
+	import {tomes} from './tomes.ts';
+	import {library_json} from '$routes/library.ts';
 	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import UnfinishedImplementationWarning from './UnfinishedImplementationWarning.svelte';
 
 	const {
 		children,

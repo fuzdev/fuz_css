@@ -3,7 +3,7 @@
 	import {resolve} from '$app/paths';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';

@@ -7,10 +7,10 @@
 
 import {test, describe, assert} from 'vitest';
 
-import {generate_css, type GenerateCssOptions} from '$lib/generate_css.js';
-import {create_test_fixtures} from './css_bundled_resolution_fixtures.js';
-import type {StyleVariable} from '$lib/variable.js';
-import {assert_css_contains, assert_css_not_contains} from './test_helpers.js';
+import {generate_css, type GenerateCssOptions} from '$lib/generate_css.ts';
+import {create_test_fixtures} from './css_bundled_resolution_fixtures.ts';
+import type {StyleVariable} from '$lib/variable.ts';
+import {assert_css_contains, assert_css_not_contains} from './test_helpers.ts';
 
 const CLASS_DEFS = {
 	p_lg: {declaration: 'padding: var(--space_lg);'},

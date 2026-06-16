@@ -8,8 +8,8 @@
  * @module
  */
 
-import type {CssClassDefinition} from './css_class_generation.js';
-import {extract_css_variables} from './css_variable_utils.js';
+import type {CssClassDefinition} from './css_class_generation.ts';
+import {extract_css_variables} from './css_variable_utils.ts';
 
 /**
  * Index mapping class names to their CSS variable dependencies.

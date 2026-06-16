@@ -10,16 +10,16 @@ import {
 	from_cached_extraction,
 	CSS_CACHE_VERSION,
 	type CachedExtraction,
-} from '$lib/css_cache.js';
-import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.js';
-import {default_cache_deps} from '$lib/deps_defaults.js';
-import {create_mock_fs_state, create_mock_cache_deps} from './fixtures/mock_deps.js';
+} from '$lib/css_cache.ts';
+import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.ts';
+import {default_cache_deps} from '$lib/deps_defaults.ts';
+import {create_mock_fs_state, create_mock_cache_deps} from './fixtures/mock_deps.ts';
 import {
 	loc,
 	make_classes,
 	make_extraction_diagnostic as make_diagnostic,
 	EMPTY_EXTRACTION,
-} from './test_helpers.js';
+} from './test_helpers.ts';
 
 const deps = default_cache_deps;
 

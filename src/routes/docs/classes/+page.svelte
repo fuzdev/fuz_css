@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -25,7 +25,7 @@
 		shadow_semantic_values,
 		distance_variants,
 		darken_lighten_variants,
-	} from '@fuzdev/fuz_css/variable_data.js';
+	} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'classes';
 

@@ -1,8 +1,8 @@
 import {test, assert} from 'vitest';
 import {readFileSync} from 'node:fs';
 
-import * as exported_variables from '$lib/variables.js';
-import {absolute_color_variables} from '$lib/variables.js';
+import * as exported_variables from '$lib/variables.ts';
+import {absolute_color_variables} from '$lib/variables.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
 // Create a set of absolute color variable names for quick lookup

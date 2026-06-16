@@ -1,6 +1,6 @@
 import {test, describe, assert} from 'vitest';
 
-import {escape_css_selector} from '$lib/css_class_generation.js';
+import {escape_css_selector} from '$lib/css_class_generation.ts';
 
 /**
  * Tests for CSS selector escaping.

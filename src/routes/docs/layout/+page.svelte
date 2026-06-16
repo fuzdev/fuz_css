@@ -1,12 +1,12 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 	import {resolve} from '$app/paths';
 
-	import {space_variants, distance_variants} from '$lib/variable_data.js';
+	import {space_variants, distance_variants} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'layout';
 

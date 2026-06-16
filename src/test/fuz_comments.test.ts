@@ -7,7 +7,7 @@
 
 import {test, describe, beforeAll, assert} from 'vitest';
 
-import {extract_from_svelte, extract_from_ts} from '$lib/css_class_extractor.js';
+import {extract_from_svelte, extract_from_ts} from '$lib/css_class_extractor.ts';
 import {
 	assert_elements,
 	assert_explicit_elements,
@@ -17,7 +17,7 @@ import {
 	assert_diagnostic,
 	svelte_script,
 	create_jsx_extractor,
-} from './css_class_extractor_test_helpers.js';
+} from './css_class_extractor_test_helpers.ts';
 
 //
 // @fuz-elements extraction

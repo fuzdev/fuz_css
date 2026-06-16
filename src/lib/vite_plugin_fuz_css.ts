@@ -12,7 +12,7 @@
  * // vite.config.ts
  * import {defineConfig} from 'vite';
  * import jsx from 'acorn-jsx';
- * import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+ * import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
  *
  * export default defineConfig({
  *   plugins: [
@@ -28,29 +28,29 @@
 
 import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
 import {join} from 'node:path';
-import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
+import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.ts';
 
-import {format_diagnostic, CssGenerationError} from './diagnostics.js';
-import {generate_css} from './generate_css.js';
-import {create_bundled_resources} from './bundled_resources.js';
-import {extract_file_cached} from './extract_file_cached.js';
-import {merge_class_definitions} from './css_class_definitions.js';
-import {css_class_interpreters} from './css_class_interpreters.js';
-import {load_css_properties} from './css_literal.js';
+import {format_diagnostic, CssGenerationError} from './diagnostics.ts';
+import {generate_css} from './generate_css.ts';
+import {create_bundled_resources} from './bundled_resources.ts';
+import {extract_file_cached} from './extract_file_cached.ts';
+import {merge_class_definitions} from './css_class_definitions.ts';
+import {css_class_interpreters} from './css_class_interpreters.ts';
+import {load_css_properties} from './css_literal.ts';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
 	save_cached_extraction,
 	delete_cached_extraction,
-} from './css_cache.js';
-import {default_cache_deps} from './deps_defaults.js';
-import {filter_file_default} from './file_filter.js';
-import {CssClasses} from './css_classes.js';
-import type {StyleRuleIndex} from './style_rule_parser.js';
-import {type VariableDependencyGraph, get_all_variable_names} from './variable_graph.js';
-import {extract_css_variables} from './css_variable_utils.js';
-import type {CssClassVariableIndex} from './class_variable_index.js';
-import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
+} from './css_cache.ts';
+import {default_cache_deps} from './deps_defaults.ts';
+import {filter_file_default} from './file_filter.ts';
+import {CssClasses} from './css_classes.ts';
+import type {StyleRuleIndex} from './style_rule_parser.ts';
+import {type VariableDependencyGraph, get_all_variable_names} from './variable_graph.ts';
+import {extract_css_variables} from './css_variable_utils.ts';
+import type {CssClassVariableIndex} from './class_variable_index.ts';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.ts';
 
 /* eslint-disable no-console */
 

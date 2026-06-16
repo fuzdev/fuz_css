@@ -4,15 +4,15 @@ import {
 	generate_classes_css,
 	extract_primary_property,
 	type CssClassDefinitionInterpreter,
-} from '$lib/css_class_generation.js';
-import {css_class_composites} from '$lib/css_class_composites.js';
+} from '$lib/css_class_generation.ts';
+import {css_class_composites} from '$lib/css_class_composites.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,
 	assert_css_order,
 	assert_diagnostic,
 	assert_no_diagnostic,
-} from './test_helpers.js';
+} from './test_helpers.ts';
 
 /**
  * Common class definitions used across multiple tests.

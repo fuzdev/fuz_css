@@ -14,9 +14,9 @@ import {
 	extract_css_classes_with_locations,
 	type ExtractionData,
 	type AcornPlugin,
-} from './css_class_extractor.js';
-import {load_cached_extraction, from_cached_extraction} from './css_cache.js';
-import type {CacheDeps} from './deps.js';
+} from './css_class_extractor.ts';
+import {load_cached_extraction, from_cached_extraction} from './css_cache.ts';
+import type {CacheDeps} from './deps.ts';
 
 export interface ExtractFileCachedOptions {
 	deps: CacheDeps;

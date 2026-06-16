@@ -13,21 +13,21 @@
  * @module
  */
 
-import type {GenerationDiagnostic} from './diagnostics.js';
+import type {GenerationDiagnostic} from './diagnostics.ts';
 import {
 	type StyleRuleIndex,
 	get_matching_rules,
 	generate_base_css,
 	collect_rule_variables,
-} from './style_rule_parser.js';
+} from './style_rule_parser.ts';
 import {
 	type VariableDependencyGraph,
 	resolve_variables_transitive,
 	generate_theme_css,
 	get_all_variable_names,
 	find_similar_variable,
-} from './variable_graph.js';
-import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.js';
+} from './variable_graph.ts';
+import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.ts';
 
 /**
  * Threshold for string similarity to suggest typo corrections.

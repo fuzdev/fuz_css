@@ -1,13 +1,13 @@
 import {test, describe} from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.js';
+import {extract_from_svelte} from '$lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,
 	svelte_script,
 	assert_no_classes,
 	assert_tracked_var,
-} from './css_class_extractor_test_helpers.js';
+} from './css_class_extractor_test_helpers.ts';
 
 describe('variable tracking', () => {
 	describe('naming convention extraction', () => {

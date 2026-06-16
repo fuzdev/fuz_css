@@ -1,8 +1,8 @@
 import {test, assert, describe} from 'vitest';
 
-import {default_themes, DEFAULT_THEME} from '$lib/themes.js';
-import {default_variables} from '$lib/variables.js';
-import {StyleVariable} from '$lib/variable.js';
+import {default_themes, DEFAULT_THEME} from '$lib/themes.ts';
+import {default_variables} from '$lib/variables.ts';
+import {StyleVariable} from '$lib/variable.ts';
 
 describe('default_themes', () => {
 	test('all themes have valid name', () => {

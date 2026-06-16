@@ -22,7 +22,7 @@
 		objectClasses,
 		// Comment hint examples
 		fromComment,
-	} from '@fuzdev/fuz_css/example_class_utilities.js';
+	} from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 	let count = $state(0);
 </script>

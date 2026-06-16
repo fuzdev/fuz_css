@@ -1,22 +1,22 @@
-import type {Tome} from '@fuzdev/fuz_ui/tome.js';
+import type {Tome} from '@fuzdev/fuz_ui/tome.ts';
 
-import introduction from '$routes/docs/introduction/+page.svelte';
-import api from '$routes/docs/api/+page.svelte';
-import examples from '$routes/docs/examples/+page.svelte';
-import semantic from '$routes/docs/semantic/+page.svelte';
-import themes from '$routes/docs/themes/+page.svelte';
-import colors from '$routes/docs/colors/+page.svelte';
-import buttons from '$routes/docs/buttons/+page.svelte';
-import chips from '$routes/docs/chips/+page.svelte';
-import forms from '$routes/docs/forms/+page.svelte';
-import elements from '$routes/docs/elements/+page.svelte';
-import classes from '$routes/docs/classes/+page.svelte';
-import typography from '$routes/docs/typography/+page.svelte';
-import variables from '$routes/docs/variables/+page.svelte';
-import layout from '$routes/docs/layout/+page.svelte';
-import shading from '$routes/docs/shading/+page.svelte';
-import shadows from '$routes/docs/shadows/+page.svelte';
-import borders from '$routes/docs/borders/+page.svelte';
+import introduction from './introduction/+page.svelte';
+import api from './api/+page.svelte';
+import examples from './examples/+page.svelte';
+import semantic from './semantic/+page.svelte';
+import themes from './themes/+page.svelte';
+import colors from './colors/+page.svelte';
+import buttons from './buttons/+page.svelte';
+import chips from './chips/+page.svelte';
+import forms from './forms/+page.svelte';
+import elements from './elements/+page.svelte';
+import classes from './classes/+page.svelte';
+import typography from './typography/+page.svelte';
+import variables from './variables/+page.svelte';
+import layout from './layout/+page.svelte';
+import shading from './shading/+page.svelte';
+import shadows from './shadows/+page.svelte';
+import borders from './borders/+page.svelte';
 // import menuitem from '$routes/docs/menuitem/+page.svelte';
 
 // TODO maybe decouple `related` from `Tome` to get bidirectionality for free

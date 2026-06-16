@@ -1,4 +1,4 @@
-import type {ArrayElement} from '@fuzdev/fuz_util/types.js';
+import type {ArrayElement} from '@fuzdev/fuz_util/types.ts';
 
 export type SizeVariant = ArrayElement<typeof font_size_variants>;
 export const font_size_variants = [

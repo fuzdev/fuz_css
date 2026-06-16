@@ -9,8 +9,8 @@
 
 import {test, assert, describe} from 'vitest';
 
-import {generate_bundled_css, type CssResolutionResult} from '../lib/css_bundled_resolution.js';
-import {assert_css_order} from './test_helpers.js';
+import {generate_bundled_css, type CssResolutionResult} from '$lib/css_bundled_resolution.ts';
+import {assert_css_order} from './test_helpers.ts';
 
 /**
  * Creates a mock resolution result for testing generate_bundled_css.

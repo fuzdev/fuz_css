@@ -21,15 +21,15 @@ import {
 	type LiteralResolutionResult,
 	type ExtractedModifiers,
 	type ModifierExtractionResult,
-} from '$lib/css_literal.js';
-import {escape_css_selector} from '$lib/css_class_generation.js';
-import {type InterpreterDiagnostic} from '$lib/diagnostics.js';
+} from '$lib/css_literal.ts';
+import {escape_css_selector} from '$lib/css_class_generation.ts';
+import {type InterpreterDiagnostic} from '$lib/diagnostics.ts';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,
 	parse_parameterized_state,
 	extract_balanced_parens,
-} from '$lib/modifiers.js';
+} from '$lib/modifiers.ts';
 
 // CSS properties loaded before tests run
 let css_properties: Set<string>;

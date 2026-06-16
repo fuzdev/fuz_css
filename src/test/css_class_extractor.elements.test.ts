@@ -1,8 +1,8 @@
 import {test, assert, describe} from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.js';
+import {extract_from_svelte} from '$lib/css_class_extractor.ts';
 
-import {assert_elements} from './css_class_extractor_test_helpers.js';
+import {assert_elements} from './css_class_extractor_test_helpers.ts';
 
 const element_cases = [
 	{

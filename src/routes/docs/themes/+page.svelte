@@ -2,7 +2,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
@@ -11,8 +11,8 @@
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 
-	import {default_themes} from '$lib/themes.js';
-	import type {Theme} from '$lib/theme.js';
+	import {default_themes} from '$lib/themes.ts';
+	import type {Theme} from '$lib/theme.ts';
 	import ThemeForm from '$routes/ThemeForm.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 

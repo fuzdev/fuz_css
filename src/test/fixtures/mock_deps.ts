@@ -6,7 +6,7 @@
  * @module
  */
 
-import type {CacheDeps} from '$lib/deps.js';
+import type {CacheDeps} from '$lib/deps.ts';
 
 /**
  * In-memory filesystem state for mock deps.

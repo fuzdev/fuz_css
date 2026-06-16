@@ -7,17 +7,17 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
+import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
 
-import type {InterpreterDiagnostic} from './diagnostics.js';
-import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.js';
+import type {InterpreterDiagnostic} from './diagnostics.ts';
+import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.ts';
 import {
 	try_resolve_literal,
 	extract_segments,
 	extract_and_validate_modifiers,
 	has_extracted_modifiers,
 	suggest_modifier,
-} from './css_literal.js';
+} from './css_literal.ts';
 
 /**
  * Result from resolving a `composes` array to combined declarations.

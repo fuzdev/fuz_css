@@ -3,14 +3,14 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
-	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {shade_scale_variants, alpha_variants} from '$lib/variable_data.js';
+	import {shade_scale_variants, alpha_variants} from '$lib/variable_data.ts';
 
 	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
 	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100

@@ -28,11 +28,11 @@
  * @module
  */
 
-import type {FileFilter} from './file_filter.js';
-import type {AcornPlugin} from './css_class_extractor.js';
-import type {CssClassDefinition, CssClassDefinitionInterpreter} from './css_class_generation.js';
-import type {StyleVariable} from './variable.js';
-import type {CacheDeps} from './deps.js';
+import type {FileFilter} from './file_filter.ts';
+import type {AcornPlugin} from './css_class_extractor.ts';
+import type {CssClassDefinition, CssClassDefinitionInterpreter} from './css_class_generation.ts';
+import type {StyleVariable} from './variable.ts';
+import type {CacheDeps} from './deps.ts';
 
 /**
  * Options for CSS class extraction from source files.

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import {resolve} from '$app/paths';
 
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import UnfinishedImplementationWarning from './docs/UnfinishedImplementationWarning.svelte';
 </script>
 
 <p>

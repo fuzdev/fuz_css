@@ -1,8 +1,8 @@
 import {test, assert, describe, beforeAll} from 'vitest';
 
-import type {ExtractionResult} from '$lib/css_class_extractor.js';
+import type {ExtractionResult} from '$lib/css_class_extractor.ts';
 
-import {class_names_equal, create_jsx_extractor} from './css_class_extractor_test_helpers.js';
+import {class_names_equal, create_jsx_extractor} from './css_class_extractor_test_helpers.ts';
 
 /**
  * JSX extractor with acorn-jsx plugin pre-configured.
@@ -276,7 +276,7 @@ const Component = ({ opacity }) => (
 
 	test('fails gracefully without jsx plugin on TSX files', async () => {
 		// This test still needs direct import to test the no-plugin case
-		const {extract_from_ts} = await import('$lib/css_class_extractor.js');
+		const {extract_from_ts} = await import('$lib/css_class_extractor.ts');
 		const source = `const Button = () => <button className="btn">Click</button>;`;
 		const result = extract_from_ts(source, 'component.tsx');
 		assert.isNull(result.classes);

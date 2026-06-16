@@ -15,12 +15,12 @@ import {
 	load_style_rule_index,
 	create_style_rule_index,
 	load_default_style_css,
-} from './style_rule_parser.js';
-import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.js';
-import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.js';
-import type {CssClassDefinition} from './css_class_generation.js';
-import type {BaseCssOption, VariablesOption} from './css_plugin_options.js';
-import type {CacheDeps} from './deps.js';
+} from './style_rule_parser.ts';
+import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.ts';
+import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.ts';
+import type {CssClassDefinition} from './css_class_generation.ts';
+import type {BaseCssOption, VariablesOption} from './css_plugin_options.ts';
+import type {CacheDeps} from './deps.ts';
 
 /**
  * Bundled CSS resources needed to emit base styles and theme variables.

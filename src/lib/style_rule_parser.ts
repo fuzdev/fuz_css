@@ -10,11 +10,11 @@
  */
 
 import {parseCss, type AST} from 'svelte/compiler';
-import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.js';
+import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.ts';
 
-import {extract_css_variables} from './css_variable_utils.js';
-import type {CacheDeps} from './deps.js';
-import type {BaseCssOption} from './css_plugin_options.js';
+import {extract_css_variables} from './css_variable_utils.ts';
+import type {CacheDeps} from './deps.ts';
+import type {BaseCssOption} from './css_plugin_options.ts';
 
 /**
  * Base fields shared by all style rules.

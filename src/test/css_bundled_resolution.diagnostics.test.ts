@@ -8,8 +8,8 @@
 
 import {test, assert, describe} from 'vitest';
 
-import {resolve_css} from '../lib/css_bundled_resolution.js';
-import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
+import {resolve_css} from '$lib/css_bundled_resolution.ts';
+import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.ts';
 
 describe('resolve_css diagnostics', () => {
 	describe('typo detection for variables', () => {

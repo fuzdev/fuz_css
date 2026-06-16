@@ -7,7 +7,7 @@
  * @module
  */
 
-import type {CssClassDefinition} from './css_class_generation.js';
+import type {CssClassDefinition} from './css_class_generation.ts';
 import {
 	generate_classes,
 	generate_property_classes,
@@ -15,7 +15,7 @@ import {
 	generate_border_radius_corners,
 	generate_shadow_classes,
 	format_spacing_value,
-} from './css_class_generators.js';
+} from './css_class_generators.ts';
 import {
 	space_variants,
 	distance_variants,
@@ -34,8 +34,8 @@ import {
 	shadow_alpha_variants,
 	darken_lighten_variants,
 	color_scheme_variants,
-} from './variable_data.js';
-import {css_class_composites} from './css_class_composites.js';
+} from './variable_data.ts';
+import {css_class_composites} from './css_class_composites.ts';
 
 // TODO add animation support, either as a separate thing or rename `css_class_definitions` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 

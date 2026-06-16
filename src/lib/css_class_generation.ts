@@ -7,23 +7,23 @@
  * @module
  */
 
-import type {Logger} from '@fuzdev/fuz_util/log.js';
-import {to_error_message} from '@fuzdev/fuz_util/error.js';
+import type {Logger} from '@fuzdev/fuz_util/log.ts';
+import {to_error_message} from '@fuzdev/fuz_util/error.ts';
 
 import {
 	type SourceLocation,
 	type InterpreterDiagnostic,
 	type GenerationDiagnostic,
 	create_generation_diagnostic,
-} from './diagnostics.js';
+} from './diagnostics.ts';
 import {
 	parse_ruleset,
 	is_single_selector_ruleset,
 	ruleset_contains_class,
-} from './css_ruleset_parser.js';
-import {resolve_class_definition} from './css_class_resolution.js';
-import {get_modifier} from './modifiers.js';
-import {extract_css_variables} from './css_variable_utils.js';
+} from './css_ruleset_parser.ts';
+import {resolve_class_definition} from './css_class_resolution.ts';
+import {get_modifier} from './modifiers.ts';
+import {extract_css_variables} from './css_variable_utils.ts';
 
 //
 // CSS Utilities

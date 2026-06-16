@@ -1,4 +1,4 @@
-import type {Theme} from './theme.js';
+import type {Theme} from './theme.ts';
 
 export const DEFAULT_THEME: Theme = {
 	name: 'base',

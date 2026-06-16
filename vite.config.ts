@@ -1,7 +1,7 @@
 import {defineConfig} from 'vite';
 import {sveltekit} from '@sveltejs/kit/vite';
 import svelte_docinfo from 'svelte-docinfo/vite.js';
-import {vite_plugin_pkg_json} from '@fuzdev/fuz_ui/vite_plugin_pkg_json.js';
+import {vite_plugin_pkg_json} from '@fuzdev/fuz_ui/vite_plugin_pkg_json.ts';
 
 import {vite_plugin_fuz_css} from './src/lib/vite_plugin_fuz_css.js';
 

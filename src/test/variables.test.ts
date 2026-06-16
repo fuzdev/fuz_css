@@ -1,8 +1,8 @@
 import {test, assert} from 'vitest';
 
-import {default_variables, absolute_color_variables} from '$lib/variables.js';
-import * as exported_variables from '$lib/variables.js';
-import {StyleVariable} from '$lib/variable.js';
+import {default_variables, absolute_color_variables} from '$lib/variables.ts';
+import * as exported_variables from '$lib/variables.ts';
+import {StyleVariable} from '$lib/variable.ts';
 
 // Create a set of absolute color variable names for quick lookup (these are dynamically generated)
 const absolute_color_variable_names = new Set(absolute_color_variables.map((v) => v.name));

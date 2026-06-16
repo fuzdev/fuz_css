@@ -1,6 +1,6 @@
 <script lang="ts">
-	import {hsl_to_hex_string, hsl_to_rgb, parse_hsl_string} from '@fuzdev/fuz_util/colors.js';
-	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.js';
+	import {hsl_to_hex_string, hsl_to_rgb, parse_hsl_string} from '@fuzdev/fuz_util/colors.ts';
+	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	const {

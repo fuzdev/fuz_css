@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {swallow} from '@fuzdev/fuz_util/dom.js';
+	import {swallow} from '@fuzdev/fuz_util/dom.ts';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 
-	import {render_theme_style, type Theme} from '$lib/theme.js';
-	import type {StyleVariable} from '$lib/variable.js';
-	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import {render_theme_style, type Theme} from '$lib/theme.ts';
+	import type {StyleVariable} from '$lib/variable.ts';
+	import StyleVariableDetail from './StyleVariableDetail.svelte';
+	import UnfinishedImplementationWarning from './docs/UnfinishedImplementationWarning.svelte';
 
 	// TODO @many add to $lib?
 

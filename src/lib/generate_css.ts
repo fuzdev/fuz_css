@@ -10,17 +10,17 @@
  * @module
  */
 
-import type {Logger} from '@fuzdev/fuz_util/log.js';
+import type {Logger} from '@fuzdev/fuz_util/log.ts';
 
-import type {Diagnostic, SourceLocation} from './diagnostics.js';
+import type {Diagnostic, SourceLocation} from './diagnostics.ts';
 import {
 	generate_classes_css,
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter,
-} from './css_class_generation.js';
-import {resolve_css, generate_bundled_css} from './css_bundled_resolution.js';
-import {get_all_variable_names} from './variable_graph.js';
-import type {BundledCssResources} from './bundled_resources.js';
+} from './css_class_generation.ts';
+import {resolve_css, generate_bundled_css} from './css_bundled_resolution.ts';
+import {get_all_variable_names} from './variable_graph.ts';
+import type {BundledCssResources} from './bundled_resources.ts';
 
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by

@@ -1,8 +1,8 @@
 import {test, assert, describe} from 'vitest';
 
-import {resolve_composes} from '$lib/css_class_resolution.js';
-import type {CssClassDefinition} from '$lib/css_class_generation.js';
-import {assert_resolved_declaration, assert_resolution_error} from './test_helpers.js';
+import {resolve_composes} from '$lib/css_class_resolution.ts';
+import type {CssClassDefinition} from '$lib/css_class_generation.ts';
+import {assert_resolved_declaration, assert_resolution_error} from './test_helpers.ts';
 
 /**
  * Tests for CSS literal class handling in resolve_composes.

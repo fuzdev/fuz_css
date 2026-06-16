@@ -1,7 +1,7 @@
 import {test, assert, describe} from 'vitest';
 
-import {generate_modified_ruleset} from '$lib/css_ruleset_parser.js';
-import {assert_css_contains, assert_css_not_contains} from './test_helpers.js';
+import {generate_modified_ruleset} from '$lib/css_ruleset_parser.ts';
+import {assert_css_contains, assert_css_not_contains} from './test_helpers.ts';
 
 /**
  * Tests for generate_modified_ruleset which creates CSS with modified selectors

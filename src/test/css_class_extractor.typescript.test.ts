@@ -1,12 +1,12 @@
 import {test, describe} from 'vitest';
 
-import {extract_from_ts, extract_css_classes} from '$lib/css_class_extractor.js';
+import {extract_from_ts, extract_css_classes} from '$lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,
 	class_set_equal,
 	assert_diagnostic,
-} from './css_class_extractor_test_helpers.js';
+} from './css_class_extractor_test_helpers.ts';
 
 describe('TypeScript extraction', () => {
 	const ts_extraction_cases = [

@@ -6,8 +6,8 @@ import {
 	generate_base_css,
 	collect_rule_variables,
 	load_style_rule_index,
-} from '../lib/style_rule_parser.js';
-import {default_cache_deps} from '../lib/deps_defaults.js';
+} from '$lib/style_rule_parser.ts';
+import {default_cache_deps} from '$lib/deps_defaults.ts';
 
 // Alias for brevity in tests
 const deps = default_cache_deps;

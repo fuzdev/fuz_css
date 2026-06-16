@@ -1,8 +1,8 @@
 <script lang="ts">
 	import type {Snippet} from 'svelte';
 	import type {SvelteHTMLElements} from 'svelte/elements';
-	import {icon_create_file} from '@fuzdev/fuz_ui/icons.js';
-	import type {SvgData} from '@fuzdev/fuz_ui/svg.js';
+	import {icon_create_file} from '@fuzdev/fuz_ui/icons.ts';
+	import type {SvgData} from '@fuzdev/fuz_ui/svg.ts';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
 
 	// TODO upstream?

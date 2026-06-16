@@ -5,7 +5,7 @@ import {
 	CssGenerationError,
 	type ExtractionDiagnostic,
 	type GenerationDiagnostic,
-} from '$lib/diagnostics.js';
+} from '$lib/diagnostics.ts';
 
 describe('format_diagnostic', () => {
 	test('formats extraction diagnostic with location', () => {

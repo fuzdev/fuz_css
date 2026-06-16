@@ -9,10 +9,10 @@
 
 import {test, assert, describe} from 'vitest';
 
-import {resolve_css} from '../lib/css_bundled_resolution.js';
-import type {CssClassDefinition} from '../lib/css_class_generation.js';
-import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.js';
-import {assert_css_order} from './test_helpers.js';
+import {resolve_css} from '$lib/css_bundled_resolution.ts';
+import type {CssClassDefinition} from '$lib/css_class_generation.ts';
+import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.ts';
+import {assert_css_order} from './test_helpers.ts';
 
 describe('resolve_css variable resolution', () => {
 	describe('source collection', () => {

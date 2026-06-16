@@ -8,11 +8,11 @@
  */
 
 import {join} from 'node:path';
-import {hash_insecure} from '@fuzdev/fuz_util/hash.js';
+import {hash_insecure} from '@fuzdev/fuz_util/hash.ts';
 
-import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-import type {ExtractionData} from './css_class_extractor.js';
-import type {CacheDeps} from './deps.js';
+import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.ts';
+import type {ExtractionData} from './css_class_extractor.ts';
+import type {CacheDeps} from './deps.ts';
 
 /**
  * Default cache directory relative to project root.

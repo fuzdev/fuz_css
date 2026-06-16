@@ -1,7 +1,7 @@
 <script lang="ts">
-	import {swallow} from '@fuzdev/fuz_util/dom.js';
+	import {swallow} from '@fuzdev/fuz_util/dom.ts';
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';

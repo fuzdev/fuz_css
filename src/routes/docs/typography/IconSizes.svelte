@@ -3,7 +3,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {icon_sizes} from '$lib/variable_data.js';
+	import {icon_sizes} from '$lib/variable_data.ts';
 </script>
 
 <TomeSection>

@@ -1,5 +1,5 @@
-import type {StyleVariable} from './variable.js';
-import {icon_sizes, color_variants, intensity_variants} from './variable_data.js';
+import type {StyleVariable} from './variable.ts';
+import {icon_sizes, color_variants, intensity_variants} from './variable_data.ts';
 
 /*
 

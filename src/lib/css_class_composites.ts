@@ -1,4 +1,4 @@
-import type {CssClassDefinition} from './css_class_generation.js';
+import type {CssClassDefinition} from './css_class_generation.ts';
 
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {

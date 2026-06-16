@@ -4,11 +4,11 @@
  * @module
  */
 
-import {parse_style_css} from '../lib/style_rule_parser.js';
-import {build_variable_graph} from '../lib/variable_graph.js';
-import {build_class_variable_index} from '../lib/class_variable_index.js';
-import type {StyleVariable} from '../lib/variable.js';
-import type {CssClassDefinition} from '../lib/css_class_generation.js';
+import {parse_style_css} from '$lib/style_rule_parser.ts';
+import {build_variable_graph} from '$lib/variable_graph.ts';
+import {build_class_variable_index} from '$lib/class_variable_index.ts';
+import type {StyleVariable} from '$lib/variable.ts';
+import type {CssClassDefinition} from '$lib/css_class_generation.ts';
 
 /**
  * Helper to create minimal test fixtures for CSS resolution tests.

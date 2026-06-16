@@ -10,10 +10,10 @@
 import {readFile, writeFile, mkdir, unlink, rename} from 'node:fs/promises';
 import {dirname} from 'node:path';
 
-import type {Result} from '@fuzdev/fuz_util/result.js';
-import {fs_classify_error, type FsError} from '@fuzdev/fuz_util/fs.js';
+import type {Result} from '@fuzdev/fuz_util/result.ts';
+import {fs_classify_error, type FsError} from '@fuzdev/fuz_util/fs.ts';
 
-import type {CacheDeps} from './deps.js';
+import type {CacheDeps} from './deps.ts';
 
 /**
  * Wraps an async void-returning function, converting thrown errors to typed `FsError`.

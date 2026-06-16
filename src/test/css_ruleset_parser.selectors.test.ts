@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {split_selector_list, find_compound_end} from '$lib/css_ruleset_parser.js';
+import {split_selector_list, find_compound_end} from '$lib/css_ruleset_parser.ts';
 
 /**
  * Tests for selector parsing utilities: split_selector_list and find_compound_end.

@@ -5,9 +5,9 @@ import {
 	get_class_variables,
 	collect_class_variables,
 	get_classes_using_variable,
-} from '../lib/class_variable_index.js';
-import {css_class_definitions} from '../lib/css_class_definitions.js';
-import type {CssClassDefinition} from '../lib/css_class_generation.js';
+} from '$lib/class_variable_index.ts';
+import {css_class_definitions} from '$lib/css_class_definitions.ts';
+import type {CssClassDefinition} from '$lib/css_class_generation.ts';
 
 describe('build_class_variable_index', () => {
 	test('declaration with variable', () => {

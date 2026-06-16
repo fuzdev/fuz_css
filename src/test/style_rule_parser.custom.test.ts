@@ -12,7 +12,7 @@ import {
 	create_style_rule_index,
 	get_matching_rules,
 	generate_base_css,
-} from '../lib/style_rule_parser.js';
+} from '$lib/style_rule_parser.ts';
 
 describe('create_style_rule_index', () => {
 	describe('basic parsing', () => {

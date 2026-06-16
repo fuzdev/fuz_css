@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {modify_single_selector, modify_selector_group} from '$lib/css_ruleset_parser.js';
+import {modify_single_selector, modify_selector_group} from '$lib/css_ruleset_parser.ts';
 
 /**
  * Tests for selector modification: modify_single_selector and modify_selector_group.

@@ -1,13 +1,13 @@
 import {test, describe} from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.js';
+import {extract_from_svelte} from '$lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,
 	assert_no_classes,
 	assert_diagnostic,
 	assert_diagnostic_count,
-} from './css_class_extractor_test_helpers.js';
+} from './css_class_extractor_test_helpers.ts';
 
 describe('basic string class attributes', () => {
 	const string_attr_cases = [

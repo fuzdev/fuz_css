@@ -1,7 +1,7 @@
 import type {Gen} from '@fuzdev/gro';
 
-import {default_themes} from './themes.js';
-import {render_theme_style} from './theme.js';
+import {default_themes} from './themes.ts';
+import {render_theme_style} from './theme.ts';
 
 // TODO maybe this should be `base_theme.css` or `base.css` or something,
 // and we could also generate and publish the other themes --

@@ -9,7 +9,7 @@
  * @module
  */
 
-import {escape_regexp} from '@fuzdev/fuz_util/regexp.js';
+import {escape_regexp} from '@fuzdev/fuz_util/regexp.ts';
 import {parseCss, type AST} from 'svelte/compiler';
 
 //

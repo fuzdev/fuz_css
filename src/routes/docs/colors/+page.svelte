@@ -1,15 +1,15 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.js';
+	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
-	import HueSwatch from '$routes/docs/colors/HueSwatch.svelte';
-	import ColorSwatch from '$routes/docs/colors/ColorSwatch.svelte';
-	import {color_variants} from '$lib/variable_data.js';
+	import HueSwatch from './HueSwatch.svelte';
+	import ColorSwatch from './ColorSwatch.svelte';
+	import {color_variants} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 

@@ -16,9 +16,9 @@ import type {
 	CssOutputOptions,
 	CssDiagnosticsOptions,
 	CssCacheOptions,
-} from '../lib/css_plugin_options.js';
-import type {GenFuzCssOptions} from '../lib/gen_fuz_css.js';
-import type {VitePluginFuzCssOptions} from '../lib/vite_plugin_fuz_css.js';
+} from '$lib/css_plugin_options.ts';
+import type {GenFuzCssOptions} from '$lib/gen_fuz_css.ts';
+import type {VitePluginFuzCssOptions} from '$lib/vite_plugin_fuz_css.ts';
 
 describe('shared options interface', () => {
 	test('CssGeneratorBaseOptions includes all expected interfaces', () => {

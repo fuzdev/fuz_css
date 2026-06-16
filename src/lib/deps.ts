@@ -38,8 +38,8 @@
  * @module
  */
 
-import type {Result} from '@fuzdev/fuz_util/result.js';
-import type {FsError} from '@fuzdev/fuz_util/fs.js';
+import type {Result} from '@fuzdev/fuz_util/result.ts';
+import type {FsError} from '@fuzdev/fuz_util/fs.ts';
 
 export type {FsError};
 

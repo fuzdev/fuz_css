@@ -5,7 +5,7 @@ import {
 	is_single_selector_ruleset,
 	ruleset_contains_class,
 	extract_css_comment,
-} from '$lib/css_ruleset_parser.js';
+} from '$lib/css_ruleset_parser.ts';
 
 /**
  * Tests for parse_ruleset and related ruleset analysis functions.

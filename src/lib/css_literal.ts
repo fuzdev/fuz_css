@@ -11,10 +11,10 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.js';
+import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
 
-import {type InterpreterDiagnostic} from './diagnostics.js';
-import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.js';
+import {type InterpreterDiagnostic} from './diagnostics.ts';
+import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.ts';
 
 //
 // Types

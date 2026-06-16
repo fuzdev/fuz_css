@@ -7,8 +7,8 @@
  * @module
  */
 
-import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.js';
-import type {ExtractionData} from './css_class_extractor.js';
+import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.ts';
+import type {ExtractionData} from './css_class_extractor.ts';
 
 /**
  * Collection of CSS classes extracted from source files.

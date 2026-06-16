@@ -8,29 +8,29 @@
  */
 
 import {join} from 'node:path';
-import type {Gen} from '@fuzdev/gro/gen.js';
-import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.js';
+import type {Gen} from '@fuzdev/gro/gen.ts';
+import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.ts';
 
-import {filter_file_default} from './file_filter.js';
-import {type ExtractionData, has_extraction_data} from './css_class_extractor.js';
-import {format_diagnostic, CssGenerationError} from './diagnostics.js';
-import {CssClasses} from './css_classes.js';
-import {generate_css} from './generate_css.js';
-import {create_bundled_resources, type BundledCssResources} from './bundled_resources.js';
-import {extract_file_cached} from './extract_file_cached.js';
-import {merge_class_definitions} from './css_class_definitions.js';
-import {css_class_interpreters} from './css_class_interpreters.js';
-import {load_css_properties} from './css_literal.js';
+import {filter_file_default} from './file_filter.ts';
+import {type ExtractionData, has_extraction_data} from './css_class_extractor.ts';
+import {format_diagnostic, CssGenerationError} from './diagnostics.ts';
+import {CssClasses} from './css_classes.ts';
+import {generate_css} from './generate_css.ts';
+import {create_bundled_resources, type BundledCssResources} from './bundled_resources.ts';
+import {extract_file_cached} from './extract_file_cached.ts';
+import {merge_class_definitions} from './css_class_definitions.ts';
+import {css_class_interpreters} from './css_class_interpreters.ts';
+import {load_css_properties} from './css_literal.ts';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
 	save_cached_extraction,
 	delete_cached_extraction,
-} from './css_cache.js';
-import {default_cache_deps} from './deps_defaults.js';
-import {get_all_variable_names} from './variable_graph.js';
-import {extract_css_variables} from './css_variable_utils.js';
-import type {CssGeneratorBaseOptions} from './css_plugin_options.js';
+} from './css_cache.ts';
+import {default_cache_deps} from './deps_defaults.ts';
+import {get_all_variable_names} from './variable_graph.ts';
+import {extract_css_variables} from './css_variable_utils.ts';
+import type {CssGeneratorBaseOptions} from './css_plugin_options.ts';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).

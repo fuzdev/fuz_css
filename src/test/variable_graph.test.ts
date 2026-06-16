@@ -8,8 +8,8 @@ import {
 	get_all_variable_names,
 	has_variable,
 	find_similar_variable,
-} from '../lib/variable_graph.js';
-import type {StyleVariable} from '../lib/variable.js';
+} from '$lib/variable_graph.ts';
+import type {StyleVariable} from '$lib/variable.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {

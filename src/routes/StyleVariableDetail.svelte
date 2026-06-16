@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type {StyleVariable} from '$lib/variable.js';
+	import type {StyleVariable} from '$lib/variable.ts';
 
 	const {
 		variable,

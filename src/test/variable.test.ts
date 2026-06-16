@@ -1,6 +1,6 @@
 import {test, assert, describe} from 'vitest';
 
-import {StyleVariable, StyleVariableName} from '$lib/variable.js';
+import {StyleVariable, StyleVariableName} from '$lib/variable.ts';
 
 describe('StyleVariable', () => {
 	describe('valid schemas', () => {
