@@ -415,9 +415,13 @@ export const generate_classes_css = (
 					diagnostics.push({
 						phase: 'generation',
 						level: 'warning',
-						message: `Ruleset "${c}" has a single selector and could be converted to declaration format for modifier support`,
+						message: `Ruleset "${
+							c
+						}" has a single selector and could be converted to declaration format for modifier support`,
 						identifier: c,
-						suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations.replace(/\s+/g, ' ').trim()}' }`,
+						suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations
+							.replace(/\s+/g, ' ')
+							.trim()}' }`,
 						locations: class_locations?.get(c) ?? null,
 					});
 				}

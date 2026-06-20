@@ -87,8 +87,8 @@
 						/>
 					</label>
 					<p>
-						More info can be included in <code>{'<'}p></code> tags like this one. Here we could include
-						info about passwords.
+						More info can be included in <code>{'<'}p></code> tags like this one. Here we could
+						include info about passwords.
 					</p>
 					<label class:disabled={created_account}>
 						<div class="title">lifestory</div>
@@ -210,9 +210,9 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			inputs and buttons, adjusting height and padding. Apply directly or on a container to cascade to
-			children.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code
+			> scale inputs and buttons, adjusting height and padding. Apply directly or on a container to
+			cascade to children.
 		</p>
 		<Code
 			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}

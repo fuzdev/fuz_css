@@ -41,8 +41,8 @@
 		<p>
 			fuz_css provides color <TomeLink slug="variables" /> that adapt to the
 			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each
-			<TomeLink slug="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity variants
-			(00-100).
+			<TomeLink slug="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity
+			variants (00-100).
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
@@ -53,8 +53,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<p>
-			Hue variables contain a single <MdnLink path="Web/CSS/hue" /> number. Each color variable combines
-			a hue variable with saturation and lightness values for light and dark modes.
+			Hue variables contain a single <MdnLink path="Web/CSS/hue" /> number. Each color variable
+			combines a hue variable with saturation and lightness values for light and dark modes.
 		</p>
 		<p>
 			Hue variables therefore provide a single source of truth that's easy to theme, but to achieve
@@ -86,8 +86,8 @@
 		</p>
 		<p>
 			Unlike the <TomeLink slug="shading">shade</TomeLink> and
-			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate), color
-			variables can be used for both text and backgrounds via utility classes:
+			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate),
+			color variables can be used for both text and backgrounds via utility classes:
 			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
 		<p>Each color exists in two forms:</p>
@@ -120,8 +120,9 @@
 		<TomeSection>
 			<TomeSectionHeader tag="h3" text="Absolute colors" />
 			<p>
-				Sometimes you need a color that <em>doesn't</em> adapt, like logos, charts, color-coded data,
-				or elements that must match across screenshots. Every adaptive color has two absolute variants:
+				Sometimes you need a color that <em>doesn't</em> adapt, like logos, charts, color-coded
+				data, or elements that must match across screenshots. Every adaptive color has two absolute
+				variants:
 			</p>
 			<ul>
 				<li><code>color_a_50_light</code> - the value used in light mode</li>

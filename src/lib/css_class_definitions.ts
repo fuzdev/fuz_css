@@ -116,7 +116,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string) => ({
 			name: `color_${hue}_${intensity}`,
-			css: `color: var(--color_${hue}_${intensity}); --text_color: var(--color_${hue}_${intensity});`,
+			css: `color: var(--color_${hue}_${intensity}); --text_color: var(--color_${hue}_${
+				intensity
+			});`,
 		}),
 		color_variants,
 		intensity_variants,
@@ -134,7 +136,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string, mode: string) => ({
 			name: `color_${hue}_${intensity}_${mode}`,
-			css: `color: var(--color_${hue}_${intensity}_${mode}); --text_color: var(--color_${hue}_${intensity}_${mode});`,
+			css: `color: var(--color_${hue}_${intensity}_${mode}); --text_color: var(--color_${hue}_${
+				intensity
+			}_${mode});`,
 		}),
 		color_variants,
 		intensity_variants,
@@ -194,7 +198,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string) => ({
 			name: `border_color_${hue}_${intensity}`,
-			css: `border-color: var(--color_${hue}_${intensity}); --border_color: var(--color_${hue}_${intensity});`,
+			css: `border-color: var(--color_${hue}_${intensity}); --border_color: var(--color_${hue}_${
+				intensity
+			});`,
 		}),
 		color_variants,
 		intensity_variants,
@@ -205,7 +211,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(hue: string, intensity: string) => ({
 			name: `outline_color_${hue}_${intensity}`,
-			css: `outline-color: var(--color_${hue}_${intensity}); --outline_color: var(--color_${hue}_${intensity});`,
+			css: `outline-color: var(--color_${hue}_${intensity}); --outline_color: var(--color_${hue}_${
+				intensity
+			});`,
 		}),
 		color_variants,
 		intensity_variants,

@@ -49,8 +49,8 @@
 	<section>
 		<p>
 			fuz_css provides four semantic shadow types that build on the light model in the
-			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
-			light emphasis, and shroud for dark overlays.
+			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow
+			for light emphasis, and shroud for dark overlays.
 		</p>
 	</section>
 	<TomeSection>
@@ -102,8 +102,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
-			controls the color's prominence -- 60 is a fine starting point for visible colored shadows.
+			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The
+			intensity controls the color's prominence -- 60 is a fine starting point for visible colored
+			shadows.
 		</p>
 		{#each color_variants as color_variant (color_variant)}
 			<TomeSection>

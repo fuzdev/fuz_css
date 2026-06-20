@@ -152,10 +152,14 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 		if (include_stats && resolution.stats && log) {
 			log.info(
-				`[css_resolution] Elements: ${resolution.stats.element_count} (${resolution.stats.elements.join(', ')})`,
+				`[css_resolution] Elements: ${
+					resolution.stats.element_count
+				} (${resolution.stats.elements.join(', ')})`,
 			);
 			log.info(
-				`[css_resolution] Rules: ${resolution.stats.included_rules} of ${resolution.stats.total_rules}`,
+				`[css_resolution] Rules: ${resolution.stats.included_rules} of ${
+					resolution.stats.total_rules
+				}`,
 			);
 			log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
 		}

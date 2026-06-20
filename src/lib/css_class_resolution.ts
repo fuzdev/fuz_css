@@ -240,7 +240,9 @@ export const resolve_composes = (
 									level: 'error',
 									identifier: original_class_name,
 									message: `Unknown modifier "${failed_prop}" with class "${potential_class}"`,
-									suggestion: `Did you mean "${corrected}"? Note: modified classes cannot be used in composes`,
+									suggestion: `Did you mean "${
+										corrected
+									}"? Note: modified classes cannot be used in composes`,
 								},
 							};
 						}

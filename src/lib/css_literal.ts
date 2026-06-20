@@ -404,7 +404,9 @@ export const extract_and_validate_modifiers = (
 							ok: false,
 							error: {
 								level: 'error',
-								message: `State modifiers must be in alphabetical order: "${prev.name}:${segment}" should be "${segment}:${prev.name}"`,
+								message: `State modifiers must be in alphabetical order: "${prev.name}:${
+									segment
+								}" should be "${segment}:${prev.name}"`,
 								identifier: class_name,
 								suggestion: `Reorder to: ...${segment}:${prev.name}:...`,
 							},

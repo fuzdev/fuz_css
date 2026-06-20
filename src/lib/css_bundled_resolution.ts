@@ -277,7 +277,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				diagnostics.push({
 					phase: 'generation',
 					level: 'error',
-					message: `@fuz-elements: No style rules found for element "${element}"${similar ? ` - did you mean "${similar}"?` : ''}`,
+					message: `@fuz-elements: No style rules found for element "${element}"${
+						similar ? ` - did you mean "${similar}"?` : ''
+					}`,
 					suggestion: similar
 						? `Check spelling. Similar element: ${similar}`
 						: 'Element has no fuz_css styles. Remove from @fuz-elements or add custom styles.',
@@ -298,7 +300,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				diagnostics.push({
 					phase: 'generation',
 					level: 'error',
-					message: `@fuz-variables: No theme variable found for "${variable}"${similar ? ` - did you mean "${similar}"?` : ''}`,
+					message: `@fuz-variables: No theme variable found for "${variable}"${
+						similar ? ` - did you mean "${similar}"?` : ''
+					}`,
 					suggestion: similar
 						? `Check spelling. Similar variable: ${similar}`
 						: 'Variable does not exist in the theme. Remove from @fuz-variables.',
@@ -364,7 +368,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				diagnostics.push({
 					phase: 'generation',
 					level: 'warning',
-					message: `Variable "--${v}" is referenced by included styles but excluded via exclude_variables - references to it will be undefined`,
+					message: `Variable "--${
+						v
+					}" is referenced by included styles but excluded via exclude_variables - references to it will be undefined`,
 					suggestion: 'Remove it from exclude_variables, or define the variable elsewhere.',
 					identifier: v,
 					locations: null,

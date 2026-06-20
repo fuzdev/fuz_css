@@ -241,8 +241,8 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.md</code>
-			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
-			defaults. Use it inside a sized container to restore normal sizing for a subtree.
+			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to
+			the defaults. Use it inside a sized container to restore normal sizing for a subtree.
 		</p>
 		<Code
 			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}

@@ -103,7 +103,9 @@ export const create_generation_diagnostic = (
 export const format_diagnostic = (d: Diagnostic): string => {
 	const suggestion = d.suggestion ? ` (${d.suggestion})` : '';
 	if (d.phase === 'extraction') {
-		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: ${d.message}${suggestion}`;
+		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: ${d.message}${
+			suggestion
+		}`;
 	}
 	const loc = d.locations?.[0];
 	const location_str = loc ? `${loc.file}:${loc.line}:${loc.column}: ` : '';

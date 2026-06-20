@@ -66,8 +66,8 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			chips up and down, adjusting font and padding.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code
+			> scale chips up and down, adjusting font and padding.
 		</p>
 		<Code
 			content={`<span class="chip xs">xs</span>\n<span class="chip sm">sm</span>\n<span class="chip">md</span>\n<span class="chip lg">lg</span>\n<span class="chip xl">xl</span>`}

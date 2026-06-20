@@ -58,8 +58,8 @@
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
 			variables your code uses are emitted, along with any they depend on. The full
-			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode and
-			direct imports.
+			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode
+			and direct imports.
 		</p>
 	</section>
 	<section>
