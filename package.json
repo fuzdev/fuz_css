@@ -70,7 +70,7 @@
     "@changesets/changelog-git": "^0.2.1",
     "@fuzdev/blake3_wasm": "^0.1.1",
     "@fuzdev/fuz_code": "^0.46.1",
-    "@fuzdev/fuz_ui": "^0.205.3",
+    "@fuzdev/fuz_ui": "^0.205.4",
     "@fuzdev/fuz_util": "^0.65.2",
     "@fuzdev/gro": "^0.206.0",
     "@fuzdev/mdz": "^0.1.0",
