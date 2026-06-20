@@ -1,0 +1,1 @@
+var e=`calc(60px + var(--space_lg))`;export{e as t};
