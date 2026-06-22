@@ -1,0 +1,1 @@
+import{t as e}from"../chunks/BeA96Smk.js";export{e as component};

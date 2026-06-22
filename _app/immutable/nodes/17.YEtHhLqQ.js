@@ -1,1 +1,0 @@
-import{t as e}from"../chunks/q7-49xJI.js";export{e as component};
