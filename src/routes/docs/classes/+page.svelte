@@ -1489,10 +1489,10 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Framework support" />
 		<p>
-			fuz_css is Svelte-first, but the base styles (<ModuleLink module_path="style.css" />,
-			<ModuleLink module_path="theme.css" />) work with any framework and plain HTML. The utility
-			class generator has varying
-			<a href="#Class-detection">detection</a> support:
+			fuz_css ships two plain CSS files, the base <ModuleLink module_path="style.css" /> and
+			<ModuleLink module_path="theme.css" />, that work with any framework and plain HTML. The
+			utility class generator's
+			<a href="#Class-detection">detection</a> support varies by framework:
 		</p>
 		<table>
 			<thead>
@@ -1504,14 +1504,14 @@ export const gen = gen_fuz_css({
 			</thead>
 			<tbody>
 				<tr>
-					<td>Svelte</td>
-					<td>full</td>
-					<td>all patterns including <code>class:</code> directives and array/object syntax</td>
-				</tr>
-				<tr>
 					<td>plain HTML</td>
 					<td>full</td>
 					<td>static <code>class="..."</code> attributes, script variables</td>
+				</tr>
+				<tr>
+					<td>Svelte</td>
+					<td>full</td>
+					<td>all patterns including <code>class:</code> directives and array/object syntax</td>
 				</tr>
 				<tr>
 					<td>React / JSX</td>
