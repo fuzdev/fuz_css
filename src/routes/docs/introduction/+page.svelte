@@ -87,7 +87,7 @@ import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\`
 				</li>
 				<li>
 					the stylesheets work with any framework and plain HTML; utility class generation supports
-					Svelte, JSX, and TypeScript/JS -- see the utility class
+					HTML/JS/TS, Svelte, and JSX -- see the utility class
 					<TomeLink slug="classes" hash="Framework-support">framework support</TomeLink>, and for
 					the companion Svelte integration see
 					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in
