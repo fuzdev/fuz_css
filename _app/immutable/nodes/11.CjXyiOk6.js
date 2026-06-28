@@ -1,1 +1,0 @@
-import{t as e}from"../chunks/ChYFeG64.js";export{e as component};
