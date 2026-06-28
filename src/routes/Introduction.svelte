@@ -7,9 +7,9 @@
 <p>
 	fuz_css is a CSS framework and design system for semantic HTML. It styles elements by default and
 	integrates custom properties, themes, and utility classes into a complete system. It ships two
-	plain CSS files, the base <code>style.css</code> and <code>theme.css</code>, that work with any
-	framework and plain HTML, and its class generator supports HTML/JS/TS, Svelte, React, Preact,
-	Solid, and other JSX frameworks. For more see the
+	plain CSS files, the base <code>style.css</code> and replaceable <code>theme.css</code>, that work
+	with any framework and plain HTML, and its class generator supports HTML/JS/TS, Svelte, React,
+	Preact, Solid, and other JSX frameworks. For more see the
 	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support</a> docs, and for
 	the companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.
 </p>
