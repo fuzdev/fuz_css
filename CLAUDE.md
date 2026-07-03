@@ -54,6 +54,26 @@ fuz_css is a **CSS framework and design system**:
 
 ## Design decisions
 
+### Styling philosophy
+
+**Default element styling is the baseline — reach past it only with a
+reason.** fuz_css styles semantic HTML out of the box, so most content needs
+no classes: headings are tiered, form controls share sizing and focus states,
+and block elements (`p`, `ul`, `ol`, `table`, `aside`, `blockquote`, `pre`,
+`fieldset`, …) get vertical rhythm automatically from the **flow-margin**
+system — each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
+`:last-child` or `.unstyled`, and margins reset to 0 on the direct children of
+a `.row` (horizontal flex; use `gap_*` there instead). Adding a
+`mb_*`/`gap_*`/`p_*` class or a `<style>` block
+should answer "what specific gap in the defaults does this close?" — the most
+common misuse is hand-spacing elements that flow margin already spaces, or
+re-declaring typography/color the element already carries. When you do style,
+work down the ladder and stop at the first rung that suffices: right semantic
+element → built-in class convention (`.selected`, `.color_a`) → composite
+(`box`, `row`, `panel`) → token class (`p_md`, `gap_lg`) → literal
+(`display:flex`) → `<style>` block with design tokens. Never hardcode spacing
+or color values.
+
 ### Two core concepts
 
 1. **Semantic styles** - The reset stylesheet styles HTML elements (buttons,
