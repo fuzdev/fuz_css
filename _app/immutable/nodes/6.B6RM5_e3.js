@@ -1,0 +1,1 @@
+import{t as e}from"../chunks/CG_Hrn8d.js";export{e as component};
