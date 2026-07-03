@@ -1,0 +1,1 @@
+import{t as e}from"../chunks/BPrY3vmu.js";export{e as component};
