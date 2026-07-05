@@ -111,7 +111,7 @@
 				content={`// vite.config.ts
 import {defineConfig} from 'vite';
 import {sveltekit} from '@sveltejs/kit/vite';
-import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
 
 export default defineConfig({
   plugins: [sveltekit(), vite_plugin_fuz_css()],
@@ -230,7 +230,7 @@ declare module 'virtual:fuz.css' {
 			<Code
 				lang="ts"
 				content={`// src/routes/fuz.gen.css.ts for SvelteKit, or src/fuz.gen.css.ts, etc.
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.ts';
 
 export const gen = gen_fuz_css();`}
 			/>
@@ -380,7 +380,7 @@ const color = get_dynamic_color();`}
 				lang="svelte"
 				content={'<' +
 					`script>
-	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.js';
+	import {shadow_alpha_variants} from '@fuzdev/fuz_css/variable_data.ts';
 
 	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 ... shadow_alpha_100
 </script>
@@ -455,7 +455,7 @@ const el = document.createElement('dialog');`}
 				lang="svelte"
 				content={'<' +
 					`script>
-	import {shade_scale_variants} from '@fuzdev/fuz_css/variable_data.js';
+	import {shade_scale_variants} from '@fuzdev/fuz_css/variable_data.ts';
 
 	// @fuz-variables shade_min shade_00 shade_05 shade_10 ... shade_100 shade_max
 </script>
@@ -988,7 +988,7 @@ vite_plugin_fuz_css({
 			</p>
 			<Code
 				lang="ts"
-				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.js';
+				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.ts';
 
 export const custom_composites: Record<string, CssClassDefinition> = {
 	// 1. \`declaration\` only - custom CSS properties
@@ -1608,7 +1608,7 @@ export const gen = gen_fuz_css({
 				content={`// vite.config.ts
 import {defineConfig} from 'vite';
 import jsx from 'acorn-jsx';
-import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.js';
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
 
 export default defineConfig({
   plugins: [
@@ -1622,7 +1622,7 @@ export default defineConfig({
 			<Code
 				lang="ts"
 				content={`// fuz.gen.css.ts
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.js';
+import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.ts';
 import jsx from 'acorn-jsx';
 
 export const gen = gen_fuz_css({
@@ -1681,7 +1681,7 @@ const Component = () => <div className={styles} />;`}
 		</p>
 		<Code
 			lang="ts"
-			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_generation.js';
+			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_generation.ts';
 
 // Example: grid-cols-N classes like "grid-cols-4"
 // Unlike composites, interpreters can parameterize values
@@ -1705,7 +1705,7 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
 			lang="ts"
-			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.js';
+			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.ts';
 
 vite_plugin_fuz_css({
   class_interpreters: [grid_cols_interpreter, ...css_class_interpreters],

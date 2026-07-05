@@ -1,4 +1,4 @@
-import {createSignal, For} from 'solid-js';
+import {createSignal} from 'solid-js';
 
 // Import from node_modules to verify extraction works for dependencies
 import {
@@ -23,7 +23,7 @@ import {
 	objectClasses,
 	// Comment hint examples
 	fromComment,
-} from '@fuzdev/fuz_css/example_class_utilities.js';
+} from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 export const App = () => {
 	const [count, setCount] = createSignal(0);

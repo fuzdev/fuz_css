@@ -46,7 +46,7 @@ export const CSS_CACHE_VERSION = 6;
 export interface CachedExtraction {
 	/** Cache version - invalidates cache when bumped */
 	v: number;
-	/** SHA-256 hash of the source file contents */
+	/** Content hash of the source file (BLAKE3 via `hash_blake3`) */
 	content_hash: string;
 	/** Classes as [name, locations] tuples, or null if none */
 	classes: Array<[string, Array<SourceLocation>]> | null;
@@ -140,7 +140,7 @@ export const load_cached_extraction = async (
  *
  * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
- * @param content_hash - SHA-256 hash of the source file contents
+ * @param content_hash - content hash of the source file contents
  * @param extraction - extraction data to cache
  */
 export const save_cached_extraction = async (

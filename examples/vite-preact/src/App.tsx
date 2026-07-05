@@ -23,7 +23,7 @@ import {
 	objectClasses,
 	// Comment hint examples
 	fromComment,
-} from '@fuzdev/fuz_css/example_class_utilities.js';
+} from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 export const App = () => {
 	const [count, setCount] = useState(0);

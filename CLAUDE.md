@@ -3,8 +3,11 @@
 > CSS framework and design system for semantic HTML
 
 fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
-custom properties, themes, and utility classes into a complete system.
-Early alpha with breaking changes ahead.
+custom properties, themes, and utility classes into a complete system. It
+ships two plain CSS files — the base `style.css` and replaceable `theme.css` —
+that work with any framework and plain HTML, and its class generator supports
+HTML/JS/TS, Svelte, and JSX (React/Preact/Solid). Early alpha with breaking
+changes ahead.
 
 For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
@@ -35,6 +38,8 @@ dev server.
 - @sveltejs/acorn-typescript, acorn-jsx, zimmerframe - AST parsing and walking
 - zod - schema validation
 - @webref/css - CSS property validation
+- @fuzdev/blake3_wasm - BLAKE3 content hashing for cache validation (optional
+  peer, via fuz_util's `hash_blake3`)
 - fuz_util (@fuzdev/fuz_util) - utility functions
 
 ## Scope
@@ -115,8 +120,10 @@ Two generators available, both using AST-based extraction and per-file caching:
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
-Both output only CSS for classes actually used. Supports Svelte 5.16+ class
-syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment hints.
+Both funnel through the shared `generate_css` pipeline (generate → resolve →
+bundle) and output only CSS for classes actually used. Supports Svelte 5.16+
+class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment
+hints.
 
 **Comment hints for static extraction:** The AST extractor cannot detect dynamic
 class names or elements. Use comment hints to explicitly include them:
@@ -142,8 +149,10 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
-  from the `md` default; `md` doubles as a cascade reset), `icon_button`,
-  `plain`, `menuitem`, `chevron`, `chip`
+  from the `md` default; `md` doubles as a cascade reset; they scale controls
+  and spacing via `--flow_margin` — headings and prose keep their font sizes),
+  `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
+  `menuitem`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
@@ -249,6 +258,17 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 - `exclude_classes` - Classes to exclude from output
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme
+- `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
+  diagnostic handling; warnings flag configs that leave dangling `var()`
+  references (`base_css` enabled with `variables: null`, or excluding a
+  variable that shipped styles still reference)
+- `filter_file` - which files get extracted (the default filter includes
+  node_modules deps)
+- `cache_dir` - extraction cache location (default `.fuz/cache/css`)
+
+These are the common options — see
+[css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
+(class definitions and interpreters, theme specificity, acorn plugins, deps).
 
 ## Docs
 
@@ -285,6 +305,12 @@ typography, borders, shading, shadows, layout. See
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
   (preferred) with HMR via `virtual:fuz.css`
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
+- [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
+  (generate → resolve → bundle) used by both generators
+- [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
+  resources (style-rule index, variable graph, class→variable index)
+- [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
+  single-file extraction shared by both generators
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
   for Gro/Vite generators
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
@@ -342,14 +368,15 @@ Tests use dot-separated aspect splitting. Major test suites:
 
 - `css_class_extractor.{test,elements,expressions,jsx,locations,tracked_vars,typescript,utilities}.test.ts`
 - `css_bundled_resolution.{test,diagnostics,variables}.test.ts`
-- `css_ruleset_parser.{test,generation,modifiers,parse,selectors}.test.ts`
+- `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
 - `style_rule_parser.{test,custom}.test.ts`
 
 Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
 `variables`, `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
-`fuz_comments`, `generate_bundled_css`, `generate_classes_css`, and more.
+`fuz_comments`, `generate_bundled_css`, `generate_classes_css`, `generate_css`,
+and more.
 
 Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
@@ -364,13 +391,17 @@ Integration: `vite_plugin_examples.test.ts` (skip with
   progress
 - **CSS Cascade Layers** - `@layer` support under consideration but not yet
   implemented
+- **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
+  will likely become toggles), element/table styles, the shadows system,
+  opaque border classes, and table cell padding that doesn't yet respond to
+  size composites
 
 ## Project standards
 
 - TypeScript strict mode
 - Svelte 5 with runes API (for docs site)
 - Prettier with tabs, 100 char width
-- Node >= 22.15
+- Node >= 24.14
 - Tests in `src/test/` (not co-located)
 
 ## Related projects

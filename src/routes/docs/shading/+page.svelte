@@ -75,8 +75,8 @@
 					dark mode; used for input backgrounds
 				</li>
 				<li><code>shade_00</code>: the base background</li>
-				<li><code>shade_05</code>: very subtle: hover states on surface</li>
-				<li><code>shade_10</code>: subtle elevation: panels, cards, aside, blockquote, code</li>
+				<li><code>shade_05</code>: very subtle: hover states on surface, code backgrounds</li>
+				<li><code>shade_10</code>: subtle elevation: panels, cards, aside</li>
 				<li><code>shade_20</code>: more elevated: active/pressed states</li>
 				<li><code>shade_30</code>: default border intensity</li>
 				<li><code>shade_100</code>: maximum tinted contrast</li>
