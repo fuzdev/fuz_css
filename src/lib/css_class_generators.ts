@@ -242,7 +242,7 @@ export const generate_shadow_classes = (
 			name: `${type.prefix}_${size}`,
 			css: `box-shadow: var(--${type.var_prefix}_${
 				size
-			}) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${
+			}) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${
 				alpha_mapping[size]
 			})), transparent);`,
 		}),

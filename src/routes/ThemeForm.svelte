@@ -14,7 +14,7 @@
 
 	// TODO should this be merged with `ThemeInput`?
 
-	// TODO add UI to change the tint hue/saturation
+	// TODO add UI to change the neutral hue/chroma
 
 	const {
 		theme = null,
@@ -34,9 +34,7 @@
 
 	const new_theme: Theme = $derived({name: new_name, variables: new_variables});
 
-	const code = $derived(
-		render_theme_style(new_theme, {empty_default_theme: false, specificity: 1}),
-	);
+	const code = $derived(render_theme_style(new_theme, {empty_default_theme: false}));
 
 	const light_count = $derived(new_variables.reduce((c, v) => (v.light ? c + 1 : c), 0));
 	const dark_count = $derived(new_variables.reduce((c, v) => (v.dark ? c + 1 : c), 0));

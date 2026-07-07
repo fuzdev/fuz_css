@@ -24,10 +24,12 @@ export const gen: Gen = ({origin_path}) => {
  */`;
 
 	const theme = default_themes[0]!;
+	// the default theme's variables are the system's defaults, so they render
+	// into the base layer; runtime theme overrides beat them from fuz.theme
 	const theme_style = render_theme_style(theme, {
 		comments: true,
 		empty_default_theme: false,
-		specificity: 1,
+		layer: 'fuz.base',
 	});
 
 	return `${banner}

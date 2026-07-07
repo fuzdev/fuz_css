@@ -74,7 +74,7 @@ should answer "what specific gap in the defaults does this close?" — the most
 common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,
 work down the ladder and stop at the first rung that suffices: right semantic
-element → built-in class convention (`.selected`, `.color_a`) → composite
+element → built-in class convention (`.selected`, `.palette_a`) → composite
 (`box`, `row`, `panel`) → token class (`p_md`, `gap_lg`) → literal
 (`display:flex`) → `<style>` block with design tokens. Never hardcode spacing
 or color values.
@@ -107,8 +107,13 @@ combined and only used content is included. In utility-only mode, import
   tokens
 - Each variable can have `light` and/or `dark` values
 - Light/dark are color-schemes _within_ a theme, not separate themes
-- [`render_theme_style()`](src/lib/theme.ts) generates CSS with specificity
-  multiplier
+- [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
+  `fuz.theme` cascade layer (defaults live in `fuz.base`, generated utility
+  classes in `fuz.utilities`; consumers' unlayered styles beat everything)
+- Color values are derived: curve knobs → ramp stops → color stops, computed
+  in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
+  emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
+  contrast gates in [oklch.ts](src/lib/oklch.ts)/[wcag.ts](src/lib/wcag.ts)
 
 ### Smart utility class generation
 
@@ -145,7 +150,7 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
 ### Three class types
 
-- **Token classes** - Map to style variables: `p_md`, `color_a_50`, `gap_lg`
+- **Token classes** - Map to style variables: `p_md`, `palette_a_50`, `gap_lg`
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
@@ -177,15 +182,26 @@ variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 See [variables.ts](src/lib/variables.ts) for definitions,
 [variable_data.ts](src/lib/variable_data.ts) for size/color variants.
 
-**Colors:**
+**Colors (OKLCH, derived):**
 
-- 10 hues with semantic roles: `a` (primary/blue), `b` (success/green), `c`
-  (error/red), `d` (secondary/purple), `e` (tertiary/yellow), `f` (muted/brown),
-  `g` (decorative/pink), `h` (caution/orange), `i` (info/cyan), `j`
-  (flourish/teal)
-- 13 intensity stops: `color_a_00` (lightest) through `color_a_100` (darkest),
-  with `_50` as the base (steps: 00, 05, 10, 20, 30, 40, 50, 60, 70, 80, 90,
-  95, 100)
+- 10 palette hues glossed by color + default role binding: `a` (blue ·
+  accent), `b` (green · positive), `c` (red · negative), `d` (purple), `e`
+  (yellow), `f` (brown · neutral), `g` (pink), `h` (orange · caution), `i`
+  (cyan · info), `j` (teal)
+- Semantic role knobs alias meaning over the letters: `--hue_accent`
+  (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
+  (all surfaces/text/borders/shadows), `--hue_positive`/`--hue_negative`/
+  `--hue_caution`/`--hue_info`; role stops (`--accent_50`, `--accent_60`,
+  `--negative_40/50`) derive through the shared ramps
+- Curve knobs drive everything: `--chroma_scale` (0 grayscale → >1 vivid),
+  `--hue_shift` (degrees of rotation across a ramp), per-scheme lightness
+  ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`
+  and `text_`), and the chroma curve
+  (`--palette_chroma_min`/`_max`/`_curve`) clamped per stop by baked
+  worst-hue sRGB gamut caps
+- 13 intensity stops: `palette_a_00` (nearest the background) through
+  `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
+  50, 60, 70, 80, 90, 95, 100)
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
 - `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
@@ -286,8 +302,17 @@ typography, borders, shading, shadows, layout. See
 - [variables.ts](src/lib/variables.ts) - All style variable definitions
 - [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
 - [variable_data.ts](src/lib/variable_data.ts) - Size, color, border variants
-- [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type
-- [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
+- [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
+  constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
+- [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
+  (design-time + tests only)
+- [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
+- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
+  `ColorScheme` type
+- [themes.ts](src/lib/themes.ts) - The curated theme registry
+- `src/lib/themes/` - One module per theme: base, low/high contrast,
+  terminal green (registered), plus unregistered exemplars (necromancer,
+  sunset ember, brutalist) and the `dark_only` helper
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 
@@ -386,7 +411,6 @@ Integration: `vite_plugin_examples.test.ts` (skip with
 - **Static extraction only** - Runtime dynamic classes (`document.createElement`,
   `innerHTML`) won't be detected. Use `additional_classes` option as workaround.
 - **No animation utilities** - Animation class generation not yet supported
-- **HSL color system** - OKLCH migration planned for better perceptual uniformity
 - **Button composites incomplete** - Some button variant classes are work in
   progress
 - **CSS Cascade Layers** - `@layer` support under consideration but not yet

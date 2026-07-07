@@ -27,16 +27,16 @@
 	// @fuz-classes shadow_xs shadow_sm shadow_md shadow_lg shadow_xl shadow_top_xs shadow_top_sm shadow_top_md shadow_top_lg shadow_top_xl shadow_bottom_xs shadow_bottom_sm shadow_bottom_md shadow_bottom_lg shadow_bottom_xl shadow_inset_xs shadow_inset_sm shadow_inset_md shadow_inset_lg shadow_inset_xl shadow_inset_top_xs shadow_inset_top_sm shadow_inset_top_md shadow_inset_top_lg shadow_inset_top_xl shadow_inset_bottom_xs shadow_inset_bottom_sm shadow_inset_bottom_md shadow_inset_bottom_lg shadow_inset_bottom_xl
 	// @fuz-classes shadow_alpha_00 shadow_alpha_05 shadow_alpha_10 shadow_alpha_20 shadow_alpha_30 shadow_alpha_40 shadow_alpha_50 shadow_alpha_60 shadow_alpha_70 shadow_alpha_80 shadow_alpha_90 shadow_alpha_95 shadow_alpha_100
 	// @fuz-classes shadow_color_umbra shadow_color_highlight shadow_color_glow shadow_color_shroud
-	// @fuz-classes shadow_color_a_00 shadow_color_a_05 shadow_color_a_10 shadow_color_a_20 shadow_color_a_30 shadow_color_a_40 shadow_color_a_50 shadow_color_a_60 shadow_color_a_70 shadow_color_a_80 shadow_color_a_90 shadow_color_a_95 shadow_color_a_100
-	// @fuz-classes shadow_color_b_00 shadow_color_b_05 shadow_color_b_10 shadow_color_b_20 shadow_color_b_30 shadow_color_b_40 shadow_color_b_50 shadow_color_b_60 shadow_color_b_70 shadow_color_b_80 shadow_color_b_90 shadow_color_b_95 shadow_color_b_100
-	// @fuz-classes shadow_color_c_00 shadow_color_c_05 shadow_color_c_10 shadow_color_c_20 shadow_color_c_30 shadow_color_c_40 shadow_color_c_50 shadow_color_c_60 shadow_color_c_70 shadow_color_c_80 shadow_color_c_90 shadow_color_c_95 shadow_color_c_100
-	// @fuz-classes shadow_color_d_00 shadow_color_d_05 shadow_color_d_10 shadow_color_d_20 shadow_color_d_30 shadow_color_d_40 shadow_color_d_50 shadow_color_d_60 shadow_color_d_70 shadow_color_d_80 shadow_color_d_90 shadow_color_d_95 shadow_color_d_100
-	// @fuz-classes shadow_color_e_00 shadow_color_e_05 shadow_color_e_10 shadow_color_e_20 shadow_color_e_30 shadow_color_e_40 shadow_color_e_50 shadow_color_e_60 shadow_color_e_70 shadow_color_e_80 shadow_color_e_90 shadow_color_e_95 shadow_color_e_100
-	// @fuz-classes shadow_color_f_00 shadow_color_f_05 shadow_color_f_10 shadow_color_f_20 shadow_color_f_30 shadow_color_f_40 shadow_color_f_50 shadow_color_f_60 shadow_color_f_70 shadow_color_f_80 shadow_color_f_90 shadow_color_f_95 shadow_color_f_100
-	// @fuz-classes shadow_color_g_00 shadow_color_g_05 shadow_color_g_10 shadow_color_g_20 shadow_color_g_30 shadow_color_g_40 shadow_color_g_50 shadow_color_g_60 shadow_color_g_70 shadow_color_g_80 shadow_color_g_90 shadow_color_g_95 shadow_color_g_100
-	// @fuz-classes shadow_color_h_00 shadow_color_h_05 shadow_color_h_10 shadow_color_h_20 shadow_color_h_30 shadow_color_h_40 shadow_color_h_50 shadow_color_h_60 shadow_color_h_70 shadow_color_h_80 shadow_color_h_90 shadow_color_h_95 shadow_color_h_100
-	// @fuz-classes shadow_color_i_00 shadow_color_i_05 shadow_color_i_10 shadow_color_i_20 shadow_color_i_30 shadow_color_i_40 shadow_color_i_50 shadow_color_i_60 shadow_color_i_70 shadow_color_i_80 shadow_color_i_90 shadow_color_i_95 shadow_color_i_100
-	// @fuz-classes shadow_color_j_00 shadow_color_j_05 shadow_color_j_10 shadow_color_j_20 shadow_color_j_30 shadow_color_j_40 shadow_color_j_50 shadow_color_j_60 shadow_color_j_70 shadow_color_j_80 shadow_color_j_90 shadow_color_j_95 shadow_color_j_100
+	// @fuz-classes shadow_palette_a_00 shadow_palette_a_05 shadow_palette_a_10 shadow_palette_a_20 shadow_palette_a_30 shadow_palette_a_40 shadow_palette_a_50 shadow_palette_a_60 shadow_palette_a_70 shadow_palette_a_80 shadow_palette_a_90 shadow_palette_a_95 shadow_palette_a_100
+	// @fuz-classes shadow_palette_b_00 shadow_palette_b_05 shadow_palette_b_10 shadow_palette_b_20 shadow_palette_b_30 shadow_palette_b_40 shadow_palette_b_50 shadow_palette_b_60 shadow_palette_b_70 shadow_palette_b_80 shadow_palette_b_90 shadow_palette_b_95 shadow_palette_b_100
+	// @fuz-classes shadow_palette_c_00 shadow_palette_c_05 shadow_palette_c_10 shadow_palette_c_20 shadow_palette_c_30 shadow_palette_c_40 shadow_palette_c_50 shadow_palette_c_60 shadow_palette_c_70 shadow_palette_c_80 shadow_palette_c_90 shadow_palette_c_95 shadow_palette_c_100
+	// @fuz-classes shadow_palette_d_00 shadow_palette_d_05 shadow_palette_d_10 shadow_palette_d_20 shadow_palette_d_30 shadow_palette_d_40 shadow_palette_d_50 shadow_palette_d_60 shadow_palette_d_70 shadow_palette_d_80 shadow_palette_d_90 shadow_palette_d_95 shadow_palette_d_100
+	// @fuz-classes shadow_palette_e_00 shadow_palette_e_05 shadow_palette_e_10 shadow_palette_e_20 shadow_palette_e_30 shadow_palette_e_40 shadow_palette_e_50 shadow_palette_e_60 shadow_palette_e_70 shadow_palette_e_80 shadow_palette_e_90 shadow_palette_e_95 shadow_palette_e_100
+	// @fuz-classes shadow_palette_f_00 shadow_palette_f_05 shadow_palette_f_10 shadow_palette_f_20 shadow_palette_f_30 shadow_palette_f_40 shadow_palette_f_50 shadow_palette_f_60 shadow_palette_f_70 shadow_palette_f_80 shadow_palette_f_90 shadow_palette_f_95 shadow_palette_f_100
+	// @fuz-classes shadow_palette_g_00 shadow_palette_g_05 shadow_palette_g_10 shadow_palette_g_20 shadow_palette_g_30 shadow_palette_g_40 shadow_palette_g_50 shadow_palette_g_60 shadow_palette_g_70 shadow_palette_g_80 shadow_palette_g_90 shadow_palette_g_95 shadow_palette_g_100
+	// @fuz-classes shadow_palette_h_00 shadow_palette_h_05 shadow_palette_h_10 shadow_palette_h_20 shadow_palette_h_30 shadow_palette_h_40 shadow_palette_h_50 shadow_palette_h_60 shadow_palette_h_70 shadow_palette_h_80 shadow_palette_h_90 shadow_palette_h_95 shadow_palette_h_100
+	// @fuz-classes shadow_palette_i_00 shadow_palette_i_05 shadow_palette_i_10 shadow_palette_i_20 shadow_palette_i_30 shadow_palette_i_40 shadow_palette_i_50 shadow_palette_i_60 shadow_palette_i_70 shadow_palette_i_80 shadow_palette_i_90 shadow_palette_i_95 shadow_palette_i_100
+	// @fuz-classes shadow_palette_j_00 shadow_palette_j_05 shadow_palette_j_10 shadow_palette_j_20 shadow_palette_j_30 shadow_palette_j_40 shadow_palette_j_50 shadow_palette_j_60 shadow_palette_j_70 shadow_palette_j_80 shadow_palette_j_90 shadow_palette_j_95 shadow_palette_j_100
 
 	// TODO duplicate shadows links
 </script>
@@ -59,7 +59,7 @@
 			Umbras are adaptive shadows that darken in light mode and lighten in dark mode. This is the
 			default shadow behavior, creating natural depth perception in both color schemes. In light
 			mode umbra is untinted (pure black); in dark mode it's tinted using
-			<code>tint_hue</code>/<code>tint_saturation</code>.
+			<code>hue_neutral</code>/<code>neutral_chroma</code>.
 		</p>
 		<form><ColorSchemeInput /></form>
 		{@render shadow_examples('umbra')}
@@ -68,8 +68,8 @@
 		<TomeSectionHeader text="Highlight" />
 		<p>
 			Highlights are adaptive shadows that lighten in light mode and darken in dark mode. In light
-			mode highlight is tinted using <code>tint_hue</code>/<code>tint_saturation</code>; in dark
-			mode it's untinted (pure black).
+			mode highlight is tinted using <code>hue_neutral</code>; in dark mode it's untinted (pure
+			black).
 		</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel fg_30 p_md">
@@ -80,7 +80,7 @@
 		<TomeSectionHeader text="Glow" />
 		<p>
 			Glows are non-adaptive shadows that lighten in both light and dark mode. Glow colors are
-			tinted using the theme's <code>tint_hue</code> and <code>tint_saturation</code>.
+			tinted using the theme's <code>hue_neutral</code>.
 		</p>
 		<form><ColorSchemeInput /></form>
 		<div class="panel darken_30 p_md">

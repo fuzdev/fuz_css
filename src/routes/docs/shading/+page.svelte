@@ -54,7 +54,7 @@
 				>shade_00</code
 			>
 			through <code>shade_100</code>) are tinted using the theme's
-			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion. The scale also
+			<code>hue_neutral</code> and <code>neutral_chroma</code> for visual cohesion. The scale also
 			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
 			contrast needs.
 		</p>

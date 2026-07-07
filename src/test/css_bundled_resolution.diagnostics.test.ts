@@ -225,7 +225,7 @@ describe('resolve_css diagnostics', () => {
 	describe('explicit variables (@fuz-variables)', () => {
 		test('emits error for explicit variable not in theme', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+				{name: 'palette_a_50', light: 'blue'},
 			]);
 
 			const result = resolve_css({
@@ -249,7 +249,7 @@ describe('resolve_css diagnostics', () => {
 
 		test('no error when explicit variable exists in theme', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+				{name: 'palette_a_50', light: 'blue'},
 				{name: 'shade_40', light: '#ccc'},
 			]);
 
@@ -260,14 +260,14 @@ describe('resolve_css diagnostics', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a_50', 'shade_40']),
+				detected_css_variables: new Set(['palette_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'shade_40']),
+				explicit_variables: new Set(['palette_a_50', 'shade_40']),
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 			// Valid explicit variables should be resolved
-			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('palette_a_50'));
 			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
@@ -297,7 +297,7 @@ describe('resolve_css diagnostics', () => {
 
 		test('errors for multiple explicit variables with mix of valid and invalid', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+				{name: 'palette_a_50', light: 'blue'},
 				{name: 'shade_40', light: '#ccc'},
 			]);
 
@@ -307,9 +307,9 @@ describe('resolve_css diagnostics', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a_50', 'shade_40']),
+				detected_css_variables: new Set(['palette_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2']),
+				explicit_variables: new Set(['palette_a_50', 'bad_var_1', 'shade_40', 'bad_var_2']),
 			});
 
 			// Only the 2 invalid variables produce errors
@@ -319,7 +319,7 @@ describe('resolve_css diagnostics', () => {
 			assert.isTrue(messages.some((m) => m.includes('bad_var_1')));
 			assert.isTrue(messages.some((m) => m.includes('bad_var_2')));
 			// Valid variables should still be resolved
-			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('palette_a_50'));
 			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
@@ -347,7 +347,7 @@ describe('resolve_css diagnostics', () => {
 
 		test('exclude_variables suppresses explicit_variables error', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+				{name: 'palette_a_50', light: 'blue'},
 			]);
 
 			const result = resolve_css({

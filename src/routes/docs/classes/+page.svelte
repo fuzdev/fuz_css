@@ -7,6 +7,7 @@
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {
 		space_variants,
 		color_variants,
@@ -320,7 +321,7 @@ import './fuz.css';`}
 			<Code
 				lang="ts"
 				content={`// extracted because of naming convention
-const buttonClasses = 'color_d font_size_lg';
+const buttonClasses = 'palette_d font_size_lg';
 const buttonClass = active ? 'active' : null;
 const snake_class = 'snake';
 const turtle_class_name = 'turtle';`}
@@ -341,7 +342,7 @@ const turtle_class_name = 'turtle';`}
 </script>
 
 <div class={styles}></div>
-<button class={clsx('color_d', variant)}></button>`}
+<button class={clsx('palette_d', variant)}></button>`}
 			/>
 			<p>
 				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
@@ -367,7 +368,7 @@ const turtle_class_name = 'turtle';`}
 				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
 const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 
-/* @fuz-classes color_a_50 color_b_50 color_c_50 */
+/* @fuz-classes palette_a_50 palette_b_50 palette_c_50 */
 const color = get_dynamic_color();`}
 			/>
 			<p>
@@ -398,7 +399,7 @@ const color = get_dynamic_color();`}
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>additional_classes</code>
 				produce errors if they can't be resolved. This helps catch typos like
-				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
+				<code>@fuz-classes palette_a_55</code> instead of <code>palette_a_50</code>.
 			</aside>
 			<p>
 				Alternatively, use the <DeclarationLink name="GenFuzCssOptions"
@@ -514,8 +515,10 @@ const el = document.createElement('dialog');`}
 			<li>used utility classes (always generated on demand; there's no full version)</li>
 		</ol>
 		<p>
-			Layers are emitted in that order, so variable definitions precede their use and utilities land
-			last to win over the low-specificity <code>:where()</code> reset.
+			Sections are emitted in that order inside <MdnLink path="Web/CSS/@layer" /> cascade layers:
+			defaults in <code>fuz.base</code>, theme overrides in <code>fuz.theme</code>, and utilities in
+			<code>fuz.utilities</code>, so utilities beat the reset by layer order (not specificity) and
+			your own unlayered styles beat everything.
 		</p>
 
 		<h4>Base styles</h4>
@@ -598,8 +601,8 @@ vite_plugin_fuz_css({
 				use
 				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
-			<Code content="<p class=&quot;pl_xl3 color_g_50&quot;>some token classes</p>" />
-			<p class="pl_xl3 color_g_50">some token classes</p>
+			<Code content="<p class=&quot;pl_xl3 palette_g_50&quot;>some token classes</p>" />
+			<p class="pl_xl3 palette_g_50">some token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -780,7 +783,7 @@ vite_plugin_fuz_css({
 				</li>
 			</ul>
 			<aside>
-				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
+				Color and text classes (<code>.palette_a_50</code>, <code>.text_70</code>, etc.) also set
 				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
 				<code>color: var(--text_color)</code> inherit the color properly.
 			</aside>
@@ -1065,7 +1068,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			</p>
 			<ul>
 				<li>
-					token classes (<code>p_lg</code>, <code>color_a_50</code>) - resolved to their
+					token classes (<code>p_lg</code>, <code>palette_a_50</code>) - resolved to their
 					declarations
 				</li>
 				<li>
@@ -1475,7 +1478,7 @@ export const gen = gen_fuz_css({
 			<li><code>.title</code> - see <TomeLink slug="forms" /></li>
 			<li><code>.row</code> - see <TomeLink slug="layout" />, <TomeLink slug="forms" /></li>
 			<li>
-				<code>.color_a</code> through <code>.color_j</code> - see <TomeLink slug="buttons" />,
+				<code>.palette_a</code> through <code>.palette_j</code> - see <TomeLink slug="buttons" />,
 				<TomeLink slug="colors" />
 			</li>
 			<li>
@@ -1573,7 +1576,7 @@ export const gen = gen_fuz_css({
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
-					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
+					<code>`palette_a_50 $&#123;base&#125;`</code> extracts <code>palette_a_50</code>, but
 					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
 					or

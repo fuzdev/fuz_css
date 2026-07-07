@@ -123,7 +123,7 @@ describe('is_possible_css_literal', () => {
 
 	test.each([
 		['opacity_50', 'underscore pattern'],
-		['color_a_50', 'underscore pattern'],
+		['palette_a_50', 'underscore pattern'],
 		['box', 'no colon'],
 		['p_md', 'underscore pattern'],
 		['', 'empty'],

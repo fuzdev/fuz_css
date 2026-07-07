@@ -642,13 +642,13 @@ describe('modified_class_interpreter', () => {
 	describe('state modifier ordering for cascade', () => {
 		test('hover classes come before active classes in output (LVFHA order)', () => {
 			const result = generate_classes_css({
-				class_names: ['active:border_color_a_50', 'hover:border_color_b_50'],
+				class_names: ['active:border_palette_a_50', 'hover:border_palette_b_50'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
 				css_properties: null,
 			});
 
-			assert_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
+			assert_css_order(result.css, '.hover\\:border_palette_b_50', '.active\\:border_palette_a_50');
 		});
 
 		test('visited < focus < hover < active ordering', () => {

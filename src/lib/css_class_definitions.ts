@@ -33,7 +33,6 @@ import {
 	shadow_semantic_values,
 	shadow_alpha_variants,
 	darken_lighten_variants,
-	color_scheme_variants,
 } from './variable_data.ts';
 import {css_class_composites} from './css_class_composites.ts';
 
@@ -95,15 +94,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--shade_${v})`,
 		'shade',
 	),
-	// Non-adaptive shade backgrounds (fixed to specific color scheme value)
-	...generate_classes(
-		(shade: string, mode: string) => ({
-			name: `shade_${shade}_${mode}`,
-			css: `background-color: var(--shade_${shade}_${mode});`,
-		}),
-		shade_variants,
-		color_scheme_variants,
-	),
 	// Hue classes
 	...generate_classes(
 		(hue: string) => ({
@@ -112,47 +102,25 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		color_variants,
 	),
-	// Color intensity classes (text color)
+	// Palette intensity classes (text color)
 	...generate_classes(
 		(hue: string, intensity: string) => ({
-			name: `color_${hue}_${intensity}`,
-			css: `color: var(--color_${hue}_${intensity}); --text_color: var(--color_${hue}_${
+			name: `palette_${hue}_${intensity}`,
+			css: `color: var(--palette_${hue}_${intensity}); --text_color: var(--palette_${hue}_${
 				intensity
 			});`,
 		}),
 		color_variants,
 		intensity_variants,
 	),
-	// Color intensity classes (background color)
+	// Palette intensity classes (background color)
 	...generate_classes(
 		(hue: string, intensity: string) => ({
 			name: `bg_${hue}_${intensity}`,
-			css: `background-color: var(--color_${hue}_${intensity});`,
+			css: `background-color: var(--palette_${hue}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,
-	),
-	// Absolute color text classes (non-adaptive)
-	...generate_classes(
-		(hue: string, intensity: string, mode: string) => ({
-			name: `color_${hue}_${intensity}_${mode}`,
-			css: `color: var(--color_${hue}_${intensity}_${mode}); --text_color: var(--color_${hue}_${
-				intensity
-			}_${mode});`,
-		}),
-		color_variants,
-		intensity_variants,
-		color_scheme_variants,
-	),
-	// Absolute color background classes (non-adaptive)
-	...generate_classes(
-		(hue: string, intensity: string, mode: string) => ({
-			name: `bg_${hue}_${intensity}_${mode}`,
-			css: `background-color: var(--color_${hue}_${intensity}_${mode});`,
-		}),
-		color_variants,
-		intensity_variants,
-		color_scheme_variants,
 	),
 	// Darken/lighten overlays (non-adaptive, alpha-based)
 	...generate_property_classes(
@@ -194,26 +162,26 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--border_color_${v}); --border_color: var(--border_color_${v})`,
 		'border_color',
 	),
-	// Border colors using hue + intensity (sets both property and contextual variable)
+	// Border colors using palette hue + intensity (sets both property and contextual variable)
 	...generate_classes(
 		(hue: string, intensity: string) => ({
-			name: `border_color_${hue}_${intensity}`,
-			css: `border-color: var(--color_${hue}_${intensity}); --border_color: var(--color_${hue}_${
-				intensity
-			});`,
+			name: `border_palette_${hue}_${intensity}`,
+			css: `border-color: var(--palette_${hue}_${intensity}); --border_color: var(--palette_${
+				hue
+			}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,
 	),
 	// Outline colors using shade scale
 	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
-	// Outline colors using hue + intensity (sets both property and contextual variable)
+	// Outline colors using palette hue + intensity (sets both property and contextual variable)
 	...generate_classes(
 		(hue: string, intensity: string) => ({
-			name: `outline_color_${hue}_${intensity}`,
-			css: `outline-color: var(--color_${hue}_${intensity}); --outline_color: var(--color_${hue}_${
-				intensity
-			});`,
+			name: `outline_palette_${hue}_${intensity}`,
+			css: `outline-color: var(--palette_${hue}_${intensity}); --outline_color: var(--palette_${
+				hue
+			}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,
@@ -265,11 +233,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		shadow_alpha_variants,
 	),
-	// Shadow colors using hue + intensity (sets contextual variable only)
+	// Shadow colors using palette hue + intensity (sets contextual variable only)
 	...generate_classes(
 		(hue: string, intensity: string) => ({
-			name: `shadow_color_${hue}_${intensity}`,
-			css: `--shadow_color: var(--color_${hue}_${intensity});`,
+			name: `shadow_palette_${hue}_${intensity}`,
+			css: `--shadow_color: var(--palette_${hue}_${intensity});`,
 		}),
 		color_variants,
 		intensity_variants,

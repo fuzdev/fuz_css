@@ -30,8 +30,8 @@
 	<section>
 		<p>
 			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
-			like <code>.selected</code> and <code>.plain</code> and <code>.color_a</code> modify the base
-			style.
+			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the
+			base style.
 		</p>
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
@@ -258,7 +258,7 @@
 		<div class="xs row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
-			<button type="button" class="color_j">3</button>
+			<button type="button" class="palette_j">3</button>
 		</div>
 	</TomeSection>
 </TomeContent>

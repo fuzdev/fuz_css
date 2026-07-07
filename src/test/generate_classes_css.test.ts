@@ -743,7 +743,7 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					base: {declaration: 'color: var(--color_a_5);'},
+					base: {declaration: 'color: var(--palette_a_5);'},
 					extended: {composes: ['base'], declaration: 'margin: var(--space_md);'},
 					card: {composes: ['extended']},
 				},
@@ -752,7 +752,7 @@ describe('generate_classes_css', () => {
 			});
 
 			// Should track variables from entire composition chain
-			assert.isTrue(result.variables_used.has('color_a_5'));
+			assert.isTrue(result.variables_used.has('palette_a_5'));
 			assert.isTrue(result.variables_used.has('space_md'));
 		});
 

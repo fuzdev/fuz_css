@@ -96,61 +96,59 @@ export const parse_style_css = (css: string, content_hash: string): StyleRuleInd
 
 	let order = 0;
 
-	// Walk the CSS AST
-	for (const child of ast.children) {
-		if (child.type === 'Rule') {
-			const rule = extract_style_rule(child, css, order++);
-			const index = rules.length;
-			rules.push(rule);
+	const index_rule = (rule: StyleRule): void => {
+		const index = rules.length;
+		rules.push(rule);
 
-			// Index by element
-			for (const element of rule.elements) {
-				const arr = by_element.get(element);
-				if (arr) {
-					arr.push(index);
-				} else {
-					by_element.set(element, [index]);
-				}
+		// Index by element
+		for (const element of rule.elements) {
+			const arr = by_element.get(element);
+			if (arr) {
+				arr.push(index);
+			} else {
+				by_element.set(element, [index]);
 			}
+		}
 
-			// Index by class
-			for (const cls of rule.classes) {
-				const arr = by_class.get(cls);
-				if (arr) {
-					arr.push(index);
-				} else {
-					by_class.set(cls, [index]);
-				}
+		// Index by class
+		for (const cls of rule.classes) {
+			const arr = by_class.get(cls);
+			if (arr) {
+				arr.push(index);
+			} else {
+				by_class.set(cls, [index]);
 			}
-		} else if (child.type === 'Atrule') {
-			// Handle @media and other at-rules
-			const rule = extract_atrule(child, css, order++);
-			if (rule) {
-				const index = rules.length;
-				rules.push(rule);
+		}
+	};
 
-				// Index by element
-				for (const element of rule.elements) {
-					const arr = by_element.get(element);
-					if (arr) {
-						arr.push(index);
-					} else {
-						by_element.set(element, [index]);
-					}
+	const walk_children = (
+		children: Iterable<AST.CSS.Rule | AST.CSS.Atrule | AST.CSS.Node>,
+	): void => {
+		for (const child of children) {
+			if (child.type === 'Rule') {
+				index_rule(extract_style_rule(child, css, order++));
+			} else if (child.type === 'Atrule') {
+				// A top-level `@layer <name> { ... }` block is unwrapped so its
+				// contents tree-shake per rule — `style.css` wraps everything in
+				// `fuz.base`, and bundled output re-layers the selected rules
+				// (custom `base_css` layer identities are likewise not preserved).
+				// A blockless `@layer a, b;` order statement is skipped for the
+				// same reason: the bundle emits its own.
+				if (child.name === 'layer') {
+					if (child.block) walk_children(child.block.children);
+					continue;
 				}
-
-				// Index by class
-				for (const cls of rule.classes) {
-					const arr = by_class.get(cls);
-					if (arr) {
-						arr.push(index);
-					} else {
-						by_class.set(cls, [index]);
-					}
+				// Handle @media and other at-rules
+				const rule = extract_atrule(child, css, order++);
+				if (rule) {
+					index_rule(rule);
 				}
 			}
 		}
-	}
+	};
+
+	// Walk the CSS AST
+	walk_children(ast.children);
 
 	return {
 		rules,

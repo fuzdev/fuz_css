@@ -51,7 +51,8 @@
 		padding-left: var(--space_sm);
 	}
 	.color {
-		background: linear-gradient(-90deg, hsl(var(--hue), 100%, 50%), hsl(var(--hue), 0%, 50%));
+		/* preview the OKLCH hue angle from achromatic to vivid at constant lightness */
+		background: linear-gradient(-90deg, oklch(0.65 0.17 var(--hue)), oklch(0.65 0 var(--hue)));
 		position: relative;
 		border-radius: 50%;
 		overflow: hidden;

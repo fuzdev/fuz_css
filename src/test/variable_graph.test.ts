@@ -14,25 +14,27 @@ import type {StyleVariable} from '$lib/variable.ts';
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
 		test('builds graph with basic variable', () => {
-			const variables: Array<StyleVariable> = [{name: 'color_a', light: 'blue', dark: 'lightblue'}];
+			const variables: Array<StyleVariable> = [
+				{name: 'palette_a', light: 'blue', dark: 'lightblue'},
+			];
 
 			const graph = build_variable_graph(variables, 'test-hash');
 
 			assert.strictEqual(graph.variables.size, 1);
-			assert.strictEqual(graph.variables.get('color_a')!.light_css, 'blue');
-			assert.strictEqual(graph.variables.get('color_a')!.dark_css, 'lightblue');
+			assert.strictEqual(graph.variables.get('palette_a')!.light_css, 'blue');
+			assert.strictEqual(graph.variables.get('palette_a')!.dark_css, 'lightblue');
 			assert.strictEqual(graph.content_hash, 'test-hash');
 		});
 
 		test('extracts dependencies from var() references', () => {
 			const variables: Array<StyleVariable> = [
 				{name: 'hue_a', light: '210'},
-				{name: 'color_a', light: 'hsl(var(--hue_a) 50% 50%)'},
+				{name: 'palette_a', light: 'hsl(var(--hue_a) 50% 50%)'},
 			];
 
 			const graph = build_variable_graph(variables, 'test-hash');
 
-			assert.isTrue(graph.variables.get('color_a')!.light_deps.has('hue_a'));
+			assert.isTrue(graph.variables.get('palette_a')!.light_deps.has('hue_a'));
 			assert.strictEqual(graph.variables.get('hue_a')!.light_deps.size, 0);
 		});
 	});
@@ -482,14 +484,14 @@ describe('generate_theme_css', () => {
 			assert.include(dark_css, '--color: lightblue;');
 		});
 
-		test('applies specificity multiplier', () => {
+		test('renders single :root scopes', () => {
 			const variables: Array<StyleVariable> = [{name: 'color', light: 'blue', dark: 'lightblue'}];
 			const graph = build_variable_graph(variables, 'test-hash');
 
-			const {light_css, dark_css} = generate_theme_css(graph, new Set(['color']), 2);
+			const {light_css, dark_css} = generate_theme_css(graph, new Set(['color']));
 
-			assert.include(light_css, ':root:root');
-			assert.include(dark_css, ':root:root.dark');
+			assert.include(light_css, ':root {');
+			assert.include(dark_css, ':root.dark {');
 		});
 	});
 
@@ -569,12 +571,12 @@ describe('build_variable_graph_from_options', () => {
 		assert.isAbove(graph.variables.size, 100);
 
 		assert.isTrue(graph.variables.has('hue_a'));
-		assert.isTrue(graph.variables.has('color_a_50'));
+		assert.isTrue(graph.variables.has('palette_a_50'));
 		assert.isTrue(graph.variables.has('text_color'));
 
-		const color_a_50 = graph.variables.get('color_a_50');
-		assert.isDefined(color_a_50);
-		assert.isTrue(color_a_50.light_deps.has('hue_a') || color_a_50.dark_deps.has('hue_a'));
+		const palette_a_50 = graph.variables.get('palette_a_50');
+		assert.isDefined(palette_a_50);
+		assert.isTrue(palette_a_50.light_deps.has('hue_a') || palette_a_50.dark_deps.has('hue_a'));
 	});
 
 	test('resolves common patterns', () => {
@@ -589,9 +591,9 @@ describe('build_variable_graph_from_options', () => {
 	test('resolves color chain', () => {
 		const graph = build_variable_graph_from_options(undefined);
 
-		const result = resolve_variables_transitive(graph, ['color_a_50']);
+		const result = resolve_variables_transitive(graph, ['palette_a_50']);
 
-		assert.isTrue(result.variables.has('color_a_50'));
+		assert.isTrue(result.variables.has('palette_a_50'));
 		assert.isTrue(result.variables.has('hue_a'));
 	});
 });
@@ -626,15 +628,15 @@ describe('find_similar_variable', () => {
 
 	test('finds best match among multiple similar variables', () => {
 		const variables: Array<StyleVariable> = [
-			{name: 'color_a_1', light: '1'},
-			{name: 'color_a_2', light: '2'},
-			{name: 'color_a_3', light: '3'},
+			{name: 'palette_a_1', light: '1'},
+			{name: 'palette_a_2', light: '2'},
+			{name: 'palette_a_3', light: '3'},
 		];
 		const graph = build_variable_graph(variables, 'test-hash');
 
-		const result = find_similar_variable(graph, 'color_a_');
+		const result = find_similar_variable(graph, 'palette_a_');
 		assert.isNotNull(result);
-		assert.match(result, /^color_a_[123]$/);
+		assert.match(result, /^palette_a_[123]$/);
 	});
 
 	test('returns null for short dissimilar strings', () => {

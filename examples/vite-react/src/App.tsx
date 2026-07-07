@@ -58,7 +58,7 @@ export const App = () => {
 					<div>
 						<h3>Literal classes</h3>
 						<div className="opacity:60%">.opacity:60%</div>
-						<div className="color:var(--color_j_50)">.color:var(--color_j_50)</div>
+						<div className="color:var(--palette_j_50)">.color:var(--palette_j_50)</div>
 						<div className="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
 					</div>
 				</section>
@@ -83,16 +83,16 @@ export const App = () => {
 					<div>
 						<h3>Interactive</h3>
 						<div className="row gap_md mb_lg">
-							<button className="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50" onClick={() => setCount((c) => c + 1)}>
+							<button className="hover:border_palette_b_50 hover:outline_palette_b_50 active:border_palette_d_50 active:outline_palette_d_50" onClick={() => setCount((c) => c + 1)}>
 								count: {count}
 							</button>
-							<span>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50 .active:outline_color_d_50</span>
+							<span>.hover:border_palette_b_50 .hover:outline_palette_b_50 .active:border_palette_d_50 .active:outline_palette_d_50</span>
 						</div>
 						<div className="row gap_md mb_lg">
-							<button className="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50" onClick={() => setCount(0)}>
+							<button className="hover:border_palette_g_50 hover:outline_palette_g_50 active:border_palette_h_50 active:outline_palette_h_50" onClick={() => setCount(0)}>
 								reset
 							</button>
-							<span>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50 .active:outline_color_h_50</span>
+							<span>.hover:border_palette_g_50 .hover:outline_palette_g_50 .active:border_palette_h_50 .active:outline_palette_h_50</span>
 						</div>
 					</div>
 				</section>

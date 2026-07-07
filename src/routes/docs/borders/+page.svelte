@@ -48,7 +48,7 @@
 
 	// @fuz-classes outline_width_focus outline_width_active
 	// @fuz-classes border_color_00 border_color_05 border_color_10 border_color_20 border_color_30 border_color_40 border_color_50 border_color_60 border_color_70 border_color_80 border_color_90 border_color_95 border_color_100
-	// @fuz-classes color_a_50 color_b_50 color_c_50 color_d_50 color_e_50 color_f_50 color_g_50 color_h_50 color_i_50 color_j_50
+	// @fuz-classes palette_a_50 palette_b_50 palette_c_50 palette_d_50 palette_e_50 palette_f_50 palette_g_50 palette_h_50 palette_i_50 palette_j_50
 
 	// TODO @many smoother gradient? esp on the low end? for both shadows and borders
 </script>
@@ -73,7 +73,7 @@
 		<TomeSectionHeader text="Tinted alpha borders" />
 		<p>
 			The <code>border_color_NN</code> variables provide tinted alpha borders that integrate with
-			the theme. They use <code>tint_hue</code> for cohesion.
+			the theme. They use <code>hue_neutral</code> for cohesion.
 		</p>
 		<div class="border_examples border_colors">
 			{#each alpha_variants as v (v)}
@@ -124,8 +124,8 @@ border-color: var(--shade_30);
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
 		<p>
-			Use color variables like <code>color_a_{selected_intensity}</code> for colored borders. The
-			intensity controls the color's prominence.
+			Use palette variables like <code>palette_a_{selected_intensity}</code> for colored borders.
+			The intensity controls the color's prominence.
 		</p>
 		<form class="intensity_selector">
 			<fieldset class="row mb_0">
@@ -194,7 +194,7 @@ border-color: var(--shade_30);
 		<TomeSectionHeader text="Outlines" />
 		<p>
 			Each border utility class has a corresponding outline variant using the same border variables
-			(like <code>outline_color_b_50</code>, <code>outline_width_4</code>, and
+			(like <code>outline_palette_b_50</code>, <code>outline_width_4</code>, and
 			<code>outline-style:solid</code>), and there are also two special outline variables:
 		</p>
 		<div class="border_examples outline_widths">

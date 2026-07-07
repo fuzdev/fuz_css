@@ -475,19 +475,19 @@ c { color: green; }
 describe('collect_rule_variables', () => {
 	test('collects from included rules', () => {
 		const css = `
-			a { color: var(--color_a); }
-			b { color: var(--color_b); background: var(--shade_00); }
+			a { color: var(--palette_a); }
+			b { color: var(--palette_b); background: var(--shade_00); }
 		`;
 		const index = parse_style_css(css, 'test-hash');
 
 		const vars = collect_rule_variables(index, new Set([1]));
-		assert.isFalse(vars.has('color_a'));
-		assert.isTrue(vars.has('color_b'));
+		assert.isFalse(vars.has('palette_a'));
+		assert.isTrue(vars.has('palette_b'));
 		assert.isTrue(vars.has('shade_00'));
 	});
 
 	test('returns empty set for empty included_rules', () => {
-		const css = `a { color: var(--color_a); }`;
+		const css = `a { color: var(--palette_a); }`;
 		const index = parse_style_css(css, 'test-hash');
 		const vars = collect_rule_variables(index, new Set());
 		assert.strictEqual(vars.size, 0);

@@ -28,6 +28,7 @@ import {
 	find_similar_variable,
 } from './variable_graph.ts';
 import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.ts';
+import {FUZ_LAYER_ORDER_STATEMENT} from './theme.ts';
 
 /**
  * Threshold for string similarity to suggest typo corrections.
@@ -150,8 +151,6 @@ export interface CssResolutionOptions {
 	additional_elements?: Iterable<string> | 'all';
 	/** Additional variables to always include, or 'all' to include all theme variables */
 	additional_variables?: Iterable<string> | 'all';
-	/** Specificity multiplier for theme selector (default 1) */
-	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
 	include_stats?: boolean;
 	/** Warn when detected elements have no matching style rules (default false) */
@@ -199,7 +198,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		utility_variables_used,
 		additional_elements,
 		additional_variables,
-		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
 		exclude_elements: raw_exclude_elements,
@@ -414,11 +412,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Step 5: Generate theme CSS
-	const {light_css, dark_css} = generate_theme_css(
-		variable_graph,
-		resolved_variables,
-		theme_specificity,
-	);
+	const {light_css, dark_css} = generate_theme_css(variable_graph, resolved_variables);
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
 	// Step 6: Generate base CSS from matched rules
@@ -475,23 +469,25 @@ export const generate_bundled_css = (
 
 	const parts: Array<string> = [];
 
-	// Theme section
+	// Theme section — default variables belong to the base layer;
+	// `render_theme_style` overrides them from the higher `fuz.theme` layer
 	if (include_theme && result.theme_css) {
 		parts.push('/* Theme Variables */');
-		parts.push(result.theme_css);
+		parts.push(`@layer fuz.base {\n${result.theme_css}\n}`);
 	}
 
 	// Base styles section
 	if (include_base && result.base_css) {
 		parts.push('/* Base Styles */');
-		parts.push(result.base_css);
+		parts.push(`@layer fuz.base {\n${result.base_css}\n}`);
 	}
 
 	// Utility classes section
 	if (include_utilities && utility_css) {
 		parts.push('/* Utility Classes */');
-		parts.push(utility_css);
+		parts.push(`@layer fuz.utilities {\n${utility_css}\n}`);
 	}
 
-	return parts.join('\n\n');
+	if (!parts.length) return '';
+	return `${FUZ_LAYER_ORDER_STATEMENT}\n\n${parts.join('\n\n')}`;
 };

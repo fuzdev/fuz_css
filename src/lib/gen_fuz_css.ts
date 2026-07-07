@@ -113,7 +113,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		acorn_plugins,
 		base_css,
 		variables,
-		theme_specificity = 1,
 		additional_elements,
 		additional_variables,
 		exclude_elements,
@@ -369,7 +368,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				additional_variables,
 				exclude_elements,
 				exclude_variables,
-				theme_specificity,
 				log,
 				include_stats,
 			});

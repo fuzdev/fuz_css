@@ -62,7 +62,6 @@ export interface GenerateCssOptions {
 	additional_variables?: Iterable<string> | 'all';
 	exclude_elements?: Iterable<string>;
 	exclude_variables?: Iterable<string>;
-	theme_specificity?: number;
 
 	/** Optional logger; only used to emit resolution stats when `include_stats`. */
 	log?: Logger;
@@ -104,7 +103,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		theme_specificity = 1,
 		log,
 		include_stats = false,
 	} = options;
@@ -142,7 +140,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			utility_variables_used: utility_result.variables_used,
 			additional_elements,
 			additional_variables,
-			theme_specificity,
 			include_stats,
 			exclude_elements,
 			exclude_variables,

@@ -1,41 +1,68 @@
 <script lang="ts">
-	import {hsl_to_hex_string, hsl_to_rgb, parse_hsl_string} from '@fuzdev/fuz_util/colors.ts';
 	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
+
+	import {oklch_to_srgb, type Oklch} from '$lib/oklch.ts';
 
 	const {
 		intensity,
 		color_name,
-		computed_styles,
-		suffix,
 	}: {
 		intensity: string;
 		color_name: string;
-		computed_styles: CSSStyleDeclaration | null;
-		suffix?: 'light' | 'dark';
 	} = $props();
 
 	const get_theme_state = theme_state_context.get();
 	const theme_state = $derived(get_theme_state());
 
-	const name = $derived(`color_${color_name}_${intensity}` + (suffix ? `_${suffix}` : ''));
-	const value = $derived.by(() => {
-		// handle the user switching between light/dark mode
-		// TODO could refactor to a class for variables
+	const name = $derived(`palette_${color_name}_${intensity}`);
+
+	let color_el: HTMLElement | undefined = $state.raw();
+
+	// the stop's value is a derived calc()/oklch() expression, so read the
+	// browser-resolved color off the rendered swatch element instead
+	const resolved = $derived.by(() => {
+		// re-read when the user switches color scheme or theme
 		theme_state.color_scheme;
-		return computed_styles?.getPropertyValue('--' + name);
+		theme_state.theme;
+		if (!color_el) return '';
+		return window.getComputedStyle(color_el).backgroundColor;
 	});
-	const hsl = $derived(value && parse_hsl_string(value));
-	const width = $derived(suffix ? '195px' : '140px');
+
+	const parsed_oklch = $derived.by((): Oklch | null => {
+		const m = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)$/.exec(resolved);
+		if (!m) return null;
+		return [Number(m[1]), Number(m[2]), Number(m[3])];
+	});
+
+	const hex = $derived.by(() => {
+		if (!parsed_oklch) return '';
+		const rgb = oklch_to_srgb(parsed_oklch);
+		return (
+			'#' +
+			rgb
+				.map((c) =>
+					Math.round(Math.min(1, Math.max(0, c)) * 255)
+						.toString(16)
+						.padStart(2, '0'),
+				)
+				.join('')
+		);
+	});
+
+	const formatted = $derived.by(() => {
+		if (!parsed_oklch) return resolved;
+		const [l, c, h] = parsed_oklch;
+		return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(0)})`;
+	});
 </script>
 
 <li style:--bg_color="var(--{name})">
-	<div class="color"></div>
+	<div class="color" bind:this={color_el}></div>
 	<div class="text">
-		<StyleVariableButton {name} style="width: {width}; justify-content: start;" />
-		<div class="hex">{hsl && hsl_to_hex_string(...hsl)}</div>
-		<div class="hsl">{value}</div>
-		<div class="rgb">rgb({hsl && hsl_to_rgb(...hsl).join(' ')})</div>
+		<StyleVariableButton {name} style="width: 150px; justify-content: start;" />
+		<div class="hex">{hex}</div>
+		<div class="oklch">{formatted}</div>
 	</div>
 </li>
 
@@ -56,16 +83,11 @@
 		padding-left: var(--space_sm);
 	}
 	.hex {
-		width: 73px;
+		width: 90px;
 		font-size: var(--font_size_sm);
 		padding-left: var(--space_sm);
 	}
-	.hsl {
-		width: 149px;
-		font-size: var(--font_size_sm);
-		padding-left: var(--space_sm);
-	}
-	.rgb {
+	.oklch {
 		font-size: var(--font_size_sm);
 		padding-left: var(--space_sm);
 	}
@@ -73,7 +95,6 @@
 		width: 100px;
 		min-width: 50px;
 		background-color: var(--bg_color);
-		color: hsl(210 55% 62%);
 	}
 	@media (max-width: 630px) {
 		.text {

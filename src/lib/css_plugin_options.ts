@@ -156,11 +156,6 @@ export interface CssOutputOptions {
 	 */
 	variables?: VariablesOption;
 	/**
-	 * Specificity multiplier for theme CSS selectors.
-	 * Defaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
-	 */
-	theme_specificity?: number;
-	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.
 	 */

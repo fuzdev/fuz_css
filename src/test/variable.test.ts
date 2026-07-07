@@ -36,7 +36,7 @@ describe('StyleVariable', () => {
 });
 
 describe('StyleVariableName', () => {
-	test.each(['foo', 'shade_40', 'color_a_50', 'a1', 'x'])('accepts valid name "%s"', (name) => {
+	test.each(['foo', 'shade_40', 'palette_a_50', 'a1', 'x'])('accepts valid name "%s"', (name) => {
 		assert.isTrue(StyleVariableName.safeParse(name).success);
 	});
 

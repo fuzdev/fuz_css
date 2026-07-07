@@ -10,8 +10,12 @@
 	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
 
 	import {default_themes} from '$lib/themes.ts';
+	import {necromancer_theme} from '$lib/themes/necromancer.ts';
+	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
+	import {brutalist_theme} from '$lib/themes/brutalist.ts';
 	import type {Theme} from '$lib/theme.ts';
 	import ThemeForm from '$routes/ThemeForm.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
@@ -21,6 +25,7 @@
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const themes = default_themes.slice();
+	const exemplar_themes = [necromancer_theme, sunset_ember_theme, brutalist_theme];
 
 	let editing_theme: null | Theme = $state.raw(null);
 </script>
@@ -75,6 +80,13 @@
 			schemes. In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>
 		<p>
+			Because the color system is derived, a theme is a set of <em>knob</em> values, not a
+			stylesheet: a handful of high-leverage variables (hue angles, <code>chroma_scale</code>, the
+			lightness curve knobs -- see <TomeLink slug="colors" />) reshape everything downstream. Theme
+			CSS renders into the <code>fuz.theme</code> cascade layer, above the
+			<code>fuz.base</code> defaults, so overrides win regardless of stylesheet order.
+		</p>
+		<p>
 			These docs are a work in progress, for now see <ModuleLink
 				module_path="theme.ts"
 			/> and <ModuleLink module_path="themes.ts" />.
@@ -82,6 +94,21 @@
 		<!-- TODO explain when exported <Code code={`<ThemeInput\n\t{themes}\n\t{selected_theme}\n/>`} /> -->
 		<div class="width_atmost_xs mb_lg">
 			<ThemeInput {themes} enable_editing onedit={(t) => (editing_theme = t)} />
+		</div>
+	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="Exemplar themes" />
+		<p>
+			Beyond the registry, fuz_css ships expressive exemplar themes as importable modules under
+			<code>themes/</code> -- registry membership, not file location, is what separates builtins
+			from exemplars. Import one and pass it to your theme setup:
+		</p>
+		<Code
+			lang="ts"
+			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
+		/>
+		<div class="width_atmost_xs mb_lg">
+			<ThemeInput themes={exemplar_themes} enable_editing onedit={(t) => (editing_theme = t)} />
 		</div>
 	</TomeSection>
 </TomeContent>

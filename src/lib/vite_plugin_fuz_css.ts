@@ -139,7 +139,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		cache_dir = DEFAULT_CACHE_DIR,
 		base_css,
 		variables,
-		theme_specificity = 1,
 		additional_elements,
 		additional_variables,
 		exclude_elements,
@@ -315,7 +314,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			additional_variables,
 			exclude_elements,
 			exclude_variables,
-			theme_specificity,
 		});
 
 		// Separate errors and warnings

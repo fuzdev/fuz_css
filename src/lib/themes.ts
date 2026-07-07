@@ -1,49 +1,23 @@
 import type {Theme} from './theme.ts';
+import {base_theme} from './themes/base.ts';
+import {low_contrast_theme} from './themes/low_contrast.ts';
+import {high_contrast_theme} from './themes/high_contrast.ts';
+import {terminal_green_theme} from './themes/terminal_green.ts';
 
-export const DEFAULT_THEME: Theme = {
-	name: 'base',
-	variables: [], // inherits base
-};
+export const DEFAULT_THEME: Theme = base_theme;
 
 /**
- * These are super basic proof-of-concept themes.
+ * The curated theme registry that theme pickers enumerate.
+ *
+ * Themes live one module per theme under `themes/` and every module ships as
+ * an importable export — registry membership, not file location, is what
+ * separates builtins from shipped exemplars. The expressive exemplars
+ * (`themes/necromancer.ts`, `themes/sunset_ember.ts`, `themes/brutalist.ts`)
+ * deliberately stay out of this list.
  */
 export const default_themes: Array<Theme> = [
 	DEFAULT_THEME,
-	{
-		name: 'low contrast',
-		variables: [
-			{name: 'tint_saturation', light: '8%'},
-			{
-				name: 'shade_00',
-				light: 'hsl(var(--tint_hue) var(--tint_saturation) 86%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 18%)',
-			},
-		],
-	},
-	{
-		name: 'high contrast',
-		variables: [
-			{
-				name: 'shade_00',
-				light: '#fff',
-				dark: '#000',
-			},
-			{
-				name: 'text_80',
-				light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
-			},
-			{
-				name: 'text_70',
-				light: 'hsl(var(--tint_hue) var(--tint_saturation) 16%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 83%)',
-			},
-			{
-				name: 'text_50',
-				light: 'hsl(var(--tint_hue) var(--tint_saturation) 24%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 75%)',
-			},
-		],
-	},
+	low_contrast_theme,
+	high_contrast_theme,
+	terminal_green_theme,
 ];

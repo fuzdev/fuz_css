@@ -1,11 +1,8 @@
 import {test, assert} from 'vitest';
 
-import {default_variables, absolute_color_variables} from '$lib/variables.ts';
+import {default_variables} from '$lib/variables.ts';
 import * as exported_variables from '$lib/variables.ts';
 import {StyleVariable} from '$lib/variable.ts';
-
-// Create a set of absolute color variable names for quick lookup (these are dynamically generated)
-const absolute_color_variable_names = new Set(absolute_color_variables.map((v) => v.name));
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
@@ -30,8 +27,6 @@ test('variables have no duplicates', () => {
 
 test('variable names match their identifiers', () => {
 	for (const v of default_variables) {
-		// Skip dynamically generated absolute color variables (they're not individually exported)
-		if (absolute_color_variable_names.has(v.name)) continue;
 		assert.isTrue(
 			v.name in exported_variables,
 			`default variable with name "${v.name}" has no matching exported identifier`,

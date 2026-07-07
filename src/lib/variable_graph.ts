@@ -160,13 +160,11 @@ export const resolve_variables_transitive = (
  *
  * @param graph - the variable dependency graph
  * @param resolved_variables - set of variable names to include
- * @param specificity - number of times to repeat the selector (default 1)
  * @returns object with `light_css` and `dark_css` strings
  */
 export const generate_theme_css = (
 	graph: VariableDependencyGraph,
 	resolved_variables: Set<string>,
-	specificity = 1,
 ): {light_css: string; dark_css: string} => {
 	const light_declarations: Array<string> = [];
 	const dark_declarations: Array<string> = [];
@@ -186,7 +184,7 @@ export const generate_theme_css = (
 		}
 	}
 
-	const scope = ':root'.repeat(specificity);
+	const scope = ':root';
 	const dark_scope = `${scope}.dark`;
 
 	let light_css = '';
@@ -229,7 +227,7 @@ export const has_variable = (graph: VariableDependencyGraph, name: string): bool
  *
  * Uses Levenshtein distance (rather than Dice coefficient in `css_bundled_resolution.ts`)
  * because variable names are longer and follow consistent naming patterns
- * (e.g., "color_a_50", "border_radius_md"). Levenshtein is better at detecting
+ * (e.g., "palette_a_50", "border_radius_md"). Levenshtein is better at detecting
  * single-character insertions/deletions in these longer, structured names.
  *
  * See `css_bundled_resolution.ts` for the Dice-based approach used for elements.
@@ -245,7 +243,7 @@ const string_similarity = (a: string, b: string): number => {
  *
  * Set to 0.85 (higher than `css_bundled_resolution.ts`'s 0.6) because:
  * - Variable names are longer, so small edit distances are more significant
- * - Many variables share prefixes (color_a_1, color_a_2, etc.) so a lower
+ * - Many variables share prefixes (palette_a_10, palette_a_20, etc.) so a lower
  *   threshold would suggest unrelated variables
  * - User-defined variables shouldn't trigger false "did you mean?" suggestions
  */
