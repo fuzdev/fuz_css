@@ -16,6 +16,7 @@
 	import {necromancer_theme} from '$lib/themes/necromancer.ts';
 	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 	import {brutalist_theme} from '$lib/themes/brutalist.ts';
+	import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
 	import type {Theme} from '$lib/theme.ts';
 	import ThemeForm from '$routes/ThemeForm.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
@@ -25,7 +26,13 @@
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
 	const themes = default_themes.slice();
-	const exemplar_themes = [necromancer_theme, sunset_ember_theme, brutalist_theme];
+	const exemplar_themes = [
+		necromancer_theme,
+		sunset_ember_theme,
+		brutalist_theme,
+		terminal_green_theme,
+		create_terminal_theme(70, 'terminal amber'),
+	];
 
 	let editing_theme: null | Theme = $state.raw(null);
 </script>

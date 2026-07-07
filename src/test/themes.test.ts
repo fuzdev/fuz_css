@@ -4,11 +4,18 @@ import {default_themes, DEFAULT_THEME} from '$lib/themes.ts';
 import {necromancer_theme} from '$lib/themes/necromancer.ts';
 import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 import {brutalist_theme} from '$lib/themes/brutalist.ts';
+import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
 import {default_variables} from '$lib/variables.ts';
 import {StyleVariable} from '$lib/variable.ts';
 
 /** Shipped exemplar themes that deliberately stay out of the registry. */
-const exemplar_themes = [necromancer_theme, sunset_ember_theme, brutalist_theme];
+const exemplar_themes = [
+	necromancer_theme,
+	sunset_ember_theme,
+	brutalist_theme,
+	terminal_green_theme,
+	create_terminal_theme(70), // amber, exercises the factory
+];
 
 describe('default_themes', () => {
 	test('all themes have valid name', () => {

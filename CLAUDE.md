@@ -310,9 +310,11 @@ typography, borders, shading, shadows, layout. See
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
   `ColorScheme` type
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
-- `src/lib/themes/` - One module per theme: base, low/high contrast,
-  terminal green (registered), plus unregistered exemplars (necromancer,
-  sunset ember, brutalist) and the `dark_only` helper
+- `src/lib/themes/` - One module per theme. The registry (base, low/high
+  contrast) is semantic-tier: role bindings + levers only, palette hues
+  untouched. Unregistered exemplars: necromancer, sunset ember, brutalist,
+  and `terminal.ts` (a `create_terminal_theme(hue)` factory; terminal green
+  = 145), plus the `dark_only` helper
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 
