@@ -3,16 +3,20 @@ import {test, assert, describe} from 'vitest';
 import {default_themes, DEFAULT_THEME} from '$lib/themes.ts';
 import {necromancer_theme} from '$lib/themes/necromancer.ts';
 import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
-import {brutalist_theme} from '$lib/themes/brutalist.ts';
+import {brutalish_theme} from '$lib/themes/brutalish.ts';
 import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
 import {default_variables} from '$lib/variables.ts';
 import {StyleVariable} from '$lib/variable.ts';
+import {theme_knob_hook_names} from '$lib/knobs.ts';
+
+// declared variables plus the hook knobs style.css consumes via fallbacks
+const known_names = new Set([...default_variables.map((v) => v.name), ...theme_knob_hook_names]);
 
 /** Shipped exemplar themes that deliberately stay out of the registry. */
 const exemplar_themes = [
 	necromancer_theme,
 	sunset_ember_theme,
-	brutalist_theme,
+	brutalish_theme,
 	terminal_green_theme,
 	create_terminal_theme(70), // amber, exercises the factory
 ];
@@ -71,7 +75,6 @@ describe('default_themes', () => {
 	});
 
 	test('theme variable names exist in default_variables', () => {
-		const known_names = new Set(default_variables.map((v) => v.name));
 		for (const theme of default_themes) {
 			for (const variable of theme.variables) {
 				assert.isTrue(
@@ -92,7 +95,6 @@ describe('exemplar themes', () => {
 	});
 
 	test('all exemplar variables validate and exist in default_variables', () => {
-		const known_names = new Set(default_variables.map((v) => v.name));
 		for (const theme of exemplar_themes) {
 			assert.isAbove(theme.variables.length, 0);
 			for (const variable of theme.variables) {

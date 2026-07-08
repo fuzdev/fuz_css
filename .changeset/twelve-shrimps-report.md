@@ -48,9 +48,9 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   fills/borders, composites, and shadow classes.
 - **Themes**: one module per theme under `themes/`
   (`@fuzdev/fuz_css/themes/necromancer.ts` etc.); `themes.ts` exports the
-  curated `default_themes` registry (base, low contrast, high contrast,
-  terminal green) with unregistered expressive exemplars (necromancer,
-  sunset ember, brutalist). The contrast themes are rewritten as curve-knob
+  curated `default_themes` registry (base, low contrast, high contrast)
+  with unregistered expressive exemplars (necromancer, sunset ember,
+  brutalish, terminal green + the `create_terminal_theme(hue)` factory). The contrast themes are rewritten as curve-knob
   overrides.
 - **New design-time modules**: `ramps.ts` (fitted knob constants, numeric
   evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), `wcag.ts`

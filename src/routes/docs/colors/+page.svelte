@@ -52,7 +52,8 @@
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
 			default but could be any color. Meaning attaches through the role knobs layered on top:
-			<code>--hue_accent</code> (links, focus, selection, selected states) defaults to
+			<code>--hue_accent</code> (links, focus, selection, selected states -- what other systems call
+			the "primary" color, named here for what it communicates) defaults to
 			<code>--hue_a</code>, <code>--hue_negative</code> to <code>--hue_c</code>, and so on. Retarget
 			a role to move just that meaning; rotate a letter to move the palette.
 		</p>

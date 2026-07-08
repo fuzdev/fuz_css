@@ -18,7 +18,7 @@ export const DEFAULT_THEME: Theme = base_theme;
  * separates builtins from shipped exemplars. Palette-tier themes (rotations,
  * duotone/monochrome collapses like `themes/terminal.ts`) and the expressive
  * exemplars (`themes/necromancer.ts`, `themes/sunset_ember.ts`,
- * `themes/brutalist.ts`) deliberately stay out of this list.
+ * `themes/brutalish.ts`) deliberately stay out of this list.
  */
 export const default_themes: Array<Theme> = [
 	DEFAULT_THEME,

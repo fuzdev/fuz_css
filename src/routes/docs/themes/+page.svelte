@@ -1,7 +1,5 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
-	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -11,30 +9,76 @@
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	import {default_themes} from '$lib/themes.ts';
 	import {necromancer_theme} from '$lib/themes/necromancer.ts';
 	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
-	import {brutalist_theme} from '$lib/themes/brutalist.ts';
+	import {brutalish_theme} from '$lib/themes/brutalish.ts';
 	import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
 	import type {Theme} from '$lib/theme.ts';
-	import ThemeForm from '$routes/ThemeForm.svelte';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import ThemeEditor from '$routes/ThemeEditor.svelte';
+	import {
+		ThemeEditorState,
+		UNSAVED_THEME_NAME,
+		type ThemeEditorSnapshotData,
+	} from '$routes/theme_editor_state.svelte.ts';
+	import type {Snapshot} from '@sveltejs/kit';
 
 	const LIBRARY_ITEM_NAME = 'themes';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
+	const get_theme_state = theme_state_context.get();
+	const theme_state = get_theme_state();
+
 	const themes = default_themes.slice();
+	// amber runs modestly denser than green phosphor - plain data composition
+	const terminal_amber_base = create_terminal_theme(70, 'terminal amber');
+	const terminal_amber_theme: Theme = {
+		...terminal_amber_base,
+		variables: [...terminal_amber_base.variables, {name: 'scale_factor', light: '0.9'}],
+	};
 	const exemplar_themes = [
 		necromancer_theme,
 		sunset_ember_theme,
-		brutalist_theme,
+		brutalish_theme,
 		terminal_green_theme,
-		create_terminal_theme(70, 'terminal amber'),
+		terminal_amber_theme,
 	];
 
-	let editing_theme: null | Theme = $state.raw(null);
+	const editor = new ThemeEditorState([...themes, ...exemplar_themes]);
+
+	// the in-progress theme appears in the picker as soon as a knob moves
+	const picker_themes: Array<Theme> = $derived([
+		...themes,
+		...(editor.dirty ? [editor.draft] : []),
+	]);
+
+	// passed as ThemeInput's `select` (not `onselect`, which collides with the
+	// DOM handler type in its menu-attribute props): applies the theme like the
+	// default select and loads it into the editor
+	const select_theme = (theme: Theme): void => {
+		theme_state.theme = theme;
+		if (theme.name !== UNSAVED_THEME_NAME) editor.load_theme(theme);
+	};
+
+	// live scope is global with no pin: the draft writes to `:root` through the
+	// normal ThemeRoot pipeline, so the whole page rethemes including the editor
+	$effect(() => {
+		if (editor.dirty) {
+			theme_state.theme = editor.draft;
+		} else if (theme_state.theme.name === UNSAVED_THEME_NAME) {
+			theme_state.theme = editor.base_theme;
+		}
+	});
+
+	// persist the in-progress theme across navigation (history-entry-scoped)
+	export const snapshot: Snapshot<ThemeEditorSnapshotData> = {
+		capture: () => editor.to_snapshot(),
+		restore: (data) => editor.restore_snapshot(data),
+	};
 </script>
 
 <TomeContent {tome}>
@@ -98,9 +142,9 @@
 				module_path="theme.ts"
 			/> and <ModuleLink module_path="themes.ts" />.
 		</p>
-		<!-- TODO explain when exported <Code code={`<ThemeInput\n\t{themes}\n\t{selected_theme}\n/>`} /> -->
+		<p>Selecting a theme loads its knobs into the editor below.</p>
 		<div class="width_atmost_xs mb_lg">
-			<ThemeInput {themes} enable_editing onedit={(t) => (editing_theme = t)} />
+			<ThemeInput themes={picker_themes} select={select_theme} />
 		</div>
 	</TomeSection>
 	<TomeSection>
@@ -115,21 +159,18 @@
 			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
 		/>
 		<div class="width_atmost_xs mb_lg">
-			<ThemeInput themes={exemplar_themes} enable_editing onedit={(t) => (editing_theme = t)} />
+			<ThemeInput themes={exemplar_themes} select={select_theme} />
 		</div>
 	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="Theme editor" />
+		<p>
+			Drag a knob and the whole page rethemes live -- extreme values can make the page hard to read,
+			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
+			theme in the picker above; it persists across navigation until you leave or reset, so copy
+			the <code>Theme</code> object below to keep it. Knob sizes reflect leverage: the big controls
+			reshape the whole system, the small ones are surgical escape hatches.
+		</p>
+		<ThemeEditor {editor} {theme_state} />
+	</TomeSection>
 </TomeContent>
-
-{#if editing_theme}
-	<Dialog onclose={() => (editing_theme = null)}>
-		<DialogContent>
-			<ThemeForm
-				theme={editing_theme}
-				onsave={(theme) => {
-					console.log(`update theme`, theme); // eslint-disable-line no-console
-					alert('todo'); // eslint-disable-line no-alert
-				}}
-			/>
-		</DialogContent>
-	</Dialog>
-{/if}

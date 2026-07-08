@@ -177,6 +177,10 @@ breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
 variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 `motion-safe:`, `contrast-more:`, etc.) are also available.
 
+Custom properties work as literals too — `--flow_margin:0`, `--button_shadow:none`
+set the property on the element straight from markup, which is how a consumer
+reaches any theme/base hook without a dedicated token class.
+
 ## Variable naming
 
 See [variables.ts](src/lib/variables.ts) for definitions,
@@ -202,6 +206,14 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - 13 intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
   50, 60, 70, 80, 90, 95, 100)
+- Form/scale knobs derive into token defaults so one move reshapes a family
+  while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
+  (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
+  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks —
+  setting it flattens the heading ladder), `--heading_font_family`, and the
+  `--background_image` decoration hook on `:root`
+- [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
+  `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
 - `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
@@ -312,9 +324,12 @@ typography, borders, shading, shadows, layout. See
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
 - `src/lib/themes/` - One module per theme. The registry (base, low/high
   contrast) is semantic-tier: role bindings + levers only, palette hues
-  untouched. Unregistered exemplars: necromancer, sunset ember, brutalist,
+  untouched. Unregistered exemplars: necromancer, sunset ember, brutalish,
   and `terminal.ts` (a `create_terminal_theme(hue)` factory; terminal green
   = 145), plus the `dark_only` helper
+- [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
+  (kind/axis/leverage/tier/range) for the knob-tier variables, joined against
+  `default_variables` by name; includes hook knobs like `heading_font_weight`
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 

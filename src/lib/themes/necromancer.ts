@@ -28,12 +28,15 @@ export const necromancer_theme: Theme = {
 		{name: 'hue_shift', light: '-14'},
 		// vivid, knowingly clipping the weak hues
 		{name: 'chroma_scale', light: '1.15'},
+		// modestly compact - crypt density
+		{name: 'scale_factor', light: '0.9'},
 		...dark_only_variables,
 		// glow depth: shadows are accent-lit halos instead of neutral light
 		{name: 'shadow_color_umbra', light: 'oklch(0.72 0.15 var(--hue_accent))'},
 		{name: 'shadow_color_glow', light: 'oklch(0.75 0.16 var(--hue_accent))'},
 		{name: 'shadow_color_highlight', light: '#000'},
-		// sharp-ish: no radius-scale knob exists yet, so the tokens pin (probe evidence)
+		// sharp-ish with a floor: the tier ladder compresses onto ~0.2rem, which a
+		// uniform radius_scale can't express, so the tokens pin (sanctioned escape)
 		{name: 'border_radius_xs3', light: '0.2rem'},
 		{name: 'border_radius_xs2', light: '0.2rem'},
 		{name: 'border_radius_xs', light: '0.2rem'},

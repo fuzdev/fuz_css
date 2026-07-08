@@ -2,6 +2,7 @@ import {test, assert} from 'vitest';
 import {readFileSync} from 'node:fs';
 
 import * as exported_variables from '$lib/variables.ts';
+import {theme_knob_hook_names} from '$lib/knobs.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
 // vitest replaces this with an empty string because CSS isn't opted into being processed,
@@ -52,8 +53,11 @@ test('variables in the CSS exist', () => {
 /**
  * These variables are known to be in the CSS but not in the exported variables.
  * This means they can be contextually used when defined, but otherwise have a fallback.
+ * Hook knobs from the catalog (e.g. `heading_font_weight`) are included
+ * automatically — they're defined as CSS-consumed-but-undeclared.
  */
 const known_without_variables = new Set([
+	...theme_knob_hook_names,
 	'fill', // contextual variable set by button palette classes (e.g., .palette_a sets --fill: var(--palette_a_40))
 	'button_fill',
 	'button_fill_hover',

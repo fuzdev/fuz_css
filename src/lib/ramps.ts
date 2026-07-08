@@ -100,10 +100,22 @@ export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs
 	dark: {lightness_00: 0.146, lightness_100: 0.97, curve: 0.87},
 };
 
-/** Fitted chroma-curve knobs for the palette ramps. */
+/**
+ * Fitted chroma-curve knobs for the palette ramps.
+ *
+ * Re-fitted ("honest chroma" retune) so the requested curve hugs the
+ * effective post-clamp chroma instead of sitting above the caps through the
+ * mid-range — turning the knobs down now responds immediately. Turning
+ * `chroma_max` up remains cap-clamped by design; `--chroma_scale` is the
+ * push-past-the-gamut knob. Residual vs the original port is small (mean
+ * ΔEOK ≈ 0.005 light / 0.003 dark) except light stop 30 (−0.028 C): the
+ * symmetric mid-peaked model can't reach the light cap envelope's peak at
+ * stop 30 — recovering it would take an asymmetric shape (peak-position
+ * knob).
+ */
 export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> = {
-	light: {chroma_min: 0.025, chroma_max: 0.161, curve: 2.35},
-	dark: {chroma_min: 0.044, chroma_max: 0.136, curve: 3},
+	light: {chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3},
+	dark: {chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27},
 };
 
 /**

@@ -47,6 +47,7 @@ Notes:
 	:host {
 		color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
 		background-color: var(--shade_00);
+		background-image: var(--background_image);
 		color: var(--text_color);
 		accent-color: var(--accent_50);
 		line-height: var(--line_height_md);
@@ -68,6 +69,7 @@ Notes:
 		min-height: 100vh;
 		font-size: 1.6rem; /* matched to `font-size: 62.5%` and same value as the default `--font_size_md`, but this one shouldn't vary */
 		font-family: var(--font_family_sans);
+		font-weight: var(--font_weight);
 		tab-size: 2; /* TODO var */
 	}
 
@@ -147,7 +149,7 @@ Respects `hidden="until-found"` for find-in-page support.
 	}
 
 	:where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) {
-		font-family: var(--font_family_serif);
+		font-family: var(--heading_font_family);
 		font-size: var(--font_size, inherit);
 		line-height: var(--line_height_sm);
 		text-wrap: balance; /* @see https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap#balance */
@@ -160,38 +162,40 @@ Respects `hidden="until-found"` for find-in-page support.
    scale (sqrt(GR) ≈ 1.272 per step). margin-top is 2 steps above margin-bottom. */
 	:where(h1:not(.unstyled)) {
 		--font_size: var(--font_size_xl3);
-		font-weight: 300;
+		/* --heading_font_weight is a hook with per-tier fallbacks: setting it
+		flattens the weight ladder deliberately (display-heavy themes) */
+		font-weight: var(--heading_font_weight, 300);
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
 		/* somewhat strange to omit only this one, but generally seems to be the desired behavior */
 		/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.28); */
 	}
 	:where(h2:not(.unstyled)) {
 		--font_size: var(--font_size_xl2);
-		font-weight: 400;
+		font-weight: var(--heading_font_weight, 400);
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2.54);
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 4.15);
 	}
 	:where(h3:not(.unstyled)) {
 		--font_size: var(--font_size_xl);
-		font-weight: 500;
+		font-weight: var(--heading_font_weight, 500);
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2);
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 3.23);
 	}
 	:where(h4:not(.unstyled)) {
 		--font_size: var(--font_size_lg);
-		font-weight: 700;
+		font-weight: var(--heading_font_weight, 700);
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.62);
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 2.54);
 	}
 	:where(h5:not(.unstyled)) {
 		--font_size: var(--font_size_md);
-		font-weight: 900;
+		font-weight: var(--heading_font_weight, 900);
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.23);
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 2);
 	}
 	:where(h6:not(.unstyled)) {
 		--font_size: var(--font_size_sm);
-		font-weight: 600;
+		font-weight: var(--heading_font_weight, 600);
 		margin-bottom: var(--flow_margin, var(--space_lg));
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
 		text-transform: uppercase;

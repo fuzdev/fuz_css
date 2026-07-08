@@ -1491,6 +1491,14 @@ export const text_disabled: StyleVariable = {
 	light: 'var(--text_50)',
 };
 
+/* decoration */
+// hook on the page background (`:root`) for gradient skies, vignettes, and
+// textures - the minimal decoration channel themes kept hitting walls on
+export const background_image: StyleVariable = {
+	name: 'background_image',
+	light: 'none',
+};
+
 /* fonts */
 export const font_family_sans: StyleVariable = {
 	name: 'font_family_sans',
@@ -1505,6 +1513,18 @@ export const font_family_mono: StyleVariable = {
 	name: 'font_family_mono',
 	light: 'ui-monospace, monospace',
 };
+export const font_weight: StyleVariable = {
+	name: 'font_weight',
+	light: '400',
+	summary: 'base body font weight',
+};
+export const heading_font_family: StyleVariable = {
+	name: 'heading_font_family',
+	light: 'var(--font_family_serif)',
+};
+// `--heading_font_weight` is a hook consumed by `style.css` with per-tier
+// fallbacks (h1 300 … h5 900), not a declared variable — setting it flattens
+// the heading weight ladder deliberately (display-heavy themes); see `knobs.ts`
 
 /* sizes like font-size */
 export const font_size_xs: StyleVariable = {name: 'font_size_xs', light: '1rem'};
@@ -1553,30 +1573,104 @@ export const selection_color: StyleVariable = {
 	dark: render_ramp_color_css('var(--hue_accent)', '80', '40%'),
 };
 
-/* spacings, rounded to pixels for the default 16px case */
-export const space_xs5: StyleVariable = {name: 'space_xs5', light: '0.1rem'};
-export const space_xs4: StyleVariable = {name: 'space_xs4', light: '0.2rem'};
-export const space_xs3: StyleVariable = {name: 'space_xs3', light: '0.3rem'};
-export const space_xs2: StyleVariable = {name: 'space_xs2', light: '0.4rem'};
-export const space_xs: StyleVariable = {name: 'space_xs', light: '0.6rem'};
-export const space_sm: StyleVariable = {name: 'space_sm', light: '0.8rem'};
-export const space_md: StyleVariable = {name: 'space_md', light: '1rem'};
-export const space_lg: StyleVariable = {name: 'space_lg', light: '1.3rem'};
-export const space_xl: StyleVariable = {name: 'space_xl', light: '1.6rem'};
-export const space_xl2: StyleVariable = {name: 'space_xl2', light: '2.1rem'};
-export const space_xl3: StyleVariable = {name: 'space_xl3', light: '2.6rem'};
-export const space_xl4: StyleVariable = {name: 'space_xl4', light: '3.3rem'};
-export const space_xl5: StyleVariable = {name: 'space_xl5', light: '4.2rem'};
-export const space_xl6: StyleVariable = {name: 'space_xl6', light: '5.4rem'};
-export const space_xl7: StyleVariable = {name: 'space_xl7', light: '6.9rem'};
-export const space_xl8: StyleVariable = {name: 'space_xl8', light: '8.7rem'};
-export const space_xl9: StyleVariable = {name: 'space_xl9', light: '11.1rem'};
-export const space_xl10: StyleVariable = {name: 'space_xl10', light: '14.1rem'};
-export const space_xl11: StyleVariable = {name: 'space_xl11', light: '17.9rem'};
-export const space_xl12: StyleVariable = {name: 'space_xl12', light: '22.8rem'};
-export const space_xl13: StyleVariable = {name: 'space_xl13', light: '29rem'};
-export const space_xl14: StyleVariable = {name: 'space_xl14', light: '36.9rem'};
-export const space_xl15: StyleVariable = {name: 'space_xl15', light: '47rem'};
+/* spacings, rounded to pixels for the default 16px case (at the default scale factor of 1) */
+export const scale_factor: StyleVariable = {
+	name: 'scale_factor',
+	light: '1',
+	summary: 'multiplies the space scale, below 1 is tighter and above 1 is more spacious',
+};
+export const space_xs5: StyleVariable = {
+	name: 'space_xs5',
+	light: 'calc(0.1rem * var(--scale_factor))',
+};
+export const space_xs4: StyleVariable = {
+	name: 'space_xs4',
+	light: 'calc(0.2rem * var(--scale_factor))',
+};
+export const space_xs3: StyleVariable = {
+	name: 'space_xs3',
+	light: 'calc(0.3rem * var(--scale_factor))',
+};
+export const space_xs2: StyleVariable = {
+	name: 'space_xs2',
+	light: 'calc(0.4rem * var(--scale_factor))',
+};
+export const space_xs: StyleVariable = {
+	name: 'space_xs',
+	light: 'calc(0.6rem * var(--scale_factor))',
+};
+export const space_sm: StyleVariable = {
+	name: 'space_sm',
+	light: 'calc(0.8rem * var(--scale_factor))',
+};
+export const space_md: StyleVariable = {
+	name: 'space_md',
+	light: 'calc(1rem * var(--scale_factor))',
+};
+export const space_lg: StyleVariable = {
+	name: 'space_lg',
+	light: 'calc(1.3rem * var(--scale_factor))',
+};
+export const space_xl: StyleVariable = {
+	name: 'space_xl',
+	light: 'calc(1.6rem * var(--scale_factor))',
+};
+export const space_xl2: StyleVariable = {
+	name: 'space_xl2',
+	light: 'calc(2.1rem * var(--scale_factor))',
+};
+export const space_xl3: StyleVariable = {
+	name: 'space_xl3',
+	light: 'calc(2.6rem * var(--scale_factor))',
+};
+export const space_xl4: StyleVariable = {
+	name: 'space_xl4',
+	light: 'calc(3.3rem * var(--scale_factor))',
+};
+export const space_xl5: StyleVariable = {
+	name: 'space_xl5',
+	light: 'calc(4.2rem * var(--scale_factor))',
+};
+export const space_xl6: StyleVariable = {
+	name: 'space_xl6',
+	light: 'calc(5.4rem * var(--scale_factor))',
+};
+export const space_xl7: StyleVariable = {
+	name: 'space_xl7',
+	light: 'calc(6.9rem * var(--scale_factor))',
+};
+export const space_xl8: StyleVariable = {
+	name: 'space_xl8',
+	light: 'calc(8.7rem * var(--scale_factor))',
+};
+export const space_xl9: StyleVariable = {
+	name: 'space_xl9',
+	light: 'calc(11.1rem * var(--scale_factor))',
+};
+export const space_xl10: StyleVariable = {
+	name: 'space_xl10',
+	light: 'calc(14.1rem * var(--scale_factor))',
+};
+export const space_xl11: StyleVariable = {
+	name: 'space_xl11',
+	light: 'calc(17.9rem * var(--scale_factor))',
+};
+export const space_xl12: StyleVariable = {
+	name: 'space_xl12',
+	light: 'calc(22.8rem * var(--scale_factor))',
+};
+export const space_xl13: StyleVariable = {
+	name: 'space_xl13',
+	light: 'calc(29rem * var(--scale_factor))',
+};
+export const space_xl14: StyleVariable = {
+	name: 'space_xl14',
+	light: 'calc(36.9rem * var(--scale_factor))',
+};
+export const space_xl15: StyleVariable = {
+	name: 'space_xl15',
+	light: 'calc(47rem * var(--scale_factor))',
+};
 export const distance_xs: StyleVariable = {name: 'distance_xs', light: '200px'};
 export const distance_sm: StyleVariable = {name: 'distance_sm', light: '320px'};
 export const distance_md: StyleVariable = {name: 'distance_md', light: '800px'};
@@ -1625,14 +1719,42 @@ export const outline_color: StyleVariable = {
 	light: 'var(--accent_50)',
 };
 
-/* border radii */
-export const border_radius_xs3: StyleVariable = {name: 'border_radius_xs3', light: '0.3rem'};
-export const border_radius_xs2: StyleVariable = {name: 'border_radius_xs2', light: '0.5rem'};
-export const border_radius_xs: StyleVariable = {name: 'border_radius_xs', light: '0.8rem'};
-export const border_radius_sm: StyleVariable = {name: 'border_radius_sm', light: '1.3rem'};
-export const border_radius_md: StyleVariable = {name: 'border_radius_md', light: '2.1rem'};
-export const border_radius_lg: StyleVariable = {name: 'border_radius_lg', light: '3.4rem'};
-export const border_radius_xl: StyleVariable = {name: 'border_radius_xl', light: '5.5rem'};
+/* border radii - the tokens multiply a per-tier base by the radius scale, so
+	"sharp"/"soft"/"pill" is one knob move while per-element tiers survive;
+	pinning an individual token opts that tier out of the scale */
+export const radius_scale: StyleVariable = {
+	name: 'radius_scale',
+	light: '1',
+	summary: '0 is sharp, below 1 is squarer, above 1 is rounder',
+};
+export const border_radius_xs3: StyleVariable = {
+	name: 'border_radius_xs3',
+	light: 'calc(0.3rem * var(--radius_scale))',
+};
+export const border_radius_xs2: StyleVariable = {
+	name: 'border_radius_xs2',
+	light: 'calc(0.5rem * var(--radius_scale))',
+};
+export const border_radius_xs: StyleVariable = {
+	name: 'border_radius_xs',
+	light: 'calc(0.8rem * var(--radius_scale))',
+};
+export const border_radius_sm: StyleVariable = {
+	name: 'border_radius_sm',
+	light: 'calc(1.3rem * var(--radius_scale))',
+};
+export const border_radius_md: StyleVariable = {
+	name: 'border_radius_md',
+	light: 'calc(2.1rem * var(--radius_scale))',
+};
+export const border_radius_lg: StyleVariable = {
+	name: 'border_radius_lg',
+	light: 'calc(3.4rem * var(--radius_scale))',
+};
+export const border_radius_xl: StyleVariable = {
+	name: 'border_radius_xl',
+	light: 'calc(5.5rem * var(--radius_scale))',
+};
 
 /* button shadows */
 export const button_shadow: StyleVariable = {
@@ -1822,19 +1944,74 @@ export const shadow_color_shroud: StyleVariable = {
 // - Small gaps at low end (subtle changes are perceptible)
 // - Large gaps at high end (need bigger changes to notice)
 // - Dark mode boosted at low end (shadows less visible against dark backgrounds)
+// The stops multiply their base alphas by the shadow alpha scale, so "flat" is
+// one knob move (button shadows follow too, via their alpha-stop references);
+// calc() results clamp to the valid range at computed-value time.
+export const shadow_alpha_scale: StyleVariable = {
+	name: 'shadow_alpha_scale',
+	light: '1',
+	summary: '0 flattens all shadows including button shadows, above 1 deepens them',
+};
 export const shadow_alpha_00: StyleVariable = {name: 'shadow_alpha_00', light: '0%'};
-export const shadow_alpha_05: StyleVariable = {name: 'shadow_alpha_05', light: '6%', dark: '13%'};
-export const shadow_alpha_10: StyleVariable = {name: 'shadow_alpha_10', light: '10%', dark: '19%'};
-export const shadow_alpha_20: StyleVariable = {name: 'shadow_alpha_20', light: '16%', dark: '27%'};
-export const shadow_alpha_30: StyleVariable = {name: 'shadow_alpha_30', light: '25%', dark: '37%'};
-export const shadow_alpha_40: StyleVariable = {name: 'shadow_alpha_40', light: '36%', dark: '47%'};
-export const shadow_alpha_50: StyleVariable = {name: 'shadow_alpha_50', light: '50%', dark: '59%'};
-export const shadow_alpha_60: StyleVariable = {name: 'shadow_alpha_60', light: '64%', dark: '71%'};
-export const shadow_alpha_70: StyleVariable = {name: 'shadow_alpha_70', light: '77%', dark: '83%'};
-export const shadow_alpha_80: StyleVariable = {name: 'shadow_alpha_80', light: '88%', dark: '91%'};
-export const shadow_alpha_90: StyleVariable = {name: 'shadow_alpha_90', light: '96%', dark: '98%'};
-export const shadow_alpha_95: StyleVariable = {name: 'shadow_alpha_95', light: '99%', dark: '100%'};
-export const shadow_alpha_100: StyleVariable = {name: 'shadow_alpha_100', light: '100%'};
+export const shadow_alpha_05: StyleVariable = {
+	name: 'shadow_alpha_05',
+	light: 'calc(6% * var(--shadow_alpha_scale))',
+	dark: 'calc(13% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_10: StyleVariable = {
+	name: 'shadow_alpha_10',
+	light: 'calc(10% * var(--shadow_alpha_scale))',
+	dark: 'calc(19% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_20: StyleVariable = {
+	name: 'shadow_alpha_20',
+	light: 'calc(16% * var(--shadow_alpha_scale))',
+	dark: 'calc(27% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_30: StyleVariable = {
+	name: 'shadow_alpha_30',
+	light: 'calc(25% * var(--shadow_alpha_scale))',
+	dark: 'calc(37% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_40: StyleVariable = {
+	name: 'shadow_alpha_40',
+	light: 'calc(36% * var(--shadow_alpha_scale))',
+	dark: 'calc(47% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_50: StyleVariable = {
+	name: 'shadow_alpha_50',
+	light: 'calc(50% * var(--shadow_alpha_scale))',
+	dark: 'calc(59% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_60: StyleVariable = {
+	name: 'shadow_alpha_60',
+	light: 'calc(64% * var(--shadow_alpha_scale))',
+	dark: 'calc(71% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_70: StyleVariable = {
+	name: 'shadow_alpha_70',
+	light: 'calc(77% * var(--shadow_alpha_scale))',
+	dark: 'calc(83% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_80: StyleVariable = {
+	name: 'shadow_alpha_80',
+	light: 'calc(88% * var(--shadow_alpha_scale))',
+	dark: 'calc(91% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_90: StyleVariable = {
+	name: 'shadow_alpha_90',
+	light: 'calc(96% * var(--shadow_alpha_scale))',
+	dark: 'calc(98% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_95: StyleVariable = {
+	name: 'shadow_alpha_95',
+	light: 'calc(99% * var(--shadow_alpha_scale))',
+	dark: 'calc(100% * var(--shadow_alpha_scale))',
+};
+export const shadow_alpha_100: StyleVariable = {
+	name: 'shadow_alpha_100',
+	light: 'calc(100% * var(--shadow_alpha_scale))',
+};
 
 /* icons */
 /* these decrease by the golden ratio, rounded to the nearest pixel,
@@ -2222,9 +2399,12 @@ export const default_variables: Array<StyleVariable> = [
 	text_95,
 	text_100,
 	text_disabled,
+	background_image,
 	font_family_sans,
 	font_family_serif,
 	font_family_mono,
+	font_weight,
+	heading_font_family,
 	font_size_xs,
 	font_size_sm,
 	font_size_md,
@@ -2249,6 +2429,7 @@ export const default_variables: Array<StyleVariable> = [
 	text_decoration_selected,
 	link_color_selected,
 	selection_color,
+	scale_factor,
 	space_xs5,
 	space_xs4,
 	space_xs3,
@@ -2294,6 +2475,7 @@ export const default_variables: Array<StyleVariable> = [
 	outline_width_active,
 	outline_style,
 	outline_color,
+	radius_scale,
 	border_radius_xs3,
 	border_radius_xs2,
 	border_radius_xs,
@@ -2344,6 +2526,7 @@ export const default_variables: Array<StyleVariable> = [
 	shadow_color_highlight,
 	shadow_color_glow,
 	shadow_color_shroud,
+	shadow_alpha_scale,
 	shadow_alpha_00,
 	shadow_alpha_05,
 	shadow_alpha_10,

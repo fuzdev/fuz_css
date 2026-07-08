@@ -97,9 +97,9 @@
 			var(--palette_lightness_00) + (var(--palette_lightness_100) - var(--palette_lightness_00)) *
 				pow(0.95, var(--palette_lightness_curve))
 		);
-		--palette_chroma_min: 0.025;
-		--palette_chroma_max: 0.161;
-		--palette_chroma_curve: 2.35;
+		--palette_chroma_min: 0.0132;
+		--palette_chroma_max: 0.106;
+		--palette_chroma_curve: 1.3;
 		--chroma_shape_00: 0;
 		--chroma_shape_05: calc(pow(0.19, var(--palette_chroma_curve)));
 		--chroma_shape_10: calc(pow(0.36, var(--palette_chroma_curve)));
@@ -1006,11 +1006,14 @@
 				calc(var(--hue_neutral) + var(--hue_shift_100))
 		);
 		--text_disabled: var(--text_50);
+		--background_image: none;
 		--font_family_sans:
 			-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif,
 			'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 		--font_family_serif: Georgia, serif;
 		--font_family_mono: ui-monospace, monospace;
+		--font_weight: 400; /* base body font weight */
+		--heading_font_family: var(--font_family_serif);
 		--font_size_xs: 1rem;
 		--font_size_sm: 1.3rem;
 		--font_size_md: 1.6rem;
@@ -1038,29 +1041,30 @@
 			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
 				calc(var(--hue_accent) + var(--hue_shift_20)) / 40%
 		);
-		--space_xs5: 0.1rem;
-		--space_xs4: 0.2rem;
-		--space_xs3: 0.3rem;
-		--space_xs2: 0.4rem;
-		--space_xs: 0.6rem;
-		--space_sm: 0.8rem;
-		--space_md: 1rem;
-		--space_lg: 1.3rem;
-		--space_xl: 1.6rem;
-		--space_xl2: 2.1rem;
-		--space_xl3: 2.6rem;
-		--space_xl4: 3.3rem;
-		--space_xl5: 4.2rem;
-		--space_xl6: 5.4rem;
-		--space_xl7: 6.9rem;
-		--space_xl8: 8.7rem;
-		--space_xl9: 11.1rem;
-		--space_xl10: 14.1rem;
-		--space_xl11: 17.9rem;
-		--space_xl12: 22.8rem;
-		--space_xl13: 29rem;
-		--space_xl14: 36.9rem;
-		--space_xl15: 47rem;
+		--scale_factor: 1; /* multiplies the space scale, below 1 is tighter and above 1 is more spacious */
+		--space_xs5: calc(0.1rem * var(--scale_factor));
+		--space_xs4: calc(0.2rem * var(--scale_factor));
+		--space_xs3: calc(0.3rem * var(--scale_factor));
+		--space_xs2: calc(0.4rem * var(--scale_factor));
+		--space_xs: calc(0.6rem * var(--scale_factor));
+		--space_sm: calc(0.8rem * var(--scale_factor));
+		--space_md: calc(1rem * var(--scale_factor));
+		--space_lg: calc(1.3rem * var(--scale_factor));
+		--space_xl: calc(1.6rem * var(--scale_factor));
+		--space_xl2: calc(2.1rem * var(--scale_factor));
+		--space_xl3: calc(2.6rem * var(--scale_factor));
+		--space_xl4: calc(3.3rem * var(--scale_factor));
+		--space_xl5: calc(4.2rem * var(--scale_factor));
+		--space_xl6: calc(5.4rem * var(--scale_factor));
+		--space_xl7: calc(6.9rem * var(--scale_factor));
+		--space_xl8: calc(8.7rem * var(--scale_factor));
+		--space_xl9: calc(11.1rem * var(--scale_factor));
+		--space_xl10: calc(14.1rem * var(--scale_factor));
+		--space_xl11: calc(17.9rem * var(--scale_factor));
+		--space_xl12: calc(22.8rem * var(--scale_factor));
+		--space_xl13: calc(29rem * var(--scale_factor));
+		--space_xl14: calc(36.9rem * var(--scale_factor));
+		--space_xl15: calc(47rem * var(--scale_factor));
 		--distance_xs: 200px;
 		--distance_sm: 320px;
 		--distance_md: 800px;
@@ -1083,13 +1087,14 @@
 		--outline_width_active: var(--border_width_1);
 		--outline_style: solid;
 		--outline_color: var(--accent_50);
-		--border_radius_xs3: 0.3rem;
-		--border_radius_xs2: 0.5rem;
-		--border_radius_xs: 0.8rem;
-		--border_radius_sm: 1.3rem;
-		--border_radius_md: 2.1rem;
-		--border_radius_lg: 3.4rem;
-		--border_radius_xl: 5.5rem;
+		--radius_scale: 1; /* 0 is sharp, below 1 is squarer, above 1 is rounder */
+		--border_radius_xs3: calc(0.3rem * var(--radius_scale));
+		--border_radius_xs2: calc(0.5rem * var(--radius_scale));
+		--border_radius_xs: calc(0.8rem * var(--radius_scale));
+		--border_radius_sm: calc(1.3rem * var(--radius_scale));
+		--border_radius_md: calc(2.1rem * var(--radius_scale));
+		--border_radius_lg: calc(3.4rem * var(--radius_scale));
+		--border_radius_xl: calc(5.5rem * var(--radius_scale));
 		--button_shadow:
 			var(--shadow_inset_bottom_xs)
 				color-mix(
@@ -1157,19 +1162,20 @@
 		--shadow_color_highlight: oklch(0.955 0.003 var(--hue_neutral));
 		--shadow_color_glow: oklch(0.955 0.003 var(--hue_neutral));
 		--shadow_color_shroud: #000;
+		--shadow_alpha_scale: 1; /* 0 flattens all shadows including button shadows, above 1 deepens them */
 		--shadow_alpha_00: 0%;
-		--shadow_alpha_05: 6%;
-		--shadow_alpha_10: 10%;
-		--shadow_alpha_20: 16%;
-		--shadow_alpha_30: 25%;
-		--shadow_alpha_40: 36%;
-		--shadow_alpha_50: 50%;
-		--shadow_alpha_60: 64%;
-		--shadow_alpha_70: 77%;
-		--shadow_alpha_80: 88%;
-		--shadow_alpha_90: 96%;
-		--shadow_alpha_95: 99%;
-		--shadow_alpha_100: 100%;
+		--shadow_alpha_05: calc(6% * var(--shadow_alpha_scale));
+		--shadow_alpha_10: calc(10% * var(--shadow_alpha_scale));
+		--shadow_alpha_20: calc(16% * var(--shadow_alpha_scale));
+		--shadow_alpha_30: calc(25% * var(--shadow_alpha_scale));
+		--shadow_alpha_40: calc(36% * var(--shadow_alpha_scale));
+		--shadow_alpha_50: calc(50% * var(--shadow_alpha_scale));
+		--shadow_alpha_60: calc(64% * var(--shadow_alpha_scale));
+		--shadow_alpha_70: calc(77% * var(--shadow_alpha_scale));
+		--shadow_alpha_80: calc(88% * var(--shadow_alpha_scale));
+		--shadow_alpha_90: calc(96% * var(--shadow_alpha_scale));
+		--shadow_alpha_95: calc(99% * var(--shadow_alpha_scale));
+		--shadow_alpha_100: calc(100% * var(--shadow_alpha_scale));
 		--icon_size_xs: 18px;
 		--icon_size_sm: 32px;
 		--icon_size_md: 48px;
@@ -1190,9 +1196,9 @@
 		--palette_lightness_00: 0.147;
 		--palette_lightness_100: 0.971;
 		--palette_lightness_curve: 0.76;
-		--palette_chroma_min: 0.044;
-		--palette_chroma_max: 0.136;
-		--palette_chroma_curve: 3;
+		--palette_chroma_min: 0.0214;
+		--palette_chroma_max: 0.1088;
+		--palette_chroma_curve: 1.27;
 		--palette_chroma_00: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
@@ -1378,17 +1384,17 @@
 		--shadow_color_umbra: oklch(0.863 0.009 var(--hue_neutral));
 		--shadow_color_highlight: #000;
 		--shadow_color_glow: oklch(0.863 0.009 var(--hue_neutral));
-		--shadow_alpha_05: 13%;
-		--shadow_alpha_10: 19%;
-		--shadow_alpha_20: 27%;
-		--shadow_alpha_30: 37%;
-		--shadow_alpha_40: 47%;
-		--shadow_alpha_50: 59%;
-		--shadow_alpha_60: 71%;
-		--shadow_alpha_70: 83%;
-		--shadow_alpha_80: 91%;
-		--shadow_alpha_90: 98%;
-		--shadow_alpha_95: 100%;
+		--shadow_alpha_05: calc(13% * var(--shadow_alpha_scale));
+		--shadow_alpha_10: calc(19% * var(--shadow_alpha_scale));
+		--shadow_alpha_20: calc(27% * var(--shadow_alpha_scale));
+		--shadow_alpha_30: calc(37% * var(--shadow_alpha_scale));
+		--shadow_alpha_40: calc(47% * var(--shadow_alpha_scale));
+		--shadow_alpha_50: calc(59% * var(--shadow_alpha_scale));
+		--shadow_alpha_60: calc(71% * var(--shadow_alpha_scale));
+		--shadow_alpha_70: calc(83% * var(--shadow_alpha_scale));
+		--shadow_alpha_80: calc(91% * var(--shadow_alpha_scale));
+		--shadow_alpha_90: calc(98% * var(--shadow_alpha_scale));
+		--shadow_alpha_95: calc(100% * var(--shadow_alpha_scale));
 	}
 }
 
