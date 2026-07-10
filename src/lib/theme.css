@@ -34,6 +34,30 @@
 		--hue_negative: var(--hue_c); /* errors, destructive actions */
 		--hue_caution: var(--hue_h); /* warnings */
 		--hue_info: var(--hue_i); /* informational callouts */
+		--accent_00: oklch(
+			var(--palette_lightness_00) calc(var(--palette_chroma_00) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_00))
+		);
+		--accent_05: oklch(
+			var(--palette_lightness_05) calc(var(--palette_chroma_05) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_05))
+		);
+		--accent_10: oklch(
+			var(--palette_lightness_10) calc(var(--palette_chroma_10) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_10))
+		);
+		--accent_20: oklch(
+			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_20))
+		);
+		--accent_30: oklch(
+			var(--palette_lightness_30) calc(var(--palette_chroma_30) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_30))
+		);
+		--accent_40: oklch(
+			var(--palette_lightness_40) calc(var(--palette_chroma_40) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_40))
+		);
 		--accent_50: oklch(
 			var(--palette_lightness_50) calc(var(--palette_chroma_50) * var(--chroma_scale))
 				calc(var(--hue_accent) + var(--hue_shift_50))
@@ -42,6 +66,98 @@
 			var(--palette_lightness_60) calc(var(--palette_chroma_60) * var(--chroma_scale))
 				calc(var(--hue_accent) + var(--hue_shift_60))
 		);
+		--accent_70: oklch(
+			var(--palette_lightness_70) calc(var(--palette_chroma_70) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_70))
+		);
+		--accent_80: oklch(
+			var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_80))
+		);
+		--accent_90: oklch(
+			var(--palette_lightness_90) calc(var(--palette_chroma_90) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_90))
+		);
+		--accent_95: oklch(
+			var(--palette_lightness_95) calc(var(--palette_chroma_95) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_95))
+		);
+		--accent_100: oklch(
+			var(--palette_lightness_100) calc(var(--palette_chroma_100) * var(--chroma_scale))
+				calc(var(--hue_accent) + var(--hue_shift_100))
+		);
+		--positive_00: oklch(
+			var(--palette_lightness_00) calc(var(--palette_chroma_00) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_00))
+		);
+		--positive_05: oklch(
+			var(--palette_lightness_05) calc(var(--palette_chroma_05) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_05))
+		);
+		--positive_10: oklch(
+			var(--palette_lightness_10) calc(var(--palette_chroma_10) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_10))
+		);
+		--positive_20: oklch(
+			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_20))
+		);
+		--positive_30: oklch(
+			var(--palette_lightness_30) calc(var(--palette_chroma_30) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_30))
+		);
+		--positive_40: oklch(
+			var(--palette_lightness_40) calc(var(--palette_chroma_40) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_40))
+		);
+		--positive_50: oklch(
+			var(--palette_lightness_50) calc(var(--palette_chroma_50) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_50))
+		);
+		--positive_60: oklch(
+			var(--palette_lightness_60) calc(var(--palette_chroma_60) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_60))
+		);
+		--positive_70: oklch(
+			var(--palette_lightness_70) calc(var(--palette_chroma_70) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_70))
+		);
+		--positive_80: oklch(
+			var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_80))
+		);
+		--positive_90: oklch(
+			var(--palette_lightness_90) calc(var(--palette_chroma_90) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_90))
+		);
+		--positive_95: oklch(
+			var(--palette_lightness_95) calc(var(--palette_chroma_95) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_95))
+		);
+		--positive_100: oklch(
+			var(--palette_lightness_100) calc(var(--palette_chroma_100) * var(--chroma_scale))
+				calc(var(--hue_positive) + var(--hue_shift_100))
+		);
+		--negative_00: oklch(
+			var(--palette_lightness_00) calc(var(--palette_chroma_00) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_00))
+		);
+		--negative_05: oklch(
+			var(--palette_lightness_05) calc(var(--palette_chroma_05) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_05))
+		);
+		--negative_10: oklch(
+			var(--palette_lightness_10) calc(var(--palette_chroma_10) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_10))
+		);
+		--negative_20: oklch(
+			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_20))
+		);
+		--negative_30: oklch(
+			var(--palette_lightness_30) calc(var(--palette_chroma_30) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_30))
+		);
 		--negative_40: oklch(
 			var(--palette_lightness_40) calc(var(--palette_chroma_40) * var(--chroma_scale))
 				calc(var(--hue_negative) + var(--hue_shift_40))
@@ -49,6 +165,134 @@
 		--negative_50: oklch(
 			var(--palette_lightness_50) calc(var(--palette_chroma_50) * var(--chroma_scale))
 				calc(var(--hue_negative) + var(--hue_shift_50))
+		);
+		--negative_60: oklch(
+			var(--palette_lightness_60) calc(var(--palette_chroma_60) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_60))
+		);
+		--negative_70: oklch(
+			var(--palette_lightness_70) calc(var(--palette_chroma_70) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_70))
+		);
+		--negative_80: oklch(
+			var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_80))
+		);
+		--negative_90: oklch(
+			var(--palette_lightness_90) calc(var(--palette_chroma_90) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_90))
+		);
+		--negative_95: oklch(
+			var(--palette_lightness_95) calc(var(--palette_chroma_95) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_95))
+		);
+		--negative_100: oklch(
+			var(--palette_lightness_100) calc(var(--palette_chroma_100) * var(--chroma_scale))
+				calc(var(--hue_negative) + var(--hue_shift_100))
+		);
+		--caution_00: oklch(
+			var(--palette_lightness_00) calc(var(--palette_chroma_00) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_00))
+		);
+		--caution_05: oklch(
+			var(--palette_lightness_05) calc(var(--palette_chroma_05) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_05))
+		);
+		--caution_10: oklch(
+			var(--palette_lightness_10) calc(var(--palette_chroma_10) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_10))
+		);
+		--caution_20: oklch(
+			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_20))
+		);
+		--caution_30: oklch(
+			var(--palette_lightness_30) calc(var(--palette_chroma_30) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_30))
+		);
+		--caution_40: oklch(
+			var(--palette_lightness_40) calc(var(--palette_chroma_40) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_40))
+		);
+		--caution_50: oklch(
+			var(--palette_lightness_50) calc(var(--palette_chroma_50) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_50))
+		);
+		--caution_60: oklch(
+			var(--palette_lightness_60) calc(var(--palette_chroma_60) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_60))
+		);
+		--caution_70: oklch(
+			var(--palette_lightness_70) calc(var(--palette_chroma_70) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_70))
+		);
+		--caution_80: oklch(
+			var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_80))
+		);
+		--caution_90: oklch(
+			var(--palette_lightness_90) calc(var(--palette_chroma_90) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_90))
+		);
+		--caution_95: oklch(
+			var(--palette_lightness_95) calc(var(--palette_chroma_95) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_95))
+		);
+		--caution_100: oklch(
+			var(--palette_lightness_100) calc(var(--palette_chroma_100) * var(--chroma_scale))
+				calc(var(--hue_caution) + var(--hue_shift_100))
+		);
+		--info_00: oklch(
+			var(--palette_lightness_00) calc(var(--palette_chroma_00) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_00))
+		);
+		--info_05: oklch(
+			var(--palette_lightness_05) calc(var(--palette_chroma_05) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_05))
+		);
+		--info_10: oklch(
+			var(--palette_lightness_10) calc(var(--palette_chroma_10) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_10))
+		);
+		--info_20: oklch(
+			var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_20))
+		);
+		--info_30: oklch(
+			var(--palette_lightness_30) calc(var(--palette_chroma_30) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_30))
+		);
+		--info_40: oklch(
+			var(--palette_lightness_40) calc(var(--palette_chroma_40) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_40))
+		);
+		--info_50: oklch(
+			var(--palette_lightness_50) calc(var(--palette_chroma_50) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_50))
+		);
+		--info_60: oklch(
+			var(--palette_lightness_60) calc(var(--palette_chroma_60) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_60))
+		);
+		--info_70: oklch(
+			var(--palette_lightness_70) calc(var(--palette_chroma_70) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_70))
+		);
+		--info_80: oklch(
+			var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_80))
+		);
+		--info_90: oklch(
+			var(--palette_lightness_90) calc(var(--palette_chroma_90) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_90))
+		);
+		--info_95: oklch(
+			var(--palette_lightness_95) calc(var(--palette_chroma_95) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_95))
+		);
+		--info_100: oklch(
+			var(--palette_lightness_100) calc(var(--palette_chroma_100) * var(--chroma_scale))
+				calc(var(--hue_info) + var(--hue_shift_100))
 		);
 		--palette_lightness_00: 0.985;
 		--palette_lightness_100: 0.116;

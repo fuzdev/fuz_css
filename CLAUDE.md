@@ -150,7 +150,8 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
 ### Three class types
 
-- **Token classes** - Map to style variables: `p_md`, `palette_a_50`, `gap_lg`
+- **Token classes** - Map to style variables: `p_md`, `palette_a_50`,
+  `positive_50`, `gap_lg`
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
@@ -184,7 +185,7 @@ reaches any theme/base hook without a dedicated token class.
 ## Variable naming
 
 See [variables.ts](src/lib/variables.ts) for definitions,
-[variable_data.ts](src/lib/variable_data.ts) for size/palette variants.
+[variable_data.ts](src/lib/variable_data.ts) for size/palette/role variants.
 
 **Colors (OKLCH, derived):**
 
@@ -195,8 +196,10 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - Semantic role knobs alias meaning over the letters: `--hue_accent`
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
   (all surfaces/text/borders/shadows), `--hue_positive`/`--hue_negative`/
-  `--hue_caution`/`--hue_info`; role stops (`--accent_50`, `--accent_60`,
-  `--negative_40/50`) derive through the shared ramps
+  `--hue_caution`/`--hue_info`; each role derives a full 13-stop scale
+  through the shared ramps (`--accent_00`–`--accent_100`, same for the
+  others) with matching text/background token classes (`.positive_50`,
+  `.bg_caution_10`)
 - Curve knobs drive everything: `--chroma_scale` (0 grayscale → >1 vivid),
   `--hue_shift` (degrees of rotation across a ramp), per-scheme lightness
   ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`

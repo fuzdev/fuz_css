@@ -79,7 +79,10 @@
 			</li>
 			<li>
 				role hues -- <code>--hue_accent</code>, <code>--hue_positive</code>,
-				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code>
+				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> -- each
+				deriving a full 13-stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
+				matching text and background classes (<code>.positive_50</code>,
+				<code>.bg_caution_10</code>)
 			</li>
 			<li>
 				lightness ramps -- <code>--palette_lightness_00</code>/<code>_100</code>/<code>_curve</code>

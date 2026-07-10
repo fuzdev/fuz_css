@@ -11,6 +11,7 @@
 	import {
 		space_variants,
 		palette_variants,
+		role_variants,
 		intensity_variants,
 		shade_variants,
 		text_variants,
@@ -779,6 +780,20 @@ vite_plugin_fuz_css({
 								intensity_variants,
 							)}</code
 						>
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						>{#each role_variants as role (role)}<code
+								>.{role}_{@render variant_range(intensity_variants)}</code
+							>{/each}
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips"
+						>{#each role_variants as role (role)}<code
+								>.bg_{role}_{@render variant_range(intensity_variants)}</code
+							>{/each}
 					</span>
 				</li>
 			</ul>

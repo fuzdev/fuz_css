@@ -175,12 +175,19 @@
 			</div>
 			<Code content={output_ts} lang="ts" />
 		</div>
-		<div class="rendered mb_lg">
-			<div class="copy">
-				<CopyToClipboard text={output_css} />
+		{#if editor.output.variables.length}
+			<div class="rendered mb_lg">
+				<div class="copy">
+					<CopyToClipboard text={output_css} />
+				</div>
+				<Code content={output_css} lang="css" />
 			</div>
-			<Code content={output_css} lang="css" />
-		</div>
+		{:else}
+			<p>
+				The theme is empty -- every variable keeps its base default, so it renders no CSS. Move a
+				knob to see its output.
+			</p>
+		{/if}
 	</section>
 </div>
 

@@ -138,6 +138,9 @@ export const icon_sizes = {
 export type PaletteVariant = ArrayElement<typeof palette_variants>;
 export const palette_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
 
+export type RoleVariant = ArrayElement<typeof role_variants>;
+export const role_variants = ['accent', 'positive', 'negative', 'caution', 'info'] as const;
+
 export type IntensityVariant = NumericScaleVariant;
 export const intensity_variants = numeric_scale_variants;
 

@@ -34,8 +34,10 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   (`--palette_lightness_NN`, `--palette_chroma_NN`, `--chroma_shape_NN`,
   `--hue_shift_NN`) that themes can pin individually.
 - **New semantic role knobs**: `--hue_accent`, `--hue_positive`,
-  `--hue_negative`, `--hue_caution`, `--hue_info`, with derived role stops
-  `--accent_50`, `--accent_60`, `--negative_40`, `--negative_50` and the
+  `--hue_negative`, `--hue_caution`, `--hue_info`, each deriving a full
+  13-stop scale through the shared ramps (`--accent_00`…`--accent_100`, same
+  for positive/negative/caution/info) with matching lazily-generated text and
+  background token classes (`.positive_50`, `.bg_caution_10`), plus the
   `--selection_color` site variable. Links, focus, selection, selected
   states, `accent-color`, and disabled-active feedback all route through
   them; focus now follows the element color (via `--outline_color`) with the

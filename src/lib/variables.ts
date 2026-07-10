@@ -112,7 +112,8 @@ Role hues retarget what a color communicates without touching the palette:
 rotating --hue_accent recolors links, focus, selection, and selected states
 in one move. The letters stay abstract palette slots. Role stops derive
 through the same ramps as the palette, so they respond to every curve knob;
-only the stops the framework itself consumes are defined.
+full 13-stop scales derive per role, mirroring the palette
+scales, and tree-shake like everything else - unused stops cost nothing.
 
 */
 export const hue_accent: StyleVariable = {
@@ -140,6 +141,31 @@ export const hue_info: StyleVariable = {
 	light: 'var(--hue_i)',
 	summary: 'informational callouts',
 };
+// accent stops - the full scale derives through the shared ramps
+export const accent_00: StyleVariable = {
+	name: 'accent_00',
+	light: render_ramp_color_css('var(--hue_accent)', '00'),
+};
+export const accent_05: StyleVariable = {
+	name: 'accent_05',
+	light: render_ramp_color_css('var(--hue_accent)', '05'),
+};
+export const accent_10: StyleVariable = {
+	name: 'accent_10',
+	light: render_ramp_color_css('var(--hue_accent)', '10'),
+};
+export const accent_20: StyleVariable = {
+	name: 'accent_20',
+	light: render_ramp_color_css('var(--hue_accent)', '20'),
+};
+export const accent_30: StyleVariable = {
+	name: 'accent_30',
+	light: render_ramp_color_css('var(--hue_accent)', '30'),
+};
+export const accent_40: StyleVariable = {
+	name: 'accent_40',
+	light: render_ramp_color_css('var(--hue_accent)', '40'),
+};
 export const accent_50: StyleVariable = {
 	name: 'accent_50',
 	light: render_ramp_color_css('var(--hue_accent)', '50'),
@@ -148,6 +174,100 @@ export const accent_60: StyleVariable = {
 	name: 'accent_60',
 	light: render_ramp_color_css('var(--hue_accent)', '60'),
 };
+export const accent_70: StyleVariable = {
+	name: 'accent_70',
+	light: render_ramp_color_css('var(--hue_accent)', '70'),
+};
+export const accent_80: StyleVariable = {
+	name: 'accent_80',
+	light: render_ramp_color_css('var(--hue_accent)', '80'),
+};
+export const accent_90: StyleVariable = {
+	name: 'accent_90',
+	light: render_ramp_color_css('var(--hue_accent)', '90'),
+};
+export const accent_95: StyleVariable = {
+	name: 'accent_95',
+	light: render_ramp_color_css('var(--hue_accent)', '95'),
+};
+export const accent_100: StyleVariable = {
+	name: 'accent_100',
+	light: render_ramp_color_css('var(--hue_accent)', '100'),
+};
+// positive stops - the full scale derives through the shared ramps
+export const positive_00: StyleVariable = {
+	name: 'positive_00',
+	light: render_ramp_color_css('var(--hue_positive)', '00'),
+};
+export const positive_05: StyleVariable = {
+	name: 'positive_05',
+	light: render_ramp_color_css('var(--hue_positive)', '05'),
+};
+export const positive_10: StyleVariable = {
+	name: 'positive_10',
+	light: render_ramp_color_css('var(--hue_positive)', '10'),
+};
+export const positive_20: StyleVariable = {
+	name: 'positive_20',
+	light: render_ramp_color_css('var(--hue_positive)', '20'),
+};
+export const positive_30: StyleVariable = {
+	name: 'positive_30',
+	light: render_ramp_color_css('var(--hue_positive)', '30'),
+};
+export const positive_40: StyleVariable = {
+	name: 'positive_40',
+	light: render_ramp_color_css('var(--hue_positive)', '40'),
+};
+export const positive_50: StyleVariable = {
+	name: 'positive_50',
+	light: render_ramp_color_css('var(--hue_positive)', '50'),
+};
+export const positive_60: StyleVariable = {
+	name: 'positive_60',
+	light: render_ramp_color_css('var(--hue_positive)', '60'),
+};
+export const positive_70: StyleVariable = {
+	name: 'positive_70',
+	light: render_ramp_color_css('var(--hue_positive)', '70'),
+};
+export const positive_80: StyleVariable = {
+	name: 'positive_80',
+	light: render_ramp_color_css('var(--hue_positive)', '80'),
+};
+export const positive_90: StyleVariable = {
+	name: 'positive_90',
+	light: render_ramp_color_css('var(--hue_positive)', '90'),
+};
+export const positive_95: StyleVariable = {
+	name: 'positive_95',
+	light: render_ramp_color_css('var(--hue_positive)', '95'),
+};
+export const positive_100: StyleVariable = {
+	name: 'positive_100',
+	light: render_ramp_color_css('var(--hue_positive)', '100'),
+};
+// negative stops - the full scale derives through the shared ramps
+export const negative_00: StyleVariable = {
+	name: 'negative_00',
+	light: render_ramp_color_css('var(--hue_negative)', '00'),
+};
+export const negative_05: StyleVariable = {
+	name: 'negative_05',
+	light: render_ramp_color_css('var(--hue_negative)', '05'),
+};
+export const negative_10: StyleVariable = {
+	name: 'negative_10',
+	light: render_ramp_color_css('var(--hue_negative)', '10'),
+};
+export const negative_20: StyleVariable = {
+	name: 'negative_20',
+	light: render_ramp_color_css('var(--hue_negative)', '20'),
+};
+export const negative_30: StyleVariable = {
+	name: 'negative_30',
+	light: render_ramp_color_css('var(--hue_negative)', '30'),
+};
 export const negative_40: StyleVariable = {
 	name: 'negative_40',
 	light: render_ramp_color_css('var(--hue_negative)', '40'),
@@ -155,6 +275,136 @@ export const negative_40: StyleVariable = {
 export const negative_50: StyleVariable = {
 	name: 'negative_50',
 	light: render_ramp_color_css('var(--hue_negative)', '50'),
+};
+export const negative_60: StyleVariable = {
+	name: 'negative_60',
+	light: render_ramp_color_css('var(--hue_negative)', '60'),
+};
+export const negative_70: StyleVariable = {
+	name: 'negative_70',
+	light: render_ramp_color_css('var(--hue_negative)', '70'),
+};
+export const negative_80: StyleVariable = {
+	name: 'negative_80',
+	light: render_ramp_color_css('var(--hue_negative)', '80'),
+};
+export const negative_90: StyleVariable = {
+	name: 'negative_90',
+	light: render_ramp_color_css('var(--hue_negative)', '90'),
+};
+export const negative_95: StyleVariable = {
+	name: 'negative_95',
+	light: render_ramp_color_css('var(--hue_negative)', '95'),
+};
+export const negative_100: StyleVariable = {
+	name: 'negative_100',
+	light: render_ramp_color_css('var(--hue_negative)', '100'),
+};
+// caution stops - the full scale derives through the shared ramps
+export const caution_00: StyleVariable = {
+	name: 'caution_00',
+	light: render_ramp_color_css('var(--hue_caution)', '00'),
+};
+export const caution_05: StyleVariable = {
+	name: 'caution_05',
+	light: render_ramp_color_css('var(--hue_caution)', '05'),
+};
+export const caution_10: StyleVariable = {
+	name: 'caution_10',
+	light: render_ramp_color_css('var(--hue_caution)', '10'),
+};
+export const caution_20: StyleVariable = {
+	name: 'caution_20',
+	light: render_ramp_color_css('var(--hue_caution)', '20'),
+};
+export const caution_30: StyleVariable = {
+	name: 'caution_30',
+	light: render_ramp_color_css('var(--hue_caution)', '30'),
+};
+export const caution_40: StyleVariable = {
+	name: 'caution_40',
+	light: render_ramp_color_css('var(--hue_caution)', '40'),
+};
+export const caution_50: StyleVariable = {
+	name: 'caution_50',
+	light: render_ramp_color_css('var(--hue_caution)', '50'),
+};
+export const caution_60: StyleVariable = {
+	name: 'caution_60',
+	light: render_ramp_color_css('var(--hue_caution)', '60'),
+};
+export const caution_70: StyleVariable = {
+	name: 'caution_70',
+	light: render_ramp_color_css('var(--hue_caution)', '70'),
+};
+export const caution_80: StyleVariable = {
+	name: 'caution_80',
+	light: render_ramp_color_css('var(--hue_caution)', '80'),
+};
+export const caution_90: StyleVariable = {
+	name: 'caution_90',
+	light: render_ramp_color_css('var(--hue_caution)', '90'),
+};
+export const caution_95: StyleVariable = {
+	name: 'caution_95',
+	light: render_ramp_color_css('var(--hue_caution)', '95'),
+};
+export const caution_100: StyleVariable = {
+	name: 'caution_100',
+	light: render_ramp_color_css('var(--hue_caution)', '100'),
+};
+// info stops - the full scale derives through the shared ramps
+export const info_00: StyleVariable = {
+	name: 'info_00',
+	light: render_ramp_color_css('var(--hue_info)', '00'),
+};
+export const info_05: StyleVariable = {
+	name: 'info_05',
+	light: render_ramp_color_css('var(--hue_info)', '05'),
+};
+export const info_10: StyleVariable = {
+	name: 'info_10',
+	light: render_ramp_color_css('var(--hue_info)', '10'),
+};
+export const info_20: StyleVariable = {
+	name: 'info_20',
+	light: render_ramp_color_css('var(--hue_info)', '20'),
+};
+export const info_30: StyleVariable = {
+	name: 'info_30',
+	light: render_ramp_color_css('var(--hue_info)', '30'),
+};
+export const info_40: StyleVariable = {
+	name: 'info_40',
+	light: render_ramp_color_css('var(--hue_info)', '40'),
+};
+export const info_50: StyleVariable = {
+	name: 'info_50',
+	light: render_ramp_color_css('var(--hue_info)', '50'),
+};
+export const info_60: StyleVariable = {
+	name: 'info_60',
+	light: render_ramp_color_css('var(--hue_info)', '60'),
+};
+export const info_70: StyleVariable = {
+	name: 'info_70',
+	light: render_ramp_color_css('var(--hue_info)', '70'),
+};
+export const info_80: StyleVariable = {
+	name: 'info_80',
+	light: render_ramp_color_css('var(--hue_info)', '80'),
+};
+export const info_90: StyleVariable = {
+	name: 'info_90',
+	light: render_ramp_color_css('var(--hue_info)', '90'),
+};
+export const info_95: StyleVariable = {
+	name: 'info_95',
+	light: render_ramp_color_css('var(--hue_info)', '95'),
+};
+export const info_100: StyleVariable = {
+	name: 'info_100',
+	light: render_ramp_color_css('var(--hue_info)', '100'),
 };
 
 /*
@@ -2084,10 +2334,71 @@ export const default_variables: Array<StyleVariable> = [
 	hue_negative,
 	hue_caution,
 	hue_info,
+	accent_00,
+	accent_05,
+	accent_10,
+	accent_20,
+	accent_30,
+	accent_40,
 	accent_50,
 	accent_60,
+	accent_70,
+	accent_80,
+	accent_90,
+	accent_95,
+	accent_100,
+	positive_00,
+	positive_05,
+	positive_10,
+	positive_20,
+	positive_30,
+	positive_40,
+	positive_50,
+	positive_60,
+	positive_70,
+	positive_80,
+	positive_90,
+	positive_95,
+	positive_100,
+	negative_00,
+	negative_05,
+	negative_10,
+	negative_20,
+	negative_30,
 	negative_40,
 	negative_50,
+	negative_60,
+	negative_70,
+	negative_80,
+	negative_90,
+	negative_95,
+	negative_100,
+	caution_00,
+	caution_05,
+	caution_10,
+	caution_20,
+	caution_30,
+	caution_40,
+	caution_50,
+	caution_60,
+	caution_70,
+	caution_80,
+	caution_90,
+	caution_95,
+	caution_100,
+	info_00,
+	info_05,
+	info_10,
+	info_20,
+	info_30,
+	info_40,
+	info_50,
+	info_60,
+	info_70,
+	info_80,
+	info_90,
+	info_95,
+	info_100,
 	palette_lightness_00,
 	palette_lightness_100,
 	palette_lightness_curve,

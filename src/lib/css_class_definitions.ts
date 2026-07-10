@@ -20,6 +20,7 @@ import {
 	space_variants,
 	distance_variants,
 	palette_variants,
+	role_variants,
 	intensity_variants,
 	shade_variants,
 	shade_scale_variants,
@@ -120,6 +121,24 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			css: `background-color: var(--palette_${letter}_${intensity});`,
 		}),
 		palette_variants,
+		intensity_variants,
+	),
+	// Role intensity classes (text color) - meaning-first twins of the palette classes
+	...generate_classes(
+		(role: string, intensity: string) => ({
+			name: `${role}_${intensity}`,
+			css: `color: var(--${role}_${intensity}); --text_color: var(--${role}_${intensity});`,
+		}),
+		role_variants,
+		intensity_variants,
+	),
+	// Role intensity classes (background color)
+	...generate_classes(
+		(role: string, intensity: string) => ({
+			name: `bg_${role}_${intensity}`,
+			css: `background-color: var(--${role}_${intensity});`,
+		}),
+		role_variants,
 		intensity_variants,
 	),
 	// Darken/lighten overlays (non-adaptive, alpha-based)

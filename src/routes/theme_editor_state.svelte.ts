@@ -209,13 +209,15 @@ export const render_theme_ts = (theme: Theme): string => {
 			return `\t\t{${parts.join(', ')}},`;
 		})
 		.join('\n');
+	// the comma rides inside so the empty case can put a comment after it
+	const variables_ts = theme.variables.length
+		? `[\n${variables}\n\t],`
+		: '[], // empty - every variable keeps its base default';
 	return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
 
 export const ${identifier}_theme: Theme = {
 	name: '${escape_single_quotes(theme.name)}',
-	variables: [
-${variables}
-	],
+	variables: ${variables_ts}
 };
 `;
 };
