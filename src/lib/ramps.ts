@@ -24,7 +24,7 @@
 
 import {
 	numeric_scale_variants,
-	type ColorVariant,
+	type PaletteVariant,
 	type ColorSchemeVariant,
 	type NumericScaleVariant,
 } from './variable_data.ts';
@@ -69,7 +69,7 @@ export interface ChromaRampKnobs {
 }
 
 /** OKLCH hue angles for the 10 palette hues, fitted from the HSL palette. */
-export const PALETTE_HUES: Record<ColorVariant, number> = {
+export const PALETTE_HUES: Record<PaletteVariant, number> = {
 	a: 250, // blue
 	b: 144, // green
 	c: 24, // red
@@ -215,7 +215,7 @@ export const ramp_chroma = (
  * Computes the default OKLCH color of a palette stop (`--palette_X_NN`).
  */
 export const palette_stop_oklch = (
-	letter: ColorVariant,
+	letter: PaletteVariant,
 	stop: NumericScaleVariant,
 	scheme: ColorSchemeVariant,
 ): Oklch => [
@@ -318,8 +318,10 @@ export const render_hue_shift_offset_css = (
  * Renders the derived default of a palette color stop, e.g. `--palette_a_50`.
  * One definition serves both schemes — the scheme flip lives in the knobs.
  */
-export const render_palette_stop_css = (letter: ColorVariant, stop: NumericScaleVariant): string =>
-	render_ramp_color_css(`var(--hue_${letter})`, stop);
+export const render_palette_stop_css = (
+	letter: PaletteVariant,
+	stop: NumericScaleVariant,
+): string => render_ramp_color_css(`var(--hue_${letter})`, stop);
 
 /**
  * Renders a color derived from the palette ramps at a stop for an arbitrary

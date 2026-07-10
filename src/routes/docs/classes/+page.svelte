@@ -10,7 +10,7 @@
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {
 		space_variants,
-		color_variants,
+		palette_variants,
 		intensity_variants,
 		shade_variants,
 		text_variants,
@@ -766,7 +766,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.color_{@render variant_range(color_variants)}_{@render variant_range(
+							>.palette_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -775,7 +775,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.bg_{@render variant_range(color_variants)}_{@render variant_range(
+							>.bg_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -803,7 +803,8 @@ vite_plugin_fuz_css({
 					</span>
 				</li>
 				<li class="mb_md">
-					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
+					<span class="code_chips"><code>.hue_{@render variant_range(palette_variants)}</code></span
+					>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
@@ -854,7 +855,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.border_color_{@render variant_range(color_variants)}_{@render variant_range(
+							>.border_palette_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -911,7 +912,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.outline_color_{@render variant_range(color_variants)}_{@render variant_range(
+							>.outline_palette_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -960,7 +961,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.shadow_color_{@render variant_range(color_variants)}_{@render variant_range(
+							>.shadow_palette_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -1577,7 +1578,7 @@ export const gen = gen_fuz_css({
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
 					<code>`palette_a_50 $&#123;base&#125;`</code> extracts <code>palette_a_50</code>, but
-					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
+					<code>`palette_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
 					or
 					<code>additional_classes</code>)

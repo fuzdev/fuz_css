@@ -10,7 +10,7 @@
 
 	import HueSwatch from './HueSwatch.svelte';
 	import ColorSwatch from './ColorSwatch.svelte';
-	import {color_variants} from '$lib/variable_data.ts';
+	import {palette_variants} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
@@ -22,7 +22,7 @@
 	// TODO button to add an inline hue input for runtime modification of the theme
 
 	// letter glosses: color name plus the default role binding where one exists
-	// Note: This array must stay in sync with color_variants (a-j = 10 elements)
+	// Note: This array must stay in sync with palette_variants (a-j = 10 elements)
 	const descriptions = [
 		'blue · default accent',
 		'green · default positive',
@@ -122,8 +122,8 @@
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
-			{#each color_variants as color_name, i (color_name)}
-				<HueSwatch {color_name} {computed_styles} description={descriptions[i]!} />
+			{#each palette_variants as letter, i (letter)}
+				<HueSwatch {letter} {computed_styles} description={descriptions[i]!} />
 			{/each}
 		</ul>
 	</TomeSection>
@@ -150,8 +150,8 @@
 			OKLCH migration.
 		</p>
 		<ul class="palette unstyled pt_xl2">
-			{#each color_variants as color_name (color_name)}
-				<ColorSwatch {color_name} />
+			{#each palette_variants as letter (letter)}
+				<ColorSwatch {letter} />
 			{/each}
 		</ul>
 	</TomeSection>

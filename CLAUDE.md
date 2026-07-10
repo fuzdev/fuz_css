@@ -184,7 +184,7 @@ reaches any theme/base hook without a dedicated token class.
 ## Variable naming
 
 See [variables.ts](src/lib/variables.ts) for definitions,
-[variable_data.ts](src/lib/variable_data.ts) for size/color variants.
+[variable_data.ts](src/lib/variable_data.ts) for size/palette variants.
 
 **Colors (OKLCH, derived):**
 

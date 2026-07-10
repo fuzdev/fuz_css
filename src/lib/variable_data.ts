@@ -135,8 +135,8 @@ export const icon_sizes = {
 	icon_size_xl3: '256px',
 };
 
-export type ColorVariant = ArrayElement<typeof color_variants>;
-export const color_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
+export type PaletteVariant = ArrayElement<typeof palette_variants>;
+export const palette_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
 
 export type IntensityVariant = NumericScaleVariant;
 export const intensity_variants = numeric_scale_variants;

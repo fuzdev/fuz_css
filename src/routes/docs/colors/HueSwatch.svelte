@@ -1,14 +1,16 @@
 <script lang="ts">
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
+	import type {PaletteVariant} from '$lib/variable_data.ts';
+
 	const {
-		color_name,
+		letter,
 		computed_styles,
 		width = 48,
 		height = 48,
 		description,
 	}: {
-		color_name: string;
+		letter: PaletteVariant;
 		computed_styles: CSSStyleDeclaration | null;
 		width?: number;
 		height?: number;
@@ -17,7 +19,7 @@
 
 	const get_color_hue_string = (name: string) => computed_styles?.getPropertyValue('--' + name);
 
-	const variable_name = $derived(`hue_${color_name}`);
+	const variable_name = $derived(`hue_${letter}`);
 	const hue = $derived(Number(get_color_hue_string(variable_name)));
 </script>
 

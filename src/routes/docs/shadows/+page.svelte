@@ -8,12 +8,12 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {
-		color_variants,
+		palette_variants,
 		shadow_size_variants,
 		shadow_variant_prefixes,
 		shadow_alpha_variants,
 		intensity_variants,
-		type ColorVariant,
+		type PaletteVariant,
 		type IntensityVariant,
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
@@ -102,11 +102,11 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The
-			intensity controls the color's prominence -- 60 is a fine starting point for visible colored
-			shadows.
+			Use <code>shadow_palette_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows.
+			The intensity controls the color's prominence -- 60 is a fine starting point for visible
+			colored shadows.
 		</p>
-		{#each color_variants as color_variant (color_variant)}
+		{#each palette_variants as color_variant (color_variant)}
 			<TomeSection>
 				{@render intensity_selector(color_variant)}
 				{@render shadow_examples(color_variant, selected_intensity)}
@@ -116,17 +116,17 @@
 </TomeContent>
 
 {#snippet shadow_examples(
-	color_variant: ColorVariant | 'umbra' | 'highlight' | 'glow' | 'shroud' | null,
+	color_variant: PaletteVariant | 'umbra' | 'highlight' | 'glow' | 'shroud' | null,
 	intensity: IntensityVariant = '60',
 )}
 	{@const is_hue =
 		color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}
 	{@const shadow_color_name = is_hue
-		? `shadow_color_${color_variant}_${intensity}`
+		? `shadow_palette_${color_variant}_${intensity}`
 		: color_variant
 			? `shadow_color_${color_variant}`
 			: 'shadow_color_umbra'}
-	{@const classes = is_hue ? 'color_' + color_variant : undefined}
+	{@const classes = is_hue ? 'palette_' + color_variant : undefined}
 	{@render shadow_example_header()}
 	{#each shadow_variant_prefixes as shadow_variant_prefix (shadow_variant_prefix)}
 		{#each shadow_size_variants as shadow_size_variant (shadow_size_variant)}
@@ -175,9 +175,9 @@
 	</div>
 {/snippet}
 
-{#snippet intensity_selector(color_variant: ColorVariant)}
-	<TomeSectionHeader text="shadow_color_{color_variant}" tag="h3"
-		>shadow_color_{color_variant}_{selected_intensity}</TomeSectionHeader
+{#snippet intensity_selector(color_variant: PaletteVariant)}
+	<TomeSectionHeader text="shadow_palette_{color_variant}" tag="h3"
+		>shadow_palette_{color_variant}_{selected_intensity}</TomeSectionHeader
 	>
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">

@@ -7,7 +7,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import {color_variants} from '$lib/variable_data.ts';
+	import {palette_variants} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'chips';
 
@@ -48,13 +48,13 @@
 
 	<TomeSection>
 		<TomeSectionHeader text="Colorful chips" />
-		{#each color_variants as c (c)}
-			{@const color_name = `color_${c}`}
+		{#each palette_variants as c (c)}
+			{@const palette_name = `palette_${c}`}
 			<section>
-				<Code content={`<span class="chip ${color_name}">`} />
-				<span class="chip {color_name}" class:mb_xs>.chip.{color_name}</span>
+				<Code content={`<span class="chip ${palette_name}">`} />
+				<span class="chip {palette_name}" class:mb_xs>.chip.{palette_name}</span>
 				<!-- svelte-ignore a11y_missing_attribute -->
-				<a class="chip {color_name}" class:mb_xs>a.chip.{color_name}</a>
+				<a class="chip {palette_name}" class:mb_xs>a.chip.{palette_name}</a>
 			</section>
 		{/each}
 		<div class="box width:100% mb_lg">

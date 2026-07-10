@@ -10,7 +10,7 @@
 
 	import {
 		border_width_variants,
-		color_variants,
+		palette_variants,
 		outline_width_variants,
 		border_radius_variants,
 		alpha_variants,
@@ -145,9 +145,9 @@ border-color: var(--shade_30);
 			<ColorSchemeInput />
 		</form>
 		<div class="border_examples border_colors">
-			{#each color_variants as color_variant (color_variant)}
-				{@const name = 'color_' + color_variant + '_' + selected_intensity}
-				{@const text_class = 'color_' + color_variant + '_50'}
+			{#each palette_variants as letter (letter)}
+				{@const name = 'palette_' + letter + '_' + selected_intensity}
+				{@const text_class = 'palette_' + letter + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div

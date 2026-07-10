@@ -15,14 +15,17 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   `outline_color_X_NN` → `outline_palette_X_NN`, `shadow_color_X_NN` →
   `shadow_palette_X_NN`. `bg_X_NN` classes keep their names. The
   `border_color_NN` alpha-ramp family (no hue letter) keeps its names.
+  At the TS level, the letter list in `variable_data.ts` renames with the
+  family: `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
 - **`--hue_a`…`--hue_j` values reinterpreted** as OKLCH hue angles (blue is
   now `250`, not HSL `210`). Any consumer CSS doing `hsl(var(--hue_x) …)`
   breaks — use `oklch(<l> <c> var(--hue_x))` or the palette/role stops.
 - **`--tint_hue`/`--tint_saturation` removed** → `--hue_neutral` (defaults to
   `var(--hue_f)`) + `--neutral_chroma` (peak chroma of the neutral scales).
-- **Absolute `_light`/`_dark` variants removed** (~260 generated variables
-  like `--color_a_50_light`/`--shade_20_dark` and their classes, including
-  `shade_XX_light/dark`). Write the literal color or define one custom
+- **Absolute `_light`/`_dark` variants removed**: the ~286 generated
+  variables (`--color_a_50_light`-style, including `--shade_XX_light/dark`)
+  and all their classes — `color_X_NN_light/dark`, `bg_X_NN_light/dark`, and
+  `shade_NN_light/dark`. Write the literal color or define one custom
   property instead.
 - **New curve knobs** (the promoted theme API): `--chroma_scale`,
   `--hue_shift`, `--palette_lightness_00/_100/_curve` (same trio for
@@ -43,7 +46,8 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   `specificity` option (the `:root:root` hack) and gained
   `layer?: string | null` (default `'fuz.theme'`); `generate_theme_css` lost
   its specificity parameter; the `theme_specificity` generator option is
-  removed.
+  removed. Custom `base_css` input is re-layered into `fuz.base` in bundled
+  output — its own `@layer` identities aren't preserved.
 - **`color-mix()` interpolation moved from `in hsl` to `in oklab`** in button
   fills/borders, composites, and shadow classes.
 - **Themes**: one module per theme under `themes/`

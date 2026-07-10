@@ -13,7 +13,7 @@ import {
 	shade_stop_oklch,
 	text_stop_oklch,
 } from '../lib/ramps.ts';
-import {color_scheme_variants, color_variants} from '../lib/variable_data.ts';
+import {color_scheme_variants, palette_variants} from '../lib/variable_data.ts';
 import {
 	oklch_in_srgb_gamut,
 	oklch_max_srgb_chroma,
@@ -42,7 +42,7 @@ const clamp_rgb = (rgb: RgbUnit): RgbUnit => [
 describe('gamut', () => {
 	test('every default palette stop is inside sRGB', () => {
 		for (const scheme of color_scheme_variants) {
-			for (const letter of color_variants) {
+			for (const letter of palette_variants) {
 				for (const stop of RAMP_STOPS) {
 					const lch = palette_stop_oklch(letter, stop, scheme);
 					assert(
@@ -100,7 +100,7 @@ describe('chroma caps', () => {
 			for (const stop of RAMP_STOPS) {
 				const lightness = ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop);
 				let true_cap = Infinity;
-				for (const letter of color_variants) {
+				for (const letter of palette_variants) {
 					true_cap = Math.min(true_cap, oklch_max_srgb_chroma(lightness, PALETTE_HUES[letter]));
 				}
 				const baked = PALETTE_CHROMA_CAPS[scheme][stop];
@@ -159,7 +159,7 @@ describe('contrast gates', () => {
 		for (const scheme of color_scheme_variants) {
 			const surface = oklch_to_srgb(shade_stop_oklch('00', scheme));
 			const text_max: RgbUnit = scheme === 'light' ? [0, 0, 0] : [1, 1, 1];
-			for (const letter of color_variants) {
+			for (const letter of palette_variants) {
 				const fill = clamp_rgb(oklch_to_srgb(palette_stop_oklch(letter, '50', scheme)));
 				const ui = wcag_contrast_ratio(fill, surface);
 				assert(

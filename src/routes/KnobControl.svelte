@@ -52,61 +52,67 @@
 </script>
 
 <div class="knob {compact ? 'sm' : knob.leverage}" class:compact>
-	<div class="knob_header row">
-		<code class="knob_name">--{knob.name}</code>
-		{#if changed}
-			<button type="button" class="plain icon_button" title="reset to base" onclick={onreset}
-				>↺</button
-			>
-		{/if}
-	</div>
-	{#if knob.kind === 'enum'}
-		<select
-			aria-label={knob.name}
-			value={value ?? ''}
-			onchange={(e) => onchange(e.currentTarget.value)}
-		>
-			{#each knob.values ?? [] as v (v)}
-				<option value={v}>{v}</option>
-			{/each}
-		</select>
-	{:else if knob.kind === 'hue' && numeric_value !== null}
-		<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
-	{:else if scalar && numeric_value !== null}
-		<div class="row gap_sm">
-			<!-- the slider clamps to the knob's safe range; the number input is the
-				knowing escape past it -->
-			<input
-				type="range"
-				aria-label="{knob.name} slider"
-				{min}
-				{max}
-				{step}
-				value={numeric_value}
-				oninput={(e) => emit_numeric(e.currentTarget.value)}
-			/>
-			<input
-				type="number"
-				aria-label={knob.name}
-				class="knob_number"
-				{step}
-				value={numeric_value}
-				oninput={(e) => emit_numeric(e.currentTarget.value)}
-			/>
-		</div>
+	{#if knob.kind === 'hue' && numeric_value !== null}
+		<!-- HueInput carries its own internal label; the name renders as its title -->
+		<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))}>
+			<code class="knob_name">--{knob.name}</code>
+		</HueInput>
 	{:else}
-		<input
-			type="text"
-			aria-label={knob.name}
-			value={value ?? ''}
-			placeholder={knob.hook ? 'unset (per-tier fallbacks)' : ''}
-			onchange={(e) => onchange(e.currentTarget.value)}
-		/>
+		<label>
+			<div class="title"><code class="knob_name">--{knob.name}</code></div>
+			{#if knob.kind === 'enum'}
+				<select value={value ?? ''} onchange={(e) => onchange(e.currentTarget.value)}>
+					{#each knob.values ?? [] as v (v)}
+						<option value={v}>{v}</option>
+					{/each}
+				</select>
+			{:else if scalar && numeric_value !== null}
+				<div class="row gap_sm">
+					<!-- the slider clamps to the knob's safe range; the number input is the
+						knowing escape past it -->
+					<input
+						type="range"
+						class="flex:1"
+						{min}
+						{max}
+						{step}
+						value={numeric_value}
+						oninput={(e) => emit_numeric(e.currentTarget.value)}
+					/>
+					<input
+						type="number"
+						aria-label={knob.name}
+						class="knob_number"
+						{step}
+						value={numeric_value}
+						oninput={(e) => emit_numeric(e.currentTarget.value)}
+					/>
+				</div>
+			{:else}
+				<input
+					type="text"
+					value={value ?? ''}
+					placeholder={knob.hook ? 'unset (per-tier fallbacks)' : ''}
+					onchange={(e) => onchange(e.currentTarget.value)}
+				/>
+			{/if}
+		</label>
+	{/if}
+	{#if changed}
+		<!-- a sibling of the label, not a child - a preceding button inside it
+			would become the label's implicit control -->
+		<button
+			type="button"
+			class="plain icon_button sm knob_reset"
+			title="reset to base"
+			onclick={onreset}>↺</button
+		>
 	{/if}
 </div>
 
 <style>
 	.knob {
+		position: relative; /* for the .knob_reset button */
 		flex: 1 1 260px;
 		max-width: 420px;
 	}
@@ -114,9 +120,15 @@
 		flex: 1 1 190px;
 		max-width: 300px;
 	}
-	.knob_header {
-		justify-content: space-between;
-		min-height: var(--icon_size_xs);
+	.title {
+		/* keep long names clear of the reset button (an sm icon_button,
+			--input_height under sm = --space_xl4) */
+		padding-right: var(--space_xl4);
+	}
+	.knob_reset {
+		position: absolute;
+		top: 0;
+		right: 0;
 	}
 	.knob_name {
 		background: transparent;
@@ -126,8 +138,5 @@
 	.knob_number {
 		width: 90px;
 		flex-shrink: 0;
-	}
-	input[type='range'] {
-		flex: 1;
 	}
 </style>

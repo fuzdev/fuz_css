@@ -8,7 +8,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import {color_variants} from '$lib/variable_data.ts';
+	import {palette_variants} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'buttons';
 
@@ -70,28 +70,30 @@
 
 	<TomeSection>
 		<TomeSectionHeader text="Colorful buttons" />
-		{#each color_variants as c (c)}
-			{@const color_name = `color_${c}`}
+		{#each palette_variants as c (c)}
+			{@const palette_name = `palette_${c}`}
 			<section>
-				<Code content={`<button class="${color_name}">`} />
-				<button type="button" class={color_name} class:mb_xs>.{color_name}</button>
-				<button type="button" class={color_name} disabled class:mb_xs>.{color_name}:disabled</button
+				<Code content={`<button class="${palette_name}">`} />
+				<button type="button" class={palette_name} class:mb_xs>.{palette_name}</button>
+				<button type="button" class={palette_name} disabled class:mb_xs
+					>.{palette_name}:disabled</button
 				>
-				<button type="button" class="{color_name} plain" class:mb_xs>.{color_name}.plain</button>
-				<button type="button" class="{color_name} plain" disabled class:mb_xs
-					>.{color_name}.plain:disabled</button
+				<button type="button" class="{palette_name} plain" class:mb_xs>.{palette_name}.plain</button
 				>
-				<button type="button" class="{color_name} selected" class:mb_xs
-					>.{color_name}.selected</button
+				<button type="button" class="{palette_name} plain" disabled class:mb_xs
+					>.{palette_name}.plain:disabled</button
 				>
-				<button type="button" class="{color_name} selected" disabled class:mb_xs
-					>.{color_name}.selected:disabled</button
+				<button type="button" class="{palette_name} selected" class:mb_xs
+					>.{palette_name}.selected</button
 				>
-				<button type="button" class="{color_name} selected deselectable" class:mb_xs
-					>.{color_name}.selected.deselectable</button
+				<button type="button" class="{palette_name} selected" disabled class:mb_xs
+					>.{palette_name}.selected:disabled</button
 				>
-				<button type="button" class="{color_name} selected deselectable" disabled class:mb_xs
-					>.{color_name}.selected.deselectable:disabled</button
+				<button type="button" class="{palette_name} selected deselectable" class:mb_xs
+					>.{palette_name}.selected.deselectable</button
+				>
+				<button type="button" class="{palette_name} selected deselectable" disabled class:mb_xs
+					>.{palette_name}.selected.deselectable:disabled</button
 				>
 			</section>
 		{/each}

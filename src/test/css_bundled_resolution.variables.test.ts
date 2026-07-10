@@ -463,7 +463,7 @@ describe('resolve_css variable resolution', () => {
 			assert_css_order(result.theme_css, '--alpha', '--mid', '--zebra');
 		});
 
-		test('theme_specificity multiplies :root', () => {
+		test('theme variables render :root and :root.dark blocks', () => {
 			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
 				{name: 'color', light: 'blue', dark: 'lightblue'},
 			]);

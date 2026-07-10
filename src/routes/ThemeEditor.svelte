@@ -1,5 +1,5 @@
 <script lang="ts">
-	// TODO upsteam to fuz_ui
+	// TODO upstream to fuz_ui
 
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
@@ -62,9 +62,9 @@
 	const output_css = $derived(render_theme_style(editor.output));
 </script>
 
-<div class="theme_editor">
-	<header>
-		<div class="row gap_lg flex_wrap">
+<div class="theme_editor width:100%">
+	<header class="mb_flow">
+		<div class="row gap_lg flex-wrap:wrap">
 			<label>
 				<div class="title">name</div>
 				<input bind:value={editor.name} />
@@ -83,7 +83,7 @@
 					{/each}
 				</select>
 			</label>
-			<div class="box gap_sm align_items_flex_start">
+			<div class="box gap_sm align-items:flex-start">
 				<span
 					class="chip"
 					title={editor.is_palette_tier
@@ -92,7 +92,7 @@
 					>{editor.is_palette_tier ? 'palette-tier' : 'semantic-tier'}</span
 				>
 				{#if editor.dirty}
-					<button type="button" onclick={() => editor.reset_all()}
+					<button type="button" class="sm" onclick={() => editor.reset_all()}
 						>reset all ({editor.overrides.size})</button
 					>
 				{/if}
@@ -110,7 +110,7 @@
 	<!-- the same knobs appear again in their axis sections below - same state,
 		two densities -->
 	<section class="quick_knobs panel p_md">
-		<div class="knobs row flex_wrap gap_md">
+		<div class="knobs row flex-wrap:wrap gap_md">
 			{#each quick_knobs as knob (knob.name)}
 				<KnobControl
 					compact
@@ -129,7 +129,7 @@
 		{#if knobs.length}
 			<section>
 				<h3>{title}</h3>
-				<div class="knobs row flex_wrap gap_lg align_items_flex_end">
+				<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
 					{#each knobs as knob (knob.name)}
 						<KnobControl
 							{knob}
@@ -147,7 +147,7 @@
 								>(the letter slots - moving these makes the theme palette-tier)</small
 							></summary
 						>
-						<div class="knobs row flex_wrap gap_lg align_items_flex_end">
+						<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
 							{#each palette_knobs as knob (knob.name)}
 								<KnobControl
 									{knob}
@@ -169,13 +169,13 @@
 		<p>
 			The copyable <code>Theme</code> object, and the CSS it renders — the theme's own footprint.
 		</p>
-		<div class="rendered">
+		<div class="rendered mb_lg">
 			<div class="copy">
 				<CopyToClipboard text={output_ts} />
 			</div>
 			<Code content={output_ts} lang="ts" />
 		</div>
-		<div class="rendered">
+		<div class="rendered mb_lg">
 			<div class="copy">
 				<CopyToClipboard text={output_css} />
 			</div>
@@ -185,27 +185,11 @@
 </div>
 
 <style>
-	.theme_editor {
-		width: 100%;
-	}
-	header {
-		margin-bottom: var(--space_lg);
-	}
-	.flex_wrap {
-		flex-wrap: wrap;
-	}
-	.align_items_flex_end {
-		align-items: flex-end;
-	}
-	.align_items_flex_start {
-		align-items: flex-start;
-	}
 	.knobs {
 		row-gap: var(--space_lg);
 	}
 	.rendered {
 		position: relative; /* for the .copy button */
-		margin-bottom: var(--space_lg);
 	}
 	.rendered :global(.code_example) {
 		width: 100%;

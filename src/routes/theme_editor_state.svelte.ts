@@ -6,7 +6,7 @@ import {default_variables} from '$lib/variables.ts';
 import {theme_knob_by_name} from '$lib/knobs.ts';
 import type {ColorSchemeVariant} from '$lib/variable_data.ts';
 
-// TODO upsteam to fuz_ui
+// TODO upstream to fuz_ui
 
 /**
  * The name of the in-progress theme shown in pickers. Never `'base'`, which
@@ -121,15 +121,17 @@ export class ThemeEditorState {
 	readonly output: Theme = $derived({name: this.name, variables: this.merged_variables});
 
 	/**
-	 * The value a scheme currently renders for a variable, accounting for the
-	 * theme layer's light slots beating the base defaults' dark slots.
+	 * The value a scheme currently renders for a variable, derived from the
+	 * same merge the renderer uses so the two can't disagree — including the
+	 * theme layer's light slots beating the base defaults' dark slots, and the
+	 * merge preserving a scheme-adaptive default's dark slot under fresh
+	 * light-only overrides.
 	 */
 	display_value(name: string, scheme: ColorSchemeVariant): string | undefined {
-		const o = this.overrides.get(name);
-		const b = this.base_variable_by_name.get(name);
+		const merged = this.#merge_variable(name);
 		const d = default_variable_by_name.get(name);
-		if (scheme === 'light') return o?.light ?? b?.light ?? d?.light;
-		return o?.dark ?? b?.dark ?? o?.light ?? b?.light ?? d?.dark ?? d?.light;
+		if (scheme === 'light') return merged?.light ?? d?.light;
+		return merged?.dark ?? merged?.light ?? d?.dark ?? d?.light;
 	}
 
 	changed(name: string): boolean {

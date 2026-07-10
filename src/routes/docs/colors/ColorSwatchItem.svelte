@@ -3,19 +3,20 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import {oklch_to_srgb, type Oklch} from '$lib/oklch.ts';
+	import type {PaletteVariant} from '$lib/variable_data.ts';
 
 	const {
 		intensity,
-		color_name,
+		letter,
 	}: {
 		intensity: string;
-		color_name: string;
+		letter: PaletteVariant;
 	} = $props();
 
 	const get_theme_state = theme_state_context.get();
 	const theme_state = $derived(get_theme_state());
 
-	const name = $derived(`palette_${color_name}_${intensity}`);
+	const name = $derived(`palette_${letter}_${intensity}`);
 
 	let color_el: HTMLElement | undefined = $state.raw();
 

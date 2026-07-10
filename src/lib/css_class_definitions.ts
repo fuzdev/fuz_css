@@ -19,7 +19,7 @@ import {
 import {
 	space_variants,
 	distance_variants,
-	color_variants,
+	palette_variants,
 	intensity_variants,
 	shade_variants,
 	shade_scale_variants,
@@ -96,30 +96,30 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	// Hue classes
 	...generate_classes(
-		(hue: string) => ({
-			name: `hue_${hue}`,
-			css: `--hue: var(--hue_${hue});`,
+		(letter: string) => ({
+			name: `hue_${letter}`,
+			css: `--hue: var(--hue_${letter});`,
 		}),
-		color_variants,
+		palette_variants,
 	),
 	// Palette intensity classes (text color)
 	...generate_classes(
-		(hue: string, intensity: string) => ({
-			name: `palette_${hue}_${intensity}`,
-			css: `color: var(--palette_${hue}_${intensity}); --text_color: var(--palette_${hue}_${
+		(letter: string, intensity: string) => ({
+			name: `palette_${letter}_${intensity}`,
+			css: `color: var(--palette_${letter}_${intensity}); --text_color: var(--palette_${letter}_${
 				intensity
 			});`,
 		}),
-		color_variants,
+		palette_variants,
 		intensity_variants,
 	),
 	// Palette intensity classes (background color)
 	...generate_classes(
-		(hue: string, intensity: string) => ({
-			name: `bg_${hue}_${intensity}`,
-			css: `background-color: var(--palette_${hue}_${intensity});`,
+		(letter: string, intensity: string) => ({
+			name: `bg_${letter}_${intensity}`,
+			css: `background-color: var(--palette_${letter}_${intensity});`,
 		}),
-		color_variants,
+		palette_variants,
 		intensity_variants,
 	),
 	// Darken/lighten overlays (non-adaptive, alpha-based)
@@ -164,26 +164,26 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	// Border colors using palette hue + intensity (sets both property and contextual variable)
 	...generate_classes(
-		(hue: string, intensity: string) => ({
-			name: `border_palette_${hue}_${intensity}`,
-			css: `border-color: var(--palette_${hue}_${intensity}); --border_color: var(--palette_${
-				hue
+		(letter: string, intensity: string) => ({
+			name: `border_palette_${letter}_${intensity}`,
+			css: `border-color: var(--palette_${letter}_${intensity}); --border_color: var(--palette_${
+				letter
 			}_${intensity});`,
 		}),
-		color_variants,
+		palette_variants,
 		intensity_variants,
 	),
 	// Outline colors using shade scale
 	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
 	// Outline colors using palette hue + intensity (sets both property and contextual variable)
 	...generate_classes(
-		(hue: string, intensity: string) => ({
-			name: `outline_palette_${hue}_${intensity}`,
-			css: `outline-color: var(--palette_${hue}_${intensity}); --outline_color: var(--palette_${
-				hue
+		(letter: string, intensity: string) => ({
+			name: `outline_palette_${letter}_${intensity}`,
+			css: `outline-color: var(--palette_${letter}_${intensity}); --outline_color: var(--palette_${
+				letter
 			}_${intensity});`,
 		}),
-		color_variants,
+		palette_variants,
 		intensity_variants,
 	),
 
@@ -235,11 +235,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	// Shadow colors using palette hue + intensity (sets contextual variable only)
 	...generate_classes(
-		(hue: string, intensity: string) => ({
-			name: `shadow_palette_${hue}_${intensity}`,
-			css: `--shadow_color: var(--palette_${hue}_${intensity});`,
+		(letter: string, intensity: string) => ({
+			name: `shadow_palette_${letter}_${intensity}`,
+			css: `--shadow_color: var(--palette_${letter}_${intensity});`,
 		}),
-		color_variants,
+		palette_variants,
 		intensity_variants,
 	),
 
