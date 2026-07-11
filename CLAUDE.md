@@ -114,6 +114,12 @@ combined and only used content is included. In utility-only mode, import
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
   contrast gates in [oklch.ts](src/lib/oklch.ts)/[wcag.ts](src/lib/wcag.ts)
+- [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
+  a theme API: `validate_theme` lints a theme's shape, `check_theme` runs the
+  gamut/monotonicity/contrast gates against an arbitrary theme (resolving its
+  bindings back to numbers), and `compile_theme` recomputes per-theme
+  worst-hue chroma caps so rotated, monochrome, or dark-only themes stay in
+  gamut
 
 ### Smart utility class generation
 
@@ -121,7 +127,10 @@ Two generators available, both using AST-based extraction and per-file caching:
 
 1. **Vite plugin** (preferred) - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
    exposes the generated CSS as `virtual:fuz.css` with HMR; works across
-   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file
+   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
+   In dev it pre-scans project sources at server startup (see `prescan`) so
+   the first served CSS is complete, and resyncs clients whose HMR socket
+   connects after a missed update
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
@@ -301,6 +310,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   variable that shipped styles still reference)
 - `filter_file` - which files get extracted (the default filter includes
   node_modules deps)
+- `prescan` (Vite plugin only) - dev-only eager source scan at server
+  startup so the first served CSS is complete (`true` = `src` under the
+  Vite root, `false` disables, or an array of directories)
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`)
 
 These are the common options — see
@@ -340,6 +352,10 @@ typography, borders, shading, shadows, layout. See
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
   `heading_font_weight`
+- [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
+  numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
+  contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over
+  a shared string→number resolution core
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 

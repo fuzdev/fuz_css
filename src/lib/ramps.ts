@@ -28,7 +28,7 @@ import {
 	type ColorSchemeVariant,
 	type NumericScaleVariant,
 } from './variable_data.ts';
-import type {Oklch} from './oklch.ts';
+import {oklch_max_srgb_chroma, type Oklch} from './oklch.ts';
 
 /** The 13 intensity stops in ramp order (00 → 100). */
 export const RAMP_STOPS: ReadonlyArray<NumericScaleVariant> = numeric_scale_variants;
@@ -199,16 +199,35 @@ export const ramp_chroma_shape = (stop: NumericScaleVariant, curve: number): num
 /**
  * Evaluates the palette chroma at a stop: the knob curve clamped by that
  * stop's worst-hue cap. `chroma_scale` multiplies above the clamp.
+ *
+ * @param knobs - chroma-curve knobs; defaults to the fitted `PALETTE_CHROMA_KNOBS`
+ * @param cap - the per-stop gamut clamp; defaults to the baked `PALETTE_CHROMA_CAPS`
  */
 export const ramp_chroma = (
 	scheme: ColorSchemeVariant,
 	stop: NumericScaleVariant,
 	chroma_scale = 1,
+	knobs: ChromaRampKnobs = PALETTE_CHROMA_KNOBS[scheme],
+	cap: number = PALETTE_CHROMA_CAPS[scheme][stop],
 ): number => {
-	const knobs = PALETTE_CHROMA_KNOBS[scheme];
 	const requested =
 		knobs.chroma_min + (knobs.chroma_max - knobs.chroma_min) * ramp_chroma_shape(stop, knobs.curve);
-	return Math.min(requested, PALETTE_CHROMA_CAPS[scheme][stop]) * chroma_scale;
+	return Math.min(requested, cap) * chroma_scale;
+};
+
+/**
+ * Evaluates a stop's hue-shift offset in degrees — the numeric twin of
+ * `render_hue_shift_offset_css`. `hue_shift` is the total rotation across a
+ * ramp, anchored at stop 50; the scheme flip is baked in so positive values
+ * always rotate hue upward toward the dark end.
+ */
+export const ramp_hue_shift_offset = (
+	stop: NumericScaleVariant,
+	scheme: ColorSchemeVariant,
+	hue_shift: number,
+): number => {
+	const centered = ramp_stop_t(stop) - 0.5;
+	return (scheme === 'light' ? centered : -centered) * hue_shift;
 };
 
 /**
@@ -241,6 +260,39 @@ export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVa
 	NEUTRAL_CHROMA[scheme] * ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 	NEUTRAL_HUE,
 ];
+
+/**
+ * Recomputes the worst-hue safe chroma caps per stop for an arbitrary hue set
+ * and lightness ramp — the generalization of the baked `PALETTE_CHROMA_CAPS`.
+ * For each stop the lightness comes from `ramp_lightness`, each hue is offset
+ * by that stop's `ramp_hue_shift_offset`, and the cap is the minimum
+ * `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to stay
+ * conservative (the browser clips anything past it). A theme's compile step
+ * feeds its own hues, lightness knobs, and hue shift to detect where the baked
+ * worst-hue envelope no longer fits.
+ *
+ * @param hues - OKLCH hue angles the ramp must stay in gamut for
+ * @param lightness_knobs - the palette lightness ramp knobs for this scheme
+ * @param hue_shift - total ramp hue rotation in degrees; defaults to 0
+ */
+export const compute_palette_chroma_caps = (
+	hues: ReadonlyArray<number>,
+	lightness_knobs: LightnessRampKnobs,
+	scheme: ColorSchemeVariant,
+	hue_shift = 0,
+): Record<NumericScaleVariant, number> => {
+	const caps = {} as Record<NumericScaleVariant, number>;
+	for (const stop of numeric_scale_variants) {
+		const lightness = ramp_lightness(lightness_knobs, stop);
+		let cap = Infinity;
+		for (const hue of hues) {
+			const effective_hue = hue + ramp_hue_shift_offset(stop, scheme, hue_shift);
+			cap = Math.min(cap, oklch_max_srgb_chroma(lightness, effective_hue));
+		}
+		caps[stop] = Math.floor(cap * 1e4) / 1e4;
+	}
+	return caps;
+};
 
 /*
 
@@ -287,15 +339,19 @@ export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
  * Renders the capped default of a palette chroma ramp stop: the knob curve
  * clamped by that stop's worst-hue gamut cap. Per-scheme because the caps
  * differ; `--chroma_scale` multiplies outside this clamp, at the color stops.
+ *
+ * @param cap - the clamp value; defaults to the baked `PALETTE_CHROMA_CAPS`,
+ * overridden by the theme compile step with a recomputed worst-hue cap
  */
 export const render_chroma_stop_css = (
 	stop: NumericScaleVariant,
 	scheme: ColorSchemeVariant,
+	cap: number = PALETTE_CHROMA_CAPS[scheme][stop],
 ): string => {
-	const cap = format_ramp_number(PALETTE_CHROMA_CAPS[scheme][stop]);
+	const cap_str = format_ramp_number(cap);
 	return `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_${
 		stop
-	})), ${cap})`;
+	})), ${cap_str})`;
 };
 
 /**

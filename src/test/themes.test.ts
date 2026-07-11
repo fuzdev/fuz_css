@@ -5,12 +5,8 @@ import {necromancer_theme} from '$lib/themes/necromancer.ts';
 import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 import {brutalish_theme} from '$lib/themes/brutalish.ts';
 import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
-import {default_variables} from '$lib/variables.ts';
 import {StyleVariable} from '$lib/variable.ts';
-import {theme_knob_hook_names} from '$lib/knobs.ts';
-
-// declared variables plus the hook knobs style.css consumes via fallbacks
-const known_names = new Set([...default_variables.map((v) => v.name), ...theme_knob_hook_names]);
+import {validate_theme} from '$lib/theme_check.ts';
 
 /** Shipped exemplar themes that deliberately stay out of the registry. */
 const exemplar_themes = [
@@ -74,14 +70,10 @@ describe('default_themes', () => {
 		assert.strictEqual(DEFAULT_THEME.name, 'base');
 	});
 
-	test('theme variable names exist in default_variables', () => {
+	test('themes validate with no errors', () => {
 		for (const theme of default_themes) {
-			for (const variable of theme.variables) {
-				assert.isTrue(
-					known_names.has(variable.name),
-					`Theme "${theme.name}" overrides unknown variable "${variable.name}"`,
-				);
-			}
+			const errors = validate_theme(theme).filter((issue) => issue.level === 'error');
+			assert.deepEqual(errors, [], `Theme "${theme.name}" has validation errors`);
 		}
 	});
 });
@@ -100,11 +92,9 @@ describe('exemplar themes', () => {
 			for (const variable of theme.variables) {
 				const result = StyleVariable.safeParse(variable);
 				assert.isTrue(result.success, `Invalid variable ${variable.name} in theme ${theme.name}`);
-				assert.isTrue(
-					known_names.has(variable.name),
-					`Theme "${theme.name}" overrides unknown variable "${variable.name}"`,
-				);
 			}
+			const errors = validate_theme(theme).filter((issue) => issue.level === 'error');
+			assert.deepEqual(errors, [], `Exemplar "${theme.name}" has validation errors`);
 		}
 	});
 });

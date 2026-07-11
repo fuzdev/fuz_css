@@ -69,6 +69,24 @@
 		return Number.isNaN(n) ? PALETTE_HUES[letter] : n;
 	};
 
+	// switching the "based on" theme flattens it as the new base, discarding any
+	// edits, so guard the switch behind a confirm when the draft is dirty
+	const on_base_change = (e: Event & {currentTarget: EventTarget & HTMLSelectElement}): void => {
+		const name = e.currentTarget.value;
+		if (
+			editor.dirty &&
+			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+			!confirm(
+				`load "${name}" as the new base? ${editor.overrides.size} edited knob(s) will be discarded`,
+			)
+		) {
+			e.currentTarget.value = editor.based_on;
+			return;
+		}
+		const theme = editor.themes.find((t) => t.name === name);
+		if (theme) editor.load_theme(theme);
+	};
+
 	const trimmed_name = $derived(editor.name.trim());
 	const name_collides = $derived(
 		trimmed_name === UNSAVED_THEME_NAME || editor.themes.some((t) => t.name === trimmed_name),
@@ -99,25 +117,7 @@
 			</label>
 			<label>
 				<div class="title">based on</div>
-				<select
-					value={editor.based_on}
-					onchange={(e) => {
-						const name = e.currentTarget.value;
-						if (
-							editor.dirty &&
-							!confirm(
-								`load "${name}" as the new base? ${
-									editor.overrides.size
-								} edited knob(s) will be discarded`,
-							)
-						) {
-							e.currentTarget.value = editor.based_on;
-							return;
-						}
-						const theme = editor.themes.find((t) => t.name === name);
-						if (theme) editor.load_theme(theme);
-					}}
-				>
+				<select value={editor.based_on} onchange={on_base_change}>
 					{#each editor.themes as theme (theme.name)}
 						<option value={theme.name}>{theme.name}</option>
 					{/each}
