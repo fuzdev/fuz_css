@@ -82,7 +82,8 @@ export const hue_j: StyleVariable = {name: 'hue_j', light: String(PALETTE_HUES.j
 export const chroma_scale: StyleVariable = {
 	name: 'chroma_scale',
 	light: '1',
-	summary: '0 is grayscale, above 1 is vivid and can clip past the sRGB gamut caps',
+	summary:
+		'0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps',
 };
 export const hue_shift: StyleVariable = {
 	name: 'hue_shift',
@@ -495,6 +496,7 @@ export const palette_chroma_curve: StyleVariable = {
 	name: 'palette_chroma_curve',
 	light: String(PALETTE_CHROMA_KNOBS.light.curve),
 	dark: String(PALETTE_CHROMA_KNOBS.dark.curve),
+	summary: 'falloff of the chroma peak; the neutral scales ride this same shape',
 };
 
 // normalized chroma shape per stop - 0 at the endpoints, 1 at the midpoint;

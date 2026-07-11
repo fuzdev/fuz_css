@@ -25,7 +25,7 @@
 		--hue_h: 41; /* orange */
 		--hue_i: 204; /* cyan */
 		--hue_j: 163; /* teal */
-		--chroma_scale: 1; /* 0 is grayscale, above 1 is vivid and can clip past the sRGB gamut caps */
+		--chroma_scale: 1; /* 0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps */
 		--hue_shift: 0; /* total degrees of hue rotation across each ramp, positive toward the dark end */
 		--hue_neutral: var(--hue_f);
 		--neutral_chroma: 0.024; /* peak chroma of the neutral scales, applied through the shared chroma shape */
@@ -343,7 +343,7 @@
 		);
 		--palette_chroma_min: 0.0132;
 		--palette_chroma_max: 0.106;
-		--palette_chroma_curve: 1.3;
+		--palette_chroma_curve: 1.3; /* falloff of the chroma peak; the neutral scales ride this same shape */
 		--chroma_shape_00: 0;
 		--chroma_shape_05: calc(pow(0.19, var(--palette_chroma_curve)));
 		--chroma_shape_10: calc(pow(0.36, var(--palette_chroma_curve)));
@@ -1442,7 +1442,7 @@
 		--palette_lightness_curve: 0.76;
 		--palette_chroma_min: 0.0214;
 		--palette_chroma_max: 0.1088;
-		--palette_chroma_curve: 1.27;
+		--palette_chroma_curve: 1.27; /* falloff of the chroma peak; the neutral scales ride this same shape */
 		--palette_chroma_00: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *

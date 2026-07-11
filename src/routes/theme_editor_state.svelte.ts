@@ -10,8 +10,8 @@ import type {ColorSchemeVariant} from '$lib/variable_data.ts';
 
 /**
  * The name of the in-progress theme shown in pickers. Never `'base'`, which
- * `render_theme_style`/`ThemeRoot` special-case to render nothing, and never
- * a registry/exemplar name, which would collide with `ThemeInput`'s
+ * fuz_ui's `ThemeRoot` suppresses to render nothing (pickers key by name), and
+ * never a registry/exemplar name, which would collide with `ThemeInput`'s
  * name-keyed selection.
  */
 export const UNSAVED_THEME_NAME = 'unsaved';

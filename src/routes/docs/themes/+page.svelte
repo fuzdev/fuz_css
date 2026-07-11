@@ -176,4 +176,40 @@
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="Validating and compiling themes" />
+		<p>
+			<ModuleLink module_path="theme_check.ts" /> provides three pure functions for checking a
+			<code>Theme</code> in tests or CI.
+		</p>
+		<p>
+			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors,
+			while type and range mismatches on the knob-tier variables are advisory warnings. It returns
+			an array of issues -- empty means the theme is structurally sound.
+		</p>
+		<p>
+			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against
+			the theme's resolved values. It is report-only and never throws, returning
+			<code>{'{ok, entries, unchecked}'}</code> -- suited to a CI or test assertion:
+		</p>
+		<Code
+			lang="ts"
+			content={`import {test, assert} from 'vitest';
+import {check_theme} from '@fuzdev/fuz_css/theme_check.ts';
+import {my_theme} from './my_theme.ts';
+
+test('my theme clears the accessibility gates', () => {
+	assert.isTrue(check_theme(my_theme).ok);
+});`}
+		/>
+		<p>
+			<code>compile_theme(theme)</code> is for themes that move hues or lightness ramps --
+			monochrome, rotated, or dark-only. It recomputes the per-stop sRGB gamut caps from the theme's
+			actual hues and appends the corrected <code>palette_chroma_NN</code> stop overrides, returning
+			<code>{'{theme, report, issues}'}</code>.
+		</p>
+		<p>
+			fuz_css gates its own registry and exemplar themes with these functions in its test suite.
+		</p>
+	</TomeSection>
 </TomeContent>

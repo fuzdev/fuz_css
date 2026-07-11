@@ -1,5 +1,4 @@
 import {default_variables} from './variables.ts';
-import {default_themes} from './themes.ts'; // TODO shoudln't be a dep, see usage below
 import type {StyleVariable} from './variable.ts';
 
 /**
@@ -26,6 +25,13 @@ export const FUZ_LAYER_ORDER_STATEMENT = '@layer fuz.base, fuz.theme, fuz.utilit
 export interface RenderThemeStyleOptions {
 	comments?: boolean;
 	id?: string | null;
+	/**
+	 * How to treat a theme whose `variables` are empty. When `true` (the
+	 * default) it renders nothing, inheriting the `fuz.base` defaults; when
+	 * `false` it renders the full `default_variables` set (how
+	 * `theme.gen.css.ts` emits the standalone `theme.css`). A theme that
+	 * carries variables always renders them and ignores this option.
+	 */
 	empty_default_theme?: boolean;
 	/**
 	 * The cascade layer wrapping the rendered variables. Theme overrides
@@ -37,12 +43,13 @@ export interface RenderThemeStyleOptions {
 
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
 	const {comments = false, id = null, empty_default_theme = true, layer = 'fuz.theme'} = options;
-	const variables =
-		theme.name === default_themes[0]!.name
-			? empty_default_theme
-				? null
-				: default_variables
-			: theme.variables;
+	// key the default-theme special case on emptiness, not the name, so any theme
+	// carrying variables renders them (a theme merely named 'base' still renders)
+	const variables = theme.variables.length
+		? theme.variables
+		: empty_default_theme
+			? null
+			: default_variables;
 	if (!variables?.length) return '';
 	const rendered_light = variables.map((v) => render_theme_variable(v)).filter(Boolean);
 	const rendered_dark = variables
