@@ -11,4 +11,6 @@ connects after a missed CSS update. Previously the first cold-start page
 load could render with incomplete utility classes until a manual refresh:
 extraction state accumulated only from modules Vite had transformed so far,
 and the corrective HMR update was dropped when the browser hadn't connected
-yet.
+yet. Bundled resources (base-CSS rule index, variable graph) also load
+eagerly at dev-server startup now, overlapping their parse with the
+pre-scan for faster cold starts.
