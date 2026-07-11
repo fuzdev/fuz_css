@@ -11,7 +11,7 @@
 	import {
 		space_variants,
 		palette_variants,
-		role_variants,
+		intent_variants,
 		intensity_variants,
 		shade_variants,
 		text_variants,
@@ -784,19 +784,27 @@ vite_plugin_fuz_css({
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						>{#each role_variants as role (role)}<code
-								>.{role}_{@render variant_range(intensity_variants)}</code
+						>{#each intent_variants as intent (intent)}<code
+								>.{intent}_{@render variant_range(intensity_variants)}</code
 							>{/each}
 					</span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips"
-						>{#each role_variants as role (role)}<code
-								>.bg_{role}_{@render variant_range(intensity_variants)}</code
+						>{#each intent_variants as intent (intent)}<code
+								>.bg_{intent}_{@render variant_range(intensity_variants)}</code
 							>{/each}
 					</span>
 				</li>
 			</ul>
+			<aside>
+				A bare scale class applies its family's dominant use — <code>.palette_a_50</code>,
+				<code>.positive_50</code>, and <code>.text_70</code> set the text color while
+				<code>.shade_50</code> sets the background — and the <code>bg_</code> prefix selects the
+				background twin (<code>.bg_a_50</code>, <code>.bg_positive_50</code>). In compound families
+				a letter alone implies the palette: <code>.border_a_50</code> is the palette family,
+				<code>.border_color_50</code> the alpha ramp.
+			</aside>
 			<aside>
 				Color and text classes (<code>.palette_a_50</code>, <code>.text_70</code>, etc.) also set
 				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
@@ -870,7 +878,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.border_palette_{@render variant_range(palette_variants)}_{@render variant_range(
+							>.border_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -927,7 +935,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.outline_palette_{@render variant_range(palette_variants)}_{@render variant_range(
+							>.outline_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>
@@ -976,7 +984,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips"
 						><code
-							>.shadow_palette_{@render variant_range(palette_variants)}_{@render variant_range(
+							>.shadow_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants,
 							)}</code
 						>

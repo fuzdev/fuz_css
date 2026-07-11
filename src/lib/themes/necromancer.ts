@@ -5,7 +5,7 @@ import {dark_only_variables} from './dark_only.ts';
  * A fantasy exemplar theme built entirely from semantic bindings and levers —
  * the palette letters keep their default hues. Violet surfaces come from
  * binding the neutral to purple, the ectoplasm-green accent from binding the
- * accent role to green, and the lit-from-below character from hue-shifted
+ * accent intent to green, and the lit-from-below character from hue-shifted
  * ramps (highlights warm, shadows cool) with glow-colored depth. Dark-only,
  * vivid past the gamut caps on purpose.
  *

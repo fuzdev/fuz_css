@@ -168,8 +168,11 @@
 			Drag a knob and the whole page rethemes live -- extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
 			theme in the picker above; it persists across navigation until you leave or reset, so copy
-			the <code>Theme</code> object below to keep it. Knob sizes reflect leverage: the big controls
-			reshape the whole system, the small ones are surgical escape hatches.
+			the <code>Theme</code> object below to keep it. The top band holds the semantic-tier moves:
+			assign each intent (accent, neutral, positive, negative, caution, info) to a palette letter --
+			or a custom angle -- and pull the high-leverage levers. Below it, each axis section carries
+			the granular knobs, with per-token escape hatches folded away; the ramp strips repaint live as
+			the derived scales move.
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>

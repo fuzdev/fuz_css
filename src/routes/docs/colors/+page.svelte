@@ -10,7 +10,7 @@
 
 	import HueSwatch from './HueSwatch.svelte';
 	import ColorSwatch from './ColorSwatch.svelte';
-	import {palette_variants} from '$lib/variable_data.ts';
+	import {palette_variants, palette_glosses, type PaletteVariant} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
@@ -21,20 +21,11 @@
 
 	// TODO button to add an inline hue input for runtime modification of the theme
 
-	// letter glosses: color name plus the default role binding where one exists
-	// Note: This array must stay in sync with palette_variants (a-j = 10 elements)
-	const descriptions = [
-		'blue · default accent',
-		'green · default positive',
-		'red · default negative',
-		'purple',
-		'yellow',
-		'brown · default neutral',
-		'pink',
-		'orange · default caution',
-		'cyan · default info',
-		'teal',
-	];
+	// letter glosses: color name plus the default intent binding where one exists
+	const describe_letter = (letter: PaletteVariant): string => {
+		const gloss = palette_glosses[letter];
+		return gloss.binding ? `${gloss.color} · default ${gloss.binding}` : gloss.color;
+	};
 </script>
 
 <TomeContent {tome}>
@@ -51,11 +42,11 @@
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
-			default but could be any color. Meaning attaches through the role knobs layered on top:
+			default but could be any color. Meaning attaches through the intent knobs layered on top:
 			<code>--hue_accent</code> (links, focus, selection, selected states -- what other systems call
 			the "primary" color, named here for what it communicates) defaults to
 			<code>--hue_a</code>, <code>--hue_negative</code> to <code>--hue_c</code>, and so on. Retarget
-			a role to move just that meaning; rotate a letter to move the palette.
+			an intent to move just that meaning; rotate a letter to move the palette.
 		</p>
 	</section>
 	<TomeSection>
@@ -67,7 +58,8 @@
 			</li>
 			<li>
 				<code>--hue_neutral</code> + <code>--neutral_chroma</code> -- the temperature and strength
-				of every surface, text, border, and shadow tint
+				of every surface, text, border, and shadow tint (the neutral intent; its scales are the
+				shade and text ramps)
 			</li>
 			<li>
 				<code>--chroma_scale</code> -- one multiplier from grayscale (0) through calm (1) to vivid
@@ -78,7 +70,7 @@
 				warm-light/cool-shadow character (default 0)
 			</li>
 			<li>
-				role hues -- <code>--hue_accent</code>, <code>--hue_positive</code>,
+				intent hues -- <code>--hue_accent</code>, <code>--hue_positive</code>,
 				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> -- each
 				deriving a full 13-stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
 				matching text and background classes (<code>.positive_50</code>,
@@ -125,8 +117,8 @@
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
-			{#each palette_variants as letter, i (letter)}
-				<HueSwatch {letter} {computed_styles} description={descriptions[i]!} />
+			{#each palette_variants as letter (letter)}
+				<HueSwatch {letter} {computed_styles} description={describe_letter(letter)} />
 			{/each}
 		</ul>
 	</TomeSection>

@@ -92,8 +92,9 @@ export const hue_shift: StyleVariable = {
 
 /*
 
-neutral role knobs - the temperature of every surface, text, border, and shadow
-(replaces the old tint_hue/tint_saturation)
+neutral intent knobs - the temperature of every surface, text, border, and
+shadow (replaces the old tint_hue/tint_saturation); the neutral is an intent
+whose scales are shade_* and text_* rather than a neutral_00-100 family
 
 */
 export const hue_neutral: StyleVariable = {name: 'hue_neutral', light: 'var(--hue_f)'};
@@ -106,13 +107,13 @@ export const neutral_chroma: StyleVariable = {
 
 /*
 
-semantic color roles - meaning-first aliases over the palette letters
+semantic color intents - meaning-first aliases over the palette letters
 
-Role hues retarget what a color communicates without touching the palette:
+Intent hues retarget what a color communicates without touching the palette:
 rotating --hue_accent recolors links, focus, selection, and selected states
-in one move. The letters stay abstract palette slots. Role stops derive
+in one move. The letters stay abstract palette slots. Intent stops derive
 through the same ramps as the palette, so they respond to every curve knob;
-full 13-stop scales derive per role, mirroring the palette
+full 13-stop scales derive per intent, mirroring the palette
 scales, and tree-shake like everything else - unused stops cost nothing.
 
 */
@@ -1816,7 +1817,7 @@ export const link_color_selected: StyleVariable = {
 	light: 'var(--text_color)',
 };
 // ports the old bespoke selection lightness in both schemes (light stop 20,
-// dark stop 80) while following the accent role and every ramp knob
+// dark stop 80) while following the accent intent and every ramp knob
 export const selection_color: StyleVariable = {
 	name: 'selection_color',
 	light: render_ramp_color_css('var(--hue_accent)', '20', '40%'),

@@ -151,7 +151,11 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 ### Three class types
 
 - **Token classes** - Map to style variables: `p_md`, `palette_a_50`,
-  `positive_50`, `gap_lg`
+  `positive_50`, `gap_lg`. A bare scale class applies its family's dominant
+  use (`palette_a_50`/`positive_50`/`text_70` set text color, `shade_50` sets
+  background) with `bg_` twins (`bg_a_50`, `bg_positive_50`); in compound
+  families a letter alone implies the palette (`border_a_50` vs the
+  `border_color_50` alpha ramp)
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
@@ -185,18 +189,20 @@ reaches any theme/base hook without a dedicated token class.
 ## Variable naming
 
 See [variables.ts](src/lib/variables.ts) for definitions,
-[variable_data.ts](src/lib/variable_data.ts) for size/palette/role variants.
+[variable_data.ts](src/lib/variable_data.ts) for size/palette/intent variants.
 
 **Colors (OKLCH, derived):**
 
-- 10 palette hues glossed by color + default role binding: `a` (blue ·
+- 10 palette hues glossed by color + default intent binding
+  (`palette_glosses` in `variable_data.ts`): `a` (blue ·
   accent), `b` (green · positive), `c` (red · negative), `d` (purple), `e`
   (yellow), `f` (brown · neutral), `g` (pink), `h` (orange · caution), `i`
   (cyan · info), `j` (teal)
-- Semantic role knobs alias meaning over the letters: `--hue_accent`
+- Semantic intent knobs alias meaning over the letters: `--hue_accent`
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
-  (all surfaces/text/borders/shadows), `--hue_positive`/`--hue_negative`/
-  `--hue_caution`/`--hue_info`; each role derives a full 13-stop scale
+  (all surfaces/text/borders/shadows — the neutral is an intent whose scales
+  are `shade_*`/`text_*`), `--hue_positive`/`--hue_negative`/
+  `--hue_caution`/`--hue_info`; each intent derives a full 13-stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
   others) with matching text/background token classes (`.positive_50`,
   `.bg_caution_10`)
@@ -326,13 +332,14 @@ typography, borders, shading, shadows, layout. See
   `ColorScheme` type
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
 - `src/lib/themes/` - One module per theme. The registry (base, low/high
-  contrast) is semantic-tier: role bindings + levers only, palette hues
+  contrast) is semantic-tier: intent bindings + levers only, palette hues
   untouched. Unregistered exemplars: necromancer, sunset ember, brutalish,
   and `terminal.ts` (a `create_terminal_theme(hue)` factory; terminal green
   = 145), plus the `dark_only` helper
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
-  (kind/axis/leverage/tier/range) for the knob-tier variables, joined against
-  `default_variables` by name; includes hook knobs like `heading_font_weight`
+  (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
+  against `default_variables` by name; includes hook knobs like
+  `heading_font_weight`
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 

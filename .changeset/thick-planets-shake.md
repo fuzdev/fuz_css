@@ -27,10 +27,16 @@ sunset ember gains a gradient sky, and necromancer and terminal amber get
 modestly denser via `scale_factor`.
 
 New `knobs.ts` module: `theme_knobs`, a typed catalog of the theme-facing
-knobs (`kind`, `axis`, `leverage`, `tier`, ranges) that powers the new inline
-theme editor on the themes docs page — live global retheming, leverage-sized
-controls, flatten-on-load "based on" composition, per-knob reset, and
-copyable `Theme`/CSS output.
+knobs (`kind`, `axis`, `leverage`, `tier`, `bindable`, ranges, plus the
+`knob_axes` display order) that powers the new inline theme editor on the
+themes docs page — live global retheming, a design band of intent bindings
+and high-leverage levers, palette-letter binding pickers for the intent and
+neutral hues (chips write `var(--hue_x)` bindings; a custom escape detaches
+to a literal angle), live ramp strips repainting the derived scales,
+granular token walls folded behind disclosures, flatten-on-load "based on"
+composition guarded against discarding edits, per-knob reset, and copyable
+`Theme`/CSS output. `variable_data.ts` gains `palette_glosses`, the letter →
+color/default-binding display data shared by the docs and the editor.
 
 Retune ("honest chroma"): `--palette_chroma_min/_max/_curve` defaults re-fit
 to hug the per-stop gamut cap envelope, so turning them down now responds

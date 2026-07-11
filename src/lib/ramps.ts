@@ -119,7 +119,7 @@ export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> =
 };
 
 /**
- * Default OKLCH hue angle of the neutral role. In CSS the knob chains to the
+ * Default OKLCH hue angle of the neutral intent. In CSS the knob chains to the
  * palette (`--hue_neutral: var(--hue_f)`), porting the old `tint_hue`
  * behavior; this constant mirrors that default numerically.
  */
@@ -325,7 +325,7 @@ export const render_palette_stop_css = (
 
 /**
  * Renders a color derived from the palette ramps at a stop for an arbitrary
- * hue reference — the shared template behind palette stops and role stops
+ * hue reference — the shared template behind palette stops and intent stops
  * (`--accent_50` renders with `var(--hue_accent)`).
  *
  * @param hue_reference - a CSS expression for the hue, e.g. `var(--hue_accent)`

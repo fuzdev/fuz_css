@@ -29,7 +29,7 @@ const docs_classes: Array<string> = [
 	...shadow_variant_prefixes.flatMap((p) => shadow_size_variants.map((s) => `${p}${s}`)),
 	...shadow_alpha_variants.map((v) => `shadow_alpha_${v}`),
 	...shadow_semantic_values.map((v) => `shadow_color_${v}`),
-	...palette_variants.flatMap((l) => intensity_variants.map((i) => `shadow_palette_${l}_${i}`)),
+	...palette_variants.flatMap((l) => intensity_variants.map((i) => `shadow_${l}_${i}`)),
 	...palette_variants.map((l) => `palette_${l}_50`),
 ];
 

@@ -8,7 +8,7 @@ export const DEFAULT_THEME: Theme = base_theme;
 /**
  * The curated theme registry that theme pickers enumerate.
  *
- * Registry themes are semantic-tier by policy: they move role bindings
+ * Registry themes are semantic-tier by policy: they move intent bindings
  * (which palette letter a meaning points at) and levers (chroma scale, hue
  * shift, curves, form knobs) but never the palette hues themselves, so the
  * letters stay a stable vocabulary across every registered theme.

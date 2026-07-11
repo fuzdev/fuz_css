@@ -2,24 +2,25 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: rework the color system to derived OKLCH, add semantic roles, cascade layers, and themes
+feat: rework the color system to derived OKLCH, add semantic intents, cascade layers, and themes
 
 The color system is now derived: curve knobs → ramp stops → color stops →
 utility classes, computed in pure CSS (`calc()`/`pow()`/`oklch()`), fitted to
 minimize the perceptual delta from the old HSL palette. Breaking changes:
 
 - **`color_` family renamed to `palette_`**: variables `--color_a_50` →
-  `--palette_a_50`, token classes `.color_a_50` → `.palette_a_50`, semantic
-  component classes `.color_a`–`.color_j` → `.palette_a`–`.palette_j`, and
-  the hue+intensity class families `border_color_X_NN` → `border_palette_X_NN`,
-  `outline_color_X_NN` → `outline_palette_X_NN`, `shadow_color_X_NN` →
-  `shadow_palette_X_NN`. `bg_X_NN` classes keep their names. The
-  `border_color_NN` alpha-ramp family (no hue letter) keeps its names.
+  `--palette_a_50`, token classes `.color_a_50` → `.palette_a_50`, and semantic
+  component classes `.color_a`–`.color_j` → `.palette_a`–`.palette_j`. In
+  compound class families the letter alone implies the palette:
+  `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` → `outline_X_NN`,
+  `shadow_color_X_NN` → `shadow_X_NN`, and `bg_X_NN` keeps its name. The
+  letterless families are unchanged (`border_color_NN` alpha ramp,
+  `outline_color_NN` shade outlines, `shadow_color_umbra` semantic colors).
   At the TS level, the letter list in `variable_data.ts` renames with the
   family: `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
 - **`--hue_a`…`--hue_j` values reinterpreted** as OKLCH hue angles (blue is
   now `250`, not HSL `210`). Any consumer CSS doing `hsl(var(--hue_x) …)`
-  breaks — use `oklch(<l> <c> var(--hue_x))` or the palette/role stops.
+  breaks — use `oklch(<l> <c> var(--hue_x))` or the palette/intent stops.
 - **`--tint_hue`/`--tint_saturation` removed** → `--hue_neutral` (defaults to
   `var(--hue_f)`) + `--neutral_chroma` (peak chroma of the neutral scales).
 - **Absolute `_light`/`_dark` variants removed**: the ~286 generated
@@ -33,15 +34,16 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   baked worst-hue sRGB gamut caps), plus derived per-stop variables
   (`--palette_lightness_NN`, `--palette_chroma_NN`, `--chroma_shape_NN`,
   `--hue_shift_NN`) that themes can pin individually.
-- **New semantic role knobs**: `--hue_accent`, `--hue_positive`,
+- **New semantic intent knobs**: `--hue_accent`, `--hue_positive`,
   `--hue_negative`, `--hue_caution`, `--hue_info`, each deriving a full
   13-stop scale through the shared ramps (`--accent_00`…`--accent_100`, same
   for positive/negative/caution/info) with matching lazily-generated text and
   background token classes (`.positive_50`, `.bg_caution_10`), plus the
-  `--selection_color` site variable. Links, focus, selection, selected
-  states, `accent-color`, and disabled-active feedback all route through
-  them; focus now follows the element color (via `--outline_color`) with the
-  accent as fallback.
+  `--selection_color` site variable and the `intent_variants`/`IntentVariant`
+  list in `variable_data.ts`. Links, focus, selection, selected states,
+  `accent-color`, and disabled-active feedback all route through them; focus
+  now follows the element color (via `--outline_color`) with the accent as
+  fallback.
 - **Cascade layers**: all shipped CSS is layered `fuz.base` (defaults) <
   `fuz.theme` (theme overrides) < `fuz.utilities` (generated classes);
   consumers' unlayered styles beat everything. `render_theme_style` lost its

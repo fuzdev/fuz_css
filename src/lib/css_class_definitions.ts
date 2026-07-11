@@ -20,7 +20,7 @@ import {
 	space_variants,
 	distance_variants,
 	palette_variants,
-	role_variants,
+	intent_variants,
 	intensity_variants,
 	shade_variants,
 	shade_scale_variants,
@@ -123,22 +123,22 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		palette_variants,
 		intensity_variants,
 	),
-	// Role intensity classes (text color) - meaning-first twins of the palette classes
+	// Intent intensity classes (text color) - meaning-first twins of the palette classes
 	...generate_classes(
-		(role: string, intensity: string) => ({
-			name: `${role}_${intensity}`,
-			css: `color: var(--${role}_${intensity}); --text_color: var(--${role}_${intensity});`,
+		(intent: string, intensity: string) => ({
+			name: `${intent}_${intensity}`,
+			css: `color: var(--${intent}_${intensity}); --text_color: var(--${intent}_${intensity});`,
 		}),
-		role_variants,
+		intent_variants,
 		intensity_variants,
 	),
-	// Role intensity classes (background color)
+	// Intent intensity classes (background color)
 	...generate_classes(
-		(role: string, intensity: string) => ({
-			name: `bg_${role}_${intensity}`,
-			css: `background-color: var(--${role}_${intensity});`,
+		(intent: string, intensity: string) => ({
+			name: `bg_${intent}_${intensity}`,
+			css: `background-color: var(--${intent}_${intensity});`,
 		}),
-		role_variants,
+		intent_variants,
 		intensity_variants,
 	),
 	// Darken/lighten overlays (non-adaptive, alpha-based)
@@ -181,10 +181,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--border_color_${v}); --border_color: var(--border_color_${v})`,
 		'border_color',
 	),
-	// Border colors using palette hue + intensity (sets both property and contextual variable)
+	// Border colors using palette hue + intensity (sets both property and contextual variable);
+	// the letter alone implies the palette - the alpha-ramp family is `border_color_NN`
 	...generate_classes(
 		(letter: string, intensity: string) => ({
-			name: `border_palette_${letter}_${intensity}`,
+			name: `border_${letter}_${intensity}`,
 			css: `border-color: var(--palette_${letter}_${intensity}); --border_color: var(--palette_${
 				letter
 			}_${intensity});`,
@@ -194,10 +195,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	),
 	// Outline colors using shade scale
 	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
-	// Outline colors using palette hue + intensity (sets both property and contextual variable)
+	// Outline colors using palette hue + intensity (sets both property and contextual variable);
+	// the letter alone implies the palette - the shade family is `outline_color_NN`
 	...generate_classes(
 		(letter: string, intensity: string) => ({
-			name: `outline_palette_${letter}_${intensity}`,
+			name: `outline_${letter}_${intensity}`,
 			css: `outline-color: var(--palette_${letter}_${intensity}); --outline_color: var(--palette_${
 				letter
 			}_${intensity});`,
@@ -252,10 +254,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		shadow_alpha_variants,
 	),
-	// Shadow colors using palette hue + intensity (sets contextual variable only)
+	// Shadow colors using palette hue + intensity (sets contextual variable only);
+	// the letter alone implies the palette - semantic colors are `shadow_color_umbra` etc.
 	...generate_classes(
 		(letter: string, intensity: string) => ({
-			name: `shadow_palette_${letter}_${intensity}`,
+			name: `shadow_${letter}_${intensity}`,
 			css: `--shadow_color: var(--palette_${letter}_${intensity});`,
 		}),
 		palette_variants,

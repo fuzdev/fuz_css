@@ -5,7 +5,7 @@ import type {Theme} from '../theme.ts';
  * the palette letters keep their default hues. The warm haze comes from a
  * strengthened neutral tint (the neutral's default binding to brown `hue_f`
  * already sits at dusk-warm 60°), the ember accent from binding the accent
- * role to orange, and the sunset character from vivid chroma pushed past the
+ * intent to orange, and the sunset character from vivid chroma pushed past the
  * conservative caps on purpose (this theme exists partly to stress weak-hue
  * gamut clipping) with hue-shifted ramps so light ends glow gold and dark
  * ends sink toward crimson. The gradient sky rides the `background_image`

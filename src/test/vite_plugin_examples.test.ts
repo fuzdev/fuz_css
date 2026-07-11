@@ -105,14 +105,14 @@ const EXPECTED_CLASSES = [
 	'flex:1',
 	// From App - Interactive (hover/active state modifiers)
 	'row',
-	'hover:border_palette_b_50',
-	'hover:outline_palette_b_50',
-	'active:border_palette_d_50',
-	'active:outline_palette_d_50',
-	'hover:border_palette_g_50',
-	'hover:outline_palette_g_50',
-	'active:border_palette_h_50',
-	'active:outline_palette_h_50',
+	'hover:border_b_50',
+	'hover:outline_b_50',
+	'active:border_d_50',
+	'active:outline_d_50',
+	'hover:border_g_50',
+	'hover:outline_g_50',
+	'active:border_h_50',
+	'active:outline_h_50',
 ].sort();
 
 /**

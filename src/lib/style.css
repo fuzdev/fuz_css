@@ -560,7 +560,7 @@ TODO think through these patterns to get somewhere consistent
 	}
 
 	:where(:is(button, input, textarea, select):not(.unstyled):focus) {
-		/* follows the element color (.palette_* sets --outline_color), else the accent role */
+		/* follows the element color (.palette_* sets --outline_color), else the accent intent */
 		--border_color: var(--outline_color);
 		--outline_width: var(--outline_width_focus);
 	}

@@ -83,16 +83,16 @@ export const App = () => {
 					<div>
 						<h3>Interactive</h3>
 						<div className="row gap_md mb_lg">
-							<button className="hover:border_palette_b_50 hover:outline_palette_b_50 active:border_palette_d_50 active:outline_palette_d_50" onClick={() => setCount((c) => c + 1)}>
+							<button className="hover:border_b_50 hover:outline_b_50 active:border_d_50 active:outline_d_50" onClick={() => setCount((c) => c + 1)}>
 								count: {count}
 							</button>
-							<span>.hover:border_palette_b_50 .hover:outline_palette_b_50 .active:border_palette_d_50 .active:outline_palette_d_50</span>
+							<span>.hover:border_b_50 .hover:outline_b_50 .active:border_d_50 .active:outline_d_50</span>
 						</div>
 						<div className="row gap_md mb_lg">
-							<button className="hover:border_palette_g_50 hover:outline_palette_g_50 active:border_palette_h_50 active:outline_palette_h_50" onClick={() => setCount(0)}>
+							<button className="hover:border_g_50 hover:outline_g_50 active:border_h_50 active:outline_h_50" onClick={() => setCount(0)}>
 								reset
 							</button>
-							<span>.hover:border_palette_g_50 .hover:outline_palette_g_50 .active:border_palette_h_50 .active:outline_palette_h_50</span>
+							<span>.hover:border_g_50 .hover:outline_g_50 .active:border_h_50 .active:outline_h_50</span>
 						</div>
 					</div>
 				</section>

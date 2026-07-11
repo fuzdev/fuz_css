@@ -31,6 +31,7 @@ export type KnobKind =
 	| 'number' // unitless scalar (multipliers, curves, chroma, weights)
 	| 'percent'
 	| 'length' // CSS length like '0.8rem'
+	| 'time' // CSS time in seconds like '0.2s'
 	| 'color'
 	| 'font_stack'
 	| 'enum'
@@ -56,9 +57,9 @@ export type KnobAxis =
 export type KnobLeverage = 'lg' | 'md' | 'sm';
 
 /**
- * The two-tier theme policy: semantic-tier knobs (role bindings + levers) are
- * safe for registry themes; palette-tier knobs (the letter hues) mark a theme
- * as an exemplar.
+ * The two-tier theme policy: semantic-tier knobs (intent bindings + levers)
+ * are safe for registry themes; palette-tier knobs (the letter hues) mark a
+ * theme as an exemplar.
  */
 export type KnobTier = 'semantic' | 'palette';
 
@@ -82,13 +83,30 @@ export interface ThemeKnob {
 	 * per-tier fallbacks flatten when set).
 	 */
 	hook?: boolean;
+	/**
+	 * True for hue knobs whose default is a palette-letter binding
+	 * (`var(--hue_X)`) — the intent and neutral hues. Editors render these as
+	 * a letter picker with a custom-angle escape, and edits may write either a
+	 * binding or a literal angle.
+	 */
+	bindable?: boolean;
 }
 
 const hue = (
 	name: StyleVariableName,
 	leverage: KnobLeverage,
 	tier: KnobTier = 'semantic',
-): ThemeKnob => ({name, kind: 'hue', axis: 'color', leverage, tier, range: [0, 360], step: 1});
+	bindable = false,
+): ThemeKnob => ({
+	name,
+	kind: 'hue',
+	axis: 'color',
+	leverage,
+	tier,
+	range: [0, 360],
+	step: 1,
+	...(bindable ? {bindable} : null),
+});
 
 const lightness_ramp = (family: string): Array<ThemeKnob> => [
 	{
@@ -126,7 +144,7 @@ const lightness_ramp = (family: string): Array<ThemeKnob> => [
  */
 export const theme_knobs: Array<ThemeKnob> = [
 	// color - the leverage core
-	hue('hue_neutral', 'lg'),
+	hue('hue_neutral', 'lg', 'semantic', true),
 	{
 		name: 'neutral_chroma',
 		kind: 'number',
@@ -136,7 +154,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0, 0.1],
 		step: 0.001,
 	},
-	hue('hue_accent', 'lg'),
+	hue('hue_accent', 'lg', 'semantic', true),
 	{
 		name: 'chroma_scale',
 		kind: 'number',
@@ -155,10 +173,10 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [-45, 45],
 		step: 1,
 	},
-	hue('hue_positive', 'md'),
-	hue('hue_negative', 'md'),
-	hue('hue_caution', 'md'),
-	hue('hue_info', 'md'),
+	hue('hue_positive', 'md', 'semantic', true),
+	hue('hue_negative', 'md', 'semantic', true),
+	hue('hue_caution', 'md', 'semantic', true),
+	hue('hue_info', 'md', 'semantic', true),
 	...lightness_ramp('palette'),
 	...lightness_ramp('shade'),
 	...lightness_ramp('text'),
@@ -381,12 +399,60 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 0.05,
 	},
 	// motion
-	{name: 'duration_1', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
-	{name: 'duration_2', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
-	{name: 'duration_3', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
-	{name: 'duration_4', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
-	{name: 'duration_5', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
-	{name: 'duration_6', kind: 'text', axis: 'motion', leverage: 'sm', tier: 'semantic'},
+	{
+		name: 'duration_1',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
+	{
+		name: 'duration_2',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
+	{
+		name: 'duration_3',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
+	{
+		name: 'duration_4',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
+	{
+		name: 'duration_5',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
+	{
+		name: 'duration_6',
+		kind: 'time',
+		axis: 'motion',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 5],
+		step: 0.01,
+	},
 	{
 		name: 'disabled_opacity',
 		kind: 'percent',
@@ -398,6 +464,19 @@ export const theme_knobs: Array<ThemeKnob> = [
 	},
 	// decoration
 	{name: 'background_image', kind: 'text', axis: 'decoration', leverage: 'md', tier: 'semantic'},
+];
+
+/**
+ * The theme-space axes in editor display order, with display titles.
+ */
+export const knob_axes: Array<{axis: KnobAxis; title: string}> = [
+	{axis: 'color', title: 'Color'},
+	{axis: 'shape', title: 'Shape'},
+	{axis: 'density', title: 'Density'},
+	{axis: 'depth', title: 'Depth'},
+	{axis: 'typography', title: 'Typography'},
+	{axis: 'motion', title: 'Motion'},
+	{axis: 'decoration', title: 'Decoration'},
 ];
 
 /**

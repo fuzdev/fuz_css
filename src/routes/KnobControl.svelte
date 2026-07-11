@@ -3,6 +3,7 @@
 
 	import type {ThemeKnob} from '$lib/knobs.ts';
 	import {PALETTE_HUES} from '$lib/ramps.ts';
+	import {palette_variants, palette_glosses, type PaletteVariant} from '$lib/variable_data.ts';
 
 	const {
 		knob,
@@ -11,6 +12,7 @@
 		onchange,
 		onreset,
 		compact = false,
+		resolve_hue = (letter) => PALETTE_HUES[letter],
 	}: {
 		knob: ThemeKnob;
 		/**
@@ -23,23 +25,45 @@
 		onreset: () => void;
 		/**
 		 * Renders small regardless of the knob's leverage tier, for the
-		 * high-leverage strip duplicated above the granular controls.
+		 * high-leverage band duplicated above the granular controls.
 		 */
 		compact?: boolean;
+		/**
+		 * Resolves a palette letter's current hue angle, so binding displays and
+		 * detachment track theme overrides instead of the shipped defaults.
+		 */
+		resolve_hue?: (letter: PaletteVariant) => number;
 	} = $props();
 
-	// resolve `var(--hue_x)` role bindings to their default angles so the
-	// slider can represent them; dragging writes the literal angle
+	const BINDING_MATCHER = /^var\(--hue_([a-j])\)$/u;
+
+	// the palette letter a bindable knob currently points at, null when detached
+	const bound_letter: PaletteVariant | null = $derived.by(() => {
+		if (!knob.bindable || value === undefined) return null;
+		const m = BINDING_MATCHER.exec(value);
+		return m ? (m[1] as PaletteVariant) : null;
+	});
+
+	// resolve `var(--hue_x)` bindings to their current angles so the slider can
+	// represent them; dragging writes the literal angle
 	const resolve_numeric = (v: string | undefined): number | null => {
 		if (v === undefined) return null;
-		const var_match = /^var\(--hue_([a-j])\)$/u.exec(v);
-		if (var_match) return PALETTE_HUES[var_match[1] as keyof typeof PALETTE_HUES];
-		const n = Number(knob.kind === 'percent' ? v.replace(/%$/u, '') : v);
+		const m = BINDING_MATCHER.exec(v);
+		if (m) return resolve_hue(m[1] as PaletteVariant);
+		let s = v;
+		if (knob.kind === 'percent') s = s.replace(/%$/u, '');
+		else if (knob.kind === 'time') s = s.replace(/(?<=\d)s$/u, '');
+		const n = Number(s);
 		return Number.isNaN(n) ? null : n;
 	};
 
 	const numeric_value = $derived(resolve_numeric(value));
-	const scalar = $derived(knob.kind === 'hue' || knob.kind === 'number' || knob.kind === 'percent');
+	const scalar = $derived(
+		knob.kind === 'hue' ||
+			knob.kind === 'number' ||
+			knob.kind === 'percent' ||
+			knob.kind === 'time',
+	);
 	const min = $derived(knob.range?.[0] ?? 0);
 	const max = $derived(knob.range?.[1] ?? 100);
 	const step = $derived(knob.step ?? 1);
@@ -47,12 +71,46 @@
 	const emit_numeric = (raw: string): void => {
 		const n = Number(raw);
 		if (Number.isNaN(n)) return;
-		onchange(knob.kind === 'percent' ? `${n}%` : String(n));
+		onchange(knob.kind === 'percent' ? `${n}%` : knob.kind === 'time' ? `${n}s` : String(n));
+	};
+
+	const gloss_title = (letter: PaletteVariant): string => {
+		const gloss = palette_glosses[letter];
+		return `${letter} — ${gloss.color}${gloss.binding ? ` · default ${gloss.binding}` : ''}`;
 	};
 </script>
 
 <div class="knob {compact ? 'sm' : knob.leverage}" class:compact>
-	{#if knob.kind === 'hue' && numeric_value !== null}
+	{#if knob.bindable}
+		<!-- intent/neutral hues: a palette-letter binding picker with a
+			custom-angle escape; chips write `var(--hue_x)`, custom detaches to a
+			literal angle -->
+		<div class="title"><code class="knob_name">--{knob.name}</code></div>
+		<div class="letter_chips">
+			{#each palette_variants as letter (letter)}
+				<button
+					type="button"
+					class="letter_chip"
+					class:selected={bound_letter === letter}
+					title={gloss_title(letter)}
+					onclick={() => onchange(`var(--hue_${letter})`)}
+				>
+					<span class="letter_swatch" style:background-color="oklch(0.65 0.14 var(--hue_{letter}))"
+					></span>{letter}
+				</button>
+			{/each}
+			<button
+				type="button"
+				class="letter_chip"
+				class:selected={bound_letter === null}
+				title="detach from the palette and set a literal angle"
+				onclick={() => onchange(String(numeric_value ?? 0))}>custom</button
+			>
+		</div>
+		{#if bound_letter === null && numeric_value !== null}
+			<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
+		{/if}
+	{:else if knob.kind === 'hue' && numeric_value !== null}
 		<!-- HueInput carries its own internal label; the name renders as its title -->
 		<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))}>
 			<code class="knob_name">--{knob.name}</code>
@@ -138,5 +196,23 @@
 	.knob_number {
 		width: 90px;
 		flex-shrink: 0;
+	}
+	.letter_chips {
+		display: flex;
+		flex-wrap: wrap;
+		gap: var(--space_xs2);
+	}
+	.letter_chip {
+		min-height: 0;
+		padding: var(--space_xs2) var(--space_xs);
+		font-size: var(--font_size_sm);
+		font-family: var(--font_family_mono);
+	}
+	.letter_swatch {
+		display: inline-block;
+		width: 0.8em;
+		height: 0.8em;
+		margin-right: var(--space_xs2);
+		border-radius: var(--border_radius_xs2);
 	}
 </style>

@@ -88,9 +88,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_palette_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows.
-			The intensity controls the color's prominence -- 60 is a fine starting point for visible
-			colored shadows.
+			Use <code>shadow_{'{letter}'}_{'{intensity}'}</code> classes to apply colored shadows. The
+			intensity controls the color's prominence -- 60 is a fine starting point for visible colored
+			shadows.
 		</p>
 		{#each palette_variants as color_variant (color_variant)}
 			<TomeSection>
@@ -108,7 +108,7 @@
 	{@const is_hue =
 		color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}
 	{@const shadow_color_name = is_hue
-		? `shadow_palette_${color_variant}_${intensity}`
+		? `shadow_${color_variant}_${intensity}`
 		: color_variant
 			? `shadow_color_${color_variant}`
 			: 'shadow_color_umbra'}
@@ -162,8 +162,8 @@
 {/snippet}
 
 {#snippet intensity_selector(color_variant: PaletteVariant)}
-	<TomeSectionHeader text="shadow_palette_{color_variant}" tag="h3"
-		>shadow_palette_{color_variant}_{selected_intensity}</TomeSectionHeader
+	<TomeSectionHeader text="shadow_{color_variant}" tag="h3"
+		>shadow_{color_variant}_{selected_intensity}</TomeSectionHeader
 	>
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">

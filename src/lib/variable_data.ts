@@ -138,8 +138,37 @@ export const icon_sizes = {
 export type PaletteVariant = ArrayElement<typeof palette_variants>;
 export const palette_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j'] as const;
 
-export type RoleVariant = ArrayElement<typeof role_variants>;
-export const role_variants = ['accent', 'positive', 'negative', 'caution', 'info'] as const;
+/**
+ * The semantic color intents that derive full scales through the shared
+ * ramps. The neutral is also an intent (`--hue_neutral`) but is absent here
+ * because its scales are `shade_*` and `text_*` rather than a
+ * `neutral_00`–`neutral_100` family.
+ */
+export type IntentVariant = ArrayElement<typeof intent_variants>;
+export const intent_variants = ['accent', 'positive', 'negative', 'caution', 'info'] as const;
+
+/**
+ * Letter glosses: each palette slot's default color plus its default intent
+ * binding where one exists. Display data for docs and the theme editor —
+ * themes recolor the slots, so these describe the defaults, not promises.
+ * The neutral binds like an intent (`--hue_neutral: var(--hue_f)`) despite
+ * being absent from `intent_variants`.
+ */
+export const palette_glosses: Record<
+	PaletteVariant,
+	{color: string; binding?: IntentVariant | 'neutral'}
+> = {
+	a: {color: 'blue', binding: 'accent'},
+	b: {color: 'green', binding: 'positive'},
+	c: {color: 'red', binding: 'negative'},
+	d: {color: 'purple'},
+	e: {color: 'yellow'},
+	f: {color: 'brown', binding: 'neutral'},
+	g: {color: 'pink'},
+	h: {color: 'orange', binding: 'caution'},
+	i: {color: 'cyan', binding: 'info'},
+	j: {color: 'teal'},
+};
 
 export type IntensityVariant = NumericScaleVariant;
 export const intensity_variants = numeric_scale_variants;

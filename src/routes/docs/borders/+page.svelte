@@ -190,7 +190,7 @@ border-color: var(--shade_30);
 		<TomeSectionHeader text="Outlines" />
 		<p>
 			Each border utility class has a corresponding outline variant using the same border variables
-			(like <code>outline_palette_b_50</code>, <code>outline_width_4</code>, and
+			(like <code>outline_b_50</code>, <code>outline_width_4</code>, and
 			<code>outline-style:solid</code>), and there are also two special outline variables:
 		</p>
 		<div class="border_examples outline_widths">
