@@ -50,16 +50,21 @@ minimize the perceptual delta from the old HSL palette. Breaking changes:
   `specificity` option (the `:root:root` hack) and gained
   `layer?: string | null` (default `'fuz.theme'`); `generate_theme_css` lost
   its specificity parameter; the `theme_specificity` generator option is
-  removed. Custom `base_css` input is re-layered into `fuz.base` in bundled
-  output — its own `@layer` identities aren't preserved.
+  removed. `render_theme_style`'s default-theme special case now keys on
+  empty `variables` rather than the `'base'` name — a theme that carries
+  variables always renders them regardless of its name; an empty theme still
+  renders nothing by default and the full `default_variables` set under
+  `empty_default_theme: false`. Custom `base_css` input is re-layered into
+  `fuz.base` in bundled output — its own `@layer` identities aren't
+  preserved.
 - **`color-mix()` interpolation moved from `in hsl` to `in oklab`** in button
   fills/borders, composites, and shadow classes.
 - **Themes**: one module per theme under `themes/`
   (`@fuzdev/fuz_css/themes/necromancer.ts` etc.); `themes.ts` exports the
   curated `default_themes` registry (base, low contrast, high contrast)
   with unregistered expressive exemplars (necromancer, sunset ember,
-  brutalish, terminal green + the `create_terminal_theme(hue)` factory). The contrast themes are rewritten as curve-knob
-  overrides.
+  brutalish, terminal green + the `create_terminal_theme(hue)` factory).
+  The contrast themes are rewritten as curve-knob overrides.
 - **New design-time modules**: `ramps.ts` (fitted knob constants, numeric
   evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), `wcag.ts`
   (luminance/contrast), with tests gating every default stop for gamut,

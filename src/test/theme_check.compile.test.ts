@@ -46,12 +46,12 @@ describe('compile_theme', () => {
 		assert.strictEqual(input.variables.length, before);
 	});
 
-	test('a dark-only mirror recomputes stale light-scheme caps', () => {
+	test('a dark stance recomputes stale light-scheme caps', () => {
 		const {theme} = compile_theme(necromancer_theme);
 		const overrides = theme.variables.slice(necromancer_theme.variables.length);
 		assert.isAbove(overrides.length, 0);
-		// the light scheme rides the dark lightness ramp, so its baked worst-hue
-		// caps are stale and must be recomputed
+		// the stance resolves the light scheme through the dark lightness ramp, so
+		// the baked worst-hue caps are stale and must be recomputed
 		const changed = overrides.some(
 			(v) => Math.abs(cap_of(v.light) - PALETTE_CHROMA_CAPS.light[stop_of(v.name)]) > 0.002,
 		);

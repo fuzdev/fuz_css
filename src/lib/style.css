@@ -50,6 +50,8 @@ Notes:
 		background-image: var(--background_image);
 		color: var(--text_color);
 		accent-color: var(--accent_50);
+		scrollbar-color: var(--scrollbar_thumb_color, var(--shade_40))
+			var(--scrollbar_track_color, transparent);
 		line-height: var(--line_height_md);
 		font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
 		/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -87,6 +89,11 @@ Notes:
 		cursor: pointer;
 	}
 
+	dialog::backdrop {
+		/* same default dim as fuz_ui's Dialog, themable through one hook */
+		background-color: var(--backdrop_color, var(--darken_60));
+	}
+
 	/*
 
 Keep hidden behavior when `display` is set.
@@ -109,6 +116,19 @@ Respects `hidden="until-found"` for find-in-page support.
 			--duration_3: initial;
 			--duration_2: initial;
 			--duration_1: initial;
+		}
+	}
+
+	/* map the OS contrast preference onto the curve knobs, mirroring the
+		'high contrast' theme; theme overrides beat this from fuz.theme */
+	@media (prefers-contrast: more) {
+		:root {
+			--shade_lightness_00: 1;
+			--text_lightness_curve: 0.45;
+		}
+		:root.dark {
+			--shade_lightness_00: 0;
+			--text_lightness_curve: 0.31;
 		}
 	}
 
@@ -317,6 +337,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		line-height: normal;
 		display: block;
 		color: var(--text_color);
+		caret-color: var(--caret_color, var(--accent_50));
 		background-color: var(--input_fill);
 		border-color: var(--border_color);
 		border-style: var(--border_style);

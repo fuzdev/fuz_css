@@ -230,6 +230,11 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks —
   setting it flattens the heading ladder), `--heading_font_family`, and the
   `--background_image` decoration hook on `:root`
+- Micro-surface hooks consumed by `style.css` via `var()` fallbacks:
+  `--caret_color` (defaults to the accent), `--scrollbar_thumb_color`/
+  `--scrollbar_track_color` (default into the shade scale), `--backdrop_color`
+  (the `dialog::backdrop` dim); `prefers-contrast: more` maps onto the curve
+  knobs mirroring the high-contrast theme, theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
@@ -340,18 +345,20 @@ typography, borders, shading, shadows, layout. See
 - [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
   (design-time + tests only)
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
-- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
+- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the
+  `scheme` stance (a single-scheme theme mirrors the adaptive defaults and
+  pins `color-scheme`, rendering its one appearance in both schemes),
   `ColorScheme` type
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
 - `src/lib/themes/` - One module per theme. The registry (base, low/high
   contrast) is semantic-tier: intent bindings + levers only, palette hues
   untouched. Unregistered exemplars: necromancer, sunset ember, brutalish,
   and `terminal.ts` (a `create_terminal_theme(hue)` factory; terminal green
-  = 145), plus the `dark_only` helper
+  = 145); necromancer and terminal are dark-only via `scheme: 'dark'`
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
-  `heading_font_weight`
+  `heading_font_weight` and the micro-surface color hooks
 - [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
   numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
   contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over

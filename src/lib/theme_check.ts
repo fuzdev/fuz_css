@@ -34,13 +34,16 @@
  * The effective-value merge mirrors the renderer's cascade-layer semantics
  * (`theme.ts` `render_theme_style`, `theme_editor_state.svelte.ts`
  * `display_value`): light = `theme.light`; dark = `theme.dark ?? theme.light`,
- * falling back to the numeric-twin default for the scheme.
+ * falling back to the numeric-twin default for the scheme. A single-scheme
+ * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
+ * mirror the renderer emits, so the gates evaluate the stanced reality in
+ * both schemes.
  *
  * @module
  */
 
 import {StyleVariable} from './variable.ts';
-import type {Theme} from './theme.ts';
+import {scheme_stance_variables, type Theme} from './theme.ts';
 import {default_variables} from './variables.ts';
 import {theme_knob_by_name, theme_knob_hook_names, type ThemeKnob} from './knobs.ts';
 import {
@@ -196,15 +199,24 @@ const COMPILED_CAP_MATCHER =
  */
 class ThemeResolver {
 	readonly #by_name: Map<string, StyleVariable>;
+	readonly #authored_names: Set<string>;
 	readonly #memo: Map<string, Resolved> = new Map();
 
 	constructor(theme: Theme) {
 		this.#by_name = new Map(theme.variables.map((v) => [v.name, v]));
+		this.#authored_names = new Set(this.#by_name.keys());
+		// a single-scheme stance resolves through the renderer's mirror, so both
+		// schemes see the stanced values; mirror entries are not author pins
+		if (theme.scheme === 'light' || theme.scheme === 'dark') {
+			for (const v of scheme_stance_variables(theme.scheme, theme.variables)) {
+				this.#by_name.set(v.name, v);
+			}
+		}
 	}
 
 	/** Whether the theme authors a value for `name` (a pin). */
 	pinned(name: string): boolean {
-		return this.#by_name.has(name);
+		return this.#authored_names.has(name);
 	}
 
 	/** Resolves `name` for `scheme`, memoized per name+scheme. */
@@ -469,6 +481,13 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 	if (!theme.name) {
 		issues.push({level: 'error', message: 'theme name must be non-empty'});
 	}
+	const scheme: unknown = (theme as {scheme?: unknown}).scheme;
+	if (scheme !== undefined && scheme !== 'dual' && scheme !== 'light' && scheme !== 'dark') {
+		issues.push({
+			level: 'error',
+			message: `invalid scheme ${JSON.stringify(scheme)} — expected 'dual', 'light', or 'dark'`,
+		});
+	}
 	for (const variable of theme.variables) {
 		const parsed = StyleVariable.safeParse(variable);
 		const name: unknown = (variable as {name?: unknown}).name;
@@ -524,6 +543,7 @@ const gamut_excess = ([r, g, b]: RgbUnit): number => Math.max(0, -r, r - 1, -g, 
  */
 export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const resolver = new ThemeResolver(theme);
+	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 	const entries: Array<ThemeGateEntry> = [];
 	const unchecked: Array<ThemeUncheckedEntry> = [];
 	const seen_unchecked: Set<string> = new Set();
@@ -714,8 +734,9 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			}
 		}
 
-		// contrast: UI affordances — every letter and intent fill at stop 50
-		const text_max: RgbUnit = scheme === 'light' ? [0, 0, 0] : [1, 1, 1];
+		// contrast: UI affordances — every letter and intent fill at stop 50;
+		// a stance renders its scheme's appearance in both, so text_max follows it
+		const text_max: RgbUnit = (stance ?? scheme) === 'light' ? [0, 0, 0] : [1, 1, 1];
 		const fills: Array<[string, number]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
@@ -855,6 +876,7 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		}
 	}
 
-	const compiled: Theme = {name: theme.name, variables: [...theme.variables, ...cap_overrides]};
+	// spread to preserve the scheme stance (and any future fields)
+	const compiled: Theme = {...theme, variables: [...theme.variables, ...cap_overrides]};
 	return {theme: compiled, report: check_theme(compiled), issues};
 };

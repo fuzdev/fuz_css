@@ -8,9 +8,25 @@ export type ColorScheme = 'dark' | 'light' | 'auto';
 
 export const color_schemes: Array<ColorScheme> = ['light', 'auto', 'dark'];
 
+/**
+ * A theme's scheme stance: which color schemes it supports. `'dual'` themes
+ * render light and dark appearances from each variable's slots; `'light'` and
+ * `'dark'` themes render that single appearance in both color schemes.
+ */
+export type ThemeScheme = 'dual' | 'light' | 'dark';
+
 export interface Theme {
 	name: string;
 	variables: Array<StyleVariable>;
+	/**
+	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance mirrors
+	 * every scheme-adaptive default the theme doesn't override so the stanced
+	 * scheme's values apply in both color schemes (see
+	 * `scheme_stance_variables`), and pins `color-scheme` on the scope so form
+	 * controls and native scrollbars agree. A stanced theme's own variables
+	 * are best authored single-slot in the light/base position.
+	 */
+	scheme?: ThemeScheme;
 }
 
 /**
@@ -41,17 +57,46 @@ export interface RenderThemeStyleOptions {
 	layer?: string | null;
 }
 
+/**
+ * Computes the mirror a single-scheme stance implies: every scheme-adaptive
+ * default (dual-slot entry in `default_variables`) not overridden by
+ * `variables`, re-slotted so the stanced scheme's value applies in both color
+ * schemes — into the base slot for a `'dark'` stance, into the dark slot for
+ * a `'light'` stance (defeating the base dark values by cascade-layer order).
+ */
+export const scheme_stance_variables = (
+	scheme: 'light' | 'dark',
+	variables: Array<StyleVariable>,
+): Array<StyleVariable> => {
+	const overridden = new Set(variables.map((v) => v.name));
+	const mirrored: Array<StyleVariable> = [];
+	for (const v of default_variables) {
+		if (v.dark === undefined || overridden.has(v.name)) continue;
+		if (scheme === 'dark') {
+			mirrored.push({name: v.name, light: v.dark});
+		} else if (v.light !== undefined) {
+			mirrored.push({name: v.name, dark: v.light});
+		}
+	}
+	return mirrored;
+};
+
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
 	const {comments = false, id = null, empty_default_theme = true, layer = 'fuz.theme'} = options;
+	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 	// key the default-theme special case on emptiness, not the name, so any theme
-	// carrying variables renders them (a theme merely named 'base' still renders)
-	const variables = theme.variables.length
+	// carrying variables renders them (a theme merely named 'base' still renders);
+	// a stanced theme always renders its stance mirror, even with no variables
+	const own = theme.variables.length
 		? theme.variables
 		: empty_default_theme
 			? null
 			: default_variables;
-	if (!variables?.length) return '';
+	// mirrored defaults first so the theme's own variables win by order
+	const variables = [...(stance ? scheme_stance_variables(stance, own ?? []) : []), ...(own ?? [])];
+	if (!variables.length && !stance) return '';
 	const rendered_light = variables.map((v) => render_theme_variable(v)).filter(Boolean);
+	if (stance) rendered_light.unshift(`color-scheme: ${stance};`);
 	const rendered_dark = variables
 		.map((v) => render_theme_variable(v, true, comments))
 		.filter(Boolean);

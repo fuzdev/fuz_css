@@ -9,7 +9,13 @@ import {necromancer_theme} from '$lib/themes/necromancer.ts';
 import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 import {brutalish_theme} from '$lib/themes/brutalish.ts';
 import {terminal_green_theme, create_terminal_theme} from '$lib/themes/terminal.ts';
-import {PALETTE_HUES, palette_stop_oklch, shade_stop_oklch} from '$lib/ramps.ts';
+import {
+	PALETTE_HUES,
+	PALETTE_CHROMA_KNOBS,
+	SHADE_LIGHTNESS_KNOBS,
+	palette_stop_oklch,
+	shade_stop_oklch,
+} from '$lib/ramps.ts';
 import {oklch_to_srgb} from '$lib/oklch.ts';
 import {wcag_contrast_ratio} from '$lib/wcag.ts';
 
@@ -70,6 +76,14 @@ describe('validate_theme', () => {
 			validate_theme({name: 't', variables: [{name: 'hue_accent', light: 'var(--hue_d)'}]}),
 			[],
 		);
+	});
+
+	test('scheme stance values validate', () => {
+		for (const scheme of ['dual', 'light', 'dark'] as const) {
+			assert.deepEqual(validate_theme({name: 't', variables: [], scheme}), []);
+		}
+		const issues = validate_theme({name: 't', variables: [], scheme: 'dusk' as 'dark'});
+		assert.isTrue(issues.some((i) => i.level === 'error'));
 	});
 });
 
@@ -159,18 +173,12 @@ describe('check_theme', () => {
 		assert.isTrue(check_theme(high_contrast_theme).ok);
 	});
 
-	test('low contrast dips below the WCAG gates by design', () => {
-		// low_contrast deliberately darkens the page (shade_lightness_00) and
-		// softens the tint, so subtle text, links, and mid fills fall below the
-		// fixed AA/AAA thresholds — the gate surfaces the tradeoff rather than
-		// blessing it. gamut, monotonicity, and resolution stay clean.
+	test('low contrast passes every gate', () => {
+		// tuned to the softest shade compression that clears the fixed AA/AAA
+		// thresholds, so the whole registry passes its own gates
 		const report = check_theme(low_contrast_theme);
 		assert.strictEqual(report.unchecked.length, 0);
-		assert.isTrue(report.entries.filter((e) => e.gate === 'gamut').every((e) => e.pass));
-		assert.isTrue(report.entries.filter((e) => e.gate === 'monotonicity').every((e) => e.pass));
-		const contrast_fails = report.entries.filter((e) => e.gate === 'contrast' && !e.pass);
-		assert.isAbove(contrast_fails.length, 0, 'low contrast is expected to dip below the gates');
-		assert.isFalse(report.ok);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
 	});
 
 	test('brutalish passes every gate', () => {
@@ -211,5 +219,52 @@ describe('check_theme', () => {
 		);
 		assert(entry, 'monotonicity entry exists');
 		assert.isFalse(entry.pass);
+	});
+});
+
+describe('scheme stance', () => {
+	test('a dark stance resolves light-scheme knobs to the dark defaults', () => {
+		const theme: Theme = {name: 't', variables: [], scheme: 'dark'};
+		assert.strictEqual(
+			resolve_theme_knob(theme, 'shade_lightness_00', 'light'),
+			SHADE_LIGHTNESS_KNOBS.dark.lightness_00,
+		);
+		assert.strictEqual(
+			resolve_theme_knob(theme, 'palette_chroma_max', 'light'),
+			PALETTE_CHROMA_KNOBS.dark.chroma_max,
+		);
+	});
+
+	test('an authored value beats the stance mirror', () => {
+		const theme: Theme = {
+			name: 't',
+			variables: [{name: 'shade_lightness_00', light: '0.5'}],
+			scheme: 'dark',
+		};
+		assert.strictEqual(resolve_theme_knob(theme, 'shade_lightness_00', 'light'), 0.5);
+	});
+
+	test('a dark stance evaluates the same reality in both schemes', () => {
+		const report = check_theme({name: 't', variables: [], scheme: 'dark'});
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		const dark_by_subject = new Map(
+			report.entries.filter((e) => e.scheme === 'dark').map((e) => [`${e.gate}|${e.subject}`, e]),
+		);
+		for (const entry of report.entries) {
+			if (entry.scheme !== 'light') continue;
+			const twin = dark_by_subject.get(`${entry.gate}|${entry.subject}`);
+			assert(twin, `dark twin exists for ${entry.subject}`);
+			assert.closeTo(entry.value, twin.value, 1e-9, `${entry.gate} ${entry.subject}`);
+		}
+	});
+
+	test('the dark-stanced exemplars pass their contrast gates in both schemes', () => {
+		for (const theme of [necromancer_theme, terminal_green_theme]) {
+			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
+			assert.isTrue(
+				contrast.every((e) => e.pass),
+				`${theme.name}: ${JSON.stringify(contrast.filter((e) => !e.pass))}`,
+			);
+		}
 	});
 });

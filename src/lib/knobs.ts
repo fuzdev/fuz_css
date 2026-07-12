@@ -208,6 +208,24 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0.2, 4],
 		step: 0.01,
 	},
+	// color - micro-surface hooks consumed by style.css via var() fallbacks
+	{name: 'caret_color', kind: 'color', axis: 'color', leverage: 'sm', tier: 'semantic', hook: true},
+	{
+		name: 'scrollbar_thumb_color',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		hook: true,
+	},
+	{
+		name: 'scrollbar_track_color',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		hook: true,
+	},
 	// color - the palette tier (moving these makes a theme an exemplar)
 	hue('hue_a', 'sm', 'palette'),
 	hue('hue_b', 'sm', 'palette'),
@@ -301,6 +319,15 @@ export const theme_knobs: Array<ThemeKnob> = [
 	{name: 'shadow_color_highlight', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
 	{name: 'shadow_color_glow', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
 	{name: 'shadow_color_shroud', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
+	// the dialog/fullscreen ::backdrop dim, a style.css var() fallback hook
+	{
+		name: 'backdrop_color',
+		kind: 'color',
+		axis: 'depth',
+		leverage: 'sm',
+		tier: 'semantic',
+		hook: true,
+	},
 	{name: 'button_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},
 	{name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},
 	{name: 'button_shadow_active', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},

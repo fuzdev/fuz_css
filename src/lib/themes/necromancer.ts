@@ -1,13 +1,12 @@
 import type {Theme} from '../theme.ts';
-import {dark_only_variables} from './dark_only.ts';
 
 /**
  * A fantasy exemplar theme built entirely from semantic bindings and levers —
  * the palette letters keep their default hues. Violet surfaces come from
  * binding the neutral to purple, the ectoplasm-green accent from binding the
  * accent intent to green, and the lit-from-below character from hue-shifted
- * ramps (highlights warm, shadows cool) with glow-colored depth. Dark-only,
- * vivid past the gamut caps on purpose.
+ * ramps (highlights warm, shadows cool) with glow-colored depth. Dark-only
+ * via the `scheme` stance, vivid past the gamut caps on purpose.
  *
  * Declared subversions: none — negative stays red.
  *
@@ -18,10 +17,11 @@ import {dark_only_variables} from './dark_only.ts';
  */
 export const necromancer_theme: Theme = {
 	name: 'necromancer',
+	scheme: 'dark',
 	variables: [
 		// grave-violet surfaces and text: the neutral binds to the purple slot
 		{name: 'hue_neutral', light: 'var(--hue_d)'},
-		{name: 'neutral_chroma', light: '0.035', dark: '0.04'},
+		{name: 'neutral_chroma', light: '0.04'},
 		// ectoplasm accent: links/focus/selection glow green over the violet world
 		{name: 'hue_accent', light: 'var(--hue_b)'},
 		// painterly ramps: shadows cool toward blue-violet, highlights warm toward magenta
@@ -30,7 +30,6 @@ export const necromancer_theme: Theme = {
 		{name: 'chroma_scale', light: '1.15'},
 		// modestly compact - crypt density
 		{name: 'scale_factor', light: '0.9'},
-		...dark_only_variables,
 		// glow depth: shadows are accent-lit halos instead of neutral light
 		{name: 'shadow_color_umbra', light: 'oklch(0.72 0.15 var(--hue_accent))'},
 		{name: 'shadow_color_glow', light: 'oklch(0.75 0.16 var(--hue_accent))'},
