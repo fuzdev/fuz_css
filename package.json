@@ -1,7 +1,7 @@
 {
   "name": "@fuzdev/fuz_css",
   "version": "0.63.2",
-  "description": "CSS framework and design system for semantic HTML",
+  "description": "semantic-first CSS framework and design system",
   "tagline": "CSS with more utility",
   "glyph": "🪴",
   "logo": "logo.svg",
