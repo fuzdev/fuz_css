@@ -56,6 +56,16 @@
 			DX with low overhead.
 		</p>
 		<p>
+			Most color variables are <em>derived</em>: curve knobs feed ramp stops, ramp stops feed color
+			stops, all computed in pure CSS (<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>).
+			A theme is a set of knob values, not a stylesheet -- it usually moves a handful of
+			high-leverage variables (intent bindings like <code>hue_accent</code>, levers like
+			<code>chroma_scale</code> and <code>radius_scale</code>, the lightness curve knobs) and
+			everything downstream re-derives, while any individual variable stays pinnable as the escape
+			hatch. See <TomeLink slug="colors" /> for the color system and <TomeLink slug="themes" /> for
+			theming.
+		</p>
+		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
 			variables your code uses are emitted, along with any they depend on. The full
 			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode
@@ -71,6 +81,8 @@
 			content={`export interface Theme {
 	name: string;
 	variables: StyleVariable[];
+	/** Single-scheme themes render one appearance in both color schemes. */
+	scheme?: 'dual' | 'light' | 'dark';
 }
 
 export interface StyleVariable {

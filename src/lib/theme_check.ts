@@ -104,8 +104,8 @@ export const known_theme_variable_names: Set<string> = new Set([
 
 /**
  * A structural lint finding. `error` marks a broken theme (bad shape, unknown
- * variable); `warning` is advisory (value doesn't match the knob's kind or
- * sits outside its safe range).
+ * variable); `warning` is advisory (value doesn't match the knob's kind, sits
+ * outside its safe range, or is a dark slot on a single-scheme-stanced theme).
  */
 export interface ThemeIssue {
 	level: 'error' | 'warning';
@@ -488,6 +488,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 			message: `invalid scheme ${JSON.stringify(scheme)} — expected 'dual', 'light', or 'dark'`,
 		});
 	}
+	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
 	for (const variable of theme.variables) {
 		const parsed = StyleVariable.safeParse(variable);
 		const name: unknown = (variable as {name?: unknown}).name;
@@ -510,6 +511,18 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 				variable: valid.name,
 			});
 			continue;
+		}
+		// a stanced theme renders one appearance in both color schemes, so a
+		// dark slot only shadows the base slot when the `.dark` class is set,
+		// silently splitting the appearances the stance promises to unify
+		if (stance && valid.dark !== undefined) {
+			issues.push({
+				level: 'warning',
+				message: `"${valid.name}" carries a dark slot under a '${
+					stance
+				}' scheme stance — stanced themes render one appearance in both color schemes, so author single-slot values`,
+				variable: valid.name,
+			});
 		}
 		const knob = theme_knob_by_name.get(valid.name);
 		if (!knob) continue;

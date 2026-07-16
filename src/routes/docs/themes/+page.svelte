@@ -158,6 +158,13 @@
 			lang="ts"
 			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
 		/>
+		<p>
+			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> -- the
+			renderer then mirrors every scheme-adaptive default the theme doesn't override, so its one
+			appearance renders in both color schemes, and pins
+			<MdnLink path="Web/CSS/color-scheme" /> to match so form controls and scrollbars agree. The
+			necromancer and terminal exemplars are dark-only this way, without hand-mirrored knob values.
+		</p>
 		<div class="width_atmost_xs mb_lg">
 			<ThemeInput themes={exemplar_themes} select={select_theme} />
 		</div>
@@ -168,11 +175,12 @@
 			Drag a knob and the whole page rethemes live -- extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
 			theme in the picker above; it persists across navigation until you leave or reset, so copy
-			the <code>Theme</code> object below to keep it. The top band holds the semantic-tier moves:
-			assign each intent (accent, neutral, positive, negative, caution, info) to a palette letter --
-			or a custom angle -- and pull the high-leverage levers. Below it, each axis section carries
-			the granular knobs, with per-token escape hatches folded away; the ramp strips repaint live as
-			the derived scales move.
+			the <code>Theme</code> object below to keep it. The scheme selector sets the theme's stance --
+			a single-scheme theme renders its one appearance in both color schemes, so edits write the
+			base slots. The top band holds the semantic-tier moves: assign each intent (accent, neutral,
+			positive, negative, caution, info) to a palette letter -- or a custom angle -- and pull the
+			high-leverage levers. Below it, each axis section carries the granular knobs, with per-token
+			escape hatches folded away; the ramp strips repaint live as the derived scales move.
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>

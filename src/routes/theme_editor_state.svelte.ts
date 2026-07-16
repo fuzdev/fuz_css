@@ -1,6 +1,6 @@
 import {SvelteMap} from 'svelte/reactivity';
 
-import type {Theme} from '$lib/theme.ts';
+import type {Theme, ThemeScheme} from '$lib/theme.ts';
 import type {StyleVariable} from '$lib/variable.ts';
 import {default_variables} from '$lib/variables.ts';
 import {theme_knob_by_name} from '$lib/knobs.ts';
@@ -28,6 +28,7 @@ export interface SlotOverride {
 export interface ThemeEditorSnapshotData {
 	name: string;
 	based_on: string;
+	scheme: ThemeScheme;
 	overrides: Array<[string, SlotOverride]>;
 }
 
@@ -44,12 +45,20 @@ export interface ThemeEditorSnapshotData {
  * layer order, so omitting it would silently change dark mode too. A base
  * theme that itself sets only light slots (e.g. dark-only mirrors) chose
  * those cross-scheme semantics deliberately and is left alone.
+ *
+ * A single-scheme stance (`Theme.scheme`) changes both halves: edits always
+ * write the light/base slot (the stance renders that one appearance in both
+ * color schemes, so dual slots are meaningless), and the merge skips the
+ * dark-slot preservation (the renderer's stance mirror handles untouched
+ * defaults). Switching into a stance re-slots existing overrides so the
+ * stanced scheme's edited values become the base slots.
  */
 export class ThemeEditorState {
 	readonly themes: Array<Theme> = [];
 
 	name: string = $state.raw('new theme');
 	based_on: string = $state.raw('base');
+	scheme: ThemeScheme = $state.raw('dual');
 	readonly overrides: SvelteMap<string, SlotOverride> = new SvelteMap();
 
 	constructor(themes: Array<Theme>) {
@@ -60,11 +69,18 @@ export class ThemeEditorState {
 		this.themes.find((t) => t.name === this.based_on) ?? this.themes[0]!,
 	);
 
+	readonly base_scheme: ThemeScheme = $derived(this.base_theme.scheme ?? 'dual');
+
+	/** The single-scheme stance, `null` for dual themes. */
+	readonly stance: 'light' | 'dark' | null = $derived(
+		this.scheme === 'light' || this.scheme === 'dark' ? this.scheme : null,
+	);
+
 	readonly base_variable_by_name: Map<string, StyleVariable> = $derived(
 		new Map(this.base_theme.variables.map((v) => [v.name, v])),
 	);
 
-	readonly dirty: boolean = $derived(this.overrides.size > 0);
+	readonly dirty: boolean = $derived(this.overrides.size > 0 || this.scheme !== this.base_scheme);
 
 	/**
 	 * True when the draft (or its base) moves palette-tier knobs — the letter
@@ -102,8 +118,9 @@ export class ThemeEditorState {
 		const light = o?.light ?? b?.light;
 		let dark = o?.dark ?? b?.dark;
 		// preserve a scheme-adaptive default's dark slot for fresh light-only
-		// overrides - see the class comment for the cascade-layer rationale
-		if (o?.light !== undefined && dark === undefined && !b) {
+		// overrides - see the class comment for the cascade-layer rationale;
+		// under a stance the renderer's mirror owns the cross-scheme story
+		if (o?.light !== undefined && dark === undefined && !b && !this.stance) {
 			dark = default_variable_by_name.get(name)?.dark;
 		}
 		if (dark !== undefined && dark === light) dark = undefined;
@@ -115,23 +132,35 @@ export class ThemeEditorState {
 	}
 
 	/** The live-applied theme, stably named so pickers key it consistently. */
-	readonly draft: Theme = $derived({name: UNSAVED_THEME_NAME, variables: this.merged_variables});
+	readonly draft: Theme = $derived({
+		name: UNSAVED_THEME_NAME,
+		variables: this.merged_variables,
+		...(this.stance ? {scheme: this.stance} : {}),
+	});
 
 	/** The copyable theme, carrying the user's chosen name. */
-	readonly output: Theme = $derived({name: this.name, variables: this.merged_variables});
+	readonly output: Theme = $derived({
+		name: this.name,
+		variables: this.merged_variables,
+		...(this.stance ? {scheme: this.stance} : {}),
+	});
 
 	/**
 	 * The value a scheme currently renders for a variable, derived from the
 	 * same merge the renderer uses so the two can't disagree — including the
-	 * theme layer's light slots beating the base defaults' dark slots, and the
+	 * theme layer's light slots beating the base defaults' dark slots, the
 	 * merge preserving a scheme-adaptive default's dark slot under fresh
-	 * light-only overrides.
+	 * light-only overrides, and a single-scheme stance mirroring untouched
+	 * scheme-adaptive defaults so both schemes show the stanced appearance.
 	 */
 	display_value(name: string, scheme: ColorSchemeVariant): string | undefined {
 		const merged = this.#merge_variable(name);
 		const d = default_variable_by_name.get(name);
-		if (scheme === 'light') return merged?.light ?? d?.light;
-		return merged?.dark ?? merged?.light ?? d?.dark ?? d?.light;
+		// the renderer's stance mirror applies only to defaults the theme
+		// doesn't touch, re-slotted so the stanced value wins in both schemes
+		const mirrored = !merged && this.stance ? d?.[this.stance] : undefined;
+		if (scheme === 'light') return merged?.light ?? mirrored ?? d?.light;
+		return merged?.dark ?? mirrored ?? merged?.light ?? d?.dark ?? d?.light;
 	}
 
 	changed(name: string): boolean {
@@ -143,8 +172,32 @@ export class ThemeEditorState {
 		const b = this.base_variable_by_name.get(name);
 		const d = default_variable_by_name.get(name);
 		const adaptive = d?.dark !== undefined || b?.dark !== undefined || o?.dark !== undefined;
-		const slot = adaptive ? scheme : 'light';
+		// under a stance edits always write the base slot - dual slots are
+		// meaningless when one appearance renders in both color schemes
+		const slot = !this.stance && adaptive ? scheme : 'light';
 		this.overrides.set(name, {...o, [slot]: value});
+	}
+
+	/**
+	 * Sets the scheme stance. Entering a single-scheme stance re-slots existing
+	 * overrides so the stanced scheme's edited values become base slots (dark
+	 * slots would otherwise shadow later stanced edits in dark mode); a
+	 * light-stanced theme drops dark-only overrides since that appearance never
+	 * renders.
+	 *
+	 * @mutates `this`
+	 */
+	set_scheme(scheme: ThemeScheme): void {
+		this.scheme = scheme;
+		if (scheme !== 'light' && scheme !== 'dark') return;
+		for (const [name, o] of this.overrides) {
+			const value = scheme === 'dark' ? (o.dark ?? o.light) : o.light;
+			if (value === undefined) {
+				this.overrides.delete(name);
+			} else {
+				this.overrides.set(name, {light: value});
+			}
+		}
 	}
 
 	reset(name: string): void {
@@ -153,11 +206,13 @@ export class ThemeEditorState {
 
 	reset_all(): void {
 		this.overrides.clear();
+		this.scheme = this.base_scheme;
 	}
 
 	/**
 	 * Loads a theme as the new base: overrides clear and the editor edits on
-	 * top of its flattened variables (flatten-on-load composition).
+	 * top of its flattened variables (flatten-on-load composition), carrying
+	 * the theme's scheme stance.
 	 *
 	 * @mutates `this`
 	 */
@@ -165,6 +220,7 @@ export class ThemeEditorState {
 		if (theme.name === UNSAVED_THEME_NAME) return;
 		this.based_on = theme.name;
 		this.overrides.clear();
+		this.scheme = theme.scheme ?? 'dual';
 		this.name = theme.name === 'base' ? 'new theme' : `custom ${theme.name}`;
 	}
 
@@ -172,6 +228,7 @@ export class ThemeEditorState {
 		return {
 			name: this.name,
 			based_on: this.based_on,
+			scheme: this.scheme,
 			overrides: Array.from(this.overrides.entries()).map(([name, o]) => [name, {...o}]),
 		};
 	}
@@ -182,6 +239,7 @@ export class ThemeEditorState {
 	restore_snapshot(data: ThemeEditorSnapshotData): void {
 		this.name = data.name;
 		this.based_on = data.based_on;
+		this.scheme = data.scheme ?? this.base_scheme;
 		this.overrides.clear();
 		for (const [name, o] of data.overrides) {
 			this.overrides.set(name, {...o});
@@ -213,10 +271,14 @@ export const render_theme_ts = (theme: Theme): string => {
 	const variables_ts = theme.variables.length
 		? `[\n${variables}\n\t],`
 		: '[], // empty - every variable keeps its base default';
+	const scheme_ts =
+		theme.scheme === 'light' || theme.scheme === 'dark'
+			? `\n\tscheme: '${theme.scheme}', // renders this appearance in both color schemes`
+			: '';
 	return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
 
 export const ${identifier}_theme: Theme = {
-	name: '${escape_single_quotes(theme.name)}',
+	name: '${escape_single_quotes(theme.name)}',${scheme_ts}
 	variables: ${variables_ts}
 };
 `;

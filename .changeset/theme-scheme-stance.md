@@ -13,7 +13,8 @@ controls and native scrollbars agree. The mirror is exported as
 `scheme_stance_variables`. A stanced theme's own variables are best authored
 single-slot in the light/base position.
 
-`validate_theme` checks the field, and `check_theme`/`compile_theme` resolve
+`validate_theme` checks the field and warns on dark slots a single-scheme
+stance makes meaningless, and `check_theme`/`compile_theme` resolve
 through the same mirror so the gates and cap recomputation evaluate the
 stanced reality in both schemes. The necromancer and terminal exemplars use
 the stance instead of hand-mirrored ramp knobs.

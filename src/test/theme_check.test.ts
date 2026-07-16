@@ -85,6 +85,34 @@ describe('validate_theme', () => {
 		const issues = validate_theme({name: 't', variables: [], scheme: 'dusk' as 'dark'});
 		assert.isTrue(issues.some((i) => i.level === 'error'));
 	});
+
+	test('a dark slot under a single-scheme stance is a warning, not an error', () => {
+		for (const scheme of ['light', 'dark'] as const) {
+			const issues = validate_theme({
+				name: 't',
+				scheme,
+				variables: [{name: 'neutral_chroma', light: '0.02', dark: '0.03'}],
+			});
+			assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'neutral_chroma'));
+			assert.isFalse(issues.some((i) => i.level === 'error'));
+		}
+		// single-slot stanced and dual-slot unstanced themes stay clean
+		assert.deepEqual(
+			validate_theme({
+				name: 't',
+				scheme: 'dark',
+				variables: [{name: 'neutral_chroma', light: '0.02'}],
+			}),
+			[],
+		);
+		assert.deepEqual(
+			validate_theme({
+				name: 't',
+				variables: [{name: 'neutral_chroma', light: '0.02', dark: '0.03'}],
+			}),
+			[],
+		);
+	});
 });
 
 describe('resolution', () => {

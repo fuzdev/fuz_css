@@ -6,7 +6,7 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import type {ThemeState} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import {render_theme_style} from '$lib/theme.ts';
+	import {render_theme_style, type ThemeScheme} from '$lib/theme.ts';
 	import {theme_knobs, knob_axes, type KnobAxis, type ThemeKnob} from '$lib/knobs.ts';
 	import {PALETTE_HUES} from '$lib/ramps.ts';
 	import {
@@ -73,12 +73,13 @@
 	// edits, so guard the switch behind a confirm when the draft is dirty
 	const on_base_change = (e: Event & {currentTarget: EventTarget & HTMLSelectElement}): void => {
 		const name = e.currentTarget.value;
+		const discarded = editor.overrides.size
+			? `${editor.overrides.size} edited knob(s) will be discarded`
+			: 'the scheme change will be discarded';
 		if (
 			editor.dirty &&
 			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
-			!confirm(
-				`load "${name}" as the new base? ${editor.overrides.size} edited knob(s) will be discarded`,
-			)
+			!confirm(`load "${name}" as the new base? ${discarded}`)
 		) {
 			e.currentTarget.value = editor.based_on;
 			return;
@@ -123,6 +124,17 @@
 					{/each}
 				</select>
 			</label>
+			<label>
+				<div class="title">scheme</div>
+				<select
+					value={editor.scheme}
+					onchange={(e) => editor.set_scheme(e.currentTarget.value as ThemeScheme)}
+				>
+					<option value="dual">dual</option>
+					<option value="light">light only</option>
+					<option value="dark">dark only</option>
+				</select>
+			</label>
 			<div class="box gap_sm align-items:flex-start">
 				<span
 					class="chip"
@@ -133,7 +145,7 @@
 				>
 				{#if editor.dirty}
 					<button type="button" class="sm" onclick={() => editor.reset_all()}
-						>reset all ({editor.overrides.size})</button
+						>reset all{editor.overrides.size ? ` (${editor.overrides.size})` : ''}</button
 					>
 				{/if}
 			</div>
@@ -143,7 +155,15 @@
 		{/if}
 		<div class="row gap_lg">
 			<ColorSchemeInput />
-			<small>edits write to the <strong>{editing_scheme}</strong> scheme's slots</small>
+			{#if editor.stance}
+				<small
+					>single-scheme theme - edits write to the base slots and the <strong
+						>{editor.stance}</strong
+					> appearance renders in both color schemes</small
+				>
+			{:else}
+				<small>edits write to the <strong>{editing_scheme}</strong> scheme's slots</small>
+			{/if}
 		</div>
 	</header>
 
