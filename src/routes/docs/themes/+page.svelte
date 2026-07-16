@@ -15,7 +15,7 @@
 	import {necromancer_theme} from '$lib/themes/necromancer.ts';
 	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 	import {brutalish_theme} from '$lib/themes/brutalish.ts';
-	import {create_terminal_theme, terminal_green_theme} from '$lib/themes/terminal.ts';
+	import {terminal_green_theme} from '$lib/themes/terminal.ts';
 	import type {Theme} from '$lib/theme.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
@@ -34,18 +34,11 @@
 	const theme_state = get_theme_state();
 
 	const themes = default_themes.slice();
-	// amber runs modestly denser than green phosphor - plain data composition
-	const terminal_amber_base = create_terminal_theme(70, 'terminal amber');
-	const terminal_amber_theme: Theme = {
-		...terminal_amber_base,
-		variables: [...terminal_amber_base.variables, {name: 'scale_factor', light: '0.9'}],
-	};
 	const exemplar_themes = [
 		necromancer_theme,
 		sunset_ember_theme,
 		brutalish_theme,
 		terminal_green_theme,
-		terminal_amber_theme,
 	];
 
 	const editor = new ThemeEditorState([...themes, ...exemplar_themes]);

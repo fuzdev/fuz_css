@@ -2,9 +2,9 @@ import type {Theme} from '../theme.ts';
 
 /**
  * A fantasy exemplar theme built entirely from semantic bindings and levers —
- * the palette letters keep their default hues. Violet surfaces come from
- * binding the neutral to purple, the ectoplasm-green accent from binding the
- * accent intent to green, and the lit-from-below character from hue-shifted
+ * the palette letters keep their default hues. Ectoplasm-green surfaces come
+ * from binding the neutral to green, the violet accent from binding the accent
+ * intent to purple, and the lit-from-below character from hue-shifted
  * ramps (highlights warm, shadows cool) with glow-colored depth. Dark-only
  * via the `scheme` stance, vivid past the gamut caps on purpose.
  *
@@ -19,13 +19,13 @@ export const necromancer_theme: Theme = {
 	name: 'necromancer',
 	scheme: 'dark',
 	variables: [
-		// grave-violet surfaces and text: the neutral binds to the purple slot
-		{name: 'hue_neutral', light: 'var(--hue_d)'},
+		// ectoplasm-green surfaces and text: the neutral binds to the green slot
+		{name: 'hue_neutral', light: 'var(--hue_b)'},
 		{name: 'neutral_chroma', light: '0.04'},
-		// ectoplasm accent: links/focus/selection glow green over the violet world
-		{name: 'hue_accent', light: 'var(--hue_b)'},
-		// painterly ramps: shadows cool toward blue-violet, highlights warm toward magenta
-		{name: 'hue_shift', light: '-14'},
+		// violet accent: links/focus/selection glow purple over the green world
+		{name: 'hue_accent', light: 'var(--hue_d)'},
+		// painterly ramps: shadows cool toward teal, highlights warm toward yellow-green
+		{name: 'hue_shift', light: '14'},
 		// vivid, knowingly clipping the weak hues
 		{name: 'chroma_scale', light: '1.15'},
 		// modestly compact - crypt density

@@ -58,6 +58,9 @@
 	};
 
 	const numeric_value = $derived(resolve_numeric(value));
+	// a live swatch of the current angle for the detach ("custom") button, so it
+	// tracks the hue the way the letter buttons track their palette slot
+	const custom_color = $derived(`oklch(0.65 0.14 ${numeric_value ?? 0})`);
 	const scalar = $derived(
 		knob.kind === 'hue' ||
 			knob.kind === 'number' ||
@@ -90,19 +93,22 @@
 			{#each palette_variants as letter (letter)}
 				<button
 					type="button"
-					class="letter_chip"
+					class="letter_chip palette_{letter}"
 					class:selected={bound_letter === letter}
 					title={gloss_title(letter)}
 					onclick={() => onchange(`var(--hue_${letter})`)}
 				>
-					<span class="letter_swatch" style:background-color="oklch(0.65 0.14 var(--hue_{letter}))"
-					></span>{letter}
+					{letter}
 				</button>
 			{/each}
 			<button
 				type="button"
 				class="letter_chip"
 				class:selected={bound_letter === null}
+				style:--fill={custom_color}
+				style:--text_color={custom_color}
+				style:--border_color={custom_color}
+				style:--outline_color={custom_color}
 				title="detach from the palette and set a literal angle"
 				onclick={() => onchange(String(numeric_value ?? 0))}>custom</button
 			>
@@ -207,12 +213,5 @@
 		padding: var(--space_xs2) var(--space_xs);
 		font-size: var(--font_size_sm);
 		font-family: var(--font_family_mono);
-	}
-	.letter_swatch {
-		display: inline-block;
-		width: 0.8em;
-		height: 0.8em;
-		margin-right: var(--space_xs2);
-		border-radius: var(--border_radius_xs2);
 	}
 </style>
