@@ -8,7 +8,7 @@ import {high_contrast_theme} from '$lib/themes/high_contrast.ts';
 import {necromancer_theme} from '$lib/themes/necromancer.ts';
 import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 import {brutalish_theme} from '$lib/themes/brutalish.ts';
-import {terminal_green_theme, create_terminal_theme} from '$lib/themes/terminal.ts';
+import {terminal_theme, create_terminal_theme} from '$lib/themes/terminal.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_KNOBS,
@@ -28,7 +28,7 @@ describe('validate_theme', () => {
 			necromancer_theme,
 			sunset_ember_theme,
 			brutalish_theme,
-			terminal_green_theme,
+			terminal_theme,
 			create_terminal_theme(70), // amber, exercises the factory
 		];
 		for (const theme of themes) {
@@ -213,8 +213,8 @@ describe('check_theme', () => {
 		assert.isTrue(check_theme(brutalish_theme).ok);
 	});
 
-	test('terminal green keeps its contrast gates', () => {
-		const contrast = check_theme(terminal_green_theme).entries.filter((e) => e.gate === 'contrast');
+	test('terminal keeps its contrast gates', () => {
+		const contrast = check_theme(terminal_theme).entries.filter((e) => e.gate === 'contrast');
 		assert.isTrue(contrast.every((e) => e.pass));
 	});
 
@@ -287,7 +287,7 @@ describe('scheme stance', () => {
 	});
 
 	test('the dark-stanced exemplars pass their contrast gates in both schemes', () => {
-		for (const theme of [necromancer_theme, terminal_green_theme]) {
+		for (const theme of [necromancer_theme, terminal_theme]) {
 			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
 			assert.isTrue(
 				contrast.every((e) => e.pass),

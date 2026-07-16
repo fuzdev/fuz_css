@@ -15,7 +15,7 @@
 	import {necromancer_theme} from '$lib/themes/necromancer.ts';
 	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
 	import {brutalish_theme} from '$lib/themes/brutalish.ts';
-	import {terminal_green_theme} from '$lib/themes/terminal.ts';
+	import {terminal_theme} from '$lib/themes/terminal.ts';
 	import type {Theme} from '$lib/theme.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
@@ -34,12 +34,7 @@
 	const theme_state = get_theme_state();
 
 	const themes = default_themes.slice();
-	const exemplar_themes = [
-		necromancer_theme,
-		sunset_ember_theme,
-		brutalish_theme,
-		terminal_green_theme,
-	];
+	const exemplar_themes = [necromancer_theme, sunset_ember_theme, brutalish_theme, terminal_theme];
 
 	const editor = new ThemeEditorState([...themes, ...exemplar_themes]);
 

@@ -100,7 +100,7 @@ describe('shipped themes', () => {
 		assert.include(names, 'necromancer');
 		assert.include(names, 'sunset ember');
 		assert.include(names, 'brutalish');
-		assert.include(names, 'terminal green');
+		assert.include(names, 'terminal');
 	});
 
 	test('all exemplar variables validate and exist in default_variables', () => {

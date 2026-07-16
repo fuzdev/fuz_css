@@ -353,8 +353,10 @@ typography, borders, shading, shadows, layout. See
 - `src/lib/themes/` - One module per theme. The registry (base, low/high
   contrast) is semantic-tier: intent bindings + levers only, palette hues
   untouched. Unregistered exemplars: necromancer, sunset ember, brutalish,
-  and `terminal.ts` (a `create_terminal_theme(hue)` factory; terminal green
-  = 145); necromancer and terminal are dark-only via `scheme: 'dark'`
+  and `terminal.ts` (the `terminal_theme` flagship — dark mono terminal chrome
+  with a green cast but functional palette — plus a `create_terminal_theme(hue)`
+  factory for pure single-phosphor monochrome terminals); necromancer and
+  terminal are dark-only via `scheme: 'dark'`
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
