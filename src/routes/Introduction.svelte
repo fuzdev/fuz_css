@@ -5,7 +5,7 @@
 </script>
 
 <p>
-	fuz_css is a CSS framework and design system for semantic HTML. It styles elements by default and
+	fuz_css is a semantic-first CSS framework and design system. It styles elements by default and
 	integrates custom properties, themes, and utility classes into a complete system. It ships two
 	plain CSS files, the base <code>style.css</code> and replaceable <code>theme.css</code>, that work
 	with any framework and plain HTML, and its class generator supports HTML/JS/TS, Svelte, React,

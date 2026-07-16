@@ -4,7 +4,7 @@
 
 > CSS with more utility 🪴
 
-fuz_css is a CSS framework and design system for semantic HTML.
+fuz_css is a semantic-first CSS framework and design system.
 It styles elements by default and
 integrates custom properties, themes, and utility classes into a complete system.
 It ships two plain CSS files, the base `style.css` and replaceable `theme.css`,

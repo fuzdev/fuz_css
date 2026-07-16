@@ -1,6 +1,6 @@
 # fuz_css
 
-> CSS framework and design system for semantic HTML
+> semantic-first CSS framework and design system
 
 fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system. It
@@ -44,7 +44,7 @@ dev server.
 
 ## Scope
 
-fuz_css is a **CSS framework and design system**:
+fuz_css is a **semantic-first CSS framework and design system**:
 
 - Semantic HTML styling without classes
 - Design tokens as CSS custom properties
