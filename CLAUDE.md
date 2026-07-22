@@ -476,7 +476,7 @@ Integration: `vite_plugin_examples.test.ts` (skip with
 
 - TypeScript strict mode
 - Svelte 5 with runes API (for docs site)
-- Prettier with tabs, 100 char width
+- tsv with tabs, 100 char width
 - Node >= 24.14
 - Tests in `src/test/` (not co-located)
 
