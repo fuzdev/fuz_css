@@ -1,34 +1,34 @@
-import {test, describe, assert} from 'vitest';
+import { test, describe, assert } from 'vitest';
 
 import {
 	generate_classes_css,
 	extract_primary_property,
-	type CssClassDefinitionInterpreter,
+	type CssClassDefinitionInterpreter
 } from '$lib/css_class_generation.ts';
-import {css_class_composites} from '$lib/css_class_composites.ts';
+import { css_class_composites } from '$lib/css_class_composites.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,
 	assert_css_order,
 	assert_diagnostic,
-	assert_no_diagnostic,
+	assert_no_diagnostic
 } from './test_helpers.ts';
 
 /**
  * Common class definitions used across multiple tests.
  */
 const COMMON_DEFS = {
-	p_lg: {declaration: 'padding: var(--space_lg);'},
-	m_md: {declaration: 'margin: var(--space_md);'},
-	rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-	shadow_md: {declaration: 'box-shadow: var(--shadow_md);'},
+	p_lg: { declaration: 'padding: var(--space_lg);' },
+	m_md: { declaration: 'margin: var(--space_md);' },
+	rounded: { declaration: 'border-radius: var(--border_radius_md);' },
+	shadow_md: { declaration: 'box-shadow: var(--shadow_md);' }
 };
 
 const BORDER_RADIUS_DEFS = {
-	border_radius_sm: {declaration: 'border-radius: var(--border_radius_sm);'},
+	border_radius_sm: { declaration: 'border-radius: var(--border_radius_sm);' },
 	border_top_right_radius_sm: {
-		declaration: 'border-top-right-radius: var(--border_radius_sm);',
-	},
+		declaration: 'border-top-right-radius: var(--border_radius_sm);'
+	}
 };
 
 const SIMPLE_LITERAL_INTERPRETER: CssClassDefinitionInterpreter = {
@@ -36,7 +36,7 @@ const SIMPLE_LITERAL_INTERPRETER: CssClassDefinitionInterpreter = {
 	interpret: (matched) => {
 		const [prop, val] = matched[0].split(':');
 		return `${prop}: ${val};`;
-	},
+	}
 };
 
 describe('generate_classes_css', () => {
@@ -45,11 +45,11 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['display:flex', 'opacity:80%'],
 				class_definitions: {
-					'display:flex': {declaration: 'display: flex;'},
-					'opacity:80%': {declaration: 'opacity: 80%;'},
+					'display:flex': { declaration: 'display: flex;' },
+					'opacity:80%': { declaration: 'opacity: 80%;' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.display\\:flex { display: flex; }');
@@ -61,17 +61,17 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:opacity:80%', 'nth-child(2n):color:red'],
 				class_definitions: {
-					'hover:opacity:80%': {declaration: 'opacity: 80%;'},
-					'nth-child(2n):color:red': {declaration: 'color: red;'},
+					'hover:opacity:80%': { declaration: 'opacity: 80%;' },
+					'nth-child(2n):color:red': { declaration: 'color: red;' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.hover\\:opacity\\:80\\%',
-				'.nth-child\\(2n\\)\\:color\\:red',
+				'.nth-child\\(2n\\)\\:color\\:red'
 			);
 		});
 	});
@@ -80,14 +80,14 @@ describe('generate_classes_css', () => {
 		test('uses interpreter for unknown classes', () => {
 			const interpreter: CssClassDefinitionInterpreter = {
 				pattern: /^test-(\w+)$/,
-				interpret: (matched) => `test-prop: ${matched[1]};`,
+				interpret: (matched) => `test-prop: ${matched[1]};`
 			};
 
 			const result = generate_classes_css({
 				class_names: ['test-value'],
 				class_definitions: {},
 				interpreters: [interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.test-value', 'test-prop: value;');
@@ -97,14 +97,14 @@ describe('generate_classes_css', () => {
 			const interpreter: CssClassDefinitionInterpreter = {
 				pattern: /^media-(\w+)$/,
 				interpret: (matched) =>
-					`@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`,
+					`@media (min-width: 800px) { .media-${matched[1]} { display: ${matched[1]}; } }`
 			};
 
 			const result = generate_classes_css({
 				class_names: ['media-flex'],
 				class_definitions: {},
 				interpreters: [interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '@media (min-width: 800px)', 'display: flex;');
@@ -118,17 +118,17 @@ describe('generate_classes_css', () => {
 						level: 'warning',
 						message: 'test warning',
 						identifier: matched[0],
-						suggestion: null,
+						suggestion: null
 					});
 					return `color: ${matched[1]};`;
-				},
+				}
 			};
 
 			const result = generate_classes_css({
 				class_names: ['warn-red'],
 				class_definitions: {},
 				interpreters: [interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.lengthOf(result.diagnostics, 1);
@@ -142,10 +142,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['test-class'],
 				class_definitions: {
-					'test-class': {declaration: 'color: red;', comment: 'Single line comment'},
+					'test-class': { declaration: 'color: red;', comment: 'Single line comment' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '/* Single line comment */');
@@ -155,10 +155,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['test-class'],
 				class_definitions: {
-					'test-class': {declaration: 'color: red;', comment: 'Line 1\nLine 2'},
+					'test-class': { declaration: 'color: red;', comment: 'Line 1\nLine 2' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '/*\nLine 1\nLine 2\n*/');
@@ -169,10 +169,10 @@ describe('generate_classes_css', () => {
 				class_names: ['card'],
 				class_definitions: {
 					...COMMON_DEFS,
-					card: {composes: ['p_lg'], comment: 'Card component'},
+					card: { composes: ['p_lg'], comment: 'Card component' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '/* Card component */', '.card {');
@@ -184,10 +184,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['simple'],
 				class_definitions: {
-					simple: {ruleset: '.simple { color: red; }'},
+					simple: { ruleset: '.simple { color: red; }' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.simple { color: red; }');
@@ -200,11 +200,11 @@ describe('generate_classes_css', () => {
 				class_definitions: {
 					multi: {
 						ruleset: `.multi { color: red; }
-.multi:hover { color: blue; }`,
-					},
+.multi:hover { color: blue; }`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.multi { color: red; }');
@@ -215,10 +215,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['clickable'],
 				class_definitions: {
-					clickable: {ruleset: `.foobar { cursor: pointer; }`},
+					clickable: { ruleset: `.foobar { cursor: pointer; }` }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.foobar { cursor: pointer; }');
@@ -231,11 +231,11 @@ describe('generate_classes_css', () => {
 				class_definitions: {
 					clickable: {
 						ruleset: `.clickable { cursor: pointer; }
-.clickable:hover { opacity: 0.8; }`,
-					},
+.clickable:hover { opacity: 0.8; }`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -245,10 +245,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['clickable'],
 				class_definitions: {
-					clickable: {ruleset: `.clickable_extended { cursor: pointer; }`},
+					clickable: { ruleset: `.clickable_extended { cursor: pointer; }` }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -262,11 +262,11 @@ describe('generate_classes_css', () => {
 						ruleset: `
 						.other { color: red; }
 						.another:hover { color: blue; }
-					`,
-					},
+					`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -276,10 +276,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['btn'],
 				class_definitions: {
-					btn: {ruleset: `.btn[disabled] { opacity: 0.5; }`},
+					btn: { ruleset: `.btn[disabled] { opacity: 0.5; }` }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -290,11 +290,11 @@ describe('generate_classes_css', () => {
 				class_names: ['responsive'],
 				class_definitions: {
 					responsive: {
-						ruleset: `/* responsive wrapper */ @media (width >= 48rem) { .responsive { display: flex; } }`,
-					},
+						ruleset: `/* responsive wrapper */ @media (width >= 48rem) { .responsive { display: flex; } }`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
@@ -305,11 +305,11 @@ describe('generate_classes_css', () => {
 				class_names: ['fancy'],
 				class_definitions: {
 					fancy: {
-						ruleset: `@supports (display: grid) { @media (width >= 48rem) { .fancy { display: grid; } } }`,
-					},
+						ruleset: `@supports (display: grid) { @media (width >= 48rem) { .fancy { display: grid; } } }`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_no_diagnostic(result.diagnostics, 'warning', 'could be converted');
@@ -319,10 +319,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['empty'],
 				class_definitions: {
-					empty: {ruleset: ''},
+					empty: { ruleset: '' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.strictEqual(result.css, '');
@@ -333,10 +333,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['whitespace'],
 				class_definitions: {
-					whitespace: {ruleset: '   \n\t   '},
+					whitespace: { ruleset: '   \n\t   ' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.strictEqual(result.css, '');
@@ -347,10 +347,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['commented'],
 				class_definitions: {
-					commented: {ruleset: '/* this ruleset is empty */'},
+					commented: { ruleset: '/* this ruleset is empty */' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -360,10 +360,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['my:custom'],
 				class_definitions: {
-					'my:custom': {ruleset: `.other { color: red; }`},
+					'my:custom': { ruleset: `.other { color: red; }` }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -373,10 +373,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['my:custom'],
 				class_definitions: {
-					'my:custom': {ruleset: `.my\\:custom { color: red; }`},
+					'my:custom': { ruleset: `.my\\:custom { color: red; }` }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_no_diagnostic(result.diagnostics, 'warning', 'no selectors containing');
@@ -386,16 +386,16 @@ describe('generate_classes_css', () => {
 	describe('sorting', () => {
 		test('maintains definition order for known classes', () => {
 			const class_definitions = {
-				aaa: {declaration: 'a: a;'},
-				zzz: {declaration: 'z: z;'},
-				mmm: {declaration: 'm: m;'},
+				aaa: { declaration: 'a: a;' },
+				zzz: { declaration: 'z: z;' },
+				mmm: { declaration: 'm: m;' }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['mmm', 'aaa', 'zzz'],
 				class_definitions,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, '.aaa', '.zzz', '.mmm');
@@ -405,10 +405,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['unknown-b', 'known', 'unknown-a'],
 				class_definitions: {
-					known: {declaration: 'k: k;'},
+					known: { declaration: 'k: k;' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			// known should be present, unknown classes without interpreter produce no output
@@ -419,14 +419,14 @@ describe('generate_classes_css', () => {
 		test('sorts interpreted classes alphabetically', () => {
 			const interpreter: CssClassDefinitionInterpreter = {
 				pattern: /^int-(\w+)$/,
-				interpret: (matched) => `prop: ${matched[1]};`,
+				interpret: (matched) => `prop: ${matched[1]};`
 			};
 
 			const result = generate_classes_css({
 				class_names: ['int-ccc', 'int-aaa', 'int-bbb'],
 				class_definitions: {},
 				interpreters: [interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, '.int-aaa', '.int-bbb', '.int-ccc');
@@ -437,7 +437,7 @@ describe('generate_classes_css', () => {
 				class_names: ['border_top_right_radius_sm', 'border-radius:0'],
 				class_definitions: BORDER_RADIUS_DEFS,
 				interpreters: [SIMPLE_LITERAL_INTERPRETER],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, 'border-radius\\:0', 'border_top_right_radius_sm');
@@ -448,7 +448,7 @@ describe('generate_classes_css', () => {
 				class_names: ['border-top-right-radius:5px', 'border_radius_sm'],
 				class_definitions: BORDER_RADIUS_DEFS,
 				interpreters: [SIMPLE_LITERAL_INTERPRETER],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, 'border_radius_sm', 'border-top-right-radius\\:5px');
@@ -459,7 +459,7 @@ describe('generate_classes_css', () => {
 				class_names: ['border-top-right-radius:5px', 'border-radius:0'],
 				class_definitions: BORDER_RADIUS_DEFS,
 				interpreters: [SIMPLE_LITERAL_INTERPRETER],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, 'border-radius\\:0', 'border-top-right-radius\\:5px');
@@ -473,14 +473,14 @@ describe('generate_classes_css', () => {
 					const prop = parts.at(-2);
 					const val = parts.at(-1);
 					return `${prop}: ${val};`;
-				},
+				}
 			};
 
 			const result = generate_classes_css({
 				class_names: ['border_top_right_radius_sm', 'hover:border-radius:0'],
 				class_definitions: BORDER_RADIUS_DEFS,
 				interpreters: [modified_literal_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, 'hover\\:border-radius\\:0', 'border_top_right_radius_sm');
@@ -492,16 +492,16 @@ describe('generate_classes_css', () => {
 			// p_md has a finite index, so it sorts before hover:p_md.
 			const catch_all_interpreter: CssClassDefinitionInterpreter = {
 				pattern: /./,
-				interpret: (matched) => `content: "${matched[0]}";`,
+				interpret: (matched) => `content: "${matched[0]}";`
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:p_md', 'p_md'],
 				class_definitions: {
-					p_md: {declaration: 'padding: var(--space_md);'},
+					p_md: { declaration: 'padding: var(--space_md);' }
 				},
 				interpreters: [catch_all_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, 'p_md', 'hover\\:p_md');
@@ -514,17 +514,17 @@ describe('generate_classes_css', () => {
 				class_names: ['card'],
 				class_definitions: {
 					...COMMON_DEFS,
-					card: {composes: ['p_lg', 'rounded']},
+					card: { composes: ['p_lg', 'rounded'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.card {',
 				'padding: var(--space_lg);',
-				'border-radius: var(--border_radius_md);',
+				'border-radius: var(--border_radius_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -534,10 +534,10 @@ describe('generate_classes_css', () => {
 				class_names: ['card'],
 				class_definitions: {
 					...COMMON_DEFS,
-					card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);'},
+					card: { composes: ['p_lg', 'rounded'], declaration: '--card-bg: var(--shade_10);' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -545,7 +545,7 @@ describe('generate_classes_css', () => {
 				'.card {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
-				'--card-bg: var(--shade_10);',
+				'--card-bg: var(--shade_10);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -555,11 +555,11 @@ describe('generate_classes_css', () => {
 				class_names: ['panel'],
 				class_definitions: {
 					...COMMON_DEFS,
-					panel_base: {composes: ['p_lg', 'rounded']},
-					panel: {composes: ['panel_base', 'shadow_md']},
+					panel_base: { composes: ['p_lg', 'rounded'] },
+					panel: { composes: ['panel_base', 'shadow_md'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -567,7 +567,7 @@ describe('generate_classes_css', () => {
 				'.panel {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
-				'box-shadow: var(--shadow_md);',
+				'box-shadow: var(--shadow_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -577,17 +577,17 @@ describe('generate_classes_css', () => {
 				class_names: ['card'],
 				class_definitions: {
 					...COMMON_DEFS,
-					card: {composes: ['p_lg', 'unknown_class']},
+					card: { composes: ['p_lg', 'unknown_class'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.card');
 			assert_diagnostic(
 				result.diagnostics,
 				'error',
-				'Unknown class "unknown_class" in composes array',
+				'Unknown class "unknown_class" in composes array'
 			);
 		});
 
@@ -595,11 +595,11 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['a'],
 				class_definitions: {
-					a: {composes: ['b']},
-					b: {composes: ['a']},
+					a: { composes: ['b'] },
+					b: { composes: ['a'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.a');
@@ -612,12 +612,12 @@ describe('generate_classes_css', () => {
 				class_definitions: {
 					clickable: {
 						ruleset: `.clickable { cursor: pointer; }
-.clickable:hover { opacity: 0.8; }`,
+.clickable:hover { opacity: 0.8; }`
 					},
-					card: {composes: ['clickable']},
+					card: { composes: ['clickable'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.card');
@@ -628,10 +628,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['self_ref'],
 				class_definitions: {
-					self_ref: {composes: ['self_ref']},
+					self_ref: { composes: ['self_ref'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.self_ref');
@@ -642,10 +642,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['empty_card'],
 				class_definitions: {
-					empty_card: {composes: []},
+					empty_card: { composes: [] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.strictEqual(result.css, '');
@@ -656,13 +656,13 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['diamond'],
 				class_definitions: {
-					base: {declaration: 'color: red;'},
-					branch_a: {composes: ['base'], declaration: 'font-size: 1rem;'},
-					branch_b: {composes: ['base'], declaration: 'font-weight: bold;'},
-					diamond: {composes: ['branch_a', 'branch_b']},
+					base: { declaration: 'color: red;' },
+					branch_a: { composes: ['base'], declaration: 'font-size: 1rem;' },
+					branch_b: { composes: ['base'], declaration: 'font-weight: bold;' },
+					diamond: { composes: ['branch_a', 'branch_b'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -670,7 +670,7 @@ describe('generate_classes_css', () => {
 				'.diamond {',
 				'color: red;',
 				'font-size: 1rem;',
-				'font-weight: bold;',
+				'font-weight: bold;'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -679,12 +679,12 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['a'],
 				class_definitions: {
-					a: {composes: ['b']},
-					b: {composes: ['c']},
-					c: {composes: ['a']},
+					a: { composes: ['b'] },
+					b: { composes: ['c'] },
+					c: { composes: ['a'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.a');
@@ -695,15 +695,15 @@ describe('generate_classes_css', () => {
 
 	describe('class_locations', () => {
 		test('diagnostics include locations when provided', () => {
-			const loc = {file: 'test.svelte', line: 10, column: 5};
+			const loc = { file: 'test.svelte', line: 10, column: 5 };
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					card: {composes: ['unknown']},
+					card: { composes: ['unknown'] }
 				},
 				interpreters: [],
 				css_properties: null,
-				class_locations: new Map([['card', [loc]]]),
+				class_locations: new Map([['card', [loc]]])
 			});
 
 			assert.lengthOf(result.diagnostics, 1);
@@ -714,10 +714,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					card: {composes: ['unknown']},
+					card: { composes: ['unknown'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.lengthOf(result.diagnostics, 1);
@@ -730,10 +730,10 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['p_lg'],
 				class_definitions: {
-					p_lg: {declaration: 'padding: var(--space_lg);'},
+					p_lg: { declaration: 'padding: var(--space_lg);' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('space_lg'));
@@ -743,12 +743,12 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					base: {declaration: 'color: var(--color_a_5);'},
-					extended: {composes: ['base'], declaration: 'margin: var(--space_md);'},
-					card: {composes: ['extended']},
+					base: { declaration: 'color: var(--color_a_5);' },
+					extended: { composes: ['base'], declaration: 'margin: var(--space_md);' },
+					card: { composes: ['extended'] }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			// Should track variables from entire composition chain
@@ -761,11 +761,11 @@ describe('generate_classes_css', () => {
 				class_names: ['themed'],
 				class_definitions: {
 					themed: {
-						ruleset: `.themed { background: var(--bg_1); color: var(--text_color_1); }`,
-					},
+						ruleset: `.themed { background: var(--bg_1); color: var(--text_color_1); }`
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('bg_1'));
@@ -777,11 +777,11 @@ describe('generate_classes_css', () => {
 				class_names: ['multi'],
 				class_definitions: {
 					multi: {
-						declaration: 'padding: var(--space_sm) var(--space_md); margin: var(--space_lg);',
-					},
+						declaration: 'padding: var(--space_sm) var(--space_md); margin: var(--space_lg);'
+					}
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('space_sm'));
@@ -793,11 +793,11 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['a', 'b'],
 				class_definitions: {
-					a: {declaration: 'padding: var(--space_md);'},
-					b: {declaration: 'margin: var(--space_md);'},
+					a: { declaration: 'padding: var(--space_md);' },
+					b: { declaration: 'margin: var(--space_md);' }
 				},
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			// Set naturally deduplicates
@@ -812,7 +812,7 @@ describe('generate_classes_css', () => {
 				class_names: ['xs'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -824,7 +824,7 @@ describe('generate_classes_css', () => {
 				'--input_padding_x: var(--space_sm);',
 				'--icon_size: var(--icon_size_xs);',
 				'--menuitem_padding: var(--space_xs5) var(--space_xs3);',
-				'--flow_margin: var(--space_sm);',
+				'--flow_margin: var(--space_sm);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -834,7 +834,7 @@ describe('generate_classes_css', () => {
 				class_names: ['xs'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_xs'));
@@ -853,7 +853,7 @@ describe('generate_classes_css', () => {
 				class_names: ['sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -865,7 +865,7 @@ describe('generate_classes_css', () => {
 				'--input_padding_x: var(--space_md);',
 				'--icon_size: var(--icon_size_sm);',
 				'--menuitem_padding: var(--space_xs4) var(--space_xs2);',
-				'--flow_margin: var(--space_md);',
+				'--flow_margin: var(--space_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -875,7 +875,7 @@ describe('generate_classes_css', () => {
 				class_names: ['sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_sm'));
@@ -894,7 +894,7 @@ describe('generate_classes_css', () => {
 				class_names: ['md'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -906,7 +906,7 @@ describe('generate_classes_css', () => {
 				'--input_padding_x: var(--space_lg);',
 				'--icon_size: var(--icon_size_md);',
 				'--menuitem_padding: var(--space_xs3) var(--space_xs);',
-				'--flow_margin: var(--space_lg);',
+				'--flow_margin: var(--space_lg);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -916,7 +916,7 @@ describe('generate_classes_css', () => {
 				class_names: ['md'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_md'));
@@ -935,7 +935,7 @@ describe('generate_classes_css', () => {
 				class_names: ['lg'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -947,7 +947,7 @@ describe('generate_classes_css', () => {
 				'--input_padding_x: var(--space_xl);',
 				'--icon_size: var(--icon_size_lg);',
 				'--menuitem_padding: var(--space_xs2) var(--space_sm);',
-				'--flow_margin: var(--space_xl);',
+				'--flow_margin: var(--space_xl);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -957,7 +957,7 @@ describe('generate_classes_css', () => {
 				class_names: ['lg'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_lg'));
@@ -976,7 +976,7 @@ describe('generate_classes_css', () => {
 				class_names: ['xl'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -988,7 +988,7 @@ describe('generate_classes_css', () => {
 				'--input_padding_x: var(--space_xl2);',
 				'--icon_size: var(--icon_size_xl);',
 				'--menuitem_padding: var(--space_xs) var(--space_md);',
-				'--flow_margin: var(--space_xl2);',
+				'--flow_margin: var(--space_xl2);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -998,7 +998,7 @@ describe('generate_classes_css', () => {
 				class_names: ['xl'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('font_size_xl'));
@@ -1017,13 +1017,13 @@ describe('generate_classes_css', () => {
 				class_names: ['mb_flow'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.mb_flow {',
-				'margin-bottom: var(--flow_margin, var(--space_lg));',
+				'margin-bottom: var(--flow_margin, var(--space_lg));'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -1033,13 +1033,13 @@ describe('generate_classes_css', () => {
 				class_names: ['mt_flow'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.mt_flow {',
-				'margin-top: var(--flow_margin, var(--space_lg));',
+				'margin-top: var(--flow_margin, var(--space_lg));'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -1049,7 +1049,7 @@ describe('generate_classes_css', () => {
 				class_names: ['mb_flow'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isTrue(result.variables_used.has('space_lg'));
@@ -1064,11 +1064,11 @@ describe('generate_classes_css', () => {
 					class_names: [name],
 					class_definitions: css_class_composites,
 					interpreters: [],
-					css_properties: null,
+					css_properties: null
 				});
 
 				assert_css_contains(result.css, 'var(--border_radius, var(--border_radius_xs))');
-			},
+			}
 		);
 
 		test('chip uses var(--font_size, inherit)', () => {
@@ -1076,7 +1076,7 @@ describe('generate_classes_css', () => {
 				class_names: ['chip'],
 				class_definitions: css_class_composites,
 				interpreters: [],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, 'font-size: var(--font_size, inherit)');
@@ -1087,14 +1087,14 @@ describe('generate_classes_css', () => {
 		test('static definition takes priority over interpreter', () => {
 			const interpreter: CssClassDefinitionInterpreter = {
 				pattern: /^box$/,
-				interpret: () => 'from-interpreter: true;',
+				interpret: () => 'from-interpreter: true;'
 			};
 
 			const result = generate_classes_css({
 				class_names: ['box'],
-				class_definitions: {box: {declaration: 'from-static: true;'}},
+				class_definitions: { box: { declaration: 'from-static: true;' } },
 				interpreters: [interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, 'from-static: true;');
@@ -1104,18 +1104,18 @@ describe('generate_classes_css', () => {
 		test('first matching interpreter wins', () => {
 			const interpreter1: CssClassDefinitionInterpreter = {
 				pattern: /^test-(.+)$/,
-				interpret: () => 'first: true;',
+				interpret: () => 'first: true;'
 			};
 			const interpreter2: CssClassDefinitionInterpreter = {
 				pattern: /^test-(.+)$/,
-				interpret: () => 'second: true;',
+				interpret: () => 'second: true;'
 			};
 
 			const result = generate_classes_css({
 				class_names: ['test-value'],
 				class_definitions: {},
 				interpreters: [interpreter1, interpreter2],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, 'first: true;');
@@ -1125,18 +1125,18 @@ describe('generate_classes_css', () => {
 		test('interpreter returning null falls through to next', () => {
 			const interpreter1: CssClassDefinitionInterpreter = {
 				pattern: /^test-(.+)$/,
-				interpret: () => null,
+				interpret: () => null
 			};
 			const interpreter2: CssClassDefinitionInterpreter = {
 				pattern: /^test-(.+)$/,
-				interpret: () => 'second: true;',
+				interpret: () => 'second: true;'
 			};
 
 			const result = generate_classes_css({
 				class_names: ['test-value'],
 				class_definitions: {},
 				interpreters: [interpreter1, interpreter2],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, 'second: true;');
@@ -1148,7 +1148,7 @@ describe('extract_primary_property', () => {
 	test('returns property name for single-property declaration', () => {
 		assert.strictEqual(
 			extract_primary_property('border-radius: var(--border_radius_sm);'),
-			'border-radius',
+			'border-radius'
 		);
 	});
 

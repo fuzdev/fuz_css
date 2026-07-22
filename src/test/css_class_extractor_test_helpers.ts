@@ -1,9 +1,9 @@
-import {assert} from 'vitest';
+import { assert } from 'vitest';
 
 import {
 	type ExtractionResult,
 	type AcornPlugin,
-	extract_from_ts,
+	extract_from_ts
 } from '$lib/css_class_extractor.ts';
 
 /**
@@ -38,8 +38,8 @@ export const create_jsx_extractor = async (): Promise<
  * Compares as arrays to also verify extraction order.
  */
 export const class_names_equal = (
-	result: {classes: Map<string, unknown> | null},
-	expected: Array<string>,
+	result: { classes: Map<string, unknown> | null },
+	expected: Array<string>
 ): void => {
 	const actual = result.classes ? [...result.classes.keys()] : [];
 	assert.deepEqual(actual, expected);
@@ -63,7 +63,7 @@ export const svelte_script = (script: string, template = '<div></div>'): string 
 /**
  * Assert no classes extracted.
  */
-export const assert_no_classes = (result: {classes: Map<string, unknown> | null}): void => {
+export const assert_no_classes = (result: { classes: Map<string, unknown> | null }): void => {
 	assert.isNull(result.classes);
 };
 
@@ -73,7 +73,7 @@ export const assert_no_classes = (result: {classes: Map<string, unknown> | null}
 export const assert_elements = (
 	result: ExtractionResult,
 	present: Array<string>,
-	absent: Array<string> = [],
+	absent: Array<string> = []
 ): void => {
 	for (const el of present) {
 		assert.isTrue(result.elements?.has(el) ?? false, `Expected "${el}" present`);
@@ -90,7 +90,7 @@ export const assert_diagnostic = (
 	result: ExtractionResult,
 	level: 'warning' | 'error',
 	contains: string,
-	file?: string,
+	file?: string
 ): void => {
 	assert.isNotNull(result.diagnostics, 'Expected diagnostics array');
 	const match = result.diagnostics.find((d) => d.level === level && d.message.includes(contains));
@@ -139,7 +139,7 @@ export const assert_class_at_line = (
 	result: ExtractionResult,
 	class_name: string,
 	line: number,
-	file?: string,
+	file?: string
 ): void => {
 	const locations = result.classes?.get(class_name);
 	assert.isDefined(locations, `Expected class "${class_name}" to exist`);
@@ -155,7 +155,7 @@ export const assert_class_at_line = (
 export const assert_class_locations = (
 	result: ExtractionResult,
 	class_name: string,
-	expected_lines: Array<number>,
+	expected_lines: Array<number>
 ): void => {
 	const locations = result.classes?.get(class_name);
 	assert.isDefined(locations, `Expected class "${class_name}" to exist`);
@@ -170,7 +170,7 @@ export const assert_class_locations = (
  */
 export const assert_explicit_classes = (
 	result: ExtractionResult,
-	expected: Array<string>,
+	expected: Array<string>
 ): void => {
 	assert.isNotNull(result.explicit_classes, 'Expected explicit_classes to be present');
 	const actual = [...result.explicit_classes].sort();
@@ -182,7 +182,7 @@ export const assert_explicit_classes = (
  */
 export const assert_explicit_elements = (
 	result: ExtractionResult,
-	expected: Array<string>,
+	expected: Array<string>
 ): void => {
 	assert.isNotNull(result.explicit_elements, 'Expected explicit_elements to be present');
 	const actual = [...result.explicit_elements].sort();
@@ -201,7 +201,7 @@ export const assert_no_explicit_elements = (result: ExtractionResult): void => {
  */
 export const assert_explicit_variables = (
 	result: ExtractionResult,
-	expected: Array<string>,
+	expected: Array<string>
 ): void => {
 	assert.isNotNull(result.explicit_variables, 'Expected explicit_variables to be present');
 	const actual = [...result.explicit_variables].sort();

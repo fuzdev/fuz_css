@@ -6,12 +6,12 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	create_style_rule_index,
 	get_matching_rules,
-	generate_base_css,
+	generate_base_css
 } from '$lib/style_rule_parser.ts';
 
 describe('create_style_rule_index', () => {

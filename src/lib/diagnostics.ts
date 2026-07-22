@@ -87,14 +87,14 @@ export interface InterpreterDiagnostic {
  */
 export const create_generation_diagnostic = (
 	diagnostic: InterpreterDiagnostic,
-	locations: Array<SourceLocation> | null,
+	locations: Array<SourceLocation> | null
 ): GenerationDiagnostic => ({
 	phase: 'generation',
 	level: diagnostic.level,
 	message: diagnostic.message,
 	identifier: diagnostic.identifier,
 	suggestion: diagnostic.suggestion ?? null,
-	locations,
+	locations
 });
 
 /**

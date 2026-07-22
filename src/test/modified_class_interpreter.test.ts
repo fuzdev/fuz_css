@@ -1,15 +1,15 @@
-import {test, describe, assert} from 'vitest';
+import { test, describe, assert } from 'vitest';
 
-import {generate_classes_css} from '$lib/css_class_generation.ts';
-import {modified_class_interpreter} from '$lib/css_class_interpreters.ts';
-import {css_class_definitions} from '$lib/css_class_definitions.ts';
-import {css_class_composites} from '$lib/css_class_composites.ts';
+import { generate_classes_css } from '$lib/css_class_generation.ts';
+import { modified_class_interpreter } from '$lib/css_class_interpreters.ts';
+import { css_class_definitions } from '$lib/css_class_definitions.ts';
+import { css_class_composites } from '$lib/css_class_composites.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,
 	assert_css_order,
 	assert_diagnostic,
-	filter_diagnostics_by_message,
+	filter_diagnostics_by_message
 } from './test_helpers.ts';
 
 /**
@@ -23,14 +23,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:box'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.hover\\:box:hover',
 				'display: flex',
-				'flex-direction: column',
+				'flex-direction: column'
 			);
 		});
 
@@ -39,7 +39,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:box'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '@media (width >= 48rem)', '.md\\:box', 'display: flex');
@@ -50,7 +50,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['dark:panel'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, ':root.dark', '.dark\\:panel', 'border-radius');
@@ -61,14 +61,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:dark:hover:box'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				':root.dark',
-				'.md\\:dark\\:hover\\:box:hover',
+				'.md\\:dark\\:hover\\:box:hover'
 			);
 		});
 
@@ -77,14 +77,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['lg:dark:focus:after:box'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
 				':root.dark',
-				'.lg\\:dark\\:focus\\:after\\:box:focus::after',
+				'.lg\\:dark\\:focus\\:after\\:box:focus::after'
 			);
 		});
 
@@ -93,7 +93,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:p_md'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:p_md:hover', 'padding');
@@ -104,7 +104,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:unknown_class'],
 				class_definitions: {},
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, 'hover:unknown_class');
@@ -115,7 +115,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['box'],
 				class_definitions: {},
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.box');
@@ -128,7 +128,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['before:box'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.before\\:box::before', 'display: flex');
@@ -139,7 +139,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:before:ellipsis'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:before\\:ellipsis:hover::before');
@@ -152,7 +152,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:row'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:row:hover', 'display: flex', 'flex-direction: row');
@@ -165,7 +165,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:selectable:hover', 'cursor: pointer');
@@ -177,7 +177,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -185,7 +185,7 @@ describe('modified_class_interpreter', () => {
 				'@media (width >= 48rem)',
 				'.md\\:selectable',
 				'.md\\:selectable:hover',
-				'.md\\:selectable.selected',
+				'.md\\:selectable.selected'
 			);
 		});
 
@@ -194,7 +194,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:menuitem'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -202,7 +202,7 @@ describe('modified_class_interpreter', () => {
 				'.hover\\:menuitem:hover',
 				'.hover\\:menuitem:hover .content',
 				'.hover\\:menuitem:hover .icon',
-				'.hover\\:menuitem:hover .title',
+				'.hover\\:menuitem:hover .title'
 			);
 		});
 
@@ -211,7 +211,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:chevron'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:chevron:hover', '.hover\\:chevron:hover::before');
@@ -222,7 +222,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:chip'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -230,7 +230,7 @@ describe('modified_class_interpreter', () => {
 				'.hover\\:chip:hover',
 				'a.hover\\:chip:hover',
 				'font-weight: 500',
-				'font-weight: 600',
+				'font-weight: 600'
 			);
 		});
 
@@ -239,14 +239,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:dark:hover:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
 				':root.dark',
-				'.md\\:dark\\:hover\\:selectable:hover',
+				'.md\\:dark\\:hover\\:selectable:hover'
 			);
 		});
 
@@ -255,14 +255,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['focus:plain'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.focus\\:plain:not(:hover):focus',
 				'.focus\\:plain:hover:focus',
-				'.focus\\:plain:active:focus',
+				'.focus\\:plain:active:focus'
 			);
 		});
 
@@ -271,7 +271,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:clickable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -280,7 +280,7 @@ describe('modified_class_interpreter', () => {
 				'.md\\:clickable',
 				'.md\\:clickable:focus',
 				'.md\\:clickable:hover',
-				'.md\\:clickable:active',
+				'.md\\:clickable:active'
 			);
 		});
 
@@ -289,14 +289,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['before:chevron'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.before\\:chevron::before',
 				'position: relative',
-				'border-left-color',
+				'border-left-color'
 			);
 			assert_css_not_contains(result.css, '::before::before');
 		});
@@ -306,7 +306,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['before:chip'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -314,7 +314,7 @@ describe('modified_class_interpreter', () => {
 				'.before\\:chip::before',
 				'a.before\\:chip::before',
 				'font-weight: 500',
-				'font-weight: 600',
+				'font-weight: 600'
 			);
 		});
 	});
@@ -325,14 +325,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.hover\\:selectable:hover',
 				'cursor: pointer',
-				'.hover\\:selectable.selected:hover',
+				'.hover\\:selectable.selected:hover'
 			);
 			assert_css_not_contains(result.css, ':hover:hover');
 		});
@@ -342,7 +342,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, ':active:hover');
@@ -353,7 +353,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['focus:clickable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.focus\\:clickable:focus', ':hover:focus', ':active:focus');
@@ -365,7 +365,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['active:clickable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, ':active:active');
@@ -377,7 +377,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:plain'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -385,7 +385,7 @@ describe('modified_class_interpreter', () => {
 				'.hover\\:plain',
 				'.hover\\:plain:not(:hover)',
 				'.hover\\:plain:hover',
-				'.hover\\:plain:active',
+				'.hover\\:plain:active'
 			);
 			assert_css_not_contains(result.css, ':hover:hover');
 			assert.isAbove(result.diagnostics.length, 0);
@@ -395,39 +395,39 @@ describe('modified_class_interpreter', () => {
 	describe('modifier on composes-based composites', () => {
 		test('modifier on composes-based composite', () => {
 			const definitions = {
-				p_lg: {declaration: 'padding: var(--space_lg);'},
-				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {composes: ['p_lg', 'rounded']},
+				p_lg: { declaration: 'padding: var(--space_lg);' },
+				rounded: { declaration: 'border-radius: var(--border_radius_md);' },
+				card: { composes: ['p_lg', 'rounded'] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'.hover\\:card:hover {',
 				'padding: var(--space_lg);',
-				'border-radius: var(--border_radius_md);',
+				'border-radius: var(--border_radius_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on composes + declaration composite', () => {
 			const definitions = {
-				p_lg: {declaration: 'padding: var(--space_lg);'},
-				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				card: {composes: ['p_lg', 'rounded'], declaration: '--card-bg: blue;'},
+				p_lg: { declaration: 'padding: var(--space_lg);' },
+				rounded: { declaration: 'border-radius: var(--border_radius_md);' },
+				card: { composes: ['p_lg', 'rounded'], declaration: '--card-bg: blue;' }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -435,23 +435,23 @@ describe('modified_class_interpreter', () => {
 				'.hover\\:card:hover {',
 				'padding: var(--space_lg);',
 				'border-radius: var(--border_radius_md);',
-				'--card-bg: blue;',
+				'--card-bg: blue;'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on nested composes composition', () => {
 			const definitions = {
-				p_lg: {declaration: 'padding: var(--space_lg);'},
-				rounded: {declaration: 'border-radius: var(--border_radius_md);'},
-				panel_base: {composes: ['p_lg', 'rounded']},
+				p_lg: { declaration: 'padding: var(--space_lg);' },
+				rounded: { declaration: 'border-radius: var(--border_radius_md);' },
+				panel_base: { composes: ['p_lg', 'rounded'] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['md:panel_base'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -459,24 +459,24 @@ describe('modified_class_interpreter', () => {
 				'@media (width >= 48rem)',
 				'.md\\:panel_base',
 				'padding: var(--space_lg);',
-				'border-radius: var(--border_radius_md);',
+				'border-radius: var(--border_radius_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
 		test('modifier on diamond dependency deduplicates silently', () => {
 			const definitions = {
-				base: {declaration: 'color: red;'},
-				branch_a: {composes: ['base'], declaration: 'font-size: 1rem;'},
-				branch_b: {composes: ['base'], declaration: 'font-weight: bold;'},
-				diamond: {composes: ['branch_a', 'branch_b']},
+				base: { declaration: 'color: red;' },
+				branch_a: { composes: ['base'], declaration: 'font-size: 1rem;' },
+				branch_b: { composes: ['base'], declaration: 'font-weight: bold;' },
+				diamond: { composes: ['branch_a', 'branch_b'] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:diamond'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -484,7 +484,7 @@ describe('modified_class_interpreter', () => {
 				'.hover\\:diamond:hover',
 				'color: red;',
 				'font-size: 1rem;',
-				'font-weight: bold;',
+				'font-weight: bold;'
 			);
 			// Should not have duplicate "color: red;" - only appears once
 			const colorMatches = result.css.match(/color: red;/g);
@@ -497,7 +497,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['md:sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -506,7 +506,7 @@ describe('modified_class_interpreter', () => {
 				'.md\\:sm',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl4);',
-				'--icon_size: var(--icon_size_sm);',
+				'--icon_size: var(--icon_size_sm);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -516,7 +516,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:sm:hover', '--font_size: var(--font_size_sm);');
@@ -528,7 +528,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:md'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.hover\\:md:hover', '--font_size: var(--font_size_md);');
@@ -540,14 +540,14 @@ describe('modified_class_interpreter', () => {
 				class_names: ['lg:sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
 				'.lg\\:sm',
-				'--font_size: var(--font_size_sm);',
+				'--font_size: var(--font_size_sm);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -557,7 +557,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['lg:md'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(
@@ -565,7 +565,7 @@ describe('modified_class_interpreter', () => {
 				'@media (width >= 64rem)',
 				'.lg\\:md',
 				'--font_size: var(--font_size_md);',
-				'--icon_size: var(--icon_size_md);',
+				'--icon_size: var(--icon_size_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
@@ -575,7 +575,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['sm', 'md'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_contains(result.css, '.sm {', '--font_size: var(--font_size_sm);');
@@ -587,35 +587,35 @@ describe('modified_class_interpreter', () => {
 	describe('error propagation', () => {
 		test('modifier on class with unknown composes array produces error', () => {
 			const definitions = {
-				card: {composes: ['unknown_class']},
+				card: { composes: ['unknown_class'] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.hover\\:card');
 			assert_diagnostic(
 				result.diagnostics,
 				'error',
-				'Unknown class "unknown_class" in composes array',
+				'Unknown class "unknown_class" in composes array'
 			);
 		});
 
 		test('modifier on class with circular reference produces error', () => {
 			const definitions = {
-				a: {composes: ['b']},
-				b: {composes: ['a']},
+				a: { composes: ['b'] },
+				b: { composes: ['a'] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:a'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_not_contains(result.css, '.hover\\:a');
@@ -624,14 +624,14 @@ describe('modified_class_interpreter', () => {
 
 		test('modifier on empty composes array produces no output', () => {
 			const definitions = {
-				empty: {composes: []},
+				empty: { composes: [] }
 			};
 
 			const result = generate_classes_css({
 				class_names: ['hover:empty'],
 				class_definitions: definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.strictEqual(result.css, '');
@@ -645,7 +645,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['active:border_color_a_50', 'hover:border_color_b_50'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
@@ -656,7 +656,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['active:p_xl', 'hover:p_lg', 'focus:p_md', 'visited:p_sm'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert_css_order(
@@ -664,7 +664,7 @@ describe('modified_class_interpreter', () => {
 				'.visited\\:p_sm',
 				'.focus\\:p_md',
 				'.hover\\:p_lg',
-				'.active\\:p_xl',
+				'.active\\:p_xl'
 			);
 		});
 
@@ -673,7 +673,7 @@ describe('modified_class_interpreter', () => {
 				class_names: ['odd:p_md', 'even:p_lg', 'first:p_sm'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			// Alphabetical: even < first < odd
@@ -687,12 +687,12 @@ describe('modified_class_interpreter', () => {
 				class_names: ['before:chevron'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			assert.isAbove(result.diagnostics.length, 0);
 			const warning = result.diagnostics.find(
-				(d) => d.identifier === 'before:chevron' && d.message.includes('pseudo-element'),
+				(d) => d.identifier === 'before:chevron' && d.message.includes('pseudo-element')
 			);
 			assert.isDefined(warning);
 			assert.strictEqual(warning.level, 'warning');
@@ -705,11 +705,11 @@ describe('modified_class_interpreter', () => {
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			const hover_warnings = filter_diagnostics_by_message(result.diagnostics, ':hover').filter(
-				(d) => d.identifier === 'hover:selectable',
+				(d) => d.identifier === 'hover:selectable'
 			);
 			assert.isAbove(hover_warnings.length, 0);
 
@@ -724,11 +724,11 @@ describe('modified_class_interpreter', () => {
 				class_names: ['focus:clickable'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
-				css_properties: null,
+				css_properties: null
 			});
 
 			const focus_warning = result.diagnostics.find(
-				(d) => d.identifier === 'focus:clickable' && d.message.includes(':focus'),
+				(d) => d.identifier === 'focus:clickable' && d.message.includes(':focus')
 			);
 			assert.isDefined(focus_warning);
 			assert.include(focus_warning.message, '.clickable:focus');

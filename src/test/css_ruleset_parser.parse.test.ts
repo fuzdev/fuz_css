@@ -1,10 +1,10 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	parse_ruleset,
 	is_single_selector_ruleset,
 	ruleset_contains_class,
-	extract_css_comment,
+	extract_css_comment
 } from '$lib/css_ruleset_parser.ts';
 
 /**

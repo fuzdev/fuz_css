@@ -1,12 +1,12 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {swallow} from '@fuzdev/fuz_util/dom.ts';
+	import { swallow } from '@fuzdev/fuz_util/dom.ts';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Dialog from '@fuzdev/fuz_ui/Dialog.svelte';
 	import DialogContent from '@fuzdev/fuz_ui/DialogContent.svelte';
 
-	import {render_theme_style, type Theme} from '$lib/theme.ts';
-	import type {StyleVariable} from '$lib/variable.ts';
+	import { render_theme_style, type Theme } from '$lib/theme.ts';
+	import type { StyleVariable } from '$lib/variable.ts';
 	import StyleVariableDetail from './StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from './docs/UnfinishedImplementationWarning.svelte';
 
@@ -18,7 +18,7 @@
 
 	const {
 		theme = null,
-		onsave,
+		onsave
 	}: {
 		/**
 		 * `null` means creating
@@ -32,10 +32,10 @@
 
 	let new_variables = $derived(theme ? theme.variables : []); // TODO `updateVariables` to `StyleVariableDetail` ?
 
-	const new_theme: Theme = $derived({name: new_name, variables: new_variables});
+	const new_theme: Theme = $derived({ name: new_name, variables: new_variables });
 
 	const code = $derived(
-		render_theme_style(new_theme, {empty_default_theme: false, specificity: 1}),
+		render_theme_style(new_theme, { empty_default_theme: false, specificity: 1 })
 	);
 
 	const light_count = $derived(new_variables.reduce((c, v) => (v.light ? c + 1 : c), 0));
@@ -61,7 +61,7 @@
 
 	const editing = $derived(!!theme);
 	const changed = $derived(
-		theme ? new_name !== theme.name || new_variables !== theme.variables : true,
+		theme ? new_name !== theme.name || new_variables !== theme.variables : true
 	);
 </script>
 
@@ -111,7 +111,7 @@
 {#if selected_variable}
 	<Dialog onclose={() => (selected_variable = null)}>
 		<DialogContent>
-			{#snippet children({close})}
+			{#snippet children({ close })}
 				<div class="panel p_lg box">
 					<StyleVariableDetail variable={selected_variable} />
 					<UnfinishedImplementationWarning />

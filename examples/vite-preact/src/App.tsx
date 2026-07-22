@@ -1,4 +1,4 @@
-import {useState} from 'preact/hooks';
+import { useState } from 'preact/hooks';
 
 // Import from node_modules to verify extraction works for dependencies
 import {
@@ -22,7 +22,7 @@ import {
 	arrayClasses,
 	objectClasses,
 	// Comment hint examples
-	fromComment,
+	fromComment
 } from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 export const App = () => {
@@ -33,7 +33,11 @@ export const App = () => {
 			<div class="column gap_lg">
 				<header class="text-align:center">
 					<h1>fuz_css + Preact</h1>
-					<p>Utility classes generated on-demand via Vite plugin (<a href="https://css.fuz.dev/docs/classes">docs</a>, <a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-preact">source</a>)</p>
+					<p>
+						Utility classes generated on-demand via Vite plugin (
+						<a href="https://css.fuz.dev/docs/classes">docs</a>,{' '}
+						<a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-preact">source</a>)
+					</p>
 				</header>
 
 				{/* Class types */}
@@ -50,7 +54,7 @@ export const App = () => {
 					<div>
 						<h3>Composite classes</h3>
 						<div class="box">.box</div>
-						<div class="ellipsis" style={{maxWidth: '365px'}}>
+						<div class="ellipsis" style={{ maxWidth: '365px' }}>
 							.ellipsis -- this text truncates with ellipsis when it overflows
 						</div>
 					</div>
@@ -59,7 +63,9 @@ export const App = () => {
 						<h3>Literal classes</h3>
 						<div class="opacity:60%">.opacity:60%</div>
 						<div class="color:var(--color_j_50)">.color:var(--color_j_50)</div>
-						<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)</div>
+						<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">
+							.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)
+						</div>
 					</div>
 				</section>
 
@@ -71,28 +77,44 @@ export const App = () => {
 						<h3>Responsive</h3>
 						<div class="mb_xl3 column gap_md md:flex-direction:row md:gap_lg">
 							<div class="flex:1">
-								<p>.column .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens</p>
+								<p>
+									.column .gap_md on mobile, .md:flex-direction:row .md:gap_lg on medium+ screens
+								</p>
 							</div>
 							<div class="flex:1">
 								<p>Resize the window to see the layout switch from column to row</p>
 							</div>
 						</div>
-						<p class="min-width(543px):font_size_lg">.min-width(543px):font_size_lg -- arbitrary breakpoint</p>
+						<p class="min-width(543px):font_size_lg">
+							.min-width(543px):font_size_lg -- arbitrary breakpoint
+						</p>
 					</div>
 
 					<div>
 						<h3>Interactive</h3>
 						<div class="row gap_md mb_lg">
-							<button class="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50" onClick={() => setCount((c) => c + 1)}>
+							<button
+								class="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50"
+								onClick={() => setCount((c) => c + 1)}
+							>
 								count: {count}
 							</button>
-							<span>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50 .active:outline_color_d_50</span>
+							<span>
+								.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50
+								.active:outline_color_d_50
+							</span>
 						</div>
 						<div class="row gap_md mb_lg">
-							<button class="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50" onClick={() => setCount(0)}>
+							<button
+								class="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50"
+								onClick={() => setCount(0)}
+							>
 								reset
 							</button>
-							<span>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50 .active:outline_color_h_50</span>
+							<span>
+								.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50
+								.active:outline_color_h_50
+							</span>
 						</div>
 					</div>
 				</section>
@@ -100,7 +122,10 @@ export const App = () => {
 				{/* Extraction */}
 				<section>
 					<h2>Extraction</h2>
-					<p>Classes detected via naming conventions, expressions, and comments (examples imported from <code>node_modules</code> to verify dependency scanning)</p>
+					<p>
+						Classes detected via naming conventions, expressions, and comments (examples imported
+						from <code>node_modules</code> to verify dependency scanning)
+					</p>
 
 					<div>
 						<h3>Naming patterns</h3>
@@ -144,7 +169,15 @@ export const App = () => {
 				</section>
 
 				<footer class="text-align:center">
-					<p>This demos a subset of features.<br />See the <a href="https://css.fuz.dev/docs/classes">docs</a> and <a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-preact">source code</a> for more.</p>
+					<p>
+						This demos a subset of features.
+						<br />
+						See the <a href="https://css.fuz.dev/docs/classes">docs</a> and{' '}
+						<a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-preact">
+							source code
+						</a>{' '}
+						for more.
+					</p>
 				</footer>
 			</div>
 		</main>

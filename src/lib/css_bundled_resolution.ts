@@ -13,21 +13,21 @@
  * @module
  */
 
-import type {GenerationDiagnostic} from './diagnostics.ts';
+import type { GenerationDiagnostic } from './diagnostics.ts';
 import {
 	type StyleRuleIndex,
 	get_matching_rules,
 	generate_base_css,
-	collect_rule_variables,
+	collect_rule_variables
 } from './style_rule_parser.ts';
 import {
 	type VariableDependencyGraph,
 	resolve_variables_transitive,
 	generate_theme_css,
 	get_all_variable_names,
-	find_similar_variable,
+	find_similar_variable
 } from './variable_graph.ts';
-import {type CssClassVariableIndex, collect_class_variables} from './class_variable_index.ts';
+import { type CssClassVariableIndex, collect_class_variables } from './class_variable_index.ts';
 
 /**
  * Threshold for string similarity to suggest typo corrections.
@@ -205,7 +205,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		exclude_elements: raw_exclude_elements,
 		exclude_variables: raw_exclude_variables,
 		explicit_elements,
-		explicit_variables,
+		explicit_variables
 	} = options;
 
 	const diagnostics: Array<GenerationDiagnostic> = [];
@@ -244,7 +244,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		included_rule_indices = get_matching_rules(
 			style_rule_index,
 			included_elements,
-			detected_classes,
+			detected_classes
 		);
 	}
 
@@ -260,7 +260,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					suggestion:
 						'Element will use browser defaults. Add to additional_elements if intentional.',
 					identifier: element,
-					locations: null,
+					locations: null
 				});
 			}
 		}
@@ -284,7 +284,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 						? `Check spelling. Similar element: ${similar}`
 						: 'Element has no fuz_css styles. Remove from @fuz-elements or add custom styles.',
 					identifier: element,
-					locations: null,
+					locations: null
 				});
 			}
 		}
@@ -307,7 +307,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 						? `Check spelling. Similar variable: ${similar}`
 						: 'Variable does not exist in the theme. Remove from @fuz-variables.',
 					identifier: variable,
-					locations: null,
+					locations: null
 				});
 			}
 		}
@@ -373,7 +373,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 					}" is referenced by included styles but excluded via exclude_variables - references to it will be undefined`,
 					suggestion: 'Remove it from exclude_variables, or define the variable elsewhere.',
 					identifier: v,
-					locations: null,
+					locations: null
 				});
 			}
 			all_variables.delete(v);
@@ -392,7 +392,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			message: warning,
 			suggestion: null,
 			identifier: 'variable_resolution',
-			locations: null,
+			locations: null
 		});
 	}
 
@@ -407,17 +407,17 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				message: `CSS variable "--${name}" not found - did you mean "--${similar}"?`,
 				suggestion: `Check spelling. Similar theme variable: --${similar}`,
 				identifier: `var(--${name})`,
-				locations: null,
+				locations: null
 			});
 		}
 		// Variables not similar to any theme variable are assumed to be user-defined
 	}
 
 	// Step 5: Generate theme CSS
-	const {light_css, dark_css} = generate_theme_css(
+	const { light_css, dark_css } = generate_theme_css(
 		variable_graph,
 		resolved_variables,
-		theme_specificity,
+		theme_specificity
 	);
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
@@ -431,7 +431,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				elements: [...included_elements],
 				included_rules: included_rule_indices.size,
 				total_rules: style_rule_index.rules.length,
-				variable_count: resolved_variables.size,
+				variable_count: resolved_variables.size
 			}
 		: undefined;
 
@@ -442,7 +442,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		included_rule_indices,
 		included_elements,
 		diagnostics,
-		stats,
+		stats
 	};
 };
 
@@ -469,9 +469,9 @@ export interface GenerateBundledCssOptions {
 export const generate_bundled_css = (
 	result: CssResolutionResult,
 	utility_css: string,
-	options: GenerateBundledCssOptions = {},
+	options: GenerateBundledCssOptions = {}
 ): string => {
-	const {include_theme = true, include_base = true, include_utilities = true} = options;
+	const { include_theme = true, include_base = true, include_utilities = true } = options;
 
 	const parts: Array<string> = [];
 

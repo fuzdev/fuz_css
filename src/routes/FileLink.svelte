@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type {Snippet} from 'svelte';
-	import type {SvelteHTMLElements} from 'svelte/elements';
-	import {icon_create_file} from '@fuzdev/fuz_ui/icons.ts';
-	import type {SvgData} from '@fuzdev/fuz_ui/svg.ts';
+	import type { Snippet } from 'svelte';
+	import type { SvelteHTMLElements } from 'svelte/elements';
+	import { icon_create_file } from '@fuzdev/fuz_ui/icons.ts';
+	import type { SvgData } from '@fuzdev/fuz_ui/svg.ts';
 	import Svg from '@fuzdev/fuz_ui/Svg.svelte';
 
 	// TODO upstream?
@@ -14,7 +14,7 @@
 		unstyled = false,
 		attrs,
 		icon = icon_create_file,
-		children,
+		children
 	}: {
 		path: string;
 		/**
@@ -35,7 +35,10 @@
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
 <a {...attrs} {href} class:chip={!unstyled} class:white-space:nowrap={true}
-	>{#if typeof icon === 'string'}{icon}{:else if typeof icon ===
-		'function'}{@render icon()}{:else}<Svg inline data={icon} size="1em" />{/if}
+	>{#if typeof icon === 'string'}{icon}{:else if typeof icon === 'function'}{@render icon()}{:else}<Svg
+			inline
+			data={icon}
+			size="1em"
+		/>{/if}
 	{#if children}{@render children()}{:else}{final_path}{/if}</a
 >

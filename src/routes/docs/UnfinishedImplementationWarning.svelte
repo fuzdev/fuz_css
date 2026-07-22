@@ -1,7 +1,7 @@
 <script lang="ts">
-	import type {SvelteHTMLElements} from 'svelte/elements';
+	import type { SvelteHTMLElements } from 'svelte/elements';
 
-	const {children, ...rest}: SvelteHTMLElements['aside'] = $props();
+	const { children, ...rest }: SvelteHTMLElements['aside'] = $props();
 </script>
 
 <aside {...rest}>

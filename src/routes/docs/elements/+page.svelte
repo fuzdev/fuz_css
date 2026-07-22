@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {resolve} from '$app/paths';
+	import { resolve } from '$app/paths';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -27,9 +27,8 @@
 		<p>
 			fuz_css applies default styles to semantic HTML elements in its <SourceFileLink
 				path="style.css">reset stylesheet</SourceFileLink
-			>. The styles use <TomeLink slug="variables" /> and include appropriate spacing, so plain HTML
-			gets user-friendly styling and theme integration automatically. The defaults are low
-			specificity using
+			>. The styles use <TomeLink slug="variables" /> and include appropriate spacing, so plain HTML gets
+			user-friendly styling and theme integration automatically. The defaults are low specificity using
 			<code>:where</code>
 			so they're easy to override, and you can opt out by adding
 			<code>.unstyled</code> to an element.
@@ -54,11 +53,10 @@
 			This paragraph has no bottom margin because default spacing is omitted for the <code
 				>:last-child</code
 			>
-			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge
-			cases that can usually by solved by adding <code>.mb_lg</code>. Coupling markup structure to
-			styles like this may be something we change, <a href="https://github.com/fuzdev/fuz_css"
-				>feedback</a
-			> is welcome.
+			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge cases
+			that can usually by solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
+			like this may be something we change, <a href="https://github.com/fuzdev/fuz_css">feedback</a> is
+			welcome.
 		</p>
 	</TomeSection>
 	<TomeSection>

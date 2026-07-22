@@ -5,9 +5,9 @@
  * similar to how @fuz-classes works for dynamic class names.
  */
 
-import {test, describe, beforeAll, assert} from 'vitest';
+import { test, describe, beforeAll, assert } from 'vitest';
 
-import {extract_from_svelte, extract_from_ts} from '$lib/css_class_extractor.ts';
+import { extract_from_svelte, extract_from_ts } from '$lib/css_class_extractor.ts';
 import {
 	assert_elements,
 	assert_explicit_elements,
@@ -16,7 +16,7 @@ import {
 	assert_no_explicit_variables,
 	assert_diagnostic,
 	svelte_script,
-	create_jsx_extractor,
+	create_jsx_extractor
 } from './css_class_extractor_test_helpers.ts';
 
 //
@@ -39,7 +39,7 @@ describe('@fuz-elements comment extraction', () => {
 			svelte_script(`
 // @fuz-elements dialog article
 const el = document.createElement('dialog');
-`),
+`)
 		);
 		assert_explicit_elements(result, ['dialog', 'article']);
 	});
@@ -49,7 +49,7 @@ const el = document.createElement('dialog');
 			svelte_script(`
 /* @fuz-elements nav header footer */
 const x = 1;
-`),
+`)
 		);
 		assert_explicit_elements(result, ['nav', 'header', 'footer']);
 	});
@@ -95,7 +95,7 @@ describe('@fuz-elements in TypeScript', () => {
 // @fuz-elements dialog details
 const el = document.createElement('dialog');
 `,
-			'test.ts',
+			'test.ts'
 		);
 		assert_explicit_elements(result, ['dialog', 'details']);
 	});
@@ -106,7 +106,7 @@ const el = document.createElement('dialog');
 /* @fuz-elements nav footer */
 export const x = 1;
 `,
-			'test.ts',
+			'test.ts'
 		);
 		assert_explicit_elements(result, ['nav', 'footer']);
 	});
@@ -147,7 +147,7 @@ describe('@fuz-variables comment extraction', () => {
 			svelte_script(`
 // @fuz-variables font_size_xl4 font_size_xl5
 const x = 1;
-`),
+`)
 		);
 		assert_explicit_variables(result, ['font_size_xl4', 'font_size_xl5']);
 	});
@@ -157,7 +157,7 @@ const x = 1;
 			svelte_script(`
 /* @fuz-variables text_min text_max */
 const x = 1;
-`),
+`)
 		);
 		assert_explicit_variables(result, ['text_min', 'text_max']);
 	});
@@ -193,7 +193,7 @@ describe('@fuz-variables in TypeScript', () => {
 // @fuz-variables space_xl8 distance_lg
 const x = 1;
 `,
-			'test.ts',
+			'test.ts'
 		);
 		assert_explicit_variables(result, ['space_xl8', 'distance_lg']);
 	});
@@ -204,7 +204,7 @@ const x = 1;
 /* @fuz-variables icon_size_xl3 */
 export const x = 1;
 `,
-			'test.ts',
+			'test.ts'
 		);
 		assert_explicit_variables(result, ['icon_size_xl3']);
 	});
@@ -247,7 +247,7 @@ describe('combined @fuz-* comments', () => {
 // @fuz-classes dynamic_class
 // @fuz-elements dialog
 const x = 1;
-`),
+`)
 		);
 		assert.deepEqual(result.explicit_classes, new Set(['dynamic_class']));
 		assert_explicit_elements(result, ['dialog']);

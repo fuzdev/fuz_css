@@ -8,8 +8,8 @@
  * @module
  */
 
-import type {CssClassDefinition} from './css_class_generation.ts';
-import {extract_css_variables} from './css_variable_utils.ts';
+import type { CssClassDefinition } from './css_class_generation.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
 
 /**
  * Index mapping class names to their CSS variable dependencies.
@@ -26,7 +26,7 @@ export interface CssClassVariableIndex {
  * @returns `CssClassVariableIndex` with variable lookups
  */
 export const build_class_variable_index = (
-	definitions: Record<string, CssClassDefinition | undefined>,
+	definitions: Record<string, CssClassDefinition | undefined>
 ): CssClassVariableIndex => {
 	const by_class: Map<string, Set<string>> = new Map();
 
@@ -39,7 +39,7 @@ export const build_class_variable_index = (
 		}
 	}
 
-	return {by_class};
+	return { by_class };
 };
 
 /**
@@ -80,7 +80,7 @@ const extract_variables_from_definition = (definition: CssClassDefinition): Set<
  */
 export const get_class_variables = (
 	index: CssClassVariableIndex,
-	class_name: string,
+	class_name: string
 ): Set<string> | null => index.by_class.get(class_name) ?? null;
 
 /**
@@ -92,7 +92,7 @@ export const get_class_variables = (
  */
 export const collect_class_variables = (
 	index: CssClassVariableIndex,
-	class_names: Iterable<string>,
+	class_names: Iterable<string>
 ): Set<string> => {
 	const variables: Set<string> = new Set();
 
@@ -117,7 +117,7 @@ export const collect_class_variables = (
  */
 export const get_classes_using_variable = (
 	index: CssClassVariableIndex,
-	variable_name: string,
+	variable_name: string
 ): Array<string> => {
 	const classes: Array<string> = [];
 

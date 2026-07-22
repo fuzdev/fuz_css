@@ -1,6 +1,6 @@
-import {default_variables} from './variables.ts';
-import {default_themes} from './themes.ts'; // TODO shoudln't be a dep, see usage below
-import type {StyleVariable} from './variable.ts';
+import { default_variables } from './variables.ts';
+import { default_themes } from './themes.ts'; // TODO shoudln't be a dep, see usage below
+import type { StyleVariable } from './variable.ts';
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
@@ -26,7 +26,7 @@ export interface RenderThemeStyleOptions {
 }
 
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
-	const {comments = false, id = null, empty_default_theme = true, specificity = 2} = options;
+	const { comments = false, id = null, empty_default_theme = true, specificity = 2 } = options;
 	const variables =
 		theme.name === default_themes[0]!.name
 			? empty_default_theme
@@ -59,7 +59,7 @@ ${
 export const render_theme_variable = (
 	variable: StyleVariable,
 	dark = false,
-	comments = true,
+	comments = true
 ): string => {
 	const v = dark ? variable.dark : variable.light;
 	if (!v) return '';

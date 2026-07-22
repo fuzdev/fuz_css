@@ -1,8 +1,8 @@
-import {test, assert} from 'vitest';
-import {readFileSync} from 'node:fs';
+import { test, assert } from 'vitest';
+import { readFileSync } from 'node:fs';
 
 import * as exported_variables from '$lib/variables.ts';
-import {absolute_color_variables} from '$lib/variables.ts';
+import { absolute_color_variables } from '$lib/variables.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
 // Create a set of absolute color variable names for quick lookup
@@ -16,7 +16,7 @@ const css_files = [main_stylesheet_text, css_classes_text];
 
 const extract_custom_properties_usage = (css: string) =>
 	Array.from(css.matchAll(/var\((?:\s|\\[nt])*--([a-z][a-z0-9_]*(?<!_))(?:[,)])/g)).map(
-		(m) => m[1]!,
+		(m) => m[1]!
 	);
 
 test('variables in the CSS exist', () => {
@@ -94,5 +94,5 @@ const known_without_variables = new Set([
 	'button_border_color_active',
 	'shadow',
 	'shadow_alpha',
-	'shadow_color',
+	'shadow_color'
 ]);

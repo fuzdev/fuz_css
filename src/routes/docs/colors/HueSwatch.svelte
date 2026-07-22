@@ -6,7 +6,7 @@
 		computed_styles,
 		width = 48,
 		height = 48,
-		description,
+		description
 	}: {
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;

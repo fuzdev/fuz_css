@@ -26,31 +26,31 @@
  * @module
  */
 
-import type {Logger as ViteLogger, Plugin, ViteDevServer} from 'vite';
-import {join} from 'node:path';
-import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.ts';
+import type { Logger as ViteLogger, Plugin, ViteDevServer } from 'vite';
+import { join } from 'node:path';
+import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
 
-import {format_diagnostic, CssGenerationError} from './diagnostics.ts';
-import {generate_css} from './generate_css.ts';
-import {create_bundled_resources} from './bundled_resources.ts';
-import {extract_file_cached} from './extract_file_cached.ts';
-import {merge_class_definitions} from './css_class_definitions.ts';
-import {css_class_interpreters} from './css_class_interpreters.ts';
-import {load_css_properties} from './css_literal.ts';
+import { format_diagnostic, CssGenerationError } from './diagnostics.ts';
+import { generate_css } from './generate_css.ts';
+import { create_bundled_resources } from './bundled_resources.ts';
+import { extract_file_cached } from './extract_file_cached.ts';
+import { merge_class_definitions } from './css_class_definitions.ts';
+import { css_class_interpreters } from './css_class_interpreters.ts';
+import { load_css_properties } from './css_literal.ts';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
 	save_cached_extraction,
-	delete_cached_extraction,
+	delete_cached_extraction
 } from './css_cache.ts';
-import {default_cache_deps} from './deps_defaults.ts';
-import {filter_file_default} from './file_filter.ts';
-import {CssClasses} from './css_classes.ts';
-import type {StyleRuleIndex} from './style_rule_parser.ts';
-import {type VariableDependencyGraph, get_all_variable_names} from './variable_graph.ts';
-import {extract_css_variables} from './css_variable_utils.ts';
-import type {CssClassVariableIndex} from './class_variable_index.ts';
-import type {CssGeneratorBaseOptions} from './css_plugin_options.ts';
+import { default_cache_deps } from './deps_defaults.ts';
+import { filter_file_default } from './file_filter.ts';
+import { CssClasses } from './css_classes.ts';
+import type { StyleRuleIndex } from './style_rule_parser.ts';
+import { type VariableDependencyGraph, get_all_variable_names } from './variable_graph.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
+import type { CssClassVariableIndex } from './class_variable_index.ts';
+import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
 
 /* eslint-disable no-console */
 
@@ -144,7 +144,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		deps = default_cache_deps,
+		deps = default_cache_deps
 	} = options;
 
 	// Derive include flags from null check
@@ -154,7 +154,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	// Merge class definitions (validates that definitions exist when needed)
 	const all_class_definitions = merge_class_definitions(
 		user_class_definitions,
-		include_default_classes,
+		include_default_classes
 	);
 
 	// Convert to Sets for efficient lookup
@@ -235,7 +235,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				base_css,
 				variables,
 				class_definitions: all_class_definitions,
-				deps,
+				deps
 			});
 			style_rule_index = resources.style_rule_index;
 			variable_graph = resources.variable_graph;
@@ -271,7 +271,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			explicit_classes,
 			all_elements,
 			explicit_elements,
-			explicit_variables,
+			explicit_variables
 		} = css_classes.get_all();
 
 		// Aggregate per-file `var(--*)` references (stored unfiltered by
@@ -292,7 +292,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			}
 		}
 
-		const {css: final_css, diagnostics: all_diagnostics} = generate_css({
+		const { css: final_css, diagnostics: all_diagnostics } = generate_css({
 			all_classes,
 			all_classes_with_locations,
 			explicit_classes,
@@ -309,13 +309,13 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			// Resources load lazily; null until ready falls back to utility-only.
 			resources:
 				style_rule_index && variable_graph && class_variable_index
-					? {style_rule_index, variable_graph, class_variable_index}
+					? { style_rule_index, variable_graph, class_variable_index }
 					: null,
 			additional_elements,
 			additional_variables,
 			exclude_elements,
 			exclude_variables,
-			theme_specificity,
+			theme_specificity
 		});
 
 		// Separate errors and warnings
@@ -394,9 +394,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 							type: 'js-update',
 							path: RESOLVED_VIRTUAL_ID,
 							acceptedPath: RESOLVED_VIRTUAL_ID,
-							timestamp: Date.now(),
-						},
-					],
+							timestamp: Date.now()
+						}
+					]
 				});
 			}
 			for (const vid of loaded_virtual_ids) {
@@ -542,7 +542,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			if (spliced_count > 1) {
 				log_error(
 					`[fuz_css] placeholder marker found in ${spliced_count} CSS assets; generated CSS is` +
-						` duplicated across them. Expected a single globally-loaded asset.`,
+						` duplicated across them. Expected a single globally-loaded asset.`
 				);
 				return;
 			}
@@ -574,7 +574,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 				throw new Error(
 					'[fuz_css] virtual:fuz.css was imported but no CSS asset exists to hold the generated' +
 						' styles — every page would be unstyled. Check the build config (cssCodeSplit /' +
-						' CSS-in-JS inlining).',
+						' CSS-in-JS inlining).'
 				);
 			}
 
@@ -584,7 +584,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			log_error(
 				`[fuz_css] placeholder marker not found in any CSS asset (likely stripped by a CSS` +
 					` minifier); appending generated CSS to all ${css_asset_count} CSS assets as a` +
-					` fallback. Output may be duplicated.`,
+					` fallback. Output may be duplicated.`
 			);
 			for (const chunk of Object.values(bundle)) {
 				if (
@@ -619,13 +619,13 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			const epoch = ++epoch_seq;
 			transform_epochs.set(id, epoch);
 
-			const {extraction, from_cache, cache_path_to_write} = await extract_file_cached({
+			const { extraction, from_cache, cache_path_to_write } = await extract_file_cached({
 				deps,
 				content: code,
 				content_hash: hash,
 				cache_path,
 				filename: id,
-				acorn_plugins,
+				acorn_plugins
 			});
 
 			// Bail if the file was deleted or re-transformed during the cache read;
@@ -667,7 +667,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			}
 
 			return null;
-		},
+		}
 
 		// Note: handleHotUpdate not needed - transform hook handles file changes,
 		// and configureServer's watcher.on('unlink') handles file deletion

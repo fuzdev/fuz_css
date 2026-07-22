@@ -1,8 +1,8 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {resolve_composes} from '$lib/css_class_resolution.ts';
-import type {CssClassDefinition} from '$lib/css_class_generation.ts';
-import {assert_resolved_declaration, assert_resolution_error} from './test_helpers.ts';
+import { resolve_composes } from '$lib/css_class_resolution.ts';
+import type { CssClassDefinition } from '$lib/css_class_generation.ts';
+import { assert_resolved_declaration, assert_resolution_error } from './test_helpers.ts';
 
 /**
  * Tests for CSS literal class handling in resolve_composes.
@@ -22,8 +22,8 @@ describe('resolve_composes with CSS literals', () => {
 			[
 				['text-align:center', 'display:flex', 'margin:0~auto'],
 				'text-align: center; display: flex; margin: 0 auto;',
-				'multiple literals',
-			],
+				'multiple literals'
+			]
 		];
 
 		test.each(success_cases)('resolves %j → "%s" (%s)', (composes, expectedDeclaration) => {
@@ -36,7 +36,7 @@ describe('resolve_composes with CSS literals', () => {
 	describe('mixed token classes and literals', () => {
 		test('resolves mixed token classes and literals', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				p_lg: {declaration: 'padding: var(--space_lg);'},
+				p_lg: { declaration: 'padding: var(--space_lg);' }
 			};
 			const result = resolve_composes(
 				['p_lg', 'text-align:center'],
@@ -44,7 +44,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert_resolved_declaration(result, 'padding: var(--space_lg); text-align: center;');
@@ -52,8 +52,8 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('resolves literal in nested composes resolution', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				base: {composes: ['text-align:center']},
-				card: {composes: ['base'], declaration: 'padding: 1rem;'},
+				base: { composes: ['text-align:center'] },
+				card: { composes: ['base'], declaration: 'padding: 1rem;' }
 			};
 			const result = resolve_composes(
 				['card'],
@@ -61,7 +61,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(result.ok);
@@ -78,7 +78,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert_resolution_error(result, 'cannot be used in composes array');
@@ -86,7 +86,7 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('modified known class gives clear error', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				box: {declaration: 'display: flex; flex-direction: column;'},
+				box: { declaration: 'display: flex; flex-direction: column;' }
 			};
 			const result = resolve_composes(
 				['hover:box'],
@@ -94,7 +94,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -104,7 +104,7 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('modified token class (md:p_lg) gives clear error', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				p_lg: {declaration: 'padding: var(--space_lg);'},
+				p_lg: { declaration: 'padding: var(--space_lg);' }
 			};
 			const result = resolve_composes(
 				['md:p_lg'],
@@ -112,7 +112,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'responsive_card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -124,7 +124,7 @@ describe('resolve_composes with CSS literals', () => {
 	describe('modifier typo detection', () => {
 		test('modifier with unknown base reports unknown class', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				box: {declaration: 'display: flex;'},
+				box: { declaration: 'display: flex;' }
 			};
 			const result = resolve_composes(
 				['hover:bx'], // bx doesn't exist (typo for box?)
@@ -132,7 +132,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -142,7 +142,7 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('modifier typo with known class suggests correction', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				box: {declaration: 'display: flex;'},
+				box: { declaration: 'display: flex;' }
 			};
 			const result = resolve_composes(
 				['hovr:box'], // typo: hovr → hover
@@ -150,7 +150,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -161,7 +161,7 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('modifier typo in middle of chain suggests correction', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				box: {declaration: 'display: flex;'},
+				box: { declaration: 'display: flex;' }
 			};
 			const result = resolve_composes(
 				['md:hovr:box'], // typo in middle: md:hovr:box → md:hover:box
@@ -169,7 +169,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -179,7 +179,7 @@ describe('resolve_composes with CSS literals', () => {
 
 		test('non-typo unknown prefix falls back to property error', () => {
 			const definitions: Record<string, CssClassDefinition> = {
-				box: {declaration: 'display: flex;'},
+				box: { declaration: 'display: flex;' }
 			};
 			const result = resolve_composes(
 				['xyz:box'], // not a modifier typo
@@ -187,7 +187,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert_resolution_error(result, 'Unknown CSS property "xyz"');
@@ -202,7 +202,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert_resolution_error(result, 'Unknown class');
@@ -215,7 +215,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'card',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(!result.ok);
@@ -232,7 +232,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(result.ok);
@@ -244,9 +244,9 @@ describe('resolve_composes with CSS literals', () => {
 		test('diamond dependency with literals deduplicated silently', () => {
 			// Both b and c include text-align:center (diamond), reaching it via different paths
 			const definitions: Record<string, CssClassDefinition> = {
-				b: {composes: ['text-align:center'], declaration: 'padding: 10px;'},
-				c: {composes: ['text-align:center'], declaration: 'margin: 10px;'},
-				a: {composes: ['b', 'c']},
+				b: { composes: ['text-align:center'], declaration: 'padding: 10px;' },
+				c: { composes: ['text-align:center'], declaration: 'margin: 10px;' },
+				a: { composes: ['b', 'c'] }
 			};
 			const result = resolve_composes(
 				['a'],
@@ -254,7 +254,7 @@ describe('resolve_composes with CSS literals', () => {
 				new Set(),
 				new Set(),
 				'test',
-				css_properties,
+				css_properties
 			);
 
 			assert.ok(result.ok);

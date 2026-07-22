@@ -1,4 +1,4 @@
-import {test, assert, describe, beforeAll} from 'vitest';
+import { test, assert, describe, beforeAll } from 'vitest';
 
 import {
 	parse_css_literal,
@@ -20,15 +20,15 @@ import {
 	type CssLiteralOutput,
 	type LiteralResolutionResult,
 	type ExtractedModifiers,
-	type ModifierExtractionResult,
+	type ModifierExtractionResult
 } from '$lib/css_literal.ts';
-import {escape_css_selector} from '$lib/css_class_generation.ts';
-import {type InterpreterDiagnostic} from '$lib/diagnostics.ts';
+import { escape_css_selector } from '$lib/css_class_generation.ts';
+import { type InterpreterDiagnostic } from '$lib/diagnostics.ts';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,
 	parse_parameterized_state,
-	extract_balanced_parens,
+	extract_balanced_parens
 } from '$lib/modifiers.ts';
 
 // CSS properties loaded before tests run
@@ -116,7 +116,7 @@ describe('is_possible_css_literal', () => {
 		['width:calc(100%-20px)'],
 		['--custom-prop:value'],
 		['nth-child(2n):color:red'],
-		['min-width(800px):display:flex'],
+		['min-width(800px):display:flex']
 	])('recognizes "%s" as possible CSS-literal', (input) => {
 		assert.isTrue(is_possible_css_literal(input));
 	});
@@ -129,7 +129,7 @@ describe('is_possible_css_literal', () => {
 		['', 'empty'],
 		[':', 'just colon'],
 		['display:', 'empty value'],
-		[':flex', 'empty property'],
+		[':flex', 'empty property']
 	])('rejects "%s" as not CSS-literal (%s)', (input) => {
 		assert.isFalse(is_possible_css_literal(input));
 	});
@@ -144,7 +144,7 @@ describe('extract_segments', () => {
 		['width:calc(100%-20px)', ['width', 'calc(100%-20px)']],
 		['min-width(800px):display:flex', ['min-width(800px)', 'display', 'flex']],
 		['before:content:""', ['before', 'content', '""']],
-		['width:calc(min(100%,500px))', ['width', 'calc(min(100%,500px))']],
+		['width:calc(min(100%,500px))', ['width', 'calc(min(100%,500px))']]
 	])('extract_segments("%s") → %j', (input, expected) => {
 		assert.deepEqual(extract_segments(input), expected);
 	});
@@ -153,7 +153,7 @@ describe('extract_segments', () => {
 	test.each<[string, Array<string>]>([
 		['width:calc((100%', ['width', 'calc((100%']], // unclosed - keeps as-is
 		['width:calc(100%))', ['width', 'calc(100%))']], // extra close - keeps as-is
-		['fn((a:b))', ['fn((a:b))']], // colon inside nested parens stays inside
+		['fn((a:b))', ['fn((a:b))']] // colon inside nested parens stays inside
 	])('extract_segments("%s") handles mismatched parens → %j', (input, expected) => {
 		assert.deepEqual(extract_segments(input), expected);
 	});
@@ -167,7 +167,7 @@ describe('format_css_value', () => {
 		['1px~solid~red', '1px solid red'],
 		['flex!important', 'flex !important'],
 		['0~auto!important', '0 auto !important'],
-		['calc(100%~-~20px)', 'calc(100% - 20px)'],
+		['calc(100%~-~20px)', 'calc(100% - 20px)']
 	] as const)('format_css_value("%s") → "%s"', (input, expected) => {
 		assert.strictEqual(format_css_value(input), expected);
 	});
@@ -177,7 +177,7 @@ describe('format_css_value', () => {
 		['~~~', '   '], // only tildes → only spaces
 		['0~', '0 '], // trailing tilde → trailing space
 		['~0', ' 0'], // leading tilde → leading space
-		['~~', '  '], // consecutive tildes → consecutive spaces
+		['~~', '  '] // consecutive tildes → consecutive spaces
 	] as const)('format_css_value("%s") → "%s" (edge cases)', (input, expected) => {
 		assert.strictEqual(format_css_value(input), expected);
 	});
@@ -185,7 +185,7 @@ describe('format_css_value', () => {
 	// !important edge cases
 	test.each([
 		['flex~!important', 'flex !important'], // tilde before !important normalizes to single space
-		['0~auto~!important', '0 auto !important'], // multiple tildes before !important
+		['0~auto~!important', '0 auto !important'] // multiple tildes before !important
 	] as const)('format_css_value("%s") → "%s" (!important edge cases)', (input, expected) => {
 		assert.strictEqual(format_css_value(input), expected);
 	});
@@ -196,7 +196,7 @@ describe('check_calc_expression', () => {
 		'warns about "%s"',
 		(input) => {
 			assert.isNotNull(check_calc_expression(input));
-		},
+		}
 	);
 
 	test.each([
@@ -204,7 +204,7 @@ describe('check_calc_expression', () => {
 		['calc(100%*2)', 'multiplication needs no spaces'],
 		['calc(100%/2)', 'division needs no spaces'],
 		['100%', 'not calc'],
-		['flex', 'not calc'],
+		['flex', 'not calc']
 	])('does not warn about "%s" (%s)', (input) => {
 		assert.isNull(check_calc_expression(input));
 	});
@@ -244,7 +244,7 @@ describe('get_modifier', () => {
 		['before', 'pseudo-element'],
 		['after', 'pseudo-element'],
 		['placeholder', 'pseudo-element'],
-		['selection', 'pseudo-element'],
+		['selection', 'pseudo-element']
 	] as const)('get_modifier("%s") → type: %s', (name, expected_type) => {
 		const modifier = get_modifier(name);
 		if (!modifier) throw new Error(`Expected modifier for "${name}"`);
@@ -261,7 +261,7 @@ describe('parse_arbitrary_breakpoint', () => {
 		['min-width(800px)', '@media (width >= 800px)'],
 		['max-width(600px)', '@media (width < 600px)'],
 		['min-width(50rem)', '@media (width >= 50rem)'],
-		['max-width(100vw)', '@media (width < 100vw)'],
+		['max-width(100vw)', '@media (width < 100vw)']
 	] as const)('parse_arbitrary_breakpoint("%s") → %s', (input, expected) => {
 		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
 	});
@@ -277,7 +277,7 @@ describe('parse_parameterized_state', () => {
 		['nth-child(2n+1)', ':nth-child(2n+1)'],
 		['nth-child(odd)', ':nth-child(odd)'],
 		['nth-of-type(3)', ':nth-of-type(3)'],
-		['nth-of-type(2n)', ':nth-of-type(2n)'],
+		['nth-of-type(2n)', ':nth-of-type(2n)']
 	] as const)('parse_parameterized_state("%s") → css: %s', (input, expected_css) => {
 		const result = parse_parameterized_state(input);
 		if (!result) throw new Error(`Expected result for "${input}"`);
@@ -297,9 +297,9 @@ describe('parse_css_literal - valid cases', () => {
 		['color:red', 'color', 'red'],
 		['font-size:16px', 'font-size', '16px'],
 		['z-index:100', 'z-index', '100'],
-		['--custom-prop:value', '--custom-prop', 'value'],
+		['--custom-prop:value', '--custom-prop', 'value']
 	] as const)('parse_css_literal("%s") → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal(input, css_properties));
 		assert.strictEqual(parsed.property, property);
 		assert.strictEqual(parsed.value, value);
 	});
@@ -307,7 +307,7 @@ describe('parse_css_literal - valid cases', () => {
 
 describe('parse_css_literal - with modifiers', () => {
 	test('hover:opacity:80%', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('hover:opacity:80%', css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal('hover:opacity:80%', css_properties));
 		assert.isNull(parsed.media);
 		assert.isNull(parsed.ancestor);
 		assert.lengthOf(parsed.states, 1);
@@ -318,7 +318,7 @@ describe('parse_css_literal - with modifiers', () => {
 	});
 
 	test('md:display:flex', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('md:display:flex', css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal('md:display:flex', css_properties));
 		if (!parsed.media) throw new Error('Expected media');
 		assert.strictEqual(parsed.media.name, 'md');
 		assert.isNull(parsed.ancestor);
@@ -327,7 +327,7 @@ describe('parse_css_literal - with modifiers', () => {
 	});
 
 	test('dark:opacity:60%', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('dark:opacity:60%', css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal('dark:opacity:60%', css_properties));
 		assert.isNull(parsed.media);
 		if (!parsed.ancestor) throw new Error('Expected ancestor');
 		assert.strictEqual(parsed.ancestor.name, 'dark');
@@ -335,15 +335,15 @@ describe('parse_css_literal - with modifiers', () => {
 	});
 
 	test('before:content:""', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('before:content:""', css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal('before:content:""', css_properties));
 		if (!parsed.pseudo_element) throw new Error('Expected pseudo_element');
 		assert.strictEqual(parsed.pseudo_element.name, 'before');
 		assert.strictEqual(parsed.property, 'content');
 	});
 
 	test('md:dark:hover:before:opacity:80%', () => {
-		const {parsed} = assert_parse_ok(
-			parse_css_literal('md:dark:hover:before:opacity:80%', css_properties),
+		const { parsed } = assert_parse_ok(
+			parse_css_literal('md:dark:hover:before:opacity:80%', css_properties)
 		);
 		if (!parsed.media) throw new Error('Expected media');
 		assert.strictEqual(parsed.media.name, 'md');
@@ -358,15 +358,15 @@ describe('parse_css_literal - with modifiers', () => {
 	});
 
 	test('focus:hover:color:red (alphabetical states)', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('focus:hover:color:red', css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal('focus:hover:color:red', css_properties));
 		assert.lengthOf(parsed.states, 2);
 		assert.strictEqual(parsed.states[0]!.name, 'focus');
 		assert.strictEqual(parsed.states[1]!.name, 'hover');
 	});
 
 	test('active:focus:hover:opacity:80% (multiple states alphabetical)', () => {
-		const {parsed} = assert_parse_ok(
-			parse_css_literal('active:focus:hover:opacity:80%', css_properties),
+		const { parsed } = assert_parse_ok(
+			parse_css_literal('active:focus:hover:opacity:80%', css_properties)
 		);
 		assert.lengthOf(parsed.states, 3);
 		assert.strictEqual(parsed.states[0]!.name, 'active');
@@ -375,24 +375,24 @@ describe('parse_css_literal - with modifiers', () => {
 	});
 
 	test('min-width(800px):display:flex (arbitrary breakpoint)', () => {
-		const {parsed} = assert_parse_ok(
-			parse_css_literal('min-width(800px):display:flex', css_properties),
+		const { parsed } = assert_parse_ok(
+			parse_css_literal('min-width(800px):display:flex', css_properties)
 		);
 		if (!parsed.media) throw new Error('Expected media');
 		assert.strictEqual(parsed.media.css, '@media (width >= 800px)');
 	});
 
 	test('nth-child(2n+1):color:red (parameterized state)', () => {
-		const {parsed} = assert_parse_ok(
-			parse_css_literal('nth-child(2n+1):color:red', css_properties),
+		const { parsed } = assert_parse_ok(
+			parse_css_literal('nth-child(2n+1):color:red', css_properties)
 		);
 		assert.lengthOf(parsed.states, 1);
 		assert.strictEqual(parsed.states[0]!.css, ':nth-child(2n+1)');
 	});
 
 	test('hover:nth-child(2n):color:red (alphabetical with parameterized)', () => {
-		const {parsed} = assert_parse_ok(
-			parse_css_literal('hover:nth-child(2n):color:red', css_properties),
+		const { parsed } = assert_parse_ok(
+			parse_css_literal('hover:nth-child(2n):color:red', css_properties)
 		);
 		assert.lengthOf(parsed.states, 2);
 		// 'hover' < 'nth-child(2n)' alphabetically
@@ -408,9 +408,9 @@ describe('parse_css_literal - error cases', () => {
 			['dark:md:display:none', 'Media modifier must come before'],
 			['hover:dark:display:none', 'Ancestor modifier must come before'],
 			['before:hover:opacity:100%', 'State modifiers must come before'],
-			['nth-child(2n):hover:color:red', 'alphabetical order'],
+			['nth-child(2n):hover:color:red', 'alphabetical order']
 		])('%s → error containing "%s"', (input, expected_message) => {
-			const {error} = assert_parse_error(parse_css_literal(input, css_properties));
+			const { error } = assert_parse_error(parse_css_literal(input, css_properties));
 			assert.include(error.message, expected_message);
 		});
 	});
@@ -419,26 +419,26 @@ describe('parse_css_literal - error cases', () => {
 		test.each<[string, string]>([
 			['dark:light:color:red', 'mutually exclusive'],
 			['sm:md:display:flex', 'Multiple media modifiers'],
-			['before:after:content:""', 'Multiple pseudo-element'],
+			['before:after:content:""', 'Multiple pseudo-element']
 		])('%s → error containing "%s"', (input, expected_message) => {
-			const {error} = assert_parse_error(parse_css_literal(input, css_properties));
+			const { error } = assert_parse_error(parse_css_literal(input, css_properties));
 			assert.include(error.message, expected_message);
 		});
 	});
 
 	test('unknown:color:red (unknown modifier)', () => {
-		const {error} = assert_parse_error(parse_css_literal('unknown:color:red', css_properties));
+		const { error } = assert_parse_error(parse_css_literal('unknown:color:red', css_properties));
 		assert.include(error.message, 'Unknown modifier');
 	});
 
 	test('hoverr:color:red (typo with suggestion)', () => {
-		const {error} = assert_parse_error(parse_css_literal('hoverr:color:red', css_properties));
+		const { error } = assert_parse_error(parse_css_literal('hoverr:color:red', css_properties));
 		assert.include(error.message, 'Unknown modifier');
 		assert.isDefined(error.suggestion);
 	});
 
 	test('dipslay:flex (typo in property with suggestion)', () => {
-		const {error} = assert_parse_error(parse_css_literal('dipslay:flex', css_properties));
+		const { error } = assert_parse_error(parse_css_literal('dipslay:flex', css_properties));
 		assert.include(error.message, 'Unknown CSS property');
 		assert.isDefined(error.suggestion);
 		assert.include(error.suggestion ?? '', 'display');
@@ -447,8 +447,8 @@ describe('parse_css_literal - error cases', () => {
 
 describe('parse_css_literal - warnings', () => {
 	test('width:calc(100%-20px) generates warning', () => {
-		const {diagnostics} = assert_parse_ok(
-			parse_css_literal('width:calc(100%-20px)', css_properties),
+		const { diagnostics } = assert_parse_ok(
+			parse_css_literal('width:calc(100%-20px)', css_properties)
 		);
 		assert.ok(diagnostics);
 		assert.lengthOf(diagnostics, 1);
@@ -518,8 +518,8 @@ describe('interpret_css_literal', () => {
 		const result = interpret_css_literal(class_name, escaped, css_properties);
 		assert.isFalse(result.ok);
 		assert.include(
-			(result as {ok: false; error: {message: string}}).error.message,
-			'Unknown CSS property',
+			(result as { ok: false; error: { message: string } }).error.message,
+			'Unknown CSS property'
 		);
 	});
 
@@ -590,7 +590,7 @@ describe('suggest_css_property', () => {
 	test.each([
 		['dipslay', 'display'],
 		['opacty', 'opacity'],
-		['colr', 'color'],
+		['colr', 'color']
 	] as const)('suggests %s for %s', (typo, expected) => {
 		assert.strictEqual(suggest_css_property(typo, css_properties), expected);
 	});
@@ -604,7 +604,7 @@ describe('suggest_modifier', () => {
 	test.each([
 		['hovr', 'hover'],
 		['focis', 'focus'],
-		['actve', 'active'],
+		['actve', 'active']
 	] as const)('suggests "%s" → "%s"', (typo, expected) => {
 		assert.strictEqual(suggest_modifier(typo), expected);
 	});
@@ -620,9 +620,9 @@ describe('parse_css_literal - max breakpoints', () => {
 		['max-md:flex-direction:column', 'max-md', 'flex-direction', 'column'],
 		['max-lg:padding:1rem', 'max-lg', 'padding', '1rem'],
 		['max-xl:gap:0', 'max-xl', 'gap', '0'],
-		['max-2xl:margin:auto', 'max-2xl', 'margin', 'auto'],
+		['max-2xl:margin:auto', 'max-2xl', 'margin', 'auto']
 	] as const)('%s parses correctly', (input, media_name, property, value) => {
-		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal(input, css_properties));
 		if (!parsed.media) throw new Error('Expected media');
 		assert.strictEqual(parsed.media.name, media_name);
 		assert.include(parsed.media.css, 'width <');
@@ -634,7 +634,7 @@ describe('parse_css_literal - max breakpoints', () => {
 describe('generate_css_literal_simple - max breakpoints', () => {
 	test.each([
 		['max-sm:display:none', '@media (width < 40rem)', 'display: none;'],
-		['max-lg:opacity:50%', '@media (width < 64rem)', 'opacity: 50%;'],
+		['max-lg:opacity:50%', '@media (width < 64rem)', 'opacity: 50%;']
 	] as const)('%s generates correct media query', (class_name, expected_media, expected_decl) => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
@@ -650,9 +650,9 @@ describe('parse_css_literal - !important with modifiers', () => {
 		['display:flex!important', 'display', 'flex !important'],
 		['hover:opacity:100%!important', 'opacity', '100% !important'],
 		['md:dark:display:block!important', 'display', 'block !important'],
-		['margin:0~auto!important', 'margin', '0 auto !important'],
+		['margin:0~auto!important', 'margin', '0 auto !important']
 	] as const)('%s → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal(input, css_properties));
 		assert.strictEqual(parsed.property, property);
 		assert.strictEqual(parsed.value, value);
 	});
@@ -661,7 +661,7 @@ describe('parse_css_literal - !important with modifiers', () => {
 describe('generate_css_literal_simple - !important', () => {
 	test.each([
 		['display:flex!important', 'display: flex !important;', null],
-		['hover:color:red!important', 'color: red !important;', ':hover'],
+		['hover:color:red!important', 'color: red !important;', ':hover']
 	] as const)('%s renders correctly', (class_name, expected_decl, expected_selector) => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
@@ -677,9 +677,9 @@ describe('parse_css_literal - Unicode values', () => {
 		['content:"→"', 'content', '"→"'],
 		['content:"✓"', 'content', '"✓"'],
 		['before:content:"«"', 'content', '"«"'],
-		['list-style-type:"•"', 'list-style-type', '"•"'],
+		['list-style-type:"•"', 'list-style-type', '"•"']
 	] as const)('%s → property: %s, value: %s', (input, property, value) => {
-		const {parsed} = assert_parse_ok(parse_css_literal(input, css_properties));
+		const { parsed } = assert_parse_ok(parse_css_literal(input, css_properties));
 		assert.strictEqual(parsed.property, property);
 		assert.strictEqual(parsed.value, value);
 	});
@@ -688,7 +688,7 @@ describe('parse_css_literal - Unicode values', () => {
 describe('generate_css_literal_simple - Unicode', () => {
 	test.each([
 		['content:"→"', 'content: "→";', null],
-		['before:content:"✓"', 'content: "✓";', '::before'],
+		['before:content:"✓"', 'content: "✓";', '::before']
 	] as const)('%s renders correctly', (class_name, expected_decl, expected_selector) => {
 		const escaped = escape_css_selector(class_name);
 		const result = interpret_css_literal(class_name, escaped, css_properties);
@@ -705,27 +705,27 @@ describe('generate_css_literal_simple - Unicode', () => {
 
 describe('has_modifiers', () => {
 	test('returns false for unmodified literal', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('display:flex', null));
+		const { parsed } = assert_parse_ok(parse_css_literal('display:flex', null));
 		assert.isFalse(has_modifiers(parsed));
 	});
 
 	test('returns true for media modifier', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('md:display:flex', null));
+		const { parsed } = assert_parse_ok(parse_css_literal('md:display:flex', null));
 		assert.isTrue(has_modifiers(parsed));
 	});
 
 	test('returns true for state modifier', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('hover:opacity:80%', null));
+		const { parsed } = assert_parse_ok(parse_css_literal('hover:opacity:80%', null));
 		assert.isTrue(has_modifiers(parsed));
 	});
 
 	test('returns true for ancestor modifier', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('dark:color:white', null));
+		const { parsed } = assert_parse_ok(parse_css_literal('dark:color:white', null));
 		assert.isTrue(has_modifiers(parsed));
 	});
 
 	test('returns true for pseudo-element modifier', () => {
-		const {parsed} = assert_parse_ok(parse_css_literal('before:content:""', null));
+		const { parsed } = assert_parse_ok(parse_css_literal('before:content:""', null));
 		assert.isTrue(has_modifiers(parsed));
 	});
 });
@@ -733,19 +733,21 @@ describe('has_modifiers', () => {
 describe('has_extracted_modifiers', () => {
 	test('returns false for empty modifiers', () => {
 		const segments = extract_segments('box');
-		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'box'));
+		const { modifiers } = assert_mod_ok(extract_and_validate_modifiers(segments, 'box'));
 		assert.isFalse(has_extracted_modifiers(modifiers));
 	});
 
 	test('returns true for media modifier', () => {
 		const segments = extract_segments('md:box');
-		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'md:box'));
+		const { modifiers } = assert_mod_ok(extract_and_validate_modifiers(segments, 'md:box'));
 		assert.isTrue(has_extracted_modifiers(modifiers));
 	});
 
 	test('returns true for multiple state modifiers', () => {
 		const segments = extract_segments('focus:hover:box');
-		const {modifiers} = assert_mod_ok(extract_and_validate_modifiers(segments, 'focus:hover:box'));
+		const { modifiers } = assert_mod_ok(
+			extract_and_validate_modifiers(segments, 'focus:hover:box')
+		);
 		assert.isTrue(has_extracted_modifiers(modifiers));
 		assert.lengthOf(modifiers.states, 2);
 	});
@@ -753,22 +755,22 @@ describe('has_extracted_modifiers', () => {
 
 describe('try_resolve_literal', () => {
 	test('resolves unmodified literal', () => {
-		const {declaration} = assert_literal_ok(
-			try_resolve_literal('text-align:center', css_properties, 'test'),
+		const { declaration } = assert_literal_ok(
+			try_resolve_literal('text-align:center', css_properties, 'test')
 		);
 		assert.strictEqual(declaration, 'text-align: center;');
 	});
 
 	test('resolves literal with ~ space encoding', () => {
-		const {declaration} = assert_literal_ok(
-			try_resolve_literal('margin:0~auto', css_properties, 'test'),
+		const { declaration } = assert_literal_ok(
+			try_resolve_literal('margin:0~auto', css_properties, 'test')
 		);
 		assert.strictEqual(declaration, 'margin: 0 auto;');
 	});
 
 	test('resolves custom property', () => {
-		const {declaration} = assert_literal_ok(
-			try_resolve_literal('--my-color:blue', css_properties, 'test'),
+		const { declaration } = assert_literal_ok(
+			try_resolve_literal('--my-color:blue', css_properties, 'test')
 		);
 		assert.strictEqual(declaration, '--my-color: blue;');
 	});
@@ -779,14 +781,14 @@ describe('try_resolve_literal', () => {
 
 	test('returns error for modified literal', () => {
 		const error = assert_literal_has_error(
-			try_resolve_literal('hover:opacity:80%', css_properties, 'test'),
+			try_resolve_literal('hover:opacity:80%', css_properties, 'test')
 		);
 		assert.include(error.message, 'cannot be used in composes array');
 	});
 
 	test('returns error for invalid property with suggestion', () => {
 		const error = assert_literal_has_error(
-			try_resolve_literal('disply:flex', css_properties, 'test'),
+			try_resolve_literal('disply:flex', css_properties, 'test')
 		);
 		assert.include(error.message, 'Unknown CSS property');
 		assert.isNotNull(error.suggestion);
@@ -797,7 +799,7 @@ describe('try_resolve_literal', () => {
 		// hover:shadow_lg parses as property:value, fails property validation
 		// The "modified class" detection happens earlier in resolve_composes
 		const error = assert_literal_has_error(
-			try_resolve_literal('hover:shadow_lg', css_properties, 'card'),
+			try_resolve_literal('hover:shadow_lg', css_properties, 'card')
 		);
 		assert.include(error.message, 'Unknown CSS property');
 	});
@@ -819,7 +821,7 @@ describe('extract_balanced_parens', () => {
 			'min-width(clamp(300px, 50%, 800px))',
 			'min-width',
 			'clamp(300px, 50%, 800px)',
-			'clamp function',
+			'clamp function'
 		],
 		['min-width(min(100vw, 1200px))', 'min-width', 'min(100vw, 1200px)', 'min function'],
 		['min-width(max(300px, 20%))', 'min-width', 'max(300px, 20%)', 'max function'],
@@ -827,9 +829,9 @@ describe('extract_balanced_parens', () => {
 			'min-width(calc(min(100vw, 1200px) - 2rem))',
 			'min-width',
 			'calc(min(100vw, 1200px) - 2rem)',
-			'nested functions',
+			'nested functions'
 		],
-		['foo(bar(baz(qux)))', 'foo', 'bar(baz(qux))', 'deeply nested'],
+		['foo(bar(baz(qux)))', 'foo', 'bar(baz(qux))', 'deeply nested']
 	] as const)('%s with prefix "%s" → "%s" (%s)', (input, prefix, expected, _desc) => {
 		assert.strictEqual(extract_balanced_parens(input, prefix), expected);
 	});
@@ -844,7 +846,7 @@ describe('extract_balanced_parens', () => {
 		['min-width(800px)trailing', 'min-width', 'trailing characters'],
 		['min-width(a)(b)', 'min-width', 'multiple paren groups'],
 		['', 'min-width', 'empty string'],
-		['min-width', 'min-width', 'no parens at all'],
+		['min-width', 'min-width', 'no parens at all']
 	] as const)('%s with prefix "%s" → null (%s)', (input, prefix, _desc) => {
 		assert.isNull(extract_balanced_parens(input, prefix));
 	});
@@ -866,7 +868,7 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		['max-width(vh)', 'max-width without number'],
 		['min-width(calc(100vw)', 'unbalanced calc'],
 		['min-width(800px)extra', 'trailing characters'],
-		['min-width(var(--breakpoint))', 'var() not supported in media queries'],
+		['min-width(var(--breakpoint))', 'var() not supported in media queries']
 	] as const)('%s returns null for %s', (input, _desc) => {
 		assert.isNull(parse_arbitrary_breakpoint(input));
 	});
@@ -880,7 +882,7 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		['min-width(100vw)', '@media (width >= 100vw)', 'viewport units'],
 		['min-width(50cqw)', '@media (width >= 50cqw)', 'container query units'],
 		['max-width(50em)', '@media (width < 50em)', 'max-width em units'],
-		['max-width(600px)', '@media (width < 600px)', 'max-width pixels'],
+		['max-width(600px)', '@media (width < 600px)', 'max-width pixels']
 	] as const)('%s → %s (%s)', (input, expected, _desc) => {
 		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
 	});
@@ -890,13 +892,13 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		[
 			'min-width(calc(100vw - 200px))',
 			'@media (width >= calc(100vw - 200px))',
-			'calc with subtraction',
+			'calc with subtraction'
 		],
 		['min-width(calc(50% + 2rem))', '@media (width >= calc(50% + 2rem))', 'calc with addition'],
 		[
 			'min-width(clamp(300px, 50vw, 800px))',
 			'@media (width >= clamp(300px, 50vw, 800px))',
-			'clamp function',
+			'clamp function'
 		],
 		['min-width(min(100vw, 1200px))', '@media (width >= min(100vw, 1200px))', 'min function'],
 		['min-width(max(300px, 20vw))', '@media (width >= max(300px, 20vw))', 'max function'],
@@ -904,13 +906,13 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		[
 			'min-width(calc(min(100vw, 1200px) - 2rem))',
 			'@media (width >= calc(min(100vw, 1200px) - 2rem))',
-			'nested functions',
+			'nested functions'
 		],
 		[
 			'min-width(env(safe-area-inset-left))',
 			'@media (width >= env(safe-area-inset-left))',
-			'env function',
-		],
+			'env function'
+		]
 	] as const)('%s → %s (%s)', (input, expected, _desc) => {
 		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
 	});
@@ -925,7 +927,7 @@ describe('parse_parameterized_state - edge cases', () => {
 		['nth-of-type(odd)', ':nth-of-type(odd)', 'odd keyword'],
 		['nth-last-of-type(3n+1)', ':nth-last-of-type(3n+1)', 'nth-last-of-type with formula'],
 		['nth-child(3n-1)', ':nth-child(3n-1)', 'negative offset'],
-		['nth-child(5)', ':nth-child(5)', 'simple number'],
+		['nth-child(5)', ':nth-child(5)', 'simple number']
 	] as const)('%s → css: %s (%s)', (input, expected_css, _desc) => {
 		const result = parse_parameterized_state(input);
 		assert.isNotNull(result);
@@ -937,7 +939,7 @@ describe('parse_parameterized_state - edge cases', () => {
 		['nth-child()', 'empty formula'],
 		['nth-child', 'missing parens'],
 		['child(2n)', 'missing nth- prefix'],
-		['nth(2n)', 'incomplete pattern'],
+		['nth(2n)', 'incomplete pattern']
 	] as const)('%s returns null for %s', (input, _desc) => {
 		assert.isNull(parse_parameterized_state(input));
 	});

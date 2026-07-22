@@ -1,6 +1,6 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {extract_css_variables, has_css_variables} from '$lib/css_variable_utils.ts';
+import { extract_css_variables, has_css_variables } from '$lib/css_variable_utils.ts';
 
 describe('extract_css_variables', () => {
 	test('returns empty set for empty string', () => {
@@ -34,7 +34,7 @@ describe('extract_css_variables', () => {
 
 	test('handles variable names with hyphens and numbers', () => {
 		const result = extract_css_variables(
-			'font-size: var(--font-size-md); margin: var(--spacing_2xl);',
+			'font-size: var(--font-size-md); margin: var(--spacing_2xl);'
 		);
 		assert.deepEqual(result, new Set(['font-size-md', 'spacing_2xl']));
 	});
@@ -72,7 +72,7 @@ describe('extract_css_variables', () => {
 
 	test('handles complex nested fallbacks', () => {
 		const result = extract_css_variables(
-			'color: var(--primary, var(--secondary, var(--tertiary)));',
+			'color: var(--primary, var(--secondary, var(--tertiary)));'
 		);
 		assert.deepEqual(result, new Set(['primary', 'secondary', 'tertiary']));
 	});
@@ -113,7 +113,7 @@ describe('extract_css_variables', () => {
 		assert.deepEqual(extract_css_variables('color: var( --spaced );'), new Set(['spaced']));
 		assert.deepEqual(
 			extract_css_variables('color: var(  --double_space );'),
-			new Set(['double_space']),
+			new Set(['double_space'])
 		);
 		assert.deepEqual(extract_css_variables('color: var(\t--tabbed );'), new Set(['tabbed']));
 		assert.deepEqual(extract_css_variables('color: var(\n--newline );'), new Set(['newline']));

@@ -1,6 +1,6 @@
-import {test, describe, assert} from 'vitest';
+import { test, describe, assert } from 'vitest';
 
-import {escape_css_selector} from '$lib/css_class_generation.ts';
+import { escape_css_selector } from '$lib/css_class_generation.ts';
 
 /**
  * Tests for CSS selector escaping.
@@ -75,7 +75,7 @@ describe('escape_css_selector', () => {
 		['a{b', 'a\\{b'],
 		['a|b', 'a\\|b'],
 		['a}b', 'a\\}b'],
-		['a~b', 'a\\~b'],
+		['a~b', 'a\\~b']
 	];
 
 	test.each(escape_cases)('escapes "%s" to "%s"', (input, expected) => {
@@ -101,7 +101,7 @@ describe('escape_css_selector - backslash edge cases', () => {
 		['end\\', 'end\\\\'],
 
 		// Backslash with various special characters
-		['path\\to\\file.css', 'path\\\\to\\\\file\\.css'],
+		['path\\to\\file.css', 'path\\\\to\\\\file\\.css']
 	];
 
 	test.each(backslash_cases)('escapes "%s" to "%s"', (input, expected) => {

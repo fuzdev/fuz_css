@@ -1,23 +1,26 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {extract_from_svelte, SourceIndex} from '$lib/css_class_extractor.ts';
+import { extract_from_svelte, SourceIndex } from '$lib/css_class_extractor.ts';
 
-import {assert_class_at_line, assert_class_locations} from './css_class_extractor_test_helpers.ts';
-import {loc} from './test_helpers.ts';
+import {
+	assert_class_at_line,
+	assert_class_locations
+} from './css_class_extractor_test_helpers.ts';
+import { loc } from './test_helpers.ts';
 
 describe('SourceIndex', () => {
 	describe('standard LF line endings', () => {
 		const source = 'abc\ndef\nghi';
 
 		const lf_cases = [
-			{offset: 0, expected: loc('f', 1, 1), desc: 'start of file'},
-			{offset: 2, expected: loc('f', 1, 3), desc: 'within first line'},
-			{offset: 4, expected: loc('f', 2, 1), desc: 'start of second line'},
-			{offset: 6, expected: loc('f', 2, 3), desc: 'within second line'},
-			{offset: 8, expected: loc('f', 3, 1), desc: 'start of third line'},
+			{ offset: 0, expected: loc('f', 1, 1), desc: 'start of file' },
+			{ offset: 2, expected: loc('f', 1, 3), desc: 'within first line' },
+			{ offset: 4, expected: loc('f', 2, 1), desc: 'start of second line' },
+			{ offset: 6, expected: loc('f', 2, 3), desc: 'within second line' },
+			{ offset: 8, expected: loc('f', 3, 1), desc: 'start of third line' }
 		];
 
-		test.each(lf_cases)('$desc (offset $offset)', ({offset, expected}) => {
+		test.each(lf_cases)('$desc (offset $offset)', ({ offset, expected }) => {
 			const index = new SourceIndex(source);
 			assert.deepEqual(index.get_location(offset, 'f'), expected);
 		});
@@ -136,7 +139,7 @@ describe('SourceIndex additional edge cases', () => {
 	test('handles very long single line', () => {
 		const source = 'a'.repeat(1000);
 		const index = new SourceIndex(source);
-		assert.deepEqual(index.get_location(500, 'f'), {file: 'f', line: 1, column: 501});
+		assert.deepEqual(index.get_location(500, 'f'), { file: 'f', line: 1, column: 501 });
 	});
 });
 

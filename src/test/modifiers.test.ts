@@ -1,13 +1,13 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {MODIFIERS} from '$lib/modifiers.ts';
+import { MODIFIERS } from '$lib/modifiers.ts';
 
 /**
  * Loads CSS selectors from @webref/css for validation.
  */
 const load_webref_selectors = async (): Promise<Set<string>> => {
 	const data = await import('@webref/css/css.json');
-	const selectors: Array<{name: string}> = (data as any).default.selectors;
+	const selectors: Array<{ name: string }> = (data as any).default.selectors;
 	return new Set(selectors.map((s) => s.name));
 };
 
@@ -54,7 +54,7 @@ describe('MODIFIERS', () => {
 
 				if (!webref_selectors.has(base_selector)) {
 					failures.push(
-						`"${m.name}" maps to "${m.css}" (base: "${base_selector}") which is not in CSS spec`,
+						`"${m.name}" maps to "${m.css}" (base: "${base_selector}") which is not in CSS spec`
 					);
 				}
 			}
@@ -62,7 +62,7 @@ describe('MODIFIERS', () => {
 			assert.strictEqual(
 				failures.length,
 				0,
-				`The following modifiers are not in the CSS spec:\n  ${failures.join('\n  ')}`,
+				`The following modifiers are not in the CSS spec:\n  ${failures.join('\n  ')}`
 			);
 		});
 	});
@@ -73,7 +73,7 @@ describe('MODIFIERS', () => {
 				if (m.type === 'media') {
 					assert.isTrue(
 						m.css.startsWith('@media '),
-						`media modifier "${m.name}" should start with "@media "`,
+						`media modifier "${m.name}" should start with "@media "`
 					);
 				}
 			}
@@ -84,7 +84,7 @@ describe('MODIFIERS', () => {
 				if (m.type === 'ancestor') {
 					assert.isTrue(
 						m.css.startsWith(':root.'),
-						`ancestor modifier "${m.name}" should start with ":root."`,
+						`ancestor modifier "${m.name}" should start with ":root."`
 					);
 				}
 			}
@@ -96,7 +96,7 @@ describe('MODIFIERS', () => {
 					assert.isTrue(m.css.startsWith(':'), `state modifier "${m.name}" should start with ":"`);
 					assert.isFalse(
 						m.css.startsWith('::'),
-						`state modifier "${m.name}" should not start with "::"`,
+						`state modifier "${m.name}" should not start with "::"`
 					);
 				}
 			}
@@ -107,7 +107,7 @@ describe('MODIFIERS', () => {
 				if (m.type === 'pseudo-element') {
 					assert.isTrue(
 						m.css.startsWith('::'),
-						`pseudo-element modifier "${m.name}" should start with "::"`,
+						`pseudo-element modifier "${m.name}" should start with "::"`
 					);
 				}
 			}

@@ -1,4 +1,4 @@
-import type {Tome} from '@fuzdev/fuz_ui/tome.ts';
+import type { Tome } from '@fuzdev/fuz_ui/tome.ts';
 
 import introduction from './introduction/+page.svelte';
 import api from './api/+page.svelte';
@@ -28,7 +28,7 @@ export const tomes: Array<Tome> = [
 		Component: introduction,
 		related_tomes: ['api'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'api',
@@ -36,7 +36,7 @@ export const tomes: Array<Tome> = [
 		Component: api,
 		related_tomes: [],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'examples',
@@ -44,7 +44,7 @@ export const tomes: Array<Tome> = [
 		Component: examples,
 		related_tomes: ['classes'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'semantic',
@@ -52,7 +52,7 @@ export const tomes: Array<Tome> = [
 		Component: semantic,
 		related_tomes: ['buttons', 'elements', 'forms', 'typography'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'themes',
@@ -60,7 +60,7 @@ export const tomes: Array<Tome> = [
 		Component: themes,
 		related_tomes: ['variables', 'colors', 'typography'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'variables',
@@ -68,7 +68,7 @@ export const tomes: Array<Tome> = [
 		Component: variables,
 		related_tomes: ['themes'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'classes',
@@ -76,7 +76,7 @@ export const tomes: Array<Tome> = [
 		Component: classes,
 		related_tomes: ['chips', 'elements'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'colors',
@@ -84,7 +84,7 @@ export const tomes: Array<Tome> = [
 		Component: colors,
 		related_tomes: ['themes', 'buttons', 'chips', 'borders', 'shading', 'shadows'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'shading',
@@ -92,7 +92,7 @@ export const tomes: Array<Tome> = [
 		Component: shading,
 		related_tomes: ['colors', 'borders', 'shadows', 'typography'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'buttons',
@@ -100,7 +100,7 @@ export const tomes: Array<Tome> = [
 		Component: buttons,
 		related_tomes: ['colors', 'chips', 'elements', 'forms', 'borders'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'chips',
@@ -108,7 +108,7 @@ export const tomes: Array<Tome> = [
 		Component: chips,
 		related_tomes: ['colors', 'buttons', 'classes'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'elements',
@@ -116,7 +116,7 @@ export const tomes: Array<Tome> = [
 		Component: elements,
 		related_tomes: ['buttons', 'forms', 'classes', 'typography', 'borders', 'layout'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'forms',
@@ -124,7 +124,7 @@ export const tomes: Array<Tome> = [
 		Component: forms,
 		related_tomes: ['buttons', 'elements', 'borders'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'typography',
@@ -132,7 +132,7 @@ export const tomes: Array<Tome> = [
 		Component: typography,
 		related_tomes: ['themes', 'shading', 'elements'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'borders',
@@ -140,7 +140,7 @@ export const tomes: Array<Tome> = [
 		Component: borders,
 		related_tomes: ['colors', 'shading', 'buttons', 'elements', 'forms', 'shadows'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'shadows',
@@ -148,7 +148,7 @@ export const tomes: Array<Tome> = [
 		Component: shadows,
 		related_tomes: ['colors', 'shading', 'borders'],
 		related_modules: [],
-		related_declarations: [],
+		related_declarations: []
 	},
 	{
 		slug: 'layout',
@@ -156,8 +156,8 @@ export const tomes: Array<Tome> = [
 		Component: layout,
 		related_tomes: ['elements'],
 		related_modules: [],
-		related_declarations: [],
-	},
+		related_declarations: []
+	}
 	// TODO maybe? or do styles like this belong elsewhere? classes? problem is we'll have a classes page for the variables
 	// {
 	// 	slug: 'menuitem',

@@ -1,10 +1,10 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {fly} from 'svelte/transition';
+	import { fly } from 'svelte/transition';
 	import Alert from '@fuzdev/fuz_ui/Alert.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -87,8 +87,8 @@
 						/>
 					</label>
 					<p>
-						More info can be included in <code>{'<'}p></code> tags like this one. Here we could
-						include info about passwords.
+						More info can be included in <code>{'<'}p></code> tags like this one. Here we could include
+						info about passwords.
 					</p>
 					<label class:disabled={created_account}>
 						<div class="title">lifestory</div>
@@ -110,8 +110,8 @@
 			</form>
 			{#if created_account}
 				<form
-					in:fly={{y: -100, duration: ANIMATION_DURATION_FAST}}
-					out:fly={{y: 100, duration: ANIMATION_DURATION_FAST}}
+					in:fly={{ y: -100, duration: ANIMATION_DURATION_FAST }}
+					out:fly={{ y: 100, duration: ANIMATION_DURATION_FAST }}
 				>
 					<Alert status="error">cannot create account because the docs are fake</Alert>
 					<button type="button" class="width:100%" onclick={() => (created_account = false)}>
@@ -210,9 +210,9 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code
-			> scale inputs and buttons, adjusting height and padding. Apply directly or on a container to
-			cascade to children.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
+			inputs and buttons, adjusting height and padding. Apply directly or on a container to cascade to
+			children.
 		</p>
 		<Code
 			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}

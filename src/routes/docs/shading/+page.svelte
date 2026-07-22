@@ -3,14 +3,14 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
-	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
+	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {shade_scale_variants, alpha_variants} from '$lib/variable_data.ts';
+	import { shade_scale_variants, alpha_variants } from '$lib/variable_data.ts';
 
 	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
 	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100
@@ -34,8 +34,8 @@
 			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
 			<MdnLink path="Web/CSS/color-scheme" />. Adaptive means the underlying values change between
 			light and dark modes to maintain consistent prominence -- low numbers stay subtle, high
-			numbers stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode,
-			dark mode, or both.
+			numbers stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode, dark
+			mode, or both.
 		</p>
 		<p>
 			Light mode's starting point is plain white documents (like paper) where we subtract light to
@@ -91,9 +91,9 @@
 		<ColorSchemeInput />
 		<aside class="mt_xl2 width_atmost_sm mx_auto">
 			<p>
-				tip: Try <button type="button" onclick={toggle_color_scheme}>toggling</button> between light
-				and dark to see how the shade scale adapts. Lower numbers stay near the surface, higher
-				numbers move toward maximum contrast.
+				tip: Try <button type="button" onclick={toggle_color_scheme}>toggling</button> between light and
+				dark to see how the shade scale adapts. Lower numbers stay near the surface, higher numbers move
+				toward maximum contrast.
 			</p>
 		</aside>
 	</section>
@@ -106,12 +106,12 @@
 		</p>
 		<ul>
 			<li>
-				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
-				use for elevated surfaces like panels, cards, and hover states
+				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode; use
+				for elevated surfaces like panels, cards, and hover states
 			</li>
 			<li>
-				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
-				use for surfaces that blend toward the background
+				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode; use
+				for surfaces that blend toward the background
 			</li>
 		</ul>
 		<p>
@@ -147,8 +147,8 @@
 		<TomeSection>
 			<TomeSectionHeader text="Stacking behavior" tag="h4" />
 			<p>
-				Unlike the opaque shade scale, alpha overlays <strong>stack</strong> when nested. Each layer
-				adds more contrast:
+				Unlike the opaque shade scale, alpha overlays <strong>stack</strong> when nested. Each layer adds
+				more contrast:
 			</p>
 			<Code
 				content={`<div class="fg_10 p_sm">
@@ -232,8 +232,7 @@
 	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
-			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested
-			UI:
+			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested UI:
 		</p>
 		<Code
 			lang="css"
@@ -247,8 +246,7 @@ background-color: var(--fg_10);
 background-color: var(--fg_20);`}
 		/>
 		<p class="mt_md">
-			<strong>Use <code>shade_NN</code></strong> when you need explicit, predictable opaque
-			surfaces:
+			<strong>Use <code>shade_NN</code></strong> when you need explicit, predictable opaque surfaces:
 		</p>
 		<Code
 			lang="css"
@@ -263,8 +261,7 @@ background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
-			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque
-			base.
+			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque base.
 		</p>
 	</TomeSection>
 	<TomeSection>

@@ -1,12 +1,12 @@
 <script lang="ts">
-	import type {Snippet} from 'svelte';
+	import type { Snippet } from 'svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {font_size_variants} from '$lib/variable_data.ts';
+	import { font_size_variants } from '$lib/variable_data.ts';
 
 	let {
 		selected_size = $bindable(2),
-		children,
+		children
 	}: {
 		selected_size?: number; // TODO improve API, is index for `'md'`
 		children?: Snippet;

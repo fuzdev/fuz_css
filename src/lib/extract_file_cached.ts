@@ -13,10 +13,10 @@
 import {
 	extract_css_classes_with_locations,
 	type ExtractionData,
-	type AcornPlugin,
+	type AcornPlugin
 } from './css_class_extractor.ts';
-import {load_cached_extraction, from_cached_extraction} from './css_cache.ts';
-import type {CacheDeps} from './deps.ts';
+import { load_cached_extraction, from_cached_extraction } from './css_cache.ts';
+import type { CacheDeps } from './deps.ts';
 
 export interface ExtractFileCachedOptions {
 	deps: CacheDeps;
@@ -45,9 +45,9 @@ export interface ExtractFileCachedResult {
  * the caller should write.
  */
 export const extract_file_cached = async (
-	options: ExtractFileCachedOptions,
+	options: ExtractFileCachedOptions
 ): Promise<ExtractFileCachedResult> => {
-	const {deps, content, content_hash, cache_path, filename, acorn_plugins} = options;
+	const { deps, content, content_hash, cache_path, filename, acorn_plugins } = options;
 
 	if (cache_path) {
 		const cached = await load_cached_extraction(deps, cache_path);
@@ -55,11 +55,11 @@ export const extract_file_cached = async (
 			return {
 				extraction: from_cached_extraction(cached),
 				from_cache: true,
-				cache_path_to_write: null,
+				cache_path_to_write: null
 			};
 		}
 	}
 
-	const extraction = extract_css_classes_with_locations(content, {filename, acorn_plugins});
-	return {extraction, from_cache: false, cache_path_to_write: cache_path};
+	const extraction = extract_css_classes_with_locations(content, { filename, acorn_plugins });
+	return { extraction, from_cache: false, cache_path_to_write: cache_path };
 };

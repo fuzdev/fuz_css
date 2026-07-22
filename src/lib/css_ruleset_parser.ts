@@ -9,8 +9,8 @@
  * @module
  */
 
-import {escape_regexp} from '@fuzdev/fuz_util/regexp.ts';
-import {parseCss, type AST} from 'svelte/compiler';
+import { escape_regexp } from '@fuzdev/fuz_util/regexp.ts';
+import { parseCss, type AST } from 'svelte/compiler';
 
 //
 // Parsing
@@ -55,7 +55,7 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
 	// Walk the CSS AST to find rules
 	walk_css_children(ast, css, rules);
 
-	return {rules};
+	return { rules };
 };
 
 /**
@@ -65,7 +65,7 @@ export const parse_ruleset = (css: string): ParsedRuleset => {
 const walk_css_children = (
 	node: Omit<AST.CSS.StyleSheetFile, 'attributes' | 'content'> | AST.CSS.Atrule,
 	original_css: string,
-	rules: Array<ParsedRule>,
+	rules: Array<ParsedRule>
 ): void => {
 	const children = 'children' in node ? node.children : [];
 
@@ -86,7 +86,7 @@ const walk_css_children = (
 const walk_css_block = (
 	block: AST.CSS.Block,
 	original_css: string,
-	rules: Array<ParsedRule>,
+	rules: Array<ParsedRule>
 ): void => {
 	for (const child of block.children) {
 		if (child.type === 'Rule') {
@@ -125,7 +125,7 @@ const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<Par
 		selector_end,
 		declarations,
 		rule_start: rule.start,
-		rule_end: rule.end,
+		rule_end: rule.end
 	});
 };
 
@@ -139,7 +139,7 @@ const extract_rule = (rule: AST.CSS.Rule, original_css: string, rules: Array<Par
  */
 export const is_single_selector_ruleset = (
 	rules: Array<ParsedRule>,
-	escaped_class_name: string,
+	escaped_class_name: string
 ): boolean => {
 	if (rules.length !== 1) return false;
 
@@ -162,7 +162,7 @@ export const is_single_selector_ruleset = (
  */
 export const ruleset_contains_class = (
 	rules: Array<ParsedRule>,
-	escaped_class_name: string,
+	escaped_class_name: string
 ): boolean => {
 	// Match .class_name but not as part of another class (e.g., .class_name_foo)
 	const pattern = new RegExp(`\\.${escape_regexp(escaped_class_name)}(?![\\w-])`);
@@ -446,7 +446,7 @@ export const modify_single_selector = (
 	original_class: string,
 	new_class_escaped: string,
 	state_css: string,
-	pseudo_element_css: string,
+	pseudo_element_css: string
 ): string => {
 	// Find the target class (must match the class name exactly, not as part of another class)
 	const class_pattern = new RegExp(`\\.${escape_regexp(original_class)}(?![\\w-])`);
@@ -486,7 +486,7 @@ export const modify_selector_group = (
 	original_class: string,
 	new_class_escaped: string,
 	states_to_add: Array<string>,
-	pseudo_element_css: string,
+	pseudo_element_css: string
 ): ModifiedSelectorGroupResult => {
 	const selectors = split_selector_list(selector_group);
 	let skipped_modifiers: Array<SkippedModifierInfo> | null = null;
@@ -507,7 +507,7 @@ export const modify_selector_group = (
 				(skipped_modifiers ??= []).push({
 					selector: trimmed,
 					reason: 'state_conflict',
-					conflicting_modifier: state,
+					conflicting_modifier: state
 				});
 			} else {
 				non_conflicting_states.push(state);
@@ -519,7 +519,7 @@ export const modify_selector_group = (
 			(skipped_modifiers ??= []).push({
 				selector: trimmed,
 				reason: 'pseudo_element_conflict',
-				conflicting_modifier: pseudo_element_css,
+				conflicting_modifier: pseudo_element_css
 			});
 		}
 
@@ -532,13 +532,13 @@ export const modify_selector_group = (
 			original_class,
 			new_class_escaped,
 			effective_state_css,
-			effective_pseudo_element_css,
+			effective_pseudo_element_css
 		);
 	});
 
 	return {
 		selector: modified_selectors.join(',\n'),
-		skipped_modifiers,
+		skipped_modifiers
 	};
 };
 
@@ -567,7 +567,7 @@ export const generate_modified_ruleset = (
 	state_css: string,
 	pseudo_element_css: string,
 	media_wrapper: string | null,
-	ancestor_wrapper: string | null,
+	ancestor_wrapper: string | null
 ): ModifiedRulesetResult => {
 	const parsed = parse_ruleset(original_ruleset);
 	let skipped_modifiers: Array<SkippedModifierInfo> | null = null;
@@ -597,7 +597,7 @@ export const generate_modified_ruleset = (
 			original_class,
 			new_class_escaped,
 			states_to_add,
-			pseudo_element_css,
+			pseudo_element_css
 		);
 
 		// Collect skip info from per-selector conflict detection
@@ -619,5 +619,5 @@ export const generate_modified_ruleset = (
 		css += '}\n';
 	}
 
-	return {css, skipped_modifiers};
+	return { css, skipped_modifiers };
 };

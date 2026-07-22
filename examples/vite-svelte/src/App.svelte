@@ -21,7 +21,7 @@
 		arrayClasses,
 		objectClasses,
 		// Comment hint examples
-		fromComment,
+		fromComment
 	} from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 	let count = $state(0);

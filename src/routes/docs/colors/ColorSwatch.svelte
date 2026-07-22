@@ -1,12 +1,12 @@
 <script lang="ts">
 	import ColorSwatchItem from './ColorSwatchItem.svelte';
-	import {intensity_variants} from '$lib/variable_data.ts';
+	import { intensity_variants } from '$lib/variable_data.ts';
 
 	const {
 		color_name,
 		computed_styles,
 		suffix,
-		absolute = false,
+		absolute = false
 	}: {
 		color_name: string;
 		computed_styles: CSSStyleDeclaration | null;

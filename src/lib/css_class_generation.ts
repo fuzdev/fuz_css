@@ -7,23 +7,23 @@
  * @module
  */
 
-import type {Logger} from '@fuzdev/fuz_util/log.ts';
-import {to_error_message} from '@fuzdev/fuz_util/error.ts';
+import type { Logger } from '@fuzdev/fuz_util/log.ts';
+import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
 import {
 	type SourceLocation,
 	type InterpreterDiagnostic,
 	type GenerationDiagnostic,
-	create_generation_diagnostic,
+	create_generation_diagnostic
 } from './diagnostics.ts';
 import {
 	parse_ruleset,
 	is_single_selector_ruleset,
-	ruleset_contains_class,
+	ruleset_contains_class
 } from './css_ruleset_parser.ts';
-import {resolve_class_definition} from './css_class_resolution.ts';
-import {get_modifier} from './modifiers.ts';
-import {extract_css_variables} from './css_variable_utils.ts';
+import { resolve_class_definition } from './css_class_resolution.ts';
+import { get_modifier } from './modifiers.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
 
 //
 // CSS Utilities
@@ -74,7 +74,7 @@ export const extract_primary_property = (declaration: string): string | null => 
 const get_sort_index = (
 	class_name: string,
 	indexes: Map<string, number>,
-	property_to_last_index: Map<string, number>,
+	property_to_last_index: Map<string, number>
 ): number => {
 	const direct = indexes.get(class_name);
 	if (direct !== undefined) return direct;
@@ -145,9 +145,7 @@ export interface CssClassDefinitionRuleset extends CssClassDefinitionBase {
 
 /** Static definitions (not interpreter-based). */
 export type CssClassDefinitionStatic =
-	| CssClassDefinitionComposition
-	| CssClassDefinitionDeclaration
-	| CssClassDefinitionRuleset;
+	CssClassDefinitionComposition | CssClassDefinitionDeclaration | CssClassDefinitionRuleset;
 
 /** Full union including interpreters. */
 export type CssClassDefinition = CssClassDefinitionStatic | CssClassDefinitionInterpreter;
@@ -206,7 +204,7 @@ export interface GenerateClassesCssOptions {
 }
 
 export const generate_classes_css = (
-	options: GenerateClassesCssOptions,
+	options: GenerateClassesCssOptions
 ): GenerateClassesCssResult => {
 	const {
 		class_names,
@@ -215,7 +213,7 @@ export const generate_classes_css = (
 		css_properties,
 		log,
 		class_locations,
-		explicit_classes,
+		explicit_classes
 	} = options;
 	const interpreter_diagnostics: Array<InterpreterDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
@@ -226,7 +224,7 @@ export const generate_classes_css = (
 		log,
 		diagnostics: interpreter_diagnostics,
 		class_definitions,
-		css_properties,
+		css_properties
 	};
 
 	// Build index maps in a single pass:
@@ -258,7 +256,7 @@ export const generate_classes_css = (
 			const order_b = get_state_modifier_order(b);
 			if (order_a !== order_b) return order_a - order_b;
 			return a.localeCompare(b); // alphabetic tiebreaker for stable sort
-		},
+		}
 	);
 
 	let css = '';
@@ -281,10 +279,10 @@ export const generate_classes_css = (
 						// or just a declaration
 						if (result.includes('{')) {
 							// Full ruleset - use as-is
-							v = {ruleset: result, comment: interpreter.comment};
+							v = { ruleset: result, comment: interpreter.comment };
 						} else {
 							// Simple declaration
-							v = {declaration: result, comment: interpreter.comment};
+							v = { declaration: result, comment: interpreter.comment };
 						}
 						break;
 					}
@@ -302,7 +300,7 @@ export const generate_classes_css = (
 			const is_css_property_error =
 				diag.level === 'error' && diag.message.startsWith('Unknown CSS property');
 			const level = is_css_property_error && !is_explicit ? 'warning' : diag.level;
-			diagnostics.push(create_generation_diagnostic({...diag, level}, locations));
+			diagnostics.push(create_generation_diagnostic({ ...diag, level }, locations));
 		}
 
 		if (!v) {
@@ -316,13 +314,13 @@ export const generate_classes_css = (
 					message: 'No matching class definition found',
 					identifier: c,
 					suggestion: 'Check spelling or add a custom class definition',
-					locations,
+					locations
 				});
 			}
 			continue;
 		}
 
-		const {comment} = v;
+		const { comment } = v;
 
 		if (comment) {
 			const trimmed = comment.trim();
@@ -346,7 +344,7 @@ export const generate_classes_css = (
 					message: resolution_result.error.message,
 					identifier: c,
 					suggestion: resolution_result.error.suggestion,
-					locations: class_locations?.get(c) ?? null,
+					locations: class_locations?.get(c) ?? null
 				});
 				continue;
 			}
@@ -372,7 +370,7 @@ export const generate_classes_css = (
 					message: `Ruleset "${c}" is empty`,
 					identifier: c,
 					suggestion: `Add CSS rules or remove the empty ruleset definition`,
-					locations: class_locations?.get(c) ?? null,
+					locations: class_locations?.get(c) ?? null
 				});
 				continue;
 			}
@@ -397,7 +395,7 @@ export const generate_classes_css = (
 						message: `Ruleset "${c}" has no selectors containing ".${c}"`,
 						identifier: c,
 						suggestion: `Ensure at least one selector uses ".${c}" so the class works when applied`,
-						locations: class_locations?.get(c) ?? null,
+						locations: class_locations?.get(c) ?? null
 					});
 				}
 
@@ -422,7 +420,7 @@ export const generate_classes_css = (
 						suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations
 							.replace(/\s+/g, ' ')
 							.trim()}' }`,
-						locations: class_locations?.get(c) ?? null,
+						locations: class_locations?.get(c) ?? null
 					});
 				}
 			} catch (e) {
@@ -434,12 +432,12 @@ export const generate_classes_css = (
 					message: `Failed to parse ruleset for "${c}": ${error_message}`,
 					identifier: c,
 					suggestion: 'Check for CSS syntax errors in the ruleset',
-					locations: class_locations?.get(c) ?? null,
+					locations: class_locations?.get(c) ?? null
 				});
 			}
 		}
 		// Note: Interpreted types are converted to declaration above, so no else clause needed
 	}
 
-	return {css, diagnostics, variables_used};
+	return { css, diagnostics, variables_used };
 };

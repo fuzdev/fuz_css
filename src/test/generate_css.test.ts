@@ -5,15 +5,15 @@
  * @module
  */
 
-import {test, describe, assert} from 'vitest';
+import { test, describe, assert } from 'vitest';
 
-import {generate_css, type GenerateCssOptions} from '$lib/generate_css.ts';
-import {create_test_fixtures} from './css_bundled_resolution_fixtures.ts';
-import type {StyleVariable} from '$lib/variable.ts';
-import {assert_css_contains, assert_css_not_contains} from './test_helpers.ts';
+import { generate_css, type GenerateCssOptions } from '$lib/generate_css.ts';
+import { create_test_fixtures } from './css_bundled_resolution_fixtures.ts';
+import type { StyleVariable } from '$lib/variable.ts';
+import { assert_css_contains, assert_css_not_contains } from './test_helpers.ts';
 
 const CLASS_DEFS = {
-	p_lg: {declaration: 'padding: var(--space_lg);'},
+	p_lg: { declaration: 'padding: var(--space_lg);' }
 };
 
 /** Builds options with sensible defaults; override per test. */
@@ -32,30 +32,30 @@ const make_options = (overrides: Partial<GenerateCssOptions> = {}): GenerateCssO
 	include_base: false,
 	include_theme: false,
 	resources: null,
-	...overrides,
+	...overrides
 });
 
 describe('generate_css', () => {
 	describe('utility-only mode', () => {
 		test('emits CSS for detected token classes, no base/theme', () => {
-			const result = generate_css(make_options({all_classes: new Set(['p_lg'])}));
+			const result = generate_css(make_options({ all_classes: new Set(['p_lg']) }));
 
 			assert_css_contains(result.css, '.p_lg { padding: var(--space_lg); }');
 			assert.equal(result.diagnostics.length, 0);
 		});
 
 		test('ignores resources when base and theme are disabled', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',
-				[],
+				[]
 			);
 
 			const result = generate_css(
 				make_options({
 					all_classes: new Set(['p_lg']),
 					all_elements: new Set(['button']),
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			assert_css_contains(result.css, '.p_lg {');
@@ -69,9 +69,9 @@ describe('generate_css', () => {
 				message: 'test diagnostic',
 				suggestion: null,
 				phase: 'extraction' as const,
-				location: {file: 'x.svelte', line: 1, column: 0},
+				location: { file: 'x.svelte', line: 1, column: 0 }
 			};
-			const result = generate_css(make_options({extraction_diagnostics: [diagnostic]}));
+			const result = generate_css(make_options({ extraction_diagnostics: [diagnostic] }));
 
 			assert.equal(result.diagnostics.length, 1);
 			assert.equal(result.diagnostics[0]!.message, 'test diagnostic');
@@ -80,14 +80,14 @@ describe('generate_css', () => {
 
 	describe('bundled mode', () => {
 		const VARIABLES: Array<StyleVariable> = [
-			{name: 'space_lg', light: '24px'},
-			{name: 'text_color', light: 'black', dark: 'white'},
+			{ name: 'space_lg', light: '24px' },
+			{ name: 'text_color', light: 'black', dark: 'white' }
 		];
 
 		test('includes base rules for detected elements and used theme variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
-				VARIABLES,
+				VARIABLES
 			);
 
 			const result = generate_css(
@@ -97,8 +97,8 @@ describe('generate_css', () => {
 					detected_css_variables: new Set(['text_color']),
 					include_base: true,
 					include_theme: true,
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			// utility class
@@ -110,9 +110,9 @@ describe('generate_css', () => {
 		});
 
 		test('merges explicit_variables into the detected set', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',
-				VARIABLES,
+				VARIABLES
 			);
 
 			const result = generate_css(
@@ -121,17 +121,17 @@ describe('generate_css', () => {
 					// not in detected_css_variables — only reachable via @fuz-variables
 					explicit_variables: new Set(['text_color']),
 					include_theme: true,
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			assert_css_contains(result.css, '--text_color');
 		});
 
 		test('surfaces resolution diagnostics (unresolved explicit variable)', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',
-				VARIABLES,
+				VARIABLES
 			);
 
 			const result = generate_css(
@@ -139,8 +139,8 @@ describe('generate_css', () => {
 					// not in the theme — resolve_css errors on the @fuz-variables annotation
 					explicit_variables: new Set(['nonexistent_var']),
 					include_theme: true,
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			const error = result.diagnostics.find((d) => d.level === 'error');
@@ -149,9 +149,9 @@ describe('generate_css', () => {
 		});
 
 		test('does not mutate the caller-supplied detected_css_variables set', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',
-				VARIABLES,
+				VARIABLES
 			);
 			const detected = new Set(['space_lg']);
 
@@ -160,17 +160,17 @@ describe('generate_css', () => {
 					explicit_variables: new Set(['text_color']),
 					include_theme: true,
 					detected_css_variables: detected,
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			assert.deepEqual([...detected], ['space_lg']);
 		});
 
 		test('warns when base styles are enabled but theme variables are disabled', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
-				VARIABLES,
+				VARIABLES
 			);
 
 			const result = generate_css(
@@ -178,12 +178,12 @@ describe('generate_css', () => {
 					all_elements: new Set(['button']),
 					include_base: true,
 					include_theme: false, // variables: null, but base styles stay on
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			const warning = result.diagnostics.find(
-				(d) => d.level === 'warning' && d.message.includes('theme variables are disabled'),
+				(d) => d.level === 'warning' && d.message.includes('theme variables are disabled')
 			);
 			assert.ok(warning, 'expected a warning about disabled theme variables');
 			// base rule still emitted, but the theme variables section is not
@@ -192,9 +192,9 @@ describe('generate_css', () => {
 		});
 
 		test('no theme-disabled warning when both base and theme are enabled', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
-				VARIABLES,
+				VARIABLES
 			);
 
 			const result = generate_css(
@@ -202,12 +202,12 @@ describe('generate_css', () => {
 					all_elements: new Set(['button']),
 					include_base: true,
 					include_theme: true,
-					resources: {style_rule_index, variable_graph, class_variable_index},
-				}),
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
 			);
 
 			assert.isUndefined(
-				result.diagnostics.find((d) => d.message.includes('theme variables are disabled')),
+				result.diagnostics.find((d) => d.message.includes('theme variables are disabled'))
 			);
 		});
 	});

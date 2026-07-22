@@ -7,11 +7,11 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {resolve_css} from '$lib/css_bundled_resolution.ts';
-import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.ts';
-import {assert_css_order} from './test_helpers.ts';
+import { resolve_css } from '$lib/css_bundled_resolution.ts';
+import { create_test_fixtures, empty_detection } from './css_bundled_resolution_fixtures.ts';
+import { assert_css_order } from './test_helpers.ts';
 
 /**
  * Core rules that should always be included regardless of detected elements.
@@ -21,47 +21,47 @@ const core_rules_cases = [
 		name: '* selector',
 		css: '* { box-sizing: border-box; }',
 		expected: 'box-sizing: border-box',
-		not_expected: null,
+		not_expected: null
 	},
 	{
 		name: ':root selector',
 		css: ':root { font-size: 16px; }\nbutton { color: red; }',
 		expected: 'font-size: 16px',
-		not_expected: 'color: red',
+		not_expected: 'color: red'
 	},
 	{
 		name: 'body selector',
 		css: 'body { margin: 0; background: white; }\nbutton { color: blue; }',
 		expected: 'margin: 0',
-		not_expected: null,
+		not_expected: null
 	},
 	{
 		name: '@font-face rules',
 		css: '@font-face { font-family: "Custom"; src: url("font.woff2"); }\nbutton { color: red; }',
 		expected: '@font-face',
-		not_expected: 'button',
+		not_expected: 'button'
 	},
 	{
 		name: '@media (prefers-reduced-motion) rules',
 		css: '@media (prefers-reduced-motion: reduce) { *, ::before, ::after { animation-duration: 0.01ms !important; } }\nbutton { color: red; }',
 		expected: 'prefers-reduced-motion',
-		not_expected: 'button',
-	},
+		not_expected: 'button'
+	}
 ];
 
 describe('resolve_css', () => {
 	describe('core rules', () => {
-		test.each(core_rules_cases)('includes $name', ({css, expected, not_expected}) => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+		test.each(core_rules_cases)('includes $name', ({ css, expected, not_expected }) => {
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				css,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
 				class_variable_index,
-				...empty_detection(),
+				...empty_detection()
 			});
 
 			assert.include(result.base_css, expected);
@@ -73,13 +73,13 @@ describe('resolve_css', () => {
 
 	describe('element matching', () => {
 		test('includes rules for detected elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: blue; }
 					input { color: green; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -89,7 +89,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'color: blue');
@@ -98,13 +98,13 @@ describe('resolve_css', () => {
 		});
 
 		test('excludes rules for undetected elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
 					a { text-decoration: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -114,7 +114,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'button { padding: 10px; }');
@@ -123,12 +123,12 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements option forces inclusion', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -136,7 +136,7 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_elements: ['button'],
+				additional_elements: ['button']
 			});
 
 			assert.include(result.base_css, 'color: red');
@@ -145,14 +145,14 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements with multiple values', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
 					dialog { padding: 16px; }
 					select { appearance: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -160,7 +160,7 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_elements: ['button', 'input', 'dialog'],
+				additional_elements: ['button', 'input', 'dialog']
 			});
 
 			assert.include(result.base_css, 'color: red');
@@ -174,14 +174,14 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements combined with detected_elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
 					a { text-decoration: none; }
 					select { appearance: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -192,7 +192,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				additional_elements: ['input'],
+				additional_elements: ['input']
 			});
 
 			// Both detected and additional should be included
@@ -206,12 +206,12 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements with overlapping detected_elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -222,7 +222,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				additional_elements: ['button', 'input'], // button appears in both
+				additional_elements: ['button', 'input'] // button appears in both
 			});
 
 			// Both should be included, no errors from overlap
@@ -233,14 +233,14 @@ describe('resolve_css', () => {
 		});
 
 		test('handles multiple elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
 					a { text-decoration: none; }
 					select { appearance: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -250,7 +250,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button', 'input', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'button');
@@ -260,13 +260,13 @@ describe('resolve_css', () => {
 		});
 
 		test('preserves cascade order', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					a { color: blue; }
 					a:hover { color: darkblue; }
 					a:active { color: navy; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -276,7 +276,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert_css_order(result.base_css, 'color: blue', 'color: darkblue', 'color: navy');
@@ -285,13 +285,13 @@ describe('resolve_css', () => {
 
 	describe('class matching', () => {
 		test('includes rules for detected classes', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button.selected { background: blue; }
 					button.disabled { opacity: 0.5; }
 					.hidden { display: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -301,7 +301,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(['selected', 'hidden']),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'button.selected');
@@ -310,12 +310,12 @@ describe('resolve_css', () => {
 		});
 
 		test('excludes rules for undetected classes', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					.active { color: green; }
 					.inactive { color: gray; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -325,7 +325,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(['active']),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'color: green');
@@ -333,13 +333,13 @@ describe('resolve_css', () => {
 		});
 
 		test('combines element and class matching', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 8px; }
 					button.primary { background: blue; }
 					.warning { color: orange; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -349,7 +349,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(['primary', 'warning']),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'button { padding');
@@ -360,12 +360,12 @@ describe('resolve_css', () => {
 
 	describe('base CSS generation', () => {
 		test('includes matched rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -375,7 +375,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'button { padding: 10px; }');
@@ -383,13 +383,13 @@ describe('resolve_css', () => {
 		});
 
 		test('preserves original order', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 5px; }
 					button:hover { background: gray; }
 					button:focus { outline: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -399,19 +399,19 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert_css_order(result.base_css, 'padding: 5px', 'background: gray', 'outline: none');
 		});
 
 		test('includes @media rules for elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { font-size: 14px; }
 					@media (min-width: 768px) { button { font-size: 16px; } }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -421,7 +421,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'font-size: 14px');
@@ -430,12 +430,12 @@ describe('resolve_css', () => {
 		});
 
 		test('includes @supports rules for elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { display: block; }
 					@supports (display: grid) { button { display: grid; } }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -445,7 +445,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'display: block');
@@ -454,12 +454,12 @@ describe('resolve_css', () => {
 		});
 
 		test('includes @container rules for elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { padding: 8px; }
 					@container (min-width: 400px) { button { padding: 16px; } }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -469,7 +469,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.include(result.base_css, 'padding: 8px');
@@ -480,9 +480,9 @@ describe('resolve_css', () => {
 
 	describe('statistics', () => {
 		test('not included by default', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -492,20 +492,20 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.isUndefined(result.stats);
 		});
 
 		test('included when include_stats true', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: blue; }
 					input { color: green; }
 				`,
-				[{name: 'color', light: 'red'}],
+				[{ name: 'color', light: 'red' }]
 			);
 
 			const result = resolve_css({
@@ -516,7 +516,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
 				utility_variables_used: new Set(),
-				include_stats: true,
+				include_stats: true
 			});
 
 			assert.isDefined(result.stats);
@@ -528,7 +528,7 @@ describe('resolve_css', () => {
 		});
 
 		test('reflects actual counts', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					* { box-sizing: border-box; }
 					button { color: blue; }
@@ -536,9 +536,9 @@ describe('resolve_css', () => {
 					a { text-decoration: none; }
 				`,
 				[
-					{name: 'color_a', light: 'blue'},
-					{name: 'color_b', light: 'green'},
-				],
+					{ name: 'color_a', light: 'blue' },
+					{ name: 'color_b', light: 'green' }
+				]
 			);
 
 			const result = resolve_css({
@@ -549,7 +549,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
-				include_stats: true,
+				include_stats: true
 			});
 
 			assert.strictEqual(result.stats!.element_count, 2);
@@ -564,7 +564,7 @@ describe('resolve_css', () => {
 
 	describe('empty scenarios', () => {
 		test('projects without any HTML elements still work', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					* { box-sizing: border-box; }
 					:root { font-size: 16px; }
@@ -573,9 +573,9 @@ describe('resolve_css', () => {
 					input { border: 1px solid; }
 				`,
 				[
-					{name: 'text_color', light: 'black'},
-					{name: 'bg_color', light: 'white'},
-				],
+					{ name: 'text_color', light: 'black' },
+					{ name: 'bg_color', light: 'white' }
+				]
 			);
 
 			const result = resolve_css({
@@ -585,7 +585,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(['p_md', 'box']),
 				detected_css_variables: new Set(['text_color']),
-				utility_variables_used: new Set(['bg_color']),
+				utility_variables_used: new Set(['bg_color'])
 			});
 
 			// Core rules should still be included
@@ -601,8 +601,8 @@ describe('resolve_css', () => {
 		});
 
 		test('empty style_rule_index', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -612,7 +612,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.base_css, '');
@@ -620,9 +620,9 @@ describe('resolve_css', () => {
 		});
 
 		test('empty variable_graph', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -632,7 +632,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.theme_css, '');
@@ -640,19 +640,19 @@ describe('resolve_css', () => {
 		});
 
 		test('empty detected sets', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: red; }
 				`,
-				[{name: 'unused', light: 'value'}],
+				[{ name: 'unused', light: 'value' }]
 			);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
 				class_variable_index,
-				...empty_detection(),
+				...empty_detection()
 			});
 
 			// Should only include core rules
@@ -664,10 +664,10 @@ describe('resolve_css', () => {
 
 	describe('additional_variables option', () => {
 		test('additional_variables forces inclusion', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -675,7 +675,7 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_variables: ['color_b'],
+				additional_variables: ['color_b']
 			});
 
 			// Only additional_variables should be included (nothing detected)
@@ -687,10 +687,10 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables combined with detected_css_variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -701,7 +701,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
-				additional_variables: ['color_c'],
+				additional_variables: ['color_c']
 			});
 
 			// Both detected and additional should be included
@@ -713,9 +713,9 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables with overlapping detected_css_variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' }
 			]);
 
 			const result = resolve_css({
@@ -726,7 +726,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
-				additional_variables: ['color_a', 'color_b'], // color_a in both
+				additional_variables: ['color_a', 'color_b'] // color_a in both
 			});
 
 			// Both should be included, no errors from overlap
@@ -739,16 +739,16 @@ describe('resolve_css', () => {
 
 	describe('additional_elements and additional_variables combined', () => {
 		test('both options work together', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
 					input { border: 1px solid var(--input_border); }
 				`,
 				[
-					{name: 'btn_color', light: 'blue'},
-					{name: 'input_border', light: 'gray'},
-					{name: 'extra_var', light: 'red'},
-				],
+					{ name: 'btn_color', light: 'blue' },
+					{ name: 'input_border', light: 'gray' },
+					{ name: 'extra_var', light: 'red' }
+				]
 			);
 
 			const result = resolve_css({
@@ -757,7 +757,7 @@ describe('resolve_css', () => {
 				class_variable_index,
 				...empty_detection(),
 				additional_elements: ['button'],
-				additional_variables: ['extra_var'],
+				additional_variables: ['extra_var']
 			});
 
 			// Button rules included
@@ -769,12 +769,12 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements brings transitive variable dependencies', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[
-					{name: 'btn_color', light: 'var(--base_color)'},
-					{name: 'base_color', light: 'blue'},
-				],
+					{ name: 'btn_color', light: 'var(--base_color)' },
+					{ name: 'base_color', light: 'blue' }
+				]
 			);
 
 			const result = resolve_css({
@@ -782,7 +782,7 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_elements: ['button'],
+				additional_elements: ['button']
 			});
 
 			// Both btn_color and its dependency base_color should be included
@@ -793,13 +793,13 @@ describe('resolve_css', () => {
 
 	describe('additional_elements and additional_variables "all" option', () => {
 		test('additional_elements: "all" includes all rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
 					a { color: purple; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -810,7 +810,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				additional_elements: 'all', // Include all rules
+				additional_elements: 'all' // Include all rules
 			});
 
 			// Should include ALL rules, not just button
@@ -820,13 +820,13 @@ describe('resolve_css', () => {
 		});
 
 		test('default behavior only includes matching rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
 					a { color: purple; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -836,7 +836,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 				// no additional_elements
 			});
 
@@ -847,10 +847,10 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables: "all" includes all variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -861,7 +861,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']), // Only detect color_a
 				utility_variables_used: new Set(),
-				additional_variables: 'all', // Include all variables
+				additional_variables: 'all' // Include all variables
 			});
 
 			// Should include ALL variables, not just color_a
@@ -874,10 +874,10 @@ describe('resolve_css', () => {
 		});
 
 		test('default behavior only includes used variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -887,7 +887,7 @@ describe('resolve_css', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 				// no additional_variables
 			});
 
@@ -901,15 +901,15 @@ describe('resolve_css', () => {
 		});
 
 		test('both "all" options includes everything', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
 					input { border: 1px solid; }
 				`,
 				[
-					{name: 'btn_color', light: 'blue'},
-					{name: 'unused', light: 'red'},
-				],
+					{ name: 'btn_color', light: 'blue' },
+					{ name: 'unused', light: 'red' }
+				]
 			);
 
 			const result = resolve_css({
@@ -918,7 +918,7 @@ describe('resolve_css', () => {
 				class_variable_index,
 				...empty_detection(),
 				additional_elements: 'all',
-				additional_variables: 'all',
+				additional_variables: 'all'
 			});
 
 			// All rules included
@@ -932,13 +932,13 @@ describe('resolve_css', () => {
 
 	describe('exclude options', () => {
 		test('exclude_elements filters from included elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
 					a { color: purple; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -949,7 +949,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				exclude_elements: ['input'],
+				exclude_elements: ['input']
 			});
 
 			// button and a included, input excluded
@@ -962,13 +962,13 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_elements combined with additional_elements', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
 					a { color: purple; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -980,7 +980,7 @@ describe('resolve_css', () => {
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
 				additional_elements: ['input', 'a'],
-				exclude_elements: ['input'], // Exclude even though it's in additional
+				exclude_elements: ['input'] // Exclude even though it's in additional
 			});
 
 			// button and a included, input excluded
@@ -990,10 +990,10 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_variables filters from resolved variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -1004,7 +1004,7 @@ describe('resolve_css', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a', 'color_b', 'color_c']),
 				utility_variables_used: new Set(),
-				exclude_variables: ['color_b'],
+				exclude_variables: ['color_b']
 			});
 
 			// color_a and color_c included, color_b excluded
@@ -1017,10 +1017,10 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_variables combined with additional_variables', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a', light: 'blue'},
-				{name: 'color_b', light: 'green'},
-				{name: 'color_c', light: 'red'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a', light: 'blue' },
+				{ name: 'color_b', light: 'green' },
+				{ name: 'color_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -1032,7 +1032,7 @@ describe('resolve_css', () => {
 				detected_css_variables: new Set(['color_a']),
 				utility_variables_used: new Set(),
 				additional_variables: ['color_b', 'color_c'],
-				exclude_variables: ['color_b'], // Exclude even though it's in additional
+				exclude_variables: ['color_b'] // Exclude even though it's in additional
 			});
 
 			// color_a and color_c included, color_b excluded

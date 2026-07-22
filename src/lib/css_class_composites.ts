@@ -1,4 +1,4 @@
-import type {CssClassDefinition} from './css_class_generation.ts';
+import type { CssClassDefinition } from './css_class_generation.ts';
 
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
@@ -7,10 +7,10 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			image-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */
 			image-rendering: pixelated; /* in case crisp-edges isn't supported */
 			image-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */
-		`,
+		`
 	},
 	circular: {
-		declaration: 'border-radius: 50%;',
+		declaration: 'border-radius: 50%;'
 	},
 	box: {
 		declaration: `
@@ -18,14 +18,14 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			flex-direction: column;
 			align-items: center;
 			justify-content: center;
-		`,
+		`
 	},
 	column: {
 		comment: 'like `.box` but uncentered',
 		declaration: `
 			display: flex;
 			flex-direction: column;
-		`,
+		`
 	},
 	row: {
 		comment: 'can be used to override the direction of a `.box`',
@@ -33,7 +33,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			display: flex;
 			flex-direction: row;
 			align-items: center;
-		`,
+		`
 	},
 	ellipsis: {
 		declaration: `
@@ -41,7 +41,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
-		`,
+		`
 	},
 	selectable: {
 		ruleset: `
@@ -70,7 +70,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.selectable.selected.deselectable:not(:disabled) {
 				cursor: pointer;
 			}
-		`,
+		`
 	},
 	clickable: {
 		ruleset: `
@@ -90,7 +90,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.clickable.active {
 				transform: var(--clickable_transform_active, scale3d(1.2, 1.2, 1.2));
 			}
-		`,
+		`
 	},
 	pane: {
 		comment:
@@ -99,14 +99,14 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			background-color: var(--shade_00);
 			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
 			border-radius: var(--border_radius, var(--border_radius_xs));
-		`,
+		`
 	},
 	panel: {
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
 			background-color: var(--fg_10);
-		`,
+		`
 	},
 	/*
 	Size composites scale a region up or down on the fuz_css scales. Each variable
@@ -126,7 +126,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--icon_size: var(--icon_size_xs);
 			--menuitem_padding: var(--space_xs5) var(--space_xs3);
 			--flow_margin: var(--space_sm);
-		`,
+		`
 	},
 	sm: {
 		comment:
@@ -140,7 +140,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--icon_size: var(--icon_size_sm);
 			--menuitem_padding: var(--space_xs4) var(--space_xs2);
 			--flow_margin: var(--space_md);
-		`,
+		`
 	},
 	md: {
 		comment: 'Default sizing restated explicitly, useful as a cascade reset within a sized parent.',
@@ -153,7 +153,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--icon_size: var(--icon_size_md);
 			--menuitem_padding: var(--space_xs3) var(--space_xs);
 			--flow_margin: var(--space_lg);
-		`,
+		`
 	},
 	lg: {
 		comment:
@@ -167,7 +167,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--icon_size: var(--icon_size_lg);
 			--menuitem_padding: var(--space_xs2) var(--space_sm);
 			--flow_margin: var(--space_xl);
-		`,
+		`
 	},
 	xl: {
 		comment:
@@ -181,16 +181,16 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--icon_size: var(--icon_size_xl);
 			--menuitem_padding: var(--space_xs) var(--space_md);
 			--flow_margin: var(--space_xl2);
-		`,
+		`
 	},
 	mb_flow: {
 		comment:
 			'Flow-aware margin-bottom that responds to --flow_margin overrides from size composites.',
-		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));',
+		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));'
 	},
 	mt_flow: {
 		comment: 'Flow-aware margin-top that responds to --flow_margin overrides from size composites.',
-		declaration: 'margin-top: var(--flow_margin, var(--space_lg));',
+		declaration: 'margin-top: var(--flow_margin, var(--space_lg));'
 	},
 	icon_button: {
 		comment: `
@@ -207,7 +207,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			line-height: 1;
 			font-weight: 900;
 			padding: 0;
-		`,
+		`
 	},
 	plain: {
 		comment:
@@ -221,7 +221,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.plain:hover, .plain:active {
 				--border_color: transparent;
 			}
-		`,
+		`
 	},
 	menuitem: {
 		ruleset: `
@@ -280,7 +280,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				text-overflow: ellipsis;
 				line-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */
 			}
-		`,
+		`
 	},
 	chevron: {
 		ruleset: `
@@ -294,7 +294,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				border: 4px solid transparent;
 				border-left-color: var(--text_70);
 			}
-		`,
+		`
 	},
 	chip: {
 		ruleset: `
@@ -349,6 +349,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				color: var(--color_j_50);
 				background-color: var(--color_j_10);
 			}
-		`,
-	},
+		`
+	}
 };

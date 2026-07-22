@@ -1,8 +1,8 @@
 <script lang="ts">
-	import type {StyleVariable} from '$lib/variable.ts';
+	import type { StyleVariable } from '$lib/variable.ts';
 
 	const {
-		variable,
+		variable
 	}: {
 		variable: StyleVariable | null;
 	} = $props();

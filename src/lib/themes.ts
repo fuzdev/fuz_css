@@ -1,8 +1,8 @@
-import type {Theme} from './theme.ts';
+import type { Theme } from './theme.ts';
 
 export const DEFAULT_THEME: Theme = {
 	name: 'base',
-	variables: [], // inherits base
+	variables: [] // inherits base
 };
 
 /**
@@ -13,13 +13,13 @@ export const default_themes: Array<Theme> = [
 	{
 		name: 'low contrast',
 		variables: [
-			{name: 'tint_saturation', light: '8%'},
+			{ name: 'tint_saturation', light: '8%' },
 			{
 				name: 'shade_00',
 				light: 'hsl(var(--tint_hue) var(--tint_saturation) 86%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 18%)',
-			},
-		],
+				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 18%)'
+			}
+		]
 	},
 	{
 		name: 'high contrast',
@@ -27,23 +27,23 @@ export const default_themes: Array<Theme> = [
 			{
 				name: 'shade_00',
 				light: '#fff',
-				dark: '#000',
+				dark: '#000'
 			},
 			{
 				name: 'text_80',
 				light: 'hsl(var(--tint_hue) var(--tint_saturation) 8%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)',
+				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 90%)'
 			},
 			{
 				name: 'text_70',
 				light: 'hsl(var(--tint_hue) var(--tint_saturation) 16%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 83%)',
+				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 83%)'
 			},
 			{
 				name: 'text_50',
 				light: 'hsl(var(--tint_hue) var(--tint_saturation) 24%)',
-				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 75%)',
-			},
-		],
-	},
+				dark: 'hsl(var(--tint_hue) var(--tint_saturation) 75%)'
+			}
+		]
+	}
 ];

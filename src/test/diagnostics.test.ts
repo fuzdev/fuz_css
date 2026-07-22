@@ -1,10 +1,10 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	format_diagnostic,
 	CssGenerationError,
 	type ExtractionDiagnostic,
-	type GenerationDiagnostic,
+	type GenerationDiagnostic
 } from '$lib/diagnostics.ts';
 
 describe('format_diagnostic', () => {
@@ -14,7 +14,7 @@ describe('format_diagnostic', () => {
 			level: 'warning',
 			message: 'test warning message',
 			suggestion: null,
-			location: {file: 'src/lib/Button.svelte', line: 10, column: 5},
+			location: { file: 'src/lib/Button.svelte', line: 10, column: 5 }
 		};
 
 		const result = format_diagnostic(diagnostic);
@@ -27,7 +27,7 @@ describe('format_diagnostic', () => {
 			level: 'error',
 			message: 'deprecated syntax',
 			suggestion: 'use the new syntax instead',
-			location: {file: 'app.ts', line: 1, column: 1},
+			location: { file: 'app.ts', line: 1, column: 1 }
 		};
 
 		const result = format_diagnostic(diagnostic);
@@ -41,7 +41,7 @@ describe('format_diagnostic', () => {
 			message: 'unknown CSS property',
 			suggestion: null,
 			identifier: 'invalid:value',
-			locations: [{file: 'src/App.svelte', line: 5, column: 12}],
+			locations: [{ file: 'src/App.svelte', line: 5, column: 12 }]
 		};
 
 		const result = format_diagnostic(diagnostic);
@@ -55,7 +55,7 @@ describe('format_diagnostic', () => {
 			message: 'invalid class',
 			suggestion: null,
 			identifier: 'bad_class',
-			locations: null,
+			locations: null
 		};
 
 		const result = format_diagnostic(diagnostic);
@@ -69,13 +69,13 @@ describe('format_diagnostic', () => {
 			message: 'unknown property',
 			suggestion: 'did you mean "color"?',
 			identifier: 'colour:red',
-			locations: [{file: 'test.ts', line: 1, column: 1}],
+			locations: [{ file: 'test.ts', line: 1, column: 1 }]
 		};
 
 		const result = format_diagnostic(diagnostic);
 		assert.strictEqual(
 			result,
-			`  - test.ts:1:1: colour:red: unknown property (did you mean "color"?)`,
+			`  - test.ts:1:1: colour:red: unknown property (did you mean "color"?)`
 		);
 	});
 
@@ -86,7 +86,7 @@ describe('format_diagnostic', () => {
 			message: 'test error',
 			suggestion: null,
 			identifier: 'test_class',
-			locations: [],
+			locations: []
 		};
 
 		const result = format_diagnostic(diagnostic);
@@ -103,8 +103,8 @@ describe('CssGenerationError', () => {
 				message: 'unknown property',
 				suggestion: null,
 				identifier: 'bad:class',
-				locations: [{file: 'app.ts', line: 1, column: 1}],
-			},
+				locations: [{ file: 'app.ts', line: 1, column: 1 }]
+			}
 		];
 
 		const error = new CssGenerationError(diagnostics);
@@ -123,7 +123,7 @@ describe('CssGenerationError', () => {
 				message: 'error one',
 				suggestion: null,
 				identifier: 'class_a',
-				locations: null,
+				locations: null
 			},
 			{
 				phase: 'generation',
@@ -131,8 +131,8 @@ describe('CssGenerationError', () => {
 				message: 'error two',
 				suggestion: null,
 				identifier: 'class_b',
-				locations: null,
-			},
+				locations: null
+			}
 		];
 
 		const error = new CssGenerationError(diagnostics);
@@ -150,7 +150,7 @@ describe('CssGenerationError', () => {
 				message: 'this is an error',
 				suggestion: null,
 				identifier: 'error_class',
-				locations: null,
+				locations: null
 			},
 			{
 				phase: 'generation',
@@ -158,8 +158,8 @@ describe('CssGenerationError', () => {
 				message: 'this is a warning',
 				suggestion: null,
 				identifier: 'warning_class',
-				locations: null,
-			},
+				locations: null
+			}
 		];
 
 		const error = new CssGenerationError(diagnostics);
@@ -178,7 +178,7 @@ describe('CssGenerationError', () => {
 				level: 'error' as const,
 				message: 'extraction error',
 				suggestion: null,
-				location: {file: 'test.ts', line: 1, column: 1},
+				location: { file: 'test.ts', line: 1, column: 1 }
 			},
 			{
 				phase: 'generation' as const,
@@ -186,8 +186,8 @@ describe('CssGenerationError', () => {
 				message: 'generation error',
 				suggestion: null,
 				identifier: 'gen_class',
-				locations: null,
-			},
+				locations: null
+			}
 		];
 
 		const error = new CssGenerationError(diagnostics);
@@ -211,8 +211,8 @@ describe('CssGenerationError', () => {
 				message: 'just a warning',
 				suggestion: null,
 				identifier: 'warn_class',
-				locations: null,
-			},
+				locations: null
+			}
 		];
 
 		const error = new CssGenerationError(diagnostics);

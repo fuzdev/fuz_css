@@ -6,16 +6,16 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {resolve_css} from '$lib/css_bundled_resolution.ts';
-import {create_test_fixtures, empty_detection} from './css_bundled_resolution_fixtures.ts';
+import { resolve_css } from '$lib/css_bundled_resolution.ts';
+import { create_test_fixtures, empty_detection } from './css_bundled_resolution_fixtures.ts';
 
 describe('resolve_css diagnostics', () => {
 	describe('typo detection for variables', () => {
 		test('emits warning for typo of known variable', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_primary', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_primary', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -26,7 +26,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				// 'color_primry' is a typo of 'color_primary' (missing 'a')
 				detected_css_variables: new Set(['color_primary', 'color_primry']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -39,9 +39,9 @@ describe('resolve_css diagnostics', () => {
 
 		test('emits warning for typo in transitive dep', () => {
 			// Variable references a typo that's similar to another variable
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'main_color', light: 'var(--main_colr)'}, // references typo
-				{name: 'main_colour', light: 'red'}, // similar - will be suggested
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'main_color', light: 'var(--main_colr)' }, // references typo
+				{ name: 'main_colour', light: 'red' } // similar - will be suggested
 			]);
 
 			const result = resolve_css({
@@ -51,7 +51,7 @@ describe('resolve_css diagnostics', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['main_color']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -61,10 +61,10 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('handles multiple typos', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'background_color', light: '#fff'},
-				{name: 'foreground_color', light: '#000'},
-				{name: 'border_radius', light: '4px'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'background_color', light: '#fff' },
+				{ name: 'foreground_color', light: '#000' },
+				{ name: 'border_radius', light: '4px' }
 			]);
 
 			const result = resolve_css({
@@ -77,9 +77,9 @@ describe('resolve_css diagnostics', () => {
 				detected_css_variables: new Set([
 					'backgroud_color', // typo of background_color
 					'forground_color', // typo of foreground_color
-					'boarder_radius', // typo of border_radius
+					'boarder_radius' // typo of border_radius
 				]),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.diagnostics.length, 3);
@@ -90,9 +90,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning for user-defined variables (not similar to theme vars)', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_primary', light: 'blue'},
-				{name: 'spacing_md', light: '16px'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_primary', light: 'blue' },
+				{ name: 'spacing_md', light: '16px' }
 			]);
 
 			const result = resolve_css({
@@ -103,7 +103,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				// These are user-defined, not similar to any theme variable
 				detected_css_variables: new Set(['fill', 'shadow', 'icon_size', 'my_custom_var']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			// No warnings because these don't look like typos
@@ -111,9 +111,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no diagnostics when all exist', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color', light: 'blue'},
-				{name: 'space', light: '16px'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color', light: 'blue' },
+				{ name: 'space', light: '16px' }
 			]);
 
 			const result = resolve_css({
@@ -123,7 +123,7 @@ describe('resolve_css diagnostics', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color', 'space']),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
@@ -132,9 +132,9 @@ describe('resolve_css diagnostics', () => {
 
 	describe('unmatched elements', () => {
 		test('no warning by default', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -144,16 +144,16 @@ describe('resolve_css diagnostics', () => {
 				detected_elements: new Set(['button', 'custom-element', 'my-widget']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
-				utility_variables_used: new Set(),
+				utility_variables_used: new Set()
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('warns when warn_unmatched_elements enabled', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -164,7 +164,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				warn_unmatched_elements: true,
+				warn_unmatched_elements: true
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -174,9 +174,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('warns for multiple unmatched', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -187,7 +187,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				warn_unmatched_elements: true,
+				warn_unmatched_elements: true
 			});
 
 			assert.strictEqual(result.diagnostics.length, 3);
@@ -198,13 +198,13 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning when all have rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
 					a { text-decoration: none; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -215,7 +215,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				warn_unmatched_elements: true,
+				warn_unmatched_elements: true
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
@@ -224,8 +224,8 @@ describe('resolve_css diagnostics', () => {
 
 	describe('explicit variables (@fuz-variables)', () => {
 		test('emits error for explicit variable not in theme', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a_50', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -236,7 +236,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['nonexistent_var']),
+				explicit_variables: new Set(['nonexistent_var'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -248,9 +248,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no error when explicit variable exists in theme', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
-				{name: 'shade_40', light: '#ccc'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a_50', light: 'blue' },
+				{ name: 'shade_40', light: '#ccc' }
 			]);
 
 			// Callers (gen_fuz_css/vite_plugin) add explicit_variables to detected_css_variables
@@ -262,7 +262,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'shade_40']),
+				explicit_variables: new Set(['color_a_50', 'shade_40'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
@@ -272,9 +272,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('suggests similar variable for typo', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'shade_40', light: '#ccc'},
-				{name: 'shade_50', light: '#999'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'shade_40', light: '#ccc' },
+				{ name: 'shade_50', light: '#999' }
 			]);
 
 			const result = resolve_css({
@@ -285,7 +285,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['shade_4']), // typo
+				explicit_variables: new Set(['shade_4']) // typo
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -296,9 +296,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('errors for multiple explicit variables with mix of valid and invalid', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
-				{name: 'shade_40', light: '#ccc'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a_50', light: 'blue' },
+				{ name: 'shade_40', light: '#ccc' }
 			]);
 
 			const result = resolve_css({
@@ -309,7 +309,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2']),
+				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2'])
 			});
 
 			// Only the 2 invalid variables produce errors
@@ -324,9 +324,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('explicit variable resolves transitive dependencies', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'base_hue', light: '210'},
-				{name: 'derived_color', light: 'hsl(var(--base_hue) 50% 50%)'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'base_hue', light: '210' },
+				{ name: 'derived_color', light: 'hsl(var(--base_hue) 50% 50%)' }
 			]);
 
 			const result = resolve_css({
@@ -337,7 +337,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['derived_color']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['derived_color']),
+				explicit_variables: new Set(['derived_color'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
@@ -346,8 +346,8 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('exclude_variables suppresses explicit_variables error', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'color_a_50', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'color_a_50', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -359,7 +359,7 @@ describe('resolve_css diagnostics', () => {
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
 				explicit_variables: new Set(['nonexistent_var', 'also_missing']),
-				exclude_variables: ['nonexistent_var'],
+				exclude_variables: ['nonexistent_var']
 			});
 
 			// Only 'also_missing' errors - 'nonexistent_var' is suppressed by exclude_variables
@@ -371,9 +371,9 @@ describe('resolve_css diagnostics', () => {
 
 	describe('explicit elements (@fuz-elements)', () => {
 		test('emits error for explicit element with no rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -384,7 +384,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_elements: new Set(['dialog']),
+				explicit_elements: new Set(['dialog'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -395,12 +395,12 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no error when explicit element has rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					dialog { padding: 1rem; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -411,19 +411,19 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_elements: new Set(['dialog']),
+				explicit_elements: new Set(['dialog'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('suggests similar element for typo', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`
 					button { color: red; }
 					dialog { padding: 1rem; }
 				`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -434,7 +434,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_elements: new Set(['dilog']), // typo
+				explicit_elements: new Set(['dilog']) // typo
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -445,9 +445,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('errors for multiple explicit elements without rules', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -458,7 +458,7 @@ describe('resolve_css diagnostics', () => {
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
-				explicit_elements: new Set(['dialog', 'details', 'summary']),
+				explicit_elements: new Set(['dialog', 'details', 'summary'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 3);
@@ -466,9 +466,9 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('exclude_elements suppresses explicit_elements error', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: red; }`,
-				[],
+				[]
 			);
 
 			const result = resolve_css({
@@ -480,7 +480,7 @@ describe('resolve_css diagnostics', () => {
 				detected_css_variables: new Set(),
 				utility_variables_used: new Set(),
 				explicit_elements: new Set(['dialog', 'details']),
-				exclude_elements: ['dialog'],
+				exclude_elements: ['dialog']
 			});
 
 			// Only 'details' errors - 'dialog' is suppressed by exclude_elements
@@ -492,9 +492,9 @@ describe('resolve_css diagnostics', () => {
 
 	describe('exclude_variables footgun', () => {
 		test('warns when an excluded variable is referenced by an included rule', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: var(--brand); }`,
-				[{name: 'brand', light: 'blue'}],
+				[{ name: 'brand', light: 'blue' }]
 			);
 
 			const result = resolve_css({
@@ -503,7 +503,7 @@ describe('resolve_css diagnostics', () => {
 				variable_graph,
 				class_variable_index,
 				detected_elements: new Set(['button']),
-				exclude_variables: ['brand'],
+				exclude_variables: ['brand']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -515,8 +515,8 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('warns when an excluded variable is referenced directly in source', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'brand', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'brand', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -525,7 +525,7 @@ describe('resolve_css diagnostics', () => {
 				variable_graph,
 				class_variable_index,
 				detected_css_variables: new Set(['brand']),
-				exclude_variables: ['brand'],
+				exclude_variables: ['brand']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 1);
@@ -533,12 +533,12 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning when the excluded variable is unused', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				`button { color: var(--brand); }`,
 				[
-					{name: 'brand', light: 'blue'},
-					{name: 'unused', light: 'red'},
-				],
+					{ name: 'brand', light: 'blue' },
+					{ name: 'unused', light: 'red' }
+				]
 			);
 
 			const result = resolve_css({
@@ -547,15 +547,15 @@ describe('resolve_css diagnostics', () => {
 				variable_graph,
 				class_variable_index,
 				detected_elements: new Set(['button']),
-				exclude_variables: ['unused'],
+				exclude_variables: ['unused']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('no warning when force-included via additional_variables then excluded', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'brand', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'brand', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -565,15 +565,15 @@ describe('resolve_css diagnostics', () => {
 				class_variable_index,
 				// force-included, not referenced by any shipped CSS — exclude is a clean override
 				additional_variables: ['brand'],
-				exclude_variables: ['brand'],
+				exclude_variables: ['brand']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 		});
 
 		test('no warning when the excluded name is not a theme variable', () => {
-			const {style_rule_index, variable_graph, class_variable_index} = create_test_fixtures(``, [
-				{name: 'brand', light: 'blue'},
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+				{ name: 'brand', light: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -583,7 +583,7 @@ describe('resolve_css diagnostics', () => {
 				class_variable_index,
 				// referenced in source but user-defined (not a known theme variable)
 				detected_css_variables: new Set(['my_custom']),
-				exclude_variables: ['my_custom'],
+				exclude_variables: ['my_custom']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);

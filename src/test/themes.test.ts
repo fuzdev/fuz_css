@@ -1,8 +1,8 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {default_themes, DEFAULT_THEME} from '$lib/themes.ts';
-import {default_variables} from '$lib/variables.ts';
-import {StyleVariable} from '$lib/variable.ts';
+import { default_themes, DEFAULT_THEME } from '$lib/themes.ts';
+import { default_variables } from '$lib/variables.ts';
+import { StyleVariable } from '$lib/variable.ts';
 
 describe('default_themes', () => {
 	test('all themes have valid name', () => {
@@ -41,7 +41,7 @@ describe('default_themes', () => {
 			assert.isAbove(
 				theme.variables.length,
 				0,
-				`Theme "${theme.name}" should have at least one variable`,
+				`Theme "${theme.name}" should have at least one variable`
 			);
 		}
 	});
@@ -63,7 +63,7 @@ describe('default_themes', () => {
 			for (const variable of theme.variables) {
 				assert.isTrue(
 					known_names.has(variable.name),
-					`Theme "${theme.name}" overrides unknown variable "${variable.name}"`,
+					`Theme "${theme.name}" overrides unknown variable "${variable.name}"`
 				);
 			}
 		}

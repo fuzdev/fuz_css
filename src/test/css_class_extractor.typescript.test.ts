@@ -1,11 +1,11 @@
-import {test, describe} from 'vitest';
+import { test, describe } from 'vitest';
 
-import {extract_from_ts, extract_css_classes} from '$lib/css_class_extractor.ts';
+import { extract_from_ts, extract_css_classes } from '$lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,
 	class_set_equal,
-	assert_diagnostic,
+	assert_diagnostic
 } from './css_class_extractor_test_helpers.ts';
 
 describe('TypeScript extraction', () => {
@@ -16,14 +16,14 @@ describe('TypeScript extraction', () => {
 const buttonClasses = 'btn primary hover:opacity:80%';
 export const cardClass = 'card';
 `,
-			expected: ['btn', 'primary', 'hover:opacity:80%', 'card'],
+			expected: ['btn', 'primary', 'hover:opacity:80%', 'card']
 		},
 		{
 			name: 'extracts classes from clsx in TypeScript',
 			source: `
 const classes = clsx('base', active && 'active', { 'display:flex': true });
 `,
-			expected: ['base', 'active', 'display:flex'],
+			expected: ['base', 'active', 'display:flex']
 		},
 		{
 			name: 'extracts classes from object with class property',
@@ -31,7 +31,7 @@ const classes = clsx('base', active && 'active', { 'display:flex': true });
 const props = { class: 'foo bar' };
 const config = { className: 'baz' };
 `,
-			expected: ['foo', 'bar', 'baz'],
+			expected: ['foo', 'bar', 'baz']
 		},
 		{
 			name: 'extracts classes from object with double-quoted string literal keys',
@@ -43,7 +43,7 @@ const config = {
 	"foo-classes": "dq-foo"
 };
 `,
-			expected: ['dq-class', 'dq-classname', 'dq-btn', 'primary', 'dq-foo'],
+			expected: ['dq-class', 'dq-classname', 'dq-btn', 'primary', 'dq-foo']
 		},
 		{
 			name: 'extracts classes from object with single-quoted string literal keys',
@@ -55,7 +55,7 @@ const config = {
 	'bar-classes': 'sq-bar'
 };
 `,
-			expected: ['sq-class', 'sq-classname', 'sq-btn', 'secondary', 'sq-bar'],
+			expected: ['sq-class', 'sq-classname', 'sq-btn', 'secondary', 'sq-bar']
 		},
 		{
 			name: 'extracts classes from mixed identifier and string literal keys',
@@ -67,11 +67,11 @@ const config = {
 	"wrapper-classes": "str-wrapper"
 };
 `,
-			expected: ['id-class', 'str-classname', 'id-container', 'str-wrapper'],
-		},
+			expected: ['id-class', 'str-classname', 'id-container', 'str-wrapper']
+		}
 	];
 
-	test.each(ts_extraction_cases)('$name', ({source, expected}) => {
+	test.each(ts_extraction_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_ts(source, 'test.ts');
 		class_names_equal(result, expected);
 	});
@@ -86,13 +86,13 @@ const config = {
 describe('unified extraction function', () => {
 	test('extract_css_classes auto-detects Svelte files', () => {
 		const source = `<div class="foo bar"></div>`;
-		const result = extract_css_classes(source, {filename: 'test.svelte'});
+		const result = extract_css_classes(source, { filename: 'test.svelte' });
 		class_set_equal(result, ['foo', 'bar']);
 	});
 
 	test('extract_css_classes auto-detects TypeScript files', () => {
 		const source = `const buttonClasses = 'btn primary';`;
-		const result = extract_css_classes(source, {filename: 'test.ts'});
+		const result = extract_css_classes(source, { filename: 'test.ts' });
 		class_set_equal(result, ['btn', 'primary']);
 	});
 
@@ -107,7 +107,7 @@ describe('unified extraction function', () => {
 	<!-- @fuz-classes dynamic-class -->
 </body>
 </html>`;
-		const result = extract_css_classes(source, {filename: 'page.html'});
+		const result = extract_css_classes(source, { filename: 'page.html' });
 		class_set_equal(result, ['dynamic-class', 'container', 'p_lg', 'btn', 'hover:opacity:80%']);
 	});
 });

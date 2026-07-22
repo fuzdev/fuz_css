@@ -6,7 +6,7 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	generate_classes,
@@ -16,9 +16,9 @@ import {
 	generate_shadow_classes,
 	format_spacing_value,
 	format_dimension_value,
-	format_variable_name,
+	format_variable_name
 } from '$lib/css_class_generators.ts';
-import type {CssClassDefinition} from '$lib/css_class_generation.ts';
+import type { CssClassDefinition } from '$lib/css_class_generation.ts';
 
 /* eslint-disable @typescript-eslint/dot-notation -- dynamic keys require bracket notation */
 
@@ -112,8 +112,8 @@ describe('generate_classes', () => {
 	describe('single dimension', () => {
 		test('generates from simple values', () => {
 			const result = generate_classes(
-				(v: string) => ({name: `pos_${v}`, css: `position: ${v};`}),
-				['static', 'relative', 'absolute'],
+				(v: string) => ({ name: `pos_${v}`, css: `position: ${v};` }),
+				['static', 'relative', 'absolute']
 			);
 
 			assert.deepEqual(Object.keys(result), ['pos_static', 'pos_relative', 'pos_absolute']);
@@ -123,15 +123,15 @@ describe('generate_classes', () => {
 
 		test('skips null returns from template', () => {
 			const result = generate_classes(
-				(v: string) => (v === 'skip' ? null : {name: `val_${v}`, css: `value: ${v};`}),
-				['a', 'skip', 'b'],
+				(v: string) => (v === 'skip' ? null : { name: `val_${v}`, css: `value: ${v};` }),
+				['a', 'skip', 'b']
 			);
 
 			assert.deepEqual(Object.keys(result), ['val_a', 'val_b']);
 		});
 
 		test('handles empty iterable', () => {
-			const result = generate_classes((v: string) => ({name: v, css: `x: ${v};`}), []);
+			const result = generate_classes((v: string) => ({ name: v, css: `x: ${v};` }), []);
 
 			assert.deepEqual(result, {});
 		});
@@ -140,9 +140,12 @@ describe('generate_classes', () => {
 	describe('two dimensions (multiplicative)', () => {
 		test('generates all combinations', () => {
 			const result = generate_classes(
-				(dir: string, size: string) => ({name: `m${dir}_${size}`, css: `margin-${dir}: ${size};`}),
+				(dir: string, size: string) => ({
+					name: `m${dir}_${size}`,
+					css: `margin-${dir}: ${size};`
+				}),
 				['t', 'b'],
-				['sm', 'lg'],
+				['sm', 'lg']
 			);
 
 			assert.deepEqual(Object.keys(result), ['mt_sm', 'mt_lg', 'mb_sm', 'mb_lg']);
@@ -152,9 +155,9 @@ describe('generate_classes', () => {
 		test('skips null returns', () => {
 			const result = generate_classes(
 				(a: string, b: string) =>
-					a === 'x' && b === '1' ? null : {name: `${a}_${b}`, css: `v: ${a}${b};`},
+					a === 'x' && b === '1' ? null : { name: `${a}_${b}`, css: `v: ${a}${b};` },
 				['x', 'y'],
-				['1', '2'],
+				['1', '2']
 			);
 
 			// x_1 is skipped
@@ -165,10 +168,10 @@ describe('generate_classes', () => {
 	describe('three dimensions', () => {
 		test('generates all combinations', () => {
 			const result = generate_classes(
-				(a: string, b: string, c: string) => ({name: `${a}_${b}_${c}`, css: `v: ${a}${b}${c};`}),
+				(a: string, b: string, c: string) => ({ name: `${a}_${b}_${c}`, css: `v: ${a}${b}${c};` }),
 				['x', 'y'],
 				['1', '2'],
-				['a', 'b'],
+				['a', 'b']
 			);
 
 			assert.lengthOf(Object.keys(result), 8); // 2 * 2 * 2
@@ -278,23 +281,23 @@ describe('generate_border_radius_corners', () => {
 
 		assert.strictEqual(
 			get_declaration(result['border_top_left_radius_8px']),
-			'border-top-left-radius: 8px;',
+			'border-top-left-radius: 8px;'
 		);
 		assert.strictEqual(
 			get_declaration(result['border_bottom_right_radius_8px']),
-			'border-bottom-right-radius: 8px;',
+			'border-bottom-right-radius: 8px;'
 		);
 	});
 
 	test('applies formatter', () => {
 		const result = generate_border_radius_corners(
 			['lg'],
-			(v) => `var(--test_border_top_left_radius_${v})`,
+			(v) => `var(--test_border_top_left_radius_${v})`
 		);
 
 		assert.strictEqual(
 			get_declaration(result['border_top_left_radius_lg']),
-			'border-top-left-radius: var(--test_border_top_left_radius_lg);',
+			'border-top-left-radius: var(--test_border_top_left_radius_lg);'
 		);
 	});
 
@@ -309,7 +312,7 @@ describe('generate_shadow_classes', () => {
 	const alpha_mapping: Record<string, string> = {
 		sm: '1',
 		md: '2',
-		lg: '3',
+		lg: '3'
 	};
 
 	test('generates all 6 shadow types', () => {

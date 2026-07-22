@@ -1,18 +1,18 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	build_class_variable_index,
 	get_class_variables,
 	collect_class_variables,
-	get_classes_using_variable,
+	get_classes_using_variable
 } from '$lib/class_variable_index.ts';
-import {css_class_definitions} from '$lib/css_class_definitions.ts';
-import type {CssClassDefinition} from '$lib/css_class_generation.ts';
+import { css_class_definitions } from '$lib/css_class_definitions.ts';
+import type { CssClassDefinition } from '$lib/css_class_generation.ts';
 
 describe('build_class_variable_index', () => {
 	test('declaration with variable', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			text_lg: {declaration: 'font-size: var(--font_size_lg);'},
+			text_lg: { declaration: 'font-size: var(--font_size_lg);' }
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -24,8 +24,8 @@ describe('build_class_variable_index', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
 			button: {
 				declaration:
-					'color: var(--text_color); background: var(--bg_color); border: var(--border_width) solid;',
-			},
+					'color: var(--text_color); background: var(--bg_color); border: var(--border_width) solid;'
+			}
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -38,7 +38,7 @@ describe('build_class_variable_index', () => {
 
 	test('declaration without variables', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			flex: {declaration: 'display: flex;'},
+			flex: { declaration: 'display: flex;' }
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -50,8 +50,8 @@ describe('build_class_variable_index', () => {
 	test('ruleset with variables', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
 			card: {
-				ruleset: `.card { padding: var(--space_md); border: 1px solid var(--border_color); }`,
-			},
+				ruleset: `.card { padding: var(--space_md); border: 1px solid var(--border_color); }`
+			}
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -63,7 +63,7 @@ describe('build_class_variable_index', () => {
 
 	test('composes-only definition', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			box: {composes: ['flex', 'center']},
+			box: { composes: ['flex', 'center'] }
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -75,8 +75,8 @@ describe('build_class_variable_index', () => {
 
 	test('undefined definition', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			exists: {declaration: 'color: var(--text);'},
-			missing: undefined,
+			exists: { declaration: 'color: var(--text);' },
+			missing: undefined
 		};
 
 		const index = build_class_variable_index(definitions);
@@ -104,7 +104,7 @@ describe('build_class_variable_index', () => {
 
 	test('color classes', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			color_a_50: {declaration: 'color: var(--color_a_50); --text_color: var(--color_a_50);'},
+			color_a_50: { declaration: 'color: var(--color_a_50); --text_color: var(--color_a_50);' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -114,7 +114,7 @@ describe('build_class_variable_index', () => {
 
 	test('nested var fallback', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			custom: {declaration: 'padding: var(--custom, var(--fallback));'},
+			custom: { declaration: 'padding: var(--custom, var(--fallback));' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -127,7 +127,7 @@ describe('build_class_variable_index', () => {
 describe('get_class_variables', () => {
 	test('existing class', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			p_md: {declaration: 'padding: var(--space_md);'},
+			p_md: { declaration: 'padding: var(--space_md);' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -149,9 +149,9 @@ describe('get_class_variables', () => {
 describe('collect_class_variables', () => {
 	test('multiple classes', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			p_md: {declaration: 'padding: var(--space_md);'},
-			m_lg: {declaration: 'margin: var(--space_lg);'},
-			text_sm: {declaration: 'font-size: var(--font_size_sm);'},
+			p_md: { declaration: 'padding: var(--space_md);' },
+			m_lg: { declaration: 'margin: var(--space_lg);' },
+			text_sm: { declaration: 'font-size: var(--font_size_sm);' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -164,7 +164,7 @@ describe('collect_class_variables', () => {
 
 	test('with unknown classes', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			known: {declaration: 'color: var(--text);'},
+			known: { declaration: 'color: var(--text);' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -178,9 +178,9 @@ describe('collect_class_variables', () => {
 describe('get_classes_using_variable', () => {
 	test('finds classes using a variable', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			p_md: {declaration: 'padding: var(--space_md);'},
-			m_md: {declaration: 'margin: var(--space_md);'},
-			text_lg: {declaration: 'font-size: var(--font_size_lg);'},
+			p_md: { declaration: 'padding: var(--space_md);' },
+			m_md: { declaration: 'margin: var(--space_md);' },
+			text_lg: { declaration: 'font-size: var(--font_size_lg);' }
 		};
 		const index = build_class_variable_index(definitions);
 
@@ -193,7 +193,7 @@ describe('get_classes_using_variable', () => {
 
 	test('unused variable returns empty array', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			p_md: {declaration: 'padding: var(--space_md);'},
+			p_md: { declaration: 'padding: var(--space_md);' }
 		};
 		const index = build_class_variable_index(definitions);
 

@@ -3,13 +3,13 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {default_variables} from '$lib/variables.ts';
+	import { default_variables } from '$lib/variables.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
@@ -58,8 +58,8 @@
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
 			variables your code uses are emitted, along with any they depend on. The full
-			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode
-			and direct imports.
+			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode and
+			direct imports.
 		</p>
 	</section>
 	<section>

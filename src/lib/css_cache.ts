@@ -7,12 +7,12 @@
  * @module
  */
 
-import {join} from 'node:path';
-import {hash_insecure} from '@fuzdev/fuz_util/hash.ts';
+import { join } from 'node:path';
+import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
-import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.ts';
-import type {ExtractionData} from './css_class_extractor.ts';
-import type {CacheDeps} from './deps.ts';
+import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
+import type { ExtractionData } from './css_class_extractor.ts';
+import type { CacheDeps } from './deps.ts';
 
 /**
  * Default cache directory relative to project root.
@@ -73,7 +73,7 @@ export interface CachedExtraction {
 export const get_cache_path = (
 	source_path: string,
 	cache_dir: string,
-	project_root: string,
+	project_root: string
 ): string => {
 	if (!source_path.startsWith(project_root)) {
 		throw new Error(`Source path "${source_path}" is not under project root "${project_root}"`);
@@ -94,7 +94,7 @@ export const get_cache_path = (
 export const get_file_cache_path = (
 	file_id: string,
 	cache_dir: string,
-	project_root: string,
+	project_root: string
 ): string => {
 	const is_internal = file_id.startsWith(project_root);
 	return is_internal
@@ -112,10 +112,10 @@ export const get_file_cache_path = (
  */
 export const load_cached_extraction = async (
 	deps: CacheDeps,
-	cache_path: string,
+	cache_path: string
 ): Promise<CachedExtraction | null> => {
 	try {
-		const r = await deps.read_text({path: cache_path});
+		const r = await deps.read_text({ path: cache_path });
 		if (!r.ok) return null;
 
 		const cached = JSON.parse(r.value) as CachedExtraction;
@@ -147,7 +147,7 @@ export const save_cached_extraction = async (
 	deps: CacheDeps,
 	cache_path: string,
 	content_hash: string,
-	extraction: ExtractionData,
+	extraction: ExtractionData
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
 	const classes_array =
@@ -179,10 +179,10 @@ export const save_cached_extraction = async (
 		diagnostics: diagnostics_array,
 		elements: elements_array,
 		explicit_elements: explicit_elements_array,
-		explicit_variables: explicit_variables_array,
+		explicit_variables: explicit_variables_array
 	};
 
-	await deps.write_text_atomic({path: cache_path, content: JSON.stringify(data)});
+	await deps.write_text_atomic({ path: cache_path, content: JSON.stringify(data) });
 };
 
 /**
@@ -194,9 +194,9 @@ export const save_cached_extraction = async (
  */
 export const delete_cached_extraction = async (
 	deps: CacheDeps,
-	cache_path: string,
+	cache_path: string
 ): Promise<void> => {
-	await deps.unlink({path: cache_path});
+	await deps.unlink({ path: cache_path });
 };
 
 /**
@@ -211,5 +211,5 @@ export const from_cached_extraction = (cached: CachedExtraction): ExtractionData
 	diagnostics: cached.diagnostics,
 	elements: cached.elements ? new Set(cached.elements) : null,
 	explicit_elements: cached.explicit_elements ? new Set(cached.explicit_elements) : null,
-	explicit_variables: cached.explicit_variables ? new Set(cached.explicit_variables) : null,
+	explicit_variables: cached.explicit_variables ? new Set(cached.explicit_variables) : null
 });

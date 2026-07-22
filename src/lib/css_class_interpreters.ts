@@ -1,14 +1,14 @@
-import {escape_css_selector, type CssClassDefinitionInterpreter} from './css_class_generation.ts';
+import { escape_css_selector, type CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import {
 	is_possible_css_literal,
 	interpret_css_literal,
 	generate_css_literal_simple,
 	extract_segments,
 	extract_and_validate_modifiers,
-	type CssLiteralOutput,
+	type CssLiteralOutput
 } from './css_literal.ts';
-import {generate_modified_ruleset} from './css_ruleset_parser.ts';
-import {resolve_class_definition} from './css_class_resolution.ts';
+import { generate_modified_ruleset } from './css_ruleset_parser.ts';
+import { resolve_class_definition } from './css_class_resolution.ts';
 
 /**
  * Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).
@@ -38,7 +38,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 			return null;
 		}
 
-		const {modifiers, remaining} = result;
+		const { modifiers, remaining } = result;
 
 		// All preceding segments must be valid modifiers (none left over)
 		if (remaining.length !== 0) {
@@ -76,7 +76,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 				base_class,
 				base_class_name,
 				ctx.class_definitions,
-				ctx.css_properties,
+				ctx.css_properties
 			);
 			if (!resolution_result.ok) {
 				ctx.diagnostics.push(resolution_result.error);
@@ -102,7 +102,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 				declaration: resolution_result.declaration,
 				selector,
 				media_wrapper: modifiers.media?.css ?? null,
-				ancestor_wrapper: modifiers.ancestor?.css ?? null,
+				ancestor_wrapper: modifiers.ancestor?.css ?? null
 			};
 
 			const css = generate_css_literal_simple(output);
@@ -118,7 +118,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 				state_css,
 				pseudo_element_css,
 				modifiers.media?.css ?? null,
-				modifiers.ancestor?.css ?? null,
+				modifiers.ancestor?.css ?? null
 			);
 
 			// Emit warnings for skipped modifiers
@@ -131,7 +131,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 							message: `Rule "${skipped.selector}" already contains a pseudo-element; "${
 								skipped.conflicting_modifier
 							}" modifier was not applied`,
-							suggestion: `The rule is included with just the class renamed`,
+							suggestion: `The rule is included with just the class renamed`
 						});
 					} else {
 						ctx.diagnostics.push({
@@ -140,7 +140,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 							message: `Rule "${skipped.selector}" already contains "${
 								skipped.conflicting_modifier
 							}"; modifier was not applied to avoid redundancy`,
-							suggestion: `The rule is included with just the class renamed`,
+							suggestion: `The rule is included with just the class renamed`
 						});
 					}
 				}
@@ -150,7 +150,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		}
 
 		return null;
-	},
+	}
 };
 
 /**
@@ -186,7 +186,7 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 
 		// Return the CSS but strip trailing newline for consistency
 		return css.trimEnd();
-	},
+	}
 };
 
 /**
@@ -196,5 +196,5 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
  */
 export const css_class_interpreters: Array<CssClassDefinitionInterpreter> = [
 	modified_class_interpreter,
-	css_literal_interpreter,
+	css_literal_interpreter
 ];

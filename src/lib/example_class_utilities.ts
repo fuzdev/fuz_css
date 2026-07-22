@@ -79,7 +79,7 @@ export const logicalClass = true && 'mt_md';
 export const arrayClasses = ['mt_lg', 'mt_xl'];
 
 /** Object - keys extracted as class names */
-export const objectClasses = {mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3'};
+export const objectClasses = { mt_xl2: 'mt_xl2', mt_xl3: 'mt_xl3' };
 
 //
 // Comment hint examples - @fuz-classes directive
