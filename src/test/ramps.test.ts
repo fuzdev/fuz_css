@@ -3,6 +3,7 @@ import { describe, test, assert } from 'vitest';
 import {
 	NEUTRAL_HUE,
 	PALETTE_CHROMA_CAPS,
+	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
 	RAMP_STOPS,
@@ -10,6 +11,7 @@ import {
 	TEXT_LIGHTNESS_KNOBS,
 	compute_palette_chroma_caps,
 	palette_stop_oklch,
+	ramp_chroma,
 	ramp_lightness,
 	shade_stop_oklch,
 	text_stop_oklch
@@ -88,6 +90,22 @@ describe('monotonicity', () => {
 					prev = l;
 				}
 			}
+		}
+	});
+});
+
+describe('chroma multipliers', () => {
+	test('defaults are in (0, 1] and palette_stop_oklch applies them', () => {
+		for (const letter of palette_variants) {
+			const multiplier = PALETTE_CHROMA_MULTIPLIERS[letter];
+			assert.isAbove(multiplier, 0, `${letter} multiplier must be positive`);
+			assert.isAtMost(multiplier, 1, `${letter} multiplier above 1 clips past the gamut caps`);
+		}
+		// the brown slot ships muted - brown is low-chroma orange
+		assert.isBelow(PALETTE_CHROMA_MULTIPLIERS.f, 1);
+		for (const scheme of color_scheme_variants) {
+			const [, chroma] = palette_stop_oklch('f', '50', scheme);
+			assert.approximately(chroma, ramp_chroma(scheme, '50') * PALETTE_CHROMA_MULTIPLIERS.f, 1e-12);
 		}
 	});
 });

@@ -221,6 +221,11 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   and `text_`), and the chroma curve
   (`--palette_chroma_min`/`_max`/`_curve`) clamped per stop by baked
   worst-hue sRGB gamut caps
+- Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
+  twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
+  `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
+  low-chroma orange). A hue binding shares only the angle — `validate_theme`
+  warns when a bound letter's multiplier differs from the intent's twin
 - 13 intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
   50, 60, 70, 80, 90, 95, 100)

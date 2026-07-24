@@ -102,6 +102,18 @@ const hue = (
 	...(bindable ? { bindable } : null)
 });
 
+// a slot chroma multiplier: [0, 1] is the safe envelope (1 = at the gamut
+// caps); direct entry above 1 knowingly clips, like the global chroma_scale
+const chroma_multiplier = (name: StyleVariableName, tier: KnobTier): ThemeKnob => ({
+	name,
+	kind: 'number',
+	axis: 'color',
+	leverage: 'sm',
+	tier,
+	range: [0, 1],
+	step: 0.01
+});
+
 const lightness_ramp = (family: string): Array<ThemeKnob> => [
 	{
 		name: `${family}_lightness_00`,
@@ -171,6 +183,12 @@ export const theme_knobs: Array<ThemeKnob> = [
 	hue('hue_negative', 'md', 'semantic', true),
 	hue('hue_caution', 'md', 'semantic', true),
 	hue('hue_info', 'md', 'semantic', true),
+	// intent chroma-character twins - pair with a binding to a muted slot
+	chroma_multiplier('accent_chroma_scale', 'semantic'),
+	chroma_multiplier('positive_chroma_scale', 'semantic'),
+	chroma_multiplier('negative_chroma_scale', 'semantic'),
+	chroma_multiplier('caution_chroma_scale', 'semantic'),
+	chroma_multiplier('info_chroma_scale', 'semantic'),
 	...lightness_ramp('palette'),
 	...lightness_ramp('shade'),
 	...lightness_ramp('text'),
@@ -238,6 +256,17 @@ export const theme_knobs: Array<ThemeKnob> = [
 	hue('hue_h', 'sm', 'palette'),
 	hue('hue_i', 'sm', 'palette'),
 	hue('hue_j', 'sm', 'palette'),
+	// per-slot chroma multipliers - a slot's chroma character under chroma_scale
+	chroma_multiplier('palette_a_chroma_scale', 'palette'),
+	chroma_multiplier('palette_b_chroma_scale', 'palette'),
+	chroma_multiplier('palette_c_chroma_scale', 'palette'),
+	chroma_multiplier('palette_d_chroma_scale', 'palette'),
+	chroma_multiplier('palette_e_chroma_scale', 'palette'),
+	chroma_multiplier('palette_f_chroma_scale', 'palette'),
+	chroma_multiplier('palette_g_chroma_scale', 'palette'),
+	chroma_multiplier('palette_h_chroma_scale', 'palette'),
+	chroma_multiplier('palette_i_chroma_scale', 'palette'),
+	chroma_multiplier('palette_j_chroma_scale', 'palette'),
 	// shape
 	{
 		name: 'radius_scale',

@@ -24,6 +24,8 @@
 
 import {
 	numeric_scale_variants,
+	palette_variants,
+	intent_variants,
 	type PaletteVariant,
 	type ColorSchemeVariant,
 	type NumericScaleVariant
@@ -80,6 +82,28 @@ export const PALETTE_HUES: Record<PaletteVariant, number> = {
 	h: 41, // orange
 	i: 210, // cyan
 	j: 180 // teal
+};
+
+/**
+ * Per-slot chroma multipliers (`--palette_X_chroma_scale`), the palette's
+ * chroma-character knobs. Each multiplies its slot's chroma under the global
+ * `--chroma_scale` (multiplicative, so the slot's character is preserved at
+ * any global setting); values at or below 1 stay inside the worst-hue gamut
+ * caps by construction, above 1 knowingly clips like the global knob. The
+ * brown slot ships muted because brown is low-chroma dark orange — no hue
+ * angle renders it at full palette chroma.
+ */
+export const PALETTE_CHROMA_MULTIPLIERS: Record<PaletteVariant, number> = {
+	a: 1,
+	b: 1,
+	c: 1,
+	d: 1,
+	e: 1,
+	f: 0.55, // brown - low-chroma orange by definition
+	g: 1,
+	h: 1,
+	i: 1,
+	j: 1
 };
 
 /** Fitted lightness knobs for the palette (`palette_X_NN`) ramps. */
@@ -239,7 +263,7 @@ export const palette_stop_oklch = (
 	scheme: ColorSchemeVariant
 ): Oklch => [
 	ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop),
-	ramp_chroma(scheme, stop),
+	ramp_chroma(scheme, stop) * PALETTE_CHROMA_MULTIPLIERS[letter],
 	PALETTE_HUES[letter]
 ];
 
@@ -379,10 +403,30 @@ export const render_palette_stop_css = (
 	stop: NumericScaleVariant
 ): string => render_ramp_color_css(`var(--hue_${letter})`, stop);
 
+// the character twin of a hue slot: palette letters and intents carry a
+// chroma multiplier that composes with the global `--chroma_scale`; other
+// hue references (e.g. the neutral, whose character is `--neutral_chroma`)
+// have none
+const slot_chroma_scale_reference = (hue_reference: string): string | null => {
+	const m = /^var\(--hue_([a-z]+)\)$/u.exec(hue_reference);
+	if (!m) return null;
+	const slot = m[1]!;
+	if ((palette_variants as ReadonlyArray<string>).includes(slot)) {
+		return `var(--palette_${slot}_chroma_scale, 1)`;
+	}
+	if ((intent_variants as ReadonlyArray<string>).includes(slot)) {
+		return `var(--${slot}_chroma_scale, 1)`;
+	}
+	return null;
+};
+
 /**
  * Renders a color derived from the palette ramps at a stop for an arbitrary
  * hue reference — the shared template behind palette stops and intent stops
- * (`--accent_50` renders with `var(--hue_accent)`).
+ * (`--accent_50` renders with `var(--hue_accent)`). A palette-letter or
+ * intent hue reference also picks up its slot's chroma multiplier
+ * (`--palette_X_chroma_scale`/`--<intent>_chroma_scale`), so the hue slot and
+ * its chroma character stay paired in the emitted CSS.
  *
  * @param hue_reference - a CSS expression for the hue, e.g. `var(--hue_accent)`
  * @param alpha - optional CSS alpha (e.g. `40%`) appended inside the `oklch()`
@@ -391,12 +435,14 @@ export const render_ramp_color_css = (
 	hue_reference: string,
 	stop: NumericScaleVariant,
 	alpha?: string
-): string =>
-	`oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
+): string => {
+	const slot_scale = slot_chroma_scale_reference(hue_reference);
+	return `oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
 		stop
-	}) * var(--chroma_scale)) calc(${hue_reference} + var(--hue_shift_${stop}))${
-		alpha ? ` / ${alpha}` : ''
-	})`;
+	}) * var(--chroma_scale)${slot_scale ? ` * ${slot_scale}` : ''}) calc(${
+		hue_reference
+	} + var(--hue_shift_${stop}))${alpha ? ` / ${alpha}` : ''})`;
+};
 
 /**
  * Renders the derived default of a neutral (shade/text) stop. The neutral

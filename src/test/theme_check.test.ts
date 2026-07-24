@@ -12,6 +12,7 @@ import { terminal_theme, create_terminal_theme } from '$lib/themes/terminal.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_KNOBS,
+	PALETTE_CHROMA_MULTIPLIERS,
 	SHADE_LIGHTNESS_KNOBS,
 	palette_stop_oklch,
 	shade_stop_oklch
@@ -119,6 +120,45 @@ describe('validate_theme', () => {
 			[]
 		);
 	});
+
+	test('binding an intent to the muted brown slot warns about the dropped character', () => {
+		const issues = validate_theme({
+			name: 't',
+			variables: [{ name: 'hue_accent', light: 'var(--hue_f)' }]
+		});
+		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'hue_accent'));
+	});
+
+	test('setting the intent chroma twin to match the bound slot silences the pairing warning', () => {
+		const issues = validate_theme({
+			name: 't',
+			variables: [
+				{ name: 'hue_accent', light: 'var(--hue_f)' },
+				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) }
+			]
+		});
+		assert.deepEqual(issues, []);
+	});
+
+	test('muting a letter warns through the default binding that points at it', () => {
+		// hue_negative defaults to var(--hue_c)
+		const issues = validate_theme({
+			name: 't',
+			variables: [{ name: 'palette_c_chroma_scale', light: '0.5' }]
+		});
+		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'hue_negative'));
+	});
+
+	test('a literal intent hue never triggers the pairing warning', () => {
+		const issues = validate_theme({
+			name: 't',
+			variables: [
+				{ name: 'hue_negative', light: '20' },
+				{ name: 'palette_c_chroma_scale', light: '0.5' }
+			]
+		});
+		assert.deepEqual(issues, []);
+	});
 });
 
 describe('resolution', () => {
@@ -141,6 +181,21 @@ describe('resolution', () => {
 	test('an intent follows an overridden default-bound letter', () => {
 		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '99' }] };
 		assert.strictEqual(resolve_theme_knob(theme, 'hue_accent', 'light'), 99);
+	});
+
+	test('chroma multipliers resolve to their defaults and honor pins', () => {
+		const empty: Theme = { name: 't', variables: [] };
+		assert.strictEqual(
+			resolve_theme_knob(empty, 'palette_f_chroma_scale', 'light'),
+			PALETTE_CHROMA_MULTIPLIERS.f
+		);
+		assert.strictEqual(resolve_theme_knob(empty, 'palette_a_chroma_scale', 'light'), 1);
+		assert.strictEqual(resolve_theme_knob(empty, 'accent_chroma_scale', 'light'), 1);
+		const pinned: Theme = {
+			name: 't',
+			variables: [{ name: 'palette_f_chroma_scale', light: '1' }]
+		};
+		assert.strictEqual(resolve_theme_knob(pinned, 'palette_f_chroma_scale', 'light'), 1);
 	});
 
 	test('self and mutual cycles resolve to null without hanging', () => {
@@ -256,6 +311,41 @@ describe('check_theme', () => {
 		);
 		assert(entry, 'monotonicity entry exists');
 		assert.isFalse(entry.pass);
+	});
+
+	test('a chroma multiplier above 1 clips gamut on a low-headroom slot', () => {
+		// the cyan slot binds the worst-hue caps, so 1.4x pushes past sRGB
+		const theme: Theme = {
+			name: 't',
+			variables: [{ name: 'palette_i_chroma_scale', light: '1.4' }]
+		};
+		const failing = check_theme(theme).entries.filter(
+			(e) => e.gate === 'gamut' && !e.pass && e.subject.startsWith('palette_i_')
+		);
+		assert.isAbove(failing.length, 0);
+	});
+
+	test('an intent folds into a letter only when hue and multiplier both match', () => {
+		// bound to the muted brown slot with the default twin of 1: same hue,
+		// different chroma, so the accent gets its own gamut entries
+		const unpaired: Theme = {
+			name: 't',
+			variables: [{ name: 'hue_accent', light: 'var(--hue_f)' }]
+		};
+		assert.isTrue(
+			check_theme(unpaired).entries.some((e) => e.gate === 'gamut' && e.subject === 'accent_50')
+		);
+		// with the twin carried, the accent renders identically to the letter and folds
+		const paired: Theme = {
+			name: 't',
+			variables: [
+				{ name: 'hue_accent', light: 'var(--hue_f)' },
+				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) }
+			]
+		};
+		assert.isFalse(
+			check_theme(paired).entries.some((e) => e.gate === 'gamut' && e.subject === 'accent_50')
+		);
 	});
 });
 

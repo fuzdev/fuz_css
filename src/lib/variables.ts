@@ -3,6 +3,7 @@ import { icon_sizes } from './variable_data.ts';
 import {
 	NEUTRAL_CHROMA,
 	PALETTE_CHROMA_KNOBS,
+	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
 	SHADE_LIGHTNESS_KNOBS,
@@ -98,6 +99,61 @@ export const hue_j: StyleVariable = {
 	summary: 'teal'
 };
 
+// per-slot chroma-character knobs - each multiplies its slot's chroma under
+// the global chroma_scale, so the slot's character holds at any global
+// setting; at or below 1 stays inside the gamut caps, above 1 knowingly clips
+const slot_chroma_summary = "the slot's chroma multiplier under the global chroma_scale";
+export const palette_a_chroma_scale: StyleVariable = {
+	name: 'palette_a_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.a),
+	summary: slot_chroma_summary
+};
+export const palette_b_chroma_scale: StyleVariable = {
+	name: 'palette_b_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.b),
+	summary: slot_chroma_summary
+};
+export const palette_c_chroma_scale: StyleVariable = {
+	name: 'palette_c_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.c),
+	summary: slot_chroma_summary
+};
+export const palette_d_chroma_scale: StyleVariable = {
+	name: 'palette_d_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.d),
+	summary: slot_chroma_summary
+};
+export const palette_e_chroma_scale: StyleVariable = {
+	name: 'palette_e_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.e),
+	summary: slot_chroma_summary
+};
+export const palette_f_chroma_scale: StyleVariable = {
+	name: 'palette_f_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.f),
+	summary: 'mutes the brown slot - brown is low-chroma orange, unreachable by hue alone'
+};
+export const palette_g_chroma_scale: StyleVariable = {
+	name: 'palette_g_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.g),
+	summary: slot_chroma_summary
+};
+export const palette_h_chroma_scale: StyleVariable = {
+	name: 'palette_h_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.h),
+	summary: slot_chroma_summary
+};
+export const palette_i_chroma_scale: StyleVariable = {
+	name: 'palette_i_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.i),
+	summary: slot_chroma_summary
+};
+export const palette_j_chroma_scale: StyleVariable = {
+	name: 'palette_j_chroma_scale',
+	light: String(PALETTE_CHROMA_MULTIPLIERS.j),
+	summary: slot_chroma_summary
+};
+
 // global color-character knobs
 export const chroma_scale: StyleVariable = {
 	name: 'chroma_scale',
@@ -162,6 +218,35 @@ export const hue_info: StyleVariable = {
 	name: 'hue_info',
 	light: 'var(--hue_i)',
 	summary: 'informational callouts'
+};
+// intent chroma-character twins - an intent hue binding shares only the
+// angle, so binding an intent to a muted palette slot needs the twin set too
+const intent_chroma_summary =
+	"the intent's chroma multiplier; set it when binding the intent to a muted palette slot";
+export const accent_chroma_scale: StyleVariable = {
+	name: 'accent_chroma_scale',
+	light: '1',
+	summary: intent_chroma_summary
+};
+export const positive_chroma_scale: StyleVariable = {
+	name: 'positive_chroma_scale',
+	light: '1',
+	summary: intent_chroma_summary
+};
+export const negative_chroma_scale: StyleVariable = {
+	name: 'negative_chroma_scale',
+	light: '1',
+	summary: intent_chroma_summary
+};
+export const caution_chroma_scale: StyleVariable = {
+	name: 'caution_chroma_scale',
+	light: '1',
+	summary: intent_chroma_summary
+};
+export const info_chroma_scale: StyleVariable = {
+	name: 'info_chroma_scale',
+	light: '1',
+	summary: intent_chroma_summary
 };
 // accent stops - the full scale derives through the shared ramps
 export const accent_00: StyleVariable = {
@@ -2352,6 +2437,16 @@ export const default_variables: Array<StyleVariable> = [
 	hue_h,
 	hue_i,
 	hue_j,
+	palette_a_chroma_scale,
+	palette_b_chroma_scale,
+	palette_c_chroma_scale,
+	palette_d_chroma_scale,
+	palette_e_chroma_scale,
+	palette_f_chroma_scale,
+	palette_g_chroma_scale,
+	palette_h_chroma_scale,
+	palette_i_chroma_scale,
+	palette_j_chroma_scale,
 	chroma_scale,
 	hue_shift,
 	hue_neutral,
@@ -2361,6 +2456,11 @@ export const default_variables: Array<StyleVariable> = [
 	hue_negative,
 	hue_caution,
 	hue_info,
+	accent_chroma_scale,
+	positive_chroma_scale,
+	negative_chroma_scale,
+	caution_chroma_scale,
+	info_chroma_scale,
 	accent_00,
 	accent_05,
 	accent_10,

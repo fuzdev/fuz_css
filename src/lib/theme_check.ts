@@ -48,6 +48,7 @@ import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import {
 	PALETTE_HUES,
+	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_LIGHTNESS_KNOBS,
 	SHADE_LIGHTNESS_KNOBS,
 	TEXT_LIGHTNESS_KNOBS,
@@ -186,6 +187,9 @@ const LIGHTNESS_KNOBS_BY_FAMILY: Record<
 };
 
 const PALETTE_LETTER_MATCHER = /^hue_([a-j])$/u;
+const PALETTE_MULTIPLIER_MATCHER = /^palette_([a-j])_chroma_scale$/u;
+const INTENT_MULTIPLIER_MATCHER = /^(accent|positive|negative|caution|info)_chroma_scale$/u;
+const INTENT_HUE_BINDING_MATCHER = /^var\(--hue_([a-j])\)$/u;
 const LIGHTNESS_KNOB_MATCHER = /^(palette|shade|text)_lightness_(00|100|curve)$/u;
 const LIGHTNESS_STOP_MATCHER =
 	/^(palette|shade|text)_lightness_(05|10|20|30|40|50|60|70|80|90|95)$/u;
@@ -302,6 +306,15 @@ class ThemeResolver {
 		// intent/neutral hues default to a palette-letter binding
 		const binding = INTENT_HUE_DEFAULT_BINDING[name];
 		if (binding) return this.#resolve(binding, scheme, visited);
+		// per-slot chroma multipliers
+		const multiplier_match = PALETTE_MULTIPLIER_MATCHER.exec(name);
+		if (multiplier_match) {
+			return {
+				ok: true,
+				value: PALETTE_CHROMA_MULTIPLIERS[multiplier_match[1] as PaletteVariant]
+			};
+		}
+		if (INTENT_MULTIPLIER_MATCHER.test(name)) return { ok: true, value: 1 };
 		// scalar knobs
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
 		if (name === 'hue_shift') return { ok: true, value: 0 };
@@ -488,8 +501,12 @@ const validate_knob_value = (
 /**
  * Lints a theme's structure: a non-empty name, valid `StyleVariable` shape and
  * known name per variable (errors), and advisory type/range warnings for the
- * knob-tier variables. Value validation is advisory and never an error. An
- * empty array means the theme is structurally valid.
+ * knob-tier variables — including a pairing warning when an intent hue binds
+ * a palette letter whose chroma multiplier differs from the intent's own
+ * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
+ * chroma character is otherwise silently dropped). Value validation is
+ * advisory and never an error. An empty array means the theme is structurally
+ * valid.
  */
 export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 	const issues: Array<ThemeIssue> = [];
@@ -548,6 +565,54 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));
 		}
 	}
+	issues.push(...validate_binding_pairing(theme));
+	return issues;
+};
+
+// the pairing lint: an intent hue bound to a palette letter (authored
+// `var(--hue_X)` or the default binding) shares only the angle, so warn when
+// the letter's chroma multiplier and the intent's twin disagree — the theme
+// probably meant the character to follow the binding (the neutral is exempt:
+// its character is `--neutral_chroma` by design)
+const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
+	const issues: Array<ThemeIssue> = [];
+	const resolver = new ThemeResolver(theme);
+	for (const intent of intent_variants) {
+		const hue_name = `hue_${intent}`;
+		const authored = theme.variables.find((v) => v.name === hue_name);
+		let letter: string | null = null;
+		if (authored) {
+			for (const slot of [authored.light, authored.dark]) {
+				const m = slot === undefined ? null : INTENT_HUE_BINDING_MATCHER.exec(slot.trim());
+				if (m) letter = m[1]!;
+			}
+		} else {
+			letter = INTENT_HUE_DEFAULT_BINDING[hue_name]!.slice('hue_'.length);
+		}
+		if (!letter) continue;
+		for (const scheme of color_scheme_variants) {
+			const letter_multiplier = resolver.resolve(`palette_${letter}_chroma_scale`, scheme);
+			const intent_multiplier = resolver.resolve(`${intent}_chroma_scale`, scheme);
+			if (
+				letter_multiplier.ok &&
+				intent_multiplier.ok &&
+				Math.abs(letter_multiplier.value - intent_multiplier.value) > 1e-9
+			) {
+				issues.push({
+					level: 'warning',
+					message: `${hue_name} binds palette letter ${letter} (chroma multiplier ${
+						letter_multiplier.value
+					}) but ${intent}_chroma_scale is ${
+						intent_multiplier.value
+					} — a binding shares only the hue angle, so set ${
+						intent
+					}_chroma_scale to carry the slot's chroma character`,
+					variable: hue_name
+				});
+				break;
+			}
+		}
+	}
 	return issues;
 };
 
@@ -595,11 +660,13 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		return r.ok ? r.value : record(r);
 	};
 
-	// a palette/intent ramp color at a stop for a given hue angle
+	// a palette/intent ramp color at a stop for a given hue angle and the
+	// slot's chroma multiplier
 	const ramp_color = (
 		hue: number,
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant
+		scheme: ColorSchemeVariant,
+		multiplier = 1
 	): Oklch | null => {
 		const lightness = num(`palette_lightness_${stop}`, scheme);
 		const chroma_stop = num(`palette_chroma_${stop}`, scheme);
@@ -610,7 +677,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		}
 		return [
 			lightness,
-			chroma_stop * chroma_scale,
+			chroma_stop * chroma_scale * multiplier,
 			hue + ramp_hue_shift_offset(stop, scheme, hue_shift)
 		];
 	};
@@ -685,23 +752,30 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 
 	for (const scheme of color_scheme_variants) {
 		// gamut: palette letters × 13 stops
-		const letter_hues: Array<number> = [];
+		const letter_slots: Array<[hue: number, multiplier: number]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
-			if (hue === null) continue;
-			letter_hues.push(hue);
+			const multiplier = num(`palette_${letter}_chroma_scale`, scheme);
+			if (hue === null || multiplier === null) continue;
+			letter_slots.push([hue, multiplier]);
 			for (const stop of numeric_scale_variants) {
-				const color = ramp_color(hue, stop, scheme);
+				const color = ramp_color(hue, stop, scheme, multiplier);
 				if (color) push_gamut(`palette_${letter}_${stop}`, color, scheme);
 			}
 		}
-		// gamut: each intent hue that resolves to a literal angle distinct from all letters
+		// gamut: each intent that renders differently from every letter — an
+		// intent folds into a letter's entries only when hue AND multiplier match
 		for (const intent of intent_variants) {
 			const hue = num(`hue_${intent}`, scheme);
-			if (hue === null) continue;
-			if (letter_hues.some((h) => Math.abs(h - hue) < 1e-9)) continue;
+			const multiplier = num(`${intent}_chroma_scale`, scheme);
+			if (hue === null || multiplier === null) continue;
+			if (
+				letter_slots.some(([h, m]) => Math.abs(h - hue) < 1e-9 && Math.abs(m - multiplier) < 1e-9)
+			) {
+				continue;
+			}
 			for (const stop of numeric_scale_variants) {
-				const color = ramp_color(hue, stop, scheme);
+				const color = ramp_color(hue, stop, scheme, multiplier);
 				if (color) push_gamut(`${intent}_${stop}`, color, scheme);
 			}
 		}
@@ -767,8 +841,9 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 
 		// contrast: link — the accent hue at stop 60 on shade_00 (resolved through bindings)
 		const accent_hue = num('hue_accent', scheme);
-		if (accent_hue !== null && shade_00) {
-			const link = ramp_color(accent_hue, '60', scheme);
+		const accent_multiplier = num('accent_chroma_scale', scheme);
+		if (accent_hue !== null && accent_multiplier !== null && shade_00) {
+			const link = ramp_color(accent_hue, '60', scheme, accent_multiplier);
 			if (link) {
 				const ratio = contrast(oklch_to_srgb(link), oklch_to_srgb(shade_00));
 				entries.push({
@@ -785,18 +860,22 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		// contrast: UI affordances — every letter and intent fill at stop 50;
 		// a stance renders its scheme's appearance in both, so text_max follows it
 		const text_max: RgbUnit = (stance ?? scheme) === 'light' ? [0, 0, 0] : [1, 1, 1];
-		const fills: Array<[string, number]> = [];
+		const fills: Array<[string, number, number]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
-			if (hue !== null) fills.push([`palette_${letter}`, hue]);
+			const multiplier = num(`palette_${letter}_chroma_scale`, scheme);
+			if (hue !== null && multiplier !== null) {
+				fills.push([`palette_${letter}`, hue, multiplier]);
+			}
 		}
 		for (const intent of intent_variants) {
 			const hue = num(`hue_${intent}`, scheme);
-			if (hue !== null) fills.push([intent, hue]);
+			const multiplier = num(`${intent}_chroma_scale`, scheme);
+			if (hue !== null && multiplier !== null) fills.push([intent, hue, multiplier]);
 		}
 		if (shade_00) {
-			for (const [label, hue] of fills) {
-				const fill = ramp_color(hue, '50', scheme);
+			for (const [label, hue, multiplier] of fills) {
+				const fill = ramp_color(hue, '50', scheme, multiplier);
 				if (!fill) continue;
 				const fill_rgb = oklch_to_srgb(fill);
 				const ui = contrast(fill_rgb, oklch_to_srgb(shade_00));

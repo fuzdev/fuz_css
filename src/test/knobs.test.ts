@@ -45,7 +45,7 @@ describe('theme_knobs', () => {
 		}
 	});
 
-	test('palette tier is exactly the letter hues', () => {
+	test('palette tier is exactly the letter hues and their chroma multipliers', () => {
 		const palette_names = theme_knobs.filter((k) => k.tier === 'palette').map((k) => k.name);
 		assert.deepEqual(palette_names, [
 			'hue_a',
@@ -57,7 +57,17 @@ describe('theme_knobs', () => {
 			'hue_g',
 			'hue_h',
 			'hue_i',
-			'hue_j'
+			'hue_j',
+			'palette_a_chroma_scale',
+			'palette_b_chroma_scale',
+			'palette_c_chroma_scale',
+			'palette_d_chroma_scale',
+			'palette_e_chroma_scale',
+			'palette_f_chroma_scale',
+			'palette_g_chroma_scale',
+			'palette_h_chroma_scale',
+			'palette_i_chroma_scale',
+			'palette_j_chroma_scale'
 		]);
 	});
 

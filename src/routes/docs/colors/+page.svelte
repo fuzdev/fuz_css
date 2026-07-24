@@ -86,6 +86,15 @@
 				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code>/<code>_curve</code>: a
 				mid-peaked curve, clamped per stop by gamut caps computed from the worst hue
 			</li>
+			<li>
+				per-slot chroma multipliers - <code>--palette_a_chroma_scale</code> …
+				<code>--palette_j_chroma_scale</code> and intent twins (<code>--accent_chroma_scale</code>,
+				…), each multiplying one slot's chroma under the global <code>--chroma_scale</code>. The
+				brown slot ships muted (<code>--palette_f_chroma_scale: 0.55</code>) because brown is
+				low-chroma orange, unreachable by hue alone. An intent bound to a muted slot needs its twin
+				set too - bindings share only the hue angle, and <code>validate_theme</code> warns when the character
+				would be dropped
+			</li>
 		</ul>
 		<p>
 			Every intermediate value these produce is also its own variable (<code
@@ -108,7 +117,8 @@
 		<p>
 			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness and
 			chroma are shared across all hues at each stop, the scales are interchangeable: setting a hue alone
-			is enough, no per-hue tuning required.
+			is enough, no per-hue tuning required. The one deliberate exception is the per-slot chroma multiplier
+			- the brown slot ships muted because no hue angle renders brown at full palette chroma.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
