@@ -55,7 +55,7 @@
 	<p>
 		Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
 		rather than being foundational to the design, and the DSL is currently more limited, with
-		interpreters providing a programmatic escape hatch -- see the
+		interpreters providing a programmatic escape hatch - see the
 		<a href="#Compared-to-alternatives">comparison</a> below.
 	</p>
 	<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
@@ -104,7 +104,7 @@
 				The <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> extracts classes
 				and generates CSS on-demand. It works with Svelte and plain HTML/TS/JS out of the box. JSX frameworks
 				(React, Preact, Solid) require the
-				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
+				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin - see
 				<a href="#React-and-JSX">React and JSX</a> below.
 			</p>
 			<Code
@@ -145,7 +145,7 @@ import 'virtual:fuz.css';`}
 			/>
 			<p>
 				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR -- changes to classes in your code trigger
+				<code>node_modules</code> dependencies. It supports HMR: changes to classes in your code trigger
 				automatic CSS updates.
 			</p>
 			<h4>Plugin options</h4>
@@ -343,7 +343,7 @@ const turtle_class_name = 'turtle';`}
 			<p>
 				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
 				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls outside
-				class attributes don't trigger tracking -- use the naming convention for those cases.
+				class attributes don't trigger tracking - use the naming convention for those cases.
 			</p>
 			<aside>
 				Currently, tracking is single-file only. Cross-module analysis and more sophisticated
@@ -386,7 +386,7 @@ const color = get_dynamic_color();`}
 {/each}`}
 			/>
 			<aside>
-				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -- they're
+				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss - they're
 				generally not used directly in your code (they exist mainly for programmatic usage ergonomics),
 				so the class won't be generated unless you hint it.
 			</aside>
@@ -490,9 +490,9 @@ const el = document.createElement('dialog');`}
 		<p>
 			Detection finds the classes, elements, and variables your source uses (see
 			<a href="#Class-detection">class detection</a> above), and resolution turns that into CSS.
-			Bundled mode -- the default for the <a href="#Vite-plugin">Vite plugin</a> and
-			<a href="#Gro-generator">Gro generator</a> -- combines three layers into a single output, each trimmed
-			to what your code uses:
+			Bundled mode (the default for the <a href="#Vite-plugin">Vite plugin</a> and
+			<a href="#Gro-generator">Gro generator</a>) combines three layers into a single output, each
+			trimmed to what your code uses:
 		</p>
 		<ol>
 			<li>
@@ -517,8 +517,9 @@ const el = document.createElement('dialog');`}
 		</p>
 		<p>
 			If you organize your own styles in <code>@layer</code>, declare fuz's layers first so yours
-			sort later and win: <code>@layer fuz.base, fuz.theme, fuz.utilities, app;</code>. Otherwise
-			fuz's layers are declared when its CSS loads and beat any of your earlier-declared layers.
+			sort later and win: <code>@layer fuz.base, fuz.theme, fuz.utilities, app;</code>.
+			Later-declared layers win, so without this line fuz's layers are declared when its CSS loads
+			and beat any layers you declared before it.
 		</p>
 
 		<h4>Base styles</h4>
@@ -592,9 +593,9 @@ vite_plugin_fuz_css({
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
 				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
-				close relationship to <TomeLink slug="variables">style variables</TomeLink> -- each maps design
-				tokens to CSS properties. They're generated programmatically from variant data, making them predictable
-				and systematic. The composites documented
+				close relationship to <TomeLink slug="variables">style variables</TomeLink>: each maps
+				design tokens to CSS properties. They're generated programmatically from variant data,
+				making them predictable and systematic. The composites documented
 				<a href="#Composite-classes">below</a>
 				are hand-written and typically represent higher-level semantic concepts. For raw CSS values, use
 				<a href="#Literal-classes">literal classes</a> instead.
@@ -795,9 +796,9 @@ vite_plugin_fuz_css({
 				</li>
 			</ul>
 			<aside>
-				A bare scale class applies its family's dominant use — <code>.palette_a_50</code>,
+				A bare scale class applies its family's dominant use: <code>.palette_a_50</code>,
 				<code>.positive_50</code>, and <code>.text_70</code> set the text color while
-				<code>.shade_50</code> sets the background — and the <code>bg_</code> prefix selects the
+				<code>.shade_50</code> sets the background. The <code>bg_</code> prefix selects the
 				background twin (<code>.bg_a_50</code>, <code>.bg_positive_50</code>). In compound families
 				a letter alone implies the palette: <code>.border_a_50</code> is the palette family,
 				<code>.border_color_50</code> the alpha ramp.
@@ -1238,9 +1239,9 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Modifiers" />
 		<p>
-			Modifiers prefix any class type -- token, composite, or literal -- to apply styles
-			conditionally based on viewport, state, or color scheme. This is what makes utility classes
-			more powerful than inline styles.
+			Modifiers prefix any class type (token, composite, or literal) to apply styles conditionally
+			based on viewport, state, or color scheme. This is what makes utility classes more powerful
+			than inline styles.
 		</p>
 
 		<h4>Responsive modifiers</h4>
@@ -1390,7 +1391,7 @@ export const gen = gen_fuz_css({
 			<p>
 				Combined modifiers follow a canonical order enforced with errors that guide you. Multiple
 				states must be alphabetical (<code>focus:hover:</code> not <code>hover:focus:</code>)
-				because both generate equivalent CSS -- canonical ordering prevents duplicates.
+				because both generate equivalent CSS; canonical ordering prevents duplicates.
 			</p>
 			<Code content="[media:][ancestor:][...state:][pseudo-element:]class" />
 			<ol>
@@ -1439,7 +1440,7 @@ export const gen = gen_fuz_css({
 			fuz_css's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for base
 			HTML elements using <TomeLink slug="variables">style variables</TomeLink>, acting as a modern
 			CSS reset that adapts to dark mode. It includes CSS classes that provide common generic
-			functionality -- these are called builtin classes.
+			functionality - these are called builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<p>Default list (styled):</p>
@@ -1593,7 +1594,7 @@ export const gen = gen_fuz_css({
 				</li>
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
-					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only --
+					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only -
 					<code>`palette_a_50 $&#123;base&#125;`</code> extracts <code>palette_a_50</code>, but
 					<code>`palette_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
@@ -1715,12 +1716,10 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 };`}
 		/>
 		<p>
-			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand --
-			something that would require 24 separate composite definitions. Note the classes for this
-			example could also be created as composites with a helper function -- fuz_css uses this
-			strategy internally to create its token classes in <ModuleLink
-				module_path="css_class_definitions.ts"
-			/>.
+			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand, something
+			that would require 24 separate composite definitions. Note the classes for this example could
+			also be created as composites with a helper function - fuz_css uses this strategy internally
+			to create its token classes in <ModuleLink module_path="css_class_definitions.ts" />.
 		</p>
 		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
@@ -1815,7 +1814,7 @@ vite_plugin_fuz_css({
 			For extensibility, all three frameworks allow custom class-to-CSS mappings. UnoCSS's dynamic
 			rules use regex + function patterns similar to fuz_css interpreters, plus separate variants
 			for modifiers. TailwindCSS uses JS plugins and UnoCSS has the more mature extensibility story;
-			fuz_css offers comparable power with interpreters but it's still evolving --
+			fuz_css offers comparable power with interpreters but it's still evolving -
 			<a href="https://github.com/fuzdev/fuz_css/discussions">feedback</a> is welcome!
 		</p>
 		<p>

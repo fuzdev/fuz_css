@@ -9,7 +9,7 @@ reshapes a whole family while individual tokens stay pinnable:
 `--shadow_alpha_scale` (multiplies the `shadow_alpha_*` ramp, including
 button shadows), `--radius_scale` (multiplies the `border_radius_*` tiers),
 `--scale_factor` (multiplies the `space_*` scale), `--font_weight` (body),
-`--heading_font_weight` (a hook with per-tier fallbacks — setting it
+`--heading_font_weight` (a hook with per-tier fallbacks - setting it
 flattens the heading ladder), `--heading_font_family`, and
 `--background_image` (decoration hook on `:root`).
 

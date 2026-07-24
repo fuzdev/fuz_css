@@ -62,7 +62,7 @@ import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\`
 			<TomeSectionHeader text="Details" />
 			<ul>
 				<li>plain CSS</li>
-				<li>minimal dependencies, all optional -- none needed if you only use the stylesheets</li>
+				<li>minimal dependencies, all optional (none needed if you only use the stylesheets)</li>
 				<li>
 					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML elements,
 					and also exports the underlying data, helpers, and types for open-ended usage
@@ -70,7 +70,7 @@ import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\`
 				<li>
 					supports <TomeLink slug="themes" /> with a basic theme stylesheet, <SourceFileLink
 						path="theme.css"
-					/>, that can be replaced with your own -- dark mode is a first-class concept, not a theme;
+					/>, that can be replaced with your own - dark mode is a first-class concept, not a theme;
 					instead, each theme can support light and/or dark <MdnLink path="Web/CSS/color-scheme"
 						>color-schemes</MdnLink
 					>
@@ -86,7 +86,7 @@ import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\`
 				</li>
 				<li>
 					the stylesheets work with any framework and plain HTML; utility class generation supports
-					HTML/JS/TS, Svelte, and JSX -- see the utility class
+					HTML/JS/TS, Svelte, and JSX - see the utility class
 					<TomeLink slug="classes" hash="Framework-support">framework support</TomeLink>, and for
 					the companion Svelte integration see
 					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in

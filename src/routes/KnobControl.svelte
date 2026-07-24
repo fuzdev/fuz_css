@@ -70,7 +70,7 @@
 	const step = $derived(knob.step ?? 1);
 
 	const emit_numeric = (raw: string): void => {
-		if (raw.trim() === '') return; // `Number('')` is 0 — don't slam the knob mid-edit
+		if (raw.trim() === '') return; // `Number('')` is 0 - don't slam the knob mid-edit
 		const n = Number(raw);
 		if (Number.isNaN(n)) return;
 		onchange(knob.kind === 'percent' ? `${n}%` : knob.kind === 'time' ? `${n}s` : String(n));
@@ -78,7 +78,7 @@
 
 	const gloss_title = (letter: PaletteVariant): string => {
 		const gloss = palette_glosses[letter];
-		return `${letter} — ${gloss.color}${gloss.binding ? ` · default ${gloss.binding}` : ''}`;
+		return `${letter} - ${gloss.color}${gloss.binding ? ` · default ${gloss.binding}` : ''}`;
 	};
 </script>
 

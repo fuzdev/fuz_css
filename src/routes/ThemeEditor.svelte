@@ -249,7 +249,7 @@
 	<section>
 		<h3>Output</h3>
 		<p>
-			The copyable <code>Theme</code> object, and the CSS it renders — the theme's own footprint.
+			The copyable <code>Theme</code> object, and the CSS it renders (only the variables the theme sets).
 		</p>
 		<div class="rendered mb_lg">
 			<div class="copy">
@@ -266,8 +266,8 @@
 			</div>
 		{:else}
 			<p>
-				The theme is empty -- every variable keeps its base default, so it renders no CSS. Move a
-				knob to see its output.
+				The theme is empty: every variable keeps its base default, so it renders no CSS. Move a knob
+				to see its output.
 			</p>
 		{/if}
 	</section>

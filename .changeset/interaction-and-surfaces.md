@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: rework interaction states and micro-surfaces — focus ring gap, hover previews focus, themable surface hooks, contrast-safe selected buttons
+feat: rework interaction states and micro-surfaces - focus ring gap, hover previews focus, themable surface hooks, contrast-safe selected buttons
 
 Focus and hover now read as one escalating highlight:
 

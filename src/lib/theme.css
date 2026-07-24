@@ -23,8 +23,8 @@
 		--hue_f: 60; /* brown */
 		--hue_g: 358; /* pink */
 		--hue_h: 41; /* orange */
-		--hue_i: 204; /* cyan */
-		--hue_j: 163; /* teal */
+		--hue_i: 210; /* cyan */
+		--hue_j: 180; /* teal */
 		--chroma_scale: 1; /* 0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps */
 		--hue_shift: 0; /* total degrees of hue rotation across each ramp, positive toward the dark end */
 		--hue_neutral: var(--hue_f);
@@ -397,56 +397,56 @@
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_40)
 			),
-			0.1162
+			0.1179
 		);
 		--palette_chroma_50: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_50)
 			),
-			0.1011
+			0.1026
 		);
 		--palette_chroma_60: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_60)
 			),
-			0.0856
+			0.0868
 		);
 		--palette_chroma_70: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_70)
 			),
-			0.0696
+			0.0706
 		);
 		--palette_chroma_80: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_80)
 			),
-			0.0533
+			0.054
 		);
 		--palette_chroma_90: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_90)
 			),
-			0.0366
+			0.0372
 		);
 		--palette_chroma_95: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_95)
 			),
-			0.0282
+			0.0286
 		);
 		--palette_chroma_100: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_100)
 			),
-			0.0197
+			0.02
 		);
 		--hue_shift_00: calc(var(--hue_shift) * -0.5);
 		--hue_shift_05: calc(var(--hue_shift) * -0.45);
@@ -1448,56 +1448,56 @@
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_00)
 			),
-			0.025
+			0.0254
 		);
 		--palette_chroma_05: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_05)
 			),
-			0.0394
+			0.04
 		);
 		--palette_chroma_10: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_10)
 			),
-			0.0494
+			0.0501
 		);
 		--palette_chroma_20: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_20)
 			),
-			0.0664
+			0.0673
 		);
 		--palette_chroma_30: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_30)
 			),
-			0.0813
+			0.0824
 		);
 		--palette_chroma_40: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_40)
 			),
-			0.095
+			0.0964
 		);
 		--palette_chroma_50: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_50)
 			),
-			0.108
+			0.1095
 		);
 		--palette_chroma_60: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_60)
 			),
-			0.1203
+			0.122
 		);
 		--palette_chroma_70: min(
 			calc(

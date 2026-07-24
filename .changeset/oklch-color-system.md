@@ -4,13 +4,13 @@
 
 feat: rework the color system to derived OKLCH, add semantic intents, cascade layers, and themes
 
-Colors are now derived — curve knobs → ramp stops → color stops — in pure
+Colors are now derived - curve knobs → ramp stops → color stops - in pure
 CSS (`calc()`/`pow()`/`oklch()`), fitted to minimize the perceptual delta
 from the old HSL palette. Breaking changes:
 
 - **`color_` renamed to `palette_`**: `--color_a_50` → `--palette_a_50`,
-  `.color_a_50` → `.palette_a_50`, `.color_a`–`.color_j` →
-  `.palette_a`–`.palette_j`. In compound families the letter alone implies
+  `.color_a_50` → `.palette_a_50`, `.color_a`-`.color_j` →
+  `.palette_a`-`.palette_j`. In compound families the letter alone implies
   the palette: `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` →
   `outline_X_NN`, `shadow_color_X_NN` → `shadow_X_NN` (`bg_X_NN` and the
   letterless families — `border_color_NN`, `outline_color_NN`,

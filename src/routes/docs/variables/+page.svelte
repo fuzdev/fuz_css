@@ -18,7 +18,7 @@
 
 	const variables = default_variables.slice().sort((a, b) => a.name.localeCompare(b.name));
 
-	// TODO maybe FAQ? need a standardized pattern -- first add the "on this page" menu functionality
+	// TODO maybe FAQ? need a standardized pattern - first add the "on this page" menu functionality
 </script>
 
 <TomeContent {tome}>
@@ -58,11 +58,9 @@
 		<p>
 			Most color variables are <em>derived</em>: curve knobs feed ramp stops, ramp stops feed color
 			stops, all computed in pure CSS (<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>).
-			A theme is a set of knob values, not a stylesheet -- it usually moves a handful of
-			high-leverage variables (intent bindings like <code>hue_accent</code>, levers like
-			<code>chroma_scale</code> and <code>radius_scale</code>, the lightness curve knobs) and
-			everything downstream re-derives, while any individual variable stays pinnable as the escape
-			hatch. See <TomeLink slug="colors" /> for the color system and <TomeLink slug="themes" /> for theming.
+			Scale knobs like <code>radius_scale</code> derive other families the same way, and any
+			individual variable stays pinnable as the escape hatch. See <TomeLink slug="colors" /> for the color
+			system and <TomeLink slug="themes" /> for theming.
 		</p>
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the

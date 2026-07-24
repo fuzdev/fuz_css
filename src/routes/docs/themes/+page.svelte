@@ -53,7 +53,7 @@
 		if (theme.name !== UNSAVED_THEME_NAME) {
 			if (
 				editor.dirty &&
-				// eslint-disable-next-line no-alert - deliberate guard against silently discarding edits
+				// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
 				!confirm(discard_confirm_message(editor, theme.name))
 			) {
 				return;
@@ -125,7 +125,7 @@
 		>
 		<p>
 			A theme is a simple JSON collection of <TomeLink slug="variables" /> that can be transformed into
-			CSS that set custom properties. Each variable can have values for light and/or dark color schemes.
+			CSS that sets custom properties. Each variable can have values for light and/or dark color schemes.
 			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>
 		<p>
@@ -136,9 +136,7 @@
 			<code>fuz.base</code> defaults, so overrides win regardless of stylesheet order.
 		</p>
 		<p>
-			These docs are a work in progress, for now see <ModuleLink module_path="theme.ts" /> and <ModuleLink
-				module_path="themes.ts"
-			/>.
+			See <ModuleLink module_path="theme.ts" /> and <ModuleLink module_path="themes.ts" /> for the API.
 		</p>
 		<p>Selecting a theme loads its knobs into the editor below.</p>
 		<div class="width_atmost_xs mb_lg">
@@ -149,8 +147,8 @@
 		<TomeSectionHeader text="Exemplar themes" />
 		<p>
 			Beyond the registry, fuz_css ships expressive exemplar themes as importable modules under
-			<code>themes/</code> - registry membership, not file location, is what separates builtins from
-			exemplars. Import one and pass it to your theme setup:
+			<code>themes/</code> - registry membership, not file location, is what separates builtins from exemplars.
+			Import one and pass it to your theme setup:
 		</p>
 		<Code
 			lang="ts"
@@ -172,13 +170,8 @@
 		<p>
 			Drag a knob and the whole page rethemes live - extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
-			theme in the picker above; it persists across navigation until you leave or reset, so copy the
-			<code>Theme</code> object below to keep it. The scheme selector sets the theme's stance - a single-scheme
-			theme renders its one appearance in both color schemes, so edits write the base slots. The top band
-			holds the semantic-tier moves: assign each intent (accent, neutral, positive, negative, caution,
-			info) to a palette letter - or a custom angle - and pull the high-leverage levers. Below it, each
-			axis section carries the granular knobs, with per-token escape hatches folded away; the ramp strips
-			repaint live as the derived scales move.
+			theme in the picker above; it survives navigating away and back, but copy the
+			<code>Theme</code> object below to keep it.
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>
@@ -186,7 +179,7 @@
 		<TomeSectionHeader text="Validating and compiling themes" />
 		<p>
 			<ModuleLink module_path="theme_check.ts" /> provides three pure functions for checking a
-			<code>Theme</code> in tests or CI.
+			<code>Theme</code>.
 		</p>
 		<p>
 			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors, while

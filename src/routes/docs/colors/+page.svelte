@@ -35,62 +35,63 @@
 				slug="variables"
 			/> in pure CSS, in the
 			<MdnLink path="Web/CSS/color_value/oklch" /> colorspace, adapting to the
-			<MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH lightness is perceptually uniform --
-			equal lightness reads equally light in every hue -- so rotating a hue knob is safe: contrast and
-			visual weight hold, which is what makes <TomeLink slug="themes">themes</TomeLink> a small set of
-			knob values instead of hundreds of hand-tuned stops.
+			<MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH lightness is perceptually uniform (equal
+			lightness reads equally light in every hue), so rotating a hue knob is safe: contrast and visual
+			weight hold.
 		</p>
 		<p>
-			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
-			default but could be any color. Meaning attaches through the intent knobs layered on top:
-			<code>--hue_accent</code> (links, focus, selection, selected states -- what other systems call
-			the "primary" color, named here for what it communicates) defaults to
+			Hues use letters so themes can reassign colors without breaking semantics ("a" is blue by
+			default but could be any color). Meaning attaches through the intent knobs layered on top:
+			<code>--hue_accent</code> (links, focus, selection, selected states - what other systems call
+			"primary") defaults to
 			<code>--hue_a</code>, <code>--hue_negative</code> to <code>--hue_c</code>, and so on. Retarget
 			an intent to move just that meaning; rotate a letter to move the palette.
 		</p>
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Curve knobs" />
-		<p>The knobs are the theme API, from highest leverage down:</p>
+		<p>
+			The knobs are the <TomeLink slug="themes">theme</TomeLink> API, from highest leverage down:
+		</p>
 		<ul>
 			<li>
-				<code>--hue_a</code> … <code>--hue_j</code> -- OKLCH hue angles for the 10 palette slots
+				<code>--hue_a</code> … <code>--hue_j</code> - OKLCH hue angles for the 10 palette slots
 			</li>
 			<li>
-				<code>--hue_neutral</code> + <code>--neutral_chroma</code> -- the temperature and strength of
-				every surface, text, border, and shadow tint (the neutral intent; its scales are the shade and
-				text ramps)
+				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of every
+				surface, text, border, and shadow tint (the neutral intent; its scales are the shade and text
+				ramps)
 			</li>
 			<li>
-				<code>--chroma_scale</code> -- one multiplier from grayscale (0) through calm (1) to vivid (above
-				1, knowingly clipping the weakest hues)
+				<code>--chroma_scale</code> - one multiplier from grayscale (0) through calm (1) to vivid (above
+				1, deliberately clipping the weakest hues)
 			</li>
 			<li>
-				<code>--hue_shift</code> -- degrees of hue rotation across each ramp for painterly warm-light/cool-shadow
+				<code>--hue_shift</code> - degrees of hue rotation across each ramp for painterly warm-light/cool-shadow
 				character (default 0)
 			</li>
 			<li>
-				intent hues -- <code>--hue_accent</code>, <code>--hue_positive</code>,
-				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> -- each
+				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
+				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> - each
 				deriving a full 13-stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
 				matching text and background classes (<code>.positive_50</code>,
 				<code>.bg_caution_10</code>)
 			</li>
 			<li>
-				lightness ramps -- <code>--palette_lightness_00</code>/<code>_100</code>/<code>_curve</code>
+				lightness ramps - <code>--palette_lightness_00</code>/<code>_100</code>/<code>_curve</code>
 				(and the same trio for <code>shade_</code> and <code>text_</code>): the endpoint stops plus
 				a curve exponent bending the ramp between them, per color scheme
 			</li>
 			<li>
-				chroma curve -- <code>--palette_chroma_min</code>/<code>_max</code>/<code>_curve</code>: a
+				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code>/<code>_curve</code>: a
 				mid-peaked curve, clamped per stop by gamut caps computed from the worst hue
 			</li>
 		</ul>
 		<p>
 			Every intermediate value these produce is also its own variable (<code
 				>--palette_lightness_30</code
-			>, <code>--palette_chroma_50</code>, …), so a theme can pin any individual stop as a surgical
-			escape hatch -- but the knobs come first.
+			>, <code>--palette_chroma_50</code>, …), so a theme can pin any individual stop as an escape
+			hatch.
 		</p>
 		<Code
 			lang="css"
@@ -106,13 +107,13 @@
 		<TomeSectionHeader text="Hue variables" />
 		<p>
 			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness and
-			chroma are shared across all hues at each stop, the scales are interchangeable -- setting a hue
-			alone is enough, no per-hue tuning required.
+			chroma are shared across all hues at each stop, the scales are interchangeable: setting a hue alone
+			is enough, no per-hue tuning required.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
 			example, fuz_css's selection color derives from <code>--hue_accent</code> (try selecting some
-			text --
+			text -
 			<span class="accent_50">same hue!</span>)
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
@@ -140,9 +141,8 @@
 		</p>
 		<p>
 			Palette stops are adaptive: they switch between light and dark ramps based on color scheme.
-			For a color that doesn't adapt, write the literal color or define one custom property -- the
-			old generated absolute variants (<code>color_a_50_light</code>-style) were removed with the
-			OKLCH migration.
+			There are no absolute variants; for a color that doesn't adapt, write the literal color or
+			define one custom property.
 		</p>
 		<ul class="palette unstyled pt_xl2">
 			{#each palette_variants as letter (letter)}

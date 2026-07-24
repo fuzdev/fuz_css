@@ -62,8 +62,8 @@
 	<section>
 		<p>
 			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt to
-			color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha because
-			light-on-dark has lower perceived contrast.
+			color scheme. Alpha borders are tuned for visual balance: dark mode uses higher alpha because light-on-dark
+			has lower perceived contrast.
 		</p>
 	</section>
 	<TomeSection>

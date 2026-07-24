@@ -89,7 +89,7 @@
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
 			Use <code>shadow_{'{letter}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
-			controls the color's prominence -- 60 is a fine starting point for visible colored shadows.
+			controls the color's prominence; 60 is a fine starting point for visible colored shadows.
 		</p>
 		{#each palette_variants as color_variant (color_variant)}
 			<TomeSection>

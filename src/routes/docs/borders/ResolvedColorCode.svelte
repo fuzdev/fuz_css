@@ -2,7 +2,7 @@
 	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	// the derived color stops are calc()/oklch() expressions, so reading them
-	// with `getPropertyValue` yields the unevaluated token stream — render a
+	// with `getPropertyValue` yields the unevaluated token stream - render a
 	// zero-size probe and read the browser-resolved color instead, like the
 	// colors page's `ColorSwatchItem`
 

@@ -29,9 +29,9 @@
 		<p>
 			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
 			<MdnLink path="Web/CSS/color-scheme" />. Adaptive means the underlying values change between
-			light and dark modes to maintain consistent prominence -- low numbers stay subtle, high
-			numbers stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode, dark
-			mode, or both.
+			light and dark modes to maintain consistent prominence: low numbers stay subtle, high numbers
+			stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode, dark mode,
+			or both.
 		</p>
 		<p>
 			Light mode's starting point is plain white documents (like paper) where we subtract light to
@@ -67,8 +67,8 @@
 			<TomeSectionHeader text="Key values" tag="h4" />
 			<ul>
 				<li>
-					<code>shade_min</code>: untinted surface-side extreme -- white in light mode, black in
-					dark mode; used for input backgrounds
+					<code>shade_min</code>: untinted surface-side extreme (white in light mode, black in dark
+					mode); used for input backgrounds
 				</li>
 				<li><code>shade_00</code>: the base background</li>
 				<li><code>shade_05</code>: very subtle: hover states on surface, code backgrounds</li>
