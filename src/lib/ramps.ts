@@ -72,7 +72,7 @@ export interface ChromaRampKnobs {
 export const PALETTE_HUES: Record<PaletteVariant, number> = {
 	a: 250, // blue
 	b: 144, // green
-	c: 24, // red
+	c: 29, // red - the OKLCH hue of #ff0000 (29.23) rounded
 	d: 296, // purple
 	e: 98, // yellow
 	f: 60, // brown
@@ -175,7 +175,7 @@ export const PALETTE_CHROMA_CAPS: Record<
 		'80': 0.0812,
 		'90': 0.0465,
 		'95': 0.03,
-		'100': 0.0141
+		'100': 0.0142
 	}
 };
 

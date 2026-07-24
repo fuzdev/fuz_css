@@ -17,7 +17,7 @@
 	:root {
 		--hue_a: 250; /* blue */
 		--hue_b: 144; /* green */
-		--hue_c: 24; /* red */
+		--hue_c: 29; /* red */
 		--hue_d: 296; /* purple */
 		--hue_e: 98; /* yellow */
 		--hue_f: 60; /* brown */
@@ -1532,7 +1532,7 @@
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *
 					var(--chroma_shape_100)
 			),
-			0.0141
+			0.0142
 		);
 		--hue_shift_00: calc(var(--hue_shift) * 0.5);
 		--hue_shift_05: calc(var(--hue_shift) * 0.45);
