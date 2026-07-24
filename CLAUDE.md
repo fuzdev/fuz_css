@@ -322,7 +322,7 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 These are the common options — see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
-(class definitions and interpreters, theme specificity, acorn plugins, deps).
+(class definitions and interpreters, acorn plugins, deps).
 
 ## Docs
 
@@ -466,8 +466,6 @@ Integration: `vite_plugin_examples.test.ts` (skip with
 - **No animation utilities** - Animation class generation not yet supported
 - **Button composites incomplete** - Some button variant classes are work in
   progress
-- **CSS Cascade Layers** - `@layer` support under consideration but not yet
-  implemented
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to

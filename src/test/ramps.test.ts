@@ -13,17 +13,17 @@ import {
 	ramp_lightness,
 	shade_stop_oklch,
 	text_stop_oklch
-} from '../lib/ramps.ts';
-import { color_scheme_variants, palette_variants } from '../lib/variable_data.ts';
-import { oklch_in_srgb_gamut, oklch_to_srgb, type RgbUnit } from '../lib/oklch.ts';
-import { wcag_contrast_ratio } from '../lib/wcag.ts';
+} from '$lib/ramps.ts';
+import { color_scheme_variants, palette_variants } from '$lib/variable_data.ts';
+import { oklch_in_srgb_gamut, oklch_to_srgb, type RgbUnit } from '$lib/oklch.ts';
+import { wcag_contrast_ratio } from '$lib/wcag.ts';
 import {
 	GATE_BODY_TEXT,
 	GATE_FILL_TEXT,
 	GATE_LINK,
 	GATE_SUBTLE_TEXT,
 	GATE_UI
-} from '../lib/theme_check.ts';
+} from '$lib/theme_check.ts';
 
 // Contrast gates for the default palette. OKLCH lightness is monotonic with
 // luminance, so these hold for every hue at a given stop pair — but WCAG

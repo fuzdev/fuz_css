@@ -184,18 +184,15 @@ export const generate_theme_css = (
 		}
 	}
 
-	const scope = ':root';
-	const dark_scope = `${scope}.dark`;
-
 	let light_css = '';
 	let dark_css = '';
 
 	if (light_declarations.length > 0) {
-		light_css = `${scope} {\n${light_declarations.join('\n')}\n}`;
+		light_css = `:root {\n${light_declarations.join('\n')}\n}`;
 	}
 
 	if (dark_declarations.length > 0) {
-		dark_css = `${dark_scope} {\n${dark_declarations.join('\n')}\n}`;
+		dark_css = `:root.dark {\n${dark_declarations.join('\n')}\n}`;
 	}
 
 	return { light_css, dark_css };

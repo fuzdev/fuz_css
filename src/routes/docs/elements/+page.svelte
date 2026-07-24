@@ -54,7 +54,7 @@
 				>:last-child</code
 			>
 			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge cases
-			that can usually by solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
+			that can usually be solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
 			like this may be something we change, <a href="https://github.com/fuzdev/fuz_css">feedback</a> is
 			welcome.
 		</p>

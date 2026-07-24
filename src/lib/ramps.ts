@@ -120,8 +120,8 @@ export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> =
 
 /**
  * Default OKLCH hue angle of the neutral intent. In CSS the knob chains to the
- * palette (`--hue_neutral: var(--hue_f)`), porting the old `tint_hue`
- * behavior; this constant mirrors that default numerically.
+ * palette (`--hue_neutral: var(--hue_f)`); this constant mirrors that default
+ * numerically.
  */
 export const NEUTRAL_HUE = PALETTE_HUES.f;
 

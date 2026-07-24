@@ -221,6 +221,7 @@ describe('check_theme', () => {
 
 	test('terminal keeps its contrast gates', () => {
 		const contrast = check_theme(terminal_theme).entries.filter((e) => e.gate === 'contrast');
+		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(contrast.every((e) => e.pass));
 	});
 
@@ -229,6 +230,7 @@ describe('check_theme', () => {
 		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.isAbove(gamut_fails.length, 0, 'chroma_scale > 1 is expected to clip weak hues');
 		const contrast = report.entries.filter((e) => e.gate === 'contrast');
+		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(
 			contrast.every((e) => e.pass),
 			'lightness holds through chroma clipping'
@@ -240,6 +242,7 @@ describe('check_theme', () => {
 		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.isAbove(gamut_fails.length, 0, 'chroma_scale > 1 is expected to clip weak hues');
 		const contrast = report.entries.filter((e) => e.gate === 'contrast');
+		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(
 			contrast.every((e) => e.pass),
 			'lightness holds through chroma clipping'

@@ -8,8 +8,8 @@ import {
 	srgb_to_oklch,
 	type Oklch,
 	type RgbUnit
-} from '../lib/oklch.ts';
-import { srgb_relative_luminance, wcag_contrast_ratio } from '../lib/wcag.ts';
+} from '$lib/oklch.ts';
+import { srgb_relative_luminance, wcag_contrast_ratio } from '$lib/wcag.ts';
 
 const assert_close = (actual: number, expected: number, tolerance: number, message?: string) => {
 	assert(

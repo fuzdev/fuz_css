@@ -114,8 +114,8 @@ export const hue_shift: StyleVariable = {
 /*
 
 neutral intent knobs - the temperature of every surface, text, border, and
-shadow (replaces the old tint_hue/tint_saturation); the neutral is an intent
-whose scales are shade_* and text_* rather than a neutral_00-100 family
+shadow; the neutral is an intent whose scales are shade_* and text_* rather
+than a neutral_00-100 family
 
 */
 export const hue_neutral: StyleVariable = { name: 'hue_neutral', light: 'var(--hue_f)' };
