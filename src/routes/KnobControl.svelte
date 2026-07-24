@@ -92,6 +92,7 @@
 					type="button"
 					class="letter_chip palette_{letter}"
 					class:selected={bound_letter === letter}
+					aria-pressed={bound_letter === letter}
 					title={gloss_title(letter)}
 					onclick={() => onchange(`var(--hue_${letter})`)}
 				>
@@ -102,6 +103,7 @@
 				type="button"
 				class="letter_chip"
 				class:selected={bound_letter === null}
+				aria-pressed={bound_letter === null}
 				style:--fill={custom_color}
 				style:--text_color={custom_color}
 				style:--border_color={custom_color}
@@ -166,6 +168,7 @@
 			type="button"
 			class="plain icon_button sm knob_reset"
 			title="reset to base"
+			aria-label="reset to base"
 			onclick={onreset}>↺</button
 		>
 	{/if}

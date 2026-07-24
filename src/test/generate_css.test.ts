@@ -44,6 +44,19 @@ describe('generate_css', () => {
 			assert.equal(result.diagnostics.length, 0);
 		});
 
+		test('wraps output in the fuz.utilities layer with the order statement', () => {
+			const result = generate_css(make_options({ all_classes: new Set(['p_lg']) }));
+
+			assert.match(result.css, /^@layer fuz\.base, fuz\.theme, fuz\.utilities;/);
+			assert_css_contains(result.css, '@layer fuz.utilities {');
+		});
+
+		test('emits nothing when no classes are detected', () => {
+			const result = generate_css(make_options());
+
+			assert.equal(result.css, '');
+		});
+
 		test('ignores resources when base and theme are disabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',

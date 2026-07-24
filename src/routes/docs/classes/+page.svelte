@@ -515,6 +515,11 @@ const el = document.createElement('dialog');`}
 			<code>fuz.utilities</code>, so utilities beat the reset by layer order (not specificity) and
 			your own unlayered styles beat everything.
 		</p>
+		<p>
+			If you organize your own styles in <code>@layer</code>, declare fuz's layers first so yours
+			sort later and win: <code>@layer fuz.base, fuz.theme, fuz.utilities, app;</code>. Otherwise
+			fuz's layers are declared when its CSS loads and beat any of your earlier-declared layers.
+		</p>
 
 		<h4>Base styles</h4>
 		<p>

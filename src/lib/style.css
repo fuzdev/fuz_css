@@ -14,10 +14,12 @@ See: https://css.fuz.dev/docs/classes
 Notes:
 
 - acts as a CSS reset and also sets minimal defaults for elements with themable variables
-- uses `:where` on all selectors with more specificity than a single tag/class
-	to lower specificity so utility classes override them -
-	this also means the fuz_css stylesheet is is less likely to
-	interfere with the page's styles regardless of where it's imported
+- wraps opinionated selectors in `:where` so they carry zero specificity -
+	cross-layer overrides (utilities, themes, consumer styles) are already
+	guaranteed by cascade-layer order, so what `:where` buys now is that
+	conflicts *within* this stylesheet resolve purely by source order
+	(the state interplay below depends on that), and that rules consumers
+	add into the fuz layers override these effortlessly
 - `.unstyled` class opts out of opinionated styling (colors, borders, decorative properties)
 	while keeping normalizations (font inheritance, border-collapse) -
 	applied to interactive elements (links, buttons, inputs, summary) and decorative containers,

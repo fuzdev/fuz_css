@@ -446,8 +446,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	const invalidate_virtual_module = (): void => {
 		if (!server) return;
 
-		// Skip HMR if bundled resources aren't loaded yet
-		// (will be loaded on first load() call, CSS regenerated then)
+		// Skip HMR if bundled resources aren't loaded yet — in dev they load
+		// eagerly at configureServer, in build lazily on the first load() call;
+		// either way the eventual load regenerates the CSS
 		if ((include_base || include_theme) && style_rule_index === null) {
 			return;
 		}

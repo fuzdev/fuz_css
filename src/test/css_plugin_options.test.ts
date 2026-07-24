@@ -153,7 +153,7 @@ describe('shared options interface', () => {
 
 		// Test callback (modify defaults)
 		const callback_opts: CssOutputOptions = {
-			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_'))
+			variables: (defaults) => defaults.filter((v) => v.name.startsWith('palette_'))
 		};
 		assert.strictEqual(typeof callback_opts.variables, 'function');
 	});

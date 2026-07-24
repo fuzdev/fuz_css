@@ -1,11 +1,12 @@
 /**
  * OKLCH/OKLab ↔ sRGB conversions and gamut math.
  *
- * Design-time and test use only — nothing here ships to browsers. The CSS
- * output of fuz_css stays pure `oklch()`/`calc()`; this module exists so
- * derivation scripts can fit curve knobs against real colors and so tests can
- * assert that every default stop is inside the sRGB gamut and meets the
- * contrast gates (see `wcag.ts`).
+ * The shipped CSS never needs this module — fuz_css output stays pure
+ * `oklch()`/`calc()`. It exists for design time and tests: derivation scripts
+ * fit curve knobs against real colors, and tests assert that every default
+ * stop is inside the sRGB gamut and meets the contrast gates (see `wcag.ts`).
+ * Display tooling (like the docs site's color swatches) may also import the
+ * conversions.
  *
  * Matrices and constants follow css-color-4 and Björn Ottosson's reference
  * implementation.

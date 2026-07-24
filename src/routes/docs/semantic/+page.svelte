@@ -28,8 +28,10 @@
 	<TomeSection>
 		<TomeSectionHeader text="Low specificity" />
 		<p>
-			All opinionated styles use <code>:where()</code> selectors, giving them zero specificity beyond
-			the element itself. Your styles and utility classes override defaults without specificity battles.
+			All opinionated styles live in the <code>fuz.base</code> cascade layer, so your unlayered
+			styles and the generated utility classes override them by layer order alone. The selectors are
+			additionally wrapped in <code>:where()</code>, giving them zero specificity, so overriding
+			stays effortless even from inside the fuz layers.
 		</p>
 		<Code
 			lang="css"

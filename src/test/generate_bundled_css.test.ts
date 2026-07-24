@@ -47,6 +47,16 @@ describe('generate_bundled_css', () => {
 			assert.include(bundled, '/* Base Styles */');
 			assert.include(bundled, '/* Utility Classes */');
 		});
+
+		test('emits the layer order statement and wraps each section in its layer', () => {
+			const result = create_mock_result();
+			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
+
+			assert.match(bundled, /^@layer fuz\.base, fuz\.theme, fuz\.utilities;/);
+			// theme variables and base styles both live in fuz.base; utilities above
+			assert.equal(bundled.match(/@layer fuz\.base \{/gu)?.length, 2);
+			assert.include(bundled, '@layer fuz.utilities {\n.p_md { padding: 16px; }\n}');
+		});
 	});
 
 	describe('exclusion options', () => {

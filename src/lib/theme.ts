@@ -95,7 +95,9 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	// mirrored defaults first so the theme's own variables win by order
 	const variables = [...(stance ? scheme_stance_variables(stance, own ?? []) : []), ...(own ?? [])];
 	if (!variables.length && !stance) return '';
-	const rendered_light = variables.map((v) => render_theme_variable(v)).filter(Boolean);
+	const rendered_light = variables
+		.map((v) => render_theme_variable(v, false, comments))
+		.filter(Boolean);
 	if (stance) rendered_light.unshift(`color-scheme: ${stance};`);
 	const rendered_dark = variables
 		.map((v) => render_theme_variable(v, true, comments))

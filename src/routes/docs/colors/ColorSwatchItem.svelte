@@ -31,6 +31,9 @@
 	});
 
 	const parsed_oklch = $derived.by((): Oklch | null => {
+		// expects the computed-style serialization of an opaque oklch() color;
+		// anything else (an alpha channel, another notation) degrades to the raw
+		// resolved string with no hex column
 		const m = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)$/.exec(resolved);
 		if (!m) return null;
 		return [Number(m[1]), Number(m[2]), Number(m[3])];

@@ -18,6 +18,7 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
+import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import { get_all_variable_names } from './variable_graph.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
@@ -191,8 +192,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			include_utilities: true
 		});
 	} else {
-		// utility-only mode
-		css = utility_result.css;
+		// utility-only mode — still layered, so the separately imported package
+		// style.css/theme.css slot beneath the generated classes and consumers'
+		// unlayered styles beat everything, same as bundled mode
+		css = utility_result.css
+			? `${FUZ_LAYER_ORDER_STATEMENT}\n\n/* Utility Classes */\n@layer fuz.utilities {\n${utility_result.css}\n}`
+			: '';
 	}
 
 	return { css, diagnostics };

@@ -343,7 +343,8 @@ typography, borders, shading, shadows, layout. See
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
   constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
 - [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
-  (design-time + tests only)
+  (design-time + tests; never needed by the shipped CSS, though display
+  tooling like the docs swatches may import the conversions)
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the
   `scheme` stance (a single-scheme theme mirrors the adaptive defaults and
