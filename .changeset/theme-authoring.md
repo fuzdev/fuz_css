@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: add theme scale knobs, the knob catalog, and theme validation/gates/compile
+feat: add theme scale knobs, the knob catalog, validation/gates/compile, and the scheme stance
 
 New theme knobs, each derived into existing token defaults so one knob move
 reshapes a whole family while individual tokens stay pinnable:
@@ -31,3 +31,17 @@ New `theme_check.ts`, resolving a theme's authored values back to numbers
   overrides where the baked caps no longer fit, and re-checks the result
 
 `ramps.ts` gains `ramp_hue_shift_offset` and `compute_palette_chroma_caps`.
+The `'low contrast'` registry theme's shade compression is retuned to the
+softest values that pass every `check_theme` contrast gate.
+
+New scheme stance: `Theme` gains `scheme?: 'dual' | 'light' | 'dark'`
+(default `'dual'`). A single-scheme theme renders its one appearance in both
+color schemes: `render_theme_style` mirrors every scheme-adaptive default
+the theme doesn't override (exported as `scheme_stance_variables`, including
+the `palette_chroma_NN` gamut-cap stops) and pins `color-scheme` on the
+scope so form controls and native scrollbars agree. Author a stanced theme's
+own variables single-slot in the light/base position. `validate_theme` warns
+on dark slots a single-scheme stance makes meaningless;
+`check_theme`/`compile_theme` resolve through the same mirror so the gates
+evaluate the stanced reality in both schemes. The necromancer and terminal
+exemplars use the stance instead of hand-mirrored ramp knobs.

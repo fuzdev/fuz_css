@@ -53,7 +53,7 @@
 		if (theme.name !== UNSAVED_THEME_NAME) {
 			if (
 				editor.dirty &&
-				// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+				// eslint-disable-next-line no-alert - deliberate guard against silently discarding edits
 				!confirm(discard_confirm_message(editor, theme.name))
 			) {
 				return;
@@ -131,7 +131,7 @@
 		<p>
 			Because the color system is derived, a theme is a set of <em>knob</em> values, not a
 			stylesheet: a handful of high-leverage variables (hue angles, <code>chroma_scale</code>, the
-			lightness curve knobs -- see <TomeLink slug="colors" />) reshape everything downstream. Theme
+			lightness curve knobs - see <TomeLink slug="colors" />) reshape everything downstream. Theme
 			CSS renders into the <code>fuz.theme</code> cascade layer, above the
 			<code>fuz.base</code> defaults, so overrides win regardless of stylesheet order.
 		</p>
@@ -149,7 +149,7 @@
 		<TomeSectionHeader text="Exemplar themes" />
 		<p>
 			Beyond the registry, fuz_css ships expressive exemplar themes as importable modules under
-			<code>themes/</code> -- registry membership, not file location, is what separates builtins from
+			<code>themes/</code> - registry membership, not file location, is what separates builtins from
 			exemplars. Import one and pass it to your theme setup:
 		</p>
 		<Code
@@ -157,7 +157,7 @@
 			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
 		/>
 		<p>
-			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> -- the
+			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - the
 			renderer then mirrors every scheme-adaptive default the theme doesn't override, so its one
 			appearance renders in both color schemes, and pins
 			<MdnLink path="Web/CSS/color-scheme" /> to match so form controls and scrollbars agree. The necromancer
@@ -170,13 +170,13 @@
 	<TomeSection>
 		<TomeSectionHeader text="Theme editor" />
 		<p>
-			Drag a knob and the whole page rethemes live -- extreme values can make the page hard to read,
+			Drag a knob and the whole page rethemes live - extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
 			theme in the picker above; it persists across navigation until you leave or reset, so copy the
-			<code>Theme</code> object below to keep it. The scheme selector sets the theme's stance -- a single-scheme
+			<code>Theme</code> object below to keep it. The scheme selector sets the theme's stance - a single-scheme
 			theme renders its one appearance in both color schemes, so edits write the base slots. The top band
 			holds the semantic-tier moves: assign each intent (accent, neutral, positive, negative, caution,
-			info) to a palette letter -- or a custom angle -- and pull the high-leverage levers. Below it, each
+			info) to a palette letter - or a custom angle - and pull the high-leverage levers. Below it, each
 			axis section carries the granular knobs, with per-token escape hatches folded away; the ramp strips
 			repaint live as the derived scales move.
 		</p>
@@ -191,12 +191,12 @@
 		<p>
 			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors, while
 			type and range mismatches on the knob-tier variables are advisory warnings. It returns an array
-			of issues -- empty means the theme is structurally sound.
+			of issues - empty means the theme is structurally sound.
 		</p>
 		<p>
 			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against
 			the theme's resolved values. It is report-only and never throws, returning
-			<code>{'{ok, entries, unchecked}'}</code> -- suited to a CI or test assertion:
+			<code>{'{ok, entries, unchecked}'}</code> - suited to a CI or test assertion:
 		</p>
 		<Code
 			lang="ts"
@@ -209,7 +209,7 @@ test('my theme clears the accessibility gates', () => {
 });`}
 		/>
 		<p>
-			<code>compile_theme(theme)</code> is for themes that move hues or lightness ramps --
+			<code>compile_theme(theme)</code> is for themes that move hues or lightness ramps -
 			monochrome, rotated, or dark-only. It recomputes the per-stop sRGB gamut caps from the theme's
 			actual hues and appends the corrected <code>palette_chroma_NN</code> stop overrides, returning
 			<code>{'{theme, report, issues}'}</code>.
