@@ -256,6 +256,16 @@ export const theme_knobs: Array<ThemeKnob> = [
 		tier: 'semantic',
 		values: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'none']
 	},
+	{
+		// the gap between an element's border and its focus/active ring, a
+		// style.css var() fallback hook (default 1px)
+		name: 'outline_offset',
+		kind: 'length',
+		axis: 'shape',
+		leverage: 'sm',
+		tier: 'semantic',
+		hook: true
+	},
 	{ name: 'border_width', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
 	{ name: 'border_width_1', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
 	{ name: 'border_width_2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },

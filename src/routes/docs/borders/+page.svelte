@@ -160,7 +160,7 @@ border-color: var(--shade_30);
 							></div>
 						{/each}
 					</div>
-					<div style:width="200px">
+					<div style:width="250px">
 						<span class="pl_sm pr_sm">=</span><ResolvedColorCode {name} />
 					</div>
 				</div>

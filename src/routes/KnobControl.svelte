@@ -169,7 +169,7 @@
 				<input
 					type="text"
 					value={value ?? ''}
-					placeholder={knob.hook ? 'unset (per-tier fallbacks)' : ''}
+					placeholder={knob.hook ? 'unset (falls back in style.css)' : ''}
 					onchange={(e) => onchange(e.currentTarget.value)}
 				/>
 			{/if}

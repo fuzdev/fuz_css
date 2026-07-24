@@ -143,6 +143,9 @@ Respects `hidden="until-found"` for find-in-page support.
 		text-decoration: var(--text_decoration);
 		border-radius: var(--border_radius, var(--border_radius_xs3));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		/* gap between border and ring so the same-color pair reads as two
+			shapes instead of one thick band; --outline_offset is a hook */
+		outline-offset: var(--outline_offset, 1px);
 	}
 	/* TODO should these be customizable with utility classes? */
 	:where(a:not(.unstyled):hover) {
@@ -347,6 +350,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-radius: var(--border_radius, var(--border_radius_sm));
 		/* TODO --outline_color should default to --hue when available, but can't be set above */
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset, 1px);
 		padding: var(--input_padding_y) var(--input_padding_x);
 		width: 100%;
 		min-width: var(--input_width_min);
@@ -512,6 +516,7 @@ see https://caniuse.com/css-has
 	:where([contenteditable]:not(.unstyled):focus-visible) {
 		--outline_width: var(--outline_width_focus);
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset, 1px);
 	}
 	:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
 		--outline_width: var(--outline_width_active);
@@ -583,6 +588,7 @@ TODO think through these patterns to get somewhere consistent
 		border-color: var(--button_border_color);
 		border-radius: var(--border_radius, var(--border_radius_sm));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset, 1px);
 	}
 
 	:where(:is(button, input, textarea, select):not(.unstyled):focus) {

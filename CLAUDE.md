@@ -233,7 +233,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - Micro-surface hooks consumed by `style.css` via `var()` fallbacks:
   `--caret_color` (defaults to the accent), `--scrollbar_thumb_color`/
   `--scrollbar_track_color` (default into the shade scale), `--backdrop_color`
-  (the `dialog::backdrop` dim); `prefers-contrast: more` maps onto the curve
+  (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
+  gap, default 1px); `prefers-contrast: more` maps onto the curve
   knobs mirroring the high-contrast theme, theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
