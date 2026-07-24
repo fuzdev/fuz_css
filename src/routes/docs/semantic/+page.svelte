@@ -1,9 +1,9 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {resolve} from '$app/paths';
+	import { resolve } from '$app/paths';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
@@ -28,9 +28,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="Low specificity" />
 		<p>
-			All opinionated styles use <code>:where()</code> selectors, giving them zero specificity
-			beyond the element itself. Your styles and utility classes override defaults without
-			specificity battles.
+			All opinionated styles use <code>:where()</code> selectors, giving them zero specificity beyond
+			the element itself. Your styles and utility classes override defaults without specificity battles.
 		</p>
 		<Code
 			lang="css"
@@ -51,9 +50,9 @@
 		<TomeSectionHeader text=".unstyled escape hatch" />
 		<p>
 			Add the <code>.unstyled</code>
-			<TomeLink slug="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of
-			decorative styling while keeping reset normalizations. Works for both decorative containers
-			and interactive elements like links, buttons, inputs, and summary.
+			<TomeLink slug="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of decorative
+			styling while keeping reset normalizations. Works for both decorative containers and interactive
+			elements like links, buttons, inputs, and summary.
 		</p>
 		<Code
 			lang="svelte"
@@ -93,20 +92,19 @@
 		<p>
 			The <code>--flow_margin</code> variable is unset by default, falling back to
 			<code>var(--space_lg)</code>. Size composite classes like <code>.sm</code> and
-			<code>.lg</code> set <code>--flow_margin</code> to adjust vertical rhythm for all flow
-			elements and headings.
+			<code>.lg</code> set <code>--flow_margin</code> to adjust vertical rhythm for all flow elements
+			and headings.
 		</p>
 		<p>
 			For elements not in the flow list, use the <code>.mb_flow</code> and <code>.mt_flow</code>
-			composite classes to get the same size-responsive spacing. Use <code>.mb_lg</code> when you
-			want a fixed value that ignores size composites.
+			composite classes to get the same size-responsive spacing. Use <code>.mb_lg</code> when you want
+			a fixed value that ignores size composites.
 		</p>
 		<aside>
 			⚠️ The <code>:not(:last-child)</code> creates unfortunate edge cases by coupling structure to
 			style, including usage with Svelte's component-level CSS variables, because it adds a wrapper
 			div. Perhaps the better global optimum is to omit the last child exception? This would add
-			unwanted margin in many cases, but perhaps that's better overall; <code>mb_0</code> removes
-			it.
+			unwanted margin in many cases, but perhaps that's better overall; <code>mb_0</code> removes it.
 		</aside>
 	</TomeSection>
 

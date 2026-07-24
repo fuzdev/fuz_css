@@ -26,9 +26,9 @@ import {
 	numeric_scale_variants,
 	type PaletteVariant,
 	type ColorSchemeVariant,
-	type NumericScaleVariant,
+	type NumericScaleVariant
 } from './variable_data.ts';
-import {oklch_max_srgb_chroma, type Oklch} from './oklch.ts';
+import { oklch_max_srgb_chroma, type Oklch } from './oklch.ts';
 
 /** The 13 intensity stops in ramp order (00 → 100). */
 export const RAMP_STOPS: ReadonlyArray<NumericScaleVariant> = numeric_scale_variants;
@@ -79,25 +79,25 @@ export const PALETTE_HUES: Record<PaletteVariant, number> = {
 	g: 358, // pink
 	h: 41, // orange
 	i: 204, // cyan
-	j: 163, // teal
+	j: 163 // teal
 };
 
 /** Fitted lightness knobs for the palette (`palette_X_NN`) ramps. */
 export const PALETTE_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
-	light: {lightness_00: 0.985, lightness_100: 0.116, curve: 1.15},
-	dark: {lightness_00: 0.147, lightness_100: 0.971, curve: 0.76},
+	light: { lightness_00: 0.985, lightness_100: 0.116, curve: 1.15 },
+	dark: { lightness_00: 0.147, lightness_100: 0.971, curve: 0.76 }
 };
 
 /** Fitted lightness knobs for the shade (surface) ramps. */
 export const SHADE_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
-	light: {lightness_00: 0.97, lightness_100: 0.171, curve: 1.09},
-	dark: {lightness_00: 0.171, lightness_100: 0.97, curve: 0.92},
+	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.09 },
+	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 0.92 }
 };
 
 /** Fitted lightness knobs for the text ramps. */
 export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
-	light: {lightness_00: 0.97, lightness_100: 0.146, curve: 1.19},
-	dark: {lightness_00: 0.146, lightness_100: 0.97, curve: 0.87},
+	light: { lightness_00: 0.97, lightness_100: 0.146, curve: 1.19 },
+	dark: { lightness_00: 0.146, lightness_100: 0.97, curve: 0.87 }
 };
 
 /**
@@ -114,8 +114,8 @@ export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs
  * knob).
  */
 export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> = {
-	light: {chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3},
-	dark: {chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27},
+	light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
+	dark: { chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27 }
 };
 
 /**
@@ -133,7 +133,7 @@ export const NEUTRAL_HUE = PALETTE_HUES.f;
  */
 export const NEUTRAL_CHROMA: Record<ColorSchemeVariant, number> = {
 	light: 0.024,
-	dark: 0.025,
+	dark: 0.025
 };
 
 /**
@@ -160,7 +160,7 @@ export const PALETTE_CHROMA_CAPS: Record<
 		'80': 0.0533,
 		'90': 0.0366,
 		'95': 0.0282,
-		'100': 0.0197,
+		'100': 0.0197
 	},
 	dark: {
 		'00': 0.025,
@@ -175,8 +175,8 @@ export const PALETTE_CHROMA_CAPS: Record<
 		'80': 0.0812,
 		'90': 0.0465,
 		'95': 0.03,
-		'100': 0.0141,
-	},
+		'100': 0.0141
+	}
 };
 
 /**
@@ -208,7 +208,7 @@ export const ramp_chroma = (
 	stop: NumericScaleVariant,
 	chroma_scale = 1,
 	knobs: ChromaRampKnobs = PALETTE_CHROMA_KNOBS[scheme],
-	cap: number = PALETTE_CHROMA_CAPS[scheme][stop],
+	cap: number = PALETTE_CHROMA_CAPS[scheme][stop]
 ): number => {
 	const requested =
 		knobs.chroma_min + (knobs.chroma_max - knobs.chroma_min) * ramp_chroma_shape(stop, knobs.curve);
@@ -224,7 +224,7 @@ export const ramp_chroma = (
 export const ramp_hue_shift_offset = (
 	stop: NumericScaleVariant,
 	scheme: ColorSchemeVariant,
-	hue_shift: number,
+	hue_shift: number
 ): number => {
 	const centered = ramp_stop_t(stop) - 0.5;
 	return (scheme === 'light' ? centered : -centered) * hue_shift;
@@ -236,11 +236,11 @@ export const ramp_hue_shift_offset = (
 export const palette_stop_oklch = (
 	letter: PaletteVariant,
 	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant,
+	scheme: ColorSchemeVariant
 ): Oklch => [
 	ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop),
 	ramp_chroma(scheme, stop),
-	PALETTE_HUES[letter],
+	PALETTE_HUES[letter]
 ];
 
 /**
@@ -249,7 +249,7 @@ export const palette_stop_oklch = (
 export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch => [
 	ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
 	NEUTRAL_CHROMA[scheme] * ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
-	NEUTRAL_HUE,
+	NEUTRAL_HUE
 ];
 
 /**
@@ -258,7 +258,7 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeV
 export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch => [
 	ramp_lightness(TEXT_LIGHTNESS_KNOBS[scheme], stop),
 	NEUTRAL_CHROMA[scheme] * ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
-	NEUTRAL_HUE,
+	NEUTRAL_HUE
 ];
 
 /**
@@ -279,7 +279,7 @@ export const compute_palette_chroma_caps = (
 	hues: ReadonlyArray<number>,
 	lightness_knobs: LightnessRampKnobs,
 	scheme: ColorSchemeVariant,
-	hue_shift = 0,
+	hue_shift = 0
 ): Record<NumericScaleVariant, number> => {
 	const caps = {} as Record<NumericScaleVariant, number>;
 	for (const stop of numeric_scale_variants) {
@@ -315,7 +315,7 @@ const format_ramp_number = (n: number): string => String(Math.round(n * 1e6) / 1
  */
 export const render_lightness_stop_css = (
 	family: RampFamily,
-	stop: NumericScaleVariant,
+	stop: NumericScaleVariant
 ): string => {
 	const p = `--${family}_lightness`;
 	const t = format_ramp_number(ramp_stop_t(stop));
@@ -346,7 +346,7 @@ export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
 export const render_chroma_stop_css = (
 	stop: NumericScaleVariant,
 	scheme: ColorSchemeVariant,
-	cap: number = PALETTE_CHROMA_CAPS[scheme][stop],
+	cap: number = PALETTE_CHROMA_CAPS[scheme][stop]
 ): string => {
 	const cap_str = format_ramp_number(cap);
 	return `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_${
@@ -362,7 +362,7 @@ export const render_chroma_stop_css = (
  */
 export const render_hue_shift_offset_css = (
 	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant,
+	scheme: ColorSchemeVariant
 ): string => {
 	const centered = ramp_stop_t(stop) - 0.5;
 	const factor = Math.round((scheme === 'light' ? centered : -centered) * 1e6) / 1e6;
@@ -376,7 +376,7 @@ export const render_hue_shift_offset_css = (
  */
 export const render_palette_stop_css = (
 	letter: PaletteVariant,
-	stop: NumericScaleVariant,
+	stop: NumericScaleVariant
 ): string => render_ramp_color_css(`var(--hue_${letter})`, stop);
 
 /**
@@ -390,7 +390,7 @@ export const render_palette_stop_css = (
 export const render_ramp_color_css = (
 	hue_reference: string,
 	stop: NumericScaleVariant,
-	alpha?: string,
+	alpha?: string
 ): string =>
 	`oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
 		stop
@@ -404,7 +404,7 @@ export const render_ramp_color_css = (
  */
 export const render_neutral_stop_css = (
 	family: Exclude<RampFamily, 'palette'>,
-	stop: NumericScaleVariant,
+	stop: NumericScaleVariant
 ): string =>
 	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
 		stop

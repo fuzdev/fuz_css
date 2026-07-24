@@ -1,10 +1,10 @@
-import {SvelteMap} from 'svelte/reactivity';
+import { SvelteMap } from 'svelte/reactivity';
 
-import type {Theme, ThemeScheme} from '$lib/theme.ts';
-import type {StyleVariable} from '$lib/variable.ts';
-import {default_variables} from '$lib/variables.ts';
-import {theme_knob_by_name} from '$lib/knobs.ts';
-import type {ColorSchemeVariant} from '$lib/variable_data.ts';
+import type { Theme, ThemeScheme } from '$lib/theme.ts';
+import type { StyleVariable } from '$lib/variable.ts';
+import { default_variables } from '$lib/variables.ts';
+import { theme_knob_by_name } from '$lib/knobs.ts';
+import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 
 // TODO upstream to fuz_ui
 
@@ -17,7 +17,7 @@ import type {ColorSchemeVariant} from '$lib/variable_data.ts';
 export const UNSAVED_THEME_NAME = 'unsaved';
 
 const default_variable_by_name: Map<string, StyleVariable> = new Map(
-	default_variables.map((v) => [v.name, v]),
+	default_variables.map((v) => [v.name, v])
 );
 
 export interface SlotOverride {
@@ -66,18 +66,18 @@ export class ThemeEditorState {
 	}
 
 	readonly base_theme: Theme = $derived(
-		this.themes.find((t) => t.name === this.based_on) ?? this.themes[0]!,
+		this.themes.find((t) => t.name === this.based_on) ?? this.themes[0]!
 	);
 
 	readonly base_scheme: ThemeScheme = $derived(this.base_theme.scheme ?? 'dual');
 
 	/** The single-scheme stance, `null` for dual themes. */
 	readonly stance: 'light' | 'dark' | null = $derived(
-		this.scheme === 'light' || this.scheme === 'dark' ? this.scheme : null,
+		this.scheme === 'light' || this.scheme === 'dark' ? this.scheme : null
 	);
 
 	readonly base_variable_by_name: Map<string, StyleVariable> = $derived(
-		new Map(this.base_theme.variables.map((v) => [v.name, v])),
+		new Map(this.base_theme.variables.map((v) => [v.name, v]))
 	);
 
 	readonly dirty: boolean = $derived(this.overrides.size > 0 || this.scheme !== this.base_scheme);
@@ -125,7 +125,7 @@ export class ThemeEditorState {
 		}
 		if (dark !== undefined && dark === light) dark = undefined;
 		if (light === undefined && dark === undefined) return null;
-		const merged: StyleVariable = {name};
+		const merged: StyleVariable = { name };
 		if (light !== undefined) merged.light = light;
 		if (dark !== undefined) merged.dark = dark;
 		return merged;
@@ -135,14 +135,14 @@ export class ThemeEditorState {
 	readonly draft: Theme = $derived({
 		name: UNSAVED_THEME_NAME,
 		variables: this.merged_variables,
-		...(this.stance ? {scheme: this.stance} : {}),
+		...(this.stance ? { scheme: this.stance } : {})
 	});
 
 	/** The copyable theme, carrying the user's chosen name. */
 	readonly output: Theme = $derived({
 		name: this.name,
 		variables: this.merged_variables,
-		...(this.stance ? {scheme: this.stance} : {}),
+		...(this.stance ? { scheme: this.stance } : {})
 	});
 
 	/**
@@ -175,7 +175,7 @@ export class ThemeEditorState {
 		// under a stance edits always write the base slot - dual slots are
 		// meaningless when one appearance renders in both color schemes
 		const slot = !this.stance && adaptive ? scheme : 'light';
-		this.overrides.set(name, {...o, [slot]: value});
+		this.overrides.set(name, { ...o, [slot]: value });
 	}
 
 	/**
@@ -195,7 +195,7 @@ export class ThemeEditorState {
 			if (value === undefined) {
 				this.overrides.delete(name);
 			} else {
-				this.overrides.set(name, {light: value});
+				this.overrides.set(name, { light: value });
 			}
 		}
 	}
@@ -229,7 +229,7 @@ export class ThemeEditorState {
 			name: this.name,
 			based_on: this.based_on,
 			scheme: this.scheme,
-			overrides: Array.from(this.overrides.entries()).map(([name, o]) => [name, {...o}]),
+			overrides: Array.from(this.overrides.entries()).map(([name, o]) => [name, { ...o }])
 		};
 	}
 
@@ -242,7 +242,7 @@ export class ThemeEditorState {
 		this.scheme = data.scheme ?? this.base_scheme;
 		this.overrides.clear();
 		for (const [name, o] of data.overrides) {
-			this.overrides.set(name, {...o});
+			this.overrides.set(name, { ...o });
 		}
 	}
 }

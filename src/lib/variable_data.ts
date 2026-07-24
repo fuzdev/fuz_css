@@ -1,4 +1,4 @@
-import type {ArrayElement} from '@fuzdev/fuz_util/types.ts';
+import type { ArrayElement } from '@fuzdev/fuz_util/types.ts';
 
 export type SizeVariant = ArrayElement<typeof font_size_variants>;
 export const font_size_variants = [
@@ -14,7 +14,7 @@ export const font_size_variants = [
 	'xl6',
 	'xl7',
 	'xl8',
-	'xl9',
+	'xl9'
 ] as const;
 
 export const font_size_names = font_size_variants.map((s) => 'font_size_' + s);
@@ -23,7 +23,7 @@ export type FontFamilyVariant = ArrayElement<typeof font_family_variants>;
 export const font_family_variants = [
 	'font_family_sans',
 	'font_family_serif',
-	'font_family_mono',
+	'font_family_mono'
 ] as const;
 
 /**
@@ -44,7 +44,7 @@ export const numeric_scale_variants = [
 	'80',
 	'90',
 	'95',
-	'100',
+	'100'
 ] as const;
 
 /**
@@ -92,7 +92,7 @@ export const space_variants = [
 	'xl12',
 	'xl13',
 	'xl14',
-	'xl15',
+	'xl15'
 ] as const;
 
 export type DistanceVariant = ArrayElement<typeof distance_variants>;
@@ -112,7 +112,7 @@ export const shadow_variant_prefixes = [
 	'shadow_bottom_',
 	'shadow_inset_',
 	'shadow_inset_top_',
-	'shadow_inset_bottom_',
+	'shadow_inset_bottom_'
 ] as const;
 
 export type ShadowSizeVariant = ArrayElement<typeof shadow_size_variants>;
@@ -132,7 +132,7 @@ export const icon_sizes = {
 	icon_size_lg: '80px',
 	icon_size_xl: '128px',
 	icon_size_xl2: '192px',
-	icon_size_xl3: '256px',
+	icon_size_xl3: '256px'
 };
 
 export type PaletteVariant = ArrayElement<typeof palette_variants>;
@@ -156,18 +156,18 @@ export const intent_variants = ['accent', 'positive', 'negative', 'caution', 'in
  */
 export const palette_glosses: Record<
 	PaletteVariant,
-	{color: string; binding?: IntentVariant | 'neutral'}
+	{ color: string; binding?: IntentVariant | 'neutral' }
 > = {
-	a: {color: 'blue', binding: 'accent'},
-	b: {color: 'green', binding: 'positive'},
-	c: {color: 'red', binding: 'negative'},
-	d: {color: 'purple'},
-	e: {color: 'yellow'},
-	f: {color: 'brown', binding: 'neutral'},
-	g: {color: 'pink'},
-	h: {color: 'orange', binding: 'caution'},
-	i: {color: 'cyan', binding: 'info'},
-	j: {color: 'teal'},
+	a: { color: 'blue', binding: 'accent' },
+	b: { color: 'green', binding: 'positive' },
+	c: { color: 'red', binding: 'negative' },
+	d: { color: 'purple' },
+	e: { color: 'yellow' },
+	f: { color: 'brown', binding: 'neutral' },
+	g: { color: 'pink' },
+	h: { color: 'orange', binding: 'caution' },
+	i: { color: 'cyan', binding: 'info' },
+	j: { color: 'teal' }
 };
 
 export type IntensityVariant = NumericScaleVariant;

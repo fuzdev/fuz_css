@@ -1,5 +1,5 @@
-import {default_variables} from './variables.ts';
-import type {StyleVariable} from './variable.ts';
+import { default_variables } from './variables.ts';
+import type { StyleVariable } from './variable.ts';
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
@@ -66,23 +66,23 @@ export interface RenderThemeStyleOptions {
  */
 export const scheme_stance_variables = (
 	scheme: 'light' | 'dark',
-	variables: Array<StyleVariable>,
+	variables: Array<StyleVariable>
 ): Array<StyleVariable> => {
 	const overridden = new Set(variables.map((v) => v.name));
 	const mirrored: Array<StyleVariable> = [];
 	for (const v of default_variables) {
 		if (v.dark === undefined || overridden.has(v.name)) continue;
 		if (scheme === 'dark') {
-			mirrored.push({name: v.name, light: v.dark});
+			mirrored.push({ name: v.name, light: v.dark });
 		} else if (v.light !== undefined) {
-			mirrored.push({name: v.name, dark: v.light});
+			mirrored.push({ name: v.name, dark: v.light });
 		}
 	}
 	return mirrored;
 };
 
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
-	const {comments = false, id = null, empty_default_theme = true, layer = 'fuz.theme'} = options;
+	const { comments = false, id = null, empty_default_theme = true, layer = 'fuz.theme' } = options;
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 	// key the default-theme special case on emptiness, not the name, so any theme
 	// carrying variables renders them (a theme merely named 'base' still renders);
@@ -126,7 +126,7 @@ ${blocks}
 export const render_theme_variable = (
 	variable: StyleVariable,
 	dark = false,
-	comments = true,
+	comments = true
 ): string => {
 	const v = dark ? variable.dark : variable.light;
 	if (!v) return '';

@@ -1,7 +1,7 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -14,7 +14,7 @@
 		shadow_alpha_variants,
 		intensity_variants,
 		type PaletteVariant,
-		type IntensityVariant,
+		type IntensityVariant
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -35,8 +35,8 @@
 	<section>
 		<p>
 			fuz_css provides four semantic shadow types that build on the light model in the
-			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow
-			for light emphasis, and shroud for dark overlays.
+			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
+			light emphasis, and shroud for dark overlays.
 		</p>
 	</section>
 	<TomeSection>
@@ -88,9 +88,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_{'{letter}'}_{'{intensity}'}</code> classes to apply colored shadows. The
-			intensity controls the color's prominence -- 60 is a fine starting point for visible colored
-			shadows.
+			Use <code>shadow_{'{letter}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
+			controls the color's prominence -- 60 is a fine starting point for visible colored shadows.
 		</p>
 		{#each palette_variants as color_variant (color_variant)}
 			<TomeSection>
@@ -103,7 +102,7 @@
 
 {#snippet shadow_examples(
 	color_variant: PaletteVariant | 'umbra' | 'highlight' | 'glow' | 'shroud' | null,
-	intensity: IntensityVariant = '60',
+	intensity: IntensityVariant = '60'
 )}
 	{@const is_hue =
 		color_variant && !['umbra', 'highlight', 'glow', 'shroud'].includes(color_variant)}

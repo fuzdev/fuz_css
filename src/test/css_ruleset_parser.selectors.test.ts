@@ -1,6 +1,6 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {split_selector_list, find_compound_end} from '$lib/css_ruleset_parser.ts';
+import { split_selector_list, find_compound_end } from '$lib/css_ruleset_parser.ts';
 
 /**
  * Tests for selector parsing utilities: split_selector_list and find_compound_end.
@@ -23,7 +23,7 @@ describe('split_selector_list', () => {
 		[".foo[data-x='a,b'], .bar", [".foo[data-x='a,b']", '.bar']],
 		['.foo[data-x=value], .bar', ['.foo[data-x=value]', '.bar']],
 		['.foo[data-x="a\\"b,c"], .bar', ['.foo[data-x="a\\"b,c"]', '.bar']],
-		['.foo[data-x="a"]:not(.b), .bar', ['.foo[data-x="a"]:not(.b)', '.bar']],
+		['.foo[data-x="a"]:not(.b), .bar', ['.foo[data-x="a"]:not(.b)', '.bar']]
 	];
 
 	test.each(cases)('split_selector_list("%s") → %j', (input, expected) => {
@@ -61,7 +61,7 @@ describe('find_compound_end', () => {
 		['', 0, 1, 'empty selector'],
 		['.btn:hover:focus', 0, 16, 'multiple pseudo-classes'],
 		['.chevron:before', 0, 8, 'CSS2 single-colon pseudo-element'],
-		['.foo*', 0, 4, 'universal selector after class'],
+		['.foo*', 0, 4, 'universal selector after class']
 	];
 
 	test.each(cases)('find_compound_end("%s", %d) → %d (%s)', (selector, startPos, expected) => {

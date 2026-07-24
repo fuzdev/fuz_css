@@ -9,12 +9,12 @@
  * @module
  */
 
-import {parseCss, type AST} from 'svelte/compiler';
-import {hash_blake3} from '@fuzdev/fuz_util/hash_blake3.ts';
+import { parseCss, type AST } from 'svelte/compiler';
+import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
 
-import {extract_css_variables} from './css_variable_utils.ts';
-import type {CacheDeps} from './deps.ts';
-import type {BaseCssOption} from './css_plugin_options.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
+import type { CacheDeps } from './deps.ts';
+import type { BaseCssOption } from './css_plugin_options.ts';
 
 /**
  * Base fields shared by all style rules.
@@ -36,13 +36,7 @@ export interface StyleRuleBase {
  * Reasons a rule is considered "core" and always included.
  */
 export type CoreReason =
-	| 'universal'
-	| 'root'
-	| 'body'
-	| 'media_query'
-	| 'html'
-	| 'host'
-	| 'font_face';
+	'universal' | 'root' | 'body' | 'media_query' | 'html' | 'host' | 'font_face';
 
 /**
  * A core style rule that is always included in output.
@@ -122,7 +116,7 @@ export const parse_style_css = (css: string, content_hash: string): StyleRuleInd
 	};
 
 	const walk_children = (
-		children: Iterable<AST.CSS.Rule | AST.CSS.Atrule | AST.CSS.Node>,
+		children: Iterable<AST.CSS.Rule | AST.CSS.Atrule | AST.CSS.Node>
 	): void => {
 		for (const child of children) {
 			if (child.type === 'Rule') {
@@ -154,7 +148,7 @@ export const parse_style_css = (css: string, content_hash: string): StyleRuleInd
 		rules,
 		by_element,
 		by_class,
-		content_hash,
+		content_hash
 	};
 };
 
@@ -175,7 +169,7 @@ const extract_style_rule = (rule: AST.CSS.Rule, css: string, order: number): Sty
 	const variables_used = extract_css_variables(block_css);
 
 	// Determine if core rule
-	const {is_core, core_reason} = check_core_rule(selector_css, elements);
+	const { is_core, core_reason } = check_core_rule(selector_css, elements);
 
 	// Type assertion needed because destructuring widens is_core to boolean
 	return {
@@ -185,7 +179,7 @@ const extract_style_rule = (rule: AST.CSS.Rule, css: string, order: number): Sty
 		variables_used,
 		order,
 		is_core,
-		core_reason,
+		core_reason
 	} as StyleRule;
 };
 
@@ -197,7 +191,7 @@ const extract_nested_rules = (
 	css: string,
 	elements: Set<string>,
 	classes: Set<string>,
-	variables_used: Set<string>,
+	variables_used: Set<string>
 ): void => {
 	for (const child of block.children) {
 		if (child.type === 'Rule') {
@@ -240,7 +234,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 				variables_used,
 				order,
 				is_core: true,
-				core_reason: 'media_query',
+				core_reason: 'media_query'
 			} as const;
 		}
 
@@ -251,7 +245,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			variables_used,
 			order,
 			is_core: false,
-			core_reason: null,
+			core_reason: null
 		} as const;
 	}
 
@@ -271,7 +265,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			variables_used,
 			order,
 			is_core: false,
-			core_reason: null,
+			core_reason: null
 		} as const;
 	}
 
@@ -290,7 +284,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 			variables_used,
 			order,
 			is_core: true,
-			core_reason: 'font_face',
+			core_reason: 'font_face'
 		} as const;
 	}
 
@@ -310,7 +304,7 @@ const extract_atrule = (atrule: AST.CSS.Atrule, css: string, order: number): Sty
 const parse_selector_list = (
 	selector_css: string,
 	elements: Set<string>,
-	classes: Set<string>,
+	classes: Set<string>
 ): void => {
 	// Split on commas, respecting parentheses
 	const selectors = split_selector_list(selector_css);
@@ -369,8 +363,8 @@ const split_selector_list = (selector_group: string): Array<string> => {
  */
 const extract_functional_content = (
 	selector: string,
-	start: number,
-): {content: string; end: number} | null => {
+	start: number
+): { content: string; end: number } | null => {
 	let depth = 1;
 	let i = start;
 
@@ -385,7 +379,7 @@ const extract_functional_content = (
 
 	return {
 		content: selector.slice(start, i - 1),
-		end: i,
+		end: i
 	};
 };
 
@@ -396,12 +390,12 @@ const extract_functional_content = (
 const parse_single_selector = (
 	selector: string,
 	elements: Set<string>,
-	classes: Set<string>,
+	classes: Set<string>
 ): void => {
 	// Find all functional pseudo-classes and extract their content iteratively
 	const functional_start_pattern = /:(?:where|is|not|has)\(/g;
 	let match;
-	const ranges_to_remove: Array<{start: number; end: number}> = [];
+	const ranges_to_remove: Array<{ start: number; end: number }> = [];
 
 	while ((match = functional_start_pattern.exec(selector)) !== null) {
 		const content_start = match.index + match[0].length;
@@ -409,7 +403,7 @@ const parse_single_selector = (
 		if (result) {
 			// Recursively parse the inner content
 			parse_selector_list(result.content, elements, classes);
-			ranges_to_remove.push({start: match.index, end: result.end});
+			ranges_to_remove.push({ start: match.index, end: result.end });
 			// Update the regex lastIndex to continue after this match
 			functional_start_pattern.lastIndex = result.end;
 		}
@@ -445,7 +439,8 @@ const parse_single_selector = (
  * Result from core rule check - discriminated union for type safety.
  * Both variants include `core_reason` for consistent object shape.
  */
-type CoreRuleCheck = {is_core: true; core_reason: CoreReason} | {is_core: false; core_reason: null};
+type CoreRuleCheck =
+	{ is_core: true; core_reason: CoreReason } | { is_core: false; core_reason: null };
 
 /**
  * Checks if a rule is a "core" rule that should always be included.
@@ -458,30 +453,30 @@ type CoreRuleCheck = {is_core: true; core_reason: CoreReason} | {is_core: false;
 const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleCheck => {
 	// Universal selector
 	if (selector_css.includes('*')) {
-		return {is_core: true, core_reason: 'universal'};
+		return { is_core: true, core_reason: 'universal' };
 	}
 
 	// :root pseudo-class
 	if (selector_css.includes(':root')) {
-		return {is_core: true, core_reason: 'root'};
+		return { is_core: true, core_reason: 'root' };
 	}
 
 	// :host pseudo-class (for web components)
 	if (selector_css.includes(':host')) {
-		return {is_core: true, core_reason: 'host'};
+		return { is_core: true, core_reason: 'host' };
 	}
 
 	// body element
 	if (elements.has('body')) {
-		return {is_core: true, core_reason: 'body'};
+		return { is_core: true, core_reason: 'body' };
 	}
 
 	// html element
 	if (elements.has('html')) {
-		return {is_core: true, core_reason: 'html'};
+		return { is_core: true, core_reason: 'html' };
 	}
 
-	return {is_core: false, core_reason: null};
+	return { is_core: false, core_reason: null };
 };
 
 /**
@@ -493,10 +488,10 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
  */
 export const load_style_rule_index = async (
 	deps: CacheDeps,
-	style_css_path?: string,
+	style_css_path?: string
 ): Promise<StyleRuleIndex> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const r = await deps.read_text({path});
+	const r = await deps.read_text({ path });
 	if (!r.ok) {
 		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
 	}
@@ -525,10 +520,10 @@ export const create_style_rule_index = (css: string): StyleRuleIndex => {
  */
 export const load_default_style_css = async (
 	deps: CacheDeps,
-	style_css_path?: string,
+	style_css_path?: string
 ): Promise<string> => {
 	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const r = await deps.read_text({path});
+	const r = await deps.read_text({ path });
 	if (!r.ok) {
 		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
 	}
@@ -545,7 +540,7 @@ export const load_default_style_css = async (
  */
 export const resolve_base_css_option = async (
 	base_css: BaseCssOption,
-	deps: CacheDeps,
+	deps: CacheDeps
 ): Promise<StyleRuleIndex | null> => {
 	// null = disabled
 	if (base_css === null) {
@@ -579,7 +574,7 @@ export const resolve_base_css_option = async (
 export const get_matching_rules = (
 	index: StyleRuleIndex,
 	detected_elements: Set<string>,
-	detected_classes: Set<string>,
+	detected_classes: Set<string>
 ): Set<number> => {
 	const included: Set<number> = new Set();
 
@@ -641,7 +636,7 @@ export const generate_base_css = (index: StyleRuleIndex, included_indices: Set<n
  */
 export const collect_rule_variables = (
 	index: StyleRuleIndex,
-	included_indices: Set<number>,
+	included_indices: Set<number>
 ): Set<string> => {
 	const variables: Set<string> = new Set();
 

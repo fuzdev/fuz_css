@@ -13,13 +13,13 @@
  * @module
  */
 
-import {test, assert, describe, beforeAll} from 'vitest';
-import {join} from 'node:path';
-import {readdir, readFile} from 'node:fs/promises';
-import {execSync} from 'node:child_process';
-import {to_error_message} from '@fuzdev/fuz_util/error.ts';
+import { test, assert, describe, beforeAll } from 'vitest';
+import { join } from 'node:path';
+import { readdir, readFile } from 'node:fs/promises';
+import { execSync } from 'node:child_process';
+import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
-import {FUZ_CSS_BANNER} from '$lib/vite_plugin_fuz_css.ts';
+import { FUZ_CSS_BANNER } from '$lib/vite_plugin_fuz_css.ts';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
@@ -29,12 +29,12 @@ const EXAMPLES_DIR = join(process.cwd(), 'examples');
 // Build the package before running example tests so examples get fresh dist/
 if (!SKIP) {
 	beforeAll(async () => {
-		execSync('npx svelte-package', {cwd: process.cwd(), stdio: 'pipe'});
+		execSync('npx svelte-package', { cwd: process.cwd(), stdio: 'pipe' });
 		// `svelte-package` leaves relative `.ts` specifiers in `dist`; with
 		// `rewriteRelativeImportExtensions: false` tsc no longer rewrites them, so the
 		// gro dist-rewrite pass (which `gro build` runs after svelte-package) must run
 		// here too — otherwise the examples can't resolve the freshly-packaged dist.
-		const {rewrite_dist_imports} = await import('@fuzdev/gro/dist_rewrite_imports.ts');
+		const { rewrite_dist_imports } = await import('@fuzdev/gro/dist_rewrite_imports.ts');
 		await rewrite_dist_imports(join(process.cwd(), 'dist'));
 	}, 60_000); // 1 minute timeout for package build
 }
@@ -112,7 +112,7 @@ const EXPECTED_CLASSES = [
 	'hover:border_g_50',
 	'hover:outline_g_50',
 	'active:border_h_50',
-	'active:outline_h_50',
+	'active:outline_h_50'
 ].sort();
 
 /**
@@ -136,8 +136,8 @@ const find_css_file = async (dist_dir: string): Promise<string | null> => {
 const build_example = (example_name: string): void => {
 	const example_dir = join(EXAMPLES_DIR, example_name);
 	try {
-		execSync('npm install', {cwd: example_dir, stdio: 'pipe'});
-		execSync('npm run build', {cwd: example_dir, stdio: 'pipe'});
+		execSync('npm install', { cwd: example_dir, stdio: 'pipe' });
+		execSync('npm run build', { cwd: example_dir, stdio: 'pipe' });
 	} catch (err) {
 		const message = to_error_message(err);
 		throw new Error(`Failed to build ${example_name}: ${message}`);
@@ -268,7 +268,7 @@ describe.skipIf(SKIP)('cross-example consistency', () => {
 			assert.deepEqual(
 				classes,
 				first_classes,
-				`${example} should produce same classes as ${first_example}`,
+				`${example} should produce same classes as ${first_example}`
 			);
 		}
 	});

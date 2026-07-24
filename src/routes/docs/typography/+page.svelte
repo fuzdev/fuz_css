@@ -3,7 +3,7 @@
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
@@ -11,13 +11,13 @@
 
 	import FontWeightControl from '$routes/FontWeightControl.svelte';
 	import FontSizeControl from '$routes/FontSizeControl.svelte';
-	import {default_variables} from '$lib/variables.ts';
+	import { default_variables } from '$lib/variables.ts';
 	import IconSizes from './IconSizes.svelte';
 	import {
 		line_height_names,
 		font_size_names,
 		text_scale_variants,
-		font_family_variants,
+		font_family_variants
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -241,8 +241,8 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.md</code>
-			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to
-			the defaults. Use it inside a sized container to restore normal sizing for a subtree.
+			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
+			defaults. Use it inside a sized container to restore normal sizing for a subtree.
 		</p>
 		<Code
 			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}

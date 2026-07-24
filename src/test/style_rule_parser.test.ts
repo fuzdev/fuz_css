@@ -1,13 +1,13 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import {
 	parse_style_css,
 	get_matching_rules,
 	generate_base_css,
 	collect_rule_variables,
-	load_style_rule_index,
+	load_style_rule_index
 } from '$lib/style_rule_parser.ts';
-import {default_cache_deps} from '$lib/deps_defaults.ts';
+import { default_cache_deps } from '$lib/deps_defaults.ts';
 
 // Alias for brevity in tests
 const deps = default_cache_deps;
@@ -58,7 +58,7 @@ describe('parse_style_css', () => {
 			['body { font-size: 16px; }', 'body'],
 			['html { font-size: 16px; }', 'html'],
 			[':host { display: block; }', 'host'],
-			['@media (prefers-reduced-motion) { :root { --duration: 0; } }', 'media_query'],
+			['@media (prefers-reduced-motion) { :root { --duration: 0; } }', 'media_query']
 		] as const)('%s is core (%s)', (css, reason) => {
 			const index = parse_style_css(css, 'test-hash');
 			assert.isTrue(index.rules[0]!.is_core);
@@ -154,7 +154,7 @@ describe('parse_style_css', () => {
 		test.each([
 			["div::before { content: ''; }", 'div', 'before'],
 			["span::after { content: ''; }", 'span', 'after'],
-			['a:hover { color: red; }', 'a', 'hover'],
+			['a:hover { color: red; }', 'a', 'hover']
 		] as const)('%s extracts element but not pseudo', (css, element, pseudo) => {
 			const index = parse_style_css(css, 'test-hash');
 			assert.isTrue(index.rules[0]!.elements.has(element));
@@ -170,7 +170,7 @@ describe('parse_style_css', () => {
 			["input[type='text'][required] { background: pink; }", 'input'],
 			[":where(input[type='number'], input[type='text']) { font-family: monospace; }", 'input'],
 			['input:not([disabled]) { cursor: pointer; }', 'input'],
-			["input[placeholder='a, b, c'] { color: gray; }", 'input'],
+			["input[placeholder='a, b, c'] { color: gray; }", 'input']
 		])('%s extracts element', (css, element) => {
 			const index = parse_style_css(css, 'test-hash');
 			assert.isTrue(index.rules[0]!.elements.has(element));
@@ -327,43 +327,43 @@ describe('parse_style_css', () => {
 			[
 				'border shorthand',
 				'button { border: var(--border_width) solid var(--border_color); }',
-				['border_width', 'border_color'],
+				['border_width', 'border_color']
 			],
 			[
 				'margin shorthand',
 				'div { margin: var(--space_sm) var(--space_md); }',
-				['space_sm', 'space_md'],
+				['space_sm', 'space_md']
 			],
 			[
 				'padding shorthand',
 				'section { padding: var(--space_xs) var(--space_sm) var(--space_md) var(--space_lg); }',
-				['space_xs', 'space_sm', 'space_md', 'space_lg'],
+				['space_xs', 'space_sm', 'space_md', 'space_lg']
 			],
 			[
 				'box-shadow shorthand',
 				'div { box-shadow: var(--shadow_x) var(--shadow_y) var(--shadow_blur) var(--shadow_color); }',
-				['shadow_x', 'shadow_y', 'shadow_blur', 'shadow_color'],
+				['shadow_x', 'shadow_y', 'shadow_blur', 'shadow_color']
 			],
 			[
 				'font shorthand',
 				'p { font: var(--font_weight) var(--font_size)/var(--line_height) var(--font_family); }',
-				['font_weight', 'font_size', 'line_height', 'font_family'],
+				['font_weight', 'font_size', 'line_height', 'font_family']
 			],
 			[
 				'background shorthand',
 				'header { background: var(--bg_color) url(image.png) var(--bg_position) / var(--bg_size); }',
-				['bg_color', 'bg_position', 'bg_size'],
+				['bg_color', 'bg_position', 'bg_size']
 			],
 			[
 				'transition shorthand',
 				'a { transition: color var(--duration) var(--easing); }',
-				['duration', 'easing'],
+				['duration', 'easing']
 			],
 			[
 				'nested calc',
 				'div { width: calc(var(--base_width) + var(--extra_width) * 2); }',
-				['base_width', 'extra_width'],
-			],
+				['base_width', 'extra_width']
+			]
 		])('extracts from %s', (_name, css, expected_vars) => {
 			const index = parse_style_css(css, 'test-hash');
 			for (const v of expected_vars) {

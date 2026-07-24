@@ -42,10 +42,10 @@
  * @module
  */
 
-import {StyleVariable} from './variable.ts';
-import {scheme_stance_variables, type Theme} from './theme.ts';
-import {default_variables} from './variables.ts';
-import {theme_knob_by_name, theme_knob_hook_names, type ThemeKnob} from './knobs.ts';
+import { StyleVariable } from './variable.ts';
+import { scheme_stance_variables, type Theme } from './theme.ts';
+import { default_variables } from './variables.ts';
+import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
@@ -60,7 +60,7 @@ import {
 	ramp_hue_shift_offset,
 	compute_palette_chroma_caps,
 	render_chroma_stop_css,
-	type LightnessRampKnobs,
+	type LightnessRampKnobs
 } from './ramps.ts';
 import {
 	numeric_scale_variants,
@@ -69,10 +69,10 @@ import {
 	color_scheme_variants,
 	type NumericScaleVariant,
 	type ColorSchemeVariant,
-	type PaletteVariant,
+	type PaletteVariant
 } from './variable_data.ts';
-import {oklch_to_srgb, oklch_in_srgb_gamut, type Oklch, type RgbUnit} from './oklch.ts';
-import {wcag_contrast_ratio} from './wcag.ts';
+import { oklch_to_srgb, oklch_in_srgb_gamut, type Oklch, type RgbUnit } from './oklch.ts';
+import { wcag_contrast_ratio } from './wcag.ts';
 
 //
 // Gate thresholds — the WCAG levels the derived palette is designed to clear.
@@ -95,7 +95,7 @@ export const GATE_FILL_TEXT = 3;
  */
 export const known_theme_variable_names: Set<string> = new Set([
 	...default_variables.map((v) => v.name),
-	...theme_knob_hook_names,
+	...theme_knob_hook_names
 ]);
 
 //
@@ -156,8 +156,7 @@ export interface CompiledTheme {
 
 /** A resolved numeric value, or the offending variable/value/reason on failure. */
 type Resolved =
-	| {ok: true; value: number}
-	| {ok: false; variable: string; value: string; reason: string};
+	{ ok: true; value: number } | { ok: false; variable: string; value: string; reason: string };
 
 /** Intent and neutral hues default to a palette-letter binding. */
 const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = {
@@ -166,7 +165,7 @@ const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = {
 	hue_negative: 'hue_c',
 	hue_caution: 'hue_h',
 	hue_info: 'hue_i',
-	hue_neutral: 'hue_f',
+	hue_neutral: 'hue_f'
 };
 
 const LIGHTNESS_KNOBS_BY_FAMILY: Record<
@@ -175,7 +174,7 @@ const LIGHTNESS_KNOBS_BY_FAMILY: Record<
 > = {
 	palette: PALETTE_LIGHTNESS_KNOBS,
 	shade: SHADE_LIGHTNESS_KNOBS,
-	text: TEXT_LIGHTNESS_KNOBS,
+	text: TEXT_LIGHTNESS_KNOBS
 };
 
 const PALETTE_LETTER_MATCHER = /^hue_([a-j])$/u;
@@ -238,7 +237,12 @@ class ThemeResolver {
 
 	#resolve(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
 		if (visited.has(name)) {
-			return {ok: false, variable: name, value: `var(--${name})`, reason: 'cyclic var() reference'};
+			return {
+				ok: false,
+				variable: name,
+				value: `var(--${name})`,
+				reason: 'cyclic var() reference'
+			};
 		}
 		const next = new Set(visited);
 		next.add(name);
@@ -252,7 +256,7 @@ class ThemeResolver {
 		// numeric literal
 		if (trimmed !== '') {
 			const n = Number(trimmed);
-			if (Number.isFinite(n)) return {ok: true, value: n};
+			if (Number.isFinite(n)) return { ok: true, value: n };
 		}
 		// exactly var(--x) — recurse through the same merge
 		const var_match = VAR_MATCHER.exec(trimmed);
@@ -260,13 +264,13 @@ class ThemeResolver {
 		// machine-emitted compiled cap form
 		const cap = this.#parse_compiled_cap(trimmed, scheme, visited);
 		if (cap) return cap;
-		return {ok: false, variable: name, value: trimmed, reason: 'unrecognized value expression'};
+		return { ok: false, variable: name, value: trimmed, reason: 'unrecognized value expression' };
 	}
 
 	#parse_compiled_cap(
 		value: string,
 		scheme: ColorSchemeVariant,
-		visited: Set<string>,
+		visited: Set<string>
 	): Resolved | null {
 		const m = COMPILED_CAP_MATCHER.exec(value);
 		if (!m) return null;
@@ -280,28 +284,28 @@ class ThemeResolver {
 		if (!curve.ok) return curve;
 		const shape = ramp_chroma_shape(stop, curve.value);
 		const requested = chroma_min.value + (chroma_max.value - chroma_min.value) * shape;
-		return {ok: true, value: Math.min(requested, literal)};
+		return { ok: true, value: Math.min(requested, literal) };
 	}
 
 	#resolve_default(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
 		// palette letters
 		const letter_match = PALETTE_LETTER_MATCHER.exec(name);
-		if (letter_match) return {ok: true, value: PALETTE_HUES[letter_match[1] as PaletteVariant]};
+		if (letter_match) return { ok: true, value: PALETTE_HUES[letter_match[1] as PaletteVariant] };
 		// intent/neutral hues default to a palette-letter binding
 		const binding = INTENT_HUE_DEFAULT_BINDING[name];
 		if (binding) return this.#resolve(binding, scheme, visited);
 		// scalar knobs
-		if (name === 'chroma_scale') return {ok: true, value: 1};
-		if (name === 'hue_shift') return {ok: true, value: 0};
-		if (name === 'neutral_chroma') return {ok: true, value: NEUTRAL_CHROMA[scheme]};
+		if (name === 'chroma_scale') return { ok: true, value: 1 };
+		if (name === 'hue_shift') return { ok: true, value: 0 };
+		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
 		if (name === 'palette_chroma_min') {
-			return {ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_min};
+			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_min };
 		}
 		if (name === 'palette_chroma_max') {
-			return {ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_max};
+			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_max };
 		}
 		if (name === 'palette_chroma_curve') {
-			return {ok: true, value: PALETTE_CHROMA_KNOBS[scheme].curve};
+			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].curve };
 		}
 		// lightness endpoints and curve
 		const knob_match = LIGHTNESS_KNOB_MATCHER.exec(name);
@@ -311,7 +315,7 @@ class ThemeResolver {
 			const field = knob_match[2];
 			const value =
 				field === '00' ? knobs.lightness_00 : field === '100' ? knobs.lightness_100 : knobs.curve;
-			return {ok: true, value};
+			return { ok: true, value };
 		}
 		// derived lightness intermediates — compute from the resolved knobs
 		const stop_match = LIGHTNESS_STOP_MATCHER.exec(name);
@@ -320,7 +324,7 @@ class ThemeResolver {
 			const stop = stop_match[2] as NumericScaleVariant;
 			const knobs = this.#lightness_knobs(family, scheme, visited);
 			if (!knobs.ok) return knobs.error;
-			return {ok: true, value: ramp_lightness(knobs.value, stop)};
+			return { ok: true, value: ramp_lightness(knobs.value, stop) };
 		}
 		// derived palette chroma stops — the capped knob curve
 		const chroma_match = PALETTE_CHROMA_STOP_MATCHER.exec(name);
@@ -329,48 +333,48 @@ class ThemeResolver {
 			const knobs = this.#chroma_knobs(scheme, visited);
 			if (!knobs.ok) return knobs.error;
 			const value = ramp_chroma(scheme, stop, 1, knobs.value, PALETTE_CHROMA_CAPS[scheme][stop]);
-			return {ok: true, value};
+			return { ok: true, value };
 		}
 		return {
 			ok: false,
 			variable: name,
 			value: '(default)',
-			reason: 'no numeric default for variable',
+			reason: 'no numeric default for variable'
 		};
 	}
 
 	#lightness_knobs(
 		family: 'palette' | 'shade' | 'text',
 		scheme: ColorSchemeVariant,
-		visited: Set<string>,
-	): {ok: true; value: LightnessRampKnobs} | {ok: false; error: Resolved} {
+		visited: Set<string>
+	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
 		const l00 = this.#resolve(`${family}_lightness_00`, scheme, visited);
-		if (!l00.ok) return {ok: false, error: l00};
+		if (!l00.ok) return { ok: false, error: l00 };
 		const l100 = this.#resolve(`${family}_lightness_100`, scheme, visited);
-		if (!l100.ok) return {ok: false, error: l100};
+		if (!l100.ok) return { ok: false, error: l100 };
 		const curve = this.#resolve(`${family}_lightness_curve`, scheme, visited);
-		if (!curve.ok) return {ok: false, error: curve};
+		if (!curve.ok) return { ok: false, error: curve };
 		return {
 			ok: true,
-			value: {lightness_00: l00.value, lightness_100: l100.value, curve: curve.value},
+			value: { lightness_00: l00.value, lightness_100: l100.value, curve: curve.value }
 		};
 	}
 
 	#chroma_knobs(
 		scheme: ColorSchemeVariant,
-		visited: Set<string>,
+		visited: Set<string>
 	):
-		| {ok: true; value: {chroma_min: number; chroma_max: number; curve: number}}
-		| {ok: false; error: Resolved} {
+		| { ok: true; value: { chroma_min: number; chroma_max: number; curve: number } }
+		| { ok: false; error: Resolved } {
 		const chroma_min = this.#resolve('palette_chroma_min', scheme, visited);
-		if (!chroma_min.ok) return {ok: false, error: chroma_min};
+		if (!chroma_min.ok) return { ok: false, error: chroma_min };
 		const chroma_max = this.#resolve('palette_chroma_max', scheme, visited);
-		if (!chroma_max.ok) return {ok: false, error: chroma_max};
+		if (!chroma_max.ok) return { ok: false, error: chroma_max };
 		const curve = this.#resolve('palette_chroma_curve', scheme, visited);
-		if (!curve.ok) return {ok: false, error: curve};
+		if (!curve.ok) return { ok: false, error: curve };
 		return {
 			ok: true,
-			value: {chroma_min: chroma_min.value, chroma_max: chroma_max.value, curve: curve.value},
+			value: { chroma_min: chroma_min.value, chroma_max: chroma_max.value, curve: curve.value }
 		};
 	}
 }
@@ -385,7 +389,7 @@ class ThemeResolver {
 export const resolve_theme_knob = (
 	theme: Theme,
 	name: string,
-	scheme: ColorSchemeVariant,
+	scheme: ColorSchemeVariant
 ): number | null => {
 	const r = new ThemeResolver(theme).resolve(name, scheme);
 	return r.ok ? r.value : null;
@@ -399,7 +403,7 @@ const validate_knob_value = (
 	knob: ThemeKnob,
 	value: string,
 	variable: string,
-	slot: string,
+	slot: string
 ): Array<ThemeIssue> => {
 	const issues: Array<ThemeIssue> = [];
 	const trimmed = value.trim();
@@ -411,7 +415,7 @@ const validate_knob_value = (
 				message: `${variable} ${slot} ${trimmed} is outside the safe range [${knob.range[0]}, ${
 					knob.range[1]
 				}], the design envelope (knowingly exceedable)`,
-				variable,
+				variable
 			});
 		}
 	};
@@ -422,7 +426,7 @@ const validate_knob_value = (
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a numeric ${knob.kind} value`,
-					variable,
+					variable
 				});
 			} else {
 				check_range();
@@ -436,7 +440,7 @@ const validate_knob_value = (
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a hue angle or var(--hue_X) binding`,
-					variable,
+					variable
 				});
 			} else if (numeric) {
 				check_range();
@@ -448,7 +452,7 @@ const validate_knob_value = (
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a CSS time value like 0.2s`,
-					variable,
+					variable
 				});
 			}
 			break;
@@ -458,7 +462,7 @@ const validate_knob_value = (
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not one of ${knob.values.join(', ')}`,
-					variable,
+					variable
 				});
 			}
 			break;
@@ -479,26 +483,26 @@ const validate_knob_value = (
 export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 	const issues: Array<ThemeIssue> = [];
 	if (!theme.name) {
-		issues.push({level: 'error', message: 'theme name must be non-empty'});
+		issues.push({ level: 'error', message: 'theme name must be non-empty' });
 	}
-	const scheme: unknown = (theme as {scheme?: unknown}).scheme;
+	const scheme: unknown = (theme as { scheme?: unknown }).scheme;
 	if (scheme !== undefined && scheme !== 'dual' && scheme !== 'light' && scheme !== 'dark') {
 		issues.push({
 			level: 'error',
-			message: `invalid scheme ${JSON.stringify(scheme)} — expected 'dual', 'light', or 'dark'`,
+			message: `invalid scheme ${JSON.stringify(scheme)} — expected 'dual', 'light', or 'dark'`
 		});
 	}
 	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
 	for (const variable of theme.variables) {
 		const parsed = StyleVariable.safeParse(variable);
-		const name: unknown = (variable as {name?: unknown}).name;
+		const name: unknown = (variable as { name?: unknown }).name;
 		const name_label = typeof name === 'string' ? name : undefined;
 		if (!parsed.success) {
 			for (const issue of parsed.error.issues) {
 				issues.push({
 					level: 'error',
 					message: `invalid variable${name_label ? ` "${name_label}"` : ''}: ${issue.message}`,
-					...(name_label ? {variable: name_label} : null),
+					...(name_label ? { variable: name_label } : null)
 				});
 			}
 			continue;
@@ -508,7 +512,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 			issues.push({
 				level: 'error',
 				message: `unknown variable "${valid.name}"`,
-				variable: valid.name,
+				variable: valid.name
 			});
 			continue;
 		}
@@ -521,7 +525,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 				message: `"${valid.name}" carries a dark slot under a '${
 					stance
 				}' scheme stance — stanced themes render one appearance in both color schemes, so author single-slot values`,
-				variable: valid.name,
+				variable: valid.name
 			});
 		}
 		const knob = theme_knob_by_name.get(valid.name);
@@ -561,11 +565,11 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const unchecked: Array<ThemeUncheckedEntry> = [];
 	const seen_unchecked: Set<string> = new Set();
 
-	const record = (r: Extract<Resolved, {ok: false}>): null => {
+	const record = (r: Extract<Resolved, { ok: false }>): null => {
 		const key = `${r.variable}|${r.value}|${r.reason}`;
 		if (!seen_unchecked.has(key)) {
 			seen_unchecked.add(key);
-			unchecked.push({variable: r.variable, value: r.value, reason: r.reason});
+			unchecked.push({ variable: r.variable, value: r.value, reason: r.reason });
 		}
 		return null;
 	};
@@ -579,7 +583,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const ramp_color = (
 		hue: number,
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant,
+		scheme: ColorSchemeVariant
 	): Oklch | null => {
 		const lightness = num(`palette_lightness_${stop}`, scheme);
 		const chroma_stop = num(`palette_chroma_${stop}`, scheme);
@@ -591,7 +595,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		return [
 			lightness,
 			chroma_stop * chroma_scale,
-			hue + ramp_hue_shift_offset(stop, scheme, hue_shift),
+			hue + ramp_hue_shift_offset(stop, scheme, hue_shift)
 		];
 	};
 
@@ -599,7 +603,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const neutral_color = (
 		family: 'shade' | 'text',
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant,
+		scheme: ColorSchemeVariant
 	): Oklch | null => {
 		const lightness = num(`${family}_lightness_${stop}`, scheme);
 		const neutral_c = num('neutral_chroma', scheme);
@@ -618,7 +622,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		return [
 			lightness,
 			neutral_c * ramp_chroma_shape(stop, curve),
-			neutral_hue + ramp_hue_shift_offset(stop, scheme, hue_shift),
+			neutral_hue + ramp_hue_shift_offset(stop, scheme, hue_shift)
 		];
 	};
 
@@ -632,13 +636,13 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			subject,
 			value: gamut_excess(oklch_to_srgb(color)),
 			threshold: 1e-4,
-			pass: oklch_in_srgb_gamut(color, 1e-4),
+			pass: oklch_in_srgb_gamut(color, 1e-4)
 		});
 	};
 
 	const push_monotonicity = (
 		family: 'palette' | 'shade' | 'text',
-		scheme: ColorSchemeVariant,
+		scheme: ColorSchemeVariant
 	): void => {
 		const lightnesses: Array<number> = [];
 		for (const stop of numeric_scale_variants) {
@@ -659,7 +663,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			subject: `${family}_lightness`,
 			value,
 			threshold: 0,
-			pass: value > 0,
+			pass: value > 0
 		});
 	};
 
@@ -710,7 +714,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				subject: `text_80 on shade_${stop}`,
 				value: ratio,
 				threshold: GATE_BODY_TEXT,
-				pass: ratio >= GATE_BODY_TEXT,
+				pass: ratio >= GATE_BODY_TEXT
 			});
 		}
 
@@ -726,7 +730,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				subject: 'text_50 on shade_00',
 				value: ratio,
 				threshold: GATE_SUBTLE_TEXT,
-				pass: ratio >= GATE_SUBTLE_TEXT,
+				pass: ratio >= GATE_SUBTLE_TEXT
 			});
 		}
 
@@ -742,7 +746,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 					subject: 'accent_60 on shade_00',
 					value: ratio,
 					threshold: GATE_LINK,
-					pass: ratio >= GATE_LINK,
+					pass: ratio >= GATE_LINK
 				});
 			}
 		}
@@ -771,7 +775,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 					subject: `${label}_50 vs shade_00`,
 					value: ui,
 					threshold: GATE_UI,
-					pass: ui >= GATE_UI,
+					pass: ui >= GATE_UI
 				});
 				const on_fill = contrast(text_max, fill_rgb);
 				entries.push({
@@ -780,14 +784,14 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 					subject: `text_max on ${label}_50`,
 					value: on_fill,
 					threshold: GATE_FILL_TEXT,
-					pass: on_fill >= GATE_FILL_TEXT,
+					pass: on_fill >= GATE_FILL_TEXT
 				});
 			}
 		}
 	}
 
 	const ok = unchecked.length === 0 && entries.every((e) => e.pass);
-	return {ok, entries, unchecked};
+	return { ok, entries, unchecked };
 };
 
 //
@@ -818,7 +822,7 @@ const resolve_or = (
 	resolver: ThemeResolver,
 	name: string,
 	scheme: ColorSchemeVariant,
-	fallback: number,
+	fallback: number
 ): number => {
 	const r = resolver.resolve(name, scheme);
 	return r.ok ? r.value : fallback;
@@ -826,7 +830,7 @@ const resolve_or = (
 
 const resolve_lightness_knobs = (
 	resolver: ThemeResolver,
-	scheme: ColorSchemeVariant,
+	scheme: ColorSchemeVariant
 ): LightnessRampKnobs => {
 	const l00 = resolver.resolve('palette_lightness_00', scheme);
 	const l100 = resolver.resolve('palette_lightness_100', scheme);
@@ -835,7 +839,7 @@ const resolve_lightness_knobs = (
 	return {
 		lightness_00: l00.ok ? l00.value : fallback.lightness_00,
 		lightness_100: l100.ok ? l100.value : fallback.lightness_100,
-		curve: curve.ok ? curve.value : fallback.curve,
+		curve: curve.ok ? curve.value : fallback.curve
 	};
 };
 
@@ -862,14 +866,14 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 			collect_hues(resolver, 'light'),
 			resolve_lightness_knobs(resolver, 'light'),
 			'light',
-			resolve_or(resolver, 'hue_shift', 'light', 0),
+			resolve_or(resolver, 'hue_shift', 'light', 0)
 		),
 		dark: compute_palette_chroma_caps(
 			collect_hues(resolver, 'dark'),
 			resolve_lightness_knobs(resolver, 'dark'),
 			'dark',
-			resolve_or(resolver, 'hue_shift', 'dark', 0),
-		),
+			resolve_or(resolver, 'hue_shift', 'dark', 0)
+		)
 	};
 
 	const cap_overrides: Array<StyleVariable> = [];
@@ -884,12 +888,12 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 				name: `palette_chroma_${stop}`,
 				// always emit both slots — the dual-slot rule
 				light: render_chroma_stop_css(stop, 'light', light_cap),
-				dark: render_chroma_stop_css(stop, 'dark', dark_cap),
+				dark: render_chroma_stop_css(stop, 'dark', dark_cap)
 			});
 		}
 	}
 
 	// spread to preserve the scheme stance (and any future fields)
-	const compiled: Theme = {...theme, variables: [...theme.variables, ...cap_overrides]};
-	return {theme: compiled, report: check_theme(compiled), issues};
+	const compiled: Theme = { ...theme, variables: [...theme.variables, ...cap_overrides] };
+	return { theme: compiled, report: check_theme(compiled), issues };
 };

@@ -1,9 +1,9 @@
 <script lang="ts">
 	import ColorSwatchItem from './ColorSwatchItem.svelte';
-	import {intensity_variants, type PaletteVariant} from '$lib/variable_data.ts';
+	import { intensity_variants, type PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
-		letter,
+		letter
 	}: {
 		letter: PaletteVariant;
 	} = $props();

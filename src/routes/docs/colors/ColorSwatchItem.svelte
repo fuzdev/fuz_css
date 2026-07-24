@@ -1,13 +1,13 @@
 <script lang="ts">
-	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import {oklch_to_srgb, type Oklch} from '$lib/oklch.ts';
-	import type {PaletteVariant} from '$lib/variable_data.ts';
+	import { oklch_to_srgb, type Oklch } from '$lib/oklch.ts';
+	import type { PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
 		intensity,
-		letter,
+		letter
 	}: {
 		intensity: string;
 		letter: PaletteVariant;
@@ -45,7 +45,7 @@
 				.map((c) =>
 					Math.round(Math.min(1, Math.max(0, c)) * 255)
 						.toString(16)
-						.padStart(2, '0'),
+						.padStart(2, '0')
 				)
 				.join('')
 		);

@@ -4,11 +4,11 @@
  * @module
  */
 
-import {parse_style_css} from '$lib/style_rule_parser.ts';
-import {build_variable_graph} from '$lib/variable_graph.ts';
-import {build_class_variable_index} from '$lib/class_variable_index.ts';
-import type {StyleVariable} from '$lib/variable.ts';
-import type {CssClassDefinition} from '$lib/css_class_generation.ts';
+import { parse_style_css } from '$lib/style_rule_parser.ts';
+import { build_variable_graph } from '$lib/variable_graph.ts';
+import { build_class_variable_index } from '$lib/class_variable_index.ts';
+import type { StyleVariable } from '$lib/variable.ts';
+import type { CssClassDefinition } from '$lib/css_class_generation.ts';
 
 /**
  * Helper to create minimal test fixtures for CSS resolution tests.
@@ -16,7 +16,7 @@ import type {CssClassDefinition} from '$lib/css_class_generation.ts';
 export const create_test_fixtures = (
 	css: string,
 	variables: Array<StyleVariable>,
-	class_defs: Record<string, CssClassDefinition | undefined> = {},
+	class_defs: Record<string, CssClassDefinition | undefined> = {}
 ): {
 	style_rule_index: ReturnType<typeof parse_style_css>;
 	variable_graph: ReturnType<typeof build_variable_graph>;
@@ -25,7 +25,7 @@ export const create_test_fixtures = (
 	const style_rule_index = parse_style_css(css, 'test-hash');
 	const variable_graph = build_variable_graph(variables, 'test-hash');
 	const class_variable_index = build_class_variable_index(class_defs);
-	return {style_rule_index, variable_graph, class_variable_index};
+	return { style_rule_index, variable_graph, class_variable_index };
 };
 
 /**
@@ -41,5 +41,5 @@ export const empty_detection = (): {
 	detected_elements: new Set<string>(),
 	detected_classes: new Set<string>(),
 	detected_css_variables: new Set<string>(),
-	utility_variables_used: new Set<string>(),
+	utility_variables_used: new Set<string>()
 });

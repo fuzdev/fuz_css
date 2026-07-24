@@ -38,97 +38,97 @@ export interface ModifierDefinition {
  */
 export const MODIFIERS: Array<ModifierDefinition> = [
 	// Media modifiers - viewport breakpoints (mobile-first)
-	{name: 'sm', type: 'media', css: '@media (width >= 40rem)', order: 1},
-	{name: 'md', type: 'media', css: '@media (width >= 48rem)', order: 2},
-	{name: 'lg', type: 'media', css: '@media (width >= 64rem)', order: 3},
-	{name: 'xl', type: 'media', css: '@media (width >= 80rem)', order: 4},
-	{name: '2xl', type: 'media', css: '@media (width >= 96rem)', order: 5},
+	{ name: 'sm', type: 'media', css: '@media (width >= 40rem)', order: 1 },
+	{ name: 'md', type: 'media', css: '@media (width >= 48rem)', order: 2 },
+	{ name: 'lg', type: 'media', css: '@media (width >= 64rem)', order: 3 },
+	{ name: 'xl', type: 'media', css: '@media (width >= 80rem)', order: 4 },
+	{ name: '2xl', type: 'media', css: '@media (width >= 96rem)', order: 5 },
 
 	// Max-width variants (for targeting below a breakpoint)
-	{name: 'max-sm', type: 'media', css: '@media (width < 40rem)', order: 11},
-	{name: 'max-md', type: 'media', css: '@media (width < 48rem)', order: 12},
-	{name: 'max-lg', type: 'media', css: '@media (width < 64rem)', order: 13},
-	{name: 'max-xl', type: 'media', css: '@media (width < 80rem)', order: 14},
-	{name: 'max-2xl', type: 'media', css: '@media (width < 96rem)', order: 15},
+	{ name: 'max-sm', type: 'media', css: '@media (width < 40rem)', order: 11 },
+	{ name: 'max-md', type: 'media', css: '@media (width < 48rem)', order: 12 },
+	{ name: 'max-lg', type: 'media', css: '@media (width < 64rem)', order: 13 },
+	{ name: 'max-xl', type: 'media', css: '@media (width < 80rem)', order: 14 },
+	{ name: 'max-2xl', type: 'media', css: '@media (width < 96rem)', order: 15 },
 
 	// Media modifiers - feature queries
-	{name: 'print', type: 'media', css: '@media print'},
-	{name: 'motion-safe', type: 'media', css: '@media (prefers-reduced-motion: no-preference)'},
-	{name: 'motion-reduce', type: 'media', css: '@media (prefers-reduced-motion: reduce)'},
-	{name: 'contrast-more', type: 'media', css: '@media (prefers-contrast: more)'},
-	{name: 'contrast-less', type: 'media', css: '@media (prefers-contrast: less)'},
-	{name: 'portrait', type: 'media', css: '@media (orientation: portrait)'},
-	{name: 'landscape', type: 'media', css: '@media (orientation: landscape)'},
-	{name: 'forced-colors', type: 'media', css: '@media (forced-colors: active)'},
+	{ name: 'print', type: 'media', css: '@media print' },
+	{ name: 'motion-safe', type: 'media', css: '@media (prefers-reduced-motion: no-preference)' },
+	{ name: 'motion-reduce', type: 'media', css: '@media (prefers-reduced-motion: reduce)' },
+	{ name: 'contrast-more', type: 'media', css: '@media (prefers-contrast: more)' },
+	{ name: 'contrast-less', type: 'media', css: '@media (prefers-contrast: less)' },
+	{ name: 'portrait', type: 'media', css: '@media (orientation: portrait)' },
+	{ name: 'landscape', type: 'media', css: '@media (orientation: landscape)' },
+	{ name: 'forced-colors', type: 'media', css: '@media (forced-colors: active)' },
 
 	// Ancestor modifiers - color scheme
-	{name: 'dark', type: 'ancestor', css: ':root.dark'},
-	{name: 'light', type: 'ancestor', css: ':root.light'},
+	{ name: 'dark', type: 'ancestor', css: ':root.dark' },
+	{ name: 'light', type: 'ancestor', css: ':root.light' },
 
 	// State modifiers - interaction (ordered for proper cascade: LVFHA)
-	{name: 'any-link', type: 'state', css: ':any-link'},
-	{name: 'link', type: 'state', css: ':link'},
-	{name: 'visited', type: 'state', css: ':visited', order: 1},
-	{name: 'focus-within', type: 'state', css: ':focus-within', order: 2},
-	{name: 'focus', type: 'state', css: ':focus', order: 3},
-	{name: 'focus-visible', type: 'state', css: ':focus-visible', order: 4},
-	{name: 'hover', type: 'state', css: ':hover', order: 5},
-	{name: 'active', type: 'state', css: ':active', order: 6},
-	{name: 'target', type: 'state', css: ':target', order: 7},
+	{ name: 'any-link', type: 'state', css: ':any-link' },
+	{ name: 'link', type: 'state', css: ':link' },
+	{ name: 'visited', type: 'state', css: ':visited', order: 1 },
+	{ name: 'focus-within', type: 'state', css: ':focus-within', order: 2 },
+	{ name: 'focus', type: 'state', css: ':focus', order: 3 },
+	{ name: 'focus-visible', type: 'state', css: ':focus-visible', order: 4 },
+	{ name: 'hover', type: 'state', css: ':hover', order: 5 },
+	{ name: 'active', type: 'state', css: ':active', order: 6 },
+	{ name: 'target', type: 'state', css: ':target', order: 7 },
 
 	// State modifiers - form states
-	{name: 'autofill', type: 'state', css: ':autofill'},
-	{name: 'blank', type: 'state', css: ':blank'},
-	{name: 'disabled', type: 'state', css: ':disabled'},
-	{name: 'enabled', type: 'state', css: ':enabled'},
-	{name: 'checked', type: 'state', css: ':checked'},
-	{name: 'indeterminate', type: 'state', css: ':indeterminate'},
-	{name: 'default', type: 'state', css: ':default'},
-	{name: 'required', type: 'state', css: ':required'},
-	{name: 'optional', type: 'state', css: ':optional'},
-	{name: 'valid', type: 'state', css: ':valid'},
-	{name: 'invalid', type: 'state', css: ':invalid'},
-	{name: 'user-valid', type: 'state', css: ':user-valid'},
-	{name: 'user-invalid', type: 'state', css: ':user-invalid'},
-	{name: 'in-range', type: 'state', css: ':in-range'},
-	{name: 'out-of-range', type: 'state', css: ':out-of-range'},
-	{name: 'placeholder-shown', type: 'state', css: ':placeholder-shown'},
-	{name: 'read-only', type: 'state', css: ':read-only'},
-	{name: 'read-write', type: 'state', css: ':read-write'},
+	{ name: 'autofill', type: 'state', css: ':autofill' },
+	{ name: 'blank', type: 'state', css: ':blank' },
+	{ name: 'disabled', type: 'state', css: ':disabled' },
+	{ name: 'enabled', type: 'state', css: ':enabled' },
+	{ name: 'checked', type: 'state', css: ':checked' },
+	{ name: 'indeterminate', type: 'state', css: ':indeterminate' },
+	{ name: 'default', type: 'state', css: ':default' },
+	{ name: 'required', type: 'state', css: ':required' },
+	{ name: 'optional', type: 'state', css: ':optional' },
+	{ name: 'valid', type: 'state', css: ':valid' },
+	{ name: 'invalid', type: 'state', css: ':invalid' },
+	{ name: 'user-valid', type: 'state', css: ':user-valid' },
+	{ name: 'user-invalid', type: 'state', css: ':user-invalid' },
+	{ name: 'in-range', type: 'state', css: ':in-range' },
+	{ name: 'out-of-range', type: 'state', css: ':out-of-range' },
+	{ name: 'placeholder-shown', type: 'state', css: ':placeholder-shown' },
+	{ name: 'read-only', type: 'state', css: ':read-only' },
+	{ name: 'read-write', type: 'state', css: ':read-write' },
 
 	// State modifiers - structural
-	{name: 'first', type: 'state', css: ':first-child'},
-	{name: 'last', type: 'state', css: ':last-child'},
-	{name: 'only', type: 'state', css: ':only-child'},
-	{name: 'first-of-type', type: 'state', css: ':first-of-type'},
-	{name: 'last-of-type', type: 'state', css: ':last-of-type'},
-	{name: 'only-of-type', type: 'state', css: ':only-of-type'},
-	{name: 'odd', type: 'state', css: ':nth-child(odd)'},
-	{name: 'even', type: 'state', css: ':nth-child(even)'},
-	{name: 'empty', type: 'state', css: ':empty'},
+	{ name: 'first', type: 'state', css: ':first-child' },
+	{ name: 'last', type: 'state', css: ':last-child' },
+	{ name: 'only', type: 'state', css: ':only-child' },
+	{ name: 'first-of-type', type: 'state', css: ':first-of-type' },
+	{ name: 'last-of-type', type: 'state', css: ':last-of-type' },
+	{ name: 'only-of-type', type: 'state', css: ':only-of-type' },
+	{ name: 'odd', type: 'state', css: ':nth-child(odd)' },
+	{ name: 'even', type: 'state', css: ':nth-child(even)' },
+	{ name: 'empty', type: 'state', css: ':empty' },
 	// Note: nth-child(N), nth-last-child(N), nth-of-type(N), nth-last-of-type(N) are handled dynamically
 
 	// State modifiers - UI states
-	{name: 'fullscreen', type: 'state', css: ':fullscreen'},
-	{name: 'modal', type: 'state', css: ':modal'},
-	{name: 'open', type: 'state', css: ':open'},
-	{name: 'popover-open', type: 'state', css: ':popover-open'},
+	{ name: 'fullscreen', type: 'state', css: ':fullscreen' },
+	{ name: 'modal', type: 'state', css: ':modal' },
+	{ name: 'open', type: 'state', css: ':open' },
+	{ name: 'popover-open', type: 'state', css: ':popover-open' },
 
 	// State modifiers - media states
-	{name: 'paused', type: 'state', css: ':paused'},
-	{name: 'playing', type: 'state', css: ':playing'},
+	{ name: 'paused', type: 'state', css: ':paused' },
+	{ name: 'playing', type: 'state', css: ':playing' },
 
 	// Pseudo-element modifiers
-	{name: 'before', type: 'pseudo-element', css: '::before'},
-	{name: 'after', type: 'pseudo-element', css: '::after'},
-	{name: 'cue', type: 'pseudo-element', css: '::cue'},
-	{name: 'first-letter', type: 'pseudo-element', css: '::first-letter'},
-	{name: 'first-line', type: 'pseudo-element', css: '::first-line'},
-	{name: 'placeholder', type: 'pseudo-element', css: '::placeholder'},
-	{name: 'selection', type: 'pseudo-element', css: '::selection'},
-	{name: 'marker', type: 'pseudo-element', css: '::marker'},
-	{name: 'file', type: 'pseudo-element', css: '::file-selector-button'},
-	{name: 'backdrop', type: 'pseudo-element', css: '::backdrop'},
+	{ name: 'before', type: 'pseudo-element', css: '::before' },
+	{ name: 'after', type: 'pseudo-element', css: '::after' },
+	{ name: 'cue', type: 'pseudo-element', css: '::cue' },
+	{ name: 'first-letter', type: 'pseudo-element', css: '::first-letter' },
+	{ name: 'first-line', type: 'pseudo-element', css: '::first-line' },
+	{ name: 'placeholder', type: 'pseudo-element', css: '::placeholder' },
+	{ name: 'selection', type: 'pseudo-element', css: '::selection' },
+	{ name: 'marker', type: 'pseudo-element', css: '::marker' },
+	{ name: 'file', type: 'pseudo-element', css: '::file-selector-button' },
+	{ name: 'backdrop', type: 'pseudo-element', css: '::backdrop' }
 ];
 
 // Generated lookup maps for efficient access
@@ -269,14 +269,14 @@ export const parse_arbitrary_breakpoint = (segment: string): string | null => {
  * @returns object with name (including parameter) and CSS, or null if not parameterized
  */
 export const parse_parameterized_state = (
-	segment: string,
-): {name: string; css: string; type: 'state'} | null => {
+	segment: string
+): { name: string; css: string; type: 'state' } | null => {
 	const nth_child_match = NTH_CHILD_PATTERN.exec(segment);
 	if (nth_child_match) {
 		return {
 			name: segment,
 			css: `:nth-child(${nth_child_match[1]})`,
-			type: 'state',
+			type: 'state'
 		};
 	}
 
@@ -285,7 +285,7 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-last-child(${nth_last_child_match[1]})`,
-			type: 'state',
+			type: 'state'
 		};
 	}
 
@@ -294,7 +294,7 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-of-type(${nth_of_type_match[1]})`,
-			type: 'state',
+			type: 'state'
 		};
 	}
 
@@ -303,7 +303,7 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-last-of-type(${nth_last_of_type_match[1]})`,
-			type: 'state',
+			type: 'state'
 		};
 	}
 
@@ -317,8 +317,8 @@ export const parse_parameterized_state = (
  * @returns the modifier definition or null if not a known modifier
  */
 export const get_modifier = (
-	segment: string,
-): (ModifierDefinition & {is_arbitrary?: boolean}) | null => {
+	segment: string
+): (ModifierDefinition & { is_arbitrary?: boolean }) | null => {
 	// Check static modifiers first
 	const media = MEDIA_MODIFIERS.get(segment);
 	if (media) return media;
@@ -339,7 +339,7 @@ export const get_modifier = (
 			name: segment,
 			type: 'media',
 			css: arbitrary_css,
-			is_arbitrary: true,
+			is_arbitrary: true
 		};
 	}
 
@@ -348,7 +348,7 @@ export const get_modifier = (
 	if (parameterized) {
 		return {
 			...parameterized,
-			is_arbitrary: true,
+			is_arbitrary: true
 		};
 	}
 

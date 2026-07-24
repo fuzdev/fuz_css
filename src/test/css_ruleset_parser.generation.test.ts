@@ -1,7 +1,7 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {generate_modified_ruleset} from '$lib/css_ruleset_parser.ts';
-import {assert_css_contains, assert_css_not_contains} from './test_helpers.ts';
+import { generate_modified_ruleset } from '$lib/css_ruleset_parser.ts';
+import { assert_css_contains, assert_css_not_contains } from './test_helpers.ts';
 
 /**
  * Tests for generate_modified_ruleset which creates CSS with modified selectors
@@ -16,7 +16,7 @@ describe('generate_modified_ruleset', () => {
 			':hover',
 			'',
 			null,
-			null,
+			null
 		);
 
 		assert_css_contains(result.css, '.hover\\:chip:hover', 'font-weight: 500;');
@@ -30,7 +30,7 @@ describe('generate_modified_ruleset', () => {
 			'',
 			'',
 			'@media (width >= 48rem)',
-			null,
+			null
 		);
 
 		assert_css_contains(result.css, '@media (width >= 48rem) {', '.md\\:chip', '}');
@@ -44,7 +44,7 @@ describe('generate_modified_ruleset', () => {
 			'',
 			'',
 			null,
-			':root.dark',
+			':root.dark'
 		);
 
 		assert_css_contains(result.css, ':root.dark {', '.dark\\:chip');
@@ -58,14 +58,14 @@ describe('generate_modified_ruleset', () => {
 			'',
 			'',
 			'@media (width >= 48rem)',
-			':root.dark',
+			':root.dark'
 		);
 
 		assert_css_contains(
 			result.css,
 			'@media (width >= 48rem) {',
 			':root.dark {',
-			'.md\\:dark\\:chip',
+			'.md\\:dark\\:chip'
 		);
 	});
 
@@ -81,14 +81,14 @@ describe('generate_modified_ruleset', () => {
 			'',
 			'',
 			'@media (width >= 48rem)',
-			null,
+			null
 		);
 
 		assert_css_contains(
 			result.css,
 			'.md\\:selectable',
 			'.md\\:selectable:hover',
-			'@media (width >= 48rem) {',
+			'@media (width >= 48rem) {'
 		);
 	});
 
@@ -105,14 +105,14 @@ describe('generate_modified_ruleset', () => {
 			':focus',
 			'',
 			null,
-			null,
+			null
 		);
 
 		assert_css_contains(
 			result.css,
 			'.focus\\:selectable:focus',
 			'.focus\\:selectable:hover:focus',
-			'.focus\\:selectable.selected:focus',
+			'.focus\\:selectable.selected:focus'
 		);
 	});
 
@@ -129,14 +129,14 @@ describe('generate_modified_ruleset', () => {
 			':hover',
 			'',
 			null,
-			null,
+			null
 		);
 
 		assert_css_contains(
 			result.css,
 			'.hover\\:menuitem:hover',
 			'.hover\\:menuitem:hover .content',
-			'.hover\\:menuitem:hover .icon',
+			'.hover\\:menuitem:hover .icon'
 		);
 	});
 
@@ -152,7 +152,7 @@ describe('generate_modified_ruleset', () => {
 			':hover',
 			'',
 			null,
-			null,
+			null
 		);
 
 		assert_css_contains(result.css, '.hover\\:chevron:hover', '.hover\\:chevron:hover::before');
@@ -170,7 +170,7 @@ describe('generate_modified_ruleset', () => {
 			':hover',
 			'',
 			null,
-			null,
+			null
 		);
 
 		assert_css_contains(result.css, '.hover\\:chip:hover', 'a.hover\\:chip:hover');
@@ -189,7 +189,7 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'::before',
 				null,
-				null,
+				null
 			);
 
 			assert_css_not_contains(result.css, ':before::before');
@@ -207,7 +207,7 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'::after',
 				null,
-				null,
+				null
 			);
 
 			assert_css_not_contains(result.css, ':after::after');
@@ -223,7 +223,7 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'::first-letter',
 				null,
-				null,
+				null
 			);
 
 			assert_css_not_contains(result.css, ':first-letter::first-letter');
@@ -244,14 +244,14 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'::before',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(
 				result.css,
 				'.before\\:chevron::before',
 				'position: relative',
-				'border: 4px solid',
+				'border: 4px solid'
 			);
 			assert_css_not_contains(result.css, '::before::before');
 			assert.isNotNull(result.skipped_modifiers);
@@ -271,7 +271,7 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'::before',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(
@@ -279,7 +279,7 @@ describe('generate_modified_ruleset', () => {
 				'.before\\:icon::before',
 				'display: inline',
 				'.before\\:icon::after',
-				"content: '→'",
+				"content: '→'"
 			);
 			assert_css_not_contains(result.css, '::after::before', '::before::after');
 			assert.isNotNull(result.skipped_modifiers);
@@ -298,7 +298,7 @@ describe('generate_modified_ruleset', () => {
 				':hover',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(
@@ -306,7 +306,7 @@ describe('generate_modified_ruleset', () => {
 				'.hover\\:chevron:hover',
 				'.hover\\:chevron:hover::before',
 				'position: relative',
-				"content: ''",
+				"content: ''"
 			);
 			assert.isNull(result.skipped_modifiers);
 		});
@@ -321,7 +321,7 @@ describe('generate_modified_ruleset', () => {
 				':hover',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(result.css, '.hover\\:plain:hover', '.hover\\:plain:active:hover');
@@ -339,7 +339,7 @@ describe('generate_modified_ruleset', () => {
 				':hover:focus',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(result.css, '.hover\\:focus\\:selectable:hover:focus');
@@ -357,14 +357,14 @@ describe('generate_modified_ruleset', () => {
 				':hover:focus',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(
 				result.css,
 				'.hover\\:focus\\:btn:hover:focus',
 				'.hover\\:focus\\:btn:focus:hover',
-				'.hover\\:focus\\:btn:active:hover:focus',
+				'.hover\\:focus\\:btn:active:hover:focus'
 			);
 			assert.isNotNull(result.skipped_modifiers);
 			assert.strictEqual(result.skipped_modifiers.length, 2);
@@ -380,7 +380,7 @@ describe('generate_modified_ruleset', () => {
 				'',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(result.css, '.md\\:box');
@@ -395,7 +395,7 @@ describe('generate_modified_ruleset', () => {
 				':focus-visible',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(result.css, '.focus-visible\\:box:focus-visible');
@@ -409,7 +409,7 @@ describe('generate_modified_ruleset', () => {
 				':hover:focus:active',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert_css_contains(result.css, '.hover\\:focus\\:active\\:box:hover:focus:active');
@@ -430,7 +430,7 @@ describe('generate_modified_ruleset', () => {
 				':hover',
 				'',
 				null,
-				null,
+				null
 			);
 
 			assert.strictEqual(result.css, '');

@@ -1,14 +1,14 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {slide} from 'svelte/transition';
+	import { slide } from 'svelte/transition';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import {palette_variants} from '$lib/variable_data.ts';
+	import { palette_variants } from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'buttons';
 
@@ -30,16 +30,16 @@
 	<section>
 		<p>
 			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
-			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the
-			base style.
+			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the base
+			style.
 		</p>
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
 			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
 			Instead of having two distinct styles of buttons with outlined and filled variants, fuz_css
 			makes outlined buttons the default, and selected buttons are filled. There's also the
-			<code>.deselectable</code> modifier class for buttons that remain clickable when selected.
-			Themes can customize this behavior.
+			<code>.deselectable</code> modifier class for buttons that remain clickable when selected. Themes
+			can customize this behavior.
 		</p>
 		<div class:mb_xs>
 			<Code content={`<button>a button</button>`} />
@@ -145,8 +145,7 @@
 		</section>
 		<section>
 			<p>
-				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when
-				selected:
+				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when selected:
 			</p>
 			<Code content={`<button class="selected deselectable">\n\t...\n</button>`} />
 		</section>
@@ -156,8 +155,7 @@
 				class="width:100% deselectable"
 				class:selected={selected_deselectable_button}
 				onclick={() => (selected_deselectable_button = !selected_deselectable_button)}
-				>a
-				.deselectable{#if selected_deselectable_button}.selected{:else}&nbsp;unselected{/if} button</button
+				>a .deselectable{#if selected_deselectable_button}.selected{:else}&nbsp;unselected{/if} button</button
 			>
 			<button type="button" class="width:100% selected deselectable" disabled
 				>disabled .deselectable.selected</button
@@ -234,8 +232,8 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code
-			> scale buttons up and down by overriding custom properties for font, height, and padding.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
+			buttons up and down by overriding custom properties for font, height, and padding.
 		</p>
 		<Code
 			content={`<button class="xs">xs</button>\n<button class="sm">sm</button>\n<button>md</button>\n<button class="lg">lg</button>\n<button class="xl">xl</button>`}

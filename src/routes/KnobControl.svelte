@@ -1,9 +1,9 @@
 <script lang="ts">
 	import HueInput from '@fuzdev/fuz_ui/HueInput.svelte';
 
-	import type {ThemeKnob} from '$lib/knobs.ts';
-	import {PALETTE_HUES} from '$lib/ramps.ts';
-	import {palette_variants, palette_glosses, type PaletteVariant} from '$lib/variable_data.ts';
+	import type { ThemeKnob } from '$lib/knobs.ts';
+	import { PALETTE_HUES } from '$lib/ramps.ts';
+	import { palette_variants, palette_glosses, type PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
 		knob,
@@ -12,7 +12,7 @@
 		onchange,
 		onreset,
 		compact = false,
-		resolve_hue = (letter) => PALETTE_HUES[letter],
+		resolve_hue = (letter) => PALETTE_HUES[letter]
 	}: {
 		knob: ThemeKnob;
 		/**
@@ -62,10 +62,7 @@
 	// tracks the hue the way the letter buttons track their palette slot
 	const custom_color = $derived(`oklch(0.65 0.14 ${numeric_value ?? 0})`);
 	const scalar = $derived(
-		knob.kind === 'hue' ||
-			knob.kind === 'number' ||
-			knob.kind === 'percent' ||
-			knob.kind === 'time',
+		knob.kind === 'hue' || knob.kind === 'number' || knob.kind === 'percent' || knob.kind === 'time'
 	);
 	const min = $derived(knob.range?.[0] ?? 0);
 	const max = $derived(knob.range?.[1] ?? 100);

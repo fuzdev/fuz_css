@@ -1,4 +1,4 @@
-import type {CssClassDefinition} from './css_class_generation.ts';
+import type { CssClassDefinition } from './css_class_generation.ts';
 
 export type GeneratedClassResult = {
 	name: string;
@@ -42,20 +42,20 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	template: ClassTemplateFn<T1, T2, T3>,
 	values: Iterable<T1>,
 	secondary?: Iterable<T2>,
-	tertiary?: Iterable<T3>,
+	tertiary?: Iterable<T3>
 ): Record<string, CssClassDefinition> => {
 	const result: Record<string, CssClassDefinition> = {};
 
 	if (!secondary) {
 		for (const v1 of values) {
 			const generated = (template as any)(v1);
-			if (generated) result[generated.name] = {declaration: generated.css};
+			if (generated) result[generated.name] = { declaration: generated.css };
 		}
 	} else if (!tertiary) {
 		for (const v1 of values) {
 			for (const v2 of secondary) {
 				const generated = (template as any)(v1, v2);
-				if (generated) result[generated.name] = {declaration: generated.css};
+				if (generated) result[generated.name] = { declaration: generated.css };
 			}
 		}
 	} else {
@@ -63,7 +63,7 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 			for (const v2 of secondary) {
 				for (const v3 of tertiary) {
 					const generated = (template as any)(v1, v2, v3);
-					if (generated) result[generated.name] = {declaration: generated.css};
+					if (generated) result[generated.name] = { declaration: generated.css };
 				}
 			}
 		}
@@ -122,14 +122,14 @@ export const generate_property_classes = (
 	property: string,
 	values: Iterable<string>,
 	formatter?: (value: string) => string,
-	prefix: string = format_variable_name(property),
+	prefix: string = format_variable_name(property)
 ): Record<string, CssClassDefinition> => {
 	return generate_classes(
 		(value: string) => ({
 			name: `${prefix}_${format_variable_name(value)}`,
-			css: `${property}: ${formatter?.(value) ?? value};`,
+			css: `${property}: ${formatter?.(value) ?? value};`
 		}),
-		values,
+		values
 	);
 };
 
@@ -144,7 +144,7 @@ export const generate_property_classes = (
 export const generate_directional_classes = (
 	property: string,
 	values: Iterable<string>,
-	formatter?: (v: string) => string,
+	formatter?: (v: string) => string
 ): Record<string, CssClassDefinition> => {
 	const prefix = property[0]; // 'm' for margin, 'p' for padding
 
@@ -153,38 +153,38 @@ export const generate_directional_classes = (
 			const formatted = formatter?.(value) ?? value;
 
 			// Map variants to their configurations
-			const configs: Record<string, {name: string; css: string} | undefined> = {
-				'': {name: `${prefix}_${format_variable_name(value)}`, css: `${property}: ${formatted};`},
+			const configs: Record<string, { name: string; css: string } | undefined> = {
+				'': { name: `${prefix}_${format_variable_name(value)}`, css: `${property}: ${formatted};` },
 				t: {
 					name: `${prefix}t_${format_variable_name(value)}`,
-					css: `${property}-top: ${formatted};`,
+					css: `${property}-top: ${formatted};`
 				},
 				r: {
 					name: `${prefix}r_${format_variable_name(value)}`,
-					css: `${property}-right: ${formatted};`,
+					css: `${property}-right: ${formatted};`
 				},
 				b: {
 					name: `${prefix}b_${format_variable_name(value)}`,
-					css: `${property}-bottom: ${formatted};`,
+					css: `${property}-bottom: ${formatted};`
 				},
 				l: {
 					name: `${prefix}l_${format_variable_name(value)}`,
-					css: `${property}-left: ${formatted};`,
+					css: `${property}-left: ${formatted};`
 				},
 				x: {
 					name: `${prefix}x_${format_variable_name(value)}`,
-					css: `${property}-left: ${formatted};\t${property}-right: ${formatted};`,
+					css: `${property}-left: ${formatted};\t${property}-right: ${formatted};`
 				},
 				y: {
 					name: `${prefix}y_${format_variable_name(value)}`,
-					css: `${property}-top: ${formatted};\t${property}-bottom: ${formatted};`,
-				},
+					css: `${property}-top: ${formatted};\t${property}-bottom: ${formatted};`
+				}
 			};
 
 			return configs[variant] || null;
 		},
 		['', 't', 'r', 'b', 'l', 'x', 'y'],
-		values,
+		values
 	);
 };
 
@@ -197,22 +197,22 @@ export const generate_directional_classes = (
  */
 export const generate_border_radius_corners = (
 	values: Iterable<string>,
-	formatter?: (value: string) => string,
+	formatter?: (value: string) => string
 ): Record<string, CssClassDefinition> => {
 	const corners = [
-		{prop: 'border-top-left-radius', name: 'border_top_left_radius'},
-		{prop: 'border-top-right-radius', name: 'border_top_right_radius'},
-		{prop: 'border-bottom-left-radius', name: 'border_bottom_left_radius'},
-		{prop: 'border-bottom-right-radius', name: 'border_bottom_right_radius'},
+		{ prop: 'border-top-left-radius', name: 'border_top_left_radius' },
+		{ prop: 'border-top-right-radius', name: 'border_top_right_radius' },
+		{ prop: 'border-bottom-left-radius', name: 'border_bottom_left_radius' },
+		{ prop: 'border-bottom-right-radius', name: 'border_bottom_right_radius' }
 	];
 
 	return generate_classes(
 		(corner: (typeof corners)[0], value: string) => ({
 			name: `${corner.name}_${format_variable_name(value)}`,
-			css: `${corner.prop}: ${formatter?.(value) ?? value};`,
+			css: `${corner.prop}: ${formatter?.(value) ?? value};`
 		}),
 		corners,
-		values,
+		values
 	);
 };
 
@@ -226,15 +226,15 @@ export const generate_border_radius_corners = (
  */
 export const generate_shadow_classes = (
 	sizes: Iterable<string>,
-	alpha_mapping: Record<string, string>,
+	alpha_mapping: Record<string, string>
 ): Record<string, CssClassDefinition> => {
 	const shadow_types = [
-		{prefix: 'shadow', var_prefix: 'shadow'},
-		{prefix: 'shadow_top', var_prefix: 'shadow_top'},
-		{prefix: 'shadow_bottom', var_prefix: 'shadow_bottom'},
-		{prefix: 'shadow_inset', var_prefix: 'shadow_inset'},
-		{prefix: 'shadow_inset_top', var_prefix: 'shadow_inset_top'},
-		{prefix: 'shadow_inset_bottom', var_prefix: 'shadow_inset_bottom'},
+		{ prefix: 'shadow', var_prefix: 'shadow' },
+		{ prefix: 'shadow_top', var_prefix: 'shadow_top' },
+		{ prefix: 'shadow_bottom', var_prefix: 'shadow_bottom' },
+		{ prefix: 'shadow_inset', var_prefix: 'shadow_inset' },
+		{ prefix: 'shadow_inset_top', var_prefix: 'shadow_inset_top' },
+		{ prefix: 'shadow_inset_bottom', var_prefix: 'shadow_inset_bottom' }
 	];
 
 	return generate_classes(
@@ -244,9 +244,9 @@ export const generate_shadow_classes = (
 				size
 			}) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${
 				alpha_mapping[size]
-			})), transparent);`,
+			})), transparent);`
 		}),
 		shadow_types,
-		sizes,
+		sizes
 	);
 };

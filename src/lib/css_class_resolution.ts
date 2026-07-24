@@ -7,24 +7,24 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
+import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
-import type {InterpreterDiagnostic} from './diagnostics.ts';
-import type {CssClassDefinition, CssClassDefinitionStatic} from './css_class_generation.ts';
+import type { InterpreterDiagnostic } from './diagnostics.ts';
+import type { CssClassDefinition, CssClassDefinitionStatic } from './css_class_generation.ts';
 import {
 	try_resolve_literal,
 	extract_segments,
 	extract_and_validate_modifiers,
 	has_extracted_modifiers,
-	suggest_modifier,
+	suggest_modifier
 } from './css_literal.ts';
 
 /**
  * Result from resolving a `composes` array to combined declarations.
  */
 export type ResolveComposesResult =
-	| {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null}
-	| {ok: false; error: InterpreterDiagnostic};
+	| { ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null }
+	| { ok: false; error: InterpreterDiagnostic };
 
 /**
  * Resolves a class definition's declaration, handling `composes` composition.
@@ -43,7 +43,7 @@ export const resolve_class_definition = (
 	def: CssClassDefinitionStatic,
 	class_name: string,
 	definitions: Record<string, CssClassDefinition | undefined>,
-	css_properties: Set<string> | null = null,
+	css_properties: Set<string> | null = null
 ): ResolveComposesResult => {
 	let warnings: Array<InterpreterDiagnostic> | null = null;
 
@@ -55,7 +55,7 @@ export const resolve_class_definition = (
 			new Set([class_name]),
 			new Set(),
 			class_name,
-			css_properties,
+			css_properties
 		);
 		if (!result.ok) return result;
 
@@ -72,14 +72,14 @@ export const resolve_class_definition = (
 					level: 'warning',
 					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
-					suggestion: 'Remove the empty declaration property or add CSS',
+					suggestion: 'Remove the empty declaration property or add CSS'
 				});
 			}
 		}
 		if (!warnings && result.warnings) {
 			warnings = result.warnings;
 		}
-		return {ok: true, declaration: combined, warnings};
+		return { ok: true, declaration: combined, warnings };
 	}
 
 	// Handle declaration-only definitions
@@ -91,15 +91,15 @@ export const resolve_class_definition = (
 					level: 'warning',
 					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
-					suggestion: 'Remove the empty declaration property or add CSS',
-				},
+					suggestion: 'Remove the empty declaration property or add CSS'
+				}
 			];
 		}
-		return {ok: true, declaration: trimmed ?? '', warnings};
+		return { ok: true, declaration: trimmed ?? '', warnings };
 	}
 
 	// Ruleset definitions don't have a single declaration
-	return {ok: true, declaration: '', warnings: null};
+	return { ok: true, declaration: '', warnings: null };
 };
 
 /**
@@ -129,7 +129,7 @@ export const resolve_composes = (
 	resolution_stack: Set<string>,
 	visited: Set<string>,
 	original_class_name: string,
-	css_properties: Set<string> | null = null,
+	css_properties: Set<string> | null = null
 ): ResolveComposesResult => {
 	const declarations: Array<string> = [];
 	let warnings: Array<InterpreterDiagnostic> | null = null;
@@ -147,8 +147,8 @@ export const resolve_composes = (
 					level: 'error',
 					identifier: original_class_name,
 					message: `Circular reference detected: ${cycle_path}`,
-					suggestion: 'Remove the circular dependency from composes arrays',
-				},
+					suggestion: 'Remove the circular dependency from composes arrays'
+				}
 			};
 		}
 
@@ -161,7 +161,7 @@ export const resolve_composes = (
 					level: 'warning',
 					identifier: original_class_name,
 					message: `Class "${name}" is redundant`,
-					suggestion: 'Already included by another class in this definition',
+					suggestion: 'Already included by another class in this definition'
 				});
 			}
 			continue;
@@ -188,8 +188,8 @@ export const resolve_composes = (
 								level: 'error',
 								identifier: original_class_name,
 								message: `Modified class "${name}" cannot be used in composes array`,
-								suggestion: 'Apply modified classes directly in markup, not in composes arrays',
-							},
+								suggestion: 'Apply modified classes directly in markup, not in composes arrays'
+							}
 						};
 					} else {
 						// Looks like modifier:unknown - report the unknown base
@@ -199,8 +199,8 @@ export const resolve_composes = (
 								level: 'error',
 								identifier: original_class_name,
 								message: `Unknown class "${base_name}" in composes array`,
-								suggestion: `Check that "${base_name}" is defined in class_definitions`,
-							},
+								suggestion: `Check that "${base_name}" is defined in class_definitions`
+							}
 						};
 					}
 				}
@@ -242,13 +242,13 @@ export const resolve_composes = (
 									message: `Unknown modifier "${failed_prop}" with class "${potential_class}"`,
 									suggestion: `Did you mean "${
 										corrected
-									}"? Note: modified classes cannot be used in composes`,
-								},
+									}"? Note: modified classes cannot be used in composes`
+								}
 							};
 						}
 					}
 				}
-				return {ok: false, error: literal_result.error};
+				return { ok: false, error: literal_result.error };
 			}
 			// Not a literal - fall through to original "unknown class" error
 			return {
@@ -257,8 +257,8 @@ export const resolve_composes = (
 					level: 'error',
 					identifier: original_class_name,
 					message: `Unknown class "${name}" in composes array`,
-					suggestion: `Check that "${name}" is defined in class_definitions`,
-				},
+					suggestion: `Check that "${name}" is defined in class_definitions`
+				}
 			};
 		}
 
@@ -270,8 +270,8 @@ export const resolve_composes = (
 					level: 'error',
 					identifier: original_class_name,
 					message: `Cannot reference interpreter pattern "${name}" in composes array`,
-					suggestion: 'Only static class definitions can be referenced',
-				},
+					suggestion: 'Only static class definitions can be referenced'
+				}
 			};
 		}
 
@@ -283,8 +283,8 @@ export const resolve_composes = (
 					level: 'error',
 					identifier: original_class_name,
 					message: `Cannot reference ruleset class "${name}" in composes array`,
-					suggestion: 'Ruleset classes have multiple selectors and cannot be inlined',
-				},
+					suggestion: 'Ruleset classes have multiple selectors and cannot be inlined'
+				}
 			};
 		}
 
@@ -300,7 +300,7 @@ export const resolve_composes = (
 				resolution_stack,
 				visited,
 				original_class_name,
-				css_properties,
+				css_properties
 			);
 			resolution_stack.delete(name);
 			if (!nested.ok) return nested; // Propagate error
@@ -325,11 +325,11 @@ export const resolve_composes = (
 					level: 'warning',
 					identifier: name,
 					message: `Class "${name}" has an empty declaration`,
-					suggestion: 'Remove the empty declaration property or add CSS',
+					suggestion: 'Remove the empty declaration property or add CSS'
 				});
 			}
 		}
 	}
 
-	return {ok: true, declaration: declarations.join(' '), warnings};
+	return { ok: true, declaration: declarations.join(' '), warnings };
 };

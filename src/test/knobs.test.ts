@@ -1,7 +1,7 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {theme_knobs, theme_knob_by_name, theme_knob_hook_names} from '$lib/knobs.ts';
-import {default_variables} from '$lib/variables.ts';
+import { theme_knobs, theme_knob_by_name, theme_knob_hook_names } from '$lib/knobs.ts';
+import { default_variables } from '$lib/variables.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
 
@@ -16,7 +16,7 @@ describe('theme_knobs', () => {
 			if (knob.hook) continue;
 			assert.isTrue(
 				declared_names.has(knob.name),
-				`Knob "${knob.name}" is not declared in default_variables`,
+				`Knob "${knob.name}" is not declared in default_variables`
 			);
 		}
 	});
@@ -26,7 +26,7 @@ describe('theme_knobs', () => {
 		for (const name of theme_knob_hook_names) {
 			assert.isFalse(
 				declared_names.has(name),
-				`Hook knob "${name}" is declared in default_variables - remove its hook flag`,
+				`Hook knob "${name}" is declared in default_variables - remove its hook flag`
 			);
 		}
 	});
@@ -57,7 +57,7 @@ describe('theme_knobs', () => {
 			'hue_g',
 			'hue_h',
 			'hue_i',
-			'hue_j',
+			'hue_j'
 		]);
 	});
 

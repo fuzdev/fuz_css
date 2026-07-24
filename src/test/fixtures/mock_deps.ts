@@ -6,7 +6,7 @@
  * @module
  */
 
-import type {CacheDeps} from '$lib/deps.ts';
+import type { CacheDeps } from '$lib/deps.ts';
 
 /**
  * In-memory filesystem state for mock deps.
@@ -20,7 +20,7 @@ export interface MockFsState {
  * Creates a new empty mock filesystem state.
  */
 export const create_mock_fs_state = (): MockFsState => ({
-	files: new Map(),
+	files: new Map()
 });
 
 /**
@@ -29,22 +29,22 @@ export const create_mock_fs_state = (): MockFsState => ({
  * @param state - The mock filesystem state to use
  */
 export const create_mock_cache_deps = (state: MockFsState): CacheDeps => ({
-	read_text: async ({path}) => {
+	read_text: async ({ path }) => {
 		const value = state.files.get(path);
-		if (value === undefined) return {ok: false, kind: 'not_found', message: `not found: ${path}`};
-		return {ok: true, value};
+		if (value === undefined) return { ok: false, kind: 'not_found', message: `not found: ${path}` };
+		return { ok: true, value };
 	},
 
-	write_text_atomic: async ({path, content}) => {
+	write_text_atomic: async ({ path, content }) => {
 		state.files.set(path, content);
-		return {ok: true};
+		return { ok: true };
 	},
 
-	unlink: async ({path}) => {
+	unlink: async ({ path }) => {
 		if (!state.files.has(path)) {
-			return {ok: false, kind: 'not_found', message: `not found: ${path}`};
+			return { ok: false, kind: 'not_found', message: `not found: ${path}` };
 		}
 		state.files.delete(path);
-		return {ok: true};
-	},
+		return { ok: true };
+	}
 });

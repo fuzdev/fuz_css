@@ -60,7 +60,7 @@ export const srgb_to_oklab = ([r, g, b]: RgbUnit): Oklab => {
 	return [
 		0.2104542553 * l_ + 0.793617785 * m_ - 0.0040720468 * s_,
 		1.9779984951 * l_ - 2.428592205 * m_ + 0.4505937099 * s_,
-		0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_,
+		0.0259040371 * l_ + 0.7827717662 * m_ - 0.808675766 * s_
 	];
 };
 
@@ -100,7 +100,7 @@ export const oklab_to_oklch = ([lightness, a, b]: Oklab): Oklch => {
 export const oklch_to_oklab = ([lightness, chroma, hue]: Oklch): Oklab => [
 	lightness,
 	chroma * Math.cos(hue * DEG_TO_RAD),
-	chroma * Math.sin(hue * DEG_TO_RAD),
+	chroma * Math.sin(hue * DEG_TO_RAD)
 ];
 
 /**

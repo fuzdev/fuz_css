@@ -21,7 +21,7 @@
 		arrayClasses,
 		objectClasses,
 		// Comment hint examples
-		fromComment,
+		fromComment
 	} from '@fuzdev/fuz_css/example_class_utilities.ts';
 
 	let count = $state(0);
@@ -96,8 +96,7 @@
 						count: {count}
 					</button>
 					<span
-						>.hover:border_b_50 .hover:outline_b_50 .active:border_d_50
-						.active:outline_d_50</span
+						>.hover:border_b_50 .hover:outline_b_50 .active:border_d_50 .active:outline_d_50</span
 					>
 				</div>
 				<div class="row gap_md mb_lg">
@@ -108,8 +107,7 @@
 						reset
 					</button>
 					<span
-						>.hover:border_g_50 .hover:outline_g_50 .active:border_h_50
-						.active:outline_h_50</span
+						>.hover:border_g_50 .hover:outline_g_50 .active:border_h_50 .active:outline_h_50</span
 					>
 				</div>
 			</div>

@@ -1,4 +1,4 @@
-import {describe, test, assert} from 'vitest';
+import { describe, test, assert } from 'vitest';
 
 import {
 	oklch_delta_e,
@@ -7,14 +7,14 @@ import {
 	oklch_to_srgb,
 	srgb_to_oklch,
 	type Oklch,
-	type RgbUnit,
+	type RgbUnit
 } from '../lib/oklch.ts';
-import {srgb_relative_luminance, wcag_contrast_ratio} from '../lib/wcag.ts';
+import { srgb_relative_luminance, wcag_contrast_ratio } from '../lib/wcag.ts';
 
 const assert_close = (actual: number, expected: number, tolerance: number, message?: string) => {
 	assert(
 		Math.abs(actual - expected) <= tolerance,
-		message ?? `expected ${actual} to be within ${tolerance} of ${expected}`,
+		message ?? `expected ${actual} to be within ${tolerance} of ${expected}`
 	);
 };
 
@@ -57,7 +57,7 @@ describe('oklch_to_srgb', () => {
 			[0.5, 0.25, 0.75],
 			[0.1, 0.9, 0.3],
 			[0.95, 0.95, 0.02],
-			[0.33, 0.33, 0.33],
+			[0.33, 0.33, 0.33]
 		];
 		for (const rgb of samples) {
 			const back = oklch_to_srgb(srgb_to_oklch(rgb));

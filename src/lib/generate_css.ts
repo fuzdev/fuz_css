@@ -10,17 +10,17 @@
  * @module
  */
 
-import type {Logger} from '@fuzdev/fuz_util/log.ts';
+import type { Logger } from '@fuzdev/fuz_util/log.ts';
 
-import type {Diagnostic, SourceLocation} from './diagnostics.ts';
+import type { Diagnostic, SourceLocation } from './diagnostics.ts';
 import {
 	generate_classes_css,
 	type CssClassDefinition,
-	type CssClassDefinitionInterpreter,
+	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
-import {resolve_css, generate_bundled_css} from './css_bundled_resolution.ts';
-import {get_all_variable_names} from './variable_graph.ts';
-import type {BundledCssResources} from './bundled_resources.ts';
+import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
+import { get_all_variable_names } from './variable_graph.ts';
+import type { BundledCssResources } from './bundled_resources.ts';
 
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by
@@ -104,7 +104,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		exclude_elements,
 		exclude_variables,
 		log,
-		include_stats = false,
+		include_stats = false
 	} = options;
 
 	const utility_result = generate_classes_css({
@@ -114,7 +114,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css_properties,
 		log,
 		class_locations: all_classes_with_locations,
-		explicit_classes,
+		explicit_classes
 	});
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];
@@ -144,19 +144,19 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			exclude_elements,
 			exclude_variables,
 			explicit_elements,
-			explicit_variables,
+			explicit_variables
 		});
 
 		if (include_stats && resolution.stats && log) {
 			log.info(
 				`[css_resolution] Elements: ${
 					resolution.stats.element_count
-				} (${resolution.stats.elements.join(', ')})`,
+				} (${resolution.stats.elements.join(', ')})`
 			);
 			log.info(
 				`[css_resolution] Rules: ${resolution.stats.included_rules} of ${
 					resolution.stats.total_rules
-				}`,
+				}`
 			);
 			log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
 		}
@@ -170,7 +170,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		if (include_base && !include_theme) {
 			const theme_var_names = get_all_variable_names(resources.variable_graph);
 			const references_theme_var = [...resolution.resolved_variables].some((v) =>
-				theme_var_names.has(v),
+				theme_var_names.has(v)
 			);
 			if (references_theme_var) {
 				diagnostics.push({
@@ -180,7 +180,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 						'Base styles are enabled but theme variables are disabled (variables: null); emitted styles reference theme variables that will be undefined',
 					suggestion: 'Import theme.css separately, or set base_css: null for utility-only mode.',
 					identifier: 'theme_variables_disabled',
-					locations: null,
+					locations: null
 				});
 			}
 		}
@@ -188,12 +188,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
-			include_utilities: true,
+			include_utilities: true
 		});
 	} else {
 		// utility-only mode
 		css = utility_result.css;
 	}
 
-	return {css, diagnostics};
+	return { css, diagnostics };
 };

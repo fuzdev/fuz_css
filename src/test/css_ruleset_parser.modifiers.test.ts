@@ -1,6 +1,6 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {modify_single_selector, modify_selector_group} from '$lib/css_ruleset_parser.ts';
+import { modify_single_selector, modify_selector_group } from '$lib/css_ruleset_parser.ts';
 
 /**
  * Tests for selector modification: modify_single_selector and modify_selector_group.
@@ -16,7 +16,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:menuitem:hover',
-			'simple selector',
+			'simple selector'
 		],
 		[
 			'.menuitem .content',
@@ -25,7 +25,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:menuitem:hover .content',
-			'descendant',
+			'descendant'
 		],
 		[
 			'.menuitem.selected',
@@ -34,7 +34,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:menuitem.selected:hover',
-			'compound',
+			'compound'
 		],
 		[
 			'.selectable:active',
@@ -43,7 +43,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:selectable:active:hover',
-			'existing pseudo-class',
+			'existing pseudo-class'
 		],
 		[
 			'.chevron::before',
@@ -52,7 +52,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:chevron:hover::before',
-			'before pseudo-element',
+			'before pseudo-element'
 		],
 
 		// Pseudo-element only
@@ -69,7 +69,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:parent:hover > .child',
-			'child combinator',
+			'child combinator'
 		],
 		[
 			'.foo + .bar',
@@ -78,7 +78,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:hover + .bar',
-			'adjacent sibling',
+			'adjacent sibling'
 		],
 		[
 			'.foo ~ .bar',
@@ -87,7 +87,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:hover ~ .bar',
-			'general sibling',
+			'general sibling'
 		],
 
 		// No match cases
@@ -103,7 +103,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:not(:is(.a, .b)):hover',
-			'nested functional',
+			'nested functional'
 		],
 		[
 			'.foo:where(.a, .b)',
@@ -112,7 +112,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:where(.a, .b):hover',
-			':where()',
+			':where()'
 		],
 		[
 			'.parent:has(.child)',
@@ -121,7 +121,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:parent:has(.child):hover',
-			':has()',
+			':has()'
 		],
 
 		// With ID selectors
@@ -133,7 +133,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo#bar:focus:hover',
-			'ID + pseudo',
+			'ID + pseudo'
 		],
 
 		// Attribute selectors
@@ -144,7 +144,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:btn[disabled]:hover',
-			'attribute',
+			'attribute'
 		],
 
 		// Class in descendant
@@ -155,7 +155,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.container .hover\\:box:hover',
-			'class in descendant',
+			'class in descendant'
 		],
 
 		// Both state and pseudo-element
@@ -166,7 +166,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'::before',
 			'.hover\\:before\\:box:hover::before',
-			'state + pseudo',
+			'state + pseudo'
 		],
 
 		// Empty state/pseudo (just rename)
@@ -181,7 +181,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:palette_a_50:hover',
-			'underscores and numbers',
+			'underscores and numbers'
 		],
 
 		// Multiple occurrences - only first instance is modified
@@ -193,7 +193,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:hover .content .foo',
-			'class twice - descendant',
+			'class twice - descendant'
 		],
 		[
 			'.foo.bar.foo',
@@ -202,7 +202,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo.bar.foo:hover',
-			'class twice - compound',
+			'class twice - compound'
 		],
 
 		// ::part() and ::slotted() pseudo-elements
@@ -213,7 +213,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:component:hover::part(button)',
-			'::part()',
+			'::part()'
 		],
 		[
 			'.host::slotted(.item)',
@@ -222,7 +222,7 @@ describe('modify_single_selector', () => {
 			':focus',
 			'',
 			'.focus\\:host:focus::slotted(.item)',
-			'::slotted()',
+			'::slotted()'
 		],
 
 		// CSS2 single-colon pseudo-elements
@@ -233,7 +233,7 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:hover:before',
-			'CSS2 :before',
+			'CSS2 :before'
 		],
 		['.foo:after', 'foo', 'hover\\:foo', ':hover', '', '.hover\\:foo:hover:after', 'CSS2 :after'],
 		[
@@ -243,8 +243,8 @@ describe('modify_single_selector', () => {
 			':hover',
 			'',
 			'.hover\\:foo:hover:first-letter',
-			'CSS2 :first-letter',
-		],
+			'CSS2 :first-letter'
+		]
 	];
 
 	test.each(cases)(
@@ -252,9 +252,9 @@ describe('modify_single_selector', () => {
 		(selector, className, newClassName, state, pseudo, expected, _desc) => {
 			assert.strictEqual(
 				modify_single_selector(selector, className, newClassName, state, pseudo),
-				expected,
+				expected
 			);
-		},
+		}
 	);
 });
 
@@ -265,12 +265,12 @@ describe('modify_selector_group', () => {
 			'selectable',
 			'hover\\:selectable',
 			[':hover'],
-			'',
+			''
 		);
 
 		assert.strictEqual(
 			result.selector,
-			'.hover\\:selectable.selected:hover,\n.hover\\:selectable:active:hover',
+			'.hover\\:selectable.selected:hover,\n.hover\\:selectable:active:hover'
 		);
 		assert.isNull(result.skipped_modifiers);
 	});
@@ -281,12 +281,12 @@ describe('modify_selector_group', () => {
 			'plain',
 			'focus\\:plain',
 			[':focus'],
-			'',
+			''
 		);
 
 		assert.strictEqual(
 			result.selector,
-			'.focus\\:plain:not(:hover):focus,\n.focus\\:plain:active:focus',
+			'.focus\\:plain:not(:hover):focus,\n.focus\\:plain:active:focus'
 		);
 		assert.isNull(result.skipped_modifiers);
 	});
@@ -298,7 +298,7 @@ describe('modify_selector_group', () => {
 				'plain',
 				'hover\\:plain',
 				[':hover'],
-				'',
+				''
 			);
 
 			assert.strictEqual(result.selector, '.hover\\:plain:hover,\n.hover\\:plain:active:hover');
@@ -316,7 +316,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'focus\\:btn',
 				[':focus'],
-				'',
+				''
 			);
 			assert.strictEqual(result.selector, '.focus\\:btn:focus-within:focus');
 			assert.isNull(result.skipped_modifiers); // No conflict - different states!
@@ -328,7 +328,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'focus\\:btn',
 				[':focus'],
-				'',
+				''
 			);
 			assert.strictEqual(result.selector, '.focus\\:btn:focus-visible:focus');
 			assert.isNull(result.skipped_modifiers);
@@ -340,7 +340,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'hover\\:btn',
 				[':hover'],
-				'',
+				''
 			);
 			assert.strictEqual(result.selector, '.hover\\:btn[data-hover="true"]:hover');
 			assert.isNull(result.skipped_modifiers);
@@ -359,7 +359,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'focus\\:btn',
 				[':focus'],
-				'',
+				''
 			);
 			assert.isNotNull(result.skipped_modifiers);
 			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':focus');
@@ -371,7 +371,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'active\\:btn',
 				[':active'],
-				'',
+				''
 			);
 			assert.isNotNull(result.skipped_modifiers);
 			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':active');
@@ -383,7 +383,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'hover\\:btn',
 				[':hover'],
-				'',
+				''
 			);
 			assert.isNotNull(result.skipped_modifiers);
 			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':hover');
@@ -395,7 +395,7 @@ describe('modify_selector_group', () => {
 				'btn',
 				'focus\\:btn',
 				[':focus'],
-				'',
+				''
 			);
 			assert.isNotNull(result.skipped_modifiers);
 			assert.strictEqual(result.skipped_modifiers[0]!.conflicting_modifier, ':focus');
@@ -407,7 +407,7 @@ describe('modify_selector_group', () => {
 				'selectable',
 				'hover\\:focus\\:selectable',
 				[':hover', ':focus'],
-				'',
+				''
 			);
 
 			assert.strictEqual(result.selector, '.hover\\:focus\\:selectable:hover:focus');
@@ -422,7 +422,7 @@ describe('modify_selector_group', () => {
 				'chevron',
 				'before\\:chevron',
 				[],
-				'::before',
+				'::before'
 			);
 
 			assert.strictEqual(result.selector, '.before\\:chevron::before,\n.before\\:chevron::before');

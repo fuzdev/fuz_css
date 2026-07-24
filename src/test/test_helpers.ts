@@ -5,10 +5,14 @@
  * to reduce duplication and improve test readability.
  */
 
-import {assert} from 'vitest';
+import { assert } from 'vitest';
 
-import type {SourceLocation, ExtractionDiagnostic, GenerationDiagnostic} from '$lib/diagnostics.ts';
-import type {ExtractionData} from '$lib/css_class_extractor.ts';
+import type {
+	SourceLocation,
+	ExtractionDiagnostic,
+	GenerationDiagnostic
+} from '$lib/diagnostics.ts';
+import type { ExtractionData } from '$lib/css_class_extractor.ts';
 
 //
 // Factory Helpers
@@ -20,7 +24,7 @@ import type {ExtractionData} from '$lib/css_class_extractor.ts';
 export const loc = (file = 'test.ts', line = 1, column = 1): SourceLocation => ({
 	file,
 	line,
-	column,
+	column
 });
 
 /**
@@ -32,7 +36,7 @@ export const EMPTY_EXTRACTION: ExtractionData = {
 	diagnostics: null,
 	elements: null,
 	explicit_elements: null,
-	explicit_variables: null,
+	explicit_variables: null
 };
 
 /**
@@ -40,28 +44,28 @@ export const EMPTY_EXTRACTION: ExtractionData = {
  */
 export const make_extraction_data = (overrides: Partial<ExtractionData> = {}): ExtractionData => ({
 	...EMPTY_EXTRACTION,
-	...overrides,
+	...overrides
 });
 
 /**
  * Creates a Map of class names to source locations from tuple entries.
  */
 export const make_classes = (
-	entries: Array<[string, Array<SourceLocation>]>,
+	entries: Array<[string, Array<SourceLocation>]>
 ): Map<string, Array<SourceLocation>> => new Map(entries);
 
 /**
  * Creates an ExtractionDiagnostic with sensible defaults.
  */
 export const make_extraction_diagnostic = (
-	overrides: Partial<ExtractionDiagnostic> = {},
+	overrides: Partial<ExtractionDiagnostic> = {}
 ): ExtractionDiagnostic => ({
 	phase: 'extraction',
 	level: 'warning',
 	message: 'test message',
 	suggestion: null,
 	location: loc(),
-	...overrides,
+	...overrides
 });
 
 //
@@ -95,10 +99,10 @@ export const assert_css_not_contains = (css: string, ...patterns: Array<string>)
  * assert_css_order(result.base_css, 'color: blue', 'color: darkblue');
  */
 export const assert_css_order = (css: string, ...patterns: Array<string>): void => {
-	const indices = patterns.map((p) => ({pattern: p, idx: css.indexOf(p)}));
+	const indices = patterns.map((p) => ({ pattern: p, idx: css.indexOf(p) }));
 
 	// First, check all patterns exist
-	for (const {pattern, idx} of indices) {
+	for (const { pattern, idx } of indices) {
 		assert.isAbove(idx, -1, `Expected string to contain "${pattern}"`);
 	}
 
@@ -109,7 +113,7 @@ export const assert_css_order = (css: string, ...patterns: Array<string>): void 
 		assert.isBelow(
 			current.idx,
 			next.idx,
-			`Expected "${current.pattern}" to appear before "${next.pattern}"`,
+			`Expected "${current.pattern}" to appear before "${next.pattern}"`
 		);
 	}
 };
@@ -132,7 +136,7 @@ export const count_css_occurrences = (css: string, pattern: string): number => {
 export const assert_diagnostic = (
 	diagnostics: Array<GenerationDiagnostic> | Array<ExtractionDiagnostic> | null,
 	level: 'error' | 'warning',
-	messageContains: string,
+	messageContains: string
 ): void => {
 	assert.isNotNull(diagnostics, 'Expected diagnostics array to exist');
 	const match = diagnostics.find((d) => d.level === level && d.message.includes(messageContains));
@@ -145,7 +149,7 @@ export const assert_diagnostic = (
 export const assert_no_diagnostic = (
 	diagnostics: Array<GenerationDiagnostic> | Array<ExtractionDiagnostic> | null,
 	level: 'error' | 'warning',
-	messageContains: string,
+	messageContains: string
 ): void => {
 	if (!diagnostics) return;
 	const match = diagnostics.find((d) => d.level === level && d.message.includes(messageContains));
@@ -157,7 +161,7 @@ export const assert_no_diagnostic = (
  */
 export const filter_diagnostics_by_level = <T extends GenerationDiagnostic | ExtractionDiagnostic>(
 	diagnostics: Array<T> | null,
-	level: 'error' | 'warning',
+	level: 'error' | 'warning'
 ): Array<T> => {
 	if (!diagnostics) return [];
 	return diagnostics.filter((d) => d.level === level);
@@ -167,10 +171,10 @@ export const filter_diagnostics_by_level = <T extends GenerationDiagnostic | Ext
  * Filters diagnostics by message content.
  */
 export const filter_diagnostics_by_message = <
-	T extends GenerationDiagnostic | ExtractionDiagnostic,
+	T extends GenerationDiagnostic | ExtractionDiagnostic
 >(
 	diagnostics: Array<T> | null,
-	messageContains: string,
+	messageContains: string
 ): Array<T> => {
 	if (!diagnostics) return [];
 	return diagnostics.filter((d) => d.message.includes(messageContains));
@@ -184,8 +188,8 @@ export const filter_diagnostics_by_message = <
  * Asserts resolution result is ok and has expected declaration.
  */
 export const assert_resolved_declaration = (
-	result: {ok: boolean; declaration?: string},
-	expected: string,
+	result: { ok: boolean; declaration?: string },
+	expected: string
 ): void => {
 	assert.isTrue(result.ok, 'Expected resolution to succeed');
 	assert.strictEqual(result.declaration, expected);
@@ -195,14 +199,14 @@ export const assert_resolved_declaration = (
  * Asserts resolution result is error with message containing text.
  */
 export const assert_resolution_error = (
-	result: {ok: boolean; error?: {message: string}},
-	messageContains: string,
+	result: { ok: boolean; error?: { message: string } },
+	messageContains: string
 ): void => {
 	assert.isFalse(result.ok, 'Expected resolution to fail');
 	assert.isDefined(result.error);
 	assert.include(
 		result.error.message,
 		messageContains,
-		`Expected error message to contain "${messageContains}"`,
+		`Expected error message to contain "${messageContains}"`
 	);
 };

@@ -1,4 +1,4 @@
-import {describe, test, assert} from 'vitest';
+import { describe, test, assert } from 'vitest';
 
 import {
 	NEUTRAL_HUE,
@@ -12,17 +12,17 @@ import {
 	palette_stop_oklch,
 	ramp_lightness,
 	shade_stop_oklch,
-	text_stop_oklch,
+	text_stop_oklch
 } from '../lib/ramps.ts';
-import {color_scheme_variants, palette_variants} from '../lib/variable_data.ts';
-import {oklch_in_srgb_gamut, oklch_to_srgb, type RgbUnit} from '../lib/oklch.ts';
-import {wcag_contrast_ratio} from '../lib/wcag.ts';
+import { color_scheme_variants, palette_variants } from '../lib/variable_data.ts';
+import { oklch_in_srgb_gamut, oklch_to_srgb, type RgbUnit } from '../lib/oklch.ts';
+import { wcag_contrast_ratio } from '../lib/wcag.ts';
 import {
 	GATE_BODY_TEXT,
 	GATE_FILL_TEXT,
 	GATE_LINK,
 	GATE_SUBTLE_TEXT,
-	GATE_UI,
+	GATE_UI
 } from '../lib/theme_check.ts';
 
 // Contrast gates for the default palette. OKLCH lightness is monotonic with
@@ -35,7 +35,7 @@ import {
 const clamp_rgb = (rgb: RgbUnit): RgbUnit => [
 	Math.min(1, Math.max(0, rgb[0])),
 	Math.min(1, Math.max(0, rgb[1])),
-	Math.min(1, Math.max(0, rgb[2])),
+	Math.min(1, Math.max(0, rgb[2]))
 ];
 
 describe('gamut', () => {
@@ -46,7 +46,7 @@ describe('gamut', () => {
 					const lch = palette_stop_oklch(letter, stop, scheme);
 					assert(
 						oklch_in_srgb_gamut(lch, 1e-4),
-						`palette_${letter}_${stop} ${scheme} out of gamut: ${lch.join(' ')}`,
+						`palette_${letter}_${stop} ${scheme} out of gamut: ${lch.join(' ')}`
 					);
 				}
 			}
@@ -58,7 +58,7 @@ describe('gamut', () => {
 			for (const stop of RAMP_STOPS) {
 				assert(
 					oklch_in_srgb_gamut(shade_stop_oklch(stop, scheme), 1e-4),
-					`shade_${stop} ${scheme}`,
+					`shade_${stop} ${scheme}`
 				);
 				assert(oklch_in_srgb_gamut(text_stop_oklch(stop, scheme), 1e-4), `text_${stop} ${scheme}`);
 			}
@@ -71,7 +71,7 @@ describe('monotonicity', () => {
 		const families = [
 			['palette', PALETTE_LIGHTNESS_KNOBS],
 			['shade', SHADE_LIGHTNESS_KNOBS],
-			['text', TEXT_LIGHTNESS_KNOBS],
+			['text', TEXT_LIGHTNESS_KNOBS]
 		] as const;
 		for (const [name, knobs_by_scheme] of families) {
 			for (const scheme of color_scheme_variants) {
@@ -82,7 +82,7 @@ describe('monotonicity', () => {
 					const l = ramp_lightness(knobs, stop);
 					assert(
 						Math.sign(l - prev) === direction,
-						`${name} ${scheme} not monotonic at stop ${stop}: ${prev} → ${l}`,
+						`${name} ${scheme} not monotonic at stop ${stop}: ${prev} → ${l}`
 					);
 					prev = l;
 				}
@@ -99,20 +99,20 @@ describe('chroma caps', () => {
 			const caps = compute_palette_chroma_caps(
 				Object.values(PALETTE_HUES),
 				PALETTE_LIGHTNESS_KNOBS[scheme],
-				scheme,
+				scheme
 			);
 			for (const stop of RAMP_STOPS) {
 				const baked = PALETTE_CHROMA_CAPS[scheme][stop];
 				const computed = caps[stop];
 				assert(
 					baked <= computed + 1e-6,
-					`cap too generous at ${stop} ${scheme}: baked ${baked} > recomputed ${computed}`,
+					`cap too generous at ${stop} ${scheme}: baked ${baked} > recomputed ${computed}`
 				);
 				assert(
 					baked >= computed - 0.001,
 					`cap stale/over-conservative at ${stop} ${scheme}: baked ${baked} < recomputed ${
 						computed
-					}`,
+					}`
 				);
 			}
 		}
@@ -128,7 +128,7 @@ describe('contrast gates', () => {
 				const ratio = wcag_contrast_ratio(text, surface);
 				assert(
 					ratio >= GATE_BODY_TEXT,
-					`text_80 on shade_${stop} ${scheme}: ${ratio.toFixed(2)} < ${GATE_BODY_TEXT}`,
+					`text_80 on shade_${stop} ${scheme}: ${ratio.toFixed(2)} < ${GATE_BODY_TEXT}`
 				);
 			}
 		}
@@ -138,11 +138,11 @@ describe('contrast gates', () => {
 		for (const scheme of color_scheme_variants) {
 			const ratio = wcag_contrast_ratio(
 				oklch_to_srgb(text_stop_oklch('50', scheme)),
-				oklch_to_srgb(shade_stop_oklch('00', scheme)),
+				oklch_to_srgb(shade_stop_oklch('00', scheme))
 			);
 			assert(
 				ratio >= GATE_SUBTLE_TEXT,
-				`text_50 on shade_00 ${scheme}: ${ratio.toFixed(2)} < ${GATE_SUBTLE_TEXT}`,
+				`text_50 on shade_00 ${scheme}: ${ratio.toFixed(2)} < ${GATE_SUBTLE_TEXT}`
 			);
 		}
 	});
@@ -151,7 +151,7 @@ describe('contrast gates', () => {
 		for (const scheme of color_scheme_variants) {
 			const ratio = wcag_contrast_ratio(
 				oklch_to_srgb(palette_stop_oklch('a', '60', scheme)),
-				oklch_to_srgb(shade_stop_oklch('00', scheme)),
+				oklch_to_srgb(shade_stop_oklch('00', scheme))
 			);
 			assert(ratio >= GATE_LINK, `link on shade_00 ${scheme}: ${ratio.toFixed(2)} < ${GATE_LINK}`);
 		}
@@ -166,12 +166,12 @@ describe('contrast gates', () => {
 				const ui = wcag_contrast_ratio(fill, surface);
 				assert(
 					ui >= GATE_UI,
-					`palette_${letter}_50 vs shade_00 ${scheme}: ${ui.toFixed(2)} < ${GATE_UI}`,
+					`palette_${letter}_50 vs shade_00 ${scheme}: ${ui.toFixed(2)} < ${GATE_UI}`
 				);
 				const on_fill = wcag_contrast_ratio(text_max, fill);
 				assert(
 					on_fill >= GATE_FILL_TEXT,
-					`text_max on palette_${letter}_50 ${scheme}: ${on_fill.toFixed(2)} < ${GATE_FILL_TEXT}`,
+					`text_max on palette_${letter}_50 ${scheme}: ${on_fill.toFixed(2)} < ${GATE_FILL_TEXT}`
 				);
 			}
 		}

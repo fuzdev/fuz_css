@@ -8,14 +8,14 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
-import {hash_insecure} from '@fuzdev/fuz_util/hash.ts';
+import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
+import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
-import {default_variables} from './variables.ts';
-import type {StyleVariable} from './variable.ts';
-import {extract_css_variables} from './css_variable_utils.ts';
+import { default_variables } from './variables.ts';
+import type { StyleVariable } from './variable.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
 
-import type {VariablesOption} from './css_plugin_options.ts';
+import type { VariablesOption } from './css_plugin_options.ts';
 
 /**
  * Information about a single style variable and its dependencies.
@@ -52,7 +52,7 @@ export interface VariableDependencyGraph {
  */
 export const build_variable_graph = (
 	variables: Array<StyleVariable>,
-	content_hash: string,
+	content_hash: string
 ): VariableDependencyGraph => {
 	const graph: Map<string, StyleVariableInfo> = new Map();
 
@@ -65,13 +65,13 @@ export const build_variable_graph = (
 			light_deps,
 			dark_deps,
 			light_css: v.light,
-			dark_css: v.dark,
+			dark_css: v.dark
 		});
 	}
 
 	return {
 		variables: graph,
-		content_hash,
+		content_hash
 	};
 };
 
@@ -98,7 +98,7 @@ export interface ResolveVariablesResult {
  */
 export const resolve_variables_transitive = (
 	graph: VariableDependencyGraph,
-	initial_variables: Iterable<string>,
+	initial_variables: Iterable<string>
 ): ResolveVariablesResult => {
 	const resolved: Set<string> = new Set();
 	const warnings: Array<string> = [];
@@ -152,7 +152,7 @@ export const resolve_variables_transitive = (
 		resolve(name, new Set());
 	}
 
-	return {variables: resolved, warnings, missing};
+	return { variables: resolved, warnings, missing };
 };
 
 /**
@@ -164,8 +164,8 @@ export const resolve_variables_transitive = (
  */
 export const generate_theme_css = (
 	graph: VariableDependencyGraph,
-	resolved_variables: Set<string>,
-): {light_css: string; dark_css: string} => {
+	resolved_variables: Set<string>
+): { light_css: string; dark_css: string } => {
 	const light_declarations: Array<string> = [];
 	const dark_declarations: Array<string> = [];
 
@@ -198,7 +198,7 @@ export const generate_theme_css = (
 		dark_css = `${dark_scope} {\n${dark_declarations.join('\n')}\n}`;
 	}
 
-	return {light_css, dark_css};
+	return { light_css, dark_css };
 };
 
 /**
@@ -259,7 +259,7 @@ const TYPO_SIMILARITY_THRESHOLD = 0.85;
  */
 export const find_similar_variable = (
 	graph: VariableDependencyGraph,
-	name: string,
+	name: string
 ): string | null => {
 	let best_match: string | null = null;
 	let best_similarity = TYPO_SIMILARITY_THRESHOLD;
@@ -296,7 +296,7 @@ export const resolve_variables_option = (variables: VariablesOption): Array<Styl
  * @returns `VariableDependencyGraph` built from the resolved variables
  */
 export const build_variable_graph_from_options = (
-	variables: VariablesOption,
+	variables: VariablesOption
 ): VariableDependencyGraph => {
 	const resolved = resolve_variables_option(variables);
 	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');

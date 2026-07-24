@@ -38,10 +38,10 @@
  * @module
  */
 
-import type {Result} from '@fuzdev/fuz_util/result.ts';
-import type {FsError} from '@fuzdev/fuz_util/fs.ts';
+import type { Result } from '@fuzdev/fuz_util/result.ts';
+import type { FsError } from '@fuzdev/fuz_util/fs.ts';
 
-export type {FsError};
+export type { FsError };
 
 /**
  * Cache-related file system deps.
@@ -56,17 +56,20 @@ export interface CacheDeps {
 	 * Reads a text file.
 	 * Returns a `not_found` error if the file doesn't exist.
 	 */
-	read_text: (options: {path: string}) => Promise<Result<{value: string}, FsError>>;
+	read_text: (options: { path: string }) => Promise<Result<{ value: string }, FsError>>;
 
 	/**
 	 * Writes a text file atomically (temp file + rename for crash safety).
 	 * Creates parent directories if they don't exist.
 	 */
-	write_text_atomic: (options: {path: string; content: string}) => Promise<Result<object, FsError>>;
+	write_text_atomic: (options: {
+		path: string;
+		content: string;
+	}) => Promise<Result<object, FsError>>;
 
 	/**
 	 * Removes a file. Returns a `not_found` error if the file doesn't exist —
 	 * callers that want `rm -f` semantics should ignore that kind explicitly.
 	 */
-	unlink: (options: {path: string}) => Promise<Result<object, FsError>>;
+	unlink: (options: { path: string }) => Promise<Result<object, FsError>>;
 }

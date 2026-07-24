@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
@@ -9,22 +9,22 @@
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
 	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import {theme_state_context} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import {default_themes} from '$lib/themes.ts';
-	import {necromancer_theme} from '$lib/themes/necromancer.ts';
-	import {sunset_ember_theme} from '$lib/themes/sunset_ember.ts';
-	import {brutalish_theme} from '$lib/themes/brutalish.ts';
-	import {terminal_theme} from '$lib/themes/terminal.ts';
-	import type {Theme} from '$lib/theme.ts';
+	import { default_themes } from '$lib/themes.ts';
+	import { necromancer_theme } from '$lib/themes/necromancer.ts';
+	import { sunset_ember_theme } from '$lib/themes/sunset_ember.ts';
+	import { brutalish_theme } from '$lib/themes/brutalish.ts';
+	import { terminal_theme } from '$lib/themes/terminal.ts';
+	import type { Theme } from '$lib/theme.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
 	import {
 		ThemeEditorState,
 		UNSAVED_THEME_NAME,
-		type ThemeEditorSnapshotData,
+		type ThemeEditorSnapshotData
 	} from '$routes/theme_editor_state.svelte.ts';
-	import type {Snapshot} from '@sveltejs/kit';
+	import type { Snapshot } from '@sveltejs/kit';
 
 	const LIBRARY_ITEM_NAME = 'themes';
 
@@ -41,7 +41,7 @@
 	// the in-progress theme appears in the picker as soon as a knob moves
 	const picker_themes: Array<Theme> = $derived([
 		...themes,
-		...(editor.dirty ? [editor.draft] : []),
+		...(editor.dirty ? [editor.draft] : [])
 	]);
 
 	// passed as ThemeInput's `select` (not `onselect`, which collides with the
@@ -65,7 +65,7 @@
 	// persist the in-progress theme across navigation (history-entry-scoped)
 	export const snapshot: Snapshot<ThemeEditorSnapshotData> = {
 		capture: () => editor.to_snapshot(),
-		restore: (data) => editor.restore_snapshot(data),
+		restore: (data) => editor.restore_snapshot(data)
 	};
 </script>
 
@@ -87,8 +87,8 @@
 		<TomeSectionHeader text="Color scheme" />
 		<p>
 			fuz_css supports
-			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes. To apply dark mode
-			manually, add the <code>dark</code> class to the root <code>html</code>
+			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes. To apply dark mode manually,
+			add the <code>dark</code> class to the root <code>html</code>
 			element.
 		</p>
 		<p>
@@ -110,13 +110,12 @@
 	<TomeSection>
 		<TomeSectionHeader text="Builtin themes" />
 		<UnfinishedImplementationWarning
-			>The builtin themes need more work, but the proof of concept is
-			ready!</UnfinishedImplementationWarning
+			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
 		>
 		<p>
-			A theme is a simple JSON collection of <TomeLink slug="variables" /> that can be transformed
-			into CSS that set custom properties. Each variable can have values for light and/or dark color
-			schemes. In other words, "dark" isn't a theme, it's a mode that any theme can implement.
+			A theme is a simple JSON collection of <TomeLink slug="variables" /> that can be transformed into
+			CSS that set custom properties. Each variable can have values for light and/or dark color schemes.
+			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
 		</p>
 		<p>
 			Because the color system is derived, a theme is a set of <em>knob</em> values, not a
@@ -126,9 +125,9 @@
 			<code>fuz.base</code> defaults, so overrides win regardless of stylesheet order.
 		</p>
 		<p>
-			These docs are a work in progress, for now see <ModuleLink
-				module_path="theme.ts"
-			/> and <ModuleLink module_path="themes.ts" />.
+			These docs are a work in progress, for now see <ModuleLink module_path="theme.ts" /> and <ModuleLink
+				module_path="themes.ts"
+			/>.
 		</p>
 		<p>Selecting a theme loads its knobs into the editor below.</p>
 		<div class="width_atmost_xs mb_lg">
@@ -139,8 +138,8 @@
 		<TomeSectionHeader text="Exemplar themes" />
 		<p>
 			Beyond the registry, fuz_css ships expressive exemplar themes as importable modules under
-			<code>themes/</code> -- registry membership, not file location, is what separates builtins
-			from exemplars. Import one and pass it to your theme setup:
+			<code>themes/</code> -- registry membership, not file location, is what separates builtins from
+			exemplars. Import one and pass it to your theme setup:
 		</p>
 		<Code
 			lang="ts"
@@ -150,8 +149,8 @@
 			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> -- the
 			renderer then mirrors every scheme-adaptive default the theme doesn't override, so its one
 			appearance renders in both color schemes, and pins
-			<MdnLink path="Web/CSS/color-scheme" /> to match so form controls and scrollbars agree. The
-			necromancer and terminal exemplars are dark-only this way, without hand-mirrored knob values.
+			<MdnLink path="Web/CSS/color-scheme" /> to match so form controls and scrollbars agree. The necromancer
+			and terminal exemplars are dark-only this way, without hand-mirrored knob values.
 		</p>
 		<div class="width_atmost_xs mb_lg">
 			<ThemeInput themes={exemplar_themes} select={select_theme} />
@@ -162,13 +161,13 @@
 		<p>
 			Drag a knob and the whole page rethemes live -- extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
-			theme in the picker above; it persists across navigation until you leave or reset, so copy
-			the <code>Theme</code> object below to keep it. The scheme selector sets the theme's stance --
-			a single-scheme theme renders its one appearance in both color schemes, so edits write the
-			base slots. The top band holds the semantic-tier moves: assign each intent (accent, neutral,
-			positive, negative, caution, info) to a palette letter -- or a custom angle -- and pull the
-			high-leverage levers. Below it, each axis section carries the granular knobs, with per-token
-			escape hatches folded away; the ramp strips repaint live as the derived scales move.
+			theme in the picker above; it persists across navigation until you leave or reset, so copy the
+			<code>Theme</code> object below to keep it. The scheme selector sets the theme's stance -- a single-scheme
+			theme renders its one appearance in both color schemes, so edits write the base slots. The top band
+			holds the semantic-tier moves: assign each intent (accent, neutral, positive, negative, caution,
+			info) to a palette letter -- or a custom angle -- and pull the high-leverage levers. Below it, each
+			axis section carries the granular knobs, with per-token escape hatches folded away; the ramp strips
+			repaint live as the derived scales move.
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>
@@ -179,9 +178,9 @@
 			<code>Theme</code> in tests or CI.
 		</p>
 		<p>
-			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors,
-			while type and range mismatches on the knob-tier variables are advisory warnings. It returns
-			an array of issues -- empty means the theme is structurally sound.
+			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors, while
+			type and range mismatches on the knob-tier variables are advisory warnings. It returns an array
+			of issues -- empty means the theme is structurally sound.
 		</p>
 		<p>
 			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against

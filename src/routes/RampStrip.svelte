@@ -1,11 +1,11 @@
 <script lang="ts">
 	// TODO upstream to fuz_ui
 
-	import {numeric_scale_variants} from '$lib/variable_data.ts';
+	import { numeric_scale_variants } from '$lib/variable_data.ts';
 
 	const {
 		prefix,
-		label = prefix,
+		label = prefix
 	}: {
 		/** The variable family prefix, e.g. `accent` renders `--accent_00`…`--accent_100`. */
 		prefix: string;

@@ -1,4 +1,4 @@
-import type {Theme} from '../theme.ts';
+import type { Theme } from '../theme.ts';
 
 /**
  * Gentle contrast: a softer neutral tint and compressed surface range, tuned
@@ -7,8 +7,8 @@ import type {Theme} from '../theme.ts';
 export const low_contrast_theme: Theme = {
 	name: 'low contrast',
 	variables: [
-		{name: 'neutral_chroma', light: '0.017', dark: '0.018'},
+		{ name: 'neutral_chroma', light: '0.017', dark: '0.018' },
 		// compress the shade ramp from the page-background end
-		{name: 'shade_lightness_00', light: '0.92', dark: '0.245'},
-	],
+		{ name: 'shade_lightness_00', light: '0.92', dark: '0.245' }
+	]
 };

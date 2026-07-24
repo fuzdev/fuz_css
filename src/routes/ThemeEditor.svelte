@@ -4,21 +4,21 @@
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
-	import type {ThemeState} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+	import type { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import {render_theme_style, type ThemeScheme} from '$lib/theme.ts';
-	import {theme_knobs, knob_axes, type KnobAxis, type ThemeKnob} from '$lib/knobs.ts';
-	import {PALETTE_HUES} from '$lib/ramps.ts';
+	import { render_theme_style, type ThemeScheme } from '$lib/theme.ts';
+	import { theme_knobs, knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
+	import { PALETTE_HUES } from '$lib/ramps.ts';
 	import {
 		palette_variants,
 		intent_variants,
 		type ColorSchemeVariant,
-		type PaletteVariant,
+		type PaletteVariant
 	} from '$lib/variable_data.ts';
 	import {
 		render_theme_ts,
 		UNSAVED_THEME_NAME,
-		type ThemeEditorState,
+		type ThemeEditorState
 	} from '$routes/theme_editor_state.svelte.ts';
 	import KnobControl from '$routes/KnobControl.svelte';
 	import RampStrip from '$routes/RampStrip.svelte';
@@ -27,7 +27,7 @@
 
 	const {
 		editor,
-		theme_state,
+		theme_state
 	}: {
 		editor: ThemeEditorState;
 		theme_state: ThemeState;
@@ -58,7 +58,7 @@
 		shape: 'border width & radius tokens',
 		density: 'space tokens',
 		typography: 'line height tokens',
-		motion: 'motion tokens',
+		motion: 'motion tokens'
 	};
 
 	// resolves a letter's current angle from the same merge the renderer uses,
@@ -71,7 +71,7 @@
 
 	// switching the "based on" theme flattens it as the new base, discarding any
 	// edits, so guard the switch behind a confirm when the draft is dirty
-	const on_base_change = (e: Event & {currentTarget: EventTarget & HTMLSelectElement}): void => {
+	const on_base_change = (e: Event & { currentTarget: EventTarget & HTMLSelectElement }): void => {
 		const name = e.currentTarget.value;
 		const discarded = editor.overrides.size
 			? `${editor.overrides.size} edited knob(s) will be discarded`
@@ -90,7 +90,7 @@
 
 	const trimmed_name = $derived(editor.name.trim());
 	const name_collides = $derived(
-		trimmed_name === UNSAVED_THEME_NAME || editor.themes.some((t) => t.name === trimmed_name),
+		trimmed_name === UNSAVED_THEME_NAME || editor.themes.some((t) => t.name === trimmed_name)
 	);
 
 	const output_ts = $derived(render_theme_ts(editor.output));

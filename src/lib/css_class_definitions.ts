@@ -7,14 +7,14 @@
  * @module
  */
 
-import type {CssClassDefinition} from './css_class_generation.ts';
+import type { CssClassDefinition } from './css_class_generation.ts';
 import {
 	generate_classes,
 	generate_property_classes,
 	generate_directional_classes,
 	generate_border_radius_corners,
 	generate_shadow_classes,
-	format_spacing_value,
+	format_spacing_value
 } from './css_class_generators.ts';
 import {
 	space_variants,
@@ -33,9 +33,9 @@ import {
 	shadow_size_variants,
 	shadow_semantic_values,
 	shadow_alpha_variants,
-	darken_lighten_variants,
+	darken_lighten_variants
 } from './variable_data.ts';
-import {css_class_composites} from './css_class_composites.ts';
+import { css_class_composites } from './css_class_composites.ts';
 
 // TODO add animation support, either as a separate thing or rename `css_class_definitions` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 
@@ -55,25 +55,25 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	typography
 
 	*/
-	font_family_sans: {declaration: 'font-family: var(--font_family_sans);'},
-	font_family_serif: {declaration: 'font-family: var(--font_family_serif);'},
-	font_family_mono: {declaration: 'font-family: var(--font_family_mono);'},
+	font_family_sans: { declaration: 'font-family: var(--font_family_sans);' },
+	font_family_serif: { declaration: 'font-family: var(--font_family_serif);' },
+	font_family_mono: { declaration: 'font-family: var(--font_family_mono);' },
 
 	...generate_property_classes(
 		'line-height',
 		line_height_variants,
-		(v) => `var(--line_height_${v})`,
+		(v) => `var(--line_height_${v})`
 	),
 	...generate_property_classes(
 		'font-size',
 		font_size_variants,
-		(v) => `var(--font_size_${v}); --font_size: var(--font_size_${v})`,
+		(v) => `var(--font_size_${v}); --font_size: var(--font_size_${v})`
 	),
 	...generate_property_classes(
 		'font-size',
 		icon_size_variants,
 		(v) => `var(--icon_size_${v}); --font_size: var(--icon_size_${v})`,
-		'icon_size',
+		'icon_size'
 	),
 
 	/*
@@ -86,22 +86,22 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		'color',
 		text_scale_variants,
 		(v) => `var(--text_${v}); --text_color: var(--text_${v})`,
-		'text',
+		'text'
 	),
 	// Shade scale (tinted backgrounds)
 	...generate_property_classes(
 		'background-color',
 		shade_scale_variants,
 		(v) => `var(--shade_${v})`,
-		'shade',
+		'shade'
 	),
 	// Hue classes
 	...generate_classes(
 		(letter: string) => ({
 			name: `hue_${letter}`,
-			css: `--hue: var(--hue_${letter});`,
+			css: `--hue: var(--hue_${letter});`
 		}),
-		palette_variants,
+		palette_variants
 	),
 	// Palette intensity classes (text color)
 	...generate_classes(
@@ -109,63 +109,63 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			name: `palette_${letter}_${intensity}`,
 			css: `color: var(--palette_${letter}_${intensity}); --text_color: var(--palette_${letter}_${
 				intensity
-			});`,
+			});`
 		}),
 		palette_variants,
-		intensity_variants,
+		intensity_variants
 	),
 	// Palette intensity classes (background color)
 	...generate_classes(
 		(letter: string, intensity: string) => ({
 			name: `bg_${letter}_${intensity}`,
-			css: `background-color: var(--palette_${letter}_${intensity});`,
+			css: `background-color: var(--palette_${letter}_${intensity});`
 		}),
 		palette_variants,
-		intensity_variants,
+		intensity_variants
 	),
 	// Intent intensity classes (text color) - meaning-first twins of the palette classes
 	...generate_classes(
 		(intent: string, intensity: string) => ({
 			name: `${intent}_${intensity}`,
-			css: `color: var(--${intent}_${intensity}); --text_color: var(--${intent}_${intensity});`,
+			css: `color: var(--${intent}_${intensity}); --text_color: var(--${intent}_${intensity});`
 		}),
 		intent_variants,
-		intensity_variants,
+		intensity_variants
 	),
 	// Intent intensity classes (background color)
 	...generate_classes(
 		(intent: string, intensity: string) => ({
 			name: `bg_${intent}_${intensity}`,
-			css: `background-color: var(--${intent}_${intensity});`,
+			css: `background-color: var(--${intent}_${intensity});`
 		}),
 		intent_variants,
-		intensity_variants,
+		intensity_variants
 	),
 	// Darken/lighten overlays (non-adaptive, alpha-based)
 	...generate_property_classes(
 		'background-color',
 		darken_lighten_variants,
 		(v) => `var(--darken_${v})`,
-		'darken',
+		'darken'
 	),
 	...generate_property_classes(
 		'background-color',
 		darken_lighten_variants,
 		(v) => `var(--lighten_${v})`,
-		'lighten',
+		'lighten'
 	),
 	// Adaptive alpha overlays (fg = toward foreground, bg = toward background)
 	...generate_property_classes(
 		'background-color',
 		darken_lighten_variants,
 		(v) => `var(--fg_${v})`,
-		'fg',
+		'fg'
 	),
 	...generate_property_classes(
 		'background-color',
 		darken_lighten_variants,
 		(v) => `var(--bg_${v})`,
-		'bg',
+		'bg'
 	),
 	/*
 
@@ -179,7 +179,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		'border-color',
 		darken_lighten_variants,
 		(v) => `var(--border_color_${v}); --border_color: var(--border_color_${v})`,
-		'border_color',
+		'border_color'
 	),
 	// Border colors using palette hue + intensity (sets both property and contextual variable);
 	// the letter alone implies the palette - the alpha-ramp family is `border_color_NN`
@@ -188,10 +188,10 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			name: `border_${letter}_${intensity}`,
 			css: `border-color: var(--palette_${letter}_${intensity}); --border_color: var(--palette_${
 				letter
-			}_${intensity});`,
+			}_${intensity});`
 		}),
 		palette_variants,
-		intensity_variants,
+		intensity_variants
 	),
 	// Outline colors using shade scale
 	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
@@ -202,29 +202,29 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			name: `outline_${letter}_${intensity}`,
 			css: `outline-color: var(--palette_${letter}_${intensity}); --outline_color: var(--palette_${
 				letter
-			}_${intensity});`,
+			}_${intensity});`
 		}),
 		palette_variants,
-		intensity_variants,
+		intensity_variants
 	),
 
 	...generate_property_classes(
 		'border-width',
 		border_width_variants.map(String),
-		(v) => `var(--border_width_${v})`,
+		(v) => `var(--border_width_${v})`
 	),
 	...generate_property_classes(
 		'outline-width',
 		border_width_variants.map(String),
-		(v) => `var(--border_width_${v})`,
+		(v) => `var(--border_width_${v})`
 	),
-	outline_width_focus: {declaration: 'outline-width: var(--outline_width_focus);'},
-	outline_width_active: {declaration: 'outline-width: var(--outline_width_active);'},
+	outline_width_focus: { declaration: 'outline-width: var(--outline_width_focus);' },
+	outline_width_active: { declaration: 'outline-width: var(--outline_width_active);' },
 
 	...generate_property_classes(
 		'border-radius',
 		border_radius_variants,
-		(v) => `var(--border_radius_${v})`,
+		(v) => `var(--border_radius_${v})`
 	),
 	...generate_border_radius_corners(border_radius_variants, (v) => `var(--border_radius_${v})`),
 
@@ -238,31 +238,31 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		sm: '40',
 		md: '50',
 		lg: '60',
-		xl: '70',
+		xl: '70'
 	}),
 	...generate_classes(
 		(value: string) => ({
 			name: `shadow_color_${value}`,
-			css: `--shadow_color: var(--shadow_color_${value});`,
+			css: `--shadow_color: var(--shadow_color_${value});`
 		}),
-		shadow_semantic_values,
+		shadow_semantic_values
 	),
 	...generate_classes(
 		(alpha: string) => ({
 			name: `shadow_alpha_${alpha}`,
-			css: `--shadow_alpha: var(--shadow_alpha_${alpha});`,
+			css: `--shadow_alpha: var(--shadow_alpha_${alpha});`
 		}),
-		shadow_alpha_variants,
+		shadow_alpha_variants
 	),
 	// Shadow colors using palette hue + intensity (sets contextual variable only);
 	// the letter alone implies the palette - semantic colors are `shadow_color_umbra` etc.
 	...generate_classes(
 		(letter: string, intensity: string) => ({
 			name: `shadow_${letter}_${intensity}`,
-			css: `--shadow_color: var(--palette_${letter}_${intensity});`,
+			css: `--shadow_color: var(--palette_${letter}_${intensity});`
 		}),
 		palette_variants,
-		intensity_variants,
+		intensity_variants
 	),
 
 	/*
@@ -276,30 +276,30 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_classes(
 		(v: string) => ({
 			name: `width_atmost_${v}`,
-			css: `width: 100%; max-width: var(--distance_${v});`,
+			css: `width: 100%; max-width: var(--distance_${v});`
 		}),
-		distance_variants,
+		distance_variants
 	),
 	...generate_classes(
 		(v: string) => ({
 			name: `width_atleast_${v}`,
-			css: `width: 100%; min-width: var(--distance_${v});`,
+			css: `width: 100%; min-width: var(--distance_${v});`
 		}),
-		distance_variants,
+		distance_variants
 	),
 	...generate_classes(
 		(v: string) => ({
 			name: `height_atmost_${v}`,
-			css: `height: 100%; max-height: var(--distance_${v});`,
+			css: `height: 100%; max-height: var(--distance_${v});`
 		}),
-		distance_variants,
+		distance_variants
 	),
 	...generate_classes(
 		(v: string) => ({
 			name: `height_atleast_${v}`,
-			css: `height: 100%; min-height: var(--distance_${v});`,
+			css: `height: 100%; min-height: var(--distance_${v});`
 		}),
-		distance_variants,
+		distance_variants
 	),
 
 	...generate_property_classes('top', space_variants, format_spacing_value),
@@ -312,7 +312,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_directional_classes('margin', ['0', 'auto', ...space_variants], format_spacing_value),
 	...generate_property_classes('gap', space_variants, format_spacing_value),
 	...generate_property_classes('column-gap', space_variants, format_spacing_value),
-	...generate_property_classes('row-gap', space_variants, format_spacing_value),
+	...generate_property_classes('row-gap', space_variants, format_spacing_value)
 };
 
 /**
@@ -326,14 +326,14 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
  */
 export const merge_class_definitions = (
 	user_definitions: Record<string, CssClassDefinition | undefined> | undefined,
-	include_defaults: boolean,
+	include_defaults: boolean
 ): Record<string, CssClassDefinition | undefined> => {
 	if (!include_defaults && !user_definitions) {
 		throw new Error('class_definitions is required when include_default_classes is false');
 	}
 	return include_defaults
 		? user_definitions
-			? {...css_class_definitions, ...user_definitions}
+			? { ...css_class_definitions, ...user_definitions }
 			: css_class_definitions
 		: user_definitions!;
 };

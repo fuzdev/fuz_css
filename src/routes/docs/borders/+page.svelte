@@ -1,7 +1,7 @@
 <script lang="ts">
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
@@ -15,7 +15,7 @@
 		border_radius_variants,
 		alpha_variants,
 		intensity_variants,
-		type IntensityVariant,
+		type IntensityVariant
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 
@@ -30,18 +30,18 @@
 		'border-radius:0',
 		'border-radius:14%',
 		'border-radius:32%',
-		'border-radius:100%',
+		'border-radius:100%'
 	];
 
 	const border_radius_corner_classes = [
 		'border-top-left-radius:26%',
 		'border-top-right-radius:100% border-bottom-left-radius:100%',
-		'border-bottom-right-radius:77%',
+		'border-bottom-right-radius:77%'
 	];
 
 	const border_radius_corner_size_classes = [
 		'border_top_left_radius_lg border_top_right_radius_sm',
-		'border_bottom_left_radius_md border_bottom_right_radius_xl',
+		'border_bottom_left_radius_md border_bottom_right_radius_xl'
 	];
 
 	let selected_intensity: IntensityVariant = $state.raw('50');
@@ -60,9 +60,9 @@
 
 	<section>
 		<p>
-			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt
-			to color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha
-			because light-on-dark has lower perceived contrast.
+			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt to
+			color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha because
+			light-on-dark has lower perceived contrast.
 		</p>
 	</section>
 	<TomeSection>
@@ -97,12 +97,11 @@
 		<TomeSection>
 			<TomeSectionHeader text="Opaque borders with shades" tag="h4" />
 			<UnfinishedImplementationWarning
-				>We may want to add <code>border_shade_NN</code> utility classes for opaque
-				borders.</UnfinishedImplementationWarning
+				>We may want to add <code>border_shade_NN</code> utility classes for opaque borders.</UnfinishedImplementationWarning
 			>
 			<p>
-				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This
-				avoids alpha transparency but requires inline styles or custom classes:
+				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This avoids
+				alpha transparency but requires inline styles or custom classes:
 			</p>
 			<Code
 				lang="css"
@@ -120,8 +119,8 @@ border-color: var(--shade_30);
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
 		<p>
-			Use palette variables like <code>palette_a_{selected_intensity}</code> for colored borders.
-			The intensity controls the color's prominence.
+			Use palette variables like <code>palette_a_{selected_intensity}</code> for colored borders. The
+			intensity controls the color's prominence.
 		</p>
 		<form class="intensity_selector">
 			<fieldset class="row mb_0">
@@ -243,8 +242,8 @@ border-color: var(--shade_30);
 		<TomeSection>
 			<TomeSectionHeader tag="h4" text="Custom values" />
 			<p>
-				Border <TomeLink slug="classes" hash="Literal-classes">literal classes</TomeLink> for
-				open-ended values:
+				Border <TomeLink slug="classes" hash="Literal-classes">literal classes</TomeLink> for open-ended
+				values:
 			</p>
 			<div class="border_examples border_radii">
 				{#each border_radius_classes as border_radius_class (border_radius_class)}

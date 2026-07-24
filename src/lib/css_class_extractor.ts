@@ -15,13 +15,13 @@
  * @module
  */
 
-import {parse as parse_svelte, type AST} from 'svelte/compiler';
-import {walk, type Visitors} from 'zimmerframe';
-import {Parser, type Node} from 'acorn';
-import {tsPlugin} from '@sveltejs/acorn-typescript';
-import {to_error_message} from '@fuzdev/fuz_util/error.ts';
+import { parse as parse_svelte, type AST } from 'svelte/compiler';
+import { walk, type Visitors } from 'zimmerframe';
+import { Parser, type Node } from 'acorn';
+import { tsPlugin } from '@sveltejs/acorn-typescript';
+import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
-import {type SourceLocation, type ExtractionDiagnostic} from './diagnostics.ts';
+import { type SourceLocation, type ExtractionDiagnostic } from './diagnostics.ts';
 
 //
 // Types
@@ -153,7 +153,7 @@ export class SourceIndex {
 			if (this.line_starts[mid]! <= offset) low = mid;
 			else high = mid - 1;
 		}
-		return {file, line: low + 1, column: offset - this.line_starts[low]! + 1};
+		return { file, line: low + 1, column: offset - this.line_starts[low]! + 1 };
 	}
 }
 
@@ -168,7 +168,7 @@ export class SourceIndex {
 const add_class_with_location = (
 	classes: Map<string, Array<SourceLocation>>,
 	class_name: string,
-	location: SourceLocation,
+	location: SourceLocation
 ): void => {
 	const existing = classes.get(class_name);
 	if (existing) {
@@ -184,7 +184,7 @@ const CLASS_UTILITY_FUNCTIONS = new Set([
 	'cn', // common alias (shadcn/ui convention)
 	'classNames', // classnames package
 	'classnames', // lowercase variant
-	'cx', // emotion and other libs
+	'cx' // emotion and other libs
 ]);
 
 // Svelte 5 runes that wrap expressions we should extract from
@@ -235,7 +235,7 @@ const create_walk_state = (file: string, source_index: SourceIndex | null): Walk
 	diagnostics: [],
 	elements: new Set(),
 	explicit_elements: new Set(),
-	explicit_variables: new Set(),
+	explicit_variables: new Set()
 });
 
 /**
@@ -248,7 +248,7 @@ const finalize_extraction_result = (state: WalkState): ExtractionResult => ({
 	diagnostics: state.diagnostics.length > 0 ? state.diagnostics : null,
 	elements: state.elements.size > 0 ? state.elements : null,
 	explicit_elements: state.explicit_elements.size > 0 ? state.explicit_elements : null,
-	explicit_variables: state.explicit_variables.size > 0 ? state.explicit_variables : null,
+	explicit_variables: state.explicit_variables.size > 0 ? state.explicit_variables : null
 });
 
 /**
@@ -262,7 +262,7 @@ const empty_extraction_result = (diagnostics: Array<ExtractionDiagnostic>): Extr
 	diagnostics: diagnostics.length > 0 ? diagnostics : null,
 	elements: null,
 	explicit_elements: null,
-	explicit_variables: null,
+	explicit_variables: null
 });
 
 /**
@@ -280,7 +280,7 @@ const location_from_offset = (state: WalkState, offset: number): SourceLocation 
 		return state.source_index.get_location(offset, state.file);
 	}
 	// Fallback for script context (should have line/column from AST)
-	return {file: state.file, line: 1, column: 1};
+	return { file: state.file, line: 1, column: 1 };
 };
 
 /**
@@ -295,7 +295,7 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 
 	let ast: AST.Root;
 	try {
-		ast = parse_svelte(source, {modern: true});
+		ast = parse_svelte(source, { modern: true });
 	} catch (err) {
 		return empty_extraction_result([
 			{
@@ -303,8 +303,8 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 				level: 'warning',
 				message: `Failed to parse Svelte file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',
-				location: {file, line: 1, column: 1},
-			},
+				location: { file, line: 1, column: 1 }
+			}
 		]);
 	}
 
@@ -340,11 +340,11 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
  * and returns the space-separated list of names.
  */
 const create_fuz_comment_parser = (
-	tag: string,
+	tag: string
 ): ((
 	content: string,
 	location: SourceLocation,
-	diagnostics: Array<ExtractionDiagnostic>,
+	diagnostics: Array<ExtractionDiagnostic>
 ) => Array<string> | null) => {
 	const pattern = new RegExp(`^\\s*@fuz-${tag}(:?)\\s+(.+?)\\s*$`);
 	return (content, location, diagnostics) => {
@@ -356,7 +356,7 @@ const create_fuz_comment_parser = (
 				level: 'warning',
 				message: `@fuz-${tag}: colon is unnecessary`,
 				suggestion: `Use @fuz-${tag} without the colon`,
-				location,
+				location
 			});
 		}
 		return match[2]!.split(/\s+/).filter(Boolean);
@@ -406,9 +406,9 @@ const process_fuz_comment = (content: string, location: SourceLocation, state: W
  */
 const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
-		Comment(node, {state}) {
+		Comment(node, { state }) {
 			process_fuz_comment(node.data, location_from_offset(state, node.start), state);
-		},
+		}
 	};
 	walk(ast.fragment as AST.SvelteNode, state, visitors);
 };
@@ -421,11 +421,11 @@ const extract_fuz_comments_from_svelte = (ast: AST.Root, state: WalkState): void
 const extract_fuz_comments_from_script = (
 	script: AST.Script,
 	source: string,
-	state: WalkState,
+	state: WalkState
 ): void => {
 	// Extract the script source using start/end positions
 	// Svelte AST nodes have start/end but the TypeScript types don't include them
-	const content = script.content as unknown as {start: number; end: number};
+	const content = script.content as unknown as { start: number; end: number };
 	const script_source = source.slice(content.start, content.end);
 
 	// Calculate the line offset for proper location reporting
@@ -436,7 +436,7 @@ const extract_fuz_comments_from_script = (
 	}
 
 	// Collect comments via acorn's onComment callback
-	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
+	const comments: Array<{ value: string; loc: { start: { line: number; column: number } } }> = [];
 
 	try {
 		const parser = Parser.extend(tsPlugin());
@@ -449,12 +449,12 @@ const extract_fuz_comments_from_script = (
 				text: string,
 				_start: number,
 				_end: number,
-				startLoc?: {line: number; column: number},
+				startLoc?: { line: number; column: number }
 			) => {
 				if (startLoc) {
-					comments.push({value: text, loc: {start: startLoc}});
+					comments.push({ value: text, loc: { start: startLoc } });
 				}
-			},
+			}
 		});
 	} catch {
 		// If parsing fails, we can't extract comments
@@ -466,7 +466,7 @@ const extract_fuz_comments_from_script = (
 		const location: SourceLocation = {
 			file: state.file,
 			line: comment.loc.start.line + line_offset,
-			column: comment.loc.start.column + 1,
+			column: comment.loc.start.column + 1
 		};
 		process_fuz_comment(comment.value, location, state);
 	}
@@ -483,10 +483,10 @@ const extract_fuz_comments_from_script = (
 export const extract_from_ts = (
 	source: string,
 	file = '<unknown>',
-	acorn_plugins?: Array<AcornPlugin>,
+	acorn_plugins?: Array<AcornPlugin>
 ): ExtractionResult => {
 	// Collect comments via acorn's onComment callback
-	const comments: Array<{value: string; loc: {start: {line: number; column: number}}}> = [];
+	const comments: Array<{ value: string; loc: { start: { line: number; column: number } } }> = [];
 
 	let ast: Node;
 	try {
@@ -502,12 +502,12 @@ export const extract_from_ts = (
 				text: string,
 				_start: number,
 				_end: number,
-				startLoc?: {line: number; column: number},
+				startLoc?: { line: number; column: number }
 			) => {
 				if (startLoc) {
-					comments.push({value: text, loc: {start: startLoc}});
+					comments.push({ value: text, loc: { start: startLoc } });
 				}
-			},
+			}
 		});
 	} catch (err) {
 		return empty_extraction_result([
@@ -516,8 +516,8 @@ export const extract_from_ts = (
 				level: 'warning',
 				message: `Failed to parse TypeScript/JS file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',
-				location: {file, line: 1, column: 1},
-			},
+				location: { file, line: 1, column: 1 }
+			}
 		]);
 	}
 
@@ -528,7 +528,7 @@ export const extract_from_ts = (
 		const location: SourceLocation = {
 			file,
 			line: comment.loc.start.line,
-			column: comment.loc.start.column + 1,
+			column: comment.loc.start.column + 1
 		};
 		process_fuz_comment(comment.value, location, state);
 	}
@@ -554,7 +554,7 @@ export const extract_from_ts = (
  */
 export const extract_css_classes = (
 	source: string,
-	options: ExtractCssClassesOptions = {},
+	options: ExtractCssClassesOptions = {}
 ): Set<string> | null => {
 	const result = extract_css_classes_with_locations(source, options);
 	return result.classes ? new Set(result.classes.keys()) : null;
@@ -570,9 +570,9 @@ export const extract_css_classes = (
  */
 export const extract_css_classes_with_locations = (
 	source: string,
-	options: ExtractCssClassesOptions = {},
+	options: ExtractCssClassesOptions = {}
 ): ExtractionResult => {
-	const {filename, acorn_plugins} = options;
+	const { filename, acorn_plugins } = options;
 	const ext = filename ? filename.slice(filename.lastIndexOf('.')) : '';
 	const file = filename ?? '<unknown>';
 
@@ -598,56 +598,56 @@ export const extract_css_classes_with_locations = (
 const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
 	const visitors: Visitors<AST.SvelteNode, WalkState> = {
 		// Handle regular elements - capture element name
-		RegularElement(node, {state, next}) {
+		RegularElement(node, { state, next }) {
 			// Track HTML element names (not components, not svelte:* elements)
 			state.elements.add(node.name);
 			process_element_attributes(node.attributes, state);
 			next();
 		},
 		// SvelteElement has dynamic tag, can't statically determine element
-		SvelteElement(node, {state, next}) {
+		SvelteElement(node, { state, next }) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
 		// Components are PascalCase - don't add to elements
-		SvelteComponent(node, {state, next}) {
+		SvelteComponent(node, { state, next }) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
-		Component(node, {state, next}) {
+		Component(node, { state, next }) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
-		SvelteFragment(node, {state, next}) {
+		SvelteFragment(node, { state, next }) {
 			process_element_attributes(node.attributes, state);
 			next();
 		},
 		// SvelteHead injects children into document <head> - walk its fragment
-		SvelteHead(_node, {next}) {
+		SvelteHead(_node, { next }) {
 			next();
 		},
 		// TitleElement is a special element type for <title> inside svelte:head
-		TitleElement(node, {state, next}) {
+		TitleElement(node, { state, next }) {
 			state.elements.add(node.name);
 			process_element_attributes(node.attributes, state);
 			next();
 		},
 		// SlotElement is <slot> - can have fallback content with elements
-		SlotElement(node, {state, next}) {
+		SlotElement(node, { state, next }) {
 			state.elements.add(node.name);
 			process_element_attributes(node.attributes, state);
 			next();
 		},
 		// SvelteBody, SvelteWindow, SvelteDocument don't have element children
-		SvelteBody(_node, {next}) {
+		SvelteBody(_node, { next }) {
 			next();
 		},
-		SvelteWindow(_node, {next}) {
+		SvelteWindow(_node, { next }) {
 			next();
 		},
-		SvelteDocument(_node, {next}) {
+		SvelteDocument(_node, { next }) {
 			next();
-		},
+		}
 	};
 
 	walk(fragment as AST.SvelteNode, state, visitors);
@@ -658,7 +658,7 @@ const walk_template = (fragment: AST.Fragment, state: WalkState): void => {
  */
 const process_element_attributes = (
 	attributes: Array<AST.Attribute | AST.SpreadAttribute | AST.Directive | AST.AttachTag>,
-	state: WalkState,
+	state: WalkState
 ): void => {
 	for (const attr of attributes) {
 		// Handle class attribute
@@ -716,20 +716,23 @@ const extract_from_attribute_value = (value: AST.Attribute['value'], state: Walk
 const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void => {
 	// Get location from the expression's start offset
 	const get_location = (): SourceLocation => {
-		const node = expr as unknown as {start?: number; loc?: {start: {line: number; column: number}}};
+		const node = expr as unknown as {
+			start?: number;
+			loc?: { start: { line: number; column: number } };
+		};
 		if (node.loc) {
-			return {file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1};
+			return { file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1 };
 		}
 		if (node.start !== undefined) {
 			return location_from_offset(state, node.start);
 		}
-		return {file: state.file, line: 1, column: 1};
+		return { file: state.file, line: 1, column: 1 };
 	};
 
 	switch (expr.type) {
 		case 'Literal': {
 			// String literal
-			const node = expr as unknown as {value: unknown};
+			const node = expr as unknown as { value: unknown };
 			if (typeof node.value === 'string') {
 				const location = get_location();
 				for (const cls of node.value.split(/\s+/).filter(Boolean)) {
@@ -744,9 +747,9 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 			// Only extract tokens that are whitespace-bounded (not fragments like `icon-` from `icon-${size}`)
 			const node = expr as unknown as {
 				quasis: Array<{
-					value: {raw: string};
+					value: { raw: string };
 					start?: number;
-					loc?: {start: {line: number; column: number}};
+					loc?: { start: { line: number; column: number } };
 				}>;
 				expressions: Array<unknown>;
 			};
@@ -758,7 +761,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 				if (!quasi.value.raw) continue;
 
 				const location = quasi.loc
-					? {file: state.file, line: quasi.loc.start.line, column: quasi.loc.start.column + 1}
+					? { file: state.file, line: quasi.loc.start.line, column: quasi.loc.start.column + 1 }
 					: quasi.start !== undefined
 						? location_from_offset(state, quasi.start)
 						: get_location();
@@ -816,7 +819,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'ArrayExpression': {
 			// Array: extract from each element
-			const node = expr as unknown as {elements: Array<unknown>};
+			const node = expr as unknown as { elements: Array<unknown> };
 			for (const element of node.elements) {
 				if (element) {
 					extract_from_expression(element as AST.SvelteNode, state);
@@ -833,15 +836,15 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 					key: unknown;
 					computed: boolean;
 					start?: number;
-					loc?: {start: {line: number; column: number}};
+					loc?: { start: { line: number; column: number } };
 				}>;
 			};
 			for (const prop of node.properties) {
 				if (prop.type === 'Property' && !prop.computed) {
 					// Non-computed key - extract the key as a class name
-					const key = prop.key as {type: string; name?: string; value?: string};
+					const key = prop.key as { type: string; name?: string; value?: string };
 					const location = prop.loc
-						? {file: state.file, line: prop.loc.start.line, column: prop.loc.start.column + 1}
+						? { file: state.file, line: prop.loc.start.line, column: prop.loc.start.column + 1 }
 						: prop.start !== undefined
 							? location_from_offset(state, prop.start)
 							: get_location();
@@ -860,7 +863,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'ConditionalExpression': {
 			// Ternary: extract from both branches
-			const node = expr as unknown as {consequent: unknown; alternate: unknown};
+			const node = expr as unknown as { consequent: unknown; alternate: unknown };
 			extract_from_expression(node.consequent as AST.SvelteNode, state);
 			extract_from_expression(node.alternate as AST.SvelteNode, state);
 			break;
@@ -868,7 +871,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'LogicalExpression': {
 			// && or ||: extract from both sides
-			const node = expr as unknown as {left: unknown; right: unknown};
+			const node = expr as unknown as { left: unknown; right: unknown };
 			extract_from_expression(node.left as AST.SvelteNode, state);
 			extract_from_expression(node.right as AST.SvelteNode, state);
 			break;
@@ -877,7 +880,12 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		case 'CallExpression': {
 			// Function call: check if it's a class utility function or Svelte rune
 			const node = expr as unknown as {
-				callee: {type: string; name?: string; object?: {name?: string}; property?: {name?: string}};
+				callee: {
+					type: string;
+					name?: string;
+					object?: { name?: string };
+					property?: { name?: string };
+				};
 				arguments: Array<unknown>;
 			};
 
@@ -905,7 +913,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'Identifier': {
 			// Variable reference: track it for later extraction
-			const node = expr as unknown as {name: string};
+			const node = expr as unknown as { name: string };
 			if (state.in_class_context) {
 				state.tracked_vars.add(node.name);
 			}
@@ -920,7 +928,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'TaggedTemplateExpression': {
 			// Tagged template literal like css`class-name` - extract from the template
-			const node = expr as unknown as {quasi: unknown};
+			const node = expr as unknown as { quasi: unknown };
 			if (node.quasi) {
 				extract_from_expression(node.quasi as AST.SvelteNode, state);
 			}
@@ -931,7 +939,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 		case 'FunctionExpression': {
 			// Function expression: extract from the body
 			// Handles $derived.by(() => cond ? 'a' : 'b')
-			const node = expr as unknown as {body: unknown};
+			const node = expr as unknown as { body: unknown };
 			if (node.body) {
 				extract_from_expression(node.body as AST.SvelteNode, state);
 			}
@@ -940,7 +948,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'BlockStatement': {
 			// Block statement: walk all statements looking for return statements
-			const node = expr as unknown as {body: Array<unknown>};
+			const node = expr as unknown as { body: Array<unknown> };
 			for (const stmt of node.body) {
 				extract_from_expression(stmt as AST.SvelteNode, state);
 			}
@@ -949,7 +957,7 @@ const extract_from_expression = (expr: AST.SvelteNode, state: WalkState): void =
 
 		case 'ReturnStatement': {
 			// Return statement: extract from the argument
-			const node = expr as unknown as {argument: unknown};
+			const node = expr as unknown as { argument: unknown };
 			if (node.argument) {
 				extract_from_expression(node.argument as AST.SvelteNode, state);
 			}
@@ -974,14 +982,14 @@ const extract_from_jsx_attribute_value = (value: unknown, state: WalkState): voi
 		type: string;
 		value?: string;
 		expression?: unknown;
-		loc?: {start: {line: number; column: number}};
+		loc?: { start: { line: number; column: number } };
 	};
 
 	if (node.type === 'Literal' && typeof node.value === 'string') {
 		// Static className="foo bar"
 		const location: SourceLocation = node.loc
-			? {file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1}
-			: {file: state.file, line: 1, column: 1};
+			? { file: state.file, line: node.loc.start.line, column: node.loc.start.column + 1 }
+			: { file: state.file, line: 1, column: 1 };
 		for (const cls of node.value.split(/\s+/).filter(Boolean)) {
 			add_class(state, cls, location);
 		}
@@ -1000,8 +1008,8 @@ const extract_from_jsx_attribute_value = (value: unknown, state: WalkState): voi
 const walk_script = (ast: unknown, state: WalkState): void => {
 	const visitors: Visitors<Node, WalkState> = {
 		// Variable declarations
-		VariableDeclarator(node, {state, next}) {
-			const declarator = node as unknown as {id: {type: string; name: string}; init: unknown};
+		VariableDeclarator(node, { state, next }) {
+			const declarator = node as unknown as { id: { type: string; name: string }; init: unknown };
 			if (declarator.id.type === 'Identifier') {
 				const name = declarator.id.name;
 				// Check if variable name matches class pattern
@@ -1020,9 +1028,9 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 		},
 
 		// Call expressions (for clsx/cn calls outside of class attributes)
-		CallExpression(node, {state, next}) {
+		CallExpression(node, { state, next }) {
 			const call = node as unknown as {
-				callee: {type: string; name?: string};
+				callee: { type: string; name?: string };
 				arguments: Array<unknown>;
 			};
 			if (call.callee.type === 'Identifier' && CLASS_UTILITY_FUNCTIONS.has(call.callee.name!)) {
@@ -1034,9 +1042,9 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 		},
 
 		// Object properties with class-related keys
-		Property(node, {state, next}) {
+		Property(node, { state, next }) {
 			const prop = node as unknown as {
-				key: {type: string; name?: string; value?: string};
+				key: { type: string; name?: string; value?: string };
 				value: unknown;
 				computed: boolean;
 			};
@@ -1060,13 +1068,13 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 
 		// JSX elements (React/Preact/Solid) - extract class-related attributes and element names
 		// These are only present when acorn-jsx plugin is used
-		JSXElement(node, {state, next}) {
+		JSXElement(node, { state, next }) {
 			const element = node as unknown as {
 				openingElement: {
-					name?: {type: string; name?: string};
+					name?: { type: string; name?: string };
 					attributes: Array<{
 						type: string;
-						name?: {type: string; name?: string};
+						name?: { type: string; name?: string };
 						value?: unknown;
 					}>;
 				};
@@ -1092,7 +1100,7 @@ const walk_script = (ast: unknown, state: WalkState): void => {
 				}
 			}
 			next();
-		},
+		}
 	};
 
 	walk(ast as Node, state, visitors);
@@ -1115,8 +1123,8 @@ const extract_from_tracked_vars = (ast: AST.Root, state: WalkState): void => {
  */
 const extract_from_tracked_vars_in_script = (ast: Node, state: WalkState): void => {
 	const find_visitors: Visitors<Node, WalkState> = {
-		VariableDeclarator(node, {state}) {
-			const declarator = node as unknown as {id: {type: string; name: string}; init: unknown};
+		VariableDeclarator(node, { state }) {
+			const declarator = node as unknown as { id: { type: string; name: string }; init: unknown };
 			if (
 				declarator.id.type === 'Identifier' &&
 				state.tracked_vars.has(declarator.id.name) &&
@@ -1125,7 +1133,7 @@ const extract_from_tracked_vars_in_script = (ast: Node, state: WalkState): void 
 			) {
 				extract_from_expression(declarator.init as AST.SvelteNode, state);
 			}
-		},
+		}
 	};
 
 	walk(ast, state, find_visitors);

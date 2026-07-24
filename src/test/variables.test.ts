@@ -1,15 +1,15 @@
-import {test, assert} from 'vitest';
+import { test, assert } from 'vitest';
 
-import {default_variables} from '$lib/variables.ts';
+import { default_variables } from '$lib/variables.ts';
 import * as exported_variables from '$lib/variables.ts';
-import {StyleVariable} from '$lib/variable.ts';
+import { StyleVariable } from '$lib/variable.ts';
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
 		const result = StyleVariable.safeParse(v);
 		assert.isTrue(
 			result.success,
-			`variable "${v.name}" failed validation: ${JSON.stringify(result.error?.issues)}`,
+			`variable "${v.name}" failed validation: ${JSON.stringify(result.error?.issues)}`
 		);
 	}
 });
@@ -19,7 +19,7 @@ test('variables have no duplicates', () => {
 	for (const v of default_variables) {
 		assert.isFalse(
 			names.has(v.name),
-			`variable "${v.name}" is duplicated in \`default_variables\``,
+			`variable "${v.name}" is duplicated in \`default_variables\``
 		);
 		names.add(v.name);
 	}
@@ -29,7 +29,7 @@ test('variable names match their identifiers', () => {
 	for (const v of default_variables) {
 		assert.isTrue(
 			v.name in exported_variables,
-			`default variable with name "${v.name}" has no matching exported identifier`,
+			`default variable with name "${v.name}" has no matching exported identifier`
 		);
 	}
 });
@@ -41,11 +41,11 @@ test('variable identifiers are all included in `default_variables`', () => {
 		assert.strictEqual(
 			identifier,
 			exported.name,
-			`variable identifier "${identifier}" does not match its name ${exported.name}`,
+			`variable identifier "${identifier}" does not match its name ${exported.name}`
 		);
 		assert.isTrue(
 			default_variables.some((v) => v.name === identifier),
-			`exported variable with identifier "${identifier}" is not included in \`default_variables\``,
+			`exported variable with identifier "${identifier}" is not included in \`default_variables\``
 		);
 	}
 });

@@ -8,7 +8,7 @@
  * @module
  */
 
-import {srgb_component_to_linear, type RgbUnit} from './oklch.ts';
+import { srgb_component_to_linear, type RgbUnit } from './oklch.ts';
 
 /**
  * Computes WCAG 2.x relative luminance of a gamma-encoded sRGB color.

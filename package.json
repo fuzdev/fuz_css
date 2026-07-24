@@ -72,7 +72,7 @@
     "@fuzdev/fuz_code": "^0.48.0",
     "@fuzdev/fuz_ui": "^0.206.7",
     "@fuzdev/fuz_util": "^0.65.2",
-    "@fuzdev/gro": "^0.207.0",
+    "@fuzdev/gro": "^0.205.1",
     "@fuzdev/mdz": "^0.3.0",
     "@ryanatkn/eslint-config": "^0.12.2",
     "@sveltejs/acorn-typescript": "^1.0.9",
@@ -88,6 +88,8 @@
     "eslint-plugin-svelte": "^3.13.1",
     "esm-env": "^1.2.2",
     "magic-string": "^0.30.21",
+    "prettier": "^3.9.6",
+    "prettier-plugin-svelte": "^4.1.1",
     "svelte": "^5.56.3",
     "svelte-check": "^4.4.6",
     "svelte-docinfo": "^0.5.4",
@@ -99,6 +101,24 @@
     "vitest": "^4.0.15",
     "zimmerframe": "^1.1.4",
     "zod": "^4.3.6"
+  },
+  "prettier": {
+    "plugins": [
+      "prettier-plugin-svelte"
+    ],
+    "useTabs": true,
+    "printWidth": 100,
+    "singleQuote": true,
+    "bracketSpacing": true,
+    "trailingComma": "none",
+    "overrides": [
+      {
+        "files": "package.json",
+        "options": {
+          "useTabs": false
+        }
+      }
+    ]
   },
   "sideEffects": [
     "**/*.css"

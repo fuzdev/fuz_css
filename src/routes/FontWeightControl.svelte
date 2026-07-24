@@ -1,9 +1,9 @@
 <script lang="ts">
-	import type {Snippet} from 'svelte';
+	import type { Snippet } from 'svelte';
 
 	let {
 		selected_font_weight = $bindable(400),
-		children,
+		children
 	}: {
 		selected_font_weight?: number;
 		children?: Snippet;

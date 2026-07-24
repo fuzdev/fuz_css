@@ -1,7 +1,7 @@
-import type {Theme} from './theme.ts';
-import {base_theme} from './themes/base.ts';
-import {low_contrast_theme} from './themes/low_contrast.ts';
-import {high_contrast_theme} from './themes/high_contrast.ts';
+import type { Theme } from './theme.ts';
+import { base_theme } from './themes/base.ts';
+import { low_contrast_theme } from './themes/low_contrast.ts';
+import { high_contrast_theme } from './themes/high_contrast.ts';
 
 export const DEFAULT_THEME: Theme = base_theme;
 
@@ -23,5 +23,5 @@ export const DEFAULT_THEME: Theme = base_theme;
 export const default_themes: Array<Theme> = [
 	DEFAULT_THEME,
 	low_contrast_theme,
-	high_contrast_theme,
+	high_contrast_theme
 ];

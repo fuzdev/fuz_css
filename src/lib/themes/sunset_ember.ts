@@ -1,4 +1,4 @@
-import type {Theme} from '../theme.ts';
+import type { Theme } from '../theme.ts';
 
 /**
  * A natural exemplar theme built entirely from semantic bindings and levers —
@@ -18,19 +18,19 @@ export const sunset_ember_theme: Theme = {
 	name: 'sunset ember',
 	variables: [
 		// ember accent: links/focus/selection burn orange
-		{name: 'hue_accent', light: 'var(--hue_h)'},
+		{ name: 'hue_accent', light: 'var(--hue_h)' },
 		// warm haze over every surface (neutral already binds to warm hue_f)
-		{name: 'neutral_chroma', light: '0.028', dark: '0.035'},
+		{ name: 'neutral_chroma', light: '0.028', dark: '0.035' },
 		// vivid — deliberately past the caps; the browser clips, lightness holds
-		{name: 'chroma_scale', light: '1.3', dark: '1.2'},
+		{ name: 'chroma_scale', light: '1.3', dark: '1.2' },
 		// light ends gold, dark ends toward crimson dusk
-		{name: 'hue_shift', light: '16'},
+		{ name: 'hue_shift', light: '16' },
 		// gradient sky: kept near the shade_00 lightness so text contrast holds
 		{
 			name: 'background_image',
 			light:
 				'linear-gradient(to bottom, oklch(0.96 0.05 var(--hue_e)), oklch(0.975 0.028 var(--hue_h)) 45%, oklch(0.965 0.035 var(--hue_c)))',
-			dark: 'linear-gradient(to bottom, oklch(0.23 0.045 var(--hue_d)), oklch(0.19 0.04 var(--hue_c)) 55%, oklch(0.16 0.045 var(--hue_c)))',
-		},
-	],
+			dark: 'linear-gradient(to bottom, oklch(0.23 0.045 var(--hue_d)), oklch(0.19 0.04 var(--hue_c)) 55%, oklch(0.16 0.045 var(--hue_c)))'
+		}
+	]
 };

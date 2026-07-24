@@ -7,8 +7,8 @@
  * @module
  */
 
-import type {SourceLocation, ExtractionDiagnostic} from './diagnostics.ts';
-import type {ExtractionData} from './css_class_extractor.ts';
+import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
+import type { ExtractionData } from './css_class_extractor.ts';
 
 /**
  * Collection of CSS classes extracted from source files.
@@ -67,7 +67,7 @@ export class CssClasses {
 	 */
 	constructor(
 		additional_classes: Set<string> | null = null,
-		exclude_classes: Set<string> | null = null,
+		exclude_classes: Set<string> | null = null
 	) {
 		this.#additional_classes = additional_classes;
 		this.#exclude_classes = exclude_classes;
@@ -173,7 +173,7 @@ export class CssClasses {
 			explicit_classes: this.#explicit,
 			all_elements: this.#all_elements,
 			explicit_elements: this.#explicit_elements,
-			explicit_variables: this.#explicit_variables,
+			explicit_variables: this.#explicit_variables
 		};
 	}
 

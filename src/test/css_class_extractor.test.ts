@@ -1,12 +1,12 @@
-import {test, describe} from 'vitest';
+import { test, describe } from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.ts';
+import { extract_from_svelte } from '$lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,
 	assert_no_classes,
 	assert_diagnostic,
-	assert_diagnostic_count,
+	assert_diagnostic_count
 } from './css_class_extractor_test_helpers.ts';
 
 describe('basic string class attributes', () => {
@@ -14,21 +14,21 @@ describe('basic string class attributes', () => {
 		{
 			name: 'extracts classes from class="string" attribute',
 			source: `<div class="foo bar baz"></div>`,
-			expected: ['foo', 'bar', 'baz'],
+			expected: ['foo', 'bar', 'baz']
 		},
 		{
 			name: 'extracts CSS-literal classes from class attribute',
 			source: `<div class="display:flex hover:opacity:80%"></div>`,
-			expected: ['display:flex', 'hover:opacity:80%'],
+			expected: ['display:flex', 'hover:opacity:80%']
 		},
 		{
 			name: 'extracts classes with responsive modifiers',
 			source: `<div class="md:display:flex lg:flex-direction:row"></div>`,
-			expected: ['md:display:flex', 'lg:flex-direction:row'],
-		},
+			expected: ['md:display:flex', 'lg:flex-direction:row']
+		}
 	];
 
-	test.each(string_attr_cases)('$name', ({source, expected}) => {
+	test.each(string_attr_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -39,26 +39,26 @@ describe('array-style class attributes (Svelte 5.16+)', () => {
 		{
 			name: 'extracts classes from class={[...]} array syntax',
 			source: `<div class={['foo', 'bar']}></div>`,
-			expected: ['foo', 'bar'],
+			expected: ['foo', 'bar']
 		},
 		{
 			name: 'extracts classes from conditional array syntax',
 			source: `<div class={[cond && 'active', 'base']}></div>`,
-			expected: ['active', 'base'],
+			expected: ['active', 'base']
 		},
 		{
 			name: 'extracts classes from complex array with CSS-literal syntax',
 			source: `<div class={[faded && 'saturate-0 opacity-50', large && 'scale-200']}></div>`,
-			expected: ['saturate-0', 'opacity-50', 'scale-200'],
+			expected: ['saturate-0', 'opacity-50', 'scale-200']
 		},
 		{
 			name: 'extracts CSS-literal classes from array syntax',
 			source: `<div class={[cond && 'box', 'display:flex']}></div>`,
-			expected: ['box', 'display:flex'],
-		},
+			expected: ['box', 'display:flex']
+		}
 	];
 
-	test.each(array_attr_cases)('$name', ({source, expected}) => {
+	test.each(array_attr_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -69,21 +69,21 @@ describe('object-style class attributes (Svelte 5.16+)', () => {
 		{
 			name: 'extracts classes from class={{...}} object syntax',
 			source: `<div class={{ cool, lame: !cool }}></div>`,
-			expected: ['cool', 'lame'],
+			expected: ['cool', 'lame']
 		},
 		{
 			name: 'extracts CSS-literal classes from object keys',
 			source: `<div class={{ 'display:flex': isActive, 'hover:opacity:80%': hasHover }}></div>`,
-			expected: ['display:flex', 'hover:opacity:80%'],
+			expected: ['display:flex', 'hover:opacity:80%']
 		},
 		{
 			name: 'extracts classes from mixed object with identifiers and strings',
 			source: `<div class={{ active, 'hover:color:red': true }}></div>`,
-			expected: ['active', 'hover:color:red'],
-		},
+			expected: ['active', 'hover:color:red']
+		}
 	];
 
-	test.each(object_attr_cases)('$name', ({source, expected}) => {
+	test.each(object_attr_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -94,21 +94,21 @@ describe('class: directive', () => {
 		{
 			name: 'extracts class from class:name directive',
 			source: `<div class:active={isActive}></div>`,
-			expected: ['active'],
+			expected: ['active']
 		},
 		{
 			name: 'extracts class from shorthand class:name directive',
 			source: `<div class:cool></div>`,
-			expected: ['cool'],
+			expected: ['cool']
 		},
 		{
 			name: 'extracts multiple class directives',
 			source: `<div class:foo class:bar={cond} class:baz></div>`,
-			expected: ['foo', 'bar', 'baz'],
-		},
+			expected: ['foo', 'bar', 'baz']
+		}
 	];
 
-	test.each(directive_cases)('$name', ({source, expected}) => {
+	test.each(directive_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -119,16 +119,16 @@ describe('component attributes', () => {
 		{
 			name: 'extracts classes from Component class prop',
 			source: `<Button class="custom-button hover:scale:1.05"></Button>`,
-			expected: ['custom-button', 'hover:scale:1.05'],
+			expected: ['custom-button', 'hover:scale:1.05']
 		},
 		{
 			name: 'extracts classes from Component with complex class prop',
 			source: `<Card class={clsx('card', selected && 'border:2px~solid~blue')}></Card>`,
-			expected: ['card', 'border:2px~solid~blue'],
-		},
+			expected: ['card', 'border:2px~solid~blue']
+		}
 	];
 
-	test.each(component_cases)('$name', ({source, expected}) => {
+	test.each(component_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -136,13 +136,13 @@ describe('component attributes', () => {
 
 describe('edge cases', () => {
 	const empty_cases = [
-		{name: 'handles empty class attribute', source: `<div class=""></div>`},
-		{name: 'handles class attribute with only whitespace', source: `<div class="   "></div>`},
-		{name: 'handles empty class array', source: `<div class={[]}></div>`},
-		{name: 'handles empty class object', source: `<div class={{}}></div>`},
+		{ name: 'handles empty class attribute', source: `<div class=""></div>` },
+		{ name: 'handles class attribute with only whitespace', source: `<div class="   "></div>` },
+		{ name: 'handles empty class array', source: `<div class={[]}></div>` },
+		{ name: 'handles empty class object', source: `<div class={{}}></div>` }
 	];
 
-	test.each(empty_cases)('$name', ({source}) => {
+	test.each(empty_cases)('$name', ({ source }) => {
 		const result = extract_from_svelte(source);
 		assert_no_classes(result);
 	});
@@ -193,7 +193,7 @@ describe('no false positives', () => {
 <a href="mailto:someone@fuz.dev">Email</a>
 <div data-value="foo:bar"></div>
 <img src="http://fuz.dev/image.png" alt="test">
-`,
+`
 		},
 		{
 			name: 'does not extract from string variables without class-like names',
@@ -203,7 +203,7 @@ describe('no false positives', () => {
 	const styles = 'display:flex';
 </script>
 <div></div>
-`,
+`
 		},
 		{
 			name: 'does not extract from script string literals without class context',
@@ -213,11 +213,11 @@ describe('no false positives', () => {
 	const config = { type: 'primary', size: 'large' };
 </script>
 <div></div>
-`,
-		},
+`
+		}
 	];
 
-	test.each(false_positive_cases)('$name', ({source}) => {
+	test.each(false_positive_cases)('$name', ({ source }) => {
 		const result = extract_from_svelte(source);
 		assert_no_classes(result);
 	});
@@ -264,7 +264,7 @@ describe('Svelte control flow blocks', () => {
 	<div class="list-item">{item.name}</div>
 {/each}
 `,
-			expected: ['list-item'],
+			expected: ['list-item']
 		},
 		{
 			name: 'extracts classes inside {#if} blocks',
@@ -275,7 +275,7 @@ describe('Svelte control flow blocks', () => {
 	<div class="hidden"></div>
 {/if}
 `,
-			expected: ['shown', 'hidden'],
+			expected: ['shown', 'hidden']
 		},
 		{
 			name: 'extracts classes inside {#snippet} blocks',
@@ -286,7 +286,7 @@ describe('Svelte control flow blocks', () => {
 	</tr>
 {/snippet}
 `,
-			expected: ['table-row', 'table-cell'],
+			expected: ['table-row', 'table-cell']
 		},
 		{
 			name: 'extracts classes from {#await} blocks',
@@ -299,7 +299,7 @@ describe('Svelte control flow blocks', () => {
 	<div class="error"></div>
 {/await}
 `,
-			expected: ['loading', 'success', 'error'],
+			expected: ['loading', 'success', 'error']
 		},
 		{
 			name: 'extracts classes from nested control flow',
@@ -310,11 +310,11 @@ describe('Svelte control flow blocks', () => {
 	{/if}
 {/each}
 `,
-			expected: ['nested-visible'],
-		},
+			expected: ['nested-visible']
+		}
 	];
 
-	test.each(control_flow_cases)('$name', ({source, expected}) => {
+	test.each(control_flow_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -333,7 +333,7 @@ describe('module scripts', () => {
 </script>
 <div></div>
 `,
-			expected: ['local-class', 'module-class', 'shared'],
+			expected: ['local-class', 'module-class', 'shared']
 		},
 		{
 			name: 'extracts classes from script module (Svelte 5 syntax)',
@@ -346,11 +346,11 @@ describe('module scripts', () => {
 </script>
 <div></div>
 `,
-			expected: ['instance-class', 'exported-one', 'exported-two'],
-		},
+			expected: ['instance-class', 'exported-one', 'exported-two']
+		}
 	];
 
-	test.each(module_script_cases)('$name', ({source, expected}) => {
+	test.each(module_script_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});
@@ -366,7 +366,7 @@ describe('@fuz-classes comment extraction', () => {
 </script>
 <div></div>
 `,
-			expected: ['outline_width_focus', 'outline_width_active'],
+			expected: ['outline_width_focus', 'outline_width_active']
 		},
 		{
 			name: 'extracts classes from multi-line @fuz-classes comment',
@@ -376,7 +376,7 @@ describe('@fuz-classes comment extraction', () => {
 </script>
 <div></div>
 `,
-			expected: ['dynamic_class_1', 'dynamic_class_2'],
+			expected: ['dynamic_class_1', 'dynamic_class_2']
 		},
 		{
 			name: 'extracts classes from multiple @fuz-classes comments',
@@ -387,7 +387,7 @@ describe('@fuz-classes comment extraction', () => {
 </script>
 <div></div>
 `,
-			expected: ['class_a', 'class_b', 'class_c', 'class_d'],
+			expected: ['class_a', 'class_b', 'class_c', 'class_d']
 		},
 		{
 			name: 'combines @fuz-classes with regular class extraction',
@@ -398,7 +398,7 @@ describe('@fuz-classes comment extraction', () => {
 </script>
 <div class="attribute_class"></div>
 `,
-			expected: ['attribute_class', 'dynamic_class', 'static_class'],
+			expected: ['attribute_class', 'dynamic_class', 'static_class']
 		},
 		{
 			name: 'extracts classes from HTML comment @fuz-classes',
@@ -406,11 +406,11 @@ describe('@fuz-classes comment extraction', () => {
 <!-- @fuz-classes html-comment-class another-class -->
 <div></div>
 `,
-			expected: ['html-comment-class', 'another-class'],
-		},
+			expected: ['html-comment-class', 'another-class']
+		}
 	];
 
-	test.each(fuz_classes_cases)('$name', ({source, expected}) => {
+	test.each(fuz_classes_cases)('$name', ({ source, expected }) => {
 		const result = extract_from_svelte(source);
 		class_names_equal(result, expected);
 	});

@@ -1,4 +1,4 @@
-import type {Theme} from '../theme.ts';
+import type { Theme } from '../theme.ts';
 
 /**
  * A practical terminal theme: the dark, monospace, sharp-cornered, flat-depth
@@ -14,19 +14,19 @@ export const terminal_theme: Theme = {
 	variables: [
 		// green-phosphor surfaces and text — the terminal cast, kept low-chroma so
 		// the palette colors read over it
-		{name: 'hue_neutral', light: 'var(--hue_b)'},
-		{name: 'neutral_chroma', light: '0.05'},
+		{ name: 'hue_neutral', light: 'var(--hue_b)' },
+		{ name: 'neutral_chroma', light: '0.05' },
 		// links, focus, selection glow phosphor green
-		{name: 'hue_accent', light: 'var(--hue_b)'},
+		{ name: 'hue_accent', light: 'var(--hue_b)' },
 		// a whisper of phosphor bloom across every ramp
-		{name: 'hue_shift', light: '12'},
+		{ name: 'hue_shift', light: '12' },
 		// mono type everywhere
-		{name: 'font_family_sans', light: 'var(--font_family_mono)'},
+		{ name: 'font_family_sans', light: 'var(--font_family_mono)' },
 		// sharp: one knob zeroes every radius tier
-		{name: 'radius_scale', light: '0'},
+		{ name: 'radius_scale', light: '0' },
 		// flat: one knob zeroes the whole alpha ramp, button shadows included
-		{name: 'shadow_alpha_scale', light: '0'},
-	],
+		{ name: 'shadow_alpha_scale', light: '0' }
+	]
 };
 
 /**
@@ -49,37 +49,37 @@ export const terminal_theme: Theme = {
  */
 export const create_terminal_theme = (
 	hue: number,
-	options: {name?: string; hue_shift?: number} = {},
+	options: { name?: string; hue_shift?: number } = {}
 ): Theme => {
-	const {name = `terminal ${hue}`, hue_shift = 45} = options;
+	const { name = `terminal ${hue}`, hue_shift = 45 } = options;
 	const hue_value = String(hue);
 	return {
 		name,
 		scheme: 'dark',
 		variables: [
 			// monochrome hue collapse
-			{name: 'hue_a', light: hue_value},
-			{name: 'hue_b', light: hue_value},
-			{name: 'hue_c', light: hue_value},
-			{name: 'hue_d', light: hue_value},
-			{name: 'hue_e', light: hue_value},
-			{name: 'hue_f', light: hue_value},
-			{name: 'hue_g', light: hue_value},
-			{name: 'hue_h', light: hue_value},
-			{name: 'hue_i', light: hue_value},
-			{name: 'hue_j', light: hue_value},
-			{name: 'hue_neutral', light: hue_value},
+			{ name: 'hue_a', light: hue_value },
+			{ name: 'hue_b', light: hue_value },
+			{ name: 'hue_c', light: hue_value },
+			{ name: 'hue_d', light: hue_value },
+			{ name: 'hue_e', light: hue_value },
+			{ name: 'hue_f', light: hue_value },
+			{ name: 'hue_g', light: hue_value },
+			{ name: 'hue_h', light: hue_value },
+			{ name: 'hue_i', light: hue_value },
+			{ name: 'hue_j', light: hue_value },
+			{ name: 'hue_neutral', light: hue_value },
 			// tinted surfaces and text
-			{name: 'neutral_chroma', light: '0.05'},
+			{ name: 'neutral_chroma', light: '0.05' },
 			// phosphor bloom: the ramps warm the bright end and cool the dim end so
 			// the monochrome isn't a flat fill, staying unmistakably one hue
-			{name: 'hue_shift', light: String(hue_shift)},
+			{ name: 'hue_shift', light: String(hue_shift) },
 			// mono type everywhere
-			{name: 'font_family_sans', light: 'var(--font_family_mono)'},
+			{ name: 'font_family_sans', light: 'var(--font_family_mono)' },
 			// sharp: one knob zeroes every radius tier
-			{name: 'radius_scale', light: '0'},
+			{ name: 'radius_scale', light: '0' },
 			// flat: one knob zeroes the whole alpha ramp, button shadows included
-			{name: 'shadow_alpha_scale', light: '0'},
-		],
+			{ name: 'shadow_alpha_scale', light: '0' }
+		]
 	};
 };

@@ -1,6 +1,6 @@
-import {test, assert, describe} from 'vitest';
-import {join} from 'node:path';
-import {mkdir, rm, writeFile, readFile} from 'node:fs/promises';
+import { test, assert, describe } from 'vitest';
+import { join } from 'node:path';
+import { mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 
 import {
 	get_cache_path,
@@ -9,16 +9,16 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 	CSS_CACHE_VERSION,
-	type CachedExtraction,
+	type CachedExtraction
 } from '$lib/css_cache.ts';
-import type {SourceLocation, ExtractionDiagnostic} from '$lib/diagnostics.ts';
-import {default_cache_deps} from '$lib/deps_defaults.ts';
-import {create_mock_fs_state, create_mock_cache_deps} from './fixtures/mock_deps.ts';
+import type { SourceLocation, ExtractionDiagnostic } from '$lib/diagnostics.ts';
+import { default_cache_deps } from '$lib/deps_defaults.ts';
+import { create_mock_fs_state, create_mock_cache_deps } from './fixtures/mock_deps.ts';
 import {
 	loc,
 	make_classes,
 	make_extraction_diagnostic as make_diagnostic,
-	EMPTY_EXTRACTION,
+	EMPTY_EXTRACTION
 } from './test_helpers.ts';
 
 const deps = default_cache_deps;
@@ -40,7 +40,7 @@ const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtractio
 	elements: null,
 	explicit_elements: null,
 	explicit_variables: null,
-	...overrides,
+	...overrides
 });
 
 //
@@ -60,7 +60,7 @@ interface SaveAndLoadOptions {
 /** Save → load → assert valid → return typed result */
 const save_and_load = async (
 	cache_path: string,
-	options: SaveAndLoadOptions = {},
+	options: SaveAndLoadOptions = {}
 ): Promise<CachedExtraction> => {
 	const {
 		classes = null,
@@ -69,7 +69,7 @@ const save_and_load = async (
 		elements = null,
 		explicit_elements = null,
 		explicit_variables = null,
-		content_hash = 'test-hash',
+		content_hash = 'test-hash'
 	} = options;
 
 	await save_cached_extraction(deps, cache_path, content_hash, {
@@ -78,7 +78,7 @@ const save_and_load = async (
 		diagnostics,
 		elements,
 		explicit_elements,
-		explicit_variables,
+		explicit_variables
 	});
 	const loaded = await load_cached_extraction(deps, cache_path);
 	assert.isNotNull(loaded);
@@ -87,8 +87,8 @@ const save_and_load = async (
 };
 
 const setup = async (): Promise<void> => {
-	await rm(TEST_DIR, {recursive: true, force: true});
-	await mkdir(join(PROJECT_ROOT, 'src/lib'), {recursive: true});
+	await rm(TEST_DIR, { recursive: true, force: true });
+	await mkdir(join(PROJECT_ROOT, 'src/lib'), { recursive: true });
 };
 
 //
@@ -100,28 +100,28 @@ describe('get_cache_path', () => {
 		{
 			name: 'mirrors source structure',
 			source: '/tmp/fuz_css_cache_test/project/src/lib/Button.svelte',
-			expected: CACHE_DIR + '/src/lib/Button.svelte.json',
+			expected: CACHE_DIR + '/src/lib/Button.svelte.json'
 		},
 		{
 			name: 'handles nested directories',
 			source: '/tmp/fuz_css_cache_test/project/src/routes/docs/colors/+page.svelte',
-			expected: CACHE_DIR + '/src/routes/docs/colors/+page.svelte.json',
+			expected: CACHE_DIR + '/src/routes/docs/colors/+page.svelte.json'
 		},
 		{
 			name: 'handles source path at project root',
 			source: '/tmp/fuz_css_cache_test/project/file.ts',
-			expected: CACHE_DIR + '/file.ts.json',
-		},
+			expected: CACHE_DIR + '/file.ts.json'
+		}
 	];
 
-	test.each(cases)('$name', ({source, expected}) => {
+	test.each(cases)('$name', ({ source, expected }) => {
 		assert.strictEqual(get_cache_path(source, CACHE_DIR, PROJECT_ROOT), expected);
 	});
 
 	test('throws for paths outside project root', () => {
 		assert.throws(
 			() => get_cache_path('/other/file.ts', CACHE_DIR, PROJECT_ROOT),
-			/Source path "\/other\/file.ts" is not under project root/,
+			/Source path "\/other\/file.ts" is not under project root/
 		);
 	});
 
@@ -130,7 +130,7 @@ describe('get_cache_path', () => {
 		const root_no_slash = '/tmp/fuz_css_cache_test/project';
 		assert.strictEqual(
 			get_cache_path(source, CACHE_DIR, root_no_slash),
-			CACHE_DIR + '/src/lib/Button.svelte.json',
+			CACHE_DIR + '/src/lib/Button.svelte.json'
 		);
 	});
 
@@ -159,7 +159,7 @@ describe('save_cached_extraction', () => {
 
 		const loaded = await save_and_load(join(CACHE_DIR, 'test.json'), {
 			classes,
-			content_hash: 'abc123',
+			content_hash: 'abc123'
 		});
 
 		assert.strictEqual(loaded.content_hash, 'abc123');
@@ -171,10 +171,10 @@ describe('save_cached_extraction', () => {
 		await setup();
 		const classes = make_classes([
 			['box', [loc('test.ts', 1, 5), loc('test.ts', 10, 3)]],
-			['p_md', [loc('test.ts', 5, 8)]],
+			['p_md', [loc('test.ts', 5, 8)]]
 		]);
 
-		const loaded = await save_and_load(join(CACHE_DIR, 'multi.json'), {classes});
+		const loaded = await save_and_load(join(CACHE_DIR, 'multi.json'), { classes });
 		const result = from_cached_extraction(loaded);
 
 		assert.strictEqual(result.classes?.size, 2);
@@ -188,11 +188,11 @@ describe('save_cached_extraction', () => {
 			make_diagnostic({
 				message: '@fuz-classes: is deprecated',
 				suggestion: 'Remove the colon',
-				location: loc('test.ts', 3, 1),
-			}),
+				location: loc('test.ts', 3, 1)
+			})
 		];
 
-		const loaded = await save_and_load(join(CACHE_DIR, 'diag.json'), {diagnostics});
+		const loaded = await save_and_load(join(CACHE_DIR, 'diag.json'), { diagnostics });
 
 		assert.isNull(loaded.classes);
 		assert.deepEqual(loaded.diagnostics, diagnostics);
@@ -202,27 +202,27 @@ describe('save_cached_extraction', () => {
 		await setup();
 		const classes = make_classes([['test', [loc('x.ts')]]]);
 
-		const loaded = await save_and_load(join(CACHE_DIR, 'deep/nested/path/file.json'), {classes});
+		const loaded = await save_and_load(join(CACHE_DIR, 'deep/nested/path/file.json'), { classes });
 
 		assert.deepEqual(loaded.classes, [['test', [loc('x.ts')]]]);
 	});
 
 	// Null/empty handling
 	const null_handling_cases = [
-		{name: 'stores empty classes Map as null', input: {classes: new Map()}, field: 'classes'},
+		{ name: 'stores empty classes Map as null', input: { classes: new Map() }, field: 'classes' },
 		{
 			name: 'stores empty diagnostics array as null',
-			input: {diagnostics: [] as Array<ExtractionDiagnostic>},
-			field: 'diagnostics',
+			input: { diagnostics: [] as Array<ExtractionDiagnostic> },
+			field: 'diagnostics'
 		},
 		{
 			name: 'stores empty elements Set as null',
-			input: {elements: new Set<string>()},
-			field: 'elements',
-		},
+			input: { elements: new Set<string>() },
+			field: 'elements'
+		}
 	] as const;
 
-	test.each(null_handling_cases)('$name', async ({input, field}) => {
+	test.each(null_handling_cases)('$name', async ({ input, field }) => {
 		await setup();
 		const loaded = await save_and_load(join(CACHE_DIR, `${field}_empty.json`), input);
 		assert.isNull(loaded[field]);
@@ -234,11 +234,11 @@ describe('save_cached_extraction', () => {
 
 		await save_and_load(cache_path, {
 			classes: make_classes([['old', [loc('a.ts')]]]),
-			content_hash: 'hash1',
+			content_hash: 'hash1'
 		});
 		const loaded = await save_and_load(cache_path, {
 			classes: make_classes([['new', [loc('b.ts', 2, 2)]]]),
-			content_hash: 'hash2',
+			content_hash: 'hash2'
 		});
 
 		assert.strictEqual(loaded.content_hash, 'hash2');
@@ -251,23 +251,23 @@ describe('save_cached_extraction', () => {
 			name: 'preserves unicode in class names and file paths',
 			classes: make_classes([
 				['émoji-class', [loc('src/компонент.svelte')]],
-				['日本語', [loc('src/中文.ts', 5, 10)]],
+				['日本語', [loc('src/中文.ts', 5, 10)]]
 			]),
-			expected_keys: ['émoji-class', '日本語'],
+			expected_keys: ['émoji-class', '日本語']
 		},
 		{
 			name: 'preserves CSS literal syntax in class names',
 			classes: make_classes([
 				['display:flex', [loc()]],
-				['hover:opacity:80%', [loc('test.ts', 2)]],
+				['hover:opacity:80%', [loc('test.ts', 2)]]
 			]),
-			expected_keys: ['display:flex', 'hover:opacity:80%'],
-		},
+			expected_keys: ['display:flex', 'hover:opacity:80%']
+		}
 	];
 
-	test.each(special_char_cases)('$name', async ({classes, expected_keys}) => {
+	test.each(special_char_cases)('$name', async ({ classes, expected_keys }) => {
 		await setup();
-		const loaded = await save_and_load(join(CACHE_DIR, 'special.json'), {classes});
+		const loaded = await save_and_load(join(CACHE_DIR, 'special.json'), { classes });
 		const result = from_cached_extraction(loaded);
 
 		assert.deepEqual(new Set(result.classes?.keys()), new Set(expected_keys));
@@ -276,11 +276,11 @@ describe('save_cached_extraction', () => {
 	test('preserves multiple diagnostics with different levels', async () => {
 		await setup();
 		const diagnostics = [
-			make_diagnostic({level: 'warning', message: 'first warning'}),
-			make_diagnostic({level: 'error', message: 'an error'}),
+			make_diagnostic({ level: 'warning', message: 'first warning' }),
+			make_diagnostic({ level: 'error', message: 'an error' })
 		];
 
-		const loaded = await save_and_load(join(CACHE_DIR, 'multi_diag.json'), {diagnostics});
+		const loaded = await save_and_load(join(CACHE_DIR, 'multi_diag.json'), { diagnostics });
 
 		assert.lengthOf(loaded.diagnostics!, 2);
 		assert.strictEqual(loaded.diagnostics![0]!.level, 'warning');
@@ -294,26 +294,29 @@ describe('save_cached_extraction', () => {
 
 describe('load_cached_extraction', () => {
 	const invalid_cache_cases = [
-		{name: 'corrupted JSON', content: 'not valid json{{{'},
-		{name: 'truncated file', content: '{"v": 1, "content_hash": "abc"'},
-		{name: 'empty file', content: ''},
-		{name: 'JSON null', content: 'null'},
-		{name: 'wrong structure', content: JSON.stringify({foo: 'bar'})},
-		{name: 'version mismatch', content: JSON.stringify({v: 999, content_hash: 'x', classes: null})},
+		{ name: 'corrupted JSON', content: 'not valid json{{{' },
+		{ name: 'truncated file', content: '{"v": 1, "content_hash": "abc"' },
+		{ name: 'empty file', content: '' },
+		{ name: 'JSON null', content: 'null' },
+		{ name: 'wrong structure', content: JSON.stringify({ foo: 'bar' }) },
+		{
+			name: 'version mismatch',
+			content: JSON.stringify({ v: 999, content_hash: 'x', classes: null })
+		},
 		{
 			name: 'version as string',
-			content: JSON.stringify({v: '2', content_hash: 'x', classes: null}),
-		},
+			content: JSON.stringify({ v: '2', content_hash: 'x', classes: null })
+		}
 	];
 
 	test('returns null for missing file', async () => {
 		assert.isNull(await load_cached_extraction(deps, '/nonexistent/path.json'));
 	});
 
-	test.each(invalid_cache_cases)('returns null for $name', async ({content}) => {
+	test.each(invalid_cache_cases)('returns null for $name', async ({ content }) => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'invalid.json');
-		await mkdir(CACHE_DIR, {recursive: true});
+		await mkdir(CACHE_DIR, { recursive: true });
 		await writeFile(cache_path, content);
 
 		assert.isNull(await load_cached_extraction(deps, cache_path));
@@ -321,18 +324,18 @@ describe('load_cached_extraction', () => {
 
 	// Additional corruption recovery tests - all return null gracefully
 	const corruption_cases = [
-		{name: 'binary garbage', content: '\x00\x01\x02\x03'},
-		{name: 'partial JSON with valid start', content: '{"v": 2, "content_hash": "x",'},
-		{name: 'array instead of object', content: '[1, 2, 3]'},
-		{name: 'number instead of object', content: '42'},
-		{name: 'NUL bytes in hash', content: '{"v": 2, "content_hash": "abc\x00123"}'},
-		{name: 'UTF-8 BOM prefix', content: '\ufeff{"v": 2, "content_hash": "hash", "classes": null}'},
+		{ name: 'binary garbage', content: '\x00\x01\x02\x03' },
+		{ name: 'partial JSON with valid start', content: '{"v": 2, "content_hash": "x",' },
+		{ name: 'array instead of object', content: '[1, 2, 3]' },
+		{ name: 'number instead of object', content: '42' },
+		{ name: 'NUL bytes in hash', content: '{"v": 2, "content_hash": "abc\x00123"}' },
+		{ name: 'UTF-8 BOM prefix', content: '\ufeff{"v": 2, "content_hash": "hash", "classes": null}' }
 	];
 
-	test.each(corruption_cases)('gracefully handles $name', async ({content}) => {
+	test.each(corruption_cases)('gracefully handles $name', async ({ content }) => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'corrupted.json');
-		await mkdir(CACHE_DIR, {recursive: true});
+		await mkdir(CACHE_DIR, { recursive: true });
 		await writeFile(cache_path, content);
 
 		// Should return null rather than throw
@@ -344,7 +347,7 @@ describe('load_cached_extraction', () => {
 	test('parses minimal valid cache (missing content_hash)', async () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'minimal.json');
-		await mkdir(CACHE_DIR, {recursive: true});
+		await mkdir(CACHE_DIR, { recursive: true });
 		await writeFile(cache_path, `{"v": ${CSS_CACHE_VERSION}}`);
 
 		// Lenient parsing accepts missing content_hash
@@ -362,7 +365,7 @@ describe('delete_cached_extraction', () => {
 	test('removes file', async () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'delete.json');
-		await mkdir(CACHE_DIR, {recursive: true});
+		await mkdir(CACHE_DIR, { recursive: true });
 		await writeFile(cache_path, '{}');
 
 		assert.strictEqual(await readFile(cache_path, 'utf8'), '{}');
@@ -389,72 +392,72 @@ describe('from_cached_extraction', () => {
 	const conversion_cases = [
 		{
 			name: 'converts class tuples to Map',
-			input: make_cached({classes: [['box', [loc()]]]}),
+			input: make_cached({ classes: [['box', [loc()]]] }),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.instanceOf(r.classes, Map);
 				assert.strictEqual(r.classes.size, 1);
 				assert.deepEqual(r.classes.get('box'), [loc()]);
-			},
+			}
 		},
 		{
 			name: 'preserves null classes',
-			input: make_cached({classes: null}),
+			input: make_cached({ classes: null }),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.isNull(r.classes);
-			},
+			}
 		},
 		{
 			name: 'converts empty classes array to empty Map',
-			input: make_cached({classes: []}),
+			input: make_cached({ classes: [] }),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.instanceOf(r.classes, Map);
 				assert.strictEqual(r.classes.size, 0);
-			},
+			}
 		},
 		{
 			name: 'preserves diagnostics reference',
 			input: (() => {
 				const diagnostics = [make_diagnostic()];
-				return {cached: make_cached({diagnostics}), diagnostics};
+				return { cached: make_cached({ diagnostics }), diagnostics };
 			})(),
 			check: (
 				r: ReturnType<typeof from_cached_extraction>,
-				input: {diagnostics: Array<ExtractionDiagnostic>},
+				input: { diagnostics: Array<ExtractionDiagnostic> }
 			) => {
 				assert.strictEqual(r.diagnostics, input.diagnostics);
-			},
+			}
 		},
 		{
 			name: 'converts elements array to Set',
-			input: make_cached({elements: ['button', 'div']}),
+			input: make_cached({ elements: ['button', 'div'] }),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.deepEqual(r.elements, new Set(['button', 'div']));
-			},
+			}
 		},
 		{
 			name: 'preserves null elements',
 			input: make_cached(),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.isNull(r.elements);
-			},
+			}
 		},
 		{
 			name: 'converts explicit_variables array to Set',
-			input: make_cached({explicit_variables: ['shade_40', 'text_50']}),
+			input: make_cached({ explicit_variables: ['shade_40', 'text_50'] }),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.deepEqual(r.explicit_variables, new Set(['shade_40', 'text_50']));
-			},
+			}
 		},
 		{
 			name: 'preserves null explicit_variables',
 			input: make_cached(),
 			check: (r: ReturnType<typeof from_cached_extraction>) => {
 				assert.isNull(r.explicit_variables);
-			},
-		},
+			}
+		}
 	];
 
-	test.each(conversion_cases)('$name', ({input, check}) => {
+	test.each(conversion_cases)('$name', ({ input, check }) => {
 		// Handle the special case where input contains extra data for the check
 		const cached = 'cached' in input ? input.cached : input;
 		const result = from_cached_extraction(cached);
@@ -477,7 +480,7 @@ describe('cache fields round-trip', () => {
 			classes,
 			explicit_classes,
 			elements,
-			content_hash: 'hash123',
+			content_hash: 'hash123'
 		});
 		const result = from_cached_extraction(loaded);
 
@@ -490,25 +493,25 @@ describe('cache fields round-trip', () => {
 	const field_cases = [
 		{
 			name: 'elements',
-			input: {elements: new Set(['button', 'input', 'svg'])},
+			input: { elements: new Set(['button', 'input', 'svg']) },
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				assert.deepEqual(r.elements, new Set(['button', 'input', 'svg'])),
+				assert.deepEqual(r.elements, new Set(['button', 'input', 'svg']))
 		},
 		{
 			name: 'explicit_classes',
-			input: {explicit_classes: new Set(['force_include'])},
+			input: { explicit_classes: new Set(['force_include']) },
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				assert.deepEqual(r.explicit_classes, new Set(['force_include'])),
+				assert.deepEqual(r.explicit_classes, new Set(['force_include']))
 		},
 		{
 			name: 'explicit_variables',
-			input: {explicit_variables: new Set(['shade_40', 'text_50'])},
+			input: { explicit_variables: new Set(['shade_40', 'text_50']) },
 			check: (r: ReturnType<typeof from_cached_extraction>) =>
-				assert.deepEqual(r.explicit_variables, new Set(['shade_40', 'text_50'])),
-		},
+				assert.deepEqual(r.explicit_variables, new Set(['shade_40', 'text_50']))
+		}
 	];
 
-	test.each(field_cases)('saves and loads $name field', async ({name, input, check}) => {
+	test.each(field_cases)('saves and loads $name field', async ({ name, input, check }) => {
 		await setup();
 		const loaded = await save_and_load(join(CACHE_DIR, `${name}_test.json`), input);
 		check(from_cached_extraction(loaded));
@@ -528,7 +531,7 @@ describe('cache functions with mock deps', () => {
 
 		await save_cached_extraction(mock_deps, cache_path, 'abc123', {
 			...EMPTY_EXTRACTION,
-			classes,
+			classes
 		});
 		const loaded = await load_cached_extraction(mock_deps, cache_path);
 

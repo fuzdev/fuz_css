@@ -1,9 +1,9 @@
-import {defineConfig} from 'vite';
-import {sveltekit} from '@sveltejs/kit/vite';
+import { defineConfig } from 'vite';
+import { sveltekit } from '@sveltejs/kit/vite';
 import svelte_docinfo from 'svelte-docinfo/vite.js';
-import {vite_plugin_pkg_json} from '@fuzdev/fuz_ui/vite_plugin_pkg_json.ts';
+import { vite_plugin_pkg_json } from '@fuzdev/fuz_ui/vite_plugin_pkg_json.ts';
 
-import {vite_plugin_fuz_css} from './src/lib/vite_plugin_fuz_css.js';
+import { vite_plugin_fuz_css } from './src/lib/vite_plugin_fuz_css.js';
 import {
 	alpha_variants,
 	darken_lighten_variants,
@@ -13,7 +13,7 @@ import {
 	shadow_alpha_variants,
 	shadow_semantic_values,
 	shadow_size_variants,
-	shadow_variant_prefixes,
+	shadow_variant_prefixes
 } from './src/lib/variable_data.js';
 
 // the docs pages construct these class families dynamically from pickers, so
@@ -30,7 +30,7 @@ const docs_classes: Array<string> = [
 	...shadow_alpha_variants.map((v) => `shadow_alpha_${v}`),
 	...shadow_semantic_values.map((v) => `shadow_color_${v}`),
 	...palette_variants.flatMap((l) => intensity_variants.map((i) => `shadow_${l}_${i}`)),
-	...palette_variants.map((l) => `palette_${l}_50`),
+	...palette_variants.map((l) => `palette_${l}_50`)
 ];
 
 export default defineConfig({
@@ -40,9 +40,9 @@ export default defineConfig({
 		vite_plugin_fuz_css({
 			additional_elements: 'all',
 			additional_variables: 'all',
-			additional_classes: docs_classes,
+			additional_classes: docs_classes
 		}),
-		vite_plugin_pkg_json(),
+		vite_plugin_pkg_json()
 	],
-	optimizeDeps: {exclude: ['@fuzdev/blake3_wasm']},
+	optimizeDeps: { exclude: ['@fuzdev/blake3_wasm'] }
 });

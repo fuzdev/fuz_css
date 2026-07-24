@@ -2,15 +2,15 @@
 	import 'virtual:fuz.css';
 	import '@fuzdev/fuz_code/theme.css';
 
-	import {SiteState, site_context} from '@fuzdev/fuz_ui/site.svelte.ts';
-	import {logo_fuz_css} from '@fuzdev/fuz_ui/logos.ts';
-	import type {Snippet} from 'svelte';
+	import { SiteState, site_context } from '@fuzdev/fuz_ui/site.svelte.ts';
+	import { logo_fuz_css } from '@fuzdev/fuz_ui/logos.ts';
+	import type { Snippet } from 'svelte';
 	import ThemeRoot from '@fuzdev/fuz_ui/ThemeRoot.svelte';
 	import Spiders from '@fuzdev/fuz_ui/Spiders.svelte';
-	import {save_theme} from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+	import { save_theme } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import pkg_json from 'virtual:pkg.json';
 
-	import {UNSAVED_THEME_NAME} from '$routes/theme_editor_state.svelte.ts';
+	import { UNSAVED_THEME_NAME } from '$routes/theme_editor_state.svelte.ts';
 
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '$lib/ContextmenuRoot.svelte';
@@ -19,12 +19,12 @@
 	// import {contextmenu_attachment} from '$lib/contextmenu_helpers.svelte.js';
 
 	const {
-		children,
+		children
 	}: {
 		children: Snippet;
 	} = $props();
 
-	site_context.set(new SiteState({icon: logo_fuz_css, pkg_json}));
+	site_context.set(new SiteState({ icon: logo_fuz_css, pkg_json }));
 
 	// let show_settings = $state.raw(false);
 </script>

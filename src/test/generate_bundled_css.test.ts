@@ -7,10 +7,10 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {generate_bundled_css, type CssResolutionResult} from '$lib/css_bundled_resolution.ts';
-import {assert_css_order} from './test_helpers.ts';
+import { generate_bundled_css, type CssResolutionResult } from '$lib/css_bundled_resolution.ts';
+import { assert_css_order } from './test_helpers.ts';
 
 /**
  * Creates a mock resolution result for testing generate_bundled_css.
@@ -22,7 +22,7 @@ const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssRe
 	included_rule_indices: new Set([0]),
 	included_elements: new Set(['button']),
 	diagnostics: [],
-	...overrides,
+	...overrides
 });
 
 describe('generate_bundled_css', () => {
@@ -35,7 +35,7 @@ describe('generate_bundled_css', () => {
 				combined,
 				'/* Theme Variables */',
 				'/* Base Styles */',
-				'/* Utility Classes */',
+				'/* Utility Classes */'
 			);
 		});
 
@@ -52,7 +52,7 @@ describe('generate_bundled_css', () => {
 	describe('exclusion options', () => {
 		test('include_theme: false excludes theme', () => {
 			const result = create_mock_result();
-			const no_theme = generate_bundled_css(result, '.p_md {}', {include_theme: false});
+			const no_theme = generate_bundled_css(result, '.p_md {}', { include_theme: false });
 
 			assert.notInclude(no_theme, '/* Theme Variables */');
 			assert.notInclude(no_theme, '--color');
@@ -62,7 +62,7 @@ describe('generate_bundled_css', () => {
 
 		test('include_base: false excludes base', () => {
 			const result = create_mock_result();
-			const no_base = generate_bundled_css(result, '.p_md {}', {include_base: false});
+			const no_base = generate_bundled_css(result, '.p_md {}', { include_base: false });
 
 			assert.include(no_base, '/* Theme Variables */');
 			assert.notInclude(no_base, '/* Base Styles */');
@@ -73,7 +73,7 @@ describe('generate_bundled_css', () => {
 		test('include_utilities: false excludes utilities', () => {
 			const result = create_mock_result();
 			const no_utility = generate_bundled_css(result, '.p_md { padding: 16px; }', {
-				include_utilities: false,
+				include_utilities: false
 			});
 
 			assert.include(no_utility, '/* Theme Variables */');
@@ -87,7 +87,7 @@ describe('generate_bundled_css', () => {
 		test('empty theme produces no section', () => {
 			const result = create_mock_result({
 				theme_css: '',
-				resolved_variables: new Set<string>(),
+				resolved_variables: new Set<string>()
 			});
 			const bundled = generate_bundled_css(result, '.p_md {}');
 
@@ -100,7 +100,7 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result({
 				base_css: '',
 				included_rule_indices: new Set<number>(),
-				included_elements: new Set<string>(),
+				included_elements: new Set<string>()
 			});
 			const bundled = generate_bundled_css(result, '.p_md {}');
 
@@ -124,7 +124,7 @@ describe('generate_bundled_css', () => {
 				base_css: '',
 				resolved_variables: new Set<string>(),
 				included_rule_indices: new Set<number>(),
-				included_elements: new Set<string>(),
+				included_elements: new Set<string>()
 			});
 			const bundled = generate_bundled_css(result, '');
 
@@ -135,7 +135,7 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result({
 				base_css: '',
 				included_rule_indices: new Set<number>(),
-				included_elements: new Set<string>(),
+				included_elements: new Set<string>()
 			});
 			const bundled = generate_bundled_css(result, '');
 

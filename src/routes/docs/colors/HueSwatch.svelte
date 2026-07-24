@@ -1,14 +1,14 @@
 <script lang="ts">
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import type {PaletteVariant} from '$lib/variable_data.ts';
+	import type { PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
 		letter,
 		computed_styles,
 		width = 48,
 		height = 48,
-		description,
+		description
 	}: {
 		letter: PaletteVariant;
 		computed_styles: CSSStyleDeclaration | null;

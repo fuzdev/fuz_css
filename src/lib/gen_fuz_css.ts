@@ -7,30 +7,30 @@
  * @module
  */
 
-import {join} from 'node:path';
-import type {Gen} from '@fuzdev/gro/gen.ts';
-import {map_concurrent, each_concurrent} from '@fuzdev/fuz_util/async.ts';
+import { join } from 'node:path';
+import type { Gen } from '@fuzdev/gro/gen.ts';
+import { map_concurrent, each_concurrent } from '@fuzdev/fuz_util/async.ts';
 
-import {filter_file_default} from './file_filter.ts';
-import {type ExtractionData, has_extraction_data} from './css_class_extractor.ts';
-import {format_diagnostic, CssGenerationError} from './diagnostics.ts';
-import {CssClasses} from './css_classes.ts';
-import {generate_css} from './generate_css.ts';
-import {create_bundled_resources, type BundledCssResources} from './bundled_resources.ts';
-import {extract_file_cached} from './extract_file_cached.ts';
-import {merge_class_definitions} from './css_class_definitions.ts';
-import {css_class_interpreters} from './css_class_interpreters.ts';
-import {load_css_properties} from './css_literal.ts';
+import { filter_file_default } from './file_filter.ts';
+import { type ExtractionData, has_extraction_data } from './css_class_extractor.ts';
+import { format_diagnostic, CssGenerationError } from './diagnostics.ts';
+import { CssClasses } from './css_classes.ts';
+import { generate_css } from './generate_css.ts';
+import { create_bundled_resources, type BundledCssResources } from './bundled_resources.ts';
+import { extract_file_cached } from './extract_file_cached.ts';
+import { merge_class_definitions } from './css_class_definitions.ts';
+import { css_class_interpreters } from './css_class_interpreters.ts';
+import { load_css_properties } from './css_literal.ts';
 import {
 	DEFAULT_CACHE_DIR,
 	get_file_cache_path,
 	save_cached_extraction,
-	delete_cached_extraction,
+	delete_cached_extraction
 } from './css_cache.ts';
-import {default_cache_deps} from './deps_defaults.ts';
-import {get_all_variable_names} from './variable_graph.ts';
-import {extract_css_variables} from './css_variable_utils.ts';
-import type {CssGeneratorBaseOptions} from './css_plugin_options.ts';
+import { default_cache_deps } from './deps_defaults.ts';
+import { get_all_variable_names } from './variable_graph.ts';
+import { extract_css_variables } from './css_variable_utils.ts';
+import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
 
 /**
  * Skip cache on CI (no point writing cache that won't be reused).
@@ -117,7 +117,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		deps = default_cache_deps,
+		deps = default_cache_deps
 	} = options;
 
 	// Derive include flags from null check
@@ -131,7 +131,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	// Merge class definitions upfront (validates that definitions exist when needed)
 	const all_class_definitions = merge_class_definitions(
 		user_class_definitions,
-		include_default_classes,
+		include_default_classes
 	);
 
 	// Lazy-load expensive resources, cached per generator instance so watch-mode
@@ -152,7 +152,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				base_css,
 				variables,
 				class_definitions: all_class_definitions,
-				deps,
+				deps
 			});
 		}
 		return bundled_resources;
@@ -164,13 +164,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 	return {
 		// Filter dependencies to skip non-extractable files.
 		// Returns 'all' when an extractable file changes, null otherwise.
-		dependencies: ({changed_file_id}) => {
+		dependencies: ({ changed_file_id }) => {
 			if (!changed_file_id) return 'all';
 			if (filter_file(changed_file_id)) return 'all';
 			return null; // Ignore .json, .md, etc.
 		},
 
-		generate: async ({filer, log, origin_path}) => {
+		generate: async ({ filer, log, origin_path }) => {
 			log.info('generating fuz_css classes...');
 
 			// Load CSS properties for validation (cached per instance)
@@ -196,7 +196,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				files_with_content: 0,
 				files_with_classes: 0,
 				cache_hits: 0,
-				cache_misses: 0,
+				cache_misses: 0
 			};
 
 			// Collect nodes to process
@@ -224,7 +224,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					nodes.push({
 						id: disknode.id,
 						contents: disknode.contents,
-						content_hash: disknode.content_hash,
+						content_hash: disknode.content_hash
 					});
 				}
 			}
@@ -239,13 +239,13 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						? null
 						: get_file_cache_path(node.id, resolved_cache_dir, project_root);
 
-					const {extraction, from_cache, cache_path_to_write} = await extract_file_cached({
+					const { extraction, from_cache, cache_path_to_write } = await extract_file_cached({
 						deps,
 						content: node.contents,
 						content_hash: node.content_hash,
 						cache_path,
 						filename: node.id,
-						acorn_plugins,
+						acorn_plugins
 					});
 
 					if (from_cache) {
@@ -263,9 +263,9 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						explicit_elements: extraction.explicit_elements,
 						explicit_variables: extraction.explicit_variables,
 						cache_path: cache_path_to_write,
-						content_hash: node.content_hash,
+						content_hash: node.content_hash
 					};
-				},
+				}
 			);
 
 			// Add to CssClasses (skip files with all-null extraction data)
@@ -280,7 +280,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 
 			// Collect cache writes (entries that need writing)
 			const cache_writes = extractions.filter(
-				(e): e is FileExtraction & {cache_path: string} => e.cache_path !== null,
+				(e): e is FileExtraction & { cache_path: string } => e.cache_path !== null
 			);
 
 			// Parallel cache writes (await completion)
@@ -290,7 +290,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						deps,
 						extraction.cache_path,
 						extraction.content_hash,
-						extraction,
+						extraction
 					);
 				}).catch((err) => log.warn('Cache write error:', err));
 			}
@@ -317,7 +317,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				explicit_classes,
 				all_elements,
 				explicit_elements,
-				explicit_variables,
+				explicit_variables
 			} = css_classes.get_all();
 
 			if (include_stats) {
@@ -349,7 +349,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				}
 			}
 
-			const {css: final_css, diagnostics: all_diagnostics} = generate_css({
+			const { css: final_css, diagnostics: all_diagnostics } = generate_css({
 				all_classes,
 				all_classes_with_locations,
 				explicit_classes,
@@ -369,7 +369,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				exclude_elements,
 				exclude_variables,
 				log,
-				include_stats,
+				include_stats
 			});
 
 			// Separate errors and warnings
@@ -421,6 +421,6 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			content_parts.push(`/* ${banner} */`);
 
 			return content_parts.join('\n\n');
-		},
+		}
 	};
 };

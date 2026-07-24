@@ -7,7 +7,7 @@
  * @module
  */
 
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
 import type {
 	CssGeneratorBaseOptions,
@@ -15,10 +15,10 @@ import type {
 	CssClassOptions,
 	CssOutputOptions,
 	CssDiagnosticsOptions,
-	CssCacheOptions,
+	CssCacheOptions
 } from '$lib/css_plugin_options.ts';
-import type {GenFuzCssOptions} from '$lib/gen_fuz_css.ts';
-import type {VitePluginFuzCssOptions} from '$lib/vite_plugin_fuz_css.ts';
+import type { GenFuzCssOptions } from '$lib/gen_fuz_css.ts';
+import type { VitePluginFuzCssOptions } from '$lib/vite_plugin_fuz_css.ts';
 
 describe('shared options interface', () => {
 	test('CssGeneratorBaseOptions includes all expected interfaces', () => {
@@ -44,7 +44,7 @@ describe('shared options interface', () => {
 			on_error: 'log',
 			on_warning: 'ignore',
 			// CssCacheOptions
-			cache_dir: '.cache',
+			cache_dir: '.cache'
 		};
 
 		assert.isDefined(base_options);
@@ -62,7 +62,7 @@ describe('shared options interface', () => {
 			include_stats: true,
 			project_root: '/path/to/project',
 			concurrency: 4,
-			cache_io_concurrency: 100,
+			cache_io_concurrency: 100
 		};
 
 		assert.isDefined(gro_options);
@@ -78,7 +78,7 @@ describe('shared options interface', () => {
 			base_css: undefined,
 			variables: undefined,
 			on_error: 'throw',
-			additional_elements: ['custom-element'],
+			additional_elements: ['custom-element']
 		};
 
 		assert.isDefined(vite_options);
@@ -88,25 +88,25 @@ describe('shared options interface', () => {
 	test('options interfaces are assignable', () => {
 		// Verify sub-interfaces can be used independently
 		const extraction: CssExtractionOptions = {
-			filter_file: (id) => id.endsWith('.svelte'),
+			filter_file: (id) => id.endsWith('.svelte')
 		};
 
 		const class_opts: CssClassOptions = {
-			include_default_classes: true,
+			include_default_classes: true
 		};
 
 		const output: CssOutputOptions = {
 			base_css: null, // disabled
-			variables: null, // disabled
+			variables: null // disabled
 		};
 
 		const diagnostics: CssDiagnosticsOptions = {
 			on_error: 'throw',
-			on_warning: 'log',
+			on_warning: 'log'
 		};
 
 		const cache: CssCacheOptions = {
-			cache_dir: '.custom-cache',
+			cache_dir: '.custom-cache'
 		};
 
 		assert.isDefined(extraction);
@@ -123,13 +123,13 @@ describe('shared options interface', () => {
 
 		// Test null (disabled)
 		const disabled_opts: CssOutputOptions = {
-			base_css: null,
+			base_css: null
 		};
 		assert.isNull(disabled_opts.base_css);
 
 		// Test string (custom CSS)
 		const custom_opts: CssOutputOptions = {
-			base_css: 'button { color: red; }',
+			base_css: 'button { color: red; }'
 		};
 		assert.strictEqual(typeof custom_opts.base_css, 'string');
 	});
@@ -141,19 +141,19 @@ describe('shared options interface', () => {
 
 		// Test null (disabled)
 		const disabled_opts: CssOutputOptions = {
-			variables: null,
+			variables: null
 		};
 		assert.isNull(disabled_opts.variables);
 
 		// Test array (custom variables)
 		const custom_opts: CssOutputOptions = {
-			variables: [{name: 'my_var', light: 'blue', dark: 'lightblue'}],
+			variables: [{ name: 'my_var', light: 'blue', dark: 'lightblue' }]
 		};
 		assert.isTrue(Array.isArray(custom_opts.variables));
 
 		// Test callback (modify defaults)
 		const callback_opts: CssOutputOptions = {
-			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_')),
+			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_'))
 		};
 		assert.strictEqual(typeof callback_opts.variables, 'function');
 	});

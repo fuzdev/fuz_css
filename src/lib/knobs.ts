@@ -20,7 +20,7 @@
  * @module
  */
 
-import type {StyleVariableName} from './variable.ts';
+import type { StyleVariableName } from './variable.ts';
 
 /**
  * The value kind of a knob, determining the editor widget and how the value
@@ -42,13 +42,7 @@ export type KnobKind =
  * The axis of the theme-space taxonomy a knob moves.
  */
 export type KnobAxis =
-	| 'color'
-	| 'shape'
-	| 'density'
-	| 'depth'
-	| 'typography'
-	| 'motion'
-	| 'decoration';
+	'color' | 'shape' | 'density' | 'depth' | 'typography' | 'motion' | 'decoration';
 
 /**
  * Leverage tier: how much of the system a knob reshapes, which the editor
@@ -96,7 +90,7 @@ const hue = (
 	name: StyleVariableName,
 	leverage: KnobLeverage,
 	tier: KnobTier = 'semantic',
-	bindable = false,
+	bindable = false
 ): ThemeKnob => ({
 	name,
 	kind: 'hue',
@@ -105,7 +99,7 @@ const hue = (
 	tier,
 	range: [0, 360],
 	step: 1,
-	...(bindable ? {bindable} : null),
+	...(bindable ? { bindable } : null)
 });
 
 const lightness_ramp = (family: string): Array<ThemeKnob> => [
@@ -116,7 +110,7 @@ const lightness_ramp = (family: string): Array<ThemeKnob> => [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0, 1],
-		step: 0.001,
+		step: 0.001
 	},
 	{
 		name: `${family}_lightness_100`,
@@ -125,7 +119,7 @@ const lightness_ramp = (family: string): Array<ThemeKnob> => [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0, 1],
-		step: 0.001,
+		step: 0.001
 	},
 	{
 		name: `${family}_lightness_curve`,
@@ -134,8 +128,8 @@ const lightness_ramp = (family: string): Array<ThemeKnob> => [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0.2, 4],
-		step: 0.01,
-	},
+		step: 0.01
+	}
 ];
 
 /**
@@ -152,7 +146,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [0, 0.1],
-		step: 0.001,
+		step: 0.001
 	},
 	hue('hue_accent', 'lg', 'semantic', true),
 	{
@@ -162,7 +156,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [0, 2],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'hue_shift',
@@ -171,7 +165,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [-45, 45],
-		step: 1,
+		step: 1
 	},
 	hue('hue_positive', 'md', 'semantic', true),
 	hue('hue_negative', 'md', 'semantic', true),
@@ -187,7 +181,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0, 0.06],
-		step: 0.001,
+		step: 0.001
 	},
 	{
 		// requests up to the per-stop gamut caps; chroma_scale pushes past them
@@ -197,7 +191,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0, 0.125],
-		step: 0.001,
+		step: 0.001
 	},
 	{
 		name: 'palette_chroma_curve',
@@ -206,17 +200,24 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [0.2, 4],
-		step: 0.01,
+		step: 0.01
 	},
 	// color - micro-surface hooks consumed by style.css via var() fallbacks
-	{name: 'caret_color', kind: 'color', axis: 'color', leverage: 'sm', tier: 'semantic', hook: true},
+	{
+		name: 'caret_color',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		hook: true
+	},
 	{
 		name: 'scrollbar_thumb_color',
 		kind: 'color',
 		axis: 'color',
 		leverage: 'sm',
 		tier: 'semantic',
-		hook: true,
+		hook: true
 	},
 	{
 		name: 'scrollbar_track_color',
@@ -224,7 +225,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		axis: 'color',
 		leverage: 'sm',
 		tier: 'semantic',
-		hook: true,
+		hook: true
 	},
 	// color - the palette tier (moving these makes a theme an exemplar)
 	hue('hue_a', 'sm', 'palette'),
@@ -245,7 +246,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [0, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'border_style',
@@ -253,25 +254,25 @@ export const theme_knobs: Array<ThemeKnob> = [
 		axis: 'shape',
 		leverage: 'md',
 		tier: 'semantic',
-		values: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'none'],
+		values: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'none']
 	},
-	{name: 'border_width', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_1', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_4', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_5', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_6', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_7', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_8', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_width_9', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_xs3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_xs2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_xs', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_sm', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_md', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_lg', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
-	{name: 'border_radius_xl', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic'},
+	{ name: 'border_width', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_1', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_4', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_5', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_6', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_7', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_8', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_width_9', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_xs3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_xs2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_xs', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_sm', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_md', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_lg', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	{ name: 'border_radius_xl', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
 	// density
 	{
 		name: 'scale_factor',
@@ -280,31 +281,31 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [0.25, 2],
-		step: 0.05,
+		step: 0.05
 	},
-	{name: 'space_xs5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xs4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xs3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xs2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xs', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_sm', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_md', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_lg', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl6', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl7', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl8', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl9', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl10', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl11', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl12', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl13', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl14', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
-	{name: 'space_xl15', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic'},
+	{ name: 'space_xs5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xs4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xs3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xs2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xs', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_sm', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_md', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_lg', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl6', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl7', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl8', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl9', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl10', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl11', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl12', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl13', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl14', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	{ name: 'space_xl15', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
 	// depth
 	{
 		name: 'shadow_alpha_scale',
@@ -313,12 +314,18 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'lg',
 		tier: 'semantic',
 		range: [0, 2],
-		step: 0.05,
+		step: 0.05
 	},
-	{name: 'shadow_color_umbra', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
-	{name: 'shadow_color_highlight', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
-	{name: 'shadow_color_glow', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
-	{name: 'shadow_color_shroud', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic'},
+	{ name: 'shadow_color_umbra', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	{
+		name: 'shadow_color_highlight',
+		kind: 'color',
+		axis: 'depth',
+		leverage: 'md',
+		tier: 'semantic'
+	},
+	{ name: 'shadow_color_glow', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	{ name: 'shadow_color_shroud', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	// the dialog/fullscreen ::backdrop dim, a style.css var() fallback hook
 	{
 		name: 'backdrop_color',
@@ -326,39 +333,39 @@ export const theme_knobs: Array<ThemeKnob> = [
 		axis: 'depth',
 		leverage: 'sm',
 		tier: 'semantic',
-		hook: true,
+		hook: true
 	},
-	{name: 'button_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},
-	{name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},
-	{name: 'button_shadow_active', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic'},
+	{ name: 'button_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	{ name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	{ name: 'button_shadow_active', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	// typography
 	{
 		name: 'font_family_sans',
 		kind: 'font_stack',
 		axis: 'typography',
 		leverage: 'md',
-		tier: 'semantic',
+		tier: 'semantic'
 	},
 	{
 		name: 'font_family_serif',
 		kind: 'font_stack',
 		axis: 'typography',
 		leverage: 'md',
-		tier: 'semantic',
+		tier: 'semantic'
 	},
 	{
 		name: 'font_family_mono',
 		kind: 'font_stack',
 		axis: 'typography',
 		leverage: 'md',
-		tier: 'semantic',
+		tier: 'semantic'
 	},
 	{
 		name: 'heading_font_family',
 		kind: 'font_stack',
 		axis: 'typography',
 		leverage: 'md',
-		tier: 'semantic',
+		tier: 'semantic'
 	},
 	{
 		name: 'font_weight',
@@ -367,7 +374,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'md',
 		tier: 'semantic',
 		range: [100, 900],
-		step: 100,
+		step: 100
 	},
 	{
 		// setting this flattens the per-tier heading weight ladder deliberately
@@ -378,7 +385,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		tier: 'semantic',
 		range: [100, 900],
 		step: 100,
-		hook: true,
+		hook: true
 	},
 	{
 		name: 'line_height_xs',
@@ -387,7 +394,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'line_height_sm',
@@ -396,7 +403,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'line_height_md',
@@ -405,7 +412,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'line_height_lg',
@@ -414,7 +421,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	{
 		name: 'line_height_xl',
@@ -423,7 +430,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
-		step: 0.05,
+		step: 0.05
 	},
 	// motion
 	{
@@ -433,7 +440,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'duration_2',
@@ -442,7 +449,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'duration_3',
@@ -451,7 +458,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'duration_4',
@@ -460,7 +467,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'duration_5',
@@ -469,7 +476,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'duration_6',
@@ -478,7 +485,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
-		step: 0.01,
+		step: 0.01
 	},
 	{
 		name: 'disabled_opacity',
@@ -487,30 +494,30 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 100],
-		step: 1,
+		step: 1
 	},
 	// decoration
-	{name: 'background_image', kind: 'text', axis: 'decoration', leverage: 'md', tier: 'semantic'},
+	{ name: 'background_image', kind: 'text', axis: 'decoration', leverage: 'md', tier: 'semantic' }
 ];
 
 /**
  * The theme-space axes in editor display order, with display titles.
  */
-export const knob_axes: Array<{axis: KnobAxis; title: string}> = [
-	{axis: 'color', title: 'Color'},
-	{axis: 'shape', title: 'Shape'},
-	{axis: 'density', title: 'Density'},
-	{axis: 'depth', title: 'Depth'},
-	{axis: 'typography', title: 'Typography'},
-	{axis: 'motion', title: 'Motion'},
-	{axis: 'decoration', title: 'Decoration'},
+export const knob_axes: Array<{ axis: KnobAxis; title: string }> = [
+	{ axis: 'color', title: 'Color' },
+	{ axis: 'shape', title: 'Shape' },
+	{ axis: 'density', title: 'Density' },
+	{ axis: 'depth', title: 'Depth' },
+	{ axis: 'typography', title: 'Typography' },
+	{ axis: 'motion', title: 'Motion' },
+	{ axis: 'decoration', title: 'Decoration' }
 ];
 
 /**
  * The catalog indexed by variable name.
  */
 export const theme_knob_by_name: Map<string, ThemeKnob> = new Map(
-	theme_knobs.map((k) => [k.name, k]),
+	theme_knobs.map((k) => [k.name, k])
 );
 
 /**
@@ -519,5 +526,5 @@ export const theme_knob_by_name: Map<string, ThemeKnob> = new Map(
  * variable names.
  */
 export const theme_knob_hook_names: Set<string> = new Set(
-	theme_knobs.filter((k) => k.hook).map((k) => k.name),
+	theme_knobs.filter((k) => k.hook).map((k) => k.name)
 );

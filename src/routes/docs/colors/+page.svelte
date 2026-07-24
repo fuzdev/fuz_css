@@ -1,6 +1,6 @@
 <script lang="ts">
 	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import {tome_get_by_slug} from '@fuzdev/fuz_ui/tome.ts';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
@@ -10,7 +10,7 @@
 
 	import HueSwatch from './HueSwatch.svelte';
 	import ColorSwatch from './ColorSwatch.svelte';
-	import {palette_variants, palette_glosses, type PaletteVariant} from '$lib/variable_data.ts';
+	import { palette_variants, palette_glosses, type PaletteVariant } from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
@@ -35,10 +35,10 @@
 				slug="variables"
 			/> in pure CSS, in the
 			<MdnLink path="Web/CSS/color_value/oklch" /> colorspace, adapting to the
-			<MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH lightness is perceptually uniform
-			-- equal lightness reads equally light in every hue -- so rotating a hue knob is safe:
-			contrast and visual weight hold, which is what makes <TomeLink slug="themes">themes</TomeLink
-			> a small set of knob values instead of hundreds of hand-tuned stops.
+			<MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH lightness is perceptually uniform --
+			equal lightness reads equally light in every hue -- so rotating a hue knob is safe: contrast and
+			visual weight hold, which is what makes <TomeLink slug="themes">themes</TomeLink> a small set of
+			knob values instead of hundreds of hand-tuned stops.
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
@@ -57,17 +57,17 @@
 				<code>--hue_a</code> … <code>--hue_j</code> -- OKLCH hue angles for the 10 palette slots
 			</li>
 			<li>
-				<code>--hue_neutral</code> + <code>--neutral_chroma</code> -- the temperature and strength
-				of every surface, text, border, and shadow tint (the neutral intent; its scales are the
-				shade and text ramps)
+				<code>--hue_neutral</code> + <code>--neutral_chroma</code> -- the temperature and strength of
+				every surface, text, border, and shadow tint (the neutral intent; its scales are the shade and
+				text ramps)
 			</li>
 			<li>
-				<code>--chroma_scale</code> -- one multiplier from grayscale (0) through calm (1) to vivid
-				(above 1, knowingly clipping the weakest hues)
+				<code>--chroma_scale</code> -- one multiplier from grayscale (0) through calm (1) to vivid (above
+				1, knowingly clipping the weakest hues)
 			</li>
 			<li>
-				<code>--hue_shift</code> -- degrees of hue rotation across each ramp for painterly
-				warm-light/cool-shadow character (default 0)
+				<code>--hue_shift</code> -- degrees of hue rotation across each ramp for painterly warm-light/cool-shadow
+				character (default 0)
 			</li>
 			<li>
 				intent hues -- <code>--hue_accent</code>, <code>--hue_positive</code>,
@@ -105,9 +105,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<p>
-			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness
-			and chroma are shared across all hues at each stop, the scales are interchangeable -- setting
-			a hue alone is enough, no per-hue tuning required.
+			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness and
+			chroma are shared across all hues at each stop, the scales are interchangeable -- setting a hue
+			alone is enough, no per-hue tuning required.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
@@ -134,8 +134,8 @@
 		</p>
 		<p>
 			Unlike the <TomeLink slug="shading">shade</TomeLink> and
-			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate),
-			palette variables can be used for both text and backgrounds via utility classes:
+			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate), palette
+			variables can be used for both text and backgrounds via utility classes:
 			<code>.palette_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
 		<p>

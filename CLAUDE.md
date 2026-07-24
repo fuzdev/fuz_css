@@ -263,8 +263,8 @@ your code uses:
 
 ```ts
 // vite.config.ts
-import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
-export default defineConfig({plugins: [vite_plugin_fuz_css()]});
+import { vite_plugin_fuz_css } from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
+export default defineConfig({ plugins: [vite_plugin_fuz_css()] });
 
 // main.ts (or your SvelteKit root layout)
 import 'virtual:fuz.css';
@@ -285,7 +285,7 @@ declare module 'virtual:fuz.css' {
 
 ```ts
 // src/routes/fuz.gen.css.ts
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.ts';
+import { gen_fuz_css } from '@fuzdev/fuz_css/gen_fuz_css.ts';
 export const gen = gen_fuz_css();
 ```
 

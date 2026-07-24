@@ -1,8 +1,8 @@
-import {test, describe, assert} from 'vitest';
+import { test, describe, assert } from 'vitest';
 
-import {generate_classes_css} from '$lib/css_class_generation.ts';
-import {css_class_composites} from '$lib/css_class_composites.ts';
-import {assert_css_contains, loc} from './test_helpers.ts';
+import { generate_classes_css } from '$lib/css_class_generation.ts';
+import { css_class_composites } from '$lib/css_class_composites.ts';
+import { assert_css_contains, loc } from './test_helpers.ts';
 
 /**
  * Tests for explicit_classes handling in generate_classes_css.
@@ -18,7 +18,7 @@ describe('explicit_classes diagnostics', () => {
 			class_definitions: {},
 			interpreters: [],
 			css_properties: null,
-			explicit_classes: new Set(['unknown_class']),
+			explicit_classes: new Set(['unknown_class'])
 		});
 
 		assert.strictEqual(result.css, '');
@@ -33,7 +33,7 @@ describe('explicit_classes diagnostics', () => {
 			class_names: ['unknown_class'],
 			class_definitions: {},
 			interpreters: [],
-			css_properties: null,
+			css_properties: null
 			// Not in explicit_classes
 		});
 
@@ -47,7 +47,7 @@ describe('explicit_classes diagnostics', () => {
 			class_definitions: css_class_composites,
 			interpreters: [],
 			css_properties: null,
-			explicit_classes: new Set(['box']),
+			explicit_classes: new Set(['box'])
 		});
 
 		assert_css_contains(result.css, '.box');
@@ -66,14 +66,14 @@ describe('explicit_classes diagnostics', () => {
 							level: 'error',
 							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
-							suggestion: null,
+							suggestion: null
 						});
 						return null;
-					},
-				},
+					}
+				}
 			],
 			css_properties: null,
-			explicit_classes: new Set(['invalid-property:value']),
+			explicit_classes: new Set(['invalid-property:value'])
 		});
 
 		assert.lengthOf(result.diagnostics, 1);
@@ -93,13 +93,13 @@ describe('explicit_classes diagnostics', () => {
 							level: 'error',
 							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
-							suggestion: null,
+							suggestion: null
 						});
 						return null;
-					},
-				},
+					}
+				}
 			],
-			css_properties: null,
+			css_properties: null
 			// Not in explicit_classes - class was implicitly extracted from code
 		});
 
@@ -123,13 +123,13 @@ describe('explicit_classes diagnostics', () => {
 							level: 'error',
 							identifier: 'some-class:value',
 							message: 'Circular reference detected',
-							suggestion: null,
+							suggestion: null
 						});
 						return null;
-					},
-				},
+					}
+				}
 			],
-			css_properties: null,
+			css_properties: null
 			// Not explicit
 		});
 
@@ -147,7 +147,7 @@ describe('explicit_classes diagnostics', () => {
 			interpreters: [],
 			css_properties: null,
 			explicit_classes: new Set(['unknown_class']),
-			class_locations: new Map([['unknown_class', [source_loc]]]),
+			class_locations: new Map([['unknown_class', [source_loc]]])
 		});
 
 		assert.lengthOf(result.diagnostics, 1);

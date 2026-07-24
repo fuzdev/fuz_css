@@ -1,5 +1,5 @@
 <script lang="ts">
-	import {resolve} from '$app/paths';
+	import { resolve } from '$app/paths';
 
 	import UnfinishedImplementationWarning from './docs/UnfinishedImplementationWarning.svelte';
 </script>
@@ -18,8 +18,8 @@
 	stylesheet containing the variables used in the reset, and these require no dependencies. There's
 	also
 	<a href={resolve('/docs/classes')}>utility classes</a>
-	for composition and convenience with a Vite plugin, and the library exports the full API for
-	complex usage.
+	for composition and convenience with a Vite plugin, and the library exports the full API for complex
+	usage.
 </p>
 <p>
 	More at the <a href={resolve('/docs')}>docs</a>

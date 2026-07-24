@@ -14,13 +14,16 @@ import {
 	type StyleRuleIndex,
 	load_style_rule_index,
 	create_style_rule_index,
-	load_default_style_css,
+	load_default_style_css
 } from './style_rule_parser.ts';
-import {type VariableDependencyGraph, build_variable_graph_from_options} from './variable_graph.ts';
-import {type CssClassVariableIndex, build_class_variable_index} from './class_variable_index.ts';
-import type {CssClassDefinition} from './css_class_generation.ts';
-import type {BaseCssOption, VariablesOption} from './css_plugin_options.ts';
-import type {CacheDeps} from './deps.ts';
+import {
+	type VariableDependencyGraph,
+	build_variable_graph_from_options
+} from './variable_graph.ts';
+import { type CssClassVariableIndex, build_class_variable_index } from './class_variable_index.ts';
+import type { CssClassDefinition } from './css_class_generation.ts';
+import type { BaseCssOption, VariablesOption } from './css_plugin_options.ts';
+import type { CacheDeps } from './deps.ts';
 
 /**
  * Bundled CSS resources needed to emit base styles and theme variables.
@@ -49,9 +52,9 @@ export interface CreateBundledResourcesOptions {
  * generators' prior behavior.
  */
 export const create_bundled_resources = async (
-	options: CreateBundledResourcesOptions,
+	options: CreateBundledResourcesOptions
 ): Promise<BundledCssResources> => {
-	const {base_css, variables, class_definitions, deps} = options;
+	const { base_css, variables, class_definitions, deps } = options;
 
 	let style_rule_index: StyleRuleIndex;
 	if (typeof base_css === 'string') {
@@ -69,6 +72,6 @@ export const create_bundled_resources = async (
 	return {
 		style_rule_index,
 		variable_graph: build_variable_graph_from_options(variables),
-		class_variable_index: build_class_variable_index(class_definitions),
+		class_variable_index: build_class_variable_index(class_definitions)
 	};
 };

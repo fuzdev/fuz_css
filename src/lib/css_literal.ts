@@ -11,10 +11,10 @@
  * @module
  */
 
-import {levenshtein_distance} from '@fuzdev/fuz_util/string.ts';
+import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
-import {type InterpreterDiagnostic} from './diagnostics.ts';
-import {get_modifier, get_all_modifier_names, type ModifierDefinition} from './modifiers.ts';
+import { type InterpreterDiagnostic } from './diagnostics.ts';
+import { get_modifier, get_all_modifier_names, type ModifierDefinition } from './modifiers.ts';
 
 //
 // Types
@@ -52,8 +52,8 @@ export interface ParsedCssLiteral {
  * Callers should use a guard pattern: `if (result.diagnostics) { ... }`
  */
 export type CssLiteralParseResult =
-	| {ok: true; parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null}
-	| {ok: false; error: InterpreterDiagnostic};
+	| { ok: true; parsed: ParsedCssLiteral; diagnostics: Array<InterpreterDiagnostic> | null }
+	| { ok: false; error: InterpreterDiagnostic };
 
 /**
  * Extracted modifiers from a class name.
@@ -74,8 +74,8 @@ export interface ExtractedModifiers {
  * Result of extracting modifiers from segments.
  */
 export type ModifierExtractionResult =
-	| {ok: true; modifiers: ExtractedModifiers; remaining: Array<string>}
-	| {ok: false; error: InterpreterDiagnostic};
+	| { ok: true; modifiers: ExtractedModifiers; remaining: Array<string> }
+	| { ok: false; error: InterpreterDiagnostic };
 
 /**
  * Result of interpreting a CSS-literal class.
@@ -84,8 +84,8 @@ export type ModifierExtractionResult =
  * Callers should use a guard pattern: `if (result.warnings) { ... }`
  */
 export type InterpretCssLiteralResult =
-	| {ok: true; output: CssLiteralOutput; warnings: Array<InterpreterDiagnostic> | null}
-	| {ok: false; error: InterpreterDiagnostic};
+	| { ok: true; output: CssLiteralOutput; warnings: Array<InterpreterDiagnostic> | null }
+	| { ok: false; error: InterpreterDiagnostic };
 
 //
 // CSS Property Validation
@@ -112,7 +112,7 @@ export const load_css_properties = async (): Promise<Set<string>> => {
  */
 export const is_valid_css_property = (
 	property: string,
-	properties: Set<string> | null,
+	properties: Set<string> | null
 ): boolean => {
 	// Custom properties are always valid
 	if (property.startsWith('--')) return true;
@@ -146,7 +146,7 @@ const find_closest_match = (typo: string, candidates: Iterable<string>): string 
  */
 export const suggest_css_property = (
 	typo: string,
-	properties: Set<string> | null,
+	properties: Set<string> | null
 ): string | null => (properties ? find_closest_match(typo, properties) : null);
 
 /**
@@ -278,7 +278,7 @@ export const extract_segments = (class_name: string): Array<string> => {
  */
 export const extract_and_validate_modifiers = (
 	segments: Array<string>,
-	class_name: string,
+	class_name: string
 ): ModifierExtractionResult => {
 	let media: ModifierDefinition | null = null;
 	let ancestor: ModifierDefinition | null = null;
@@ -305,8 +305,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Multiple media modifiers not allowed`,
 							identifier: class_name,
-							suggestion: null,
-						},
+							suggestion: null
+						}
 					};
 				}
 				if (ancestor) {
@@ -316,8 +316,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Media modifier must come before ancestor modifier`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${ancestor.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${ancestor.name}"`
+						}
 					};
 				}
 				if (states.length > 0) {
@@ -327,8 +327,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Media modifier must come before state modifiers`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${states[0]!.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${states[0]!.name}"`
+						}
 					};
 				}
 				if (pseudo_element) {
@@ -338,8 +338,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Media modifier must come before pseudo-element`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${pseudo_element.name}"`
+						}
 					};
 				}
 				media = modifier;
@@ -354,8 +354,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Modifiers "${ancestor.name}" and "${segment}" are mutually exclusive`,
 							identifier: class_name,
-							suggestion: null,
-						},
+							suggestion: null
+						}
 					};
 				}
 				if (states.length > 0) {
@@ -365,8 +365,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Ancestor modifier must come before state modifiers`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${states[0]!.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${states[0]!.name}"`
+						}
 					};
 				}
 				if (pseudo_element) {
@@ -376,8 +376,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Ancestor modifier must come before pseudo-element`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${pseudo_element.name}"`
+						}
 					};
 				}
 				ancestor = modifier;
@@ -392,8 +392,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `State modifiers must come before pseudo-element`,
 							identifier: class_name,
-							suggestion: `Move "${segment}" before "${pseudo_element.name}"`,
-						},
+							suggestion: `Move "${segment}" before "${pseudo_element.name}"`
+						}
 					};
 				}
 				// Check alphabetical order (full string comparison)
@@ -408,8 +408,8 @@ export const extract_and_validate_modifiers = (
 									segment
 								}" should be "${segment}:${prev.name}"`,
 								identifier: class_name,
-								suggestion: `Reorder to: ...${segment}:${prev.name}:...`,
-							},
+								suggestion: `Reorder to: ...${segment}:${prev.name}:...`
+							}
 						};
 					}
 				}
@@ -425,8 +425,8 @@ export const extract_and_validate_modifiers = (
 							level: 'error',
 							message: `Multiple pseudo-element modifiers not allowed`,
 							identifier: class_name,
-							suggestion: null,
-						},
+							suggestion: null
+						}
 					};
 				}
 				pseudo_element = modifier;
@@ -437,8 +437,8 @@ export const extract_and_validate_modifiers = (
 
 	return {
 		ok: true,
-		modifiers: {media, ancestor, states, pseudo_element},
-		remaining: segments.slice(i),
+		modifiers: { media, ancestor, states, pseudo_element },
+		remaining: segments.slice(i)
 	};
 };
 
@@ -452,7 +452,7 @@ export const extract_and_validate_modifiers = (
  */
 export const parse_css_literal = (
 	class_name: string,
-	css_properties: Set<string> | null,
+	css_properties: Set<string> | null
 ): CssLiteralParseResult => {
 	const segments = extract_segments(class_name);
 
@@ -463,8 +463,8 @@ export const parse_css_literal = (
 				level: 'error',
 				message: `Invalid CSS-literal syntax: expected "property:value" format`,
 				identifier: class_name,
-				suggestion: null,
-			},
+				suggestion: null
+			}
 		};
 	}
 
@@ -480,7 +480,7 @@ export const parse_css_literal = (
 	const modifier_result = extract_and_validate_modifiers(modifier_segments, class_name);
 
 	if (!modifier_result.ok) {
-		return {ok: false, error: modifier_result.error};
+		return { ok: false, error: modifier_result.error };
 	}
 
 	// All segments should have been consumed as modifiers
@@ -494,12 +494,12 @@ export const parse_css_literal = (
 				level: 'error',
 				message: `Unknown modifier "${unknown}"`,
 				identifier: class_name,
-				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
-			},
+				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null
+			}
 		};
 	}
 
-	const {media, ancestor, states, pseudo_element} = modifier_result.modifiers;
+	const { media, ancestor, states, pseudo_element } = modifier_result.modifiers;
 
 	// Validate property
 	if (!is_valid_css_property(property, css_properties)) {
@@ -510,8 +510,8 @@ export const parse_css_literal = (
 				level: 'error',
 				message: `Unknown CSS property "${property}"`,
 				identifier: class_name,
-				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null,
-			},
+				suggestion: suggestion ? `Did you mean "${suggestion}"?` : null
+			}
 		};
 	}
 
@@ -525,7 +525,7 @@ export const parse_css_literal = (
 			level: 'warning',
 			message: calc_warning,
 			identifier: class_name,
-			suggestion: `Use ~ for spaces in calc expressions`,
+			suggestion: `Use ~ for spaces in calc expressions`
 		});
 	}
 
@@ -538,9 +538,9 @@ export const parse_css_literal = (
 			states,
 			pseudo_element,
 			property,
-			value: formatted_value,
+			value: formatted_value
 		},
-		diagnostics,
+		diagnostics
 	};
 };
 
@@ -603,15 +603,15 @@ export interface CssLiteralOutput {
 export const interpret_css_literal = (
 	class_name: string,
 	escaped_class_name: string,
-	css_properties: Set<string> | null,
+	css_properties: Set<string> | null
 ): InterpretCssLiteralResult => {
 	const result = parse_css_literal(class_name, css_properties);
 
 	if (!result.ok) {
-		return {ok: false, error: result.error};
+		return { ok: false, error: result.error };
 	}
 
-	const {parsed, diagnostics} = result;
+	const { parsed, diagnostics } = result;
 
 	return {
 		ok: true,
@@ -619,9 +619,9 @@ export const interpret_css_literal = (
 			declaration: generate_declaration(parsed),
 			selector: generate_selector(escaped_class_name, parsed),
 			media_wrapper: parsed.media?.css ?? null,
-			ancestor_wrapper: parsed.ancestor?.css ?? null,
+			ancestor_wrapper: parsed.ancestor?.css ?? null
 		},
-		warnings: diagnostics,
+		warnings: diagnostics
 	};
 };
 
@@ -633,8 +633,8 @@ export const interpret_css_literal = (
  * Result of attempting to resolve a CSS literal for composition.
  */
 export type LiteralResolutionResult =
-	| {ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null}
-	| {ok: false; error: InterpreterDiagnostic | null};
+	| { ok: true; declaration: string; warnings: Array<InterpreterDiagnostic> | null }
+	| { ok: false; error: InterpreterDiagnostic | null };
 
 /**
  * Checks if a parsed CSS literal has any modifiers.
@@ -671,21 +671,21 @@ export const has_extracted_modifiers = (modifiers: ExtractedModifiers): boolean 
 export const try_resolve_literal = (
 	class_name: string,
 	css_properties: Set<string> | null,
-	context_class_name: string,
+	context_class_name: string
 ): LiteralResolutionResult => {
 	// Quick check - must look like a CSS literal
 	if (!is_possible_css_literal(class_name)) {
-		return {ok: false, error: null};
+		return { ok: false, error: null };
 	}
 
 	// Parse the literal
 	const result = parse_css_literal(class_name, css_properties);
 
 	if (!result.ok) {
-		return {ok: false, error: contextualize_error(result.error, context_class_name)};
+		return { ok: false, error: contextualize_error(result.error, context_class_name) };
 	}
 
-	const {parsed, diagnostics} = result;
+	const { parsed, diagnostics } = result;
 
 	// Check for modifiers - modified literals cannot be composed
 	if (has_modifiers(parsed)) {
@@ -695,8 +695,8 @@ export const try_resolve_literal = (
 				level: 'error',
 				identifier: context_class_name,
 				message: `Modified class "${class_name}" cannot be used in composes array`,
-				suggestion: 'Apply modified classes directly in markup, not in composes arrays',
-			},
+				suggestion: 'Apply modified classes directly in markup, not in composes arrays'
+			}
 		};
 	}
 
@@ -704,7 +704,7 @@ export const try_resolve_literal = (
 	return {
 		ok: true,
 		declaration: generate_declaration(parsed),
-		warnings: diagnostics,
+		warnings: diagnostics
 	};
 };
 
@@ -713,10 +713,10 @@ export const try_resolve_literal = (
  */
 const contextualize_error = (
 	error: InterpreterDiagnostic,
-	context_class_name: string,
+	context_class_name: string
 ): InterpreterDiagnostic => ({
 	...error,
-	identifier: context_class_name,
+	identifier: context_class_name
 });
 
 /**

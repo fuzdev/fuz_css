@@ -1,8 +1,8 @@
-import {test, assert, describe} from 'vitest';
+import { test, assert, describe } from 'vitest';
 
-import {extract_from_svelte} from '$lib/css_class_extractor.ts';
+import { extract_from_svelte } from '$lib/css_class_extractor.ts';
 
-import {assert_elements} from './css_class_extractor_test_helpers.ts';
+import { assert_elements } from './css_class_extractor_test_helpers.ts';
 
 const element_cases = [
 	{
@@ -15,7 +15,7 @@ const element_cases = [
 </div>
 `,
 		present: ['div', 'button', 'input', 'a'],
-		absent: [],
+		absent: []
 	},
 	{
 		name: 'svelte:element dynamic tag is not added to elements',
@@ -27,7 +27,7 @@ const element_cases = [
 <div class="static">Static content</div>
 `,
 		present: ['div'],
-		absent: ['svelte:element', 'button'],
+		absent: ['svelte:element', 'button']
 	},
 	{
 		name: 'svelte:body and svelte:window are not added to elements',
@@ -37,7 +37,7 @@ const element_cases = [
 <main>Content</main>
 `,
 		present: ['main'],
-		absent: ['svelte:body', 'svelte:window'],
+		absent: ['svelte:body', 'svelte:window']
 	},
 	{
 		name: 'svelte:head is not added but child elements are',
@@ -50,7 +50,7 @@ const element_cases = [
 <main>Content</main>
 `,
 		present: ['main', 'title', 'meta', 'link'],
-		absent: ['svelte:head'],
+		absent: ['svelte:head']
 	},
 	{
 		name: 'slot element and fallback content elements are detected',
@@ -65,7 +65,7 @@ const element_cases = [
 </slot>
 `,
 		present: ['slot', 'header', 'h1', 'p'],
-		absent: [],
+		absent: []
 	},
 	{
 		name: 'detects SVG elements',
@@ -79,7 +79,7 @@ const element_cases = [
 </svg>
 `,
 		present: ['svg', 'circle', 'path', 'g', 'rect'],
-		absent: [],
+		absent: []
 	},
 	{
 		name: 'detects MathML elements',
@@ -96,7 +96,7 @@ const element_cases = [
 </math>
 `,
 		present: ['math', 'mrow', 'mi', 'mo', 'mfrac', 'mn'],
-		absent: [],
+		absent: []
 	},
 	{
 		name: 'detects custom elements with dashes',
@@ -108,7 +108,7 @@ const element_cases = [
 </custom-card>
 `,
 		present: ['my-button', 'custom-card', 'card-header', 'card-body'],
-		absent: [],
+		absent: []
 	},
 	{
 		name: 'does not detect Svelte components as elements',
@@ -122,7 +122,7 @@ const element_cases = [
 <div>Regular element</div>
 `,
 		present: ['div'],
-		absent: ['Button', 'Card'],
+		absent: ['Button', 'Card']
 	},
 	{
 		name: 'detects elements in nested control flow',
@@ -138,12 +138,12 @@ const element_cases = [
 {/if}
 `,
 		present: ['article', 'section', 'header'],
-		absent: [],
-	},
+		absent: []
+	}
 ];
 
 describe('element detection', () => {
-	test.each(element_cases)('$name', ({source, present, absent}) => {
+	test.each(element_cases)('$name', ({ source, present, absent }) => {
 		const result = extract_from_svelte(source);
 		assert_elements(result, present, absent);
 	});
