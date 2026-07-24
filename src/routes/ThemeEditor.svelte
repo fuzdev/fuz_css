@@ -109,7 +109,7 @@
 
 <div class="theme_editor width:100%">
 	<header class="mb_flow">
-		<div class="row gap_lg flex-wrap:wrap">
+		<div class="row gap_lg flex-wrap:wrap mb_lg">
 			<label>
 				<div class="title">name</div>
 				<input bind:value={editor.name} />
