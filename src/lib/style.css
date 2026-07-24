@@ -368,8 +368,11 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		background-color: var(--shade_00);
 	}
 
-	:where(:is(input, textarea, select):not(.unstyled):hover) {
-		--border_color: var(--border_color_20);
+	:where(:is(input, textarea, select):not(.unstyled):hover:not(:disabled)) {
+		/* hover previews the focus color — the element color when classed
+			(.palette_* sets --outline_color), else the accent intent; focus then
+			adds the outline at the same color, escalating visibility */
+		--border_color: var(--outline_color);
 	}
 
 	/* these have no active states because they feel buggy in the browsers,
@@ -593,61 +596,61 @@ TODO think through these patterns to get somewhere consistent
 
 	:where(button:not(.unstyled).palette_a) {
 		--text_color: var(--palette_a_50);
-		--fill: var(--palette_a_40);
+		--fill: var(--palette_a_50);
 		--border_color: var(--palette_a_50);
 		--outline_color: var(--palette_a_50);
 	}
 	:where(button:not(.unstyled).palette_b) {
 		--text_color: var(--palette_b_50);
-		--fill: var(--palette_b_40);
+		--fill: var(--palette_b_50);
 		--border_color: var(--palette_b_50);
 		--outline_color: var(--palette_b_50);
 	}
 	:where(button:not(.unstyled).palette_c) {
 		--text_color: var(--palette_c_50);
-		--fill: var(--palette_c_40);
+		--fill: var(--palette_c_50);
 		--border_color: var(--palette_c_50);
 		--outline_color: var(--palette_c_50);
 	}
 	:where(button:not(.unstyled).palette_d) {
 		--text_color: var(--palette_d_50);
-		--fill: var(--palette_d_40);
+		--fill: var(--palette_d_50);
 		--border_color: var(--palette_d_50);
 		--outline_color: var(--palette_d_50);
 	}
 	:where(button:not(.unstyled).palette_e) {
 		--text_color: var(--palette_e_50);
-		--fill: var(--palette_e_40);
+		--fill: var(--palette_e_50);
 		--border_color: var(--palette_e_50);
 		--outline_color: var(--palette_e_50);
 	}
 	:where(button:not(.unstyled).palette_f) {
 		--text_color: var(--palette_f_50);
-		--fill: var(--palette_f_40);
+		--fill: var(--palette_f_50);
 		--border_color: var(--palette_f_50);
 		--outline_color: var(--palette_f_50);
 	}
 	:where(button:not(.unstyled).palette_g) {
 		--text_color: var(--palette_g_50);
-		--fill: var(--palette_g_40);
+		--fill: var(--palette_g_50);
 		--border_color: var(--palette_g_50);
 		--outline_color: var(--palette_g_50);
 	}
 	:where(button:not(.unstyled).palette_h) {
 		--text_color: var(--palette_h_50);
-		--fill: var(--palette_h_40);
+		--fill: var(--palette_h_50);
 		--border_color: var(--palette_h_50);
 		--outline_color: var(--palette_h_50);
 	}
 	:where(button:not(.unstyled).palette_i) {
 		--text_color: var(--palette_i_50);
-		--fill: var(--palette_i_40);
+		--fill: var(--palette_i_50);
 		--border_color: var(--palette_i_50);
 		--outline_color: var(--palette_i_50);
 	}
 	:where(button:not(.unstyled).palette_j) {
 		--text_color: var(--palette_j_50);
-		--fill: var(--palette_j_40);
+		--fill: var(--palette_j_50);
 		--border_color: var(--palette_j_50);
 		--outline_color: var(--palette_j_50);
 	}
@@ -663,7 +666,10 @@ TODO think through these patterns to get somewhere consistent
 		outline: none;
 	}
 	:where(button:not(.unstyled).selected) {
-		--button_text_color: var(--text_05);
+		/* text_00 is the ramp endpoint: contrast themes bending
+			--text_lightness_curve move the near-background stops toward the fill,
+			but can never move an endpoint, so inverse text stays readable */
+		--button_text_color: var(--text_00);
 		--button_fill: var(--fill, var(--shade_50));
 		--button_fill_hover: var(--fill, var(--shade_50));
 		--button_fill_active: var(--fill, var(--shade_50));
@@ -686,7 +692,7 @@ TODO think through these patterns to get somewhere consistent
 		--button_text_color: color-mix(in oklab, var(--text_color) 90%, var(--shade_max));
 	}
 	:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
-		--button_text_color: var(--shade_min);
+		--button_text_color: var(--text_min);
 	}
 	:where(button:not(.unstyled):not(:disabled):active) {
 		--button_fill: var(--button_fill_active);
@@ -703,8 +709,8 @@ TODO think through these patterns to get somewhere consistent
 	}
 	/* TODO is there a cleaner way to override these through vars? */
 	:where(button:not(.unstyled).selected:disabled:active) {
-		--text_color: var(--text_10);
-		--fill: var(--negative_40);
+		--text_color: var(--text_00);
+		--fill: var(--negative_50);
 	}
 	:where(button:not(.unstyled):not(.selected):disabled:active) {
 		--fill: transparent;

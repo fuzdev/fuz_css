@@ -113,7 +113,7 @@
 			Hue variables are also useful to construct custom colors not covered by the palette. For
 			example, fuz_css's selection color derives from <code>--hue_accent</code> (try selecting some
 			text --
-			<span class="palette_a_50">same hue!</span>)
+			<span class="accent_50">same hue!</span>)
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">

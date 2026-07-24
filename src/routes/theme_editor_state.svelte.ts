@@ -62,6 +62,7 @@ export class ThemeEditorState {
 	readonly overrides: SvelteMap<string, SlotOverride> = new SvelteMap();
 
 	constructor(themes: Array<Theme>) {
+		if (!themes.length) throw new Error('ThemeEditorState requires at least one theme');
 		this.themes = themes;
 	}
 
@@ -238,7 +239,11 @@ export class ThemeEditorState {
 	 */
 	restore_snapshot(data: ThemeEditorSnapshotData): void {
 		this.name = data.name;
-		this.based_on = data.based_on;
+		// a stale snapshot may reference a renamed/removed theme - fall back to
+		// the first theme rather than leaving the "based on" select unmatched
+		this.based_on = this.themes.some((t) => t.name === data.based_on)
+			? data.based_on
+			: this.themes[0]!.name;
 		this.scheme = data.scheme ?? this.base_scheme;
 		this.overrides.clear();
 		for (const [name, o] of data.overrides) {
@@ -246,6 +251,18 @@ export class ThemeEditorState {
 		}
 	}
 }
+
+/**
+ * The confirm-dialog message shown before a dirty draft is discarded by
+ * loading `name` as the new base — shared by every picker that can trigger
+ * the flatten-on-load, so the wording can't drift.
+ */
+export const discard_confirm_message = (editor: ThemeEditorState, name: string): string => {
+	const discarded = editor.overrides.size
+		? `${editor.overrides.size} edited knob(s) will be discarded`
+		: 'the scheme change will be discarded';
+	return `load "${name}" as the new base? ${discarded}`;
+};
 
 const escape_single_quotes = (s: string): string =>
 	s.replaceAll('\\', '\\\\').replaceAll("'", "\\'");

@@ -88,6 +88,14 @@ export const GATE_LINK = 4.5;
 export const GATE_UI = 3;
 /** Large-text floor: `text_max` on every stop-50 fill. */
 export const GATE_FILL_TEXT = 3;
+/**
+ * Selected-control inverse text: `text_00` on `shade_50` and on every stop-50
+ * fill — the selected-button pairings in `style.css` (`.selected` fills with
+ * `shade_50`, `.palette_X.selected` with `palette_X_50`). The endpoint stop is
+ * immune to `text_lightness_curve` bends, so this gate moves only when a theme
+ * moves the endpoints, the fill ramps, or the hues.
+ */
+export const GATE_SELECTED_TEXT = 3;
 
 /**
  * The variable names a theme may set: the declared defaults plus the hook
@@ -408,8 +416,8 @@ const validate_knob_value = (
 	const issues: Array<ThemeIssue> = [];
 	const trimmed = value.trim();
 	const numeric = trimmed !== '' && Number.isFinite(Number(trimmed));
-	const check_range = (): void => {
-		if (knob.range && (Number(trimmed) < knob.range[0] || Number(trimmed) > knob.range[1])) {
+	const check_range = (n: number = Number(trimmed)): void => {
+		if (knob.range && (n < knob.range[0] || n > knob.range[1])) {
 			issues.push({
 				level: 'warning',
 				message: `${variable} ${slot} ${trimmed} is outside the safe range [${knob.range[0]}, ${
@@ -448,12 +456,15 @@ const validate_knob_value = (
 			break;
 		}
 		case 'time': {
-			if (!/^-?\d*\.?\d+s$/u.test(trimmed)) {
+			const time_match = /^(-?\d*\.?\d+)s$/u.exec(trimmed);
+			if (!time_match) {
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a CSS time value like 0.2s`,
 					variable
 				});
+			} else {
+				check_range(Number(time_match[1]));
 			}
 			break;
 		}
@@ -557,6 +568,11 @@ const gamut_excess = ([r, g, b]: RgbUnit): number => Math.max(0, -r, r - 1, -g, 
  * failures land in `entries` (with `pass: false`), inputs that can't be
  * resolved land in `unchecked`, and `ok` is true only when every entry passes
  * and nothing is unchecked. Never throws.
+ *
+ * An intent hue that resolves to the same angle as a palette letter (the
+ * default for every intent) folds into that letter's entries rather than
+ * duplicating them, so reports for letter-bound themes list fewer subjects
+ * than the full letters × intents grid.
  */
 export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const resolver = new ThemeResolver(theme);
@@ -720,6 +736,21 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 
 		const shade_00 = neutral_color('shade', '00', scheme);
 
+		// contrast: selected-control inverse text — text_00 on shade_50
+		const text_00 = neutral_color('text', '00', scheme);
+		const shade_50 = neutral_color('shade', '50', scheme);
+		if (text_00 && shade_50) {
+			const ratio = contrast(oklch_to_srgb(text_00), oklch_to_srgb(shade_50));
+			entries.push({
+				gate: 'contrast',
+				scheme,
+				subject: 'text_00 on shade_50',
+				value: ratio,
+				threshold: GATE_SELECTED_TEXT,
+				pass: ratio >= GATE_SELECTED_TEXT
+			});
+		}
+
 		// contrast: subtle text — text_50 on shade_00
 		const text_50 = neutral_color('text', '50', scheme);
 		if (text_50 && shade_00) {
@@ -786,6 +817,17 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 					threshold: GATE_FILL_TEXT,
 					pass: on_fill >= GATE_FILL_TEXT
 				});
+				if (text_00) {
+					const selected = contrast(oklch_to_srgb(text_00), fill_rgb);
+					entries.push({
+						gate: 'contrast',
+						scheme,
+						subject: `text_00 on ${label}_50`,
+						value: selected,
+						threshold: GATE_SELECTED_TEXT,
+						pass: selected >= GATE_SELECTED_TEXT
+					});
+				}
 			}
 		}
 	}
@@ -815,7 +857,10 @@ const collect_hues = (resolver: ThemeResolver, scheme: ColorSchemeVariant): Arra
 		const r = resolver.resolve(`hue_${intent}`, scheme);
 		if (r.ok && !hues.some((h) => Math.abs(h - r.value) < 1e-9)) hues.push(r.value);
 	}
-	return hues;
+	// with no resolvable hue at all, an empty set would yield Infinity caps and
+	// emit garbage CSS — fall back to the default hues (the re-check still
+	// reports the unresolvable pins)
+	return hues.length ? hues : Object.values(PALETTE_HUES);
 };
 
 const resolve_or = (

@@ -402,6 +402,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	 * and the connect-time resync.
 	 */
 	const invalidate_and_push = (new_css: string): void => {
+		// Deliberately not updating last_served_css: only load() marks CSS as
+		// served, so if the pushed js-update never causes a refetch, the next
+		// ws connection re-diffs against what clients actually hold and pushes
+		// again — convergence relies on that refetch loop.
 		last_generated_css = new_css;
 		pending_css = new_css; // Store for reuse in load() to avoid regenerating
 
@@ -566,6 +570,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		prescan_active = true;
 		try {
 			await each_concurrent(file_ids, PRESCAN_CONCURRENCY, async (id) => {
+				// Reads disk bytes while transform later receives Vite's input for
+				// the same id; with enforce: 'pre' those are identical, so the
+				// content-hash short-circuit makes the second ingest a no-op. A
+				// loader that rewrites content before 'pre' plugins would extract
+				// twice, with the transform result winning — harmless, just noted.
 				const r = await deps.read_text({ path: id });
 				if (!r.ok) return; // deleted mid-scan or unreadable; transform covers it if it reappears
 				await ingest_file(id, r.value);

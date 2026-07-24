@@ -20,6 +20,7 @@
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
 	import {
+		discard_confirm_message,
 		ThemeEditorState,
 		UNSAVED_THEME_NAME,
 		type ThemeEditorSnapshotData
@@ -46,10 +47,20 @@
 
 	// passed as ThemeInput's `select` (not `onselect`, which collides with the
 	// DOM handler type in its menu-attribute props): applies the theme like the
-	// default select and loads it into the editor
+	// default select and loads it into the editor, with the same dirty-draft
+	// guard as the editor's "based on" select
 	const select_theme = (theme: Theme): void => {
+		if (theme.name !== UNSAVED_THEME_NAME) {
+			if (
+				editor.dirty &&
+				// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+				!confirm(discard_confirm_message(editor, theme.name))
+			) {
+				return;
+			}
+			editor.load_theme(theme);
+		}
 		theme_state.theme = theme;
-		if (theme.name !== UNSAVED_THEME_NAME) editor.load_theme(theme);
 	};
 
 	// live scope is global with no pin: the draft writes to `:root` through the

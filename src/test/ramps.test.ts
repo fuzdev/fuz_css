@@ -21,6 +21,7 @@ import {
 	GATE_BODY_TEXT,
 	GATE_FILL_TEXT,
 	GATE_LINK,
+	GATE_SELECTED_TEXT,
 	GATE_SUBTLE_TEXT,
 	GATE_UI
 } from '$lib/theme_check.ts';
@@ -147,6 +148,19 @@ describe('contrast gates', () => {
 		}
 	});
 
+	test('selected inverse text: text_00 on shade_50 clears the large-text floor', () => {
+		for (const scheme of color_scheme_variants) {
+			const ratio = wcag_contrast_ratio(
+				oklch_to_srgb(text_stop_oklch('00', scheme)),
+				oklch_to_srgb(shade_stop_oklch('50', scheme))
+			);
+			assert(
+				ratio >= GATE_SELECTED_TEXT,
+				`text_00 on shade_50 ${scheme}: ${ratio.toFixed(2)} < ${GATE_SELECTED_TEXT}`
+			);
+		}
+	});
+
 	test('links: palette_a_60 on shade_00 meets AA', () => {
 		for (const scheme of color_scheme_variants) {
 			const ratio = wcag_contrast_ratio(
@@ -161,6 +175,7 @@ describe('contrast gates', () => {
 		for (const scheme of color_scheme_variants) {
 			const surface = oklch_to_srgb(shade_stop_oklch('00', scheme));
 			const text_max: RgbUnit = scheme === 'light' ? [0, 0, 0] : [1, 1, 1];
+			const text_00 = oklch_to_srgb(text_stop_oklch('00', scheme));
 			for (const letter of palette_variants) {
 				const fill = clamp_rgb(oklch_to_srgb(palette_stop_oklch(letter, '50', scheme)));
 				const ui = wcag_contrast_ratio(fill, surface);
@@ -172,6 +187,11 @@ describe('contrast gates', () => {
 				assert(
 					on_fill >= GATE_FILL_TEXT,
 					`text_max on palette_${letter}_50 ${scheme}: ${on_fill.toFixed(2)} < ${GATE_FILL_TEXT}`
+				);
+				const selected = wcag_contrast_ratio(text_00, fill);
+				assert(
+					selected >= GATE_SELECTED_TEXT,
+					`text_00 on palette_${letter}_50 ${scheme}: ${selected.toFixed(2)} < ${GATE_SELECTED_TEXT}`
 				);
 			}
 		}

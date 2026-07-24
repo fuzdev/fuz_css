@@ -16,6 +16,7 @@
 		type PaletteVariant
 	} from '$lib/variable_data.ts';
 	import {
+		discard_confirm_message,
 		render_theme_ts,
 		UNSAVED_THEME_NAME,
 		type ThemeEditorState
@@ -73,13 +74,10 @@
 	// edits, so guard the switch behind a confirm when the draft is dirty
 	const on_base_change = (e: Event & { currentTarget: EventTarget & HTMLSelectElement }): void => {
 		const name = e.currentTarget.value;
-		const discarded = editor.overrides.size
-			? `${editor.overrides.size} edited knob(s) will be discarded`
-			: 'the scheme change will be discarded';
 		if (
 			editor.dirty &&
 			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
-			!confirm(`load "${name}" as the new base? ${discarded}`)
+			!confirm(discard_confirm_message(editor, name))
 		) {
 			e.currentTarget.value = editor.based_on;
 			return;

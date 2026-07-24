@@ -1,4 +1,5 @@
 import type { CssClassDefinition } from './css_class_generation.ts';
+import { palette_variants } from './variable_data.ts';
 
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
@@ -309,46 +310,14 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			a.chip {
 				font-weight: 600;
 			}
-			.chip.palette_a {
-				color: var(--palette_a_50);
-				background-color: var(--palette_a_10);
-			}
-			.chip.palette_b {
-				color: var(--palette_b_50);
-				background-color: var(--palette_b_10);
-			}
-			.chip.palette_c {
-				color: var(--palette_c_50);
-				background-color: var(--palette_c_10);
-			}
-			.chip.palette_d {
-				color: var(--palette_d_50);
-				background-color: var(--palette_d_10);
-			}
-			.chip.palette_e {
-				color: var(--palette_e_50);
-				background-color: var(--palette_e_10);
-			}
-			.chip.palette_f {
-				color: var(--palette_f_50);
-				background-color: var(--palette_f_10);
-			}
-			.chip.palette_g {
-				color: var(--palette_g_50);
-				background-color: var(--palette_g_10);
-			}
-			.chip.palette_h {
-				color: var(--palette_h_50);
-				background-color: var(--palette_h_10);
-			}
-			.chip.palette_i {
-				color: var(--palette_i_50);
-				background-color: var(--palette_i_10);
-			}
-			.chip.palette_j {
-				color: var(--palette_j_50);
-				background-color: var(--palette_j_10);
-			}
+			${palette_variants
+				.map(
+					(letter) => `.chip.palette_${letter} {
+				color: var(--palette_${letter}_50);
+				background-color: var(--palette_${letter}_10);
+			}`
+				)
+				.join('\n\t\t\t')}
 		`
 	}
 };

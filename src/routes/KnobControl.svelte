@@ -59,8 +59,9 @@
 
 	const numeric_value = $derived(resolve_numeric(value));
 	// a live swatch of the current angle for the detach ("custom") button, so it
-	// tracks the hue the way the letter buttons track their palette slot
-	const custom_color = $derived(`oklch(0.65 0.14 ${numeric_value ?? 0})`);
+	// tracks the hue the way the letter buttons track their palette slot;
+	// same L/C as HueSwatch's gradient so hue displays read consistently
+	const custom_color = $derived(`oklch(0.65 0.17 ${numeric_value ?? 0})`);
 	const scalar = $derived(
 		knob.kind === 'hue' || knob.kind === 'number' || knob.kind === 'percent' || knob.kind === 'time'
 	);
@@ -115,6 +116,15 @@
 		</div>
 		{#if bound_letter === null && numeric_value !== null}
 			<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
+		{:else if bound_letter === null}
+			<!-- a detached value the slider can't represent (e.g. a calc()) -
+				raw text entry as the escape hatch -->
+			<input
+				type="text"
+				aria-label={knob.name}
+				value={value ?? ''}
+				onchange={(e) => onchange(e.currentTarget.value)}
+			/>
 		{/if}
 	{:else if knob.kind === 'hue' && numeric_value !== null}
 		<!-- HueInput carries its own internal label; the name renders as its title -->
@@ -126,6 +136,9 @@
 			<div class="title"><code class="knob_name">--{knob.name}</code></div>
 			{#if knob.kind === 'enum'}
 				<select value={value ?? ''} onchange={(e) => onchange(e.currentTarget.value)}>
+					{#if value === undefined}
+						<option value="" disabled>unset</option>
+					{/if}
 					{#each knob.values ?? [] as v (v)}
 						<option value={v}>{v}</option>
 					{/each}

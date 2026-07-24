@@ -15,8 +15,7 @@ export const brutalish_theme: Theme = {
 	name: 'brutalish',
 	variables: [
 		// concrete ground, saturated accents: the neutral goes raw while the
-		// palette keeps punch
-		{ name: 'chroma_scale', light: '0.5' },
+		// palette keeps its full default chroma for punch
 		{ name: 'neutral_chroma', light: '0.006' },
 		// paper white / void black, max contrast
 		{ name: 'shade_lightness_00', light: '1', dark: '0' },

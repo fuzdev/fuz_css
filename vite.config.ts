@@ -3,7 +3,7 @@ import { sveltekit } from '@sveltejs/kit/vite';
 import svelte_docinfo from 'svelte-docinfo/vite.js';
 import { vite_plugin_pkg_json } from '@fuzdev/fuz_ui/vite_plugin_pkg_json.ts';
 
-import { vite_plugin_fuz_css } from './src/lib/vite_plugin_fuz_css.js';
+import { vite_plugin_fuz_css } from './src/lib/vite_plugin_fuz_css.ts';
 import {
 	alpha_variants,
 	darken_lighten_variants,
@@ -14,7 +14,7 @@ import {
 	shadow_semantic_values,
 	shadow_size_variants,
 	shadow_variant_prefixes
-} from './src/lib/variable_data.js';
+} from './src/lib/variable_data.ts';
 
 // the docs pages construct these class families dynamically from pickers, so
 // static extraction can't see them - declared here from the variant lists
