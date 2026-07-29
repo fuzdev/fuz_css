@@ -175,12 +175,12 @@ describe('modify_single_selector', () => {
 		// Class with numbers/underscores
 		['.p_md', 'p_md', 'hover\\:p_md', ':hover', '', '.hover\\:p_md:hover', 'numbers'],
 		[
-			'.palette_a_50',
-			'palette_a_50',
-			'hover\\:palette_a_50',
+			'.color_a_50',
+			'color_a_50',
+			'hover\\:color_a_50',
 			':hover',
 			'',
-			'.hover\\:palette_a_50:hover',
+			'.hover\\:color_a_50:hover',
 			'underscores and numbers'
 		],
 

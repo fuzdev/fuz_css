@@ -101,17 +101,24 @@
 		</p>
 		<ul>
 			<li>
-				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
+				<code>--fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
 				use for elevated surfaces like panels, cards, and hover states
 			</li>
 			<li>
-				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
+				<code>--bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
 				use for surfaces that blend toward the background
 			</li>
 		</ul>
 		<p>
 			In light mode, <code>fg</code> is the same as <code>darken</code> and <code>bg</code> is the
 			same as <code>lighten</code>. In dark mode, they're swapped.
+		</p>
+		<p>
+			The overlays are variables, not token classes - <code>bg_</code> is the opaque background
+			class prefix (<code>.bg_a_50</code>, <code>.bg_positive_50</code>), so reach the overlays with
+			a literal class (<code>background-color:var(--fg_10)</code>) or a
+			<code>&lt;style&gt;</code>
+			block.
 		</p>
 		<TomeSection>
 			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
@@ -120,7 +127,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'fg_' + v}
 					<div>
-						<div class="overlay_color fg_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -133,7 +140,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'bg_' + v}
 					<div>
-						<div class="overlay_color bg_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -146,10 +153,10 @@
 				adds more contrast:
 			</p>
 			<Code
-				content={`<div class="fg_10 p_sm">
-	<div class="fg_10 p_sm">
-		<div class="fg_10 p_sm">
-			<div class="fg_10 p_sm">
+				content={`<div class="background-color:var(--fg_10) p_sm">
+	<div class="background-color:var(--fg_10) p_sm">
+		<div class="background-color:var(--fg_10) p_sm">
+			<div class="background-color:var(--fg_10) p_sm">
 				...
 			</div>
 		</div>
@@ -157,13 +164,13 @@
 </div>`}
 			/>
 			<div class="stacking_demo">
-				<div class="stacking_layer fg_10">
-					<span>fg_10</span>
-					<div class="stacking_layer fg_10">
-						<span>nested fg_10</span>
-						<div class="stacking_layer fg_10">
+				<div class="stacking_layer">
+					<span>var(--fg_10)</span>
+					<div class="stacking_layer">
+						<span>nested var(--fg_10)</span>
+						<div class="stacking_layer">
 							<span>triple nested</span>
-							<div class="stacking_layer fg_10">
+							<div class="stacking_layer">
 								<span>quadruple nested</span>
 							</div>
 						</div>
@@ -173,7 +180,7 @@
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
 				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
-				<code>.menuitem</code> use <code>fg_10</code> for this stacking behavior.
+				<code>.menuitem</code> use <code>var(--fg_10)</code> for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -194,7 +201,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'darken_' + v}
 					<div>
-						<div class="overlay_color darken_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -207,7 +214,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'lighten_' + v}
 					<div>
-						<div class="overlay_color lighten_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -227,8 +234,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
-			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested
-			UI:
+			<strong>Use <code>--fg_NN</code></strong> when you need stacking behavior or are building
+			nested UI:
 		</p>
 		<Code
 			lang="css"
@@ -258,8 +265,8 @@ background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
-			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque
-			base.
+			<code>--fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the
+			opaque base.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -309,6 +316,7 @@ background-color: var(--shade_min);`}
 		padding: var(--space_md);
 		border-radius: var(--border_radius_xs);
 		margin-top: var(--space_sm);
+		background-color: var(--fg_10);
 	}
 	.stacking_layer span {
 		font-family: var(--font_family_mono);

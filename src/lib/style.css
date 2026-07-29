@@ -83,8 +83,7 @@ Notes:
 		background-image: var(--background_image);
 		color: var(--text_color);
 		accent-color: var(--accent_50);
-		scrollbar-color: var(--scrollbar_thumb_color, var(--shade_40))
-			var(--scrollbar_track_color, transparent);
+		scrollbar-color: var(--scrollbar_thumb_color) var(--scrollbar_track_color);
 		line-height: var(--line_height_md);
 		font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
 		/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
@@ -123,8 +122,8 @@ Notes:
 	}
 
 	:where(dialog:not(.unstyled))::backdrop {
-		/* same default dim as fuz_ui's Dialog, themable through one hook */
-		background-color: var(--backdrop_color, var(--darken_60));
+		/* same default dim as fuz_ui's Dialog, themable through one variable */
+		background-color: var(--backdrop_color);
 	}
 
 	/*
@@ -150,8 +149,8 @@ Respects `hidden="until-found"` for find-in-page support.
 		border-radius: var(--border_radius, var(--border_radius_xs3));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
 		/* gap between border and ring so the same-color pair reads as two
-			shapes instead of one thick band; --outline_offset is a hook */
-		outline-offset: var(--outline_offset, 1px);
+			shapes instead of one thick band */
+		outline-offset: var(--outline_offset);
 	}
 	/* TODO should these be customizable with utility classes? */
 	:where(a:not(.unstyled):hover) {
@@ -345,7 +344,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		line-height: normal;
 		display: block;
 		color: var(--text_color);
-		caret-color: var(--caret_color, var(--accent_50));
+		caret-color: var(--caret_color);
 		background-color: var(--input_fill);
 		border-color: var(--border_color);
 		border-style: var(--border_style);
@@ -353,7 +352,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-radius: var(--border_radius, var(--border_radius_sm));
 		/* TODO --outline_color should default to --hue when available, but can't be set above */
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
-		outline-offset: var(--outline_offset, 1px);
+		outline-offset: var(--outline_offset);
 		padding: var(--input_padding_y) var(--input_padding_x);
 		width: 100%;
 		min-width: var(--input_width_min);
@@ -519,7 +518,7 @@ see https://caniuse.com/css-has
 	:where([contenteditable]:not(.unstyled):focus-visible) {
 		--outline_width: var(--outline_width_focus);
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
-		outline-offset: var(--outline_offset, 1px);
+		outline-offset: var(--outline_offset);
 	}
 	:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
 		--outline_width: var(--outline_width_active);
@@ -591,7 +590,7 @@ TODO think through these patterns to get somewhere consistent
 		border-color: var(--button_border_color);
 		border-radius: var(--border_radius, var(--border_radius_sm));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
-		outline-offset: var(--outline_offset, 1px);
+		outline-offset: var(--outline_offset);
 	}
 
 	:where(:is(button, input, textarea, select):not(.unstyled):focus) {

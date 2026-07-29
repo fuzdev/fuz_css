@@ -59,7 +59,7 @@ test('variables in the CSS exist', () => {
  */
 const known_without_variables = new Set([
 	...theme_knob_hook_names,
-	'fill', // contextual variable set by button palette classes (e.g., .palette_a sets --fill: var(--palette_a_40))
+	'fill', // contextual variable set by button palette classes (e.g., .palette_a sets --fill: var(--palette_a_50))
 	'button_fill',
 	'button_fill_hover',
 	'button_fill_active',

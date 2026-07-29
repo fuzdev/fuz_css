@@ -380,7 +380,7 @@ const turtle_class_name = 'turtle';`}
 				content={`// @fuz-classes opacity:50% opacity:75% opacity:100%
 const opacity_classes = [50, 75, 100].map((n) => \`opacity:\${n}%\`);
 
-/* @fuz-classes palette_a_50 palette_b_50 palette_c_50 */
+/* @fuz-classes color_a_50 color_b_50 color_c_50 */
 const color = get_dynamic_color();`}
 			/>
 			<p>
@@ -411,7 +411,7 @@ const color = get_dynamic_color();`}
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>additional_classes</code>
 				produce errors if they can't be resolved. This helps catch typos like
-				<code>@fuz-classes palette_a_55</code> instead of <code>palette_a_50</code>.
+				<code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
 			</aside>
 			<p>
 				Alternatively, use the
@@ -621,8 +621,8 @@ vite_plugin_fuz_css({
 				<a href="#Literal-classes">literal classes</a>
 				instead.
 			</p>
-			<Code content="<p class=&quot;pl_xl3 palette_g_50&quot;>some token classes</p>" />
-			<p class="pl_xl3 palette_g_50">some token classes</p>
+			<Code content="<p class=&quot;pl_xl3 color_g_50&quot;>some token classes</p>" />
+			<p class="pl_xl3 color_g_50">some token classes</p>
 			<p>
 				Token classes use <code>snake_case</code> because style variables are designed for optional
 				use in JS (imported from <ModuleLink module_path="variables.ts" />, but costing nothing
@@ -787,7 +787,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.palette_{@render variant_range(palette_variants)}_{@render variant_range(
+							.color_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
@@ -818,16 +818,20 @@ vite_plugin_fuz_css({
 				</li>
 			</ul>
 			<aside>
-				A bare scale class applies its family's dominant use: <code>.palette_a_50</code>,
-				<code>.positive_50</code>, and <code>.text_70</code> set the text color while
-				<code>.shade_50</code> sets the background. The <code>bg_</code> prefix selects the
-				background twin (<code>.bg_a_50</code>, <code>.bg_positive_50</code>). In compound families
-				a letter alone implies the palette: <code>.border_a_50</code> is the palette family,
-				<code>.border_color_50</code>
-				the alpha ramp.
+				Palette-letter classes are property-first, and the letter alone implies the palette:
+				<code>.color_a_50</code>, <code>.bg_a_50</code>, <code>.border_a_50</code>, and
+				<code>.outline_a_50</code> apply <code>--palette_a_50</code> to their named property (<code>
+					.border_color_50
+				</code>
+				is the letterless alpha ramp). A bare intent or neutral scale class applies its family's
+				dominant use: <code>.positive_50</code> and
+				<code>.text_70</code> set the text color while <code>.shade_50</code> sets the background,
+				with the <code>bg_</code> prefix selecting the background twin (<code>
+					.bg_positive_50
+				</code>).
 			</aside>
 			<aside>
-				Color and text classes (<code>.palette_a_50</code>, <code>.text_70</code>, etc.) also set
+				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
 				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
 				<code>color: var(--text_color)</code>
 				inherit the color properly.
@@ -1115,7 +1119,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			</p>
 			<ul>
 				<li>
-					token classes (<code>p_lg</code>, <code>palette_a_50</code>) - resolved to their
+					token classes (<code>p_lg</code>, <code>color_a_50</code>) - resolved to their
 					declarations
 				</li>
 				<li>
@@ -1623,7 +1627,7 @@ export const gen = gen_fuz_css({
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only -
-					<code>`palette_a_50 $&#123;base&#125;`</code> extracts <code>palette_a_50</code>, but
+					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
 					<code>`palette_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
 					or

@@ -143,7 +143,7 @@
 			Unlike the <TomeLink slug="shading">shade</TomeLink> and
 			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate),
 			palette variables can be used for both text and backgrounds via utility classes:
-			<code>.palette_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
+			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
 		<p>
 			Palette stops are adaptive: they switch between light and dark ramps based on color scheme.

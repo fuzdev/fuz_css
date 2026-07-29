@@ -165,12 +165,16 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
 ### Three class types
 
-- **Token classes** - Map to style variables: `p_md`, `palette_a_50`,
-  `positive_50`, `gap_lg`. A bare scale class applies its family's dominant
-  use (`palette_a_50`/`positive_50`/`text_70` set text color, `shade_50` sets
-  background) with `bg_` twins (`bg_a_50`, `bg_positive_50`); in compound
-  families a letter alone implies the palette (`border_a_50` vs the
-  `border_color_50` alpha ramp)
+- **Token classes** - Map to style variables: `p_md`, `color_a_50`,
+  `positive_50`, `gap_lg`. Palette-letter classes are property-first and the
+  letter alone implies the palette: `color_a_50`, `bg_a_50`, `border_a_50`,
+  `outline_a_50`, and `shadow_a_50` apply the `--palette_a_NN` stops to their
+  named property (`border_color_50` is the letterless alpha ramp). A bare
+  intent or neutral scale class applies its family's dominant use
+  (`positive_50`/`text_70` set text color, `shade_50` sets background) with
+  `bg_` twins (`bg_positive_50`). The adaptive alpha overlays
+  (`--fg_*`/`--bg_*`) are variables only, reached via literals
+  (`background-color:var(--fg_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
@@ -241,12 +245,14 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks —
   setting it flattens the heading ladder), `--heading_font_family`, and the
   `--background_image` decoration hook on `:root`
-- Micro-surface hooks consumed by `style.css` via `var()` fallbacks:
-  `--caret_color` (defaults to the accent), `--scrollbar_thumb_color`/
+- Micro-surface variables declared in `default_variables`: `--caret_color`
+  (defaults to the accent), `--scrollbar_thumb_color`/
   `--scrollbar_track_color` (default into the shade scale), `--backdrop_color`
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
-  gap, default 1px); `prefers-contrast: more` maps onto the curve
-  knobs mirroring the high-contrast theme, theme-overridable
+  gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
+  hook (per-tier fallbacks, so no single default exists); `prefers-contrast:
+  more` maps onto the curve knobs mirroring the high-contrast theme,
+  theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)

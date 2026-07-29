@@ -279,7 +279,8 @@ test('my theme clears the accessibility gates', () => {
 		</p>
 		<p>
 			fuz_css gates its own themes - including every theme × contrast-modifier composition - with
-			these functions in its test suite.
+			these functions in its test suite, and the editor above runs the same lint and gates live on
+			every edit.
 		</p>
 	</TomeSection>
 </TomeContent>

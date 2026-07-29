@@ -96,6 +96,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		'shade'
 	),
 	// Hue classes
+	// TODO nothing in the shipped CSS consumes `--hue` yet (see the
+	// `--outline_color` TODO in style.css) - these are a consumer hook for
+	// now; wire something to the variable or drop them
 	...generate_classes(
 		(letter: string) => ({
 			name: `hue_${letter}`,
@@ -103,10 +106,12 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		palette_variants
 	),
-	// Palette intensity classes (text color)
+	// Palette intensity classes (text color); property-first like the other
+	// applications of the palette variables (`bg_`, `border_`, `outline_`,
+	// `shadow_`) - the letter alone implies the palette
 	...generate_classes(
 		(letter: string, intensity: string) => ({
-			name: `palette_${letter}_${intensity}`,
+			name: `color_${letter}_${intensity}`,
 			css: `color: var(--palette_${letter}_${intensity}); --text_color: var(--palette_${letter}_${
 				intensity
 			});`
@@ -154,19 +159,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--lighten_${v})`,
 		'lighten'
 	),
-	// Adaptive alpha overlays (fg = toward foreground, bg = toward background)
-	...generate_property_classes(
-		'background-color',
-		darken_lighten_variants,
-		(v) => `var(--fg_${v})`,
-		'fg'
-	),
-	...generate_property_classes(
-		'background-color',
-		darken_lighten_variants,
-		(v) => `var(--bg_${v})`,
-		'bg'
-	),
+	// The adaptive alpha overlay variables (`--fg_*` toward foreground,
+	// `--bg_*` toward background) have no bare token classes: `bg_` is the
+	// opaque background prefix (`bg_a_50`, `bg_positive_50`), and a bare
+	// `bg_50` alpha wash beside those was the one collision in the family.
+	// Reach the overlays with literals - `background-color:var(--fg_10)`.
 	/*
 
 	borders

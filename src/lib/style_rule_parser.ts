@@ -221,6 +221,10 @@ const extract_style_rule = (
  * variables, and reports whether any nested rule is itself core (e.g. a
  * `:root` block inside a media query).
  */
+// TODO the top-level `untargetable` fallback in `extract_style_rule` (no
+// element/class hooks → force core) isn't applied here, so a conditional
+// group containing only untargetable rules (e.g. `@media { ::selection {} }`)
+// would be silently unreachable; no shipped rule hits this today
 const extract_nested_rules = (
 	block: AST.CSS.Block,
 	css: string,

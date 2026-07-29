@@ -573,14 +573,22 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		prescan_active = true;
 		try {
 			await each_concurrent(file_ids, PRESCAN_CONCURRENCY, async (id) => {
-				// Reads disk bytes while transform later receives Vite's input for
-				// the same id; with enforce: 'pre' those are identical, so the
-				// content-hash short-circuit makes the second ingest a no-op. A
-				// loader that rewrites content before 'pre' plugins would extract
-				// twice, with the transform result winning - harmless, just noted.
-				const r = await deps.read_text({ path: id });
-				if (!r.ok) return; // deleted mid-scan or unreadable; transform covers it if it reappears
-				await ingest_file(id, r.value);
+				// Per-file isolation: `each_concurrent` is fail-fast, so an uncaught
+				// throw (a custom deps or acorn plugin, not parse errors - those
+				// become diagnostics) would silently skip every remaining file;
+				// transform() ingests independently and this matches that.
+				try {
+					// Reads disk bytes while transform later receives Vite's input for
+					// the same id; with enforce: 'pre' those are identical, so the
+					// content-hash short-circuit makes the second ingest a no-op. A
+					// loader that rewrites content before 'pre' plugins would extract
+					// twice, with the transform result winning - harmless, just noted.
+					const r = await deps.read_text({ path: id });
+					if (!r.ok) return; // deleted mid-scan or unreadable; transform covers it if it reappears
+					await ingest_file(id, r.value);
+				} catch (error) {
+					log_error(`[fuz_css] pre-scan failed to extract ${id}: ${error}`);
+				}
 			});
 		} finally {
 			prescan_active = false;

@@ -8,6 +8,7 @@
 
 	import { render_theme_style, type Theme, type ThemeScheme } from '$lib/theme.ts';
 	import { theme_knobs, knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
+	import type { ThemeGateEntry } from '$lib/theme_check.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
 	import {
 		palette_variants,
@@ -51,6 +52,21 @@
 			: 'light';
 	});
 
+	const failing_gates: Array<ThemeGateEntry> = $derived(
+		editor.check_report.entries.filter((e) => !e.pass)
+	);
+
+	const format_gate_value = (entry: ThemeGateEntry): string => {
+		switch (entry.gate) {
+			case 'contrast':
+				return `${entry.value.toFixed(2)}:1 (needs ${entry.threshold}:1)`;
+			case 'gamut':
+				return `${entry.value.toFixed(4)} past the sRGB gamut`;
+			case 'monotonicity':
+				return `min ramp step ${entry.value.toFixed(4)} (needs > ${entry.threshold})`;
+		}
+	};
+
 	const semantic_knobs = (axis: KnobAxis): Array<ThemeKnob> =>
 		theme_knobs.filter((k) => k.axis === axis && k.tier === 'semantic');
 	const palette_knobs = theme_knobs.filter((k) => k.tier === 'palette');
@@ -63,7 +79,7 @@
 	// visual main flow; each axis labels what its disclosure actually holds
 	const sm_details: Partial<Record<KnobAxis, { title: string; hint: string }>> = {
 		color: {
-			title: 'chroma character & surface hooks',
+			title: 'chroma character & surface colors',
 			hint: 'per-slot multipliers and micro-surface colors'
 		},
 		shape: {
@@ -71,7 +87,7 @@
 			hint: 'escape hatches - pin individual tokens'
 		},
 		density: { title: 'space tokens', hint: 'escape hatches - pin individual tokens' },
-		depth: { title: 'backdrop hook', hint: 'the dialog and fullscreen backdrop dim' },
+		depth: { title: 'backdrop', hint: 'the dialog and fullscreen backdrop dim' },
 		typography: { title: 'line height tokens', hint: 'escape hatches - pin individual tokens' },
 		motion: { title: 'duration tokens', hint: 'escape hatches - pin individual tokens' }
 	};
@@ -264,6 +280,55 @@
 			</section>
 		{/if}
 	{/each}
+
+	<section>
+		<h3>Gates</h3>
+		<p>
+			<code>validate_theme</code> and <code>check_theme</code> run live against the draft - the same
+			lint and gamut/monotonicity/contrast gates the shipped themes pass in CI.
+		</p>
+		{#if editor.issues.length === 0 &&
+			failing_gates.length === 0 &&
+			editor.check_report.unchecked.length === 0
+		}
+			<p class="positive_50">
+				all gates pass <small>({editor.check_report.entries.length} checks)</small>
+			</p>
+		{:else}
+			{#if editor.issues.length}
+				<ul class="unstyled">
+					{#each editor.issues as issue, i (i)}
+						<li class={issue.level === 'error' ? 'negative_50' : 'caution_50'}>
+							{issue.level}: {issue.message}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+			{#if failing_gates.length}
+				<ul class="unstyled">
+					{#each failing_gates as entry, i (i)}
+						<li class="negative_50">
+							{entry.gate} · {entry.scheme} · {entry.subject}: {format_gate_value(entry)}
+						</li>
+					{/each}
+				</ul>
+			{/if}
+			{#if editor.check_report.unchecked.length}
+				<details>
+					<summary>
+						{editor.check_report.unchecked.length} unchecked <small>
+							(values the numeric gates can't resolve)
+						</small>
+					</summary>
+					<ul class="unstyled">
+						{#each editor.check_report.unchecked as u (u.variable + u.value)}
+							<li><code>{u.variable}</code>: {u.value} <small>({u.reason})</small></li>
+						{/each}
+					</ul>
+				</details>
+			{/if}
+		{/if}
+	</section>
 
 	<section>
 		<h3>Output</h3>

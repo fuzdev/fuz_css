@@ -231,6 +231,38 @@ describe('discard_confirm_message', () => {
 	});
 });
 
+describe('gates', () => {
+	test('an untouched draft passes the lint and gates', () => {
+		const editor = create_editor();
+		assert.deepEqual(editor.issues, []);
+		assert.isTrue(editor.check_report.ok);
+		assert.isAbove(editor.check_report.entries.length, 0);
+	});
+
+	test('a gate-breaking edit surfaces failing entries', () => {
+		const editor = create_editor();
+		// collapsing the shade lightness ramp to a single value breaks
+		// monotonicity in both schemes
+		editor.set_value('shade_lightness_00', '0.5', 'light');
+		editor.set_value('shade_lightness_00', '0.5', 'dark');
+		editor.set_value('shade_lightness_100', '0.5', 'light');
+		editor.set_value('shade_lightness_100', '0.5', 'dark');
+		assert.isFalse(editor.check_report.ok);
+		assert.isTrue(
+			editor.check_report.entries.some((e) => e.gate === 'monotonicity' && !e.pass),
+			'the collapsed ramp fails the monotonicity gate'
+		);
+	});
+
+	test('an unknown variable is a lint error', () => {
+		const editor = create_editor();
+		editor.set_value('not_a_real_variable', '1', 'light');
+		assert.isTrue(
+			editor.issues.some((i) => i.level === 'error' && i.variable === 'not_a_real_variable')
+		);
+	});
+});
+
 // keep the type import "used" for the linter across fixture literals
 const _theme_type_check: Theme = base_theme;
 void _theme_type_check;

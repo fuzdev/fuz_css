@@ -12,9 +12,9 @@
  *
  * The catalog deliberately covers only the knob tier, not all ~490 variables:
  * derived ramp stops, color stops, and most site hooks are the escape-hatch
- * tier and stay out. A few catalog entries are hooks (`hook: true`) consumed
- * by `style.css` with fallbacks rather than declared variables - they exist
- * here so themes can set them without tripping the no-invented-variables
+ * tier and stay out. A catalog entry may be a hook (`hook: true`) consumed by
+ * `style.css` with per-site fallbacks rather than a declared variable - it
+ * exists here so themes can set it without tripping the no-invented-variables
  * check.
  *
  * @module
@@ -73,8 +73,9 @@ export interface ThemeKnob {
 	values?: Array<string>;
 	/**
 	 * True for knobs consumed by `style.css` via `var()` fallbacks instead of
-	 * being declared in `default_variables` (e.g. `heading_font_weight`, whose
-	 * per-tier fallbacks flatten when set).
+	 * being declared in `default_variables`. Only for knobs whose fallbacks
+	 * differ per site, so no single declared default exists -
+	 * `heading_font_weight`, whose per-tier fallbacks flatten when set.
 	 */
 	hook?: boolean;
 	/**
@@ -211,30 +212,27 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0.2, 4],
 		step: 0.01
 	},
-	// color - micro-surface hooks consumed by style.css via var() fallbacks
+	// color - micro-surface variables consumed by style.css
 	{
 		name: 'caret_color',
 		kind: 'color',
 		axis: 'color',
 		leverage: 'sm',
-		tier: 'semantic',
-		hook: true
+		tier: 'semantic'
 	},
 	{
 		name: 'scrollbar_thumb_color',
 		kind: 'color',
 		axis: 'color',
 		leverage: 'sm',
-		tier: 'semantic',
-		hook: true
+		tier: 'semantic'
 	},
 	{
 		name: 'scrollbar_track_color',
 		kind: 'color',
 		axis: 'color',
 		leverage: 'sm',
-		tier: 'semantic',
-		hook: true
+		tier: 'semantic'
 	},
 	{
 		// how muted disabled UI reads - a perceptual/color move, not motion
@@ -287,14 +285,12 @@ export const theme_knobs: Array<ThemeKnob> = [
 		values: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'none']
 	},
 	{
-		// the gap between an element's border and its focus/active ring, a
-		// style.css var() fallback hook (default 1px)
+		// the gap between an element's border and its focus/active ring
 		name: 'outline_offset',
 		kind: 'length',
 		axis: 'shape',
 		leverage: 'sm',
-		tier: 'semantic',
-		hook: true
+		tier: 'semantic'
 	},
 	{ name: 'border_width', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
 	{ name: 'border_width_1', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
@@ -366,14 +362,13 @@ export const theme_knobs: Array<ThemeKnob> = [
 	},
 	{ name: 'shadow_color_glow', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	{ name: 'shadow_color_shroud', kind: 'color', axis: 'depth', leverage: 'md', tier: 'semantic' },
-	// the dialog/fullscreen ::backdrop dim, a style.css var() fallback hook
+	// the dialog/fullscreen ::backdrop dim
 	{
 		name: 'backdrop_color',
 		kind: 'color',
 		axis: 'depth',
 		leverage: 'sm',
-		tier: 'semantic',
-		hook: true
+		tier: 'semantic'
 	},
 	{ name: 'button_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	{ name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },

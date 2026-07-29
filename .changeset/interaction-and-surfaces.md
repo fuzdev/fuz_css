@@ -2,16 +2,16 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: rework interaction states and micro-surfaces - focus ring gap, hover previews focus, themable surface hooks, contrast-safe selected buttons
+feat: rework interaction states and micro-surfaces - focus ring gap, hover previews focus, themable surface variables, contrast-safe selected buttons
 
 Focus and hover now read as one escalating highlight:
 
 - Focusable elements (links, buttons, inputs, contenteditable) draw their
-  outline with `outline-offset: var(--outline_offset, 1px)`. The ring and
-  the border share a color by design (the element color, defaulting to the
-  accent), so without a gap they merged into one thick band; the offset
-  makes them read as two shapes while keeping the ring's full contrast
-  against the page.
+  outline with `outline-offset: var(--outline_offset)` (default `1px`). The
+  ring and the border share a color by design (the element color, defaulting
+  to the accent), so without a gap they merged into one thick band; the
+  offset makes them read as two shapes while keeping the ring's full
+  contrast against the page.
 - Hovering an input, textarea, or select colors the border with
   `var(--outline_color)` — the element color when one is set (an
   `outline_*` class, or `.palette_*` on buttons), the accent intent
@@ -19,16 +19,13 @@ Focus and hover now read as one escalating highlight:
   alpha. Focus keeps setting the border to the same color and adds the
   outline. Disabled inputs no longer react to hover.
 
-New micro-surface defaults in `style.css`, each themable through a `var()`
-fallback hook (all in the knob catalog, so theme validation accepts them):
+New micro-surface defaults in `style.css`, each themable through an
+ordinary declared variable (all in the knob catalog):
 
-- `scrollbar-color` on `:root` — thumb defaults to `var(--shade_40)` on a
-  transparent track; hooks `--scrollbar_thumb_color` /
-  `--scrollbar_track_color`
-- `caret-color` on text inputs — defaults to `var(--accent_50)`; hook
-  `--caret_color`
-- `dialog::backdrop` — defaults to `var(--darken_60)`; hook
-  `--backdrop_color`
+- `scrollbar-color` on `:root` — `--scrollbar_thumb_color` (default
+  `var(--shade_40)`) on `--scrollbar_track_color` (default transparent)
+- `caret-color` on text inputs — `--caret_color`, default `var(--accent_50)`
+- `dialog::backdrop` — `--backdrop_color`, default `var(--darken_60)`
 - `--outline_offset` — the border-to-focus-ring gap above
 - `@media (prefers-contrast: more)` maps the OS preference onto the curve
   knobs, mirroring the `'high contrast'` theme. It ships in the
@@ -36,6 +33,10 @@ fallback hook (all in the knob catalog, so theme validation accepts them):
   duration suppression), above the `fuz.base` defaults and below
   `fuz.theme`, so it applies regardless of stylesheet order and theme
   overrides beat it
+
+(`--heading_font_weight` is the lone `var()`-fallback hook — its per-tier
+fallbacks mean no single declared default exists, and setting it flattens
+the heading weight ladder deliberately.)
 
 Selected-button text stays readable under contrast-bent themes and colored
 fills:

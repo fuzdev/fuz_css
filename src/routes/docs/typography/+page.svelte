@@ -171,7 +171,7 @@
 		<p>
 			The text scale is separate from the shade scale because text and backgrounds have different
 			contrast requirements. Use <code>text_*</code> for text colors and <code>shade_*</code> for
-			backgrounds. For colored text, use <code>palette_a_50</code> etc.
+			backgrounds. For colored text, use <code>color_a_50</code> etc.
 		</p>
 		<div class="panel">
 			{#each text_scale_variants as variant (variant)}

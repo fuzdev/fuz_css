@@ -10,14 +10,25 @@ from the old HSL palette.
 
 Breaking changes:
 
-- **`color_` renamed to `palette_`**: `--color_a_50` → `--palette_a_50`,
-  `.color_a_50` → `.palette_a_50`, `.color_a`-`.color_j` →
-  `.palette_a`-`.palette_j`. In compound families the letter alone implies
-  the palette: `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` →
+- **`--color_*` variables renamed to `--palette_*`**: `--color_a_50` →
+  `--palette_a_50` for all 10 letters × 13 stops, with the TS mirrors
+  `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
+  Classes are property-first and the letter alone implies the palette: the
+  text-color stop classes keep their names (`.color_a_50`, now applying
+  `--palette_a_50`), while the compound families shorten -
+  `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` →
   `outline_X_NN`, `shadow_color_X_NN` → `shadow_X_NN` (`bg_X_NN` and the
   letterless families — `border_color_NN`, `outline_color_NN`,
-  `shadow_color_umbra` — keep their names). In TS:
-  `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
+  `shadow_color_umbra` — keep their names). The bare component conventions
+  `.color_a`-`.color_j` → `.palette_a`-`.palette_j` (they recolor buttons
+  and chips as a unit, not one property).
+- **`.fg_NN`/`.bg_NN` token classes removed**: the adaptive alpha overlays
+  stay as variables (`--fg_*`/`--bg_*`) but no longer generate bare token
+  classes — `bg_` is the opaque background class prefix (`.bg_a_50`,
+  `.bg_positive_50`), and a translucent `.bg_50` beside those was the one
+  collision in the naming family. Use literals instead:
+  `background-color:var(--fg_10)`. The `.darken_NN`/`.lighten_NN` classes
+  are unchanged.
 - **`--hue_a`…`--hue_j` are now OKLCH hue angles** (blue is `250`, not HSL
   `210`). Consumer CSS doing `hsl(var(--hue_x) …)` breaks — use
   `oklch(<l> <c> var(--hue_x))` or the palette/intent stops.

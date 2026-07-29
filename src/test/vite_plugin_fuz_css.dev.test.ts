@@ -5,6 +5,7 @@ import { dirname, join } from 'node:path';
 import { rm } from 'node:fs/promises';
 
 import { vite_plugin_fuz_css, type VitePluginFuzCssOptions } from '$lib/vite_plugin_fuz_css.ts';
+import { default_cache_deps } from '$lib/deps_defaults.ts';
 
 const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_dev');
 
@@ -69,6 +70,58 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 			assert(result);
 			assert(result.code.includes('.gap_lg'), 'includes the default src root');
 			assert(result.code.includes('.mt_lg'), 'includes classes from the extra/ root');
+		} finally {
+			await server.close();
+		}
+	});
+
+	test('a file that throws mid-scan does not abort the rest of the pre-scan', async () => {
+		// `each_concurrent` is fail-fast - without per-file isolation one bad
+		// file would silently skip every file not yet in flight for the
+		// server's life. The fixture is smaller than the scan concurrency, so
+		// the discriminating assertion is the log shape: the per-file message
+		// (isolated) vs the whole-scan `pre-scan failed:` abort (fail-fast).
+		const errors: Array<string> = [];
+		const noop = () => {};
+		const server = await createServer({
+			root: fixture_root,
+			configFile: false,
+			customLogger: {
+				info: noop,
+				warn: noop,
+				warnOnce: noop,
+				error: (msg) => void errors.push(msg),
+				clearScreen: noop,
+				hasErrorLogged: () => false,
+				hasWarned: false
+			},
+			server: { middlewareMode: true, ws: false },
+			optimizeDeps: { noDiscovery: true },
+			plugins: [
+				vite_plugin_fuz_css({
+					filter_file: filter_fixture_file,
+					deps: {
+						...default_cache_deps,
+						read_text: async (options) => {
+							if (options.path.endsWith('island.html')) {
+								throw new Error('synthetic read failure');
+							}
+							return default_cache_deps.read_text(options);
+						}
+					}
+				})
+			]
+		});
+		try {
+			const result = await server.transformRequest('/__fuz.css');
+			assert(result);
+			assert(result.code.includes('.p_md'), 'other files still extract');
+			assert(!result.code.includes('.gap_lg'), 'the throwing file is skipped');
+			assert(
+				errors.some((m) => m.includes('pre-scan failed to extract')),
+				'the failure is logged per file'
+			);
+			assert(!errors.some((m) => m.includes('pre-scan failed:')), 'the scan itself does not abort');
 		} finally {
 			await server.close();
 		}

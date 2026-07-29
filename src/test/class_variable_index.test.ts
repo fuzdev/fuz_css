@@ -104,13 +104,13 @@ describe('build_class_variable_index', () => {
 
 	test('color classes', () => {
 		const definitions: Record<string, CssClassDefinition | undefined> = {
-			palette_a_50: {
+			color_a_50: {
 				declaration: 'color: var(--palette_a_50); --text_color: var(--palette_a_50);'
 			}
 		};
 		const index = build_class_variable_index(definitions);
 
-		const vars = index.by_class.get('palette_a_50')!;
+		const vars = index.by_class.get('color_a_50')!;
 		assert.isTrue(vars.has('palette_a_50'));
 	});
 

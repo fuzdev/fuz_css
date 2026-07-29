@@ -73,6 +73,10 @@ compiled-cap overrides):
   theme's own hues and lightness ramp, emits `palette_chroma_NN` overrides
   where the baked caps no longer fit, and re-checks the result
 
+The shipped themes pass these in CI - including every theme ×
+contrast-modifier composition - and the docs page's inline editor runs the
+same lint and gates live on every edit.
+
 **Build-time `theme` option.** The Vite plugin and Gro generator take a
 `theme` baked into the generated CSS:
 

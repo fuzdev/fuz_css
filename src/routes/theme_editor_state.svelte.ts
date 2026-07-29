@@ -5,6 +5,12 @@ import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import type { StyleVariable } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
+import {
+	validate_theme,
+	check_theme,
+	type ThemeIssue,
+	type ThemeCheckReport
+} from '$lib/theme_check.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 
 // TODO upstream to fuz_ui
@@ -155,6 +161,16 @@ export class ThemeEditorState {
 			...(this.stance ? { scheme: this.stance } : {})
 		})
 	);
+
+	/** Structural lint findings for the draft, from `validate_theme`. */
+	readonly issues: Array<ThemeIssue> = $derived(validate_theme(this.output));
+
+	/**
+	 * The gamut/monotonicity/contrast gate report for the draft, from
+	 * `check_theme` - the same gates the shipped themes pass in CI, re-run on
+	 * every edit.
+	 */
+	readonly check_report: ThemeCheckReport = $derived(check_theme(this.output));
 
 	/**
 	 * The value a scheme currently renders for a variable, derived from the

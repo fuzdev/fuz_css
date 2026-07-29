@@ -1554,6 +1554,7 @@
 		--outline_width_active: var(--border_width_1);
 		--outline_style: solid;
 		--outline_color: var(--accent_50);
+		--outline_offset: 1px; /* the gap between an element border and its focus ring */
 		--radius_scale: 1; /* 0 is sharp, below 1 is squarer, above 1 is rounder */
 		--border_radius_xs3: calc(0.3rem * var(--radius_scale));
 		--border_radius_xs2: calc(0.5rem * var(--radius_scale));
@@ -1595,6 +1596,10 @@
 		--input_width_min: 100px;
 		--input_height: var(--space_xl5);
 		--input_height_compact: var(--space_xl4);
+		--caret_color: var(--accent_50);
+		--scrollbar_thumb_color: var(--shade_40);
+		--scrollbar_track_color: transparent;
+		--backdrop_color: var(--darken_60); /* the dim behind an open dialog */
 		--shadow_xs: 0 0 3px 0px;
 		--shadow_top_xs: 0 -1px 3px 0px;
 		--shadow_bottom_xs: 0 1px 3px 0px;

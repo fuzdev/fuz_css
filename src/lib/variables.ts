@@ -2023,6 +2023,11 @@ export const outline_color: StyleVariable = {
 	name: 'outline_color',
 	light: 'var(--accent_50)'
 };
+export const outline_offset: StyleVariable = {
+	name: 'outline_offset',
+	light: '1px',
+	summary: 'the gap between an element border and its focus ring'
+};
 
 /* border radii - the tokens multiply a per-tier base by the radius scale, so
 	"sharp"/"soft"/"pill" is one knob move while per-element tiers survive;
@@ -2089,6 +2094,25 @@ export const input_height: StyleVariable = { name: 'input_height', light: 'var(-
 export const input_height_compact: StyleVariable = {
 	name: 'input_height_compact',
 	light: 'var(--space_xl4)'
+};
+
+/* micro-surfaces */
+export const caret_color: StyleVariable = {
+	name: 'caret_color',
+	light: 'var(--accent_50)'
+};
+export const scrollbar_thumb_color: StyleVariable = {
+	name: 'scrollbar_thumb_color',
+	light: 'var(--shade_40)'
+};
+export const scrollbar_track_color: StyleVariable = {
+	name: 'scrollbar_track_color',
+	light: 'transparent'
+};
+export const backdrop_color: StyleVariable = {
+	name: 'backdrop_color',
+	light: 'var(--darken_60)',
+	summary: 'the dim behind an open dialog'
 };
 
 /*
@@ -2844,6 +2868,7 @@ export const default_variables: Array<StyleVariable> = [
 	outline_width_active,
 	outline_style,
 	outline_color,
+	outline_offset,
 	radius_scale,
 	border_radius_xs3,
 	border_radius_xs2,
@@ -2861,6 +2886,10 @@ export const default_variables: Array<StyleVariable> = [
 	input_width_min,
 	input_height,
 	input_height_compact,
+	caret_color,
+	scrollbar_thumb_color,
+	scrollbar_track_color,
+	backdrop_color,
 	shadow_xs,
 	shadow_top_xs,
 	shadow_bottom_xs,
