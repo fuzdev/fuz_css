@@ -110,6 +110,10 @@ combined and only used content is included. In utility-only mode, import
 - [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
   `fuz.theme` cascade layer (defaults live in `fuz.base`, generated utility
   classes in `fuz.utilities`; consumers' unlayered styles beat everything)
+- A theme applies either at build time (the generators' `theme` option, baked
+  into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
+  renders it to a `<style>` element). They compose — the runtime theme wins
+  by cascade layer
 - Color values are derived: curve knobs → ramp stops → color stops, computed
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
@@ -309,6 +313,10 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles or callback to modify defaults
 - `variables` - Custom theme variables or callback to modify defaults
+- `theme` - A `Theme` baked into the generated CSS, overlaid onto `variables`
+  last-wins by name. The static counterpart to fuz_ui's `ThemeRoot`: no
+  runtime theme rendering, and the output stays tree-shaken because the
+  overlay happens before the dependency graph is built
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars
@@ -352,11 +360,22 @@ typography, borders, shading, shadows, layout. See
   (design-time + tests; never needed by the shipped CSS, though display
   tooling like the docs swatches may import the conversions)
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
-- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the
-  `scheme` stance (a single-scheme theme mirrors the adaptive defaults and
-  pins `color-scheme`, rendering its one appearance in both schemes),
+- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
   `compose_themes` (flatten + last-wins fragment composition — the
-  hand-flatten precursor to `extends`), `ColorScheme` type
+  hand-flatten precursor to `extends`), `ColorScheme` type. A pure renderer:
+  it holds no variable data, so mounting a theme costs ~1.3KB minified
+  instead of ~38KB. It renders what the theme carries and pins
+  `color-scheme` for a `scheme` stance
+- [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
+  computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
+  defaults re-slotted so its one appearance holds in both schemes). Kept out
+  of `theme.ts` so only consumers of a stanced theme pay for the data; the
+  shipped stanced exemplars resolve at their own module scope
+- [scheme_adaptive_variables.ts](src/lib/scheme_adaptive_variables.ts) -
+  generated literal twin of the dual-slot subset of `default_variables`,
+  emitted so the mirror carries no dependency on `variables.ts` (whose
+  module-init emitter calls defeat tree-shaking — importing one variable
+  costs ~20KB)
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
   (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
   low/high contrast are modifiers composed over any theme via
@@ -378,6 +397,8 @@ typography, borders, shading, shadows, layout. See
   a shared string→number resolution core
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
+- [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
+  Gro generator that produces `scheme_adaptive_variables.ts`
 
 **CSS extraction:**
 

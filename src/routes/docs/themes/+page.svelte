@@ -162,6 +162,39 @@
 		</p>
 	</TomeSection>
 	<TomeSection>
+		<TomeSectionHeader text="Applying a theme" />
+		<p>
+			A theme is plain data - an array of style variables - so it can be applied at build time or at
+			runtime. Most projects want build time.
+		</p>
+		<p>
+			Pass a theme to the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
+			<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> and its values bake into
+			the generated CSS - no runtime rendering, no JavaScript shipped, and the output stays tree-shaken:
+		</p>
+		<Code
+			lang="ts"
+			content={`// vite.config.ts
+import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
+import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';
+
+export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_theme})]});`}
+		/>
+		<p>
+			It overlays the default variables last-wins by name, so it composes with the
+			<code>variables</code> option. Unlike the runtime path it doesn't pin
+			<MdnLink path="Web/CSS/color-scheme" /> - for a single-scheme theme, add the
+			<code>dark</code> or <code>light</code> class to the root <code>html</code> element, as in the next
+			section.
+		</p>
+		<p>
+			For runtime switching - a picker, or a theme loaded per user - use <code>ThemeRoot</code> from
+			<a href="https://ui.fuz.dev/">fuz_ui</a>, which renders the theme to a
+			<code>style</code> element. The two compose: the build-time theme is the starting point, and a runtime
+			theme overrides it by cascade layer.
+		</p>
+	</TomeSection>
+	<TomeSection>
 		<TomeSectionHeader text="Color scheme" />
 		<p>
 			fuz_css supports

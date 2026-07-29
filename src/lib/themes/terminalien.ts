@@ -1,4 +1,5 @@
 import type { Theme } from '../theme.ts';
+import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
  * A dense terminal theme with an alien cast: dark, monospace, sharp-cornered,
@@ -10,7 +11,7 @@ import type { Theme } from '../theme.ts';
  *
  * Declared subversions: none.
  */
-export const terminalien_theme: Theme = {
+const authored: Theme = {
 	name: 'terminalien',
 	scheme: 'dark',
 	variables: [
@@ -34,3 +35,9 @@ export const terminalien_theme: Theme = {
 		{ name: 'line_height_xl', light: '2' }
 	]
 };
+
+/**
+ * Resolved at module scope so the stance mirror rides this module's chunk
+ * rather than every consumer's theme path — see `theme_stance.ts`.
+ */
+export const terminalien_theme: Theme = resolve_theme_stance(authored);

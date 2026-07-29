@@ -7,7 +7,6 @@
 	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import SourceFileLink from '$routes/SourceFileLink.svelte';
 	import Introduction from '$routes/Introduction.svelte';
 
 	const LIBRARY_ITEM_NAME = 'introduction';
@@ -44,15 +43,17 @@ import 'virtual:fuz.css'; // Vite plugin
 import './fuz.css'; // Gro generator, written to the filesystem`}
 			/>
 			<p>
-				For projects managing their own theme or base styles, use utility-only mode with separate
-				imports:
+				That single import is all most projects need - it already contains the base styles and theme
+				variables, so importing the full stylesheets alongside it ships both layers twice. Those
+				stylesheets are the escape hatch, for projects managing their own theme or base styles;
+				using them means turning the generated ones off:
 			</p>
 			<Code
 				lang="ts"
-				content={`// utility-only mode - full package CSS, only used utilities
+				content={`// utility-only mode - set \`base_css: null, variables: null\` on the plugin
 import '@fuzdev/fuz_css/style.css'; // all base styles
 import '@fuzdev/fuz_css/theme.css'; // all variables
-import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\``}
+import 'virtual:fuz.css'; // used utilities only`}
 			/>
 			<p>
 				See the <TomeLink slug="classes" /> reference for setup details and configuration options.
@@ -68,12 +69,10 @@ import 'virtual:fuz.css'; // used utilities, \`base_css: null, variables: null\`
 					and also exports the underlying data, helpers, and types for open-ended usage
 				</li>
 				<li>
-					supports <TomeLink slug="themes" /> with a basic theme stylesheet, <SourceFileLink
-						path="theme.css"
-					/>, that can be replaced with your own - dark mode is a first-class concept, not a theme;
-					instead, each theme can support light and/or dark <MdnLink path="Web/CSS/color-scheme"
-						>color-schemes</MdnLink
-					>
+					supports <TomeLink slug="themes" /> as sets of style variables, applied at build time through
+					the generators' <code>theme</code> option or swapped at runtime - dark mode is a
+					first-class concept, not a theme; instead, each theme can support light and/or dark
+					<MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
 				</li>
 				<li>
 					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types (token,

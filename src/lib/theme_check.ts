@@ -36,14 +36,15 @@
  * `display_value`): light = `theme.light`; dark = `theme.dark ?? theme.light`,
  * falling back to the numeric-twin default for the scheme. A single-scheme
  * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
- * mirror the renderer emits, so the gates evaluate the stanced reality in
- * both schemes.
+ * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
+ * reality in both schemes whether or not the theme arrives resolved.
  *
  * @module
  */
 
 import { StyleVariable } from './variable.ts';
-import { scheme_stance_variables, type Theme } from './theme.ts';
+import type { Theme } from './theme.ts';
+import { scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import {

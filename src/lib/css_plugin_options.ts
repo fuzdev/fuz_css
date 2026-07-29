@@ -32,6 +32,7 @@ import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import type { StyleVariable } from './variable.ts';
+import type { Theme } from './theme.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -155,6 +156,26 @@ export interface CssOutputOptions {
 	 * ```
 	 */
 	variables?: VariablesOption;
+	/**
+	 * A theme to bake into the generated CSS, overlaid onto `variables`
+	 * last-wins by name. This is how a project picks a theme statically: no JS
+	 * theme rendering at runtime, and the output stays tree-shaken because the
+	 * overlay happens before the dependency graph is built, so a theme's
+	 * referenced variables are pulled in transitively.
+	 *
+	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
+	 * runtime theme winning by cascade layer. A single-scheme theme needs
+	 * `resolve_theme_stance` first so its `scheme_mirror` applies, and pinning
+	 * `color-scheme` is separate — the `dark`/`light` class on the `html`
+	 * element drives it.
+	 *
+	 * @example
+	 * ```ts
+	 * import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';
+	 * vite_plugin_fuz_css({theme: necromancer_theme});
+	 * ```
+	 */
+	theme?: Theme | null;
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.

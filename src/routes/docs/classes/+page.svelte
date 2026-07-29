@@ -199,6 +199,10 @@ import 'virtual:fuz.css';`}
 					utility-only mode, or provide a callback to modify defaults
 				</li>
 				<li>
+					<code>theme</code> - a <TomeLink slug="themes" /> to bake into the generated CSS, overlaid onto
+					<code>variables</code> last-wins by name
+				</li>
+				<li>
 					<code>additional_elements</code> - elements to always include styles for (for
 					runtime-created elements), or <code>'all'</code> to include all base styles
 				</li>

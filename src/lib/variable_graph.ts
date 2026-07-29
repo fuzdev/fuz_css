@@ -12,6 +12,7 @@ import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
 import { default_variables } from './variables.ts';
+import type { Theme } from './theme.ts';
 import type { StyleVariable } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 
@@ -286,16 +287,42 @@ export const resolve_variables_option = (variables: VariablesOption): Array<Styl
 };
 
 /**
+ * Overlays a theme's variables onto a resolved variable set, last-wins by name.
+ *
+ * This is how a theme is baked in at build time: the overlaid values flow
+ * through the dependency graph like any other, so the variables a theme
+ * references are pulled in transitively and the output stays tree-shaken. A
+ * stanced theme's `scheme_mirror` applies first, matching the renderer's order.
+ *
+ * @param variables - the resolved default or custom variables
+ * @param theme - the theme to overlay, or null/undefined for none
+ * @returns the composed variables, or `variables` unchanged when there's no theme
+ */
+export const apply_theme_variables = (
+	variables: Array<StyleVariable>,
+	theme: Theme | null | undefined
+): Array<StyleVariable> => {
+	if (!theme) return variables;
+	const by_name = new Map(variables.map((v) => [v.name, v]));
+	// mirror first, then the theme's own, so authored values win
+	for (const v of theme.scheme_mirror ?? []) by_name.set(v.name, v);
+	for (const v of theme.variables) by_name.set(v.name, v);
+	return [...by_name.values()];
+};
+
+/**
  * Builds a variable dependency graph from a variables option.
  * Handles all option forms: undefined (defaults), null (disabled), array, or callback.
  *
  * @param variables - the variables option from generator config
+ * @param theme - an optional theme to overlay onto the resolved variables
  * @returns `VariableDependencyGraph` built from the resolved variables
  */
 export const build_variable_graph_from_options = (
-	variables: VariablesOption
+	variables: VariablesOption,
+	theme?: Theme | null
 ): VariableDependencyGraph => {
-	const resolved = resolve_variables_option(variables);
+	const resolved = apply_theme_variables(resolve_variables_option(variables), theme);
 	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');
 	return build_variable_graph(resolved, hash_insecure(content));
 };

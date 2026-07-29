@@ -175,6 +175,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		cache_dir = DEFAULT_CACHE_DIR,
 		base_css,
 		variables,
+		theme,
 		additional_elements,
 		additional_variables,
 		exclude_elements,
@@ -276,6 +277,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 			const resources = await create_bundled_resources({
 				base_css,
 				variables,
+				theme,
 				class_definitions: all_class_definitions,
 				deps
 			});

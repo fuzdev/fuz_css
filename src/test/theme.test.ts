@@ -1,11 +1,8 @@
 import { test, assert, describe } from 'vitest';
 
-import {
-	compose_themes,
-	render_theme_style,
-	scheme_stance_variables,
-	type Theme
-} from '$lib/theme.ts';
+import { compose_themes, render_theme_style, type Theme } from '$lib/theme.ts';
+import { resolve_theme_stance, scheme_stance_variables } from '$lib/theme_stance.ts';
+import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
 import { default_variables } from '$lib/variables.ts';
 
 // a scheme-adaptive default (dual slots) to observe the stance mirror through
@@ -35,11 +32,10 @@ describe('render_theme_style', () => {
 		assert.strictEqual(render_theme_style({ name: 'base', variables: [] }), '');
 	});
 
-	test('an empty-variables theme with empty_default_theme false renders the full defaults', () => {
-		const css = render_theme_style(
-			{ name: 'anything', variables: [] },
-			{ empty_default_theme: false }
-		);
+	test('the full defaults render when passed explicitly', () => {
+		// the renderer holds no variable data of its own, so rendering the full
+		// default set is an ordinary call with the defaults as the theme
+		const css = render_theme_style({ name: 'anything', variables: default_variables });
 		assert.isAbove(css.length, 0);
 		for (const v of default_variables) {
 			if (v.light !== undefined) assert.include(css, `--${v.name}: ${v.light};`);
@@ -49,7 +45,9 @@ describe('render_theme_style', () => {
 
 describe('scheme stance', () => {
 	test('a dark stance mirrors adaptive defaults into the base scheme', () => {
-		const css = render_theme_style({ name: 't', variables: [], scheme: 'dark' });
+		const css = render_theme_style(
+			resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' })
+		);
 		const { light } = split_schemes(css);
 		assert.include(light, 'color-scheme: dark;');
 		// the dark slot's value renders in the :root block
@@ -57,22 +55,48 @@ describe('scheme stance', () => {
 	});
 
 	test('a dark stance skips defaults the theme overrides', () => {
-		const theme: Theme = {
+		const theme = resolve_theme_stance({
 			name: 't',
 			variables: [{ name: adaptive_default.name, light: '0.5' }],
 			scheme: 'dark'
-		};
+		});
 		const { light } = split_schemes(render_theme_style(theme));
 		assert.include(light, `--${adaptive_default.name}: 0.5;`);
 		assert.notInclude(light, `--${adaptive_default.name}: ${adaptive_default.dark};`);
 	});
 
 	test('a light stance mirrors light values into the dark scheme', () => {
-		const css = render_theme_style({ name: 't', variables: [], scheme: 'light' });
+		const css = render_theme_style(
+			resolve_theme_stance({ name: 't', variables: [], scheme: 'light' })
+		);
 		const { light, dark } = split_schemes(css);
 		assert.include(light, 'color-scheme: light;');
 		// the light slot's value renders in the :root.dark block, defeating base dark
 		assert.include(dark, `--${adaptive_default.name}: ${adaptive_default.light};`);
+	});
+
+	test('resolve_theme_stance keeps the mirror out of the authored variables', () => {
+		const theme = resolve_theme_stance({
+			name: 't',
+			variables: [{ name: 'chroma_scale', light: '2' }],
+			scheme: 'dark'
+		});
+		// authored knobs stay distinguishable from the derived mirror
+		assert.lengthOf(theme.variables, 1);
+		assert.isAbove(theme.scheme_mirror!.length, 0);
+	});
+
+	test('resolve_theme_stance leaves a dual-scheme theme unchanged', () => {
+		const theme: Theme = { name: 't', variables: [], scheme: 'dual' };
+		assert.strictEqual(resolve_theme_stance(theme), theme);
+		const bare: Theme = { name: 't', variables: [] };
+		assert.strictEqual(resolve_theme_stance(bare), bare);
+	});
+
+	test('an unresolved stanced theme still pins color-scheme', () => {
+		// the renderer pins the stance on its own; only the mirror needs resolving
+		const css = render_theme_style({ name: 't', variables: [], scheme: 'dark' });
+		assert.include(css, 'color-scheme: dark;');
 	});
 
 	test('a dual or absent scheme renders no stance', () => {
@@ -82,6 +106,20 @@ describe('scheme stance', () => {
 			variables: [{ name: 'chroma_scale', light: '2' }]
 		});
 		assert.notInclude(css, 'color-scheme:');
+	});
+
+	test('the generated mirror twin matches the dual-slot defaults', () => {
+		// `gro gen --check` guards drift too; this states the invariant
+		const adaptive = default_variables.filter((v) => v.dark !== undefined);
+		assert.deepEqual(
+			scheme_adaptive_variables.map((v) => v.name),
+			adaptive.map((v) => v.name)
+		);
+		for (const v of scheme_adaptive_variables) {
+			const source = adaptive.find((d) => d.name === v.name)!;
+			assert.strictEqual(v.light, source.light);
+			assert.strictEqual(v.dark, source.dark);
+		}
 	});
 
 	test('scheme_stance_variables excludes overridden names and single-slot defaults', () => {

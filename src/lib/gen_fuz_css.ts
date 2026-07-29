@@ -113,6 +113,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		acorn_plugins,
 		base_css,
 		variables,
+		theme,
 		additional_elements,
 		additional_variables,
 		exclude_elements,
@@ -151,6 +152,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			bundled_resources = await create_bundled_resources({
 				base_css,
 				variables,
+				theme,
 				class_definitions: all_class_definitions,
 				deps
 			});

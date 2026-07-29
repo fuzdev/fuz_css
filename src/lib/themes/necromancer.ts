@@ -1,4 +1,5 @@
 import type { Theme } from '../theme.ts';
+import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
  * A fantasy exemplar theme built entirely from semantic bindings and levers —
@@ -15,7 +16,7 @@ import type { Theme } from '../theme.ts';
  * so this knob-only version ships at ~90% volume. The walls it hit are
  * recorded as probe evidence.
  */
-export const necromancer_theme: Theme = {
+const authored: Theme = {
 	name: 'necromancer',
 	scheme: 'dark',
 	variables: [
@@ -43,3 +44,9 @@ export const necromancer_theme: Theme = {
 		{ name: 'border_radius_xl', light: '0.8rem' }
 	]
 };
+
+/**
+ * Resolved at module scope so the stance mirror rides this module's chunk
+ * rather than every consumer's theme path — see `theme_stance.ts`.
+ */
+export const necromancer_theme: Theme = resolve_theme_stance(authored);

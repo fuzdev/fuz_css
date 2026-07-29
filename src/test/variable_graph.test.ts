@@ -1,6 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
 import {
+	apply_theme_variables,
 	build_variable_graph,
 	build_variable_graph_from_options,
 	resolve_variables_transitive,
@@ -10,6 +11,7 @@ import {
 	find_similar_variable
 } from '$lib/variable_graph.ts';
 import type { StyleVariable } from '$lib/variable.ts';
+import type { Theme } from '$lib/theme.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
@@ -651,5 +653,75 @@ describe('find_similar_variable', () => {
 		];
 		const graph = build_variable_graph(variables, 'test-hash');
 		assert.isNull(find_similar_variable(graph, 'shadow'));
+	});
+});
+
+describe('apply_theme_variables', () => {
+	const defaults: Array<StyleVariable> = [
+		{ name: 'hue_a', light: '210' },
+		{ name: 'hue_b', light: '120' },
+		{ name: 'shade_00', light: '#fff', dark: '#000' }
+	];
+
+	test('returns the input unchanged with no theme', () => {
+		assert.strictEqual(apply_theme_variables(defaults, null), defaults);
+		assert.strictEqual(apply_theme_variables(defaults, undefined), defaults);
+	});
+
+	test("overlays the theme's variables last-wins by name", () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '30' }] };
+		const result = apply_theme_variables(defaults, theme);
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_a'),
+			{ name: 'hue_a', light: '30' }
+		);
+		// untouched names survive, and the set doesn't grow
+		assert.lengthOf(result, 3);
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_b'),
+			{ name: 'hue_b', light: '120' }
+		);
+	});
+
+	test('appends variables the defaults lack', () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'my_brand', light: '#f60' }] };
+		const result = apply_theme_variables(defaults, theme);
+		assert.lengthOf(result, 4);
+		assert.isDefined(result.find((v) => v.name === 'my_brand'));
+	});
+
+	test("applies scheme_mirror before the theme's own variables", () => {
+		const theme: Theme = {
+			name: 't',
+			scheme: 'dark',
+			scheme_mirror: [
+				{ name: 'shade_00', light: '#000' },
+				{ name: 'hue_b', light: '99' }
+			],
+			variables: [{ name: 'shade_00', light: 'authored' }]
+		};
+		const result = apply_theme_variables(defaults, theme);
+		// the theme's own value wins over its mirror
+		assert.deepEqual(
+			result.find((v) => v.name === 'shade_00'),
+			{ name: 'shade_00', light: 'authored' }
+		);
+		// mirror entries the theme doesn't author still apply, replacing both slots
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_b'),
+			{ name: 'hue_b', light: '99' }
+		);
+	});
+
+	test('build_variable_graph_from_options bakes the theme into the graph', () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '30' }] };
+		const graph = build_variable_graph_from_options(defaults, theme);
+		assert.strictEqual(graph.variables.get('hue_a')!.light_css, '30');
+		// a different theme must not collide in the graph's content hash
+		const other = build_variable_graph_from_options(defaults, {
+			name: 't2',
+			variables: [{ name: 'hue_a', light: '40' }]
+		});
+		assert.notStrictEqual(graph.content_hash, other.content_hash);
 	});
 });

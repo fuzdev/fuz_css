@@ -1,4 +1,3 @@
-import { default_variables } from './variables.ts';
 import type { StyleVariable } from './variable.ts';
 
 /**
@@ -19,14 +18,29 @@ export interface Theme {
 	name: string;
 	variables: Array<StyleVariable>;
 	/**
-	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance mirrors
-	 * every scheme-adaptive default the theme doesn't override so the stanced
-	 * scheme's values apply in both color schemes (see
-	 * `scheme_stance_variables`), and pins `color-scheme` on the scope so form
-	 * controls and native scrollbars agree. A stanced theme's own variables
-	 * are best authored single-slot in the light/base position.
+	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance pins
+	 * `color-scheme` on the scope so form controls and native scrollbars agree.
+	 * A stanced theme's own variables are best authored single-slot in the
+	 * light/base position.
+	 *
+	 * Rendering a stanced theme faithfully also needs the scheme-adaptive
+	 * defaults mirrored into the stanced scheme; that is
+	 * `resolve_theme_stance` in `theme_stance.ts`, applied before rendering.
+	 * The renderer only pins `color-scheme` — it holds no variable data of its
+	 * own, so the mirror stays off the theme path of consumers who don't use a
+	 * stanced theme.
 	 */
 	scheme?: ThemeScheme;
+	/**
+	 * The stance mirror computed by `resolve_theme_stance`: scheme-adaptive
+	 * defaults re-slotted so a single-scheme theme's appearance holds in both
+	 * color schemes. Rendered before `variables`, so the theme's own values
+	 * win by order.
+	 *
+	 * Kept apart from `variables` so the authored knobs stay distinguishable
+	 * from the derived ones.
+	 */
+	scheme_mirror?: Array<StyleVariable>;
 }
 
 /**
@@ -41,14 +55,6 @@ export const FUZ_LAYER_ORDER_STATEMENT = '@layer fuz.base, fuz.theme, fuz.utilit
 export interface RenderThemeStyleOptions {
 	comments?: boolean;
 	id?: string | null;
-	/**
-	 * How to treat a theme whose `variables` are empty. When `true` (the
-	 * default) it renders nothing, inheriting the `fuz.base` defaults; when
-	 * `false` it renders the full `default_variables` set (how
-	 * `theme.gen.css.ts` emits the standalone `theme.css`). A theme that
-	 * carries variables always renders them and ignores this option.
-	 */
-	empty_default_theme?: boolean;
 	/**
 	 * The cascade layer wrapping the rendered variables. Theme overrides
 	 * default to `fuz.theme` so they beat the `fuz.base` defaults by layer
@@ -67,8 +73,10 @@ export interface RenderThemeStyleOptions {
  * The base's `scheme` stance wins; when the base is single-scheme, each
  * overlay variable is re-slotted to the stanced scheme's value so a
  * dual-slot fragment can't leak the other scheme's appearance past the
- * stance. The composed name appends the overlay names so name-keyed pickers
- * and renderers treat the composition as its own theme.
+ * stance. The base's `scheme_mirror` carries through unchanged — it renders
+ * before `variables`, so overlay values still win. The composed name appends
+ * the overlay names so name-keyed pickers and renderers treat the composition
+ * as its own theme.
  */
 export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
 	if (!overlays.length) return base;
@@ -90,47 +98,33 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 	return {
 		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
 		...(base.scheme !== undefined && { scheme: base.scheme }),
+		// the mirror renders before `variables`, so overlay values still win
+		...(base.scheme_mirror !== undefined && { scheme_mirror: base.scheme_mirror }),
 		variables: [...by_name.values()]
 	};
 };
 
 /**
- * Computes the mirror a single-scheme stance implies: every scheme-adaptive
- * default (dual-slot entry in `default_variables`) not overridden by
- * `variables`, re-slotted so the stanced scheme's value applies in both color
- * schemes — into the base slot for a `'dark'` stance, into the dark slot for
- * a `'light'` stance (defeating the base dark values by cascade-layer order).
+ * Renders a theme's variables as CSS, wrapped in the `fuz.theme` cascade
+ * layer by default.
+ *
+ * Renders exactly what the theme carries — an empty `variables` array renders
+ * nothing (inheriting the `fuz.base` defaults) unless a `scheme` stance needs
+ * pinning. To render the full default set, pass it: `render_theme_style({name:
+ * 'base', variables: default_variables})`. To render a single-scheme theme
+ * faithfully, resolve it through `resolve_theme_stance` first.
+ *
+ * @param theme - the theme to render
+ * @param options - see `RenderThemeStyleOptions`
+ * @returns the theme CSS, or an empty string when there's nothing to render
  */
-export const scheme_stance_variables = (
-	scheme: 'light' | 'dark',
-	variables: Array<StyleVariable>
-): Array<StyleVariable> => {
-	const overridden = new Set(variables.map((v) => v.name));
-	const mirrored: Array<StyleVariable> = [];
-	for (const v of default_variables) {
-		if (v.dark === undefined || overridden.has(v.name)) continue;
-		if (scheme === 'dark') {
-			mirrored.push({ name: v.name, light: v.dark });
-		} else if (v.light !== undefined) {
-			mirrored.push({ name: v.name, dark: v.light });
-		}
-	}
-	return mirrored;
-};
-
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
-	const { comments = false, id = null, empty_default_theme = true, layer = 'fuz.theme' } = options;
+	const { comments = false, id = null, layer = 'fuz.theme' } = options;
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
-	// key the default-theme special case on emptiness, not the name, so any theme
-	// carrying variables renders them (a theme merely named 'base' still renders);
-	// a stanced theme always renders its stance mirror, even with no variables
-	const own = theme.variables.length
-		? theme.variables
-		: empty_default_theme
-			? null
-			: default_variables;
 	// mirrored defaults first so the theme's own variables win by order
-	const variables = [...(stance ? scheme_stance_variables(stance, own ?? []) : []), ...(own ?? [])];
+	const variables = theme.scheme_mirror?.length
+		? [...theme.scheme_mirror, ...theme.variables]
+		: theme.variables;
 	if (!variables.length && !stance) return '';
 	const rendered_light = variables
 		.map((v) => render_theme_variable(v, false, comments))
