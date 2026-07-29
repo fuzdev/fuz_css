@@ -240,21 +240,6 @@ export const ramp_chroma = (
 };
 
 /**
- * Evaluates a stop's hue-shift offset in degrees — the numeric twin of
- * `render_hue_shift_offset_css`. `hue_shift` is the total rotation across a
- * ramp, anchored at stop 50; the scheme flip is baked in so positive values
- * always rotate hue upward toward the dark end.
- */
-export const ramp_hue_shift_offset = (
-	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant,
-	hue_shift: number
-): number => {
-	const centered = ramp_stop_t(stop) - 0.5;
-	return (scheme === 'light' ? centered : -centered) * hue_shift;
-};
-
-/**
  * Computes the default OKLCH color of a palette stop (`--palette_X_NN`).
  */
 export const palette_stop_oklch = (
@@ -288,30 +273,25 @@ export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVa
 /**
  * Recomputes the worst-hue safe chroma caps per stop for an arbitrary hue set
  * and lightness ramp — the generalization of the baked `PALETTE_CHROMA_CAPS`.
- * For each stop the lightness comes from `ramp_lightness`, each hue is offset
- * by that stop's `ramp_hue_shift_offset`, and the cap is the minimum
- * `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to stay
- * conservative (the browser clips anything past it). A theme's compile step
- * feeds its own hues, lightness knobs, and hue shift to detect where the baked
+ * For each stop the lightness comes from `ramp_lightness` and the cap is the
+ * minimum `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to
+ * stay conservative (the browser clips anything past it). A theme's compile
+ * step feeds its own hues and lightness knobs to detect where the baked
  * worst-hue envelope no longer fits.
  *
  * @param hues - OKLCH hue angles the ramp must stay in gamut for
  * @param lightness_knobs - the palette lightness ramp knobs for this scheme
- * @param hue_shift - total ramp hue rotation in degrees; defaults to 0
  */
 export const compute_palette_chroma_caps = (
 	hues: ReadonlyArray<number>,
-	lightness_knobs: LightnessRampKnobs,
-	scheme: ColorSchemeVariant,
-	hue_shift = 0
+	lightness_knobs: LightnessRampKnobs
 ): Record<NumericScaleVariant, number> => {
 	const caps = {} as Record<NumericScaleVariant, number>;
 	for (const stop of numeric_scale_variants) {
 		const lightness = ramp_lightness(lightness_knobs, stop);
 		let cap = Infinity;
 		for (const hue of hues) {
-			const effective_hue = hue + ramp_hue_shift_offset(stop, scheme, hue_shift);
-			cap = Math.min(cap, oklch_max_srgb_chroma(lightness, effective_hue));
+			cap = Math.min(cap, oklch_max_srgb_chroma(lightness, hue));
 		}
 		caps[stop] = Math.floor(cap * 1e4) / 1e4;
 	}
@@ -379,22 +359,6 @@ export const render_chroma_stop_css = (
 };
 
 /**
- * Renders a stop's hue-shift offset. `--hue_shift` is the total rotation in
- * degrees across a ramp, anchored at stop 50; the scheme sign flip is baked
- * into these per-scheme slots so positive values always rotate hue upward
- * toward the dark end.
- */
-export const render_hue_shift_offset_css = (
-	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant
-): string => {
-	const centered = ramp_stop_t(stop) - 0.5;
-	const factor = Math.round((scheme === 'light' ? centered : -centered) * 1e6) / 1e6;
-	if (factor === 0) return '0';
-	return `calc(var(--hue_shift) * ${format_ramp_number(factor)})`;
-};
-
-/**
  * Renders the derived default of a palette color stop, e.g. `--palette_a_50`.
  * One definition serves both schemes — the scheme flip lives in the knobs.
  */
@@ -439,9 +403,9 @@ export const render_ramp_color_css = (
 	const slot_scale = slot_chroma_scale_reference(hue_reference);
 	return `oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
 		stop
-	}) * var(--chroma_scale)${slot_scale ? ` * ${slot_scale}` : ''}) calc(${
+	}) * var(--chroma_scale)${slot_scale ? ` * ${slot_scale}` : ''}) ${
 		hue_reference
-	} + var(--hue_shift_${stop}))${alpha ? ` / ${alpha}` : ''})`;
+	}${alpha ? ` / ${alpha}` : ''})`;
 };
 
 /**
@@ -454,4 +418,4 @@ export const render_neutral_stop_css = (
 ): string =>
 	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
 		stop
-	})) calc(var(--hue_neutral) + var(--hue_shift_${stop})))`;
+	})) var(--hue_neutral))`;

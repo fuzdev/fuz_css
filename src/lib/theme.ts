@@ -58,6 +58,43 @@ export interface RenderThemeStyleOptions {
 }
 
 /**
+ * Composes a base theme with overlay fragments by flatten + last-wins: later
+ * variables replace same-named earlier ones wholesale (both slots). Any
+ * knob-only theme is already a valid fragment — the contrast modifiers in
+ * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
+ * precursor to a first-class `extends`, with the same merge semantics.
+ *
+ * The base's `scheme` stance wins; when the base is single-scheme, each
+ * overlay variable is re-slotted to the stanced scheme's value so a
+ * dual-slot fragment can't leak the other scheme's appearance past the
+ * stance. The composed name appends the overlay names so name-keyed pickers
+ * and renderers treat the composition as its own theme.
+ */
+export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
+	if (!overlays.length) return base;
+	const stance = base.scheme === 'light' || base.scheme === 'dark' ? base.scheme : null;
+	const by_name = new Map<string, StyleVariable>();
+	for (const v of base.variables) by_name.set(v.name, v);
+	for (const overlay of overlays) {
+		for (const v of overlay.variables) {
+			if (stance) {
+				// single-slot in the base position, like stanced themes author their own
+				const value = stance === 'dark' ? (v.dark ?? v.light) : v.light;
+				if (value === undefined) continue;
+				by_name.set(v.name, { name: v.name, light: value });
+			} else {
+				by_name.set(v.name, v);
+			}
+		}
+	}
+	return {
+		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
+		...(base.scheme !== undefined && { scheme: base.scheme }),
+		variables: [...by_name.values()]
+	};
+};
+
+/**
  * Computes the mirror a single-scheme stance implies: every scheme-adaptive
  * default (dual-slot entry in `default_variables`) not overridden by
  * `variables`, re-slotted so the stanced scheme's value applies in both color

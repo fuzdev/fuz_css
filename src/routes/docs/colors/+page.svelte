@@ -67,10 +67,6 @@
 				1, deliberately clipping the weakest hues)
 			</li>
 			<li>
-				<code>--hue_shift</code> - degrees of hue rotation across each ramp for painterly warm-light/cool-shadow
-				character (default 0)
-			</li>
-			<li>
 				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
 				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> - each
 				deriving a full 13-stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with

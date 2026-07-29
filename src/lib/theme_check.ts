@@ -58,7 +58,6 @@ import {
 	ramp_lightness,
 	ramp_chroma,
 	ramp_chroma_shape,
-	ramp_hue_shift_offset,
 	compute_palette_chroma_caps,
 	render_chroma_stop_css,
 	type LightnessRampKnobs
@@ -317,7 +316,6 @@ class ThemeResolver {
 		if (INTENT_MULTIPLIER_MATCHER.test(name)) return { ok: true, value: 1 };
 		// scalar knobs
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
-		if (name === 'hue_shift') return { ok: true, value: 0 };
 		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
 		if (name === 'palette_chroma_min') {
 			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_min };
@@ -671,15 +669,10 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		const lightness = num(`palette_lightness_${stop}`, scheme);
 		const chroma_stop = num(`palette_chroma_${stop}`, scheme);
 		const chroma_scale = num('chroma_scale', scheme);
-		const hue_shift = num('hue_shift', scheme);
-		if (lightness === null || chroma_stop === null || chroma_scale === null || hue_shift === null) {
+		if (lightness === null || chroma_stop === null || chroma_scale === null) {
 			return null;
 		}
-		return [
-			lightness,
-			chroma_stop * chroma_scale * multiplier,
-			hue + ramp_hue_shift_offset(stop, scheme, hue_shift)
-		];
+		return [lightness, chroma_stop * chroma_scale * multiplier, hue];
 	};
 
 	// a neutral (shade/text) ramp color at a stop
@@ -692,21 +685,10 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		const neutral_c = num('neutral_chroma', scheme);
 		const curve = num('palette_chroma_curve', scheme);
 		const neutral_hue = num('hue_neutral', scheme);
-		const hue_shift = num('hue_shift', scheme);
-		if (
-			lightness === null ||
-			neutral_c === null ||
-			curve === null ||
-			neutral_hue === null ||
-			hue_shift === null
-		) {
+		if (lightness === null || neutral_c === null || curve === null || neutral_hue === null) {
 			return null;
 		}
-		return [
-			lightness,
-			neutral_c * ramp_chroma_shape(stop, curve),
-			neutral_hue + ramp_hue_shift_offset(stop, scheme, hue_shift)
-		];
+		return [lightness, neutral_c * ramp_chroma_shape(stop, curve), neutral_hue];
 	};
 
 	const contrast = (a: RgbUnit, b: RgbUnit): number =>
@@ -942,16 +924,6 @@ const collect_hues = (resolver: ThemeResolver, scheme: ColorSchemeVariant): Arra
 	return hues.length ? hues : Object.values(PALETTE_HUES);
 };
 
-const resolve_or = (
-	resolver: ThemeResolver,
-	name: string,
-	scheme: ColorSchemeVariant,
-	fallback: number
-): number => {
-	const r = resolver.resolve(name, scheme);
-	return r.ok ? r.value : fallback;
-};
-
 const resolve_lightness_knobs = (
 	resolver: ThemeResolver,
 	scheme: ColorSchemeVariant
@@ -968,11 +940,11 @@ const resolve_lightness_knobs = (
 };
 
 /**
- * Recomputes a theme's per-stop worst-hue chroma caps from its own hues,
- * palette lightness ramp, and hue shift, then emits `palette_chroma_NN`
- * overrides wherever the baked caps no longer fit — the fix for a theme
- * (rotated hues, a monochrome collapse, a dark-only mirror) whose gamut
- * headroom the baked worst-hue table misjudges.
+ * Recomputes a theme's per-stop worst-hue chroma caps from its own hues and
+ * palette lightness ramp, then emits `palette_chroma_NN` overrides wherever
+ * the baked caps no longer fit — the fix for a theme (rotated hues, a
+ * monochrome collapse, a dark-only mirror) whose gamut headroom the baked
+ * worst-hue table misjudges.
  *
  * A stop is emitted only when either scheme's recomputed cap drifts from the
  * baked value by more than the emit epsilon and the theme doesn't already pin
@@ -988,15 +960,11 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	const recomputed: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
 		light: compute_palette_chroma_caps(
 			collect_hues(resolver, 'light'),
-			resolve_lightness_knobs(resolver, 'light'),
-			'light',
-			resolve_or(resolver, 'hue_shift', 'light', 0)
+			resolve_lightness_knobs(resolver, 'light')
 		),
 		dark: compute_palette_chroma_caps(
 			collect_hues(resolver, 'dark'),
-			resolve_lightness_knobs(resolver, 'dark'),
-			'dark',
-			resolve_or(resolver, 'hue_shift', 'dark', 0)
+			resolve_lightness_knobs(resolver, 'dark')
 		)
 	};
 

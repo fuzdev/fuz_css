@@ -1,6 +1,11 @@
 import { test, assert, describe } from 'vitest';
 
-import { render_theme_style, scheme_stance_variables, type Theme } from '$lib/theme.ts';
+import {
+	compose_themes,
+	render_theme_style,
+	scheme_stance_variables,
+	type Theme
+} from '$lib/theme.ts';
 import { default_variables } from '$lib/variables.ts';
 
 // a scheme-adaptive default (dual slots) to observe the stance mirror through
@@ -91,5 +96,56 @@ describe('scheme stance', () => {
 			assert.strictEqual(v.light, source.dark);
 			assert.isUndefined(v.dark);
 		}
+	});
+});
+
+describe('compose_themes', () => {
+	const base: Theme = {
+		name: 'my base',
+		variables: [
+			{ name: 'chroma_scale', light: '1.2' },
+			{ name: 'shade_lightness_00', light: '0.95', dark: '0.2' }
+		]
+	};
+	const overlay: Theme = {
+		name: 'my overlay',
+		variables: [
+			{ name: 'shade_lightness_00', light: '1', dark: '0' },
+			{ name: 'text_lightness_curve', light: '0.5' }
+		]
+	};
+
+	test('no overlays returns the base unchanged', () => {
+		assert.strictEqual(compose_themes(base), base);
+	});
+
+	test('flatten + last-wins: overlay variables replace same-named ones wholesale', () => {
+		const composed = compose_themes(base, overlay);
+		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
+		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '1', dark: '0' });
+		// untouched base variables survive
+		assert.isDefined(composed.variables.find((v) => v.name === 'chroma_scale'));
+		// overlay-only variables append
+		assert.isDefined(composed.variables.find((v) => v.name === 'text_lightness_curve'));
+		assert.strictEqual(composed.variables.length, 3);
+	});
+
+	test('the composed name appends the overlay names', () => {
+		assert.strictEqual(compose_themes(base, overlay).name, 'my base (my overlay)');
+	});
+
+	test('a single-scheme base re-slots dual-slot overlay variables to the stance', () => {
+		const stanced: Theme = { ...base, scheme: 'dark' };
+		const composed = compose_themes(stanced, overlay);
+		assert.strictEqual(composed.scheme, 'dark');
+		// the overlay's dark value lands in the base slot, single-slot
+		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
+		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '0' });
+	});
+
+	test('rendering a composition applies the overlay over the base', () => {
+		const css = render_theme_style(compose_themes(base, overlay));
+		assert.include(css, '--shade_lightness_00: 1;');
+		assert.include(css, '--chroma_scale: 1.2;');
 	});
 });

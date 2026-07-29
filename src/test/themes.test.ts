@@ -1,8 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
 import type { Theme } from '$lib/theme.ts';
-import { default_themes, DEFAULT_THEME } from '$lib/themes.ts';
-import { create_terminal_theme } from '$lib/themes/terminal.ts';
+import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.ts';
 import { StyleVariable } from '$lib/variable.ts';
 import { validate_theme } from '$lib/theme_check.ts';
 
@@ -23,12 +22,12 @@ const shipped_themes: Array<Theme> = Object.values(theme_modules).flatMap((mod) 
 );
 
 const registry_names = new Set(default_themes.map((t) => t.name));
+const modifier_names = new Set(contrast_modifiers.map((t) => t.name));
 
-/** Shipped exemplar themes that deliberately stay out of the registry. */
-const exemplar_themes = [
-	...shipped_themes.filter((t) => !registry_names.has(t.name)),
-	create_terminal_theme(70) // amber, exercises the factory
-];
+/** Shipped exemplar themes: outside the registry and not contrast modifiers. */
+const exemplar_themes = shipped_themes.filter(
+	(t) => !registry_names.has(t.name) && !modifier_names.has(t.name)
+);
 
 describe('default_themes', () => {
 	test('all themes have valid name', () => {
@@ -75,8 +74,21 @@ describe('default_themes', () => {
 	test('default_themes contains expected themes', () => {
 		const names = default_themes.map((t) => t.name);
 		assert.include(names, 'base');
+	});
+
+	test('contrast is a modifier, not a registry theme', () => {
+		const names = contrast_modifiers.map((t) => t.name);
 		assert.include(names, 'low contrast');
 		assert.include(names, 'high contrast');
+		const registry = new Set(default_themes.map((t) => t.name));
+		for (const name of names) assert.isFalse(registry.has(name));
+	});
+
+	test('contrast modifiers validate with no errors', () => {
+		for (const modifier of contrast_modifiers) {
+			const errors = validate_theme(modifier).filter((issue) => issue.level === 'error');
+			assert.deepEqual(errors, [], `Modifier "${modifier.name}" has validation errors`);
+		}
 	});
 
 	test('DEFAULT_THEME has name "base"', () => {
@@ -100,7 +112,7 @@ describe('shipped themes', () => {
 		assert.include(names, 'necromancer');
 		assert.include(names, 'sunset ember');
 		assert.include(names, 'brutalish');
-		assert.include(names, 'terminal');
+		assert.include(names, 'terminalien');
 	});
 
 	test('all exemplar variables validate and exist in default_variables', () => {

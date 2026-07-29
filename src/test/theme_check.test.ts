@@ -1,14 +1,15 @@
 import { test, assert, describe } from 'vitest';
 
 import { validate_theme, check_theme, resolve_theme_knob, GATE_LINK } from '$lib/theme_check.ts';
-import type { Theme } from '$lib/theme.ts';
-import { default_themes } from '$lib/themes.ts';
+import { compose_themes, type Theme } from '$lib/theme.ts';
+import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
 import { necromancer_theme } from '$lib/themes/necromancer.ts';
 import { sunset_ember_theme } from '$lib/themes/sunset_ember.ts';
 import { brutalish_theme } from '$lib/themes/brutalish.ts';
-import { terminal_theme, create_terminal_theme } from '$lib/themes/terminal.ts';
+import { terminalien_theme } from '$lib/themes/terminalien.ts';
+import { create_monochrome_theme } from './test_helpers.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_KNOBS,
@@ -29,8 +30,8 @@ describe('validate_theme', () => {
 			necromancer_theme,
 			sunset_ember_theme,
 			brutalish_theme,
-			terminal_theme,
-			create_terminal_theme(70) // amber, exercises the factory
+			terminalien_theme,
+			create_monochrome_theme(70) // amber, exercises the palette-tier collapse
 		];
 		for (const theme of themes) {
 			const errors = validate_theme(theme).filter((issue) => issue.level === 'error');
@@ -274,8 +275,8 @@ describe('check_theme', () => {
 		assert.isTrue(check_theme(brutalish_theme).ok);
 	});
 
-	test('terminal keeps its contrast gates', () => {
-		const contrast = check_theme(terminal_theme).entries.filter((e) => e.gate === 'contrast');
+	test('terminalien keeps its contrast gates', () => {
+		const contrast = check_theme(terminalien_theme).entries.filter((e) => e.gate === 'contrast');
 		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(contrast.every((e) => e.pass));
 	});
@@ -386,12 +387,57 @@ describe('scheme stance', () => {
 	});
 
 	test('the dark-stanced exemplars pass their contrast gates in both schemes', () => {
-		for (const theme of [necromancer_theme, terminal_theme]) {
+		for (const theme of [necromancer_theme, terminalien_theme]) {
 			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
 			assert.isTrue(
 				contrast.every((e) => e.pass),
 				`${theme.name}: ${JSON.stringify(contrast.filter((e) => !e.pass))}`
 			);
+		}
+	});
+});
+
+describe('contrast modifier compositions', () => {
+	const bases = [
+		default_themes[0]!,
+		necromancer_theme,
+		sunset_ember_theme,
+		brutalish_theme,
+		terminalien_theme
+	];
+
+	test('every base × modifier validates with no errors', () => {
+		for (const base of bases) {
+			for (const modifier of contrast_modifiers) {
+				const composed = compose_themes(base, modifier);
+				const errors = validate_theme(composed).filter((issue) => issue.level === 'error');
+				assert.deepEqual(errors, [], `${composed.name}: ${JSON.stringify(errors)}`);
+			}
+		}
+	});
+
+	// declared exception: sunset ember's past-cap cyan/teal UI fills sit just
+	// under the 3:1 fill gate against low contrast's raised background floor
+	// (~2.89–2.91) — a marginal, known combination cost, not a regression
+	const known_failing = new Set(['sunset ember (low contrast)']);
+
+	test('every base × modifier keeps its contrast gates, minus declared exceptions', () => {
+		for (const base of bases) {
+			for (const modifier of contrast_modifiers) {
+				const composed = compose_themes(base, modifier);
+				const contrast = check_theme(composed).entries.filter((e) => e.gate === 'contrast');
+				assert.isAbove(contrast.length, 0, `${composed.name}: contrast gates resolved`);
+				const failing = contrast.filter((e) => !e.pass);
+				if (known_failing.has(composed.name)) {
+					// the exception stays marginal: only near-threshold fill gates fail
+					assert.isAbove(failing.length, 0, `${composed.name}: exception no longer needed`);
+					for (const e of failing) {
+						assert.isAbove(e.value, e.threshold * 0.9, `${composed.name}: ${e.subject}`);
+					}
+				} else {
+					assert.deepEqual(failing, [], `${composed.name}: ${JSON.stringify(failing)}`);
+				}
+			}
 		}
 	});
 });

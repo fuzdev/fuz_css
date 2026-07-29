@@ -10,7 +10,6 @@ import {
 	TEXT_LIGHTNESS_KNOBS,
 	render_chroma_shape_css,
 	render_chroma_stop_css,
-	render_hue_shift_offset_css,
 	render_lightness_stop_css,
 	render_neutral_stop_css,
 	render_palette_stop_css,
@@ -160,11 +159,6 @@ export const chroma_scale: StyleVariable = {
 	light: '1',
 	summary:
 		'0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps'
-};
-export const hue_shift: StyleVariable = {
-	name: 'hue_shift',
-	light: '0',
-	summary: 'total degrees of hue rotation across each ramp, positive toward the dark end'
 };
 
 /*
@@ -724,73 +718,6 @@ export const palette_chroma_100: StyleVariable = {
 	name: 'palette_chroma_100',
 	light: render_chroma_stop_css('100', 'light'),
 	dark: render_chroma_stop_css('100', 'dark')
-};
-
-// per-stop hue-shift offsets - the scheme sign flip is baked into the slots so
-// positive --hue_shift always rotates hue upward toward the dark end
-export const hue_shift_00: StyleVariable = {
-	name: 'hue_shift_00',
-	light: render_hue_shift_offset_css('00', 'light'),
-	dark: render_hue_shift_offset_css('00', 'dark')
-};
-export const hue_shift_05: StyleVariable = {
-	name: 'hue_shift_05',
-	light: render_hue_shift_offset_css('05', 'light'),
-	dark: render_hue_shift_offset_css('05', 'dark')
-};
-export const hue_shift_10: StyleVariable = {
-	name: 'hue_shift_10',
-	light: render_hue_shift_offset_css('10', 'light'),
-	dark: render_hue_shift_offset_css('10', 'dark')
-};
-export const hue_shift_20: StyleVariable = {
-	name: 'hue_shift_20',
-	light: render_hue_shift_offset_css('20', 'light'),
-	dark: render_hue_shift_offset_css('20', 'dark')
-};
-export const hue_shift_30: StyleVariable = {
-	name: 'hue_shift_30',
-	light: render_hue_shift_offset_css('30', 'light'),
-	dark: render_hue_shift_offset_css('30', 'dark')
-};
-export const hue_shift_40: StyleVariable = {
-	name: 'hue_shift_40',
-	light: render_hue_shift_offset_css('40', 'light'),
-	dark: render_hue_shift_offset_css('40', 'dark')
-};
-export const hue_shift_50: StyleVariable = {
-	name: 'hue_shift_50',
-	light: render_hue_shift_offset_css('50', 'light')
-};
-export const hue_shift_60: StyleVariable = {
-	name: 'hue_shift_60',
-	light: render_hue_shift_offset_css('60', 'light'),
-	dark: render_hue_shift_offset_css('60', 'dark')
-};
-export const hue_shift_70: StyleVariable = {
-	name: 'hue_shift_70',
-	light: render_hue_shift_offset_css('70', 'light'),
-	dark: render_hue_shift_offset_css('70', 'dark')
-};
-export const hue_shift_80: StyleVariable = {
-	name: 'hue_shift_80',
-	light: render_hue_shift_offset_css('80', 'light'),
-	dark: render_hue_shift_offset_css('80', 'dark')
-};
-export const hue_shift_90: StyleVariable = {
-	name: 'hue_shift_90',
-	light: render_hue_shift_offset_css('90', 'light'),
-	dark: render_hue_shift_offset_css('90', 'dark')
-};
-export const hue_shift_95: StyleVariable = {
-	name: 'hue_shift_95',
-	light: render_hue_shift_offset_css('95', 'light'),
-	dark: render_hue_shift_offset_css('95', 'dark')
-};
-export const hue_shift_100: StyleVariable = {
-	name: 'hue_shift_100',
-	light: render_hue_shift_offset_css('100', 'light'),
-	dark: render_hue_shift_offset_css('100', 'dark')
 };
 
 // palette color stops - one definition per stop; the scheme flip lives in the knobs
@@ -2448,7 +2375,6 @@ export const default_variables: Array<StyleVariable> = [
 	palette_i_chroma_scale,
 	palette_j_chroma_scale,
 	chroma_scale,
-	hue_shift,
 	hue_neutral,
 	neutral_chroma,
 	hue_accent,
@@ -2569,19 +2495,6 @@ export const default_variables: Array<StyleVariable> = [
 	palette_chroma_90,
 	palette_chroma_95,
 	palette_chroma_100,
-	hue_shift_00,
-	hue_shift_05,
-	hue_shift_10,
-	hue_shift_20,
-	hue_shift_30,
-	hue_shift_40,
-	hue_shift_50,
-	hue_shift_60,
-	hue_shift_70,
-	hue_shift_80,
-	hue_shift_90,
-	hue_shift_95,
-	hue_shift_100,
 	palette_a_00,
 	palette_a_05,
 	palette_a_10,

@@ -216,7 +216,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   others) with matching text/background token classes (`.positive_50`,
   `.bg_caution_10`)
 - Curve knobs drive everything: `--chroma_scale` (0 grayscale → >1 vivid),
-  `--hue_shift` (degrees of rotation across a ramp), per-scheme lightness
+  per-scheme lightness
   ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`
   and `text_`), and the chroma curve
   (`--palette_chroma_min`/`_max`/`_curve`) clamped per stop by baked
@@ -355,15 +355,19 @@ typography, borders, shading, shadows, layout. See
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the
   `scheme` stance (a single-scheme theme mirrors the adaptive defaults and
   pins `color-scheme`, rendering its one appearance in both schemes),
-  `ColorScheme` type
+  `compose_themes` (flatten + last-wins fragment composition — the
+  hand-flatten precursor to `extends`), `ColorScheme` type
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
-- `src/lib/themes/` - One module per theme. The registry (base, low/high
-  contrast) is semantic-tier: intent bindings + levers only, palette hues
-  untouched. Unregistered exemplars: necromancer, sunset ember, brutalish,
-  and `terminal.ts` (the `terminal_theme` flagship — dark mono terminal chrome
-  with a green cast but functional palette — plus a `create_terminal_theme(hue)`
-  factory for pure single-phosphor monochrome terminals); necromancer and
-  terminal are dark-only via `scheme: 'dark'`
+  (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
+  low/high contrast are modifiers composed over any theme via
+  `compose_themes`, not themes themselves — users see one flat "themes"
+  list
+- `src/lib/themes/` - One module per theme. Registered: base. Shipped
+  exemplars: necromancer, sunset ember, brutalish, and `terminalien.ts`
+  (dense dark mono terminal chrome with a green-phosphor cast but
+  functional palette — compact `scale_factor` plus tightened line-height
+  pins); necromancer and terminalien are dark-only via `scheme: 'dark'`.
+  The contrast pair live here too as the modifier modules
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like

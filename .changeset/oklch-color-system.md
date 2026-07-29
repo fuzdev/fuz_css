@@ -26,11 +26,11 @@ from the old HSL palette. Breaking changes:
   their classes. Write the literal color or define one custom property
   instead.
 - **New curve knobs** (the promoted theme API): `--chroma_scale`,
-  `--hue_shift`, `--palette_lightness_00/_100/_curve` (same trio for
+  `--palette_lightness_00/_100/_curve` (same trio for
   `shade_`/`text_`), `--palette_chroma_min/_max/_curve` (clamped per stop by
   baked worst-hue sRGB gamut caps), plus per-stop derived variables themes
   can pin individually (`--palette_lightness_NN`, `--palette_chroma_NN`,
-  `--chroma_shape_NN`, `--hue_shift_NN`).
+  `--chroma_shape_NN`).
 - **New semantic intent knobs**: `--hue_accent`, `--hue_positive`,
   `--hue_negative`, `--hue_caution`, `--hue_info`, each deriving a 13-stop
   scale through the shared ramps (`--accent_00`…`--accent_100`, etc.) with
@@ -50,10 +50,11 @@ from the old HSL palette. Breaking changes:
 - **`color-mix()` interpolation moved from `in hsl` to `in oklab`** in
   button fills/borders, composites, and shadow classes.
 - **Themes**: `themes.ts` exports the curated `default_themes` registry
-  (base, low contrast, high contrast — the contrast themes are rewritten as
-  curve-knob overrides), one module per theme under `themes/`, plus
-  unregistered exemplars (necromancer, sunset ember, brutalish, terminal
-  green + the `create_terminal_theme(hue)` factory).
+  (base) and `contrast_modifiers` (low/high contrast, rewritten as
+  curve-knob overrides — modifiers composed over any theme with
+  `compose_themes`, not themes in the list), one module per theme under
+  `themes/`, plus unregistered exemplars (necromancer, sunset ember,
+  brutalish, terminalien).
 - **New design-time modules**: `ramps.ts` (fitted knob constants, numeric
   evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), `wcag.ts`
   (luminance/contrast), with tests gating every default stop for gamut,

@@ -27,12 +27,19 @@ New `theme_check.ts`, resolving a theme's authored values back to numbers
   (the same thresholds the repo's tests assert, exported as the `GATE_*`
   constants)
 - `compile_theme` — recomputes per-stop worst-hue chroma caps from a theme's
-  own hues, lightness ramp, and hue shift, emits `palette_chroma_NN`
+  own hues and lightness ramp, emits `palette_chroma_NN`
   overrides where the baked caps no longer fit, and re-checks the result
 
-`ramps.ts` gains `ramp_hue_shift_offset` and `compute_palette_chroma_caps`.
-The `'low contrast'` registry theme's shade compression is retuned to the
+`ramps.ts` gains `compute_palette_chroma_caps`.
+The `'low contrast'` theme's shade compression is retuned to the
 softest values that pass every `check_theme` contrast gate.
+
+Contrast becomes a modifier, not a theme: `default_themes` shrinks to the
+base theme, the contrast pair move to the new `contrast_modifiers` export,
+and the new `compose_themes(base, ...overlays)` composes fragments by
+flatten + last-wins (a single-scheme base re-slots dual-slot overlay
+variables to its stance). The test suite gates every shipped theme ×
+contrast-modifier combination.
 
 New scheme stance: `Theme` gains `scheme?: 'dual' | 'light' | 'dark'`
 (default `'dual'`). A single-scheme theme renders its one appearance in both
@@ -43,5 +50,8 @@ scope so form controls and native scrollbars agree. Author a stanced theme's
 own variables single-slot in the light/base position. `validate_theme` warns
 on dark slots a single-scheme stance makes meaningless;
 `check_theme`/`compile_theme` resolve through the same mirror so the gates
-evaluate the stanced reality in both schemes. The necromancer and terminal
-exemplars use the stance instead of hand-mirrored ramp knobs.
+evaluate the stanced reality in both schemes. The necromancer and
+terminalien exemplars use the stance instead of hand-mirrored ramp knobs.
+(Terminalien is the terminal exemplar renamed and densified — compact
+`scale_factor` plus tightened line-height pins; the
+`create_terminal_theme(hue)` factory is deleted.)

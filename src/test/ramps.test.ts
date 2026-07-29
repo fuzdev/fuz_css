@@ -117,8 +117,7 @@ describe('chroma caps', () => {
 		for (const scheme of color_scheme_variants) {
 			const caps = compute_palette_chroma_caps(
 				Object.values(PALETTE_HUES),
-				PALETTE_LIGHTNESS_KNOBS[scheme],
-				scheme
+				PALETTE_LIGHTNESS_KNOBS[scheme]
 			);
 			for (const stop of RAMP_STOPS) {
 				const baked = PALETTE_CHROMA_CAPS[scheme][stop];

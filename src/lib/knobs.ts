@@ -170,15 +170,6 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0, 2],
 		step: 0.05
 	},
-	{
-		name: 'hue_shift',
-		kind: 'number',
-		axis: 'color',
-		leverage: 'lg',
-		tier: 'semantic',
-		range: [-45, 45],
-		step: 1
-	},
 	hue('hue_positive', 'md', 'semantic', true),
 	hue('hue_negative', 'md', 'semantic', true),
 	hue('hue_caution', 'md', 'semantic', true),

@@ -11,12 +11,12 @@
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import { default_themes } from '$lib/themes.ts';
+	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 	import { necromancer_theme } from '$lib/themes/necromancer.ts';
 	import { sunset_ember_theme } from '$lib/themes/sunset_ember.ts';
 	import { brutalish_theme } from '$lib/themes/brutalish.ts';
-	import { terminal_theme } from '$lib/themes/terminal.ts';
-	import type { Theme } from '$lib/theme.ts';
+	import { terminalien_theme } from '$lib/themes/terminalien.ts';
+	import { compose_themes, type Theme } from '$lib/theme.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
 	import {
@@ -34,10 +34,22 @@
 	const get_theme_state = theme_state_context.get();
 	const theme_state = get_theme_state();
 
-	const themes = default_themes.slice();
-	const exemplar_themes = [necromancer_theme, sunset_ember_theme, brutalish_theme, terminal_theme];
+	// one gallery: the registry and the shipped exemplars are a single list to
+	// users — registry membership is policy for consumer pickers, not UX
+	const themes = [
+		...default_themes,
+		necromancer_theme,
+		sunset_ember_theme,
+		brutalish_theme,
+		terminalien_theme
+	];
 
-	const editor = new ThemeEditorState([...themes, ...exemplar_themes]);
+	const editor = new ThemeEditorState(themes);
+
+	// the picked base theme, tracked apart from the applied theme so the picker
+	// highlight survives contrast composition (compositions rename themselves)
+	let selected_base: Theme = $state.raw(theme_state.theme);
+	let contrast_modifier: Theme | null = $state.raw(null);
 
 	// the in-progress theme appears in the picker as soon as a knob moves
 	const picker_themes: Array<Theme> = $derived([
@@ -45,22 +57,36 @@
 		...(editor.dirty ? [editor.draft] : [])
 	]);
 
+	const apply_theme = (): void => {
+		theme_state.theme = contrast_modifier
+			? compose_themes(selected_base, contrast_modifier)
+			: selected_base;
+	};
+
 	// passed as ThemeInput's `select` (not `onselect`, which collides with the
-	// DOM handler type in its menu-attribute props): applies the theme like the
-	// default select and loads it into the editor, with the same dirty-draft
-	// guard as the editor's "based on" select
+	// DOM handler type in its menu-attribute props): applies the theme composed
+	// with the active contrast modifier and loads it into the editor, with the
+	// same dirty-draft guard as the editor's "based on" select
 	const select_theme = (theme: Theme): void => {
-		if (theme.name !== UNSAVED_THEME_NAME) {
-			if (
-				editor.dirty &&
-				// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
-				!confirm(discard_confirm_message(editor, theme.name))
-			) {
-				return;
-			}
-			editor.load_theme(theme);
+		if (theme.name === UNSAVED_THEME_NAME) {
+			theme_state.theme = theme;
+			return;
 		}
-		theme_state.theme = theme;
+		if (
+			editor.dirty &&
+			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+			!confirm(discard_confirm_message(editor, theme.name))
+		) {
+			return;
+		}
+		editor.load_theme(theme);
+		selected_base = theme;
+		apply_theme();
+	};
+
+	const select_contrast = (name: string): void => {
+		contrast_modifier = contrast_modifiers.find((m) => m.name === name) ?? null;
+		apply_theme();
 	};
 
 	// live scope is global with no pin: the draft writes to `:root` through the
@@ -81,89 +107,79 @@
 </script>
 
 <TomeContent {tome}>
-	<section>
-		<p>
-			fuz_css supports both the browser's
-			<MdnLink path="Web/CSS/color-scheme" />
-			and custom themes based on <TomeLink slug="variables" />, which use
-			<MdnLink path="Web/CSS/--*">CSS custom properties</MdnLink>.
-		</p>
-		<p>
-			fuz_css works with any JS framework, but it provides only stylesheets, not integrations. This
-			website uses the companion Svelte UI library <a href="https://ui.fuz.dev/">fuz_ui</a>
-			to provide the UI below to control the fuz_css color scheme and themes.
-		</p>
-	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Color scheme" />
-		<p>
-			fuz_css supports
-			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes. To apply dark mode manually,
-			add the <code>dark</code> class to the root <code>html</code>
-			element.
-		</p>
-		<p>
-			The Fuz integration detects the default with
-			<MdnLink path="Web/CSS/@media/prefers-color-scheme" />, and users can also set it directly
-			with a component like
-			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte"
-				>this one</a
-			>:
-		</p>
-		<div class="display:flex mb_lg">
-			<ColorSchemeInput />
-		</div>
-		<p>
-			The builtin themes support both dark and light color schemes. Custom themes may support one or
-			both color schemes.
-		</p>
-	</TomeSection>
-	<TomeSection>
-		<TomeSectionHeader text="Builtin themes" />
+		<TomeSectionHeader text="Themes" />
 		<UnfinishedImplementationWarning
-			>The builtin themes need more work, but the proof of concept is ready!</UnfinishedImplementationWarning
+			>The theme set is still growing, but the proof of concept is ready!</UnfinishedImplementationWarning
 		>
 		<p>
-			A theme is a simple JSON collection of <TomeLink slug="variables" /> that can be transformed into
-			CSS that sets custom properties. Each variable can have values for light and/or dark color schemes.
-			In other words, "dark" isn't a theme, it's a mode that any theme can implement.
+			A theme is a set of <em>knob</em> values, not a stylesheet: a JSON collection of
+			<TomeLink slug="variables" /> where a handful of high-leverage variables (hue angles,
+			<code>chroma_scale</code>, the lightness curve knobs - see <TomeLink slug="colors" />) reshape
+			everything downstream. Each variable can have values for light and/or dark color schemes, so
+			"dark" isn't a theme, it's a mode that any theme can implement. Selecting a theme applies it
+			to this whole website and loads its knobs into the editor below.
 		</p>
-		<p>
-			Because the color system is derived, a theme is a set of <em>knob</em> values, not a
-			stylesheet: a handful of high-leverage variables (hue angles, <code>chroma_scale</code>, the
-			lightness curve knobs - see <TomeLink slug="colors" />) reshape everything downstream. Theme
-			CSS renders into the <code>fuz.theme</code> cascade layer, above the
-			<code>fuz.base</code> defaults, so overrides win regardless of stylesheet order.
-		</p>
-		<p>
-			See <ModuleLink module_path="theme.ts" /> and <ModuleLink module_path="themes.ts" /> for the API.
-		</p>
-		<p>Selecting a theme loads its knobs into the editor below.</p>
 		<div class="width_atmost_xs mb_lg">
-			<ThemeInput themes={picker_themes} select={select_theme} />
+			<ThemeInput
+				themes={picker_themes}
+				selected_theme={{ theme: selected_base }}
+				select={select_theme}
+			/>
 		</div>
-	</TomeSection>
-	<TomeSection>
-		<TomeSectionHeader text="Exemplar themes" />
+		<label class="width_atmost_xs mb_lg">
+			<span class="title">Contrast</span>
+			<select
+				value={contrast_modifier?.name ?? ''}
+				onchange={(e) => select_contrast(e.currentTarget.value)}
+			>
+				<option value="">default</option>
+				{#each contrast_modifiers as modifier (modifier.name)}
+					<option value={modifier.name}>{modifier.name}</option>
+				{/each}
+			</select>
+		</label>
 		<p>
-			Beyond the registry, fuz_css ships expressive exemplar themes as importable modules under
-			<code>themes/</code> - registry membership, not file location, is what separates builtins from exemplars.
-			Import one and pass it to your theme setup:
+			Contrast is a <em>modifier</em>, not a theme: the low/high contrast pair compose over any
+			selected theme with <code>compose_themes</code> (flatten + last-wins), so every theme has low and
+			high contrast variants for free.
+		</p>
+		<p>
+			Every theme ships as an importable module under <code>themes/</code>, and theme CSS renders
+			into the <code>fuz.theme</code> cascade layer, above the <code>fuz.base</code> defaults, so
+			overrides win regardless of stylesheet order. See <ModuleLink module_path="theme.ts" /> and
+			<ModuleLink module_path="themes.ts" /> for the API:
 		</p>
 		<Code
 			lang="ts"
 			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
 		/>
 		<p>
-			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - the
-			renderer then mirrors every scheme-adaptive default the theme doesn't override, so its one
-			appearance renders in both color schemes, and pins
-			<MdnLink path="Web/CSS/color-scheme" /> to match so form controls and scrollbars agree. The necromancer
-			and terminal exemplars are dark-only this way, without hand-mirrored knob values.
+			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - its
+			one appearance then renders in both color schemes and
+			<MdnLink path="Web/CSS/color-scheme" /> is pinned to match. The necromancer and terminalien themes
+			are dark-only this way.
 		</p>
-		<div class="width_atmost_xs mb_lg">
-			<ThemeInput themes={exemplar_themes} select={select_theme} />
+	</TomeSection>
+	<TomeSection>
+		<TomeSectionHeader text="Color scheme" />
+		<p>
+			fuz_css supports
+			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes, detected from
+			<MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by default. To apply dark mode manually,
+			add the <code>dark</code> class to the root <code>html</code> element, or use a component like
+			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte"
+				>this one</a
+			>
+			from the companion Svelte library <a href="https://ui.fuz.dev/">fuz_ui</a>:
+		</p>
+		<div class="display:flex mb_lg">
+			<ColorSchemeInput />
 		</div>
+		<p>
+			fuz_css itself works with any JS framework - it provides only stylesheets, and themes are
+			plain data any integration can render.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Theme editor" />
@@ -208,7 +224,8 @@ test('my theme clears the accessibility gates', () => {
 			<code>{'{theme, report, issues}'}</code>.
 		</p>
 		<p>
-			fuz_css gates its own registry and exemplar themes with these functions in its test suite.
+			fuz_css gates its own themes - including every theme × contrast-modifier composition - with
+			these functions in its test suite.
 		</p>
 	</TomeSection>
 </TomeContent>

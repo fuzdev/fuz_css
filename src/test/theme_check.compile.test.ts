@@ -4,7 +4,7 @@ import { compile_theme } from '$lib/theme_check.ts';
 import type { Theme } from '$lib/theme.ts';
 import { default_themes } from '$lib/themes.ts';
 import { necromancer_theme } from '$lib/themes/necromancer.ts';
-import { create_terminal_theme } from '$lib/themes/terminal.ts';
+import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS } from '$lib/ramps.ts';
 import type { NumericScaleVariant } from '$lib/variable_data.ts';
 
@@ -26,8 +26,8 @@ describe('compile_theme', () => {
 		assert.strictEqual(theme.variables.length, base_theme.variables.length);
 	});
 
-	test('a single-hue terminal theme emits higher mid-stop caps', () => {
-		const input = create_terminal_theme(145);
+	test('a single-hue monochrome theme emits higher mid-stop caps', () => {
+		const input = create_monochrome_theme(145);
 		const { theme, report } = compile_theme(input);
 		const overrides = theme.variables.slice(input.variables.length);
 		assert.isAbove(overrides.length, 0);
@@ -40,7 +40,7 @@ describe('compile_theme', () => {
 	});
 
 	test('compile does not mutate the input theme', () => {
-		const input = create_terminal_theme(145);
+		const input = create_monochrome_theme(145);
 		const before = input.variables.length;
 		compile_theme(input);
 		assert.strictEqual(input.variables.length, before);
@@ -60,9 +60,9 @@ describe('compile_theme', () => {
 
 	test('a pinned palette_chroma_NN is respected — no emission for that stop', () => {
 		const input: Theme = {
-			name: 'terminal pinned',
+			name: 'monochrome pinned',
 			variables: [
-				...create_terminal_theme(145).variables,
+				...create_monochrome_theme(145).variables,
 				{ name: 'palette_chroma_50', light: '0.05' }
 			]
 		};
@@ -72,6 +72,6 @@ describe('compile_theme', () => {
 	});
 
 	test('the compiled theme is fully checkable — nothing unchecked', () => {
-		assert.strictEqual(compile_theme(create_terminal_theme(145)).report.unchecked.length, 0);
+		assert.strictEqual(compile_theme(create_monochrome_theme(145)).report.unchecked.length, 0);
 	});
 });

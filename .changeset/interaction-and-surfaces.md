@@ -38,7 +38,7 @@ fills:
 
 - Selected buttons use `--text_00` (the text ramp endpoint) instead of
   `--text_05`/`--text_10` for inverse text. Themes bending
-  `--text_lightness_curve` — the high-contrast registry theme, brutalish,
+  `--text_lightness_curve` — the high-contrast modifier, brutalish,
   and the OS `prefers-contrast: more` mapping — dragged the near-background
   stops toward the fill lightness, washing selected text out (down to
   ~1.2:1); the endpoints are the knobs themselves, so the curve can never

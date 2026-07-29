@@ -4,9 +4,9 @@ import type { Theme } from '../theme.ts';
  * A fantasy exemplar theme built entirely from semantic bindings and levers —
  * the palette letters keep their default hues. Ectoplasm-green surfaces come
  * from binding the neutral to green, the violet accent from binding the accent
- * intent to purple, and the lit-from-below character from hue-shifted
- * ramps (highlights warm, shadows cool) with glow-colored depth. Dark-only
- * via the `scheme` stance, vivid past the gamut caps on purpose.
+ * intent to purple, and the lit-from-below character from glow-colored
+ * depth. Dark-only via the `scheme` stance, vivid past the gamut caps on
+ * purpose.
  *
  * Declared subversions: none — negative stays red.
  *
@@ -24,8 +24,6 @@ export const necromancer_theme: Theme = {
 		{ name: 'neutral_chroma', light: '0.04' },
 		// violet accent: links/focus/selection glow purple over the green world
 		{ name: 'hue_accent', light: 'var(--hue_d)' },
-		// painterly ramps: shadows cool toward teal, highlights warm toward yellow-green
-		{ name: 'hue_shift', light: '14' },
 		// vivid, knowingly clipping the weak hues
 		{ name: 'chroma_scale', light: '1.15' },
 		// modestly compact - crypt density

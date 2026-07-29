@@ -13,6 +13,7 @@ import type {
 	GenerationDiagnostic
 } from '$lib/diagnostics.ts';
 import type { ExtractionData } from '$lib/css_class_extractor.ts';
+import type { Theme } from '$lib/theme.ts';
 
 //
 // Factory Helpers
@@ -26,6 +27,34 @@ export const loc = (file = 'test.ts', line = 1, column = 1): SourceLocation => (
 	line,
 	column
 });
+
+/**
+ * Creates a pure single-hue monochrome theme: every palette slot and the
+ * neutral collapse onto one OKLCH hue, dark-only. The palette-tier stress
+ * fixture for the resolution/gate/compile paths (rotated hues, dark-only
+ * stance, recomputed worst-hue caps).
+ */
+export const create_monochrome_theme = (hue: number): Theme => {
+	const hue_value = String(hue);
+	return {
+		name: `monochrome ${hue}`,
+		scheme: 'dark',
+		variables: [
+			{ name: 'hue_a', light: hue_value },
+			{ name: 'hue_b', light: hue_value },
+			{ name: 'hue_c', light: hue_value },
+			{ name: 'hue_d', light: hue_value },
+			{ name: 'hue_e', light: hue_value },
+			{ name: 'hue_f', light: hue_value },
+			{ name: 'hue_g', light: hue_value },
+			{ name: 'hue_h', light: hue_value },
+			{ name: 'hue_i', light: hue_value },
+			{ name: 'hue_j', light: hue_value },
+			{ name: 'hue_neutral', light: hue_value },
+			{ name: 'neutral_chroma', light: '0.05' }
+		]
+	};
+};
 
 /**
  * An `ExtractionData` with all fields set to `null`.
