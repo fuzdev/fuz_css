@@ -25,8 +25,11 @@
 	<section>
 		<p>
 			Style variables, or just "variables" in fuz_css, are <MdnLink
-				path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*">CSS custom properties</MdnLink
-			> that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable can have
+				path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*"
+			>
+				CSS custom properties
+			</MdnLink>
+			that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable can have
 			values for light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>.
 			They're design tokens with an API.
 		</p>
@@ -37,9 +40,9 @@
 		<ul>
 			<li>by CSS classes, both utility and component</li>
 			<li>
-				by other variables, both in calculations and to add useful semantics (e.g. <code
-					>button_fill_hover</code
-				>
+				by other variables, both in calculations and to add useful semantics (e.g. <code>
+					button_fill_hover
+				</code>
 				uses <code>shade_50</code> but can be themed independently)
 			</li>
 			<li>
@@ -59,14 +62,14 @@
 			Most color variables are <em>derived</em>: curve knobs feed ramp stops, ramp stops feed color
 			stops, all computed in pure CSS (<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>).
 			Scale knobs like <code>radius_scale</code> derive other families the same way, and any
-			individual variable stays pinnable as the escape hatch. See <TomeLink slug="colors" /> for the color
-			system and <TomeLink slug="themes" /> for theming.
+			individual variable stays pinnable as the escape hatch. See <TomeLink slug="colors" /> for the
+			color system and <TomeLink slug="themes" /> for theming.
 		</p>
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
 			variables your code uses are emitted, along with any they depend on. The full
-			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode and
-			direct imports.
+			<ModuleLink module_path="theme.css" />
+			stylesheet ships every variable, for utility-only mode and direct imports.
 		</p>
 	</section>
 	<section>

@@ -87,14 +87,13 @@
 						/>
 					</label>
 					<p>
-						More info can be included in <code>{'<'}p></code> tags like this one. Here we could include
-						info about passwords.
+						More info can be included in <code>{'<'}p></code> tags like this one. Here we could
+						include info about passwords.
 					</p>
 					<label class:disabled={created_account}>
 						<div class="title">lifestory</div>
-						<textarea bind:value={lifestory} disabled={created_account} placeholder="👀"
-						></textarea></label
-					>
+						<textarea bind:value={lifestory} disabled={created_account} placeholder="👀"></textarea>
+					</label>
 					<label class:disabled={created_account}>
 						<div class="title">select</div>
 						<select class="text-align:center font_size_xl5" disabled={created_account}>
@@ -142,9 +141,9 @@
 		<TomeSectionHeader text="form with checkboxes">
 			<code>form</code> with checkboxes
 		</TomeSectionHeader>
-		<UnfinishedImplementationWarning
-			>This will change, probably to toggles.</UnfinishedImplementationWarning
-		>
+		<UnfinishedImplementationWarning>
+			This will change, probably to toggles.
+		</UnfinishedImplementationWarning>
 		<!-- TODO make this a form, but figure out the checkbox problem - maybe a last-child exception? -->
 		<form>
 			<fieldset>
@@ -158,20 +157,20 @@
 				</label>
 				<label class="row disabled">
 					<input type="checkbox" disabled style:margin-right="var(--space_lg)" />
-					<Code content={`<input type="checkbox" disabled />`} /> (disabled)
+					<Code content={`<input type="checkbox" disabled />`} />
+					(disabled)
 				</label>
 				<label class="row disabled">
 					<input type="checkbox" checked disabled />
-					<Code content={`<input type="checkbox" checked disabled />`} /> (disabled)
+					<Code content={`<input type="checkbox" checked disabled />`} />
+					(disabled)
 				</label>
 			</fieldset>
 		</form>
 		<aside>
 			The above are wrapped with: <Code content={`<label class="row">`} inline />
-			with <code>.disabled</code> as needed: <Code
-				content={`<label class="row disabled">`}
-				inline
-			/>
+			with <code>.disabled</code> as needed:
+			<Code content={`<label class="row disabled">`} inline />
 		</aside>
 	</TomeSection>
 
@@ -183,14 +182,14 @@
 			<fieldset>
 				{#each radio_items as radio_item (radio_item)}
 					{@const selected = radio_item === selected_radio_item}
-					<label class="row" class:selected
-						><input type="radio" bind:group={selected_radio_item} value={radio_item} />
+					<label class="row" class:selected>
+						<input type="radio" bind:group={selected_radio_item} value={radio_item} />
 						<Code
 							content={`<label class="row${selected ? ' selected' : ''}">\n\t<input type="radio" ${
 								selected ? 'checked' : ''
 							}/>\n</label>`}
-						/></label
-					>
+						/>
+					</label>
 				{/each}
 				<label class="row disabled">
 					<input type="radio" disabled />
@@ -210,9 +209,9 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			inputs and buttons, adjusting height and padding. Apply directly or on a container to cascade to
-			children.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
+			scale inputs and buttons, adjusting height and padding. Apply directly or on a container to
+			cascade to children.
 		</p>
 		<Code
 			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}

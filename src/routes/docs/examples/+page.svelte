@@ -12,11 +12,11 @@
 <TomeContent {tome}>
 	<section class="column gap_md">
 		<p>
-			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the <TomeLink slug="classes" /> system
-			using the
-			<a href="https://github.com/fuzdev/fuz_css/blob/main/src/lib/vite_plugin_fuz_css.ts"
-				>Vite plugin</a
-			>:
+			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the
+			<TomeLink slug="classes" /> system using the
+			<a href="https://github.com/fuzdev/fuz_css/blob/main/src/lib/vite_plugin_fuz_css.ts">
+				Vite plugin
+			</a>:
 		</p>
 		<ul>
 			<li><a href="{GITHUB_EXAMPLES}/vite-svelte">vite-svelte</a> - Svelte 5</li>

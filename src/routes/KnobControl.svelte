@@ -111,8 +111,10 @@
 				style:--border_color={custom_color}
 				style:--outline_color={custom_color}
 				title="detach from the palette and set a literal angle"
-				onclick={() => onchange(String(numeric_value ?? 0))}>custom</button
+				onclick={() => onchange(String(numeric_value ?? 0))}
 			>
+				custom
+			</button>
 		</div>
 		{#if bound_letter === null && numeric_value !== null}
 			<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
@@ -183,8 +185,10 @@
 			class="plain icon_button sm knob_reset"
 			title="reset to base"
 			aria-label="reset to base"
-			onclick={onreset}>↺</button
+			onclick={onreset}
 		>
+			↺
+		</button>
 	{/if}
 </div>
 

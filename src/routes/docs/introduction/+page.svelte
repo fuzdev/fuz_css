@@ -22,9 +22,9 @@
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
 				Use the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-				<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> for bundled CSS that includes
-				theme variables, base styles, and utility classes in a single import. Add the plugin to your Vite
-				config:
+				<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink>
+				for bundled CSS that includes theme variables, base styles, and utility classes in a single
+				import. Add the plugin to your Vite config:
 			</p>
 			<Code
 				lang="ts"
@@ -65,18 +65,19 @@ import 'virtual:fuz.css'; // used utilities only`}
 				<li>plain CSS</li>
 				<li>minimal dependencies, all optional (none needed if you only use the stylesheets)</li>
 				<li>
-					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML elements,
-					and also exports the underlying data, helpers, and types for open-ended usage
+					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML
+					elements, and also exports the underlying data, helpers, and types for open-ended usage
 				</li>
 				<li>
-					supports <TomeLink slug="themes" /> as sets of style variables, applied at build time through
-					the generators' <code>theme</code> option or swapped at runtime - dark mode is a
+					supports <TomeLink slug="themes" /> as sets of style variables, applied at build time
+					through the generators' <code>theme</code> option or swapped at runtime - dark mode is a
 					first-class concept, not a theme; instead, each theme can support light and/or dark
 					<MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
 				</li>
 				<li>
-					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types (token,
-					composite, CSS-literal) and modifiers for responsive, state, color-scheme, and pseudo-elements
+					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types
+					(token, composite, CSS-literal) and modifiers for responsive, state, color-scheme, and
+					pseudo-elements
 				</li>
 				<li>
 					uses its own concept of style <TomeLink slug="variables" />, a specialization of CSS
@@ -92,9 +93,10 @@ import 'virtual:fuz.css'; // used utilities only`}
 					<a href="https://ui.fuz.dev/">fuz_ui</a>
 				</li>
 				<li>
-					see the <TomeLink slug="classes" hash="Compared-to-alternatives"
-						>comparison to alternatives</TomeLink
-					> to understand fuz_css relative to TailwindCSS and UnoCSS
+					see the <TomeLink slug="classes" hash="Compared-to-alternatives">
+						comparison to alternatives
+					</TomeLink>
+					to understand fuz_css relative to TailwindCSS and UnoCSS
 				</li>
 			</ul>
 		</TomeSection>

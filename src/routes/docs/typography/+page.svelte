@@ -109,13 +109,15 @@
 		</form>
 		{#each font_size_variants as size (size.name)}
 			<div class="row flex-wrap:wrap">
-				<StyleVariableButton title={size.light} name={size.name}
-					><span
+				<StyleVariableButton title={size.light} name={size.name}>
+					<span
 						style:font-size="var(--{size.name})"
 						style:font-weight={selected_font_weight}
-						class="font_family_sans">{size.name}</span
-					></StyleVariableButton
-				>
+						class="font_family_sans"
+					>
+						{size.name}
+					</span>
+				</StyleVariableButton>
 				<div class="row">
 					<span class="pr_sm">=</span>
 					<code>{computed_styles?.getPropertyValue('--' + size.name)}</code>
@@ -151,7 +153,8 @@
 			The text scale (<code>text_00</code> through <code>text_100</code>) provides tinted neutral
 			colors optimized for text legibility. The scale uses "prominence" semantics for light and dark
 			modes: low numbers are subtle, high numbers are strong. This matches the
-			<TomeLink slug="shading">shade scale</TomeLink> pattern.
+			<TomeLink slug="shading">shade scale</TomeLink>
+			pattern.
 		</p>
 		<ul>
 			<li><code>text_00</code> - surface-side endpoint: essentially invisible on surface</li>
@@ -174,11 +177,11 @@
 			{#each text_scale_variants as variant (variant)}
 				{@const name = 'text_' + variant}
 				<div class="row">
-					<StyleVariableButton {name}
-						><span class="font_family_mono" style:color="var(--{name})">
+					<StyleVariableButton {name}>
+						<span class="font_family_mono" style:color="var(--{name})">
 							{name}
-						</span></StyleVariableButton
-					> = <code>{computed_styles?.getPropertyValue('--' + name)}</code>
+						</span>
+					</StyleVariableButton> = <code>{computed_styles?.getPropertyValue('--' + name)}</code>
 				</div>
 			{/each}
 		</div>
@@ -190,16 +193,16 @@
 		<div>
 			{#each line_height_names as name (name)}
 				<div>
-					<StyleVariableButton {name}
-						><div style:line-height="var(--{name})" class="button_contents font_family_mono">
+					<StyleVariableButton {name}>
+						<div style:line-height="var(--{name})" class="button_contents font_family_mono">
 							<div>
 								{name} =
 								<code>{computed_styles?.getPropertyValue('--' + name)}</code>
 							</div>
 							<div>{name}</div>
 							<div>{name}</div>
-						</div></StyleVariableButton
-					>
+						</div>
+					</StyleVariableButton>
 				</div>
 			{/each}
 		</div>
@@ -241,8 +244,9 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.md</code>
-			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to the
-			defaults. Use it inside a sized container to restore normal sizing for a subtree.
+			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink>
+			resets sizing to the defaults. Use it inside a sized container to restore normal sizing for a
+			subtree.
 		</p>
 		<Code
 			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}

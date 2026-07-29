@@ -82,13 +82,13 @@
 						<div class="content">
 							<div class="icon">a</div>
 							<div class="title">
-								<span class="text"
-									><Code
+								<span class="text">
+									<Code
 										content={`<div class="menuitem selectable${
 											clicked === 'a' ? ' selected' : ''
 										}">`}
-									/></span
-								>
+									/>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -105,13 +105,13 @@
 						<div class="content">
 							<div class="icon">b</div>
 							<div class="title">
-								<span class="text"
-									><Code
+								<span class="text">
+									<Code
 										content={`<div class="menuitem selectable${
 											clicked === 'b' ? ' selected' : ''
 										}">`}
-									/></span
-								>
+									/>
+								</span>
 							</div>
 						</div>
 					</div>
@@ -128,13 +128,13 @@
 						<div class="content">
 							<div class="icon">c</div>
 							<div class="title">
-								<span class="text"
-									><Code
+								<span class="text">
+									<Code
 										content={`<div class="menuitem selectable${
 											clicked === 'c' ? ' selected' : ''
 										}">`}
-									/></span
-								>
+									/>
+								</span>
 							</div>
 						</div>
 					</div>

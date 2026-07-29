@@ -139,12 +139,13 @@
 					title={editor.is_palette_tier
 						? 'moves palette letter hues - exemplar tier, stays out of registries'
 						: 'moves only intent bindings and levers - safe for theme registries'}
-					>{editor.is_palette_tier ? 'palette-tier' : 'semantic-tier'}</span
 				>
+					{editor.is_palette_tier ? 'palette-tier' : 'semantic-tier'}
+				</span>
 				{#if editor.dirty}
-					<button type="button" class="sm" onclick={() => editor.reset_all()}
-						>reset all{editor.overrides.size ? ` (${editor.overrides.size})` : ''}</button
-					>
+					<button type="button" class="sm" onclick={() => editor.reset_all()}>
+						reset all{editor.overrides.size ? ` (${editor.overrides.size})` : ''}
+					</button>
 				{/if}
 			</div>
 		</div>
@@ -154,11 +155,11 @@
 		<div class="row gap_lg">
 			<ColorSchemeInput />
 			{#if editor.stance}
-				<small
-					>single-scheme theme - edits write to the base slots and the <strong
-						>{editor.stance}</strong
-					> appearance renders in both color schemes</small
-				>
+				<small>
+					single-scheme theme - edits write to the base slots and the
+					<strong>{editor.stance}</strong>
+					appearance renders in both color schemes
+				</small>
 			{:else}
 				<small>edits write to the <strong>{editing_scheme}</strong> scheme's slots</small>
 			{/if}
@@ -212,10 +213,10 @@
 				{/if}
 				{#if sm_knobs.length}
 					<details class="mt_lg">
-						<summary
-							>{sm_details_titles[axis] ?? 'granular tokens'}
-							<small>(escape hatches - pin individual tokens)</small></summary
-						>
+						<summary>
+							{sm_details_titles[axis] ?? 'granular tokens'}
+							<small>(escape hatches - pin individual tokens)</small>
+						</summary>
 						<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end mt_md">
 							{#each sm_knobs as knob (knob.name)}
 								{@render knob_control(knob, false)}
@@ -225,11 +226,11 @@
 				{/if}
 				{#if axis === 'color'}
 					<details class="mt_lg">
-						<summary
-							>palette hues <small
-								>(the letter slots - moving these makes the theme palette-tier)</small
-							></summary
-						>
+						<summary>
+							palette hues <small>
+								(the letter slots - moving these makes the theme palette-tier)
+							</small>
+						</summary>
 						<div class="ramp_strips mt_md mb_lg">
 							{#each palette_variants as letter (letter)}
 								<RampStrip prefix="palette_{letter}" label="palette_{letter}" />
@@ -249,7 +250,8 @@
 	<section>
 		<h3>Output</h3>
 		<p>
-			The copyable <code>Theme</code> object, and the CSS it renders (only the variables the theme sets).
+			The copyable <code>Theme</code> object, and the CSS it renders (only the variables the theme
+			sets).
 		</p>
 		<div class="rendered mb_lg">
 			<div class="copy">

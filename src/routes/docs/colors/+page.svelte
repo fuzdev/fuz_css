@@ -31,13 +31,12 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css's colors are <em>derived</em>: around a dozen knobs produce every color <TomeLink
-				slug="variables"
-			/> in pure CSS, in the
+			fuz_css's colors are <em>derived</em>: around a dozen knobs produce every color
+			<TomeLink slug="variables" /> in pure CSS, in the
 			<MdnLink path="Web/CSS/color_value/oklch" /> colorspace, adapting to the
-			<MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH lightness is perceptually uniform (equal
-			lightness reads equally light in every hue), so rotating a hue knob is safe: contrast and visual
-			weight hold.
+			<MdnLink path="Web/CSS/color-scheme" />
+			automatically. OKLCH lightness is perceptually uniform (equal lightness reads equally light in
+			every hue), so rotating a hue knob is safe: contrast and visual weight hold.
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics ("a" is blue by
@@ -58,13 +57,13 @@
 				<code>--hue_a</code> … <code>--hue_j</code> - OKLCH hue angles for the 10 palette slots
 			</li>
 			<li>
-				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of every
-				surface, text, border, and shadow tint (the neutral intent; its scales are the shade and text
-				ramps)
+				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of
+				every surface, text, border, and shadow tint (the neutral intent; its scales are the shade
+				and text ramps)
 			</li>
 			<li>
-				<code>--chroma_scale</code> - one multiplier from grayscale (0) through calm (1) to vivid (above
-				1, deliberately clipping the weakest hues)
+				<code>--chroma_scale</code> - one multiplier from grayscale (0) through calm (1) to vivid
+				(above 1, deliberately clipping the weakest hues)
 			</li>
 			<li>
 				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
@@ -88,15 +87,15 @@
 				…), each multiplying one slot's chroma under the global <code>--chroma_scale</code>. The
 				brown slot ships muted (<code>--palette_f_chroma_scale: 0.55</code>) because brown is
 				low-chroma orange, unreachable by hue alone. An intent bound to a muted slot needs its twin
-				set too - bindings share only the hue angle, and <code>validate_theme</code> warns when the character
-				would be dropped
+				set too - bindings share only the hue angle, and <code>validate_theme</code> warns when the
+				character would be dropped
 			</li>
 		</ul>
 		<p>
-			Every intermediate value these produce is also its own variable (<code
-				>--palette_lightness_30</code
-			>, <code>--palette_chroma_50</code>, …), so a theme can pin any individual stop as an escape
-			hatch.
+			Every intermediate value these produce is also its own variable (<code>
+				--palette_lightness_30
+			</code>, <code>--palette_chroma_50</code>, …), so a theme can pin any individual stop as an
+			escape hatch.
 		</p>
 		<Code
 			lang="css"
@@ -111,10 +110,11 @@
 	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<p>
-			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness and
-			chroma are shared across all hues at each stop, the scales are interchangeable: setting a hue alone
-			is enough, no per-hue tuning required. The one deliberate exception is the per-slot chroma multiplier
-			- the brown slot ships muted because no hue angle renders brown at full palette chroma.
+			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness
+			and chroma are shared across all hues at each stop, the scales are interchangeable: setting a
+			hue alone is enough, no per-hue tuning required. The one deliberate exception is the per-slot
+			chroma multiplier - the brown slot ships muted because no hue angle renders brown at full
+			palette chroma.
 		</p>
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
@@ -141,8 +141,8 @@
 		</p>
 		<p>
 			Unlike the <TomeLink slug="shading">shade</TomeLink> and
-			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate), palette
-			variables can be used for both text and backgrounds via utility classes:
+			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate),
+			palette variables can be used for both text and backgrounds via utility classes:
 			<code>.palette_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
 		</p>
 		<p>

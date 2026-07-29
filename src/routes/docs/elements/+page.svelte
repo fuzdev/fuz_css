@@ -26,19 +26,23 @@
 	<section>
 		<p>
 			fuz_css applies default styles to semantic HTML elements in its <SourceFileLink
-				path="style.css">reset stylesheet</SourceFileLink
-			>. The styles use <TomeLink slug="variables" /> and include appropriate spacing, so plain HTML gets
-			user-friendly styling and theme integration automatically. The defaults are low specificity using
+				path="style.css"
+			>
+				reset stylesheet
+			</SourceFileLink>. The styles use <TomeLink slug="variables" /> and include appropriate
+			spacing, so plain HTML gets user-friendly styling and theme integration automatically. The
+			defaults are low specificity using
 			<code>:where</code>
 			so they're easy to override, and you can opt out by adding
-			<code>.unstyled</code> to an element.
+			<code>.unstyled</code>
+			to an element.
 		</p>
 	</section>
-	<UnfinishedImplementationWarning
-		>Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css/issues"
-			>requests</a
-		>?</UnfinishedImplementationWarning
-	>
+	<UnfinishedImplementationWarning>
+		Element styles are incomplete. Any <a href="https://github.com/fuzdev/fuz_css/issues">
+			requests
+		</a>?
+	</UnfinishedImplementationWarning>
 	<TomeSection>
 		<TomeSectionHeader text="p">
 			<MdnLink path="Web/HTML/Element/p" />
@@ -50,13 +54,14 @@
 		<p>p</p>
 		<p>p</p>
 		<p>
-			This paragraph has no bottom margin because default spacing is omitted for the <code
-				>:last-child</code
-			>
-			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge cases
-			that can usually be solved by adding <code>.mb_lg</code>. Coupling markup structure to styles
-			like this may be something we change, <a href="https://github.com/fuzdev/fuz_css">feedback</a> is
-			welcome.
+			This paragraph has no bottom margin because default spacing is omitted for the <code>
+				:last-child
+			</code>
+			of all otherwise-spaced elements, streamlining the common case. This has some unfortunate edge
+			cases that can usually be solved by adding <code>.mb_lg</code>. Coupling markup structure to
+			styles like this may be something we change,
+			<a href="https://github.com/fuzdev/fuz_css">feedback</a>
+			is welcome.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -103,9 +108,9 @@
 			/>
 		</details>
 		<details class="unstyled">
-			<summary class="unstyled"
-				><code>details</code> and <code>summary</code> with <code>.unstyled</code></summary
-			>
+			<summary class="unstyled">
+				<code>details</code> and <code>summary</code> with <code>.unstyled</code>
+			</summary>
 			unstyled details content
 		</details>
 	</TomeSection>

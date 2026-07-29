@@ -109,9 +109,9 @@
 <TomeContent {tome}>
 	<TomeSection>
 		<TomeSectionHeader text="Themes" />
-		<UnfinishedImplementationWarning
-			>The theme set is still growing, but the proof of concept is ready!</UnfinishedImplementationWarning
-		>
+		<UnfinishedImplementationWarning>
+			The theme set is still growing, but the proof of concept is ready!
+		</UnfinishedImplementationWarning>
 		<p>
 			A theme is a set of <em>knob</em> values, not a stylesheet: a JSON collection of
 			<TomeLink slug="variables" /> where a handful of high-leverage variables (hue angles,
@@ -141,14 +141,15 @@
 		</label>
 		<p>
 			Contrast is a <em>modifier</em>, not a theme: the low/high contrast pair compose over any
-			selected theme with <code>compose_themes</code> (flatten + last-wins), so every theme has low and
-			high contrast variants for free.
+			selected theme with <code>compose_themes</code> (flatten + last-wins), so every theme has low
+			and high contrast variants for free.
 		</p>
 		<p>
 			Every theme ships as an importable module under <code>themes/</code>, and theme CSS renders
 			into the <code>fuz.theme</code> cascade layer, above the <code>fuz.base</code> defaults, so
 			overrides win regardless of stylesheet order. See <ModuleLink module_path="theme.ts" /> and
-			<ModuleLink module_path="themes.ts" /> for the API:
+			<ModuleLink module_path="themes.ts" />
+			for the API:
 		</p>
 		<Code
 			lang="ts"
@@ -157,8 +158,8 @@
 		<p>
 			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - its
 			one appearance then renders in both color schemes and
-			<MdnLink path="Web/CSS/color-scheme" /> is pinned to match. The necromancer and terminalien themes
-			are dark-only this way.
+			<MdnLink path="Web/CSS/color-scheme" />
+			is pinned to match. The necromancer and terminalien themes are dark-only this way.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -169,8 +170,9 @@
 		</p>
 		<p>
 			Pass a theme to the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-			<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> and its values bake into
-			the generated CSS - no runtime rendering, no JavaScript shipped, and the output stays tree-shaken:
+			<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink>
+			and its values bake into the generated CSS - no runtime rendering, no JavaScript shipped, and
+			the output stays tree-shaken:
 		</p>
 		<Code
 			lang="ts"
@@ -184,14 +186,15 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_t
 			It overlays the default variables last-wins by name, so it composes with the
 			<code>variables</code> option. Unlike the runtime path it doesn't pin
 			<MdnLink path="Web/CSS/color-scheme" /> - for a single-scheme theme, add the
-			<code>dark</code> or <code>light</code> class to the root <code>html</code> element, as in the next
-			section.
+			<code>dark</code> or <code>light</code> class to the root <code>html</code> element, as in the
+			next section.
 		</p>
 		<p>
 			For runtime switching - a picker, or a theme loaded per user - use <code>ThemeRoot</code> from
 			<a href="https://ui.fuz.dev/">fuz_ui</a>, which renders the theme to a
-			<code>style</code> element. The two compose: the build-time theme is the starting point, and a runtime
-			theme overrides it by cascade layer.
+			<code>style</code>
+			element. The two compose: the build-time theme is the starting point, and a runtime theme
+			overrides it by cascade layer.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -199,11 +202,12 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_t
 		<p>
 			fuz_css supports
 			<MdnLink path="Web/CSS/color-scheme" /> with dark and light modes, detected from
-			<MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by default. To apply dark mode manually,
-			add the <code>dark</code> class to the root <code>html</code> element, or use a component like
-			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte"
-				>this one</a
-			>
+			<MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by default. To apply dark mode
+			manually, add the <code>dark</code> class to the root <code>html</code> element, or use a
+			component like
+			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte">
+				this one
+			</a>
 			from the companion Svelte library <a href="https://ui.fuz.dev/">fuz_ui</a>:
 		</p>
 		<div class="display:flex mb_lg">
@@ -220,7 +224,8 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_t
 			Drag a knob and the whole page rethemes live - extreme values can make the page hard to read,
 			which is an honest signal, not a bug. Every edit updates a temporary "{UNSAVED_THEME_NAME}"
 			theme in the picker above; it survives navigating away and back, but copy the
-			<code>Theme</code> object below to keep it.
+			<code>Theme</code>
+			object below to keep it.
 		</p>
 		<ThemeEditor {editor} {theme_state} />
 	</TomeSection>
@@ -231,14 +236,15 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_t
 			<code>Theme</code>.
 		</p>
 		<p>
-			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors, while
-			type and range mismatches on the knob-tier variables are advisory warnings. It returns an array
-			of issues - empty means the theme is structurally sound.
+			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors,
+			while type and range mismatches on the knob-tier variables are advisory warnings. It returns
+			an array of issues - empty means the theme is structurally sound.
 		</p>
 		<p>
 			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against
 			the theme's resolved values. It is report-only and never throws, returning
-			<code>{'{ok, entries, unchecked}'}</code> - suited to a CI or test assertion:
+			<code>{'{ok, entries, unchecked}'}</code>
+			- suited to a CI or test assertion:
 		</p>
 		<Code
 			lang="ts"

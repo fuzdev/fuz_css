@@ -30,16 +30,17 @@
 	<section>
 		<p>
 			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
-			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the base
-			style.
+			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the
+			base style.
 		</p>
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
 			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
 			Instead of having two distinct styles of buttons with outlined and filled variants, fuz_css
 			makes outlined buttons the default, and selected buttons are filled. There's also the
-			<code>.deselectable</code> modifier class for buttons that remain clickable when selected. Themes
-			can customize this behavior.
+			<code>.deselectable</code>
+			modifier class for buttons that remain clickable when selected. Themes can customize this
+			behavior.
 		</p>
 		<div class:mb_xs>
 			<Code content={`<button>a button</button>`} />
@@ -53,12 +54,12 @@
 		<button type="button" class="plain" disabled class:mb_xs>button.plain:disabled</button>
 		<button type="button" class="selected" class:mb_xs>button.selected</button>
 		<button type="button" class="selected" disabled class:mb_xs>button.selected:disabled</button>
-		<button type="button" class="selected deselectable" class:mb_xs
-			>button.selected.deselectable</button
-		>
-		<button type="button" class="selected deselectable" disabled class:mb_xs
-			>button.selected.deselectable:disabled</button
-		>
+		<button type="button" class="selected deselectable" class:mb_xs>
+			button.selected.deselectable
+		</button>
+		<button type="button" class="selected deselectable" disabled class:mb_xs>
+			button.selected.deselectable:disabled
+		</button>
 		<button type="button" class="unstyled">with .unstyled</button>
 	</section>
 
@@ -75,26 +76,27 @@
 			<section>
 				<Code content={`<button class="${palette_name}">`} />
 				<button type="button" class={palette_name} class:mb_xs>.{palette_name}</button>
-				<button type="button" class={palette_name} disabled class:mb_xs
-					>.{palette_name}:disabled</button
-				>
-				<button type="button" class="{palette_name} plain" class:mb_xs>.{palette_name}.plain</button
-				>
-				<button type="button" class="{palette_name} plain" disabled class:mb_xs
-					>.{palette_name}.plain:disabled</button
-				>
-				<button type="button" class="{palette_name} selected" class:mb_xs
-					>.{palette_name}.selected</button
-				>
-				<button type="button" class="{palette_name} selected" disabled class:mb_xs
-					>.{palette_name}.selected:disabled</button
-				>
-				<button type="button" class="{palette_name} selected deselectable" class:mb_xs
-					>.{palette_name}.selected.deselectable</button
-				>
-				<button type="button" class="{palette_name} selected deselectable" disabled class:mb_xs
-					>.{palette_name}.selected.deselectable:disabled</button
-				>
+				<button type="button" class={palette_name} disabled class:mb_xs>
+					.{palette_name}:disabled
+				</button>
+				<button type="button" class="{palette_name} plain" class:mb_xs>
+					.{palette_name}.plain
+				</button>
+				<button type="button" class="{palette_name} plain" disabled class:mb_xs>
+					.{palette_name}.plain:disabled
+				</button>
+				<button type="button" class="{palette_name} selected" class:mb_xs>
+					.{palette_name}.selected
+				</button>
+				<button type="button" class="{palette_name} selected" disabled class:mb_xs>
+					.{palette_name}.selected:disabled
+				</button>
+				<button type="button" class="{palette_name} selected deselectable" class:mb_xs>
+					.{palette_name}.selected.deselectable
+				</button>
+				<button type="button" class="{palette_name} selected deselectable" disabled class:mb_xs>
+					.{palette_name}.selected.deselectable:disabled
+				</button>
 			</section>
 		{/each}
 		<div class="box width:100% mb_lg">
@@ -145,7 +147,8 @@
 		</section>
 		<section>
 			<p>
-				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when selected:
+				<code>.selected</code> buttons with <code>.deselectable</code> continue to be clickable when
+				selected:
 			</p>
 			<Code content={`<button class="selected deselectable">\n\t...\n</button>`} />
 		</section>
@@ -155,11 +158,16 @@
 				class="width:100% deselectable"
 				class:selected={selected_deselectable_button}
 				onclick={() => (selected_deselectable_button = !selected_deselectable_button)}
-				>a .deselectable{#if selected_deselectable_button}.selected{:else}&nbsp;unselected{/if} button</button
 			>
-			<button type="button" class="width:100% selected deselectable" disabled
-				>disabled .deselectable.selected</button
-			>
+				a .deselectable{#if selected_deselectable_button}
+					.selected
+				{:else}
+					&nbsp;unselected
+				{/if} button
+			</button>
+			<button type="button" class="width:100% selected deselectable" disabled>
+				disabled .deselectable.selected
+			</button>
 		</section>
 	</TomeSection>
 
@@ -232,8 +240,8 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code> scale
-			buttons up and down by overriding custom properties for font, height, and padding.
+			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
+			scale buttons up and down by overriding custom properties for font, height, and padding.
 		</p>
 		<Code
 			content={`<button class="xs">xs</button>\n<button class="sm">sm</button>\n<button>md</button>\n<button class="lg">lg</button>\n<button class="xl">xl</button>`}
