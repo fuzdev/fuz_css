@@ -18,6 +18,7 @@ import { assert_css_order } from './test_helpers.ts';
 const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssResolutionResult => ({
 	theme_css: ':root { --color: blue; }',
 	base_css: 'button { color: red; }',
+	preferences_css: '',
 	resolved_variables: new Set(['color']),
 	included_rule_indices: new Set([0]),
 	included_elements: new Set(['button']),
@@ -52,10 +53,26 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result();
 			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
 
-			assert.match(bundled, /^@layer fuz\.base, fuz\.theme, fuz\.utilities;/);
+			assert.match(bundled, /^@layer fuz\.base, fuz\.preferences, fuz\.theme, fuz\.utilities;/);
 			// theme variables and base styles both live in fuz.base; utilities above
 			assert.equal(bundled.match(/@layer fuz\.base \{/gu)?.length, 2);
 			assert.include(bundled, '@layer fuz.utilities {\n.p_md { padding: 16px; }\n}');
+		});
+
+		test('preference rules are wrapped in fuz.preferences', () => {
+			const result = create_mock_result({
+				preferences_css: '@media (prefers-contrast: more) {\n:root { --x: 1; }\n}'
+			});
+			const bundled = generate_bundled_css(result, '');
+
+			assert.include(bundled, '/* User-Preference Mappings */');
+			assert.include(
+				bundled,
+				'@layer fuz.preferences {\n@media (prefers-contrast: more) {\n:root { --x: 1; }\n}\n}'
+			);
+			// gated by include_base alongside the base styles they come from
+			const no_base = generate_bundled_css(result, '', { include_base: false });
+			assert.notInclude(no_base, 'fuz.preferences {');
 		});
 	});
 

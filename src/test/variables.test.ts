@@ -3,6 +3,8 @@ import { test, assert } from 'vitest';
 import { default_variables } from '$lib/variables.ts';
 import * as exported_variables from '$lib/variables.ts';
 import { StyleVariable } from '$lib/variable.ts';
+import { PALETTE_CHROMA_MULTIPLIERS } from '$lib/ramps.ts';
+import { palette_variants, intent_variants } from '$lib/variable_data.ts';
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
@@ -51,3 +53,21 @@ test('variable identifiers are all included in `default_variables`', () => {
 });
 
 const is_style_variable = (v: unknown): v is StyleVariable => StyleVariable.safeParse(v).success;
+
+test('per-slot chroma multiplier defaults pin the numeric twin', () => {
+	// the emitted CSS falls back to 1 when the variable is absent, so the
+	// declared defaults are what keep the CSS and the numeric-twin gates
+	// agreeing - brown's 0.55 mute in particular
+	const by_name = new Map(default_variables.map((v) => [v.name, v]));
+	for (const letter of palette_variants) {
+		const v = by_name.get(`palette_${letter}_chroma_scale`);
+		assert(v, `palette_${letter}_chroma_scale is declared`);
+		assert.strictEqual(v.light, String(PALETTE_CHROMA_MULTIPLIERS[letter]), v.name);
+		assert.isUndefined(v.dark, `${v.name} is scheme-agnostic`);
+	}
+	for (const intent of intent_variants) {
+		const v = by_name.get(`${intent}_chroma_scale`);
+		assert(v, `${intent}_chroma_scale is declared`);
+		assert.strictEqual(v.light, '1', v.name);
+	}
+});

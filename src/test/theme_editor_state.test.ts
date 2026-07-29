@@ -1,0 +1,240 @@
+/**
+ * Tests for the docs site's theme editor state: the slot-merge semantics,
+ * scheme-stance re-slotting, display values, snapshots, and the copyable
+ * TypeScript output.
+ *
+ * @module
+ */
+
+import { test, assert, describe } from 'vitest';
+
+import {
+	ThemeEditorState,
+	render_theme_ts,
+	discard_confirm_message,
+	UNSAVED_THEME_NAME
+} from '$routes/theme_editor_state.svelte.ts';
+import type { Theme } from '$lib/theme.ts';
+import { base_theme } from '$lib/themes/base.ts';
+import { necromancer_theme } from '$lib/themes/necromancer.ts';
+import { default_variables } from '$lib/variables.ts';
+
+const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
+const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
+
+const create_editor = (): ThemeEditorState =>
+	new ThemeEditorState([base_theme, necromancer_theme]);
+
+describe('set_value slot semantics', () => {
+	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.9', 'light');
+		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		// the default's dark slot is preserved explicitly - a theme's :root block
+		// beats the base defaults' :root.dark by layer order, so omitting it
+		// would silently change dark mode too
+		assert.deepEqual(merged, {
+			name: adaptive_default.name,
+			light: '0.9',
+			dark: adaptive_default.dark
+		});
+	});
+
+	test('editing the dark slot leaves the light slot to the default', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.3', 'dark');
+		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		assert.deepEqual(merged, { name: adaptive_default.name, dark: '0.3' });
+	});
+
+	test('a single-slot variable always edits the base slot', () => {
+		const editor = create_editor();
+		editor.set_value(single_slot_default.name, '1.4', 'dark');
+		const merged = editor.merged_variables.find((v) => v.name === single_slot_default.name);
+		assert.deepEqual(merged, { name: single_slot_default.name, light: '1.4' });
+	});
+
+	test('identical light and dark values collapse to a single slot', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.5', 'light');
+		editor.set_value(adaptive_default.name, '0.5', 'dark');
+		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.5' });
+	});
+});
+
+describe('scheme stance', () => {
+	test('entering a stance re-slots existing overrides to the base slot', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.25', 'dark');
+		editor.set_scheme('dark');
+		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.25' });
+	});
+
+	test('a light stance drops dark-only overrides - that appearance never renders', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.25', 'dark');
+		editor.set_scheme('light');
+		assert.isFalse(editor.overrides.has(adaptive_default.name));
+	});
+
+	test('edits under a stance write the base slot and skip dark preservation', () => {
+		const editor = create_editor();
+		editor.set_scheme('dark');
+		editor.set_value(adaptive_default.name, '0.25', 'dark');
+		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		// no preserved dark slot - the stance mirror owns untouched defaults
+		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.25' });
+	});
+
+	test('the draft and output of a stanced editor carry a resolved scheme_mirror', () => {
+		const editor = create_editor();
+		editor.set_scheme('dark');
+		assert.strictEqual(editor.draft.scheme, 'dark');
+		assert.isAbove(editor.draft.scheme_mirror!.length, 0);
+		assert.isAbove(editor.output.scheme_mirror!.length, 0);
+		// a dual editor's draft has no mirror
+		const dual = create_editor();
+		assert.isUndefined(dual.draft.scheme_mirror);
+	});
+});
+
+describe('display_value', () => {
+	test('falls back to the default per scheme', () => {
+		const editor = create_editor();
+		assert.strictEqual(
+			editor.display_value(adaptive_default.name, 'light'),
+			adaptive_default.light
+		);
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.dark);
+	});
+
+	test('a light-only merged value applies to both schemes', () => {
+		const editor = create_editor();
+		editor.set_value(single_slot_default.name, '1.7', 'light');
+		assert.strictEqual(editor.display_value(single_slot_default.name, 'light'), '1.7');
+		assert.strictEqual(editor.display_value(single_slot_default.name, 'dark'), '1.7');
+	});
+
+	test('a stance mirrors untouched scheme-adaptive defaults into both schemes', () => {
+		const editor = create_editor();
+		editor.set_scheme('dark');
+		assert.strictEqual(
+			editor.display_value(adaptive_default.name, 'light'),
+			adaptive_default.dark
+		);
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.dark);
+	});
+});
+
+describe('load_theme and dirty', () => {
+	test('a fresh editor is clean; edits and scheme changes dirty it', () => {
+		const editor = create_editor();
+		assert.isFalse(editor.dirty);
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.isTrue(editor.dirty);
+		editor.reset(single_slot_default.name);
+		assert.isFalse(editor.dirty);
+		editor.set_scheme('dark');
+		assert.isTrue(editor.dirty);
+		editor.reset_all();
+		assert.isFalse(editor.dirty);
+	});
+
+	test('loading a theme flattens it as the base and carries its stance', () => {
+		const editor = create_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		editor.load_theme(necromancer_theme);
+		assert.strictEqual(editor.based_on, necromancer_theme.name);
+		assert.strictEqual(editor.overrides.size, 0);
+		assert.strictEqual(editor.scheme, 'dark');
+		assert.isFalse(editor.dirty);
+		// the base theme's own variables flow into the merge
+		const merged_names = new Set(editor.merged_variables.map((v) => v.name));
+		for (const v of necromancer_theme.variables) {
+			assert.isTrue(merged_names.has(v.name), v.name);
+		}
+	});
+
+	test('the unsaved draft itself never loads as a base', () => {
+		const editor = create_editor();
+		editor.load_theme({ name: UNSAVED_THEME_NAME, variables: [] });
+		assert.strictEqual(editor.based_on, 'base');
+	});
+});
+
+describe('snapshots', () => {
+	test('round-trips name, base, scheme, and overrides', () => {
+		const editor = create_editor();
+		editor.name = 'my theme';
+		editor.load_theme(necromancer_theme);
+		editor.set_value(single_slot_default.name, '1.4', 'light');
+		const snapshot = editor.to_snapshot();
+
+		const restored = create_editor();
+		restored.restore_snapshot(snapshot);
+		assert.strictEqual(restored.based_on, necromancer_theme.name);
+		assert.strictEqual(restored.scheme, 'dark');
+		assert.deepEqual(restored.overrides.get(single_slot_default.name), { light: '1.4' });
+	});
+
+	test('a stale snapshot referencing a removed theme falls back to the first', () => {
+		const editor = create_editor();
+		editor.restore_snapshot({
+			name: 'x',
+			based_on: 'deleted theme',
+			scheme: 'dual',
+			overrides: []
+		});
+		assert.strictEqual(editor.based_on, base_theme.name);
+	});
+});
+
+describe('render_theme_ts', () => {
+	test('a dual theme renders a plain module', () => {
+		const ts = render_theme_ts({
+			name: 'my theme',
+			variables: [{ name: 'chroma_scale', light: '1.4' }]
+		});
+		assert.include(ts, 'export const my_theme_theme: Theme = {');
+		assert.include(ts, "{name: 'chroma_scale', light: '1.4'},");
+		assert.notInclude(ts, 'resolve_theme_stance');
+	});
+
+	test('a stanced theme renders the resolve-at-module-scope shape', () => {
+		const ts = render_theme_ts({
+			name: 'darkling',
+			scheme: 'dark',
+			variables: [{ name: 'neutral_chroma', light: '0.04' }]
+		});
+		assert.include(ts, "import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';");
+		assert.include(ts, "scheme: 'dark',");
+		assert.include(ts, 'const authored: Theme = {');
+		assert.include(ts, 'export const darkling_theme: Theme = resolve_theme_stance(authored);');
+	});
+
+	test('single quotes in values escape', () => {
+		const ts = render_theme_ts({
+			name: "it's",
+			variables: [{ name: 'background_image', light: "url('x.png')" }]
+		});
+		assert.include(ts, "name: 'it\\'s'");
+		assert.include(ts, "light: 'url(\\'x.png\\')'");
+	});
+});
+
+describe('discard_confirm_message', () => {
+	test('names the discarded work', () => {
+		const editor = create_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.include(discard_confirm_message(editor, 'necromancer'), '1 edited knob(s)');
+		editor.reset_all();
+		editor.set_scheme('dark');
+		assert.include(discard_confirm_message(editor, 'necromancer'), 'scheme change');
+	});
+});
+
+// keep the type import "used" for the linter across fixture literals
+const _theme_type_check: Theme = base_theme;
+void _theme_type_check;

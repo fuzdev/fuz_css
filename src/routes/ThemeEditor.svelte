@@ -6,7 +6,7 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import type { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import { render_theme_style, type ThemeScheme } from '$lib/theme.ts';
+	import { render_theme_style, type Theme, type ThemeScheme } from '$lib/theme.ts';
 	import { theme_knobs, knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
 	import {
@@ -28,10 +28,16 @@
 
 	const {
 		editor,
-		theme_state
+		theme_state,
+		onload_theme
 	}: {
 		editor: ThemeEditorState;
 		theme_state: ThemeState;
+		/**
+		 * Called after the "based on" select loads a theme as the new base, so
+		 * the page can apply it and sync its own picker selection.
+		 */
+		onload_theme?: (theme: Theme) => void;
 	} = $props();
 
 	// the scheme whose slots edits write to; OS changes while 'auto' aren't
@@ -53,13 +59,21 @@
 	const binding_knobs = theme_knobs.filter((k) => k.bindable);
 	const lever_knobs = theme_knobs.filter((k) => k.leverage === 'lg' && !k.bindable);
 
-	// the sm escape-hatch walls fold behind a disclosure per axis so the levers
-	// stay the visual main flow
-	const sm_details_titles: Partial<Record<KnobAxis, string>> = {
-		shape: 'border width & radius tokens',
-		density: 'space tokens',
-		typography: 'line height tokens',
-		motion: 'motion tokens'
+	// the sm knobs fold behind a disclosure per axis so the levers stay the
+	// visual main flow; each axis labels what its disclosure actually holds
+	const sm_details: Partial<Record<KnobAxis, { title: string; hint: string }>> = {
+		color: {
+			title: 'chroma character & surface hooks',
+			hint: 'per-slot multipliers and micro-surface colors'
+		},
+		shape: {
+			title: 'border width & radius tokens',
+			hint: 'escape hatches - pin individual tokens'
+		},
+		density: { title: 'space tokens', hint: 'escape hatches - pin individual tokens' },
+		depth: { title: 'backdrop hook', hint: 'the dialog and fullscreen backdrop dim' },
+		typography: { title: 'line height tokens', hint: 'escape hatches - pin individual tokens' },
+		motion: { title: 'duration tokens', hint: 'escape hatches - pin individual tokens' }
 	};
 
 	// resolves a letter's current angle from the same merge the renderer uses,
@@ -83,7 +97,10 @@
 			return;
 		}
 		const theme = editor.themes.find((t) => t.name === name);
-		if (theme) editor.load_theme(theme);
+		if (theme) {
+			editor.load_theme(theme);
+			onload_theme?.(theme);
+		}
 	};
 
 	const trimmed_name = $derived(editor.name.trim());
@@ -179,7 +196,7 @@
 		</div>
 		<div>
 			<small>levers - the highest-leverage knobs</small>
-			<div class="knobs row flex-wrap:wrap gap_md">
+			<div class="knobs compact row flex-wrap:wrap">
 				{#each lever_knobs as knob (knob.name)}
 					{@render knob_control(knob, true)}
 				{/each}
@@ -212,10 +229,11 @@
 					</div>
 				{/if}
 				{#if sm_knobs.length}
+					{@const sm_meta = sm_details[axis]}
 					<details class="mt_lg">
 						<summary>
-							{sm_details_titles[axis] ?? 'granular tokens'}
-							<small>(escape hatches - pin individual tokens)</small>
+							{sm_meta?.title ?? 'granular tokens'}
+							<small>({sm_meta?.hint ?? 'escape hatches - pin individual tokens'})</small>
 						</summary>
 						<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end mt_md">
 							{#each sm_knobs as knob (knob.name)}
@@ -250,8 +268,8 @@
 	<section>
 		<h3>Output</h3>
 		<p>
-			The copyable <code>Theme</code> object, and the CSS it renders (only the variables the theme
-			sets).
+			The copyable <code>Theme</code> object, and the CSS it renders - the variables the theme sets,
+			plus the scheme-stance mirror when the theme is single-scheme.
 		</p>
 		<div class="rendered mb_lg">
 			<div class="copy">
@@ -259,7 +277,7 @@
 			</div>
 			<Code content={output_ts} lang="ts" />
 		</div>
-		{#if editor.output.variables.length}
+		{#if editor.output.variables.length || editor.output.scheme_mirror?.length}
 			<div class="rendered mb_lg">
 				<div class="copy">
 					<CopyToClipboard text={output_css} />
@@ -276,8 +294,9 @@
 </div>
 
 <style>
-	.knobs {
-		row-gap: var(--space_lg);
+	/* dense horizontally, normal rhythm between wrapped rows */
+	.knobs.compact {
+		gap: var(--space_lg) var(--space_md);
 	}
 	.ramp_strips {
 		display: grid;

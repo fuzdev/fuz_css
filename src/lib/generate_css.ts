@@ -56,6 +56,12 @@ export interface GenerateCssOptions {
 
 	include_base: boolean;
 	include_theme: boolean;
+	/**
+	 * Whether a `theme` option was configured, independent of whether theme
+	 * output is enabled - lets the footgun guard flag a theme silently
+	 * discarded by `variables: null`.
+	 */
+	has_theme?: boolean;
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
@@ -71,7 +77,7 @@ export interface GenerateCssOptions {
 }
 
 export interface GenerateCssResult {
-	/** Final CSS without banner comments — callers add their own. */
+	/** Final CSS without banner comments - callers add their own. */
 	css: string;
 	/** Extraction + generation + resolution diagnostics, unfiltered. */
 	diagnostics: Array<Diagnostic>;
@@ -79,8 +85,8 @@ export interface GenerateCssResult {
 
 /**
  * Runs the full CSS-generation pipeline: utility classes via
- * `generate_classes_css`, then — when base or theme output is enabled and
- * bundled `resources` are available — base styles and theme variables via
+ * `generate_classes_css`, then - when base or theme output is enabled and
+ * bundled `resources` are available - base styles and theme variables via
  * `resolve_css` + `generate_bundled_css`. Returns the combined CSS and every
  * diagnostic produced along the way.
  */
@@ -99,6 +105,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css_properties,
 		include_base,
 		include_theme,
+		has_theme = false,
 		resources,
 		additional_elements,
 		additional_variables,
@@ -119,6 +126,21 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 	});
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];
+
+	// Footgun guard: a configured `theme` with theme output disabled
+	// (`variables: null`) is silently discarded - the theme flows into the
+	// variable graph but the graph never renders.
+	if (has_theme && !include_theme) {
+		diagnostics.push({
+			phase: 'generation',
+			level: 'warning',
+			message:
+				'A theme is configured but theme variables are disabled (variables: null); the theme will not be emitted',
+			suggestion: 'Remove the theme option, or enable variables so the theme can render.',
+			identifier: 'theme_discarded',
+			locations: null
+		});
+	}
 
 	let css: string;
 	if ((include_base || include_theme) && resources) {
@@ -166,7 +188,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 		// Footgun guard: base styles on, theme off (`variables: null`). The kept base rules and
 		// utility classes still reference fuz_css theme variables, but the disabled theme output
-		// won't define them — every such `var()` dangles. Utility-only mode (both off) never reaches
+		// won't define them - every such `var()` dangles. Utility-only mode (both off) never reaches
 		// this branch; the legitimate escape is importing `theme.css` separately.
 		if (include_base && !include_theme) {
 			const theme_var_names = get_all_variable_names(resources.variable_graph);
@@ -192,7 +214,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			include_utilities: true
 		});
 	} else {
-		// utility-only mode — still layered, so the separately imported package
+		// utility-only mode - still layered, so the separately imported package
 		// style.css/theme.css slot beneath the generated classes and consumers'
 		// unlayered styles beat everything, same as bundled mode
 		css = utility_result.css

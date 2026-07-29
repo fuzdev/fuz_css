@@ -194,13 +194,16 @@
 
 <style>
 	.knob {
+		/* control-column sizing; no distance token sits near these */
+		--knob_basis: 260px;
+		--knob_max_width: 420px;
 		position: relative; /* for the .knob_reset button */
-		flex: 1 1 260px;
-		max-width: 420px;
+		flex: 1 1 var(--knob_basis);
+		max-width: var(--knob_max_width);
 	}
 	.knob.compact {
-		flex: 1 1 190px;
-		max-width: 300px;
+		--knob_basis: 190px;
+		--knob_max_width: 300px;
 	}
 	.title {
 		/* keep long names clear of the reset button (an sm icon_button,

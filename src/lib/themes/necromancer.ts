@@ -2,19 +2,16 @@ import type { Theme } from '../theme.ts';
 import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
- * A fantasy exemplar theme built entirely from semantic bindings and levers —
- * the palette letters keep their default hues. Ectoplasm-green surfaces come
- * from binding the neutral to green, the violet accent from binding the accent
- * intent to purple, and the lit-from-below character from glow-colored
- * depth. Dark-only via the `scheme` stance, vivid past the gamut caps on
- * purpose.
+ * A fantasy exemplar theme built entirely from semantic bindings and levers -
+ * the palette letters keep their default hues, and negative stays red.
+ * Ectoplasm-green surfaces come from binding the neutral to green, the violet
+ * accent from binding the accent intent to purple, and the lit-from-below
+ * character from glow-colored depth. Dark-only via the `scheme` stance, vivid
+ * past the gamut caps on purpose.
  *
- * Declared subversions: none — negative stays red.
- *
- * This theme carries the decoration brief (ornamental borders, glow textures,
- * vignette backgrounds); those need the theme CSS block or decoration hooks,
- * so this knob-only version ships at ~90% volume. The walls it hit are
- * recorded as probe evidence.
+ * Ornamental borders, glow textures, and vignette backgrounds would complete
+ * the look, but need decoration hooks that don't exist yet - this is the
+ * knob-only version.
  */
 const authored: Theme = {
 	name: 'necromancer',
@@ -47,6 +44,6 @@ const authored: Theme = {
 
 /**
  * Resolved at module scope so the stance mirror rides this module's chunk
- * rather than every consumer's theme path — see `theme_stance.ts`.
+ * rather than every consumer's theme path - see `theme_stance.ts`.
  */
 export const necromancer_theme: Theme = resolve_theme_stance(authored);

@@ -23,7 +23,7 @@ export const modified_class_interpreter: CssClassDefinitionInterpreter = {
 		const class_name = matched[0];
 		const segments = extract_segments(class_name);
 
-		// The last segment is always the base class name — only preceding segments
+		// The last segment is always the base class name - only preceding segments
 		// can be modifiers. This avoids ambiguity when a class name collides with
 		// a modifier name (e.g., `sm` and `md` are both breakpoint modifiers and
 		// size composite classes).

@@ -29,7 +29,7 @@ import {
 } from '$lib/theme_check.ts';
 
 // Contrast gates for the default palette. OKLCH lightness is monotonic with
-// luminance, so these hold for every hue at a given stop pair — but WCAG
+// luminance, so these hold for every hue at a given stop pair - but WCAG
 // ratios are computed from real luminance here, not approximated from ΔL.
 // Thresholds are anchored to WCAG levels the old palette met (or, for the
 // per-hue UI gates, failed and the derived palette now meets); promoted to
@@ -113,7 +113,7 @@ describe('chroma multipliers', () => {
 describe('chroma caps', () => {
 	test('baked caps match the worst-hue gamut math (drift check)', () => {
 		// if the default hues or lightness knobs change without recomputing the
-		// caps, this fails — the caps are design-time constants, not free values
+		// caps, this fails - the caps are design-time constants, not free values
 		for (const scheme of color_scheme_variants) {
 			const caps = compute_palette_chroma_caps(
 				Object.values(PALETTE_HUES),

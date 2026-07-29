@@ -9,7 +9,7 @@ import { vite_plugin_fuz_css, type VitePluginFuzCssOptions } from '$lib/vite_plu
 const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_dev');
 
 // The fixture lives under `src/test/`, which the default filter excludes by
-// path — scope extraction to the fixture's html files instead.
+// path - scope extraction to the fixture's html files instead.
 const filter_fixture_file = (path: string): boolean => path.endsWith('.html');
 
 const create_dev_server = (options?: VitePluginFuzCssOptions): Promise<ViteDevServer> =>
@@ -34,7 +34,7 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 	test('first CSS serve includes classes from files no module ever imported', async () => {
 		const server = await create_dev_server();
 		try {
-			// Request the virtual CSS before transforming anything — the cold-start
+			// Request the virtual CSS before transforming anything - the cold-start
 			// shape where extraction state would otherwise be empty.
 			const result = await server.transformRequest('/__fuz.css');
 			assert(result);

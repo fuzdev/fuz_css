@@ -12,7 +12,7 @@
  */
 
 /* theme: base */
-@layer fuz.base, fuz.theme, fuz.utilities;
+@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
 @layer fuz.base {
 	:root {
 		--hue_a: 250; /* blue */
@@ -1330,19 +1330,45 @@
 		--bg_90: var(--lighten_90);
 		--bg_95: var(--lighten_95);
 		--bg_100: var(--lighten_100);
+		--border_color_lightness: 0.345; /* OKLCH lightness of the border color family */
+		--border_color_chroma: calc(var(--neutral_chroma) * 2.6667); /* the border family's chroma, derived from the neutral's */
 		--border_color_00: transparent;
-		--border_color_05: oklch(0.345 0.064 var(--hue_neutral) / 4%);
-		--border_color_10: oklch(0.345 0.064 var(--hue_neutral) / 7%);
-		--border_color_20: oklch(0.345 0.064 var(--hue_neutral) / 13%);
-		--border_color_30: oklch(0.345 0.064 var(--hue_neutral) / 22%);
-		--border_color_40: oklch(0.345 0.064 var(--hue_neutral) / 34%);
-		--border_color_50: oklch(0.345 0.064 var(--hue_neutral) / 48%);
-		--border_color_60: oklch(0.345 0.064 var(--hue_neutral) / 62%);
-		--border_color_70: oklch(0.345 0.064 var(--hue_neutral) / 76%);
-		--border_color_80: oklch(0.345 0.064 var(--hue_neutral) / 88%);
-		--border_color_90: oklch(0.345 0.064 var(--hue_neutral) / 96%);
-		--border_color_95: oklch(0.345 0.064 var(--hue_neutral) / 99%);
-		--border_color_100: oklch(0.345 0.064 var(--hue_neutral));
+		--border_color_05: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 4%
+		);
+		--border_color_10: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 7%
+		);
+		--border_color_20: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 13%
+		);
+		--border_color_30: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 22%
+		);
+		--border_color_40: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 34%
+		);
+		--border_color_50: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 48%
+		);
+		--border_color_60: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 62%
+		);
+		--border_color_70: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 76%
+		);
+		--border_color_80: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 88%
+		);
+		--border_color_90: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 96%
+		);
+		--border_color_95: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 99%
+		);
+		--border_color_100: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral)
+		);
 		--text_min: #fff;
 		--text_max: #000;
 		--text_color: var(--text_80);
@@ -1762,18 +1788,38 @@
 		--bg_90: var(--darken_90);
 		--bg_95: var(--darken_95);
 		--bg_100: var(--darken_100);
-		--border_color_05: oklch(0.857 0.053 var(--hue_neutral) / 8%);
-		--border_color_10: oklch(0.857 0.053 var(--hue_neutral) / 14%);
-		--border_color_20: oklch(0.857 0.053 var(--hue_neutral) / 22%);
-		--border_color_30: oklch(0.857 0.053 var(--hue_neutral) / 32%);
-		--border_color_40: oklch(0.857 0.053 var(--hue_neutral) / 44%);
-		--border_color_50: oklch(0.857 0.053 var(--hue_neutral) / 56%);
-		--border_color_60: oklch(0.857 0.053 var(--hue_neutral) / 68%);
-		--border_color_70: oklch(0.857 0.053 var(--hue_neutral) / 80%);
-		--border_color_80: oklch(0.857 0.053 var(--hue_neutral) / 90%);
-		--border_color_90: oklch(0.857 0.053 var(--hue_neutral) / 97%);
-		--border_color_95: oklch(0.857 0.053 var(--hue_neutral) / 99%);
-		--border_color_100: oklch(0.857 0.053 var(--hue_neutral));
+		--border_color_lightness: 0.857; /* OKLCH lightness of the border color family */
+		--border_color_chroma: calc(var(--neutral_chroma) * 2.12); /* the border family's chroma, derived from the neutral's */
+		--border_color_05: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 8%
+		);
+		--border_color_10: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 14%
+		);
+		--border_color_20: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 22%
+		);
+		--border_color_30: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 32%
+		);
+		--border_color_40: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 44%
+		);
+		--border_color_50: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 56%
+		);
+		--border_color_60: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 68%
+		);
+		--border_color_70: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 80%
+		);
+		--border_color_80: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 90%
+		);
+		--border_color_90: oklch(
+			var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 97%
+		);
 		--text_min: #000;
 		--text_max: #fff;
 		--text_lightness_00: 0.146;

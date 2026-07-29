@@ -2,18 +2,18 @@
  * The theme knob catalog: typed metadata for the style variables that themes
  * are expected to turn, keyed by variable name.
  *
- * This is a side catalog over `variables.ts` — `StyleVariable` stays the
+ * This is a side catalog over `variables.ts` - `StyleVariable` stays the
  * authored and rendered value form, and the catalog adds the metadata that
  * value form can't carry: what kind of value a knob takes (which widget edits
  * it), which axis of the theme space it moves, how much leverage it has (its
  * control size in the editor), and which tier of the two-tier theme policy it
- * belongs to. Defaults and light/dark slots are not duplicated here — join
+ * belongs to. Defaults and light/dark slots are not duplicated here - join
  * against `default_variables` by name.
  *
  * The catalog deliberately covers only the knob tier, not all ~490 variables:
  * derived ramp stops, color stops, and most site hooks are the escape-hatch
  * tier and stay out. A few catalog entries are hooks (`hook: true`) consumed
- * by `style.css` with fallbacks rather than declared variables — they exist
+ * by `style.css` with fallbacks rather than declared variables - they exist
  * here so themes can set them without tripping the no-invented-variables
  * check.
  *
@@ -64,7 +64,7 @@ export interface ThemeKnob {
 	leverage: KnobLeverage;
 	tier: KnobTier;
 	/**
-	 * The safe envelope for scalar kinds — editor sliders clamp to it, while
+	 * The safe envelope for scalar kinds - editor sliders clamp to it, while
 	 * direct numeric entry may exceed it knowingly.
 	 */
 	range?: [number, number];
@@ -79,7 +79,7 @@ export interface ThemeKnob {
 	hook?: boolean;
 	/**
 	 * True for hue knobs whose default is a palette-letter binding
-	 * (`var(--hue_X)`) — the intent and neutral hues. Editors render these as
+	 * (`var(--hue_X)`) - the intent and neutral hues. Editors render these as
 	 * a letter picker with a custom-angle escape, and edits may write either a
 	 * binding or a literal angle.
 	 */
@@ -235,6 +235,16 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic',
 		hook: true
+	},
+	{
+		// how muted disabled UI reads - a perceptual/color move, not motion
+		name: 'disabled_opacity',
+		kind: 'percent',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 100],
+		step: 1
 	},
 	// color - the palette tier (moving these makes a theme an exemplar)
 	hue('hue_a', 'sm', 'palette'),
@@ -517,15 +527,6 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0, 5],
 		step: 0.01
 	},
-	{
-		name: 'disabled_opacity',
-		kind: 'percent',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 100],
-		step: 1
-	},
 	// decoration
 	{ name: 'background_image', kind: 'text', axis: 'decoration', leverage: 'md', tier: 'semantic' }
 ];
@@ -551,7 +552,7 @@ export const theme_knob_by_name: Map<string, ThemeKnob> = new Map(
 );
 
 /**
- * Names of hook knobs — consumed by `style.css` via fallbacks, not declared
+ * Names of hook knobs - consumed by `style.css` via fallbacks, not declared
  * in `default_variables`. Theme validation unions these with the declared
  * variable names.
  */

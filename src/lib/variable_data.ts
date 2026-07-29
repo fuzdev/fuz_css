@@ -142,14 +142,14 @@ export const palette_variants = ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j
  * The semantic color intents that derive full scales through the shared
  * ramps. The neutral is also an intent (`--hue_neutral`) but is absent here
  * because its scales are `shade_*` and `text_*` rather than a
- * `neutral_00`–`neutral_100` family.
+ * `neutral_00` through `neutral_100` family.
  */
 export type IntentVariant = ArrayElement<typeof intent_variants>;
 export const intent_variants = ['accent', 'positive', 'negative', 'caution', 'info'] as const;
 
 /**
  * Letter glosses: each palette slot's default color plus its default intent
- * binding where one exists. Display data for docs and the theme editor —
+ * binding where one exists. Display data for docs and the theme editor -
  * themes recolor the slots, so these describe the defaults, not promises.
  * The neutral binds like an intent (`--hue_neutral: var(--hue_f)`) despite
  * being absent from `intent_variants`.

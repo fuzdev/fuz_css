@@ -487,7 +487,7 @@ describe('generate_classes_css', () => {
 		});
 
 		test('modified token class sorts alphabetically, not by property', () => {
-			// hover:p_md: segments ['hover', 'p_md'] — the loop runs i < 1 (i.e. only i=0),
+			// hover:p_md: segments ['hover', 'p_md'] - the loop runs i < 1 (i.e. only i=0),
 			// 'hover' is skipped as a modifier, loop ends, returns MAX_VALUE.
 			// p_md has a finite index, so it sorts before hover:p_md.
 			const catch_all_interpreter: CssClassDefinitionInterpreter = {

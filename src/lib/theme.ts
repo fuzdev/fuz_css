@@ -26,7 +26,7 @@ export interface Theme {
 	 * Rendering a stanced theme faithfully also needs the scheme-adaptive
 	 * defaults mirrored into the stanced scheme; that is
 	 * `resolve_theme_stance` in `theme_stance.ts`, applied before rendering.
-	 * The renderer only pins `color-scheme` — it holds no variable data of its
+	 * The renderer only pins `color-scheme` - it holds no variable data of its
 	 * own, so the mirror stays off the theme path of consumers who don't use a
 	 * stanced theme.
 	 */
@@ -45,15 +45,24 @@ export interface Theme {
 
 /**
  * The fuz_css cascade layer order: defaults (variables + element styles) in
- * `fuz.base`, theme overrides in `fuz.theme`, generated utility classes in
- * `fuz.utilities`. Layer order beats specificity, so theme overrides win over
- * the statically imported defaults regardless of head insertion order, and
- * consumers' unlayered styles beat everything.
+ * `fuz.base`, OS user-preference mappings (`prefers-contrast`,
+ * `prefers-reduced-motion`) in `fuz.preferences`, theme overrides in
+ * `fuz.theme`, generated utility classes in `fuz.utilities`. Layer order
+ * beats specificity and source order, so the preference mappings win over
+ * the defaults, theme overrides win over both regardless of head insertion
+ * order, and consumers' unlayered styles beat everything.
  */
-export const FUZ_LAYER_ORDER_STATEMENT = '@layer fuz.base, fuz.theme, fuz.utilities;';
+export const FUZ_LAYER_ORDER_STATEMENT =
+	'@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;';
 
 export interface RenderThemeStyleOptions {
 	comments?: boolean;
+	/**
+	 * Scopes the rendered variables to `#id` instead of `:root`. Dark slots
+	 * render for both placements of the scheme class - on the scope element
+	 * itself (`#id.dark`) and on the root (`:root.dark #id`), the ecosystem
+	 * convention - so a scoped theme's dark appearance follows the page's.
+	 */
 	id?: string | null;
 	/**
 	 * The cascade layer wrapping the rendered variables. Theme overrides
@@ -66,17 +75,19 @@ export interface RenderThemeStyleOptions {
 /**
  * Composes a base theme with overlay fragments by flatten + last-wins: later
  * variables replace same-named earlier ones wholesale (both slots). Any
- * knob-only theme is already a valid fragment — the contrast modifiers in
+ * knob-only theme is already a valid fragment - the contrast modifiers in
  * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
  * precursor to a first-class `extends`, with the same merge semantics.
  *
  * The base's `scheme` stance wins; when the base is single-scheme, each
  * overlay variable is re-slotted to the stanced scheme's value so a
  * dual-slot fragment can't leak the other scheme's appearance past the
- * stance. The base's `scheme_mirror` carries through unchanged — it renders
- * before `variables`, so overlay values still win. The composed name appends
- * the overlay names so name-keyed pickers and renderers treat the composition
- * as its own theme.
+ * stance. The base's `scheme_mirror` carries through minus any names the
+ * overlays set - the mirror was computed against the base's own variables,
+ * so entries for newly composed names would shadow nothing but still render
+ * - and overlay values win over the remaining mirror by source order.
+ * The composed name appends the overlay names so name-keyed pickers and
+ * renderers treat the composition as its own theme.
  */
 export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
 	if (!overlays.length) return base;
@@ -98,8 +109,11 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 	return {
 		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
 		...(base.scheme !== undefined && { scheme: base.scheme }),
-		// the mirror renders before `variables`, so overlay values still win
-		...(base.scheme_mirror !== undefined && { scheme_mirror: base.scheme_mirror }),
+		// drop mirror entries the overlays now author; the rest renders before
+		// `variables`, so overlay values win by order
+		...(base.scheme_mirror !== undefined && {
+			scheme_mirror: base.scheme_mirror.filter((v) => !by_name.has(v.name))
+		}),
 		variables: [...by_name.values()]
 	};
 };
@@ -108,7 +122,7 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
  * Renders a theme's variables as CSS, wrapped in the `fuz.theme` cascade
  * layer by default.
  *
- * Renders exactly what the theme carries — an empty `variables` array renders
+ * Renders exactly what the theme carries - an empty `variables` array renders
  * nothing (inheriting the `fuz.base` defaults) unless a `scheme` stance needs
  * pinning. To render the full default set, pass it: `render_theme_style({name:
  * 'base', variables: default_variables})`. To render a single-scheme theme
@@ -134,6 +148,9 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 		.map((v) => render_theme_variable(v, true, comments))
 		.filter(Boolean);
 	const scope = id ? '#' + id : ':root';
+	// the scheme class conventionally lives on the root element, so a scoped
+	// theme's dark block matches both that and a class on the scope itself
+	const dark_scope = id ? `${scope}.dark, :root.dark ${scope}` : ':root.dark';
 	const blocks = `${
 		rendered_light.length
 			? `${scope} {
@@ -143,7 +160,7 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	}
 ${
 	rendered_dark.length
-		? `${scope}.dark {
+		? `${dark_scope} {
 	${rendered_dark.join('\n\t')}
 }`
 		: ''

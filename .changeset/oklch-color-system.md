@@ -29,9 +29,14 @@ Breaking changes:
   instead.
 - **`color-mix()` interpolation moved from `in hsl` to `in oklab`** in
   button fills/borders, composites, and shadow classes.
-- **Cascade layers**: all shipped CSS is layered `fuz.base` < `fuz.theme` <
-  `fuz.utilities`, so consumers' unlayered styles beat everything. Custom
-  `base_css` is re-layered into `fuz.base` in bundled output.
+- **Cascade layers**: all shipped CSS is layered `fuz.base` <
+  `fuz.preferences` < `fuz.theme` < `fuz.utilities`, so consumers' unlayered
+  styles beat everything. The OS user-preference mappings
+  (`prefers-contrast`, `prefers-reduced-motion`) live in `fuz.preferences`,
+  above the defaults and below themes, so they apply in every consumption
+  mode and explicit theme overrides still win. Custom `base_css` is
+  re-layered into `fuz.base` in bundled output (only the `fuz.preferences`
+  identity is preserved).
 
 New:
 
@@ -62,6 +67,11 @@ New:
   — `validate_theme` warns when the bound letter's multiplier differs from
   the intent's twin, and `check_theme` runs its gates through the
   multipliers.
+- **Derived border colors**: the `border_color_*` alpha ramp colors through
+  the neutral intent — new `--border_color_lightness` and
+  `--border_color_chroma` knobs, the chroma derived from `--neutral_chroma`
+  — so grayscale and retinted themes reshape borders in the same move as
+  surfaces and text.
 - **Design-time modules**: `ramps.ts` (fitted knob constants, numeric
   evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), and
   `wcag.ts` (luminance/contrast), with tests gating every default stop for

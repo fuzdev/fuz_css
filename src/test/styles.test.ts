@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 import * as exported_variables from '$lib/variables.ts';
 import { theme_knob_hook_names } from '$lib/knobs.ts';
+import { parse_style_css } from '$lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
 // vitest replaces this with an empty string because CSS isn't opted into being processed,
@@ -54,7 +55,7 @@ test('variables in the CSS exist', () => {
  * These variables are known to be in the CSS but not in the exported variables.
  * This means they can be contextually used when defined, but otherwise have a fallback.
  * Hook knobs from the catalog (e.g. `heading_font_weight`) are included
- * automatically — they're defined as CSS-consumed-but-undeclared.
+ * automatically - they're defined as CSS-consumed-but-undeclared.
  */
 const known_without_variables = new Set([
 	...theme_knob_hook_names,
@@ -93,3 +94,36 @@ const known_without_variables = new Set([
 	'shadow_alpha',
 	'shadow_color'
 ]);
+
+test('the OS user-preference mappings parse core and layer into fuz.preferences', () => {
+	// bundled output must always carry these - they target :root, so they ride
+	// the conditional-group-with-core-inner rule - and must re-layer into
+	// fuz.preferences so they beat the fuz.base defaults in every mode
+	const index = parse_style_css(main_stylesheet_text);
+	for (const feature of ['prefers-contrast: more', 'prefers-reduced-motion']) {
+		const rule = index.rules.find((r) => r.css.includes(feature));
+		assert(rule, `style.css carries a ${feature} block`);
+		assert.isTrue(rule.is_core, `${feature} is core`);
+		assert.strictEqual(rule.layer, 'fuz.preferences', feature);
+	}
+	// everything else stays in fuz.base
+	const misplaced = index.rules.filter(
+		(r) => r.layer === 'fuz.preferences' && !r.css.includes('prefers-')
+	);
+	assert.deepEqual(misplaced, []);
+});
+
+test('untargetable base rules are core, so bundled output always ships them', () => {
+	// pseudo-element and attribute selectors name no element or class, so
+	// detection can never match them - without the core marking they'd be
+	// tree-shaken out of every bundle (and --selection_color could never apply)
+	const index = parse_style_css(main_stylesheet_text);
+	for (const selector of ['::selection', '::placeholder', '::file-selector-button', '[hidden]']) {
+		const rule = index.rules.find((r) => r.css.startsWith(selector));
+		assert(rule, `style.css carries a ${selector} rule`);
+		assert.isTrue(rule.is_core, `${selector} is core`);
+		assert.strictEqual(rule.core_reason, 'untargetable', selector);
+	}
+	const selection = index.rules.find((r) => r.css.startsWith('::selection'));
+	assert.isTrue(selection!.variables_used.has('selection_color'));
+});

@@ -41,6 +41,18 @@ describe('render_theme_style', () => {
 			if (v.light !== undefined) assert.include(css, `--${v.name}: ${v.light};`);
 		}
 	});
+
+	test('an id scope renders dark slots for both scheme-class placements', () => {
+		// the scheme class conventionally lives on the root element, so the dark
+		// block must match :root.dark descendants, not only a class on the scope
+		const css = render_theme_style(
+			{ name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9', dark: '0.2' }] },
+			{ id: 'my_scope' }
+		);
+		assert.include(css, '#my_scope {');
+		assert.include(css, '#my_scope.dark, :root.dark #my_scope {');
+		assert.notInclude(css, ':root {');
+	});
 });
 
 describe('scheme stance', () => {
@@ -65,14 +77,18 @@ describe('scheme stance', () => {
 		assert.notInclude(light, `--${adaptive_default.name}: ${adaptive_default.dark};`);
 	});
 
-	test('a light stance mirrors light values into the dark scheme', () => {
+	test('a light stance mirrors light values into the base slot', () => {
 		const css = render_theme_style(
 			resolve_theme_stance({ name: 't', variables: [], scheme: 'light' })
 		);
 		const { light, dark } = split_schemes(css);
 		assert.include(light, 'color-scheme: light;');
-		// the light slot's value renders in the :root.dark block, defeating base dark
-		assert.include(dark, `--${adaptive_default.name}: ${adaptive_default.light};`);
+		// the light value renders in the :root block, which applies in both
+		// schemes - fuz.theme beats the fuz.base :root.dark defaults by layer
+		// order, and staying out of :root.dark keeps later same-block
+		// declarations (overlays, compiled caps) winning by source order
+		assert.include(light, `--${adaptive_default.name}: ${adaptive_default.light};`);
+		assert.notInclude(dark, `--${adaptive_default.name}:`);
 	});
 
 	test('resolve_theme_stance keeps the mirror out of the authored variables', () => {
@@ -179,6 +195,40 @@ describe('compose_themes', () => {
 		// the overlay's dark value lands in the base slot, single-slot
 		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
 		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '0' });
+	});
+
+	test('a light-stanced base takes overlay light values, dropping dark-only ones', () => {
+		const stanced: Theme = { ...base, scheme: 'light' };
+		const composed = compose_themes(stanced, {
+			name: 'o',
+			variables: [
+				{ name: 'shade_lightness_00', light: '1', dark: '0' },
+				{ name: 'text_lightness_curve', dark: '0.5' } // dark-only never renders under a light stance
+			]
+		});
+		assert.deepEqual(
+			composed.variables.find((v) => v.name === 'shade_lightness_00'),
+			{ name: 'shade_lightness_00', light: '1' }
+		);
+		assert.isUndefined(composed.variables.find((v) => v.name === 'text_lightness_curve'));
+	});
+
+	test('composing over a resolved stanced base drops overlaid names from the mirror', () => {
+		// resolve first, like the shipped stanced exemplars arrive
+		const stanced = resolve_theme_stance({ name: 's', variables: [], scheme: 'light' });
+		assert(stanced.scheme_mirror);
+		assert.isTrue(stanced.scheme_mirror.some((v) => v.name === adaptive_default.name));
+		const composed = compose_themes(stanced, {
+			name: 'o',
+			variables: [{ name: adaptive_default.name, light: '0.123' }]
+		});
+		// the overlay now authors the variable, so the mirror cedes it - the
+		// overlay's :root declaration must be the only one for the name
+		assert.isFalse(composed.scheme_mirror!.some((v) => v.name === adaptive_default.name));
+		const css = render_theme_style(composed);
+		const { light, dark } = split_schemes(css);
+		assert.include(light, `--${adaptive_default.name}: 0.123;`);
+		assert.notInclude(dark, `--${adaptive_default.name}:`);
 	});
 
 	test('rendering a composition applies the overlay over the base', () => {

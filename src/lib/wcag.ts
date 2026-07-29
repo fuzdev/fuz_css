@@ -1,7 +1,7 @@
 /**
  * WCAG 2.x relative luminance and contrast ratio.
  *
- * Design-time and test use only, like `oklch.ts` — these power the contrast
+ * Design-time and test use only, like `oklch.ts` - these power the contrast
  * gates that assert readable default pairings (body text on surfaces, links,
  * focus outlines) across the derived palette.
  *

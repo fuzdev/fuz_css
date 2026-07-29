@@ -9,7 +9,6 @@
  */
 
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
-import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
 import { default_variables } from './variables.ts';
 import type { Theme } from './theme.ts';
@@ -40,21 +39,15 @@ export interface StyleVariableInfo {
 export interface VariableDependencyGraph {
 	/** Map from variable name to its info */
 	variables: Map<string, StyleVariableInfo>;
-	/** Content hash for cache invalidation */
-	content_hash: string;
 }
 
 /**
  * Builds a dependency graph from an array of style variables.
  *
  * @param variables - array of `StyleVariable` objects
- * @param content_hash - hash of the source for cache invalidation
  * @returns `VariableDependencyGraph`
  */
-export const build_variable_graph = (
-	variables: Array<StyleVariable>,
-	content_hash: string
-): VariableDependencyGraph => {
+export const build_variable_graph = (variables: Array<StyleVariable>): VariableDependencyGraph => {
 	const graph: Map<string, StyleVariableInfo> = new Map();
 
 	for (const v of variables) {
@@ -71,8 +64,7 @@ export const build_variable_graph = (
 	}
 
 	return {
-		variables: graph,
-		content_hash
+		variables: graph
 	};
 };
 
@@ -304,9 +296,22 @@ export const apply_theme_variables = (
 ): Array<StyleVariable> => {
 	if (!theme) return variables;
 	const by_name = new Map(variables.map((v) => [v.name, v]));
+	// Replacement mirrors the runtime cascade: a light-slot theme value beats
+	// the base default's dark slot by layer order, so it replaces wholesale.
+	// A dark-only theme value only shadows the default under `.dark`, so the
+	// default's light slot must survive into the baked entry - dropping it
+	// would leave the variable undefined in the light scheme.
+	const overlay = (v: StyleVariable): void => {
+		const existing = by_name.get(v.name);
+		if (v.light === undefined && v.dark !== undefined && existing?.light !== undefined) {
+			by_name.set(v.name, { ...v, light: existing.light });
+		} else {
+			by_name.set(v.name, v);
+		}
+	};
 	// mirror first, then the theme's own, so authored values win
-	for (const v of theme.scheme_mirror ?? []) by_name.set(v.name, v);
-	for (const v of theme.variables) by_name.set(v.name, v);
+	for (const v of theme.scheme_mirror ?? []) overlay(v);
+	for (const v of theme.variables) overlay(v);
 	return [...by_name.values()];
 };
 
@@ -323,6 +328,5 @@ export const build_variable_graph_from_options = (
 	theme?: Theme | null
 ): VariableDependencyGraph => {
 	const resolved = apply_theme_variables(resolve_variables_option(variables), theme);
-	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');
-	return build_variable_graph(resolved, hash_insecure(content));
+	return build_variable_graph(resolved);
 };

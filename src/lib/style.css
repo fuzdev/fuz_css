@@ -28,12 +28,43 @@ Notes:
 
 */
 
-@layer fuz.base, fuz.theme, fuz.utilities;
+@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
 
-/* All rules live in the fuz.base cascade layer: theme overrides beat them from
-	fuz.theme, generated utility classes from fuz.utilities, and consumers'
-	unlayered styles beat everything. The bundled generators unwrap this block
-	and re-layer only the rules a project uses. */
+/* OS user-preference mappings live in fuz.preferences, above the fuz.base
+	defaults (so they beat them regardless of import order, including theme.css
+	in utility-only mode) and below fuz.theme (so theme overrides beat them). */
+@layer fuz.preferences {
+	@media (prefers-reduced-motion) {
+		:root {
+			/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation)  */
+			--duration_6: initial;
+			--duration_5: initial;
+			--duration_4: initial;
+			--duration_3: initial;
+			--duration_2: initial;
+			--duration_1: initial;
+		}
+	}
+
+	/* map the OS contrast preference onto the curve knobs, mirroring the
+		'high contrast' theme */
+	@media (prefers-contrast: more) {
+		:root {
+			--shade_lightness_00: 1;
+			--text_lightness_curve: 0.45;
+		}
+		:root.dark {
+			--shade_lightness_00: 0;
+			--text_lightness_curve: 0.31;
+		}
+	}
+}
+
+/* All other rules live in the fuz.base cascade layer: the preference mappings
+	beat them from fuz.preferences, theme overrides from fuz.theme, generated
+	utility classes from fuz.utilities, and consumers' unlayered styles beat
+	everything. The bundled generators unwrap these blocks and re-layer only
+	the rules a project uses. */
 @layer fuz.base {
 	*,
 	::before,
@@ -91,7 +122,7 @@ Notes:
 		cursor: pointer;
 	}
 
-	dialog::backdrop {
+	:where(dialog:not(.unstyled))::backdrop {
 		/* same default dim as fuz_ui's Dialog, themable through one hook */
 		background-color: var(--backdrop_color, var(--darken_60));
 	}
@@ -107,31 +138,6 @@ Respects `hidden="until-found"` for find-in-page support.
 */
 	[hidden]:where(:not([hidden='until-found'])) {
 		display: none !important;
-	}
-
-	@media (prefers-reduced-motion) {
-		:root {
-			/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation)  */
-			--duration_6: initial;
-			--duration_5: initial;
-			--duration_4: initial;
-			--duration_3: initial;
-			--duration_2: initial;
-			--duration_1: initial;
-		}
-	}
-
-	/* map the OS contrast preference onto the curve knobs, mirroring the
-		'high contrast' theme; theme overrides beat this from fuz.theme */
-	@media (prefers-contrast: more) {
-		:root {
-			--shade_lightness_00: 1;
-			--text_lightness_curve: 0.45;
-		}
-		:root.dark {
-			--shade_lightness_00: 0;
-			--text_lightness_curve: 0.31;
-		}
 	}
 
 	:where(a:not(.unstyled)) {
@@ -161,9 +167,6 @@ Respects `hidden="until-found"` for find-in-page support.
 		--text_color: var(--link_color_selected);
 		--outline_color: var(--border_color);
 		text-decoration: var(--text_decoration_selected);
-	}
-	:where(a:not(.unstyled).selected:active) {
-		--outline_color: var(--border_color);
 	}
 
 	:where(:is(ul, ol, menu):not(.unstyled)) {
@@ -373,9 +376,9 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	}
 
 	:where(:is(input, textarea, select):not(.unstyled):hover:not(:disabled)) {
-		/* hover previews the focus color — the element color when classed
-			(.palette_* sets --outline_color), else the accent intent; focus then
-			adds the outline at the same color, escalating visibility */
+		/* hover previews the focus color - the element color when set (an
+			outline_* class; on buttons, .palette_*), else the accent intent; focus
+			then adds the outline at the same color, escalating visibility */
 		--border_color: var(--outline_color);
 	}
 
@@ -592,7 +595,8 @@ TODO think through these patterns to get somewhere consistent
 	}
 
 	:where(:is(button, input, textarea, select):not(.unstyled):focus) {
-		/* follows the element color (.palette_* sets --outline_color), else the accent intent */
+		/* follows the element color when set (an outline_* class; on buttons,
+			.palette_*), else the accent intent */
 		--border_color: var(--outline_color);
 		--outline_width: var(--outline_width_focus);
 	}
@@ -693,8 +697,6 @@ TODO think through these patterns to get somewhere consistent
 		--shadow: var(--button_shadow_hover);
 	}
 	:where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
-		/* TODO or set a hover var? make consistent with fill */
-		--button_border_color: var(--button_border_color_hover);
 		--button_text_color: color-mix(in oklab, var(--text_color) 90%, var(--shade_max));
 	}
 	:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {

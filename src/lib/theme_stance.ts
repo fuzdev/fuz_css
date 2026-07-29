@@ -16,10 +16,13 @@ import type { StyleVariable } from './variable.ts';
 
 /**
  * Computes the mirror a single-scheme stance implies: every scheme-adaptive
- * default not overridden by `variables`, re-slotted so the stanced scheme's
- * value applies in both color schemes — into the base slot for a `'dark'`
- * stance, into the dark slot for a `'light'` stance (defeating the base dark
- * values by cascade-layer order).
+ * default not overridden by `variables`, re-slotted with the stanced scheme's
+ * value in the base (light) slot. A base-slot declaration in `fuz.theme`
+ * applies in both color schemes - cascade-layer order beats the higher
+ * specificity of the `fuz.base` `:root.dark` defaults - and keeping the
+ * mirror out of the dark slot means later same-block declarations (the
+ * theme's own variables, composed overlays, compiled cap overrides) always
+ * win by source order.
  *
  * @param scheme - the stance to mirror for
  * @param variables - the theme's own variables, whose names are left alone
@@ -33,11 +36,8 @@ export const scheme_stance_variables = (
 	const mirrored: Array<StyleVariable> = [];
 	for (const v of scheme_adaptive_variables) {
 		if (overridden.has(v.name)) continue;
-		if (scheme === 'dark') {
-			if (v.dark !== undefined) mirrored.push({ name: v.name, light: v.dark });
-		} else if (v.light !== undefined) {
-			mirrored.push({ name: v.name, dark: v.light });
-		}
+		const value = scheme === 'dark' ? v.dark : v.light;
+		if (value !== undefined) mirrored.push({ name: v.name, light: value });
 	}
 	return mirrored;
 };
@@ -48,7 +48,7 @@ export const scheme_stance_variables = (
  * A dual-scheme theme is returned unchanged.
  *
  * The mirror lands in its own field rather than merged into `variables` so the
- * authored knobs stay distinguishable from the derived ones — `compile_theme`
+ * authored knobs stay distinguishable from the derived ones - `compile_theme`
  * reads `variables` to detect author pins, and theme editors show it as the
  * theme's own surface.
  *

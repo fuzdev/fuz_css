@@ -563,7 +563,7 @@ describe('resolve_css diagnostics', () => {
 				style_rule_index,
 				variable_graph,
 				class_variable_index,
-				// force-included, not referenced by any shipped CSS — exclude is a clean override
+				// force-included, not referenced by any shipped CSS - exclude is a clean override
 				additional_variables: ['brand'],
 				exclude_variables: ['brand']
 			});

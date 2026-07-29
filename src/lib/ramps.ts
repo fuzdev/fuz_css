@@ -5,14 +5,14 @@
  * constants and formulas that `variables.ts` renders as pure-CSS
  * `calc()`/`pow()`/`oklch()` defaults, evaluated here in TypeScript so
  * design-time tests can gate the defaults (gamut, ramp monotonicity, contrast
- * — see `src/test/ramps.test.ts`) and derivation scripts can reason about the
+ * - see `src/test/ramps.test.ts`) and derivation scripts can reason about the
  * palette without a browser.
  *
  * The knob values were fitted against the pre-OKLCH HSL palette to minimize
  * the perceptual delta of the port. Model shapes:
  *
  * - lightness: `L(t) = L00 + (L100 - L00) * pow(t, curve)` with `t = stop/100`
- *   — the endpoint knobs literally are stops 00/100, so the dark scheme flips
+ *   - the endpoint knobs literally are stops 00/100, so the dark scheme flips
  *   direction purely through knob values, and pinning an endpoint stop and
  *   turning a knob are the same act
  * - chroma: `C(t) = min + (max - min) * pow(4t(1-t), curve)`, a symmetric
@@ -43,7 +43,7 @@ export const ramp_stop_t = (stop: NumericScaleVariant): number => Number(stop) /
 /**
  * Knobs for a pow-curve lightness ramp. The endpoints are the ramp's own
  * 00/100 stops, so light and dark schemes differ only in values, never in
- * formula — no direction flag needed.
+ * formula - no direction flag needed.
  */
 export interface LightnessRampKnobs {
 	/** OKLCH lightness at stop 00, in [0, 1]. */
@@ -90,7 +90,7 @@ export const PALETTE_HUES: Record<PaletteVariant, number> = {
  * `--chroma_scale` (multiplicative, so the slot's character is preserved at
  * any global setting); values at or below 1 stay inside the worst-hue gamut
  * caps by construction, above 1 knowingly clips like the global knob. The
- * brown slot ships muted because brown is low-chroma dark orange — no hue
+ * brown slot ships muted because brown is low-chroma dark orange - no hue
  * angle renders it at full palette chroma.
  */
 export const PALETTE_CHROMA_MULTIPLIERS: Record<PaletteVariant, number> = {
@@ -127,15 +127,14 @@ export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs
 /**
  * Fitted chroma-curve knobs for the palette ramps.
  *
- * Re-fitted ("honest chroma" retune) so the requested curve hugs the
- * effective post-clamp chroma instead of sitting above the caps through the
- * mid-range — turning the knobs down now responds immediately. Turning
- * `chroma_max` up remains cap-clamped by design; `--chroma_scale` is the
- * push-past-the-gamut knob. Residual vs the original port is small (mean
- * ΔEOK ≈ 0.005 light / 0.003 dark) except light stop 30 (−0.028 C): the
- * symmetric mid-peaked model can't reach the light cap envelope's peak at
- * stop 30 — recovering it would take an asymmetric shape (peak-position
- * knob).
+ * Fitted so the requested curve hugs the effective post-clamp chroma instead
+ * of sitting above the caps through the mid-range - turning the knobs down
+ * responds immediately. Turning `chroma_max` up remains cap-clamped by
+ * design; `--chroma_scale` is the push-past-the-gamut knob. The residual vs
+ * the HSL palette this fit ports is small (mean ΔEOK ≈ 0.005 light / 0.003
+ * dark) except light stop 30 (−0.028 C): the symmetric mid-peaked model
+ * can't reach the light cap envelope's peak there - recovering it would
+ * take an asymmetric shape (a peak-position knob).
  */
 export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> = {
 	light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
@@ -159,6 +158,74 @@ export const NEUTRAL_CHROMA: Record<ColorSchemeVariant, number> = {
 	light: 0.024,
 	dark: 0.025
 };
+
+/**
+ * OKLCH lightness of the border color family (`--border_color_lightness`),
+ * fitted from the HSL palette. Sits mid-ramp so borders read against both
+ * the page background and fills.
+ */
+export const BORDER_COLOR_LIGHTNESS: Record<ColorSchemeVariant, number> = {
+	light: 0.345,
+	dark: 0.857
+};
+
+/**
+ * The border family's chroma as a multiple of `--neutral_chroma` - borders
+ * carry a stronger tint than surfaces so they read at low alpha. In CSS this
+ * is `--border_color_chroma: calc(var(--neutral_chroma) * <multiple>)`.
+ */
+export const BORDER_CHROMA_MULTIPLIER: Record<ColorSchemeVariant, number> = {
+	light: 2.6667,
+	dark: 2.12
+};
+
+/**
+ * Alpha (in %) of each border color stop. A perceptually-uniform curve -
+ * small gaps at the low end, large at the high end - boosted at the low end
+ * in dark mode where borders are less visible against dark backgrounds.
+ * Stop 00 renders `transparent` and stop 100 opaque.
+ */
+export const BORDER_COLOR_ALPHAS: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
+	light: {
+		'00': 0,
+		'05': 4,
+		'10': 7,
+		'20': 13,
+		'30': 22,
+		'40': 34,
+		'50': 48,
+		'60': 62,
+		'70': 76,
+		'80': 88,
+		'90': 96,
+		'95': 99,
+		'100': 100
+	},
+	dark: {
+		'00': 0,
+		'05': 8,
+		'10': 14,
+		'20': 22,
+		'30': 32,
+		'40': 44,
+		'50': 56,
+		'60': 68,
+		'70': 80,
+		'80': 90,
+		'90': 97,
+		'95': 99,
+		'100': 100
+	}
+};
+
+/**
+ * Computes the default OKLCH color of the border family (without alpha).
+ */
+export const border_color_oklch = (scheme: ColorSchemeVariant): Oklch => [
+	BORDER_COLOR_LIGHTNESS[scheme],
+	NEUTRAL_CHROMA[scheme] * BORDER_CHROMA_MULTIPLIER[scheme],
+	NEUTRAL_HUE
+];
 
 /**
  * Worst-hue safe chroma caps per stop: the largest chroma at that stop's
@@ -212,7 +279,7 @@ export const ramp_lightness = (knobs: LightnessRampKnobs, stop: NumericScaleVari
 };
 
 /**
- * Evaluates the normalized chroma shape `pow(4t(1-t), curve)` at a stop —
+ * Evaluates the normalized chroma shape `pow(4t(1-t), curve)` at a stop -
  * 0 at the endpoints, 1 at the midpoint.
  */
 export const ramp_chroma_shape = (stop: NumericScaleVariant, curve: number): number => {
@@ -272,7 +339,7 @@ export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVa
 
 /**
  * Recomputes the worst-hue safe chroma caps per stop for an arbitrary hue set
- * and lightness ramp — the generalization of the baked `PALETTE_CHROMA_CAPS`.
+ * and lightness ramp - the generalization of the baked `PALETTE_CHROMA_CAPS`.
  * For each stop the lightness comes from `ramp_lightness` and the cap is the
  * minimum `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to
  * stay conservative (the browser clips anything past it). A theme's compile
@@ -300,7 +367,7 @@ export const compute_palette_chroma_caps = (
 
 /*
 
-CSS emitters — the string twins of the numeric evaluators above. These render
+CSS emitters - the string twins of the numeric evaluators above. These render
 the pure-CSS `calc()`/`pow()`/`min()`/`oklch()` default values that
 `variables.ts` ships, pulling every literal (stop positions, shape constants,
 caps) from the same source the tests evaluate.
@@ -360,7 +427,7 @@ export const render_chroma_stop_css = (
 
 /**
  * Renders the derived default of a palette color stop, e.g. `--palette_a_50`.
- * One definition serves both schemes — the scheme flip lives in the knobs.
+ * One definition serves both schemes - the scheme flip lives in the knobs.
  */
 export const render_palette_stop_css = (
 	letter: PaletteVariant,
@@ -386,7 +453,7 @@ const slot_chroma_scale_reference = (hue_reference: string): string | null => {
 
 /**
  * Renders a color derived from the palette ramps at a stop for an arbitrary
- * hue reference — the shared template behind palette stops and intent stops
+ * hue reference - the shared template behind palette stops and intent stops
  * (`--accent_50` renders with `var(--hue_accent)`). A palette-letter or
  * intent hue reference also picks up its slot's chroma multiplier
  * (`--palette_X_chroma_scale`/`--<intent>_chroma_scale`), so the hue slot and
@@ -419,3 +486,20 @@ export const render_neutral_stop_css = (
 	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
 		stop
 	})) var(--hue_neutral))`;
+
+/**
+ * Renders the derived default of a border color stop (`--border_color_NN`):
+ * the border family's color at the stop's alpha from `BORDER_COLOR_ALPHAS`.
+ * The color part is scheme-agnostic - the flip lives in the referenced knobs
+ * - so stops whose alpha matches across schemes render identically and
+ * `variables.ts` declares them single-slot.
+ */
+export const render_border_color_stop_css = (
+	stop: NumericScaleVariant,
+	scheme: ColorSchemeVariant
+): string => {
+	const alpha = BORDER_COLOR_ALPHAS[scheme][stop];
+	if (alpha === 0) return 'transparent';
+	const color = 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral)';
+	return alpha === 100 ? `${color})` : `${color} / ${alpha}%)`;
+};

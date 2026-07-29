@@ -2,6 +2,7 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import type { PaletteVariant } from '$lib/variable_data.ts';
+	import { PALETTE_HUES } from '$lib/ramps.ts';
 
 	const {
 		letter,
@@ -20,7 +21,12 @@
 	const get_color_hue_string = (name: string) => computed_styles?.getPropertyValue('--' + name);
 
 	const variable_name = $derived(`hue_${letter}`);
-	const hue = $derived(Number(get_color_hue_string(variable_name)));
+	// `computed_styles` is null during SSR/prerender - fall back to the default
+	// angle so the static HTML doesn't ship NaN
+	const hue = $derived.by(() => {
+		const n = Number(get_color_hue_string(variable_name));
+		return Number.isNaN(n) ? PALETTE_HUES[letter] : n;
+	});
 </script>
 
 <li style:--hue="var(--{variable_name})">

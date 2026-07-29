@@ -2,7 +2,7 @@ import type { Theme } from '../theme.ts';
 
 /**
  * Stretched contrast: pure white/black page background and text bent toward
- * the extremes across the whole ramp — curve-knob moves, not stop surgery.
+ * the extremes across the whole ramp - curve-knob moves, not stop surgery.
  */
 export const high_contrast_theme: Theme = {
 	name: 'high contrast',

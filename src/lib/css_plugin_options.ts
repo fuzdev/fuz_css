@@ -166,8 +166,14 @@ export interface CssOutputOptions {
 	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
 	 * runtime theme winning by cascade layer. A single-scheme theme needs
 	 * `resolve_theme_stance` first so its `scheme_mirror` applies, and pinning
-	 * `color-scheme` is separate — the `dark`/`light` class on the `html`
+	 * `color-scheme` is separate - the `dark`/`light` class on the `html`
 	 * element drives it.
+	 *
+	 * The baked values become the output's defaults, so a runtime theme can't
+	 * revert to the pre-bake appearance by being empty - the base theme
+	 * renders nothing. To offer "back to fuz defaults" at runtime, render the
+	 * defaults explicitly:
+	 * `render_theme_style({name: 'base', variables: default_variables})`.
 	 *
 	 * @example
 	 * ```ts

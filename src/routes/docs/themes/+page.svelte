@@ -35,7 +35,7 @@
 	const theme_state = get_theme_state();
 
 	// one gallery: the registry and the shipped exemplars are a single list to
-	// users — registry membership is policy for consumer pickers, not UX
+	// users - registry membership is policy for consumer pickers, not UX
 	const themes = [
 		...default_themes,
 		necromancer_theme,
@@ -47,8 +47,11 @@
 	const editor = new ThemeEditorState(themes);
 
 	// the picked base theme, tracked apart from the applied theme so the picker
-	// highlight survives contrast composition (compositions rename themselves)
-	let selected_base: Theme = $state.raw(theme_state.theme);
+	// highlight survives contrast composition (compositions rename themselves);
+	// a persisted unsaved draft isn't a base, so fall back to the editor's
+	let selected_base: Theme = $state.raw(
+		theme_state.theme.name === UNSAVED_THEME_NAME ? editor.base_theme : theme_state.theme
+	);
 	let contrast_modifier: Theme | null = $state.raw(null);
 
 	// the in-progress theme appears in the picker as soon as a knob moves
@@ -99,10 +102,22 @@
 		}
 	});
 
+	// applies a theme the editor's "based on" select loaded as the new base
+	const on_editor_load_theme = (theme: Theme): void => {
+		selected_base = theme;
+		apply_theme();
+	};
+
 	// persist the in-progress theme across navigation (history-entry-scoped)
 	export const snapshot: Snapshot<ThemeEditorSnapshotData> = {
 		capture: () => editor.to_snapshot(),
-		restore: (data) => editor.restore_snapshot(data)
+		restore: (data) => {
+			editor.restore_snapshot(data);
+			// re-sync the picker highlight and applied theme with the restored
+			// base; a dirty draft re-applies itself through the effect below
+			selected_base = editor.base_theme;
+			if (!editor.dirty) apply_theme();
+		}
 	};
 </script>
 
@@ -227,7 +242,7 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_t
 			<code>Theme</code>
 			object below to keep it.
 		</p>
-		<ThemeEditor {editor} {theme_state} />
+		<ThemeEditor {editor} {theme_state} onload_theme={on_editor_load_theme} />
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Validating and compiling themes" />

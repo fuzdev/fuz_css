@@ -527,15 +527,17 @@ const el = document.createElement('dialog');`}
 		</ol>
 		<p>
 			Sections are emitted in that order inside <MdnLink path="Web/CSS/@layer" /> cascade layers:
-			defaults in <code>fuz.base</code>, theme overrides in <code>fuz.theme</code>, and utilities in
-			<code>fuz.utilities</code>, so utilities beat the reset by layer order (not specificity) and
-			your own unlayered styles beat everything.
+			defaults in <code>fuz.base</code>, OS user-preference mappings (like
+			<code>prefers-contrast</code>) in <code>fuz.preferences</code>, theme overrides in
+			<code>fuz.theme</code>, and utilities in <code>fuz.utilities</code>, so utilities beat the
+			reset by layer order (not specificity) and your own unlayered styles beat everything.
 		</p>
 		<p>
 			If you organize your own styles in <code>@layer</code>, declare fuz's layers first so yours
-			sort later and win: <code>@layer fuz.base, fuz.theme, fuz.utilities, app;</code>.
-			Later-declared layers win, so without this line fuz's layers are declared when its CSS loads
-			and beat any layers you declared before it.
+			sort later and win:
+			<code>@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities, app;</code>. Later-declared
+			layers win, so without this line fuz's layers are declared when its CSS loads and beat any
+			layers you declared before it.
 		</p>
 
 		<h4>Base styles</h4>

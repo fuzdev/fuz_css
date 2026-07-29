@@ -4,7 +4,7 @@
  *
  * Three functions sit over a shared numeric resolution core:
  *
- * - `validate_theme` is the structural lint — non-empty name, `StyleVariable`
+ * - `validate_theme` is the structural lint - non-empty name, `StyleVariable`
  *   shape, known variable names, and advisory type/range warnings for the
  *   knob-tier variables.
  * - `check_theme` evaluates the gamut, ramp-monotonicity, and contrast gates
@@ -56,6 +56,9 @@ import {
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
+	BORDER_COLOR_LIGHTNESS,
+	BORDER_CHROMA_MULTIPLIER,
+	BORDER_COLOR_ALPHAS,
 	ramp_lightness,
 	ramp_chroma,
 	ramp_chroma_shape,
@@ -76,7 +79,7 @@ import { oklch_to_srgb, oklch_in_srgb_gamut, type Oklch, type RgbUnit } from './
 import { wcag_contrast_ratio } from './wcag.ts';
 
 //
-// Gate thresholds — the WCAG levels the derived palette is designed to clear.
+// Gate thresholds - the WCAG levels the derived palette is designed to clear.
 //
 
 /** AAA body text: `text_80` on `shade_00`/`05`/`10`. */
@@ -91,12 +94,25 @@ export const GATE_UI = 3;
 export const GATE_FILL_TEXT = 3;
 /**
  * Selected-control inverse text: `text_00` on `shade_50` and on every stop-50
- * fill — the selected-button pairings in `style.css` (`.selected` fills with
+ * fill - the selected-button pairings in `style.css` (`.selected` fills with
  * `shade_50`, `.palette_X.selected` with `palette_X_50`). The endpoint stop is
  * immune to `text_lightness_curve` bends, so this gate moves only when a theme
  * moves the endpoints, the fill ramps, or the hues.
  */
 export const GATE_SELECTED_TEXT = 3;
+/**
+ * Control borders: `shade_30` (the `--border_color` default) vs `shade_00`.
+ * A regression floor for the shipped design, not a WCAG level - 1.4.11's 3:1
+ * applies to required component boundaries, and fuz borders sit deliberately
+ * softer - so a theme can't silently wash control borders out.
+ */
+export const GATE_BORDER = 1.5;
+/**
+ * Divider borders: the `border_color_30` alpha color composited over
+ * `shade_00` (the `hr` pairing in `style.css`). A regression floor like
+ * `GATE_BORDER`.
+ */
+export const GATE_BORDER_DIVIDER = 1.3;
 
 /**
  * The variable names a theme may set: the declared defaults plus the hook
@@ -195,6 +211,10 @@ const LIGHTNESS_STOP_MATCHER =
 	/^(palette|shade|text)_lightness_(05|10|20|30|40|50|60|70|80|90|95)$/u;
 const PALETTE_CHROMA_STOP_MATCHER = /^palette_chroma_(00|05|10|20|30|40|50|60|70|80|90|95|100)$/u;
 const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
+// the scaled-reference form emitted for `border_color_chroma`
+// (`calc(var(--neutral_chroma) * 2.12)`) and useful for authored multipliers
+const SCALED_VAR_MATCHER =
+	/^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(-?\d*\.?\d+)\s*\)$/u;
 
 /**
  * The compiled worst-hue cap form emitted by `render_chroma_stop_css`:
@@ -270,9 +290,16 @@ class ThemeResolver {
 			const n = Number(trimmed);
 			if (Number.isFinite(n)) return { ok: true, value: n };
 		}
-		// exactly var(--x) — recurse through the same merge
+		// exactly var(--x) - recurse through the same merge
 		const var_match = VAR_MATCHER.exec(trimmed);
 		if (var_match) return this.#resolve(var_match[1]!, scheme, visited);
+		// calc(var(--x) * k) - a scaled reference, resolved then multiplied
+		const scaled_match = SCALED_VAR_MATCHER.exec(trimmed);
+		if (scaled_match) {
+			const inner = this.#resolve(scaled_match[1]!, scheme, visited);
+			if (!inner.ok) return inner;
+			return { ok: true, value: inner.value * Number(scaled_match[2]) };
+		}
 		// machine-emitted compiled cap form
 		const cap = this.#parse_compiled_cap(trimmed, scheme, visited);
 		if (cap) return cap;
@@ -318,6 +345,15 @@ class ThemeResolver {
 		// scalar knobs
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
 		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
+		if (name === 'border_color_lightness') {
+			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };
+		}
+		if (name === 'border_color_chroma') {
+			// derives from the neutral so a retinted theme flows through
+			const neutral = this.#resolve('neutral_chroma', scheme, visited);
+			if (!neutral.ok) return neutral;
+			return { ok: true, value: neutral.value * BORDER_CHROMA_MULTIPLIER[scheme] };
+		}
 		if (name === 'palette_chroma_min') {
 			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_min };
 		}
@@ -337,7 +373,7 @@ class ThemeResolver {
 				field === '00' ? knobs.lightness_00 : field === '100' ? knobs.lightness_100 : knobs.curve;
 			return { ok: true, value };
 		}
-		// derived lightness intermediates — compute from the resolved knobs
+		// derived lightness intermediates - compute from the resolved knobs
 		const stop_match = LIGHTNESS_STOP_MATCHER.exec(name);
 		if (stop_match) {
 			const family = stop_match[1] as 'palette' | 'shade' | 'text';
@@ -346,7 +382,7 @@ class ThemeResolver {
 			if (!knobs.ok) return knobs.error;
 			return { ok: true, value: ramp_lightness(knobs.value, stop) };
 		}
-		// derived palette chroma stops — the capped knob curve
+		// derived palette chroma stops - the capped knob curve
 		const chroma_match = PALETTE_CHROMA_STOP_MATCHER.exec(name);
 		if (chroma_match) {
 			const stop = chroma_match[1] as NumericScaleVariant;
@@ -416,7 +452,7 @@ export const resolve_theme_knob = (
 };
 
 //
-// validate_theme — the structural lint.
+// validate_theme - the structural lint.
 //
 
 const validate_knob_value = (
@@ -491,7 +527,7 @@ const validate_knob_value = (
 			break;
 		}
 		default:
-			// length, color, font_stack, shadow, text — freeform, advisory only
+			// length, color, font_stack, shadow, text - freeform, advisory only
 			break;
 	}
 	return issues;
@@ -500,7 +536,7 @@ const validate_knob_value = (
 /**
  * Lints a theme's structure: a non-empty name, valid `StyleVariable` shape and
  * known name per variable (errors), and advisory type/range warnings for the
- * knob-tier variables — including a pairing warning when an intent hue binds
+ * knob-tier variables - including a pairing warning when an intent hue binds
  * a palette letter whose chroma multiplier differs from the intent's own
  * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
  * chroma character is otherwise silently dropped). Value validation is
@@ -516,10 +552,19 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 	if (scheme !== undefined && scheme !== 'dual' && scheme !== 'light' && scheme !== 'dark') {
 		issues.push({
 			level: 'error',
-			message: `invalid scheme ${JSON.stringify(scheme)} — expected 'dual', 'light', or 'dark'`
+			message: `invalid scheme ${JSON.stringify(scheme)} - expected 'dual', 'light', or 'dark'`
 		});
 	}
 	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
+	// a stanced theme renders correctly only with its mirror computed - the
+	// gates here resolve through the mirror either way, so without this warning
+	// a hand-rolled stanced theme checks clean but renders unmirrored
+	if (stance && theme.scheme_mirror === undefined) {
+		issues.push({
+			level: 'warning',
+			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
+		});
+	}
 	for (const variable of theme.variables) {
 		const parsed = StyleVariable.safeParse(variable);
 		const name: unknown = (variable as { name?: unknown }).name;
@@ -551,7 +596,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 				level: 'warning',
 				message: `"${valid.name}" carries a dark slot under a '${
 					stance
-				}' scheme stance — stanced themes render one appearance in both color schemes, so author single-slot values`,
+				}' scheme stance - stanced themes render one appearance in both color schemes, so author single-slot values`,
 				variable: valid.name
 			});
 		}
@@ -570,7 +615,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 
 // the pairing lint: an intent hue bound to a palette letter (authored
 // `var(--hue_X)` or the default binding) shares only the angle, so warn when
-// the letter's chroma multiplier and the intent's twin disagree — the theme
+// the letter's chroma multiplier and the intent's twin disagree - the theme
 // probably meant the character to follow the binding (the neutral is exempt:
 // its character is `--neutral_chroma` by design)
 const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
@@ -603,7 +648,7 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 						letter_multiplier.value
 					}) but ${intent}_chroma_scale is ${
 						intent_multiplier.value
-					} — a binding shares only the hue angle, so set ${
+					} - a binding shares only the hue angle, so set ${
 						intent
 					}_chroma_scale to carry the slot's chroma character`,
 					variable: hue_name
@@ -616,14 +661,14 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 };
 
 //
-// check_theme — the numeric-twin accessibility gates.
+// check_theme - the numeric-twin accessibility gates.
 //
 
 const clamp01 = (n: number): number => Math.min(1, Math.max(0, n));
 
 const clamp_rgb = (rgb: RgbUnit): RgbUnit => [clamp01(rgb[0]), clamp01(rgb[1]), clamp01(rgb[2])];
 
-// max sRGB channel excess outside [0, 1] — 0 when in gamut
+// max sRGB channel excess outside [0, 1] - 0 when in gamut
 const gamut_excess = ([r, g, b]: RgbUnit): number => Math.max(0, -r, r - 1, -g, g - 1, -b, b - 1);
 
 /**
@@ -746,7 +791,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				if (color) push_gamut(`palette_${letter}_${stop}`, color, scheme);
 			}
 		}
-		// gamut: each intent that renders differently from every letter — an
+		// gamut: each intent that renders differently from every letter - an
 		// intent folds into a letter's entries only when hue AND multiplier match
 		for (const intent of intent_variants) {
 			const hue = num(`hue_${intent}`, scheme);
@@ -775,7 +820,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			push_monotonicity(family, scheme);
 		}
 
-		// contrast: body text — text_80 on shade_00/05/10
+		// contrast: body text - text_80 on shade_00/05/10
 		const text_80 = neutral_color('text', '80', scheme);
 		for (const stop of ['00', '05', '10'] as const) {
 			const surface = neutral_color('shade', stop, scheme);
@@ -793,7 +838,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 
 		const shade_00 = neutral_color('shade', '00', scheme);
 
-		// contrast: selected-control inverse text — text_00 on shade_50
+		// contrast: selected-control inverse text - text_00 on shade_50
 		const text_00 = neutral_color('text', '00', scheme);
 		const shade_50 = neutral_color('shade', '50', scheme);
 		if (text_00 && shade_50) {
@@ -808,7 +853,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			});
 		}
 
-		// contrast: subtle text — text_50 on shade_00
+		// contrast: subtle text - text_50 on shade_00
 		const text_50 = neutral_color('text', '50', scheme);
 		if (text_50 && shade_00) {
 			const ratio = contrast(oklch_to_srgb(text_50), oklch_to_srgb(shade_00));
@@ -822,7 +867,48 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			});
 		}
 
-		// contrast: link — the accent hue at stop 60 on shade_00 (resolved through bindings)
+		// contrast: control borders - shade_30 (the --border_color default) vs shade_00
+		const shade_30 = neutral_color('shade', '30', scheme);
+		if (shade_30 && shade_00) {
+			const ratio = contrast(oklch_to_srgb(shade_30), oklch_to_srgb(shade_00));
+			entries.push({
+				gate: 'contrast',
+				scheme,
+				subject: 'shade_30 vs shade_00',
+				value: ratio,
+				threshold: GATE_BORDER,
+				pass: ratio >= GATE_BORDER
+			});
+		}
+
+		// contrast: divider borders - border_color_30 alpha-composited over shade_00
+		const border_l = num('border_color_lightness', scheme);
+		const border_c = num('border_color_chroma', scheme);
+		const border_h = num('hue_neutral', scheme);
+		if (border_l !== null && border_c !== null && border_h !== null && shade_00) {
+			const border_rgb = clamp_rgb(oklch_to_srgb([border_l, border_c, border_h]));
+			const bg_rgb = clamp_rgb(oklch_to_srgb(shade_00));
+			// the alpha is baked into border_color_30's rendered CSS, which a
+			// stance mirrors into both schemes - so it follows the stance
+			const alpha = BORDER_COLOR_ALPHAS[stance ?? scheme]['30'] / 100;
+			// gamma-space compositing, matching how browsers stack backgrounds
+			const composited: RgbUnit = [
+				alpha * border_rgb[0] + (1 - alpha) * bg_rgb[0],
+				alpha * border_rgb[1] + (1 - alpha) * bg_rgb[1],
+				alpha * border_rgb[2] + (1 - alpha) * bg_rgb[2]
+			];
+			const ratio = wcag_contrast_ratio(composited, bg_rgb);
+			entries.push({
+				gate: 'contrast',
+				scheme,
+				subject: 'border_color_30 over shade_00',
+				value: ratio,
+				threshold: GATE_BORDER_DIVIDER,
+				pass: ratio >= GATE_BORDER_DIVIDER
+			});
+		}
+
+		// contrast: link - the accent hue at stop 60 on shade_00 (resolved through bindings)
 		const accent_hue = num('hue_accent', scheme);
 		const accent_multiplier = num('accent_chroma_scale', scheme);
 		if (accent_hue !== null && accent_multiplier !== null && shade_00) {
@@ -840,7 +926,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			}
 		}
 
-		// contrast: UI affordances — every letter and intent fill at stop 50;
+		// contrast: UI affordances - every letter and intent fill at stop 50;
 		// a stance renders its scheme's appearance in both, so text_max follows it
 		const text_max: RgbUnit = (stance ?? scheme) === 'light' ? [0, 0, 0] : [1, 1, 1];
 		const fills: Array<[string, number, number]> = [];
@@ -899,7 +985,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 };
 
 //
-// compile_theme — recompute worst-hue caps for the theme's own hues.
+// compile_theme - recompute worst-hue caps for the theme's own hues.
 //
 
 // the difference at which a recomputed cap is worth emitting; below this the
@@ -920,7 +1006,7 @@ const collect_hues = (resolver: ThemeResolver, scheme: ColorSchemeVariant): Arra
 		if (r.ok && !hues.some((h) => Math.abs(h - r.value) < 1e-9)) hues.push(r.value);
 	}
 	// with no resolvable hue at all, an empty set would yield Infinity caps and
-	// emit garbage CSS — fall back to the default hues (the re-check still
+	// emit garbage CSS - fall back to the default hues (the re-check still
 	// reports the unresolvable pins)
 	return hues.length ? hues : Object.values(PALETTE_HUES);
 };
@@ -943,20 +1029,26 @@ const resolve_lightness_knobs = (
 /**
  * Recomputes a theme's per-stop worst-hue chroma caps from its own hues and
  * palette lightness ramp, then emits `palette_chroma_NN` overrides wherever
- * the baked caps no longer fit — the fix for a theme (rotated hues, a
+ * the baked caps no longer fit - the fix for a theme (rotated hues, a
  * monochrome collapse, a dark-only mirror) whose gamut headroom the baked
  * worst-hue table misjudges.
  *
  * A stop is emitted only when either scheme's recomputed cap drifts from the
  * baked value by more than the emit epsilon and the theme doesn't already pin
- * that stop. Both slots are always emitted together so a one-scheme override
- * can't silently kill the base default's other slot by cascade-layer order.
- * The input theme is never mutated. The report re-checks the emitted theme,
- * whose compiled-cap overrides the resolution core recognizes.
+ * that stop. A dual theme's overrides emit both slots together so a
+ * one-scheme override can't silently kill the base default's other slot by
+ * cascade-layer order; a stanced theme's emit single-slot in the base
+ * position (its two schemes resolve identically through the mirror), as do
+ * slots whose rendered values coincide. A stanced theme's `scheme_mirror` is
+ * recomputed over the emitted variables, so the output is render-ready even
+ * when the input wasn't resolved. The input theme is never mutated. The
+ * report re-checks the emitted theme, whose compiled-cap overrides the
+ * resolution core recognizes.
  */
 export const compile_theme = (theme: Theme): CompiledTheme => {
 	const issues = validate_theme(theme);
 	const resolver = new ThemeResolver(theme);
+	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 
 	const recomputed: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
 		light: compute_palette_chroma_caps(
@@ -977,16 +1069,20 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		const light_drift = Math.abs(light_cap - PALETTE_CHROMA_CAPS.light[stop]);
 		const dark_drift = Math.abs(dark_cap - PALETTE_CHROMA_CAPS.dark[stop]);
 		if (light_drift > CAP_EMIT_EPSILON || dark_drift > CAP_EMIT_EPSILON) {
-			cap_overrides.push({
-				name: `palette_chroma_${stop}`,
-				// always emit both slots — the dual-slot rule
-				light: render_chroma_stop_css(stop, 'light', light_cap),
-				dark: render_chroma_stop_css(stop, 'dark', dark_cap)
-			});
+			const light_value = render_chroma_stop_css(stop, 'light', light_cap);
+			const dark_value = render_chroma_stop_css(stop, 'dark', dark_cap);
+			cap_overrides.push(
+				stance || light_value === dark_value
+					? { name: `palette_chroma_${stop}`, light: light_value }
+					: { name: `palette_chroma_${stop}`, light: light_value, dark: dark_value }
+			);
 		}
 	}
 
 	// spread to preserve the scheme stance (and any future fields)
 	const compiled: Theme = { ...theme, variables: [...theme.variables, ...cap_overrides] };
+	// the emitted variables shadow mirror entries, so recompute the mirror over
+	// them; this also resolves a stanced input that skipped resolve_theme_stance
+	if (stance) compiled.scheme_mirror = scheme_stance_variables(stance, compiled.variables);
 	return { theme: compiled, report: check_theme(compiled), issues };
 };

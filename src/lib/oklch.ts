@@ -1,7 +1,7 @@
 /**
  * OKLCH/OKLab ↔ sRGB conversions and gamut math.
  *
- * The shipped CSS never needs this module — fuz_css output stays pure
+ * The shipped CSS never needs this module - fuz_css output stays pure
  * `oklch()`/`calc()`. It exists for design time and tests: derivation scripts
  * fit curve knobs against real colors, and tests assert that every default
  * stop is inside the sRGB gamut and meets the contrast gates (see `wcag.ts`).
@@ -168,7 +168,7 @@ export const oklch_max_srgb_chroma = (lightness: number, hue: number, precision 
 };
 
 /**
- * Computes ΔEOK between two OKLCH colors — the Euclidean distance in OKLab.
+ * Computes ΔEOK between two OKLCH colors - the Euclidean distance in OKLab.
  * Just-noticeable differences sit around 0.02; css-color-4's gamut mapping
  * uses 0.02 as its "local MINDE" threshold.
  */

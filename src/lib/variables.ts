@@ -2,12 +2,15 @@ import type { StyleVariable } from './variable.ts';
 import { icon_sizes } from './variable_data.ts';
 import {
 	NEUTRAL_CHROMA,
+	BORDER_CHROMA_MULTIPLIER,
+	BORDER_COLOR_LIGHTNESS,
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
 	SHADE_LIGHTNESS_KNOBS,
 	TEXT_LIGHTNESS_KNOBS,
+	render_border_color_stop_css,
 	render_chroma_shape_css,
 	render_chroma_stop_css,
 	render_lightness_stop_css,
@@ -1569,77 +1572,90 @@ export const bg_100: StyleVariable = {
 
 border_color alpha - tinted alpha borders for accessibility
 
-Theme-integrated borders with alpha transparency, tinted by the neutral hue
-for cohesion (the base colors port the old hsl(tint 60% 20%/80%) exactly).
-Higher alpha in dark mode compensates for lower perceived contrast.
+Theme-integrated borders with alpha transparency, colored by the neutral
+intent: the hue is `--hue_neutral` and the chroma derives from
+`--neutral_chroma` (borders carry a stronger tint than surfaces, hence the
+multiplier), so grayscale and retinted themes reshape borders in the same
+move as everything else. The lightness sits mid-ramp as its own pinnable
+knob. Higher alpha in dark mode compensates for lower perceived contrast.
 
 */
+export const border_color_lightness: StyleVariable = {
+	name: 'border_color_lightness',
+	light: String(BORDER_COLOR_LIGHTNESS.light),
+	dark: String(BORDER_COLOR_LIGHTNESS.dark),
+	summary: 'OKLCH lightness of the border color family'
+};
+export const border_color_chroma: StyleVariable = {
+	name: 'border_color_chroma',
+	// stronger tint than the surfaces so borders read at low alpha
+	light: `calc(var(--neutral_chroma) * ${BORDER_CHROMA_MULTIPLIER.light})`,
+	dark: `calc(var(--neutral_chroma) * ${BORDER_CHROMA_MULTIPLIER.dark})`,
+	summary: "the border family's chroma, derived from the neutral's"
+};
 export const border_color_00: StyleVariable = {
 	name: 'border_color_00',
-	light: 'transparent'
+	light: render_border_color_stop_css('00', 'light')
 };
-// Perceptually-uniform alpha curve for borders (matches shadow_alpha curve)
-// - Small gaps at low end, large gaps at high end
-// - Dark mode boosted at low end (borders less visible against dark backgrounds)
 export const border_color_05: StyleVariable = {
 	name: 'border_color_05',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 4%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 8%)'
+	light: render_border_color_stop_css('05', 'light'),
+	dark: render_border_color_stop_css('05', 'dark')
 };
 export const border_color_10: StyleVariable = {
 	name: 'border_color_10',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 7%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 14%)'
+	light: render_border_color_stop_css('10', 'light'),
+	dark: render_border_color_stop_css('10', 'dark')
 };
 export const border_color_20: StyleVariable = {
 	name: 'border_color_20',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 13%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 22%)'
+	light: render_border_color_stop_css('20', 'light'),
+	dark: render_border_color_stop_css('20', 'dark')
 };
 export const border_color_30: StyleVariable = {
 	name: 'border_color_30',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 22%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 32%)'
+	light: render_border_color_stop_css('30', 'light'),
+	dark: render_border_color_stop_css('30', 'dark')
 };
 export const border_color_40: StyleVariable = {
 	name: 'border_color_40',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 34%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 44%)'
+	light: render_border_color_stop_css('40', 'light'),
+	dark: render_border_color_stop_css('40', 'dark')
 };
 export const border_color_50: StyleVariable = {
 	name: 'border_color_50',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 48%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 56%)'
+	light: render_border_color_stop_css('50', 'light'),
+	dark: render_border_color_stop_css('50', 'dark')
 };
 export const border_color_60: StyleVariable = {
 	name: 'border_color_60',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 62%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 68%)'
+	light: render_border_color_stop_css('60', 'light'),
+	dark: render_border_color_stop_css('60', 'dark')
 };
 export const border_color_70: StyleVariable = {
 	name: 'border_color_70',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 76%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 80%)'
+	light: render_border_color_stop_css('70', 'light'),
+	dark: render_border_color_stop_css('70', 'dark')
 };
 export const border_color_80: StyleVariable = {
 	name: 'border_color_80',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 88%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 90%)'
+	light: render_border_color_stop_css('80', 'light'),
+	dark: render_border_color_stop_css('80', 'dark')
 };
 export const border_color_90: StyleVariable = {
 	name: 'border_color_90',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 96%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 97%)'
+	light: render_border_color_stop_css('90', 'light'),
+	dark: render_border_color_stop_css('90', 'dark')
 };
+// the color part is scheme-agnostic (the flip lives in the knobs), so stops
+// whose alpha matches across schemes define a single slot
 export const border_color_95: StyleVariable = {
 	name: 'border_color_95',
-	light: 'oklch(0.345 0.064 var(--hue_neutral) / 99%)',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral) / 99%)'
+	light: render_border_color_stop_css('95', 'light')
 };
 export const border_color_100: StyleVariable = {
 	name: 'border_color_100',
-	light: 'oklch(0.345 0.064 var(--hue_neutral))',
-	dark: 'oklch(0.857 0.053 var(--hue_neutral))'
+	light: render_border_color_stop_css('100', 'light')
 };
 
 /*
@@ -1812,7 +1828,7 @@ export const heading_font_family: StyleVariable = {
 	light: 'var(--font_family_serif)'
 };
 // `--heading_font_weight` is a hook consumed by `style.css` with per-tier
-// fallbacks (h1 300 … h5 900), not a declared variable — setting it flattens
+// fallbacks (h1 300 … h5 900), not a declared variable - setting it flattens
 // the heading weight ladder deliberately (display-heavy themes); see `knobs.ts`
 
 /* sizes like font-size */
@@ -2706,6 +2722,8 @@ export const default_variables: Array<StyleVariable> = [
 	bg_90,
 	bg_95,
 	bg_100,
+	border_color_lightness,
+	border_color_chroma,
 	border_color_00,
 	border_color_05,
 	border_color_10,

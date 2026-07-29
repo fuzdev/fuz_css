@@ -128,65 +128,71 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'bg_90', light: 'var(--lighten_90)', dark: 'var(--darken_90)' },
 	{ name: 'bg_95', light: 'var(--lighten_95)', dark: 'var(--darken_95)' },
 	{ name: 'bg_100', light: 'var(--lighten_100)', dark: 'var(--darken_100)' },
+	{ name: 'border_color_lightness', light: '0.345', dark: '0.857' },
+	{
+		name: 'border_color_chroma',
+		light: 'calc(var(--neutral_chroma) * 2.6667)',
+		dark: 'calc(var(--neutral_chroma) * 2.12)'
+	},
 	{
 		name: 'border_color_05',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 4%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 8%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 4%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 8%)'
 	},
 	{
 		name: 'border_color_10',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 7%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 14%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 7%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 14%)'
 	},
 	{
 		name: 'border_color_20',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 13%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 22%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 13%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 22%)'
 	},
 	{
 		name: 'border_color_30',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 22%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 32%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 22%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 32%)'
 	},
 	{
 		name: 'border_color_40',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 34%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 44%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 34%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 44%)'
 	},
 	{
 		name: 'border_color_50',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 48%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 56%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 48%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 56%)'
 	},
 	{
 		name: 'border_color_60',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 62%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 68%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 62%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 68%)'
 	},
 	{
 		name: 'border_color_70',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 76%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 80%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 76%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 80%)'
 	},
 	{
 		name: 'border_color_80',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 88%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 90%)'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 88%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 90%)'
 	},
 	{
 		name: 'border_color_90',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 96%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 97%)'
-	},
-	{
-		name: 'border_color_95',
-		light: 'oklch(0.345 0.064 var(--hue_neutral) / 99%)',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral) / 99%)'
-	},
-	{
-		name: 'border_color_100',
-		light: 'oklch(0.345 0.064 var(--hue_neutral))',
-		dark: 'oklch(0.857 0.053 var(--hue_neutral))'
+		light:
+			'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 96%)',
+		dark: 'oklch(var(--border_color_lightness) var(--border_color_chroma) var(--hue_neutral) / 97%)'
 	},
 	{ name: 'text_min', light: '#fff', dark: '#000' },
 	{ name: 'text_max', light: '#000', dark: '#fff' },

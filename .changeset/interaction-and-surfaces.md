@@ -31,7 +31,11 @@ fallback hook (all in the knob catalog, so theme validation accepts them):
   `--backdrop_color`
 - `--outline_offset` — the border-to-focus-ring gap above
 - `@media (prefers-contrast: more)` maps the OS preference onto the curve
-  knobs, mirroring the `'high contrast'` theme; theme overrides beat it
+  knobs, mirroring the `'high contrast'` theme. It ships in the
+  `fuz.preferences` cascade layer (as does the `prefers-reduced-motion`
+  duration suppression), above the `fuz.base` defaults and below
+  `fuz.theme`, so it applies regardless of stylesheet order and theme
+  overrides beat it
 
 Selected-button text stays readable under contrast-bent themes and colored
 fills:

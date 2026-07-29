@@ -1,6 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 
 import type { Theme, ThemeScheme } from '$lib/theme.ts';
+import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import type { StyleVariable } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
@@ -40,7 +41,7 @@ export interface ThemeEditorSnapshotData {
  * (dual-slot) edit the slot of the scheme being viewed; single-slot variables
  * always edit the light (base) slot so the change applies to both schemes.
  * When a fresh light-slot override lands on a variable whose default is
- * dual-slot, the merge preserves the default's dark slot explicitly — a
+ * dual-slot, the merge preserves the default's dark slot explicitly - a
  * theme's `:root` block beats the base defaults' `:root.dark` by cascade
  * layer order, so omitting it would silently change dark mode too. A base
  * theme that itself sets only light slots (e.g. dark-only mirrors) chose
@@ -84,8 +85,8 @@ export class ThemeEditorState {
 	readonly dirty: boolean = $derived(this.overrides.size > 0 || this.scheme !== this.base_scheme);
 
 	/**
-	 * True when the draft (or its base) moves palette-tier knobs — the letter
-	 * hues — making it an exemplar-tier theme per the two-tier policy.
+	 * True when the draft (or its base) moves palette-tier knobs - the letter
+	 * hues - making it an exemplar-tier theme per the two-tier policy.
 	 */
 	readonly is_palette_tier: boolean = $derived.by(() => {
 		for (const name of this.overrides.keys()) {
@@ -132,23 +133,32 @@ export class ThemeEditorState {
 		return merged;
 	}
 
-	/** The live-applied theme, stably named so pickers key it consistently. */
-	readonly draft: Theme = $derived({
-		name: UNSAVED_THEME_NAME,
-		variables: this.merged_variables,
-		...(this.stance ? { scheme: this.stance } : {})
-	});
+	/**
+	 * The live-applied theme, stably named so pickers key it consistently.
+	 * Resolved through `resolve_theme_stance` so a single-scheme draft carries
+	 * its mirror - without it the renderer would pin `color-scheme` but show
+	 * the other scheme's defaults.
+	 */
+	readonly draft: Theme = $derived(
+		resolve_theme_stance({
+			name: UNSAVED_THEME_NAME,
+			variables: this.merged_variables,
+			...(this.stance ? { scheme: this.stance } : {})
+		})
+	);
 
-	/** The copyable theme, carrying the user's chosen name. */
-	readonly output: Theme = $derived({
-		name: this.name,
-		variables: this.merged_variables,
-		...(this.stance ? { scheme: this.stance } : {})
-	});
+	/** The copyable theme, carrying the user's chosen name, stance-resolved. */
+	readonly output: Theme = $derived(
+		resolve_theme_stance({
+			name: this.name,
+			variables: this.merged_variables,
+			...(this.stance ? { scheme: this.stance } : {})
+		})
+	);
 
 	/**
 	 * The value a scheme currently renders for a variable, derived from the
-	 * same merge the renderer uses so the two can't disagree — including the
+	 * same merge the renderer uses so the two can't disagree - including the
 	 * theme layer's light slots beating the base defaults' dark slots, the
 	 * merge preserving a scheme-adaptive default's dark slot under fresh
 	 * light-only overrides, and a single-scheme stance mirroring untouched
@@ -254,7 +264,7 @@ export class ThemeEditorState {
 
 /**
  * The confirm-dialog message shown before a dirty draft is discarded by
- * loading `name` as the new base — shared by every picker that can trigger
+ * loading `name` as the new base - shared by every picker that can trigger
  * the flatten-on-load, so the wording can't drift.
  */
 export const discard_confirm_message = (editor: ThemeEditorState, name: string): string => {
@@ -268,7 +278,10 @@ const escape_single_quotes = (s: string): string =>
 	s.replaceAll('\\', '\\\\').replaceAll("'", "\\'");
 
 /**
- * Renders a theme as a copyable TypeScript module.
+ * Renders a theme as a copyable TypeScript module. A single-scheme theme
+ * emits the same resolve-at-module-scope shape as the shipped stanced
+ * exemplars, so the copied module is render-ready - the authored variables
+ * stay legible and the stance mirror computes where the theme is defined.
  */
 export const render_theme_ts = (theme: Theme): string => {
 	const identifier =
@@ -288,14 +301,25 @@ export const render_theme_ts = (theme: Theme): string => {
 	const variables_ts = theme.variables.length
 		? `[\n${variables}\n\t],`
 		: '[], // empty - every variable keeps its base default';
-	const scheme_ts =
-		theme.scheme === 'light' || theme.scheme === 'dark'
-			? `\n\tscheme: '${theme.scheme}', // renders this appearance in both color schemes`
-			: '';
+	const stanced = theme.scheme === 'light' || theme.scheme === 'dark';
+	if (stanced) {
+		return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
+import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';
+
+const authored: Theme = {
+	name: '${escape_single_quotes(theme.name)}',
+	scheme: '${theme.scheme}', // renders this appearance in both color schemes
+	variables: ${variables_ts}
+};
+
+/** Resolved at module scope so the theme is render-ready when imported. */
+export const ${identifier}_theme: Theme = resolve_theme_stance(authored);
+`;
+	}
 	return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
 
 export const ${identifier}_theme: Theme = {
-	name: '${escape_single_quotes(theme.name)}',${scheme_ts}
+	name: '${escape_single_quotes(theme.name)}',
 	variables: ${variables_ts}
 };
 `;

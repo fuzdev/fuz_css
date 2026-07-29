@@ -115,8 +115,10 @@ export interface CssResolutionStats {
 export interface CssResolutionResult {
 	/** CSS for theme variables (light and dark) */
 	theme_css: string;
-	/** CSS for base styles (from `style.css`) */
+	/** CSS for base styles (from `style.css`), destined for `fuz.base` */
 	base_css: string;
+	/** CSS for the OS user-preference mappings, destined for `fuz.preferences` */
+	preferences_css: string;
 	/** All resolved variable names (including transitive deps) */
 	resolved_variables: Set<string>;
 	/** Indices of rules included from the style index */
@@ -357,7 +359,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// g) Remove excluded variables. Warn when an excluded variable is actually referenced by
-	// shipped CSS — its `var()` would resolve to nothing. Force-included-only variables and
+	// shipped CSS - its `var()` would resolve to nothing. Force-included-only variables and
 	// unknown (non-theme) names are dropped silently, since neither leaves a dangling reference.
 	if (exclude_variables) {
 		const known_var_names = get_all_variable_names(variable_graph);
@@ -415,8 +417,13 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const { light_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
-	// Step 6: Generate base CSS from matched rules
-	const base_css = generate_base_css(style_rule_index, included_rule_indices);
+	// Step 6: Generate base CSS from matched rules, split by destination layer
+	const base_css = generate_base_css(style_rule_index, included_rule_indices, 'fuz.base');
+	const preferences_css = generate_base_css(
+		style_rule_index,
+		included_rule_indices,
+		'fuz.preferences'
+	);
 
 	// Build stats if requested
 	const stats = include_stats
@@ -432,6 +439,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	return {
 		theme_css,
 		base_css,
+		preferences_css,
 		resolved_variables,
 		included_rule_indices,
 		included_elements,
@@ -469,7 +477,7 @@ export const generate_bundled_css = (
 
 	const parts: Array<string> = [];
 
-	// Theme section — default variables belong to the base layer;
+	// Theme section - default variables belong to the base layer;
 	// `render_theme_style` overrides them from the higher `fuz.theme` layer
 	if (include_theme && result.theme_css) {
 		parts.push('/* Theme Variables */');
@@ -480,6 +488,12 @@ export const generate_bundled_css = (
 	if (include_base && result.base_css) {
 		parts.push('/* Base Styles */');
 		parts.push(`@layer fuz.base {\n${result.base_css}\n}`);
+	}
+
+	// OS user-preference mappings, above the defaults and below themes
+	if (include_base && result.preferences_css) {
+		parts.push('/* User-Preference Mappings */');
+		parts.push(`@layer fuz.preferences {\n${result.preferences_css}\n}`);
 	}
 
 	// Utility classes section

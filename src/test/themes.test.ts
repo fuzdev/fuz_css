@@ -5,7 +5,7 @@ import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.t
 import { StyleVariable } from '$lib/variable.ts';
 import { validate_theme } from '$lib/theme_check.ts';
 
-// every theme module ships from themes/, so discover them by glob — a new
+// every theme module ships from themes/, so discover them by glob - a new
 // module can't silently skip validation by being left off a hand-list
 const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
 

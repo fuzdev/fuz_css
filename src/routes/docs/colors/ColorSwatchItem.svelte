@@ -19,15 +19,18 @@
 	const name = $derived(`palette_${letter}_${intensity}`);
 
 	let color_el: HTMLElement | undefined = $state.raw();
+	let resolved = $state.raw('');
 
 	// the stop's value is a derived calc()/oklch() expression, so read the
-	// browser-resolved color off the rendered swatch element instead
-	const resolved = $derived.by(() => {
-		// re-read when the user switches color scheme or theme
+	// browser-resolved color off the rendered swatch element instead; an
+	// effect (not a derived) so the read happens after the scheme class
+	// toggles on the root - same shape as the borders page's ResolvedColorCode
+	$effect(() => {
 		theme_state.color_scheme;
 		theme_state.theme;
-		if (!color_el) return '';
-		return window.getComputedStyle(color_el).backgroundColor;
+		name;
+		if (!color_el) return;
+		resolved = window.getComputedStyle(color_el).backgroundColor;
 	});
 
 	const parsed_oklch = $derived.by((): Oklch | null => {

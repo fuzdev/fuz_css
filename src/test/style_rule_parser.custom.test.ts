@@ -242,8 +242,8 @@ describe('create_style_rule_index', () => {
 			const index1 = create_style_rule_index(css1);
 			const index2 = create_style_rule_index(css2);
 
-			// Different content should produce different hashes
-			assert.notStrictEqual(index1.content_hash, index2.content_hash);
+			// Different content parses to different rule sets
+			assert.notStrictEqual(index1.rules[0]!.css, index2.rules[0]!.css);
 		});
 	});
 

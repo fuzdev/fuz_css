@@ -68,7 +68,7 @@ export interface CacheDeps {
 	}) => Promise<Result<object, FsError>>;
 
 	/**
-	 * Removes a file. Returns a `not_found` error if the file doesn't exist —
+	 * Removes a file. Returns a `not_found` error if the file doesn't exist -
 	 * callers that want `rm -f` semantics should ignore that kind explicitly.
 	 */
 	unlink: (options: { path: string }) => Promise<Result<object, FsError>>;

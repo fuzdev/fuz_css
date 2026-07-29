@@ -33,7 +33,7 @@ if (!SKIP) {
 		// `svelte-package` leaves relative `.ts` specifiers in `dist`; with
 		// `rewriteRelativeImportExtensions: false` tsc no longer rewrites them, so the
 		// gro dist-rewrite pass (which `gro build` runs after svelte-package) must run
-		// here too — otherwise the examples can't resolve the freshly-packaged dist.
+		// here too - otherwise the examples can't resolve the freshly-packaged dist.
 		const { rewrite_dist_imports } = await import('@fuzdev/gro/dist_rewrite_imports.ts');
 		await rewrite_dist_imports(join(process.cwd(), 'dist'));
 	}, 60_000); // 1 minute timeout for package build

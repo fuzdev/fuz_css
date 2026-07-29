@@ -108,8 +108,10 @@ combined and only used content is included. In utility-only mode, import
 - Each variable can have `light` and/or `dark` values
 - Light/dark are color-schemes _within_ a theme, not separate themes
 - [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
-  `fuz.theme` cascade layer (defaults live in `fuz.base`, generated utility
-  classes in `fuz.utilities`; consumers' unlayered styles beat everything)
+  `fuz.theme` cascade layer (defaults live in `fuz.base`, OS user-preference
+  mappings like `prefers-contrast` in `fuz.preferences` above them, generated
+  utility classes in `fuz.utilities`; consumers' unlayered styles beat
+  everything)
 - A theme applies either at build time (the generators' `theme` option, baked
   into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
   renders it to a `<style>` element). They compose — the runtime theme wins

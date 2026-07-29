@@ -1,6 +1,19 @@
 import { test, assert, describe } from 'vitest';
 
-import { validate_theme, check_theme, resolve_theme_knob, GATE_LINK } from '$lib/theme_check.ts';
+import {
+	validate_theme,
+	check_theme,
+	resolve_theme_knob,
+	GATE_BODY_TEXT,
+	GATE_SUBTLE_TEXT,
+	GATE_LINK,
+	GATE_UI,
+	GATE_FILL_TEXT,
+	GATE_SELECTED_TEXT,
+	GATE_BORDER,
+	GATE_BORDER_DIVIDER
+} from '$lib/theme_check.ts';
+import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import { compose_themes, type Theme } from '$lib/theme.ts';
 import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
@@ -87,11 +100,30 @@ describe('validate_theme', () => {
 	});
 
 	test('scheme stance values validate', () => {
-		for (const scheme of ['dual', 'light', 'dark'] as const) {
-			assert.deepEqual(validate_theme({ name: 't', variables: [], scheme }), []);
+		assert.deepEqual(validate_theme({ name: 't', variables: [], scheme: 'dual' }), []);
+		for (const scheme of ['light', 'dark'] as const) {
+			assert.deepEqual(
+				validate_theme(resolve_theme_stance({ name: 't', variables: [], scheme })),
+				[]
+			);
 		}
 		const issues = validate_theme({ name: 't', variables: [], scheme: 'dusk' as 'dark' });
 		assert.isTrue(issues.some((i) => i.level === 'error'));
+	});
+
+	test('a single-scheme stance without a resolved mirror is a warning', () => {
+		for (const scheme of ['light', 'dark'] as const) {
+			const issues = validate_theme({ name: 't', variables: [], scheme });
+			assert.isTrue(
+				issues.some((i) => i.level === 'warning' && i.message.includes('resolve_theme_stance'))
+			);
+			assert.isFalse(issues.some((i) => i.level === 'error'));
+			// resolving clears it
+			assert.deepEqual(
+				validate_theme(resolve_theme_stance({ name: 't', variables: [], scheme })),
+				[]
+			);
+		}
 	});
 
 	test('a dark slot under a single-scheme stance is a warning, not an error', () => {
@@ -106,11 +138,13 @@ describe('validate_theme', () => {
 		}
 		// single-slot stanced and dual-slot unstanced themes stay clean
 		assert.deepEqual(
-			validate_theme({
-				name: 't',
-				scheme: 'dark',
-				variables: [{ name: 'neutral_chroma', light: '0.02' }]
-			}),
+			validate_theme(
+				resolve_theme_stance({
+					name: 't',
+					scheme: 'dark',
+					variables: [{ name: 'neutral_chroma', light: '0.02' }]
+				})
+			),
 			[]
 		);
 		assert.deepEqual(
@@ -386,9 +420,42 @@ describe('scheme stance', () => {
 		}
 	});
 
+	test('every contrast gate emits its pinned subjects at its exported threshold', () => {
+		// pins gate *emission*: deleting a gate's block from check_theme fails
+		// here even though every all-pass assertion elsewhere stays green
+		const report = check_theme({ name: 't', variables: [] });
+		const by_subject = new Map<string, Array<(typeof report.entries)[number]>>();
+		for (const e of report.entries) {
+			if (e.gate !== 'contrast') continue;
+			const list = by_subject.get(e.subject) ?? [];
+			list.push(e);
+			by_subject.set(e.subject, list);
+		}
+		const expect_subject = (subject: string, threshold: number): void => {
+			const entries = by_subject.get(subject);
+			assert(entries, `emits ${subject}`);
+			assert.strictEqual(entries.length, 2, `${subject} in both schemes`);
+			for (const e of entries) assert.strictEqual(e.threshold, threshold, subject);
+		};
+		expect_subject('text_80 on shade_00', GATE_BODY_TEXT);
+		expect_subject('text_80 on shade_05', GATE_BODY_TEXT);
+		expect_subject('text_80 on shade_10', GATE_BODY_TEXT);
+		expect_subject('text_00 on shade_50', GATE_SELECTED_TEXT);
+		expect_subject('text_50 on shade_00', GATE_SUBTLE_TEXT);
+		expect_subject('shade_30 vs shade_00', GATE_BORDER);
+		expect_subject('border_color_30 over shade_00', GATE_BORDER_DIVIDER);
+		expect_subject('accent_60 on shade_00', GATE_LINK);
+		for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
+			expect_subject(`palette_${letter}_50 vs shade_00`, GATE_UI);
+			expect_subject(`text_max on palette_${letter}_50`, GATE_FILL_TEXT);
+			expect_subject(`text_00 on palette_${letter}_50`, GATE_SELECTED_TEXT);
+		}
+	});
+
 	test('the dark-stanced exemplars pass their contrast gates in both schemes', () => {
 		for (const theme of [necromancer_theme, terminalien_theme]) {
 			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
+			assert.isAbove(contrast.length, 0, `${theme.name}: contrast gates resolved`);
 			assert.isTrue(
 				contrast.every((e) => e.pass),
 				`${theme.name}: ${JSON.stringify(contrast.filter((e) => !e.pass))}`
@@ -398,13 +465,32 @@ describe('scheme stance', () => {
 });
 
 describe('contrast modifier compositions', () => {
-	const bases = [
-		default_themes[0]!,
-		necromancer_theme,
-		sunset_ember_theme,
-		brutalish_theme,
-		terminalien_theme
-	];
+	// discover the shipped themes by glob like themes.test.ts, so a new
+	// exemplar module can't be silently left out of the composition matrix
+	const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
+	const is_theme = (value: unknown): value is Theme =>
+		value !== null &&
+		typeof value === 'object' &&
+		'name' in value &&
+		'variables' in value &&
+		Array.isArray((value as Theme).variables);
+	const modifier_names = new Set(contrast_modifiers.map((t) => t.name));
+	const bases: Array<Theme> = Object.values(theme_modules)
+		.flatMap((mod) => Object.values(mod as Record<string, unknown>).filter(is_theme))
+		.filter((t) => !modifier_names.has(t.name));
+
+	test('the glob discovers every hand-known base', () => {
+		const names = new Set(bases.map((t) => t.name));
+		for (const expected of [
+			default_themes[0]!.name,
+			necromancer_theme.name,
+			sunset_ember_theme.name,
+			brutalish_theme.name,
+			terminalien_theme.name
+		]) {
+			assert.isTrue(names.has(expected), expected);
+		}
+	});
 
 	test('every base × modifier validates with no errors', () => {
 		for (const base of bases) {
@@ -418,8 +504,24 @@ describe('contrast modifier compositions', () => {
 
 	// declared exception: sunset ember's past-cap cyan/teal UI fills sit just
 	// under the 3:1 fill gate against low contrast's raised background floor
-	// (~2.89–2.91) — a marginal, known combination cost, not a regression
+	// (~2.89 to 2.91) - a marginal, known combination cost, not a regression
 	const known_failing = new Set(['sunset ember (low contrast)']);
+
+	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
+		for (const base of bases) {
+			for (const modifier of contrast_modifiers) {
+				const composed = compose_themes(base, modifier);
+				const report = check_theme(composed);
+				// nothing unresolvable: an unresolved knob silently removes gate
+				// entries, so this is what keeps the contrast assertions honest
+				assert.deepEqual(report.unchecked, [], composed.name);
+				const monotonicity = report.entries.filter((e) => e.gate === 'monotonicity');
+				assert.isAbove(monotonicity.length, 0, `${composed.name}: monotonicity resolved`);
+				const failing_monotonicity = monotonicity.filter((e) => !e.pass);
+				assert.deepEqual(failing_monotonicity, [], composed.name);
+			}
+		}
+	});
 
 	test('every base × modifier keeps its contrast gates, minus declared exceptions', () => {
 		for (const base of bases) {

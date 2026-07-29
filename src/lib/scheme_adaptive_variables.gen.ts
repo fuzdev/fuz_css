@@ -7,7 +7,7 @@ import { default_variables } from './variables.ts';
  * scheme-adaptive (dual-slot) subset of `default_variables`.
  *
  * The subset is emitted as literals rather than imported so `theme_stance.ts`
- * carries no dependency on `variables.ts` — the emitter calls there defeat
+ * carries no dependency on `variables.ts` - the emitter calls there defeat
  * tree-shaking, so importing any part of it pulls the whole derived variable
  * set into the consumer's bundle.
  *
