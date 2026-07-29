@@ -213,8 +213,7 @@ const PALETTE_CHROMA_STOP_MATCHER = /^palette_chroma_(00|05|10|20|30|40|50|60|70
 const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
 // the scaled-reference form emitted for `border_color_chroma`
 // (`calc(var(--neutral_chroma) * 2.12)`) and useful for authored multipliers
-const SCALED_VAR_MATCHER =
-	/^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(-?\d*\.?\d+)\s*\)$/u;
+const SCALED_VAR_MATCHER = /^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(-?\d*\.?\d+)\s*\)$/u;
 
 /**
  * The compiled worst-hue cap form emitted by `render_chroma_stop_css`:

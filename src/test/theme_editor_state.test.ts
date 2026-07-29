@@ -22,8 +22,7 @@ import { default_variables } from '$lib/variables.ts';
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
 
-const create_editor = (): ThemeEditorState =>
-	new ThemeEditorState([base_theme, necromancer_theme]);
+const create_editor = (): ThemeEditorState => new ThemeEditorState([base_theme, necromancer_theme]);
 
 describe('set_value slot semantics', () => {
 	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
@@ -120,10 +119,7 @@ describe('display_value', () => {
 	test('a stance mirrors untouched scheme-adaptive defaults into both schemes', () => {
 		const editor = create_editor();
 		editor.set_scheme('dark');
-		assert.strictEqual(
-			editor.display_value(adaptive_default.name, 'light'),
-			adaptive_default.dark
-		);
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'light'), adaptive_default.dark);
 		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.dark);
 	});
 });

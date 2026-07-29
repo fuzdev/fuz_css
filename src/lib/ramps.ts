@@ -185,7 +185,10 @@ export const BORDER_CHROMA_MULTIPLIER: Record<ColorSchemeVariant, number> = {
  * in dark mode where borders are less visible against dark backgrounds.
  * Stop 00 renders `transparent` and stop 100 opaque.
  */
-export const BORDER_COLOR_ALPHAS: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
+export const BORDER_COLOR_ALPHAS: Record<
+	ColorSchemeVariant,
+	Record<NumericScaleVariant, number>
+> = {
 	light: {
 		'00': 0,
 		'05': 4,

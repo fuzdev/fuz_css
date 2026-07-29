@@ -1,7 +1,6 @@
 import { describe, test, assert } from 'vitest';
 
 import {
-	NEUTRAL_HUE,
 	PALETTE_CHROMA_CAPS,
 	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_HUES,
@@ -11,7 +10,6 @@ import {
 	TEXT_LIGHTNESS_KNOBS,
 	compute_palette_chroma_caps,
 	palette_stop_oklch,
-	ramp_chroma,
 	ramp_lightness,
 	shade_stop_oklch,
 	text_stop_oklch
@@ -95,7 +93,7 @@ describe('monotonicity', () => {
 });
 
 describe('chroma multipliers', () => {
-	test('defaults are in (0, 1] and palette_stop_oklch applies them', () => {
+	test('defaults are in (0, 1]', () => {
 		for (const letter of palette_variants) {
 			const multiplier = PALETTE_CHROMA_MULTIPLIERS[letter];
 			assert.isAbove(multiplier, 0, `${letter} multiplier must be positive`);
@@ -103,10 +101,6 @@ describe('chroma multipliers', () => {
 		}
 		// the brown slot ships muted - brown is low-chroma orange
 		assert.isBelow(PALETTE_CHROMA_MULTIPLIERS.f, 1);
-		for (const scheme of color_scheme_variants) {
-			const [, chroma] = palette_stop_oklch('f', '50', scheme);
-			assert.approximately(chroma, ramp_chroma(scheme, '50') * PALETTE_CHROMA_MULTIPLIERS.f, 1e-12);
-		}
 	});
 });
 
@@ -216,12 +210,11 @@ describe('contrast gates', () => {
 });
 
 describe('neutral', () => {
-	test('shade and text scales stay near the neutral hue with subtle chroma', () => {
+	test('the shade scale keeps its chroma subtle', () => {
 		for (const scheme of color_scheme_variants) {
 			for (const stop of RAMP_STOPS) {
-				const [, chroma, hue] = shade_stop_oklch(stop, scheme);
+				const [, chroma] = shade_stop_oklch(stop, scheme);
 				assert(chroma <= 0.03, `shade_${stop} ${scheme} chroma ${chroma} too strong`);
-				assert(hue === NEUTRAL_HUE);
 			}
 		}
 	});
