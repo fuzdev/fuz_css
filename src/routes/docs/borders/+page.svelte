@@ -64,9 +64,9 @@
 
 	<section>
 		<p>
-			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt to
-			color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha because
-			light-on-dark has lower perceived contrast.
+			Border variables integrate with the <TomeLink slug="themes">theme</TomeLink> system and adapt
+			to color scheme. Alpha borders are tuned for visual balance -- dark mode uses higher alpha
+			because light-on-dark has lower perceived contrast.
 		</p>
 	</section>
 	<TomeSection>
@@ -91,21 +91,21 @@
 						{/each}
 					</div>
 					<div style:width="250px">
-						<span class="pl_sm pr_sm">=</span><code
-							>{computed_styles?.getPropertyValue('--' + name)}</code
-						>
+						<span class="pl_sm pr_sm">=</span><code>
+							{computed_styles?.getPropertyValue('--' + name)}
+						</code>
 					</div>
 				</div>
 			{/each}
 		</div>
 		<TomeSection>
 			<TomeSectionHeader text="Opaque borders with shades" tag="h4" />
-			<UnfinishedImplementationWarning
-				>We may want to add <code>border_shade_NN</code> utility classes for opaque borders.</UnfinishedImplementationWarning
-			>
+			<UnfinishedImplementationWarning>
+				We may want to add <code>border_shade_NN</code> utility classes for opaque borders.
+			</UnfinishedImplementationWarning>
 			<p>
-				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This avoids
-				alpha transparency but requires inline styles or custom classes:
+				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This
+				avoids alpha transparency but requires inline styles or custom classes:
 			</p>
 			<Code
 				lang="css"
@@ -123,8 +123,8 @@ border-color: var(--shade_30);
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
 		<p>
-			Use color variables like <code>color_a_{selected_intensity}</code> for colored borders. The intensity
-			controls the color's prominence.
+			Use color variables like <code>color_a_{selected_intensity}</code> for colored borders. The
+			intensity controls the color's prominence.
 		</p>
 		<form class="intensity_selector">
 			<fieldset class="row mb_0">
@@ -164,9 +164,9 @@ border-color: var(--shade_30);
 						{/each}
 					</div>
 					<div style:width="200px">
-						<span class="pl_sm pr_sm">=</span><code
-							>{computed_styles?.getPropertyValue('--' + name)}</code
-						>
+						<span class="pl_sm pr_sm">=</span><code>
+							{computed_styles?.getPropertyValue('--' + name)}
+						</code>
 					</div>
 				</div>
 			{/each}
@@ -182,9 +182,9 @@ border-color: var(--shade_30);
 					<div class="border_example border_width" style:border-width="var(--{name})">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code
-						>{computed_styles?.getPropertyValue('--' + name)}</code
-					>
+					<span class="pl_sm pr_sm">=</span><code>
+						{computed_styles?.getPropertyValue('--' + name)}
+					</code>
 				</div>
 			{/each}
 		</div>
@@ -203,9 +203,9 @@ border-color: var(--shade_30);
 					<div class="border_example {name} outline-style:solid outline_color_30">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code
-						>{computed_styles?.getPropertyValue('--' + name)}</code
-					>
+					<span class="pl_sm pr_sm">=</span><code>
+						{computed_styles?.getPropertyValue('--' + name)}
+					</code>
 				</div>
 			{/each}
 		</div>
@@ -222,9 +222,9 @@ border-color: var(--shade_30);
 					<div class="border_example border_radius" style:border-radius="var(--{name})">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code
-						>{computed_styles?.getPropertyValue('--' + name)}</code
-					>
+					<span class="pl_sm pr_sm">=</span><code>
+						{computed_styles?.getPropertyValue('--' + name)}
+					</code>
 				</div>
 			{/each}
 		</div>
@@ -246,8 +246,8 @@ border-color: var(--shade_30);
 		<TomeSection>
 			<TomeSectionHeader tag="h4" text="Custom values" />
 			<p>
-				Border <TomeLink slug="classes" hash="Literal-classes">literal classes</TomeLink> for open-ended
-				values:
+				Border <TomeLink slug="classes" hash="Literal-classes">literal classes</TomeLink> for
+				open-ended values:
 			</p>
 			<div class="border_examples border_radii">
 				{#each border_radius_classes as border_radius_class (border_radius_class)}

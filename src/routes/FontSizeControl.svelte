@@ -22,8 +22,8 @@
 	const selected_name = $derived(font_size_variants[selected_size - 1]);
 </script>
 
-<label
-	><div class="title row width:100% flex-wrap:wrap">
+<label>
+	<div class="title row width:100% flex-wrap:wrap">
 		{#if children}
 			{@render children()}
 		{:else}
@@ -39,9 +39,9 @@
 			step={1}
 			{max}
 		/>
-		= var(<StyleVariableButton name="font_size_{selected_name}"
-			>--font_size_{selected_name}</StyleVariableButton
-		>)
+		= var(<StyleVariableButton name="font_size_{selected_name}">
+			--font_size_{selected_name}
+		</StyleVariableButton>)
 	</div>
 	<input type="range" bind:value={selected_size} {min} step={1} {max} />
 </label>

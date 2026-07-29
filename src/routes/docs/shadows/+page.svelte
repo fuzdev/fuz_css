@@ -42,15 +42,16 @@
 </script>
 
 <TomeContent {tome}>
-	<UnfinishedImplementationWarning
-		>This is unfinished and will change. It feels simultaneously limiting in usage and bloated in
-		the implementation.</UnfinishedImplementationWarning
-	>
+	<UnfinishedImplementationWarning>
+		This is unfinished and will change. It feels simultaneously limiting in usage and bloated in the
+		implementation.
+	</UnfinishedImplementationWarning>
 	<section>
 		<p>
 			fuz_css provides four semantic shadow types that build on the light model in the
-			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow for
-			light emphasis, and shroud for dark overlays.
+			<TomeLink slug="shading" />
+			docs: umbra for natural depth, highlight for rim lighting, glow for light emphasis, and shroud
+			for dark overlays.
 		</p>
 	</section>
 	<TomeSection>
@@ -102,8 +103,9 @@
 	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
-			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The intensity
-			controls the color's prominence -- 60 is a fine starting point for visible colored shadows.
+			Use <code>shadow_color_{'{hue}'}_{'{intensity}'}</code> classes to apply colored shadows. The
+			intensity controls the color's prominence -- 60 is a fine starting point for visible colored
+			shadows.
 		</p>
 		{#each color_variants as color_variant (color_variant)}
 			<TomeSection>
@@ -136,12 +138,12 @@
 					{#if is_hue}
 						<code class="p_xs {classes}">.{shadow_color_name}</code>
 					{:else}
-						<StyleVariableButton name={shadow_color_name} class={classes}
-							><span>
+						<StyleVariableButton name={shadow_color_name} class={classes}>
+							<span>
 								{shadow_color_name}
-								{#if color_variant === 'umbra'}&nbsp;<small>(default)</small>{/if}</span
-							></StyleVariableButton
-						>
+								{#if color_variant === 'umbra'}&nbsp;<small>(default)</small>{/if}
+							</span>
+						</StyleVariableButton>
 					{/if}
 				</div>
 				{@render shadow_variant_examples(shadow_color_name, shadow_size_name)}
@@ -175,9 +177,9 @@
 {/snippet}
 
 {#snippet intensity_selector(color_variant: ColorVariant)}
-	<TomeSectionHeader text="shadow_color_{color_variant}" tag="h3"
-		>shadow_color_{color_variant}_{selected_intensity}</TomeSectionHeader
-	>
+	<TomeSectionHeader text="shadow_color_{color_variant}" tag="h3">
+		shadow_color_{color_variant}_{selected_intensity}
+	</TomeSectionHeader>
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">
 			{#each intensity_variants as intensity (intensity)}

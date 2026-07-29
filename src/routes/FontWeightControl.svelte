@@ -12,8 +12,8 @@
 	// TODO @many publish in $lib when ready, the 950 thing has me wack
 </script>
 
-<label
-	><div class="title row width:100% flex-wrap:wrap">
+<label>
+	<div class="title row width:100% flex-wrap:wrap">
 		{#if children}
 			{@render children()}
 		{:else}

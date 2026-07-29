@@ -34,11 +34,13 @@
 </script>
 
 <!-- eslint-disable-next-line svelte/no-navigation-without-resolve -->
-<a {...attrs} {href} class:chip={!unstyled} class:white-space:nowrap={true}
-	>{#if typeof icon === 'string'}{icon}{:else if typeof icon === 'function'}{@render icon()}{:else}<Svg
-			inline
-			data={icon}
-			size="1em"
-		/>{/if}
-	{#if children}{@render children()}{:else}{final_path}{/if}</a
->
+<a {...attrs} {href} class:chip={!unstyled} class:white-space:nowrap={true}>
+	{#if typeof icon === 'string'}
+		{icon}
+	{:else if typeof icon === 'function'}
+		{@render icon()}
+	{:else}
+		<Svg inline data={icon} size="1em" />
+	{/if}
+	{#if children}{@render children()}{:else}{final_path}{/if}
+</a>

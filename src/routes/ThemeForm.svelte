@@ -76,26 +76,26 @@
 	<header>
 		<div class="variables_header">
 			<p>variables: {light_count} light, {dark_count} dark</p>
-			<button type="button" class="width:100%" onclick={add_variable} disabled
-				>add a variable</button
-			>
+			<button type="button" class="width:100%" onclick={add_variable} disabled>
+				add a variable
+			</button>
 		</div>
 		<form>
 			<label>
 				<div class="title">name</div>
 				<input bind:value={new_name} placeholder=">" />
 			</label>
-			<button type="button" onclick={save} disabled={!changed}
-				>{#if editing}save changes{:else}create theme{/if}</button
-			>
+			<button type="button" onclick={save} disabled={!changed}>
+				{#if editing}save changes{:else}create theme{/if}
+			</button>
 		</form>
 	</header>
 	<div class="content">
 		<div class="variables">
 			{#each new_variables as variable (variable.name)}
-				<button type="button" class="variable menuitem" onclick={(e) => edit_variable(e, variable)}
-					>--{variable.name}</button
-				>
+				<button type="button" class="variable menuitem" onclick={(e) => edit_variable(e, variable)}>
+					--{variable.name}
+				</button>
 			{/each}
 		</div>
 		<div class="rendered">

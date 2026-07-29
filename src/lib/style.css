@@ -202,23 +202,23 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 /* checkboxes and radios are expected to be nested inside a `label`, thus no bottom margin */
 :where(
 	:is(
-			p,
-			ul,
-			ol,
-			menu,
-			form,
-			fieldset,
-			table,
-			details,
-			textarea,
-			select,
-			label,
-			pre,
-			blockquote,
-			aside,
-			nav,
-			legend
-		):not(:last-child):not(.unstyled)
+		p,
+		ul,
+		ol,
+		menu,
+		form,
+		fieldset,
+		table,
+		details,
+		textarea,
+		select,
+		label,
+		pre,
+		blockquote,
+		aside,
+		nav,
+		legend
+	):not(:last-child):not(.unstyled)
 ) {
 	margin-bottom: var(--flow_margin, var(--space_lg));
 }

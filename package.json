@@ -72,7 +72,7 @@
     "@fuzdev/fuz_code": "^0.47.0",
     "@fuzdev/fuz_ui": "^0.206.6",
     "@fuzdev/fuz_util": "^0.65.2",
-    "@fuzdev/gro": "^0.206.0",
+    "@fuzdev/gro": "^0.209.0",
     "@fuzdev/mdz": "^0.3.0",
     "@ryanatkn/eslint-config": "^0.12.1",
     "@sveltejs/acorn-typescript": "^1.0.9",
