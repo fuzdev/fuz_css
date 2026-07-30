@@ -9,8 +9,10 @@ import { theme_knob_by_name } from '$lib/knobs.ts';
 import {
 	validate_theme,
 	check_theme,
+	create_theme_resolver,
 	type ThemeIssue,
-	type ThemeCheckReport
+	type ThemeCheckReport,
+	type ThemeKnobResolver
 } from '$lib/theme_check.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 
@@ -184,6 +186,13 @@ export class ThemeEditorState {
 	readonly check_report: ThemeCheckReport = $derived(check_theme(this.output));
 
 	/**
+	 * The memoized numeric resolver over the draft, rebuilt per edit like
+	 * `check_report` - agreement with `display_value` is structural since both
+	 * read the same `output` (the same effective-value merge and stance mirror).
+	 */
+	readonly resolver: ThemeKnobResolver = $derived(create_theme_resolver(this.output));
+
+	/**
 	 * The value a scheme currently renders for a variable, derived from the
 	 * same merge the renderer uses so the two can't disagree - including the
 	 * theme layer's light slots beating the base defaults' dark slots, the
@@ -199,6 +208,17 @@ export class ThemeEditorState {
 		const mirrored = !merged && this.stance ? d?.[this.stance] : undefined;
 		if (scheme === 'light') return merged?.light ?? mirrored ?? d?.light;
 		return merged?.dark ?? mirrored ?? merged?.light ?? d?.dark ?? d?.light;
+	}
+
+	/**
+	 * The numeric twin of `display_value`: the number a scheme currently
+	 * renders for a knob, resolved through derivation chains (`var()`
+	 * bindings, the `calc(var(--x) * k)` scaled-reference form, derived
+	 * stops). `null` for values outside the resolver's color-system coverage
+	 * (lengths, colors, shadows, unset hooks).
+	 */
+	resolved_value(name: string, scheme: ColorSchemeVariant): number | null {
+		return this.resolver.resolve(name, scheme);
 	}
 
 	changed(name: string): boolean {

@@ -8,6 +8,7 @@
 	const {
 		knob,
 		value,
+		resolved = null,
 		changed,
 		onchange,
 		onreset,
@@ -20,6 +21,14 @@
 		 * hooks.
 		 */
 		value: string | undefined;
+		/**
+		 * The numeric resolution of `value` through derivation chains (the
+		 * editor state's `resolved_value`), so a knob whose value is an
+		 * expression (e.g. `border_color_chroma`'s scaled-reference default)
+		 * still gets a positioned slider and a placeholder readout. `null` when
+		 * unresolvable.
+		 */
+		resolved?: number | null;
 		changed: boolean;
 		onchange: (value: string) => void;
 		onreset: () => void;
@@ -66,6 +75,18 @@
 	const min = $derived(knob.range?.[0] ?? 0);
 	const max = $derived(knob.range?.[1] ?? 100);
 	const step = $derived(knob.step ?? 1);
+
+	// a derived (unpinned-expression) value the literal parse can't represent:
+	// position the slider at it and show it as a placeholder, never as a value -
+	// the filled number box stays the "the theme sets this" signal
+	const derived_numeric = $derived(
+		scalar && numeric_value === null && resolved !== null ? resolved : null
+	);
+	const format_step = (n: number): string => {
+		const s = String(step);
+		const decimals = s.includes('.') ? s.split('.')[1]!.length : 0;
+		return n.toFixed(decimals);
+	};
 
 	const emit_numeric = (raw: string): void => {
 		if (raw.trim() === '') return; // `Number('')` is 0 - don't slam the knob mid-edit
@@ -126,9 +147,11 @@
 				onchange={(e) => onchange(e.currentTarget.value)}
 			/>
 		{/if}
-	{:else if knob.kind === 'hue' && numeric_value !== null}
+	{:else if knob.kind === 'hue' && (numeric_value ?? derived_numeric) !== null}
 		<!-- HueInput carries its own internal label; the name renders as its title -->
-		<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))}>
+		<HueInput
+			bind:value={() => numeric_value ?? derived_numeric ?? 0, (v) => emit_numeric(String(v))}
+		>
 			<code class="knob_name">--{knob.name}</code>
 		</HueInput>
 	{:else}
@@ -143,25 +166,30 @@
 						<option value={v}>{v}</option>
 					{/each}
 				</select>
-			{:else if scalar && numeric_value !== null}
+			{:else if scalar && (numeric_value !== null || derived_numeric !== null)}
 				<div class="row gap_sm">
 					<!-- the slider clamps to the knob's safe range; the number input is the
-						knowing escape past it -->
+						knowing escape past it. A derived value positions the slider but
+						renders as placeholder only - dragging or typing pins it -->
 					<input
 						type="range"
 						class="flex:1"
 						{min}
 						{max}
 						{step}
-						value={numeric_value}
+						value={numeric_value ?? derived_numeric}
 						oninput={(e) => emit_numeric(e.currentTarget.value)}
 					/>
 					<input
 						type="number"
-						aria-label={knob.name}
+						aria-label={derived_numeric !== null
+							? `${knob.name} (derived ${format_step(derived_numeric)})`
+							: knob.name}
+						title={derived_numeric !== null ? `derived: ${value} - drag or type to pin` : undefined}
 						class="knob_number"
 						{step}
-						value={numeric_value}
+						value={numeric_value ?? ''}
+						placeholder={derived_numeric !== null ? format_step(derived_numeric) : undefined}
 						oninput={(e) => emit_numeric(e.currentTarget.value)}
 					/>
 				</div>

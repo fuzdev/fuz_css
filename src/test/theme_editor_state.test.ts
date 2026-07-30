@@ -18,6 +18,7 @@ import type { Theme } from '$lib/theme.ts';
 import { base_theme } from '$lib/themes/base.ts';
 import { necromancer_theme } from '$lib/themes/necromancer.ts';
 import { default_variables } from '$lib/variables.ts';
+import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '$lib/ramps.ts';
 
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
@@ -181,6 +182,64 @@ describe('display_value', () => {
 		editor.set_scheme('dark');
 		assert.strictEqual(editor.display_value(adaptive_default.name, 'light'), adaptive_default.dark);
 		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.dark);
+	});
+});
+
+describe('resolved_value', () => {
+	test('resolves the derived border_color_chroma default per scheme', () => {
+		const editor = create_editor();
+		assert.closeTo(
+			editor.resolved_value('border_color_chroma', 'light')!,
+			NEUTRAL_CHROMA.light * BORDER_CHROMA_MULTIPLIER.light,
+			1e-9
+		);
+		assert.closeTo(
+			editor.resolved_value('border_color_chroma', 'dark')!,
+			NEUTRAL_CHROMA.dark * BORDER_CHROMA_MULTIPLIER.dark,
+			1e-9
+		);
+	});
+
+	test('an override on the source knob moves the derived value', () => {
+		const editor = create_editor();
+		editor.set_value('neutral_chroma', '0.05', 'light');
+		assert.closeTo(
+			editor.resolved_value('border_color_chroma', 'light')!,
+			0.05 * BORDER_CHROMA_MULTIPLIER.light,
+			1e-9
+		);
+	});
+
+	test('a direct pin wins over the derivation and reset re-derives', () => {
+		const editor = create_editor();
+		editor.set_value('border_color_chroma', '0.09', 'light');
+		assert.strictEqual(editor.resolved_value('border_color_chroma', 'light'), 0.09);
+		editor.reset('border_color_chroma');
+		assert.closeTo(
+			editor.resolved_value('border_color_chroma', 'light')!,
+			NEUTRAL_CHROMA.light * BORDER_CHROMA_MULTIPLIER.light,
+			1e-9
+		);
+	});
+
+	test('a stanced base resolves the same value in both schemes', () => {
+		const editor = create_editor();
+		editor.load_theme(necromancer_theme);
+		const light = editor.resolved_value('border_color_chroma', 'light');
+		assert.isNotNull(light);
+		assert.strictEqual(light, editor.resolved_value('border_color_chroma', 'dark'));
+	});
+
+	test('hue bindings resolve to their letter angles', () => {
+		const editor = create_editor();
+		assert.strictEqual(editor.resolved_value('hue_accent', 'light'), PALETTE_HUES.a);
+		editor.set_value('hue_accent', 'var(--hue_c)', 'light');
+		assert.strictEqual(editor.resolved_value('hue_accent', 'light'), PALETTE_HUES.c);
+	});
+
+	test('values outside the color system resolve to null', () => {
+		const editor = create_editor();
+		assert.isNull(editor.resolved_value('space_md', 'light'));
 	});
 });
 

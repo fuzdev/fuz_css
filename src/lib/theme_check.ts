@@ -442,9 +442,39 @@ class ThemeResolver {
 }
 
 /**
+ * A reusable numeric resolver over one theme - the memoized query surface for
+ * UI display (the theme editor's derived-knob readouts) and tests.
+ */
+export interface ThemeKnobResolver {
+	/** Resolves `name` for `scheme` to a number, or `null` when it can't be resolved. */
+	resolve(name: string, scheme: ColorSchemeVariant): number | null;
+	/** Whether the theme authors a value for `name` (a pin; stance-mirror entries excluded). */
+	pinned(name: string): boolean;
+}
+
+/**
+ * Creates a `ThemeKnobResolver` for `theme`, sharing the resolution core used
+ * by `validate_theme`/`check_theme`/`compile_theme`. The instance memoizes per
+ * name+scheme, so repeated lookups (a UI rendering every knob) stay cheap -
+ * create one per theme value and discard when the theme changes.
+ */
+export const create_theme_resolver = (theme: Theme): ThemeKnobResolver => {
+	const resolver = new ThemeResolver(theme);
+	return {
+		resolve: (name, scheme) => {
+			const r = resolver.resolve(name, scheme);
+			return r.ok ? r.value : null;
+		},
+		pinned: (name) => resolver.pinned(name)
+	};
+};
+
+/**
  * Resolves a single knob-tier or derived-stop variable of `theme` to a number,
  * or `null` when it can't be resolved. Exposed for direct tests of the
- * resolution rules (binding chains, cycles, unresolvable expressions).
+ * resolution rules (binding chains, cycles, unresolvable expressions); UIs
+ * doing repeated lookups should hold a `create_theme_resolver` instance
+ * instead, since this rebuilds the resolver (and its memo) per call.
  *
  * @param name - the variable name (without the leading `--`)
  */
@@ -452,10 +482,7 @@ export const resolve_theme_knob = (
 	theme: Theme,
 	name: string,
 	scheme: ColorSchemeVariant
-): number | null => {
-	const r = new ThemeResolver(theme).resolve(name, scheme);
-	return r.ok ? r.value : null;
-};
+): number | null => create_theme_resolver(theme).resolve(name, scheme);
 
 //
 // validate_theme - the structural lint.

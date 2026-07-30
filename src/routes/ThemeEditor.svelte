@@ -93,12 +93,11 @@
 	};
 
 	// resolves a letter's current angle from the same merge the renderer uses,
-	// so binding chips and detachment track theme overrides
-	const resolve_hue = (letter: PaletteVariant): number => {
-		const v = editor.display_value(`hue_${letter}`, editing_scheme);
-		const n = Number(v);
-		return Number.isNaN(n) ? PALETTE_HUES[letter] : n;
-	};
+	// so binding chips and detachment track theme overrides - through the
+	// shared resolver, so chained bindings resolve instead of silently
+	// falling back to the shipped default
+	const resolve_hue = (letter: PaletteVariant): number =>
+		editor.resolved_value(`hue_${letter}`, editing_scheme) ?? PALETTE_HUES[letter];
 
 	// switching the "based on" theme flattens it as the new base, discarding any
 	// edits, so guard the switch behind a confirm when the draft is dirty
@@ -134,6 +133,7 @@
 		{knob}
 		{resolve_hue}
 		value={editor.display_value(knob.name, editing_scheme)}
+		resolved={editor.resolved_value(knob.name, editing_scheme)}
 		changed={editor.changed(knob.name)}
 		onchange={(value) => editor.set_value(knob.name, value, editing_scheme)}
 		onreset={() => editor.reset(knob.name)}

@@ -404,7 +404,8 @@ typography, borders, shading, shadows, layout. See
 - [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
   numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
   contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over
-  a shared string→number resolution core
+  a shared string→number resolution core, exposed as `create_theme_resolver`
+  for memoized UI lookups (the theme editor's derived-knob readouts)
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
@@ -499,6 +500,14 @@ and more.
 
 Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
+
+Component tests (`KnobControl`, `RampStrip`, `ThemeEditor`,
+`resolved_color.svelte`) render in jsdom via a per-file
+`@vitest-environment jsdom` pragma - mounting through
+`component_test_helpers.ts` with context harnesses (`*Harness.svelte` in
+`src/test/`), the fuz_ui pattern. All other suites stay in node;
+`vite.config.ts` sets `resolve.conditions: ['browser']` in test mode so
+svelte's `mount()` resolves to the client build.
 
 ## Known limitations
 

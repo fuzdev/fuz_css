@@ -28,7 +28,7 @@ const docs_classes: Array<string> = [
 	...palette_variants.map((l) => `color_${l}_50`)
 ];
 
-export default defineConfig({
+export default defineConfig(({ mode }) => ({
 	plugins: [
 		sveltekit(),
 		svelte_docinfo(),
@@ -39,5 +39,7 @@ export default defineConfig({
 		}),
 		vite_plugin_pkg_json()
 	],
+	// in test mode, use browser conditions so svelte's mount() resolves to the client version
+	resolve: mode === 'test' ? { conditions: ['browser'] } : undefined,
 	optimizeDeps: { exclude: ['@fuzdev/blake3_wasm'] }
-});
+}));

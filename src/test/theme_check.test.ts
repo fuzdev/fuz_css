@@ -3,6 +3,7 @@ import { test, assert, describe } from 'vitest';
 import {
 	validate_theme,
 	check_theme,
+	create_theme_resolver,
 	resolve_theme_knob,
 	GATE_BODY_TEXT,
 	GATE_SUBTLE_TEXT,
@@ -28,6 +29,8 @@ import {
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_MULTIPLIERS,
 	SHADE_LIGHTNESS_KNOBS,
+	NEUTRAL_CHROMA,
+	BORDER_CHROMA_MULTIPLIER,
 	palette_stop_oklch,
 	shade_stop_oklch
 } from '$lib/ramps.ts';
@@ -461,6 +464,71 @@ describe('scheme stance', () => {
 				`${theme.name}: ${JSON.stringify(contrast.filter((e) => !e.pass))}`
 			);
 		}
+	});
+});
+
+describe('create_theme_resolver', () => {
+	test('resolves the derived border_color_chroma default per scheme', () => {
+		const resolver = create_theme_resolver({ name: 't', variables: [] });
+		assert.closeTo(
+			resolver.resolve('border_color_chroma', 'light')!,
+			NEUTRAL_CHROMA.light * BORDER_CHROMA_MULTIPLIER.light,
+			1e-9
+		);
+		assert.closeTo(
+			resolver.resolve('border_color_chroma', 'dark')!,
+			NEUTRAL_CHROMA.dark * BORDER_CHROMA_MULTIPLIER.dark,
+			1e-9
+		);
+	});
+
+	test('the derivation tracks a theme-pinned neutral_chroma', () => {
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [{ name: 'neutral_chroma', light: '0.05' }]
+		});
+		assert.closeTo(
+			resolver.resolve('border_color_chroma', 'light')!,
+			0.05 * BORDER_CHROMA_MULTIPLIER.light,
+			1e-9
+		);
+	});
+
+	test('a pinned border_color_chroma wins over the derivation', () => {
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [{ name: 'border_color_chroma', light: '0.09' }]
+		});
+		assert.strictEqual(resolver.resolve('border_color_chroma', 'light'), 0.09);
+	});
+
+	test('pinned() reports authored variables only, excluding stance-mirror entries', () => {
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [{ name: 'chroma_scale', light: '0.5' }],
+			scheme: 'dark'
+		});
+		assert.isTrue(resolver.pinned('chroma_scale'));
+		assert.isFalse(resolver.pinned('shade_lightness_00'));
+		// the mirror still resolves through: light reads the dark default
+		assert.strictEqual(
+			resolver.resolve('shade_lightness_00', 'light'),
+			SHADE_LIGHTNESS_KNOBS.dark.lightness_00
+		);
+	});
+
+	test('a dark stance derives border_color_chroma identically in both schemes', () => {
+		const resolver = create_theme_resolver(necromancer_theme);
+		const light = resolver.resolve('border_color_chroma', 'light');
+		const dark = resolver.resolve('border_color_chroma', 'dark');
+		assert.isNotNull(light);
+		assert.strictEqual(light, dark);
+	});
+
+	test('values outside the color system resolve to null', () => {
+		const resolver = create_theme_resolver({ name: 't', variables: [] });
+		assert.isNull(resolver.resolve('space_md', 'light'));
+		assert.isNull(resolver.resolve('button_shadow', 'light'));
 	});
 });
 
