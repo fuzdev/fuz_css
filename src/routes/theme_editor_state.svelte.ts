@@ -1,6 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
+import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import type { Theme, ThemeScheme } from '$lib/theme.ts';
+import { pick_stance_slot, type Theme, type ThemeScheme } from '$lib/theme.ts';
 import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import type { StyleVariable } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
@@ -58,7 +59,9 @@ export interface ThemeEditorSnapshotData {
  * color schemes, so dual slots are meaningless), and the merge skips the
  * dark-slot preservation (the renderer's stance mirror handles untouched
  * defaults). Switching into a stance re-slots existing overrides so the
- * stanced scheme's edited values become the base slots.
+ * stanced scheme's edited values become the base slots, and the merge
+ * re-slots a dual base theme's own dual-slot variables the same way - so a
+ * stanced draft over a dual base can't ship both appearances.
  */
 export class ThemeEditorState {
 	readonly themes: Array<Theme> = [];
@@ -123,13 +126,24 @@ export class ThemeEditorState {
 	#merge_variable(name: string): StyleVariable | null {
 		const o = this.overrides.get(name);
 		const b = this.base_variable_by_name.get(name);
-		const light = o?.light ?? b?.light;
-		let dark = o?.dark ?? b?.dark;
-		// preserve a scheme-adaptive default's dark slot for fresh light-only
-		// overrides - see the class comment for the cascade-layer rationale;
-		// under a stance the renderer's mirror owns the cross-scheme story
-		if (o?.light !== undefined && dark === undefined && !b && !this.stance) {
-			dark = default_variable_by_name.get(name)?.dark;
+		let light: string | undefined;
+		let dark: string | undefined;
+		if (this.stance) {
+			// re-slot each layer to the stance, sharing `compose_themes`' overlay
+			// semantics: the stanced scheme's value becomes the base slot and the
+			// other never renders. Overrides are usually single-slot already, but
+			// a dual base theme's own variables carry both slots and would split
+			// the appearances the stance promises to unify - re-slotting per layer
+			// keeps an override's base-slot edit winning over the base's dark slot
+			light = pick_stance_slot(o, this.stance) ?? pick_stance_slot(b, this.stance);
+		} else {
+			light = o?.light ?? b?.light;
+			dark = o?.dark ?? b?.dark;
+			// preserve a scheme-adaptive default's dark slot for fresh light-only
+			// overrides - see the class comment for the cascade-layer rationale
+			if (o?.light !== undefined && dark === undefined && !b) {
+				dark = default_variable_by_name.get(name)?.dark;
+			}
 		}
 		if (dark !== undefined && dark === light) dark = undefined;
 		if (light === undefined && dark === undefined) return null;
@@ -140,20 +154,11 @@ export class ThemeEditorState {
 	}
 
 	/**
-	 * The live-applied theme, stably named so pickers key it consistently.
-	 * Resolved through `resolve_theme_stance` so a single-scheme draft carries
-	 * its mirror - without it the renderer would pin `color-scheme` but show
-	 * the other scheme's defaults.
+	 * The copyable theme, carrying the user's chosen name. Resolved through
+	 * `resolve_theme_stance` so a single-scheme draft carries its mirror -
+	 * without it the renderer would pin `color-scheme` but show the other
+	 * scheme's defaults.
 	 */
-	readonly draft: Theme = $derived(
-		resolve_theme_stance({
-			name: UNSAVED_THEME_NAME,
-			variables: this.merged_variables,
-			...(this.stance ? { scheme: this.stance } : {})
-		})
-	);
-
-	/** The copyable theme, carrying the user's chosen name, stance-resolved. */
 	readonly output: Theme = $derived(
 		resolve_theme_stance({
 			name: this.name,
@@ -161,6 +166,12 @@ export class ThemeEditorState {
 			...(this.stance ? { scheme: this.stance } : {})
 		})
 	);
+
+	/**
+	 * The live-applied theme: `output` renamed to a stable name so pickers key
+	 * it consistently.
+	 */
+	readonly draft: Theme = $derived({ ...this.output, name: UNSAVED_THEME_NAME });
 
 	/** Structural lint findings for the draft, from `validate_theme`. */
 	readonly issues: Array<ThemeIssue> = $derived(validate_theme(this.output));
@@ -290,9 +301,6 @@ export const discard_confirm_message = (editor: ThemeEditorState, name: string):
 	return `load "${name}" as the new base? ${discarded}`;
 };
 
-const escape_single_quotes = (s: string): string =>
-	s.replaceAll('\\', '\\\\').replaceAll("'", "\\'");
-
 /**
  * Renders a theme as a copyable TypeScript module. A single-scheme theme
  * emits the same resolve-at-module-scope shape as the shipped stanced
@@ -307,9 +315,9 @@ export const render_theme_ts = (theme: Theme): string => {
 			.replaceAll(/^_+|_+$/gu, '') || 'custom';
 	const variables = theme.variables
 		.map((v) => {
-			const parts = [`name: '${escape_single_quotes(v.name)}'`];
-			if (v.light !== undefined) parts.push(`light: '${escape_single_quotes(v.light)}'`);
-			if (v.dark !== undefined) parts.push(`dark: '${escape_single_quotes(v.dark)}'`);
+			const parts = [`name: '${escape_js_string(v.name)}'`];
+			if (v.light !== undefined) parts.push(`light: '${escape_js_string(v.light)}'`);
+			if (v.dark !== undefined) parts.push(`dark: '${escape_js_string(v.dark)}'`);
 			return `\t\t{${parts.join(', ')}},`;
 		})
 		.join('\n');
@@ -323,7 +331,7 @@ export const render_theme_ts = (theme: Theme): string => {
 import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';
 
 const authored: Theme = {
-	name: '${escape_single_quotes(theme.name)}',
+	name: '${escape_js_string(theme.name)}',
 	scheme: '${theme.scheme}', // renders this appearance in both color schemes
 	variables: ${variables_ts}
 };
@@ -335,7 +343,7 @@ export const ${identifier}_theme: Theme = resolve_theme_stance(authored);
 	return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
 
 export const ${identifier}_theme: Theme = {
-	name: '${escape_single_quotes(theme.name)}',
+	name: '${escape_js_string(theme.name)}',
 	variables: ${variables_ts}
 };
 `;

@@ -819,10 +819,9 @@ vite_plugin_fuz_css({
 			</ul>
 			<aside>
 				Palette-letter classes are property-first, and the letter alone implies the palette:
-				<code>.color_a_50</code>, <code>.bg_a_50</code>, <code>.border_a_50</code>, and
-				<code>.outline_a_50</code> apply <code>--palette_a_50</code> to their named property (<code>
-					.border_color_50
-				</code>
+				<code>.color_a_50</code>, <code>.bg_a_50</code>, <code>.border_a_50</code>,
+				<code>.outline_a_50</code>, and <code>.shadow_a_50</code> apply
+				<code>--palette_a_50</code> to their named property (<code>.border_color_50</code>
 				is the letterless alpha ramp). A bare intent or neutral scale class applies its family's
 				dominant use: <code>.positive_50</code> and
 				<code>.text_70</code> set the text color while <code>.shade_50</code> sets the background,
@@ -1628,7 +1627,7 @@ export const gen = gen_fuz_css({
 					<strong>expressions:</strong> logical (<code>&&</code>,
 					<code>||</code>, <code>??</code>), ternaries, template literals (complete tokens only -
 					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
-					<code>`palette_$&#123;hue&#125;_50`</code> cannot be extracted; use
+					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code>
 					or
 					<code>additional_classes</code>)

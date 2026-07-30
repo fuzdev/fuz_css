@@ -324,7 +324,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 - `theme` - A `Theme` baked into the generated CSS, overlaid onto `variables`
   last-wins by name. The static counterpart to fuz_ui's `ThemeRoot`: no
   runtime theme rendering, and the output stays tree-shaken because the
-  overlay happens before the dependency graph is built
+  overlay happens before the dependency graph is built. A stanced theme's
+  `scheme_mirror` auto-resolves at build time, so hand-rolled themes don't
+  need `resolve_theme_stance`
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars

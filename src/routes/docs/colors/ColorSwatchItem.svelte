@@ -1,8 +1,7 @@
 <script lang="ts">
-	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import { oklch_to_srgb, type Oklch } from '$lib/oklch.ts';
+	import { ResolvedColor } from '../resolved_color.svelte.ts';
 	import type { PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
@@ -13,63 +12,19 @@
 		letter: PaletteVariant;
 	} = $props();
 
-	const get_theme_state = theme_state_context.get();
-	const theme_state = $derived(get_theme_state());
-
 	const name = $derived(`palette_${letter}_${intensity}`);
 
-	let color_el: HTMLElement | undefined = $state.raw();
-	let resolved = $state.raw('');
-
 	// the stop's value is a derived calc()/oklch() expression, so read the
-	// browser-resolved color off the rendered swatch element instead; an
-	// effect (not a derived) so the read happens after the scheme class
-	// toggles on the root - same shape as the borders page's ResolvedColorCode
-	$effect(() => {
-		theme_state.color_scheme;
-		theme_state.theme;
-		name;
-		if (!color_el) return;
-		resolved = window.getComputedStyle(color_el).backgroundColor;
-	});
-
-	const parsed_oklch = $derived.by((): Oklch | null => {
-		// expects the computed-style serialization of an opaque oklch() color;
-		// anything else (an alpha channel, another notation) degrades to the raw
-		// resolved string with no hex column
-		const m = /^oklch\(([\d.]+) ([\d.]+) ([\d.]+)\)$/.exec(resolved);
-		if (!m) return null;
-		return [Number(m[1]), Number(m[2]), Number(m[3])];
-	});
-
-	const hex = $derived.by(() => {
-		if (!parsed_oklch) return '';
-		const rgb = oklch_to_srgb(parsed_oklch);
-		return (
-			'#' +
-			rgb
-				.map((c) =>
-					Math.round(Math.min(1, Math.max(0, c)) * 255)
-						.toString(16)
-						.padStart(2, '0')
-				)
-				.join('')
-		);
-	});
-
-	const formatted = $derived.by(() => {
-		if (!parsed_oklch) return resolved;
-		const [l, c, h] = parsed_oklch;
-		return `oklch(${l.toFixed(3)} ${c.toFixed(3)} ${h.toFixed(0)})`;
-	});
+	// browser-resolved color off the rendered swatch element
+	const color = new ResolvedColor(() => name);
 </script>
 
 <li style:--bg_color="var(--{name})">
-	<div class="color" bind:this={color_el}></div>
+	<div class="color" bind:this={color.el}></div>
 	<div class="text">
 		<StyleVariableButton {name} style="width: 150px; justify-content: start;" />
-		<div class="hex">{hex}</div>
-		<div class="oklch">{formatted}</div>
+		<div class="hex">{color.hex}</div>
+		<div class="oklch">{color.formatted}</div>
 	</div>
 </li>
 

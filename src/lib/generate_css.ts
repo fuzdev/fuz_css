@@ -20,8 +20,13 @@ import {
 } from './css_class_generation.ts';
 import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
-import { get_all_variable_names } from './variable_graph.ts';
+import { default_variables } from './variables.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
+
+// the names fuz_css's theme output would define - the reference set for the
+// disabled-theme dangling-`var()` guard, which can't use the variable graph
+// (built from the same disabled option, so empty)
+const default_variable_names: Set<string> = new Set(default_variables.map((v) => v.name));
 
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by
@@ -189,11 +194,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		// Footgun guard: base styles on, theme off (`variables: null`). The kept base rules and
 		// utility classes still reference fuz_css theme variables, but the disabled theme output
 		// won't define them - every such `var()` dangles. Utility-only mode (both off) never reaches
-		// this branch; the legitimate escape is importing `theme.css` separately.
+		// this branch; the legitimate escape is importing `theme.css` separately. Checked against
+		// the default variable names - the graph here was built from the same `variables: null`,
+		// so it's empty and can't identify theme variables.
 		if (include_base && !include_theme) {
-			const theme_var_names = get_all_variable_names(resources.variable_graph);
-			const references_theme_var = [...resolution.resolved_variables].some((v) =>
-				theme_var_names.has(v)
+			const references_theme_var = [...resolution.referenced_variables].some((v) =>
+				default_variable_names.has(v)
 			);
 			if (references_theme_var) {
 				diagnostics.push({

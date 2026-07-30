@@ -17,7 +17,7 @@ import type { GenerationDiagnostic } from './diagnostics.ts';
 import {
 	type StyleRuleIndex,
 	get_matching_rules,
-	generate_base_css,
+	generate_base_css_by_layer,
 	collect_rule_variables
 } from './style_rule_parser.ts';
 import {
@@ -121,6 +121,13 @@ export interface CssResolutionResult {
 	preferences_css: string;
 	/** All resolved variable names (including transitive deps) */
 	resolved_variables: Set<string>;
+	/**
+	 * Variable names referenced by shipped CSS (matched rules, generated
+	 * classes, utilities, source `var()`), before graph resolution - unlike
+	 * `resolved_variables` this includes names the graph doesn't define, so
+	 * dangling-reference checks can key on it.
+	 */
+	referenced_variables: Set<string>;
 	/** Indices of rules included from the style index */
 	included_rule_indices: Set<number>;
 	/** Element names that were matched */
@@ -418,12 +425,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
 	// Step 6: Generate base CSS from matched rules, split by destination layer
-	const base_css = generate_base_css(style_rule_index, included_rule_indices, 'fuz.base');
-	const preferences_css = generate_base_css(
-		style_rule_index,
-		included_rule_indices,
-		'fuz.preferences'
-	);
+	const layered_css = generate_base_css_by_layer(style_rule_index, included_rule_indices);
+	const base_css = layered_css['fuz.base'];
+	const preferences_css = layered_css['fuz.preferences'];
 
 	// Build stats if requested
 	const stats = include_stats
@@ -441,6 +445,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		base_css,
 		preferences_css,
 		resolved_variables,
+		referenced_variables,
 		included_rule_indices,
 		included_elements,
 		diagnostics,

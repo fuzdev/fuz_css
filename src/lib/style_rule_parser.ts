@@ -670,25 +670,45 @@ export const get_matching_rules = (
  *
  * @param index - the `StyleRuleIndex`
  * @param included_indices - set of rule indices to include
- * @param layer - when given, include only rules destined for this layer
  * @returns CSS string with only included rules, in original order
  */
-export const generate_base_css = (
-	index: StyleRuleIndex,
-	included_indices: Set<number>,
-	layer?: RuleLayer
-): string => {
+export const generate_base_css = (index: StyleRuleIndex, included_indices: Set<number>): string => {
 	// Sort by order to preserve cascade
 	const sorted_indices = Array.from(included_indices).sort((a, b) => a - b);
 
 	const parts: Array<string> = [];
 	for (const idx of sorted_indices) {
-		const rule = index.rules[idx]!;
-		if (layer !== undefined && rule.layer !== layer) continue;
-		parts.push(rule.css);
+		parts.push(index.rules[idx]!.css);
 	}
 
 	return parts.join('\n\n');
+};
+
+/**
+ * Generates CSS from a `StyleRuleIndex` with only the included rules,
+ * partitioned by destination cascade layer in one sorted pass.
+ *
+ * @param index - the `StyleRuleIndex`
+ * @param included_indices - set of rule indices to include
+ * @returns per-layer CSS strings, each in original rule order
+ */
+export const generate_base_css_by_layer = (
+	index: StyleRuleIndex,
+	included_indices: Set<number>
+): Record<RuleLayer, string> => {
+	// Sort by order to preserve cascade
+	const sorted_indices = Array.from(included_indices).sort((a, b) => a - b);
+
+	const parts: Record<RuleLayer, Array<string>> = { 'fuz.base': [], 'fuz.preferences': [] };
+	for (const idx of sorted_indices) {
+		const rule = index.rules[idx]!;
+		parts[rule.layer].push(rule.css);
+	}
+
+	return {
+		'fuz.base': parts['fuz.base'].join('\n\n'),
+		'fuz.preferences': parts['fuz.preferences'].join('\n\n')
+	};
 };
 
 /**

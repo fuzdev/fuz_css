@@ -73,6 +73,17 @@ export interface RenderThemeStyleOptions {
 }
 
 /**
+ * Picks the value a single-scheme stance renders from a dual-slot shape: the
+ * stanced scheme's slot, dark falling back to the light/base position. Shared
+ * by `compose_themes` and the theme editor so the re-slot semantics can't
+ * drift.
+ */
+export const pick_stance_slot = (
+	v: { light?: string; dark?: string } | undefined,
+	stance: 'light' | 'dark'
+): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.light) : v?.light);
+
+/**
  * Composes a base theme with overlay fragments by flatten + last-wins: later
  * variables replace same-named earlier ones wholesale (both slots). Any
  * knob-only theme is already a valid fragment - the contrast modifiers in
@@ -98,7 +109,7 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 		for (const v of overlay.variables) {
 			if (stance) {
 				// single-slot in the base position, like stanced themes author their own
-				const value = stance === 'dark' ? (v.dark ?? v.light) : v.light;
+				const value = pick_stance_slot(v, stance);
 				if (value === undefined) continue;
 				by_name.set(v.name, { name: v.name, light: value });
 			} else {

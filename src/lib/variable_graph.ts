@@ -12,6 +12,7 @@ import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
 import type { Theme } from './theme.ts';
+import { resolve_theme_stance } from './theme_stance.ts';
 import type { StyleVariable } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 
@@ -284,7 +285,10 @@ export const resolve_variables_option = (variables: VariablesOption): Array<Styl
  * This is how a theme is baked in at build time: the overlaid values flow
  * through the dependency graph like any other, so the variables a theme
  * references are pulled in transitively and the output stays tree-shaken. A
- * stanced theme's `scheme_mirror` applies first, matching the renderer's order.
+ * stanced theme's `scheme_mirror` applies first, matching the renderer's order
+ * - and a stanced theme arriving without its mirror computed is resolved
+ * through `resolve_theme_stance` here, so a hand-rolled theme bakes the same
+ * as the shipped exemplars (build time has no bundle-weight concern).
  *
  * @param variables - the resolved default or custom variables
  * @param theme - the theme to overlay, or null/undefined for none
@@ -295,6 +299,7 @@ export const apply_theme_variables = (
 	theme: Theme | null | undefined
 ): Array<StyleVariable> => {
 	if (!theme) return variables;
+	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
 	const by_name = new Map(variables.map((v) => [v.name, v]));
 	// Replacement mirrors the runtime cascade: a light-slot theme value beats
 	// the base default's dark slot by layer order, so it replaces wholesale.
@@ -310,8 +315,8 @@ export const apply_theme_variables = (
 		}
 	};
 	// mirror first, then the theme's own, so authored values win
-	for (const v of theme.scheme_mirror ?? []) overlay(v);
-	for (const v of theme.variables) overlay(v);
+	for (const v of resolved.scheme_mirror ?? []) overlay(v);
+	for (const v of resolved.variables) overlay(v);
 	return [...by_name.values()];
 };
 

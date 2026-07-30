@@ -42,11 +42,18 @@
  * @module
  */
 
+import { clamp } from '@fuzdev/fuz_util/maths.ts';
+
 import { StyleVariable } from './variable.ts';
 import type { Theme } from './theme.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
-import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
+import {
+	theme_knob_by_name,
+	theme_knob_hook_names,
+	HUE_BINDING_MATCHER,
+	type ThemeKnob
+} from './knobs.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
@@ -71,6 +78,7 @@ import {
 	palette_variants,
 	intent_variants,
 	color_scheme_variants,
+	palette_glosses,
 	type NumericScaleVariant,
 	type ColorSchemeVariant,
 	type PaletteVariant
@@ -183,15 +191,15 @@ export interface CompiledTheme {
 type Resolved =
 	{ ok: true; value: number } | { ok: false; variable: string; value: string; reason: string };
 
-/** Intent and neutral hues default to a palette-letter binding. */
-const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = {
-	hue_accent: 'hue_a',
-	hue_positive: 'hue_b',
-	hue_negative: 'hue_c',
-	hue_caution: 'hue_h',
-	hue_info: 'hue_i',
-	hue_neutral: 'hue_f'
-};
+/**
+ * Intent and neutral hues default to a palette-letter binding - derived by
+ * inverting `palette_glosses` so rebinding an intent there flows through.
+ */
+const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = Object.fromEntries(
+	Object.entries(palette_glosses).flatMap(([letter, gloss]) =>
+		gloss.binding ? [[`hue_${gloss.binding}`, `hue_${letter}`]] : []
+	)
+);
 
 const LIGHTNESS_KNOBS_BY_FAMILY: Record<
 	'palette' | 'shade' | 'text',
@@ -205,7 +213,6 @@ const LIGHTNESS_KNOBS_BY_FAMILY: Record<
 const PALETTE_LETTER_MATCHER = /^hue_([a-j])$/u;
 const PALETTE_MULTIPLIER_MATCHER = /^palette_([a-j])_chroma_scale$/u;
 const INTENT_MULTIPLIER_MATCHER = /^(accent|positive|negative|caution|info)_chroma_scale$/u;
-const INTENT_HUE_BINDING_MATCHER = /^var\(--hue_([a-j])\)$/u;
 const LIGHTNESS_KNOB_MATCHER = /^(palette|shade|text)_lightness_(00|100|curve)$/u;
 const LIGHTNESS_STOP_MATCHER =
 	/^(palette|shade|text)_lightness_(05|10|20|30|40|50|60|70|80|90|95)$/u;
@@ -477,20 +484,24 @@ const validate_knob_value = (
 	switch (knob.kind) {
 		case 'number':
 		case 'percent': {
-			if (!numeric) {
+			// reference forms the resolver understands - var(--x) and the scaled
+			// calc(var(--x) * k) (e.g. border_color_chroma's derived default) -
+			// pass without a range check, which needs the resolved value
+			const is_reference = VAR_MATCHER.test(trimmed) || SCALED_VAR_MATCHER.test(trimmed);
+			if (!numeric && !is_reference) {
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a numeric ${knob.kind} value`,
 					variable
 				});
-			} else {
+			} else if (numeric) {
 				check_range();
 			}
 			break;
 		}
 		case 'hue': {
 			// a literal angle, or a var(--hue_X) binding (legal CSS regardless of `bindable`)
-			const is_binding = /^var\(--hue_[a-j]\)$/u.test(trimmed);
+			const is_binding = HUE_BINDING_MATCHER.test(trimmed);
 			if (!numeric && !is_binding) {
 				issues.push({
 					level: 'warning',
@@ -626,7 +637,7 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 		let letter: string | null = null;
 		if (authored) {
 			for (const slot of [authored.light, authored.dark]) {
-				const m = slot === undefined ? null : INTENT_HUE_BINDING_MATCHER.exec(slot.trim());
+				const m = slot === undefined ? null : HUE_BINDING_MATCHER.exec(slot.trim());
 				if (m) letter = m[1]!;
 			}
 		} else {
@@ -663,9 +674,11 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 // check_theme - the numeric-twin accessibility gates.
 //
 
-const clamp01 = (n: number): number => Math.min(1, Math.max(0, n));
-
-const clamp_rgb = (rgb: RgbUnit): RgbUnit => [clamp01(rgb[0]), clamp01(rgb[1]), clamp01(rgb[2])];
+const clamp_rgb = (rgb: RgbUnit): RgbUnit => [
+	clamp(rgb[0], 0, 1),
+	clamp(rgb[1], 0, 1),
+	clamp(rgb[2], 0, 1)
+];
 
 // max sRGB channel excess outside [0, 1] - 0 when in gamut
 const gamut_excess = ([r, g, b]: RgbUnit): number => Math.max(0, -r, r - 1, -g, g - 1, -b, b - 1);
@@ -750,6 +763,15 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		});
 	};
 
+	const push_contrast = (
+		subject: string,
+		value: number,
+		threshold: number,
+		scheme: ColorSchemeVariant
+	): void => {
+		entries.push({ gate: 'contrast', scheme, subject, value, threshold, pass: value >= threshold });
+	};
+
 	const push_monotonicity = (
 		family: 'palette' | 'shade' | 'text',
 		scheme: ColorSchemeVariant
@@ -825,14 +847,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			const surface = neutral_color('shade', stop, scheme);
 			if (!text_80 || !surface) continue;
 			const ratio = contrast(oklch_to_srgb(text_80), oklch_to_srgb(surface));
-			entries.push({
-				gate: 'contrast',
-				scheme,
-				subject: `text_80 on shade_${stop}`,
-				value: ratio,
-				threshold: GATE_BODY_TEXT,
-				pass: ratio >= GATE_BODY_TEXT
-			});
+			push_contrast(`text_80 on shade_${stop}`, ratio, GATE_BODY_TEXT, scheme);
 		}
 
 		const shade_00 = neutral_color('shade', '00', scheme);
@@ -842,42 +857,21 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		const shade_50 = neutral_color('shade', '50', scheme);
 		if (text_00 && shade_50) {
 			const ratio = contrast(oklch_to_srgb(text_00), oklch_to_srgb(shade_50));
-			entries.push({
-				gate: 'contrast',
-				scheme,
-				subject: 'text_00 on shade_50',
-				value: ratio,
-				threshold: GATE_SELECTED_TEXT,
-				pass: ratio >= GATE_SELECTED_TEXT
-			});
+			push_contrast('text_00 on shade_50', ratio, GATE_SELECTED_TEXT, scheme);
 		}
 
 		// contrast: subtle text - text_50 on shade_00
 		const text_50 = neutral_color('text', '50', scheme);
 		if (text_50 && shade_00) {
 			const ratio = contrast(oklch_to_srgb(text_50), oklch_to_srgb(shade_00));
-			entries.push({
-				gate: 'contrast',
-				scheme,
-				subject: 'text_50 on shade_00',
-				value: ratio,
-				threshold: GATE_SUBTLE_TEXT,
-				pass: ratio >= GATE_SUBTLE_TEXT
-			});
+			push_contrast('text_50 on shade_00', ratio, GATE_SUBTLE_TEXT, scheme);
 		}
 
 		// contrast: control borders - shade_30 (the --border_color default) vs shade_00
 		const shade_30 = neutral_color('shade', '30', scheme);
 		if (shade_30 && shade_00) {
 			const ratio = contrast(oklch_to_srgb(shade_30), oklch_to_srgb(shade_00));
-			entries.push({
-				gate: 'contrast',
-				scheme,
-				subject: 'shade_30 vs shade_00',
-				value: ratio,
-				threshold: GATE_BORDER,
-				pass: ratio >= GATE_BORDER
-			});
+			push_contrast('shade_30 vs shade_00', ratio, GATE_BORDER, scheme);
 		}
 
 		// contrast: divider borders - border_color_30 alpha-composited over shade_00
@@ -897,14 +891,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				alpha * border_rgb[2] + (1 - alpha) * bg_rgb[2]
 			];
 			const ratio = wcag_contrast_ratio(composited, bg_rgb);
-			entries.push({
-				gate: 'contrast',
-				scheme,
-				subject: 'border_color_30 over shade_00',
-				value: ratio,
-				threshold: GATE_BORDER_DIVIDER,
-				pass: ratio >= GATE_BORDER_DIVIDER
-			});
+			push_contrast('border_color_30 over shade_00', ratio, GATE_BORDER_DIVIDER, scheme);
 		}
 
 		// contrast: link - the accent hue at stop 60 on shade_00 (resolved through bindings)
@@ -914,14 +901,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			const link = ramp_color(accent_hue, '60', scheme, accent_multiplier);
 			if (link) {
 				const ratio = contrast(oklch_to_srgb(link), oklch_to_srgb(shade_00));
-				entries.push({
-					gate: 'contrast',
-					scheme,
-					subject: 'accent_60 on shade_00',
-					value: ratio,
-					threshold: GATE_LINK,
-					pass: ratio >= GATE_LINK
-				});
+				push_contrast('accent_60 on shade_00', ratio, GATE_LINK, scheme);
 			}
 		}
 
@@ -947,33 +927,12 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				if (!fill) continue;
 				const fill_rgb = oklch_to_srgb(fill);
 				const ui = contrast(fill_rgb, oklch_to_srgb(shade_00));
-				entries.push({
-					gate: 'contrast',
-					scheme,
-					subject: `${label}_50 vs shade_00`,
-					value: ui,
-					threshold: GATE_UI,
-					pass: ui >= GATE_UI
-				});
+				push_contrast(`${label}_50 vs shade_00`, ui, GATE_UI, scheme);
 				const on_fill = contrast(text_max, fill_rgb);
-				entries.push({
-					gate: 'contrast',
-					scheme,
-					subject: `text_max on ${label}_50`,
-					value: on_fill,
-					threshold: GATE_FILL_TEXT,
-					pass: on_fill >= GATE_FILL_TEXT
-				});
+				push_contrast(`text_max on ${label}_50`, on_fill, GATE_FILL_TEXT, scheme);
 				if (text_00) {
 					const selected = contrast(oklch_to_srgb(text_00), fill_rgb);
-					entries.push({
-						gate: 'contrast',
-						scheme,
-						subject: `text_00 on ${label}_50`,
-						value: selected,
-						threshold: GATE_SELECTED_TEXT,
-						pass: selected >= GATE_SELECTED_TEXT
-					});
+					push_contrast(`text_00 on ${label}_50`, selected, GATE_SELECTED_TEXT, scheme);
 				}
 			}
 		}

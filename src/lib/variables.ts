@@ -45,7 +45,7 @@ defaults for gamut, ramp monotonicity, and contrast.
 
 Layers, each derivable from the one above and each overridable per stop:
 curve knobs → ramp stops (`--palette_lightness_50`, `--palette_chroma_50`)
-→ color stops (`--palette_a_50`) → utility classes (`.palette_a_50`).
+→ color stops (`--palette_a_50`) → utility classes (`.color_a_50`).
 
 */
 

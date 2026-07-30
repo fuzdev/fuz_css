@@ -204,6 +204,31 @@ describe('generate_css', () => {
 			assert_css_not_contains(result.css, 'Theme Variables');
 		});
 
+		test('the disabled-theme warning fires with an empty variable graph', () => {
+			// the real `variables: null` path builds the graph from that same option,
+			// so it's empty - the guard keys on the default names, not the graph
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+				'button { color: var(--text_color); }',
+				[]
+			);
+
+			const result = generate_css(
+				make_options({
+					all_elements: new Set(['button']),
+					include_base: true,
+					include_theme: false,
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
+			);
+
+			assert.ok(
+				result.diagnostics.find(
+					(d) => d.level === 'warning' && d.message.includes('theme variables are disabled')
+				),
+				'expected the warning to fire from the production-shaped empty graph'
+			);
+		});
+
 		test('no theme-disabled warning when both base and theme are enabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',

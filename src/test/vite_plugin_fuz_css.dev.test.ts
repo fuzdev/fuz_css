@@ -6,6 +6,7 @@ import { rm } from 'node:fs/promises';
 
 import { vite_plugin_fuz_css, type VitePluginFuzCssOptions } from '$lib/vite_plugin_fuz_css.ts';
 import { default_cache_deps } from '$lib/deps_defaults.ts';
+import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
 
 const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_dev');
 
@@ -122,6 +123,37 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 				'the failure is logged per file'
 			);
 			assert(!errors.some((m) => m.includes('pre-scan failed:')), 'the scan itself does not abort');
+		} finally {
+			await server.close();
+		}
+	});
+});
+
+describe('vite_plugin_fuz_css theme option', () => {
+	test('bakes a theme into the served CSS, auto-resolving its stance', async () => {
+		const server = await create_dev_server({
+			additional_variables: ['shade_lightness_00'],
+			// hand-rolled stanced theme: no `resolve_theme_stance` call - the
+			// build seam resolves the mirror itself
+			theme: {
+				name: 'test dark',
+				scheme: 'dark',
+				variables: [{ name: 'space_md', light: '99px' }]
+			}
+		});
+		try {
+			const result = await server.transformRequest('/__fuz.css');
+			assert(result);
+			assert(result.code.includes('--space_md: 99px'), 'the authored theme value bakes in');
+			const adaptive = scheme_adaptive_variables.find((v) => v.name === 'shade_lightness_00')!;
+			assert(
+				result.code.includes(`--shade_lightness_00: ${adaptive.dark}`),
+				'the stance mirror re-slots the untouched scheme-adaptive default'
+			);
+			assert(
+				!result.code.includes(`--shade_lightness_00: ${adaptive.light}`),
+				'the light appearance never renders under the dark stance'
+			);
 		} finally {
 			await server.close();
 		}

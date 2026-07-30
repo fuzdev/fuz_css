@@ -164,8 +164,9 @@ export interface CssOutputOptions {
 	 * referenced variables are pulled in transitively.
 	 *
 	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
-	 * runtime theme winning by cascade layer. A single-scheme theme needs
-	 * `resolve_theme_stance` first so its `scheme_mirror` applies, and pinning
+	 * runtime theme winning by cascade layer. A single-scheme theme's
+	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
+	 * renderer, which needs `resolve_theme_stance` called first), and pinning
 	 * `color-scheme` is separate - the `dark`/`light` class on the `html`
 	 * element drives it.
 	 *

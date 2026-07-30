@@ -143,7 +143,7 @@ border-color: var(--shade_30);
 		<div class="border_examples border_colors">
 			{#each palette_variants as letter (letter)}
 				{@const name = 'palette_' + letter + '_' + selected_intensity}
-				{@const text_class = 'palette_' + letter + '_50'}
+				{@const text_class = 'color_' + letter + '_50'}
 				<div class="border_color_outer">
 					<div class="border_color_inner">
 						<div

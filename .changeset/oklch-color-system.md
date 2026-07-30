@@ -18,19 +18,19 @@ Breaking changes:
   `--palette_a_50`), while the compound families shorten -
   `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` →
   `outline_X_NN`, `shadow_color_X_NN` → `shadow_X_NN` (`bg_X_NN` and the
-  letterless families — `border_color_NN`, `outline_color_NN`,
-  `shadow_color_umbra` — keep their names). The bare component conventions
+  letterless families like `border_color_NN` and `shadow_color_umbra` keep
+  their names). The bare component conventions
   `.color_a`-`.color_j` → `.palette_a`-`.palette_j` (they recolor buttons
   and chips as a unit, not one property).
 - **`.fg_NN`/`.bg_NN` token classes removed**: the adaptive alpha overlays
   stay as variables (`--fg_*`/`--bg_*`) but no longer generate bare token
-  classes — `bg_` is the opaque background class prefix (`.bg_a_50`,
+  classes - `bg_` is the opaque background class prefix (`.bg_a_50`,
   `.bg_positive_50`), and a translucent `.bg_50` beside those was the one
   collision in the naming family. Use literals instead:
   `background-color:var(--fg_10)`. The `.darken_NN`/`.lighten_NN` classes
   are unchanged.
 - **`--hue_a`…`--hue_j` are now OKLCH hue angles** (blue is `250`, not HSL
-  `210`). Consumer CSS doing `hsl(var(--hue_x) …)` breaks — use
+  `210`). Consumer CSS doing `hsl(var(--hue_x) …)` breaks - use
   `oklch(<l> <c> var(--hue_x))` or the palette/intent stops.
 - **`--tint_hue`/`--tint_saturation` removed** → `--hue_neutral` (defaults
   to `var(--hue_f)`) + `--neutral_chroma`.
@@ -69,19 +69,19 @@ New:
   `--palette_j_chroma_scale` and intent twins (`--accent_chroma_scale`,
   same for positive/negative/caution/info), default `1`, each multiplying
   its slot's chroma under the global `--chroma_scale` so the slot's
-  character holds at any global setting — grayscale stays grayscale and
+  character holds at any global setting - grayscale stays grayscale and
   vivid scales proportionally. Values at or below 1 stay inside the sRGB
   gamut caps by construction; above 1 knowingly clips, like the global
   knob. The brown slot `f` ships at `0.55`: brown is low-chroma dark
   orange, so under uniform chroma it read as a second orange beside
   `--hue_h`. An intent hue bound to a palette letter shares only the angle
-  — `validate_theme` warns when the bound letter's multiplier differs from
+  - `validate_theme` warns when the bound letter's multiplier differs from
   the intent's twin, and `check_theme` runs its gates through the
   multipliers.
 - **Derived border colors**: the `border_color_*` alpha ramp colors through
-  the neutral intent — new `--border_color_lightness` and
-  `--border_color_chroma` knobs, the chroma derived from `--neutral_chroma`
-  — so grayscale and retinted themes reshape borders in the same move as
+  the neutral intent (new `--border_color_lightness` and
+  `--border_color_chroma` knobs, the chroma derived from `--neutral_chroma`),
+  so grayscale and retinted themes reshape borders in the same move as
   surfaces and text.
 - **Design-time modules**: `ramps.ts` (fitted knob constants, numeric
   evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), and

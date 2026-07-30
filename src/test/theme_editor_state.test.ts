@@ -99,6 +99,66 @@ describe('scheme stance', () => {
 	});
 });
 
+describe('scheme stance over a dual base theme', () => {
+	// a dual base authoring both slots itself - like brutalish and sunset ember
+	const dual_base: Theme = {
+		name: 'dualish',
+		variables: [
+			{ name: 'shade_lightness_00', light: '0.9', dark: '0.3' },
+			{ name: 'chroma_scale', light: '1.4' }
+		]
+	};
+	const create_dual_editor = (): ThemeEditorState => {
+		const editor = new ThemeEditorState([base_theme, dual_base]);
+		editor.load_theme(dual_base);
+		return editor;
+	};
+
+	test("entering a stance re-slots the base theme's own dual-slot variables", () => {
+		const editor = create_dual_editor();
+		editor.set_scheme('dark');
+		// the base's dark appearance becomes the base slot - without this the
+		// output would ship both appearances the stance promises to unify
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
+			{ name: 'shade_lightness_00', light: '0.3' }
+		);
+		// single-slot base variables pass through unchanged
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === 'chroma_scale'),
+			{ name: 'chroma_scale', light: '1.4' }
+		);
+		// no dark-slot stance warnings - the merge re-slotted them away
+		assert.isUndefined(editor.issues.find((i) => i.message.includes('dark slot')));
+	});
+
+	test('a light stance keeps the light value and drops the dark slot', () => {
+		const editor = create_dual_editor();
+		editor.set_scheme('light');
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
+			{ name: 'shade_lightness_00', light: '0.9' }
+		);
+	});
+
+	test('display_value shows the stanced appearance in both schemes', () => {
+		const editor = create_dual_editor();
+		editor.set_scheme('dark');
+		assert.strictEqual(editor.display_value('shade_lightness_00', 'light'), '0.3');
+		assert.strictEqual(editor.display_value('shade_lightness_00', 'dark'), '0.3');
+	});
+
+	test('an override under the stance still wins over the re-slotted base', () => {
+		const editor = create_dual_editor();
+		editor.set_scheme('dark');
+		editor.set_value('shade_lightness_00', '0.2', 'dark');
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
+			{ name: 'shade_lightness_00', light: '0.2' }
+		);
+	});
+});
+
 describe('display_value', () => {
 	test('falls back to the default per scheme', () => {
 		const editor = create_editor();

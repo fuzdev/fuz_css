@@ -21,6 +21,20 @@
  */
 
 import type { StyleVariableName } from './variable.ts';
+import {
+	border_radius_variants,
+	border_width_variants,
+	intent_variants,
+	line_height_variants,
+	palette_variants,
+	space_variants
+} from './variable_data.ts';
+
+/**
+ * Matches a `var(--hue_X)` palette-letter binding, capturing the letter -
+ * the value form `bindable` hue knobs default to.
+ */
+export const HUE_BINDING_MATCHER: RegExp = /^var\(--hue_([a-j])\)$/u;
 
 /**
  * The value kind of a knob, determining the editor widget and how the value
@@ -115,6 +129,15 @@ const chroma_multiplier = (name: StyleVariableName, tier: KnobTier): ThemeKnob =
 	step: 0.01
 });
 
+// an escape-hatch-leverage CSS length token, pinnable under its family's scale knob
+const length_knob = (name: StyleVariableName, axis: KnobAxis): ThemeKnob => ({
+	name,
+	kind: 'length',
+	axis,
+	leverage: 'sm',
+	tier: 'semantic'
+});
+
 const lightness_ramp = (family: string): Array<ThemeKnob> => [
 	{
 		name: `${family}_lightness_00`,
@@ -176,11 +199,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 	hue('hue_caution', 'md', 'semantic', true),
 	hue('hue_info', 'md', 'semantic', true),
 	// intent chroma-character twins - pair with a binding to a muted slot
-	chroma_multiplier('accent_chroma_scale', 'semantic'),
-	chroma_multiplier('positive_chroma_scale', 'semantic'),
-	chroma_multiplier('negative_chroma_scale', 'semantic'),
-	chroma_multiplier('caution_chroma_scale', 'semantic'),
-	chroma_multiplier('info_chroma_scale', 'semantic'),
+	...intent_variants.map((i) => chroma_multiplier(`${i}_chroma_scale`, 'semantic')),
 	...lightness_ramp('palette'),
 	...lightness_ramp('shade'),
 	...lightness_ramp('text'),
@@ -211,6 +230,27 @@ export const theme_knobs: Array<ThemeKnob> = [
 		tier: 'semantic',
 		range: [0.2, 4],
 		step: 0.01
+	},
+	{
+		// mid-ramp so borders read against both the page background and fills
+		name: 'border_color_lightness',
+		kind: 'number',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 1],
+		step: 0.001
+	},
+	{
+		// the default derives from the neutral (calc(var(--neutral_chroma) * k));
+		// setting a literal number pins the border family's chroma
+		name: 'border_color_chroma',
+		kind: 'number',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic',
+		range: [0, 0.15],
+		step: 0.001
 	},
 	// color - micro-surface variables consumed by style.css
 	{
@@ -245,27 +285,9 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 1
 	},
 	// color - the palette tier (moving these makes a theme an exemplar)
-	hue('hue_a', 'sm', 'palette'),
-	hue('hue_b', 'sm', 'palette'),
-	hue('hue_c', 'sm', 'palette'),
-	hue('hue_d', 'sm', 'palette'),
-	hue('hue_e', 'sm', 'palette'),
-	hue('hue_f', 'sm', 'palette'),
-	hue('hue_g', 'sm', 'palette'),
-	hue('hue_h', 'sm', 'palette'),
-	hue('hue_i', 'sm', 'palette'),
-	hue('hue_j', 'sm', 'palette'),
+	...palette_variants.map((l) => hue(`hue_${l}`, 'sm', 'palette')),
 	// per-slot chroma multipliers - a slot's chroma character under chroma_scale
-	chroma_multiplier('palette_a_chroma_scale', 'palette'),
-	chroma_multiplier('palette_b_chroma_scale', 'palette'),
-	chroma_multiplier('palette_c_chroma_scale', 'palette'),
-	chroma_multiplier('palette_d_chroma_scale', 'palette'),
-	chroma_multiplier('palette_e_chroma_scale', 'palette'),
-	chroma_multiplier('palette_f_chroma_scale', 'palette'),
-	chroma_multiplier('palette_g_chroma_scale', 'palette'),
-	chroma_multiplier('palette_h_chroma_scale', 'palette'),
-	chroma_multiplier('palette_i_chroma_scale', 'palette'),
-	chroma_multiplier('palette_j_chroma_scale', 'palette'),
+	...palette_variants.map((l) => chroma_multiplier(`palette_${l}_chroma_scale`, 'palette')),
 	// shape
 	{
 		name: 'radius_scale',
@@ -292,23 +314,9 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic'
 	},
-	{ name: 'border_width', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_1', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_4', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_5', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_6', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_7', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_8', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_width_9', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_xs3', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_xs2', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_xs', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_sm', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_md', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_lg', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
-	{ name: 'border_radius_xl', kind: 'length', axis: 'shape', leverage: 'sm', tier: 'semantic' },
+	length_knob('border_width', 'shape'),
+	...border_width_variants.map((v) => length_knob(`border_width_${v}`, 'shape')),
+	...border_radius_variants.map((v) => length_knob(`border_radius_${v}`, 'shape')),
 	// density
 	{
 		name: 'scale_factor',
@@ -319,29 +327,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0.25, 2],
 		step: 0.05
 	},
-	{ name: 'space_xs5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xs4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xs3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xs2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xs', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_sm', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_md', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_lg', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl2', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl3', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl4', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl5', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl6', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl7', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl8', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl9', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl10', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl11', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl12', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl13', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl14', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
-	{ name: 'space_xl15', kind: 'length', axis: 'density', leverage: 'sm', tier: 'semantic' },
+	...space_variants.map((v) => length_knob(`space_${v}`, 'density')),
 	// depth
 	{
 		name: 'shadow_alpha_scale',
@@ -422,51 +408,15 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 100,
 		hook: true
 	},
-	{
-		name: 'line_height_xs',
+	...line_height_variants.map((v): ThemeKnob => ({
+		name: `line_height_${v}`,
 		kind: 'number',
 		axis: 'typography',
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0.8, 3],
 		step: 0.05
-	},
-	{
-		name: 'line_height_sm',
-		kind: 'number',
-		axis: 'typography',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0.8, 3],
-		step: 0.05
-	},
-	{
-		name: 'line_height_md',
-		kind: 'number',
-		axis: 'typography',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0.8, 3],
-		step: 0.05
-	},
-	{
-		name: 'line_height_lg',
-		kind: 'number',
-		axis: 'typography',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0.8, 3],
-		step: 0.05
-	},
-	{
-		name: 'line_height_xl',
-		kind: 'number',
-		axis: 'typography',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0.8, 3],
-		step: 0.05
-	},
+	})),
 	// motion
 	{
 		name: 'duration_1',

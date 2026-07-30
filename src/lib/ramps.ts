@@ -403,7 +403,8 @@ export const render_lightness_stop_css = (
  */
 export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
 	const t = ramp_stop_t(stop);
-	const base = Math.round(4 * t * (1 - t) * 1e6) / 1e6;
+	// exact 0/1 at the endpoints and midpoint; format_ramp_number rounds the rest
+	const base = 4 * t * (1 - t);
 	if (base === 0) return '0';
 	if (base === 1) return '1';
 	return `calc(pow(${format_ramp_number(base)}, var(--palette_chroma_curve)))`;

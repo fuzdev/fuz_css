@@ -1,7 +1,7 @@
 <script lang="ts">
 	import HueInput from '@fuzdev/fuz_ui/HueInput.svelte';
 
-	import type { ThemeKnob } from '$lib/knobs.ts';
+	import { HUE_BINDING_MATCHER, type ThemeKnob } from '$lib/knobs.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
 	import { palette_variants, palette_glosses, type PaletteVariant } from '$lib/variable_data.ts';
 
@@ -35,12 +35,10 @@
 		resolve_hue?: (letter: PaletteVariant) => number;
 	} = $props();
 
-	const BINDING_MATCHER = /^var\(--hue_([a-j])\)$/u;
-
 	// the palette letter a bindable knob currently points at, null when detached
 	const bound_letter: PaletteVariant | null = $derived.by(() => {
 		if (!knob.bindable || value === undefined) return null;
-		const m = BINDING_MATCHER.exec(value);
+		const m = HUE_BINDING_MATCHER.exec(value);
 		return m ? (m[1] as PaletteVariant) : null;
 	});
 
@@ -48,7 +46,7 @@
 	// represent them; dragging writes the literal angle
 	const resolve_numeric = (v: string | undefined): number | null => {
 		if (v === undefined) return null;
-		const m = BINDING_MATCHER.exec(v);
+		const m = HUE_BINDING_MATCHER.exec(v);
 		if (m) return resolve_hue(m[1] as PaletteVariant);
 		let s = v;
 		if (knob.kind === 'percent') s = s.replace(/%$/u, '');

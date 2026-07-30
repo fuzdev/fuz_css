@@ -118,9 +118,10 @@ const is_ci = !!process.env.CI;
 const HMR_DEBOUNCE_MS = 10;
 
 /**
- * Concurrency for the dev pre-scan (file read + cache read + extract).
- * Matches the Gro generator's default - the value controls I/O interleaving,
- * not CPU parallelism (AST parsing is synchronous on the main thread).
+ * Concurrency for the dev pre-scan (file read + cache read + extract + cache
+ * write). Matches the Gro generator's default - the value controls I/O
+ * interleaving, not CPU parallelism (AST parsing is synchronous on the main
+ * thread).
  */
 const PRESCAN_CONCURRENCY = 8;
 
@@ -478,12 +479,19 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	/**
 	 * Ingests one file into extraction state: content-hash short-circuit,
 	 * cache-aware extraction, then classes/variables/hash updates and the
-	 * fire-and-forget cache write. Shared by `transform()` and the dev
-	 * pre-scan. The per-file epoch guard drops this ingest's result when a
-	 * deletion or a newer ingest for the same file races the awaited cache
-	 * read.
+	 * cache write. Shared by `transform()` and the dev pre-scan. The per-file
+	 * epoch guard drops this ingest's result when a deletion or a newer ingest
+	 * for the same file races the awaited cache read.
+	 *
+	 * The cache write is fire-and-forget by default so `transform()` doesn't
+	 * block Vite on cache IO; the pre-scan passes `await_cache_write` so its
+	 * concurrency bound covers the writes too.
 	 */
-	const ingest_file = async (id: string, code: string): Promise<void> => {
+	const ingest_file = async (
+		id: string,
+		code: string,
+		await_cache_write = false
+	): Promise<void> => {
 		// Compute content hash; skip if unchanged
 		const hash = hash_blake3(code);
 		if (hashes.get(id) === hash) {
@@ -535,11 +543,14 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		update_detected_variables(id, code);
 		hashes.set(id, hash);
 
-		// Save to cache (fire and forget - don't block)
+		// Save to cache - see the `await_cache_write` note in the doc comment
+		let cache_write: Promise<void> | undefined;
 		if (cache_path_to_write) {
-			save_cached_extraction(deps, cache_path_to_write, hash, extraction).catch(() => {
-				// Ignore cache errors
-			});
+			cache_write = save_cached_extraction(deps, cache_path_to_write, hash, extraction).catch(
+				() => {
+					// Ignore cache errors
+				}
+			);
 		}
 
 		// Trigger HMR if the virtual module was already served; suppressed
@@ -548,6 +559,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 		if (virtual_module_loaded && !prescan_active) {
 			invalidate_virtual_module();
 		}
+
+		if (await_cache_write && cache_write) await cache_write;
 	};
 
 	/**
@@ -585,7 +598,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 					// twice, with the transform result winning - harmless, just noted.
 					const r = await deps.read_text({ path: id });
 					if (!r.ok) return; // deleted mid-scan or unreadable; transform covers it if it reappears
-					await ingest_file(id, r.value);
+					// await the cache write too, so PRESCAN_CONCURRENCY bounds it
+					await ingest_file(id, r.value, true);
 				} catch (error) {
 					log_error(`[fuz_css] pre-scan failed to extract ${id}: ${error}`);
 				}

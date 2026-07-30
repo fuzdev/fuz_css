@@ -12,6 +12,7 @@ import {
 } from '$lib/variable_graph.ts';
 import type { StyleVariable } from '$lib/variable.ts';
 import type { Theme } from '$lib/theme.ts';
+import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
@@ -709,6 +710,24 @@ describe('apply_theme_variables', () => {
 		assert.deepEqual(
 			result.find((v) => v.name === 'hue_b'),
 			{ name: 'hue_b', light: '99' }
+		);
+	});
+
+	test('a stanced theme without a computed mirror auto-resolves it', () => {
+		const adaptive = scheme_adaptive_variables.find((v) => v.name === 'shade_lightness_00')!;
+		const with_adaptive: Array<StyleVariable> = [...defaults, { ...adaptive }];
+		// hand-rolled: `scheme` set but no `resolve_theme_stance` call
+		const theme: Theme = { name: 't', scheme: 'dark', variables: [{ name: 'hue_a', light: '30' }] };
+		const result = apply_theme_variables(with_adaptive, theme);
+		// the mirror re-slots the untouched scheme-adaptive default to its dark value
+		assert.deepEqual(
+			result.find((v) => v.name === adaptive.name),
+			{ name: adaptive.name, light: adaptive.dark }
+		);
+		// the theme's own variables still apply over the mirror
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_a'),
+			{ name: 'hue_a', light: '30' }
 		);
 	});
 
