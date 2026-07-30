@@ -12,6 +12,7 @@
 import { parseCss, type AST } from 'svelte/compiler';
 
 import { extract_css_variables } from './css_variable_utils.ts';
+import { split_selector_list } from './css_ruleset_parser.ts';
 import type { CacheDeps } from './deps.ts';
 import type { BaseCssOption } from './css_plugin_options.ts';
 
@@ -133,10 +134,7 @@ export const parse_style_css = (css: string): StyleRuleIndex => {
 		}
 	};
 
-	const walk_children = (
-		children: Iterable<AST.CSS.Rule | AST.CSS.Atrule | AST.CSS.Node>,
-		layer: RuleLayer
-	): void => {
+	const walk_children = (children: Iterable<AST.CSS.Node>, layer: RuleLayer): void => {
 		for (const child of children) {
 			if (child.type === 'Rule') {
 				index_rule(extract_style_rule(child, css, order++, layer));
@@ -373,45 +371,6 @@ const parse_selector_list = (
 	for (const selector of selectors) {
 		parse_single_selector(selector.trim(), elements, classes);
 	}
-};
-
-/**
- * Splits a selector list by commas, respecting parentheses.
- */
-const split_selector_list = (selector_group: string): Array<string> => {
-	const selectors: Array<string> = [];
-	let current = '';
-	let paren_depth = 0;
-	let bracket_depth = 0;
-
-	for (let i = 0; i < selector_group.length; i++) {
-		const char = selector_group[i]!;
-
-		if (char === '(') {
-			paren_depth++;
-			current += char;
-		} else if (char === ')') {
-			paren_depth--;
-			current += char;
-		} else if (char === '[') {
-			bracket_depth++;
-			current += char;
-		} else if (char === ']') {
-			bracket_depth--;
-			current += char;
-		} else if (char === ',' && paren_depth === 0 && bracket_depth === 0) {
-			selectors.push(current.trim());
-			current = '';
-		} else {
-			current += char;
-		}
-	}
-
-	if (current.trim()) {
-		selectors.push(current.trim());
-	}
-
-	return selectors;
 };
 
 /**
@@ -663,25 +622,6 @@ export const get_matching_rules = (
 	}
 
 	return included;
-};
-
-/**
- * Generates CSS from a `StyleRuleIndex` with only the included rules.
- *
- * @param index - the `StyleRuleIndex`
- * @param included_indices - set of rule indices to include
- * @returns CSS string with only included rules, in original order
- */
-export const generate_base_css = (index: StyleRuleIndex, included_indices: Set<number>): string => {
-	// Sort by order to preserve cascade
-	const sorted_indices = Array.from(included_indices).sort((a, b) => a - b);
-
-	const parts: Array<string> = [];
-	for (const idx of sorted_indices) {
-		parts.push(index.rules[idx]!.css);
-	}
-
-	return parts.join('\n\n');
 };
 
 /**

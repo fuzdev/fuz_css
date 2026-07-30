@@ -11,7 +11,7 @@ import { test, assert, describe } from 'vitest';
 import {
 	create_style_rule_index,
 	get_matching_rules,
-	generate_base_css
+	generate_base_css_by_layer
 } from '$lib/style_rule_parser.ts';
 
 describe('create_style_rule_index', () => {
@@ -219,7 +219,7 @@ describe('create_style_rule_index', () => {
 			assert.strictEqual(matched.size, 1);
 		});
 
-		test('generate_base_css outputs only matched rules', () => {
+		test('generate_base_css_by_layer outputs only matched rules', () => {
 			const css = `
 				button { color: blue; }
 				input { border: 1px solid; }
@@ -227,7 +227,7 @@ describe('create_style_rule_index', () => {
 
 			const index = create_style_rule_index(css);
 			const matched = get_matching_rules(index, new Set(['button']), new Set());
-			const output = generate_base_css(index, matched);
+			const output = generate_base_css_by_layer(index, matched)['fuz.base'];
 
 			assert.include(output, 'button { color: blue; }');
 			assert.notInclude(output, 'input');

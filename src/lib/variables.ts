@@ -2391,7 +2391,7 @@ export const disabled_opacity: StyleVariable = {
 
 /**
  * These are implicitly the variables for the `base` theme.
- * See also the empty `variables` array of the `base` theme in `themes.ts`.
+ * See also the empty `variables` array of the `base` theme in `themes/base.ts`.
  */
 export const default_variables: Array<StyleVariable> = [
 	hue_a,

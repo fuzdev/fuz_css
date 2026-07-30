@@ -3,7 +3,7 @@ import { test, assert, describe } from 'vitest';
 import {
 	parse_style_css,
 	get_matching_rules,
-	generate_base_css,
+	generate_base_css_by_layer,
 	collect_rule_variables,
 	load_style_rule_index
 } from '$lib/style_rule_parser.ts';
@@ -449,7 +449,7 @@ describe('get_matching_rules', () => {
 	});
 });
 
-describe('generate_base_css', () => {
+describe('generate_base_css_by_layer', () => {
 	test('preserves order', () => {
 		const css = `
 a { color: red; }
@@ -458,10 +458,30 @@ c { color: green; }
 `;
 		const index = parse_style_css(css);
 
-		const result = generate_base_css(index, new Set([2, 0]));
+		const result = generate_base_css_by_layer(index, new Set([2, 0]))['fuz.base'];
 
 		assert.isBelow(result.indexOf('red'), result.indexOf('green'));
 		assert.notInclude(result, 'blue');
+	});
+
+	test('partitions rules by destination layer', () => {
+		const css = `
+@layer fuz.preferences {
+	@media (prefers-contrast: more) { :root { --x: 1; } }
+}
+@layer fuz.base {
+	button { color: red; }
+}
+`;
+		const index = parse_style_css(css);
+		const all = new Set(index.rules.map((_, i) => i));
+
+		const result = generate_base_css_by_layer(index, all);
+
+		assert.include(result['fuz.preferences'], 'prefers-contrast');
+		assert.notInclude(result['fuz.preferences'], 'button');
+		assert.include(result['fuz.base'], 'button');
+		assert.notInclude(result['fuz.base'], 'prefers-contrast');
 	});
 });
 
