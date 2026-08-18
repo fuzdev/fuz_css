@@ -1,4 +1,4 @@
-import type { Theme } from './theme.ts';
+import type { Theme } from './variable.ts';
 import { base_theme } from './themes/base.ts';
 import { low_contrast_theme } from './themes/low_contrast.ts';
 import { high_contrast_theme } from './themes/high_contrast.ts';
@@ -17,11 +17,11 @@ export const DEFAULT_THEME: Theme = base_theme;
  * an importable export - registry membership, not file location, is what
  * separates registered themes from shipped exemplars. The exemplars
  * deliberately stay out of this list: a set of recognizable materials, each
- * anchoring an era - `themes/ember.ts` (firelight, dual-scheme),
- * `themes/parchment.ts` (the illuminated manuscript, light-only),
- * `themes/concrete.ts` (brutalism), `themes/phosphor.ts` (the CRT terminal,
- * dark-only), and `themes/neon.ts` (80s signage at night, dark-only and the
- * one palette-tier exemplar).
+ * anchoring an era - `themes/ember.ts` (firelight), `themes/parchment.ts`
+ * (the illuminated manuscript, candlelit after dark), `themes/concrete.ts`
+ * (brutalism), `themes/nineties.ts` (the 90s desktop web, beveled),
+ * `themes/phosphor.ts` (the CRT terminal, dark-only), and `themes/neon.ts`
+ * (80s signage at night, dark-only and the one palette-tier exemplar).
  *
  * Contrast is not a theme: the low/high contrast pair are modifiers
  * (`contrast_modifiers`) composed over any theme with `compose_themes`.

@@ -1,9 +1,9 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import { pick_stance_slot, type Theme, type ThemeScheme } from '$lib/theme.ts';
+import { pick_stance_slot } from '$lib/theme.ts';
 import { resolve_theme_stance } from '$lib/theme_stance.ts';
-import type { StyleVariable } from '$lib/variable.ts';
+import type { StyleVariable, Theme, ThemeScheme } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
 import {
@@ -351,7 +351,7 @@ export const render_theme_ts = (theme: Theme): string => {
 		: '[], // empty - every variable keeps its base default';
 	const stanced = theme.scheme === 'light' || theme.scheme === 'dark';
 	if (stanced) {
-		return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
+		return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
 import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';
 
 const authored: Theme = {
@@ -364,7 +364,7 @@ const authored: Theme = {
 export const ${identifier}_theme: Theme = resolve_theme_stance(authored);
 `;
 	}
-	return `import type {Theme} from '@fuzdev/fuz_css/theme.ts';
+	return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
 
 export const ${identifier}_theme: Theme = {
 	name: '${escape_js_string(theme.name)}',

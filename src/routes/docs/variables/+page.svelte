@@ -74,24 +74,33 @@
 	</section>
 	<section>
 		<div class="mb_md">
-			<ModuleLink module_path="theme.ts" />
+			<ModuleLink module_path="variable.ts" />
 		</div>
 		<Code
 			lang="ts"
-			content={`export interface Theme {
+			content={`export type Theme = {
 	name: string;
 	variables: StyleVariable[];
 	/** Single-scheme themes render one appearance in both color schemes. */
 	scheme?: 'dual' | 'light' | 'dark';
-}
+	/** The derived stance mirror, from \`resolve_theme_stance\`. */
+	scheme_mirror?: StyleVariable[];
+};
 
-export interface StyleVariable {
+export type StyleVariable = {
 	name: string;
 	light?: string;
 	dark?: string;
 	summary?: string;
-}`}
+};`}
 		/>
+		<p>
+			Both are zod schemas with their types inferred, so the same names validate at runtime -
+			<code>Theme.safeParse(value)</code> for the detail, <code>parse_theme(value)</code> for a
+			theme-or-<code>null</code>, and <code>validate_theme(theme)</code> in
+			<ModuleLink module_path="theme_check.ts" />
+			for the full lint.
+		</p>
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text={`All ${variables.length} style variables`} />

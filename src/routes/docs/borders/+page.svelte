@@ -5,6 +5,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
@@ -53,7 +54,6 @@
 <TomeContent {tome}>
 	<!-- TODO  -->
 	<!-- <div>border_color</div> -->
-	<!-- <div>border_style</div> -->
 	<!-- <div>border_width</div> -->
 	<!-- <div>outline_width</div> -->
 	<!-- <div>outline_style</div> -->
@@ -66,6 +66,34 @@
 			because light-on-dark has lower perceived contrast.
 		</p>
 	</section>
+	<TomeSection>
+		<TomeSectionHeader text="Border style" />
+		<p>
+			<code>--border_style</code> is global - asides, blockquotes, and form fields all read it.
+			Buttons take <code>--button_border_style</code> instead (defaulting to
+			<code>var(--border_style)</code>), and swap to
+			<code>--button_border_style_active</code>
+			while pressed. Buttons are the only element with a raised/pressed affordance, so the split
+			lands there rather than as a general state variable.
+		</p>
+		<p>
+			That pair is what makes beveled chrome expressible, since
+			<MdnLink path="Web/CSS/border-style" />'s <code>inset</code> and <code>outset</code> derive
+			their light and dark edges from the border color - raised buttons that press in, over sunken
+			fields:
+		</p>
+		<Code
+			lang="ts"
+			content={`variables: [
+	{name: 'border_style', light: 'inset'}, // sunken fields
+	{name: 'button_border_style', light: 'outset'}, // raised buttons
+	{name: 'button_border_style_active', light: 'inset'} // that press in
+]`}
+		/>
+		<p>
+			The <TomeLink slug="themes">nineties</TomeLink> exemplar theme is built on exactly this.
+		</p>
+	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Tinted alpha borders" />
 		<p>

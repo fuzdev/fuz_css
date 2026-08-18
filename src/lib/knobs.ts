@@ -10,7 +10,7 @@
  * belongs to. Defaults and light/dark slots are not duplicated here - join
  * against `default_variables` by name.
  *
- * The catalog deliberately covers only the knob tier, not all ~490 variables:
+ * The catalog deliberately covers only the knob tier, not all ~560 variables:
  * derived ramp stops, color stops, and most site hooks are the escape-hatch
  * tier and stay out. A catalog entry may be a hook (`hook: true`) consumed by
  * `style.css` with per-site fallbacks rather than a declared variable - it
@@ -35,6 +35,21 @@ import {
  * the value form `bindable` hue knobs default to.
  */
 export const HUE_BINDING_MATCHER: RegExp = /^var\(--hue_([a-j])\)$/u;
+
+// the border-style keywords the shape knobs offer; `inset`/`outset` derive
+// their light and dark edges from the border color, which is what makes a
+// beveled raised/pressed pair expressible
+const BORDER_STYLE_VALUES = [
+	'solid',
+	'dashed',
+	'dotted',
+	'double',
+	'groove',
+	'ridge',
+	'inset',
+	'outset',
+	'none'
+];
 
 /**
  * The value kind of a knob, determining the editor widget and how the value
@@ -304,7 +319,25 @@ export const theme_knobs: Array<ThemeKnob> = [
 		axis: 'shape',
 		leverage: 'md',
 		tier: 'semantic',
-		values: ['solid', 'dashed', 'dotted', 'double', 'groove', 'ridge', 'none']
+		values: BORDER_STYLE_VALUES
+	},
+	{
+		// buttons split off the global style so a theme can raise them against
+		// sunken fields, the way beveled system chrome does
+		name: 'button_border_style',
+		kind: 'enum',
+		axis: 'shape',
+		leverage: 'sm',
+		tier: 'semantic',
+		values: BORDER_STYLE_VALUES
+	},
+	{
+		name: 'button_border_style_active',
+		kind: 'enum',
+		axis: 'shape',
+		leverage: 'sm',
+		tier: 'semantic',
+		values: BORDER_STYLE_VALUES
 	},
 	{
 		// the gap between an element's border and its focus/active ring
@@ -360,6 +393,14 @@ export const theme_knobs: Array<ThemeKnob> = [
 	{ name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	{ name: 'button_shadow_active', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	// typography
+	{
+		// the body font; the three stacks below stay what they say they are
+		name: 'font_family',
+		kind: 'font_stack',
+		axis: 'typography',
+		leverage: 'lg',
+		tier: 'semantic'
+	},
 	{
 		name: 'font_family_sans',
 		kind: 'font_stack',

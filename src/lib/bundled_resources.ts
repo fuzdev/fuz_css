@@ -23,7 +23,7 @@ import {
 import { type CssClassVariableIndex, build_class_variable_index } from './class_variable_index.ts';
 import type { CssClassDefinition } from './css_class_generation.ts';
 import type { BaseCssOption, VariablesOption } from './css_plugin_options.ts';
-import type { Theme } from './theme.ts';
+import type { Theme } from './variable.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**

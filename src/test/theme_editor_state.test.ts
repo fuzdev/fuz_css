@@ -14,7 +14,7 @@ import {
 	discard_confirm_message
 } from '$routes/theme_editor_state.svelte.ts';
 import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
-import type { Theme } from '$lib/theme.ts';
+import type { Theme } from '$lib/variable.ts';
 import { base_theme } from '$lib/themes/base.ts';
 import { neon_theme } from '$lib/themes/neon.ts';
 import { default_variables } from '$lib/variables.ts';

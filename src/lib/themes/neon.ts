@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**

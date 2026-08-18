@@ -18,7 +18,8 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
-import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style, type Theme } from './theme.ts';
+import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style } from './theme.ts';
+import type { Theme } from './variable.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import { default_variables } from './variables.ts';

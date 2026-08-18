@@ -102,7 +102,7 @@ Notes:
 	body {
 		min-height: 100vh;
 		font-size: 1.6rem; /* matched to `font-size: 62.5%` and same value as the default `--font_size_md`, but this one shouldn't vary */
-		font-family: var(--font_family_sans);
+		font-family: var(--font_family);
 		font-weight: var(--font_weight);
 		tab-size: 2; /* TODO var */
 	}
@@ -586,7 +586,7 @@ TODO think through these patterns to get somewhere consistent
 		padding: 0 var(--input_padding_x);
 		box-shadow: var(--shadow, var(--button_shadow));
 		border-width: var(--border_width);
-		border-style: var(--border_style);
+		border-style: var(--button_border_style);
 		border-color: var(--button_border_color);
 		border-radius: var(--border_radius, var(--border_radius_sm));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
@@ -668,7 +668,7 @@ TODO think through these patterns to get somewhere consistent
 	:where(button:not(.unstyled):disabled) {
 		/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
 		--button_fill: transparent;
-		--border_style: solid dashed;
+		--button_border_style: solid dashed;
 		cursor: default;
 		box-shadow: none;
 		opacity: var(--disabled_opacity);
@@ -706,6 +706,9 @@ TODO think through these patterns to get somewhere consistent
 		--button_border_color: var(--button_border_color_active);
 		--outline_width: var(--outline_width_active);
 		--shadow: var(--button_shadow_active);
+		/* set on the property, not the variable - a variable pointing back at
+			`--button_border_style` would be a cycle */
+		border-style: var(--button_border_style_active);
 	}
 	:where(
 		:is(input, textarea, select, button):not(.unstyled):disabled:active,

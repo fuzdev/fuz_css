@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 
 /**
  * An era exemplar theme: brutalism's raw concrete. Near-grayscale ground with

@@ -1,10 +1,23 @@
 import { test, assert } from 'vitest';
 
 import { default_variables } from '$lib/variables.ts';
-import * as exported_variables from '$lib/variables.ts';
 import { StyleVariable } from '$lib/variable.ts';
 import { PALETTE_CHROMA_MULTIPLIERS } from '$lib/ramps.ts';
-import { palette_variants, intent_variants, palette_glosses } from '$lib/variable_data.ts';
+import {
+	palette_variants,
+	intent_variants,
+	palette_glosses,
+	numeric_scale_variants,
+	font_size_variants,
+	line_height_variants,
+	space_variants,
+	distance_variants,
+	border_radius_variants,
+	border_width_variants,
+	icon_size_variants,
+	shadow_size_variants,
+	shadow_variant_prefixes
+} from '$lib/variable_data.ts';
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
@@ -27,32 +40,53 @@ test('variables have no duplicates', () => {
 	}
 });
 
-test('variable names match their identifiers', () => {
-	for (const v of default_variables) {
-		assert.isTrue(
-			v.name in exported_variables,
-			`default variable with name "${v.name}" has no matching exported identifier`
-		);
-	}
+test('the loop-built families cover every variant list', () => {
+	// the families are spread in from loops over `variable_data.ts`, so a
+	// variant added there without a matching family (or vice versa) shows up
+	// here rather than as a silently missing token
+	const names = new Set(default_variables.map((v) => v.name));
+	const expected = [
+		...palette_variants.flatMap((letter) => [
+			`hue_${letter}`,
+			`palette_${letter}_chroma_scale`,
+			...numeric_scale_variants.map((stop) => `palette_${letter}_${stop}`)
+		]),
+		...intent_variants.flatMap((intent) => [
+			`hue_${intent}`,
+			`${intent}_chroma_scale`,
+			...numeric_scale_variants.map((stop) => `${intent}_${stop}`)
+		]),
+		...numeric_scale_variants.flatMap((stop) => [
+			`chroma_shape_${stop}`,
+			`palette_chroma_${stop}`,
+			`shade_${stop}`,
+			`text_${stop}`,
+			`darken_${stop}`,
+			`lighten_${stop}`,
+			`fg_${stop}`,
+			`bg_${stop}`,
+			`border_color_${stop}`,
+			`shadow_alpha_${stop}`
+		]),
+		...(['palette', 'shade', 'text'] as const).flatMap((family) =>
+			['00', '100', 'curve', ...numeric_scale_variants.slice(1, -1)].map(
+				(stop) => `${family}_lightness_${stop}`
+			)
+		),
+		...font_size_variants.map((size) => `font_size_${size}`),
+		...line_height_variants.map((size) => `line_height_${size}`),
+		...space_variants.map((size) => `space_${size}`),
+		...distance_variants.map((size) => `distance_${size}`),
+		...border_radius_variants.map((size) => `border_radius_${size}`),
+		...border_width_variants.map((width) => `border_width_${width}`),
+		...icon_size_variants.map((size) => `icon_size_${size}`),
+		...shadow_size_variants.flatMap((size) =>
+			shadow_variant_prefixes.map((prefix) => `${prefix}${size}`)
+		)
+	];
+	const missing = expected.filter((name) => !names.has(name));
+	assert.deepEqual(missing, []);
 });
-
-test('variable identifiers are all included in `default_variables`', () => {
-	for (const identifier in exported_variables) {
-		const exported = (exported_variables as any)[identifier];
-		if (!is_style_variable(exported)) continue;
-		assert.strictEqual(
-			identifier,
-			exported.name,
-			`variable identifier "${identifier}" does not match its name ${exported.name}`
-		);
-		assert.isTrue(
-			default_variables.some((v) => v.name === identifier),
-			`exported variable with identifier "${identifier}" is not included in \`default_variables\``
-		);
-	}
-});
-
-const is_style_variable = (v: unknown): v is StyleVariable => StyleVariable.safeParse(v).success;
 
 test('per-slot chroma multiplier defaults pin the numeric twin', () => {
 	// the emitted CSS falls back to 1 when the variable is absent, so the

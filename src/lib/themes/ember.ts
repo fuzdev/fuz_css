@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 
 /**
  * An era exemplar theme from before the eras: firelight. Built entirely from

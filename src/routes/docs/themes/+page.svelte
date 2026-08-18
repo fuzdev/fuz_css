@@ -17,9 +17,12 @@
 	import { concrete_theme } from '$lib/themes/concrete.ts';
 	import { phosphor_theme } from '$lib/themes/phosphor.ts';
 	import { neon_theme } from '$lib/themes/neon.ts';
-	import { compose_themes, type Theme } from '$lib/theme.ts';
+	import { nineties_theme } from '$lib/themes/nineties.ts';
+	import { compose_themes } from '$lib/theme.ts';
+	import type { Theme } from '$lib/variable.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
+	import ContrastInput from '$routes/ContrastInput.svelte';
 	import {
 		discard_confirm_message,
 		ThemeEditorState,
@@ -42,6 +45,7 @@
 		ember_theme,
 		parchment_theme,
 		concrete_theme,
+		nineties_theme,
 		phosphor_theme,
 		neon_theme
 	];
@@ -99,8 +103,8 @@
 		selected_base = theme;
 	};
 
-	const select_contrast = (name: string): void => {
-		contrast_modifier = contrast_modifiers.find((m) => m.name === name) ?? null;
+	const select_contrast = (modifier: Theme | null): void => {
+		contrast_modifier = modifier;
 	};
 
 	// tracks a theme the editor's "based on" select loaded as the new base
@@ -141,18 +145,18 @@
 				select={select_theme}
 			/>
 		</div>
-		<label class="width_atmost_xs mb_lg">
-			<span class="title">Contrast</span>
-			<select
-				value={contrast_modifier?.name ?? ''}
-				onchange={(e) => select_contrast(e.currentTarget.value)}
-			>
-				<option value="">default</option>
-				{#each contrast_modifiers as modifier (modifier.name)}
-					<option value={modifier.name}>{modifier.name}</option>
-				{/each}
-			</select>
-		</label>
+		<div class="width_atmost_xs mb_lg">
+			<div class="title">Contrast</div>
+			<ContrastInput
+				modifiers={contrast_modifiers}
+				selected={contrast_modifier}
+				select={select_contrast}
+			/>
+		</div>
+		<div class="width_atmost_xs mb_lg">
+			<div class="title">Color scheme</div>
+			<ColorSchemeInput />
+		</div>
 		<p>
 			Contrast is a <em>modifier</em>, not a theme: the low/high contrast pair compose over any
 			selected theme with <code>compose_themes</code> (flatten + last-wins), so every theme has low
@@ -173,8 +177,9 @@
 			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - its
 			one appearance then renders in both color schemes and
 			<MdnLink path="Web/CSS/color-scheme" />
-			is pinned to match. The neon and phosphor themes are dark-only this way, and parchment is
-			light-only.
+			is pinned to match. The neon and phosphor themes are dark-only this way - a CRT and a lit sign
+			have no daytime appearance. Everything else is dual-scheme, including parchment, whose dark
+			appearance is the same page by candlelight.
 		</p>
 	</TomeSection>
 	<TomeSection>

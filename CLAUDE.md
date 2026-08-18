@@ -246,6 +246,17 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks —
   setting it flattens the heading ladder), `--heading_font_family`, and the
   `--background_image` decoration hook on `:root`
+- `--font_family` is the body font (default `var(--font_family_sans)`), kept
+  apart from the three stacks (`--font_family_sans`/`_serif`/`_mono`) so
+  retargeting the body doesn't make one of them mean something it isn't;
+  headings still take `--heading_font_family`, so "one family everywhere" is
+  two knobs by design
+- `--border_style` is global, but buttons read `--button_border_style`
+  (default `var(--border_style)`) and swap to `--button_border_style_active`
+  while pressed — the raised/pressed pair `outset`/`inset` needs, and the
+  only element with that affordance. A theme's contextual `--border_style`
+  override no longer reaches buttons, since the derived default resolves at
+  `:root`
 - Micro-surface variables declared in `default_variables`: `--caret_color`
   (defaults to the accent), `--scrollbar_thumb_color`/
   `--scrollbar_track_color` (default into the shade scale), `--backdrop_color`
@@ -362,9 +373,18 @@ typography, borders, shading, shadows, layout. See
 
 **Variables & themes:**
 
-- [variables.ts](src/lib/variables.ts) - All style variable definitions
-- [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
-- [variable_data.ts](src/lib/variable_data.ts) - Size, color, border variants
+- [variables.ts](src/lib/variables.ts) - All style variable definitions, as a
+  single `default_variables` export; uniform families are loop-built from the
+  variant lists and ramp emitters and spread into it in place
+- [variable.ts](src/lib/variable.ts) - The `StyleVariable` and `Theme` zod
+  schemas (with `ThemeScheme` and `parse_theme`), kept apart from `theme.ts`
+  so the renderer stays zod-free
+- [variable_data.ts](src/lib/variable_data.ts) - The variable vocabulary:
+  size/color/border variant lists plus the fitted value tables their ladders
+  step through (`FONT_SIZES`, `SPACE_SIZES`, `BORDER_RADII`, `DISTANCES`,
+  `LINE_HEIGHTS`, `ICON_SIZES`, `DURATIONS`, `SHADOW_GEOMETRY`,
+  `SHADOW_ALPHAS`, `OVERLAY_ALPHAS`), keyed by variant and unitless -
+  `variables.ts` adds the unit and any `calc()` wrapper
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
   constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
 - [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
@@ -373,7 +393,8 @@ typography, borders, shading, shadows, layout. See
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
   `compose_themes` (flatten + last-wins fragment composition — the
-  hand-flatten precursor to `extends`), `ColorScheme` type. A pure renderer:
+  hand-flatten precursor to `extends`), `ColorScheme` type (`Theme` itself
+  lives in `variable.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~1.3KB minified
   instead of ~38KB. It renders what the theme carries and pins
   `color-scheme` for a `scheme` stance
@@ -385,8 +406,8 @@ typography, borders, shading, shadows, layout. See
 - [scheme_adaptive_variables.ts](src/lib/scheme_adaptive_variables.ts) -
   generated literal twin of the dual-slot subset of `default_variables`,
   emitted so the mirror carries no dependency on `variables.ts` (whose
-  module-init emitter calls defeat tree-shaking — importing one variable
-  costs ~20KB)
+  module-init emitter calls defeat tree-shaking — reaching for
+  `default_variables` costs ~20KB)
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
   (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
   low/high contrast are modifiers composed over any theme via
@@ -395,14 +416,18 @@ typography, borders, shading, shadows, layout. See
 - `src/lib/themes/` - One module per theme. Registered: base. Shipped
   exemplars are recognizable materials, each anchoring an era: ember
   (firelight — warm haze, vivid past the caps, gradient-sky
-  `background_image`, dual-scheme), parchment (the illuminated manuscript —
-  serif body, rubrication-red accent, double-ruled borders, the sole
-  light-only stance), concrete (brutalism — near-grayscale neutral, sharp,
-  flat, border-forward, heavy headings), phosphor (the CRT terminal — green
-  cast, mono, compact, instant short `duration_*`, dark-only), and neon
-  (80s signage — magenta accent, colored glow shadows, capsule radius pins,
-  a rotated yellow slot making it the one palette-tier exemplar,
-  dark-only). The contrast pair live here too as the modifier modules
+  `background_image`), parchment (the illuminated manuscript — serif body,
+  rubrication-red accent, double-ruled borders, candlelit in dark),
+  concrete (brutalism — near-grayscale neutral, sharp, flat, border-forward,
+  heavy headings), nineties (the 90s desktop web — colorless chrome on an
+  off-white ground, serif everything, underlined links, and the only
+  exemplar built on borders rather than depth: `outset` buttons pressing to
+  `inset` over `inset` fields), phosphor (the CRT terminal — green cast,
+  mono, compact, instant short `duration_*`, dark-only), and neon (80s
+  signage — magenta accent, colored glow shadows, capsule radius pins, a
+  rotated yellow slot making it the one palette-tier exemplar, dark-only).
+  Only phosphor and neon take a `scheme` stance; everything else is
+  dual-scheme. The contrast pair live here too as the modifier modules
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like

@@ -17,8 +17,7 @@
  */
 
 import { scheme_adaptive_variables } from './scheme_adaptive_variables.ts';
-import type { Theme } from './theme.ts';
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 
 /**
  * Computes the mirror a single-scheme stance implies: every scheme-adaptive

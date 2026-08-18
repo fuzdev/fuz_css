@@ -4,9 +4,9 @@
  *
  * Three functions sit over a shared numeric resolution core:
  *
- * - `validate_theme` is the structural lint - non-empty name, `StyleVariable`
- *   shape, known variable names, and advisory type/range warnings for the
- *   knob-tier variables.
+ * - `validate_theme` is the structural lint - the `Theme` schema, known
+ *   variable names, and advisory type/range warnings for the knob-tier
+ *   variables.
  * - `check_theme` evaluates the gamut, ramp-monotonicity, and contrast gates
  *   against an arbitrary theme (the base theme's defaults included), reusing
  *   the `ramps.ts` numeric twin, `oklch.ts` conversions, and `wcag.ts`
@@ -50,8 +50,7 @@
 
 import { clamp } from '@fuzdev/fuz_util/maths.ts';
 
-import { StyleVariable } from './variable.ts';
-import type { Theme } from './theme.ts';
+import { Theme, type StyleVariable } from './variable.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import {
@@ -583,28 +582,47 @@ const validate_knob_value = (
 	return issues;
 };
 
+// maps one schema issue onto a `ThemeIssue`, naming the variable it landed on
+// when the path points into `variables`/`scheme_mirror` - the schema reports
+// the whole theme at once, so the path is what carries the location
+const to_shape_issue = (
+	theme: Theme,
+	path: ReadonlyArray<PropertyKey>,
+	message: string
+): ThemeIssue => {
+	const [head, index] = path;
+	if (head === 'variables' || head === 'scheme_mirror') {
+		const entry = typeof index === 'number' ? theme[head]?.[index] : undefined;
+		const name = typeof entry?.name === 'string' ? entry.name : undefined;
+		return {
+			level: 'error',
+			message: `invalid variable${name ? ` "${name}"` : ''}: ${message}`,
+			...(name ? { variable: name } : null)
+		};
+	}
+	return { level: 'error', message: path.length ? `${path.join('.')}: ${message}` : message };
+};
+
 /**
- * Lints a theme's structure: a non-empty name, valid `StyleVariable` shape and
- * known name per variable (errors), and advisory type/range warnings for the
- * knob-tier variables - including a pairing warning when an intent hue binds
- * a palette letter whose chroma multiplier differs from the intent's own
+ * Lints a theme's structure: the `Theme` schema (errors), a known name per
+ * variable (errors), and advisory type/range warnings for the knob-tier
+ * variables - including a pairing warning when an intent hue binds a palette
+ * letter whose chroma multiplier differs from the intent's own
  * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
  * chroma character is otherwise silently dropped). Value validation is
  * advisory and never an error. An empty array means the theme is structurally
  * valid.
+ *
+ * A shape failure returns on its own: the knob lint reads values the schema
+ * hasn't vouched for, so it runs only over a theme that parsed.
  */
 export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
+	const parsed = Theme.safeParse(theme);
+	if (!parsed.success) {
+		return parsed.error.issues.map((issue) => to_shape_issue(theme, issue.path, issue.message));
+	}
 	const issues: Array<ThemeIssue> = [];
-	if (!theme.name) {
-		issues.push({ level: 'error', message: 'theme name must be non-empty' });
-	}
-	const scheme: unknown = (theme as { scheme?: unknown }).scheme;
-	if (scheme !== undefined && scheme !== 'dual' && scheme !== 'light' && scheme !== 'dark') {
-		issues.push({
-			level: 'error',
-			message: `invalid scheme ${JSON.stringify(scheme)} - expected 'dual', 'light', or 'dark'`
-		});
-	}
+	const { scheme } = parsed.data;
 	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
 	// a stanced theme renders correctly only with its mirror computed - the
 	// gates here resolve through the mirror either way, so without this warning
@@ -615,21 +633,7 @@ export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
 			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
 		});
 	}
-	for (const variable of theme.variables) {
-		const parsed = StyleVariable.safeParse(variable);
-		const name: unknown = (variable as { name?: unknown }).name;
-		const name_label = typeof name === 'string' ? name : undefined;
-		if (!parsed.success) {
-			for (const issue of parsed.error.issues) {
-				issues.push({
-					level: 'error',
-					message: `invalid variable${name_label ? ` "${name_label}"` : ''}: ${issue.message}`,
-					...(name_label ? { variable: name_label } : null)
-				});
-			}
-			continue;
-		}
-		const valid = parsed.data;
+	for (const valid of parsed.data.variables) {
 		if (!known_theme_variable_names.has(valid.name)) {
 			issues.push({
 				level: 'error',

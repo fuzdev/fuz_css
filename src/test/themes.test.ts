@@ -1,8 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
-import type { Theme } from '$lib/theme.ts';
 import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.ts';
-import { StyleVariable } from '$lib/variable.ts';
+import { StyleVariable, type Theme } from '$lib/variable.ts';
 import { validate_theme } from '$lib/theme_check.ts';
 
 // every theme module ships from themes/, so discover them by glob - a new
@@ -98,7 +97,7 @@ describe('shipped themes', () => {
 		for (const registered of default_themes) {
 			assert.include(names, registered.name);
 		}
-		for (const exemplar of ['ember', 'parchment', 'concrete', 'phosphor', 'neon']) {
+		for (const exemplar of ['ember', 'parchment', 'concrete', 'phosphor', 'neon', 'nineties']) {
 			assert.include(names, exemplar);
 		}
 	});

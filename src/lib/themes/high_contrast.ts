@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 
 /**
  * Stretched contrast: pure white/black page background and text bent toward

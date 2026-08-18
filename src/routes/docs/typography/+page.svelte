@@ -84,6 +84,15 @@
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Font families" />
+		<p>
+			These three are the <em>stacks</em>, and they keep meaning what they say. What the page
+			actually renders body text in is <code>--font_family</code>, which defaults to
+			<code>var(--font_family_sans)</code> - a theme that wants serif or mono body text retargets
+			that one rather than redefining a stack. Headings take
+			<code>--heading_font_family</code> (default <code>var(--font_family_serif)</code>), so serif
+			headings over a sans body is the default and "one family everywhere" is deliberately two
+			knobs.
+		</p>
 		<div>
 			{#each font_family_variants as font_family (font_family)}
 				<div

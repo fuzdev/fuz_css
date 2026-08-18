@@ -208,20 +208,20 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{
 		name: 'button_shadow',
 		light:
-			'var(--shadow_inset_bottom_xs) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30), transparent), var(--shadow_inset_top_xs) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
-		dark: 'var(--shadow_inset_top_xs) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30), transparent), var(--shadow_inset_bottom_xs) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)'
+			'var(--shadow_inset_bottom_xs) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_30), transparent), var(--shadow_inset_top_xs) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)',
+		dark: 'var(--shadow_inset_top_xs) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_30), transparent), var(--shadow_inset_bottom_xs) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent)'
 	},
 	{
 		name: 'button_shadow_hover',
 		light:
-			'var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
-		dark: 'var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)'
+			'var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
+		dark: 'var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)'
 	},
 	{
 		name: 'button_shadow_active',
 		light:
-			'var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
-		dark: 'var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)'
+			'var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent), var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)',
+		dark: 'var(--shadow_inset_bottom_sm) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent), var(--shadow_inset_top_sm) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent)'
 	},
 	{ name: 'shadow_color_umbra', light: '#000', dark: 'oklch(0.863 0.009 var(--hue_neutral))' },
 	{ name: 'shadow_color_highlight', light: 'oklch(0.955 0.003 var(--hue_neutral))', dark: '#000' },

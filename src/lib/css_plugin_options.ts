@@ -31,8 +31,7 @@
 import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
-import type { StyleVariable } from './variable.ts';
-import type { Theme } from './theme.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**

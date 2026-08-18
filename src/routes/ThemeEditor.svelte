@@ -6,7 +6,8 @@
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import type { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import { render_theme_style, type Theme, type ThemeScheme } from '$lib/theme.ts';
+	import { render_theme_style } from '$lib/theme.ts';
+	import type { Theme, ThemeScheme } from '$lib/variable.ts';
 	import { theme_knobs, theme_knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
 	import type { ThemeGateEntry } from '$lib/theme_check.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';

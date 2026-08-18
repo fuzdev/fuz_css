@@ -1478,6 +1478,7 @@
 			'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
 		--font_family_serif: Georgia, serif;
 		--font_family_mono: ui-monospace, monospace;
+		--font_family: var(--font_family_sans); /* the body font */
 		--font_weight: 400; /* base body font weight */
 		--heading_font_family: var(--font_family_serif);
 		--font_size_xs: 1rem;
@@ -1563,31 +1564,21 @@
 		--border_radius_md: calc(2.1rem * var(--radius_scale));
 		--border_radius_lg: calc(3.4rem * var(--radius_scale));
 		--border_radius_xl: calc(5.5rem * var(--radius_scale));
+		--button_border_style: var(--border_style);
+		--button_border_style_active: var(--button_border_style); /* the pressed border style, e.g. `inset` against an `outset` rest state */
 		--button_shadow:
 			var(--shadow_inset_bottom_xs)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_30), transparent),
 			var(--shadow_inset_top_xs)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent);
 		--button_shadow_hover:
 			var(--shadow_inset_bottom_sm)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent),
 			var(--shadow_inset_top_sm)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 		--button_shadow_active:
 			var(--shadow_inset_top_sm)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent),
 			var(--shadow_inset_bottom_sm)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 		--input_fill: var(--bg_80);
@@ -1837,29 +1828,17 @@
 		);
 		--button_shadow:
 			var(--shadow_inset_top_xs)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_30),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_30), transparent),
 			var(--shadow_inset_bottom_xs)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_30), transparent);
 		--button_shadow_hover:
 			var(--shadow_inset_top_sm)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent),
 			var(--shadow_inset_bottom_sm)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 		--button_shadow_active:
 			var(--shadow_inset_bottom_sm)
-				color-mix(
-					in oklab,
-					var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_40),
-					transparent
-				),
+				color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_40), transparent),
 			var(--shadow_inset_top_sm)
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 		--shadow_color_umbra: oklch(0.863 0.009 var(--hue_neutral));

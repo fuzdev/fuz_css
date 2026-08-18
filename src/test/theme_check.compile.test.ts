@@ -1,7 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
 import { compile_theme, check_theme } from '$lib/theme_check.ts';
-import type { Theme } from '$lib/theme.ts';
+import type { Theme } from '$lib/variable.ts';
 import { default_themes } from '$lib/themes.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS } from '$lib/ramps.ts';

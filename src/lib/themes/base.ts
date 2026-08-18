@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 
 /**
  * The default theme - inherits every base default variable.

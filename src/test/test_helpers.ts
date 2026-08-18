@@ -13,7 +13,7 @@ import type {
 	GenerationDiagnostic
 } from '$lib/diagnostics.ts';
 import type { ExtractionData } from '$lib/css_class_extractor.ts';
-import type { Theme } from '$lib/theme.ts';
+import type { Theme } from '$lib/variable.ts';
 
 //
 // Factory Helpers

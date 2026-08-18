@@ -15,11 +15,11 @@ contrast are curve-knob fragments composed over any theme with the new
 base re-slots dual-slot overlay variables to its stance), not themes in the
 list. Themes live one module per theme under `themes/`, with unregistered
 exemplars - recognizable materials, each anchoring an era: ember
-(firelight, dual-scheme), parchment (the illuminated manuscript,
-light-only), concrete (brutalism), phosphor (the CRT terminal, dark-only),
-and neon (80s signage at night, dark-only and palette-tier). Low contrast
-is tuned to the softest compression that passes every `check_theme`
-contrast gate.
+(firelight), parchment (the illuminated manuscript, candlelit after dark),
+concrete (brutalism), nineties (the 90s desktop web, beveled), phosphor (the
+CRT terminal, dark-only), and neon (80s signage at night, dark-only and
+palette-tier). Low contrast is tuned to the softest compression that passes
+every `check_theme` contrast gate.
 
 **Scheme stance.** `Theme` gains `scheme?: 'dual' | 'light' | 'dark'`
 (default `'dual'`). A single-scheme theme renders its one appearance in
@@ -33,8 +33,9 @@ stay distinguishable from the derived ones. `validate_theme` warns on a
 missing mirror and on dark slots a stance makes meaningless;
 `check_theme`/`compile_theme` resolve through the same mirror so the gates
 evaluate the stanced reality in both schemes. The neon and phosphor
-exemplars are dark-only and parchment light-only via the stance, resolved
-at module scope.
+exemplars are dark-only via the stance, resolved at module scope - a CRT and
+a lit sign have no daytime appearance, while every other exemplar does and
+stays dual-scheme.
 
 **Pure renderer.** `theme.ts` no longer depends on `variables.ts`, so
 mounting a theme stops pulling the full derived variable set into the

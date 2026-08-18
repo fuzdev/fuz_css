@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
@@ -19,8 +19,10 @@ const authored: Theme = {
 		{ name: 'neutral_chroma', light: '0.05' },
 		// links, focus, selection glow phosphor green
 		{ name: 'hue_accent', light: 'var(--hue_b)' },
-		// mono type everywhere
-		{ name: 'font_family_sans', light: 'var(--font_family_mono)' },
+		// mono type everywhere - headings carry their own family knob, which
+		// defaults to the serif stack, so a terminal has to retarget both
+		{ name: 'font_family', light: 'var(--font_family_mono)' },
+		{ name: 'heading_font_family', light: 'var(--font_family_mono)' },
 		// sharp: one knob zeroes every radius tier
 		{ name: 'radius_scale', light: '0' },
 		// flat: one knob zeroes the whole alpha ramp, button shadows included

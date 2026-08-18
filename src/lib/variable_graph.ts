@@ -11,9 +11,8 @@
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
-import type { Theme } from './theme.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 
 import type { VariablesOption } from './css_plugin_options.ts';

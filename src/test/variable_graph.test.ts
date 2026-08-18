@@ -10,8 +10,7 @@ import {
 	has_variable,
 	find_similar_variable
 } from '$lib/variable_graph.ts';
-import type { StyleVariable } from '$lib/variable.ts';
-import type { Theme } from '$lib/theme.ts';
+import type { StyleVariable, Theme } from '$lib/variable.ts';
 import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
 
 describe('build_variable_graph', () => {

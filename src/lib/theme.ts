@@ -1,4 +1,4 @@
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
@@ -6,42 +6,6 @@ import type { StyleVariable } from './variable.ts';
 export type ColorScheme = 'dark' | 'light' | 'auto';
 
 export const color_schemes: Array<ColorScheme> = ['light', 'auto', 'dark'];
-
-/**
- * A theme's scheme stance: which color schemes it supports. `'dual'` themes
- * render light and dark appearances from each variable's slots; `'light'` and
- * `'dark'` themes render that single appearance in both color schemes.
- */
-export type ThemeScheme = 'dual' | 'light' | 'dark';
-
-export interface Theme {
-	name: string;
-	variables: Array<StyleVariable>;
-	/**
-	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance pins
-	 * `color-scheme` on the scope so form controls and native scrollbars agree.
-	 * A stanced theme's own variables are best authored single-slot in the
-	 * light/base position.
-	 *
-	 * Rendering a stanced theme faithfully also needs the scheme-adaptive
-	 * defaults mirrored into the stanced scheme; that is
-	 * `resolve_theme_stance` in `theme_stance.ts`, applied before rendering.
-	 * The renderer only pins `color-scheme` - it holds no variable data of its
-	 * own, so the mirror stays off the theme path of consumers who don't use a
-	 * stanced theme.
-	 */
-	scheme?: ThemeScheme;
-	/**
-	 * The stance mirror computed by `resolve_theme_stance`: scheme-adaptive
-	 * defaults re-slotted so a single-scheme theme's appearance holds in both
-	 * color schemes. Rendered before `variables`, so the theme's own values
-	 * win by order.
-	 *
-	 * Kept apart from `variables` so the authored knobs stay distinguishable
-	 * from the derived ones.
-	 */
-	scheme_mirror?: Array<StyleVariable>;
-}
 
 /**
  * The fuz_css cascade layer order: defaults (variables + element styles) in

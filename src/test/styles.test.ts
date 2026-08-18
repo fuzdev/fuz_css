@@ -1,7 +1,7 @@
 import { test, assert } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-import * as exported_variables from '$lib/variables.ts';
+import { default_variables } from '$lib/variables.ts';
 import { theme_knob_hook_names } from '$lib/knobs.ts';
 import { parse_style_css } from '$lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
@@ -11,6 +11,8 @@ import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 const main_stylesheet_text = readFileSync('./src/lib/style.css', 'utf8');
 
 const css_files = [main_stylesheet_text, css_classes_text];
+
+const declared_variable_names = new Set(default_variables.map((v) => v.name));
 
 const extract_custom_properties_usage = (css: string) =>
 	Array.from(css.matchAll(/var\((?:\s|\\[nt])*--([a-z][a-z0-9_]*(?<!_))(?:[,)])/g)).map(
@@ -26,11 +28,11 @@ test('variables in the CSS exist', () => {
 		assert.ok(css);
 		const variable_names = extract_custom_properties_usage(css);
 		for (const name of variable_names) {
-			if (name in exported_variables) {
-				// Variable exists in exported variables, all good
+			if (declared_variable_names.has(name)) {
+				// Variable exists in the declared defaults, all good
 				continue;
 			} else if (known_without_variables.has(name)) {
-				// Found a known variable that doesn't have an export
+				// Found a known variable that isn't declared
 				found_known.add(name);
 			} else {
 				// Unknown variable that's neither exported nor in our known list
@@ -52,7 +54,7 @@ test('variables in the CSS exist', () => {
 });
 
 /**
- * These variables are known to be in the CSS but not in the exported variables.
+ * These variables are known to be in the CSS but not in `default_variables`.
  * This means they can be contextually used when defined, but otherwise have a fallback.
  * Hook knobs from the catalog (e.g. `heading_font_weight`) are included
  * automatically - they're defined as CSS-consumed-but-undeclared.

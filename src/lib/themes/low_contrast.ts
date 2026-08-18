@@ -1,4 +1,4 @@
-import type { Theme } from '../theme.ts';
+import type { Theme } from '../variable.ts';
 
 /**
  * Gentle contrast: a softer neutral tint and compressed surface range, tuned

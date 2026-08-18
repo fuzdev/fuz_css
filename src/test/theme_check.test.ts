@@ -14,7 +14,8 @@ import {
 	GATE_BORDER_DIVIDER
 } from '$lib/theme_check.ts';
 import { resolve_theme_stance } from '$lib/theme_stance.ts';
-import { compose_themes, type Theme } from '$lib/theme.ts';
+import { compose_themes } from '$lib/theme.ts';
+import type { Theme } from '$lib/variable.ts';
 import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
@@ -23,6 +24,7 @@ import { parchment_theme } from '$lib/themes/parchment.ts';
 import { concrete_theme } from '$lib/themes/concrete.ts';
 import { phosphor_theme } from '$lib/themes/phosphor.ts';
 import { neon_theme } from '$lib/themes/neon.ts';
+import { nineties_theme } from '$lib/themes/nineties.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import {
 	PALETTE_HUES,
@@ -53,6 +55,7 @@ describe('validate_theme', () => {
 			concrete_theme,
 			phosphor_theme,
 			neon_theme,
+			nineties_theme,
 			create_monochrome_theme(70) // amber, exercises the palette-tier collapse
 		];
 		for (const theme of themes) {
@@ -318,8 +321,15 @@ describe('check_theme', () => {
 		assert.isTrue(check_theme(concrete_theme).ok);
 	});
 
-	test('parchment passes every gate - the light stance included', () => {
+	test('parchment passes every gate in both schemes', () => {
 		assert.isTrue(check_theme(parchment_theme).ok);
+	});
+
+	test('nineties passes every gate - no clipping, its ground stays inside them', () => {
+		// the theme's whole premise is a ground off the paper-white extreme, and
+		// how far it can step is exactly what these gates bound
+		const report = check_theme(nineties_theme);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
 	});
 
 	test('phosphor keeps its contrast gates', () => {
@@ -464,7 +474,7 @@ describe('scheme stance', () => {
 	});
 
 	test('the stanced exemplars pass their contrast gates in both schemes', () => {
-		for (const theme of [neon_theme, phosphor_theme, parchment_theme]) {
+		for (const theme of [neon_theme, phosphor_theme]) {
 			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
 			assert.isAbove(contrast.length, 0, `${theme.name}: contrast gates resolved`);
 			assert.isTrue(
