@@ -1,18 +1,18 @@
 import type { Theme } from '../theme.ts';
 
 /**
- * A natural exemplar theme built entirely from semantic bindings and levers -
- * the palette letters keep their default hues. The warm haze comes from a
- * strengthened neutral tint (the neutral's default binding to brown `hue_f`
- * already sits at dusk-warm 60°), the ember accent from binding the accent
- * intent to orange, and the sunset character from vivid chroma pushed past the
- * conservative caps on purpose (this theme exists partly to stress weak-hue
- * gamut clipping). The gradient sky rides the `background_image`
- * decoration hook: gold high to crimson low by day, indigo sinking to
- * crimson dusk by night. Dual-scheme.
+ * An era exemplar theme from before the eras: firelight. Built entirely from
+ * semantic bindings and levers - the palette letters keep their default hues.
+ * The warm haze comes from a strengthened neutral tint (the neutral's default
+ * binding to brown `hue_f` already sits at dusk-warm 60°), the ember accent
+ * from binding the accent intent to orange, and the glow from vivid chroma
+ * pushed past the conservative caps on purpose (this theme exists partly to
+ * stress weak-hue gamut clipping). The gradient sky rides the
+ * `background_image` decoration hook: gold high to crimson low by day, indigo
+ * sinking to crimson dusk by night. Dual-scheme.
  */
-export const sunset_ember_theme: Theme = {
-	name: 'sunset ember',
+export const ember_theme: Theme = {
+	name: 'ember',
 	variables: [
 		// ember accent: links/focus/selection burn orange
 		{ name: 'hue_accent', light: 'var(--hue_h)' },

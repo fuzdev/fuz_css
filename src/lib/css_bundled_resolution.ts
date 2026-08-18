@@ -463,6 +463,13 @@ export interface GenerateBundledCssOptions {
 	include_base?: boolean;
 	/** Include utility classes section. @default true */
 	include_utilities?: boolean;
+	/**
+	 * A baked theme's own overlay (its variables + stance mirror +
+	 * `color-scheme` pin), rendered unlayered - emitted into the `fuz.theme`
+	 * layer so it outranks the `fuz.preferences` OS mappings the same way the
+	 * runtime renderer's output does.
+	 */
+	theme_overlay_css?: string | null;
 }
 
 /**
@@ -478,7 +485,12 @@ export const generate_bundled_css = (
 	utility_css: string,
 	options: GenerateBundledCssOptions = {}
 ): string => {
-	const { include_theme = true, include_base = true, include_utilities = true } = options;
+	const {
+		include_theme = true,
+		include_base = true,
+		include_utilities = true,
+		theme_overlay_css = null
+	} = options;
 
 	const parts: Array<string> = [];
 
@@ -496,9 +508,15 @@ export const generate_bundled_css = (
 	}
 
 	// OS user-preference mappings, above the defaults and below themes
-	if (include_base && result.preferences_css) {
+	if ((include_theme || include_base) && result.preferences_css) {
 		parts.push('/* User-Preference Mappings */');
 		parts.push(`@layer fuz.preferences {\n${result.preferences_css}\n}`);
+	}
+
+	// the baked theme's own overlay, above the preferences like at runtime
+	if (include_theme && theme_overlay_css) {
+		parts.push('/* Theme Overrides */');
+		parts.push(`@layer fuz.theme {\n${theme_overlay_css}\n}`);
 	}
 
 	// Utility classes section

@@ -14,9 +14,12 @@ contrast are curve-knob fragments composed over any theme with the new
 `compose_themes(base, ...overlays)` (flatten + last-wins; a single-scheme
 base re-slots dual-slot overlay variables to its stance), not themes in the
 list. Themes live one module per theme under `themes/`, with unregistered
-exemplars: necromancer, sunset ember, brutalish, and terminalien. Low
-contrast is tuned to the softest compression that passes every
-`check_theme` contrast gate.
+exemplars - recognizable materials, each anchoring an era: ember
+(firelight, dual-scheme), parchment (the illuminated manuscript,
+light-only), concrete (brutalism), phosphor (the CRT terminal, dark-only),
+and neon (80s signage at night, dark-only and palette-tier). Low contrast
+is tuned to the softest compression that passes every `check_theme`
+contrast gate.
 
 **Scheme stance.** `Theme` gains `scheme?: 'dual' | 'light' | 'dark'`
 (default `'dual'`). A single-scheme theme renders its one appearance in
@@ -29,9 +32,9 @@ in the light/base position and resolve it with `resolve_theme_stance` (new
 stay distinguishable from the derived ones. `validate_theme` warns on a
 missing mirror and on dark slots a stance makes meaningless;
 `check_theme`/`compile_theme` resolve through the same mirror so the gates
-evaluate the stanced reality in both schemes. The necromancer and
-terminalien exemplars are dark-only via the stance, resolved at module
-scope.
+evaluate the stanced reality in both schemes. The neon and phosphor
+exemplars are dark-only and parchment light-only via the stance, resolved
+at module scope.
 
 **Pure renderer.** `theme.ts` no longer depends on `variables.ts`, so
 mounting a theme stops pulling the full derived variable set into the
@@ -74,17 +77,17 @@ compiled-cap overrides):
   where the baked caps no longer fit, and re-checks the result
 
 The shipped themes and their contrast-modifier compositions are gated in
-CI (one declared marginal exception: sunset ember composed with low
-contrast sits just under three light-scheme UI-fill gates), and the docs
-page's inline editor runs the same lint and gates live on every edit.
+CI (one declared marginal exception: ember composed with low contrast sits
+just under three light-scheme UI-fill gates), and the docs page's inline
+editor runs the same lint and gates live on every edit.
 
 **Build-time `theme` option.** The Vite plugin and Gro generator take a
 `theme` baked into the generated CSS:
 
 ```ts
-import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';
+import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';
 
-vite_plugin_fuz_css({theme: necromancer_theme});
+vite_plugin_fuz_css({theme: phosphor_theme});
 ```
 
 The theme overlays the resolved `variables` last-wins by name, so its
@@ -92,14 +95,11 @@ values flow through the dependency graph like any other - the variables a
 theme references are pulled in transitively and the output stays
 tree-shaken. A single-scheme theme's `scheme_mirror` applies first,
 matching the renderer's order, computed automatically if the theme arrives
-unresolved. This is the static counterpart to fuz_ui's
-`ThemeRoot`: no runtime theme rendering, no JavaScript shipped; the two
-compose, the runtime theme winning by cascade layer. Pinning
-`color-scheme` stays separate - the `dark`/`light` class on the root
-element drives it. Also exposes `apply_theme_variables` from
-`variable_graph.ts`; `build_variable_graph_from_options` takes an optional
-theme.
-
-Also fixed: the dangling-`var()` warning for `base_css` with
-`variables: null` never fired - it checked the variable graph that same
-option had emptied; it now checks the default variable names.
+unresolved. The theme's own overlay also renders into the `fuz.theme`
+cascade layer - above the `fuz.preferences` OS mappings, with
+`color-scheme` pinned for a single-scheme stance - so a baked theme
+behaves exactly like the same theme rendered at runtime. This is the
+static counterpart to fuz_ui's `ThemeRoot`: no runtime theme rendering, no
+JavaScript shipped; the two compose, the runtime theme winning by cascade
+layer. Also exposes `apply_theme_variables` from `variable_graph.ts`;
+`build_variable_graph_from_options` takes an optional theme.

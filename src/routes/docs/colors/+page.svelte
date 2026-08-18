@@ -10,7 +10,7 @@
 
 	import HueSwatch from './HueSwatch.svelte';
 	import ColorSwatch from './ColorSwatch.svelte';
-	import { palette_variants, palette_glosses, type PaletteVariant } from '$lib/variable_data.ts';
+	import { palette_variants, format_palette_gloss } from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
@@ -20,12 +20,6 @@
 		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
 	// TODO button to add an inline hue input for runtime modification of the theme
-
-	// letter glosses: color name plus the default intent binding where one exists
-	const describe_letter = (letter: PaletteVariant): string => {
-		const gloss = palette_glosses[letter];
-		return gloss.binding ? `${gloss.color} · default ${gloss.binding}` : gloss.color;
-	};
 </script>
 
 <TomeContent {tome}>
@@ -125,7 +119,7 @@
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
 			{#each palette_variants as letter (letter)}
-				<HueSwatch {letter} {computed_styles} description={describe_letter(letter)} />
+				<HueSwatch {letter} {computed_styles} description={format_palette_gloss(letter)} />
 			{/each}
 		</ul>
 	</TomeSection>

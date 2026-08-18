@@ -1,16 +1,16 @@
 import type { Theme } from '../theme.ts';
 
 /**
- * An era exemplar theme riffing on brutalism - brutal-ish: raw concrete
- * surfaces with punchy saturated accents, sharp, flat, border-forward -
- * built from levers only, the palette letters keep their default hues. The
- * neutral collapses to a concrete whisper while the palette keeps real
- * color, so statuses and accents punch against the raw ground; shape and
- * depth flatten to single scale knobs; borders carry the structure;
- * headings go display-heavy through the flattened weight ladder.
+ * An era exemplar theme: brutalism's raw concrete. Near-grayscale ground with
+ * punchy saturated accents, sharp, flat, border-forward - built from levers
+ * only, the palette letters keep their default hues. The neutral collapses to
+ * a concrete whisper while the palette keeps real color, so statuses and
+ * accents punch against the raw ground; shape and depth flatten to single
+ * scale knobs; borders carry the structure; headings go display-heavy through
+ * the flattened weight ladder.
  */
-export const brutalish_theme: Theme = {
-	name: 'brutalish',
+export const concrete_theme: Theme = {
+	name: 'concrete',
 	variables: [
 		// concrete ground, saturated accents: the neutral goes raw while the
 		// palette keeps its full default chroma for punch

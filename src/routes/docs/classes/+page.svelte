@@ -852,11 +852,6 @@ vite_plugin_fuz_css({
 				</li>
 				<li class="mb_md">
 					<span class="code_chips">
-						<code>.hue_{@render variant_range(palette_variants)}</code>
-					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips">
 						<code>.darken_{@render variant_range(darken_lighten_variants)}</code>
 						<code>.lighten_{@render variant_range(darken_lighten_variants)}</code>
 					</span>

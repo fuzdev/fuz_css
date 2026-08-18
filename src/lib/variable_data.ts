@@ -170,6 +170,16 @@ export const palette_glosses: Record<
 	j: { color: 'teal' }
 };
 
+/**
+ * Formats a letter's gloss for display: the color name plus the default
+ * intent binding where one exists, e.g. `blue · default accent`. Shared by
+ * display surfaces so the phrasing can't drift.
+ */
+export const format_palette_gloss = (letter: PaletteVariant): string => {
+	const gloss = palette_glosses[letter];
+	return gloss.binding ? `${gloss.color} · default ${gloss.binding}` : gloss.color;
+};
+
 export type IntensityVariant = NumericScaleVariant;
 export const intensity_variants = numeric_scale_variants;
 
@@ -190,8 +200,3 @@ export const color_scheme_variants = ['light', 'dark'] as const;
 
 export type OutlineWidthVariant = ArrayElement<typeof outline_width_variants>;
 export const outline_width_variants = ['focus', 'active'] as const;
-
-/**
- * Maximum value for CSS z-index property (32-bit signed integer max).
- */
-export const Z_INDEX_MAX = 2_147_483_647;

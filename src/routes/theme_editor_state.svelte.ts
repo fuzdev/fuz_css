@@ -15,16 +15,9 @@ import {
 	type ThemeKnobResolver
 } from '$lib/theme_check.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
+import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 
 // TODO upstream to fuz_ui
-
-/**
- * The name of the in-progress theme shown in pickers. Never `'base'`, which
- * fuz_ui's `ThemeRoot` suppresses to render nothing (pickers key by name), and
- * never a registry/exemplar name, which would collide with `ThemeInput`'s
- * name-keyed selection.
- */
-export const UNSAVED_THEME_NAME = 'unsaved';
 
 const default_variable_by_name: Map<string, StyleVariable> = new Map(
 	default_variables.map((v) => [v.name, v])
@@ -66,6 +59,8 @@ export interface ThemeEditorSnapshotData {
  * stanced draft over a dual base can't ship both appearances.
  */
 export class ThemeEditorState {
+	// the initializer looks dead (the constructor always assigns) but TS's
+	// class-field ordering needs it - the $derived fields below read `themes`
 	readonly themes: Array<Theme> = [];
 
 	name: string = $state.raw('new theme');
@@ -124,6 +119,15 @@ export class ThemeEditorState {
 		}
 		return merged;
 	});
+
+	/**
+	 * `merged_variables` indexed by name - the lookup `display_value` reads so
+	 * the per-knob template pass reuses the one merge instead of re-merging
+	 * per call, making "derived from the same merge" structural.
+	 */
+	readonly #merged_by_name: Map<string, StyleVariable> = $derived(
+		new Map(this.merged_variables.map((v) => [v.name, v]))
+	);
 
 	#merge_variable(name: string): StyleVariable | null {
 		const o = this.overrides.get(name);
@@ -201,7 +205,7 @@ export class ThemeEditorState {
 	 * scheme-adaptive defaults so both schemes show the stanced appearance.
 	 */
 	display_value(name: string, scheme: ColorSchemeVariant): string | undefined {
-		const merged = this.#merge_variable(name);
+		const merged = this.#merged_by_name.get(name);
 		const d = default_variable_by_name.get(name);
 		// the renderer's stance mirror applies only to defaults the theme
 		// doesn't touch, re-slotted so the stanced value wins in both schemes

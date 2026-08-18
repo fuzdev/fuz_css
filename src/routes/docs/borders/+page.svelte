@@ -18,7 +18,7 @@
 		type IntensityVariant
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import ResolvedColorCode from '$routes/docs/borders/ResolvedColorCode.svelte';
+	import ResolvedColorCode from './ResolvedColorCode.svelte';
 
 	const LIBRARY_ITEM_NAME = 'borders';
 
@@ -88,9 +88,7 @@
 						{/each}
 					</div>
 					<div style:width="250px">
-						<span class="pl_sm pr_sm">=</span><code>
-							{computed_styles?.getPropertyValue('--' + name)}
-						</code>
+						<span class="pl_sm pr_sm">=</span><ResolvedColorCode {name} />
 					</div>
 				</div>
 			{/each}

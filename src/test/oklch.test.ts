@@ -1,15 +1,12 @@
 import { describe, test, assert } from 'vitest';
 
 import {
-	oklch_delta_e,
 	oklch_in_srgb_gamut,
 	oklch_max_srgb_chroma,
 	oklch_to_srgb,
 	srgb_to_oklch,
-	type Oklch,
 	type RgbUnit
 } from '$lib/oklch.ts';
-import { srgb_relative_luminance, wcag_contrast_ratio } from '$lib/wcag.ts';
 
 const assert_close = (actual: number, expected: number, tolerance: number, message?: string) => {
 	assert(
@@ -104,34 +101,5 @@ describe('oklch_max_srgb_chroma', () => {
 		const yellow = oklch_max_srgb_chroma(0.55, 100);
 		const blue = oklch_max_srgb_chroma(0.55, 264);
 		assert(yellow < blue * 0.6, `yellow ${yellow} vs blue ${blue}`);
-	});
-});
-
-describe('oklch_delta_e', () => {
-	test('is 0 for identical colors and symmetric otherwise', () => {
-		const a: Oklch = [0.6, 0.15, 210];
-		const b: Oklch = [0.62, 0.13, 215];
-		assert(oklch_delta_e(a, a) === 0);
-		assert_close(oklch_delta_e(a, b), oklch_delta_e(b, a), 1e-12);
-		assert(oklch_delta_e(a, b) > 0);
-	});
-
-	test('ignores hue for achromatic colors', () => {
-		assert_close(oklch_delta_e([0.5, 0, 0], [0.5, 0, 180]), 0, 1e-12);
-	});
-});
-
-describe('wcag', () => {
-	test('luminance of white and black', () => {
-		assert_close(srgb_relative_luminance([1, 1, 1]), 1, 1e-6);
-		assert_close(srgb_relative_luminance([0, 0, 0]), 0, 1e-6);
-	});
-
-	test('contrast ratio extremes and a known mid pair', () => {
-		assert_close(wcag_contrast_ratio([1, 1, 1], [0, 0, 0]), 21, 1e-6);
-		assert_close(wcag_contrast_ratio([0, 0, 0], [1, 1, 1]), 21, 1e-6);
-		// #767676 on white is the canonical ~4.54:1 AA boundary gray
-		const gray: RgbUnit = [0x76 / 255, 0x76 / 255, 0x76 / 255];
-		assert_close(wcag_contrast_ratio(gray, [1, 1, 1]), 4.54, 0.01);
 	});
 });

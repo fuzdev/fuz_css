@@ -365,7 +365,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 				css_properties: cached_css_properties,
 				include_base,
 				include_theme,
-				has_theme: theme != null,
+				theme,
 				resources,
 				additional_elements,
 				additional_variables,

@@ -71,9 +71,30 @@ describe('generate_bundled_css', () => {
 				bundled,
 				'@layer fuz.preferences {\n@media (prefers-contrast: more) {\n:root { --x: 1; }\n}\n}'
 			);
-			// gated by include_base alongside the base styles they come from
+			// the mappings set only theme variables, so they ship whenever either
+			// the theme or the base styles that consume them do
 			const no_base = generate_bundled_css(result, '', { include_base: false });
-			assert.notInclude(no_base, 'fuz.preferences {');
+			assert.include(no_base, 'fuz.preferences {');
+			const neither = generate_bundled_css(result, '', {
+				include_base: false,
+				include_theme: false
+			});
+			assert.notInclude(neither, 'fuz.preferences {');
+		});
+
+		test('a baked theme overlay renders into fuz.theme above the preferences', () => {
+			const result = create_mock_result();
+			const bundled = generate_bundled_css(result, '', {
+				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n\t--hue_neutral: var(--hue_b);\n}'
+			});
+			assert.include(bundled, '/* Theme Overrides */');
+			assert.include(bundled, '@layer fuz.theme {\n:root {\n\tcolor-scheme: dark;');
+			// disabled theme output drops the overlay with the rest of the theme
+			const no_theme = generate_bundled_css(result, '', {
+				include_theme: false,
+				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n}'
+			});
+			assert.notInclude(no_theme, 'fuz.theme {');
 		});
 	});
 

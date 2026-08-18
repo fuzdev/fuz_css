@@ -225,8 +225,9 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
   others) with matching text/background token classes (`.positive_50`,
   `.bg_caution_10`)
-- Curve knobs drive everything: `--chroma_scale` (0 grayscale → >1 vivid),
-  per-scheme lightness
+- Curve knobs drive everything: `--chroma_scale` (0 collapses the palette
+  to grayscale → >1 vivid; the neutral scales ride `--neutral_chroma`
+  instead), per-scheme lightness
   ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`
   and `text_`), and the chroma curve
   (`--palette_chroma_min`/`_max`/`_curve`) clamped per stop by baked
@@ -392,11 +393,16 @@ typography, borders, shading, shadows, layout. See
   `compose_themes`, not themes themselves — users see one flat "themes"
   list
 - `src/lib/themes/` - One module per theme. Registered: base. Shipped
-  exemplars: necromancer, sunset ember, brutalish, and `terminalien.ts`
-  (dense dark mono terminal chrome with a green-phosphor cast but
-  functional palette — compact `scale_factor` plus tightened line-height
-  pins); necromancer and terminalien are dark-only via `scheme: 'dark'`.
-  The contrast pair live here too as the modifier modules
+  exemplars are recognizable materials, each anchoring an era: ember
+  (firelight — warm haze, vivid past the caps, gradient-sky
+  `background_image`, dual-scheme), parchment (the illuminated manuscript —
+  serif body, rubrication-red accent, double-ruled borders, the sole
+  light-only stance), concrete (brutalism — near-grayscale neutral, sharp,
+  flat, border-forward, heavy headings), phosphor (the CRT terminal — green
+  cast, mono, compact, instant short `duration_*`, dark-only), and neon
+  (80s signage — magenta accent, colored glow shadows, capsule radius pins,
+  a rotated yellow slot making it the one palette-tier exemplar,
+  dark-only). The contrast pair live here too as the modifier modules
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
@@ -473,6 +479,23 @@ typography, borders, shading, shadows, layout. See
 
 - [style.css](src/lib/style.css) - CSS reset and element defaults (all rules)
 - [theme.css](src/lib/theme.css) - Generated base theme variables (all variables)
+
+### Docs site - ./src/routes/
+
+The themes docs page hosts an inline theme editor built from
+[ThemeEditor.svelte](src/routes/ThemeEditor.svelte),
+[KnobControl.svelte](src/routes/KnobControl.svelte),
+[RampStrip.svelte](src/routes/RampStrip.svelte), and
+[theme_editor_state.svelte.ts](src/routes/theme_editor_state.svelte.ts)
+(marked `TODO upstream to fuz_ui`), with
+[theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
+in a leaf module so the root layout doesn't pull the editor's dependency
+graph. [resolved_color.svelte.ts](src/routes/docs/resolved_color.svelte.ts)
+resolves rendered colors for the docs swatches. `vite.config.ts` declares
+the docs site's own generator inputs: a `docs_classes` list plus
+`additional_variables: 'all'` / `additional_elements: 'all'`, which is what
+lets fully dynamic references like `RampStrip`'s `var(--{prefix}_{stop})`
+work without per-page `@fuz-classes` walls.
 
 ### Examples - ./examples/
 

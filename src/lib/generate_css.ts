@@ -18,7 +18,8 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
-import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
+import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style, type Theme } from './theme.ts';
+import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import { default_variables } from './variables.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
@@ -62,11 +63,15 @@ export interface GenerateCssOptions {
 	include_base: boolean;
 	include_theme: boolean;
 	/**
-	 * Whether a `theme` option was configured, independent of whether theme
-	 * output is enabled - lets the footgun guard flag a theme silently
-	 * discarded by `variables: null`.
+	 * The configured `theme` option, if any - its variables were already
+	 * overlaid into `resources`' variable graph by the caller. Carried here so
+	 * the theme's own overlay can also render into the `fuz.theme` cascade
+	 * layer (above the `fuz.preferences` OS mappings, with a stance's
+	 * `color-scheme` pin), matching how the same theme behaves at runtime -
+	 * and so the footgun guard can flag a theme silently discarded by
+	 * `variables: null`.
 	 */
-	has_theme?: boolean;
+	theme?: Theme | null;
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
@@ -110,7 +115,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css_properties,
 		include_base,
 		include_theme,
-		has_theme = false,
+		theme = null,
 		resources,
 		additional_elements,
 		additional_variables,
@@ -135,7 +140,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 	// Footgun guard: a configured `theme` with theme output disabled
 	// (`variables: null`) is silently discarded - the theme flows into the
 	// variable graph but the graph never renders.
-	if (has_theme && !include_theme) {
+	if (theme != null && !include_theme) {
 		diagnostics.push({
 			phase: 'generation',
 			level: 'warning',
@@ -217,7 +222,17 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
-			include_utilities: true
+			include_utilities: true,
+			// the theme's own overlay re-renders into fuz.theme so it outranks
+			// the fuz.preferences OS mappings and pins color-scheme for a
+			// stance, exactly like the runtime path renders the same theme
+			theme_overlay_css:
+				include_theme && theme
+					? render_theme_style(
+							theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme,
+							{ layer: null }
+						)
+					: null
 		});
 	} else {
 		// utility-only mode - still layered, so the separately imported package

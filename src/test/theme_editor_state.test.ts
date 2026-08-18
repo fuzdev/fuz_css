@@ -11,19 +11,19 @@ import { test, assert, describe } from 'vitest';
 import {
 	ThemeEditorState,
 	render_theme_ts,
-	discard_confirm_message,
-	UNSAVED_THEME_NAME
+	discard_confirm_message
 } from '$routes/theme_editor_state.svelte.ts';
+import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 import type { Theme } from '$lib/theme.ts';
 import { base_theme } from '$lib/themes/base.ts';
-import { necromancer_theme } from '$lib/themes/necromancer.ts';
+import { neon_theme } from '$lib/themes/neon.ts';
 import { default_variables } from '$lib/variables.ts';
 import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '$lib/ramps.ts';
 
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
 
-const create_editor = (): ThemeEditorState => new ThemeEditorState([base_theme, necromancer_theme]);
+const create_editor = (): ThemeEditorState => new ThemeEditorState([base_theme, neon_theme]);
 
 describe('set_value slot semantics', () => {
 	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
@@ -101,7 +101,7 @@ describe('scheme stance', () => {
 });
 
 describe('scheme stance over a dual base theme', () => {
-	// a dual base authoring both slots itself - like brutalish and sunset ember
+	// a dual base authoring both slots itself - like concrete and ember
 	const dual_base: Theme = {
 		name: 'dualish',
 		variables: [
@@ -224,7 +224,7 @@ describe('resolved_value', () => {
 
 	test('a stanced base resolves the same value in both schemes', () => {
 		const editor = create_editor();
-		editor.load_theme(necromancer_theme);
+		editor.load_theme(neon_theme);
 		const light = editor.resolved_value('border_color_chroma', 'light');
 		assert.isNotNull(light);
 		assert.strictEqual(light, editor.resolved_value('border_color_chroma', 'dark'));
@@ -260,14 +260,14 @@ describe('load_theme and dirty', () => {
 	test('loading a theme flattens it as the base and carries its stance', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '2', 'light');
-		editor.load_theme(necromancer_theme);
-		assert.strictEqual(editor.based_on, necromancer_theme.name);
+		editor.load_theme(neon_theme);
+		assert.strictEqual(editor.based_on, neon_theme.name);
 		assert.strictEqual(editor.overrides.size, 0);
 		assert.strictEqual(editor.scheme, 'dark');
 		assert.isFalse(editor.dirty);
 		// the base theme's own variables flow into the merge
 		const merged_names = new Set(editor.merged_variables.map((v) => v.name));
-		for (const v of necromancer_theme.variables) {
+		for (const v of neon_theme.variables) {
 			assert.isTrue(merged_names.has(v.name), v.name);
 		}
 	});
@@ -283,13 +283,13 @@ describe('snapshots', () => {
 	test('round-trips name, base, scheme, and overrides', () => {
 		const editor = create_editor();
 		editor.name = 'my theme';
-		editor.load_theme(necromancer_theme);
+		editor.load_theme(neon_theme);
 		editor.set_value(single_slot_default.name, '1.4', 'light');
 		const snapshot = editor.to_snapshot();
 
 		const restored = create_editor();
 		restored.restore_snapshot(snapshot);
-		assert.strictEqual(restored.based_on, necromancer_theme.name);
+		assert.strictEqual(restored.based_on, neon_theme.name);
 		assert.strictEqual(restored.scheme, 'dark');
 		assert.deepEqual(restored.overrides.get(single_slot_default.name), { light: '1.4' });
 	});
@@ -343,10 +343,10 @@ describe('discard_confirm_message', () => {
 	test('names the discarded work', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '2', 'light');
-		assert.include(discard_confirm_message(editor, 'necromancer'), '1 edited knob(s)');
+		assert.include(discard_confirm_message(editor, 'neon'), '1 edited knob(s)');
 		editor.reset_all();
 		editor.set_scheme('dark');
-		assert.include(discard_confirm_message(editor, 'necromancer'), 'scheme change');
+		assert.include(discard_confirm_message(editor, 'neon'), 'scheme change');
 	});
 });
 
@@ -381,7 +381,3 @@ describe('gates', () => {
 		);
 	});
 });
-
-// keep the type import "used" for the linter across fixture literals
-const _theme_type_check: Theme = base_theme;
-void _theme_type_check;

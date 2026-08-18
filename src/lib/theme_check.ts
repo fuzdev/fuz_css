@@ -8,9 +8,9 @@
  *   shape, known variable names, and advisory type/range warnings for the
  *   knob-tier variables.
  * - `check_theme` evaluates the gamut, ramp-monotonicity, and contrast gates
- *   (the same ones `src/test/ramps.test.ts` asserts for the defaults) against
- *   an arbitrary theme, reusing the `ramps.ts` numeric twin, `oklch.ts`
- *   conversions, and `wcag.ts` ratios. It is report-only and never throws.
+ *   against an arbitrary theme (the base theme's defaults included), reusing
+ *   the `ramps.ts` numeric twin, `oklch.ts` conversions, and `wcag.ts`
+ *   ratios. It is report-only and never throws.
  * - `compile_theme` recomputes the per-stop worst-hue chroma caps for a
  *   theme's own hues and lightness ramp and emits `palette_chroma_NN`
  *   overrides where the baked caps no longer fit, then re-checks.
@@ -30,6 +30,12 @@
  * - Derived ramp stops use a pinned numeric value when the theme pins one,
  *   fall back to the `ramps.ts` formulas with the resolved knobs otherwise,
  *   and mark the touching gates `unchecked` when a pin is unresolvable.
+ * - A few gate inputs do NOT resolve through the theme and are fixed to the
+ *   shipped design: `text_min`/`text_max` (assumed pure black/white),
+ *   `border_color_NN` alphas (`BORDER_COLOR_ALPHAS`), and the
+ *   `chroma_shape_NN` intermediates (recomputed from the curve knob, so a
+ *   theme pinning a shape stop directly checks against the unpinned shape).
+ *   A theme moving those can render differently than it checks.
  *
  * The effective-value merge mirrors the renderer's cascade-layer semantics
  * (`theme.ts` `render_theme_style`, `theme_editor_state.svelte.ts`
@@ -69,9 +75,12 @@ import {
 	ramp_lightness,
 	ramp_chroma,
 	ramp_chroma_shape,
+	ramp_color_oklch,
+	neutral_color_oklch,
 	compute_palette_chroma_caps,
 	render_chroma_stop_css,
-	type LightnessRampKnobs
+	type LightnessRampKnobs,
+	type ChromaRampKnobs
 } from './ramps.ts';
 import {
 	numeric_scale_variants,
@@ -83,7 +92,7 @@ import {
 	type ColorSchemeVariant,
 	type PaletteVariant
 } from './variable_data.ts';
-import { oklch_to_srgb, oklch_in_srgb_gamut, type Oklch, type RgbUnit } from './oklch.ts';
+import { oklch_to_srgb, type Oklch, type RgbUnit } from './oklch.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
 
 //
@@ -149,7 +158,14 @@ export interface ThemeIssue {
 /** Which accessibility gate an entry belongs to. */
 export type ThemeGateId = 'gamut' | 'monotonicity' | 'contrast';
 
-/** A single gate measurement against a theme. */
+/**
+ * A single gate measurement against a theme. The `value`/`threshold`
+ * comparison direction depends on the gate: `contrast` passes at
+ * `value >= threshold` (a WCAG ratio floor), `monotonicity` at
+ * `value > threshold` (the minimum ramp step must exceed 0), and `gamut` at
+ * `value <= threshold` (sRGB channel excess stays within tolerance). `pass`
+ * is authoritative; renderers formatting the comparison switch on `gate`.
+ */
 export interface ThemeGateEntry {
 	gate: ThemeGateId;
 	scheme: ColorSchemeVariant;
@@ -394,7 +410,7 @@ class ThemeResolver {
 			const stop = chroma_match[1] as NumericScaleVariant;
 			const knobs = this.#chroma_knobs(scheme, visited);
 			if (!knobs.ok) return knobs.error;
-			const value = ramp_chroma(scheme, stop, 1, knobs.value, PALETTE_CHROMA_CAPS[scheme][stop]);
+			const value = ramp_chroma(stop, knobs.value, PALETTE_CHROMA_CAPS[scheme][stop]);
 			return { ok: true, value };
 		}
 		return {
@@ -405,39 +421,51 @@ class ThemeResolver {
 		};
 	}
 
+	// resolves every name to a number, bailing with the first failure
+	#resolve_all(
+		names: Array<string>,
+		scheme: ColorSchemeVariant,
+		visited: Set<string>
+	): { ok: true; values: Array<number> } | { ok: false; error: Resolved } {
+		const values: Array<number> = [];
+		for (const name of names) {
+			const r = this.#resolve(name, scheme, visited);
+			if (!r.ok) return { ok: false, error: r };
+			values.push(r.value);
+		}
+		return { ok: true, values };
+	}
+
 	#lightness_knobs(
 		family: 'palette' | 'shade' | 'text',
 		scheme: ColorSchemeVariant,
 		visited: Set<string>
 	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
-		const l00 = this.#resolve(`${family}_lightness_00`, scheme, visited);
-		if (!l00.ok) return { ok: false, error: l00 };
-		const l100 = this.#resolve(`${family}_lightness_100`, scheme, visited);
-		if (!l100.ok) return { ok: false, error: l100 };
-		const curve = this.#resolve(`${family}_lightness_curve`, scheme, visited);
-		if (!curve.ok) return { ok: false, error: curve };
+		const r = this.#resolve_all(
+			[`${family}_lightness_00`, `${family}_lightness_100`, `${family}_lightness_curve`],
+			scheme,
+			visited
+		);
+		if (!r.ok) return r;
+		const [lightness_00, lightness_100, curve] = r.values;
 		return {
 			ok: true,
-			value: { lightness_00: l00.value, lightness_100: l100.value, curve: curve.value }
+			value: { lightness_00: lightness_00!, lightness_100: lightness_100!, curve: curve! }
 		};
 	}
 
 	#chroma_knobs(
 		scheme: ColorSchemeVariant,
 		visited: Set<string>
-	):
-		| { ok: true; value: { chroma_min: number; chroma_max: number; curve: number } }
-		| { ok: false; error: Resolved } {
-		const chroma_min = this.#resolve('palette_chroma_min', scheme, visited);
-		if (!chroma_min.ok) return { ok: false, error: chroma_min };
-		const chroma_max = this.#resolve('palette_chroma_max', scheme, visited);
-		if (!chroma_max.ok) return { ok: false, error: chroma_max };
-		const curve = this.#resolve('palette_chroma_curve', scheme, visited);
-		if (!curve.ok) return { ok: false, error: curve };
-		return {
-			ok: true,
-			value: { chroma_min: chroma_min.value, chroma_max: chroma_max.value, curve: curve.value }
-		};
+	): { ok: true; value: ChromaRampKnobs } | { ok: false; error: Resolved } {
+		const r = this.#resolve_all(
+			['palette_chroma_min', 'palette_chroma_max', 'palette_chroma_curve'],
+			scheme,
+			visited
+		);
+		if (!r.ok) return r;
+		const [chroma_min, chroma_max, curve] = r.values;
+		return { ok: true, value: { chroma_min: chroma_min!, chroma_max: chroma_max!, curve: curve! } };
 	}
 }
 
@@ -469,21 +497,6 @@ export const create_theme_resolver = (theme: Theme): ThemeKnobResolver => {
 	};
 };
 
-/**
- * Resolves a single knob-tier or derived-stop variable of `theme` to a number,
- * or `null` when it can't be resolved. Exposed for direct tests of the
- * resolution rules (binding chains, cycles, unresolvable expressions); UIs
- * doing repeated lookups should hold a `create_theme_resolver` instance
- * instead, since this rebuilds the resolver (and its memo) per call.
- *
- * @param name - the variable name (without the leading `--`)
- */
-export const resolve_theme_knob = (
-	theme: Theme,
-	name: string,
-	scheme: ColorSchemeVariant
-): number | null => create_theme_resolver(theme).resolve(name, scheme);
-
 //
 // validate_theme - the structural lint.
 //
@@ -497,7 +510,7 @@ const validate_knob_value = (
 	const issues: Array<ThemeIssue> = [];
 	const trimmed = value.trim();
 	const numeric = trimmed !== '' && Number.isFinite(Number(trimmed));
-	const check_range = (n: number = Number(trimmed)): void => {
+	const check_range = (n: number): void => {
 		if (knob.range && (n < knob.range[0] || n > knob.range[1])) {
 			issues.push({
 				level: 'warning',
@@ -522,7 +535,7 @@ const validate_knob_value = (
 					variable
 				});
 			} else if (numeric) {
-				check_range();
+				check_range(Number(trimmed));
 			}
 			break;
 		}
@@ -536,7 +549,7 @@ const validate_knob_value = (
 					variable
 				});
 			} else if (numeric) {
-				check_range();
+				check_range(Number(trimmed));
 			}
 			break;
 		}
@@ -757,7 +770,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		if (lightness === null || chroma_stop === null || chroma_scale === null) {
 			return null;
 		}
-		return [lightness, chroma_stop * chroma_scale * multiplier, hue];
+		return ramp_color_oklch(lightness, chroma_stop, hue, chroma_scale, multiplier);
 	};
 
 	// a neutral (shade/text) ramp color at a stop
@@ -773,20 +786,21 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		if (lightness === null || neutral_c === null || curve === null || neutral_hue === null) {
 			return null;
 		}
-		return [lightness, neutral_c * ramp_chroma_shape(stop, curve), neutral_hue];
+		return neutral_color_oklch(lightness, neutral_c, ramp_chroma_shape(stop, curve), neutral_hue);
 	};
 
 	const contrast = (a: RgbUnit, b: RgbUnit): number =>
 		wcag_contrast_ratio(clamp_rgb(a), clamp_rgb(b));
 
 	const push_gamut = (subject: string, color: Oklch, scheme: ColorSchemeVariant): void => {
+		const value = gamut_excess(oklch_to_srgb(color));
 		entries.push({
 			gate: 'gamut',
 			scheme,
 			subject,
-			value: gamut_excess(oklch_to_srgb(color)),
+			value,
 			threshold: 1e-4,
-			pass: oklch_in_srgb_gamut(color, 1e-4)
+			pass: value <= 1e-4
 		});
 	};
 
@@ -1020,7 +1034,10 @@ const resolve_lightness_knobs = (
  *
  * A stop is emitted only when either scheme's recomputed cap drifts from the
  * baked value by more than the emit epsilon and the theme doesn't already pin
- * that stop. A dual theme's overrides emit both slots together so a
+ * that stop. For a stanced theme both schemes resolve to the stanced
+ * appearance, so the caps are computed once and baselined against the stanced
+ * scheme's baked table - the values the stance mirror already re-slots - and
+ * a stance alone (hues and lightness ramp unmoved) emits nothing. A dual theme's overrides emit both slots together so a
  * one-scheme override can't silently kill the base default's other slot by
  * cascade-layer order; a stanced theme's emit single-slot in the base
  * position (its two schemes resolve identically through the mirror), as do
@@ -1031,19 +1048,27 @@ const resolve_lightness_knobs = (
  * resolution core recognizes.
  */
 export const compile_theme = (theme: Theme): CompiledTheme => {
-	const issues = validate_theme(theme);
 	const resolver = new ThemeResolver(theme);
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 
+	const recompute = (scheme: ColorSchemeVariant): Record<NumericScaleVariant, number> =>
+		compute_palette_chroma_caps(
+			collect_hues(resolver, scheme),
+			resolve_lightness_knobs(resolver, scheme)
+		);
+	// a stanced theme resolves both schemes to the stanced appearance through
+	// the mirror, so compute the (expensive) gamut search once - and baseline
+	// against the stanced scheme's baked caps: those are what the mirror
+	// re-slots into the base position, so comparing against the light table
+	// would emit no-op overrides duplicating the mirror for every dark stance
+	const stance_caps = stance ? recompute(stance) : null;
 	const recomputed: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
-		light: compute_palette_chroma_caps(
-			collect_hues(resolver, 'light'),
-			resolve_lightness_knobs(resolver, 'light')
-		),
-		dark: compute_palette_chroma_caps(
-			collect_hues(resolver, 'dark'),
-			resolve_lightness_knobs(resolver, 'dark')
-		)
+		light: stance_caps ?? recompute('light'),
+		dark: stance_caps ?? recompute('dark')
+	};
+	const baked: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
+		light: PALETTE_CHROMA_CAPS[stance ?? 'light'],
+		dark: PALETTE_CHROMA_CAPS[stance ?? 'dark']
 	};
 
 	const cap_overrides: Array<StyleVariable> = [];
@@ -1051,8 +1076,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		if (resolver.pinned(`palette_chroma_${stop}`)) continue; // respect the pin
 		const light_cap = recomputed.light[stop];
 		const dark_cap = recomputed.dark[stop];
-		const light_drift = Math.abs(light_cap - PALETTE_CHROMA_CAPS.light[stop]);
-		const dark_drift = Math.abs(dark_cap - PALETTE_CHROMA_CAPS.dark[stop]);
+		const light_drift = Math.abs(light_cap - baked.light[stop]);
+		const dark_drift = Math.abs(dark_cap - baked.dark[stop]);
 		if (light_drift > CAP_EMIT_EPSILON || dark_drift > CAP_EMIT_EPSILON) {
 			const light_value = render_chroma_stop_css(stop, 'light', light_cap);
 			const dark_value = render_chroma_stop_css(stop, 'dark', dark_cap);
@@ -1069,5 +1094,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	// the emitted variables shadow mirror entries, so recompute the mirror over
 	// them; this also resolves a stanced input that skipped resolve_theme_stance
 	if (stance) compiled.scheme_mirror = scheme_stance_variables(stance, compiled.variables);
-	return { theme: compiled, report: check_theme(compiled), issues };
+	// lint the compiled output, not the input - compiling resolves the stance,
+	// so an unresolved stanced input shouldn't surface the "resolve the theme"
+	// warning the same call just fixed
+	return { theme: compiled, report: check_theme(compiled), issues: validate_theme(compiled) };
 };

@@ -95,17 +95,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--shade_${v})`,
 		'shade'
 	),
-	// Hue classes
-	// TODO nothing in the shipped CSS consumes `--hue` yet (see the
-	// `--outline_color` TODO in style.css) - these are a consumer hook for
-	// now; wire something to the variable or drop them
-	...generate_classes(
-		(letter: string) => ({
-			name: `hue_${letter}`,
-			css: `--hue: var(--hue_${letter});`
-		}),
-		palette_variants
-	),
 	// Palette intensity classes (text color); property-first like the other
 	// applications of the palette variables (`bg_`, `border_`, `outline_`,
 	// `shadow_`) - the letter alone implies the palette

@@ -3,7 +3,11 @@
 
 	import { HUE_BINDING_MATCHER, type ThemeKnob } from '$lib/knobs.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
-	import { palette_variants, palette_glosses, type PaletteVariant } from '$lib/variable_data.ts';
+	import {
+		palette_variants,
+		format_palette_gloss,
+		type PaletteVariant
+	} from '$lib/variable_data.ts';
 
 	const {
 		knob,
@@ -95,12 +99,11 @@
 		onchange(knob.kind === 'percent' ? `${n}%` : knob.kind === 'time' ? `${n}s` : String(n));
 	};
 
-	const gloss_title = (letter: PaletteVariant): string => {
-		const gloss = palette_glosses[letter];
-		return `${letter} - ${gloss.color}${gloss.binding ? ` · default ${gloss.binding}` : ''}`;
-	};
+	const gloss_title = (letter: PaletteVariant): string =>
+		`${letter} - ${format_palette_gloss(letter)}`;
 </script>
 
+<!-- @fuz-classes sm md lg -->
 <div class="knob {compact ? 'sm' : knob.leverage}" class:compact>
 	{#if knob.bindable}
 		<!-- intent/neutral hues: a palette-letter binding picker with a

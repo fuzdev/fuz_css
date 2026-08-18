@@ -4,9 +4,8 @@
  * This is the numeric single source of truth for the OKLCH palette: the same
  * constants and formulas that `variables.ts` renders as pure-CSS
  * `calc()`/`pow()`/`oklch()` defaults, evaluated here in TypeScript so
- * design-time tests can gate the defaults (gamut, ramp monotonicity, contrast
- * - see `src/test/ramps.test.ts`) and derivation scripts can reason about the
- * palette without a browser.
+ * design-time tests and the theme gates (`theme_check.ts`) can reason about
+ * the palette without a browser.
  *
  * The knob values were fitted against the pre-OKLCH HSL palette to minimize
  * the perceptual delta of the port. Model shapes:
@@ -25,20 +24,15 @@
 import {
 	numeric_scale_variants,
 	palette_variants,
-	intent_variants,
+	type IntentVariant,
 	type PaletteVariant,
 	type ColorSchemeVariant,
 	type NumericScaleVariant
 } from './variable_data.ts';
 import { oklch_max_srgb_chroma, type Oklch } from './oklch.ts';
 
-/** The 13 intensity stops in ramp order (00 → 100). */
-export const RAMP_STOPS: ReadonlyArray<NumericScaleVariant> = numeric_scale_variants;
-
-/**
- * Converts a stop variant to its ramp position `t` in [0, 1].
- */
-export const ramp_stop_t = (stop: NumericScaleVariant): number => Number(stop) / 100;
+// a stop variant's ramp position t in [0, 1]
+const ramp_stop_t = (stop: NumericScaleVariant): number => Number(stop) / 100;
 
 /**
  * Knobs for a pow-curve lightness ramp. The endpoints are the ramp's own
@@ -283,31 +277,60 @@ export const ramp_lightness = (knobs: LightnessRampKnobs, stop: NumericScaleVari
 
 /**
  * Evaluates the normalized chroma shape `pow(4t(1-t), curve)` at a stop -
- * 0 at the endpoints, 1 at the midpoint.
+ * 0 at the endpoints, 1 at the midpoint. The endpoint/midpoint guards mirror
+ * `render_chroma_shape_css`'s exact-literal short-circuits, keeping the twins
+ * total for any curve (JS would otherwise yield `0 ** 0 === 1`).
  */
 export const ramp_chroma_shape = (stop: NumericScaleVariant, curve: number): number => {
 	const t = ramp_stop_t(stop);
-	return (4 * t * (1 - t)) ** curve;
+	const base = 4 * t * (1 - t);
+	if (base === 0) return 0;
+	if (base === 1) return 1;
+	return base ** curve;
 };
 
 /**
  * Evaluates the palette chroma at a stop: the knob curve clamped by that
- * stop's worst-hue cap. `chroma_scale` multiplies above the clamp.
- *
- * @param knobs - chroma-curve knobs; defaults to the fitted `PALETTE_CHROMA_KNOBS`
- * @param cap - the per-stop gamut clamp; defaults to the baked `PALETTE_CHROMA_CAPS`
+ * stop's worst-hue cap. `chroma_scale` multiplies above the clamp. Defaults
+ * for a scheme come from `PALETTE_CHROMA_KNOBS[scheme]` and
+ * `PALETTE_CHROMA_CAPS[scheme][stop]`.
  */
 export const ramp_chroma = (
-	scheme: ColorSchemeVariant,
 	stop: NumericScaleVariant,
-	chroma_scale = 1,
-	knobs: ChromaRampKnobs = PALETTE_CHROMA_KNOBS[scheme],
-	cap: number = PALETTE_CHROMA_CAPS[scheme][stop]
+	knobs: ChromaRampKnobs,
+	cap: number,
+	chroma_scale = 1
 ): number => {
 	const requested =
 		knobs.chroma_min + (knobs.chroma_max - knobs.chroma_min) * ramp_chroma_shape(stop, knobs.curve);
 	return Math.min(requested, cap) * chroma_scale;
 };
+
+/**
+ * Combines resolved palette-ramp inputs into a color stop's OKLCH - the one
+ * formula behind `--palette_X_NN`/`--<intent>_NN` (`chroma * chroma_scale *
+ * slot multiplier` at the ramp lightness), shared by the default twins below
+ * and `check_theme`'s theme-resolved gates so the two can't drift.
+ */
+export const ramp_color_oklch = (
+	lightness: number,
+	chroma: number,
+	hue: number,
+	chroma_scale = 1,
+	slot_chroma_scale = 1
+): Oklch => [lightness, chroma * chroma_scale * slot_chroma_scale, hue];
+
+/**
+ * Combines resolved neutral-scale inputs into a shade/text stop's OKLCH: the
+ * peak `neutral_chroma` scaled by the shared chroma shape. The neutral twin
+ * of `ramp_color_oklch`, shared with `check_theme` for the same reason.
+ */
+export const neutral_color_oklch = (
+	lightness: number,
+	neutral_chroma: number,
+	chroma_shape: number,
+	hue: number
+): Oklch => [lightness, neutral_chroma * chroma_shape, hue];
 
 /**
  * Computes the default OKLCH color of a palette stop (`--palette_X_NN`).
@@ -316,29 +339,36 @@ export const palette_stop_oklch = (
 	letter: PaletteVariant,
 	stop: NumericScaleVariant,
 	scheme: ColorSchemeVariant
-): Oklch => [
-	ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop),
-	ramp_chroma(scheme, stop) * PALETTE_CHROMA_MULTIPLIERS[letter],
-	PALETTE_HUES[letter]
-];
+): Oklch =>
+	ramp_color_oklch(
+		ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop),
+		ramp_chroma(stop, PALETTE_CHROMA_KNOBS[scheme], PALETTE_CHROMA_CAPS[scheme][stop]),
+		PALETTE_HUES[letter],
+		1,
+		PALETTE_CHROMA_MULTIPLIERS[letter]
+	);
 
 /**
  * Computes the default OKLCH color of a shade stop (`--shade_NN`).
  */
-export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch => [
-	ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
-	NEUTRAL_CHROMA[scheme] * ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
-	NEUTRAL_HUE
-];
+export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch =>
+	neutral_color_oklch(
+		ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
+		NEUTRAL_CHROMA[scheme],
+		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
+		NEUTRAL_HUE
+	);
 
 /**
  * Computes the default OKLCH color of a text stop (`--text_NN`).
  */
-export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch => [
-	ramp_lightness(TEXT_LIGHTNESS_KNOBS[scheme], stop),
-	NEUTRAL_CHROMA[scheme] * ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
-	NEUTRAL_HUE
-];
+export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch =>
+	neutral_color_oklch(
+		ramp_lightness(TEXT_LIGHTNESS_KNOBS[scheme], stop),
+		NEUTRAL_CHROMA[scheme],
+		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
+		NEUTRAL_HUE
+	);
 
 /**
  * Recomputes the worst-hue safe chroma caps per stop for an arbitrary hue set
@@ -436,47 +466,30 @@ export const render_chroma_stop_css = (
 export const render_palette_stop_css = (
 	letter: PaletteVariant,
 	stop: NumericScaleVariant
-): string => render_ramp_color_css(`var(--hue_${letter})`, stop);
-
-// the character twin of a hue slot: palette letters and intents carry a
-// chroma multiplier that composes with the global `--chroma_scale`; other
-// hue references (e.g. the neutral, whose character is `--neutral_chroma`)
-// have none
-const slot_chroma_scale_reference = (hue_reference: string): string | null => {
-	const m = /^var\(--hue_([a-z]+)\)$/u.exec(hue_reference);
-	if (!m) return null;
-	const slot = m[1]!;
-	if ((palette_variants as ReadonlyArray<string>).includes(slot)) {
-		return `var(--palette_${slot}_chroma_scale, 1)`;
-	}
-	if ((intent_variants as ReadonlyArray<string>).includes(slot)) {
-		return `var(--${slot}_chroma_scale, 1)`;
-	}
-	return null;
-};
+): string => render_ramp_color_css(letter, stop);
 
 /**
- * Renders a color derived from the palette ramps at a stop for an arbitrary
- * hue reference - the shared template behind palette stops and intent stops
- * (`--accent_50` renders with `var(--hue_accent)`). A palette-letter or
- * intent hue reference also picks up its slot's chroma multiplier
- * (`--palette_X_chroma_scale`/`--<intent>_chroma_scale`), so the hue slot and
- * its chroma character stay paired in the emitted CSS.
+ * Renders a color derived from the palette ramps at a stop for a hue slot -
+ * the shared template behind palette stops and intent stops (`--accent_50`
+ * renders with `var(--hue_accent)`). Both slot references are built from the
+ * slot name, so the hue (`--hue_<slot>`) and its chroma-character multiplier
+ * (`--palette_X_chroma_scale`/`--<intent>_chroma_scale`) stay paired in the
+ * emitted CSS by construction.
  *
- * @param hue_reference - a CSS expression for the hue, e.g. `var(--hue_accent)`
+ * @param slot - a palette letter or intent name
  * @param alpha - optional CSS alpha (e.g. `40%`) appended inside the `oklch()`
  */
 export const render_ramp_color_css = (
-	hue_reference: string,
+	slot: PaletteVariant | IntentVariant,
 	stop: NumericScaleVariant,
 	alpha?: string
 ): string => {
-	const slot_scale = slot_chroma_scale_reference(hue_reference);
+	const slot_scale = (palette_variants as ReadonlyArray<string>).includes(slot)
+		? `var(--palette_${slot}_chroma_scale, 1)`
+		: `var(--${slot}_chroma_scale, 1)`;
 	return `oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
 		stop
-	}) * var(--chroma_scale)${slot_scale ? ` * ${slot_scale}` : ''}) ${
-		hue_reference
-	}${alpha ? ` / ${alpha}` : ''})`;
+	}) * var(--chroma_scale) * ${slot_scale}) var(--hue_${slot})${alpha ? ` / ${alpha}` : ''})`;
 };
 
 /**

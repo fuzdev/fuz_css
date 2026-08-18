@@ -7,7 +7,7 @@ import { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 import { ThemeEditorState } from '$routes/theme_editor_state.svelte.ts';
 import { base_theme } from '$lib/themes/base.ts';
-import { necromancer_theme } from '$lib/themes/necromancer.ts';
+import { neon_theme } from '$lib/themes/neon.ts';
 import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER } from '$lib/ramps.ts';
 import ThemeEditorHarness from './ThemeEditorHarness.svelte';
 import { mount_component, unmount_component, set_input_value } from './component_test_helpers.ts';
@@ -23,7 +23,7 @@ afterEach(async () => {
 });
 
 const mount_editor = (): { editor: ThemeEditorState; container: HTMLElement } => {
-	const editor = new ThemeEditorState([base_theme, necromancer_theme]);
+	const editor = new ThemeEditorState([base_theme, neon_theme]);
 	mounted = mount_component(ThemeEditorHarness as any, {
 		editor,
 		theme_state: new ThemeState()
@@ -85,14 +85,14 @@ describe('ThemeEditor', () => {
 		assert(based_on instanceof HTMLSelectElement);
 		const confirm = vi.fn(() => false);
 		vi.stubGlobal('confirm', confirm);
-		set_input_value(based_on, 'necromancer', 'change');
+		set_input_value(based_on, 'neon', 'change');
 		flushSync();
 		assert.strictEqual(editor.based_on, 'base');
 		assert.strictEqual(confirm.mock.calls.length, 1);
 		confirm.mockReturnValue(true);
-		set_input_value(based_on, 'necromancer', 'change');
+		set_input_value(based_on, 'neon', 'change');
 		flushSync();
-		assert.strictEqual(editor.based_on, 'necromancer');
+		assert.strictEqual(editor.based_on, 'neon');
 		assert.strictEqual(editor.overrides.size, 0);
 	});
 });

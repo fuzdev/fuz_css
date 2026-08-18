@@ -12,19 +12,20 @@
 	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
-	import { necromancer_theme } from '$lib/themes/necromancer.ts';
-	import { sunset_ember_theme } from '$lib/themes/sunset_ember.ts';
-	import { brutalish_theme } from '$lib/themes/brutalish.ts';
-	import { terminalien_theme } from '$lib/themes/terminalien.ts';
+	import { ember_theme } from '$lib/themes/ember.ts';
+	import { parchment_theme } from '$lib/themes/parchment.ts';
+	import { concrete_theme } from '$lib/themes/concrete.ts';
+	import { phosphor_theme } from '$lib/themes/phosphor.ts';
+	import { neon_theme } from '$lib/themes/neon.ts';
 	import { compose_themes, type Theme } from '$lib/theme.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
 	import {
 		discard_confirm_message,
 		ThemeEditorState,
-		UNSAVED_THEME_NAME,
 		type ThemeEditorSnapshotData
 	} from '$routes/theme_editor_state.svelte.ts';
+	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 	import type { Snapshot } from '@sveltejs/kit';
 
 	const LIBRARY_ITEM_NAME = 'themes';
@@ -38,10 +39,11 @@
 	// users - registry membership is policy for consumer pickers, not UX
 	const themes = [
 		...default_themes,
-		necromancer_theme,
-		sunset_ember_theme,
-		brutalish_theme,
-		terminalien_theme
+		ember_theme,
+		parchment_theme,
+		concrete_theme,
+		phosphor_theme,
+		neon_theme
 	];
 
 	const editor = new ThemeEditorState(themes);
@@ -60,21 +62,32 @@
 		...(editor.dirty ? [editor.draft] : [])
 	]);
 
-	const apply_theme = (): void => {
-		theme_state.theme = contrast_modifier
-			? compose_themes(selected_base, contrast_modifier)
-			: selected_base;
-	};
+	// the single source for what the page applies: the dirty draft (or the
+	// picked base) composed with the active contrast modifier - one derived
+	// value instead of two writers racing for theme_state.theme
+	const applied_theme: Theme = $derived.by(() => {
+		const base = editor.dirty ? editor.draft : selected_base;
+		if (!contrast_modifier) return base;
+		const composed = compose_themes(base, contrast_modifier);
+		// compose_themes renames ("unsaved (high contrast)"); keep the draft's
+		// stable name so the picker keys it and +layout.svelte still skips
+		// persisting the composition
+		return editor.dirty ? { ...composed, name: UNSAVED_THEME_NAME } : composed;
+	});
+
+	// live scope is global with no pin: the applied theme writes to `:root`
+	// through the normal ThemeRoot pipeline, so the whole page rethemes
+	// including the editor
+	$effect(() => {
+		theme_state.theme = applied_theme;
+	});
 
 	// passed as ThemeInput's `select` (not `onselect`, which collides with the
-	// DOM handler type in its menu-attribute props): applies the theme composed
-	// with the active contrast modifier and loads it into the editor, with the
-	// same dirty-draft guard as the editor's "based on" select
+	// DOM handler type in its menu-attribute props): loads the picked theme
+	// into the editor, with the same dirty-draft guard as the editor's "based
+	// on" select; the effect above applies it composed with the contrast
 	const select_theme = (theme: Theme): void => {
-		if (theme.name === UNSAVED_THEME_NAME) {
-			theme_state.theme = theme;
-			return;
-		}
+		if (theme.name === UNSAVED_THEME_NAME) return; // already applied while dirty
 		if (
 			editor.dirty &&
 			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
@@ -84,28 +97,15 @@
 		}
 		editor.load_theme(theme);
 		selected_base = theme;
-		apply_theme();
 	};
 
 	const select_contrast = (name: string): void => {
 		contrast_modifier = contrast_modifiers.find((m) => m.name === name) ?? null;
-		apply_theme();
 	};
 
-	// live scope is global with no pin: the draft writes to `:root` through the
-	// normal ThemeRoot pipeline, so the whole page rethemes including the editor
-	$effect(() => {
-		if (editor.dirty) {
-			theme_state.theme = editor.draft;
-		} else if (theme_state.theme.name === UNSAVED_THEME_NAME) {
-			theme_state.theme = editor.base_theme;
-		}
-	});
-
-	// applies a theme the editor's "based on" select loaded as the new base
+	// tracks a theme the editor's "based on" select loaded as the new base
 	const on_editor_load_theme = (theme: Theme): void => {
 		selected_base = theme;
-		apply_theme();
 	};
 
 	// persist the in-progress theme across navigation (history-entry-scoped)
@@ -113,10 +113,9 @@
 		capture: () => editor.to_snapshot(),
 		restore: (data) => {
 			editor.restore_snapshot(data);
-			// re-sync the picker highlight and applied theme with the restored
-			// base; a dirty draft re-applies itself through the effect below
+			// re-sync the picker highlight with the restored base; the applied
+			// theme follows through the derived effect
 			selected_base = editor.base_theme;
-			if (!editor.dirty) apply_theme();
 		}
 	};
 </script>
@@ -168,13 +167,14 @@
 		</p>
 		<Code
 			lang="ts"
-			content={`import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';`}
+			content={`import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';`}
 		/>
 		<p>
 			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - its
 			one appearance then renders in both color schemes and
 			<MdnLink path="Web/CSS/color-scheme" />
-			is pinned to match. The necromancer and terminalien themes are dark-only this way.
+			is pinned to match. The neon and phosphor themes are dark-only this way, and parchment is
+			light-only.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -193,16 +193,16 @@
 			lang="ts"
 			content={`// vite.config.ts
 import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
-import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';
+import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';
 
-export default defineConfig({plugins: [vite_plugin_fuz_css({theme: necromancer_theme})]});`}
+export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_theme})]});`}
 		/>
 		<p>
 			It overlays the default variables last-wins by name, so it composes with the
-			<code>variables</code> option. Unlike the runtime path it doesn't pin
-			<MdnLink path="Web/CSS/color-scheme" /> - for a single-scheme theme, add the
-			<code>dark</code> or <code>light</code> class to the root <code>html</code> element, as in the
-			next section.
+			<code>variables</code> option. The theme's own overlay also renders into the
+			<code>fuz.theme</code> layer - above the OS preference mappings, with
+			<MdnLink path="Web/CSS/color-scheme" />
+			pinned for a single-scheme stance - so a baked theme behaves the same as the runtime path.
 		</p>
 		<p>
 			For runtime switching - a picker, or a theme loaded per user - use <code>ThemeRoot</code> from

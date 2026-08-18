@@ -10,7 +10,7 @@
 	import { save_theme } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import pkg_json from 'virtual:pkg.json';
 
-	import { UNSAVED_THEME_NAME } from '$routes/theme_editor_state.svelte.ts';
+	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '$lib/ContextmenuRoot.svelte';

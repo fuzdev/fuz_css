@@ -3,7 +3,6 @@ import { test, assert, describe } from 'vitest';
 import { compile_theme, check_theme } from '$lib/theme_check.ts';
 import type { Theme } from '$lib/theme.ts';
 import { default_themes } from '$lib/themes.ts';
-import { necromancer_theme } from '$lib/themes/necromancer.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS } from '$lib/ramps.ts';
 import type { NumericScaleVariant } from '$lib/variable_data.ts';
@@ -33,8 +32,9 @@ describe('compile_theme', () => {
 		assert.isAbove(overrides.length, 0);
 		const stop_50 = overrides.find((v) => v.name === 'palette_chroma_50');
 		assert(stop_50, 'stop 50 emitted');
-		// one green hue has more gamut headroom than the worst-hue envelope
-		assert.isAbove(cap_of(stop_50.light), PALETTE_CHROMA_CAPS.light['50']);
+		// one green hue has more gamut headroom than the worst-hue envelope;
+		// the theme is dark-stanced, so the baseline is the dark baked table
+		assert.isAbove(cap_of(stop_50.light), PALETTE_CHROMA_CAPS.dark['50']);
 		// a stanced theme emits single-slot in the base position - both schemes
 		// resolve identically through the mirror
 		assert.isUndefined(stop_50.dark);
@@ -48,16 +48,33 @@ describe('compile_theme', () => {
 		assert.strictEqual(input.variables.length, before);
 	});
 
-	test('a dark stance recomputes stale light-scheme caps', () => {
-		const { theme } = compile_theme(necromancer_theme);
-		const overrides = theme.variables.slice(necromancer_theme.variables.length);
+	test('a stance alone emits nothing - the mirror already carries its caps', () => {
+		// both schemes resolve to the stanced appearance, whose baked caps the
+		// stance mirror re-slots; with hues and lightness unmoved there is no
+		// drift to fix, so overrides would only duplicate the mirror
+		const stanced: Theme = { name: 'dark stance', scheme: 'dark', variables: [] };
+		const { theme } = compile_theme(stanced);
+		assert.strictEqual(theme.variables.length, 0);
+	});
+
+	test('a dark-stanced hue move drifts from the stanced baked caps and emits', () => {
+		const input = create_monochrome_theme(145); // dark-stanced, hues collapsed
+		const { theme } = compile_theme(input);
+		const overrides = theme.variables.slice(input.variables.length);
 		assert.isAbove(overrides.length, 0);
-		// the stance resolves the light scheme through the dark lightness ramp, so
-		// the baked worst-hue caps are stale and must be recomputed
+		// the baseline under a dark stance is the dark baked table
 		const changed = overrides.some(
-			(v) => Math.abs(cap_of(v.light) - PALETTE_CHROMA_CAPS.light[stop_of(v.name)]) > 0.002
+			(v) => Math.abs(cap_of(v.light) - PALETTE_CHROMA_CAPS.dark[stop_of(v.name)]) > 0.002
 		);
-		assert.isTrue(changed, 'light caps differ from the baked worst-hue table');
+		assert.isTrue(changed, "caps differ from the stanced scheme's baked table");
+	});
+
+	test('compiling resolves the stance, so the lint reports the output as resolved', () => {
+		const { issues } = compile_theme(create_monochrome_theme(145));
+		assert.isFalse(
+			issues.some((issue) => issue.message.includes('resolve_theme_stance')),
+			'no stale advice to resolve a stance the compile already resolved'
+		);
 	});
 
 	test('a pinned palette_chroma_NN is respected - no emission for that stop', () => {

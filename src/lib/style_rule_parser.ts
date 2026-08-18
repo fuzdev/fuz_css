@@ -219,10 +219,6 @@ const extract_style_rule = (
  * variables, and reports whether any nested rule is itself core (e.g. a
  * `:root` block inside a media query).
  */
-// TODO the top-level `untargetable` fallback in `extract_style_rule` (no
-// element/class hooks → force core) isn't applied here, so a conditional
-// group containing only untargetable rules (e.g. `@media { ::selection {} }`)
-// would be silently unreachable; no shipped rule hits this today
 const extract_nested_rules = (
 	block: AST.CSS.Block,
 	css: string,
@@ -294,6 +290,22 @@ const extract_atrule = (
 			} as const;
 		}
 
+		// a group with no element/class hooks at all (e.g. only ::selection
+		// rules) can never be matched by detection, so it must always ship -
+		// the same fallback extract_style_rule applies at the top level
+		if (elements.size === 0 && classes.size === 0) {
+			return {
+				css: rule_css,
+				elements,
+				classes,
+				variables_used,
+				order,
+				layer,
+				is_core: true,
+				core_reason: 'untargetable'
+			} as const;
+		}
+
 		return {
 			css: rule_css,
 			elements,
@@ -306,8 +318,9 @@ const extract_atrule = (
 		} as const;
 	}
 
-	// Handle @keyframes - include it if any rules reference animations
-	// We extract variables but don't index by element/class since keyframes don't use selectors
+	// @keyframes carry no element/class hooks, so detection can never select
+	// them - they're untargetable and always ship (dropping one silently
+	// breaks every animation that references it)
 	if (atrule.name === 'keyframes' && atrule.block) {
 		// Extract variables from keyframe rules
 		const block_css = css.slice(atrule.block.start, atrule.block.end);
@@ -322,8 +335,8 @@ const extract_atrule = (
 			variables_used,
 			order,
 			layer,
-			is_core: false,
-			core_reason: null
+			is_core: true,
+			core_reason: 'untargetable'
 		} as const;
 	}
 

@@ -4,7 +4,6 @@ import {
 	validate_theme,
 	check_theme,
 	create_theme_resolver,
-	resolve_theme_knob,
 	GATE_BODY_TEXT,
 	GATE_SUBTLE_TEXT,
 	GATE_LINK,
@@ -19,10 +18,11 @@ import { compose_themes, type Theme } from '$lib/theme.ts';
 import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
-import { necromancer_theme } from '$lib/themes/necromancer.ts';
-import { sunset_ember_theme } from '$lib/themes/sunset_ember.ts';
-import { brutalish_theme } from '$lib/themes/brutalish.ts';
-import { terminalien_theme } from '$lib/themes/terminalien.ts';
+import { ember_theme } from '$lib/themes/ember.ts';
+import { parchment_theme } from '$lib/themes/parchment.ts';
+import { concrete_theme } from '$lib/themes/concrete.ts';
+import { phosphor_theme } from '$lib/themes/phosphor.ts';
+import { neon_theme } from '$lib/themes/neon.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import {
 	PALETTE_HUES,
@@ -39,14 +39,20 @@ import { wcag_contrast_ratio } from '$lib/wcag.ts';
 
 const base_theme = default_themes[0]!;
 
+// per-call resolver over the shared resolution core, for direct tests of the
+// resolution rules (binding chains, cycles, unresolvable expressions)
+const resolve_theme_knob = (theme: Theme, name: string, scheme: 'light' | 'dark'): number | null =>
+	create_theme_resolver(theme).resolve(name, scheme);
+
 describe('validate_theme', () => {
 	test('registry and exemplar themes produce no errors', () => {
 		const themes = [
 			...default_themes,
-			necromancer_theme,
-			sunset_ember_theme,
-			brutalish_theme,
-			terminalien_theme,
+			ember_theme,
+			parchment_theme,
+			concrete_theme,
+			phosphor_theme,
+			neon_theme,
 			create_monochrome_theme(70) // amber, exercises the palette-tier collapse
 		];
 		for (const theme of themes) {
@@ -308,32 +314,34 @@ describe('check_theme', () => {
 		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
 	});
 
-	test('brutalish passes every gate', () => {
-		assert.isTrue(check_theme(brutalish_theme).ok);
+	test('concrete passes every gate', () => {
+		assert.isTrue(check_theme(concrete_theme).ok);
 	});
 
-	test('terminalien keeps its contrast gates', () => {
-		const contrast = check_theme(terminalien_theme).entries.filter((e) => e.gate === 'contrast');
+	test('parchment passes every gate - the light stance included', () => {
+		assert.isTrue(check_theme(parchment_theme).ok);
+	});
+
+	test('phosphor keeps its contrast gates', () => {
+		const contrast = check_theme(phosphor_theme).entries.filter((e) => e.gate === 'contrast');
 		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(contrast.every((e) => e.pass));
 	});
 
-	test('necromancer clips gamut by design but keeps all contrast', () => {
-		const report = check_theme(necromancer_theme);
+	// gamut regression floors for the vivid pair: the deliberate clipping is
+	// part of their design, but a knob edit that doubles it should not land
+	// silently - update these recorded counts when retuning on purpose
+	test.each([
+		['neon', neon_theme, 72],
+		['ember', ember_theme, 68]
+	])('%s clips gamut by design but keeps all contrast', (_name, theme, expected_gamut_fails) => {
+		const report = check_theme(theme);
 		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
-		assert.isAbove(gamut_fails.length, 0, 'chroma_scale > 1 is expected to clip weak hues');
-		const contrast = report.entries.filter((e) => e.gate === 'contrast');
-		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
-		assert.isTrue(
-			contrast.every((e) => e.pass),
-			'lightness holds through chroma clipping'
+		assert.strictEqual(
+			gamut_fails.length,
+			expected_gamut_fails,
+			'chroma_scale > 1 clips a recorded set of weak-hue stops'
 		);
-	});
-
-	test('sunset ember clips gamut by design but keeps all contrast', () => {
-		const report = check_theme(sunset_ember_theme);
-		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
-		assert.isAbove(gamut_fails.length, 0, 'chroma_scale > 1 is expected to clip weak hues');
 		const contrast = report.entries.filter((e) => e.gate === 'contrast');
 		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
 		assert.isTrue(
@@ -455,8 +463,8 @@ describe('scheme stance', () => {
 		}
 	});
 
-	test('the dark-stanced exemplars pass their contrast gates in both schemes', () => {
-		for (const theme of [necromancer_theme, terminalien_theme]) {
+	test('the stanced exemplars pass their contrast gates in both schemes', () => {
+		for (const theme of [neon_theme, phosphor_theme, parchment_theme]) {
 			const contrast = check_theme(theme).entries.filter((e) => e.gate === 'contrast');
 			assert.isAbove(contrast.length, 0, `${theme.name}: contrast gates resolved`);
 			assert.isTrue(
@@ -518,7 +526,7 @@ describe('create_theme_resolver', () => {
 	});
 
 	test('a dark stance derives border_color_chroma identically in both schemes', () => {
-		const resolver = create_theme_resolver(necromancer_theme);
+		const resolver = create_theme_resolver(neon_theme);
 		const light = resolver.resolve('border_color_chroma', 'light');
 		const dark = resolver.resolve('border_color_chroma', 'dark');
 		assert.isNotNull(light);
@@ -551,10 +559,11 @@ describe('contrast modifier compositions', () => {
 		const names = new Set(bases.map((t) => t.name));
 		for (const expected of [
 			default_themes[0]!.name,
-			necromancer_theme.name,
-			sunset_ember_theme.name,
-			brutalish_theme.name,
-			terminalien_theme.name
+			ember_theme.name,
+			parchment_theme.name,
+			concrete_theme.name,
+			phosphor_theme.name,
+			neon_theme.name
 		]) {
 			assert.isTrue(names.has(expected), expected);
 		}
@@ -570,10 +579,10 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	// declared exception: sunset ember's past-cap cyan/teal UI fills sit just
+	// declared exception: ember's past-cap cyan/teal UI fills sit just
 	// under the 3:1 fill gate against low contrast's raised background floor
 	// (~2.89 to 2.91) - a marginal, known combination cost, not a regression
-	const known_failing = new Set(['sunset ember (low contrast)']);
+	const known_failing = new Set(['ember (low contrast)']);
 
 	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
 		for (const base of bases) {

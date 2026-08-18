@@ -250,7 +250,9 @@ describe('generate_css', () => {
 		});
 
 		test('a configured theme discarded by variables: null warns', () => {
-			const result = generate_css(make_options({ has_theme: true, include_theme: false }));
+			const result = generate_css(
+				make_options({ theme: { name: 't', variables: [] }, include_theme: false })
+			);
 			const warning = result.diagnostics.find(
 				(d) => d.level === 'warning' && 'identifier' in d && d.identifier === 'theme_discarded'
 			);
@@ -262,7 +264,7 @@ describe('generate_css', () => {
 			);
 			const ok_result = generate_css(
 				make_options({
-					has_theme: true,
+					theme: { name: 't', variables: [] },
 					include_theme: true,
 					resources: { style_rule_index, variable_graph, class_variable_index }
 				})

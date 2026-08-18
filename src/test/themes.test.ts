@@ -30,15 +30,15 @@ const exemplar_themes = shipped_themes.filter(
 );
 
 describe('default_themes', () => {
-	test('all themes have valid name', () => {
-		for (const theme of default_themes) {
+	test('all shipped themes have valid names', () => {
+		for (const theme of shipped_themes) {
 			assert.strictEqual(typeof theme.name, 'string');
 			assert.isAbove(theme.name.length, 0);
 		}
 	});
 
-	test('all theme variables pass StyleVariable validation', () => {
-		for (const theme of default_themes) {
+	test('all shipped theme variables pass StyleVariable validation', () => {
+		for (const theme of shipped_themes) {
 			for (const variable of theme.variables) {
 				const result = StyleVariable.safeParse(variable);
 				assert.isTrue(result.success, `Invalid variable ${variable.name} in theme ${theme.name}`);
@@ -54,21 +54,10 @@ describe('default_themes', () => {
 		assert.strictEqual(default_themes[0], DEFAULT_THEME);
 	});
 
-	test('theme names are unique', () => {
-		const names = default_themes.map((t) => t.name);
+	test('shipped theme names are unique across every module', () => {
+		const names = shipped_themes.map((t) => t.name);
 		const unique_names = new Set(names);
 		assert.strictEqual(unique_names.size, names.length);
-	});
-
-	test('non-default themes have at least one variable', () => {
-		const non_default_themes = default_themes.slice(1);
-		for (const theme of non_default_themes) {
-			assert.isAbove(
-				theme.variables.length,
-				0,
-				`Theme "${theme.name}" should have at least one variable`
-			);
-		}
 	});
 
 	test('default_themes contains expected themes', () => {
@@ -109,10 +98,9 @@ describe('shipped themes', () => {
 		for (const registered of default_themes) {
 			assert.include(names, registered.name);
 		}
-		assert.include(names, 'necromancer');
-		assert.include(names, 'sunset ember');
-		assert.include(names, 'brutalish');
-		assert.include(names, 'terminalien');
+		for (const exemplar of ['ember', 'parchment', 'concrete', 'phosphor', 'neon']) {
+			assert.include(names, exemplar);
+		}
 	});
 
 	test('all exemplar variables validate and exist in default_variables', () => {

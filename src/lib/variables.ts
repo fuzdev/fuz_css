@@ -248,267 +248,267 @@ export const info_chroma_scale: StyleVariable = {
 // accent stops - the full scale derives through the shared ramps
 export const accent_00: StyleVariable = {
 	name: 'accent_00',
-	light: render_ramp_color_css('var(--hue_accent)', '00')
+	light: render_ramp_color_css('accent', '00')
 };
 export const accent_05: StyleVariable = {
 	name: 'accent_05',
-	light: render_ramp_color_css('var(--hue_accent)', '05')
+	light: render_ramp_color_css('accent', '05')
 };
 export const accent_10: StyleVariable = {
 	name: 'accent_10',
-	light: render_ramp_color_css('var(--hue_accent)', '10')
+	light: render_ramp_color_css('accent', '10')
 };
 export const accent_20: StyleVariable = {
 	name: 'accent_20',
-	light: render_ramp_color_css('var(--hue_accent)', '20')
+	light: render_ramp_color_css('accent', '20')
 };
 export const accent_30: StyleVariable = {
 	name: 'accent_30',
-	light: render_ramp_color_css('var(--hue_accent)', '30')
+	light: render_ramp_color_css('accent', '30')
 };
 export const accent_40: StyleVariable = {
 	name: 'accent_40',
-	light: render_ramp_color_css('var(--hue_accent)', '40')
+	light: render_ramp_color_css('accent', '40')
 };
 export const accent_50: StyleVariable = {
 	name: 'accent_50',
-	light: render_ramp_color_css('var(--hue_accent)', '50')
+	light: render_ramp_color_css('accent', '50')
 };
 export const accent_60: StyleVariable = {
 	name: 'accent_60',
-	light: render_ramp_color_css('var(--hue_accent)', '60')
+	light: render_ramp_color_css('accent', '60')
 };
 export const accent_70: StyleVariable = {
 	name: 'accent_70',
-	light: render_ramp_color_css('var(--hue_accent)', '70')
+	light: render_ramp_color_css('accent', '70')
 };
 export const accent_80: StyleVariable = {
 	name: 'accent_80',
-	light: render_ramp_color_css('var(--hue_accent)', '80')
+	light: render_ramp_color_css('accent', '80')
 };
 export const accent_90: StyleVariable = {
 	name: 'accent_90',
-	light: render_ramp_color_css('var(--hue_accent)', '90')
+	light: render_ramp_color_css('accent', '90')
 };
 export const accent_95: StyleVariable = {
 	name: 'accent_95',
-	light: render_ramp_color_css('var(--hue_accent)', '95')
+	light: render_ramp_color_css('accent', '95')
 };
 export const accent_100: StyleVariable = {
 	name: 'accent_100',
-	light: render_ramp_color_css('var(--hue_accent)', '100')
+	light: render_ramp_color_css('accent', '100')
 };
 // positive stops - the full scale derives through the shared ramps
 export const positive_00: StyleVariable = {
 	name: 'positive_00',
-	light: render_ramp_color_css('var(--hue_positive)', '00')
+	light: render_ramp_color_css('positive', '00')
 };
 export const positive_05: StyleVariable = {
 	name: 'positive_05',
-	light: render_ramp_color_css('var(--hue_positive)', '05')
+	light: render_ramp_color_css('positive', '05')
 };
 export const positive_10: StyleVariable = {
 	name: 'positive_10',
-	light: render_ramp_color_css('var(--hue_positive)', '10')
+	light: render_ramp_color_css('positive', '10')
 };
 export const positive_20: StyleVariable = {
 	name: 'positive_20',
-	light: render_ramp_color_css('var(--hue_positive)', '20')
+	light: render_ramp_color_css('positive', '20')
 };
 export const positive_30: StyleVariable = {
 	name: 'positive_30',
-	light: render_ramp_color_css('var(--hue_positive)', '30')
+	light: render_ramp_color_css('positive', '30')
 };
 export const positive_40: StyleVariable = {
 	name: 'positive_40',
-	light: render_ramp_color_css('var(--hue_positive)', '40')
+	light: render_ramp_color_css('positive', '40')
 };
 export const positive_50: StyleVariable = {
 	name: 'positive_50',
-	light: render_ramp_color_css('var(--hue_positive)', '50')
+	light: render_ramp_color_css('positive', '50')
 };
 export const positive_60: StyleVariable = {
 	name: 'positive_60',
-	light: render_ramp_color_css('var(--hue_positive)', '60')
+	light: render_ramp_color_css('positive', '60')
 };
 export const positive_70: StyleVariable = {
 	name: 'positive_70',
-	light: render_ramp_color_css('var(--hue_positive)', '70')
+	light: render_ramp_color_css('positive', '70')
 };
 export const positive_80: StyleVariable = {
 	name: 'positive_80',
-	light: render_ramp_color_css('var(--hue_positive)', '80')
+	light: render_ramp_color_css('positive', '80')
 };
 export const positive_90: StyleVariable = {
 	name: 'positive_90',
-	light: render_ramp_color_css('var(--hue_positive)', '90')
+	light: render_ramp_color_css('positive', '90')
 };
 export const positive_95: StyleVariable = {
 	name: 'positive_95',
-	light: render_ramp_color_css('var(--hue_positive)', '95')
+	light: render_ramp_color_css('positive', '95')
 };
 export const positive_100: StyleVariable = {
 	name: 'positive_100',
-	light: render_ramp_color_css('var(--hue_positive)', '100')
+	light: render_ramp_color_css('positive', '100')
 };
 // negative stops - the full scale derives through the shared ramps
 export const negative_00: StyleVariable = {
 	name: 'negative_00',
-	light: render_ramp_color_css('var(--hue_negative)', '00')
+	light: render_ramp_color_css('negative', '00')
 };
 export const negative_05: StyleVariable = {
 	name: 'negative_05',
-	light: render_ramp_color_css('var(--hue_negative)', '05')
+	light: render_ramp_color_css('negative', '05')
 };
 export const negative_10: StyleVariable = {
 	name: 'negative_10',
-	light: render_ramp_color_css('var(--hue_negative)', '10')
+	light: render_ramp_color_css('negative', '10')
 };
 export const negative_20: StyleVariable = {
 	name: 'negative_20',
-	light: render_ramp_color_css('var(--hue_negative)', '20')
+	light: render_ramp_color_css('negative', '20')
 };
 export const negative_30: StyleVariable = {
 	name: 'negative_30',
-	light: render_ramp_color_css('var(--hue_negative)', '30')
+	light: render_ramp_color_css('negative', '30')
 };
 export const negative_40: StyleVariable = {
 	name: 'negative_40',
-	light: render_ramp_color_css('var(--hue_negative)', '40')
+	light: render_ramp_color_css('negative', '40')
 };
 export const negative_50: StyleVariable = {
 	name: 'negative_50',
-	light: render_ramp_color_css('var(--hue_negative)', '50')
+	light: render_ramp_color_css('negative', '50')
 };
 export const negative_60: StyleVariable = {
 	name: 'negative_60',
-	light: render_ramp_color_css('var(--hue_negative)', '60')
+	light: render_ramp_color_css('negative', '60')
 };
 export const negative_70: StyleVariable = {
 	name: 'negative_70',
-	light: render_ramp_color_css('var(--hue_negative)', '70')
+	light: render_ramp_color_css('negative', '70')
 };
 export const negative_80: StyleVariable = {
 	name: 'negative_80',
-	light: render_ramp_color_css('var(--hue_negative)', '80')
+	light: render_ramp_color_css('negative', '80')
 };
 export const negative_90: StyleVariable = {
 	name: 'negative_90',
-	light: render_ramp_color_css('var(--hue_negative)', '90')
+	light: render_ramp_color_css('negative', '90')
 };
 export const negative_95: StyleVariable = {
 	name: 'negative_95',
-	light: render_ramp_color_css('var(--hue_negative)', '95')
+	light: render_ramp_color_css('negative', '95')
 };
 export const negative_100: StyleVariable = {
 	name: 'negative_100',
-	light: render_ramp_color_css('var(--hue_negative)', '100')
+	light: render_ramp_color_css('negative', '100')
 };
 // caution stops - the full scale derives through the shared ramps
 export const caution_00: StyleVariable = {
 	name: 'caution_00',
-	light: render_ramp_color_css('var(--hue_caution)', '00')
+	light: render_ramp_color_css('caution', '00')
 };
 export const caution_05: StyleVariable = {
 	name: 'caution_05',
-	light: render_ramp_color_css('var(--hue_caution)', '05')
+	light: render_ramp_color_css('caution', '05')
 };
 export const caution_10: StyleVariable = {
 	name: 'caution_10',
-	light: render_ramp_color_css('var(--hue_caution)', '10')
+	light: render_ramp_color_css('caution', '10')
 };
 export const caution_20: StyleVariable = {
 	name: 'caution_20',
-	light: render_ramp_color_css('var(--hue_caution)', '20')
+	light: render_ramp_color_css('caution', '20')
 };
 export const caution_30: StyleVariable = {
 	name: 'caution_30',
-	light: render_ramp_color_css('var(--hue_caution)', '30')
+	light: render_ramp_color_css('caution', '30')
 };
 export const caution_40: StyleVariable = {
 	name: 'caution_40',
-	light: render_ramp_color_css('var(--hue_caution)', '40')
+	light: render_ramp_color_css('caution', '40')
 };
 export const caution_50: StyleVariable = {
 	name: 'caution_50',
-	light: render_ramp_color_css('var(--hue_caution)', '50')
+	light: render_ramp_color_css('caution', '50')
 };
 export const caution_60: StyleVariable = {
 	name: 'caution_60',
-	light: render_ramp_color_css('var(--hue_caution)', '60')
+	light: render_ramp_color_css('caution', '60')
 };
 export const caution_70: StyleVariable = {
 	name: 'caution_70',
-	light: render_ramp_color_css('var(--hue_caution)', '70')
+	light: render_ramp_color_css('caution', '70')
 };
 export const caution_80: StyleVariable = {
 	name: 'caution_80',
-	light: render_ramp_color_css('var(--hue_caution)', '80')
+	light: render_ramp_color_css('caution', '80')
 };
 export const caution_90: StyleVariable = {
 	name: 'caution_90',
-	light: render_ramp_color_css('var(--hue_caution)', '90')
+	light: render_ramp_color_css('caution', '90')
 };
 export const caution_95: StyleVariable = {
 	name: 'caution_95',
-	light: render_ramp_color_css('var(--hue_caution)', '95')
+	light: render_ramp_color_css('caution', '95')
 };
 export const caution_100: StyleVariable = {
 	name: 'caution_100',
-	light: render_ramp_color_css('var(--hue_caution)', '100')
+	light: render_ramp_color_css('caution', '100')
 };
 // info stops - the full scale derives through the shared ramps
 export const info_00: StyleVariable = {
 	name: 'info_00',
-	light: render_ramp_color_css('var(--hue_info)', '00')
+	light: render_ramp_color_css('info', '00')
 };
 export const info_05: StyleVariable = {
 	name: 'info_05',
-	light: render_ramp_color_css('var(--hue_info)', '05')
+	light: render_ramp_color_css('info', '05')
 };
 export const info_10: StyleVariable = {
 	name: 'info_10',
-	light: render_ramp_color_css('var(--hue_info)', '10')
+	light: render_ramp_color_css('info', '10')
 };
 export const info_20: StyleVariable = {
 	name: 'info_20',
-	light: render_ramp_color_css('var(--hue_info)', '20')
+	light: render_ramp_color_css('info', '20')
 };
 export const info_30: StyleVariable = {
 	name: 'info_30',
-	light: render_ramp_color_css('var(--hue_info)', '30')
+	light: render_ramp_color_css('info', '30')
 };
 export const info_40: StyleVariable = {
 	name: 'info_40',
-	light: render_ramp_color_css('var(--hue_info)', '40')
+	light: render_ramp_color_css('info', '40')
 };
 export const info_50: StyleVariable = {
 	name: 'info_50',
-	light: render_ramp_color_css('var(--hue_info)', '50')
+	light: render_ramp_color_css('info', '50')
 };
 export const info_60: StyleVariable = {
 	name: 'info_60',
-	light: render_ramp_color_css('var(--hue_info)', '60')
+	light: render_ramp_color_css('info', '60')
 };
 export const info_70: StyleVariable = {
 	name: 'info_70',
-	light: render_ramp_color_css('var(--hue_info)', '70')
+	light: render_ramp_color_css('info', '70')
 };
 export const info_80: StyleVariable = {
 	name: 'info_80',
-	light: render_ramp_color_css('var(--hue_info)', '80')
+	light: render_ramp_color_css('info', '80')
 };
 export const info_90: StyleVariable = {
 	name: 'info_90',
-	light: render_ramp_color_css('var(--hue_info)', '90')
+	light: render_ramp_color_css('info', '90')
 };
 export const info_95: StyleVariable = {
 	name: 'info_95',
-	light: render_ramp_color_css('var(--hue_info)', '95')
+	light: render_ramp_color_css('info', '95')
 };
 export const info_100: StyleVariable = {
 	name: 'info_100',
-	light: render_ramp_color_css('var(--hue_info)', '100')
+	light: render_ramp_color_css('info', '100')
 };
 
 /*
@@ -1874,8 +1874,8 @@ export const link_color_selected: StyleVariable = {
 // dark stop 80) while following the accent intent and every ramp knob
 export const selection_color: StyleVariable = {
 	name: 'selection_color',
-	light: render_ramp_color_css('var(--hue_accent)', '20', '40%'),
-	dark: render_ramp_color_css('var(--hue_accent)', '80', '40%')
+	light: render_ramp_color_css('accent', '20', '40%'),
+	dark: render_ramp_color_css('accent', '80', '40%')
 };
 
 /* spacings, rounded to pixels for the default 16px case (at the default scale factor of 1) */

@@ -418,60 +418,15 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 0.05
 	})),
 	// motion
-	{
-		name: 'duration_1',
+	...(['1', '2', '3', '4', '5', '6'] as const).map((n): ThemeKnob => ({
+		name: `duration_${n}`,
 		kind: 'time',
 		axis: 'motion',
 		leverage: 'sm',
 		tier: 'semantic',
 		range: [0, 5],
 		step: 0.01
-	},
-	{
-		name: 'duration_2',
-		kind: 'time',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 5],
-		step: 0.01
-	},
-	{
-		name: 'duration_3',
-		kind: 'time',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 5],
-		step: 0.01
-	},
-	{
-		name: 'duration_4',
-		kind: 'time',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 5],
-		step: 0.01
-	},
-	{
-		name: 'duration_5',
-		kind: 'time',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 5],
-		step: 0.01
-	},
-	{
-		name: 'duration_6',
-		kind: 'time',
-		axis: 'motion',
-		leverage: 'sm',
-		tier: 'semantic',
-		range: [0, 5],
-		step: 0.01
-	},
+	})),
 	// decoration
 	{ name: 'background_image', kind: 'text', axis: 'decoration', leverage: 'md', tier: 'semantic' }
 ];
@@ -479,7 +434,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 /**
  * The theme-space axes in editor display order, with display titles.
  */
-export const knob_axes: Array<{ axis: KnobAxis; title: string }> = [
+export const theme_knob_axes: Array<{ axis: KnobAxis; title: string }> = [
 	{ axis: 'color', title: 'Color' },
 	{ axis: 'shape', title: 'Shape' },
 	{ axis: 'density', title: 'Density' },

@@ -19,8 +19,8 @@ import {
 	SHADE_LIGHTNESS_KNOBS,
 	TEXT_LIGHTNESS_KNOBS,
 	PALETTE_CHROMA_KNOBS,
+	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
-	RAMP_STOPS,
 	ramp_lightness,
 	ramp_chroma,
 	ramp_chroma_shape,
@@ -39,6 +39,7 @@ import {
 	type RampFamily
 } from '$lib/ramps.ts';
 import {
+	numeric_scale_variants,
 	palette_variants,
 	color_scheme_variants,
 	type ColorSchemeVariant,
@@ -208,9 +209,13 @@ const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 		vars[`hue_${letter}`] = PALETTE_HUES[letter];
 		vars[`palette_${letter}_chroma_scale`] = PALETTE_CHROMA_MULTIPLIERS[letter];
 	}
-	for (const stop of RAMP_STOPS) {
+	for (const stop of numeric_scale_variants) {
 		vars[`chroma_shape_${stop}`] = ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve);
-		vars[`palette_chroma_${stop}`] = ramp_chroma(scheme, stop);
+		vars[`palette_chroma_${stop}`] = ramp_chroma(
+			stop,
+			PALETTE_CHROMA_KNOBS[scheme],
+			PALETTE_CHROMA_CAPS[scheme][stop]
+		);
 		for (const family of ['palette', 'shade', 'text'] as const) {
 			vars[`${family}_lightness_${stop}`] = ramp_lightness(LIGHTNESS_KNOBS[family][scheme], stop);
 		}
@@ -218,7 +223,7 @@ const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 	return vars;
 };
 
-const DERIVED_STOPS = RAMP_STOPS.filter(
+const DERIVED_STOPS = numeric_scale_variants.filter(
 	(stop) => stop !== '00' && stop !== '100'
 ) as Array<NumericScaleVariant>;
 
@@ -246,7 +251,7 @@ describe('chroma shape emitter', () => {
 		for (const scheme of color_scheme_variants) {
 			const curve = PALETTE_CHROMA_KNOBS[scheme].curve;
 			const vars = knob_vars(scheme);
-			for (const stop of RAMP_STOPS) {
+			for (const stop of numeric_scale_variants) {
 				const css = render_chroma_shape_css(stop);
 				assert.closeTo(
 					evaluate_css_number(css, vars),
@@ -266,11 +271,11 @@ describe('chroma stop emitter', () => {
 	test('matches ramp_chroma - the capped knob curve - at every stop', () => {
 		for (const scheme of color_scheme_variants) {
 			const vars = knob_vars(scheme);
-			for (const stop of RAMP_STOPS) {
-				const css = render_chroma_stop_css(stop, scheme);
+			for (const stop of numeric_scale_variants) {
+				const css = render_chroma_stop_css(stop, scheme, PALETTE_CHROMA_CAPS[scheme][stop]);
 				assert.closeTo(
 					evaluate_css_number(css, vars),
-					ramp_chroma(scheme, stop),
+					ramp_chroma(stop, PALETTE_CHROMA_KNOBS[scheme], PALETTE_CHROMA_CAPS[scheme][stop]),
 					TOLERANCE,
 					`${scheme} ${stop}`
 				);
@@ -290,7 +295,7 @@ describe('palette stop emitter', () => {
 		for (const scheme of color_scheme_variants) {
 			const vars = knob_vars(scheme);
 			for (const letter of palette_variants) {
-				for (const stop of RAMP_STOPS) {
+				for (const stop of numeric_scale_variants) {
 					const [l_css, c_css, h_css] = parse_oklch_args(render_palette_stop_css(letter, stop));
 					const [l, c, h] = palette_stop_oklch(letter, stop, scheme);
 					assert.closeTo(evaluate_css_number(l_css, vars), l, TOLERANCE, `${letter} ${stop} L`);
@@ -314,7 +319,7 @@ describe('neutral stop emitter', () => {
 	test('matches shade_stop_oklch and text_stop_oklch at every stop', () => {
 		for (const scheme of color_scheme_variants) {
 			const vars = knob_vars(scheme);
-			for (const stop of RAMP_STOPS) {
+			for (const stop of numeric_scale_variants) {
 				for (const [family, twin] of [
 					['shade', shade_stop_oklch],
 					['text', text_stop_oklch]
@@ -333,18 +338,23 @@ describe('neutral stop emitter', () => {
 describe('ramp color emitter', () => {
 	test('an intent hue reference picks up its chroma multiplier twin', () => {
 		const vars = { ...knob_vars('light'), accent_chroma_scale: 0.7 };
-		const [, c_css] = parse_oklch_args(render_ramp_color_css('var(--hue_accent)', '50'));
-		assert.closeTo(evaluate_css_number(c_css, vars), ramp_chroma('light', '50') * 0.7, TOLERANCE);
+		const [, c_css] = parse_oklch_args(render_ramp_color_css('accent', '50'));
+		assert.closeTo(
+			evaluate_css_number(c_css, vars),
+			ramp_chroma('50', PALETTE_CHROMA_KNOBS.light, PALETTE_CHROMA_CAPS.light['50']) * 0.7,
+			TOLERANCE
+		);
 	});
 
-	test('a non-slot hue reference carries no multiplier', () => {
-		const css = render_ramp_color_css('var(--hue_neutral)', '50');
-		assert.notInclude(css, 'chroma_scale,');
-		assert.notInclude(css, 'neutral_chroma_scale');
+	test('letter and intent slots pair their hue with their own multiplier', () => {
+		assert.include(render_ramp_color_css('a', '50'), 'var(--palette_a_chroma_scale, 1)');
+		assert.include(render_ramp_color_css('a', '50'), 'var(--hue_a)');
+		assert.include(render_ramp_color_css('accent', '50'), 'var(--accent_chroma_scale, 1)');
+		assert.include(render_ramp_color_css('accent', '50'), 'var(--hue_accent)');
 	});
 
 	test('the alpha channel renders into the oklch()', () => {
-		const css = render_ramp_color_css('var(--hue_a)', '40', '40%');
+		const css = render_ramp_color_css('a', '40', '40%');
 		assert.isTrue(css.endsWith('/ 40%)'), css);
 	});
 });
@@ -354,7 +364,7 @@ describe('border color stop emitter', () => {
 		for (const scheme of color_scheme_variants) {
 			const vars = knob_vars(scheme);
 			const [l, c, h] = border_color_oklch(scheme);
-			for (const stop of RAMP_STOPS) {
+			for (const stop of numeric_scale_variants) {
 				const alpha = BORDER_COLOR_ALPHAS[scheme][stop];
 				const css = render_border_color_stop_css(stop, scheme);
 				if (alpha === 0) {
@@ -362,7 +372,7 @@ describe('border color stop emitter', () => {
 					continue;
 				}
 				const color = alpha === 100 ? css : css.replace(` / ${alpha}%)`, ')');
-				assert.notStrictEqual(color, css === color ? '' : css, 'alpha stripped');
+				if (alpha !== 100) assert.notStrictEqual(color, css, 'alpha stripped');
 				const [l_css, c_css, h_css] = parse_oklch_args(color);
 				assert.closeTo(evaluate_css_number(l_css, vars), l, TOLERANCE, `${scheme} ${stop} L`);
 				assert.closeTo(evaluate_css_number(c_css, vars), c, TOLERANCE, `${scheme} ${stop} C`);

@@ -184,10 +184,11 @@ ${blocks}
 }`;
 };
 
-export const render_theme_variable = (
+// one variable's declaration for a scheme slot, or '' when the slot is empty
+const render_theme_variable = (
 	variable: StyleVariable,
-	dark = false,
-	comments = true
+	dark: boolean,
+	comments: boolean
 ): string => {
 	const v = dark ? variable.dark : variable.light;
 	if (!v) return '';

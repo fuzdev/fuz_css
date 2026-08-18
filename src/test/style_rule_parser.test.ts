@@ -231,7 +231,9 @@ describe('parse_style_css', () => {
 			assert.strictEqual(index.rules.length, 1);
 			assert.strictEqual(index.rules[0]!.elements.size, 0);
 			assert.strictEqual(index.rules[0]!.classes.size, 0);
-			assert.isFalse(index.rules[0]!.is_core);
+			// no hooks means detection can never select it, so it always ships
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
 		});
 
 		test('@keyframes with variables', () => {
@@ -521,5 +523,42 @@ describe('load_style_rule_index', () => {
 		assert.isTrue(index.by_element.has('a'));
 
 		assert.isTrue(index.by_class.has('unstyled'));
+	});
+});
+
+describe('untargetable rules', () => {
+	test('a rule with no element or class hooks is core', () => {
+		// ::selection and [hidden] can never be matched by detection
+		const index = parse_style_css(
+			'::selection { background: var(--a); }\n[hidden] { display: none; }'
+		);
+		assert.strictEqual(index.rules.length, 2);
+		for (const rule of index.rules) {
+			assert.isTrue(rule.is_core);
+			assert.strictEqual(rule.core_reason, 'untargetable');
+		}
+	});
+
+	test('@keyframes carry their variables and always ship', () => {
+		const index = parse_style_css(
+			'@keyframes spin { from { opacity: var(--o); } to { opacity: 1; } }'
+		);
+		assert.strictEqual(index.rules.length, 1);
+		const rule = index.rules[0]!;
+		assert.isTrue(rule.is_core);
+		assert.strictEqual(rule.core_reason, 'untargetable');
+		assert.isTrue(rule.variables_used.has('o'));
+	});
+
+	test('a conditional group with only untargetable rules is core', () => {
+		const index = parse_style_css('@media print { ::selection { background: none; } }');
+		assert.strictEqual(index.rules.length, 1);
+		assert.isTrue(index.rules[0]!.is_core);
+		assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
+	});
+
+	test('a blockless @layer statement parses to no rules', () => {
+		const index = parse_style_css('@layer a, b;');
+		assert.strictEqual(index.rules.length, 0);
 	});
 });

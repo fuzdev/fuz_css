@@ -166,9 +166,10 @@ export interface CssOutputOptions {
 	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
 	 * runtime theme winning by cascade layer. A single-scheme theme's
 	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
-	 * renderer, which needs `resolve_theme_stance` called first), and pinning
-	 * `color-scheme` is separate - the `dark`/`light` class on the `html`
-	 * element drives it.
+	 * renderer, which needs `resolve_theme_stance` called first). The theme's
+	 * own overlay also renders into the `fuz.theme` layer - above the
+	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance -
+	 * so the baked theme behaves exactly like the same theme at runtime.
 	 *
 	 * The baked values become the output's defaults, so a runtime theme can't
 	 * revert to the pre-bake appearance by being empty - the base theme
@@ -178,8 +179,8 @@ export interface CssOutputOptions {
 	 *
 	 * @example
 	 * ```ts
-	 * import {necromancer_theme} from '@fuzdev/fuz_css/themes/necromancer.ts';
-	 * vite_plugin_fuz_css({theme: necromancer_theme});
+	 * import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';
+	 * vite_plugin_fuz_css({theme: phosphor_theme});
 	 * ```
 	 */
 	theme?: Theme | null;
