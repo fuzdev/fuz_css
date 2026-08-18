@@ -97,7 +97,7 @@ describe('shipped themes', () => {
 		for (const registered of default_themes) {
 			assert.include(names, registered.name);
 		}
-		for (const exemplar of ['ember', 'parchment', 'concrete', 'phosphor', 'neon', 'nineties']) {
+		for (const exemplar of ['smolder', 'parchment', 'concrete', 'phosphor', 'neon', 'nineties']) {
 			assert.include(names, exemplar);
 		}
 	});

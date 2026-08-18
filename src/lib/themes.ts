@@ -17,7 +17,7 @@ export const DEFAULT_THEME: Theme = base_theme;
  * an importable export - registry membership, not file location, is what
  * separates registered themes from shipped exemplars. The exemplars
  * deliberately stay out of this list: a set of recognizable materials, each
- * anchoring an era - `themes/ember.ts` (firelight), `themes/parchment.ts`
+ * anchoring an era - `themes/smolder.ts` (firelight), `themes/parchment.ts`
  * (the illuminated manuscript, candlelit after dark), `themes/concrete.ts`
  * (brutalism), `themes/nineties.ts` (the 90s desktop web, beveled),
  * `themes/phosphor.ts` (the CRT terminal, dark-only), and `themes/neon.ts`

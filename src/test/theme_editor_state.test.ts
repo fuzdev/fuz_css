@@ -101,7 +101,7 @@ describe('scheme stance', () => {
 });
 
 describe('scheme stance over a dual base theme', () => {
-	// a dual base authoring both slots itself - like concrete and ember
+	// a dual base authoring both slots itself - like concrete and smolder
 	const dual_base: Theme = {
 		name: 'dualish',
 		variables: [

@@ -414,7 +414,7 @@ typography, borders, shading, shadows, layout. See
   `compose_themes`, not themes themselves — users see one flat "themes"
   list
 - `src/lib/themes/` - One module per theme. Registered: base. Shipped
-  exemplars are recognizable materials, each anchoring an era: ember
+  exemplars are recognizable materials, each anchoring an era: smolder
   (firelight — warm haze, vivid past the caps, gradient-sky
   `background_image`), parchment (the illuminated manuscript — serif body,
   rubrication-red accent, double-ruled borders, candlelit in dark),

@@ -19,7 +19,7 @@ const authored: Theme = {
 	variables: [
 		// night cast: the neutral binds to the purple slot
 		{ name: 'hue_neutral', light: 'var(--hue_d)' },
-		{ name: 'neutral_chroma', light: '0.035' },
+		{ name: 'neutral_chroma', light: '0.09' },
 		// magenta accent: links/focus/selection glow hot pink
 		{ name: 'hue_accent', light: 'var(--hue_g)' },
 		// vivid, knowingly clipping the weak hues

@@ -4,17 +4,17 @@ import type { Theme } from '../variable.ts';
  * An era exemplar theme from before the eras: firelight. Built entirely from
  * semantic bindings and levers - the palette letters keep their default hues.
  * The warm haze comes from a strengthened neutral tint (the neutral's default
- * binding to brown `hue_f` already sits at dusk-warm 60°), the ember accent
- * from binding the accent intent to orange, and the glow from vivid chroma
- * pushed past the conservative caps on purpose (this theme exists partly to
- * stress weak-hue gamut clipping). The gradient sky rides the
+ * binding to brown `hue_f` already sits at dusk-warm 60°), the smoldering
+ * accent from binding the accent intent to orange, and the glow from vivid
+ * chroma pushed past the conservative caps on purpose (this theme exists
+ * partly to stress weak-hue gamut clipping). The gradient sky rides the
  * `background_image` decoration hook: gold high to crimson low by day, indigo
  * sinking to crimson dusk by night. Dual-scheme.
  */
-export const ember_theme: Theme = {
-	name: 'ember',
+export const smolder_theme: Theme = {
+	name: 'smolder',
 	variables: [
-		// ember accent: links/focus/selection burn orange
+		// smoldering accent: links/focus/selection burn orange
 		{ name: 'hue_accent', light: 'var(--hue_h)' },
 		// warm haze over every surface (neutral already binds to warm hue_f)
 		{ name: 'neutral_chroma', light: '0.028', dark: '0.035' },

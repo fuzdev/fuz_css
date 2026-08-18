@@ -19,7 +19,7 @@ import type { Theme } from '$lib/variable.ts';
 import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
-import { ember_theme } from '$lib/themes/ember.ts';
+import { smolder_theme } from '$lib/themes/smolder.ts';
 import { parchment_theme } from '$lib/themes/parchment.ts';
 import { concrete_theme } from '$lib/themes/concrete.ts';
 import { phosphor_theme } from '$lib/themes/phosphor.ts';
@@ -50,7 +50,7 @@ describe('validate_theme', () => {
 	test('registry and exemplar themes produce no errors', () => {
 		const themes = [
 			...default_themes,
-			ember_theme,
+			smolder_theme,
 			parchment_theme,
 			concrete_theme,
 			phosphor_theme,
@@ -343,7 +343,7 @@ describe('check_theme', () => {
 	// silently - update these recorded counts when retuning on purpose
 	test.each([
 		['neon', neon_theme, 72],
-		['ember', ember_theme, 68]
+		['smolder', smolder_theme, 68]
 	])('%s clips gamut by design but keeps all contrast', (_name, theme, expected_gamut_fails) => {
 		const report = check_theme(theme);
 		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
@@ -569,7 +569,7 @@ describe('contrast modifier compositions', () => {
 		const names = new Set(bases.map((t) => t.name));
 		for (const expected of [
 			default_themes[0]!.name,
-			ember_theme.name,
+			smolder_theme.name,
 			parchment_theme.name,
 			concrete_theme.name,
 			phosphor_theme.name,
@@ -589,10 +589,10 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	// declared exception: ember's past-cap cyan/teal UI fills sit just
+	// declared exception: smolder's past-cap cyan/teal UI fills sit just
 	// under the 3:1 fill gate against low contrast's raised background floor
 	// (~2.89 to 2.91) - a marginal, known combination cost, not a regression
-	const known_failing = new Set(['ember (low contrast)']);
+	const known_failing = new Set(['smolder (low contrast)']);
 
 	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
 		for (const base of bases) {

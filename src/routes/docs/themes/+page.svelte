@@ -12,7 +12,7 @@
 	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
-	import { ember_theme } from '$lib/themes/ember.ts';
+	import { smolder_theme } from '$lib/themes/smolder.ts';
 	import { parchment_theme } from '$lib/themes/parchment.ts';
 	import { concrete_theme } from '$lib/themes/concrete.ts';
 	import { phosphor_theme } from '$lib/themes/phosphor.ts';
@@ -42,7 +42,7 @@
 	// users - registry membership is policy for consumer pickers, not UX
 	const themes = [
 		...default_themes,
-		ember_theme,
+		smolder_theme,
 		parchment_theme,
 		concrete_theme,
 		nineties_theme,

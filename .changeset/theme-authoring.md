@@ -14,7 +14,7 @@ contrast are curve-knob fragments composed over any theme with the new
 `compose_themes(base, ...overlays)` (flatten + last-wins; a single-scheme
 base re-slots dual-slot overlay variables to its stance), not themes in the
 list. Themes live one module per theme under `themes/`, with unregistered
-exemplars - recognizable materials, each anchoring an era: ember
+exemplars - recognizable materials, each anchoring an era: smolder
 (firelight), parchment (the illuminated manuscript, candlelit after dark),
 concrete (brutalism), nineties (the 90s desktop web, beveled), phosphor (the
 CRT terminal, dark-only), and neon (80s signage at night, dark-only and
@@ -78,7 +78,7 @@ compiled-cap overrides):
   where the baked caps no longer fit, and re-checks the result
 
 The shipped themes and their contrast-modifier compositions are gated in
-CI (one declared marginal exception: ember composed with low contrast sits
+CI (one declared marginal exception: smolder composed with low contrast sits
 just under three light-scheme UI-fill gates), and the docs page's inline
 editor runs the same lint and gates live on every edit.
 
