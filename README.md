@@ -19,6 +19,10 @@ the [discussions](https://github.com/fuzdev/fuz_css/discussions).
 View the [docs](https://css.fuz.dev/docs) at [css.fuz.dev](https://css.fuz.dev/).
 More about the stack at [fuz.dev](https://www.fuz.dev/)
 
+## Contributing
+
+[fuz.dev/contributing](https://www.fuz.dev/contributing)
+
 ## License [🐦](https://wikipedia.org/wiki/Free_and_open-source_software)
 
 [MIT](LICENSE)

@@ -77,7 +77,7 @@
     "@ryanatkn/eslint-config": "^0.12.2",
     "@sveltejs/acorn-typescript": "^1.0.9",
     "@sveltejs/adapter-static": "^3.0.10",
-    "@sveltejs/kit": "^2.66.0",
+    "@sveltejs/kit": "^2.70.2",
     "@sveltejs/package": "^2.5.7",
     "@sveltejs/vite-plugin-svelte": "^6.2.4",
     "@types/estree": "^1.0.8",
