@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.63.3
+
+### Patch Changes
+
+- fix: splice the generated CSS at the build-mode placeholder's position instead of appending it, so stylesheets imported after `virtual:fuz.css` cascade over fuz_css in production builds like they do in dev ([572d001](https://github.com/fuzdev/fuz_css/commit/572d001))
+
 ## 0.63.2
 
 ### Patch Changes
