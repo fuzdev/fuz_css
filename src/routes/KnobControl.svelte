@@ -1,4 +1,6 @@
 <script lang="ts">
+	// TODO upstream to fuz_ui
+
 	import HueInput from '@fuzdev/fuz_ui/HueInput.svelte';
 
 	import { HUE_BINDING_MATCHER, type ThemeKnob } from '$lib/knobs.ts';
@@ -110,13 +112,14 @@
 			custom-angle escape; chips write `var(--hue_x)`, custom detaches to a
 			literal angle -->
 		<div class="title"><code class="knob_name">--{knob.name}</code></div>
-		<div class="letter_chips">
+		<div class="letter_chips" role="radiogroup" aria-label="--{knob.name} binding">
 			{#each palette_variants as letter (letter)}
 				<button
 					type="button"
 					class="letter_chip palette_{letter}"
 					class:selected={bound_letter === letter}
-					aria-pressed={bound_letter === letter}
+					role="radio"
+					aria-checked={bound_letter === letter}
 					title={gloss_title(letter)}
 					onclick={() => onchange(`var(--hue_${letter})`)}
 				>
@@ -127,7 +130,8 @@
 				type="button"
 				class="letter_chip"
 				class:selected={bound_letter === null}
-				aria-pressed={bound_letter === null}
+				role="radio"
+				aria-checked={bound_letter === null}
 				style:--fill={custom_color}
 				style:--text_color={custom_color}
 				style:--border_color={custom_color}
@@ -234,7 +238,7 @@
 		--knob_basis: 190px;
 		--knob_max_width: 300px;
 	}
-	.title {
+	.knob:has(.knob_reset) .title {
 		/* keep long names clear of the reset button (an sm icon_button,
 			--input_height under sm = --space_xl4) */
 		padding-right: var(--space_xl4);

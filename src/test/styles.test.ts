@@ -3,6 +3,7 @@ import { readFileSync } from 'node:fs';
 
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_hook_names } from '$lib/knobs.ts';
+import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
 import { parse_style_css } from '$lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
@@ -113,6 +114,18 @@ test('the OS user-preference mappings parse core and layer into fuz.preferences'
 		(r) => r.layer === 'fuz.preferences' && !r.css.includes('prefers-')
 	);
 	assert.deepEqual(misplaced, []);
+});
+
+test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {
+	// style.css restates the modifier's knob values by hand, so retuning the
+	// theme must retune the OS mapping with it
+	const index = parse_style_css(main_stylesheet_text);
+	const rule = index.rules.find((r) => r.css.includes('prefers-contrast: more'));
+	assert(rule);
+	for (const { name, light, dark } of high_contrast_theme.variables) {
+		assert.include(rule.css, `--${name}: ${light};`, `${name} light`);
+		assert.include(rule.css, `--${name}: ${dark};`, `${name} dark`);
+	}
 });
 
 test('untargetable base rules are core, so bundled output always ships them', () => {

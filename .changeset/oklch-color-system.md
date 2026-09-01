@@ -2,88 +2,51 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: rework the color system to derived OKLCH with semantic intents and cascade layers
+feat: derived OKLCH color system with semantic intents and cascade layers
 
-Colors are now derived - curve knobs → ramp stops → color stops - in pure
-CSS (`calc()`/`pow()`/`oklch()`), fitted to minimize the perceptual delta
-from the old HSL palette.
+Breaking:
 
-Breaking changes:
-
-- **`--color_*` variables renamed to `--palette_*`**: `--color_a_50` →
-  `--palette_a_50` for all 10 letters × 13 stops, with the TS mirrors
+- `--color_X_NN` → `--palette_X_NN` (10 letters × 13 stops);
   `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
-  Classes are property-first and the letter alone implies the palette: the
-  text-color stop classes keep their names (`.color_a_50`, now applying
-  `--palette_a_50`), while the compound families shorten -
-  `border_color_X_NN` → `border_X_NN`, `outline_color_X_NN` →
-  `outline_X_NN`, `shadow_color_X_NN` → `shadow_X_NN` (`bg_X_NN` and the
-  letterless families like `border_color_NN` and `shadow_color_umbra` keep
-  their names). The bare component conventions
-  `.color_a`-`.color_j` → `.palette_a`-`.palette_j` (they recolor buttons
-  and chips as a unit, not one property).
-- **`.fg_NN`/`.bg_NN` token classes removed**: the adaptive alpha overlays
-  stay as variables (`--fg_*`/`--bg_*`) but no longer generate bare token
-  classes - `bg_` is the opaque background class prefix (`.bg_a_50`,
-  `.bg_positive_50`), and a translucent `.bg_50` beside those was the one
-  collision in the naming family. Use literals instead:
-  `background-color:var(--fg_10)`. The `.darken_NN`/`.lighten_NN` classes
-  are unchanged.
-- **`--hue_a`…`--hue_j` are now OKLCH hue angles** (blue is `250`, not HSL
-  `210`). Consumer CSS doing `hsl(var(--hue_x) …)` breaks - use
-  `oklch(<l> <c> var(--hue_x))` or the palette/intent stops.
-- **`--tint_hue`/`--tint_saturation` removed** → `--hue_neutral` (defaults
-  to `var(--hue_f)`) + `--neutral_chroma`.
-- **Absolute `_light`/`_dark` variants removed**: the ~286 generated
-  variables (`--color_a_50_light`-style, `--shade_XX_light/dark`) and all
-  their classes. Write the literal color or define one custom property
-  instead.
-- **`color-mix()` interpolation moved from `in hsl` to `in oklab`** in
-  button fills/borders, composites, and shadow classes.
-- **Cascade layers**: all shipped CSS is layered `fuz.base` <
-  `fuz.preferences` < `fuz.theme` < `fuz.utilities`, so consumers' unlayered
-  styles beat everything. The OS user-preference mappings
-  (`prefers-contrast`, `prefers-reduced-motion`) live in `fuz.preferences`,
-  above the defaults and below themes, so they apply in every consumption
-  mode and explicit theme overrides still win. Custom `base_css` is
-  re-layered into `fuz.base` in bundled output (only the `fuz.preferences`
-  identity is preserved).
+- Class renames: `border_color_X_NN` → `border_X_NN`,
+  `outline_color_X_NN` → `outline_X_NN`, `shadow_color_X_NN` →
+  `shadow_X_NN`, `.color_a`-`.color_j` → `.palette_a`-`.palette_j`.
+  `.color_X_NN`, `bg_X_NN`, `border_color_NN`, and `shadow_color_*` keep
+  their names.
+- Classes removed: `.fg_NN`/`.bg_NN` (use
+  `background-color:var(--fg_10)`; `bg_` is now the opaque prefix),
+  `.hue_a`-`.hue_j` and `--hue`, and every `_light`/`_dark` variable and
+  class.
+- `--hue_a`…`--hue_j` are OKLCH angles (blue `250`, was `210`); replace
+  `hsl(var(--hue_x) …)` with `oklch(<l> <c> var(--hue_x))` or a stop.
+- `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
+- `color-mix()` interpolates `in oklab` (was `in hsl`).
+- Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
+  `fuz.utilities`; unlayered consumer styles beat all of it. Custom
+  `base_css` is re-layered into `fuz.base`.
+- `variables.ts` exports only `default_variables`; read a variable with
+  `default_variables.find((v) => v.name === 'space_md')`. `icon_sizes` →
+  `ICON_SIZES` (`ICON_SIZES.xs === 18`, was `'18px'`); `Z_INDEX_MAX`
+  removed (inline `2147483647`).
 
 New:
 
-- **Curve knobs** (the promoted theme API): `--chroma_scale`,
-  `--palette_lightness_00/_100/_curve` (same trio for `shade_`/`text_`),
-  and `--palette_chroma_min/_max/_curve` clamped per stop by baked worst-hue
-  sRGB gamut caps, plus per-stop derived variables themes can pin
-  individually (`--palette_lightness_NN`, `--palette_chroma_NN`,
-  `--chroma_shape_NN`).
-- **Semantic intent knobs**: `--hue_accent`, `--hue_positive`,
-  `--hue_negative`, `--hue_caution`, `--hue_info`, each deriving a full
-  13-stop scale through the shared ramps (`--accent_00`…`--accent_100`,
-  etc.) with matching token classes (`.positive_50`, `.bg_caution_10`),
-  plus `--selection_color` and `intent_variants`/`IntentVariant` in
-  `variable_data.ts`. Links, focus, selection, `accent-color`, and
-  disabled-active feedback route through them; focus follows the element
-  color (via `--outline_color`) with the accent as fallback.
-- **Per-slot chroma character**: `--palette_a_chroma_scale` …
-  `--palette_j_chroma_scale` and intent twins (`--accent_chroma_scale`,
-  same for positive/negative/caution/info), default `1`, each multiplying
-  its slot's chroma under the global `--chroma_scale` so the slot's
-  character holds at any global setting - grayscale stays grayscale and
-  vivid scales proportionally. Values at or below 1 stay inside the sRGB
-  gamut caps by construction; above 1 knowingly clips, like the global
-  knob. The brown slot `f` ships at `0.55`: brown is low-chroma dark
-  orange, so under uniform chroma it read as a second orange beside
-  `--hue_h`. An intent hue bound to a palette letter shares only the angle
-  - `validate_theme` warns when the bound letter's multiplier differs from
-  the intent's twin, and `check_theme` runs its gates through the
-  multipliers.
-- **Derived border colors**: the `border_color_*` alpha ramp colors through
-  the neutral intent (new `--border_color_lightness` and
-  `--border_color_chroma` knobs, the chroma derived from `--neutral_chroma`),
-  so grayscale and retinted themes reshape borders in the same move as
-  surfaces and text.
-- **Design-time modules**: `ramps.ts` (fitted knob constants, numeric
-  evaluators, CSS emitters), `oklch.ts` (OKLCH↔sRGB + gamut math), and
-  `wcag.ts` (luminance/contrast), with tests gating every default stop for
-  gamut, monotonicity, and contrast.
+- Curve knobs: `--chroma_scale`, `--palette_lightness_00/_100/_curve` (and
+  `shade_`/`text_`), `--palette_chroma_min/_max`, `--chroma_curve`, with
+  pinnable derived stops `--palette_lightness_NN`, `--palette_chroma_NN`,
+  `--chroma_shape_NN`.
+- Intent knobs `--hue_accent`/`_positive`/`_negative`/`_caution`/`_info`,
+  each with a 13-stop scale (`--accent_00`…`--accent_100`), token classes
+  (`.positive_50`, `.bg_caution_10`), `--selection_color`, and
+  `intent_variants`/`IntentVariant`. Links, focus, selection,
+  `accent-color`, and disabled-active feedback use them; focus follows
+  `--outline_color` with the accent as fallback.
+- Per-slot chroma multipliers `--palette_X_chroma_scale` and
+  `--<intent>_chroma_scale` (default `1`; brown `f` ships at `0.55`).
+- `--border_color_lightness`/`--border_color_chroma` derive the
+  `border_color_*` alpha ramp through the neutral intent.
+- Value tables in `variable_data.ts`: `FONT_SIZES`, `SPACE_SIZES`,
+  `BORDER_RADII`, `DISTANCES`, `LINE_HEIGHTS`, `DURATIONS`
+  (+ `duration_variants`), `SHADOW_GEOMETRY`, `SHADOW_ALPHAS`,
+  `OVERLAY_ALPHAS`.
+- Design-time modules `ramps.ts`, `oklch.ts`, `wcag.ts`.

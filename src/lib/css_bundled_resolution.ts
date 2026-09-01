@@ -121,13 +121,6 @@ export interface CssResolutionResult {
 	preferences_css: string;
 	/** All resolved variable names (including transitive deps) */
 	resolved_variables: Set<string>;
-	/**
-	 * Variable names referenced by shipped CSS (matched rules, generated
-	 * classes, utilities, source `var()`), before graph resolution - unlike
-	 * `resolved_variables` this includes names the graph doesn't define, so
-	 * dangling-reference checks can key on it.
-	 */
-	referenced_variables: Set<string>;
 	/** Indices of rules included from the style index */
 	included_rule_indices: Set<number>;
 	/** Element names that were matched */
@@ -445,7 +438,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		base_css,
 		preferences_css,
 		resolved_variables,
-		referenced_variables,
 		included_rule_indices,
 		included_elements,
 		diagnostics,

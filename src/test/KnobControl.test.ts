@@ -167,7 +167,7 @@ describe('bindable knobs', () => {
 		const container = mount_knob({ knob: get_knob('hue_accent'), value: 'var(--hue_a)' });
 		const chips = container.querySelectorAll('.letter_chip');
 		assert.strictEqual(chips.length, palette_variants.length + 1);
-		const bound = container.querySelector('.letter_chip[aria-pressed="true"]');
+		const bound = container.querySelector('.letter_chip[aria-checked="true"]');
 		assert.strictEqual(bound?.textContent?.trim(), 'a');
 	});
 

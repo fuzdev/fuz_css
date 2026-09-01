@@ -3,6 +3,7 @@ import { test, assert, describe } from 'vitest';
 import { compile_theme, check_theme } from '$lib/theme_check.ts';
 import type { Theme } from '$lib/variable.ts';
 import { default_themes } from '$lib/themes.ts';
+import { neon_theme } from '$lib/themes/neon.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS } from '$lib/ramps.ts';
 import type { NumericScaleVariant } from '$lib/variable_data.ts';
@@ -20,6 +21,12 @@ const stop_of = (name: string): NumericScaleVariant =>
 	name.slice('palette_chroma_'.length) as NumericScaleVariant;
 
 describe('compile_theme', () => {
+	test('the neon exemplar emits no cap overrides', () => {
+		// its rotated yellow slot stays inside the baked worst-hue caps
+		const { theme } = compile_theme(neon_theme);
+		assert.strictEqual(theme.variables.length, neon_theme.variables.length);
+	});
+
 	test('the base theme emits no cap overrides', () => {
 		const { theme } = compile_theme(base_theme);
 		assert.strictEqual(theme.variables.length, base_theme.variables.length);

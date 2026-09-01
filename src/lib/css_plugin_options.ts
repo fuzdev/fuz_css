@@ -23,7 +23,10 @@
  * This applies to `BaseCssOption` and `VariablesOption`.
  * Setting both to `null` enables "utility-only mode" where you manage
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
- * and `theme.css`, which include all content).
+ * and `theme.css`, which include all content). `variables: null` on its own
+ * is an error: the base styles reference theme variables, so disabling only
+ * the theme leaves them dangling. To bundle every variable instead, keep
+ * `variables` and set `additional_variables: 'all'`.
  *
  * @module
  */

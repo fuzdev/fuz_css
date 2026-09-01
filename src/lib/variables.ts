@@ -58,9 +58,10 @@ import {
 	render_border_color_stop_css,
 	render_chroma_shape_css,
 	render_chroma_stop_css,
+	render_shadow_tint_css,
+	PALETTE_CHROMA_CAPS,
 	render_lightness_stop_css,
 	render_neutral_stop_css,
-	render_palette_stop_css,
 	render_ramp_color_css,
 	type LightnessRampKnobs,
 	type RampFamily
@@ -70,9 +71,8 @@ import {
 
 TODO lots of things here to address:
 
-- either change colors with alpha transparency to opaque color values,
-	or make sure there are opaque variants available for everything
-	- by default we should avoid alpha to reduce base-case performance costs
+- the alpha families (`border_color_*`, `fg_*`/`bg_*`, `darken_*`/`lighten_*`, shadows)
+	are alpha by design, but the base-case compositing cost is unmeasured
 	- maybe move all shadows out of the base theme?
 - lots of inconsistencies, like the relationship between base and modified values
 	- in some cases the base value is just a value, in other cases it's the "current" value
@@ -344,10 +344,10 @@ export const default_variables: Array<StyleVariable> = [
 		dark: String(PALETTE_CHROMA_KNOBS.dark.chroma_max)
 	},
 	{
-		name: 'palette_chroma_curve',
+		name: 'chroma_curve',
 		light: String(PALETTE_CHROMA_KNOBS.light.curve),
 		dark: String(PALETTE_CHROMA_KNOBS.dark.curve),
-		summary: 'falloff of the chroma peak; the neutral scales ride this same shape'
+		summary: 'falloff of the chroma peak, shared by the palette ramp and the neutral scales'
 	},
 
 	// normalized chroma shape per stop - 0 at the endpoints, 1 at the midpoint;
@@ -360,15 +360,15 @@ export const default_variables: Array<StyleVariable> = [
 	// capped palette chroma stops (per-scheme caps)
 	...numeric_scale_variants.map((stop) => ({
 		name: `palette_chroma_${stop}`,
-		light: render_chroma_stop_css(stop, 'light'),
-		dark: render_chroma_stop_css(stop, 'dark')
+		light: render_chroma_stop_css(stop, PALETTE_CHROMA_CAPS.light[stop]),
+		dark: render_chroma_stop_css(stop, PALETTE_CHROMA_CAPS.dark[stop])
 	})),
 
 	// palette color stops - one definition per stop; the scheme flip lives in the knobs
 	...palette_variants.flatMap((letter) =>
 		numeric_scale_variants.map((stop) => ({
 			name: `palette_${letter}_${stop}`,
-			light: render_palette_stop_css(letter, stop)
+			light: render_ramp_color_css(letter, stop)
 		}))
 	),
 
@@ -581,16 +581,12 @@ export const default_variables: Array<StyleVariable> = [
 
 	/* shadows (see `SHADOW_GEOMETRY`) */
 	...shadow_size_variants.flatMap((size) => shadow_variables(size)),
-	{ name: 'shadow_color_umbra', light: '#000', dark: 'oklch(0.863 0.009 var(--hue_neutral))' },
-	{
-		name: 'shadow_color_highlight',
-		light: 'oklch(0.955 0.003 var(--hue_neutral))',
-		dark: '#000'
-	},
+	{ name: 'shadow_color_umbra', light: '#000', dark: render_shadow_tint_css('dim') },
+	{ name: 'shadow_color_highlight', light: render_shadow_tint_css('bright'), dark: '#000' },
 	{
 		name: 'shadow_color_glow',
-		light: 'oklch(0.955 0.003 var(--hue_neutral))',
-		dark: 'oklch(0.863 0.009 var(--hue_neutral))'
+		light: render_shadow_tint_css('bright'),
+		dark: render_shadow_tint_css('dim')
 	},
 	{ name: 'shadow_color_shroud', light: '#000' },
 	// the stops multiply their base alphas (see `SHADOW_ALPHAS`) by the shadow
@@ -613,9 +609,7 @@ export const default_variables: Array<StyleVariable> = [
 			: { name, light: scaled(light_alpha), dark: scaled(dark_alpha) };
 	}),
 
-	/* icons */
-	/* these decrease by the golden ratio, rounded to the nearest pixel,
-		and they're insensitive to font size (`px` not `rem`) */
+	/* icons (see `ICON_SIZES`) */
 	...icon_size_variants.map((size) => ({
 		name: `icon_size_${size}`,
 		light: `${ICON_SIZES[size]}px`

@@ -111,12 +111,12 @@ Notes:
 		background-color: var(--selection_color);
 	}
 
-	::placeholder {
+	:where(input, textarea)::placeholder {
 		opacity: 1;
 		color: color-mix(in oklab, currentcolor 50%, transparent);
 	}
 
-	::file-selector-button {
+	:where(input)::file-selector-button {
 		font: inherit;
 		cursor: pointer;
 	}
@@ -260,8 +260,10 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	) {
 		margin-bottom: var(--flow_margin, var(--space_lg));
 	}
-	:where(section:not(:last-child)) {
-		margin-bottom: var(--space_xl7);
+	/* sections are the page-level gap: a flow-margin multiple (xl7 over the lg
+		default), so density composites scale it with the rest of the rhythm */
+	:where(section:not(:last-child):not(.unstyled)) {
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 5.31);
 	}
 
 	/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
@@ -400,9 +402,6 @@ so for consistent visuals we opt to include no active state */
 	}
 	:where(input[type='checkbox']:not(.unstyled))::before {
 		content: var(--checkbox_content);
-		position: relative;
-		left: var(--left);
-		top: var(--top);
 		width: 100%;
 		height: 100%;
 		text-align: center;

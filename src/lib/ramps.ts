@@ -118,8 +118,17 @@ export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs
 	dark: { lightness_00: 0.146, lightness_100: 0.97, curve: 0.87 }
 };
 
+/** The lightness ramp knobs by family, for lookups keyed on a `RampFamily`. */
+export const LIGHTNESS_KNOBS: Record<RampFamily, Record<ColorSchemeVariant, LightnessRampKnobs>> = {
+	palette: PALETTE_LIGHTNESS_KNOBS,
+	shade: SHADE_LIGHTNESS_KNOBS,
+	text: TEXT_LIGHTNESS_KNOBS
+};
+
 /**
- * Fitted chroma-curve knobs for the palette ramps.
+ * Fitted chroma-curve knobs for the palette ramps. `curve` renders as the
+ * single `--chroma_curve`, which the neutral scales share; `chroma_min` and
+ * `chroma_max` are the palette's own.
  *
  * Fitted so the requested curve hugs the effective post-clamp chroma instead
  * of sitting above the caps through the mid-range - turning the knobs down
@@ -140,7 +149,7 @@ export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> =
  * palette (`--hue_neutral: var(--hue_f)`); this constant mirrors that default
  * numerically.
  */
-export const NEUTRAL_HUE = PALETTE_HUES.f;
+const NEUTRAL_HUE = PALETTE_HUES.f;
 
 /**
  * Peak chroma of the neutral (shade/text) scales. The neutral rides the
@@ -151,6 +160,25 @@ export const NEUTRAL_HUE = PALETTE_HUES.f;
 export const NEUTRAL_CHROMA: Record<ColorSchemeVariant, number> = {
 	light: 0.024,
 	dark: 0.025
+};
+
+export type ShadowTint = 'bright' | 'dim';
+
+/**
+ * Fitted neutral-hued tints for the shadow color endpoints: `bright` is the
+ * light-scheme highlight and glow, `dim` the dark-scheme umbra and glow. Each
+ * renders on `--hue_neutral`, so a retinted neutral recolors shadows with
+ * the surfaces.
+ */
+export const SHADOW_TINTS: Record<ShadowTint, { lightness: number; chroma: number }> = {
+	bright: { lightness: 0.955, chroma: 0.003 },
+	dim: { lightness: 0.863, chroma: 0.009 }
+};
+
+/** Renders a `SHADOW_TINTS` entry as `oklch()` on the neutral hue. */
+export const render_shadow_tint_css = (tint: ShadowTint): string => {
+	const { lightness, chroma } = SHADOW_TINTS[tint];
+	return `oklch(${lightness} ${chroma} var(--hue_neutral))`;
 };
 
 /**
@@ -291,19 +319,18 @@ export const ramp_chroma_shape = (stop: NumericScaleVariant, curve: number): num
 
 /**
  * Evaluates the palette chroma at a stop: the knob curve clamped by that
- * stop's worst-hue cap. `chroma_scale` multiplies above the clamp. Defaults
- * for a scheme come from `PALETTE_CHROMA_KNOBS[scheme]` and
- * `PALETTE_CHROMA_CAPS[scheme][stop]`.
+ * stop's worst-hue cap. The `--chroma_scale` multipliers apply above the
+ * clamp, in `ramp_color_oklch`. Defaults for a scheme come from
+ * `PALETTE_CHROMA_KNOBS[scheme]` and `PALETTE_CHROMA_CAPS[scheme][stop]`.
  */
 export const ramp_chroma = (
 	stop: NumericScaleVariant,
 	knobs: ChromaRampKnobs,
-	cap: number,
-	chroma_scale = 1
+	cap: number
 ): number => {
 	const requested =
 		knobs.chroma_min + (knobs.chroma_max - knobs.chroma_min) * ramp_chroma_shape(stop, knobs.curve);
-	return Math.min(requested, cap) * chroma_scale;
+	return Math.min(requested, cap);
 };
 
 /**
@@ -428,7 +455,7 @@ export const render_lightness_stop_css = (
 
 /**
  * Renders the normalized chroma shape of a stop, shared by the palette chroma
- * ramp and the neutral scales: `pow(4t(1-t), --palette_chroma_curve)`.
+ * ramp and the neutral scales: `pow(4t(1-t), --chroma_curve)`.
  * Exactly 0 at the endpoints and 1 at the midpoint.
  */
 export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
@@ -437,36 +464,22 @@ export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
 	const base = 4 * t * (1 - t);
 	if (base === 0) return '0';
 	if (base === 1) return '1';
-	return `calc(pow(${format_ramp_number(base)}, var(--palette_chroma_curve)))`;
+	return `calc(pow(${format_ramp_number(base)}, var(--chroma_curve)))`;
 };
 
 /**
  * Renders the capped default of a palette chroma ramp stop: the knob curve
- * clamped by that stop's worst-hue gamut cap. Per-scheme because the caps
- * differ; `--chroma_scale` multiplies outside this clamp, at the color stops.
- *
- * @param cap - the clamp value; defaults to the baked `PALETTE_CHROMA_CAPS`,
- * overridden by the theme compile step with a recomputed worst-hue cap
+ * clamped by a worst-hue gamut cap - the baked per-scheme
+ * `PALETTE_CHROMA_CAPS` for the defaults, or one the theme compile step
+ * recomputed. `--chroma_scale` multiplies outside this clamp, at the color
+ * stops.
  */
-export const render_chroma_stop_css = (
-	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant,
-	cap: number = PALETTE_CHROMA_CAPS[scheme][stop]
-): string => {
+export const render_chroma_stop_css = (stop: NumericScaleVariant, cap: number): string => {
 	const cap_str = format_ramp_number(cap);
 	return `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_${
 		stop
 	})), ${cap_str})`;
 };
-
-/**
- * Renders the derived default of a palette color stop, e.g. `--palette_a_50`.
- * One definition serves both schemes - the scheme flip lives in the knobs.
- */
-export const render_palette_stop_css = (
-	letter: PaletteVariant,
-	stop: NumericScaleVariant
-): string => render_ramp_color_css(letter, stop);
 
 /**
  * Renders a color derived from the palette ramps at a stop for a hue slot -
@@ -489,7 +502,7 @@ export const render_ramp_color_css = (
 		: `var(--${slot}_chroma_scale, 1)`;
 	return `oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
 		stop
-	}) * var(--chroma_scale) * ${slot_scale}) var(--hue_${slot})${alpha ? ` / ${alpha}` : ''})`;
+	}) * var(--chroma_scale, 1) * ${slot_scale}) var(--hue_${slot})${alpha ? ` / ${alpha}` : ''})`;
 };
 
 /**

@@ -180,7 +180,7 @@ describe('generate_css', () => {
 			assert.deepEqual([...detected], ['space_lg']);
 		});
 
-		test('warns when base styles are enabled but theme variables are disabled', () => {
+		test('errors when base styles are enabled but theme variables are disabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
 				VARIABLES
@@ -195,41 +195,27 @@ describe('generate_css', () => {
 				})
 			);
 
-			const warning = result.diagnostics.find(
-				(d) => d.level === 'warning' && d.message.includes('theme variables are disabled')
+			const error = result.diagnostics.find(
+				(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
 			);
-			assert.ok(warning, 'expected a warning about disabled theme variables');
+			assert.ok(error, 'expected an error about disabled theme variables');
 			// base rule still emitted, but the theme variables section is not
 			assert_css_contains(result.css, 'button');
 			assert_css_not_contains(result.css, 'Theme Variables');
 		});
 
-		test('the disabled-theme warning fires with an empty variable graph', () => {
-			// the real `variables: null` path builds the graph from that same option,
-			// so it's empty - the guard keys on the default names, not the graph
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
-				'button { color: var(--text_color); }',
-				[]
-			);
-
-			const result = generate_css(
-				make_options({
-					all_elements: new Set(['button']),
-					include_base: true,
-					include_theme: false,
-					resources: { style_rule_index, variable_graph, class_variable_index }
-				})
-			);
+		test('the disabled-theme error is a config check, independent of resources', () => {
+			const result = generate_css(make_options({ include_base: true, include_theme: false }));
 
 			assert.ok(
 				result.diagnostics.find(
-					(d) => d.level === 'warning' && d.message.includes('theme variables are disabled')
+					(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
 				),
-				'expected the warning to fire from the production-shaped empty graph'
+				'expected the error without any resources loaded'
 			);
 		});
 
-		test('no theme-disabled warning when both base and theme are enabled', () => {
+		test('no theme-disabled error when both base and theme are enabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
 				VARIABLES

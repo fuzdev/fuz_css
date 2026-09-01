@@ -422,19 +422,19 @@
 		);
 		--palette_chroma_min: 0.0132;
 		--palette_chroma_max: 0.106;
-		--palette_chroma_curve: 1.3; /* falloff of the chroma peak; the neutral scales ride this same shape */
+		--chroma_curve: 1.3; /* falloff of the chroma peak, shared by the palette ramp and the neutral scales */
 		--chroma_shape_00: 0;
-		--chroma_shape_05: calc(pow(0.19, var(--palette_chroma_curve)));
-		--chroma_shape_10: calc(pow(0.36, var(--palette_chroma_curve)));
-		--chroma_shape_20: calc(pow(0.64, var(--palette_chroma_curve)));
-		--chroma_shape_30: calc(pow(0.84, var(--palette_chroma_curve)));
-		--chroma_shape_40: calc(pow(0.96, var(--palette_chroma_curve)));
+		--chroma_shape_05: calc(pow(0.19, var(--chroma_curve)));
+		--chroma_shape_10: calc(pow(0.36, var(--chroma_curve)));
+		--chroma_shape_20: calc(pow(0.64, var(--chroma_curve)));
+		--chroma_shape_30: calc(pow(0.84, var(--chroma_curve)));
+		--chroma_shape_40: calc(pow(0.96, var(--chroma_curve)));
 		--chroma_shape_50: 1;
-		--chroma_shape_60: calc(pow(0.96, var(--palette_chroma_curve)));
-		--chroma_shape_70: calc(pow(0.84, var(--palette_chroma_curve)));
-		--chroma_shape_80: calc(pow(0.64, var(--palette_chroma_curve)));
-		--chroma_shape_90: calc(pow(0.36, var(--palette_chroma_curve)));
-		--chroma_shape_95: calc(pow(0.19, var(--palette_chroma_curve)));
+		--chroma_shape_60: calc(pow(0.96, var(--chroma_curve)));
+		--chroma_shape_70: calc(pow(0.84, var(--chroma_curve)));
+		--chroma_shape_80: calc(pow(0.64, var(--chroma_curve)));
+		--chroma_shape_90: calc(pow(0.36, var(--chroma_curve)));
+		--chroma_shape_95: calc(pow(0.19, var(--chroma_curve)));
 		--chroma_shape_100: 0;
 		--palette_chroma_00: min(
 			calc(
@@ -1661,7 +1661,7 @@
 		--palette_lightness_curve: 0.76;
 		--palette_chroma_min: 0.0214;
 		--palette_chroma_max: 0.1088;
-		--palette_chroma_curve: 1.27; /* falloff of the chroma peak; the neutral scales ride this same shape */
+		--chroma_curve: 1.27; /* falloff of the chroma peak; the neutral scales ride this same shape */
 		--palette_chroma_00: min(
 			calc(
 				var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) *

@@ -228,8 +228,8 @@ export type IconSizeVariant = ArrayElement<typeof icon_size_variants>;
 export const icon_size_variants = ['xs', 'sm', 'md', 'lg', 'xl', 'xl2', 'xl3'] as const;
 
 /**
- * Icon sizes in px, decreasing by the golden ratio and rounded to the nearest
- * pixel. Deliberately insensitive to font size, hence px rather than rem.
+ * Icon sizes in px, stepping up by roughly the golden ratio and rounded to the
+ * nearest pixel. Deliberately insensitive to font size, hence px rather than rem.
  */
 export const ICON_SIZES: Record<IconSizeVariant, number> = {
 	xs: 18,

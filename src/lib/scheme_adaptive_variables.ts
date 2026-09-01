@@ -18,7 +18,7 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'palette_lightness_curve', light: '1.15', dark: '0.76' },
 	{ name: 'palette_chroma_min', light: '0.0132', dark: '0.0214' },
 	{ name: 'palette_chroma_max', light: '0.106', dark: '0.1088' },
-	{ name: 'palette_chroma_curve', light: '1.3', dark: '1.27' },
+	{ name: 'chroma_curve', light: '1.3', dark: '1.27' },
 	{
 		name: 'palette_chroma_00',
 		light:

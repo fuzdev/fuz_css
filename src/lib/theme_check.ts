@@ -32,7 +32,8 @@
  *   and mark the touching gates `unchecked` when a pin is unresolvable.
  * - A few gate inputs do NOT resolve through the theme and are fixed to the
  *   shipped design: `text_min`/`text_max` (assumed pure black/white),
- *   `border_color_NN` alphas (`BORDER_COLOR_ALPHAS`), and the
+ *   `border_color_NN` alphas (`BORDER_COLOR_ALPHAS`), the control-border
+ *   gate's `--border_color` (assumed its `shade_30` default), and the
  *   `chroma_shape_NN` intermediates (recomputed from the curve knob, so a
  *   theme pinning a shape stop directly checks against the unpinned shape).
  *   A theme moving those can render differently than it checks.
@@ -63,8 +64,7 @@ import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_LIGHTNESS_KNOBS,
-	SHADE_LIGHTNESS_KNOBS,
-	TEXT_LIGHTNESS_KNOBS,
+	LIGHTNESS_KNOBS,
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
@@ -79,6 +79,7 @@ import {
 	compute_palette_chroma_caps,
 	render_chroma_stop_css,
 	type LightnessRampKnobs,
+	type RampFamily,
 	type ChromaRampKnobs
 } from './ramps.ts';
 import {
@@ -131,8 +132,19 @@ export const GATE_BORDER = 1.5;
 export const GATE_BORDER_DIVIDER = 1.3;
 
 /**
+ * Gamut gate: how far outside sRGB (summed channel excess) a stop may sit and
+ * still pass - float noise, not visible clipping.
+ */
+export const GATE_GAMUT_TOLERANCE = 1e-4;
+
+// equality slack for resolved hue angles and chroma multipliers
+const NUMERIC_EPSILON = 1e-9;
+
+/**
  * The variable names a theme may set: the declared defaults plus the hook
- * knobs `style.css` consumes through `var()` fallbacks.
+ * knobs `style.css` consumes through `var()` fallbacks. The authoring-side
+ * companion to `validate_theme`, for tooling that completes or checks names
+ * before a theme is assembled.
  */
 export const known_theme_variable_names: Set<string> = new Set([
 	...default_variables.map((v) => v.name),
@@ -216,22 +228,18 @@ const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = Object.fromEntries(
 	)
 );
 
-const LIGHTNESS_KNOBS_BY_FAMILY: Record<
-	'palette' | 'shade' | 'text',
-	Record<ColorSchemeVariant, LightnessRampKnobs>
-> = {
-	palette: PALETTE_LIGHTNESS_KNOBS,
-	shade: SHADE_LIGHTNESS_KNOBS,
-	text: TEXT_LIGHTNESS_KNOBS
-};
-
 const PALETTE_LETTER_MATCHER = /^hue_([a-j])$/u;
 const PALETTE_MULTIPLIER_MATCHER = /^palette_([a-j])_chroma_scale$/u;
 const INTENT_MULTIPLIER_MATCHER = /^(accent|positive|negative|caution|info)_chroma_scale$/u;
 const LIGHTNESS_KNOB_MATCHER = /^(palette|shade|text)_lightness_(00|100|curve)$/u;
-const LIGHTNESS_STOP_MATCHER =
-	/^(palette|shade|text)_lightness_(05|10|20|30|40|50|60|70|80|90|95)$/u;
-const PALETTE_CHROMA_STOP_MATCHER = /^palette_chroma_(00|05|10|20|30|40|50|60|70|80|90|95|100)$/u;
+// the stop alternations, built from the variant list so a scale change can't strand them
+const STOPS_PATTERN = numeric_scale_variants.join('|');
+const DERIVED_STOPS_PATTERN = numeric_scale_variants.slice(1, -1).join('|');
+const LIGHTNESS_STOP_MATCHER = new RegExp(
+	`^(palette|shade|text)_lightness_(${DERIVED_STOPS_PATTERN})$`,
+	'u'
+);
+const PALETTE_CHROMA_STOP_MATCHER = new RegExp(`^palette_chroma_(${STOPS_PATTERN})$`, 'u');
 const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
 // the scaled-reference form emitted for `border_color_chroma`
 // (`calc(var(--neutral_chroma) * 2.12)`) and useful for authored multipliers
@@ -242,8 +250,10 @@ const SCALED_VAR_MATCHER = /^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(-
  * `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_NN)), <number>)`.
  * Recognizing it keeps compiled themes fully checkable.
  */
-const COMPILED_CAP_MATCHER =
-	/^min\(\s*calc\(\s*var\(--palette_chroma_min\)\s*\+\s*\(\s*var\(--palette_chroma_max\)\s*-\s*var\(--palette_chroma_min\)\s*\)\s*\*\s*var\(--chroma_shape_(00|05|10|20|30|40|50|60|70|80|90|95|100)\)\s*\)\s*,\s*(-?\d*\.?\d+)\s*\)$/u;
+const COMPILED_CAP_MATCHER = new RegExp(
+	String.raw`^min\(\s*calc\(\s*var\(--palette_chroma_min\)\s*\+\s*\(\s*var\(--palette_chroma_max\)\s*-\s*var\(--palette_chroma_min\)\s*\)\s*\*\s*var\(--chroma_shape_(${STOPS_PATTERN})\)\s*\)\s*,\s*(-?\d*\.?\d+)\s*\)$`,
+	'u'
+);
 
 /**
  * Resolves knob-tier and derived-stop variables of a single theme to numbers,
@@ -340,7 +350,7 @@ class ThemeResolver {
 		if (!chroma_min.ok) return chroma_min;
 		const chroma_max = this.#resolve('palette_chroma_max', scheme, visited);
 		if (!chroma_max.ok) return chroma_max;
-		const curve = this.#resolve('palette_chroma_curve', scheme, visited);
+		const curve = this.#resolve('chroma_curve', scheme, visited);
 		if (!curve.ok) return curve;
 		const shape = ramp_chroma_shape(stop, curve.value);
 		const requested = chroma_min.value + (chroma_max.value - chroma_min.value) * shape;
@@ -381,14 +391,13 @@ class ThemeResolver {
 		if (name === 'palette_chroma_max') {
 			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_max };
 		}
-		if (name === 'palette_chroma_curve') {
+		if (name === 'chroma_curve') {
 			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].curve };
 		}
 		// lightness endpoints and curve
 		const knob_match = LIGHTNESS_KNOB_MATCHER.exec(name);
 		if (knob_match) {
-			const knobs =
-				LIGHTNESS_KNOBS_BY_FAMILY[knob_match[1] as 'palette' | 'shade' | 'text'][scheme];
+			const knobs = LIGHTNESS_KNOBS[knob_match[1] as RampFamily][scheme];
 			const field = knob_match[2];
 			const value =
 				field === '00' ? knobs.lightness_00 : field === '100' ? knobs.lightness_100 : knobs.curve;
@@ -397,7 +406,7 @@ class ThemeResolver {
 		// derived lightness intermediates - compute from the resolved knobs
 		const stop_match = LIGHTNESS_STOP_MATCHER.exec(name);
 		if (stop_match) {
-			const family = stop_match[1] as 'palette' | 'shade' | 'text';
+			const family = stop_match[1] as RampFamily;
 			const stop = stop_match[2] as NumericScaleVariant;
 			const knobs = this.#lightness_knobs(family, scheme, visited);
 			if (!knobs.ok) return knobs.error;
@@ -436,7 +445,7 @@ class ThemeResolver {
 	}
 
 	#lightness_knobs(
-		family: 'palette' | 'shade' | 'text',
+		family: RampFamily,
 		scheme: ColorSchemeVariant,
 		visited: Set<string>
 	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
@@ -458,7 +467,7 @@ class ThemeResolver {
 		visited: Set<string>
 	): { ok: true; value: ChromaRampKnobs } | { ok: false; error: Resolved } {
 		const r = this.#resolve_all(
-			['palette_chroma_min', 'palette_chroma_max', 'palette_chroma_curve'],
+			['palette_chroma_min', 'palette_chroma_max', 'chroma_curve'],
 			scheme,
 			visited
 		);
@@ -520,21 +529,35 @@ const validate_knob_value = (
 			});
 		}
 	};
+	// reference forms the resolver understands - var(--x) and the scaled
+	// calc(var(--x) * k) (e.g. border_color_chroma's derived default) - pass
+	// without a range check, which needs the resolved value
+	const is_reference = VAR_MATCHER.test(trimmed) || SCALED_VAR_MATCHER.test(trimmed);
 	switch (knob.kind) {
-		case 'number':
-		case 'percent': {
-			// reference forms the resolver understands - var(--x) and the scaled
-			// calc(var(--x) * k) (e.g. border_color_chroma's derived default) -
-			// pass without a range check, which needs the resolved value
-			const is_reference = VAR_MATCHER.test(trimmed) || SCALED_VAR_MATCHER.test(trimmed);
+		case 'number': {
 			if (!numeric && !is_reference) {
 				issues.push({
 					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a numeric ${knob.kind} value`,
+					message: `${variable} ${slot} "${value}" is not a numeric value`,
 					variable
 				});
 			} else if (numeric) {
 				check_range(Number(trimmed));
+			}
+			break;
+		}
+		case 'percent': {
+			// the CSS form (`60%`), which is what the defaults declare and the
+			// editor writes; the range is in percent units
+			const percent_match = /^(-?\d*\.?\d+)%$/u.exec(trimmed);
+			if (!percent_match && !is_reference) {
+				issues.push({
+					level: 'warning',
+					message: `${variable} ${slot} "${value}" is not a CSS percentage like 60%`,
+					variable
+				});
+			} else if (percent_match) {
+				check_range(Number(percent_match[1]));
 			}
 			break;
 		}
@@ -586,14 +609,21 @@ const validate_knob_value = (
 // when the path points into `variables`/`scheme_mirror` - the schema reports
 // the whole theme at once, so the path is what carries the location
 const to_shape_issue = (
-	theme: Theme,
+	theme: unknown,
 	path: ReadonlyArray<PropertyKey>,
 	message: string
 ): ThemeIssue => {
 	const [head, index] = path;
 	if (head === 'variables' || head === 'scheme_mirror') {
-		const entry = typeof index === 'number' ? theme[head]?.[index] : undefined;
-		const name = typeof entry?.name === 'string' ? entry.name : undefined;
+		const list =
+			typeof theme === 'object' && theme !== null
+				? (theme as Record<string, unknown>)[head]
+				: undefined;
+		const entry: unknown = Array.isArray(list) && typeof index === 'number' ? list[index] : undefined;
+		const name =
+			typeof entry === 'object' && entry !== null && typeof (entry as { name?: unknown }).name === 'string'
+				? (entry as { name: string }).name
+				: undefined;
 		return {
 			level: 'error',
 			message: `invalid variable${name ? ` "${name}"` : ''}: ${message}`,
@@ -614,20 +644,22 @@ const to_shape_issue = (
  * valid.
  *
  * A shape failure returns on its own: the knob lint reads values the schema
- * hasn't vouched for, so it runs only over a theme that parsed.
+ * hasn't vouched for, so it runs only over a theme that parsed. Takes
+ * `unknown` so untrusted input (a theme restored from storage, a pasted
+ * object) needs no cast to be checked.
  */
-export const validate_theme = (theme: Theme): Array<ThemeIssue> => {
+export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 	const parsed = Theme.safeParse(theme);
 	if (!parsed.success) {
 		return parsed.error.issues.map((issue) => to_shape_issue(theme, issue.path, issue.message));
 	}
 	const issues: Array<ThemeIssue> = [];
-	const { scheme } = parsed.data;
+	const { scheme, scheme_mirror } = parsed.data;
 	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
 	// a stanced theme renders correctly only with its mirror computed - the
 	// gates here resolve through the mirror either way, so without this warning
 	// a hand-rolled stanced theme checks clean but renders unmirrored
-	if (stance && theme.scheme_mirror === undefined) {
+	if (stance && scheme_mirror === undefined) {
 		issues.push({
 			level: 'warning',
 			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
@@ -694,7 +726,7 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 			if (
 				letter_multiplier.ok &&
 				intent_multiplier.ok &&
-				Math.abs(letter_multiplier.value - intent_multiplier.value) > 1e-9
+				Math.abs(letter_multiplier.value - intent_multiplier.value) > NUMERIC_EPSILON
 			) {
 				issues.push({
 					level: 'warning',
@@ -785,7 +817,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	): Oklch | null => {
 		const lightness = num(`${family}_lightness_${stop}`, scheme);
 		const neutral_c = num('neutral_chroma', scheme);
-		const curve = num('palette_chroma_curve', scheme);
+		const curve = num('chroma_curve', scheme);
 		const neutral_hue = num('hue_neutral', scheme);
 		if (lightness === null || neutral_c === null || curve === null || neutral_hue === null) {
 			return null;
@@ -803,8 +835,8 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			scheme,
 			subject,
 			value,
-			threshold: 1e-4,
-			pass: value <= 1e-4
+			threshold: GATE_GAMUT_TOLERANCE,
+			pass: value <= GATE_GAMUT_TOLERANCE
 		});
 	};
 
@@ -818,7 +850,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	};
 
 	const push_monotonicity = (
-		family: 'palette' | 'shade' | 'text',
+		family: RampFamily,
 		scheme: ColorSchemeVariant
 	): void => {
 		const lightnesses: Array<number> = [];
@@ -864,7 +896,9 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			const multiplier = num(`${intent}_chroma_scale`, scheme);
 			if (hue === null || multiplier === null) continue;
 			if (
-				letter_slots.some(([h, m]) => Math.abs(h - hue) < 1e-9 && Math.abs(m - multiplier) < 1e-9)
+				letter_slots.some(
+					([h, m]) => Math.abs(h - hue) < NUMERIC_EPSILON && Math.abs(m - multiplier) < NUMERIC_EPSILON
+				)
 			) {
 				continue;
 			}
@@ -1006,7 +1040,7 @@ const collect_hues = (resolver: ThemeResolver, scheme: ColorSchemeVariant): Arra
 	}
 	for (const intent of intent_variants) {
 		const r = resolver.resolve(`hue_${intent}`, scheme);
-		if (r.ok && !hues.some((h) => Math.abs(h - r.value) < 1e-9)) hues.push(r.value);
+		if (r.ok && !hues.some((h) => Math.abs(h - r.value) < NUMERIC_EPSILON)) hues.push(r.value);
 	}
 	// with no resolvable hue at all, an empty set would yield Infinity caps and
 	// emit garbage CSS - fall back to the default hues (the re-check still
@@ -1083,8 +1117,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		const light_drift = Math.abs(light_cap - baked.light[stop]);
 		const dark_drift = Math.abs(dark_cap - baked.dark[stop]);
 		if (light_drift > CAP_EMIT_EPSILON || dark_drift > CAP_EMIT_EPSILON) {
-			const light_value = render_chroma_stop_css(stop, 'light', light_cap);
-			const dark_value = render_chroma_stop_css(stop, 'dark', dark_cap);
+			const light_value = render_chroma_stop_css(stop, light_cap);
+			const dark_value = render_chroma_stop_css(stop, dark_cap);
 			cap_overrides.push(
 				stance || light_value === dark_value
 					? { name: `palette_chroma_${stop}`, light: light_value }

@@ -19,12 +19,19 @@ export const StyleVariableName = z
 export type StyleVariableName = z.infer<typeof StyleVariableName>;
 
 /**
- * Zod schema for validating `StyleVariable` objects.
- * Use `safeParse` for validation; the `StyleVariable` type is defined separately
- * to preserve the `Flavored` brand on `name`.
+ * A style variable: a custom property name with a value per color scheme.
+ *
+ * The slots follow the renderer's cascade: `light` is the base position,
+ * rendered on `:root`, and `dark` renders on `:root.dark`. A theme variable
+ * with only `light` therefore applies in both color schemes (its `fuz.theme`
+ * `:root` beats the `fuz.base` dark default by layer order), while `dark`
+ * alone applies in dark only - which is why the shipped themes author a
+ * scheme-agnostic knob as a single `light` value.
+ *
+ * Strict: a misspelled slot is an error, not a silently dropped scheme.
  */
 export const StyleVariable = z
-	.object({
+	.strictObject({
 		name: StyleVariableName,
 		light: z.string().optional(),
 		dark: z.string().optional(),

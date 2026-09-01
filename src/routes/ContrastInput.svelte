@@ -1,5 +1,6 @@
 <script lang="ts">
-	// TODO upstream to fuz_ui
+	// TODO replace with fuz_ui's `RadioMenu` (which `ColorSchemeInput` now
+	// wraps) once the fuz_ui release carrying it lands
 
 	import { swallow } from '@fuzdev/fuz_util/dom.ts';
 	import type { SvelteHTMLElements } from 'svelte/elements';
@@ -28,12 +29,12 @@
 
 <!-- the same shape as fuz_ui's ColorSchemeInput: a horizontal radio menu of
 	joined buttons, not a select, so the three states are one glance apart -->
-<menu {...rest} class="contrast-control unstyled {rest.class}">
+<menu {...rest} class={['contrast-control', 'unstyled', rest.class]}>
 	{#each options as { modifier, label } (label)}
 		{@const is_selected = modifier === selected}
 		<button
 			type="button"
-			class={['contrast color_a', { selected: is_selected }]}
+			class={['contrast palette_a', { selected: is_selected }]}
 			role="menuitemradio"
 			title={is_selected ? `${label} contrast is selected` : `select ${label} contrast`}
 			aria-checked={is_selected}

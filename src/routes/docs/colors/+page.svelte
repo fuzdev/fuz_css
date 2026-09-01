@@ -16,16 +16,13 @@
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
-	const computed_styles =
-		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
-
 	// TODO button to add an inline hue input for runtime modification of the theme
 </script>
 
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css's colors are <em>derived</em>: around a dozen knobs produce every color
+			fuz_css's colors are <em>derived</em>: a handful of high-leverage knobs produce every color
 			<TomeLink slug="variables" /> in pure CSS, in the
 			<MdnLink path="Web/CSS/color_value/oklch" /> colorspace, adapting to the
 			<MdnLink path="Web/CSS/color-scheme" />
@@ -119,7 +116,7 @@
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
 			{#each palette_variants as letter (letter)}
-				<HueSwatch {letter} {computed_styles} description={format_palette_gloss(letter)} />
+				<HueSwatch {letter} description={format_palette_gloss(letter)} />
 			{/each}
 		</ul>
 	</TomeSection>

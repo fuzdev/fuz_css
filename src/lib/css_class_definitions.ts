@@ -158,9 +158,8 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	borders
 
 	*/
-	// Border colors using shade scale (opaque, for explicit shade-based borders)
-	...generate_property_classes('border-color', shade_variants, (v) => `var(--shade_${v})`),
-	// Border color alpha (tinted alpha borders - overrides shade-based for 05-95)
+	// Border color alpha ramp - the letterless `border_color_NN` family sets both
+	// the property and the contextual variable (`outline_color_NN` is the opaque shade ramp)
 	...generate_property_classes(
 		'border-color',
 		darken_lighten_variants,

@@ -3,6 +3,7 @@ import { test, assert, describe } from 'vitest';
 import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.ts';
 import { StyleVariable, type Theme } from '$lib/variable.ts';
 import { validate_theme } from '$lib/theme_check.ts';
+import { theme_knob_by_name } from '$lib/knobs.ts';
 
 // every theme module ships from themes/, so discover them by glob - a new
 // module can't silently skip validation by being left off a hand-list
@@ -113,5 +114,21 @@ describe('shipped themes', () => {
 			const errors = validate_theme(theme).filter((issue) => issue.level === 'error');
 			assert.deepEqual(errors, [], `Exemplar "${theme.name}" has validation errors`);
 		}
+	});
+});
+
+describe('theme tiers', () => {
+	const sets_palette_tier = (theme: Theme): boolean =>
+		theme.variables.some((v) => theme_knob_by_name.get(v.name)?.tier === 'palette');
+
+	test('registry themes and modifiers stay in the semantic tier', () => {
+		for (const theme of [...default_themes, ...contrast_modifiers]) {
+			assert.isFalse(sets_palette_tier(theme), `"${theme.name}" moves a palette-tier knob`);
+		}
+	});
+
+	test('neon is the only palette-tier exemplar', () => {
+		const palette_tier = exemplar_themes.filter(sets_palette_tier).map((t) => t.name);
+		assert.deepEqual(palette_tier, ['neon']);
 	});
 });

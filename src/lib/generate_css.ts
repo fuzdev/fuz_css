@@ -19,16 +19,27 @@ import {
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
 import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style } from './theme.ts';
-import type { Theme } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
-import { default_variables } from './variables.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
 
-// the names fuz_css's theme output would define - the reference set for the
-// disabled-theme dangling-`var()` guard, which can't use the variable graph
-// (built from the same disabled option, so empty)
-const default_variable_names: Set<string> = new Set(default_variables.map((v) => v.name));
+// the theme's own overlay for the fuz.theme layer, filtered to the variables
+// the resolution kept so it stays as tree-shaken as the fuz.base block it
+// re-declares (a stance's scheme_mirror alone carries every scheme-adaptive
+// default); the color-scheme pin for a stance renders regardless
+const render_theme_overlay = (theme: Theme, resolved_variables: Set<string>): string => {
+	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
+	const keep = (v: StyleVariable): boolean => resolved_variables.has(v.name);
+	return render_theme_style(
+		{
+			...resolved,
+			variables: resolved.variables.filter(keep),
+			scheme_mirror: resolved.scheme_mirror?.filter(keep)
+		},
+		{ layer: null }
+	);
+};
 
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by
@@ -138,6 +149,24 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];
 
+	// Config error: base styles on, theme off (`variables: null`). The kept base
+	// rules and utility classes reference theme variables the disabled theme
+	// output won't define, so every such `var()` dangles. Utility-only mode
+	// (both off) is the way to bring your own; to ship the full variable set
+	// bundled, keep `variables` and set `additional_variables: 'all'`.
+	if (include_base && !include_theme) {
+		diagnostics.push({
+			phase: 'generation',
+			level: 'error',
+			message:
+				'Base styles are enabled but theme variables are disabled (variables: null); the emitted base styles reference theme variables nothing defines',
+			suggestion:
+				"Set base_css: null too for utility-only mode, or keep variables and set additional_variables: 'all' to bundle the full theme.",
+			identifier: 'theme_variables_disabled',
+			locations: null
+		});
+	}
+
 	// Footgun guard: a configured `theme` with theme output disabled
 	// (`variables: null`) is silently discarded - the theme flows into the
 	// variable graph but the graph never renders.
@@ -197,29 +226,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 		diagnostics.push(...resolution.diagnostics);
 
-		// Footgun guard: base styles on, theme off (`variables: null`). The kept base rules and
-		// utility classes still reference fuz_css theme variables, but the disabled theme output
-		// won't define them - every such `var()` dangles. Utility-only mode (both off) never reaches
-		// this branch; the legitimate escape is importing `theme.css` separately. Checked against
-		// the default variable names - the graph here was built from the same `variables: null`,
-		// so it's empty and can't identify theme variables.
-		if (include_base && !include_theme) {
-			const references_theme_var = [...resolution.referenced_variables].some((v) =>
-				default_variable_names.has(v)
-			);
-			if (references_theme_var) {
-				diagnostics.push({
-					phase: 'generation',
-					level: 'warning',
-					message:
-						'Base styles are enabled but theme variables are disabled (variables: null); emitted styles reference theme variables that will be undefined',
-					suggestion: 'Import theme.css separately, or set base_css: null for utility-only mode.',
-					identifier: 'theme_variables_disabled',
-					locations: null
-				});
-			}
-		}
-
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
@@ -228,12 +234,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			// the fuz.preferences OS mappings and pins color-scheme for a
 			// stance, exactly like the runtime path renders the same theme
 			theme_overlay_css:
-				include_theme && theme
-					? render_theme_style(
-							theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme,
-							{ layer: null }
-						)
-					: null
+				include_theme && theme ? render_theme_overlay(theme, resolution.resolved_variables) : null
 		});
 	} else {
 		// utility-only mode - still layered, so the separately imported package

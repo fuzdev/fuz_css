@@ -4,7 +4,7 @@
 
 fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system. It
-ships two plain CSS files — the base `style.css` and replaceable `theme.css` —
+ships two plain CSS files - the base `style.css` and replaceable `theme.css` -
 that work with any framework and plain HTML, and its class generator supports
 HTML/JS/TS, Svelte, and JSX (React/Preact/Solid). Early alpha with breaking
 changes ahead.
@@ -15,7 +15,7 @@ components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 ## Committing
 
 `git add` and `git commit` are denied by `.claude/settings.local.json` in
-this repo — make the edits and stop, the user commits.
+this repo - make the edits and stop, the user commits.
 
 ## Gro commands
 
@@ -61,16 +61,17 @@ fuz_css is a **semantic-first CSS framework and design system**:
 
 ### Styling philosophy
 
-**Default element styling is the baseline — reach past it only with a
+**Default element styling is the baseline - reach past it only with a
 reason.** fuz_css styles semantic HTML out of the box, so most content needs
 no classes: headings are tiered, form controls share sizing and focus states,
 and block elements (`p`, `ul`, `ol`, `table`, `aside`, `blockquote`, `pre`,
 `fieldset`, …) get vertical rhythm automatically from the **flow-margin**
-system — each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
-`:last-child` or `.unstyled`, and margins reset to 0 on the direct children of
-a `.row` (horizontal flex; use `gap_*` there instead). Adding a
+system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
+`:last-child` or `.unstyled` (headings and `section` take multiples of it),
+and margins reset to 0 on the direct children of a `.row` (horizontal flex;
+use `gap_*` there instead). Adding a
 `mb_*`/`gap_*`/`p_*` class or a `<style>` block
-should answer "what specific gap in the defaults does this close?" — the most
+should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,
 work down the ladder and stop at the first rung that suffices: right semantic
@@ -114,7 +115,7 @@ combined and only used content is included. In utility-only mode, import
   everything)
 - A theme applies either at build time (the generators' `theme` option, baked
   into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
-  renders it to a `<style>` element). They compose — the runtime theme wins
+  renders it to a `<style>` element). They compose - the runtime theme wins
   by cascade layer
 - Color values are derived: curve knobs → ramp stops → color stops, computed
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
@@ -168,9 +169,10 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 - **Token classes** - Map to style variables: `p_md`, `color_a_50`,
   `positive_50`, `gap_lg`. Palette-letter classes are property-first and the
   letter alone implies the palette: `color_a_50`, `bg_a_50`, `border_a_50`,
-  `outline_a_50`, and `shadow_a_50` apply the `--palette_a_NN` stops to their
-  named property (`border_color_50` is the letterless alpha ramp). A bare
-  intent or neutral scale class applies its family's dominant use
+  and `outline_a_50` apply the `--palette_a_NN` stops to their named property
+  and `shadow_a_50` sets the contextual `--shadow_color` (`border_color_50` is
+  the letterless alpha ramp). A bare intent or neutral scale class applies its
+  family's dominant use
   (`positive_50`/`text_70` set text color, `shade_50` sets background) with
   `bg_` twins (`bg_positive_50`). The adaptive alpha overlays
   (`--fg_*`/`--bg_*`) are variables only, reached via literals
@@ -179,7 +181,9 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
   from the `md` default; `md` doubles as a cascade reset; they scale controls
-  and spacing via `--flow_margin` — headings and prose keep their font sizes),
+  and spacing via `--flow_margin` - headings and prose keep their font sizes,
+  while a bare `.heading` reads the current `--font_size`, so a composite or
+  a `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
   `menuitem`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
@@ -201,7 +205,7 @@ breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
 variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 `motion-safe:`, `contrast-more:`, etc.) are also available.
 
-Custom properties work as literals too — `--flow_margin:0`, `--button_shadow:none`
+Custom properties work as literals too - `--flow_margin:0`, `--button_shadow:none`
 set the property on the element straight from markup, which is how a consumer
 reaches any theme/base hook without a dedicated token class.
 
@@ -219,7 +223,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (cyan · info), `j` (teal)
 - Semantic intent knobs alias meaning over the letters: `--hue_accent`
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
-  (all surfaces/text/borders/shadows — the neutral is an intent whose scales
+  (all surfaces/text/borders/shadows - the neutral is an intent whose scales
   are `shade_*`/`text_*`), `--hue_positive`/`--hue_negative`/
   `--hue_caution`/`--hue_info`; each intent derives a full 13-stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
@@ -229,13 +233,13 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   to grayscale → >1 vivid; the neutral scales ride `--neutral_chroma`
   instead), per-scheme lightness
   ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`
-  and `text_`), and the chroma curve
-  (`--palette_chroma_min`/`_max`/`_curve`) clamped per stop by baked
-  worst-hue sRGB gamut caps
+  and `text_`), and the chroma curve (`--chroma_curve`, shared with the
+  neutral scales, over the palette's `--palette_chroma_min`/`_max`) clamped
+  per stop by baked worst-hue sRGB gamut caps
 - Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
   twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
-  low-chroma orange). A hue binding shares only the angle — `validate_theme`
+  low-chroma orange). A hue binding shares only the angle - `validate_theme`
   warns when a bound letter's multiplier differs from the intent's twin
 - 13 intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
@@ -243,7 +247,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - Form/scale knobs derive into token defaults so one move reshapes a family
   while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
   (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
-  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks —
+  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
   setting it flattens the heading ladder), `--heading_font_family`, and the
   `--background_image` decoration hook on `:root`
 - `--font_family` is the body font (default `var(--font_family_sans)`), kept
@@ -253,13 +257,14 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   two knobs by design
 - `--border_style` is global, but buttons read `--button_border_style`
   (default `var(--border_style)`) and swap to `--button_border_style_active`
-  while pressed — the raised/pressed pair `outset`/`inset` needs, and the
+  while pressed - the raised/pressed pair `outset`/`inset` needs, and the
   only element with that affordance. A theme's contextual `--border_style`
   override no longer reaches buttons, since the derived default resolves at
   `:root`
 - Micro-surface variables declared in `default_variables`: `--caret_color`
   (defaults to the accent), `--scrollbar_thumb_color`/
-  `--scrollbar_track_color` (default into the shade scale), `--backdrop_color`
+  `--scrollbar_track_color` (the thumb defaults into the shade scale, the
+  track to transparent), `--backdrop_color`
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
   hook (per-tier fallbacks, so no single default exists); `prefers-contrast:
@@ -346,9 +351,11 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme
 - `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
-  diagnostic handling; warnings flag configs that leave dangling `var()`
-  references (`base_css` enabled with `variables: null`, or excluding a
-  variable that shipped styles still reference)
+  diagnostic handling; `base_css` enabled with `variables: null` is an error
+  (the base styles would reference variables nothing defines - set both to
+  `null` for utility-only mode, or `additional_variables: 'all'` to bundle
+  the full theme), and warnings flag excluding a variable that shipped
+  styles still reference
 - `filter_file` - which files get extracted (the default filter includes
   node_modules deps)
 - `prescan` (Vite plugin only) - dev-only eager source scan at server
@@ -356,7 +363,7 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   Vite root, `false` disables, or an array of directories)
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`)
 
-These are the common options — see
+These are the common options - see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
 (class definitions and interpreters, acorn plugins, deps).
 
@@ -392,7 +399,7 @@ typography, borders, shading, shadows, layout. See
   tooling like the docs swatches may import the conversions)
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
-  `compose_themes` (flatten + last-wins fragment composition — the
+  `compose_themes` (flatten + last-wins fragment composition - the
   hand-flatten precursor to `extends`), `ColorScheme` type (`Theme` itself
   lives in `variable.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~1.3KB minified
@@ -406,32 +413,32 @@ typography, borders, shading, shadows, layout. See
 - [scheme_adaptive_variables.ts](src/lib/scheme_adaptive_variables.ts) -
   generated literal twin of the dual-slot subset of `default_variables`,
   emitted so the mirror carries no dependency on `variables.ts` (whose
-  module-init emitter calls defeat tree-shaking — reaching for
+  module-init emitter calls defeat tree-shaking - reaching for
   `default_variables` costs ~20KB)
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
   (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
   low/high contrast are modifiers composed over any theme via
-  `compose_themes`, not themes themselves — users see one flat "themes"
+  `compose_themes`, not themes themselves - users see one flat "themes"
   list
 - `src/lib/themes/` - One module per theme. Registered: base. Shipped
   exemplars are recognizable materials, each anchoring an era: smolder
-  (firelight — warm haze, vivid past the caps, gradient-sky
-  `background_image`), parchment (the illuminated manuscript — serif body,
+  (firelight - warm haze, vivid past the caps, gradient-sky
+  `background_image`), parchment (the illuminated manuscript - serif body,
   rubrication-red accent, double-ruled borders, candlelit in dark),
-  concrete (brutalism — near-grayscale neutral, sharp, flat, border-forward,
-  heavy headings), nineties (the 90s desktop web — colorless chrome on an
+  concrete (brutalism - near-grayscale neutral, sharp, flat, border-forward,
+  heavy headings), nineties (the 90s desktop web - colorless chrome on an
   off-white ground, serif everything, underlined links, and the only
   exemplar built on borders rather than depth: `outset` buttons pressing to
-  `inset` over `inset` fields), phosphor (the CRT terminal — green cast,
+  `inset` over `inset` fields), phosphor (the CRT terminal - green cast,
   mono, compact, instant short `duration_*`, dark-only), and neon (80s
-  signage — magenta accent, colored glow shadows, capsule radius pins, a
+  signage - magenta accent, colored glow shadows, capsule radius pins, a
   rotated yellow slot making it the one palette-tier exemplar, dark-only).
   Only phosphor and neon take a `scheme` stance; everything else is
   dual-scheme. The contrast pair live here too as the modifier modules
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
-  `heading_font_weight` and the micro-surface color hooks
+  `heading_font_weight` and the micro-surface color variables
 - [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
   numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
   contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over
@@ -455,6 +462,9 @@ typography, borders, shading, shadows, layout. See
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
   (preferred) with HMR via `virtual:fuz.css`
+- [css_placeholder_splice.ts](src/lib/css_placeholder_splice.ts) - The
+  build-mode placeholder and the splice that writes the generated CSS at its
+  position in the bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
   (generate → resolve → bundle) used by both generators

@@ -24,6 +24,7 @@ import type { StyleVariableName } from './variable.ts';
 import {
 	border_radius_variants,
 	border_width_variants,
+	duration_variants,
 	intent_variants,
 	line_height_variants,
 	palette_variants,
@@ -238,7 +239,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 0.001
 	},
 	{
-		name: 'palette_chroma_curve',
+		name: 'chroma_curve',
 		kind: 'number',
 		axis: 'color',
 		leverage: 'md',
@@ -459,7 +460,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 		step: 0.05
 	})),
 	// motion
-	...(['1', '2', '3', '4', '5', '6'] as const).map((n): ThemeKnob => ({
+	...duration_variants.map((n): ThemeKnob => ({
 		name: `duration_${n}`,
 		kind: 'time',
 		axis: 'motion',

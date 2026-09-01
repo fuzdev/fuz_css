@@ -26,6 +26,12 @@ export interface RenderThemeStyleOptions {
 	 * render for both placements of the scheme class - on the scope element
 	 * itself (`#id.dark`) and on the root (`:root.dark #id`), the ecosystem
 	 * convention - so a scoped theme's dark appearance follows the page's.
+	 *
+	 * Only literal-valued variables take effect in a scope: the derived color
+	 * stops (`--palette_a_50`, `--shade_50`, ...) resolve their `calc()` on
+	 * `:root`, and a descendant inherits the computed color, so a curve knob
+	 * like `--chroma_scale` set at `#id` changes nothing. Knob-only themes
+	 * need `:root`.
 	 */
 	id?: string | null;
 	/**

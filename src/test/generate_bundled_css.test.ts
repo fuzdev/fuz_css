@@ -20,7 +20,6 @@ const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssRe
 	base_css: 'button { color: red; }',
 	preferences_css: '',
 	resolved_variables: new Set(['color']),
-	referenced_variables: new Set(['color']),
 	included_rule_indices: new Set([0]),
 	included_elements: new Set(['button']),
 	diagnostics: [],

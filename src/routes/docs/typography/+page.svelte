@@ -242,8 +242,10 @@
 			Here, size composites adjust the vertical rhythm by setting <code>--flow_margin</code>, not
 			the text size. Paragraph text keeps its fixed size, and headings keep their own sizes to
 			preserve hierarchy; only controls like buttons and chips read the composite's
-			<code>--font_size</code>. Scaling headers and prose with size composites is under
-			consideration, design feedback is welcome.
+			<code>--font_size</code>. A bare <code>.heading</code> is the exception: it reads the
+			current <code>--font_size</code>, so <code>.heading.lg</code> or a
+			<code>--font_size</code> literal tiers it. Scaling headers and prose with size composites
+			is under consideration, design feedback is welcome.
 		</UnfinishedImplementationWarning>
 	</TomeSection>
 

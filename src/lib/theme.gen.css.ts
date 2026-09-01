@@ -33,9 +33,9 @@ export const gen: Gen = ({ origin_path }) => {
 
 	return `${banner}
 
-		/* theme: ${theme.name} */
-    ${theme_style}
+/* theme: ${theme.name} */
+${theme_style}
 
-    ${banner}
-  `;
+${banner}
+`;
 };

@@ -820,9 +820,10 @@ vite_plugin_fuz_css({
 			<aside>
 				Palette-letter classes are property-first, and the letter alone implies the palette:
 				<code>.color_a_50</code>, <code>.bg_a_50</code>, <code>.border_a_50</code>,
-				<code>.outline_a_50</code>, and <code>.shadow_a_50</code> apply
-				<code>--palette_a_50</code> to their named property (<code>.border_color_50</code>
-				is the letterless alpha ramp). A bare intent or neutral scale class applies its family's
+				and <code>.outline_a_50</code> apply <code>--palette_a_50</code> to their named
+				property, and <code>.shadow_a_50</code> sets it as the contextual
+				<code>--shadow_color</code> (<code>.border_color_50</code> is the letterless alpha
+				ramp). A bare intent or neutral scale class applies its family's
 				dominant use: <code>.positive_50</code> and
 				<code>.text_70</code> set the text color while <code>.shade_50</code> sets the background,
 				with the <code>bg_</code> prefix selecting the background twin (<code>

@@ -3,6 +3,7 @@
 
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
+	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 	import type { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
@@ -40,16 +41,25 @@
 		onload_theme?: (theme: Theme) => void;
 	} = $props();
 
-	// the scheme whose slots edits write to; OS changes while 'auto' aren't
-	// tracked live, acceptable for now
-	const editing_scheme: ColorSchemeVariant = $derived.by(() => {
-		const c = theme_state.color_scheme;
-		if (c === 'dark') return 'dark';
-		if (c === 'light') return 'light';
-		return typeof matchMedia !== 'undefined' && matchMedia('(prefers-color-scheme: dark)').matches
-			? 'dark'
-			: 'light';
+	// the OS preference, tracked live so an OS flip while 'auto' doesn't keep
+	// edits writing to the stale slot; false during SSR, corrected on mount
+	let os_prefers_dark = $state(false);
+	$effect(() => {
+		const query = matchMedia('(prefers-color-scheme: dark)');
+		const update = () => {
+			os_prefers_dark = query.matches;
+		};
+		update();
+		query.addEventListener('change', update);
+		return () => query.removeEventListener('change', update);
 	});
+
+	// the scheme whose slots edits write to
+	const editing_scheme: ColorSchemeVariant = $derived(
+		theme_state.color_scheme === 'dark' || (theme_state.color_scheme === 'auto' && os_prefers_dark)
+			? 'dark'
+			: 'light'
+	);
 
 	const failing_gates: Array<ThemeGateEntry> = $derived(
 		editor.check_report.entries.filter((e) => !e.pass)
@@ -265,7 +275,7 @@
 					</summary>
 					<div class="ramp_strips mt_md mb_lg">
 						{#each palette_variants as letter (letter)}
-							<RampStrip prefix="palette_{letter}" label="palette_{letter}" />
+							<RampStrip prefix="palette_{letter}" />
 						{/each}
 					</div>
 					<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
@@ -334,25 +344,31 @@
 		The copyable <code>Theme</code> object, and the CSS it renders - the variables the theme sets,
 		plus the scheme-stance mirror when the theme is single-scheme.
 	</p>
-	<div class="rendered mb_lg">
-		<div class="copy">
-			<CopyToClipboard text={output_ts} />
-		</div>
-		<Code content={output_ts} lang="ts" />
-	</div>
-	{#if editor.output.variables.length || editor.output.scheme_mirror?.length}
-		<div class="rendered mb_lg">
+	<!-- lazily rendered: the highlighted output is the costliest thing on the
+		page and would re-render on every knob drag while open -->
+	<Details summary="theme object">
+		<div class="rendered mt_md">
 			<div class="copy">
-				<CopyToClipboard text={output_css} />
+				<CopyToClipboard text={output_ts} />
 			</div>
-			<Code content={output_css} lang="css" />
+			<Code content={output_ts} lang="ts" />
 		</div>
-	{:else}
-		<p>
-			The theme is empty: every variable keeps its base default, so it renders no CSS. Move a knob
-			to see its output.
-		</p>
-	{/if}
+	</Details>
+	<Details summary="rendered CSS">
+		{#if editor.output.variables.length || editor.output.scheme_mirror?.length}
+			<div class="rendered mt_md">
+				<div class="copy">
+					<CopyToClipboard text={output_css} />
+				</div>
+				<Code content={output_css} lang="css" />
+			</div>
+		{:else}
+			<p class="mt_md">
+				The theme is empty: every variable keeps its base default, so it renders no CSS. Move a
+				knob to see its output.
+			</p>
+		{/if}
+	</Details>
 </section>
 
 <style>

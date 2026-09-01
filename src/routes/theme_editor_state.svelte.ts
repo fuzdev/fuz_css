@@ -59,9 +59,7 @@ export interface ThemeEditorSnapshotData {
  * stanced draft over a dual base can't ship both appearances.
  */
 export class ThemeEditorState {
-	// the initializer looks dead (the constructor always assigns) but TS's
-	// class-field ordering needs it - the $derived fields below read `themes`
-	readonly themes: Array<Theme> = [];
+	readonly themes: Array<Theme>;
 
 	name: string = $state.raw('new theme');
 	based_on: string = $state.raw('base');

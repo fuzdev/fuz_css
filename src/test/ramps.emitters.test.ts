@@ -15,9 +15,7 @@ import { test, assert, describe } from 'vitest';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
-	PALETTE_LIGHTNESS_KNOBS,
-	SHADE_LIGHTNESS_KNOBS,
-	TEXT_LIGHTNESS_KNOBS,
+	LIGHTNESS_KNOBS,
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
@@ -30,10 +28,10 @@ import {
 	render_lightness_stop_css,
 	render_chroma_shape_css,
 	render_chroma_stop_css,
-	render_palette_stop_css,
 	render_neutral_stop_css,
 	render_ramp_color_css,
 	render_border_color_stop_css,
+	render_shadow_tint_css,
 	border_color_oklch,
 	BORDER_COLOR_ALPHAS,
 	type RampFamily
@@ -179,12 +177,6 @@ const parse_oklch_args = (css: string): [string, string, string] => {
 	return args as [string, string, string];
 };
 
-const LIGHTNESS_KNOBS = {
-	palette: PALETTE_LIGHTNESS_KNOBS,
-	shade: SHADE_LIGHTNESS_KNOBS,
-	text: TEXT_LIGHTNESS_KNOBS
-} as const;
-
 /** All knob variables an emitted color stop can reference, per scheme. */
 const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 	const vars: Record<string, number> = {
@@ -197,7 +189,7 @@ const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 		accent_chroma_scale: 1,
 		palette_chroma_min: PALETTE_CHROMA_KNOBS[scheme].chroma_min,
 		palette_chroma_max: PALETTE_CHROMA_KNOBS[scheme].chroma_max,
-		palette_chroma_curve: PALETTE_CHROMA_KNOBS[scheme].curve
+		chroma_curve: PALETTE_CHROMA_KNOBS[scheme].curve
 	};
 	for (const family of ['palette', 'shade', 'text'] as const) {
 		const knobs = LIGHTNESS_KNOBS[family][scheme];
@@ -272,7 +264,7 @@ describe('chroma stop emitter', () => {
 		for (const scheme of color_scheme_variants) {
 			const vars = knob_vars(scheme);
 			for (const stop of numeric_scale_variants) {
-				const css = render_chroma_stop_css(stop, scheme, PALETTE_CHROMA_CAPS[scheme][stop]);
+				const css = render_chroma_stop_css(stop, PALETTE_CHROMA_CAPS[scheme][stop]);
 				assert.closeTo(
 					evaluate_css_number(css, vars),
 					ramp_chroma(stop, PALETTE_CHROMA_KNOBS[scheme], PALETTE_CHROMA_CAPS[scheme][stop]),
@@ -296,7 +288,7 @@ describe('palette stop emitter', () => {
 			const vars = knob_vars(scheme);
 			for (const letter of palette_variants) {
 				for (const stop of numeric_scale_variants) {
-					const [l_css, c_css, h_css] = parse_oklch_args(render_palette_stop_css(letter, stop));
+					const [l_css, c_css, h_css] = parse_oklch_args(render_ramp_color_css(letter, stop));
 					const [l, c, h] = palette_stop_oklch(letter, stop, scheme);
 					assert.closeTo(evaluate_css_number(l_css, vars), l, TOLERANCE, `${letter} ${stop} L`);
 					assert.closeTo(evaluate_css_number(c_css, vars), c, TOLERANCE, `${letter} ${stop} C`);
@@ -308,8 +300,8 @@ describe('palette stop emitter', () => {
 
 	test("the slot multiplier rides the emitted chroma - brown's mute is in the CSS", () => {
 		const vars = knob_vars('light');
-		const [, c_f] = parse_oklch_args(render_palette_stop_css('f', '50'));
-		const [, c_h] = parse_oklch_args(render_palette_stop_css('h', '50'));
+		const [, c_f] = parse_oklch_args(render_ramp_color_css('f', '50'));
+		const [, c_h] = parse_oklch_args(render_ramp_color_css('h', '50'));
 		const ratio = evaluate_css_number(c_f, vars) / evaluate_css_number(c_h, vars);
 		assert.closeTo(ratio, PALETTE_CHROMA_MULTIPLIERS.f, TOLERANCE);
 	});
@@ -379,5 +371,12 @@ describe('border color stop emitter', () => {
 				assert.closeTo(evaluate_css_number(h_css, vars), h, TOLERANCE, `${scheme} ${stop} H`);
 			}
 		}
+	});
+});
+
+describe('shadow tint emitter', () => {
+	test('renders the fitted tints on the neutral hue', () => {
+		assert.strictEqual(render_shadow_tint_css('dim'), 'oklch(0.863 0.009 var(--hue_neutral))');
+		assert.strictEqual(render_shadow_tint_css('bright'), 'oklch(0.955 0.003 var(--hue_neutral))');
 	});
 });

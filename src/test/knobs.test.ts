@@ -1,11 +1,24 @@
 import { test, assert, describe } from 'vitest';
 
-import { theme_knobs, theme_knob_by_name, theme_knob_hook_names } from '$lib/knobs.ts';
+import {
+	theme_knobs,
+	theme_knob_by_name,
+	theme_knob_hook_names,
+	theme_knob_axes
+} from '$lib/knobs.ts';
 import { default_variables } from '$lib/variables.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
 
 describe('theme_knobs', () => {
+	test('every knob axis is in the editor axis list', () => {
+		// a knob on an unlisted axis would silently vanish from the editor
+		const axes = new Set(theme_knob_axes.map((a) => a.axis));
+		for (const knob of theme_knobs) {
+			assert.isTrue(axes.has(knob.axis), `Knob "${knob.name}" axis "${knob.axis}" is unlisted`);
+		}
+	});
+
 	test('knob names are unique', () => {
 		const names = theme_knobs.map((k) => k.name);
 		assert.strictEqual(new Set(names).size, names.length);
