@@ -1,41 +1,30 @@
 <script lang="ts">
-	import { hsl_to_hex_string, hsl_to_rgb, parse_hsl_string } from '@fuzdev/fuz_util/colors.ts';
-	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
+
+	import { ResolvedColor } from '../resolved_color.svelte.ts';
+	import type { PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
 		intensity,
-		color_name,
-		computed_styles,
-		suffix
+		letter
 	}: {
 		intensity: string;
-		color_name: string;
-		computed_styles: CSSStyleDeclaration | null;
-		suffix?: 'light' | 'dark';
+		letter: PaletteVariant;
 	} = $props();
 
-	const get_theme_state = theme_state_context.get();
-	const theme_state = $derived(get_theme_state());
+	const name = $derived(`palette_${letter}_${intensity}`);
 
-	const name = $derived(`color_${color_name}_${intensity}` + (suffix ? `_${suffix}` : ''));
-	const value = $derived.by(() => {
-		// handle the user switching between light/dark mode
-		// TODO could refactor to a class for variables
-		theme_state.color_scheme;
-		return computed_styles?.getPropertyValue('--' + name);
-	});
-	const hsl = $derived(value && parse_hsl_string(value));
-	const width = $derived(suffix ? '195px' : '140px');
+	// the stop's value is a derived calc()/oklch() expression, so read the
+	// browser-resolved color off the rendered swatch element
+	const color = new ResolvedColor(() => name);
 </script>
 
 <li style:--bg_color="var(--{name})">
-	<div class="color"></div>
+	<div class="color" bind:this={color.el}></div>
 	<div class="text">
-		<StyleVariableButton {name} style="width: {width}; justify-content: start;" />
-		<div class="hex">{hsl && hsl_to_hex_string(...hsl)}</div>
-		<div class="hsl">{value}</div>
-		<div class="rgb">rgb({hsl && hsl_to_rgb(...hsl).join(' ')})</div>
+		<StyleVariableButton {name} style="width: 150px; justify-content: start;" />
+		<div class="hex">{color.hex}</div>
+		<div class="oklch">{color.formatted}</div>
 	</div>
 </li>
 
@@ -56,16 +45,11 @@
 		padding-left: var(--space_sm);
 	}
 	.hex {
-		width: 73px;
+		width: 90px;
 		font-size: var(--font_size_sm);
 		padding-left: var(--space_sm);
 	}
-	.hsl {
-		width: 149px;
-		font-size: var(--font_size_sm);
-		padding-left: var(--space_sm);
-	}
-	.rgb {
+	.oklch {
 		font-size: var(--font_size_sm);
 		padding-left: var(--space_sm);
 	}
@@ -73,7 +57,6 @@
 		width: 100px;
 		min-width: 50px;
 		background-color: var(--bg_color);
-		color: hsl(210 55% 62%);
 	}
 	@media (max-width: 630px) {
 		.text {

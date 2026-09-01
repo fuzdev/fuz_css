@@ -487,7 +487,7 @@ describe('generate_classes_css', () => {
 		});
 
 		test('modified token class sorts alphabetically, not by property', () => {
-			// hover:p_md: segments ['hover', 'p_md'] — the loop runs i < 1 (i.e. only i=0),
+			// hover:p_md: segments ['hover', 'p_md'] - the loop runs i < 1 (i.e. only i=0),
 			// 'hover' is skipped as a modifier, loop ends, returns MAX_VALUE.
 			// p_md has a finite index, so it sorts before hover:p_md.
 			const catch_all_interpreter: CssClassDefinitionInterpreter = {
@@ -743,7 +743,7 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					base: { declaration: 'color: var(--color_a_5);' },
+					base: { declaration: 'color: var(--palette_a_5);' },
 					extended: { composes: ['base'], declaration: 'margin: var(--space_md);' },
 					card: { composes: ['extended'] }
 				},
@@ -752,7 +752,7 @@ describe('generate_classes_css', () => {
 			});
 
 			// Should track variables from entire composition chain
-			assert.isTrue(result.variables_used.has('color_a_5'));
+			assert.isTrue(result.variables_used.has('palette_a_5'));
 			assert.isTrue(result.variables_used.has('space_md'));
 		});
 

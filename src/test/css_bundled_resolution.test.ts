@@ -536,8 +536,8 @@ describe('resolve_css', () => {
 					a { text-decoration: none; }
 				`,
 				[
-					{ name: 'color_a', light: 'blue' },
-					{ name: 'color_b', light: 'green' }
+					{ name: 'palette_a', light: 'blue' },
+					{ name: 'palette_b', light: 'green' }
 				]
 			);
 
@@ -547,7 +547,7 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']),
+				detected_css_variables: new Set(['palette_a']),
 				utility_variables_used: new Set(),
 				include_stats: true
 			});
@@ -665,9 +665,9 @@ describe('resolve_css', () => {
 	describe('additional_variables option', () => {
 		test('additional_variables forces inclusion', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -675,22 +675,22 @@ describe('resolve_css', () => {
 				variable_graph,
 				class_variable_index,
 				...empty_detection(),
-				additional_variables: ['color_b']
+				additional_variables: ['palette_b']
 			});
 
 			// Only additional_variables should be included (nothing detected)
-			assert.isFalse(result.resolved_variables.has('color_a'));
-			assert.isTrue(result.resolved_variables.has('color_b'));
-			assert.isFalse(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_b');
-			assert.notInclude(result.theme_css, '--color_a');
+			assert.isFalse(result.resolved_variables.has('palette_a'));
+			assert.isTrue(result.resolved_variables.has('palette_b'));
+			assert.isFalse(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_b');
+			assert.notInclude(result.theme_css, '--palette_a');
 		});
 
 		test('additional_variables combined with detected_css_variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -699,23 +699,23 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']),
+				detected_css_variables: new Set(['palette_a']),
 				utility_variables_used: new Set(),
-				additional_variables: ['color_c']
+				additional_variables: ['palette_c']
 			});
 
 			// Both detected and additional should be included
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isFalse(result.resolved_variables.has('color_b'));
-			assert.isTrue(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_a');
-			assert.include(result.theme_css, '--color_c');
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isFalse(result.resolved_variables.has('palette_b'));
+			assert.isTrue(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.include(result.theme_css, '--palette_c');
 		});
 
 		test('additional_variables with overlapping detected_css_variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' }
 			]);
 
 			const result = resolve_css({
@@ -724,16 +724,16 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']),
+				detected_css_variables: new Set(['palette_a']),
 				utility_variables_used: new Set(),
-				additional_variables: ['color_a', 'color_b'] // color_a in both
+				additional_variables: ['palette_a', 'palette_b'] // palette_a in both
 			});
 
 			// Both should be included, no errors from overlap
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isTrue(result.resolved_variables.has('color_b'));
-			assert.include(result.theme_css, '--color_a');
-			assert.include(result.theme_css, '--color_b');
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isTrue(result.resolved_variables.has('palette_b'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.include(result.theme_css, '--palette_b');
 		});
 	});
 
@@ -848,9 +848,9 @@ describe('resolve_css', () => {
 
 		test('additional_variables: "all" includes all variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -859,25 +859,25 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']), // Only detect color_a
+				detected_css_variables: new Set(['palette_a']), // Only detect palette_a
 				utility_variables_used: new Set(),
 				additional_variables: 'all' // Include all variables
 			});
 
-			// Should include ALL variables, not just color_a
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isTrue(result.resolved_variables.has('color_b'));
-			assert.isTrue(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_a');
-			assert.include(result.theme_css, '--color_b');
-			assert.include(result.theme_css, '--color_c');
+			// Should include ALL variables, not just palette_a
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isTrue(result.resolved_variables.has('palette_b'));
+			assert.isTrue(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.include(result.theme_css, '--palette_b');
+			assert.include(result.theme_css, '--palette_c');
 		});
 
 		test('default behavior only includes used variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -886,18 +886,18 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']),
+				detected_css_variables: new Set(['palette_a']),
 				utility_variables_used: new Set()
 				// no additional_variables
 			});
 
-			// Should only include color_a
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isFalse(result.resolved_variables.has('color_b'));
-			assert.isFalse(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_a');
-			assert.notInclude(result.theme_css, '--color_b');
-			assert.notInclude(result.theme_css, '--color_c');
+			// Should only include palette_a
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isFalse(result.resolved_variables.has('palette_b'));
+			assert.isFalse(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.notInclude(result.theme_css, '--palette_b');
+			assert.notInclude(result.theme_css, '--palette_c');
 		});
 
 		test('both "all" options includes everything', () => {
@@ -991,9 +991,9 @@ describe('resolve_css', () => {
 
 		test('exclude_variables filters from resolved variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -1002,25 +1002,25 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a', 'color_b', 'color_c']),
+				detected_css_variables: new Set(['palette_a', 'palette_b', 'palette_c']),
 				utility_variables_used: new Set(),
-				exclude_variables: ['color_b']
+				exclude_variables: ['palette_b']
 			});
 
-			// color_a and color_c included, color_b excluded
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isFalse(result.resolved_variables.has('color_b'));
-			assert.isTrue(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_a');
-			assert.notInclude(result.theme_css, '--color_b');
-			assert.include(result.theme_css, '--color_c');
+			// palette_a and palette_c included, palette_b excluded
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isFalse(result.resolved_variables.has('palette_b'));
+			assert.isTrue(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.notInclude(result.theme_css, '--palette_b');
+			assert.include(result.theme_css, '--palette_c');
 		});
 
 		test('exclude_variables combined with additional_variables', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' }
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -1029,19 +1029,19 @@ describe('resolve_css', () => {
 				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a']),
+				detected_css_variables: new Set(['palette_a']),
 				utility_variables_used: new Set(),
-				additional_variables: ['color_b', 'color_c'],
-				exclude_variables: ['color_b'] // Exclude even though it's in additional
+				additional_variables: ['palette_b', 'palette_c'],
+				exclude_variables: ['palette_b'] // Exclude even though it's in additional
 			});
 
-			// color_a and color_c included, color_b excluded
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isFalse(result.resolved_variables.has('color_b'));
-			assert.isTrue(result.resolved_variables.has('color_c'));
-			assert.include(result.theme_css, '--color_a');
-			assert.notInclude(result.theme_css, '--color_b');
-			assert.include(result.theme_css, '--color_c');
+			// palette_a and palette_c included, palette_b excluded
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isFalse(result.resolved_variables.has('palette_b'));
+			assert.isTrue(result.resolved_variables.has('palette_c'));
+			assert.include(result.theme_css, '--palette_a');
+			assert.notInclude(result.theme_css, '--palette_b');
+			assert.include(result.theme_css, '--palette_c');
 		});
 	});
 });

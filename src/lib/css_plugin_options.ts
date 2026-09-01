@@ -23,7 +23,10 @@
  * This applies to `BaseCssOption` and `VariablesOption`.
  * Setting both to `null` enables "utility-only mode" where you manage
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
- * and `theme.css`, which include all content).
+ * and `theme.css`, which include all content). `variables: null` on its own
+ * is an error: the base styles reference theme variables, so disabling only
+ * the theme leaves them dangling. To bundle every variable instead, keep
+ * `variables` and set `additional_variables: 'all'`.
  *
  * @module
  */
@@ -31,7 +34,7 @@
 import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -156,10 +159,33 @@ export interface CssOutputOptions {
 	 */
 	variables?: VariablesOption;
 	/**
-	 * Specificity multiplier for theme CSS selectors.
-	 * Defaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
+	 * A theme to bake into the generated CSS, overlaid onto `variables`
+	 * last-wins by name. This is how a project picks a theme statically: no JS
+	 * theme rendering at runtime, and the output stays tree-shaken because the
+	 * overlay happens before the dependency graph is built, so a theme's
+	 * referenced variables are pulled in transitively.
+	 *
+	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
+	 * runtime theme winning by cascade layer. A single-scheme theme's
+	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
+	 * renderer, which needs `resolve_theme_stance` called first). The theme's
+	 * own overlay also renders into the `fuz.theme` layer - above the
+	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance -
+	 * so the baked theme behaves exactly like the same theme at runtime.
+	 *
+	 * The baked values become the output's defaults, so a runtime theme can't
+	 * revert to the pre-bake appearance by being empty - the base theme
+	 * renders nothing. To offer "back to fuz defaults" at runtime, render the
+	 * defaults explicitly:
+	 * `render_theme_style({name: 'base', variables: default_variables})`.
+	 *
+	 * @example
+	 * ```ts
+	 * import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';
+	 * vite_plugin_fuz_css({theme: phosphor_theme});
+	 * ```
 	 */
-	theme_specificity?: number;
+	theme?: Theme | null;
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.

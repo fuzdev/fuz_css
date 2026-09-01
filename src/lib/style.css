@@ -14,10 +14,12 @@ See: https://css.fuz.dev/docs/classes
 Notes:
 
 - acts as a CSS reset and also sets minimal defaults for elements with themable variables
-- uses `:where` on all selectors with more specificity than a single tag/class
-	to lower specificity so utility classes override them -
-	this also means the fuz_css stylesheet is is less likely to
-	interfere with the page's styles regardless of where it's imported
+- wraps opinionated selectors in `:where` so they carry zero specificity -
+	cross-layer overrides (utilities, themes, consumer styles) are already
+	guaranteed by cascade-layer order, so what `:where` buys now is that
+	conflicts *within* this stylesheet resolve purely by source order
+	(the state interplay below depends on that), and that rules consumers
+	add into the fuz layers override these effortlessly
 - `.unstyled` class opts out of opinionated styling (colors, borders, decorative properties)
 	while keeping normalizations (font inheritance, border-collapse) -
 	applied to interactive elements (links, buttons, inputs, summary) and decorative containers,
@@ -26,59 +28,105 @@ Notes:
 
 */
 
-*,
-::before,
-::after,
-::backdrop {
-	box-sizing: border-box;
-	border: 0 solid;
-	margin: 0;
-	padding: 0;
+@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
+
+/* OS user-preference mappings live in fuz.preferences, above the fuz.base
+	defaults (so they beat them regardless of import order, including theme.css
+	in utility-only mode) and below fuz.theme (so theme overrides beat them). */
+@layer fuz.preferences {
+	@media (prefers-reduced-motion) {
+		:root {
+			/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation)  */
+			--duration_6: initial;
+			--duration_5: initial;
+			--duration_4: initial;
+			--duration_3: initial;
+			--duration_2: initial;
+			--duration_1: initial;
+		}
+	}
+
+	/* map the OS contrast preference onto the curve knobs, mirroring the
+		'high contrast' theme */
+	@media (prefers-contrast: more) {
+		:root {
+			--shade_lightness_00: 1;
+			--text_lightness_curve: 0.45;
+		}
+		:root.dark {
+			--shade_lightness_00: 0;
+			--text_lightness_curve: 0.31;
+		}
+	}
 }
 
-:root,
-:host {
-	color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
-	background-color: var(--shade_00);
-	color: var(--text_color);
-	accent-color: var(--color_a_50);
-	line-height: var(--line_height_md);
-	font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
-	/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
-	-moz-text-size-adjust: none;
-	-webkit-text-size-adjust: none;
-	text-size-adjust: none;
-	-webkit-tap-highlight-color: transparent;
-}
-:root.dark {
-	color-scheme: dark;
-}
-:root.light {
-	color-scheme: light;
-}
+/* All other rules live in the fuz.base cascade layer: the preference mappings
+	beat them from fuz.preferences, theme overrides from fuz.theme, generated
+	utility classes from fuz.utilities, and consumers' unlayered styles beat
+	everything. The bundled generators unwrap these blocks and re-layer only
+	the rules a project uses. */
+@layer fuz.base {
+	*,
+	::before,
+	::after,
+	::backdrop {
+		box-sizing: border-box;
+		border: 0 solid;
+		margin: 0;
+		padding: 0;
+	}
 
-body {
-	min-height: 100vh;
-	font-size: 1.6rem; /* matched to `font-size: 62.5%` and same value as the default `--font_size_md`, but this one shouldn't vary */
-	font-family: var(--font_family_sans);
-	tab-size: 2; /* TODO var */
-}
+	:root,
+	:host {
+		color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
+		background-color: var(--shade_00);
+		background-image: var(--background_image);
+		color: var(--text_color);
+		accent-color: var(--accent_50);
+		scrollbar-color: var(--scrollbar_thumb_color) var(--scrollbar_track_color);
+		line-height: var(--line_height_md);
+		font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
+		/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
+		-moz-text-size-adjust: none;
+		-webkit-text-size-adjust: none;
+		text-size-adjust: none;
+		-webkit-tap-highlight-color: transparent;
+	}
+	:root.dark {
+		color-scheme: dark;
+	}
+	:root.light {
+		color-scheme: light;
+	}
 
-::selection {
-	background-color: hsl(var(--hue_a) 90% 80% / 40%);
-}
+	body {
+		min-height: 100vh;
+		font-size: 1.6rem; /* matched to `font-size: 62.5%` and same value as the default `--font_size_md`, but this one shouldn't vary */
+		font-family: var(--font_family);
+		font-weight: var(--font_weight);
+		tab-size: 2; /* TODO var */
+	}
 
-::placeholder {
-	opacity: 1;
-	color: color-mix(in oklab, currentcolor 50%, transparent);
-}
+	::selection {
+		background-color: var(--selection_color);
+	}
 
-::file-selector-button {
-	font: inherit;
-	cursor: pointer;
-}
+	:where(input, textarea)::placeholder {
+		opacity: 1;
+		color: color-mix(in oklab, currentcolor 50%, transparent);
+	}
 
-/*
+	:where(input)::file-selector-button {
+		font: inherit;
+		cursor: pointer;
+	}
+
+	:where(dialog:not(.unstyled))::backdrop {
+		/* same default dim as fuz_ui's Dialog, themable through one variable */
+		background-color: var(--backdrop_color);
+	}
+
+	/*
 
 Keep hidden behavior when `display` is set.
 The `!important` makes this `hidden` behavior much higher specificity.
@@ -87,332 +135,326 @@ Respects `hidden="until-found"` for find-in-page support.
 @source https://github.com/jensimmons/cssremedy
 
 */
-[hidden]:where(:not([hidden='until-found'])) {
-	display: none !important;
-}
-
-@media (prefers-reduced-motion) {
-	:root {
-		/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation)  */
-		--duration_6: initial;
-		--duration_5: initial;
-		--duration_4: initial;
-		--duration_3: initial;
-		--duration_2: initial;
-		--duration_1: initial;
+	[hidden]:where(:not([hidden='until-found'])) {
+		display: none !important;
 	}
-}
 
-:where(a:not(.unstyled)) {
-	cursor: pointer;
-	/* TODO should the generic be --link_color or --color? */
-	--text_color: var(--link_color);
-	color: var(--text_color);
-	font-weight: 700;
-	text-decoration: var(--text_decoration);
-	border-radius: var(--border_radius, var(--border_radius_xs3));
-	outline: var(--outline_width) var(--outline_style) var(--outline_color);
-}
-/* TODO should these be customizable with utility classes? */
-:where(a:not(.unstyled):hover) {
-	text-decoration: var(--text_decoration_hover);
-}
-:where(a:not(.unstyled):focus) {
-	--outline_width: var(--outline_width_focus);
-}
-:where(a:not(.unstyled):active) {
-	--outline_width: var(--outline_width_active);
-}
-:where(a:not(.unstyled).selected) {
-	--text_color: var(--link_color_selected);
-	--outline_color: var(--border_color);
-	text-decoration: var(--text_decoration_selected);
-}
-:where(a:not(.unstyled).selected:active) {
-	--outline_color: var(--border_color);
-}
+	:where(a:not(.unstyled)) {
+		cursor: pointer;
+		/* TODO should the generic be --link_color or --color? */
+		--text_color: var(--link_color);
+		color: var(--text_color);
+		font-weight: 700;
+		text-decoration: var(--text_decoration);
+		border-radius: var(--border_radius, var(--border_radius_xs3));
+		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		/* gap between border and ring so the same-color pair reads as two
+			shapes instead of one thick band */
+		outline-offset: var(--outline_offset);
+	}
+	/* TODO should these be customizable with utility classes? */
+	:where(a:not(.unstyled):hover) {
+		text-decoration: var(--text_decoration_hover);
+	}
+	:where(a:not(.unstyled):focus) {
+		--outline_width: var(--outline_width_focus);
+	}
+	:where(a:not(.unstyled):active) {
+		--outline_width: var(--outline_width_active);
+	}
+	:where(a:not(.unstyled).selected) {
+		--text_color: var(--link_color_selected);
+		--outline_color: var(--border_color);
+		text-decoration: var(--text_decoration_selected);
+	}
 
-:where(:is(ul, ol, menu):not(.unstyled)) {
-	padding-left: var(--space_xl4);
-}
-:where(.unstyled:is(ul, ol, menu)) {
-	list-style: none;
-}
+	:where(:is(ul, ol, menu):not(.unstyled)) {
+		padding-left: var(--space_xl4);
+	}
+	:where(.unstyled:is(ul, ol, menu)) {
+		list-style: none;
+	}
 
-:where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) {
-	font-family: var(--font_family_serif);
-	font-size: var(--font_size, inherit);
-	line-height: var(--line_height_sm);
-	text-wrap: balance; /* @see https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap#balance */
-	/* TODO use this pattern elsewhere? provides API to components like `MdnLogo` */
-	overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
-}
+	:where(:is(h1, h2, h3, h4, h5, h6, .heading):not(.unstyled)) {
+		font-family: var(--heading_font_family);
+		font-size: var(--font_size, inherit);
+		line-height: var(--line_height_sm);
+		text-wrap: balance; /* @see https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap#balance */
+		/* TODO use this pattern elsewhere? provides API to components like `MdnLogo` */
+		overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
+	}
 
-/* heading margins use calc multipliers on --flow_margin so they scale proportionally
+	/* heading margins use calc multipliers on --flow_margin so they scale proportionally
    with .sm while preserving hierarchy. multipliers are derived from the space
    scale (sqrt(GR) ≈ 1.272 per step). margin-top is 2 steps above margin-bottom. */
-:where(h1:not(.unstyled)) {
-	--font_size: var(--font_size_xl3);
-	font-weight: 300;
-	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
-	/* somewhat strange to omit only this one, but generally seems to be the desired behavior */
-	/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.28); */
-}
-:where(h2:not(.unstyled)) {
-	--font_size: var(--font_size_xl2);
-	font-weight: 400;
-	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2.54);
-	margin-top: calc(var(--flow_margin, var(--space_lg)) * 4.15);
-}
-:where(h3:not(.unstyled)) {
-	--font_size: var(--font_size_xl);
-	font-weight: 500;
-	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2);
-	margin-top: calc(var(--flow_margin, var(--space_lg)) * 3.23);
-}
-:where(h4:not(.unstyled)) {
-	--font_size: var(--font_size_lg);
-	font-weight: 700;
-	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.62);
-	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2.54);
-}
-:where(h5:not(.unstyled)) {
-	--font_size: var(--font_size_md);
-	font-weight: 900;
-	margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.23);
-	margin-top: calc(var(--flow_margin, var(--space_lg)) * 2);
-}
-:where(h6:not(.unstyled)) {
-	--font_size: var(--font_size_sm);
-	font-weight: 600;
-	margin-bottom: var(--flow_margin, var(--space_lg));
-	margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
-	text-transform: uppercase;
-}
+	:where(h1:not(.unstyled)) {
+		--font_size: var(--font_size_xl3);
+		/* --heading_font_weight is a hook with per-tier fallbacks: setting it
+		flattens the weight ladder deliberately (display-heavy themes) */
+		font-weight: var(--heading_font_weight, 300);
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 3.23);
+		/* somewhat strange to omit only this one, but generally seems to be the desired behavior */
+		/* margin-top: calc(var(--flow_margin, var(--space_lg)) * 5.28); */
+	}
+	:where(h2:not(.unstyled)) {
+		--font_size: var(--font_size_xl2);
+		font-weight: var(--heading_font_weight, 400);
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2.54);
+		margin-top: calc(var(--flow_margin, var(--space_lg)) * 4.15);
+	}
+	:where(h3:not(.unstyled)) {
+		--font_size: var(--font_size_xl);
+		font-weight: var(--heading_font_weight, 500);
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 2);
+		margin-top: calc(var(--flow_margin, var(--space_lg)) * 3.23);
+	}
+	:where(h4:not(.unstyled)) {
+		--font_size: var(--font_size_lg);
+		font-weight: var(--heading_font_weight, 700);
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.62);
+		margin-top: calc(var(--flow_margin, var(--space_lg)) * 2.54);
+	}
+	:where(h5:not(.unstyled)) {
+		--font_size: var(--font_size_md);
+		font-weight: var(--heading_font_weight, 900);
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 1.23);
+		margin-top: calc(var(--flow_margin, var(--space_lg)) * 2);
+	}
+	:where(h6:not(.unstyled)) {
+		--font_size: var(--font_size_sm);
+		font-weight: var(--heading_font_weight, 600);
+		margin-bottom: var(--flow_margin, var(--space_lg));
+		margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
+		text-transform: uppercase;
+	}
 
-:where(p) {
-	overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
-}
+	:where(p) {
+		overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */
+	}
 
-/*
+	/*
 TODO remove the :last-child here and elsewhere when margin-trim is fully supported,
 currently can break based on DOM structure - https://developer.mozilla.org/en-US/docs/Web/CSS/margin-trim
 */
-/* TODO other elements */
-/* checkboxes and radios are expected to be nested inside a `label`, thus no bottom margin */
-:where(
-	:is(
-		p,
-		ul,
-		ol,
-		menu,
-		form,
-		fieldset,
-		table,
-		details,
-		textarea,
-		select,
-		label,
-		pre,
-		blockquote,
-		aside,
-		nav,
-		legend
-	):not(:last-child):not(.unstyled)
-) {
-	margin-bottom: var(--flow_margin, var(--space_lg));
-}
-:where(section:not(:last-child)) {
-	margin-bottom: var(--space_xl7);
-}
+	/* TODO other elements */
+	/* checkboxes and radios are expected to be nested inside a `label`, thus no bottom margin */
+	:where(
+		:is(
+			p,
+			ul,
+			ol,
+			menu,
+			form,
+			fieldset,
+			table,
+			details,
+			textarea,
+			select,
+			label,
+			pre,
+			blockquote,
+			aside,
+			nav,
+			legend
+		):not(:last-child):not(.unstyled)
+	) {
+		margin-bottom: var(--flow_margin, var(--space_lg));
+	}
+	/* sections are the page-level gap: a flow-margin multiple (xl7 over the lg
+		default), so density composites scale it with the rest of the rhythm */
+	:where(section:not(:last-child):not(.unstyled)) {
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 5.31);
+	}
 
-/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
-:where(.row > *) {
-	margin: 0;
-}
+	/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
+	:where(.row > *) {
+		margin: 0;
+	}
 
-:where(aside:not(.unstyled)) {
-	border-left-color: var(--border_color);
-	border-left-style: var(--border_style);
-	border-left-width: var(--border_width_3);
-	border-radius: var(--border_radius, var(--border_radius_xs));
-	padding: var(--space_md);
-	color: var(--text_color);
-	background-color: var(--fg_10);
-}
+	:where(aside:not(.unstyled)) {
+		border-left-color: var(--border_color);
+		border-left-style: var(--border_style);
+		border-left-width: var(--border_width_3);
+		border-radius: var(--border_radius, var(--border_radius_xs));
+		padding: var(--space_md);
+		color: var(--text_color);
+		background-color: var(--fg_10);
+	}
 
-:where(blockquote:not(.unstyled)) {
-	border-left-color: var(--border_color);
-	border-left-style: var(--border_style);
-	border-left-width: var(--border_width_8);
-	padding: var(--space_md);
-	color: var(--text_color);
-}
+	:where(blockquote:not(.unstyled)) {
+		border-left-color: var(--border_color);
+		border-left-style: var(--border_style);
+		border-left-width: var(--border_width_8);
+		padding: var(--space_md);
+		color: var(--text_color);
+	}
 
-:where(code:not(.unstyled)) {
-	white-space: pre-wrap;
-	font-family: var(--font_family_mono);
-	-webkit-hyphens: none;
-	hyphens: none;
-	color: var(--text_color);
-	background-color: var(--fg_05);
-	padding: 0 var(--space_xs2);
-	border-radius: var(--border_radius, var(--border_radius_xs));
-}
+	:where(code:not(.unstyled)) {
+		white-space: pre-wrap;
+		font-family: var(--font_family_mono);
+		-webkit-hyphens: none;
+		hyphens: none;
+		color: var(--text_color);
+		background-color: var(--fg_05);
+		padding: 0 var(--space_xs2);
+		border-radius: var(--border_radius, var(--border_radius_xs));
+	}
 
-:where(code.inline, p code) {
-	display: inline-block;
-	vertical-align: baseline;
-}
+	:where(code.inline, p code) {
+		display: inline-block;
+		vertical-align: baseline;
+	}
 
-:where(pre:not(.unstyled)) {
-	font-family: var(--font_family_mono);
-	color: var(--text_color);
-	white-space: pre;
-	overflow: auto;
-	max-width: 100%;
-}
+	:where(pre:not(.unstyled)) {
+		font-family: var(--font_family_mono);
+		color: var(--text_color);
+		white-space: pre;
+		overflow: auto;
+		max-width: 100%;
+	}
 
-:where(hr:not(.unstyled)) {
-	border-top: 1px solid var(--border_color_30);
-	border-bottom: 2px solid var(--border_color_30);
-	border-left: none;
-	border-right: none;
-	width: 100%;
-	height: 5px;
-	margin: var(--space_xl7) 0;
-}
+	:where(hr:not(.unstyled)) {
+		border-top: 1px solid var(--border_color_30);
+		border-bottom: 2px solid var(--border_color_30);
+		border-left: none;
+		border-right: none;
+		width: 100%;
+		height: 5px;
+		margin: var(--space_xl7) 0;
+	}
 
-:where(fieldset:not(.unstyled)) {
-	display: flex;
-	flex-direction: column;
-}
-:where(fieldset) {
-	/* TODO consider a global border reset */
-	border: 0;
-}
+	:where(fieldset:not(.unstyled)) {
+		display: flex;
+		flex-direction: column;
+	}
+	:where(fieldset) {
+		/* TODO consider a global border reset */
+		border: 0;
+	}
 
-:where(legend:not(.unstyled)) {
-	font-size: var(--font_size_lg);
-}
+	:where(legend:not(.unstyled)) {
+		font-size: var(--font_size_lg);
+	}
 
-/* normalization - keep font inheritance even for unstyled */
-:where(input, textarea, select) {
-	font: inherit;
-}
+	/* normalization - keep font inheritance even for unstyled */
+	:where(input, textarea, select) {
+		font: inherit;
+	}
 
-:where(:is(input, textarea, select):not(.unstyled)) {
-	appearance: none;
-	line-height: normal;
-	display: block;
-	color: var(--text_color);
-	background-color: var(--input_fill);
-	border-color: var(--border_color);
-	border-style: var(--border_style);
-	border-width: var(--border_width);
-	border-radius: var(--border_radius, var(--border_radius_sm));
-	/* TODO --outline_color should default to --hue when available, but can't be set above */
-	outline: var(--outline_width) var(--outline_style) var(--outline_color);
-	padding: var(--input_padding_y) var(--input_padding_x);
-	width: 100%;
-	min-width: var(--input_width_min);
-	min-height: var(--input_height);
-}
+	:where(:is(input, textarea, select):not(.unstyled)) {
+		appearance: none;
+		line-height: normal;
+		display: block;
+		color: var(--text_color);
+		caret-color: var(--caret_color);
+		background-color: var(--input_fill);
+		border-color: var(--border_color);
+		border-style: var(--border_style);
+		border-width: var(--border_width);
+		border-radius: var(--border_radius, var(--border_radius_sm));
+		/* TODO --outline_color should default to --hue when available, but can't be set above */
+		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset);
+		padding: var(--input_padding_y) var(--input_padding_x);
+		width: 100%;
+		min-width: var(--input_width_min);
+		min-height: var(--input_height);
+	}
 
-:where(textarea:not(.unstyled)) {
-	--input_padding_y: var(--space_sm);
-	height: 100px;
-	resize: vertical;
-}
+	:where(textarea:not(.unstyled)) {
+		--input_padding_y: var(--space_sm);
+		height: 100px;
+		resize: vertical;
+	}
 
-:where(:is(select, option, input[type='color']):not(:disabled)) {
-	cursor: pointer;
-}
+	:where(:is(select, option, input[type='color']):not(:disabled)) {
+		cursor: pointer;
+	}
 
-:where(option:not(.unstyled)) {
-	color: var(--text_color);
-	background-color: var(--shade_00);
-}
+	:where(option:not(.unstyled)) {
+		color: var(--text_color);
+		background-color: var(--shade_00);
+	}
 
-:where(:is(input, textarea, select):not(.unstyled):hover) {
-	--border_color: var(--border_color_20);
-}
+	:where(:is(input, textarea, select):not(.unstyled):hover:not(:disabled)) {
+		/* hover previews the focus color - the element color when set (an
+			outline_* class; on buttons, .palette_*), else the accent intent; focus
+			then adds the outline at the same color, escalating visibility */
+		--border_color: var(--outline_color);
+	}
 
-/* these have no active states because they feel buggy in the browsers,
+	/* these have no active states because they feel buggy in the browsers,
 because the active state only applies when the thumb is clicked directly,
 but not for the identical user action of clicking the track,
 so for consistent visuals we opt to include no active state */
-:where(input[type='checkbox']:not(.unstyled)) {
-	cursor: pointer;
-	width: var(--input_height_compact);
-	height: var(--input_height_compact);
-	min-width: var(--input_height_compact);
-	min-height: var(--input_height_compact);
-	border-radius: var(--border_radius, var(--border_radius_xs));
-	--input_padding_x: 0;
-	--checkbox_content: var(--checkbox_content_empty, '');
-}
-:where(input[type='checkbox']:not(.unstyled):checked) {
-	--checkbox_content: var(--checkbox_content_checked, '✓'); /* ✔✓ ✗ ✘ */
-}
-:where(input[type='checkbox']:not(.unstyled))::before {
-	content: var(--checkbox_content);
-	position: relative;
-	left: var(--left);
-	top: var(--top);
-	width: 100%;
-	height: 100%;
-	text-align: center;
-	line-height: normal;
-	display: flex;
-	align-items: center;
-	justify-content: center;
-	overflow: var(--overflow, visible);
-	font-size: var(--font_size, var(--font_size_xl3));
-	color: var(--text_color);
-}
+	:where(input[type='checkbox']:not(.unstyled)) {
+		cursor: pointer;
+		width: var(--input_height_compact);
+		height: var(--input_height_compact);
+		min-width: var(--input_height_compact);
+		min-height: var(--input_height_compact);
+		border-radius: var(--border_radius, var(--border_radius_xs));
+		--input_padding_x: 0;
+		--checkbox_content: var(--checkbox_content_empty, '');
+	}
+	:where(input[type='checkbox']:not(.unstyled):checked) {
+		--checkbox_content: var(--checkbox_content_checked, '✓'); /* ✔✓ ✗ ✘ */
+	}
+	:where(input[type='checkbox']:not(.unstyled))::before {
+		content: var(--checkbox_content);
+		width: 100%;
+		height: 100%;
+		text-align: center;
+		line-height: normal;
+		display: flex;
+		align-items: center;
+		justify-content: center;
+		overflow: var(--overflow, visible);
+		font-size: var(--font_size, var(--font_size_xl3));
+		color: var(--text_color);
+	}
 
-:where(input[type='radio']:not(.unstyled)) {
-	cursor: pointer;
-	width: var(--input_height_compact);
-	height: var(--input_height_compact);
-	border-radius: 50%;
-	min-width: var(--input_height_compact);
-	min-height: var(--input_height_compact);
-	--input_padding_x: 0;
-}
-:where(input[type='radio']:not(.unstyled):checked)::before {
-	content: '';
-	display: block;
-	position: relative;
-	top: 25%;
-	left: 25%;
-	width: 50%;
-	height: 50%;
-	background-color: var(--text_color);
-	border-radius: 50%;
-}
+	:where(input[type='radio']:not(.unstyled)) {
+		cursor: pointer;
+		width: var(--input_height_compact);
+		height: var(--input_height_compact);
+		border-radius: 50%;
+		min-width: var(--input_height_compact);
+		min-height: var(--input_height_compact);
+		--input_padding_x: 0;
+	}
+	:where(input[type='radio']:not(.unstyled):checked)::before {
+		content: '';
+		display: block;
+		position: relative;
+		top: 25%;
+		left: 25%;
+		width: 50%;
+		height: 50%;
+		background-color: var(--text_color);
+		border-radius: 50%;
+	}
 
-/* TODO @many figure these variables out so they're easily customized (similar pattern in a lot of places) */
-:where(input[type='range']:not(.unstyled)) {
-	--thumb_size: var(--space_xl);
-	--thumb_background_color: var(--text_70);
-	cursor: pointer;
-}
-:where(input[type='range']:not(.unstyled):hover:not(:disabled)) {
-	--thumb_background_color: var(--color_a_50);
-}
-:where(input[type='range']:not(.unstyled):disabled:active) {
-	--thumb_background_color: var(--color_c_50);
-}
-:where(input[type='range']:not(.unstyled))::-webkit-slider-thumb {
-	appearance: none;
-	height: var(--thumb_size);
-	width: var(--thumb_size);
-	border-radius: 50%;
-	background-color: var(--thumb_background_color);
-	border: 0;
-	/*
+	/* TODO @many figure these variables out so they're easily customized (similar pattern in a lot of places) */
+	:where(input[type='range']:not(.unstyled)) {
+		--thumb_size: var(--space_xl);
+		--thumb_background_color: var(--text_70);
+		cursor: pointer;
+	}
+	:where(input[type='range']:not(.unstyled):hover:not(:disabled)) {
+		--thumb_background_color: var(--accent_50);
+	}
+	:where(input[type='range']:not(.unstyled):disabled:active) {
+		--thumb_background_color: var(--negative_50);
+	}
+	:where(input[type='range']:not(.unstyled))::-webkit-slider-thumb {
+		appearance: none;
+		height: var(--thumb_size);
+		width: var(--thumb_size);
+		border-radius: 50%;
+		background-color: var(--thumb_background_color);
+		border: 0;
+		/*
 
 	this is the only line that differs between the `moz` one
 	CSS stops parsing if it hits an unknown selector like `::-moz-range-thumb` in Webkit/Blink,
@@ -420,93 +462,94 @@ so for consistent visuals we opt to include no active state */
 	one of the few times I've wanted to reach for PostCSS
 
 	*/
-	margin-top: calc(var(--thumb_size) / -2);
-}
-:where(input[type='range']:not(.unstyled))::-moz-range-thumb {
-	appearance: none;
-	height: var(--thumb_size);
-	width: var(--thumb_size);
-	border-radius: 50%;
-	background-color: var(--thumb_background_color);
-	border: 0;
-}
-:where(input[type='range']:not(.unstyled))::-webkit-slider-runnable-track {
-	width: 100%;
-	height: var(--border_width);
-	background-color: var(--thumb_background_color);
-}
-:where(input[type='range']:not(.unstyled))::-moz-range-track {
-	width: 100%;
-	height: var(--border_width);
-	background-color: var(--thumb_background_color);
-}
+		margin-top: calc(var(--thumb_size) / -2);
+	}
+	:where(input[type='range']:not(.unstyled))::-moz-range-thumb {
+		appearance: none;
+		height: var(--thumb_size);
+		width: var(--thumb_size);
+		border-radius: 50%;
+		background-color: var(--thumb_background_color);
+		border: 0;
+	}
+	:where(input[type='range']:not(.unstyled))::-webkit-slider-runnable-track {
+		width: 100%;
+		height: var(--border_width);
+		background-color: var(--thumb_background_color);
+	}
+	:where(input[type='range']:not(.unstyled))::-moz-range-track {
+		width: 100%;
+		height: var(--border_width);
+		background-color: var(--thumb_background_color);
+	}
 
-/*  TODO :has selector? `button:has(input[type='checkbox']:checked)`
+	/*  TODO :has selector? `button:has(input[type='checkbox']:checked)`
 see https://caniuse.com/css-has
  */
-:where(input:not(.unstyled):checked:not(:disabled)) {
-	--text_color: var(--color_a_50);
-	--border_color: var(--color_a_50);
-}
-:where(input[type='radio']:not(.unstyled):checked) {
-	cursor: default;
-}
+	:where(input:not(.unstyled):checked:not(:disabled)) {
+		--text_color: var(--accent_50);
+		--border_color: var(--accent_50);
+	}
+	:where(input[type='radio']:not(.unstyled):checked) {
+		cursor: default;
+	}
 
-:where(
-	:is(input, textarea, select):not(.unstyled).inline,
-	p :is(input, textarea, select):not(.unstyled)
-) {
-	display: inline-block;
-	margin-left: var(--space_lg);
-	/* TODO ideally `width` here would be set to a minimum and have an API to increase size --
+	:where(
+		:is(input, textarea, select):not(.unstyled).inline,
+		p :is(input, textarea, select):not(.unstyled)
+	) {
+		display: inline-block;
+		margin-left: var(--space_lg);
+		/* TODO ideally `width` here would be set to a minimum and have an API to increase size --
 	buttons can grow automatically, but how can inputs? only with js?
 	 */
-	width: var(--input_width_min);
-}
+		width: var(--input_width_min);
+	}
 
-:where(:is(input, textarea, select):not(.unstyled):disabled) {
-	/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
-	--input_fill: transparent;
-	--border_style: solid dashed;
-	opacity: var(--disabled_opacity);
-	outline: none;
-}
+	:where(:is(input, textarea, select):not(.unstyled):disabled) {
+		/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
+		--input_fill: transparent;
+		--border_style: solid dashed;
+		opacity: var(--disabled_opacity);
+		outline: none;
+	}
 
-:where([contenteditable]:not(.unstyled):focus-visible) {
-	--outline_width: var(--outline_width_focus);
-	outline: var(--outline_width) var(--outline_style) var(--outline_color);
-}
-:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
-	--outline_width: var(--outline_width_active);
-}
+	:where([contenteditable]:not(.unstyled):focus-visible) {
+		--outline_width: var(--outline_width_focus);
+		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset);
+	}
+	:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
+		--outline_width: var(--outline_width_active);
+	}
 
-/* TODO could improve this with the coming `:has` selector
+	/* TODO could improve this with the coming `:has` selector
 for disabled colors without needing a wrapper .disabled class */
-:where(label:not(.unstyled)) {
-	display: block;
-	color: var(--text_color);
-	cursor: pointer;
-}
-:where(:is(label:not(.unstyled) .title)) {
-	font-weight: 600;
-	margin-bottom: var(--space_xs2);
-}
-:where(label.selected:not(.unstyled)) {
-	cursor: default;
-	--text_color: var(--color_a_50);
-}
-:where(label.disabled:not(.unstyled)) {
-	cursor: default;
-	--text_color: var(--text_disabled);
-}
-:where(label.row:not(.unstyled)) {
-	justify-content: flex-start;
-}
-:where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio']):not(.unstyled)) {
-	margin-right: var(--space_md);
-}
+	:where(label:not(.unstyled)) {
+		display: block;
+		color: var(--text_color);
+		cursor: pointer;
+	}
+	:where(:is(label:not(.unstyled) .title)) {
+		font-weight: 600;
+		margin-bottom: var(--space_xs2);
+	}
+	:where(label.selected:not(.unstyled)) {
+		cursor: default;
+		--text_color: var(--accent_50);
+	}
+	:where(label.disabled:not(.unstyled)) {
+		cursor: default;
+		--text_color: var(--text_disabled);
+	}
+	:where(label.row:not(.unstyled)) {
+		justify-content: flex-start;
+	}
+	:where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio']):not(.unstyled)) {
+		margin-right: var(--space_md);
+	}
 
-/*
+	/*
 
 TODO think through these patterns to get somewhere consistent
 
@@ -516,247 +559,255 @@ TODO think through these patterns to get somewhere consistent
 - but these need to be resolved locally to get overrides, couldn't set `fill` for example - can you use a variable still though, just also locally declare it?
 
 */
-:where(button:not(.unstyled)) {
-	--text_color: var(--text_70);
-	--button_text_color: var(--text_color);
-	--button_fill: color-mix(in hsl, var(--fill, var(--shade_50)) 8%, transparent);
-	--button_fill_hover: color-mix(in hsl, var(--fill, var(--shade_50)) 16%, transparent);
-	--button_fill_active: color-mix(in hsl, var(--fill, var(--shade_50)) 24%, transparent);
-	--button_border_color: var(--border_color);
-	/* TODO give real values, 90%? */
-	--button_border_color_hover: color-mix(in hsl, var(--border_color) 90%, var(--shade_max));
-	--button_border_color_active: color-mix(in hsl, var(--border_color) 80%, var(--shade_max));
-	color: var(--button_text_color);
-	background-color: var(--button_fill);
-	cursor: pointer;
-	appearance: none;
-	display: flex;
-	flex-wrap: wrap;
-	align-items: center;
-	justify-content: center;
-	font: inherit;
-	font-size: var(--font_size, inherit);
-	font-weight: 700;
-	line-height: normal;
-	min-height: var(--button_min_height, var(--input_height));
-	padding: 0 var(--input_padding_x);
-	box-shadow: var(--shadow, var(--button_shadow));
-	border-width: var(--border_width);
-	border-style: var(--border_style);
-	border-color: var(--button_border_color);
-	border-radius: var(--border_radius, var(--border_radius_sm));
-	outline: var(--outline_width) var(--outline_style) var(--outline_color);
-}
+	:where(button:not(.unstyled)) {
+		--text_color: var(--text_70);
+		--button_text_color: var(--text_color);
+		--button_fill: color-mix(in oklab, var(--fill, var(--shade_50)) 8%, transparent);
+		--button_fill_hover: color-mix(in oklab, var(--fill, var(--shade_50)) 16%, transparent);
+		--button_fill_active: color-mix(in oklab, var(--fill, var(--shade_50)) 24%, transparent);
+		--button_border_color: var(--border_color);
+		/* TODO give real values, 90%? */
+		--button_border_color_hover: color-mix(in oklab, var(--border_color) 90%, var(--shade_max));
+		--button_border_color_active: color-mix(in oklab, var(--border_color) 80%, var(--shade_max));
+		color: var(--button_text_color);
+		background-color: var(--button_fill);
+		cursor: pointer;
+		appearance: none;
+		display: flex;
+		flex-wrap: wrap;
+		align-items: center;
+		justify-content: center;
+		font: inherit;
+		font-size: var(--font_size, inherit);
+		font-weight: 700;
+		line-height: normal;
+		min-height: var(--button_min_height, var(--input_height));
+		padding: 0 var(--input_padding_x);
+		box-shadow: var(--shadow, var(--button_shadow));
+		border-width: var(--border_width);
+		border-style: var(--button_border_style);
+		border-color: var(--button_border_color);
+		border-radius: var(--border_radius, var(--border_radius_sm));
+		outline: var(--outline_width) var(--outline_style) var(--outline_color);
+		outline-offset: var(--outline_offset);
+	}
 
-:where(:is(button, input, textarea, select):not(.unstyled):focus) {
-	--border_color: var(--color_a_50);
-	--outline_width: var(--outline_width_focus);
-}
+	:where(:is(button, input, textarea, select):not(.unstyled):focus) {
+		/* follows the element color when set (an outline_* class; on buttons,
+			.palette_*), else the accent intent */
+		--border_color: var(--outline_color);
+		--outline_width: var(--outline_width_focus);
+	}
 
-/* TODO maybe gradients? or at least use a text_color */
-/* TODO hover variants with brighter borders? maybe use a colorless border for that? */
+	/* TODO maybe gradients? or at least use a text_color */
+	/* TODO hover variants with brighter borders? maybe use a colorless border for that? */
 
-:where(button:not(.unstyled).color_a) {
-	--text_color: var(--color_a_50);
-	--fill: var(--color_a_40);
-	--border_color: var(--color_a_50);
-	--outline_color: var(--color_a_50);
-}
-:where(button:not(.unstyled).color_b) {
-	--text_color: var(--color_b_50);
-	--fill: var(--color_b_40);
-	--border_color: var(--color_b_50);
-	--outline_color: var(--color_b_50);
-}
-:where(button:not(.unstyled).color_c) {
-	--text_color: var(--color_c_50);
-	--fill: var(--color_c_40);
-	--border_color: var(--color_c_50);
-	--outline_color: var(--color_c_50);
-}
-:where(button:not(.unstyled).color_d) {
-	--text_color: var(--color_d_50);
-	--fill: var(--color_d_40);
-	--border_color: var(--color_d_50);
-	--outline_color: var(--color_d_50);
-}
-:where(button:not(.unstyled).color_e) {
-	--text_color: var(--color_e_50);
-	--fill: var(--color_e_40);
-	--border_color: var(--color_e_50);
-	--outline_color: var(--color_e_50);
-}
-:where(button:not(.unstyled).color_f) {
-	--text_color: var(--color_f_50);
-	--fill: var(--color_f_40);
-	--border_color: var(--color_f_50);
-	--outline_color: var(--color_f_50);
-}
-:where(button:not(.unstyled).color_g) {
-	--text_color: var(--color_g_50);
-	--fill: var(--color_g_40);
-	--border_color: var(--color_g_50);
-	--outline_color: var(--color_g_50);
-}
-:where(button:not(.unstyled).color_h) {
-	--text_color: var(--color_h_50);
-	--fill: var(--color_h_40);
-	--border_color: var(--color_h_50);
-	--outline_color: var(--color_h_50);
-}
-:where(button:not(.unstyled).color_i) {
-	--text_color: var(--color_i_50);
-	--fill: var(--color_i_40);
-	--border_color: var(--color_i_50);
-	--outline_color: var(--color_i_50);
-}
-:where(button:not(.unstyled).color_j) {
-	--text_color: var(--color_j_50);
-	--fill: var(--color_j_40);
-	--border_color: var(--color_j_50);
-	--outline_color: var(--color_j_50);
-}
+	:where(button:not(.unstyled).palette_a) {
+		--text_color: var(--palette_a_50);
+		--fill: var(--palette_a_50);
+		--border_color: var(--palette_a_50);
+		--outline_color: var(--palette_a_50);
+	}
+	:where(button:not(.unstyled).palette_b) {
+		--text_color: var(--palette_b_50);
+		--fill: var(--palette_b_50);
+		--border_color: var(--palette_b_50);
+		--outline_color: var(--palette_b_50);
+	}
+	:where(button:not(.unstyled).palette_c) {
+		--text_color: var(--palette_c_50);
+		--fill: var(--palette_c_50);
+		--border_color: var(--palette_c_50);
+		--outline_color: var(--palette_c_50);
+	}
+	:where(button:not(.unstyled).palette_d) {
+		--text_color: var(--palette_d_50);
+		--fill: var(--palette_d_50);
+		--border_color: var(--palette_d_50);
+		--outline_color: var(--palette_d_50);
+	}
+	:where(button:not(.unstyled).palette_e) {
+		--text_color: var(--palette_e_50);
+		--fill: var(--palette_e_50);
+		--border_color: var(--palette_e_50);
+		--outline_color: var(--palette_e_50);
+	}
+	:where(button:not(.unstyled).palette_f) {
+		--text_color: var(--palette_f_50);
+		--fill: var(--palette_f_50);
+		--border_color: var(--palette_f_50);
+		--outline_color: var(--palette_f_50);
+	}
+	:where(button:not(.unstyled).palette_g) {
+		--text_color: var(--palette_g_50);
+		--fill: var(--palette_g_50);
+		--border_color: var(--palette_g_50);
+		--outline_color: var(--palette_g_50);
+	}
+	:where(button:not(.unstyled).palette_h) {
+		--text_color: var(--palette_h_50);
+		--fill: var(--palette_h_50);
+		--border_color: var(--palette_h_50);
+		--outline_color: var(--palette_h_50);
+	}
+	:where(button:not(.unstyled).palette_i) {
+		--text_color: var(--palette_i_50);
+		--fill: var(--palette_i_50);
+		--border_color: var(--palette_i_50);
+		--outline_color: var(--palette_i_50);
+	}
+	:where(button:not(.unstyled).palette_j) {
+		--text_color: var(--palette_j_50);
+		--fill: var(--palette_j_50);
+		--border_color: var(--palette_j_50);
+		--outline_color: var(--palette_j_50);
+	}
 
-/* TODO try to rearrange some of this to go after the colored variants */
-:where(button:not(.unstyled):disabled) {
-	/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
-	--button_fill: transparent;
-	--border_style: solid dashed;
-	cursor: default;
-	box-shadow: none;
-	opacity: var(--disabled_opacity);
-	outline: none;
-}
-:where(button:not(.unstyled).selected) {
-	--button_text_color: var(--text_05);
-	--button_fill: var(--fill, var(--shade_50));
-	--button_fill_hover: var(--fill, var(--shade_50));
-	--button_fill_active: var(--fill, var(--shade_50));
-	--button_border_color: var(--border_color);
-}
-:where(button:not(.unstyled).selected:not(.deselectable)) {
-	--button_border_color_hover: var(--border_color);
-	--button_border_color_active: var(--border_color);
-	cursor: default;
-	box-shadow: none;
-}
-:where(button:not(.unstyled):not(:disabled):hover, button:not(.unstyled):focus) {
-	--button_fill: var(--button_fill_hover);
-	--button_border_color: var(--button_border_color_hover);
-	--shadow: var(--button_shadow_hover);
-}
-:where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
-	/* TODO or set a hover var? make consistent with fill */
-	--button_border_color: var(--button_border_color_hover);
-	--button_text_color: color-mix(in hsl, var(--text_color) 90%, var(--shade_max));
-}
-:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
-	--button_text_color: var(--shade_min);
-}
-:where(button:not(.unstyled):not(:disabled):active) {
-	--button_fill: var(--button_fill_active);
-	--button_border_color: var(--button_border_color_active);
-	--outline_width: var(--outline_width_active);
-	--shadow: var(--button_shadow_active);
-}
-:where(
-	:is(input, textarea, select, button):not(.unstyled):disabled:active,
-	label:not(.unstyled).disabled:active
-) {
-	--text_color: var(--color_c_50);
-	--border_color: var(--color_c_50);
-}
-/* TODO is there a cleaner way to override these through vars? */
-:where(button:not(.unstyled).selected:disabled:active) {
-	--text_color: var(--text_10);
-	--fill: var(--color_c_40);
-}
-:where(button:not(.unstyled):not(.selected):disabled:active) {
-	--fill: transparent;
-}
-:where(button:not(.unstyled).selected:not(.deselectable):active) {
-	--outline_width: var(--outline_width_focus);
-}
+	/* TODO try to rearrange some of this to go after the colored variants */
+	:where(button:not(.unstyled):disabled) {
+		/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
+		--button_fill: transparent;
+		--button_border_style: solid dashed;
+		cursor: default;
+		box-shadow: none;
+		opacity: var(--disabled_opacity);
+		outline: none;
+	}
+	:where(button:not(.unstyled).selected) {
+		/* text_00 is the ramp endpoint: contrast themes bending
+			--text_lightness_curve move the near-background stops toward the fill,
+			but can never move an endpoint, so inverse text stays readable */
+		--button_text_color: var(--text_00);
+		--button_fill: var(--fill, var(--shade_50));
+		--button_fill_hover: var(--fill, var(--shade_50));
+		--button_fill_active: var(--fill, var(--shade_50));
+		--button_border_color: var(--border_color);
+	}
+	:where(button:not(.unstyled).selected:not(.deselectable)) {
+		--button_border_color_hover: var(--border_color);
+		--button_border_color_active: var(--border_color);
+		cursor: default;
+		box-shadow: none;
+	}
+	:where(button:not(.unstyled):not(:disabled):hover, button:not(.unstyled):focus) {
+		--button_fill: var(--button_fill_hover);
+		--button_border_color: var(--button_border_color_hover);
+		--shadow: var(--button_shadow_hover);
+	}
+	:where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
+		--button_text_color: color-mix(in oklab, var(--text_color) 90%, var(--shade_max));
+	}
+	:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
+		--button_text_color: var(--text_min);
+	}
+	:where(button:not(.unstyled):not(:disabled):active) {
+		--button_fill: var(--button_fill_active);
+		--button_border_color: var(--button_border_color_active);
+		--outline_width: var(--outline_width_active);
+		--shadow: var(--button_shadow_active);
+		/* set on the property, not the variable - a variable pointing back at
+			`--button_border_style` would be a cycle */
+		border-style: var(--button_border_style_active);
+	}
+	:where(
+		:is(input, textarea, select, button):not(.unstyled):disabled:active,
+		label:not(.unstyled).disabled:active
+	) {
+		--text_color: var(--negative_50);
+		--border_color: var(--negative_50);
+	}
+	/* TODO is there a cleaner way to override these through vars? */
+	:where(button:not(.unstyled).selected:disabled:active) {
+		--text_color: var(--text_00);
+		--fill: var(--negative_50);
+	}
+	:where(button:not(.unstyled):not(.selected):disabled:active) {
+		--fill: transparent;
+	}
+	:where(button:not(.unstyled).selected:not(.deselectable):active) {
+		--outline_width: var(--outline_width_focus);
+	}
 
-:where(button:not(.unstyled).inline, p button:not(.unstyled)) {
-	display: inline-block;
-	/* TODO this increases paragraph line spacing */
-	min-height: var(--button_min_height, var(--input_height_compact));
-}
+	:where(button:not(.unstyled).inline, p button:not(.unstyled)) {
+		display: inline-block;
+		/* TODO this increases paragraph line spacing */
+		min-height: var(--button_min_height, var(--input_height_compact));
+	}
 
-:where(small) {
-	font-size: var(--font_size_sm);
-}
+	:where(small) {
+		font-size: var(--font_size_sm);
+	}
 
-:where(img, picture, canvas, svg, video) {
-	display: block;
-	max-width: 100%; /* shrink to fit */
-	height: auto; /* preserve aspect ratio */
-}
+	:where(img, picture, canvas, svg, video) {
+		display: block;
+		max-width: 100%; /* shrink to fit */
+		height: auto; /* preserve aspect ratio */
+	}
 
-:where(audio) {
-	width: 100%;
-}
+	:where(audio) {
+		width: 100%;
+	}
 
-:where(summary:not(.unstyled)) {
-	cursor: pointer;
-	padding: var(--space_md);
-	border-radius: var(--border_radius, var(--border_radius_xs));
-}
-:where(summary:hover:not(.unstyled)) {
-	background-color: var(--fg_10);
-}
-:where(summary:active:not(.unstyled)) {
-	background-color: var(--fg_20);
-}
-:where(details[open] summary:not(.unstyled)) {
-	margin-bottom: var(--space_sm);
-}
+	:where(summary:not(.unstyled)) {
+		cursor: pointer;
+		padding: var(--space_md);
+		border-radius: var(--border_radius, var(--border_radius_xs));
+	}
+	:where(summary:hover:not(.unstyled)) {
+		background-color: var(--fg_10);
+	}
+	:where(summary:active:not(.unstyled)) {
+		background-color: var(--fg_20);
+	}
+	:where(details[open] summary:not(.unstyled)) {
+		margin-bottom: var(--space_sm);
+	}
 
-:where(table) {
-	border-collapse: collapse;
-}
-:where(thead) {
-	text-align: left;
-}
-:where(th) {
-	font-weight: bold;
-}
-:where(th, td) {
-	padding: var(--space_xs3) var(--space_sm);
-}
-:where(tr) {
-	border-bottom: 1px solid var(--border_color_10);
-}
-:where(tr:hover) {
-	background-color: var(--fg_10);
-}
+	:where(table) {
+		border-collapse: collapse;
+	}
+	:where(thead) {
+		text-align: left;
+	}
+	:where(th) {
+		font-weight: bold;
+	}
+	:where(th, td) {
+		padding: var(--space_xs3) var(--space_sm);
+	}
+	:where(tr) {
+		border-bottom: 1px solid var(--border_color_10);
+	}
+	:where(tr:hover) {
+		background-color: var(--fg_10);
+	}
 
-:where(abbr[title]) {
-	text-decoration: underline dotted;
-}
+	:where(abbr[title]) {
+		text-decoration: underline dotted;
+	}
 
-:where(b, strong) {
-	font-weight: bolder;
-}
+	:where(b, strong) {
+		font-weight: bolder;
+	}
 
-:where(kbd, samp) {
-	font-family: var(--font_family_mono);
-}
+	:where(kbd, samp) {
+		font-family: var(--font_family_mono);
+	}
 
-:where(sub, sup) {
-	font-size: 75%;
-	line-height: 0;
-	position: relative;
-	vertical-align: baseline;
-}
-:where(sub) {
-	bottom: -0.25em;
-}
-:where(sup) {
-	top: -0.5em;
-}
+	:where(sub, sup) {
+		font-size: 75%;
+		line-height: 0;
+		position: relative;
+		vertical-align: baseline;
+	}
+	:where(sub) {
+		bottom: -0.25em;
+	}
+	:where(sup) {
+		top: -0.5em;
+	}
 
-:where(progress) {
-	vertical-align: baseline;
-}
+	:where(progress) {
+		vertical-align: baseline;
+	}
+} /* @layer fuz.base */

@@ -9,10 +9,10 @@
  */
 
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
-import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
 import { default_variables } from './variables.ts';
-import type { StyleVariable } from './variable.ts';
+import { resolve_theme_stance } from './theme_stance.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 
 import type { VariablesOption } from './css_plugin_options.ts';
@@ -39,21 +39,15 @@ export interface StyleVariableInfo {
 export interface VariableDependencyGraph {
 	/** Map from variable name to its info */
 	variables: Map<string, StyleVariableInfo>;
-	/** Content hash for cache invalidation */
-	content_hash: string;
 }
 
 /**
  * Builds a dependency graph from an array of style variables.
  *
  * @param variables - array of `StyleVariable` objects
- * @param content_hash - hash of the source for cache invalidation
  * @returns `VariableDependencyGraph`
  */
-export const build_variable_graph = (
-	variables: Array<StyleVariable>,
-	content_hash: string
-): VariableDependencyGraph => {
+export const build_variable_graph = (variables: Array<StyleVariable>): VariableDependencyGraph => {
 	const graph: Map<string, StyleVariableInfo> = new Map();
 
 	for (const v of variables) {
@@ -70,8 +64,7 @@ export const build_variable_graph = (
 	}
 
 	return {
-		variables: graph,
-		content_hash
+		variables: graph
 	};
 };
 
@@ -160,13 +153,11 @@ export const resolve_variables_transitive = (
  *
  * @param graph - the variable dependency graph
  * @param resolved_variables - set of variable names to include
- * @param specificity - number of times to repeat the selector (default 1)
  * @returns object with `light_css` and `dark_css` strings
  */
 export const generate_theme_css = (
 	graph: VariableDependencyGraph,
-	resolved_variables: Set<string>,
-	specificity = 1
+	resolved_variables: Set<string>
 ): { light_css: string; dark_css: string } => {
 	const light_declarations: Array<string> = [];
 	const dark_declarations: Array<string> = [];
@@ -186,18 +177,15 @@ export const generate_theme_css = (
 		}
 	}
 
-	const scope = ':root'.repeat(specificity);
-	const dark_scope = `${scope}.dark`;
-
 	let light_css = '';
 	let dark_css = '';
 
 	if (light_declarations.length > 0) {
-		light_css = `${scope} {\n${light_declarations.join('\n')}\n}`;
+		light_css = `:root {\n${light_declarations.join('\n')}\n}`;
 	}
 
 	if (dark_declarations.length > 0) {
-		dark_css = `${dark_scope} {\n${dark_declarations.join('\n')}\n}`;
+		dark_css = `:root.dark {\n${dark_declarations.join('\n')}\n}`;
 	}
 
 	return { light_css, dark_css };
@@ -229,7 +217,7 @@ export const has_variable = (graph: VariableDependencyGraph, name: string): bool
  *
  * Uses Levenshtein distance (rather than Dice coefficient in `css_bundled_resolution.ts`)
  * because variable names are longer and follow consistent naming patterns
- * (e.g., "color_a_50", "border_radius_md"). Levenshtein is better at detecting
+ * (e.g., "palette_a_50", "border_radius_md"). Levenshtein is better at detecting
  * single-character insertions/deletions in these longer, structured names.
  *
  * See `css_bundled_resolution.ts` for the Dice-based approach used for elements.
@@ -245,7 +233,7 @@ const string_similarity = (a: string, b: string): number => {
  *
  * Set to 0.85 (higher than `css_bundled_resolution.ts`'s 0.6) because:
  * - Variable names are longer, so small edit distances are more significant
- * - Many variables share prefixes (color_a_1, color_a_2, etc.) so a lower
+ * - Many variables share prefixes (palette_a_10, palette_a_20, etc.) so a lower
  *   threshold would suggest unrelated variables
  * - User-defined variables shouldn't trigger false "did you mean?" suggestions
  */
@@ -291,16 +279,58 @@ export const resolve_variables_option = (variables: VariablesOption): Array<Styl
 };
 
 /**
+ * Overlays a theme's variables onto a resolved variable set, last-wins by name.
+ *
+ * This is how a theme is baked in at build time: the overlaid values flow
+ * through the dependency graph like any other, so the variables a theme
+ * references are pulled in transitively and the output stays tree-shaken. A
+ * stanced theme's `scheme_mirror` applies first, matching the renderer's order
+ * - and a stanced theme arriving without its mirror computed is resolved
+ * through `resolve_theme_stance` here, so a hand-rolled theme bakes the same
+ * as the shipped exemplars (build time has no bundle-weight concern).
+ *
+ * @param variables - the resolved default or custom variables
+ * @param theme - the theme to overlay, or null/undefined for none
+ * @returns the composed variables, or `variables` unchanged when there's no theme
+ */
+export const apply_theme_variables = (
+	variables: Array<StyleVariable>,
+	theme: Theme | null | undefined
+): Array<StyleVariable> => {
+	if (!theme) return variables;
+	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
+	const by_name = new Map(variables.map((v) => [v.name, v]));
+	// Replacement mirrors the runtime cascade: a light-slot theme value beats
+	// the base default's dark slot by layer order, so it replaces wholesale.
+	// A dark-only theme value only shadows the default under `.dark`, so the
+	// default's light slot must survive into the baked entry - dropping it
+	// would leave the variable undefined in the light scheme.
+	const overlay = (v: StyleVariable): void => {
+		const existing = by_name.get(v.name);
+		if (v.light === undefined && v.dark !== undefined && existing?.light !== undefined) {
+			by_name.set(v.name, { ...v, light: existing.light });
+		} else {
+			by_name.set(v.name, v);
+		}
+	};
+	// mirror first, then the theme's own, so authored values win
+	for (const v of resolved.scheme_mirror ?? []) overlay(v);
+	for (const v of resolved.variables) overlay(v);
+	return [...by_name.values()];
+};
+
+/**
  * Builds a variable dependency graph from a variables option.
  * Handles all option forms: undefined (defaults), null (disabled), array, or callback.
  *
  * @param variables - the variables option from generator config
+ * @param theme - an optional theme to overlay onto the resolved variables
  * @returns `VariableDependencyGraph` built from the resolved variables
  */
 export const build_variable_graph_from_options = (
-	variables: VariablesOption
+	variables: VariablesOption,
+	theme?: Theme | null
 ): VariableDependencyGraph => {
-	const resolved = resolve_variables_option(variables);
-	const content = resolved.map((v) => `${v.name}:${v.light ?? ''}:${v.dark ?? ''}`).join('|');
-	return build_variable_graph(resolved, hash_insecure(content));
+	const resolved = apply_theme_variables(resolve_variables_option(variables), theme);
+	return build_variable_graph(resolved);
 };

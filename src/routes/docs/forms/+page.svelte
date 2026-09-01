@@ -144,7 +144,7 @@
 		<UnfinishedImplementationWarning>
 			This will change, probably to toggles.
 		</UnfinishedImplementationWarning>
-		<!-- TODO make this a form, but figure out the checkbox problem -- maybe a last-child exception? -->
+		<!-- TODO make this a form, but figure out the checkbox problem - maybe a last-child exception? -->
 		<form>
 			<fieldset>
 				<label class="row">
@@ -245,8 +245,7 @@
 		</div>
 		<UnfinishedImplementationWarning class="mt_lg">
 			Table cell padding doesn't yet respond to size composites. A size-composite region containing
-			a table will scale inputs and buttons but leave cells at their default padding. Planned in the
-			semantic variable chains migration.
+			a table will scale inputs and buttons but leave cells at their default padding.
 		</UnfinishedImplementationWarning>
 	</TomeSection>
 </TomeContent>

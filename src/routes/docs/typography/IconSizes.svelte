@@ -3,7 +3,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import { icon_sizes } from '$lib/variable_data.ts';
+	import { ICON_SIZES, icon_size_variants } from '$lib/variable_data.ts';
 </script>
 
 <TomeSection>
@@ -15,7 +15,9 @@
 	</aside>
 </TomeSection>
 <div class="icon_sizes">
-	{#each Object.entries(icon_sizes) as [name, value] (name)}
+	{#each icon_size_variants as variant (variant)}
+		{@const name = `icon_size_${variant}`}
+		{@const value = `${ICON_SIZES[variant]}px`}
 		<figure>
 			<figcaption>
 				<StyleVariableButton {name} /> =

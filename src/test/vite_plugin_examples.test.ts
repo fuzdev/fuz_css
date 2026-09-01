@@ -33,7 +33,7 @@ if (!SKIP) {
 		// `svelte-package` leaves relative `.ts` specifiers in `dist`; with
 		// `rewriteRelativeImportExtensions: false` tsc no longer rewrites them, so the
 		// gro dist-rewrite pass (which `gro build` runs after svelte-package) must run
-		// here too — otherwise the examples can't resolve the freshly-packaged dist.
+		// here too - otherwise the examples can't resolve the freshly-packaged dist.
 		const { rewrite_dist_imports } = await import('@fuzdev/gro/dist_rewrite_imports.ts');
 		await rewrite_dist_imports(join(process.cwd(), 'dist'));
 	}, 60_000); // 1 minute timeout for package build
@@ -56,7 +56,7 @@ const EXPECTED_CLASSES = [
 	'ellipsis',
 	// From App - Class Types section (Literal classes)
 	'opacity:60%',
-	'color:var(--color_j_50)',
+	'color:var(--palette_j_50)',
 	'box-shadow:0~4px~8px~rgb(0,0,0,0.2)',
 	// From example_class_utilities.ts - Naming patterns (mb_* + ml_* for plurals)
 	'mb_xs5', // demoClass
@@ -105,14 +105,14 @@ const EXPECTED_CLASSES = [
 	'flex:1',
 	// From App - Interactive (hover/active state modifiers)
 	'row',
-	'hover:border_color_b_50',
-	'hover:outline_color_b_50',
-	'active:border_color_d_50',
-	'active:outline_color_d_50',
-	'hover:border_color_g_50',
-	'hover:outline_color_g_50',
-	'active:border_color_h_50',
-	'active:outline_color_h_50'
+	'hover:border_b_50',
+	'hover:outline_b_50',
+	'active:border_d_50',
+	'active:outline_d_50',
+	'hover:border_g_50',
+	'hover:outline_g_50',
+	'active:border_h_50',
+	'active:outline_h_50'
 ].sort();
 
 /**
@@ -188,12 +188,14 @@ const extract_utility_section = (css: string): string => {
  * Handles escaped characters in class names (colons, percent signs, parens, tildes, commas, dots).
  */
 const extract_class_names = (css: string): Array<string> => {
+	// strip @layer preludes so `fuz.utilities` doesn't read as a `.utilities` class
+	const without_layer_preludes = css.replaceAll(/@layer[^{;]*[{;]/g, '');
 	const classes: Set<string> = new Set();
 	// Match class selectors: .classname
 	// Class names can contain escaped characters like \: \% \( \) \~ \, \.
 	const pattern = /\.([a-zA-Z_][a-zA-Z0-9_-]*(?:\\[:%()~,.][-a-zA-Z0-9_(),%~.]*)*)/g;
 	let match;
-	while ((match = pattern.exec(css)) !== null) {
+	while ((match = pattern.exec(without_layer_preludes)) !== null) {
 		// Unescape CSS escape sequences: \: -> :, \% -> %, \( -> (, etc.
 		const class_name = match[1]!.replace(/\\([:%()~,.])/g, '$1');
 		classes.add(class_name);

@@ -44,6 +44,19 @@ describe('generate_css', () => {
 			assert.equal(result.diagnostics.length, 0);
 		});
 
+		test('wraps output in the fuz.utilities layer with the order statement', () => {
+			const result = generate_css(make_options({ all_classes: new Set(['p_lg']) }));
+
+			assert.match(result.css, /^@layer fuz\.base, fuz\.preferences, fuz\.theme, fuz\.utilities;/);
+			assert_css_contains(result.css, '@layer fuz.utilities {');
+		});
+
+		test('emits nothing when no classes are detected', () => {
+			const result = generate_css(make_options());
+
+			assert.equal(result.css, '');
+		});
+
 		test('ignores resources when base and theme are disabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: red; }',
@@ -118,7 +131,7 @@ describe('generate_css', () => {
 			const result = generate_css(
 				make_options({
 					all_elements: new Set(['button']),
-					// not in detected_css_variables — only reachable via @fuz-variables
+					// not in detected_css_variables - only reachable via @fuz-variables
 					explicit_variables: new Set(['text_color']),
 					include_theme: true,
 					resources: { style_rule_index, variable_graph, class_variable_index }
@@ -136,7 +149,7 @@ describe('generate_css', () => {
 
 			const result = generate_css(
 				make_options({
-					// not in the theme — resolve_css errors on the @fuz-variables annotation
+					// not in the theme - resolve_css errors on the @fuz-variables annotation
 					explicit_variables: new Set(['nonexistent_var']),
 					include_theme: true,
 					resources: { style_rule_index, variable_graph, class_variable_index }
@@ -167,7 +180,7 @@ describe('generate_css', () => {
 			assert.deepEqual([...detected], ['space_lg']);
 		});
 
-		test('warns when base styles are enabled but theme variables are disabled', () => {
+		test('errors when base styles are enabled but theme variables are disabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
 				VARIABLES
@@ -182,16 +195,27 @@ describe('generate_css', () => {
 				})
 			);
 
-			const warning = result.diagnostics.find(
-				(d) => d.level === 'warning' && d.message.includes('theme variables are disabled')
+			const error = result.diagnostics.find(
+				(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
 			);
-			assert.ok(warning, 'expected a warning about disabled theme variables');
+			assert.ok(error, 'expected an error about disabled theme variables');
 			// base rule still emitted, but the theme variables section is not
 			assert_css_contains(result.css, 'button');
 			assert_css_not_contains(result.css, 'Theme Variables');
 		});
 
-		test('no theme-disabled warning when both base and theme are enabled', () => {
+		test('the disabled-theme error is a config check, independent of resources', () => {
+			const result = generate_css(make_options({ include_base: true, include_theme: false }));
+
+			assert.ok(
+				result.diagnostics.find(
+					(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
+				),
+				'expected the error without any resources loaded'
+			);
+		});
+
+		test('no theme-disabled error when both base and theme are enabled', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
 				'button { color: var(--text_color); }',
 				VARIABLES
@@ -209,6 +233,61 @@ describe('generate_css', () => {
 			assert.isUndefined(
 				result.diagnostics.find((d) => d.message.includes('theme variables are disabled'))
 			);
+		});
+
+		test('a configured theme discarded by variables: null warns', () => {
+			const result = generate_css(
+				make_options({ theme: { name: 't', variables: [] }, include_theme: false })
+			);
+			const warning = result.diagnostics.find(
+				(d) => d.level === 'warning' && 'identifier' in d && d.identifier === 'theme_discarded'
+			);
+			assert.ok(warning, 'expected a theme_discarded warning');
+			// no warning when the theme can actually render
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+				'button { color: red; }',
+				VARIABLES
+			);
+			const ok_result = generate_css(
+				make_options({
+					theme: { name: 't', variables: [] },
+					include_theme: true,
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
+			);
+			assert.isUndefined(
+				ok_result.diagnostics.find((d) => 'identifier' in d && d.identifier === 'theme_discarded')
+			);
+		});
+
+		test('preference rules survive tree-shaking into the fuz.preferences layer', () => {
+			// no detected elements or classes at all - the media block still ships
+			// because its inner :root rule is core
+			const base_css = `@layer fuz.preferences {
+	@media (prefers-contrast: more) {
+		:root { --text_color: black; }
+	}
+}
+@layer fuz.base {
+	button { color: var(--text_color); }
+}`;
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+				base_css,
+				VARIABLES
+			);
+
+			const result = generate_css(
+				make_options({
+					include_base: true,
+					include_theme: true,
+					resources: { style_rule_index, variable_graph, class_variable_index }
+				})
+			);
+
+			assert_css_contains(result.css, '@layer fuz.preferences {');
+			assert_css_contains(result.css, 'prefers-contrast: more');
+			// the unused button rule is still shaken out
+			assert_css_not_contains(result.css, 'button');
 		});
 	});
 });

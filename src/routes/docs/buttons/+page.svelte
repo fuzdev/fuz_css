@@ -8,7 +8,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import { color_variants } from '$lib/variable_data.ts';
+	import { palette_variants } from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'buttons';
 
@@ -30,8 +30,8 @@
 	<section>
 		<p>
 			The <code>&lt;button&gt;</code> element is styled by default without adding classes. Classes
-			like <code>.selected</code> and <code>.plain</code> and <code>.color_a</code> modify the base
-			style.
+			like <code>.selected</code> and <code>.plain</code> and <code>.palette_a</code> modify the
+			base style.
 		</p>
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
@@ -71,29 +71,31 @@
 
 	<TomeSection>
 		<TomeSectionHeader text="Colorful buttons" />
-		{#each color_variants as c (c)}
-			{@const color_name = `color_${c}`}
+		{#each palette_variants as c (c)}
+			{@const palette_name = `palette_${c}`}
 			<section>
-				<Code content={`<button class="${color_name}">`} />
-				<button type="button" class={color_name} class:mb_xs>.{color_name}</button>
-				<button type="button" class={color_name} disabled class:mb_xs>
-					.{color_name}:disabled
+				<Code content={`<button class="${palette_name}">`} />
+				<button type="button" class={palette_name} class:mb_xs>.{palette_name}</button>
+				<button type="button" class={palette_name} disabled class:mb_xs>
+					.{palette_name}:disabled
 				</button>
-				<button type="button" class="{color_name} plain" class:mb_xs>.{color_name}.plain</button>
-				<button type="button" class="{color_name} plain" disabled class:mb_xs>
-					.{color_name}.plain:disabled
+				<button type="button" class="{palette_name} plain" class:mb_xs>
+					.{palette_name}.plain
 				</button>
-				<button type="button" class="{color_name} selected" class:mb_xs>
-					.{color_name}.selected
+				<button type="button" class="{palette_name} plain" disabled class:mb_xs>
+					.{palette_name}.plain:disabled
 				</button>
-				<button type="button" class="{color_name} selected" disabled class:mb_xs>
-					.{color_name}.selected:disabled
+				<button type="button" class="{palette_name} selected" class:mb_xs>
+					.{palette_name}.selected
 				</button>
-				<button type="button" class="{color_name} selected deselectable" class:mb_xs>
-					.{color_name}.selected.deselectable
+				<button type="button" class="{palette_name} selected" disabled class:mb_xs>
+					.{palette_name}.selected:disabled
 				</button>
-				<button type="button" class="{color_name} selected deselectable" disabled class:mb_xs>
-					.{color_name}.selected.deselectable:disabled
+				<button type="button" class="{palette_name} selected deselectable" class:mb_xs>
+					.{palette_name}.selected.deselectable
+				</button>
+				<button type="button" class="{palette_name} selected deselectable" disabled class:mb_xs>
+					.{palette_name}.selected.deselectable:disabled
 				</button>
 			</section>
 		{/each}
@@ -264,7 +266,7 @@
 		<div class="xs row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
-			<button type="button" class="color_j">3</button>
+			<button type="button" class="palette_j">3</button>
 		</div>
 	</TomeSection>
 </TomeContent>

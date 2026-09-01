@@ -60,7 +60,7 @@
 			<div>
 				<h3>Literal classes</h3>
 				<div class="opacity:60%">.opacity:60%</div>
-				<div class="color:var(--color_j_50)">.color:var(--color_j_50)</div>
+				<div class="color:var(--palette_j_50)">.color:var(--palette_j_50)</div>
 				<div class="box-shadow:0~4px~8px~rgb(0,0,0,0.2)">
 					.box-shadow:0~4px~8px~rgb(0,0,0,0.2) (~ encodes spaces)
 				</div>
@@ -90,26 +90,24 @@
 				<h3>Interactive</h3>
 				<div class="row gap_md mb_lg">
 					<button
-						class="hover:border_color_b_50 hover:outline_color_b_50 active:border_color_d_50 active:outline_color_d_50"
+						class="hover:border_b_50 hover:outline_b_50 active:border_d_50 active:outline_d_50"
 						onclick={() => count++}
 					>
 						count: {count}
 					</button>
 					<span
-						>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50
-						.active:outline_color_d_50</span
+						>.hover:border_b_50 .hover:outline_b_50 .active:border_d_50 .active:outline_d_50</span
 					>
 				</div>
 				<div class="row gap_md mb_lg">
 					<button
-						class="hover:border_color_g_50 hover:outline_color_g_50 active:border_color_h_50 active:outline_color_h_50"
+						class="hover:border_g_50 hover:outline_g_50 active:border_h_50 active:outline_h_50"
 						onclick={() => (count = 0)}
 					>
 						reset
 					</button>
 					<span
-						>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50
-						.active:outline_color_h_50</span
+						>.hover:border_g_50 .hover:outline_g_50 .active:border_h_50 .active:outline_h_50</span
 					>
 				</div>
 			</div>

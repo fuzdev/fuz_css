@@ -20,17 +20,18 @@
 			fuz_css styles HTML elements in its <SourceFileLink path="style.css">
 				reset stylesheet
 			</SourceFileLink>, so semantic markup gets themed and color-scheme-aware styling automatically
-			-- utility classes optional. The goal is to be accessible and attractive out of the box,
+			- utility classes optional. The goal is to be accessible and attractive out of the box,
 			minimal yet extensible.
 		</p>
 	</section>
 
 	<TomeSection>
-		<TomeSectionHeader text="Low specificity" />
+		<TomeSectionHeader text="Layers and specificity" />
 		<p>
-			All opinionated styles use <code>:where()</code> selectors, giving them zero specificity
-			beyond the element itself. Your styles and utility classes override defaults without
-			specificity battles.
+			All opinionated styles live in the <code>fuz.base</code> cascade layer, so your unlayered
+			styles and the generated utility classes override them by layer order alone. The selectors are
+			additionally wrapped in <code>:where()</code>, giving them zero specificity, so overriding
+			stays effortless even from inside the fuz layers.
 		</p>
 		<Code
 			lang="css"
@@ -114,7 +115,7 @@
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
 			The <code>.row</code> layout composite resets margins on its direct children. Flow margins
-			make less sense in horizontal flex layout -- for spacing prefer gap utilities like
+			make less sense in horizontal flex layout - for spacing prefer gap utilities like
 			<code>.gap_md</code> and <code>var(--gap_sm)</code> instead.
 		</p>
 		<Code

@@ -18,9 +18,28 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
+import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style } from './theme.ts';
+import type { StyleVariable, Theme } from './variable.ts';
+import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
-import { get_all_variable_names } from './variable_graph.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
+
+// the theme's own overlay for the fuz.theme layer, filtered to the variables
+// the resolution kept so it stays as tree-shaken as the fuz.base block it
+// re-declares (a stance's scheme_mirror alone carries every scheme-adaptive
+// default); the color-scheme pin for a stance renders regardless
+const render_theme_overlay = (theme: Theme, resolved_variables: Set<string>): string => {
+	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
+	const keep = (v: StyleVariable): boolean => resolved_variables.has(v.name);
+	return render_theme_style(
+		{
+			...resolved,
+			variables: resolved.variables.filter(keep),
+			scheme_mirror: resolved.scheme_mirror?.filter(keep)
+		},
+		{ layer: null }
+	);
+};
 
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by
@@ -55,6 +74,16 @@ export interface GenerateCssOptions {
 
 	include_base: boolean;
 	include_theme: boolean;
+	/**
+	 * The configured `theme` option, if any - its variables were already
+	 * overlaid into `resources`' variable graph by the caller. Carried here so
+	 * the theme's own overlay can also render into the `fuz.theme` cascade
+	 * layer (above the `fuz.preferences` OS mappings, with a stance's
+	 * `color-scheme` pin), matching how the same theme behaves at runtime -
+	 * and so the footgun guard can flag a theme silently discarded by
+	 * `variables: null`.
+	 */
+	theme?: Theme | null;
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
@@ -62,7 +91,6 @@ export interface GenerateCssOptions {
 	additional_variables?: Iterable<string> | 'all';
 	exclude_elements?: Iterable<string>;
 	exclude_variables?: Iterable<string>;
-	theme_specificity?: number;
 
 	/** Optional logger; only used to emit resolution stats when `include_stats`. */
 	log?: Logger;
@@ -71,7 +99,7 @@ export interface GenerateCssOptions {
 }
 
 export interface GenerateCssResult {
-	/** Final CSS without banner comments — callers add their own. */
+	/** Final CSS without banner comments - callers add their own. */
 	css: string;
 	/** Extraction + generation + resolution diagnostics, unfiltered. */
 	diagnostics: Array<Diagnostic>;
@@ -79,8 +107,8 @@ export interface GenerateCssResult {
 
 /**
  * Runs the full CSS-generation pipeline: utility classes via
- * `generate_classes_css`, then — when base or theme output is enabled and
- * bundled `resources` are available — base styles and theme variables via
+ * `generate_classes_css`, then - when base or theme output is enabled and
+ * bundled `resources` are available - base styles and theme variables via
  * `resolve_css` + `generate_bundled_css`. Returns the combined CSS and every
  * diagnostic produced along the way.
  */
@@ -99,12 +127,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css_properties,
 		include_base,
 		include_theme,
+		theme = null,
 		resources,
 		additional_elements,
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		theme_specificity = 1,
 		log,
 		include_stats = false
 	} = options;
@@ -120,6 +148,39 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 	});
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];
+
+	// Config error: base styles on, theme off (`variables: null`). The kept base
+	// rules and utility classes reference theme variables the disabled theme
+	// output won't define, so every such `var()` dangles. Utility-only mode
+	// (both off) is the way to bring your own; to ship the full variable set
+	// bundled, keep `variables` and set `additional_variables: 'all'`.
+	if (include_base && !include_theme) {
+		diagnostics.push({
+			phase: 'generation',
+			level: 'error',
+			message:
+				'Base styles are enabled but theme variables are disabled (variables: null); the emitted base styles reference theme variables nothing defines',
+			suggestion:
+				"Set base_css: null too for utility-only mode, or keep variables and set additional_variables: 'all' to bundle the full theme.",
+			identifier: 'theme_variables_disabled',
+			locations: null
+		});
+	}
+
+	// Footgun guard: a configured `theme` with theme output disabled
+	// (`variables: null`) is silently discarded - the theme flows into the
+	// variable graph but the graph never renders.
+	if (theme != null && !include_theme) {
+		diagnostics.push({
+			phase: 'generation',
+			level: 'warning',
+			message:
+				'A theme is configured but theme variables are disabled (variables: null); the theme will not be emitted',
+			suggestion: 'Remove the theme option, or enable variables so the theme can render.',
+			identifier: 'theme_discarded',
+			locations: null
+		});
+	}
 
 	let css: string;
 	if ((include_base || include_theme) && resources) {
@@ -142,7 +203,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			utility_variables_used: utility_result.variables_used,
 			additional_elements,
 			additional_variables,
-			theme_specificity,
 			include_stats,
 			exclude_elements,
 			exclude_variables,
@@ -166,36 +226,23 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 		diagnostics.push(...resolution.diagnostics);
 
-		// Footgun guard: base styles on, theme off (`variables: null`). The kept base rules and
-		// utility classes still reference fuz_css theme variables, but the disabled theme output
-		// won't define them — every such `var()` dangles. Utility-only mode (both off) never reaches
-		// this branch; the legitimate escape is importing `theme.css` separately.
-		if (include_base && !include_theme) {
-			const theme_var_names = get_all_variable_names(resources.variable_graph);
-			const references_theme_var = [...resolution.resolved_variables].some((v) =>
-				theme_var_names.has(v)
-			);
-			if (references_theme_var) {
-				diagnostics.push({
-					phase: 'generation',
-					level: 'warning',
-					message:
-						'Base styles are enabled but theme variables are disabled (variables: null); emitted styles reference theme variables that will be undefined',
-					suggestion: 'Import theme.css separately, or set base_css: null for utility-only mode.',
-					identifier: 'theme_variables_disabled',
-					locations: null
-				});
-			}
-		}
-
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
-			include_utilities: true
+			include_utilities: true,
+			// the theme's own overlay re-renders into fuz.theme so it outranks
+			// the fuz.preferences OS mappings and pins color-scheme for a
+			// stance, exactly like the runtime path renders the same theme
+			theme_overlay_css:
+				include_theme && theme ? render_theme_overlay(theme, resolution.resolved_variables) : null
 		});
 	} else {
-		// utility-only mode
-		css = utility_result.css;
+		// utility-only mode - still layered, so the separately imported package
+		// style.css/theme.css slot beneath the generated classes and consumers'
+		// unlayered styles beat everything, same as bundled mode
+		css = utility_result.css
+			? `${FUZ_LAYER_ORDER_STATEMENT}\n\n/* Utility Classes */\n@layer fuz.utilities {\n${utility_result.css}\n}`
+			: '';
 	}
 
 	return { css, diagnostics };

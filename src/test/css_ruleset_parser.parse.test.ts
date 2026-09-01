@@ -351,7 +351,7 @@ describe('ruleset_contains_class', () => {
 	});
 
 	test('handles class name with numbers', () => {
-		const result = parse_ruleset('.color_a_50 { color: var(--color_a_50); }');
+		const result = parse_ruleset('.color_a_50 { color: var(--palette_a_50); }');
 		assert.isTrue(ruleset_contains_class(result.rules, 'color_a_50'));
 		assert.isFalse(ruleset_contains_class(result.rules, 'color_a'));
 	});

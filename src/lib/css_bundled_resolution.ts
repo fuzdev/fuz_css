@@ -17,7 +17,7 @@ import type { GenerationDiagnostic } from './diagnostics.ts';
 import {
 	type StyleRuleIndex,
 	get_matching_rules,
-	generate_base_css,
+	generate_base_css_by_layer,
 	collect_rule_variables
 } from './style_rule_parser.ts';
 import {
@@ -28,6 +28,7 @@ import {
 	find_similar_variable
 } from './variable_graph.ts';
 import { type CssClassVariableIndex, collect_class_variables } from './class_variable_index.ts';
+import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 
 /**
  * Threshold for string similarity to suggest typo corrections.
@@ -114,8 +115,10 @@ export interface CssResolutionStats {
 export interface CssResolutionResult {
 	/** CSS for theme variables (light and dark) */
 	theme_css: string;
-	/** CSS for base styles (from `style.css`) */
+	/** CSS for base styles (from `style.css`), destined for `fuz.base` */
 	base_css: string;
+	/** CSS for the OS user-preference mappings, destined for `fuz.preferences` */
+	preferences_css: string;
 	/** All resolved variable names (including transitive deps) */
 	resolved_variables: Set<string>;
 	/** Indices of rules included from the style index */
@@ -150,8 +153,6 @@ export interface CssResolutionOptions {
 	additional_elements?: Iterable<string> | 'all';
 	/** Additional variables to always include, or 'all' to include all theme variables */
 	additional_variables?: Iterable<string> | 'all';
-	/** Specificity multiplier for theme selector (default 1) */
-	theme_specificity?: number;
 	/** Whether to include resolution statistics in result */
 	include_stats?: boolean;
 	/** Warn when detected elements have no matching style rules (default false) */
@@ -199,7 +200,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		utility_variables_used,
 		additional_elements,
 		additional_variables,
-		theme_specificity = 1,
 		include_stats = false,
 		warn_unmatched_elements = false,
 		exclude_elements: raw_exclude_elements,
@@ -359,7 +359,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// g) Remove excluded variables. Warn when an excluded variable is actually referenced by
-	// shipped CSS — its `var()` would resolve to nothing. Force-included-only variables and
+	// shipped CSS - its `var()` would resolve to nothing. Force-included-only variables and
 	// unknown (non-theme) names are dropped silently, since neither leaves a dangling reference.
 	if (exclude_variables) {
 		const known_var_names = get_all_variable_names(variable_graph);
@@ -414,15 +414,13 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Step 5: Generate theme CSS
-	const { light_css, dark_css } = generate_theme_css(
-		variable_graph,
-		resolved_variables,
-		theme_specificity
-	);
+	const { light_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
-	// Step 6: Generate base CSS from matched rules
-	const base_css = generate_base_css(style_rule_index, included_rule_indices);
+	// Step 6: Generate base CSS from matched rules, split by destination layer
+	const layered_css = generate_base_css_by_layer(style_rule_index, included_rule_indices);
+	const base_css = layered_css['fuz.base'];
+	const preferences_css = layered_css['fuz.preferences'];
 
 	// Build stats if requested
 	const stats = include_stats
@@ -438,6 +436,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	return {
 		theme_css,
 		base_css,
+		preferences_css,
 		resolved_variables,
 		included_rule_indices,
 		included_elements,
@@ -456,6 +455,13 @@ export interface GenerateBundledCssOptions {
 	include_base?: boolean;
 	/** Include utility classes section. @default true */
 	include_utilities?: boolean;
+	/**
+	 * A baked theme's own overlay (its variables + stance mirror +
+	 * `color-scheme` pin), rendered unlayered - emitted into the `fuz.theme`
+	 * layer so it outranks the `fuz.preferences` OS mappings the same way the
+	 * runtime renderer's output does.
+	 */
+	theme_overlay_css?: string | null;
 }
 
 /**
@@ -471,27 +477,46 @@ export const generate_bundled_css = (
 	utility_css: string,
 	options: GenerateBundledCssOptions = {}
 ): string => {
-	const { include_theme = true, include_base = true, include_utilities = true } = options;
+	const {
+		include_theme = true,
+		include_base = true,
+		include_utilities = true,
+		theme_overlay_css = null
+	} = options;
 
 	const parts: Array<string> = [];
 
-	// Theme section
+	// Theme section - default variables belong to the base layer;
+	// `render_theme_style` overrides them from the higher `fuz.theme` layer
 	if (include_theme && result.theme_css) {
 		parts.push('/* Theme Variables */');
-		parts.push(result.theme_css);
+		parts.push(`@layer fuz.base {\n${result.theme_css}\n}`);
 	}
 
 	// Base styles section
 	if (include_base && result.base_css) {
 		parts.push('/* Base Styles */');
-		parts.push(result.base_css);
+		parts.push(`@layer fuz.base {\n${result.base_css}\n}`);
+	}
+
+	// OS user-preference mappings, above the defaults and below themes
+	if ((include_theme || include_base) && result.preferences_css) {
+		parts.push('/* User-Preference Mappings */');
+		parts.push(`@layer fuz.preferences {\n${result.preferences_css}\n}`);
+	}
+
+	// the baked theme's own overlay, above the preferences like at runtime
+	if (include_theme && theme_overlay_css) {
+		parts.push('/* Theme Overrides */');
+		parts.push(`@layer fuz.theme {\n${theme_overlay_css}\n}`);
 	}
 
 	// Utility classes section
 	if (include_utilities && utility_css) {
 		parts.push('/* Utility Classes */');
-		parts.push(utility_css);
+		parts.push(`@layer fuz.utilities {\n${utility_css}\n}`);
 	}
 
-	return parts.join('\n\n');
+	if (!parts.length) return '';
+	return `${FUZ_LAYER_ORDER_STATEMENT}\n\n${parts.join('\n\n')}`;
 };

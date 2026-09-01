@@ -4,7 +4,7 @@
 
 fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system. It
-ships two plain CSS files — the base `style.css` and replaceable `theme.css` —
+ships two plain CSS files - the base `style.css` and replaceable `theme.css` -
 that work with any framework and plain HTML, and its class generator supports
 HTML/JS/TS, Svelte, and JSX (React/Preact/Solid). Early alpha with breaking
 changes ahead.
@@ -15,7 +15,7 @@ components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 ## Committing
 
 `git add` and `git commit` are denied by `.claude/settings.local.json` in
-this repo — make the edits and stop, the user commits.
+this repo - make the edits and stop, the user commits.
 
 ## Gro commands
 
@@ -61,20 +61,21 @@ fuz_css is a **semantic-first CSS framework and design system**:
 
 ### Styling philosophy
 
-**Default element styling is the baseline — reach past it only with a
+**Default element styling is the baseline - reach past it only with a
 reason.** fuz_css styles semantic HTML out of the box, so most content needs
 no classes: headings are tiered, form controls share sizing and focus states,
 and block elements (`p`, `ul`, `ol`, `table`, `aside`, `blockquote`, `pre`,
 `fieldset`, …) get vertical rhythm automatically from the **flow-margin**
-system — each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
-`:last-child` or `.unstyled`, and margins reset to 0 on the direct children of
-a `.row` (horizontal flex; use `gap_*` there instead). Adding a
+system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
+`:last-child` or `.unstyled` (headings and `section` take multiples of it),
+and margins reset to 0 on the direct children of a `.row` (horizontal flex;
+use `gap_*` there instead). Adding a
 `mb_*`/`gap_*`/`p_*` class or a `<style>` block
-should answer "what specific gap in the defaults does this close?" — the most
+should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,
 work down the ladder and stop at the first rung that suffices: right semantic
-element → built-in class convention (`.selected`, `.color_a`) → composite
+element → built-in class convention (`.selected`, `.palette_a`) → composite
 (`box`, `row`, `panel`) → token class (`p_md`, `gap_lg`) → literal
 (`display:flex`) → `<style>` block with design tokens. Never hardcode spacing
 or color values.
@@ -107,8 +108,25 @@ combined and only used content is included. In utility-only mode, import
   tokens
 - Each variable can have `light` and/or `dark` values
 - Light/dark are color-schemes _within_ a theme, not separate themes
-- [`render_theme_style()`](src/lib/theme.ts) generates CSS with specificity
-  multiplier
+- [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
+  `fuz.theme` cascade layer (defaults live in `fuz.base`, OS user-preference
+  mappings like `prefers-contrast` in `fuz.preferences` above them, generated
+  utility classes in `fuz.utilities`; consumers' unlayered styles beat
+  everything)
+- A theme applies either at build time (the generators' `theme` option, baked
+  into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
+  renders it to a `<style>` element). They compose - the runtime theme wins
+  by cascade layer
+- Color values are derived: curve knobs → ramp stops → color stops, computed
+  in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
+  emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
+  contrast gates in [oklch.ts](src/lib/oklch.ts)/[wcag.ts](src/lib/wcag.ts)
+- [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
+  a theme API: `validate_theme` lints a theme's shape, `check_theme` runs the
+  gamut/monotonicity/contrast gates against an arbitrary theme (resolving its
+  bindings back to numbers), and `compile_theme` recomputes per-theme
+  worst-hue chroma caps so rotated, monochrome, or dark-only themes stay in
+  gamut
 
 ### Smart utility class generation
 
@@ -116,7 +134,10 @@ Two generators available, both using AST-based extraction and per-file caching:
 
 1. **Vite plugin** (preferred) - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
    exposes the generated CSS as `virtual:fuz.css` with HMR; works across
-   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file
+   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
+   In dev it pre-scans project sources at server startup (see `prescan`) so
+   the first served CSS is complete, and resyncs clients whose HMR socket
+   connects after a missed update
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
@@ -145,12 +166,24 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
 ### Three class types
 
-- **Token classes** - Map to style variables: `p_md`, `color_a_50`, `gap_lg`
+- **Token classes** - Map to style variables: `p_md`, `color_a_50`,
+  `positive_50`, `gap_lg`. Palette-letter classes are property-first and the
+  letter alone implies the palette: `color_a_50`, `bg_a_50`, `border_a_50`,
+  and `outline_a_50` apply the `--palette_a_NN` stops to their named property
+  and `shadow_a_50` sets the contextual `--shadow_color` (`border_color_50` is
+  the letterless alpha ramp). A bare intent or neutral scale class applies its
+  family's dominant use
+  (`positive_50`/`text_70` set text color, `shade_50` sets background) with
+  `bg_` twins (`bg_positive_50`). The adaptive alpha overlays
+  (`--fg_*`/`--bg_*`) are variables only, reached via literals
+  (`background-color:var(--fg_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
   from the `md` default; `md` doubles as a cascade reset; they scale controls
-  and spacing via `--flow_margin` — headings and prose keep their font sizes),
+  and spacing via `--flow_margin` - headings and prose keep their font sizes,
+  while a bare `.heading` reads the current `--font_size`, so a composite or
+  a `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
   `menuitem`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
@@ -172,20 +205,73 @@ breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
 variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 `motion-safe:`, `contrast-more:`, etc.) are also available.
 
+Custom properties work as literals too - `--flow_margin:0`, `--button_shadow:none`
+set the property on the element straight from markup, which is how a consumer
+reaches any theme/base hook without a dedicated token class.
+
 ## Variable naming
 
 See [variables.ts](src/lib/variables.ts) for definitions,
-[variable_data.ts](src/lib/variable_data.ts) for size/color variants.
+[variable_data.ts](src/lib/variable_data.ts) for size/palette/intent variants.
 
-**Colors:**
+**Colors (OKLCH, derived):**
 
-- 10 hues with semantic roles: `a` (primary/blue), `b` (success/green), `c`
-  (error/red), `d` (secondary/purple), `e` (tertiary/yellow), `f` (muted/brown),
-  `g` (decorative/pink), `h` (caution/orange), `i` (info/cyan), `j`
-  (flourish/teal)
-- 13 intensity stops: `color_a_00` (lightest) through `color_a_100` (darkest),
-  with `_50` as the base (steps: 00, 05, 10, 20, 30, 40, 50, 60, 70, 80, 90,
-  95, 100)
+- 10 palette hues glossed by color + default intent binding
+  (`palette_glosses` in `variable_data.ts`): `a` (blue ·
+  accent), `b` (green · positive), `c` (red · negative), `d` (purple), `e`
+  (yellow), `f` (brown · neutral), `g` (pink), `h` (orange · caution), `i`
+  (cyan · info), `j` (teal)
+- Semantic intent knobs alias meaning over the letters: `--hue_accent`
+  (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
+  (all surfaces/text/borders/shadows - the neutral is an intent whose scales
+  are `shade_*`/`text_*`), `--hue_positive`/`--hue_negative`/
+  `--hue_caution`/`--hue_info`; each intent derives a full 13-stop scale
+  through the shared ramps (`--accent_00`–`--accent_100`, same for the
+  others) with matching text/background token classes (`.positive_50`,
+  `.bg_caution_10`)
+- Curve knobs drive everything: `--chroma_scale` (0 collapses the palette
+  to grayscale → >1 vivid; the neutral scales ride `--neutral_chroma`
+  instead), per-scheme lightness
+  ramps (`--palette_lightness_00`/`_100`/`_curve`, same trio for `shade_`
+  and `text_`), and the chroma curve (`--chroma_curve`, shared with the
+  neutral scales, over the palette's `--palette_chroma_min`/`_max`) clamped
+  per stop by baked worst-hue sRGB gamut caps
+- Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
+  twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
+  `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
+  low-chroma orange). A hue binding shares only the angle - `validate_theme`
+  warns when a bound letter's multiplier differs from the intent's twin
+- 13 intensity stops: `palette_a_00` (nearest the background) through
+  `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
+  50, 60, 70, 80, 90, 95, 100)
+- Form/scale knobs derive into token defaults so one move reshapes a family
+  while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
+  (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
+  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
+  setting it flattens the heading ladder), `--heading_font_family`, and the
+  `--background_image` decoration hook on `:root`
+- `--font_family` is the body font (default `var(--font_family_sans)`), kept
+  apart from the three stacks (`--font_family_sans`/`_serif`/`_mono`) so
+  retargeting the body doesn't make one of them mean something it isn't;
+  headings still take `--heading_font_family`, so "one family everywhere" is
+  two knobs by design
+- `--border_style` is global, but buttons read `--button_border_style`
+  (default `var(--border_style)`) and swap to `--button_border_style_active`
+  while pressed - the raised/pressed pair `outset`/`inset` needs, and the
+  only element with that affordance. A theme's contextual `--border_style`
+  override no longer reaches buttons, since the derived default resolves at
+  `:root`
+- Micro-surface variables declared in `default_variables`: `--caret_color`
+  (defaults to the accent), `--scrollbar_thumb_color`/
+  `--scrollbar_track_color` (the thumb defaults into the shade scale, the
+  track to transparent), `--backdrop_color`
+  (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
+  gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
+  hook (per-tier fallbacks, so no single default exists); `prefers-contrast:
+  more` maps onto the curve knobs mirroring the high-contrast theme,
+  theme-overridable
+- [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
+  `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
 - `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
@@ -252,6 +338,12 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles or callback to modify defaults
 - `variables` - Custom theme variables or callback to modify defaults
+- `theme` - A `Theme` baked into the generated CSS, overlaid onto `variables`
+  last-wins by name. The static counterpart to fuz_ui's `ThemeRoot`: no
+  runtime theme rendering, and the output stays tree-shaken because the
+  overlay happens before the dependency graph is built. A stanced theme's
+  `scheme_mirror` auto-resolves at build time, so hand-rolled themes don't
+  need `resolve_theme_stance`
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars
@@ -259,16 +351,21 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme
 - `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
-  diagnostic handling; warnings flag configs that leave dangling `var()`
-  references (`base_css` enabled with `variables: null`, or excluding a
-  variable that shipped styles still reference)
+  diagnostic handling; `base_css` enabled with `variables: null` is an error
+  (the base styles would reference variables nothing defines - set both to
+  `null` for utility-only mode, or `additional_variables: 'all'` to bundle
+  the full theme), and warnings flag excluding a variable that shipped
+  styles still reference
 - `filter_file` - which files get extracted (the default filter includes
   node_modules deps)
+- `prescan` (Vite plugin only) - dev-only eager source scan at server
+  startup so the first served CSS is complete (`true` = `src` under the
+  Vite root, `false` disables, or an array of directories)
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`)
 
-These are the common options — see
+These are the common options - see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
-(class definitions and interpreters, theme specificity, acorn plugins, deps).
+(class definitions and interpreters, acorn plugins, deps).
 
 ## Docs
 
@@ -283,13 +380,74 @@ typography, borders, shading, shadows, layout. See
 
 **Variables & themes:**
 
-- [variables.ts](src/lib/variables.ts) - All style variable definitions
-- [variable.ts](src/lib/variable.ts) - `StyleVariable` type and validation
-- [variable_data.ts](src/lib/variable_data.ts) - Size, color, border variants
-- [theme.ts](src/lib/theme.ts) - Theme rendering, `ColorScheme` type
-- [themes.ts](src/lib/themes.ts) - Theme definitions (base, low/high contrast)
+- [variables.ts](src/lib/variables.ts) - All style variable definitions, as a
+  single `default_variables` export; uniform families are loop-built from the
+  variant lists and ramp emitters and spread into it in place
+- [variable.ts](src/lib/variable.ts) - The `StyleVariable` and `Theme` zod
+  schemas (with `ThemeScheme` and `parse_theme`), kept apart from `theme.ts`
+  so the renderer stays zod-free
+- [variable_data.ts](src/lib/variable_data.ts) - The variable vocabulary:
+  size/color/border variant lists plus the fitted value tables their ladders
+  step through (`FONT_SIZES`, `SPACE_SIZES`, `BORDER_RADII`, `DISTANCES`,
+  `LINE_HEIGHTS`, `ICON_SIZES`, `DURATIONS`, `SHADOW_GEOMETRY`,
+  `SHADOW_ALPHAS`, `OVERLAY_ALPHAS`), keyed by variant and unitless -
+  `variables.ts` adds the unit and any `calc()` wrapper
+- [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
+  constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
+- [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
+  (design-time + tests; never needed by the shipped CSS, though display
+  tooling like the docs swatches may import the conversions)
+- [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
+- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
+  `compose_themes` (flatten + last-wins fragment composition - the
+  hand-flatten precursor to `extends`), `ColorScheme` type (`Theme` itself
+  lives in `variable.ts`). A pure renderer:
+  it holds no variable data, so mounting a theme costs ~1.3KB minified
+  instead of ~38KB. It renders what the theme carries and pins
+  `color-scheme` for a `scheme` stance
+- [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
+  computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
+  defaults re-slotted so its one appearance holds in both schemes). Kept out
+  of `theme.ts` so only consumers of a stanced theme pay for the data; the
+  shipped stanced exemplars resolve at their own module scope
+- [scheme_adaptive_variables.ts](src/lib/scheme_adaptive_variables.ts) -
+  generated literal twin of the dual-slot subset of `default_variables`,
+  emitted so the mirror carries no dependency on `variables.ts` (whose
+  module-init emitter calls defeat tree-shaking - reaching for
+  `default_variables` costs ~20KB)
+- [themes.ts](src/lib/themes.ts) - The curated theme registry
+  (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
+  low/high contrast are modifiers composed over any theme via
+  `compose_themes`, not themes themselves - users see one flat "themes"
+  list
+- `src/lib/themes/` - One module per theme. Registered: base. Shipped
+  exemplars are recognizable materials, each anchoring an era: smolder
+  (firelight - warm haze, vivid past the caps, gradient-sky
+  `background_image`), parchment (the illuminated manuscript - serif body,
+  rubrication-red accent, double-ruled borders, candlelit in dark),
+  concrete (brutalism - near-grayscale neutral, sharp, flat, border-forward,
+  heavy headings), nineties (the 90s desktop web - colorless chrome on an
+  off-white ground, serif everything, underlined links, and the only
+  exemplar built on borders rather than depth: `outset` buttons pressing to
+  `inset` over `inset` fields), phosphor (the CRT terminal - green cast,
+  mono, compact, instant short `duration_*`, dark-only), and neon (80s
+  signage - magenta accent, colored glow shadows, capsule radius pins, a
+  rotated yellow slot making it the one palette-tier exemplar, dark-only).
+  Only phosphor and neon take a `scheme` stance; everything else is
+  dual-scheme. The contrast pair live here too as the modifier modules
+- [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
+  (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
+  against `default_variables` by name; includes hook knobs like
+  `heading_font_weight` and the micro-surface color variables
+- [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
+  numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
+  contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over
+  a shared string→number resolution core, exposed as `create_theme_resolver`
+  for memoized UI lookups (the theme editor's derived-knob readouts)
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
+- [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
+  Gro generator that produces `scheme_adaptive_variables.ts`
 
 **CSS extraction:**
 
@@ -304,6 +462,9 @@ typography, borders, shading, shadows, layout. See
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
   (preferred) with HMR via `virtual:fuz.css`
+- [css_placeholder_splice.ts](src/lib/css_placeholder_splice.ts) - The
+  build-mode placeholder and the splice that writes the generated CSS at its
+  position in the bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
   (generate → resolve → bundle) used by both generators
@@ -354,6 +515,23 @@ typography, borders, shading, shadows, layout. See
 - [style.css](src/lib/style.css) - CSS reset and element defaults (all rules)
 - [theme.css](src/lib/theme.css) - Generated base theme variables (all variables)
 
+### Docs site - ./src/routes/
+
+The themes docs page hosts an inline theme editor built from
+[ThemeEditor.svelte](src/routes/ThemeEditor.svelte),
+[KnobControl.svelte](src/routes/KnobControl.svelte),
+[RampStrip.svelte](src/routes/RampStrip.svelte), and
+[theme_editor_state.svelte.ts](src/routes/theme_editor_state.svelte.ts)
+(marked `TODO upstream to fuz_ui`), with
+[theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
+in a leaf module so the root layout doesn't pull the editor's dependency
+graph. [resolved_color.svelte.ts](src/routes/docs/resolved_color.svelte.ts)
+resolves rendered colors for the docs swatches. `vite.config.ts` declares
+the docs site's own generator inputs: a `docs_classes` list plus
+`additional_variables: 'all'` / `additional_elements: 'all'`, which is what
+lets fully dynamic references like `RampStrip`'s `var(--{prefix}_{stop})`
+work without per-page `@fuz-classes` walls.
+
 ### Examples - ./examples/
 
 Vite plugin examples for Svelte, React, Preact, and Solid. Each demonstrates
@@ -381,16 +559,21 @@ and more.
 Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
 
+Component tests (`KnobControl`, `RampStrip`, `ThemeEditor`,
+`resolved_color.svelte`) render in jsdom via a per-file
+`@vitest-environment jsdom` pragma - mounting through
+`component_test_helpers.ts` with context harnesses (`*Harness.svelte` in
+`src/test/`), the fuz_ui pattern. All other suites stay in node;
+`vite.config.ts` sets `resolve.conditions: ['browser']` in test mode so
+svelte's `mount()` resolves to the client build.
+
 ## Known limitations
 
 - **Static extraction only** - Runtime dynamic classes (`document.createElement`,
   `innerHTML`) won't be detected. Use `additional_classes` option as workaround.
 - **No animation utilities** - Animation class generation not yet supported
-- **HSL color system** - OKLCH migration planned for better perceptual uniformity
 - **Button composites incomplete** - Some button variant classes are work in
   progress
-- **CSS Cascade Layers** - `@layer` support under consideration but not yet
-  implemented
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to
@@ -400,7 +583,7 @@ Integration: `vite_plugin_examples.test.ts` (skip with
 
 - TypeScript strict mode
 - Svelte 5 with runes API (for docs site)
-- Prettier with tabs, 100 char width
+- tsv with tabs, 100 char width
 - Node >= 24.14
 - Tests in `src/test/` (not co-located)
 

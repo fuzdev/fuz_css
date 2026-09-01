@@ -1,5 +1,5 @@
 /**
- * Tests for splicing the build-mode placeholder in `vite_plugin_fuz_css`.
+ * Tests for splicing the build-mode placeholder into a bundled stylesheet.
  *
  * The generated CSS has to land at the marker's own position rather than at the
  * end of the asset, so that a stylesheet imported after `virtual:fuz.css` still
@@ -10,7 +10,7 @@
 
 import { test, assert, describe } from 'vitest';
 
-import { splice_css_at_placeholder } from '$lib/vite_plugin_fuz_css.ts';
+import { splice_css_at_placeholder } from '$lib/css_placeholder_splice.ts';
 
 /** The marker rule the build-mode virtual module emits. */
 const MARKER = ':root{--fuz-css-placeholder:1}';
@@ -79,7 +79,7 @@ describe('splice_css_at_placeholder', () => {
 
 	test('splits a merged rule: decls before the marker stay before the generated CSS', () => {
 		// The app stylesheet was bundled before `virtual:fuz.css`, so the merge
-		// put its decls before the marker — fuz_css must still cascade over them.
+		// put its decls before the marker - fuz_css must still cascade over them.
 		const merged = ":root{--font_family_serif: 'DM Serif Display';--fuz-css-placeholder:1}";
 		const spliced = splice_css_at_placeholder(merged, GENERATED);
 		assert.isNotNull(spliced);
@@ -100,7 +100,44 @@ describe('splice_css_at_placeholder', () => {
 		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf("'DM Serif Display'"));
 	});
 
+	test('keeps a hoisted @charset ahead of a leading marker', () => {
+		const charset = '@charset "UTF-8";';
+		const spliced = splice_css_at_placeholder(charset + MARKER + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert.ok(spliced.startsWith(charset), 'the statement at-rule must survive the splice');
+		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
+	});
+
+	test('keeps a hoisted @import ahead of a leading marker', () => {
+		const font_import = '@import url(https://fonts.example/css);';
+		const spliced = splice_css_at_placeholder(font_import + MARKER + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert.ok(spliced.startsWith(font_import));
+		assert.notInclude(spliced, '--fuz-css-placeholder');
+	});
+
+	test('splices inside an enclosing block without swallowing its prelude', () => {
+		const spliced = splice_css_at_placeholder(`@layer app{${MARKER}${APP}}`, GENERATED);
+		assert.isNotNull(spliced);
+		assert.ok(spliced.startsWith('@layer app{'));
+		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
+		assert.ok(spliced.endsWith('}'));
+	});
+
+	test('strips a marker when given empty CSS', () => {
+		const spliced = splice_css_at_placeholder(MARKER + APP, '');
+		assert.isNotNull(spliced);
+		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert.include(spliced, APP);
+	});
+
 	test('returns null when the marker is absent', () => {
 		assert.isNull(splice_css_at_placeholder(APP, GENERATED));
+	});
+
+	test('returns null when the marker has no enclosing rule', () => {
+		assert.isNull(splice_css_at_placeholder('--fuz-css-placeholder:1', GENERATED));
 	});
 });
