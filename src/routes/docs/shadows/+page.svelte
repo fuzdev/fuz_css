@@ -49,9 +49,8 @@
 	<section>
 		<p>
 			fuz_css provides four semantic shadow types that build on the light model in the
-			<TomeLink slug="shading" />
-			docs: umbra for natural depth, highlight for rim lighting, glow for light emphasis, and shroud
-			for dark overlays.
+			<TomeLink slug="shading" /> docs: umbra for natural depth, highlight for rim lighting, glow
+			for light emphasis, and shroud for dark overlays.
 		</p>
 	</section>
 	<TomeSection>

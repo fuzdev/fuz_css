@@ -32,9 +32,9 @@
 		<header class="text-align:center">
 			<h1>fuz_css + Svelte</h1>
 			<p>
-				Utility classes generated on-demand via Vite plugin (<a
-					href="https://css.fuz.dev/docs/classes">docs</a
-				>, <a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-svelte">source</a>)
+				Utility classes generated on-demand via Vite plugin
+				(<a href="https://css.fuz.dev/docs/classes">docs</a>,
+				<a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-svelte">source</a>)
 			</p>
 		</header>
 
@@ -95,10 +95,10 @@
 					>
 						count: {count}
 					</button>
-					<span
-						>.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50
-						.active:outline_color_d_50</span
-					>
+					<span>
+						.hover:border_color_b_50 .hover:outline_color_b_50 .active:border_color_d_50
+						.active:outline_color_d_50
+					</span>
 				</div>
 				<div class="row gap_md mb_lg">
 					<button
@@ -107,10 +107,10 @@
 					>
 						reset
 					</button>
-					<span
-						>.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50
-						.active:outline_color_h_50</span
-					>
+					<span>
+						.hover:border_color_g_50 .hover:outline_color_g_50 .active:border_color_h_50
+						.active:outline_color_h_50
+					</span>
 				</div>
 			</div>
 		</section>
@@ -119,9 +119,8 @@
 		<section>
 			<h2>Extraction</h2>
 			<p>
-				Classes detected via naming conventions, expressions, and comments (examples imported from <code
-					>node_modules</code
-				> to verify dependency scanning)
+				Classes detected via naming conventions, expressions, and comments (examples imported from
+				<code>node_modules</code> to verify dependency scanning)
 			</p>
 
 			<div>
@@ -168,10 +167,9 @@
 		<footer class="text-align:center">
 			<p>
 				This demos a subset of features.<br />See the
-				<a href="https://css.fuz.dev/docs/classes">docs</a>
-				and
-				<a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-svelte">source code</a> for
-				more.
+				<a href="https://css.fuz.dev/docs/classes">docs</a> and
+				<a href="https://github.com/fuzdev/fuz_css/tree/main/examples/vite-svelte">source code</a>
+				for more.
 			</p>
 		</footer>
 	</div>

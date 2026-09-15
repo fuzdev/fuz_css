@@ -27,7 +27,10 @@
 		</div>
 	</section>
 	<section>
-		<Card href={resolve('/docs')}>docs{#snippet icon()}🪴{/snippet}</Card>
+		<Card href={resolve('/docs')}>
+			docs
+			{#snippet icon()}🪴{/snippet}
+		</Card>
 	</section>
 	<section class="width_atmost_sm p_sm border_radius_md shadow_xs text-align:center">
 		fuz_css is part of the Fuz stack, <br /> see

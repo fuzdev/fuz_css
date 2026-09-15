@@ -41,8 +41,8 @@
 		</ul>
 		<p>
 			Space variants are used in <a href={resolve('/docs/classes')}>classes</a> like
-			<code>.p_md</code>
-			for padding, margin, other forms of spacing like gap, positioning, dimensions, etc.
+			<code>.p_md</code> for padding, margin, other forms of spacing like gap, positioning,
+			dimensions, etc.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -60,8 +60,7 @@
 		</ul>
 		<p>
 			Distance variants have <a href={resolve('/docs/classes')}>classes</a> like
-			<code>.width_atmost_sm</code>
-			and <code>.width_atleast_md</code>.
+			<code>.width_atmost_sm</code> and <code>.width_atleast_md</code>.
 		</p>
 	</TomeSection>
 </TomeContent>

@@ -51,8 +51,7 @@
 		<TomeSectionHeader text="The shade scale" />
 		<p>
 			The shade scale is the primary system for backgrounds and surfaces. All numbered shades
-			(<code>shade_00</code>
-			through <code>shade_100</code>) are tinted using the theme's
+			(<code>shade_00</code> through <code>shade_100</code>) are tinted using the theme's
 			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion. The scale also
 			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
 			contrast needs.

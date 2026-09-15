@@ -153,8 +153,7 @@
 			The text scale (<code>text_00</code> through <code>text_100</code>) provides tinted neutral
 			colors optimized for text legibility. The scale uses "prominence" semantics for light and dark
 			modes: low numbers are subtle, high numbers are strong. This matches the
-			<TomeLink slug="shading">shade scale</TomeLink>
-			pattern.
+			<TomeLink slug="shading">shade scale</TomeLink> pattern.
 		</p>
 		<ul>
 			<li><code>text_00</code> - surface-side endpoint: essentially invisible on surface</li>
@@ -213,9 +212,8 @@
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
 			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
-			set
-			<code>--flow_margin</code>, scaling the vertical spacing between flow elements and headings.
-			Apply on a container to cascade to children.
+			set <code>--flow_margin</code>, scaling the vertical spacing between flow elements and
+			headings. Apply on a container to cascade to children.
 		</p>
 		<Code
 			content={`<div class="lg">\n\t<h3>heading</h3>\n\t<p>paragraph</p>\n\t<p>paragraph</p>\n</div>`}
@@ -244,9 +242,8 @@
 		</TomeSectionHeader>
 		<p>
 			The <code>.md</code>
-			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink>
-			resets sizing to the defaults. Use it inside a sized container to restore normal sizing for a
-			subtree.
+			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to
+			the defaults. Use it inside a sized container to restore normal sizing for a subtree.
 		</p>
 		<Code
 			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}

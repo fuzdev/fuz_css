@@ -17,11 +17,10 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css styles HTML elements in its <SourceFileLink path="style.css">
-				reset stylesheet
-			</SourceFileLink>, so semantic markup gets themed and color-scheme-aware styling automatically
-			-- utility classes optional. The goal is to be accessible and attractive out of the box,
-			minimal yet extensible.
+			fuz_css styles HTML elements in its
+			<SourceFileLink path="style.css">reset stylesheet</SourceFileLink>, so semantic markup gets
+			themed and color-scheme-aware styling automatically -- utility classes optional. The goal is
+			to be accessible and attractive out of the box, minimal yet extensible.
 		</p>
 	</section>
 
@@ -51,9 +50,9 @@
 		<TomeSectionHeader text=".unstyled escape hatch" />
 		<p>
 			Add the <code>.unstyled</code>
-			<TomeLink slug="classes" hash="Builtin-classes">builtin class</TomeLink>
-			to opt out of decorative styling while keeping reset normalizations. Works for both decorative
-			containers and interactive elements like links, buttons, inputs, and summary.
+			<TomeLink slug="classes" hash="Builtin-classes">builtin class</TomeLink> to opt out of
+			decorative styling while keeping reset normalizations. Works for both decorative containers
+			and interactive elements like links, buttons, inputs, and summary.
 		</p>
 		<Code
 			lang="svelte"

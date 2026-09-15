@@ -41,8 +41,8 @@
 		<p>
 			fuz_css provides color <TomeLink slug="variables" /> that adapt to the
 			<MdnLink path="Web/CSS/color-scheme" />, working naturally in both light and dark modes. Each
-			<TomeLink slug="themes">theme</TomeLink>
-			can customize the 10 hues (a-j) and their intensity variants (00-100).
+			<TomeLink slug="themes">theme</TomeLink> can customize the 10 hues (a-j) and their intensity
+			variants (00-100).
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics -- "a" is blue by
