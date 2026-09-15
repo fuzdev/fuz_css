@@ -10,8 +10,7 @@
 	<TomeSectionHeader text="Icon sizes" />
 	<aside>
 		unlike <code>--font_size_</code> variables, <code>--icon_</code> variables are in
-		<code>px</code>
-		not <code>rem</code>, so they're insensitive to browser font size
+		<code>px</code> not <code>rem</code>, so they're insensitive to browser font size
 	</aside>
 </TomeSection>
 <div class="icon_sizes">

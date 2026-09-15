@@ -168,9 +168,8 @@
 			</fieldset>
 		</form>
 		<aside>
-			The above are wrapped with: <Code content={`<label class="row">`} inline />
-			with <code>.disabled</code> as needed:
-			<Code content={`<label class="row disabled">`} inline />
+			The above are wrapped with: <Code content={`<label class="row">`} inline /> with
+			<code>.disabled</code> as needed: <Code content={`<label class="row disabled">`} inline />
 		</aside>
 	</TomeSection>
 

@@ -23,19 +23,18 @@
 	<section>
 		<p>
 			fuz_css's colors are <em>derived</em>: a handful of high-leverage knobs produce every color
-			<TomeLink slug="variables" /> in pure CSS, in the
-			<MdnLink path="Web/CSS/color_value/oklch" /> colorspace, adapting to the
-			<MdnLink path="Web/CSS/color-scheme" />
-			automatically. OKLCH lightness is perceptually uniform (equal lightness reads equally light in
-			every hue), so rotating a hue knob is safe: contrast and visual weight hold.
+			<TomeLink slug="variables" /> in pure CSS, in the <MdnLink path="Web/CSS/color_value/oklch" />
+			colorspace, adapting to the <MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH
+			lightness is perceptually uniform (equal lightness reads equally light in every hue), so
+			rotating a hue knob is safe: contrast and visual weight hold.
 		</p>
 		<p>
 			Hues use letters so themes can reassign colors without breaking semantics ("a" is blue by
 			default but could be any color). Meaning attaches through the intent knobs layered on top:
 			<code>--hue_accent</code> (links, focus, selection, selected states - what other systems call
-			"primary") defaults to
-			<code>--hue_a</code>, <code>--hue_negative</code> to <code>--hue_c</code>, and so on. Retarget
-			an intent to move just that meaning; rotate a letter to move the palette.
+			"primary") defaults to <code>--hue_a</code>, <code>--hue_negative</code> to
+			<code>--hue_c</code>, and so on. Retarget an intent to move just that meaning; rotate a letter
+			to move the palette.
 		</p>
 	</section>
 	<TomeSection>
@@ -83,10 +82,9 @@
 			</li>
 		</ul>
 		<p>
-			Every intermediate value these produce is also its own variable (<code>
-				--palette_lightness_30
-			</code>, <code>--palette_chroma_50</code>, …), so a theme can pin any individual stop as an
-			escape hatch.
+			Every intermediate value these produce is also its own variable
+			(<code>--palette_lightness_30</code>, <code>--palette_chroma_50</code>, …), so a theme can pin
+			any individual stop as an escape hatch.
 		</p>
 		<Code
 			lang="css"
@@ -110,8 +108,7 @@
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
 			example, fuz_css's selection color derives from <code>--hue_accent</code> (try selecting some
-			text -
-			<span class="accent_50">same hue!</span>)
+			text - <span class="accent_50">same hue!</span>)
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">

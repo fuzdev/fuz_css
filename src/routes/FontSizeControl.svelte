@@ -39,7 +39,8 @@
 			step={1}
 			{max}
 		/>
-		= var(<StyleVariableButton name="font_size_{selected_name}">
+		=
+		var(<StyleVariableButton name="font_size_{selected_name}">
 			--font_size_{selected_name}
 		</StyleVariableButton>)
 	</div>

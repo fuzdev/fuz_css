@@ -120,7 +120,7 @@ describe('sRGB transfer function', () => {
 	});
 
 	test('mid gray linearizes to about 21%', () => {
-		assert_close(srgb_component_to_linear(0.5), 0.2140, 1e-4);
+		assert_close(srgb_component_to_linear(0.5), 0.214, 1e-4);
 	});
 
 	test('round-trips across the range', () => {

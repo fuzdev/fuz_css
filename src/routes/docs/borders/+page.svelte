@@ -71,10 +71,9 @@
 		<p>
 			<code>--border_style</code> is global - asides, blockquotes, and form fields all read it.
 			Buttons take <code>--button_border_style</code> instead (defaulting to
-			<code>var(--border_style)</code>), and swap to
-			<code>--button_border_style_active</code>
-			while pressed. Buttons are the only element with a raised/pressed affordance, so the split
-			lands there rather than as a general state variable.
+			<code>var(--border_style)</code>), and swap to <code>--button_border_style_active</code> while
+			pressed. Buttons are the only element with a raised/pressed affordance, so the split lands
+			there rather than as a general state variable.
 		</p>
 		<p>
 			That pair is what makes beveled chrome expressible, since

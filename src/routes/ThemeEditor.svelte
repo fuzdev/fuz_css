@@ -197,8 +197,7 @@
 		<ColorSchemeInput />
 		{#if editor.stance}
 			<small>
-				single-scheme theme - edits write to the base slots and the
-				<strong>{editor.stance}</strong>
+				single-scheme theme - edits write to the base slots and the <strong>{editor.stance}</strong>
 				appearance renders in both color schemes
 			</small>
 		{:else}
@@ -269,9 +268,8 @@
 			{#if axis === 'color'}
 				<details class="mt_lg">
 					<summary>
-						palette hues <small>
-							(the letter slots - moving these makes the theme palette-tier)
-						</small>
+						palette hues
+						<small>(the letter slots - moving these makes the theme palette-tier)</small>
 					</summary>
 					<div class="ramp_strips mt_md mb_lg">
 						{#each palette_variants as letter (letter)}
@@ -324,9 +322,8 @@
 		{#if editor.check_report.unchecked.length}
 			<details>
 				<summary>
-					{editor.check_report.unchecked.length} unchecked <small>
-						(values the numeric gates can't resolve)
-					</small>
+					{editor.check_report.unchecked.length} unchecked
+					<small>(values the numeric gates can't resolve)</small>
 				</summary>
 				<ul class="unstyled">
 					{#each editor.check_report.unchecked as u (u.variable + u.value)}
@@ -364,8 +361,8 @@
 			</div>
 		{:else}
 			<p class="mt_md">
-				The theme is empty: every variable keeps its base default, so it renders no CSS. Move a
-				knob to see its output.
+				The theme is empty: every variable keeps its base default, so it renders no CSS. Move a knob
+				to see its output.
 			</p>
 		{/if}
 	</Details>

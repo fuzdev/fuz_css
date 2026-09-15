@@ -24,9 +24,8 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			Style variables, or just "variables" in fuz_css, are <MdnLink
-				path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*"
-			>
+			Style variables, or just "variables" in fuz_css, are
+			<MdnLink path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*">
 				CSS custom properties
 			</MdnLink>
 			that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable can have
@@ -40,10 +39,8 @@
 		<ul>
 			<li>by CSS classes, both utility and component</li>
 			<li>
-				by other variables, both in calculations and to add useful semantics (e.g. <code>
-					button_fill_hover
-				</code>
-				uses <code>shade_50</code> but can be themed independently)
+				by other variables, both in calculations and to add useful semantics (e.g.
+				<code>button_fill_hover</code> uses <code>shade_50</code> but can be themed independently)
 			</li>
 			<li>
 				in JS like the <a href="https://svelte.dev/">Svelte</a> components in
@@ -68,8 +65,8 @@
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
 			variables your code uses are emitted, along with any they depend on. The full
-			<ModuleLink module_path="theme.css" />
-			stylesheet ships every variable, for utility-only mode and direct imports.
+			<ModuleLink module_path="theme.css" /> stylesheet ships every variable, for utility-only mode
+			and direct imports.
 		</p>
 	</section>
 	<section>
@@ -98,8 +95,7 @@ export type StyleVariable = {
 			Both are zod schemas with their types inferred, so the same names validate at runtime -
 			<code>Theme.safeParse(value)</code> for the detail, <code>parse_theme(value)</code> for a
 			theme-or-<code>null</code>, and <code>validate_theme(theme)</code> in
-			<ModuleLink module_path="theme_check.ts" />
-			for the full lint.
+			<ModuleLink module_path="theme_check.ts" /> for the full lint.
 		</p>
 	</section>
 	<TomeSection>

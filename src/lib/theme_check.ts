@@ -619,9 +619,12 @@ const to_shape_issue = (
 			typeof theme === 'object' && theme !== null
 				? (theme as Record<string, unknown>)[head]
 				: undefined;
-		const entry: unknown = Array.isArray(list) && typeof index === 'number' ? list[index] : undefined;
+		const entry: unknown =
+			Array.isArray(list) && typeof index === 'number' ? list[index] : undefined;
 		const name =
-			typeof entry === 'object' && entry !== null && typeof (entry as { name?: unknown }).name === 'string'
+			typeof entry === 'object' &&
+			entry !== null &&
+			typeof (entry as { name?: unknown }).name === 'string'
 				? (entry as { name: string }).name
 				: undefined;
 		return {
@@ -849,10 +852,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		entries.push({ gate: 'contrast', scheme, subject, value, threshold, pass: value >= threshold });
 	};
 
-	const push_monotonicity = (
-		family: RampFamily,
-		scheme: ColorSchemeVariant
-	): void => {
+	const push_monotonicity = (family: RampFamily, scheme: ColorSchemeVariant): void => {
 		const lightnesses: Array<number> = [];
 		for (const stop of numeric_scale_variants) {
 			const l = num(`${family}_lightness_${stop}`, scheme);
@@ -897,7 +897,8 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			if (hue === null || multiplier === null) continue;
 			if (
 				letter_slots.some(
-					([h, m]) => Math.abs(h - hue) < NUMERIC_EPSILON && Math.abs(m - multiplier) < NUMERIC_EPSILON
+					([h, m]) =>
+						Math.abs(h - hue) < NUMERIC_EPSILON && Math.abs(m - multiplier) < NUMERIC_EPSILON
 				)
 			) {
 				continue;

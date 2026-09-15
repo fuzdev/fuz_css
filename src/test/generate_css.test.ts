@@ -196,7 +196,8 @@ describe('generate_css', () => {
 			);
 
 			const error = result.diagnostics.find(
-				(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
+				(d) =>
+					d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
 			);
 			assert.ok(error, 'expected an error about disabled theme variables');
 			// base rule still emitted, but the theme variables section is not
@@ -209,7 +210,8 @@ describe('generate_css', () => {
 
 			assert.ok(
 				result.diagnostics.find(
-					(d) => d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
+					(d) =>
+						d.level === 'error' && 'identifier' in d && d.identifier === 'theme_variables_disabled'
 				),
 				'expected the error without any resources loaded'
 			);

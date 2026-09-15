@@ -22,9 +22,9 @@
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
 				Use the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-				<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink>
-				for bundled CSS that includes theme variables, base styles, and utility classes in a single
-				import. Add the plugin to your Vite config:
+				<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> for bundled CSS that
+				includes theme variables, base styles, and utility classes in a single import. Add the
+				plugin to your Vite config:
 			</p>
 			<Code
 				lang="ts"
@@ -93,7 +93,8 @@ import 'virtual:fuz.css'; // used utilities only`}
 					<a href="https://ui.fuz.dev/">fuz_ui</a>
 				</li>
 				<li>
-					see the <TomeLink slug="classes" hash="Compared-to-alternatives">
+					see the
+					<TomeLink slug="classes" hash="Compared-to-alternatives">
 						comparison to alternatives
 					</TomeLink>
 					to understand fuz_css relative to TailwindCSS and UnoCSS

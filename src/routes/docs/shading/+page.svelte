@@ -47,8 +47,7 @@
 		<TomeSectionHeader text="The shade scale" />
 		<p>
 			The shade scale is the primary system for backgrounds and surfaces. All numbered shades
-			(<code>shade_00</code>
-			through <code>shade_100</code>) are tinted using the theme's
+			(<code>shade_00</code> through <code>shade_100</code>) are tinted using the theme's
 			<code>hue_neutral</code> and <code>neutral_chroma</code> for visual cohesion. The scale also
 			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
 			contrast needs.
@@ -116,8 +115,7 @@
 		<p>
 			The overlays are variables, not token classes - <code>bg_</code> is the opaque background
 			class prefix (<code>.bg_a_50</code>, <code>.bg_positive_50</code>), so reach the overlays with
-			a literal class (<code>background-color:var(--fg_10)</code>) or a
-			<code>&lt;style&gt;</code>
+			a literal class (<code>background-color:var(--fg_10)</code>) or a <code>&lt;style&gt;</code>
 			block.
 		</p>
 		<TomeSection>
