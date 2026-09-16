@@ -38,7 +38,7 @@ dev server.
 - @sveltejs/acorn-typescript, acorn-jsx, zimmerframe - AST parsing and walking
 - zod - schema validation
 - @webref/css - CSS property validation
-- @fuzdev/blake3_wasm - BLAKE3 content hashing for cache validation (optional
+- @fuzdev/blake3-wasm - BLAKE3 content hashing for cache validation (optional
   peer, via fuz_util's `hash_blake3`)
 - fuz_util (@fuzdev/fuz_util) - utility functions
 
