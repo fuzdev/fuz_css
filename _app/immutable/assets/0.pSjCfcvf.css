@@ -2109,6 +2109,7 @@ These are used as modifiers to buttons.
 .pb_0 { padding-bottom: 0; }
 .pb_xl { padding-bottom: var(--space_xl); }
 .pl_sm { padding-left: var(--space_sm); }
+.pl_md { padding-left: var(--space_md); }
 .pl_lg { padding-left: var(--space_lg); }
 .pl_xl { padding-left: var(--space_xl); }
 .pl_xl2 { padding-left: var(--space_xl2); }
@@ -2170,6 +2171,7 @@ These are used as modifiers to buttons.
 .position\:relative { position: relative; }
 .position\:sticky { position: sticky; }
 .text-align\:center { text-align: center; }
+.text-align\:right { text-align: right; }
 .vertical-align\:middle { vertical-align: middle; }
 .white-space\:nowrap { white-space: nowrap; }
 .word-break\:break-all { word-break: break-all; }
