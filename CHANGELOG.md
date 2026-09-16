@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.64.0
+
+### Minor Changes
+
+- **breaking** chore: the optional peer dep `@fuzdev/blake3_wasm` is renamed to `@fuzdev/blake3-wasm` (`^0.2.0`) — swap the dependency and any `optimizeDeps.exclude` entry ([d865cdc](https://github.com/fuzdev/fuz_css/commit/d865cdc))
+
 ## 0.63.3
 
 ### Patch Changes
