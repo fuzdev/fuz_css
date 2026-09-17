@@ -133,9 +133,9 @@ describe('extract_css_variables', () => {
 		// This is why we use simple regex scanning instead of AST-based extraction:
 		// variables in component props like <MdnLink size="var(--icon_size_xs)" />
 		// aren't in style attributes but still reference theme variables
-		const svelte_component = `<MdnLink size="var(--icon_size_xs)" color="var(--color_a_5)" />`;
+		const svelte_component = `<MdnLink size="var(--icon_size_xs)" color="var(--palette_a_5)" />`;
 		const result = extract_css_variables(svelte_component);
-		assert.deepEqual(result, new Set(['icon_size_xs', 'color_a_5']));
+		assert.deepEqual(result, new Set(['icon_size_xs', 'palette_a_5']));
 	});
 
 	test('extracts variables from JSX props', () => {

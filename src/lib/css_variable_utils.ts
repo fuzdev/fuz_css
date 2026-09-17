@@ -14,7 +14,7 @@
  * Allows optional whitespace after the opening parenthesis per CSS spec.
  *
  * Examples:
- * - `var(--color_a_50)` → captures `color_a_50`
+ * - `var(--palette_a_50)` → captures `palette_a_50`
  * - `var(--font_size_md, 1.6rem)` → captures `font_size_md`
  * - `var( --spacing )` → captures `spacing`
  */

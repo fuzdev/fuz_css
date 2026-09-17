@@ -1,6 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
 import {
+	apply_theme_variables,
 	build_variable_graph,
 	build_variable_graph_from_options,
 	resolve_variables_transitive,
@@ -9,32 +10,32 @@ import {
 	has_variable,
 	find_similar_variable
 } from '$lib/variable_graph.ts';
-import type { StyleVariable } from '$lib/variable.ts';
+import type { StyleVariable, Theme } from '$lib/variable.ts';
+import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
 		test('builds graph with basic variable', () => {
 			const variables: Array<StyleVariable> = [
-				{ name: 'color_a', light: 'blue', dark: 'lightblue' }
+				{ name: 'palette_a', light: 'blue', dark: 'lightblue' }
 			];
 
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			assert.strictEqual(graph.variables.size, 1);
-			assert.strictEqual(graph.variables.get('color_a')!.light_css, 'blue');
-			assert.strictEqual(graph.variables.get('color_a')!.dark_css, 'lightblue');
-			assert.strictEqual(graph.content_hash, 'test-hash');
+			assert.strictEqual(graph.variables.get('palette_a')!.light_css, 'blue');
+			assert.strictEqual(graph.variables.get('palette_a')!.dark_css, 'lightblue');
 		});
 
 		test('extracts dependencies from var() references', () => {
 			const variables: Array<StyleVariable> = [
 				{ name: 'hue_a', light: '210' },
-				{ name: 'color_a', light: 'hsl(var(--hue_a) 50% 50%)' }
+				{ name: 'palette_a', light: 'hsl(var(--hue_a) 50% 50%)' }
 			];
 
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
-			assert.isTrue(graph.variables.get('color_a')!.light_deps.has('hue_a'));
+			assert.isTrue(graph.variables.get('palette_a')!.light_deps.has('hue_a'));
 			assert.strictEqual(graph.variables.get('hue_a')!.light_deps.size, 0);
 		});
 	});
@@ -43,7 +44,7 @@ describe('build_variable_graph', () => {
 		test('handles light-only variable', () => {
 			const variables: Array<StyleVariable> = [{ name: 'spacing', light: '16px' }];
 
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			assert.strictEqual(graph.variables.get('spacing')!.light_css, '16px');
 			assert.isUndefined(graph.variables.get('spacing')!.dark_css);
@@ -53,7 +54,7 @@ describe('build_variable_graph', () => {
 		test('handles dark-only variable', () => {
 			const variables: Array<StyleVariable> = [{ name: 'shadow', dark: 'none' }];
 
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			assert.isUndefined(graph.variables.get('shadow')!.light_css);
 			assert.strictEqual(graph.variables.get('shadow')!.dark_css, 'none');
@@ -66,7 +67,7 @@ describe('build_variable_graph', () => {
 				{ name: 'composite', light: 'var(--base_light)', dark: 'var(--base_dark)' }
 			];
 
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			assert.isTrue(graph.variables.get('composite')!.light_deps.has('base_light'));
 			assert.isFalse(graph.variables.get('composite')!.light_deps.has('base_dark'));
@@ -83,7 +84,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'a', light: '1' },
 				{ name: 'b', light: '2' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['a']);
 
@@ -97,7 +98,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'hue', light: '210' },
 				{ name: 'color', light: 'hsl(var(--hue) 50% 50%)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['color']);
 
@@ -111,7 +112,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'b', light: '2' },
 				{ name: 'c', light: '3' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['a', 'c']);
 
@@ -129,7 +130,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'c', light: 'var(--b)' },
 				{ name: 'd', light: 'var(--c)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['d']);
 
@@ -146,7 +147,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'c', light: 'independent-value' },
 				{ name: 'a', light: 'calc(var(--b) + var(--c))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['a']);
 
@@ -168,7 +169,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'b', light: 'calc(var(--d) + var(--e))' },
 				{ name: 'root', light: 'calc(var(--a) + var(--b))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['root']);
 
@@ -188,7 +189,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'x', light: 'var(--shared)' },
 				{ name: 'y', light: 'var(--shared)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['x', 'y']);
 
@@ -206,7 +207,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'dark_base', dark: 'black' },
 				{ name: 'combo', light: 'var(--light_base)', dark: 'var(--dark_base)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['combo']);
 
@@ -223,7 +224,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'dark_mid', dark: 'var(--dark_leaf)' },
 				{ name: 'themed', light: 'var(--light_mid)', dark: 'var(--dark_mid)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['themed']);
 
@@ -244,7 +245,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'c', light: '3' },
 				{ name: 'composed', light: 'var(--a, var(--b, var(--c)))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['composed']);
 
@@ -258,7 +259,7 @@ describe('resolve_variables_transitive', () => {
 	describe('missing variables', () => {
 		test('tracks missing variables', () => {
 			const variables: Array<StyleVariable> = [{ name: 'known', light: '1' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['known', 'unknown']);
 
@@ -271,7 +272,7 @@ describe('resolve_variables_transitive', () => {
 
 		test('tracks multiple missing variables', () => {
 			const variables: Array<StyleVariable> = [{ name: 'exists', light: '1' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, [
 				'exists',
@@ -288,7 +289,7 @@ describe('resolve_variables_transitive', () => {
 
 		test('tracks missing dependencies', () => {
 			const variables: Array<StyleVariable> = [{ name: 'root', light: 'var(--missing_dep)' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['root']);
 
@@ -303,7 +304,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'a', light: '1' },
 				{ name: 'b', light: 'var(--a)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const result = resolve_variables_transitive(graph, ['b']);
 
@@ -340,7 +341,7 @@ describe('resolve_variables_transitive', () => {
 				['a', 'b']
 			]
 		])('detects %s', (_name, variables, expected_vars) => {
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['a']);
 
 			for (const v of expected_vars) {
@@ -354,7 +355,7 @@ describe('resolve_variables_transitive', () => {
 			const variables: Array<StyleVariable> = [
 				{ name: 'x', light: 'var(--x, 1)', dark: 'var(--x, 2)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['x']);
 
 			assert.isTrue(result.variables.has('x'));
@@ -373,7 +374,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'e', light: '5' },
 				{ name: 'deep', light: 'var(--a, var(--b, var(--c, var(--d, var(--e)))))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['deep']);
 
 			for (const v of ['a', 'b', 'c', 'd', 'e', 'deep']) {
@@ -392,7 +393,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'd3', dark: 'var(--d2)' },
 				{ name: 'themed', light: 'var(--l3)', dark: 'var(--d3)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['themed']);
 
 			assert.strictEqual(result.variables.size, 7);
@@ -413,7 +414,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'c', light: 'fallback-value' },
 				{ name: 'a', light: 'var(--b, var(--c))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['a']);
 
 			assert.isTrue(result.variables.has('a'));
@@ -430,7 +431,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'padding', light: '20px' },
 				{ name: 'content_width', light: 'calc(var(--width) - var(--padding) * 2)' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['content_width']);
 
 			assert.isTrue(result.variables.has('content_width'));
@@ -444,7 +445,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'base', light: '10px' },
 				{ name: 'computed', light: 'calc(var(--base) + var(--missing, 5px))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['computed']);
 
 			assert.isTrue(result.variables.has('computed'));
@@ -460,7 +461,7 @@ describe('resolve_variables_transitive', () => {
 				{ name: 'c', light: '30' },
 				{ name: 'nested', light: 'calc(var(--a) + calc(var(--b) * var(--c)))' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			const result = resolve_variables_transitive(graph, ['nested']);
 
 			for (const v of ['a', 'b', 'c', 'nested']) {
@@ -474,7 +475,7 @@ describe('generate_theme_css', () => {
 	describe('basic output', () => {
 		test('generates light and dark blocks', () => {
 			const variables: Array<StyleVariable> = [{ name: 'color', light: 'blue', dark: 'lightblue' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const { light_css, dark_css } = generate_theme_css(graph, new Set(['color']));
 
@@ -484,21 +485,21 @@ describe('generate_theme_css', () => {
 			assert.include(dark_css, '--color: lightblue;');
 		});
 
-		test('applies specificity multiplier', () => {
+		test('renders single :root scopes', () => {
 			const variables: Array<StyleVariable> = [{ name: 'color', light: 'blue', dark: 'lightblue' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
-			const { light_css, dark_css } = generate_theme_css(graph, new Set(['color']), 2);
+			const { light_css, dark_css } = generate_theme_css(graph, new Set(['color']));
 
-			assert.include(light_css, ':root:root');
-			assert.include(dark_css, ':root:root.dark');
+			assert.include(light_css, ':root {');
+			assert.include(dark_css, ':root.dark {');
 		});
 	});
 
 	describe('light/dark only variables', () => {
 		test('light-only produces only light block', () => {
 			const variables: Array<StyleVariable> = [{ name: 'spacing', light: '16px' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const { light_css, dark_css } = generate_theme_css(graph, new Set(['spacing']));
 
@@ -508,7 +509,7 @@ describe('generate_theme_css', () => {
 
 		test('dark-only produces only dark block', () => {
 			const variables: Array<StyleVariable> = [{ name: 'glow', dark: 'none' }];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const { light_css, dark_css } = generate_theme_css(graph, new Set(['glow']));
 
@@ -524,7 +525,7 @@ describe('generate_theme_css', () => {
 				{ name: 'alpha', light: '1' },
 				{ name: 'mid', light: '2' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 
 			const { light_css } = generate_theme_css(graph, new Set(['zebra', 'alpha', 'mid']));
 
@@ -545,7 +546,7 @@ describe('utility functions', () => {
 			{ name: 'b', light: '2' },
 			{ name: 'c', light: '3' }
 		];
-		const graph = build_variable_graph(variables, 'test-hash');
+		const graph = build_variable_graph(variables);
 
 		const names = get_all_variable_names(graph);
 
@@ -557,7 +558,7 @@ describe('utility functions', () => {
 
 	test('has_variable checks existence', () => {
 		const variables: Array<StyleVariable> = [{ name: 'exists', light: '1' }];
-		const graph = build_variable_graph(variables, 'test-hash');
+		const graph = build_variable_graph(variables);
 
 		assert.isTrue(has_variable(graph, 'exists'));
 		assert.isFalse(has_variable(graph, 'missing'));
@@ -571,12 +572,12 @@ describe('build_variable_graph_from_options', () => {
 		assert.isAbove(graph.variables.size, 100);
 
 		assert.isTrue(graph.variables.has('hue_a'));
-		assert.isTrue(graph.variables.has('color_a_50'));
+		assert.isTrue(graph.variables.has('palette_a_50'));
 		assert.isTrue(graph.variables.has('text_color'));
 
-		const color_a_50 = graph.variables.get('color_a_50');
-		assert.isDefined(color_a_50);
-		assert.isTrue(color_a_50.light_deps.has('hue_a') || color_a_50.dark_deps.has('hue_a'));
+		const palette_a_50 = graph.variables.get('palette_a_50');
+		assert.isDefined(palette_a_50);
+		assert.isTrue(palette_a_50.light_deps.has('hue_a') || palette_a_50.dark_deps.has('hue_a'));
 	});
 
 	test('resolves common patterns', () => {
@@ -591,9 +592,9 @@ describe('build_variable_graph_from_options', () => {
 	test('resolves color chain', () => {
 		const graph = build_variable_graph_from_options(undefined);
 
-		const result = resolve_variables_transitive(graph, ['color_a_50']);
+		const result = resolve_variables_transitive(graph, ['palette_a_50']);
 
-		assert.isTrue(result.variables.has('color_a_50'));
+		assert.isTrue(result.variables.has('palette_a_50'));
 		assert.isTrue(result.variables.has('hue_a'));
 	});
 });
@@ -610,7 +611,7 @@ describe('find_similar_variable', () => {
 				'swapped chars'
 			]
 		])('%s → %s (%s)', (typo, expected, variables) => {
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			assert.strictEqual(find_similar_variable(graph, typo), expected);
 		});
 	});
@@ -621,27 +622,27 @@ describe('find_similar_variable', () => {
 				{ name: 'color_primary', light: 'blue' },
 				{ name: 'spacing_md', light: '16px' }
 			];
-			const graph = build_variable_graph(variables, 'test-hash');
+			const graph = build_variable_graph(variables);
 			assert.isNull(find_similar_variable(graph, name));
 		});
 	});
 
 	test('returns null for empty graph', () => {
-		const graph = build_variable_graph([], 'test-hash');
+		const graph = build_variable_graph([]);
 		assert.isNull(find_similar_variable(graph, 'anything'));
 	});
 
 	test('finds best match among multiple similar variables', () => {
 		const variables: Array<StyleVariable> = [
-			{ name: 'color_a_1', light: '1' },
-			{ name: 'color_a_2', light: '2' },
-			{ name: 'color_a_3', light: '3' }
+			{ name: 'palette_a_1', light: '1' },
+			{ name: 'palette_a_2', light: '2' },
+			{ name: 'palette_a_3', light: '3' }
 		];
-		const graph = build_variable_graph(variables, 'test-hash');
+		const graph = build_variable_graph(variables);
 
-		const result = find_similar_variable(graph, 'color_a_');
+		const result = find_similar_variable(graph, 'palette_a_');
 		assert.isNotNull(result);
-		assert.match(result, /^color_a_[123]$/);
+		assert.match(result, /^palette_a_[123]$/);
 	});
 
 	test('returns null for short dissimilar strings', () => {
@@ -649,7 +650,136 @@ describe('find_similar_variable', () => {
 			{ name: 'shadow_xs', light: '1px' },
 			{ name: 'shadow_sm', light: '2px' }
 		];
-		const graph = build_variable_graph(variables, 'test-hash');
+		const graph = build_variable_graph(variables);
 		assert.isNull(find_similar_variable(graph, 'shadow'));
+	});
+});
+
+describe('apply_theme_variables', () => {
+	const defaults: Array<StyleVariable> = [
+		{ name: 'hue_a', light: '210' },
+		{ name: 'hue_b', light: '120' },
+		{ name: 'shade_00', light: '#fff', dark: '#000' }
+	];
+
+	test('returns the input unchanged with no theme', () => {
+		assert.strictEqual(apply_theme_variables(defaults, null), defaults);
+		assert.strictEqual(apply_theme_variables(defaults, undefined), defaults);
+	});
+
+	test("overlays the theme's variables last-wins by name", () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '30' }] };
+		const result = apply_theme_variables(defaults, theme);
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_a'),
+			{ name: 'hue_a', light: '30' }
+		);
+		// untouched names survive, and the set doesn't grow
+		assert.lengthOf(result, 3);
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_b'),
+			{ name: 'hue_b', light: '120' }
+		);
+	});
+
+	test('appends variables the defaults lack', () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'my_brand', light: '#f60' }] };
+		const result = apply_theme_variables(defaults, theme);
+		assert.lengthOf(result, 4);
+		assert.isDefined(result.find((v) => v.name === 'my_brand'));
+	});
+
+	test("applies scheme_mirror before the theme's own variables", () => {
+		const theme: Theme = {
+			name: 't',
+			scheme: 'dark',
+			scheme_mirror: [
+				{ name: 'shade_00', light: '#000' },
+				{ name: 'hue_b', light: '99' }
+			],
+			variables: [{ name: 'shade_00', light: 'authored' }]
+		};
+		const result = apply_theme_variables(defaults, theme);
+		// the theme's own value wins over its mirror
+		assert.deepEqual(
+			result.find((v) => v.name === 'shade_00'),
+			{ name: 'shade_00', light: 'authored' }
+		);
+		// mirror entries the theme doesn't author still apply, replacing both slots
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_b'),
+			{ name: 'hue_b', light: '99' }
+		);
+	});
+
+	test('a stanced theme without a computed mirror auto-resolves it', () => {
+		const adaptive = scheme_adaptive_variables.find((v) => v.name === 'shade_lightness_00')!;
+		const with_adaptive: Array<StyleVariable> = [...defaults, { ...adaptive }];
+		// hand-rolled: `scheme` set but no `resolve_theme_stance` call
+		const theme: Theme = { name: 't', scheme: 'dark', variables: [{ name: 'hue_a', light: '30' }] };
+		const result = apply_theme_variables(with_adaptive, theme);
+		// the mirror re-slots the untouched scheme-adaptive default to its dark value
+		assert.deepEqual(
+			result.find((v) => v.name === adaptive.name),
+			{ name: adaptive.name, light: adaptive.dark }
+		);
+		// the theme's own variables still apply over the mirror
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_a'),
+			{ name: 'hue_a', light: '30' }
+		);
+	});
+
+	test('build_variable_graph_from_options bakes the theme into the graph', () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '30' }] };
+		const graph = build_variable_graph_from_options(defaults, theme);
+		assert.strictEqual(graph.variables.get('hue_a')!.light_css, '30');
+		// a different theme produces a different graph
+		const other = build_variable_graph_from_options(defaults, {
+			name: 't2',
+			variables: [{ name: 'hue_a', light: '40' }]
+		});
+		assert.strictEqual(other.variables.get('hue_a')!.light_css, '40');
+	});
+});
+
+describe('apply_theme_variables slot semantics', () => {
+	const defaults: Array<StyleVariable> = [{ name: 'shade_00', light: '#fff', dark: '#000' }];
+
+	test('a light-only theme value replaces both slots, matching the runtime cascade', () => {
+		// at runtime a fuz.theme :root declaration beats the fuz.base :root.dark
+		// default by layer order, so the baked entry drops the dark slot
+		const result = apply_theme_variables(defaults, {
+			name: 't',
+			variables: [{ name: 'shade_00', light: '#eee' }]
+		});
+		assert.deepEqual(result, [{ name: 'shade_00', light: '#eee' }]);
+	});
+
+	test("a dark-only theme value keeps the default's light slot", () => {
+		// at runtime the theme's :root.dark only shadows under `.dark`, so the
+		// light scheme still resolves the default - the baked entry must too
+		const result = apply_theme_variables(defaults, {
+			name: 't',
+			variables: [{ name: 'shade_00', dark: '#111' }]
+		});
+		assert.deepEqual(result, [{ name: 'shade_00', light: '#fff', dark: '#111' }]);
+	});
+});
+
+describe('build-time theme against the real defaults', () => {
+	test("a theme's var() reference pulls the variable in transitively", () => {
+		const graph = build_variable_graph_from_options(undefined, {
+			name: 't',
+			variables: [{ name: 'hue_accent', light: 'var(--hue_d)' }]
+		});
+		const { variables, missing } = resolve_variables_transitive(graph, ['accent_50']);
+		assert.strictEqual(missing.size, 0);
+		assert.isTrue(variables.has('hue_accent'));
+		// the rebinding's target rides along even though nothing else uses it
+		assert.isTrue(variables.has('hue_d'));
+		const { light_css } = generate_theme_css(graph, variables);
+		assert.include(light_css, '--hue_accent: var(--hue_d);');
+		assert.include(light_css, '--hue_d:');
 	});
 });

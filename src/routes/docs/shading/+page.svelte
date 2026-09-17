@@ -12,11 +12,7 @@
 
 	import { shade_scale_variants, alpha_variants } from '$lib/variable_data.ts';
 
-	// @fuz-classes fg_00 fg_05 fg_10 fg_20 fg_30 fg_40 fg_50 fg_60 fg_70 fg_80 fg_90 fg_95 fg_100
-	// @fuz-classes bg_00 bg_05 bg_10 bg_20 bg_30 bg_40 bg_50 bg_60 bg_70 bg_80 bg_90 bg_95 bg_100
 	// @fuz-classes shade_50
-	// @fuz-classes darken_00 darken_05 darken_10 darken_20 darken_30 darken_40 darken_50 darken_60 darken_70 darken_80 darken_90 darken_95 darken_100
-	// @fuz-classes lighten_00 lighten_05 lighten_10 lighten_20 lighten_30 lighten_40 lighten_50 lighten_60 lighten_70 lighten_80 lighten_90 lighten_95 lighten_100
 	const LIBRARY_ITEM_NAME = 'shading';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
@@ -33,9 +29,9 @@
 		<p>
 			fuz_css offers a shading model built on <em>adaptive</em> style variables that respond to the
 			<MdnLink path="Web/CSS/color-scheme" />. Adaptive means the underlying values change between
-			light and dark modes to maintain consistent prominence -- low numbers stay subtle, high
-			numbers stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode,
-			dark mode, or both.
+			light and dark modes to maintain consistent prominence: low numbers stay subtle, high numbers
+			stay strong. Each <TomeLink slug="themes">theme</TomeLink> can implement light mode, dark
+			mode, or both.
 		</p>
 		<p>
 			Light mode's starting point is plain white documents (like paper) where we subtract light to
@@ -52,7 +48,7 @@
 		<p>
 			The shade scale is the primary system for backgrounds and surfaces. All numbered shades
 			(<code>shade_00</code> through <code>shade_100</code>) are tinted using the theme's
-			<code>tint_hue</code> and <code>tint_saturation</code> for visual cohesion. The scale also
+			<code>hue_neutral</code> and <code>neutral_chroma</code> for visual cohesion. The scale also
 			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
 			contrast needs.
 		</p>
@@ -69,8 +65,8 @@
 			<TomeSectionHeader text="Key values" tag="h4" />
 			<ul>
 				<li>
-					<code>shade_min</code>: untinted surface-side extreme -- white in light mode, black in
-					dark mode; used for input backgrounds
+					<code>shade_min</code>: untinted surface-side extreme (white in light mode, black in dark
+					mode); used for input backgrounds
 				</li>
 				<li><code>shade_00</code>: the base background</li>
 				<li><code>shade_05</code>: very subtle: hover states on surface, code backgrounds</li>
@@ -104,17 +100,23 @@
 		</p>
 		<ul>
 			<li>
-				<code>fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
+				<code>--fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
 				use for elevated surfaces like panels, cards, and hover states
 			</li>
 			<li>
-				<code>bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
+				<code>--bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
 				use for surfaces that blend toward the background
 			</li>
 		</ul>
 		<p>
 			In light mode, <code>fg</code> is the same as <code>darken</code> and <code>bg</code> is the
 			same as <code>lighten</code>. In dark mode, they're swapped.
+		</p>
+		<p>
+			The overlays are variables, not token classes - <code>bg_</code> is the opaque background
+			class prefix (<code>.bg_a_50</code>, <code>.bg_positive_50</code>), so reach the overlays with
+			a literal class (<code>background-color:var(--fg_10)</code>) or a <code>&lt;style&gt;</code>
+			block.
 		</p>
 		<TomeSection>
 			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
@@ -123,7 +125,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'fg_' + v}
 					<div>
-						<div class="overlay_color fg_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -136,7 +138,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'bg_' + v}
 					<div>
-						<div class="overlay_color bg_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -149,10 +151,10 @@
 				adds more contrast:
 			</p>
 			<Code
-				content={`<div class="fg_10 p_sm">
-	<div class="fg_10 p_sm">
-		<div class="fg_10 p_sm">
-			<div class="fg_10 p_sm">
+				content={`<div class="background-color:var(--fg_10) p_sm">
+	<div class="background-color:var(--fg_10) p_sm">
+		<div class="background-color:var(--fg_10) p_sm">
+			<div class="background-color:var(--fg_10) p_sm">
 				...
 			</div>
 		</div>
@@ -160,13 +162,13 @@
 </div>`}
 			/>
 			<div class="stacking_demo">
-				<div class="stacking_layer fg_10">
-					<span>fg_10</span>
-					<div class="stacking_layer fg_10">
-						<span>nested fg_10</span>
-						<div class="stacking_layer fg_10">
+				<div class="stacking_layer">
+					<span>var(--fg_10)</span>
+					<div class="stacking_layer">
+						<span>nested var(--fg_10)</span>
+						<div class="stacking_layer">
 							<span>triple nested</span>
-							<div class="stacking_layer fg_10">
+							<div class="stacking_layer">
 								<span>quadruple nested</span>
 							</div>
 						</div>
@@ -176,7 +178,7 @@
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
 				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
-				<code>.menuitem</code> use <code>fg_10</code> for this stacking behavior.
+				<code>.menuitem</code> use <code>var(--fg_10)</code> for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -197,7 +199,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'darken_' + v}
 					<div>
-						<div class="overlay_color darken_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -210,7 +212,7 @@
 				{#each alpha_variants as v (v)}
 					{@const name = 'lighten_' + v}
 					<div>
-						<div class="overlay_color lighten_{v}"></div>
+						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
 					</div>
 				{/each}
@@ -230,8 +232,8 @@
 	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
-			<strong>Use <code>fg_NN</code></strong> when you need stacking behavior or are building nested
-			UI:
+			<strong>Use <code>--fg_NN</code></strong> when you need stacking behavior or are building
+			nested UI:
 		</p>
 		<Code
 			lang="css"
@@ -261,8 +263,8 @@ background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
-			<code>fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the opaque
-			base.
+			<code>--fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the
+			opaque base.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -312,6 +314,7 @@ background-color: var(--shade_min);`}
 		padding: var(--space_md);
 		border-radius: var(--border_radius_xs);
 		margin-top: var(--space_sm);
+		background-color: var(--fg_10);
 	}
 	.stacking_layer span {
 		font-family: var(--font_family_mono);

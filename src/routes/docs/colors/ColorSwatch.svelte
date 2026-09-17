@@ -1,38 +1,19 @@
 <script lang="ts">
 	import ColorSwatchItem from './ColorSwatchItem.svelte';
-	import { intensity_variants } from '$lib/variable_data.ts';
+	import { intensity_variants, type PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
-		color_name,
-		computed_styles,
-		suffix,
-		absolute = false
+		letter
 	}: {
-		color_name: string;
-		computed_styles: CSSStyleDeclaration | null;
-		suffix?: 'light' | 'dark';
-		absolute?: boolean;
+		letter: PaletteVariant;
 	} = $props();
 </script>
 
-{#if absolute}
-	<ul class="unstyled">
-		{#each intensity_variants as intensity (intensity)}
-			<ColorSwatchItem {intensity} {color_name} {computed_styles} suffix="light" />
-		{/each}
-	</ul>
-	<ul class="unstyled">
-		{#each intensity_variants as intensity (intensity)}
-			<ColorSwatchItem {intensity} {color_name} {computed_styles} suffix="dark" />
-		{/each}
-	</ul>
-{:else}
-	<ul class="unstyled">
-		{#each intensity_variants as intensity (intensity)}
-			<ColorSwatchItem {intensity} {color_name} {computed_styles} {suffix} />
-		{/each}
-	</ul>
-{/if}
+<ul class="unstyled">
+	{#each intensity_variants as intensity (intensity)}
+		<ColorSwatchItem {intensity} {letter} />
+	{/each}
+</ul>
 
 <style>
 	ul {

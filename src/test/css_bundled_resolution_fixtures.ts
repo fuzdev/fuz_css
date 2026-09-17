@@ -22,8 +22,8 @@ export const create_test_fixtures = (
 	variable_graph: ReturnType<typeof build_variable_graph>;
 	class_variable_index: ReturnType<typeof build_class_variable_index>;
 } => {
-	const style_rule_index = parse_style_css(css, 'test-hash');
-	const variable_graph = build_variable_graph(variables, 'test-hash');
+	const style_rule_index = parse_style_css(css);
+	const variable_graph = build_variable_graph(variables);
 	const class_variable_index = build_class_variable_index(class_defs);
 	return { style_rule_index, variable_graph, class_variable_index };
 };

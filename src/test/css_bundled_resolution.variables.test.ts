@@ -114,9 +114,9 @@ describe('resolve_css variable resolution', () => {
 
 		test('additional_variables: "all" includes every variable', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a', light: 'blue' },
-				{ name: 'color_b', light: 'green' },
-				{ name: 'color_c', light: 'red' },
+				{ name: 'palette_a', light: 'blue' },
+				{ name: 'palette_b', light: 'green' },
+				{ name: 'palette_c', light: 'red' },
 				{ name: 'space_sm', light: '8px' },
 				{ name: 'space_md', light: '16px' }
 			]);
@@ -131,9 +131,9 @@ describe('resolve_css variable resolution', () => {
 
 			// All 5 variables should be included
 			assert.strictEqual(result.resolved_variables.size, 5);
-			assert.isTrue(result.resolved_variables.has('color_a'));
-			assert.isTrue(result.resolved_variables.has('color_b'));
-			assert.isTrue(result.resolved_variables.has('color_c'));
+			assert.isTrue(result.resolved_variables.has('palette_a'));
+			assert.isTrue(result.resolved_variables.has('palette_b'));
+			assert.isTrue(result.resolved_variables.has('palette_c'));
 			assert.isTrue(result.resolved_variables.has('space_sm'));
 			assert.isTrue(result.resolved_variables.has('space_md'));
 		});
@@ -463,7 +463,7 @@ describe('resolve_css variable resolution', () => {
 			assert_css_order(result.theme_css, '--alpha', '--mid', '--zebra');
 		});
 
-		test('theme_specificity multiplies :root', () => {
+		test('theme variables render :root and :root.dark blocks', () => {
 			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
 				{ name: 'color', light: 'blue', dark: 'lightblue' }
 			]);
@@ -475,12 +475,11 @@ describe('resolve_css variable resolution', () => {
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
-				utility_variables_used: new Set(),
-				theme_specificity: 3
+				utility_variables_used: new Set()
 			});
 
-			assert.include(result.theme_css, ':root:root:root {');
-			assert.include(result.theme_css, ':root:root:root.dark {');
+			assert.include(result.theme_css, ':root {');
+			assert.include(result.theme_css, ':root.dark {');
 		});
 
 		test('empty variables produce empty string', () => {

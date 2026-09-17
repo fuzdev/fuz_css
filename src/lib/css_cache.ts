@@ -186,8 +186,9 @@ export const save_cached_extraction = async (
 };
 
 /**
- * Deletes a cached extraction file.
- * Silently succeeds if the file doesn't exist.
+ * Deletes a cached extraction file. Best-effort: every `unlink` error is
+ * swallowed, not just `not_found` - the cache is disposable and callers
+ * delete fire-and-forget.
  *
  * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file

@@ -50,7 +50,7 @@
 		<p>
 			This paragraph has no bottom margin because default spacing is omitted for the
 			<code>:last-child</code> of all otherwise-spaced elements, streamlining the common case. This
-			has some unfortunate edge cases that can usually by solved by adding <code>.mb_lg</code>.
+			has some unfortunate edge cases that can usually be solved by adding <code>.mb_lg</code>.
 			Coupling markup structure to styles like this may be something we change,
 			<a href="https://github.com/fuzdev/fuz_css">feedback</a> is welcome.
 		</p>

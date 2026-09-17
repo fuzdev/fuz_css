@@ -1,4 +1,5 @@
 import type { CssClassDefinition } from './css_class_generation.ts';
+import { palette_variants } from './variable_data.ts';
 
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
@@ -46,9 +47,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	selectable: {
 		ruleset: `
 			.selectable {
-				--button_fill: color-mix(in hsl, var(--shade_50) 8%, transparent);
-				--button_fill_hover: color-mix(in hsl, var(--shade_50) 16%, transparent);
-				--button_fill_active: color-mix(in hsl, var(--shade_50) 24%, transparent);
+				--button_fill: color-mix(in oklab, var(--shade_50) 8%, transparent);
+				--button_fill_hover: color-mix(in oklab, var(--shade_50) 16%, transparent);
+				--button_fill_active: color-mix(in oklab, var(--shade_50) 24%, transparent);
 				cursor: pointer;
 				background-color: var(--button_fill);
 				border-color: var(--border_color_30);
@@ -62,7 +63,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.selectable.selected,
 			.selectable:active {
 				background-color: var(--button_fill_active);
-				border-color: var(--color_a_50);
+				border-color: var(--accent_50);
 			}
 			.selectable.selected {
 				cursor: default;
@@ -97,7 +98,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
 			background-color: var(--shade_00);
-			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
+			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
 			border-radius: var(--border_radius, var(--border_radius_xs));
 		`
 	},
@@ -239,7 +240,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 			.menuitem.selected {
 				/* TODO different patterns for border and surface? */
-				--border_color: var(--color_a_50);
+				--border_color: var(--accent_50);
 				background-color: var(--fg_10);
 				cursor: default;
 			}
@@ -309,46 +310,14 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			a.chip {
 				font-weight: 600;
 			}
-			.chip.color_a {
-				color: var(--color_a_50);
-				background-color: var(--color_a_10);
-			}
-			.chip.color_b {
-				color: var(--color_b_50);
-				background-color: var(--color_b_10);
-			}
-			.chip.color_c {
-				color: var(--color_c_50);
-				background-color: var(--color_c_10);
-			}
-			.chip.color_d {
-				color: var(--color_d_50);
-				background-color: var(--color_d_10);
-			}
-			.chip.color_e {
-				color: var(--color_e_50);
-				background-color: var(--color_e_10);
-			}
-			.chip.color_f {
-				color: var(--color_f_50);
-				background-color: var(--color_f_10);
-			}
-			.chip.color_g {
-				color: var(--color_g_50);
-				background-color: var(--color_g_10);
-			}
-			.chip.color_h {
-				color: var(--color_h_50);
-				background-color: var(--color_h_10);
-			}
-			.chip.color_i {
-				color: var(--color_i_50);
-				background-color: var(--color_i_10);
-			}
-			.chip.color_j {
-				color: var(--color_j_50);
-				background-color: var(--color_j_10);
-			}
+			${palette_variants
+				.map(
+					(letter) => `.chip.palette_${letter} {
+				color: var(--palette_${letter}_50);
+				background-color: var(--palette_${letter}_10);
+			}`
+				)
+				.join('\n\t\t\t')}
 		`
 	}
 };

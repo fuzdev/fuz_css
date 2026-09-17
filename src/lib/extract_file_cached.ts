@@ -3,7 +3,7 @@
  * Vite plugin. Returns extraction sourced from cache when the content hash
  * matches, else freshly parsed, plus the cache path to write on a miss.
  *
- * Callers own everything around this — in-memory hash short-circuits, the Vite
+ * Callers own everything around this - in-memory hash short-circuits, the Vite
  * deletion-race guard, diagnostic logging, stats counting, and how/when to
  * write the cache (fire-and-forget vs. batched).
  *
