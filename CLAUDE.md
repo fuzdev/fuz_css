@@ -12,11 +12,6 @@ changes ahead.
 For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
-## Committing
-
-`git add` and `git commit` are denied by `.claude/settings.local.json` in
-this repo — make the edits and stop, the user commits.
-
 ## Gro commands
 
 ```bash
