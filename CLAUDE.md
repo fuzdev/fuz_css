@@ -22,9 +22,6 @@ gro gen       # regenerate theme.css and other .gen files
 gro build     # build the package for production
 ```
 
-IMPORTANT for AI agents: Do NOT run `gro dev` - the developer will manage the
-dev server.
-
 ## Key dependencies
 
 - Svelte 5 - `svelte/compiler` parses CSS and Svelte source in the extractor
