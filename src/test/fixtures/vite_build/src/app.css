@@ -1,0 +1,7 @@
+:root {
+	--build_fixture_token: 1px;
+}
+
+.build-fixture {
+	outline: var(--build_fixture_token) solid;
+}

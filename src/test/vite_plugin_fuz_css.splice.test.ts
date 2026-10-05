@@ -10,10 +10,22 @@
 
 import { test, assert, describe } from 'vitest';
 
-import { splice_css_at_placeholder } from '$lib/css_placeholder_splice.ts';
+import {
+	FUZ_CSS_PLACEHOLDER,
+	FUZ_CSS_PLACEHOLDER_RULE,
+	parse_css_placeholder_hash,
+	splice_css_at_placeholder,
+	to_hashed_css_placeholder
+} from '$lib/css_placeholder_splice.ts';
 
 /** The marker rule the build-mode virtual module emits. */
 const MARKER = ':root{--fuz-css-placeholder:1}';
+
+/** Stands in for a hash of the generated CSS - digit-first after the prefix, the awkward case. */
+const HASH = '9e5a0123456789ab';
+
+/** The marker rule restated with the generated CSS's hash. */
+const HASHED_MARKER = `:root{${FUZ_CSS_PLACEHOLDER}:h${HASH}}`;
 
 /** Stands in for the generated theme + classes. */
 const GENERATED = ':root{--font_family_serif: Georgia, serif}';
@@ -139,5 +151,163 @@ describe('splice_css_at_placeholder', () => {
 
 	test('returns null when the marker has no enclosing rule', () => {
 		assert.isNull(splice_css_at_placeholder('--fuz-css-placeholder:1', GENERATED));
+	});
+});
+
+describe('to_hashed_css_placeholder', () => {
+	test('restates the placeholder rule as one declaration carrying the hash', () => {
+		assert.strictEqual(to_hashed_css_placeholder(FUZ_CSS_PLACEHOLDER_RULE, HASH), HASHED_MARKER);
+		assert.strictEqual(to_hashed_css_placeholder(MARKER, HASH), HASHED_MARKER);
+	});
+
+	test('differs by hash and from the unhashed rule', () => {
+		assert.notStrictEqual(HASHED_MARKER, FUZ_CSS_PLACEHOLDER_RULE);
+		assert.notStrictEqual(HASHED_MARKER, to_hashed_css_placeholder(MARKER, '0000000000000000'));
+	});
+
+	test('changes only the value, keeping what surrounds the placeholder', () => {
+		// what a CSS pipeline can leave: a wrapper, its own formatting, neighbors
+		const processed = `@layer app {\n  :root {\n    --a: 1;\n    ${FUZ_CSS_PLACEHOLDER}: 1;\n  }\n}\n`;
+		const hashed = to_hashed_css_placeholder(processed, HASH);
+		assert.isNotNull(hashed);
+		assert.strictEqual(hashed, processed.replace(': 1;\n  }', `: h${HASH};\n  }`));
+		assert.strictEqual(parse_css_placeholder_hash(hashed), HASH);
+	});
+
+	test('hashes every copy of the placeholder', () => {
+		const hashed = to_hashed_css_placeholder(MARKER + APP + MARKER, HASH);
+		assert.strictEqual(hashed, HASHED_MARKER + APP + HASHED_MARKER);
+	});
+
+	test('replaces a hash the placeholder already carries', () => {
+		assert.strictEqual(
+			to_hashed_css_placeholder(HASHED_MARKER, '0000000000000000'),
+			`:root{${FUZ_CSS_PLACEHOLDER}:h0000000000000000}`
+		);
+	});
+
+	test('returns null when there is no placeholder', () => {
+		assert.isNull(to_hashed_css_placeholder(APP, HASH));
+		assert.isNull(to_hashed_css_placeholder('', HASH));
+	});
+
+	test('splicing the hashed text gives the bytes splicing the unhashed text does', () => {
+		const processed = `@layer app{${MARKER}${APP}}`;
+		const hashed = to_hashed_css_placeholder(processed, HASH);
+		assert.isNotNull(hashed);
+		assert.strictEqual(
+			splice_css_at_placeholder(hashed, GENERATED),
+			splice_css_at_placeholder(processed, GENERATED)
+		);
+	});
+});
+
+describe('parse_css_placeholder_hash', () => {
+	test('reads the hash back out of a bundled stylesheet', () => {
+		assert.strictEqual(parse_css_placeholder_hash(APP + HASHED_MARKER + APP), HASH);
+	});
+
+	test('reads through unminified spacing', () => {
+		const unminified = `:root {\n\t${FUZ_CSS_PLACEHOLDER}: h${HASH};\n}\n`;
+		assert.strictEqual(parse_css_placeholder_hash(unminified), HASH);
+	});
+
+	test('reads a hash merged into a neighboring rule', () => {
+		const merged = `:root{--a: 1;${FUZ_CSS_PLACEHOLDER}:h${HASH};--b: 2}`;
+		assert.strictEqual(parse_css_placeholder_hash(merged), HASH);
+	});
+
+	test('returns null for the unhashed placeholder', () => {
+		assert.isNull(parse_css_placeholder_hash(MARKER + APP));
+	});
+
+	test('returns null when there is no placeholder', () => {
+		assert.isNull(parse_css_placeholder_hash(APP));
+	});
+});
+
+describe('splice_css_at_placeholder with a hashed placeholder', () => {
+	/** Asserts nothing of either placeholder form is left - property or hash. */
+	const assert_no_marker = (spliced: string): void => {
+		assert.notInclude(spliced, FUZ_CSS_PLACEHOLDER);
+		assert.notInclude(spliced, HASH);
+		assert.notInclude(spliced, ':root{}');
+	};
+
+	test('splices at a solo hashed marker and leaves no trace of it', () => {
+		const spliced = splice_css_at_placeholder(HASHED_MARKER + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced, GENERATED + '\n' + APP);
+	});
+
+	test('produces the same output as the unhashed marker', () => {
+		const before = ':root{--a: 1}';
+		assert.strictEqual(
+			splice_css_at_placeholder(before + HASHED_MARKER + APP, GENERATED),
+			splice_css_at_placeholder(before + MARKER + APP, GENERATED)
+		);
+	});
+
+	test('tolerates the unminified hashed marker rule', () => {
+		const spliced = splice_css_at_placeholder(
+			`:root {\n\t${FUZ_CSS_PLACEHOLDER}: h${HASH};\n}\n` + APP,
+			GENERATED
+		);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
+	});
+
+	test('tolerates a minified marker with a trailing semicolon', () => {
+		const spliced = splice_css_at_placeholder(
+			`:root{${FUZ_CSS_PLACEHOLDER}:h${HASH};}` + APP,
+			GENERATED
+		);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+	});
+
+	test('splits a merged rule: decls after the hashed marker stay after', () => {
+		const merged = `:root{${FUZ_CSS_PLACEHOLDER}:h${HASH};--font_family_serif: 'DM Serif Display'}`;
+		const spliced = splice_css_at_placeholder(':root{--a: 1}' + merged, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.ok(spliced.indexOf('--a: 1') < spliced.indexOf(GENERATED));
+		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf("'DM Serif Display'"));
+	});
+
+	test('splits a merged rule: decls before the hashed marker stay before', () => {
+		const merged = `:root{--font_family_serif: 'DM Serif Display';${FUZ_CSS_PLACEHOLDER}:h${HASH}}`;
+		const spliced = splice_css_at_placeholder(merged, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.ok(spliced.indexOf("'DM Serif Display'") < spliced.indexOf(GENERATED));
+	});
+
+	test('splits a merged rule with decls on both sides of the hashed marker', () => {
+		const merged = `:root{--a: 1;${FUZ_CSS_PLACEHOLDER}:h${HASH};--b: 2}`;
+		const spliced = splice_css_at_placeholder(merged, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced, `:root{--a: 1;}${GENERATED}\n:root{--b: 2}`);
+	});
+
+	test('repeated splicing strips every marker, whichever form each takes', () => {
+		// the loop `generateBundle` runs: place the CSS at the first marker,
+		// then strip the rest with empty CSS until none is left
+		let spliced = splice_css_at_placeholder(
+			HASHED_MARKER + APP + MARKER + HASHED_MARKER,
+			GENERATED
+		);
+		assert.isNotNull(spliced);
+		let stripped = splice_css_at_placeholder(spliced, '');
+		while (stripped !== null) {
+			spliced = stripped;
+			stripped = splice_css_at_placeholder(spliced, '');
+		}
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced.split(GENERATED).length - 1, 1, 'the generated CSS is placed once');
+		assert.include(spliced, APP);
 	});
 });

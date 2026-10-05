@@ -3,6 +3,15 @@
  * `virtual:fuz.css`, and the splice that replaces it with the generated CSS
  * in `generateBundle`.
  *
+ * The placeholder is one declaration whose value says what it stands in for:
+ * `1` while the generated CSS isn't known yet (`FUZ_CSS_PLACEHOLDER_RULE`),
+ * or a hash of the generated CSS once it is (`to_hashed_css_placeholder`).
+ * The hashed form is what makes the bundler's content hash for the
+ * stylesheet cover CSS that's only written into it afterwards. Both forms
+ * are a single declaration, so the splice that strips one strips the other -
+ * there is no second declaration a minifier could reorder, merge away from
+ * the first, or leave behind.
+ *
  * @module
  */
 
@@ -15,18 +24,73 @@
  */
 export const FUZ_CSS_PLACEHOLDER = '--fuz-css-placeholder';
 
-/** The rule the build-mode virtual module resolves to. */
+/**
+ * The rule the build-mode virtual module loads as, before the generated CSS
+ * is known.
+ */
 export const FUZ_CSS_PLACEHOLDER_RULE = `:root{${FUZ_CSS_PLACEHOLDER}:1}`;
 
-/** Matches the placeholder declaration - index and extent locate the marker within its rule. */
-const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*1\s*;?/;
+/**
+ * Prefix of a hashed placeholder's value, making it an identifier whatever
+ * the hash starts with - a bare hex run can lex as a number (`1e5`).
+ */
+const FUZ_CSS_PLACEHOLDER_HASH_PREFIX = 'h';
+
+/**
+ * Matches the placeholder declaration in either form - index and extent
+ * locate the marker within its rule, and the capture is its value.
+ */
+const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*([\w-]+)\s*;?/;
 
 /** Matches anything that isn't ignorable filler between declarations. */
 const NON_FILLER_RE = /[^\s;]/;
 
+/** Matches every placeholder declaration, capturing what precedes its value. */
+const FUZ_CSS_PLACEHOLDER_VALUE_RE = /(--fuz-css-placeholder\s*:\s*)[\w-]+/g;
+
+/**
+ * Restates every placeholder in a stylesheet with a hash of the generated
+ * CSS as its value, leaving the rest of the text as it is.
+ *
+ * The bundler names a stylesheet from its content before the generated CSS is
+ * spliced in. Carrying the hash in the placeholder makes that content - and so
+ * the filename - change exactly when the generated CSS does.
+ *
+ * Only the value changes, so whatever a CSS pipeline did around the
+ * placeholder stays: a wrapper it was moved into (`@layer`, `@media`), its
+ * formatting, a copy of it. Each copy gets the same hash.
+ *
+ * @param source - CSS holding the placeholder, in either form
+ * @param content_hash - hash of the generated CSS, as word characters (hex, base64url)
+ * @returns `source` with each placeholder carrying `content_hash`, or `null`
+ * when it holds no placeholder
+ */
+export const to_hashed_css_placeholder = (source: string, content_hash: string): string | null => {
+	let found = false;
+	const hashed = source.replace(FUZ_CSS_PLACEHOLDER_VALUE_RE, (_match, before: string) => {
+		found = true;
+		return before + FUZ_CSS_PLACEHOLDER_HASH_PREFIX + content_hash;
+	});
+	return found ? hashed : null;
+};
+
+/**
+ * Parses the hash the first placeholder in a stylesheet carries.
+ *
+ * @param source - the stylesheet holding the marker
+ * @returns the hash given to `to_hashed_css_placeholder`, or `null` when the
+ * stylesheet has no placeholder or its placeholder is unhashed
+ */
+export const parse_css_placeholder_hash = (source: string): string | null => {
+	const value = FUZ_CSS_PLACEHOLDER_DECL_RE.exec(source)?.[1];
+	if (value === undefined || !value.startsWith(FUZ_CSS_PLACEHOLDER_HASH_PREFIX)) return null;
+	return value.slice(FUZ_CSS_PLACEHOLDER_HASH_PREFIX.length);
+};
+
 /**
  * Replaces the first placeholder in a bundled stylesheet with the generated
- * CSS, at the offset the marker occupies.
+ * CSS, at the offset the marker occupies. Either form of the placeholder -
+ * unhashed or hashed - is located and stripped the same way.
  *
  * Position is the point: the marker sits where Vite placed `virtual:fuz.css`
  * in the importer's stylesheet, so writing the generated CSS there reproduces

@@ -132,7 +132,18 @@ Two generators available, both using AST-based extraction and per-file caching:
    SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
    In dev it pre-scans project sources at server startup (see `prescan`) so
    the first served CSS is complete, and resyncs clients whose HMR socket
-   connects after a missed update
+   connects after a missed update. In build the virtual module is a
+   placeholder rule until every transform has run: `renderChunk` restates it
+   with a hash of the generated CSS, so the stylesheet's filename (and the
+   chunks named from it) tracks that CSS, and `generateBundle` splices the
+   CSS in at the placeholder's position in one of two passes, chosen by
+   `build.cssCodeSplit` - at the default order ahead of other plugins for a
+   code-split build, so their `generateBundle` hooks read finished
+   stylesheets, or at `order: 'post'` for the single stylesheet Vite emits
+   late with `build.cssCodeSplit: false` (the `build.lib` default). The
+   passes need different places in the plugin order, so
+   `vite_plugin_fuz_css()` returns two plugin objects (pass the array to
+   `plugins` as is), and building needs Vite 6 or later
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
@@ -466,10 +477,17 @@ typography, borders, shading, shadows, layout. See
 **CSS generation:**
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
-  (preferred) with HMR via `virtual:fuz.css`
+  (preferred) with HMR via `virtual:fuz.css`, as two plugin objects: the
+  `enforce: 'pre'` one and a build-only one placed after Vite's CSS
+  processing. The second captures the virtual module's text as the CSS
+  pipeline (PostCSS, lightningcss) left it, and the hash is restated into
+  that text by calling the `transform` of Vite's `vite:css-post` plugin - a
+  reach into Vite internals that degrades to a filename hash that doesn't
+  cover the generated CSS, with a one-time warning, never to wrong CSS
 - [css_placeholder_splice.ts](src/lib/css_placeholder_splice.ts) - The
-  build-mode placeholder and the splice that writes the generated CSS at its
-  position in the bundled stylesheet
+  build-mode placeholder (one declaration, unhashed at load and restated in
+  place with the generated CSS's hash) and the splice that writes the
+  generated CSS at its position in the bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
   (generate → resolve → bundle) used by both generators
@@ -571,7 +589,10 @@ Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
 `fuz_comments`, `generate_bundled_css`, `generate_classes_css`, `generate_css`,
 and more.
 
-Integration: `vite_plugin_examples.test.ts` (skip with
+The Vite plugin has `vite_plugin_fuz_css.{build,dev,splice,ws}.test.ts`: the
+build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,
+varying the generated CSS through `additional_classes` so the emitted JS
+stays byte-identical. Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
 
 Component tests (`KnobControl`, `RampStrip`, `ThemeEditor`,

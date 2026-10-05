@@ -133,6 +133,18 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 	});
 });
 
+describe('vite_plugin_fuz_css serve plugins', () => {
+	test('the build-only plugin object is not applied in serve', async () => {
+		const server = await create_dev_server();
+		try {
+			const names = server.config.plugins.map((p) => p.name).filter((n) => n.includes('fuz-css'));
+			assert.deepEqual(names, ['vite-plugin-fuz-css']);
+		} finally {
+			await server.close();
+		}
+	});
+});
+
 describe('vite_plugin_fuz_css theme option', () => {
 	test('bakes a theme into the served CSS, auto-resolving its stance', async () => {
 		const server = await create_dev_server({
