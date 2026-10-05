@@ -5,7 +5,8 @@ import type { Theme } from '$lib/variable.ts';
 import { default_themes } from '$lib/themes.ts';
 import { neon_theme } from '$lib/themes/neon.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
-import { PALETTE_CHROMA_CAPS } from '$lib/ramps.ts';
+import { PALETTE_CHROMA_CAPS, PALETTE_HUES } from '$lib/ramps.ts';
+import { oklch_max_srgb_chroma } from '$lib/oklch.ts';
 import type { NumericScaleVariant } from '$lib/variable_data.ts';
 
 const base_theme = default_themes[0]!;
@@ -19,6 +20,16 @@ const cap_of = (value: string | undefined): number => {
 
 const stop_of = (name: string): NumericScaleVariant =>
 	name.slice('palette_chroma_'.length) as NumericScaleVariant;
+
+// the worst-hue cap straight from the gamut math: the largest chroma inside
+// sRGB for every hue at one lightness, floored like the emitted literal
+const worst_hue_cap = (lightness: number, hues: Array<number>): number =>
+	Math.floor(Math.min(...hues.map((hue) => oklch_max_srgb_chroma(lightness, hue))) * 1e4) / 1e4;
+
+const gamut_fails = (report: ReturnType<typeof check_theme>): Array<string> =>
+	report.entries
+		.filter((e) => e.gate === 'gamut' && !e.pass)
+		.map((e) => `${e.scheme} ${e.subject}`);
 
 describe('compile_theme', () => {
 	test('the neon exemplar emits no cap overrides', () => {
@@ -136,6 +147,122 @@ describe('compile_theme', () => {
 		}
 		const after = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.deepEqual(after, [], 'compiled caps bring every stop back into gamut');
+	});
+
+	test('a pinned intermediate lightness stop gets its cap at the pinned lightness', () => {
+		// stop 20 pinned lighter than the curve puts it, inside its neighbors:
+		// the baked cap assumes the curve's lightness, so the stop overshoots
+		// sRGB until its cap is recomputed where the stop actually sits
+		const input: Theme = {
+			name: 'pinned stop',
+			variables: [{ name: 'palette_lightness_20', light: '0.92', dark: '0.32' }]
+		};
+		const before = check_theme(input);
+		assert.isAbove(gamut_fails(before).length, 0, 'the input fails gamut against the baked caps');
+		assert.isTrue(
+			gamut_fails(before).every((subject) => subject.endsWith('_20')),
+			'only the pinned stop overshoots'
+		);
+		const { theme, report } = compile_theme(input);
+		const overrides = theme.variables.slice(input.variables.length);
+		assert.deepEqual(
+			overrides.map((v) => v.name),
+			['palette_chroma_20'],
+			'only the pinned stop drifts from the baked table'
+		);
+		const hues = Object.values(PALETTE_HUES);
+		const [override] = overrides;
+		assert.strictEqual(cap_of(override!.light), worst_hue_cap(0.92, hues));
+		assert.strictEqual(cap_of(override!.dark), worst_hue_cap(0.32, hues));
+		// both tighten: the pin moves each scheme's stop toward its near-ground end
+		assert.isBelow(cap_of(override!.light), PALETTE_CHROMA_CAPS.light['20']);
+		assert.isBelow(cap_of(override!.dark), PALETTE_CHROMA_CAPS.dark['20']);
+		assert.deepEqual(gamut_fails(report), []);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+	});
+
+	test('compiling a theme that checks clean keeps it clean under a pinned lightness stop', () => {
+		// one green hue with the chroma request raised until the caps bind: the
+		// input passes on the conservative baked caps, so the looser caps compile
+		// emits have to be the pinned stop's own or they push it out of gamut
+		const input: Theme = {
+			name: 'monochrome pinned stop',
+			variables: [
+				...Object.keys(PALETTE_HUES).map((letter) => ({ name: `hue_${letter}`, light: '145' })),
+				{ name: 'palette_chroma_max', light: '0.3' },
+				{ name: 'palette_lightness_20', light: '0.92', dark: '0.32' }
+			]
+		};
+		assert.isTrue(check_theme(input).ok, 'the input checks clean');
+		const { theme, report } = compile_theme(input);
+		const stop_20 = theme.variables
+			.slice(input.variables.length)
+			.find((v) => v.name === 'palette_chroma_20');
+		assert(stop_20, 'stop 20 emitted');
+		assert.strictEqual(cap_of(stop_20.light), worst_hue_cap(0.92, [145]));
+		assert.strictEqual(cap_of(stop_20.dark), worst_hue_cap(0.32, [145]));
+		assert.deepEqual(gamut_fails(report), []);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+	});
+
+	test('a stanced theme honors a pinned lightness stop in its one appearance', () => {
+		const input: Theme = {
+			name: 'stanced pinned stop',
+			scheme: 'dark',
+			variables: [{ name: 'palette_lightness_20', light: '0.32' }]
+		};
+		assert.isAbove(gamut_fails(check_theme(input)).length, 0);
+		const { theme, report } = compile_theme(input);
+		const overrides = theme.variables.slice(input.variables.length);
+		assert.deepEqual(
+			overrides.map((v) => v.name),
+			['palette_chroma_20']
+		);
+		// both schemes resolve the same pin through the mirror, so one slot carries it
+		assert.strictEqual(
+			cap_of(overrides[0]!.light),
+			worst_hue_cap(0.32, Object.values(PALETTE_HUES))
+		);
+		assert.isUndefined(overrides[0]!.dark);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+	});
+
+	test('a stanced theme whose pin splits its schemes emits a cap for each', () => {
+		// a dark slot under a stance breaks the one-appearance promise (the lint
+		// warns), but both slots still render - so each needs its own cap
+		const input: Theme = {
+			name: 'stanced split stop',
+			scheme: 'dark',
+			variables: [{ name: 'palette_lightness_20', light: '0.32', dark: '0.25' }]
+		};
+		const { theme, report } = compile_theme(input);
+		const overrides = theme.variables.slice(input.variables.length);
+		assert.deepEqual(
+			overrides.map((v) => v.name),
+			['palette_chroma_20']
+		);
+		const hues = Object.values(PALETTE_HUES);
+		assert.strictEqual(cap_of(overrides[0]!.light), worst_hue_cap(0.32, hues));
+		assert.strictEqual(cap_of(overrides[0]!.dark), worst_hue_cap(0.25, hues));
+		assert.notStrictEqual(cap_of(overrides[0]!.light), cap_of(overrides[0]!.dark));
+		assert.deepEqual(gamut_fails(report), []);
+	});
+
+	test('a stop whose lightness does not resolve is skipped, not capped at the curve', () => {
+		// valid CSS, but not a number the resolver reads - a cap computed at the
+		// curve's lightness would describe a color the stop doesn't render
+		const input: Theme = {
+			name: 'percent stop',
+			variables: [
+				{ name: 'hue_i', light: '205' },
+				{ name: 'palette_lightness_20', light: '84%' }
+			]
+		};
+		const { theme, report } = compile_theme(input);
+		const names = theme.variables.slice(input.variables.length).map((v) => v.name);
+		assert.isAbove(names.length, 0, 'the nudged hue still tightens the stops that resolve');
+		assert.notInclude(names, 'palette_chroma_20');
+		assert.isTrue(report.unchecked.some((u) => u.variable === 'palette_lightness_20'));
 	});
 
 	test('an unresolvable hue emits nothing rather than caps computed without it', () => {

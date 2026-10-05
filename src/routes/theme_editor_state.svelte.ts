@@ -227,8 +227,8 @@ export class ThemeEditorState {
 
 	/**
 	 * The gamut/monotonicity/contrast gate report for the draft, from
-	 * `check_theme` - the same gates the shipped themes pass in CI, re-run on
-	 * every edit.
+	 * `check_theme` - the same gates the shipped themes are held to in CI,
+	 * re-run on every edit.
 	 */
 	readonly check_report: ThemeCheckReport = $derived(check_theme(this.output));
 

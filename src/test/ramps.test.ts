@@ -5,7 +5,8 @@ import {
 	PALETTE_CHROMA_MULTIPLIERS,
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
-	compute_palette_chroma_caps,
+	compute_worst_hue_chroma_cap,
+	ramp_lightness,
 	shade_stop_oklch
 } from '$lib/ramps.ts';
 import {
@@ -36,14 +37,14 @@ describe('chroma caps', () => {
 	test('baked caps match the worst-hue gamut math (drift check)', () => {
 		// if the default hues or lightness knobs change without recomputing the
 		// caps, this fails - the caps are design-time constants, not free values
+		const hues = Object.values(PALETTE_HUES);
 		for (const scheme of color_scheme_variants) {
-			const caps = compute_palette_chroma_caps(
-				Object.values(PALETTE_HUES),
-				PALETTE_LIGHTNESS_KNOBS[scheme]
-			);
 			for (const stop of numeric_scale_variants) {
 				const baked = PALETTE_CHROMA_CAPS[scheme][stop];
-				const computed = caps[stop];
+				const computed = compute_worst_hue_chroma_cap(
+					hues,
+					ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop)
+				);
 				assert(
 					baked <= computed + 1e-6,
 					`cap too generous at ${stop} ${scheme}: baked ${baked} > recomputed ${computed}`

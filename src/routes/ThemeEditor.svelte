@@ -255,7 +255,7 @@
 	<h3>Gates</h3>
 	<p>
 		<code>validate_theme</code> and <code>check_theme</code> run live against the draft - the same
-		lint and gamut/monotonicity/contrast gates the shipped themes pass in CI.
+		lint and gamut/monotonicity/contrast gates the shipped themes are held to in CI.
 	</p>
 	{#if editor.issues.length === 0 &&
 		failing_gates.length === 0 &&
@@ -287,7 +287,7 @@
 			<details>
 				<summary>
 					{editor.check_report.unchecked.length} unchecked
-					<small>(values the numeric gates can't resolve)</small>
+					<small>(values the gates can't evaluate)</small>
 				</summary>
 				<ul class="unstyled">
 					{#each editor.check_report.unchecked as u (u.variable + u.value)}

@@ -40,8 +40,16 @@ New:
   `theme_knob_axes`); `palette_glosses` in `variable_data.ts`.
 - `theme_check.ts`: `validate_theme(unknown)`, `check_theme` (gamut,
   monotonicity, contrast gates; `GATE_*` thresholds), `compile_theme`
-  (per-theme chroma caps), `create_theme_resolver`,
-  `known_theme_variable_names`.
+  (per-theme chroma caps, each computed at the lightness its stop resolves
+  to), `create_theme_resolver`, `known_theme_variable_names`,
+  `theme_gate_role_names`.
+  `check_theme().ok` is true only when every gate passes and nothing is
+  `unchecked`: a gate input that can't be evaluated is reported there
+  instead of passing unread. The contrast gates follow the role variables
+  the default styles paint through (`theme_gate_role_names`: `text_color`,
+  `link_color`, `border_color`, ...), and a directly authored color stop or
+  role is measured as written when it is an `oklch(L C H)` numeric literal
+  or an exact `var()` reference to a color the gates evaluate.
 - Generators take `theme`, baked into the output and tree-shaken:
   `vite_plugin_fuz_css({theme: phosphor_theme})`. Composes with fuz_ui's
   `ThemeRoot`: the baked theme renders into the `fuz.theme.baked` sublayer

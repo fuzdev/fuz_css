@@ -232,7 +232,17 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 		<p>
 			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against
 			the theme's resolved values. It is report-only and never throws, returning
-			<code>{'{ok, entries, unchecked}'}</code> - suited to a CI or test assertion:
+			<code>{'{ok, entries, unchecked}'}</code>. The contrast gates measure the pairings the default
+			styles make on the page background - body and subtle text, links, borders, fills, and colored
+			labels, including a <code>.palette_a</code> button's label on its own tinted fill. They follow
+			the role variables those styles paint through, so a theme that sets <code>border_color</code>
+			to <code>var(--text_60)</code> has its borders measured at <code>text_60</code>, in an entry
+			named for the role (<code>border_color vs shade_00</code>). A value a gate depends on but
+			can't evaluate lands in <code>unchecked</code> instead of passing unread: a knob that doesn't
+			resolve to a number, or a color stop or role set to anything other than an
+			<code>oklch(L C H)</code> numeric literal or an exact <code>var()</code> reference to another
+			gated color. <code>ok</code> is true only when every entry passes and nothing is unchecked -
+			suited to a CI or test assertion:
 		</p>
 		<Code
 			lang="ts"
@@ -245,15 +255,18 @@ test('my theme clears the accessibility gates', () => {
 });`}
 		/>
 		<p>
-			<code>compile_theme(theme)</code> is for themes that move hues or lightness ramps -
+			<code>compile_theme(theme)</code> is for themes that move hues or palette lightness -
 			monochrome, rotated, or dark-only. It recomputes the per-stop sRGB gamut caps from the theme's
-			actual hues and appends the corrected <code>palette_chroma_NN</code> stop overrides, returning
-			<code>{'{theme, report, issues}'}</code>.
+			actual hues and the lightness each stop resolves to, a pinned
+			<code>palette_lightness_NN</code> included, and appends the corrected
+			<code>palette_chroma_NN</code> stop overrides, returning
+			<code>{'{theme, report, issues}'}</code>. Chroma pushed past the caps on purpose
+			(<code>chroma_scale</code> above 1) still clips afterward, and the report says so.
 		</p>
 		<p>
 			fuz_css gates its own themes - including every theme × contrast-modifier composition - with
-			these functions in its test suite, and the editor above runs the same lint and gates live on
-			every edit.
+			these functions in its test suite, declaring the pairings an exemplar knowingly gives up as
+			exact exceptions, and the editor above runs the same lint and gates live on every edit.
 		</p>
 	</TomeSection>
 </TomeContent>

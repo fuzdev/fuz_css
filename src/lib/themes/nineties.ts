@@ -21,7 +21,8 @@ export const nineties_theme: Theme = {
 		// the only exemplar with no cast at all
 		{ name: 'neutral_chroma', light: '0' },
 		// the desktop, not the page: the ground steps off the extreme in both
-		// schemes, as far as the contrast gates allow
+		// schemes, as far as the text and fill contrast gates allow - the colored
+		// button label on its own tinted fill is the pairing it gives up by day
 		{ name: 'shade_lightness_00', light: '0.923', dark: '0.24' },
 		// text is tuned for a white page by default; on a gray ground the mid
 		// stops wash, so the ramp pulls harder toward its ends

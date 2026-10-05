@@ -13,7 +13,7 @@ Breaking:
   `--border_style` on an ancestor no longer reaches buttons - set the
   button knobs there too.
 - Colored labels move to stop 60, the text-safe stop links use, so they
-  meet AA: `.palette_X` buttons use `palette_X_60` for the label, fill,
+  meet AA at rest: `.palette_X` buttons use `palette_X_60` for the label, fill,
   border, and outline (was stop 50, fill 40), `.chip.palette_X` labels use
   `palette_X_60`, and `label.selected` uses `--accent_60`.
 - Selected buttons use `--text_00` for inverse text (was
@@ -41,6 +41,7 @@ New:
   (`var(--accent_50)`), `--backdrop_color` (`var(--darken_60)`).
 - `@media (prefers-contrast: more)` maps onto the curve knobs in the
   `fuz.preferences` layer; theme overrides beat it.
-- `check_theme` gains `GATE_SELECTED_TEXT` and `GATE_PALETTE_TEXT`, both
-  AA, over the stop-60 pairings above; the knob catalog's border
-  styles gain `inset`/`outset`.
+- `check_theme` gates the stop-60 pairings above at AA
+  (`GATE_SELECTED_TEXT`, `GATE_PALETTE_TEXT`), measuring the `.palette_X`
+  button label against its rendered rest fill (its own color at 8% alpha
+  over `shade_00`); the knob catalog's border styles gain `inset`/`outset`.

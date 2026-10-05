@@ -22,7 +22,6 @@
  */
 
 import {
-	numeric_scale_variants,
 	palette_variants,
 	type IntentVariant,
 	type PaletteVariant,
@@ -398,31 +397,25 @@ export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVa
 	);
 
 /**
- * Recomputes the worst-hue safe chroma caps per stop for an arbitrary hue set
- * and lightness ramp - the generalization of the baked `PALETTE_CHROMA_CAPS`.
- * For each stop the lightness comes from `ramp_lightness` and the cap is the
- * minimum `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to
- * stay conservative (the browser clips anything past it). A theme's compile
- * step feeds its own hues and lightness knobs to detect where the baked
- * worst-hue envelope no longer fits.
+ * Computes the worst-hue safe chroma cap at one lightness: the minimum
+ * `oklch_max_srgb_chroma` across the hues, floored to 4 decimals to stay
+ * conservative (the browser clips anything past it). The generalization of
+ * the baked `PALETTE_CHROMA_CAPS` to an arbitrary hue set and lightness - a
+ * theme's compile step calls it with each stop's own resolved lightness to
+ * detect where the baked worst-hue envelope no longer fits.
  *
- * @param hues - OKLCH hue angles the ramp must stay in gamut for
- * @param lightness_knobs - the palette lightness ramp knobs for this scheme
+ * @param hues - OKLCH hue angles the stop must stay in gamut for
+ * @param lightness - the stop's OKLCH lightness
  */
-export const compute_palette_chroma_caps = (
+export const compute_worst_hue_chroma_cap = (
 	hues: ReadonlyArray<number>,
-	lightness_knobs: LightnessRampKnobs
-): Record<NumericScaleVariant, number> => {
-	const caps = {} as Record<NumericScaleVariant, number>;
-	for (const stop of numeric_scale_variants) {
-		const lightness = ramp_lightness(lightness_knobs, stop);
-		let cap = Infinity;
-		for (const hue of hues) {
-			cap = Math.min(cap, oklch_max_srgb_chroma(lightness, hue));
-		}
-		caps[stop] = Math.floor(cap * 1e4) / 1e4;
+	lightness: number
+): number => {
+	let cap = Infinity;
+	for (const hue of hues) {
+		cap = Math.min(cap, oklch_max_srgb_chroma(lightness, hue));
 	}
-	return caps;
+	return Math.floor(cap * 1e4) / 1e4;
 };
 
 /*

@@ -12,8 +12,9 @@
  *   the `ramps.ts` numeric twin, `oklch.ts` conversions, and `wcag.ts`
  *   ratios. It is report-only and never throws.
  * - `compile_theme` recomputes the per-stop worst-hue chroma caps for a
- *   theme's own hues and lightness ramp and emits `palette_chroma_NN`
- *   overrides where the baked caps no longer fit, then re-checks.
+ *   theme's own hues and the palette lightness each stop resolves to, emits
+ *   `palette_chroma_NN` overrides where the baked caps no longer fit, then
+ *   re-checks.
  *
  * The resolution core turns the CSS strings themes author back into numbers so
  * the gates can run. Its contract:
@@ -27,16 +28,34 @@
  *   visited-set cycle guard), or the machine-emitted compiled-cap
  *   `min(calc(...), <number>)` form. Anything else is unresolvable and is
  *   recorded with its variable, value, and reason.
- * - Derived ramp stops use a pinned numeric value when the theme pins one,
- *   fall back to the `ramps.ts` formulas with the resolved knobs otherwise,
- *   and mark the touching gates `unchecked` when a pin is unresolvable.
- * - A few gate inputs do NOT resolve through the theme and are fixed to the
- *   shipped design: `text_min`/`text_max` (assumed pure black/white),
- *   `border_color_NN` alphas (`BORDER_COLOR_ALPHAS`), the control-border
- *   gate's `--border_color` (assumed its `shade_30` default), and the
- *   `chroma_shape_NN` intermediates (recomputed from the curve knob, so a
- *   theme pinning a shape stop directly checks against the unpinned shape).
- *   A theme moving those can render differently than it checks.
+ * - Derived ramp stops (`palette_lightness_NN` and its shade/text twins,
+ *   `palette_chroma_NN`, `chroma_shape_NN`) use a pinned numeric value when
+ *   the theme pins one, fall back to the `ramps.ts` formulas with the
+ *   resolved knobs otherwise, and mark the touching gates `unchecked` when a
+ *   pin is unresolvable.
+ * - The color variables the gates read (the palette, intent, shade, and text
+ *   stops, `text_max`, and `border_color_30`) derive from those numbers
+ *   unless the theme authors one directly. An authored color is measured as
+ *   written when it is an `oklch(L C H)` literal with plain numeric
+ *   components (an optional `/ alpha` composites where the gate measures a
+ *   color over its ground) or an exact `var()` reference to another color
+ *   the gates evaluate; any other form is recorded in `unchecked` and its
+ *   gates are skipped. The gates look every color up by variable name, so
+ *   this covers exactly the variables a gate reads and no others.
+ * - The gates measure what the default styles paint, so they follow the
+ *   roles those styles paint through: `text_color`, `text_disabled`,
+ *   `link_color`, `link_color_selected`, `border_color`, and `outline_color`
+ *   (`theme_gate_role_names`). Each aliases a stop or another role by
+ *   default, read from the shipped declarations, and a theme that repoints
+ *   one is gated at the
+ *   color it points to - same rule, same `unchecked` fallback. One table of
+ *   pairing gates names each role beside its grounds and threshold, so the
+ *   gate definitions and the following can't drift.
+ * - Outside the gates: the micro-surface colors no pairing models
+ *   (`caret_color`, `selection_color`, `scrollbar_thumb_color`,
+ *   `backdrop_color`), a `background_image` painted over the `shade_00`
+ *   ground, and the stronger button tints of the hover, focus, and pressed
+ *   states.
  *
  * The effective-value merge mirrors the renderer's cascade-layer semantics
  * (`theme.ts` `render_theme_style`): light = `theme.light`; dark =
@@ -63,7 +82,6 @@ import {
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
-	PALETTE_LIGHTNESS_KNOBS,
 	LIGHTNESS_KNOBS,
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
@@ -72,15 +90,13 @@ import {
 	BORDER_CHROMA_MULTIPLIER,
 	BORDER_COLOR_ALPHAS,
 	ramp_lightness,
-	ramp_chroma,
 	ramp_chroma_shape,
 	ramp_color_oklch,
 	neutral_color_oklch,
-	compute_palette_chroma_caps,
+	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
 	type LightnessRampKnobs,
-	type RampFamily,
-	type ChromaRampKnobs
+	type RampFamily
 } from './ramps.ts';
 import {
 	numeric_scale_variants,
@@ -92,20 +108,27 @@ import {
 	type ColorSchemeVariant,
 	type PaletteVariant
 } from './variable_data.ts';
-import { oklch_to_srgb, type Oklch, type RgbUnit } from './oklch.ts';
+import { oklch_to_srgb, type RgbUnit } from './oklch.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
 
 //
 // Gate thresholds - the WCAG levels the derived palette is designed to clear.
 //
 
-/** AAA body text: `text_80` on `shade_00`/`05`/`10`. */
+/** AAA body text: `--text_color` (`text_80` by default) on `shade_00`/`05`/`10`. */
 export const GATE_BODY_TEXT = 7;
-/** Disabled/secondary floor: `text_50` on `shade_00`. */
+/** Disabled/secondary floor: `--text_disabled` (`text_50` by default) on `shade_00`. */
 export const GATE_SUBTLE_TEXT = 3;
-/** AA link default: the accent hue at stop 60 on `shade_00`. */
+/**
+ * AA links: `--link_color` (the accent at stop 60 by default) on `shade_00`,
+ * plus that stop itself when a theme repoints the role, since
+ * `label.selected` paints it directly, and an authored `--link_color_selected`.
+ */
 export const GATE_LINK = 4.5;
-/** WCAG 1.4.11 non-text: every hue at stop 50 vs `shade_00`. */
+/**
+ * WCAG 1.4.11 non-text: every hue at stop 50 vs `shade_00`, and an authored
+ * `--outline_color` (the focus ring, the accent at stop 50 by default).
+ */
 export const GATE_UI = 3;
 /** Large-text floor: `text_max` on every stop-50 fill. */
 export const GATE_FILL_TEXT = 3;
@@ -118,12 +141,17 @@ export const GATE_FILL_TEXT = 3;
  */
 export const GATE_SELECTED_TEXT = 4.5;
 /**
- * AA colored labels: every palette hue at stop 60 on `shade_00` and on its own
- * stop-10 tint - the `.palette_X` button and chip label pairings.
+ * AA colored labels: every palette hue at stop 60 on `shade_00` (colored text
+ * and `.plain` buttons), on the `.palette_X` button's rest fill, and on its
+ * own stop-10 tint (the chip). The button fill follows the `style.css`
+ * recipe: the label's own color at 8% alpha, composited over `shade_00` in
+ * gamma-encoded sRGB. An 8-bit raster quantizes both colors, so a rendered
+ * measurement lands within about 0.07 of the ratio. Only the rest fill is
+ * gated - the hover, focus, and pressed fills tint further and are not.
  */
 export const GATE_PALETTE_TEXT = 4.5;
 /**
- * Control borders: `shade_30` (the `--border_color` default) vs `shade_00`.
+ * Control borders: `--border_color` (`shade_30` by default) vs `shade_00`.
  * A regression floor for the shipped design, not a WCAG level - 1.4.11's 3:1
  * applies to required component boundaries, and fuz borders sit deliberately
  * softer - so a theme can't silently wash control borders out.
@@ -191,7 +219,11 @@ export interface ThemeGateEntry {
 	pass: boolean;
 }
 
-/** A gate input that couldn't be resolved to a number, so its gate was skipped. */
+/**
+ * A gate input the checker couldn't evaluate, so the gates reading it were
+ * skipped: a knob or derived stop that doesn't resolve to a number, or a
+ * pinned color in a form the gates don't read.
+ */
 export interface ThemeUncheckedEntry {
 	variable: string;
 	value: string;
@@ -245,6 +277,7 @@ const LIGHTNESS_STOP_MATCHER = new RegExp(
 	'u'
 );
 const PALETTE_CHROMA_STOP_MATCHER = new RegExp(`^palette_chroma_(${STOPS_PATTERN})$`, 'u');
+const CHROMA_SHAPE_STOP_MATCHER = new RegExp(`^chroma_shape_(${STOPS_PATTERN})$`, 'u');
 const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
 // the scaled-reference form emitted for `border_color_chroma`
 // (`calc(var(--neutral_chroma) * 2.12)`) and useful for authored multipliers
@@ -286,6 +319,14 @@ class ThemeResolver {
 		return this.#authored_names.has(name);
 	}
 
+	/**
+	 * The theme's own value for `name` in `scheme` (a pin), or `undefined` when
+	 * it authors none for that slot. Stance-mirror entries are not pins.
+	 */
+	authored(name: string, scheme: ColorSchemeVariant): string | undefined {
+		return this.#authored_names.has(name) ? this.#slot_value(name, scheme) : undefined;
+	}
+
 	/** Resolves `name` for `scheme`, memoized per name+scheme. */
 	resolve(name: string, scheme: ColorSchemeVariant): Resolved {
 		const key = `${scheme}|${name}`;
@@ -296,8 +337,9 @@ class ThemeResolver {
 		return result;
 	}
 
-	// the theme-authored value for a slot, honoring the dark → light fallback
-	#authored(name: string, scheme: ColorSchemeVariant): string | undefined {
+	// the effective value for a slot (authored or stance-mirrored), honoring
+	// the dark → light fallback
+	#slot_value(name: string, scheme: ColorSchemeVariant): string | undefined {
 		const v = this.#by_name.get(name);
 		if (!v) return undefined;
 		return scheme === 'light' ? v.light : (v.dark ?? v.light);
@@ -314,8 +356,8 @@ class ThemeResolver {
 		}
 		const next = new Set(visited);
 		next.add(name);
-		const authored = this.#authored(name, scheme);
-		if (authored !== undefined) return this.#parse(name, authored, scheme, next);
+		const value = this.#slot_value(name, scheme);
+		if (value !== undefined) return this.#parse(name, value, scheme, next);
 		return this.#resolve_default(name, scheme, next);
 	}
 
@@ -349,17 +391,27 @@ class ThemeResolver {
 	): Resolved | null {
 		const m = COMPILED_CAP_MATCHER.exec(value);
 		if (!m) return null;
-		const stop = m[1] as NumericScaleVariant;
-		const literal = Number(m[2]);
-		const chroma_min = this.#resolve('palette_chroma_min', scheme, visited);
-		if (!chroma_min.ok) return chroma_min;
-		const chroma_max = this.#resolve('palette_chroma_max', scheme, visited);
-		if (!chroma_max.ok) return chroma_max;
-		const curve = this.#resolve('chroma_curve', scheme, visited);
-		if (!curve.ok) return curve;
-		const shape = ramp_chroma_shape(stop, curve.value);
-		const requested = chroma_min.value + (chroma_max.value - chroma_min.value) * shape;
-		return { ok: true, value: Math.min(requested, literal) };
+		return this.#capped_chroma(m[1] as NumericScaleVariant, Number(m[2]), scheme, visited);
+	}
+
+	// a palette chroma stop: the requested curve clamped by a worst-hue cap -
+	// the numeric twin of `render_chroma_stop_css`, reading the stop's shape
+	// through the resolver so a pinned `chroma_shape_NN` is honored
+	#capped_chroma(
+		stop: NumericScaleVariant,
+		cap: number,
+		scheme: ColorSchemeVariant,
+		visited: Set<string>
+	): Resolved {
+		const r = this.#resolve_all(
+			['palette_chroma_min', 'palette_chroma_max', `chroma_shape_${stop}`],
+			scheme,
+			visited
+		);
+		if (!r.ok) return r.error;
+		const [chroma_min, chroma_max, shape] = r.values;
+		const requested = chroma_min! + (chroma_max! - chroma_min!) * shape!;
+		return { ok: true, value: Math.min(requested, cap) };
 	}
 
 	#resolve_default(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
@@ -417,14 +469,22 @@ class ThemeResolver {
 			if (!knobs.ok) return knobs.error;
 			return { ok: true, value: ramp_lightness(knobs.value, stop) };
 		}
-		// derived palette chroma stops - the capped knob curve
+		// derived chroma shape stops - the normalized curve both the palette
+		// chroma ramp and the neutral scales ride
+		const shape_match = CHROMA_SHAPE_STOP_MATCHER.exec(name);
+		if (shape_match) {
+			const curve = this.#resolve('chroma_curve', scheme, visited);
+			if (!curve.ok) return curve;
+			return {
+				ok: true,
+				value: ramp_chroma_shape(shape_match[1] as NumericScaleVariant, curve.value)
+			};
+		}
+		// derived palette chroma stops - the knob curve under the baked cap
 		const chroma_match = PALETTE_CHROMA_STOP_MATCHER.exec(name);
 		if (chroma_match) {
 			const stop = chroma_match[1] as NumericScaleVariant;
-			const knobs = this.#chroma_knobs(scheme, visited);
-			if (!knobs.ok) return knobs.error;
-			const value = ramp_chroma(stop, knobs.value, PALETTE_CHROMA_CAPS[scheme][stop]);
-			return { ok: true, value };
+			return this.#capped_chroma(stop, PALETTE_CHROMA_CAPS[scheme][stop], scheme, visited);
 		}
 		return {
 			ok: false,
@@ -465,20 +525,6 @@ class ThemeResolver {
 			ok: true,
 			value: { lightness_00: lightness_00!, lightness_100: lightness_100!, curve: curve! }
 		};
-	}
-
-	#chroma_knobs(
-		scheme: ColorSchemeVariant,
-		visited: Set<string>
-	): { ok: true; value: ChromaRampKnobs } | { ok: false; error: Resolved } {
-		const r = this.#resolve_all(
-			['palette_chroma_min', 'palette_chroma_max', 'chroma_curve'],
-			scheme,
-			visited
-		);
-		if (!r.ok) return r;
-		const [chroma_min, chroma_max, curve] = r.values;
-		return { ok: true, value: { chroma_min: chroma_min!, chroma_max: chroma_max!, curve: curve! } };
 	}
 }
 
@@ -767,17 +813,169 @@ const clamp_rgb = (rgb: RgbUnit): RgbUnit => [
 // max sRGB channel excess outside [0, 1] - 0 when in gamut
 const gamut_excess = ([r, g, b]: RgbUnit): number => Math.max(0, -r, r - 1, -g, g - 1, -b, b - 1);
 
+// source-over compositing of a translucent color on an opaque backdrop, in
+// gamma-encoded sRGB - how browsers stack backgrounds and borders
+const composite_over = (color: RgbUnit, alpha: number, backdrop: RgbUnit): RgbUnit => [
+	alpha * color[0] + (1 - alpha) * backdrop[0],
+	alpha * color[1] + (1 - alpha) * backdrop[1],
+	alpha * color[2] + (1 - alpha) * backdrop[2]
+];
+
+// the rest fill of a `.palette_X` button in `style.css`:
+// `--button_fill: color-mix(in oklab, var(--fill) 8%, transparent)`, which is
+// the fill color at this alpha
+const BUTTON_FILL_ALPHA = 0.08;
+
+/** A color a gate reads: unclamped gamma-encoded sRGB and alpha in [0, 1]. */
+interface GateColor {
+	rgb: RgbUnit;
+	alpha: number;
+}
+
+// a CSS <number>, which is stricter than what `Number()` accepts
+const CSS_NUMBER_PATTERN = String.raw`[+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?`;
+
+// the color literal the gates evaluate: `oklch(L C H)` with plain numeric
+// components and an optional `/ alpha` (a number or a percentage)
+const OKLCH_LITERAL_MATCHER = new RegExp(
+	String.raw`^oklch\(\s*(${CSS_NUMBER_PATTERN})\s+(${CSS_NUMBER_PATTERN})\s+(${CSS_NUMBER_PATTERN})\s*(?:\/\s*(${CSS_NUMBER_PATTERN})(%?)\s*)?\)$`,
+	'iu'
+);
+
+// parses an authored color literal, clamping lightness, chroma, and alpha the
+// way the browser clamps a parsed `oklch()`; `null` for every other form
+const parse_color_literal = (value: string): GateColor | null => {
+	const m = OKLCH_LITERAL_MATCHER.exec(value);
+	if (!m) return null;
+	const alpha = m[4] === undefined ? 1 : Number(m[4]) / (m[5] ? 100 : 1);
+	return {
+		rgb: oklch_to_srgb([clamp(Number(m[1]), 0, 1), Math.max(0, Number(m[2])), Number(m[3])]),
+		alpha: clamp(alpha, 0, 1)
+	};
+};
+
+const REASON_COLOR_FORM =
+	'authored color is neither an oklch(L C H) numeric literal nor an exact var() reference, so the gates reading it are skipped';
+const REASON_COLOR_REFERENCE =
+	'authored color references a variable the gates cannot evaluate, so the gates reading it are skipped';
+const REASON_COLOR_ALPHA =
+	'authored color is translucent where the gates read an opaque color, so they are skipped';
+
+// the names of the color variables the gates can evaluate, beyond the aliases
+const PALETTE_STOP_MATCHER = new RegExp(`^palette_([a-j])_(${STOPS_PATTERN})$`, 'u');
+const INTENT_STOP_MATCHER = new RegExp(`^(${intent_variants.join('|')})_(${STOPS_PATTERN})$`, 'u');
+const NEUTRAL_STOP_MATCHER = new RegExp(`^(shade|text)_(${STOPS_PATTERN})$`, 'u');
+const BORDER_COLOR_STOP_MATCHER = new RegExp(`^border_color_(${STOPS_PATTERN})$`, 'u');
+const EXTREME_MATCHER = /^(?:shade|text)_(min|max)$/u;
+
+// the aliases the declared defaults carry - a variable whose default is
+// exactly `var(--x)`, like the roles `text_color` → `text_80` and
+// `link_color_selected` → `text_color`. Read from the declarations, so what a
+// role falls back to can't drift from what ships
+const ALIAS_DEFAULTS: Map<string, string> = new Map(
+	default_variables.flatMap((v): Array<[string, string]> => {
+		const m = v.light !== undefined && v.dark === undefined ? VAR_MATCHER.exec(v.light) : null;
+		return m ? [[v.name, m[1]!]] : [];
+	})
+);
+
+/**
+ * A contrast gate over one painted color and the shade stops it sits on.
+ * `color` names what `style.css` paints: a role variable (`text_color`),
+ * which the gate follows through whatever the theme points it at, or a stop
+ * painted directly (`text_00`).
+ */
+interface PairingGate {
+	color: string;
+	/** How the subject reads: `<color> on|vs|over shade_NN`. */
+	relation: 'on' | 'vs' | 'over';
+	grounds: ReadonlyArray<NumericScaleVariant>;
+	threshold: number;
+	/**
+	 * The role's default pairing is another gate's entry, so it gets its own
+	 * only when the theme authors it.
+	 */
+	when_authored?: boolean;
+	/**
+	 * `style.css` also paints the role's default stop directly, so that stop
+	 * stays gated when the theme repoints the role.
+	 */
+	default_painted?: boolean;
+}
+
+// the single-color pairings, in report order. A role is gated here and
+// nowhere else: its default comes from `ALIAS_DEFAULTS`, and `check_theme`
+// measures whatever the theme points it at
+const PAIRING_GATES: ReadonlyArray<PairingGate> = [
+	// body text on the page and the first raised surfaces
+	{ color: 'text_color', relation: 'on', grounds: ['00', '05', '10'], threshold: GATE_BODY_TEXT },
+	// selected-control inverse text on the neutral selected fill
+	{ color: 'text_00', relation: 'on', grounds: ['60'], threshold: GATE_SELECTED_TEXT },
+	{ color: 'text_disabled', relation: 'on', grounds: ['00'], threshold: GATE_SUBTLE_TEXT },
+	{ color: 'border_color', relation: 'vs', grounds: ['00'], threshold: GATE_BORDER },
+	// the `hr` divider, the one translucent default
+	{ color: 'border_color_30', relation: 'over', grounds: ['00'], threshold: GATE_BORDER_DIVIDER },
+	// `label.selected` paints the link's default stop itself
+	{
+		color: 'link_color',
+		relation: 'on',
+		grounds: ['00'],
+		threshold: GATE_LINK,
+		default_painted: true
+	},
+	// a selected link reads as body text by default, which the first gate covers
+	{
+		color: 'link_color_selected',
+		relation: 'on',
+		grounds: ['00'],
+		threshold: GATE_LINK,
+		when_authored: true
+	},
+	// the focus ring is the accent at stop 50 by default, which the fill gate covers
+	{
+		color: 'outline_color',
+		relation: 'vs',
+		grounds: ['00'],
+		threshold: GATE_UI,
+		when_authored: true
+	}
+];
+
+/**
+ * The role variables the contrast gates follow - each aliases a color stop or
+ * another role by default (`text_color` is `var(--text_80)`), and
+ * `check_theme` measures
+ * whatever a theme points it at instead of the stop it left.
+ */
+export const theme_gate_role_names: ReadonlyArray<string> = PAIRING_GATES.map(
+	(gate) => gate.color
+).filter((name) => ALIAS_DEFAULTS.has(name));
+
+const NO_VISITS: ReadonlySet<string> = new Set();
+
 /**
  * Runs the gamut, monotonicity, and contrast gates against a theme, resolving
  * its authored CSS back to numbers through the resolution core. Report-only:
  * failures land in `entries` (with `pass: false`), inputs that can't be
- * resolved land in `unchecked`, and `ok` is true only when every entry passes
+ * evaluated land in `unchecked`, and `ok` is true only when every entry passes
  * and nothing is unchecked. Never throws.
  *
- * An intent hue that resolves to the same angle as a palette letter (the
- * default for every intent) folds into that letter's entries rather than
- * duplicating them, so reports for letter-bound themes list fewer subjects
- * than the full letters × intents grid.
+ * Every color a gate reads is looked up by its variable name, so a theme that
+ * authors one directly - a stop (`palette_a_50`, `shade_00`, `text_max`,
+ * `border_color_30`) or a role (`text_color`, `link_color`, `border_color`) -
+ * is measured at the authored color when it is an `oklch(L C H)` numeric
+ * literal or an exact `var()` reference to another color the gates evaluate,
+ * and recorded in `unchecked` otherwise. An authored color a gate depends on
+ * never passes unread, and one no gate reads stays out of the report.
+ *
+ * A contrast subject names what was measured: the default stop while a role
+ * is at its default (`text_80 on shade_00`), the role once the theme authors
+ * it (`text_color on shade_00`).
+ *
+ * An intent stop that renders the same color as a palette letter's (the
+ * default for every intent) folds into that letter's gamut entry rather than
+ * duplicating it, so reports for letter-bound themes list fewer subjects than
+ * the full letters × intents grid.
  */
 export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const resolver = new ThemeResolver(theme);
@@ -786,7 +984,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const unchecked: Array<ThemeUncheckedEntry> = [];
 	const seen_unchecked: Set<string> = new Set();
 
-	const record = (r: Extract<Resolved, { ok: false }>): null => {
+	const record = (r: ThemeUncheckedEntry): null => {
 		const key = `${r.variable}|${r.value}|${r.reason}`;
 		if (!seen_unchecked.has(key)) {
 			seen_unchecked.add(key);
@@ -800,44 +998,165 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		return r.ok ? r.value : record(r);
 	};
 
-	// a palette/intent ramp color at a stop for a given hue angle and the
-	// slot's chroma multiplier
-	const ramp_color = (
+	// the theme's own value for a color variable, evaluated: `undefined` when
+	// it authors none for the slot, `null` (recorded) when the value isn't a
+	// form the gates evaluate. Every gate color comes through here by name,
+	// which is what makes the set of authored colors the report answers for
+	// exactly the gates' own inputs
+	const authored_color = (
+		name: string,
+		scheme: ColorSchemeVariant,
+		visited: ReadonlySet<string>
+	): GateColor | null | undefined => {
+		const authored = resolver.authored(name, scheme);
+		if (authored === undefined) return undefined;
+		const value = authored.trim();
+		const literal = parse_color_literal(value);
+		if (literal) return literal;
+		const reference = VAR_MATCHER.exec(value);
+		if (!reference) return record({ variable: name, value, reason: REASON_COLOR_FORM });
+		const color = color_of(reference[1]!, scheme, new Set(visited).add(name));
+		return color === undefined
+			? record({ variable: name, value, reason: REASON_COLOR_REFERENCE })
+			: color;
+	};
+
+	// an opaque color variable: the theme's authored color when it has one,
+	// else the value derived from the resolved knobs
+	const opaque_color = (
+		name: string,
+		scheme: ColorSchemeVariant,
+		derive: () => RgbUnit | null,
+		visited: ReadonlySet<string> = NO_VISITS
+	): RgbUnit | null => {
+		const authored = authored_color(name, scheme, visited);
+		if (authored === undefined) return derive();
+		if (authored === null) return null;
+		if (authored.alpha < 1) {
+			const value = resolver.authored(name, scheme)!.trim();
+			return record({ variable: name, value, reason: REASON_COLOR_ALPHA });
+		}
+		return authored.rgb;
+	};
+
+	// a palette letter's or intent's color at a stop (`palette_a_50`,
+	// `accent_60`), derived from the slot's hue angle and chroma multiplier
+	const slot_color = (
+		slot: string,
 		hue: number,
+		multiplier: number,
 		stop: NumericScaleVariant,
 		scheme: ColorSchemeVariant,
-		multiplier = 1
-	): Oklch | null => {
-		const lightness = num(`palette_lightness_${stop}`, scheme);
-		const chroma_stop = num(`palette_chroma_${stop}`, scheme);
-		const chroma_scale = num('chroma_scale', scheme);
-		if (lightness === null || chroma_stop === null || chroma_scale === null) {
-			return null;
-		}
-		return ramp_color_oklch(lightness, chroma_stop, hue, chroma_scale, multiplier);
-	};
+		visited?: ReadonlySet<string>
+	): RgbUnit | null =>
+		opaque_color(
+			`${slot}_${stop}`,
+			scheme,
+			() => {
+				const lightness = num(`palette_lightness_${stop}`, scheme);
+				const chroma_stop = num(`palette_chroma_${stop}`, scheme);
+				const chroma_scale = num('chroma_scale', scheme);
+				if (lightness === null || chroma_stop === null || chroma_scale === null) {
+					return null;
+				}
+				return oklch_to_srgb(
+					ramp_color_oklch(lightness, chroma_stop, hue, chroma_scale, multiplier)
+				);
+			},
+			visited
+		);
 
 	// a neutral (shade/text) ramp color at a stop
 	const neutral_color = (
 		family: 'shade' | 'text',
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant
-	): Oklch | null => {
-		const lightness = num(`${family}_lightness_${stop}`, scheme);
-		const neutral_c = num('neutral_chroma', scheme);
-		const curve = num('chroma_curve', scheme);
-		const neutral_hue = num('hue_neutral', scheme);
-		if (lightness === null || neutral_c === null || curve === null || neutral_hue === null) {
-			return null;
+		scheme: ColorSchemeVariant,
+		visited?: ReadonlySet<string>
+	): RgbUnit | null =>
+		opaque_color(
+			`${family}_${stop}`,
+			scheme,
+			() => {
+				const lightness = num(`${family}_lightness_${stop}`, scheme);
+				const neutral_c = num('neutral_chroma', scheme);
+				const shape = num(`chroma_shape_${stop}`, scheme);
+				const neutral_hue = num('hue_neutral', scheme);
+				if (lightness === null || neutral_c === null || shape === null || neutral_hue === null) {
+					return null;
+				}
+				return oklch_to_srgb(neutral_color_oklch(lightness, neutral_c, shape, neutral_hue));
+			},
+			visited
+		);
+
+	const opaque = (rgb: RgbUnit | null): GateColor | null => rgb && { rgb, alpha: 1 };
+
+	// evaluates a color variable by name - a stop, an untinted extreme, or an
+	// alias followed through to what it points at. `undefined` when the name
+	// isn't a color the gates evaluate
+	const color_of = (
+		name: string,
+		scheme: ColorSchemeVariant,
+		visited: ReadonlySet<string> = NO_VISITS
+	): GateColor | null | undefined => {
+		if (visited.has(name)) {
+			return record({
+				variable: name,
+				value: `var(--${name})`,
+				reason: 'cyclic var() reference'
+			});
 		}
-		return neutral_color_oklch(lightness, neutral_c, ramp_chroma_shape(stop, curve), neutral_hue);
+		const slot_match = PALETTE_STOP_MATCHER.exec(name) ?? INTENT_STOP_MATCHER.exec(name);
+		if (slot_match) {
+			const letter = name.startsWith('palette_');
+			const slot = letter ? `palette_${slot_match[1]}` : slot_match[1]!;
+			const hue = num(`hue_${slot_match[1]}`, scheme);
+			const multiplier = num(`${slot}_chroma_scale`, scheme);
+			if (hue === null || multiplier === null) return null;
+			const stop = slot_match[2] as NumericScaleVariant;
+			return opaque(slot_color(slot, hue, multiplier, stop, scheme, visited));
+		}
+		const neutral_match = NEUTRAL_STOP_MATCHER.exec(name);
+		if (neutral_match) {
+			const family = neutral_match[1] as 'shade' | 'text';
+			const stop = neutral_match[2] as NumericScaleVariant;
+			return opaque(neutral_color(family, stop, scheme, visited));
+		}
+		const extreme_match = EXTREME_MATCHER.exec(name);
+		if (extreme_match) {
+			// `max` is the far end from the ground - black in light - and a stance
+			// renders its scheme's appearance in both
+			const black = (extreme_match[1] === 'max') === ((stance ?? scheme) === 'light');
+			return opaque(opaque_color(name, scheme, () => (black ? [0, 0, 0] : [1, 1, 1]), visited));
+		}
+		const border_match = BORDER_COLOR_STOP_MATCHER.exec(name);
+		if (border_match) {
+			const authored = authored_color(name, scheme, visited);
+			if (authored !== undefined) return authored;
+			const border_l = num('border_color_lightness', scheme);
+			const border_c = num('border_color_chroma', scheme);
+			const border_h = num('hue_neutral', scheme);
+			if (border_l === null || border_c === null || border_h === null) return null;
+			// the alpha is baked into the stop's rendered CSS, which a stance
+			// mirrors into both schemes - so it follows the stance
+			const stop = border_match[1] as NumericScaleVariant;
+			const alpha = BORDER_COLOR_ALPHAS[stance ?? scheme][stop] / 100;
+			return { rgb: oklch_to_srgb([border_l, border_c, border_h]), alpha };
+		}
+		const alias = ALIAS_DEFAULTS.get(name);
+		if (alias !== undefined) {
+			const authored = authored_color(name, scheme, visited);
+			if (authored !== undefined) return authored;
+			return color_of(alias, scheme, new Set(visited).add(name));
+		}
+		return undefined;
 	};
 
 	const contrast = (a: RgbUnit, b: RgbUnit): number =>
 		wcag_contrast_ratio(clamp_rgb(a), clamp_rgb(b));
 
-	const push_gamut = (subject: string, color: Oklch, scheme: ColorSchemeVariant): void => {
-		const value = gamut_excess(oklch_to_srgb(color));
+	const push_gamut = (subject: string, color: RgbUnit, scheme: ColorSchemeVariant): void => {
+		const value = gamut_excess(color);
 		entries.push({
 			gate: 'gamut',
 			scheme,
@@ -882,34 +1201,64 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	};
 
 	for (const scheme of color_scheme_variants) {
+		const authored = (name: string): boolean => resolver.authored(name, scheme) !== undefined;
+
+		// what a subject calls a painted color: the role once the theme authors
+		// it, the stop it defaults to until then
+		const label_of = (name: string): string => {
+			const alias = ALIAS_DEFAULTS.get(name);
+			return alias === undefined || authored(name) ? name : label_of(alias);
+		};
+
+		// one painted color against each of a gate's grounds, a translucent
+		// color composited over the ground first
+		const push_pairing = (gate: PairingGate, name: string): void => {
+			const color = color_of(name, scheme);
+			for (const stop of gate.grounds) {
+				const ground = neutral_color('shade', stop, scheme);
+				if (!color || !ground) continue;
+				const ground_rgb = clamp_rgb(ground);
+				const color_rgb = clamp_rgb(color.rgb);
+				const ratio = wcag_contrast_ratio(
+					color.alpha < 1 ? composite_over(color_rgb, color.alpha, ground_rgb) : color_rgb,
+					ground_rgb
+				);
+				const subject = `${label_of(name)} ${gate.relation} shade_${stop}`;
+				push_contrast(subject, ratio, gate.threshold, scheme);
+			}
+		};
+
 		// gamut: palette letters × stops
-		const letter_slots: Array<[hue: number, multiplier: number]> = [];
+		const letter_slots: Array<[letter: PaletteVariant, hue: number, multiplier: number]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
 			const multiplier = num(`palette_${letter}_chroma_scale`, scheme);
 			if (hue === null || multiplier === null) continue;
-			letter_slots.push([hue, multiplier]);
+			letter_slots.push([letter, hue, multiplier]);
 			for (const stop of numeric_scale_variants) {
-				const color = ramp_color(hue, stop, scheme, multiplier);
+				const color = slot_color(`palette_${letter}`, hue, multiplier, stop, scheme);
 				if (color) push_gamut(`palette_${letter}_${stop}`, color, scheme);
 			}
 		}
-		// gamut: each intent that renders differently from every letter - an
-		// intent folds into a letter's entries only when hue AND multiplier match
+		// gamut: each intent stop that renders differently from every letter's -
+		// it folds into a letter's entry only when hue AND multiplier match and
+		// neither stop is authored as its own color
 		for (const intent of intent_variants) {
 			const hue = num(`hue_${intent}`, scheme);
 			const multiplier = num(`${intent}_chroma_scale`, scheme);
 			if (hue === null || multiplier === null) continue;
-			if (
-				letter_slots.some(
-					([h, m]) =>
-						Math.abs(h - hue) < NUMERIC_EPSILON && Math.abs(m - multiplier) < NUMERIC_EPSILON
-				)
-			) {
-				continue;
-			}
+			const twins = letter_slots.filter(
+				([, h, m]) =>
+					Math.abs(h - hue) < NUMERIC_EPSILON && Math.abs(m - multiplier) < NUMERIC_EPSILON
+			);
 			for (const stop of numeric_scale_variants) {
-				const color = ramp_color(hue, stop, scheme, multiplier);
+				if (
+					!authored(`${intent}_${stop}`) &&
+					twins.some(([letter]) => !authored(`palette_${letter}_${stop}`))
+				) {
+					continue;
+				}
+				const color = slot_color(intent, hue, multiplier, stop, scheme);
 				if (color) push_gamut(`${intent}_${stop}`, color, scheme);
 			}
 		}
@@ -926,74 +1275,23 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			push_monotonicity(family, scheme);
 		}
 
-		// contrast: body text - text_80 on shade_00/05/10
-		const text_80 = neutral_color('text', '80', scheme);
-		for (const stop of ['00', '05', '10'] as const) {
-			const surface = neutral_color('shade', stop, scheme);
-			if (!text_80 || !surface) continue;
-			const ratio = contrast(oklch_to_srgb(text_80), oklch_to_srgb(surface));
-			push_contrast(`text_80 on shade_${stop}`, ratio, GATE_BODY_TEXT, scheme);
-		}
-
-		const shade_00 = neutral_color('shade', '00', scheme);
-
-		// contrast: selected-control inverse text - text_00 on shade_60
-		const text_00 = neutral_color('text', '00', scheme);
-		const shade_60 = neutral_color('shade', '60', scheme);
-		if (text_00 && shade_60) {
-			const ratio = contrast(oklch_to_srgb(text_00), oklch_to_srgb(shade_60));
-			push_contrast('text_00 on shade_60', ratio, GATE_SELECTED_TEXT, scheme);
-		}
-
-		// contrast: subtle text - text_50 on shade_00
-		const text_50 = neutral_color('text', '50', scheme);
-		if (text_50 && shade_00) {
-			const ratio = contrast(oklch_to_srgb(text_50), oklch_to_srgb(shade_00));
-			push_contrast('text_50 on shade_00', ratio, GATE_SUBTLE_TEXT, scheme);
-		}
-
-		// contrast: control borders - shade_30 (the --border_color default) vs shade_00
-		const shade_30 = neutral_color('shade', '30', scheme);
-		if (shade_30 && shade_00) {
-			const ratio = contrast(oklch_to_srgb(shade_30), oklch_to_srgb(shade_00));
-			push_contrast('shade_30 vs shade_00', ratio, GATE_BORDER, scheme);
-		}
-
-		// contrast: divider borders - border_color_30 alpha-composited over shade_00
-		const border_l = num('border_color_lightness', scheme);
-		const border_c = num('border_color_chroma', scheme);
-		const border_h = num('hue_neutral', scheme);
-		if (border_l !== null && border_c !== null && border_h !== null && shade_00) {
-			const border_rgb = clamp_rgb(oklch_to_srgb([border_l, border_c, border_h]));
-			const bg_rgb = clamp_rgb(oklch_to_srgb(shade_00));
-			// the alpha is baked into border_color_30's rendered CSS, which a
-			// stance mirrors into both schemes - so it follows the stance
-			const alpha = BORDER_COLOR_ALPHAS[stance ?? scheme]['30'] / 100;
-			// gamma-space compositing, matching how browsers stack backgrounds
-			const composited: RgbUnit = [
-				alpha * border_rgb[0] + (1 - alpha) * bg_rgb[0],
-				alpha * border_rgb[1] + (1 - alpha) * bg_rgb[1],
-				alpha * border_rgb[2] + (1 - alpha) * bg_rgb[2]
-			];
-			const ratio = wcag_contrast_ratio(composited, bg_rgb);
-			push_contrast('border_color_30 over shade_00', ratio, GATE_BORDER_DIVIDER, scheme);
-		}
-
-		// contrast: link - the accent hue at stop 60 on shade_00 (resolved through bindings)
-		const accent_hue = num('hue_accent', scheme);
-		const accent_multiplier = num('accent_chroma_scale', scheme);
-		if (accent_hue !== null && accent_multiplier !== null && shade_00) {
-			const link = ramp_color(accent_hue, '60', scheme, accent_multiplier);
-			if (link) {
-				const ratio = contrast(oklch_to_srgb(link), oklch_to_srgb(shade_00));
-				push_contrast('accent_60 on shade_00', ratio, GATE_LINK, scheme);
+		// contrast: the single-color pairings - body, selected, and subtle text,
+		// borders, links, and the focus ring
+		for (const gate of PAIRING_GATES) {
+			const role_authored = authored(gate.color);
+			if (gate.when_authored && !role_authored) continue;
+			push_pairing(gate, gate.color);
+			const alias = ALIAS_DEFAULTS.get(gate.color);
+			if (gate.default_painted && role_authored && alias !== undefined) {
+				push_pairing(gate, alias);
 			}
 		}
 
 		// contrast: UI affordances - every letter and intent at stop 50, the
-		// fill stop 60 selected buttons use, and the palette letters as label text;
-		// a stance renders its scheme's appearance in both, so text_max follows it
-		const text_max: RgbUnit = (stance ?? scheme) === 'light' ? [0, 0, 0] : [1, 1, 1];
+		// fill stop 60 selected buttons use, and the palette letters as label text
+		const shade_00 = neutral_color('shade', '00', scheme);
+		const text_00 = neutral_color('text', '00', scheme);
+		const text_max = color_of('text_max', scheme)?.rgb ?? null;
 		const fills: Array<[label: string, hue: number, multiplier: number, is_letter?: boolean]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
@@ -1008,30 +1306,35 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			if (hue !== null && multiplier !== null) fills.push([intent, hue, multiplier]);
 		}
 		if (shade_00) {
-			const shade_00_rgb = oklch_to_srgb(shade_00);
 			for (const [label, hue, multiplier, is_letter] of fills) {
-				const fill = ramp_color(hue, '50', scheme, multiplier);
-				if (!fill) continue;
-				const fill_rgb = oklch_to_srgb(fill);
-				const ui = contrast(fill_rgb, shade_00_rgb);
-				push_contrast(`${label}_50 vs shade_00`, ui, GATE_UI, scheme);
-				const on_fill = contrast(text_max, fill_rgb);
-				push_contrast(`text_max on ${label}_50`, on_fill, GATE_FILL_TEXT, scheme);
-				const stop_60 = ramp_color(hue, '60', scheme, multiplier);
+				const fill = slot_color(label, hue, multiplier, '50', scheme);
+				if (fill) {
+					const ui = contrast(fill, shade_00);
+					push_contrast(`${label}_50 vs shade_00`, ui, GATE_UI, scheme);
+					if (text_max) {
+						const on_fill = contrast(text_max, fill);
+						push_contrast(`text_max on ${label}_50`, on_fill, GATE_FILL_TEXT, scheme);
+					}
+				}
+				const stop_60 = slot_color(label, hue, multiplier, '60', scheme);
 				if (!stop_60) continue;
-				const stop_60_rgb = oklch_to_srgb(stop_60);
 				if (text_00) {
-					const selected = contrast(oklch_to_srgb(text_00), stop_60_rgb);
+					const selected = contrast(text_00, stop_60);
 					push_contrast(`text_00 on ${label}_60`, selected, GATE_SELECTED_TEXT, scheme);
 				}
 				if (!is_letter) continue;
-				// the button label sits on a faint tint of its own color over the
-				// page, the chip label on its stop-10 tint
-				const on_page = contrast(stop_60_rgb, shade_00_rgb);
+				// the colored label on the page itself (colored text, `.plain`
+				// buttons), on the `.palette_X` button's rest fill - a faint tint of
+				// the label's own color over the page - and on the chip's stop-10 tint
+				const on_page = contrast(stop_60, shade_00);
 				push_contrast(`${label}_60 on shade_00`, on_page, GATE_PALETTE_TEXT, scheme);
-				const tint = ramp_color(hue, '10', scheme, multiplier);
+				const label_rgb = clamp_rgb(stop_60);
+				const button_fill = composite_over(label_rgb, BUTTON_FILL_ALPHA, clamp_rgb(shade_00));
+				const on_button = wcag_contrast_ratio(label_rgb, button_fill);
+				push_contrast(`${label}_60 on ${label} button fill`, on_button, GATE_PALETTE_TEXT, scheme);
+				const tint = slot_color(label, hue, multiplier, '10', scheme);
 				if (tint) {
-					const on_tint = contrast(stop_60_rgb, oklch_to_srgb(tint));
+					const on_tint = contrast(stop_60, tint);
 					push_contrast(`${label}_60 on ${label}_10`, on_tint, GATE_PALETTE_TEXT, scheme);
 				}
 			}
@@ -1075,60 +1378,70 @@ const collect_hues = (
 	return hues;
 };
 
-const resolve_lightness_knobs = (
-	resolver: ThemeResolver,
-	scheme: ColorSchemeVariant
-): LightnessRampKnobs => {
-	const l00 = resolver.resolve('palette_lightness_00', scheme);
-	const l100 = resolver.resolve('palette_lightness_100', scheme);
-	const curve = resolver.resolve('palette_lightness_curve', scheme);
-	const fallback = PALETTE_LIGHTNESS_KNOBS[scheme];
-	return {
-		lightness_00: l00.ok ? l00.value : fallback.lightness_00,
-		lightness_100: l100.ok ? l100.value : fallback.lightness_100,
-		curve: curve.ok ? curve.value : fallback.curve
-	};
-};
-
 /**
  * Recomputes a theme's per-stop worst-hue chroma caps from its own hues and
- * palette lightness ramp, then emits `palette_chroma_NN` overrides wherever
- * the baked caps no longer fit - the fix for a theme (rotated hues, a
- * monochrome collapse, a dark-only mirror) whose gamut headroom the baked
- * worst-hue table misjudges.
+ * the palette lightness each stop resolves to, then emits `palette_chroma_NN`
+ * overrides wherever the baked caps no longer fit - the fix for a theme
+ * (rotated hues, a monochrome collapse, a moved lightness ramp) whose gamut
+ * headroom the baked worst-hue table misjudges.
+ *
+ * Each stop's cap is computed at the lightness the resolution core resolves
+ * for `palette_lightness_NN` in that scheme - a pinned intermediate stop when
+ * the theme pins one, the endpoint-and-curve ramp otherwise - so the caps
+ * describe the same colors `check_theme` gates.
  *
  * A stop is emitted when either scheme's recomputed cap is tighter than the
  * baked value, or looser by more than the emit epsilon, and the theme doesn't
  * already pin that stop. Nothing is emitted when a hue fails to resolve to a
- * number, since caps computed without it could overshoot its gamut. For a stanced theme both schemes resolve to the stanced
- * appearance, so the caps are computed once and baselined against the stanced
- * scheme's baked table - the values the stance mirror already re-slots - and
- * a stance alone (hues and lightness ramp unmoved) emits nothing. A dual theme's overrides emit both slots together so a
- * one-scheme override can't silently kill the base default's other slot by
- * cascade-layer order; a stanced theme's emit single-slot in the base
- * position (its two schemes resolve identically through the mirror), as do
- * slots whose rendered values coincide. A stanced theme's `scheme_mirror` is
- * recomputed over the emitted variables, so the output is render-ready even
- * when the input wasn't resolved. The input theme is never mutated. The
- * report re-checks the emitted theme, whose compiled-cap overrides the
- * resolution core recognizes.
+ * number, since caps computed without it could overshoot its gamut, and a
+ * stop whose lightness fails to resolve is skipped. An override emits both
+ * slots together, so a one-scheme override can't silently kill the base
+ * default's other slot by cascade-layer order, collapsing to a single slot
+ * in the base position when the two rendered values coincide.
+ *
+ * A stanced theme's two schemes resolve to the stanced appearance through the
+ * mirror, so its caps are baselined against the stanced scheme's baked table -
+ * the values the mirror already re-slots - and a stance alone (hues and
+ * lightness unmoved) emits nothing. Its overrides coincide across schemes and
+ * emit single-slot unless the theme authors a dark slot that splits them. A
+ * stanced theme's `scheme_mirror` is recomputed over the emitted variables,
+ * so the output is render-ready even when the input wasn't resolved.
+ *
+ * The caps bound the requested chroma only: `chroma_scale` and the per-slot
+ * `*_chroma_scale` multipliers apply above the clamp. A theme that raises one
+ * past 1 clips by design - its gamut failures survive the compile, and a cap
+ * the compile loosens can add to them, since the multiplier then pushes more
+ * stops past the looser cap. The input theme is never mutated. The report re-checks the emitted theme, whose
+ * compiled-cap overrides the resolution core recognizes.
  */
 export const compile_theme = (theme: Theme): CompiledTheme => {
 	const resolver = new ThemeResolver(theme);
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 
-	const recompute = (scheme: ColorSchemeVariant): Record<NumericScaleVariant, number> | null => {
-		const hues = collect_hues(resolver, scheme);
-		return hues && compute_palette_chroma_caps(hues, resolve_lightness_knobs(resolver, scheme));
+	const hues: Record<ColorSchemeVariant, Array<number> | null> = {
+		light: collect_hues(resolver, 'light'),
+		dark: collect_hues(resolver, 'dark')
 	};
-	// a stanced theme resolves both schemes to the stanced appearance through
-	// the mirror, so compute the (expensive) gamut search once - and baseline
-	// against the stanced scheme's baked caps: those are what the mirror
-	// re-slots into the base position, so comparing against the light table
-	// would emit no-op overrides duplicating the mirror for every dark stance
-	const stance_caps = stance ? recompute(stance) : null;
-	const light_caps = stance ? stance_caps : recompute('light');
-	const dark_caps = stance ? stance_caps : recompute('dark');
+	// the gamut search is the expensive part, and a stanced theme resolves both
+	// schemes to the same hues and lightness - so memoize by the search inputs
+	const caps: Map<string, number> = new Map();
+	const recompute = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): number | null => {
+		const scheme_hues = hues[scheme];
+		// the stop's own lightness, so a pinned intermediate is honored
+		const lightness = resolver.resolve(`palette_lightness_${stop}`, scheme);
+		if (!scheme_hues || !lightness.ok) return null;
+		const key = `${lightness.value}|${scheme_hues.join(',')}`;
+		let cap = caps.get(key);
+		if (cap === undefined) {
+			cap = compute_worst_hue_chroma_cap(scheme_hues, lightness.value);
+			caps.set(key, cap);
+		}
+		return cap;
+	};
+	// a stance baselines both schemes against the stanced scheme's baked caps:
+	// those are what the mirror re-slots into the base position, so comparing
+	// against the light table would emit no-op overrides duplicating the mirror
+	// for every dark stance
 	const baked: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
 		light: PALETTE_CHROMA_CAPS[stance ?? 'light'],
 		dark: PALETTE_CHROMA_CAPS[stance ?? 'dark']
@@ -1139,15 +1452,16 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		cap < baked_cap - NUMERIC_EPSILON || cap - baked_cap > CAP_EMIT_EPSILON;
 
 	const cap_overrides: Array<StyleVariable> = [];
-	for (const stop of light_caps && dark_caps ? numeric_scale_variants : []) {
+	for (const stop of hues.light && hues.dark ? numeric_scale_variants : []) {
 		if (resolver.pinned(`palette_chroma_${stop}`)) continue; // respect the pin
-		const light_cap = light_caps![stop];
-		const dark_cap = dark_caps![stop];
+		const light_cap = recompute(stop, 'light');
+		const dark_cap = recompute(stop, 'dark');
+		if (light_cap === null || dark_cap === null) continue;
 		if (cap_moved(light_cap, baked.light[stop]) || cap_moved(dark_cap, baked.dark[stop])) {
 			const light_value = render_chroma_stop_css(stop, light_cap);
 			const dark_value = render_chroma_stop_css(stop, dark_cap);
 			cap_overrides.push(
-				stance || light_value === dark_value
+				light_value === dark_value
 					? { name: `palette_chroma_${stop}`, light: light_value }
 					: { name: `palette_chroma_${stop}`, light: light_value, dark: dark_value }
 			);

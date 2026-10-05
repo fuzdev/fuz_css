@@ -119,9 +119,12 @@ combined and only used content is included. In utility-only mode, import
 - [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
   a theme API: `validate_theme` lints a theme's shape, `check_theme` runs the
   gamut/monotonicity/contrast gates against an arbitrary theme (resolving its
-  bindings back to numbers), and `compile_theme` recomputes per-theme
-  worst-hue chroma caps so rotated, monochrome, or dark-only themes stay in
-  gamut
+  bindings back to numbers, following the role variables the default styles
+  paint through - `text_color`, `link_color`, `border_color`, and the rest of
+  `theme_gate_role_names` - and reporting any gate input it can't evaluate as
+  `unchecked` rather than passing it unread), and `compile_theme` recomputes
+  per-theme worst-hue chroma caps at each stop's resolved lightness so
+  rotated, monochrome, dark-only, or lightness-pinned themes stay in gamut
 
 ### Smart utility class generation
 
@@ -261,7 +264,10 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
   50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, the
   `.palette_X` button and chip labels, and selected-button fills use it, and
-  `check_theme` gates those pairings at AA
+  `check_theme` gates those pairings at AA - the button label against its
+  rest fill (its own color at 8% alpha over `shade_00`); the pairings an
+  exemplar or composition knowingly gives up are declared as exact
+  exceptions in the theme_check tests
 - Form/scale knobs derive into token defaults so one move reshapes a family
   while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
   (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
@@ -468,10 +474,14 @@ typography, borders, shading, shadows, layout. See
   `heading_font_weight` and the micro-surface color variables
 - [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
   numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
-  contrast), and the worst-hue chroma-cap compile step (`compile_theme`, which
-  emits any cap that tightens and emits nothing when a hue won't resolve to a
-  number) over a shared string→number resolution core, exposed as `create_theme_resolver`
-  for memoized UI lookups (the theme editor's derived-knob readouts)
+  contrast - a directly authored color stop or role is measured when it's an
+  `oklch(L C H)` numeric literal or an exact `var()` reference to a color the
+  gates evaluate, and lands in `unchecked` otherwise), and the
+  worst-hue chroma-cap compile step (`compile_theme`, which caps each stop at
+  the lightness it resolves to, emits any cap that tightens, and emits nothing
+  when a hue won't resolve to a number) over a shared string→number resolution
+  core, exposed as `create_theme_resolver` for memoized UI lookups (the theme
+  editor's derived-knob readouts)
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
