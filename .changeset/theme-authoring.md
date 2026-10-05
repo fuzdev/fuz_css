@@ -16,6 +16,12 @@ Breaking:
   `layer?: string | null` (default `'fuz.theme'`); `generate_theme_css`
   loses its specificity parameter; the `theme_specificity` generator option
   is removed.
+- A style variable's `light`/`dark` must be a contained CSS value, and its
+  `summary` must not close a comment: `parse_theme` and `validate_theme`
+  reject a value that could end its own declaration (a top-level `;`,
+  braces, `!important`, a comment, unbalanced quotes or brackets,
+  `</style`), and `render_theme_style` drops one. Quote a URL that needs
+  those characters.
 - `default_themes` is just base. Low/high contrast are `contrast_modifiers`,
   composed over a theme with `compose_themes(base, ...overlays)`.
 
@@ -38,6 +44,7 @@ New:
   `known_theme_variable_names`.
 - Generators take `theme`, baked into the output and tree-shaken:
   `vite_plugin_fuz_css({theme: phosphor_theme})`. Composes with fuz_ui's
-  `ThemeRoot`, the runtime theme winning. `apply_theme_variables` is
-  exported from `variable_graph.ts`.
+  `ThemeRoot`: the baked theme renders into the `fuz.theme.baked` sublayer
+  (`FUZ_BAKED_THEME_LAYER`), so the runtime theme wins.
+  `apply_theme_variables` is exported from `variable_graph.ts`.
 - `theme.ts` no longer imports `variables.ts` (~1.3KB minified, was ~38KB).

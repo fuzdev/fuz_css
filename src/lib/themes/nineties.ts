@@ -22,7 +22,7 @@ export const nineties_theme: Theme = {
 		{ name: 'neutral_chroma', light: '0' },
 		// the desktop, not the page: the ground steps off the extreme in both
 		// schemes, as far as the contrast gates allow
-		{ name: 'shade_lightness_00', light: '0.92', dark: '0.24' },
+		{ name: 'shade_lightness_00', light: '0.923', dark: '0.24' },
 		// text is tuned for a white page by default; on a gray ground the mid
 		// stops wash, so the ramp pulls harder toward its ends
 		{ name: 'text_lightness_curve', light: '0.9', dark: '0.7' },

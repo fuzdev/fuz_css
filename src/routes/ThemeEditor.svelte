@@ -5,10 +5,9 @@
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
-	import type { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	import { render_theme_style } from '$lib/theme.ts';
-	import type { Theme, ThemeScheme } from '$lib/variable.ts';
+	import type { ThemeScheme } from '$lib/variable.ts';
 	import { theme_knobs, theme_knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
 	import type { ThemeGateEntry } from '$lib/theme_check.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
@@ -18,49 +17,22 @@
 		type ColorSchemeVariant,
 		type PaletteVariant
 	} from '$lib/variable_data.ts';
-	import {
-		discard_confirm_message,
-		render_theme_ts,
-		type ThemeEditorState
-	} from '$routes/theme_editor_state.svelte.ts';
+	import { render_theme_ts, type ThemeEditorState } from '$routes/theme_editor_state.svelte.ts';
+	import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
 	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 	import KnobControl from '$routes/KnobControl.svelte';
 	import RampStrip from '$routes/RampStrip.svelte';
 
 	const {
-		editor,
-		theme_state,
-		onload_theme
+		editor
 	}: {
 		editor: ThemeEditorState;
-		theme_state: ThemeState;
-		/**
-		 * Called after the "based on" select loads a theme as the new base, so
-		 * the page can apply it and sync its own picker selection.
-		 */
-		onload_theme?: (theme: Theme) => void;
 	} = $props();
 
-	// the OS preference, tracked live so an OS flip while 'auto' doesn't keep
-	// edits writing to the stale slot; false during SSR, corrected on mount
-	let os_prefers_dark = $state(false);
-	$effect(() => {
-		if (typeof matchMedia === 'undefined') return;
-		const query = matchMedia('(prefers-color-scheme: dark)');
-		const update = () => {
-			os_prefers_dark = query.matches;
-		};
-		update();
-		query.addEventListener('change', update);
-		return () => query.removeEventListener('change', update);
-	});
-
-	// the scheme whose slots edits write to
-	const editing_scheme: ColorSchemeVariant = $derived(
-		theme_state.color_scheme === 'dark' || (theme_state.color_scheme === 'auto' && os_prefers_dark)
-			? 'dark'
-			: 'light'
-	);
+	// the scheme whose slots edits write to: the one the page renders, read
+	// off the root class rather than derived from the 'auto' setting and the
+	// OS, which can disagree with what's on screen
+	const editing_scheme: ColorSchemeVariant = $derived(root_color_scheme());
 
 	const failing_gates: Array<ThemeGateEntry> = $derived(
 		editor.check_report.entries.filter((e) => !e.pass)
@@ -112,19 +84,10 @@
 	// switching the "based on" theme flattens it as the new base, discarding any
 	// edits, so guard the switch behind a confirm when the draft is dirty
 	const on_base_change = (e: Event & { currentTarget: EventTarget & HTMLSelectElement }): void => {
-		const name = e.currentTarget.value;
-		if (
-			editor.dirty &&
-			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
-			!confirm(discard_confirm_message(editor, name))
-		) {
+		const theme = editor.themes.find((t) => t.name === e.currentTarget.value);
+		// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+		if (!theme || !editor.load_theme_guarded(theme, (message) => confirm(message))) {
 			e.currentTarget.value = editor.based_on;
-			return;
-		}
-		const theme = editor.themes.find((t) => t.name === name);
-		if (theme) {
-			editor.load_theme(theme);
-			onload_theme?.(theme);
 		}
 	};
 

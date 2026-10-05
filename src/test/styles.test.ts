@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_hook_names } from '$lib/knobs.ts';
 import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
+import { duration_variants } from '$lib/variable_data.ts';
 import { parse_style_css } from '$lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
@@ -112,6 +113,17 @@ test('the OS user-preference mappings parse core and layer into fuz.preferences'
 		(r) => r.layer === 'fuz.preferences' && !r.css.includes('prefers-')
 	);
 	assert.deepEqual(misplaced, []);
+});
+
+test('the reduced-motion mapping disables every duration and outranks themes', () => {
+	// themes render into fuz.theme, above this layer, so only `!important`
+	// keeps a theme's durations from re-enabling motion the user turned off
+	const index = parse_style_css(main_stylesheet_text);
+	const rule = index.rules.find((r) => r.css.includes('prefers-reduced-motion'));
+	assert(rule);
+	for (const variant of duration_variants) {
+		assert.include(rule.css, `--duration_${variant}: initial !important;`, String(variant));
+	}
 });
 
 test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {

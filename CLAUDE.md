@@ -104,11 +104,14 @@ combined and only used content is included. In utility-only mode, import
   `fuz.theme` cascade layer (defaults live in `fuz.base`, OS user-preference
   mappings like `prefers-contrast` in `fuz.preferences` above them, generated
   utility classes in `fuz.utilities`; consumers' unlayered styles beat
-  everything)
+  everything except the two `!important` declarations in layers - the
+  `prefers-reduced-motion` mapping, so a theme's durations can't re-enable
+  motion, and `[hidden]`)
 - A theme applies either at build time (the generators' `theme` option, baked
   into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
-  renders it to a `<style>` element). They compose - the runtime theme wins
-  by cascade layer
+  renders it to a `<style>` element). They compose - the baked theme's
+  overlay renders into the `fuz.theme.baked` sublayer, which a runtime
+  theme's direct `fuz.theme` styles outrank whatever the specificity
 - Color values are derived: curve knobs → ramp stops → color stops, computed
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
@@ -235,7 +238,9 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   warns when a bound letter's multiplier differs from the intent's twin
 - 13 intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
-  50, 60, 70, 80, 90, 95, 100)
+  50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, the
+  `.palette_X` button and chip labels, and selected-button fills use it, and
+  `check_theme` gates those pairings at AA
 - Form/scale knobs derive into token defaults so one move reshapes a family
   while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
   (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
@@ -399,6 +404,11 @@ typography, borders, shading, shadows, layout. See
   it holds no variable data, so mounting a theme costs ~1.3KB minified
   instead of ~38KB. It renders what the theme carries (the `scheme_mirror`
   only under a stance) and pins `color-scheme` for a `scheme` stance
+- [css_containment.ts](src/lib/css_containment.ts) - Containment checks for
+  text rendered verbatim into a stylesheet (`css_value_is_contained` and its
+  comment and property-name twins). A theme may be untrusted data, so the
+  `Theme` schema rejects a value that could end its own declaration or the
+  `<style>` element, and `render_theme_style` drops one
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
   defaults re-slotted so its one appearance holds in both schemes). Kept out
@@ -520,7 +530,17 @@ The themes docs page hosts an inline theme editor built from
 (marked `TODO upstream to fuz_ui`), with
 [theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
 in a leaf module so the root layout doesn't pull the editor's dependency
-graph. [resolved_color.svelte.ts](src/routes/docs/resolved_color.svelte.ts)
+graph. `ThemeEditorState` owns what the page applies - the dirty draft or its
+base, composed with the active contrast modifier (`applied_theme`) - plus the
+shared discard guard (`load_theme_guarded`) and `sync_applied_theme`, which
+adopts a theme already applied at mount so a persisted theme or contrast
+composition isn't replaced by the editor's defaults. The themes page keeps
+one editor per browser session, so a draft survives in-app navigation, and
+only bridges `applied_theme` to fuz_ui's theme state.
+[root_color_scheme.svelte.ts](src/routes/root_color_scheme.svelte.ts) reads
+the scheme the page renders off the root class reactively; the editor's
+edited slot and the swatch readouts follow it rather than the theme state,
+which can disagree with what's on screen. [resolved_color.svelte.ts](src/routes/docs/resolved_color.svelte.ts)
 resolves rendered colors for the docs swatches. `vite.config.ts` declares
 the docs site's own generator inputs: a `docs_classes` list plus
 `additional_variables: 'all'` / `additional_elements: 'all'`, which is what

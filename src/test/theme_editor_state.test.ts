@@ -1,7 +1,7 @@
 /**
  * Tests for the docs site's theme editor state: the slot-merge semantics,
- * scheme-stance re-slotting, display values, snapshots, and the copyable
- * TypeScript output.
+ * scheme-stance re-slotting, display values, snapshots, the applied theme
+ * and its sync with the page, and the copyable TypeScript output.
  *
  * @module
  */
@@ -15,6 +15,7 @@ import {
 } from '$routes/theme_editor_state.svelte.ts';
 import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 import type { Theme } from '$lib/variable.ts';
+import { compose_themes } from '$lib/theme.ts';
 import { base_theme } from '$lib/themes/base.ts';
 import { neon_theme } from '$lib/themes/neon.ts';
 import { default_variables } from '$lib/variables.ts';
@@ -23,7 +24,8 @@ import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '$lib/ram
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
 
-const create_editor = (): ThemeEditorState => new ThemeEditorState([base_theme, neon_theme]);
+const create_editor = (): ThemeEditorState =>
+	new ThemeEditorState({ themes: [base_theme, neon_theme] });
 
 describe('set_value slot semantics', () => {
 	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
@@ -64,28 +66,63 @@ describe('set_value slot semantics', () => {
 });
 
 describe('scheme stance', () => {
-	test('entering a stance re-slots existing overrides to the base slot', () => {
+	const merged_adaptive = (editor: ThemeEditorState) =>
+		editor.merged_variables.find((v) => v.name === adaptive_default.name);
+
+	test('entering a stance renders an existing override from the stanced slot', () => {
 		const editor = create_editor();
 		editor.set_value(adaptive_default.name, '0.25', 'dark');
 		editor.set_scheme('dark');
-		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
-		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.25' });
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.25' });
 	});
 
-	test('a light stance drops dark-only overrides - that appearance never renders', () => {
+	test("a light stance doesn't render a dark-only override - that appearance never shows", () => {
 		const editor = create_editor();
 		editor.set_value(adaptive_default.name, '0.25', 'dark');
 		editor.set_scheme('light');
-		assert.isFalse(editor.overrides.has(adaptive_default.name));
+		assert.isUndefined(merged_adaptive(editor));
 	});
 
-	test('edits under a stance write the base slot and skip dark preservation', () => {
+	test('a stance round trip loses no edits', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.9', 'light');
+		editor.set_value(adaptive_default.name, '0.25', 'dark');
+		const before = { ...editor.overrides.get(adaptive_default.name) };
+		for (const stance of ['dark', 'light'] as const) {
+			editor.set_scheme(stance);
+			editor.set_scheme('dual');
+			assert.deepEqual(editor.overrides.get(adaptive_default.name), before, stance);
+		}
+		assert.deepEqual(merged_adaptive(editor), {
+			name: adaptive_default.name,
+			light: '0.9',
+			dark: '0.25'
+		});
+	});
+
+	test('edits under a stance write the stanced slot and skip dark preservation', () => {
 		const editor = create_editor();
 		editor.set_scheme('dark');
-		editor.set_value(adaptive_default.name, '0.25', 'dark');
-		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
+		// whichever scheme is being viewed, the one appearance is the stance's
+		editor.set_value(adaptive_default.name, '0.25', 'light');
+		assert.deepEqual(editor.overrides.get(adaptive_default.name), { dark: '0.25' });
 		// no preserved dark slot - the stance mirror owns untouched defaults
-		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.25' });
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.25' });
+	});
+
+	test('a stanced edit wins over an edit made before the stance', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.25', 'dark');
+		editor.set_scheme('dark');
+		editor.set_value(adaptive_default.name, '0.3', 'dark');
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.3' });
+	});
+
+	test('a single-slot variable edits the base slot under a stance, so it holds after it', () => {
+		const editor = create_editor();
+		editor.set_scheme('dark');
+		editor.set_value(single_slot_default.name, '2', 'dark');
+		assert.deepEqual(editor.overrides.get(single_slot_default.name), { light: '2' });
 	});
 
 	test('the draft and output of a stanced editor carry a resolved scheme_mirror', () => {
@@ -110,7 +147,7 @@ describe('scheme stance over a dual base theme', () => {
 		]
 	};
 	const create_dual_editor = (): ThemeEditorState => {
-		const editor = new ThemeEditorState([base_theme, dual_base]);
+		const editor = new ThemeEditorState({ themes: [base_theme, dual_base] });
 		editor.load_theme(dual_base);
 		return editor;
 	};
@@ -385,5 +422,112 @@ describe('gates', () => {
 		assert.isTrue(
 			editor.issues.some((i) => i.level === 'error' && i.variable === 'not_a_real_variable')
 		);
+	});
+});
+
+describe('applied theme', () => {
+	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', light: '1.5' }] };
+	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', light: '0.5' }] };
+	const create_contrast_editor = (): ThemeEditorState =>
+		new ThemeEditorState({ themes: [base_theme, neon_theme], contrast_modifiers: [low, high] });
+
+	test('a clean editor applies and picks its base', () => {
+		const editor = create_contrast_editor();
+		assert.strictEqual(editor.applied_theme, base_theme);
+		assert.strictEqual(editor.picked_theme, base_theme);
+		assert.deepEqual(editor.picker_themes, [base_theme, neon_theme]);
+	});
+
+	test('a dirty editor applies and picks its draft, which joins the picker', () => {
+		const editor = create_contrast_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.strictEqual(editor.applied_theme.name, UNSAVED_THEME_NAME);
+		// read outside a reactive context a derived recomputes, so compare by value
+		assert.deepEqual(editor.picked_theme, editor.draft);
+		assert.deepEqual(editor.picker_themes.at(-1), editor.draft);
+	});
+
+	test('the contrast modifier composes over the base, and over a draft under its stable name', () => {
+		const editor = create_contrast_editor();
+		editor.contrast_modifier = high;
+		assert.strictEqual(editor.applied_theme.name, 'base (high)');
+		// the picker still highlights the base, not the composition
+		assert.strictEqual(editor.picked_theme, base_theme);
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.strictEqual(editor.applied_theme.name, UNSAVED_THEME_NAME);
+		assert.isDefined(editor.applied_theme.variables.find((v) => v.name === 'chroma_scale'));
+	});
+
+	test('load_theme_guarded loads over a clean editor without asking', () => {
+		const editor = create_contrast_editor();
+		let asked = 0;
+		assert.isTrue(editor.load_theme_guarded(neon_theme, () => (asked++, true)));
+		assert.strictEqual(asked, 0);
+		assert.strictEqual(editor.based_on, neon_theme.name);
+	});
+
+	test('load_theme_guarded keeps a dirty draft when the discard is declined', () => {
+		const editor = create_contrast_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		let message = '';
+		assert.isFalse(editor.load_theme_guarded(neon_theme, (m) => ((message = m), false)));
+		assert.include(message, neon_theme.name);
+		assert.strictEqual(editor.based_on, base_theme.name);
+		assert.isTrue(editor.dirty);
+		assert.isTrue(editor.load_theme_guarded(neon_theme, () => true));
+		assert.isFalse(editor.dirty);
+	});
+
+	test('load_theme_guarded ignores the draft itself', () => {
+		const editor = create_contrast_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.isFalse(editor.load_theme_guarded(editor.draft, () => true));
+		assert.isTrue(editor.dirty);
+	});
+
+	test('sync_applied_theme adopts an applied base by name', () => {
+		const editor = create_contrast_editor();
+		// a theme restored from storage is an equal value, not the same object
+		assert.isTrue(editor.sync_applied_theme(structuredClone(neon_theme)));
+		assert.strictEqual(editor.base_theme, neon_theme);
+		assert.strictEqual(editor.scheme, neon_theme.scheme);
+		assert.isNull(editor.contrast_modifier);
+		assert.strictEqual(editor.applied_theme, neon_theme);
+	});
+
+	test('sync_applied_theme adopts an applied contrast composition', () => {
+		const editor = create_contrast_editor();
+		const applied = compose_themes(neon_theme, high);
+		assert.isTrue(editor.sync_applied_theme(applied));
+		assert.strictEqual(editor.base_theme, neon_theme);
+		assert.strictEqual(editor.contrast_modifier, high);
+		assert.strictEqual(editor.applied_theme.name, applied.name);
+	});
+
+	test('sync_applied_theme clears a modifier the applied theme lacks', () => {
+		const editor = create_contrast_editor();
+		editor.contrast_modifier = low;
+		assert.isTrue(editor.sync_applied_theme(neon_theme));
+		assert.isNull(editor.contrast_modifier);
+	});
+
+	test('sync_applied_theme leaves a dirty editor, the draft, and unknown themes alone', () => {
+		const editor = create_contrast_editor();
+		assert.isFalse(editor.sync_applied_theme({ name: 'stranger', variables: [] }));
+		assert.isFalse(editor.sync_applied_theme({ name: UNSAVED_THEME_NAME, variables: [] }));
+		assert.strictEqual(editor.based_on, base_theme.name);
+		editor.set_value(single_slot_default.name, '2', 'light');
+		assert.isFalse(editor.sync_applied_theme(neon_theme));
+		assert.strictEqual(editor.based_on, base_theme.name);
+	});
+
+	test('the snapshot round-trips the contrast modifier, and tolerates one without it', () => {
+		const editor = create_contrast_editor();
+		editor.contrast_modifier = high;
+		const restored = create_contrast_editor();
+		restored.restore_snapshot(editor.to_snapshot());
+		assert.strictEqual(restored.contrast_modifier, high);
+		restored.restore_snapshot({ name: 'x', based_on: 'base', scheme: 'dual', overrides: [] });
+		assert.isNull(restored.contrast_modifier);
 	});
 });

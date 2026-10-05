@@ -4,6 +4,7 @@
 
 	import type { PaletteVariant } from '$lib/variable_data.ts';
 	import { PALETTE_HUES } from '$lib/ramps.ts';
+	import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
 
 	const {
 		letter,
@@ -27,9 +28,8 @@
 	let rendered_hue: number | null = $state(null);
 	const hue = $derived(rendered_hue ?? PALETTE_HUES[letter]);
 	$effect(() => {
-		const theme_state = get_theme_state();
-		theme_state.color_scheme;
-		theme_state.theme;
+		root_color_scheme();
+		get_theme_state().theme;
 		const n = Number(
 			getComputedStyle(document.documentElement).getPropertyValue('--' + variable_name)
 		);

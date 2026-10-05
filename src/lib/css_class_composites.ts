@@ -313,7 +313,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			${palette_variants
 				.map(
 					(letter) => `.chip.palette_${letter} {
-				color: var(--palette_${letter}_50);
+				color: var(--palette_${letter}_60);
 				background-color: var(--palette_${letter}_10);
 			}`
 				)

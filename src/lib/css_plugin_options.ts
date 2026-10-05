@@ -169,9 +169,10 @@ export interface CssOutputOptions {
 	 * runtime theme winning by cascade layer. A single-scheme theme's
 	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
 	 * renderer, which needs `resolve_theme_stance` called first). The theme's
-	 * own overlay also renders into the `fuz.theme` layer - above the
-	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance -
-	 * so the baked theme behaves exactly like the same theme at runtime.
+	 * own overlay also renders into the `fuz.theme.baked` sublayer - above the
+	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance,
+	 * and below a runtime theme's direct `fuz.theme` styles - so the baked
+	 * theme behaves like the same theme at runtime until one overrides it.
 	 *
 	 * The baked values become the output's defaults, so a runtime theme can't
 	 * revert to the pre-bake appearance by being empty - the base theme

@@ -1,7 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import { pick_stance_slot } from '$lib/theme.ts';
+import { compose_themes, pick_stance_slot } from '$lib/theme.ts';
 import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
@@ -33,6 +33,20 @@ export interface ThemeEditorSnapshotData {
 	based_on: string;
 	scheme: ThemeScheme;
 	overrides: Array<[string, SlotOverride]>;
+	/** The active contrast modifier's name, absent or `null` for none. */
+	contrast?: string | null;
+}
+
+export interface ThemeEditorStateOptions {
+	/** The themes a draft can be based on. The first is the fallback base. */
+	themes: Array<Theme>;
+	/**
+	 * Modifier themes that compose over whatever is applied, usually
+	 * `contrast_modifiers`.
+	 *
+	 * @default []
+	 */
+	contrast_modifiers?: Array<Theme>;
 }
 
 /**
@@ -49,26 +63,37 @@ export interface ThemeEditorSnapshotData {
  * theme that itself sets only light slots (e.g. dark-only mirrors) chose
  * those cross-scheme semantics deliberately and is left alone.
  *
- * A single-scheme stance (`Theme.scheme`) changes both halves: edits always
- * write the light/base slot (the stance renders that one appearance in both
- * color schemes, so dual slots are meaningless), and the merge skips the
- * dark-slot preservation (the renderer's stance mirror handles untouched
- * defaults). Switching into a stance re-slots existing overrides so the
- * stanced scheme's edited values become the base slots, and the merge
- * re-slots a dual base theme's own dual-slot variables the same way - so a
- * stanced draft over a dual base can't ship both appearances.
+ * A single-scheme stance (`Theme.scheme`) changes both halves: edits to a
+ * scheme-adaptive variable write the stanced scheme's slot whichever scheme
+ * is being viewed (the stance renders that one appearance in both), and the
+ * merge re-slots each layer to the stance and skips the dark-slot
+ * preservation (the renderer's stance mirror handles untouched defaults). The
+ * overrides themselves are never rewritten by a stance change, so switching
+ * into a stance and back loses nothing - the other scheme's edits just don't
+ * render while the stance holds - and a stanced draft over a dual base can't
+ * ship both appearances.
+ *
+ * The editor also owns what the page applies: `applied_theme` is the dirty
+ * draft or the base, composed with the active contrast modifier, and
+ * `sync_applied_theme` adopts a theme that was already applied when the
+ * editor mounts.
  */
 export class ThemeEditorState {
 	readonly themes: Array<Theme>;
+	readonly contrast_modifiers: Array<Theme>;
 
 	name: string = $state.raw('new theme');
 	based_on: string = $state.raw('base');
 	scheme: ThemeScheme = $state.raw('dual');
 	readonly overrides: SvelteMap<string, SlotOverride> = new SvelteMap();
+	/** The modifier composed over the applied theme, `null` for none. */
+	contrast_modifier: Theme | null = $state.raw(null);
 
-	constructor(themes: Array<Theme>) {
+	constructor(options: ThemeEditorStateOptions) {
+		const { themes, contrast_modifiers = [] } = options;
 		if (!themes.length) throw new Error('ThemeEditorState requires at least one theme');
 		this.themes = themes;
+		this.contrast_modifiers = contrast_modifiers;
 	}
 
 	readonly base_theme: Theme = $derived.by(
@@ -177,6 +202,26 @@ export class ThemeEditorState {
 	 */
 	readonly draft: Theme = $derived({ ...this.output, name: UNSAVED_THEME_NAME });
 
+	/** The themes a picker offers: the bases, plus the draft once a knob moves. */
+	readonly picker_themes: Array<Theme> = $derived.by(() =>
+		this.dirty ? [...this.themes, this.draft] : this.themes
+	);
+
+	/** The theme a picker highlights: what's applied, before the contrast modifier. */
+	readonly picked_theme: Theme = $derived.by(() => (this.dirty ? this.draft : this.base_theme));
+
+	/**
+	 * What the page applies: the picked theme composed with the active
+	 * contrast modifier. A composed draft keeps the draft's stable name, since
+	 * `compose_themes` renames and pickers and persistence key on it.
+	 */
+	readonly applied_theme: Theme = $derived.by(() => {
+		const modifier = this.contrast_modifier;
+		if (!modifier) return this.picked_theme;
+		const composed = compose_themes(this.picked_theme, modifier);
+		return this.dirty ? { ...composed, name: UNSAVED_THEME_NAME } : composed;
+	});
+
 	/** Structural lint findings for the draft, from `validate_theme`. */
 	readonly issues: Array<ThemeIssue> = $derived(validate_theme(this.output));
 
@@ -232,32 +277,21 @@ export class ThemeEditorState {
 		const b = this.base_variable_by_name.get(name);
 		const d = default_variable_by_name.get(name);
 		const adaptive = d?.dark !== undefined || b?.dark !== undefined || o?.dark !== undefined;
-		// under a stance edits always write the base slot - dual slots are
-		// meaningless when one appearance renders in both color schemes
-		const slot = !this.stance && adaptive ? scheme : 'light';
+		// a scheme-adaptive variable edits the slot of the scheme being viewed,
+		// or under a stance the stanced scheme's slot - that one appearance
+		// renders in both, and writing its own slot is what lets the merge pick
+		// the edit over an earlier one; anything else edits the base slot
+		const slot = adaptive ? (this.stance ?? scheme) : 'light';
 		this.overrides.set(name, { ...o, [slot]: value });
 	}
 
 	/**
-	 * Sets the scheme stance. Entering a single-scheme stance re-slots existing
-	 * overrides so the stanced scheme's edited values become base slots (dark
-	 * slots would otherwise shadow later stanced edits in dark mode); a
-	 * light-stanced theme drops dark-only overrides since that appearance never
-	 * renders.
-	 *
-	 * @mutates `this`
+	 * Sets the scheme stance. Overrides are left as they are: the merge picks
+	 * the stanced scheme's slots while a stance holds, so leaving the stance
+	 * restores every edit made before it.
 	 */
 	set_scheme(scheme: ThemeScheme): void {
 		this.scheme = scheme;
-		if (scheme !== 'light' && scheme !== 'dark') return;
-		for (const [name, o] of this.overrides) {
-			const value = scheme === 'dark' ? (o.dark ?? o.light) : o.light;
-			if (value === undefined) {
-				this.overrides.delete(name);
-			} else {
-				this.overrides.set(name, { light: value });
-			}
-		}
 	}
 
 	reset(name: string): void {
@@ -284,12 +318,55 @@ export class ThemeEditorState {
 		this.name = theme.name === 'base' ? 'new theme' : `custom ${theme.name}`;
 	}
 
+	/**
+	 * Loads a theme as the new base unless that would discard a dirty draft
+	 * the user wants to keep - the one guard every picker shares.
+	 *
+	 * @param theme - the theme to load
+	 * @param confirm_discard - asks whether to discard the draft, given the message to show
+	 * @returns whether the theme loaded
+	 * @mutates `this`
+	 */
+	load_theme_guarded(theme: Theme, confirm_discard: (message: string) => boolean): boolean {
+		if (theme.name === UNSAVED_THEME_NAME) return false; // the draft, already applied
+		if (this.dirty && !confirm_discard(discard_confirm_message(this, theme.name))) return false;
+		this.load_theme(theme);
+		return true;
+	}
+
+	/**
+	 * Adopts a theme the page already applies - one persisted from an earlier
+	 * visit or picked elsewhere - so the editor's base and contrast modifier
+	 * match what's rendered instead of replacing it with the editor's own
+	 * defaults. Recognizes a base by name and a contrast composition by its
+	 * composed name. A dirty editor keeps its draft, and the draft itself or
+	 * an unknown theme leaves the editor as it is.
+	 *
+	 * @returns whether the editor now matches `theme`
+	 * @mutates `this`
+	 */
+	sync_applied_theme(theme: Theme): boolean {
+		if (this.dirty || theme.name === UNSAVED_THEME_NAME) return false;
+		for (const base of this.themes) {
+			const modifier =
+				base.name === theme.name
+					? null
+					: this.contrast_modifiers.find((m) => compose_themes(base, m).name === theme.name);
+			if (modifier === undefined) continue;
+			this.load_theme(base);
+			this.contrast_modifier = modifier;
+			return true;
+		}
+		return false;
+	}
+
 	to_snapshot(): ThemeEditorSnapshotData {
 		return {
 			name: this.name,
 			based_on: this.based_on,
 			scheme: this.scheme,
-			overrides: Array.from(this.overrides.entries()).map(([name, o]) => [name, { ...o }])
+			overrides: Array.from(this.overrides.entries()).map(([name, o]) => [name, { ...o }]),
+			contrast: this.contrast_modifier?.name ?? null
 		};
 	}
 
@@ -308,6 +385,7 @@ export class ThemeEditorState {
 		for (const [name, o] of data.overrides) {
 			this.overrides.set(name, { ...o });
 		}
+		this.contrast_modifier = this.contrast_modifiers.find((m) => m.name === data.contrast) ?? null;
 	}
 }
 

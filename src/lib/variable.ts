@@ -11,12 +11,19 @@
 
 import { z } from 'zod';
 
+import { css_comment_is_contained, css_value_is_contained } from './css_containment.ts';
+
 export const STYLE_VARIABLE_NAME_MATCHER = /^[a-z][a-z0-9_]*(?<!_)$/;
 
 export const StyleVariableName = z
 	.string()
 	.regex(STYLE_VARIABLE_NAME_MATCHER, 'invalid style variable name');
 export type StyleVariableName = z.infer<typeof StyleVariableName>;
+
+// a slot renders verbatim into a declaration, so it has to stay inside it
+const StyleVariableValue = z
+	.string()
+	.refine(css_value_is_contained, 'must be a single contained CSS value');
 
 /**
  * A style variable: a custom property name with a value per color scheme.
@@ -28,14 +35,16 @@ export type StyleVariableName = z.infer<typeof StyleVariableName>;
  * alone applies in dark only - which is why the shipped themes author a
  * scheme-agnostic knob as a single `light` value.
  *
- * Strict: a misspelled slot is an error, not a silently dropped scheme.
+ * Strict: a misspelled slot is an error, not a silently dropped scheme. A
+ * slot must also be a contained CSS value (see `css_containment.ts`), since it
+ * renders verbatim.
  */
 export const StyleVariable = z
 	.strictObject({
 		name: StyleVariableName,
-		light: z.string().optional(),
-		dark: z.string().optional(),
-		summary: z.string().optional()
+		light: StyleVariableValue.optional(),
+		dark: StyleVariableValue.optional(),
+		summary: z.string().refine(css_comment_is_contained, 'must not close a CSS comment').optional()
 	})
 	.refine((v) => v.light !== undefined || v.dark !== undefined, {
 		message: 'must have at least one of light or dark'

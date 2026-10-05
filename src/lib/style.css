@@ -36,13 +36,16 @@ Notes:
 @layer fuz.preferences {
 	@media (prefers-reduced-motion) {
 		:root {
-			/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation)  */
-			--duration_6: initial;
-			--duration_5: initial;
-			--duration_4: initial;
-			--duration_3: initial;
-			--duration_2: initial;
-			--duration_1: initial;
+			/* setting to `initial` disables animations but allows for fallbacks (see PendingAnimation);
+				`!important` because a theme may set durations and must not re-enable motion the
+				user turned off - in a layer it outranks every `:root` declaration, layered or not,
+				while an element further down can still set its own duration */
+			--duration_6: initial !important;
+			--duration_5: initial !important;
+			--duration_4: initial !important;
+			--duration_3: initial !important;
+			--duration_2: initial !important;
+			--duration_1: initial !important;
 		}
 	}
 
@@ -536,7 +539,7 @@ for disabled colors without needing a wrapper .disabled class */
 	}
 	:where(label.selected:not(.unstyled)) {
 		cursor: default;
-		--text_color: var(--accent_50);
+		--text_color: var(--accent_60);
 	}
 	:where(label.disabled:not(.unstyled)) {
 		cursor: default;
@@ -602,65 +605,68 @@ TODO think through these patterns to get somewhere consistent
 	/* TODO maybe gradients? or at least use a text_color */
 	/* TODO hover variants with brighter borders? maybe use a colorless border for that? */
 
+	/* stop 60 is the text-safe stop (the one links use): AA for the label on its
+		own tint, and for the inverse text once selected fills the button */
+
 	:where(button:not(.unstyled).palette_a) {
-		--text_color: var(--palette_a_50);
-		--fill: var(--palette_a_50);
-		--border_color: var(--palette_a_50);
-		--outline_color: var(--palette_a_50);
+		--text_color: var(--palette_a_60);
+		--fill: var(--palette_a_60);
+		--border_color: var(--palette_a_60);
+		--outline_color: var(--palette_a_60);
 	}
 	:where(button:not(.unstyled).palette_b) {
-		--text_color: var(--palette_b_50);
-		--fill: var(--palette_b_50);
-		--border_color: var(--palette_b_50);
-		--outline_color: var(--palette_b_50);
+		--text_color: var(--palette_b_60);
+		--fill: var(--palette_b_60);
+		--border_color: var(--palette_b_60);
+		--outline_color: var(--palette_b_60);
 	}
 	:where(button:not(.unstyled).palette_c) {
-		--text_color: var(--palette_c_50);
-		--fill: var(--palette_c_50);
-		--border_color: var(--palette_c_50);
-		--outline_color: var(--palette_c_50);
+		--text_color: var(--palette_c_60);
+		--fill: var(--palette_c_60);
+		--border_color: var(--palette_c_60);
+		--outline_color: var(--palette_c_60);
 	}
 	:where(button:not(.unstyled).palette_d) {
-		--text_color: var(--palette_d_50);
-		--fill: var(--palette_d_50);
-		--border_color: var(--palette_d_50);
-		--outline_color: var(--palette_d_50);
+		--text_color: var(--palette_d_60);
+		--fill: var(--palette_d_60);
+		--border_color: var(--palette_d_60);
+		--outline_color: var(--palette_d_60);
 	}
 	:where(button:not(.unstyled).palette_e) {
-		--text_color: var(--palette_e_50);
-		--fill: var(--palette_e_50);
-		--border_color: var(--palette_e_50);
-		--outline_color: var(--palette_e_50);
+		--text_color: var(--palette_e_60);
+		--fill: var(--palette_e_60);
+		--border_color: var(--palette_e_60);
+		--outline_color: var(--palette_e_60);
 	}
 	:where(button:not(.unstyled).palette_f) {
-		--text_color: var(--palette_f_50);
-		--fill: var(--palette_f_50);
-		--border_color: var(--palette_f_50);
-		--outline_color: var(--palette_f_50);
+		--text_color: var(--palette_f_60);
+		--fill: var(--palette_f_60);
+		--border_color: var(--palette_f_60);
+		--outline_color: var(--palette_f_60);
 	}
 	:where(button:not(.unstyled).palette_g) {
-		--text_color: var(--palette_g_50);
-		--fill: var(--palette_g_50);
-		--border_color: var(--palette_g_50);
-		--outline_color: var(--palette_g_50);
+		--text_color: var(--palette_g_60);
+		--fill: var(--palette_g_60);
+		--border_color: var(--palette_g_60);
+		--outline_color: var(--palette_g_60);
 	}
 	:where(button:not(.unstyled).palette_h) {
-		--text_color: var(--palette_h_50);
-		--fill: var(--palette_h_50);
-		--border_color: var(--palette_h_50);
-		--outline_color: var(--palette_h_50);
+		--text_color: var(--palette_h_60);
+		--fill: var(--palette_h_60);
+		--border_color: var(--palette_h_60);
+		--outline_color: var(--palette_h_60);
 	}
 	:where(button:not(.unstyled).palette_i) {
-		--text_color: var(--palette_i_50);
-		--fill: var(--palette_i_50);
-		--border_color: var(--palette_i_50);
-		--outline_color: var(--palette_i_50);
+		--text_color: var(--palette_i_60);
+		--fill: var(--palette_i_60);
+		--border_color: var(--palette_i_60);
+		--outline_color: var(--palette_i_60);
 	}
 	:where(button:not(.unstyled).palette_j) {
-		--text_color: var(--palette_j_50);
-		--fill: var(--palette_j_50);
-		--border_color: var(--palette_j_50);
-		--outline_color: var(--palette_j_50);
+		--text_color: var(--palette_j_60);
+		--fill: var(--palette_j_60);
+		--border_color: var(--palette_j_60);
+		--outline_color: var(--palette_j_60);
 	}
 
 	/* TODO try to rearrange some of this to go after the colored variants */
@@ -678,9 +684,9 @@ TODO think through these patterns to get somewhere consistent
 			--text_lightness_curve move the near-background stops toward the fill,
 			but can never move an endpoint, so inverse text stays readable */
 		--button_text_color: var(--text_00);
-		--button_fill: var(--fill, var(--shade_50));
-		--button_fill_hover: var(--fill, var(--shade_50));
-		--button_fill_active: var(--fill, var(--shade_50));
+		--button_fill: var(--fill, var(--shade_60));
+		--button_fill_hover: var(--fill, var(--shade_60));
+		--button_fill_active: var(--fill, var(--shade_60));
 		--button_border_color: var(--border_color);
 	}
 	:where(button:not(.unstyled).selected:not(.deselectable)) {

@@ -24,7 +24,7 @@ import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
 
-// the theme's own overlay for the fuz.theme layer, filtered to the variables
+// the theme's own overlay for the baked theme sublayer, filtered to the variables
 // the resolution kept so it stays as tree-shaken as the fuz.base block it
 // re-declares (a stance's scheme_mirror alone carries every scheme-adaptive
 // default); the color-scheme pin for a stance renders regardless
@@ -230,9 +230,10 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			include_theme,
 			include_base,
 			include_utilities: true,
-			// the theme's own overlay re-renders into fuz.theme so it outranks
-			// the fuz.preferences OS mappings and pins color-scheme for a
-			// stance, exactly like the runtime path renders the same theme
+			// the theme's own overlay re-renders into the baked sublayer of
+			// fuz.theme so it outranks the fuz.preferences OS mappings and pins
+			// color-scheme for a stance, like the runtime path renders the same
+			// theme, while a runtime theme still wins over it
 			theme_overlay_css:
 				include_theme && theme ? render_theme_overlay(theme, resolution.resolved_variables) : null
 		});

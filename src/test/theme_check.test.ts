@@ -10,6 +10,7 @@ import {
 	GATE_UI,
 	GATE_FILL_TEXT,
 	GATE_SELECTED_TEXT,
+	GATE_PALETTE_TEXT,
 	GATE_BORDER,
 	GATE_BORDER_DIVIDER
 } from '$lib/theme_check.ts';
@@ -400,24 +401,37 @@ describe('check_theme', () => {
 	// gamut regression floors for the vivid pair: the deliberate clipping is
 	// part of their design, but a knob edit that doubles it should not land
 	// silently - update these recorded counts when retuning on purpose
+	//
+	// declared exception: clipping smolder's past-cap cyan and teal shifts the
+	// chip label pairing just under AA in light (~4.4) - the cost of the theme
+	// stressing weak-hue clipping on purpose, kept marginal by the floor below
 	test.each([
-		['neon', neon_theme, 72],
-		['smolder', smolder_theme, 68]
-	])('%s clips gamut by design but keeps all contrast', (_name, theme, expected_gamut_fails) => {
-		const report = check_theme(theme);
-		const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
-		assert.strictEqual(
-			gamut_fails.length,
-			expected_gamut_fails,
-			'chroma_scale > 1 clips a recorded set of weak-hue stops'
-		);
-		const contrast = report.entries.filter((e) => e.gate === 'contrast');
-		assert.isAbove(contrast.length, 0, 'contrast gates resolved');
-		assert.isTrue(
-			contrast.every((e) => e.pass),
-			'lightness holds through chroma clipping'
-		);
-	});
+		['neon', neon_theme, 72, []],
+		['smolder', smolder_theme, 68, ['palette_i_60 on palette_i_10', 'palette_j_60 on palette_j_10']]
+	])(
+		'%s clips gamut by design and keeps its contrast, minus declared exceptions',
+		(_name, theme, expected_gamut_fails, expected_contrast_fails) => {
+			const report = check_theme(theme);
+			const gamut_fails = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
+			assert.strictEqual(
+				gamut_fails.length,
+				expected_gamut_fails,
+				'chroma_scale > 1 clips a recorded set of weak-hue stops'
+			);
+			const contrast = report.entries.filter((e) => e.gate === 'contrast');
+			assert.isAbove(contrast.length, 0, 'contrast gates resolved');
+			const failing = contrast.filter((e) => !e.pass);
+			assert.deepEqual(
+				failing.map((e) => e.subject),
+				expected_contrast_fails,
+				'lightness holds through chroma clipping'
+			);
+			for (const e of failing) {
+				assert.strictEqual(e.scheme, 'light', e.subject);
+				assert.isAbove(e.value, e.threshold * 0.95, `${e.subject} stays marginal`);
+			}
+		}
+	);
 
 	test('a mid lightness stop pinned out of order fails monotonicity', () => {
 		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_50', light: '0.99' }] };
@@ -520,7 +534,7 @@ describe('scheme stance', () => {
 		expect_subject('text_80 on shade_00', GATE_BODY_TEXT);
 		expect_subject('text_80 on shade_05', GATE_BODY_TEXT);
 		expect_subject('text_80 on shade_10', GATE_BODY_TEXT);
-		expect_subject('text_00 on shade_50', GATE_SELECTED_TEXT);
+		expect_subject('text_00 on shade_60', GATE_SELECTED_TEXT);
 		expect_subject('text_50 on shade_00', GATE_SUBTLE_TEXT);
 		expect_subject('shade_30 vs shade_00', GATE_BORDER);
 		expect_subject('border_color_30 over shade_00', GATE_BORDER_DIVIDER);
@@ -528,7 +542,9 @@ describe('scheme stance', () => {
 		for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
 			expect_subject(`palette_${letter}_50 vs shade_00`, GATE_UI);
 			expect_subject(`text_max on palette_${letter}_50`, GATE_FILL_TEXT);
-			expect_subject(`text_00 on palette_${letter}_50`, GATE_SELECTED_TEXT);
+			expect_subject(`text_00 on palette_${letter}_60`, GATE_SELECTED_TEXT);
+			expect_subject(`palette_${letter}_60 on shade_00`, GATE_PALETTE_TEXT);
+			expect_subject(`palette_${letter}_60 on palette_${letter}_10`, GATE_PALETTE_TEXT);
 		}
 	});
 
@@ -648,10 +664,12 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	// declared exception: smolder's past-cap cyan/teal UI fills sit just
-	// under the 3:1 fill gate against low contrast's raised background floor
-	// (~2.89 to 2.91) - a marginal, known combination cost, not a regression
-	const known_failing = new Set(['smolder (low contrast)']);
+	// declared exceptions: smolder's past-cap cyan/teal miss the chip label
+	// gate on their own (see the vivid-pair test above), which every
+	// composition inherits; against low contrast's raised background floor
+	// their UI fills and labels also sit just under their gates - marginal,
+	// known combination costs, not regressions
+	const known_failing = new Set(['smolder (low contrast)', 'smolder (high contrast)']);
 
 	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
 		for (const base of bases) {

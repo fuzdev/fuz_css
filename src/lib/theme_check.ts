@@ -110,13 +110,18 @@ export const GATE_UI = 3;
 /** Large-text floor: `text_max` on every stop-50 fill. */
 export const GATE_FILL_TEXT = 3;
 /**
- * Selected-control inverse text: `text_00` on `shade_50` and on every stop-50
- * fill - the selected-button pairings in `style.css` (`.selected` fills with
- * `shade_50`, `.palette_X.selected` with `palette_X_50`). The endpoint stop is
- * immune to `text_lightness_curve` bends, so this gate moves only when a theme
- * moves the endpoints, the fill ramps, or the hues.
+ * AA selected-control inverse text: `text_00` on `shade_60` and on every
+ * stop-60 fill - the selected-button pairings in `style.css` (`.selected`
+ * fills with `shade_60`, `.palette_X.selected` with `palette_X_60`). The
+ * endpoint stop is immune to `text_lightness_curve` bends, so this gate moves
+ * only when a theme moves the endpoints, the fill ramps, or the hues.
  */
-export const GATE_SELECTED_TEXT = 3;
+export const GATE_SELECTED_TEXT = 4.5;
+/**
+ * AA colored labels: every palette hue at stop 60 on `shade_00` and on its own
+ * stop-10 tint - the `.palette_X` button and chip label pairings.
+ */
+export const GATE_PALETTE_TEXT = 4.5;
 /**
  * Control borders: `shade_30` (the `--border_color` default) vs `shade_00`.
  * A regression floor for the shipped design, not a WCAG level - 1.4.11's 3:1
@@ -932,12 +937,12 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 
 		const shade_00 = neutral_color('shade', '00', scheme);
 
-		// contrast: selected-control inverse text - text_00 on shade_50
+		// contrast: selected-control inverse text - text_00 on shade_60
 		const text_00 = neutral_color('text', '00', scheme);
-		const shade_50 = neutral_color('shade', '50', scheme);
-		if (text_00 && shade_50) {
-			const ratio = contrast(oklch_to_srgb(text_00), oklch_to_srgb(shade_50));
-			push_contrast('text_00 on shade_50', ratio, GATE_SELECTED_TEXT, scheme);
+		const shade_60 = neutral_color('shade', '60', scheme);
+		if (text_00 && shade_60) {
+			const ratio = contrast(oklch_to_srgb(text_00), oklch_to_srgb(shade_60));
+			push_contrast('text_00 on shade_60', ratio, GATE_SELECTED_TEXT, scheme);
 		}
 
 		// contrast: subtle text - text_50 on shade_00
@@ -985,15 +990,16 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			}
 		}
 
-		// contrast: UI affordances - every letter and intent fill at stop 50;
+		// contrast: UI affordances - every letter and intent at stop 50, the
+		// fill stop 60 selected buttons use, and the palette letters as label text;
 		// a stance renders its scheme's appearance in both, so text_max follows it
 		const text_max: RgbUnit = (stance ?? scheme) === 'light' ? [0, 0, 0] : [1, 1, 1];
-		const fills: Array<[string, number, number]> = [];
+		const fills: Array<[label: string, hue: number, multiplier: number, is_letter?: boolean]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
 			const multiplier = num(`palette_${letter}_chroma_scale`, scheme);
 			if (hue !== null && multiplier !== null) {
-				fills.push([`palette_${letter}`, hue, multiplier]);
+				fills.push([`palette_${letter}`, hue, multiplier, true]);
 			}
 		}
 		for (const intent of intent_variants) {
@@ -1002,17 +1008,31 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			if (hue !== null && multiplier !== null) fills.push([intent, hue, multiplier]);
 		}
 		if (shade_00) {
-			for (const [label, hue, multiplier] of fills) {
+			const shade_00_rgb = oklch_to_srgb(shade_00);
+			for (const [label, hue, multiplier, is_letter] of fills) {
 				const fill = ramp_color(hue, '50', scheme, multiplier);
 				if (!fill) continue;
 				const fill_rgb = oklch_to_srgb(fill);
-				const ui = contrast(fill_rgb, oklch_to_srgb(shade_00));
+				const ui = contrast(fill_rgb, shade_00_rgb);
 				push_contrast(`${label}_50 vs shade_00`, ui, GATE_UI, scheme);
 				const on_fill = contrast(text_max, fill_rgb);
 				push_contrast(`text_max on ${label}_50`, on_fill, GATE_FILL_TEXT, scheme);
+				const stop_60 = ramp_color(hue, '60', scheme, multiplier);
+				if (!stop_60) continue;
+				const stop_60_rgb = oklch_to_srgb(stop_60);
 				if (text_00) {
-					const selected = contrast(oklch_to_srgb(text_00), fill_rgb);
-					push_contrast(`text_00 on ${label}_50`, selected, GATE_SELECTED_TEXT, scheme);
+					const selected = contrast(oklch_to_srgb(text_00), stop_60_rgb);
+					push_contrast(`text_00 on ${label}_60`, selected, GATE_SELECTED_TEXT, scheme);
+				}
+				if (!is_letter) continue;
+				// the button label sits on a faint tint of its own color over the
+				// page, the chip label on its stop-10 tint
+				const on_page = contrast(stop_60_rgb, shade_00_rgb);
+				push_contrast(`${label}_60 on shade_00`, on_page, GATE_PALETTE_TEXT, scheme);
+				const tint = ramp_color(hue, '10', scheme, multiplier);
+				if (tint) {
+					const on_tint = contrast(stop_60_rgb, oklch_to_srgb(tint));
+					push_contrast(`${label}_60 on ${label}_10`, on_tint, GATE_PALETTE_TEXT, scheme);
 				}
 			}
 		}

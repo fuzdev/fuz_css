@@ -1,15 +1,5 @@
-<script lang="ts">
-	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
-	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
-	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
-	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
-	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
-	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
-	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
-	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
-	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
-	import Code from '@fuzdev/fuz_code/Code.svelte';
-	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
+<script lang="ts" module>
+	import { BROWSER } from 'esm-env';
 
 	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
 	import { smolder_theme } from '$lib/themes/smolder.ts';
@@ -18,25 +8,10 @@
 	import { phosphor_theme } from '$lib/themes/phosphor.ts';
 	import { neon_theme } from '$lib/themes/neon.ts';
 	import { nineties_theme } from '$lib/themes/nineties.ts';
-	import { compose_themes } from '$lib/theme.ts';
-	import type { Theme } from '$lib/variable.ts';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import ThemeEditor from '$routes/ThemeEditor.svelte';
-	import ContrastInput from '$routes/ContrastInput.svelte';
 	import {
-		discard_confirm_message,
 		ThemeEditorState,
 		type ThemeEditorSnapshotData
 	} from '$routes/theme_editor_state.svelte.ts';
-	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
-	import type { Snapshot } from '@sveltejs/kit';
-
-	const LIBRARY_ITEM_NAME = 'themes';
-
-	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
-
-	const get_theme_state = theme_state_context.get();
-	const theme_state = get_theme_state();
 
 	// one gallery: the registry and the shipped exemplars are a single list to
 	// users - registry membership is policy for consumer pickers, not UX
@@ -50,77 +25,69 @@
 		neon_theme
 	];
 
-	const editor = new ThemeEditorState(themes);
+	const create_editor = (): ThemeEditorState =>
+		new ThemeEditorState({ themes, contrast_modifiers });
 
-	// the picked base theme, tracked apart from the applied theme so the picker
-	// highlight survives contrast composition (compositions rename themselves);
-	// a persisted unsaved draft isn't a base, so fall back to the editor's
-	let selected_base: Theme = $state.raw(
-		theme_state.theme.name === UNSAVED_THEME_NAME ? editor.base_theme : theme_state.theme
-	);
-	let contrast_modifier: Theme | null = $state.raw(null);
+	// one editor per browser session, so a draft survives navigating to another
+	// page and back by link - the page component is recreated, and the
+	// snapshot below only covers history navigation
+	let session_editor: ThemeEditorState | null = null;
+</script>
 
-	// the in-progress theme appears in the picker as soon as a knob moves
-	const picker_themes: Array<Theme> = $derived([
-		...themes,
-		...(editor.dirty ? [editor.draft] : [])
-	]);
+<script lang="ts">
+	import TomeContent from '@fuzdev/fuz_ui/TomeContent.svelte';
+	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
+	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
+	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
+	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
+	import ThemeInput from '@fuzdev/fuz_ui/ThemeInput.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
+	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import Code from '@fuzdev/fuz_code/Code.svelte';
+	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	// the single source for what the page applies: the dirty draft (or the
-	// picked base) composed with the active contrast modifier - one derived
-	// value instead of two writers racing for theme_state.theme
-	const applied_theme: Theme = $derived.by(() => {
-		const base = editor.dirty ? editor.draft : selected_base;
-		if (!contrast_modifier) return base;
-		const composed = compose_themes(base, contrast_modifier);
-		// compose_themes renames ("unsaved (high contrast)"); keep the draft's
-		// stable name so the picker keys it and +layout.svelte still skips
-		// persisting the composition
-		return editor.dirty ? { ...composed, name: UNSAVED_THEME_NAME } : composed;
-	});
+	import type { Theme } from '$lib/variable.ts';
+	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import ThemeEditor from '$routes/ThemeEditor.svelte';
+	import ContrastInput from '$routes/ContrastInput.svelte';
+	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
+	import type { Snapshot } from '@sveltejs/kit';
+
+	const LIBRARY_ITEM_NAME = 'themes';
+
+	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
+
+	const get_theme_state = theme_state_context.get();
+	const theme_state = get_theme_state();
+
+	// the server renders a fresh editor per request; the browser keeps one
+	const editor = BROWSER ? (session_editor ??= create_editor()) : create_editor();
+
+	// adopt whatever the page already applies - a theme persisted from an
+	// earlier visit, possibly a contrast composition - before the effect below
+	// starts writing; a dirty editor keeps its draft
+	editor.sync_applied_theme(theme_state.theme);
 
 	// live scope is global with no pin: the applied theme writes to `:root`
 	// through the normal ThemeRoot pipeline, so the whole page rethemes
 	// including the editor
 	$effect(() => {
-		theme_state.theme = applied_theme;
+		theme_state.theme = editor.applied_theme;
 	});
 
 	// passed as ThemeInput's `select` (not `onselect`, which collides with the
 	// DOM handler type in its menu-attribute props): loads the picked theme
-	// into the editor, with the same dirty-draft guard as the editor's "based
-	// on" select; the effect above applies it composed with the contrast
+	// into the editor behind the dirty-draft guard
 	const select_theme = (theme: Theme): void => {
-		if (theme.name === UNSAVED_THEME_NAME) return; // already applied while dirty
-		if (
-			editor.dirty &&
-			// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
-			!confirm(discard_confirm_message(editor, theme.name))
-		) {
-			return;
-		}
-		editor.load_theme(theme);
-		selected_base = theme;
+		// eslint-disable-next-line no-alert -- deliberate guard against silently discarding edits
+		editor.load_theme_guarded(theme, (message) => confirm(message));
 	};
 
-	const select_contrast = (modifier: Theme | null): void => {
-		contrast_modifier = modifier;
-	};
-
-	// tracks a theme the editor's "based on" select loaded as the new base
-	const on_editor_load_theme = (theme: Theme): void => {
-		selected_base = theme;
-	};
-
-	// persist the in-progress theme across navigation (history-entry-scoped)
+	// persist the in-progress theme across history navigation and reloads
 	export const snapshot: Snapshot<ThemeEditorSnapshotData> = {
 		capture: () => editor.to_snapshot(),
-		restore: (data) => {
-			editor.restore_snapshot(data);
-			// re-sync the picker highlight with the restored base; the applied
-			// theme follows through the derived effect
-			selected_base = editor.base_theme;
-		}
+		restore: (data) => editor.restore_snapshot(data)
 	};
 </script>
 
@@ -140,17 +107,17 @@
 		</p>
 		<div class="width_atmost_xs mb_lg">
 			<ThemeInput
-				themes={picker_themes}
-				selected_theme={{ theme: selected_base }}
+				themes={editor.picker_themes}
+				selected_theme={{ theme: editor.picked_theme }}
 				select={select_theme}
 			/>
 		</div>
 		<div class="width_atmost_xs mb_lg">
 			<div class="title">Contrast</div>
 			<ContrastInput
-				modifiers={contrast_modifiers}
-				selected={contrast_modifier}
-				select={select_contrast}
+				modifiers={editor.contrast_modifiers}
+				selected={editor.contrast_modifier}
+				select={(modifier) => (editor.contrast_modifier = modifier)}
 			/>
 		</div>
 		<div class="width_atmost_xs mb_lg">
@@ -203,7 +170,7 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 		<p>
 			It overlays the default variables last-wins by name, so it composes with the
 			<code>variables</code> option. The theme's own overlay also renders into the
-			<code>fuz.theme</code> layer - above the OS preference mappings, with
+			<code>fuz.theme.baked</code> sublayer - above the OS preference mappings, with
 			<MdnLink path="Web/CSS/color-scheme" /> pinned for a single-scheme stance - so a baked theme
 			behaves the same as the runtime path.
 		</p>
@@ -211,7 +178,7 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			For runtime switching - a picker, or a theme loaded per user - use <code>ThemeRoot</code> from
 			<a href="https://ui.fuz.dev/">fuz_ui</a>, which renders the theme to a <code>style</code>
 			element. The two compose: the build-time theme is the starting point, and a runtime theme
-			overrides it by cascade layer.
+			overrides it by cascade layer, since a layer's direct styles outrank its sublayers.
 		</p>
 		<p>
 			Knobs take effect at the root. The derived color stops resolve their <code>calc()</code> on
@@ -249,7 +216,7 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			theme in the picker above; it survives navigating away and back, but copy the
 			<code>Theme</code> object below to keep it.
 		</p>
-		<ThemeEditor {editor} {theme_state} onload_theme={on_editor_load_theme} />
+		<ThemeEditor {editor} />
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Validating and compiling themes" />

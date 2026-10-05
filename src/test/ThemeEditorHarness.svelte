@@ -11,4 +11,4 @@
 	theme_state_context.set(() => theme_state);
 </script>
 
-<ThemeEditor {editor} {theme_state} />
+<ThemeEditor {editor} />

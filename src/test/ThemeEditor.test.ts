@@ -23,7 +23,7 @@ afterEach(async () => {
 });
 
 const mount_editor = (): { editor: ThemeEditorState; container: HTMLElement } => {
-	const editor = new ThemeEditorState([base_theme, neon_theme]);
+	const editor = new ThemeEditorState({ themes: [base_theme, neon_theme] });
 	mounted = mount_component(ThemeEditorHarness as any, {
 		editor,
 		theme_state: new ThemeState()

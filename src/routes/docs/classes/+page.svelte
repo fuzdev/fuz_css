@@ -517,7 +517,10 @@ const el = document.createElement('dialog');`}
 			defaults in <code>fuz.base</code>, OS user-preference mappings (like
 			<code>prefers-contrast</code>) in <code>fuz.preferences</code>, theme overrides in
 			<code>fuz.theme</code>, and utilities in <code>fuz.utilities</code>, so utilities beat the
-			reset by layer order (not specificity) and your own unlayered styles beat everything.
+			reset by layer order (not specificity) and your own unlayered styles beat everything. The
+			exceptions are two <code>!important</code> declarations, which a layer makes outrank unlayered
+			styles too: <code>[hidden]</code>, and the <code>prefers-reduced-motion</code> mapping that
+			clears the <code>--duration_*</code> variables so a theme can't re-enable motion.
 		</p>
 		<p>
 			If you organize your own styles in <code>@layer</code>, declare fuz's layers first so yours

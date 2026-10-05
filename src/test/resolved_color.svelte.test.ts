@@ -103,15 +103,26 @@ describe('ResolvedColor', () => {
 		assert.strictEqual(color.hex, expected_hex([0.5, 0.1, 250]));
 	});
 
-	test('re-reads when the color scheme changes', () => {
-		let scheme_reads = 0;
+	test('re-reads after the root scheme class changes', async () => {
+		// the reader resolves against the root class like a real probe, so a
+		// read taken before the class toggles would report the old scheme -
+		// tracking the theme state alone reads one toggle behind
+		const root = document.documentElement;
 		const { color, theme_state } = mount_color(() =>
-			++scheme_reads === 1 ? 'oklch(0.5 0.1 250)' : 'oklch(0.7 0.1 250)'
+			root.classList.contains('dark') ? 'oklch(0.7 0.1 250)' : 'oklch(0.5 0.1 250)'
 		);
-		assert.strictEqual(color.formatted, 'oklch(0.500 0.100 250)');
-		theme_state.color_scheme = 'dark';
-		flushSync();
-		assert.strictEqual(color.formatted, 'oklch(0.700 0.100 250)');
+		try {
+			assert.strictEqual(color.formatted, 'oklch(0.500 0.100 250)');
+			// the state changes first and the class follows, as under ThemeRoot
+			theme_state.color_scheme = 'dark';
+			flushSync();
+			root.classList.add('dark');
+			await new Promise((resolve) => setTimeout(resolve)); // mutation records deliver async
+			flushSync();
+			assert.strictEqual(color.formatted, 'oklch(0.700 0.100 250)');
+		} finally {
+			root.classList.remove('dark');
+		}
 	});
 
 	test('an alpha serialization keeps a formatted value and a hex', () => {

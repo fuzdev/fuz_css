@@ -28,7 +28,7 @@ import {
 	find_similar_variable
 } from './variable_graph.ts';
 import { type CssClassVariableIndex, collect_class_variables } from './class_variable_index.ts';
-import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
+import { FUZ_BAKED_THEME_LAYER, FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 
 /**
  * Threshold for string similarity to suggest typo corrections.
@@ -457,9 +457,9 @@ export interface GenerateBundledCssOptions {
 	include_utilities?: boolean;
 	/**
 	 * A baked theme's own overlay (its variables + stance mirror +
-	 * `color-scheme` pin), rendered unlayered - emitted into the `fuz.theme`
-	 * layer so it outranks the `fuz.preferences` OS mappings the same way the
-	 * runtime renderer's output does.
+	 * `color-scheme` pin), rendered unlayered - emitted into the
+	 * `FUZ_BAKED_THEME_LAYER` sublayer so it outranks the `fuz.preferences` OS
+	 * mappings like the runtime renderer's output does, and loses to it.
 	 */
 	theme_overlay_css?: string | null;
 }
@@ -505,10 +505,11 @@ export const generate_bundled_css = (
 		parts.push(`@layer fuz.preferences {\n${result.preferences_css}\n}`);
 	}
 
-	// the baked theme's own overlay, above the preferences like at runtime
+	// the baked theme's own overlay, above the preferences like at runtime and
+	// in a sublayer so a runtime theme's direct `fuz.theme` styles outrank it
 	if (include_theme && theme_overlay_css) {
 		parts.push('/* Theme Overrides */');
-		parts.push(`@layer fuz.theme {\n${theme_overlay_css}\n}`);
+		parts.push(`@layer ${FUZ_BAKED_THEME_LAYER} {\n${theme_overlay_css}\n}`);
 	}
 
 	// Utility classes section

@@ -81,19 +81,20 @@ describe('generate_bundled_css', () => {
 			assert.notInclude(neither, 'fuz.preferences {');
 		});
 
-		test('a baked theme overlay renders into fuz.theme above the preferences', () => {
+		test('a baked theme overlay renders into the fuz.theme.baked sublayer', () => {
 			const result = create_mock_result();
 			const bundled = generate_bundled_css(result, '', {
 				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n\t--hue_neutral: var(--hue_b);\n}'
 			});
 			assert.include(bundled, '/* Theme Overrides */');
-			assert.include(bundled, '@layer fuz.theme {\n:root {\n\tcolor-scheme: dark;');
+			// the baked sublayer, so a runtime theme's direct fuz.theme styles win
+			assert.include(bundled, '@layer fuz.theme.baked {\n:root {\n\tcolor-scheme: dark;');
 			// disabled theme output drops the overlay with the rest of the theme
 			const no_theme = generate_bundled_css(result, '', {
 				include_theme: false,
 				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n}'
 			});
-			assert.notInclude(no_theme, 'fuz.theme {');
+			assert.notInclude(no_theme, 'fuz.theme.baked');
 		});
 	});
 
