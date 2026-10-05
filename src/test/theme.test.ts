@@ -116,6 +116,14 @@ describe('scheme stance', () => {
 		assert.include(css, 'color-scheme: dark;');
 	});
 
+	test('a dual theme carrying a scheme_mirror renders without it', () => {
+		// the mirror belongs to the stance - without one it would repaint the
+		// light scheme with the other scheme's defaults and no color-scheme pin
+		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
+		assert.isAbove(resolved.scheme_mirror!.length, 0);
+		assert.strictEqual(render_theme_style({ ...resolved, scheme: 'dual' }), '');
+	});
+
 	test('a dual or absent scheme renders no stance', () => {
 		assert.strictEqual(render_theme_style({ name: 't', variables: [], scheme: 'dual' }), '');
 		const css = render_theme_style({
@@ -183,6 +191,26 @@ describe('compose_themes', () => {
 		// overlay-only variables append
 		assert.isDefined(composed.variables.find((v) => v.name === 'text_lightness_curve'));
 		assert.strictEqual(composed.variables.length, 3);
+	});
+
+	test('a dark-only overlay keeps the light slot beneath it', () => {
+		// a dark slot only shadows under `.dark`, so replacing wholesale would
+		// drop the base's light-scheme value
+		const composed = compose_themes(base, {
+			name: 'dark tweak',
+			variables: [{ name: 'shade_lightness_00', dark: '0.1' }]
+		});
+		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
+		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '0.95', dark: '0.1' });
+	});
+
+	test('a dark-only overlay of a name the base lacks stays dark-only', () => {
+		const composed = compose_themes(base, {
+			name: 'dark tweak',
+			variables: [{ name: 'neutral_chroma', dark: '0.04' }]
+		});
+		const neutral = composed.variables.find((v) => v.name === 'neutral_chroma');
+		assert.deepEqual(neutral, { name: 'neutral_chroma', dark: '0.04' });
 	});
 
 	test('the composed name appends the overlay names', () => {

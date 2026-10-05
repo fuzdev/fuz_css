@@ -213,6 +213,13 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			element. The two compose: the build-time theme is the starting point, and a runtime theme
 			overrides it by cascade layer.
 		</p>
+		<p>
+			Knobs take effect at the root. The derived color stops resolve their <code>calc()</code> on
+			<code>:root</code> and descendants inherit the computed color, so setting a curve knob like
+			<code>--chroma_scale</code> on an element further down the tree changes nothing there. Set
+			knobs through a theme, and reach for a literal-valued variable when a subtree needs its own
+			value.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Color scheme" />

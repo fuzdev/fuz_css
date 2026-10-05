@@ -202,8 +202,8 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{
 		name: 'selection_color',
 		light:
-			'oklch(var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)',
-		dark: 'oklch(var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)'
+			'oklch(var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)',
+		dark: 'oklch(var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)'
 	},
 	{
 		name: 'button_shadow',

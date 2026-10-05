@@ -39,9 +39,9 @@
  *   A theme moving those can render differently than it checks.
  *
  * The effective-value merge mirrors the renderer's cascade-layer semantics
- * (`theme.ts` `render_theme_style`, `theme_editor_state.svelte.ts`
- * `display_value`): light = `theme.light`; dark = `theme.dark ?? theme.light`,
- * falling back to the numeric-twin default for the scheme. A single-scheme
+ * (`theme.ts` `render_theme_style`): light = `theme.light`; dark =
+ * `theme.dark ?? theme.light`, falling back to the numeric-twin default for
+ * the scheme. A single-scheme
  * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
  * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
  * reality in both schemes whether or not the theme arrives resolved.
@@ -132,7 +132,7 @@ export const GATE_BORDER = 1.5;
 export const GATE_BORDER_DIVIDER = 1.3;
 
 /**
- * Gamut gate: how far outside sRGB (summed channel excess) a stop may sit and
+ * Gamut gate: how far outside sRGB (the largest channel excess) a stop may sit and
  * still pass - float noise, not visible clipping.
  */
 export const GATE_GAMUT_TOLERANCE = 1e-4;
@@ -517,7 +517,9 @@ const validate_knob_value = (
 ): Array<ThemeIssue> => {
 	const issues: Array<ThemeIssue> = [];
 	const trimmed = value.trim();
-	const numeric = trimmed !== '' && Number.isFinite(Number(trimmed));
+	// a plain decimal - `Number()` alone would also take hex, binary, and
+	// exponent forms that aren't the CSS numbers a knob carries
+	const numeric = /^-?\d*\.?\d+$/u.test(trimmed);
 	const check_range = (n: number): void => {
 		if (knob.range && (n < knob.range[0] || n > knob.range[1])) {
 			issues.push({
@@ -562,12 +564,11 @@ const validate_knob_value = (
 			break;
 		}
 		case 'hue': {
-			// a literal angle, or a var(--hue_X) binding (legal CSS regardless of `bindable`)
-			const is_binding = HUE_BINDING_MATCHER.test(trimmed);
-			if (!numeric && !is_binding) {
+			// a literal angle, or a var() binding (legal CSS regardless of `bindable`)
+			if (!numeric && !is_reference) {
 				issues.push({
 					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a hue angle or var(--hue_X) binding`,
+					message: `${variable} ${slot} "${value}" is not a hue angle or var() binding`,
 					variable
 				});
 			} else if (numeric) {
@@ -576,20 +577,22 @@ const validate_knob_value = (
 			break;
 		}
 		case 'time': {
-			const time_match = /^(-?\d*\.?\d+)s$/u.exec(trimmed);
-			if (!time_match) {
+			// seconds or milliseconds; the range is in seconds
+			const time_match = /^(-?\d*\.?\d+)(s|ms)$/u.exec(trimmed);
+			if (!time_match && !is_reference) {
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not a CSS time value like 0.2s`,
 					variable
 				});
-			} else {
-				check_range(Number(time_match[1]));
+			} else if (time_match) {
+				const n = Number(time_match[1]);
+				check_range(time_match[2] === 'ms' ? n / 1000 : n);
 			}
 			break;
 		}
 		case 'enum': {
-			if (knob.values && !knob.values.includes(trimmed)) {
+			if (knob.values && !knob.values.includes(trimmed) && !is_reference) {
 				issues.push({
 					level: 'warning',
 					message: `${variable} ${slot} "${value}" is not one of ${knob.values.join(', ')}`,
@@ -698,7 +701,7 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));
 		}
 	}
-	issues.push(...validate_binding_pairing(theme));
+	issues.push(...validate_binding_pairing(parsed.data));
 	return issues;
 };
 
@@ -713,17 +716,14 @@ const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
 	for (const intent of intent_variants) {
 		const hue_name = `hue_${intent}`;
 		const authored = theme.variables.find((v) => v.name === hue_name);
-		let letter: string | null = null;
-		if (authored) {
-			for (const slot of [authored.light, authored.dark]) {
-				const m = slot === undefined ? null : HUE_BINDING_MATCHER.exec(slot.trim());
-				if (m) letter = m[1]!;
-			}
-		} else {
-			letter = INTENT_HUE_DEFAULT_BINDING[hue_name]!.slice('hue_'.length);
-		}
-		if (!letter) continue;
+		const default_letter = INTENT_HUE_DEFAULT_BINDING[hue_name]!.slice('hue_'.length);
 		for (const scheme of color_scheme_variants) {
+			// each scheme binds through its own effective slot, so a theme that
+			// binds a muted letter in only one scheme still gets the warning
+			const slot = scheme === 'light' ? authored?.light : (authored?.dark ?? authored?.light);
+			const letter =
+				slot === undefined ? default_letter : HUE_BINDING_MATCHER.exec(slot.trim())?.[1];
+			if (!letter) continue; // a literal angle binds no letter
 			const letter_multiplier = resolver.resolve(`palette_${letter}_chroma_scale`, scheme);
 			const intent_multiplier = resolver.resolve(`${intent}_chroma_scale`, scheme);
 			if (
@@ -877,7 +877,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	};
 
 	for (const scheme of color_scheme_variants) {
-		// gamut: palette letters × 13 stops
+		// gamut: palette letters × stops
 		const letter_slots: Array<[hue: number, multiplier: number]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
@@ -1026,27 +1026,33 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 // compile_theme - recompute worst-hue caps for the theme's own hues.
 //
 
-// the difference at which a recomputed cap is worth emitting; below this the
-// baked table's ~1e-3 search slack would produce no-op overrides, and sub-JND
-// chroma isn't worth an override
+// how far a recomputed cap must sit above the baked one to be worth emitting -
+// reclaiming sub-JND chroma headroom isn't worth an override. A cap that
+// tightens always emits: the gamut gate's tolerance is far finer than this,
+// so any stop the baked table overshoots is a stop the gate reports
 const CAP_EMIT_EPSILON = 0.002;
 
-// the theme's effective hue set for cap recomputation: 10 letters plus any
-// intent that resolves to a literal angle distinct from every letter
-const collect_hues = (resolver: ThemeResolver, scheme: ColorSchemeVariant): Array<number> => {
+// the theme's effective hue set for cap recomputation: the palette letters
+// plus any intent that resolves to a literal angle distinct from every letter.
+// `null` when any hue fails to resolve - caps computed without it would claim
+// headroom the missing hue may not have, so the compile step emits nothing
+// (the re-check still reports the unresolvable pins)
+const collect_hues = (
+	resolver: ThemeResolver,
+	scheme: ColorSchemeVariant
+): Array<number> | null => {
 	const hues: Array<number> = [];
 	for (const letter of palette_variants) {
 		const r = resolver.resolve(`hue_${letter}`, scheme);
-		if (r.ok) hues.push(r.value);
+		if (!r.ok) return null;
+		hues.push(r.value);
 	}
 	for (const intent of intent_variants) {
 		const r = resolver.resolve(`hue_${intent}`, scheme);
-		if (r.ok && !hues.some((h) => Math.abs(h - r.value) < NUMERIC_EPSILON)) hues.push(r.value);
+		if (!r.ok) return null;
+		if (!hues.some((h) => Math.abs(h - r.value) < NUMERIC_EPSILON)) hues.push(r.value);
 	}
-	// with no resolvable hue at all, an empty set would yield Infinity caps and
-	// emit garbage CSS - fall back to the default hues (the re-check still
-	// reports the unresolvable pins)
-	return hues.length ? hues : Object.values(PALETTE_HUES);
+	return hues;
 };
 
 const resolve_lightness_knobs = (
@@ -1071,9 +1077,10 @@ const resolve_lightness_knobs = (
  * monochrome collapse, a dark-only mirror) whose gamut headroom the baked
  * worst-hue table misjudges.
  *
- * A stop is emitted only when either scheme's recomputed cap drifts from the
- * baked value by more than the emit epsilon and the theme doesn't already pin
- * that stop. For a stanced theme both schemes resolve to the stanced
+ * A stop is emitted when either scheme's recomputed cap is tighter than the
+ * baked value, or looser by more than the emit epsilon, and the theme doesn't
+ * already pin that stop. Nothing is emitted when a hue fails to resolve to a
+ * number, since caps computed without it could overshoot its gamut. For a stanced theme both schemes resolve to the stanced
  * appearance, so the caps are computed once and baselined against the stanced
  * scheme's baked table - the values the stance mirror already re-slots - and
  * a stance alone (hues and lightness ramp unmoved) emits nothing. A dual theme's overrides emit both slots together so a
@@ -1090,34 +1097,33 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	const resolver = new ThemeResolver(theme);
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
 
-	const recompute = (scheme: ColorSchemeVariant): Record<NumericScaleVariant, number> =>
-		compute_palette_chroma_caps(
-			collect_hues(resolver, scheme),
-			resolve_lightness_knobs(resolver, scheme)
-		);
+	const recompute = (scheme: ColorSchemeVariant): Record<NumericScaleVariant, number> | null => {
+		const hues = collect_hues(resolver, scheme);
+		return hues && compute_palette_chroma_caps(hues, resolve_lightness_knobs(resolver, scheme));
+	};
 	// a stanced theme resolves both schemes to the stanced appearance through
 	// the mirror, so compute the (expensive) gamut search once - and baseline
 	// against the stanced scheme's baked caps: those are what the mirror
 	// re-slots into the base position, so comparing against the light table
 	// would emit no-op overrides duplicating the mirror for every dark stance
 	const stance_caps = stance ? recompute(stance) : null;
-	const recomputed: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
-		light: stance_caps ?? recompute('light'),
-		dark: stance_caps ?? recompute('dark')
-	};
+	const light_caps = stance ? stance_caps : recompute('light');
+	const dark_caps = stance ? stance_caps : recompute('dark');
 	const baked: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
 		light: PALETTE_CHROMA_CAPS[stance ?? 'light'],
 		dark: PALETTE_CHROMA_CAPS[stance ?? 'dark']
 	};
 
+	// tightening always emits, loosening only past the epsilon
+	const cap_moved = (cap: number, baked_cap: number): boolean =>
+		cap < baked_cap - NUMERIC_EPSILON || cap - baked_cap > CAP_EMIT_EPSILON;
+
 	const cap_overrides: Array<StyleVariable> = [];
-	for (const stop of numeric_scale_variants) {
+	for (const stop of light_caps && dark_caps ? numeric_scale_variants : []) {
 		if (resolver.pinned(`palette_chroma_${stop}`)) continue; // respect the pin
-		const light_cap = recomputed.light[stop];
-		const dark_cap = recomputed.dark[stop];
-		const light_drift = Math.abs(light_cap - baked.light[stop]);
-		const dark_drift = Math.abs(dark_cap - baked.dark[stop]);
-		if (light_drift > CAP_EMIT_EPSILON || dark_drift > CAP_EMIT_EPSILON) {
+		const light_cap = light_caps![stop];
+		const dark_cap = dark_caps![stop];
+		if (cap_moved(light_cap, baked.light[stop]) || cap_moved(dark_cap, baked.dark[stop])) {
 			const light_value = render_chroma_stop_css(stop, light_cap);
 			const dark_value = render_chroma_stop_css(stop, dark_cap);
 			cap_overrides.push(

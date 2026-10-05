@@ -392,11 +392,13 @@ typography, borders, shading, shadows, layout. See
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
   `compose_themes` (flatten + last-wins fragment composition - the
-  hand-flatten precursor to `extends`), `ColorScheme` type (`Theme` itself
-  lives in `variable.ts`). A pure renderer:
+  hand-flatten precursor to `extends`), `overlay_style_variable` (the one
+  slot merge `compose_themes` and the build-time overlay share: wholesale
+  replacement, a dark-only overlay keeping the light slot beneath it),
+  `ColorScheme` type (`Theme` itself lives in `variable.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~1.3KB minified
-  instead of ~38KB. It renders what the theme carries and pins
-  `color-scheme` for a `scheme` stance
+  instead of ~38KB. It renders what the theme carries (the `scheme_mirror`
+  only under a stance) and pins `color-scheme` for a `scheme` stance
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
   defaults re-slotted so its one appearance holds in both schemes). Kept out
@@ -433,8 +435,9 @@ typography, borders, shading, shadows, layout. See
   `heading_font_weight` and the micro-surface color variables
 - [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
   numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
-  contrast), and the worst-hue chroma-cap compile step (`compile_theme`) over
-  a shared string→number resolution core, exposed as `create_theme_resolver`
+  contrast), and the worst-hue chroma-cap compile step (`compile_theme`, which
+  emits any cap that tightens and emits nothing when a hue won't resolve to a
+  number) over a shared string→number resolution core, exposed as `create_theme_resolver`
   for memoized UI lookups (the theme editor's derived-knob readouts)
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`

@@ -68,8 +68,9 @@
 				a curve exponent bending the ramp between them, per color scheme
 			</li>
 			<li>
-				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code>/<code>_curve</code>: a
-				mid-peaked curve, clamped per stop by gamut caps computed from the worst hue
+				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code> and
+				<code>--chroma_curve</code>: a mid-peaked curve, clamped per stop by gamut caps computed
+				from the worst hue
 			</li>
 			<li>
 				per-slot chroma multipliers - <code>--palette_a_chroma_scale</code> …

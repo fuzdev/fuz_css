@@ -25,8 +25,12 @@ const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vit
 const filter_fixture_file = (path: string): boolean =>
 	path.endsWith('.html') || path.endsWith('late_module.ts');
 
+// a cache directory of this suite's own: the dev suite shares the fixture
+// root and runs in parallel, so a shared cache would be deleted mid-run
+const cache_dir = '.fuz/ws_test';
+
 afterAll(async () => {
-	await rm(join(fixture_root, '.fuz'), { recursive: true, force: true });
+	await rm(join(fixture_root, cache_dir), { recursive: true, force: true });
 });
 
 interface WsSession {
@@ -77,7 +81,7 @@ describe('vite_plugin_fuz_css connect-time resync', () => {
 				logLevel: 'silent',
 				server: { host: '127.0.0.1', port: 0 },
 				optimizeDeps: { noDiscovery: true },
-				plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file })]
+				plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir })]
 			});
 			await server.listen();
 			const port = (server.httpServer!.address() as AddressInfo).port;

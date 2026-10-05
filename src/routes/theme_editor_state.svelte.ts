@@ -71,8 +71,8 @@ export class ThemeEditorState {
 		this.themes = themes;
 	}
 
-	readonly base_theme: Theme = $derived(
-		this.themes.find((t) => t.name === this.based_on) ?? this.themes[0]!
+	readonly base_theme: Theme = $derived.by(
+		() => this.themes.find((t) => t.name === this.based_on) ?? this.themes[0]!
 	);
 
 	readonly base_scheme: ThemeScheme = $derived(this.base_theme.scheme ?? 'dual');
@@ -330,11 +330,13 @@ export const discard_confirm_message = (editor: ThemeEditorState, name: string):
  * stay legible and the stance mirror computes where the theme is defined.
  */
 export const render_theme_ts = (theme: Theme): string => {
-	const identifier =
+	const slug =
 		theme.name
 			.toLowerCase()
 			.replaceAll(/[^a-z0-9]+/gu, '_')
 			.replaceAll(/^_+|_+$/gu, '') || 'custom';
+	// an identifier can't lead with a digit, so those names take the prefix form
+	const identifier = /^\d/u.test(slug) ? `theme_${slug}` : `${slug}_theme`;
 	const variables = theme.variables
 		.map((v) => {
 			const parts = [`name: '${escape_js_string(v.name)}'`];
@@ -359,12 +361,12 @@ const authored: Theme = {
 };
 
 /** Resolved at module scope so the theme is render-ready when imported. */
-export const ${identifier}_theme: Theme = resolve_theme_stance(authored);
+export const ${identifier}: Theme = resolve_theme_stance(authored);
 `;
 	}
 	return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
 
-export const ${identifier}_theme: Theme = {
+export const ${identifier}: Theme = {
 	name: '${escape_js_string(theme.name)}',
 	variables: ${variables_ts}
 };

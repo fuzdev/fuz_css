@@ -10,7 +10,7 @@
  * belongs to. Defaults and light/dark slots are not duplicated here - join
  * against `default_variables` by name.
  *
- * The catalog deliberately covers only the knob tier, not all ~560 variables:
+ * The catalog deliberately covers only the knob tier, not every variable:
  * derived ramp stops, color stops, and most site hooks are the escape-hatch
  * tier and stay out. A catalog entry may be a hook (`hook: true`) consumed by
  * `style.css` with per-site fallbacks rather than a declared variable - it

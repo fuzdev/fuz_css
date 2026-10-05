@@ -14,6 +14,10 @@ const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vit
 // path - scope extraction to the fixture's html files instead.
 const filter_fixture_file = (path: string): boolean => path.endsWith('.html');
 
+// A cache directory of this suite's own: the ws suite shares the fixture
+// root and runs in parallel, so a shared cache would be deleted mid-run.
+const cache_dir = '.fuz/dev_test';
+
 const create_dev_server = (options?: VitePluginFuzCssOptions): Promise<ViteDevServer> =>
 	createServer({
 		root: fixture_root,
@@ -24,12 +28,11 @@ const create_dev_server = (options?: VitePluginFuzCssOptions): Promise<ViteDevSe
 		// registers against Vite's noop ws stub).
 		server: { middlewareMode: true, ws: false },
 		optimizeDeps: { noDiscovery: true },
-		plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file, ...options })]
+		plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir, ...options })]
 	});
 
 afterAll(async () => {
-	// The plugin's extraction cache defaults to `.fuz/cache/css` under the Vite root.
-	await rm(join(fixture_root, '.fuz'), { recursive: true, force: true });
+	await rm(join(fixture_root, cache_dir), { recursive: true, force: true });
 });
 
 describe('vite_plugin_fuz_css dev pre-scan', () => {
@@ -101,6 +104,7 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 			plugins: [
 				vite_plugin_fuz_css({
 					filter_file: filter_fixture_file,
+					cache_dir,
 					deps: {
 						...default_cache_deps,
 						read_text: async (options) => {

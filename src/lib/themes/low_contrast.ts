@@ -2,7 +2,9 @@ import type { Theme } from '../variable.ts';
 
 /**
  * Gentle contrast: a softer neutral tint and compressed surface range, tuned
- * to the softest compression that still passes every `check_theme` WCAG gate.
+ * to the softest compression that still passes every `check_theme` WCAG gate
+ * over the base theme. Composed over a theme with a tighter ground it can dip
+ * below a gate, so check the composition.
  */
 export const low_contrast_theme: Theme = {
 	name: 'low contrast',

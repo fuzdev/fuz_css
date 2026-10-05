@@ -11,8 +11,8 @@ Breaking:
 - Class renames: `border_color_X_NN` → `border_X_NN`,
   `outline_color_X_NN` → `outline_X_NN`, `shadow_color_X_NN` →
   `shadow_X_NN`, `.color_a`-`.color_j` → `.palette_a`-`.palette_j`.
-  `.color_X_NN`, `bg_X_NN`, `border_color_NN`, and `shadow_color_*` keep
-  their names.
+  `.color_X_NN`, `bg_X_NN`, `border_color_NN`, and the semantic
+  `shadow_color_umbra`/`_highlight`/`_glow`/`_shroud` keep their names.
 - Classes removed: `.fg_NN`/`.bg_NN` (use
   `background-color:var(--fg_10)`; `bg_` is now the opaque prefix),
   `.hue_a`-`.hue_j` and `--hue`, and every `_light`/`_dark` variable and
@@ -22,8 +22,10 @@ Breaking:
 - `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
 - `color-mix()` interpolates `in oklab` (was `in hsl`).
 - Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
-  `fuz.utilities`; unlayered consumer styles beat all of it. Custom
-  `base_css` is re-layered into `fuz.base`.
+  `fuz.utilities`; unlayered consumer styles beat all of it, except
+  `[hidden]`'s `display: none !important`, which a layer makes outrank
+  unlayered `!important` too. Custom `base_css` is re-layered into
+  `fuz.base`.
 - `variables.ts` exports only `default_variables`; read a variable with
   `default_variables.find((v) => v.name === 'space_md')`. `icon_sizes` →
   `ICON_SIZES` (`ICON_SIZES.xs === 18`, was `'18px'`); `Z_INDEX_MAX`

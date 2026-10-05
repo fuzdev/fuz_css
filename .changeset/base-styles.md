@@ -20,6 +20,10 @@ Breaking:
   longer react to hover.
 - `section` bottom margin is a `--flow_margin` multiple (same default),
   scaled by size composites; `.unstyled` opts out.
+- The checkbox checkmark no longer reads the `--left`/`--top` position
+  hooks.
+- `::placeholder` and `::file-selector-button` styles are scoped to
+  `input`/`textarea`, so bundled output ships them only with those elements.
 
 New:
 

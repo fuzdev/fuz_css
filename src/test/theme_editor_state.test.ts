@@ -282,13 +282,14 @@ describe('load_theme and dirty', () => {
 describe('snapshots', () => {
 	test('round-trips name, base, scheme, and overrides', () => {
 		const editor = create_editor();
-		editor.name = 'my theme';
 		editor.load_theme(neon_theme);
+		editor.name = 'my theme'; // after the load, which renames the draft
 		editor.set_value(single_slot_default.name, '1.4', 'light');
 		const snapshot = editor.to_snapshot();
 
 		const restored = create_editor();
 		restored.restore_snapshot(snapshot);
+		assert.strictEqual(restored.name, 'my theme');
 		assert.strictEqual(restored.based_on, neon_theme.name);
 		assert.strictEqual(restored.scheme, 'dark');
 		assert.deepEqual(restored.overrides.get(single_slot_default.name), { light: '1.4' });
@@ -327,6 +328,11 @@ describe('render_theme_ts', () => {
 		assert.include(ts, "scheme: 'dark',");
 		assert.include(ts, 'const authored: Theme = {');
 		assert.include(ts, 'export const darkling_theme: Theme = resolve_theme_stance(authored);');
+	});
+
+	test('a name leading with a digit takes the prefix form, a valid identifier', () => {
+		const ts = render_theme_ts({ name: '90s web', variables: [] });
+		assert.include(ts, 'export const theme_90s_web: Theme = {');
 	});
 
 	test('single quotes in values escape', () => {

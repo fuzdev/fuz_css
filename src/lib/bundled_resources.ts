@@ -3,9 +3,9 @@
  * class→variable index) shared by the Gro generator and the Vite plugin.
  *
  * The two generators consume these differently - the Gro generator caches one
- * bundle per instance, the Vite plugin loads lazily on first virtual-module
- * access - but build them identically from the same options. This keeps that
- * construction in one place.
+ * bundle per instance, the Vite plugin loads eagerly at dev-server startup and
+ * on first virtual-module access in a build - but build them identically from
+ * the same options. This keeps that construction in one place.
  *
  * @module
  */
@@ -51,8 +51,7 @@ export interface CreateBundledResourcesOptions {
 
 /**
  * Builds the bundled CSS resources from generator options. The `style.css`
- * index is always built (even when only theme output is enabled), matching the
- * generators' prior behavior.
+ * index is always built, even when only theme output is enabled.
  */
 export const create_bundled_resources = async (
 	options: CreateBundledResourcesOptions

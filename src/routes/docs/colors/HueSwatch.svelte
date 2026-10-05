@@ -24,7 +24,8 @@
 	// the angle the page currently renders, re-read after each theme or scheme
 	// change so the readout tracks the swatch; the default angle stands in
 	// during SSR/prerender so the static HTML doesn't ship NaN
-	let hue: number = $state(PALETTE_HUES[letter]);
+	let rendered_hue: number | null = $state(null);
+	const hue = $derived(rendered_hue ?? PALETTE_HUES[letter]);
 	$effect(() => {
 		const theme_state = get_theme_state();
 		theme_state.color_scheme;
@@ -32,7 +33,7 @@
 		const n = Number(
 			getComputedStyle(document.documentElement).getPropertyValue('--' + variable_name)
 		);
-		hue = Number.isNaN(n) ? PALETTE_HUES[letter] : n;
+		rendered_hue = Number.isNaN(n) ? null : n;
 	});
 </script>
 

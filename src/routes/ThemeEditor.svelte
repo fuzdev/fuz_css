@@ -45,6 +45,7 @@
 	// edits writing to the stale slot; false during SSR, corrected on mount
 	let os_prefers_dark = $state(false);
 	$effect(() => {
+		if (typeof matchMedia === 'undefined') return;
 		const query = matchMedia('(prefers-color-scheme: dark)');
 		const update = () => {
 			os_prefers_dark = query.matches;

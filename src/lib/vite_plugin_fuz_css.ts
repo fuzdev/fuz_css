@@ -225,7 +225,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Plug
 	 * Records every `var(--*)` reference in a file via regex scan. Stored unfiltered;
 	 * `render_css` narrows to theme variables once `variable_graph` is loaded.
 	 *
-	 * Filtering here (the old behavior) silently dropped detections from any file
+	 * Filtering here would silently drop detections from any file
 	 * transformed before the graph loads - and the graph loads asynchronously
 	 * (eagerly at `configureServer` in dev, on the first `load()` in build).
 	 * In SvelteKit dev, route nodes (e.g. `+page.svelte`) are resolved, and

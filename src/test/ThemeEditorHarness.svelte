@@ -1,6 +1,6 @@
 <script lang="ts">
 	// Test harness: sets the theme-state context `ThemeEditor` and its
-	// children (`ResolvedColor` probes, fuz_ui pickers) read during init.
+	// children (the fuz_ui pickers) read during init.
 	import { theme_state_context, type ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
 	import ThemeEditor from '$routes/ThemeEditor.svelte';

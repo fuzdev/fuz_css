@@ -84,8 +84,6 @@ const known_without_variables = new Set([
 	'checkbox_content',
 	'checkbox_content_empty',
 	'checkbox_content_checked',
-	'left',
-	'top',
 	'overflow',
 	'thumb_size',
 	'thumb_background_color',
@@ -122,9 +120,15 @@ test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {
 	const index = parse_style_css(main_stylesheet_text);
 	const rule = index.rules.find((r) => r.css.includes('prefers-contrast: more'));
 	assert(rule);
+	// the dark block follows the light one, so splitting there checks each
+	// value lands in its own scheme rather than merely somewhere in the rule
+	const dark_at = rule.css.indexOf(':root.dark');
+	assert.isAbove(dark_at, -1, 'the mapping carries a :root.dark block');
+	const light_css = rule.css.slice(0, dark_at);
+	const dark_css = rule.css.slice(dark_at);
 	for (const { name, light, dark } of high_contrast_theme.variables) {
-		assert.include(rule.css, `--${name}: ${light};`, `${name} light`);
-		assert.include(rule.css, `--${name}: ${dark};`, `${name} dark`);
+		assert.include(light_css, `--${name}: ${light};`, `${name} light`);
+		assert.include(dark_css, `--${name}: ${dark};`, `${name} dark`);
 	}
 });
 
@@ -133,7 +137,7 @@ test('untargetable base rules are core, so bundled output always ships them', ()
 	// detection can never match them - without the core marking they'd be
 	// tree-shaken out of every bundle (and --selection_color could never apply)
 	const index = parse_style_css(main_stylesheet_text);
-	for (const selector of ['::selection', '::placeholder', '::file-selector-button', '[hidden]']) {
+	for (const selector of ['::selection', '[hidden]']) {
 		const rule = index.rules.find((r) => r.css.startsWith(selector));
 		assert(rule, `style.css carries a ${selector} rule`);
 		assert.isTrue(rule.is_core, `${selector} is core`);
@@ -141,4 +145,20 @@ test('untargetable base rules are core, so bundled output always ships them', ()
 	}
 	const selection = index.rules.find((r) => r.css.startsWith('::selection'));
 	assert.isTrue(selection!.variables_used.has('selection_color'));
+});
+
+test('element-scoped pseudo-element rules ship with their elements', () => {
+	// scoping a pseudo-element to its elements makes it targetable, so it
+	// tree-shakes with them instead of riding in every bundle as core
+	const index = parse_style_css(main_stylesheet_text);
+	const scoped: Array<[pseudo: string, elements: Array<string>]> = [
+		['::placeholder', ['input', 'textarea']],
+		['::file-selector-button', ['input']]
+	];
+	for (const [pseudo, elements] of scoped) {
+		const rule = index.rules.find((r) => r.css.split('{')[0]!.includes(pseudo));
+		assert(rule, `style.css carries a ${pseudo} rule`);
+		assert.isFalse(rule.is_core, `${pseudo} is not core`);
+		assert.deepEqual([...rule.elements].sort(), elements, pseudo);
+	}
 });

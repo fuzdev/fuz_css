@@ -120,6 +120,33 @@ describe('compile_theme', () => {
 		assert.strictEqual(report.unchecked.length, 0);
 	});
 
+	test('a small hue rotation that tightens a cap emits it, clearing the gamut failures', () => {
+		// cyan nudged a few degrees loses headroom the baked worst-hue table
+		// sized for the default angle - a drift well under the loosening
+		// epsilon, but past the gamut gate's tolerance
+		const input: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', light: '205' }] };
+		const before = check_theme(input).entries.filter((e) => e.gate === 'gamut' && !e.pass);
+		assert.isAbove(before.length, 0, 'the input fails gamut against the baked caps');
+		const { theme, report } = compile_theme(input);
+		const overrides = theme.variables.slice(input.variables.length);
+		assert.isAbove(overrides.length, 0);
+		for (const v of overrides) {
+			const stop = stop_of(v.name);
+			assert.isAtMost(cap_of(v.light), PALETTE_CHROMA_CAPS.light[stop], `${v.name} light`);
+		}
+		const after = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
+		assert.deepEqual(after, [], 'compiled caps bring every stop back into gamut');
+	});
+
+	test('an unresolvable hue emits nothing rather than caps computed without it', () => {
+		// valid CSS, but not a number the resolver reads - caps computed from
+		// the remaining hues would claim headroom this one may not have
+		const input: Theme = { name: 'unit hue', variables: [{ name: 'hue_i', light: '195deg' }] };
+		const { theme, report } = compile_theme(input);
+		assert.strictEqual(theme.variables.length, input.variables.length);
+		assert.isAbove(report.unchecked.length, 0, 'the re-check still reports the hue');
+	});
+
 	test('a stanced compiled theme recomputes its scheme_mirror over the emitted variables', () => {
 		const input = create_monochrome_theme(145); // dark-stanced, unresolved
 		const { theme } = compile_theme(input);

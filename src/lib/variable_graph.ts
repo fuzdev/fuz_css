@@ -12,6 +12,7 @@ import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
+import { overlay_style_variable } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 
@@ -301,17 +302,10 @@ export const apply_theme_variables = (
 	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
 	const by_name = new Map(variables.map((v) => [v.name, v]));
 	// Replacement mirrors the runtime cascade: a light-slot theme value beats
-	// the base default's dark slot by layer order, so it replaces wholesale.
-	// A dark-only theme value only shadows the default under `.dark`, so the
-	// default's light slot must survive into the baked entry - dropping it
-	// would leave the variable undefined in the light scheme.
+	// the base default's dark slot by layer order, so it replaces wholesale,
+	// while a dark-only value keeps the default's light slot.
 	const overlay = (v: StyleVariable): void => {
-		const existing = by_name.get(v.name);
-		if (v.light === undefined && v.dark !== undefined && existing?.light !== undefined) {
-			by_name.set(v.name, { ...v, light: existing.light });
-		} else {
-			by_name.set(v.name, v);
-		}
+		by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
 	};
 	// mirror first, then the theme's own, so authored values win
 	for (const v of resolved.scheme_mirror ?? []) overlay(v);

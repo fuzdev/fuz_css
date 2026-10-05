@@ -277,7 +277,7 @@ describe('chroma stop emitter', () => {
 
 	test('an explicit cap overrides the baked one', () => {
 		const vars = knob_vars('light');
-		const css = render_chroma_stop_css('50', 'light', 0.01);
+		const css = render_chroma_stop_css('50', 0.01);
 		assert.closeTo(evaluate_css_number(css, vars), 0.01, TOLERANCE);
 	});
 });

@@ -54,8 +54,27 @@ export const pick_stance_slot = (
 ): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.light) : v?.light);
 
 /**
+ * Overlays one variable onto the same-named variable beneath it, the merge
+ * every theme composition shares: the overlay replaces wholesale, except that
+ * a dark-only overlay keeps the light slot beneath it. A dark slot only
+ * shadows under `.dark`, so dropping the light slot would leave the variable
+ * without its light-scheme value.
+ *
+ * @param existing - the variable being overlaid, if any
+ * @param overlay - the variable that wins
+ */
+export const overlay_style_variable = (
+	existing: StyleVariable | undefined,
+	overlay: StyleVariable
+): StyleVariable =>
+	overlay.light === undefined && overlay.dark !== undefined && existing?.light !== undefined
+		? { ...overlay, light: existing.light }
+		: overlay;
+
+/**
  * Composes a base theme with overlay fragments by flatten + last-wins: later
- * variables replace same-named earlier ones wholesale (both slots). Any
+ * variables replace same-named earlier ones wholesale, a dark-only overlay
+ * keeping the light slot beneath it (see `overlay_style_variable`). Any
  * knob-only theme is already a valid fragment - the contrast modifiers in
  * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
  * precursor to a first-class `extends`, with the same merge semantics.
@@ -83,7 +102,7 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 				if (value === undefined) continue;
 				by_name.set(v.name, { name: v.name, light: value });
 			} else {
-				by_name.set(v.name, v);
+				by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
 			}
 		}
 	}
@@ -116,10 +135,12 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
 	const { comments = false, id = null, layer = 'fuz.theme' } = options;
 	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
-	// mirrored defaults first so the theme's own variables win by order
-	const variables = theme.scheme_mirror?.length
-		? [...theme.scheme_mirror, ...theme.variables]
-		: theme.variables;
+	// mirrored defaults first so the theme's own variables win by order; the
+	// mirror belongs to the stance, so a dual theme carrying one renders without it
+	const variables =
+		stance && theme.scheme_mirror?.length
+			? [...theme.scheme_mirror, ...theme.variables]
+			: theme.variables;
 	if (!variables.length && !stance) return '';
 	const rendered_light = variables
 		.map((v) => render_theme_variable(v, false, comments))

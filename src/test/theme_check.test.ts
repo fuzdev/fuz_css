@@ -38,6 +38,7 @@ import {
 } from '$lib/ramps.ts';
 import { oklch_to_srgb } from '$lib/oklch.ts';
 import { wcag_contrast_ratio } from '$lib/wcag.ts';
+import { default_variables } from '$lib/variables.ts';
 
 const base_theme = default_themes[0]!;
 
@@ -109,6 +110,51 @@ describe('validate_theme', () => {
 			validate_theme({ name: 't', variables: [{ name: 'hue_accent', light: 'var(--hue_d)' }] }),
 			[]
 		);
+	});
+
+	test('the default variables lint clean', () => {
+		// the defaults are the reference values, so a warning here is a lint
+		// false positive (derived defaults are var() references and calc()s)
+		assert.deepEqual(validate_theme({ name: 't', variables: default_variables }), []);
+	});
+
+	test('a var() reference passes the hue, enum, and time lints', () => {
+		assert.deepEqual(
+			validate_theme({
+				name: 't',
+				variables: [
+					{ name: 'hue_positive', light: 'var(--hue_accent)' },
+					{ name: 'button_border_style', light: 'var(--border_style)' },
+					{ name: 'duration_1', light: 'var(--duration_2)' }
+				]
+			}),
+			[]
+		);
+	});
+
+	test('a time knob takes milliseconds, range-checked in seconds', () => {
+		assert.deepEqual(
+			validate_theme({ name: 't', variables: [{ name: 'duration_1', light: '80ms' }] }),
+			[]
+		);
+		const issues = validate_theme({
+			name: 't',
+			variables: [{ name: 'duration_1', light: '90000ms' }]
+		});
+		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'duration_1'));
+	});
+
+	test('a non-decimal number form is not a numeric knob value', () => {
+		for (const value of ['0x10', '1e1', '0b11']) {
+			const issues = validate_theme({
+				name: 't',
+				variables: [{ name: 'chroma_scale', light: value }]
+			});
+			assert.isTrue(
+				issues.some((i) => i.level === 'warning' && i.variable === 'chroma_scale'),
+				value
+			);
+		}
 	});
 
 	test('scheme stance values validate', () => {
@@ -194,6 +240,19 @@ describe('validate_theme', () => {
 			variables: [{ name: 'palette_c_chroma_scale', light: '0.5' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'hue_negative'));
+	});
+
+	test('a muted binding in one scheme warns even when the other binds a full-chroma slot', () => {
+		for (const variable of [
+			{ name: 'hue_accent', light: 'var(--hue_f)', dark: 'var(--hue_a)' },
+			{ name: 'hue_accent', light: 'var(--hue_a)', dark: 'var(--hue_f)' }
+		]) {
+			const issues = validate_theme({ name: 't', variables: [variable] });
+			assert.isTrue(
+				issues.some((i) => i.level === 'warning' && i.variable === 'hue_accent'),
+				JSON.stringify(variable)
+			);
+		}
 	});
 
 	test('a literal intent hue never triggers the pairing warning', () => {
