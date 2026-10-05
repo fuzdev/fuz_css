@@ -1,16 +1,16 @@
 /**
- * Connect-time HMR resync over a real websocket: a client whose socket opens
- * after a missed CSS update must be pushed the fresh virtual module. The
- * middleware-mode dev tests can't reach this path (the plugin's connection
- * listener registers against Vite's noop ws stub), so this suite runs a
- * listening dev server and speaks the `vite-hmr` protocol with Node's global
- * `WebSocket`.
+ * The evaluation handshake over a real websocket: a client reporting that it
+ * evaluated the virtual module must be pushed an update when it holds code a
+ * refetch would replace, and left alone when it doesn't. The middleware-mode
+ * dev tests can't reach this path (the hot channel there is Vite's noop
+ * stub), so this suite runs a listening dev server and speaks the `vite-hmr`
+ * protocol with Node's global `WebSocket`.
  *
  * @module
  */
 
 import { describe, test, assert, afterAll } from 'vitest';
-import { createServer, type ViteDevServer } from 'vite';
+import { createServer, type Plugin, type ServerOptions, type ViteDevServer } from 'vite';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { rm } from 'node:fs/promises';
@@ -70,8 +70,43 @@ const wait_for = async <T>(
 	}
 };
 
-describe('vite_plugin_fuz_css connect-time resync', () => {
-	test('a socket opening after a missed update is pushed the fresh CSS', async () => {
+// room for a listening server's startup and the waits on a loaded machine
+const TEST_TIMEOUT = 20_000;
+
+/**
+ * The `fuz_css:evaluated` report in the virtual module's client code. Either
+ * quote around the event name, for the test whose plugin reprints it.
+ */
+const EVALUATED_REPORT_MATCHER =
+	/import\.meta\.hot\.send\(["']fuz_css:evaluated["'], \{"hash":"([0-9a-f]+)"\}\)/;
+
+/** Reads the hash the virtual module's client code reports when evaluated. */
+const parse_evaluated_hash = (code: string): string => {
+	const match = EVALUATED_REPORT_MATCHER.exec(code);
+	assert(match, 'the client code reports its evaluation');
+	return match[1]!;
+};
+
+/** Sends the report a client makes when it evaluates the virtual module. */
+const send_evaluated = (session: WsSession, hash: unknown): void => {
+	session.socket.send(
+		JSON.stringify({ type: 'custom', event: 'fuz_css:evaluated', data: { hash } })
+	);
+};
+
+const count_css_updates = (session: WsSession): number =>
+	session.messages.filter(
+		(m) => m.type === 'update' && JSON.stringify(m.updates ?? '').includes('__fuz.css')
+	).length;
+
+/** Lets a message the server would send in response to the last one arrive. */
+const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 150));
+
+describe('vite_plugin_fuz_css evaluation handshake', () => {
+	const with_listening_server = async (
+		fn: (server: ViteDevServer, connect: () => Promise<WsSession>) => Promise<void>,
+		config?: { server?: ServerOptions; plugins?: Array<Plugin> }
+	): Promise<void> => {
 		let server: ViteDevServer | null = null;
 		const sessions: Array<WsSession> = [];
 		try {
@@ -79,55 +114,258 @@ describe('vite_plugin_fuz_css connect-time resync', () => {
 				root: fixture_root,
 				configFile: false,
 				logLevel: 'silent',
-				server: { host: '127.0.0.1', port: 0 },
+				server: { host: '127.0.0.1', port: 0, ...config?.server },
 				optimizeDeps: { noDiscovery: true },
-				plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir })]
+				plugins: [
+					vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir }),
+					...(config?.plugins ?? [])
+				]
 			});
 			await server.listen();
 			const port = (server.httpServer!.address() as AddressInfo).port;
-
-			// first serve: the state every already-connected client holds
-			const first = await server.transformRequest('/__fuz.css');
-			assert(first);
-			assert(first.code.includes('.p_md'), 'prescan classes served');
-			assert(!first.code.includes('.mb_xl3'), 'late module not yet ingested');
-
-			// a client connected while the CSS is current gets no update push
-			const idle = await connect_hmr(port);
-			sessions.push(idle);
-			await wait_for(() => (idle.messages.some((m) => m.type === 'connected') ? true : undefined));
-			await new Promise((r) => setTimeout(r, 150));
-			assert.isFalse(
-				idle.messages.some((m) => m.type === 'update'),
-				'no update for an in-sync client'
-			);
-			idle.close();
-
-			// diverge with no client connected: transforming the late module
-			// ingests new classes and schedules the debounced push, which is
-			// dropped because no socket is open
-			await server.transformRequest('/extra/late_module.ts');
-			await new Promise((r) => setTimeout(r, 100)); // let the debounce fire unheard
-
-			// the resync: a socket opening now gets pushed the virtual module
-			const late = await connect_hmr(port);
-			sessions.push(late);
-			const update = await wait_for(() =>
-				late.messages.find(
-					(m) =>
-						m.type === 'update' &&
-						JSON.stringify((m as { updates?: unknown }).updates ?? '').includes('__fuz.css')
-				)
-			);
-			assert(update, 'the late client received the virtual CSS update');
-
-			// the refetch the update triggers serves the diverged CSS
-			const refetched = await server.transformRequest('/__fuz.css');
-			assert(refetched);
-			assert(refetched.code.includes('.mb_xl3'), 'refetch serves the late class');
+			await fn(server, async () => {
+				const session = await connect_hmr(port);
+				sessions.push(session);
+				await wait_for(() =>
+					session.messages.some((m) => m.type === 'connected') ? true : undefined
+				);
+				return session;
+			});
 		} finally {
 			for (const s of sessions) s.close();
 			await server?.close();
 		}
-	}, 20_000);
+	};
+
+	test(
+		'only the client code of the bare module reports its evaluation',
+		async () => {
+			await with_listening_server(async (server) => {
+				const client = await server.transformRequest('/__fuz.css');
+				assert(client);
+				parse_evaluated_hash(client.code);
+
+				const direct = await server.transformRequest('/__fuz.css?direct');
+				assert(direct);
+				assert(!direct.code.includes('fuz_css:evaluated'), 'the direct CSS has no report');
+
+				const ssr = await server.environments.ssr.transformRequest('/__fuz.css');
+				assert(ssr);
+				assert(!ssr.code.includes('fuz_css:evaluated'), 'the server module has no report');
+
+				const inlined = await server.ssrLoadModule('/__fuz.css?inline');
+				assert(!inlined.default.includes('fuz_css:evaluated'), 'the inlined CSS has no report');
+			});
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'a client that evaluated the current module is not pushed',
+		async () => {
+			await with_listening_server(async (server, connect) => {
+				const first = await server.transformRequest('/__fuz.css');
+				assert(first);
+				const client = await connect();
+				await settle();
+				assert.strictEqual(count_css_updates(client), 0, 'connecting alone pushes nothing');
+
+				send_evaluated(client, parse_evaluated_hash(first.code));
+				await settle();
+				assert.strictEqual(count_css_updates(client), 0);
+			});
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'a client that evaluated a module it missed the update for is pushed, once',
+		async () => {
+			await with_listening_server(async (server, connect) => {
+				// first serve: the code a page loading now starts to evaluate
+				const first = await server.transformRequest('/__fuz.css');
+				assert(first);
+				assert(first.code.includes('.p_md'), 'prescan classes served');
+				assert(!first.code.includes('.mb_xl3'), 'late module not yet ingested');
+				const stale_hash = parse_evaluated_hash(first.code);
+
+				// a bystander that holds the same code and takes the broadcast update
+				const bystander = await connect();
+
+				// diverge: transforming the late module ingests new classes and
+				// schedules the debounced update, which the loading page's client
+				// drops because the module hasn't evaluated yet
+				await server.transformRequest('/extra/late_module.ts');
+				await wait_for(() => (count_css_updates(bystander) === 1 ? true : undefined));
+
+				// the page finishes loading and reports the code it evaluated, while
+				// the module is invalidated and nothing has refetched it
+				const late = await connect();
+				send_evaluated(late, stale_hash);
+				await wait_for(() => (count_css_updates(late) === 1 ? true : undefined));
+
+				// the refetch the update triggers serves the diverged CSS
+				const refetched = await server.transformRequest('/__fuz.css');
+				assert(refetched);
+				assert(refetched.code.includes('.mb_xl3'), 'refetch serves the late class');
+				const current_hash = parse_evaluated_hash(refetched.code);
+				assert.notStrictEqual(current_hash, stale_hash);
+
+				// the refetched module evaluates and reports again: the exchange ends
+				send_evaluated(late, current_hash);
+				await settle();
+				assert.strictEqual(count_css_updates(late), 1, 'no second update for the current code');
+				assert.strictEqual(count_css_updates(bystander), 1, 'the push went to the reporter only');
+
+				// another client still holding the first code, now that the module
+				// is cached with the current one
+				const later = await connect();
+				send_evaluated(later, stale_hash);
+				await wait_for(() => (count_css_updates(later) === 1 ? true : undefined));
+				assert.strictEqual(count_css_updates(late), 1);
+				assert.strictEqual(count_css_updates(bystander), 1);
+			});
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'a client pushed for a hash is pushed for it again after holding the current code',
+		async () => {
+			await with_listening_server(async (server, connect) => {
+				const first = await server.transformRequest('/__fuz.css');
+				assert(first);
+				const earlier_hash = parse_evaluated_hash(first.code);
+				const client = await connect();
+
+				// the CSS moves on: the broadcast update, then a push for the
+				// client's report of the code it held before
+				await server.transformRequest('/extra/late_module.ts');
+				await wait_for(() => (count_css_updates(client) === 1 ? true : undefined));
+				send_evaluated(client, earlier_hash);
+				await wait_for(() => (count_css_updates(client) === 2 ? true : undefined));
+
+				// its refetch reports the current code, which ends that exchange
+				const refetched = await server.transformRequest('/__fuz.css');
+				assert(refetched);
+				send_evaluated(client, parse_evaluated_hash(refetched.code));
+				await settle();
+				assert.strictEqual(count_css_updates(client), 2);
+
+				// holding the earlier code again while it's stale - CSS that
+				// returned to a prior state, then moved on - is answered anew
+				send_evaluated(client, earlier_hash);
+				await wait_for(() => (count_css_updates(client) === 3 ? true : undefined));
+
+				// and still only once until it reports the current code
+				send_evaluated(client, earlier_hash);
+				await settle();
+				assert.strictEqual(count_css_updates(client), 3);
+			});
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'a report whose statement a later plugin reprinted is pushed once per code',
+		async () => {
+			// a stand-in for an `enforce: 'post'` plugin that reprints modules: the
+			// cached transform no longer holds the report statement verbatim, so no
+			// report can match it
+			const plugin_reprint: Plugin = {
+				name: 'reprint',
+				enforce: 'post',
+				transform(code, id) {
+					if (id !== '/__fuz.css') return null;
+					return { code: code.replace('"fuz_css:evaluated"', "'fuz_css:evaluated'"), map: null };
+				}
+			};
+			await with_listening_server(
+				async (server, connect) => {
+					const first = await server.transformRequest('/__fuz.css');
+					assert(first);
+					assert(first.code.includes("'fuz_css:evaluated'"), 'the statement was reprinted');
+					const hash = parse_evaluated_hash(first.code);
+					const client = await connect();
+
+					// each refetch serves the same code, which reports the same hash
+					send_evaluated(client, hash);
+					await wait_for(() => (count_css_updates(client) === 1 ? true : undefined));
+					send_evaluated(client, hash);
+					send_evaluated(client, hash);
+					await settle();
+					assert.strictEqual(count_css_updates(client), 1, 'the exchange ends');
+
+					// a later change still reaches the client: the broadcast update,
+					// then one push for the new code's report
+					await server.transformRequest('/extra/late_module.ts');
+					await wait_for(() => (count_css_updates(client) === 2 ? true : undefined));
+					const refetched = await server.transformRequest('/__fuz.css');
+					assert(refetched);
+					assert(refetched.code.includes('.mb_xl3'));
+					const next_hash = parse_evaluated_hash(refetched.code);
+					assert.notStrictEqual(next_hash, hash);
+					send_evaluated(client, next_hash);
+					await wait_for(() => (count_css_updates(client) === 3 ? true : undefined));
+					send_evaluated(client, next_hash);
+					await settle();
+					assert.strictEqual(count_css_updates(client), 3);
+
+					// the bound is per client: another one holding the first code is answered
+					const other = await connect();
+					send_evaluated(other, hash);
+					await wait_for(() => (count_css_updates(other) === 1 ? true : undefined));
+				},
+				{ plugins: [plugin_reprint] }
+			);
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'the module does not report where no hot update could answer',
+		async () => {
+			// with HMR off the server sends no updates
+			await with_listening_server(
+				async (server) => {
+					const client = await server.transformRequest('/__fuz.css');
+					assert(client);
+					assert(client.code.includes('.p_md'));
+					assert(!client.code.includes('fuz_css:evaluated'));
+				},
+				{ server: { hmr: false } }
+			);
+			// without a websocket the report could not be sent at all
+			await with_listening_server(
+				async (server) => {
+					const client = await server.transformRequest('/__fuz.css');
+					assert(client);
+					assert(client.code.includes('.p_md'));
+					assert(!client.code.includes('fuz_css:evaluated'));
+				},
+				{ server: { ws: false } }
+			);
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'a malformed report is ignored',
+		async () => {
+			await with_listening_server(async (server, connect) => {
+				const first = await server.transformRequest('/__fuz.css');
+				assert(first);
+				const client = await connect();
+				send_evaluated(client, 123);
+				client.socket.send(JSON.stringify({ type: 'custom', event: 'fuz_css:evaluated' }));
+				await settle();
+				assert.strictEqual(count_css_updates(client), 0);
+
+				// the server is still answering reports
+				send_evaluated(client, 'not the current hash');
+				await wait_for(() => (count_css_updates(client) === 1 ? true : undefined));
+			});
+		},
+		TEST_TIMEOUT
+	);
 });

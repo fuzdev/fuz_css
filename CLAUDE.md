@@ -130,9 +130,19 @@ Two generators available, both using AST-based extraction and per-file caching:
 1. **Vite plugin** (preferred) - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
    exposes the generated CSS as `virtual:fuz.css` with HMR; works across
    SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
-   In dev it pre-scans project sources at server startup (see `prescan`) so
-   the first served CSS is complete, and resyncs clients whose HMR socket
-   connects after a missed update. In build the virtual module is a
+   In dev it pre-scans project sources and the root `index.html` at server
+   startup (see `prescan`) so the first served CSS is complete, keeps those
+   files current from the watcher, and extracts everything else as the dev
+   server transforms it - keyed by file path with Vite's `?v=`/`?t=`
+   cache-busters dropped, and a pre-bundled dependency through the source
+   files its sourcemap lists (or as its bundled chunk when those can't be
+   read). A client can't take a hot update before the
+   virtual module has evaluated, so CSS that changes while a page is loading
+   is delivered by a handshake: each client reports the module code it
+   evaluated, and the server pushes that client an update when a refetch
+   would give it different code, once per reported code (no report is
+   added when `server.ws` or `server.hmr` is off). In build the virtual
+   module is a
    placeholder rule until every transform has run: `renderChunk` restates it
    with a hash of the generated CSS, so the stylesheet's filename (and the
    chunks named from it) tracks that CSS, and `generateBundle` splices the
@@ -141,9 +151,9 @@ Two generators available, both using AST-based extraction and per-file caching:
    code-split build, so their `generateBundle` hooks read finished
    stylesheets, or at `order: 'post'` for the single stylesheet Vite emits
    late with `build.cssCodeSplit: false` (the `build.lib` default). The
-   passes need different places in the plugin order, so
-   `vite_plugin_fuz_css()` returns two plugin objects (pass the array to
-   `plugins` as is), and building needs Vite 6 or later
+   build's passes and the dev handshake need different places in the plugin
+   order, so `vite_plugin_fuz_css()` returns several plugin objects (pass
+   the array to `plugins` as is), and the plugin needs Vite 6 or later
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
@@ -368,7 +378,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   node_modules deps)
 - `prescan` (Vite plugin only) - dev-only eager source scan at server
   startup so the first served CSS is complete (`true` = `src` under the
-  Vite root, `false` disables, or an array of directories)
+  Vite root, `false` disables, or an array of directories; the root
+  `index.html` is scanned whichever directories are given). Its TSDoc lists
+  where dev and build extraction still differ
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`)
 
 These are the common options - see
@@ -477,9 +489,11 @@ typography, borders, shading, shadows, layout. See
 **CSS generation:**
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
-  (preferred) with HMR via `virtual:fuz.css`, as two plugin objects: the
-  `enforce: 'pre'` one and a build-only one placed after Vite's CSS
-  processing. The second captures the virtual module's text as the CSS
+  (preferred) with HMR via `virtual:fuz.css`, as several plugin objects: the
+  `enforce: 'pre'` one, a build-only one placed after Vite's CSS
+  processing, and a serve-only `enforce: 'post'` one that appends the
+  evaluation report to the virtual module's client code. The build-only one
+  captures the virtual module's text as the CSS
   pipeline (PostCSS, lightningcss) left it, and the hash is restated into
   that text by calling the `transform` of Vite's `vite:css-post` plugin - a
   reach into Vite internals that degrades to a filename hash that doesn't
@@ -592,7 +606,11 @@ and more.
 The Vite plugin has `vite_plugin_fuz_css.{build,dev,splice,ws}.test.ts`: the
 build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,
 varying the generated CSS through `additional_classes` so the emitted JS
-stays byte-identical. Integration: `vite_plugin_examples.test.ts` (skip with
+stays byte-identical. The dev suite runs middleware-mode servers over
+`src/test/fixtures/vite_dev/`, and over a temp root for the tests that write
+files or stand in for the dependency optimizer's output; the ws suite runs a
+listening server and speaks the `vite-hmr` protocol for the evaluation
+handshake. Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
 
 Component tests (`KnobControl`, `RampStrip`, `ThemeEditor`,
