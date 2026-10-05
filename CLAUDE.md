@@ -12,11 +12,6 @@ changes ahead.
 For coding conventions, see Skill(fuz-stack). For UI
 components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 
-## Committing
-
-`git add` and `git commit` are denied by `.claude/settings.local.json` in
-this repo - make the edits and stop, the user commits.
-
 ## Gro commands
 
 ```bash
@@ -26,9 +21,6 @@ gro test      # run tests (SKIP_EXAMPLE_TESTS=1 to skip slow integration tests)
 gro gen       # regenerate theme.css and other .gen files
 gro build     # build the package for production
 ```
-
-IMPORTANT for AI agents: Do NOT run `gro dev` - the developer will manage the
-dev server.
 
 ## Key dependencies
 
@@ -583,7 +575,7 @@ svelte's `mount()` resolves to the client build.
 
 - TypeScript strict mode
 - Svelte 5 with runes API (for docs site)
-- tsv with tabs, 100 char width
+- tsv (`gro format`) with tabs, 100 char width
 - Node >= 24.14
 - Tests in `src/test/` (not co-located)
 
