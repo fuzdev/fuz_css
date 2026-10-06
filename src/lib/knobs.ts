@@ -353,7 +353,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 	...border_radius_variants.map((v) => length_knob(`border_radius_${v}`, 'shape')),
 	// density
 	{
-		name: 'scale_factor',
+		name: 'space_scale',
 		kind: 'number',
 		axis: 'density',
 		leverage: 'lg',

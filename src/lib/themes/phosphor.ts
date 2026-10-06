@@ -28,8 +28,8 @@ const authored: Theme = {
 		// flat: one knob zeroes the whole alpha ramp, button shadows included
 		{ name: 'shadow_alpha_scale', light: '0' },
 		// terminal density: compact spacing plus tightened leading (leading is
-		// deliberately decoupled from scale_factor - these pins are the theme's own)
-		{ name: 'scale_factor', light: '0.85' },
+		// deliberately decoupled from space_scale - these pins are the theme's own)
+		{ name: 'space_scale', light: '0.85' },
 		{ name: 'line_height_md', light: '1.4' },
 		{ name: 'line_height_lg', light: '1.6' },
 		{ name: 'line_height_xl', light: '2' },

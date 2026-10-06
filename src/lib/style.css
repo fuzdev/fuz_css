@@ -167,7 +167,6 @@ Respects `hidden="until-found"` for find-in-page support.
 	}
 	:where(a:not(.unstyled).selected) {
 		--text_color: var(--link_color_selected);
-		--outline_color: var(--border_color);
 		text-decoration: var(--text_decoration_selected);
 	}
 

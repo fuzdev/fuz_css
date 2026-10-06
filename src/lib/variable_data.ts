@@ -126,7 +126,7 @@ export const space_variants = [
 	'xl15'
 ] as const;
 
-/** Spaces in rem, before the `--scale_factor` multiplier. */
+/** Spaces in rem, before the `--space_scale` multiplier. */
 export const SPACE_SIZES: Record<SpaceVariant, number> = {
 	xs5: 0.1,
 	xs4: 0.2,

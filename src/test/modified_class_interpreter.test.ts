@@ -260,9 +260,8 @@ describe('modified_class_interpreter', () => {
 
 			assert_css_contains(
 				result.css,
-				'.focus\\:plain:not(:hover):focus',
-				'.focus\\:plain:hover:focus',
-				'.focus\\:plain:active:focus'
+				'.focus\\:plain:not(.selected):focus',
+				'.focus\\:plain:not(.selected, :hover):focus'
 			);
 		});
 
@@ -382,12 +381,11 @@ describe('modified_class_interpreter', () => {
 
 			assert_css_contains(
 				result.css,
-				'.hover\\:plain',
-				'.hover\\:plain:not(:hover)',
-				'.hover\\:plain:hover',
-				'.hover\\:plain:active'
+				'.hover\\:plain:not(.selected):hover',
+				// already names :hover, so only the class is renamed
+				'.hover\\:plain:not(.selected, :hover) {'
 			);
-			assert_css_not_contains(result.css, ':hover:hover');
+			assert_css_not_contains(result.css, ':hover:hover', ':hover):hover');
 			assert.isAbove(result.diagnostics.length, 0);
 		});
 	});

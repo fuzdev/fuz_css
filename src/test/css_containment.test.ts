@@ -99,6 +99,23 @@ describe('css_custom_property_name_is_contained', () => {
 	});
 });
 
+describe('non-strings', () => {
+	// each would coerce to text on its way into a stylesheet, some of it
+	// contained by the look of it: `['a']` reads as `a`, `null` as `null`
+	const non_strings: Array<unknown> = [undefined, null, true, 0, 1, [], ['a'], [['a']], {}];
+	test('are never contained, and never throw', () => {
+		for (const value of non_strings) {
+			const label = JSON.stringify(value) ?? 'undefined';
+			assert.isFalse(css_value_is_contained(value), label);
+			assert.isFalse(css_comment_is_contained(value), label);
+			assert.isFalse(css_custom_property_name_is_contained(value), label);
+		}
+	});
+	test('an array holding a comment closer is not a contained comment', () => {
+		assert.isFalse(css_comment_is_contained(['*/ body { display: none } /*']));
+	});
+});
+
 describe('the theme boundary', () => {
 	const hostile = {
 		name: 'hostile',

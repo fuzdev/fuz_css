@@ -266,3 +266,263 @@ describe('compose_themes', () => {
 		assert.include(css, '--chroma_scale: 1.2;');
 	});
 });
+
+/**
+ * Asserts rendered theme CSS is only what the renderer writes: nothing closes
+ * the `<style>` element, every block is one of the renderer's own and closes,
+ * and every declaration is a custom property or the stance's `color-scheme`.
+ * Reads the structure with its own scan rather than the containment helpers,
+ * so it can't inherit a mistake of theirs.
+ */
+const assert_theme_css_is_contained = (css: string): void => {
+	assert.notMatch(css, /<\/style/i);
+	const preludes: Array<string> = [];
+	const declarations: Array<string> = [];
+	let depth = 0;
+	let paren_depth = 0;
+	let text = '';
+	for (let i = 0; i < css.length; i++) {
+		const char = css[i]!;
+		if (char === '"' || char === "'") {
+			// strings are inert - skip to the matching quote
+			let end = i + 1;
+			while (end < css.length && css[end] !== char) {
+				assert.notMatch(css[end]!, /[\n\r\f]/, 'no string spans a line');
+				end += css[end] === '\\' ? 2 : 1;
+			}
+			assert.isBelow(end, css.length, 'every string closes');
+			i = end;
+		} else if (char === '/' && css[i + 1] === '*') {
+			const end = css.indexOf('*/', i + 2);
+			assert.isAbove(end, -1, 'every comment closes');
+			i = end + 1;
+		} else if (char === '(' || char === '[') {
+			paren_depth++;
+		} else if (char === ')' || char === ']') {
+			assert.isAbove(paren_depth--, 0, 'no stray closing bracket');
+		} else if (paren_depth > 0) {
+			// a block's brackets own everything inside them
+		} else if (char === '{') {
+			preludes.push(text.trim());
+			text = '';
+			depth++;
+		} else if (char === '}') {
+			assert.strictEqual(text.trim(), '', 'every declaration is terminated');
+			assert.isAbove(depth--, 0, 'no stray closing brace');
+		} else if (char === ';') {
+			if (depth > 0) declarations.push(text.trim());
+			text = '';
+		} else {
+			text += char;
+		}
+	}
+	assert.strictEqual(depth, 0, 'every block closes');
+	assert.strictEqual(paren_depth, 0, 'every bracket closes');
+	for (const prelude of preludes) {
+		assert.include(['@layer fuz.theme', ':root', ':root.dark'], prelude);
+	}
+	for (const declaration of declarations) {
+		assert.match(declaration, /^(--[\w-]+|color-scheme):/);
+	}
+};
+
+describe('render_theme_style over malformed themes', () => {
+	const WRAPPED_DARK_STANCE = `@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
+@layer fuz.theme {
+:root {
+	color-scheme: dark;
+}
+}`;
+	const wrap_light = (
+		declarations: string
+	): string => `@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
+@layer fuz.theme {
+:root {
+	${declarations}
+}
+}`;
+	const variable = { name: 'a', light: '1' };
+
+	const cases: Array<[shape: string, theme: unknown, expected: string]> = [
+		['a null theme', null, ''],
+		['a number theme', 1, ''],
+		['a string theme', 'theme', ''],
+		['an array theme', [variable], ''],
+		['missing variables', { name: 't' }, ''],
+		['null variables', { name: 't', variables: null }, ''],
+		['object variables', { name: 't', variables: { 0: variable, length: 1 } }, ''],
+		['string variables', { name: 't', variables: 'ab' }, ''],
+		['number variables', { name: 't', variables: 1 }, ''],
+		[
+			'an object scheme_mirror under a stance',
+			{ name: 't', scheme: 'dark', scheme_mirror: { length: 1 }, variables: [] },
+			WRAPPED_DARK_STANCE
+		],
+		[
+			'a string scheme_mirror under a stance',
+			{ name: 't', scheme: 'dark', scheme_mirror: 'ab', variables: [] },
+			WRAPPED_DARK_STANCE
+		],
+		['a non-string scheme', { name: 't', scheme: ['dark'], variables: [] }, ''],
+		['a null entry', { name: 't', variables: [null] }, ''],
+		['a number entry', { name: 't', variables: [1] }, ''],
+		['a string entry', { name: 't', variables: ['light'] }, ''],
+		['an array entry', { name: 't', variables: [[variable]] }, ''],
+		['a number slot', { name: 't', variables: [{ name: 'a', light: 1 }] }, ''],
+		['a boolean slot', { name: 't', variables: [{ name: 'a', light: true }] }, ''],
+		['an array slot', { name: 't', variables: [{ name: 'a', light: ['1'] }] }, ''],
+		['an object slot', { name: 't', variables: [{ name: 'a', light: { value: '1' } }] }, ''],
+		['a missing name', { name: 't', variables: [{ light: '1' }] }, ''],
+		['a null name', { name: 't', variables: [{ name: null, light: '1' }] }, ''],
+		['a number name', { name: 't', variables: [{ name: 1, light: '1' }] }, ''],
+		['an array name', { name: 't', variables: [{ name: ['a'], light: '1' }] }, ''],
+		[
+			'an array summary that would close its comment',
+			{
+				name: 't',
+				variables: [{ ...variable, summary: ['*/ } body { display: none } /*'] }]
+			},
+			wrap_light('--a: 1;')
+		],
+		[
+			'a number summary',
+			{ name: 't', variables: [{ ...variable, summary: 1 }] },
+			wrap_light('--a: 1;')
+		],
+		[
+			'an object summary',
+			{ name: 't', variables: [{ ...variable, summary: {} }] },
+			wrap_light('--a: 1;')
+		],
+		[
+			'malformed entries beside a well-formed one',
+			{
+				name: 't',
+				variables: [null, { name: 'b', light: 2 }, variable, 'x', { name: ['c'], light: '3' }]
+			},
+			wrap_light('--a: 1;')
+		]
+	];
+
+	test.each(cases)('%s renders as dropped', (_shape, theme, expected) => {
+		const css = render_theme_style(theme as Theme, { comments: true });
+		assert.strictEqual(css, expected);
+		assert_theme_css_is_contained(css);
+	});
+
+	test('a well-formed summary still renders', () => {
+		const css = render_theme_style(
+			{ name: 't', variables: [{ ...variable, summary: 'the summary' }] },
+			{ comments: true }
+		);
+		assert.strictEqual(css, wrap_light('--a: 1; /* the summary */'));
+	});
+
+	test('the containment assertion catches what it claims to', () => {
+		for (const css of [
+			':root {\n\t--a: 1; } body { display: none;\n}',
+			':root {\n\t--a: 1; /* */ } /* */\n}',
+			':root {\n\t--a: 1; color: red;\n}',
+			':root {\n\t--a: 1</style>;\n}',
+			':root {\n\t--a: calc(1;\n}',
+			':root {\n\t--a: "1;\n}',
+			':root {\n\t--a: "\n} body { display: none; } b { --c: ";\n}',
+			':root {\n\t--a: 1\n}'
+		]) {
+			assert.throws(() => assert_theme_css_is_contained(css), undefined, undefined, css);
+		}
+	});
+
+	test('fuzzed JSON never throws or escapes', () => {
+		// mulberry32, seeded so a failure reproduces
+		let seed = 0x5eed;
+		const random = (): number => {
+			seed = (seed + 0x6d2b79f5) | 0;
+			let t = Math.imul(seed ^ (seed >>> 15), 1 | seed);
+			t ^= t + Math.imul(t ^ (t >>> 7), 61 | t);
+			return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+		};
+		const pick = <T>(items: ReadonlyArray<T>): T => items[Math.floor(random() * items.length)]!;
+
+		const strings = [
+			'',
+			'"\n} body { display: none } b { --c: "',
+			'a',
+			'chroma_scale',
+			'light',
+			'dark',
+			'dual',
+			'1',
+			'var(--hue_a)',
+			'calc(1 + (2 * 3))',
+			'url(data:image/png;base64,AAAA)',
+			'"a; } b { /* ! */"',
+			"it's",
+			'the summary',
+			'1; --b: 2',
+			'1 } body { display: none',
+			'red !important',
+			'*/ } body { display: none } /*',
+			'/* open',
+			'</style><script>alert(1)</script>',
+			'</STYLE >',
+			'calc(1',
+			'1)',
+			'"unclosed',
+			'trailing\\',
+			'line\nbreak',
+			'a: 1; } :root { --b'
+		];
+		const keys = ['name', 'variables', 'scheme', 'scheme_mirror', 'light', 'dark', 'summary'];
+		const random_json = (depth: number): unknown => {
+			const roll = random();
+			if (depth <= 0 || roll < 0.45) {
+				return pick([null, true, false, 0, 1, -1.5, ...strings, ...strings]);
+			}
+			if (roll < 0.7) {
+				return Array.from({ length: Math.floor(random() * 4) }, () => random_json(depth - 1));
+			}
+			return Object.fromEntries(
+				Array.from({ length: Math.floor(random() * 5) }, () => [pick(keys), random_json(depth - 1)])
+			);
+		};
+		// mostly the right shape with any JSON in each position, so the fuzz
+		// reaches the declaration path instead of dying at the first read
+		const maybe = (value: () => unknown): unknown => (random() < 0.75 ? value() : random_json(2));
+		const random_variable = (): unknown =>
+			maybe(() => ({
+				name: maybe(() => pick(['a', 'b_1', 'chroma-scale'])),
+				...(random() < 0.8 && { light: maybe(() => pick(strings)) }),
+				...(random() < 0.5 && { dark: maybe(() => pick(strings)) }),
+				...(random() < 0.5 && { summary: maybe(() => pick(strings)) })
+			}));
+		const random_variables = (): unknown =>
+			maybe(() => Array.from({ length: Math.floor(random() * 5) }, random_variable));
+		const random_theme = (): unknown =>
+			maybe(() => ({
+				name: maybe(() => 't'),
+				...(random() < 0.5 && { scheme: maybe(() => pick(['dual', 'light', 'dark'])) }),
+				...(random() < 0.5 && { scheme_mirror: random_variables() }),
+				...(random() < 0.9 && { variables: random_variables() })
+			}));
+
+		let rendered = 0;
+		let commented = 0;
+		for (let i = 0; i < 4000; i++) {
+			const theme = random_theme();
+			const options = { comments: random() < 0.5, layer: random() < 0.5 ? null : undefined };
+			let css: string;
+			try {
+				css = render_theme_style(theme as Theme, options);
+				assert_theme_css_is_contained(css);
+			} catch (error) {
+				throw new Error(`failed on ${JSON.stringify(theme)}`, { cause: error });
+			}
+			if (css) rendered++;
+			if (css.includes('/*')) commented++;
+		}
+		// not vacuous: plenty of themes rendered declarations and comments
+		assert.isAbove(rendered, 1000);
+		assert.isAbove(commented, 100);
+	});
+});

@@ -1509,30 +1509,30 @@
 				calc(var(--palette_chroma_20) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1))
 				var(--hue_accent) / 40%
 		);
-		--scale_factor: 1; /* multiplies the space scale, below 1 is tighter and above 1 is more spacious */
-		--space_xs5: calc(0.1rem * var(--scale_factor));
-		--space_xs4: calc(0.2rem * var(--scale_factor));
-		--space_xs3: calc(0.3rem * var(--scale_factor));
-		--space_xs2: calc(0.4rem * var(--scale_factor));
-		--space_xs: calc(0.6rem * var(--scale_factor));
-		--space_sm: calc(0.8rem * var(--scale_factor));
-		--space_md: calc(1rem * var(--scale_factor));
-		--space_lg: calc(1.3rem * var(--scale_factor));
-		--space_xl: calc(1.6rem * var(--scale_factor));
-		--space_xl2: calc(2.1rem * var(--scale_factor));
-		--space_xl3: calc(2.6rem * var(--scale_factor));
-		--space_xl4: calc(3.3rem * var(--scale_factor));
-		--space_xl5: calc(4.2rem * var(--scale_factor));
-		--space_xl6: calc(5.4rem * var(--scale_factor));
-		--space_xl7: calc(6.9rem * var(--scale_factor));
-		--space_xl8: calc(8.7rem * var(--scale_factor));
-		--space_xl9: calc(11.1rem * var(--scale_factor));
-		--space_xl10: calc(14.1rem * var(--scale_factor));
-		--space_xl11: calc(17.9rem * var(--scale_factor));
-		--space_xl12: calc(22.8rem * var(--scale_factor));
-		--space_xl13: calc(29rem * var(--scale_factor));
-		--space_xl14: calc(36.9rem * var(--scale_factor));
-		--space_xl15: calc(47rem * var(--scale_factor));
+		--space_scale: 1; /* multiplies the space scale, below 1 is tighter and above 1 is more spacious */
+		--space_xs5: calc(0.1rem * var(--space_scale));
+		--space_xs4: calc(0.2rem * var(--space_scale));
+		--space_xs3: calc(0.3rem * var(--space_scale));
+		--space_xs2: calc(0.4rem * var(--space_scale));
+		--space_xs: calc(0.6rem * var(--space_scale));
+		--space_sm: calc(0.8rem * var(--space_scale));
+		--space_md: calc(1rem * var(--space_scale));
+		--space_lg: calc(1.3rem * var(--space_scale));
+		--space_xl: calc(1.6rem * var(--space_scale));
+		--space_xl2: calc(2.1rem * var(--space_scale));
+		--space_xl3: calc(2.6rem * var(--space_scale));
+		--space_xl4: calc(3.3rem * var(--space_scale));
+		--space_xl5: calc(4.2rem * var(--space_scale));
+		--space_xl6: calc(5.4rem * var(--space_scale));
+		--space_xl7: calc(6.9rem * var(--space_scale));
+		--space_xl8: calc(8.7rem * var(--space_scale));
+		--space_xl9: calc(11.1rem * var(--space_scale));
+		--space_xl10: calc(14.1rem * var(--space_scale));
+		--space_xl11: calc(17.9rem * var(--space_scale));
+		--space_xl12: calc(22.8rem * var(--space_scale));
+		--space_xl13: calc(29rem * var(--space_scale));
+		--space_xl14: calc(36.9rem * var(--space_scale));
+		--space_xl15: calc(47rem * var(--space_scale));
 		--distance_xs: 200px;
 		--distance_sm: 320px;
 		--distance_md: 800px;

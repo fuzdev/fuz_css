@@ -214,13 +214,12 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment:
 			'TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?',
 		ruleset: `
-			.plain:not(:hover) {
+			.plain:not(.selected) {
 				--border_color: transparent;
+			}
+			.plain:not(.selected, :hover) {
 				box-shadow: none;
 				--button_fill: transparent;
-			}
-			.plain:hover, .plain:active {
-				--border_color: transparent;
 			}
 		`
 	},

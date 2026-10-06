@@ -174,3 +174,16 @@ test('element-scoped pseudo-element rules ship with their elements', () => {
 		assert.deepEqual([...rule.elements].sort(), elements, pseudo);
 	}
 });
+
+test('a selected link keeps the focus outline color every link has', () => {
+	// the ring is the only focus indicator, so `.selected` must not repoint it
+	// at a color with no contrast floor against the page
+	const index = parse_style_css(main_stylesheet_text);
+	const rules = index.rules.filter((r) =>
+		/^:where\(a:not\(\.unstyled\)[^{]*\.selected/.test(r.css)
+	);
+	assert.isAbove(rules.length, 0, 'style.css carries a selected link rule');
+	for (const rule of rules) {
+		assert.notInclude(rule.css, '--outline_color');
+	}
+});

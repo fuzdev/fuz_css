@@ -269,7 +269,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   exemplar or composition knowingly gives up are declared as exact
   exceptions in the theme_check tests
 - Form/scale knobs derive into token defaults so one move reshapes a family
-  while tokens stay pinnable: `--radius_scale` (border radii), `--scale_factor`
+  while tokens stay pinnable: `--radius_scale` (border radii), `--space_scale`
   (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
   setting it flattens the heading ladder), `--heading_font_family`, and the
@@ -437,7 +437,9 @@ typography, borders, shading, shadows, layout. See
   text rendered verbatim into a stylesheet (`css_value_is_contained` and its
   comment and property-name twins). A theme may be untrusted data, so the
   `Theme` schema rejects a value that could end its own declaration or the
-  `<style>` element, and `render_theme_style` drops one
+  `<style>` element, and `render_theme_style` drops one. The checks take
+  `unknown` and fail non-strings, and the renderer is total over any JSON
+  value - what isn't the type `Theme` declares is dropped, never thrown on
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
   defaults re-slotted so its one appearance holds in both schemes). Kept out

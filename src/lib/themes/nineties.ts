@@ -40,9 +40,9 @@ export const nineties_theme: Theme = {
 		{ name: 'radius_scale', light: '0' },
 		{ name: 'shadow_alpha_scale', light: '0' },
 		// desktop density: small type packed tight, a step short of phosphor's
-		// terminal compression (leading is decoupled from scale_factor, so the
+		// terminal compression (leading is decoupled from space_scale, so the
 		// leading pins are the theme's own)
-		{ name: 'scale_factor', light: '0.9' },
+		{ name: 'space_scale', light: '0.9' },
 		{ name: 'line_height_md', light: '1.45' },
 		{ name: 'line_height_lg', light: '1.7' },
 		{ name: 'line_height_xl', light: '2.1' },

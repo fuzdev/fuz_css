@@ -21,7 +21,10 @@ Breaking:
   reject a value that could end its own declaration (a top-level `;`,
   braces, `!important`, a comment, unbalanced quotes or brackets,
   `</style`), and `render_theme_style` drops one. Quote a URL that needs
-  those characters.
+  those characters. `render_theme_style` takes any JSON value without
+  throwing, for a theme that skipped the schema: what isn't the declared
+  type is dropped (a `variables` that isn't an array, an entry that isn't
+  an object, a name, slot, or summary that isn't a string).
 - `default_themes` is just base. Low/high contrast are `contrast_modifiers`,
   composed over a theme with `compose_themes(base, ...overlays)`.
 
@@ -33,7 +36,7 @@ New:
   the renderer pins `color-scheme`.
 - Exemplar themes under `themes/`: smolder, parchment, concrete, nineties,
   phosphor (dark-only), neon (dark-only).
-- Scale knobs `--shadow_alpha_scale`, `--radius_scale`, `--scale_factor`,
+- Scale knobs `--shadow_alpha_scale`, `--radius_scale`, `--space_scale`,
   `--font_weight`, `--heading_font_weight` (hook; setting it flattens the
   ladder), `--heading_font_family`, `--background_image`.
 - `knobs.ts`: the typed knob catalog (`theme_knobs`, `theme_knob_by_name`,

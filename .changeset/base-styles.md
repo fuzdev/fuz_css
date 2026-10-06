@@ -17,8 +17,14 @@ Breaking:
   border, and outline (was stop 50, fill 40), `.chip.palette_X` labels use
   `palette_X_60`, and `label.selected` uses `--accent_60`.
 - Selected buttons use `--text_00` for inverse text (was
-  `--text_05`/`--text_10`) on a `--shade_60` fill (was `--shade_50`), the
-  selected border matching the fill.
+  `--text_05`/`--text_10`) on a `--shade_60` fill (was `--shade_50`); the
+  border stays `--border_color`, matching the fill only on `.palette_X`
+  buttons.
+- `.plain` strips the fill, border, and shadow from unselected elements
+  only, so a `.plain.selected` button keeps the selected style (was a
+  transparent fill under the inverse text until hover).
+- A selected link's focus and pressed outline keeps the default
+  `--outline_color` (`.selected` repointed it to `--border_color`).
 - Hovering an input, textarea, or select colors the border with
   `--outline_color` instead of `--border_color_20`; disabled inputs no
   longer react to hover.

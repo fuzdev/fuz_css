@@ -10,6 +10,10 @@
  * These are not CSS validators: a contained value can still be meaningless
  * CSS, which the browser discards on its own.
  *
+ * Each check takes `unknown` and fails anything that isn't a string, so
+ * unvalidated data can be handed over as it is: a non-string would otherwise
+ * be coerced on its way into the stylesheet, past the check that read it.
+ *
  * @module
  */
 
@@ -35,8 +39,8 @@ const INNERMOST_BRACKETS_MATCHER = /\([^()[\]]*\)|\[[^()[\]]*\]/gu;
  *
  * @param value - the declaration value, e.g. a style variable's slot
  */
-export const css_value_is_contained = (value: string): boolean => {
-	if (STYLE_CLOSER_MATCHER.test(value)) return false;
+export const css_value_is_contained = (value: unknown): boolean => {
+	if (typeof value !== 'string' || STYLE_CLOSER_MATCHER.test(value)) return false;
 	// escapes and strings are inert, so drop them before reading the structure;
 	// what survives of either - a trailing escape, an unclosed quote - fails next
 	let rest = value.replace(ESCAPE_OR_STRING_MATCHER, '');
@@ -57,8 +61,8 @@ export const css_value_is_contained = (value: string): boolean => {
  *
  * @param text - the comment body, e.g. a style variable's summary
  */
-export const css_comment_is_contained = (text: string): boolean =>
-	!text.includes('*/') && !STYLE_CLOSER_MATCHER.test(text);
+export const css_comment_is_contained = (text: unknown): boolean =>
+	typeof text === 'string' && !text.includes('*/') && !STYLE_CLOSER_MATCHER.test(text);
 
 /**
  * Checks that a custom property name is a plain identifier, so it can't
@@ -66,5 +70,5 @@ export const css_comment_is_contained = (text: string): boolean =>
  *
  * @param name - the name without its `--` prefix
  */
-export const css_custom_property_name_is_contained = (name: string): boolean =>
-	/^[\w-]+$/u.test(name);
+export const css_custom_property_name_is_contained = (name: unknown): boolean =>
+	typeof name === 'string' && /^[\w-]+$/u.test(name);

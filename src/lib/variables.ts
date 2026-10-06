@@ -497,15 +497,15 @@ export const default_variables: Array<StyleVariable> = [
 		dark: render_ramp_color_css('accent', '80', '40%')
 	},
 
-	/* spacings, rounded to pixels for the default 16px case (at the default scale factor of 1) */
+	/* spacings, rounded to pixels for the default 16px case (at the default space scale of 1) */
 	{
-		name: 'scale_factor',
+		name: 'space_scale',
 		light: '1',
 		summary: 'multiplies the space scale, below 1 is tighter and above 1 is more spacious'
 	},
 	...space_variants.map((size) => ({
 		name: `space_${size}`,
-		light: `calc(${SPACE_SIZES[size]}rem * var(--scale_factor))`
+		light: `calc(${SPACE_SIZES[size]}rem * var(--space_scale))`
 	})),
 	...distance_variants.map((size) => ({
 		name: `distance_${size}`,

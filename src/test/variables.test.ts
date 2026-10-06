@@ -40,6 +40,15 @@ test('variables have no duplicates', () => {
 	}
 });
 
+test('every var() reference names a declared variable', () => {
+	const names = new Set(default_variables.map((v) => v.name));
+	for (const v of default_variables) {
+		for (const match of `${v.light ?? ''} ${v.dark ?? ''}`.matchAll(/var\(\s*--([\w-]+)/g)) {
+			assert.isTrue(names.has(match[1]!), `${v.name} references --${match[1]}`);
+		}
+	}
+});
+
 test('the loop-built families cover every variant list', () => {
 	// the families are spread in from loops over `variable_data.ts`, so a
 	// variant added there without a matching family (or vice versa) shows up

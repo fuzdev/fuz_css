@@ -1056,6 +1056,29 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('plain composite', () => {
+		test('strips chrome from unselected elements only', () => {
+			const result = generate_classes_css({
+				class_names: ['plain'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null
+			});
+
+			// a selected button's inverse text needs its fill, so no rule may
+			// reach a selected element
+			const selectors = Array.from(result.css.matchAll(/^\s*(\.plain[^{]*)\{/gm), (m) =>
+				m[1]!.trim()
+			);
+			assert.isAbove(selectors.length, 0);
+			for (const selector of selectors) {
+				assert.match(selector, /^\.plain:not\(\.selected[,)]/, selector);
+			}
+			assert_css_contains(result.css, '--button_fill: transparent;', 'box-shadow: none;');
+			assert.lengthOf(result.diagnostics, 0);
+		});
+	});
+
 	describe('composite fallback patterns', () => {
 		test.each(['chip', 'pane', 'panel'])(
 			'%s uses var(--border_radius, var(--border_radius_xs))',
