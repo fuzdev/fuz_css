@@ -360,8 +360,21 @@ For projects managing their own theme/base styles, set `base_css: null` and
 
 Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 
-- `base_css` - Custom base styles or callback to modify defaults
-- `variables` - Custom theme variables or callback to modify defaults
+- `base_css` - Custom base styles (a string) or callback to modify defaults.
+  The contract is pass-through with shallow tree-shaking: any CSS the parser
+  accepts (`parseCss` from `svelte/compiler`), which the generator places in
+  `fuz.base`, a callback's additions included (so they sit below themes and
+  utilities). Top-level style rules and top-level
+  `@media`/`@supports`/`@container` rules tree-shake by the elements and
+  classes they target (a conditional rule ships whole or not at all, and a
+  rule with a selector the index can't match - no element or class, or an
+  escaped or non-ASCII name - always ships); every other at-rule ships as
+  written; every `var()` in what ships is tracked at any nesting depth. The
+  generator owns layering - only top-level `@layer fuz.base`/`fuz.preferences`
+  blocks and the shipped order statement are recognized, as `style.css` uses
+  them. A top-level `@charset` is the one construct left out
+- `variables` - Custom theme variables (an array replacing the defaults) or
+  callback to modify defaults; the set is the whole theme
 - `theme` - A `Theme` baked into the generated CSS, overlaid onto `variables`
   last-wins by name. The static counterpart to fuz_ui's `ThemeRoot`: no
   runtime theme rendering, and the output stays tree-shaken because the
@@ -375,11 +388,26 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme
 - `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
-  diagnostic handling; `base_css` enabled with `variables: null` is an error
-  (the base styles would reference variables nothing defines - set both to
+  diagnostic handling. Errors from the base stylesheet: `base_css_layer` (an
+  `@layer` rule of the consumer's own, at any depth) and
+  `base_css_unsupported_at_rule` (`@import`/`@namespace`, invalid inside a
+  layer) name the construct and its line and never remove CSS - it ships as
+  written - and `undefined_theme_variables` fires when emitted base styles
+  reference, with no fallback, a variable the defaults define that nothing
+  defines: the configured `variables` lack it (`null`, `[]`, or a partial
+  set), the referencing rule doesn't declare it, and no shipped
+  top-level rule with a selector that is exactly `:root`, `:host`, `html`,
+  `body`, or `*` does. A variable-free base and the
+  consumer's own property names stay silent, as does a name listed in
+  `exclude_variables` (`default_variables.map((v) => v.name)` pairs bundled
+  base styles with a separately imported `theme.css`). Set both options to
   `null` for utility-only mode, or `additional_variables: 'all'` to bundle
-  the full theme), and warnings flag excluding a variable that shipped
-  styles still reference
+  the full theme. Warnings flag excluding a variable that shipped styles
+  still reference. The parse diagnostics ride the `StyleRuleIndex` (built
+  once per generator) and `resolve_css` forwards them on every render, so
+  they dispatch like any other; a `base_css` the parser rejects, or a
+  callback returning a non-string, throws from `create_bundled_resources`
+  with an error naming `base_css`
 - `filter_file` - which files get extracted (the default filter includes
   node_modules deps)
 - `prescan` (Vite plugin only) - dev-only eager source scan at server
@@ -530,11 +558,14 @@ typography, borders, shading, shadows, layout. See
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
   transitive resolution
 - [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
-  extraction utilities
+  extraction utilities: references, fallback-less references, declarations,
+  and comment stripping
 - [class_variable_index.ts](src/lib/class_variable_index.ts) - Class to variable
   mapping for dependency resolution
-- [style_rule_parser.ts](src/lib/style_rule_parser.ts) - CSS rule parsing for
-  base style tree-shaking
+- [style_rule_parser.ts](src/lib/style_rule_parser.ts) - Base stylesheet
+  parsing for tree-shaking: indexes top-level rules by the elements and
+  classes they target, tracks their variables, and collects the `base_css`
+  parse diagnostics
 - [css_class_generation.ts](src/lib/css_class_generation.ts) -
   `CssClassDefinition` types, `generate_classes_css()`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
@@ -607,13 +638,13 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_bundled_resolution.{test,diagnostics,variables}.test.ts`
 - `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
-- `style_rule_parser.{test,custom}.test.ts`
+- `style_rule_parser.{test,at_rules,custom}.test.ts`
 
 Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
 `variables`, `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
-`fuz_comments`, `generate_bundled_css`, `generate_classes_css`, `generate_css`,
-and more.
+`fuz_comments`, `bundled_resources`, `generate_bundled_css`,
+`generate_classes_css`, `generate_css`, and more.
 
 The Vite plugin has `vite_plugin_fuz_css.{build,dev,splice,ws}.test.ts`: the
 build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,

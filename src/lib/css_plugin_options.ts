@@ -23,10 +23,13 @@
  * This applies to `BaseCssOption` and `VariablesOption`.
  * Setting both to `null` enables "utility-only mode" where you manage
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
- * and `theme.css`, which include all content). `variables: null` on its own
- * is an error: the base styles reference theme variables, so disabling only
- * the theme leaves them dangling. To bundle every variable instead, keep
- * `variables` and set `additional_variables: 'all'`.
+ * and `theme.css`, which include all content).
+ *
+ * The two are checked against each other: base styles that reference a theme
+ * variable nothing defines raise the `undefined_theme_variables` error,
+ * whether `variables` is `null`, empty, or missing some of the defaults. To
+ * bundle every variable instead, keep `variables` and set
+ * `additional_variables: 'all'`.
  *
  * @module
  */
@@ -93,7 +96,8 @@ export interface CssClassOptions {
  * - `string` - Custom CSS to replace defaults
  * - `(default_css) => string` - Callback to modify default CSS
  *
- * See module documentation for the `undefined` vs `null` convention.
+ * See module documentation for the `undefined` vs `null` convention, and
+ * `CssOutputOptions.base_css` for what the generators do with the stylesheet.
  */
 export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
 
@@ -126,6 +130,37 @@ export interface CssOutputOptions {
 	 * - `string`: Custom CSS to replace defaults
 	 * - `(default_css) => string`: Callback to modify default CSS
 	 *
+	 * The stylesheet is any CSS the parser accepts (`parseCss` from
+	 * `svelte/compiler`), which the generator places in the `fuz.base` cascade
+	 * layer, below themes and utility classes:
+	 *
+	 * - Top-level style rules and top-level `@media`, `@supports`, and
+	 *   `@container` rules are tree-shaken by the elements and classes they
+	 *   target. A conditional rule ships whole or not at all. Rules that target
+	 *   `:root`, `:host`, `html`, `body`, or `*` always ship, and so does a
+	 *   rule with a selector that can't be matched against detected usage: one
+	 *   naming no element or class (`[role='button']`, `::selection`), or with
+	 *   an escaped or non-ASCII name (`.md\:flex`).
+	 * - Every other at-rule ships as written (`@keyframes`, `@font-face`,
+	 *   `@property`, `@scope`, ...), used or not.
+	 * - Every `var()` reference in CSS that ships is tracked, however deeply
+	 *   it is nested, so the theme includes the variables it needs.
+	 * - The generator owns layering. A callback's additions land in `fuz.base`
+	 *   with everything else, so they lose to themes, utility classes, and
+	 *   unlayered styles - put overrides that must win in your own stylesheet.
+	 *   Top-level `@layer fuz.base` and `@layer fuz.preferences` blocks are
+	 *   recognized as the default stylesheet uses them; any other `@layer`
+	 *   rule is the error `base_css_layer`.
+	 * - `@import` and `@namespace` are invalid inside a layer and are the
+	 *   error `base_css_unsupported_at_rule`.
+	 *
+	 * An error never removes CSS: the construct ships as written (a layer
+	 * becomes a sublayer of `fuz.base`, and browsers ignore the other two),
+	 * and the error names it and its line. The one construct left out is a
+	 * top-level `@charset`, which means nothing in a string. A stylesheet the
+	 * parser rejects, or a callback that doesn't return a string, fails
+	 * generation with an error naming `base_css`.
+	 *
 	 * @example
 	 * ```ts
 	 * // Append custom reset
@@ -143,6 +178,23 @@ export interface CssOutputOptions {
 	 * - `Array<StyleVariable>`: Custom variable definitions (replaces defaults)
 	 * - `(defaults) => Array<StyleVariable>`: Callback to modify default variables
 	 *
+	 * The set is the whole theme: only variables in it are emitted, and only
+	 * the ones the output references. Base styles that reference a variable
+	 * the fuz_css defaults define but this set lacks - with `null`, an empty
+	 * array, or an array or callback result missing some - raise the error
+	 * `undefined_theme_variables`, because a `var()` with no fallback would
+	 * resolve to nothing. A reference with a fallback (`var(--x, 1px)`) is
+	 * never an error, nor is a name the base styles declare themselves: in the
+	 * rule that references it, or in a top-level rule with a selector that is
+	 * exactly `:root`, `:host`, `html`, `body`, or `*`.
+	 * Custom property names of your own are never checked.
+	 *
+	 * To fix the error, define the variables here (keep the defaults a
+	 * callback receives unless you replace what they style), or set
+	 * `base_css: null` too for utility-only mode. To pair bundled base styles
+	 * with a theme stylesheet imported separately, tell the generator the
+	 * default set is defined elsewhere through `exclude_variables`.
+	 *
 	 * @example
 	 * ```ts
 	 * // Override specific variables
@@ -155,6 +207,10 @@ export interface CssOutputOptions {
 	 *     ...defaults,
 	 *     { name: 'my_brand', light: '#ff6600', dark: '#ff8833' }
 	 * ]
+	 *
+	 * // Bundled base styles over a separately imported `theme.css`
+	 * variables: null,
+	 * exclude_variables: default_variables.map((v) => v.name)
 	 * ```
 	 */
 	variables?: VariablesOption;
@@ -216,7 +272,16 @@ export interface CssOutputOptions {
 	exclude_elements?: Iterable<string>;
 	/**
 	 * CSS variables to exclude from theme output, even if referenced.
-	 * Useful for filtering out variables you don't want in the theme.
+	 * Useful for filtering out variables you don't want in the theme, and for
+	 * declaring that something else defines one: excluding a variable the
+	 * output references is a warning when the theme has it, and a name listed
+	 * here is skipped by the `undefined_theme_variables` check.
+	 *
+	 * @example
+	 * ```ts
+	 * // every default variable is defined by a stylesheet imported separately
+	 * exclude_variables: default_variables.map((v) => v.name)
+	 * ```
 	 */
 	exclude_variables?: Iterable<string>;
 }

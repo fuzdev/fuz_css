@@ -1,26 +1,52 @@
 /**
- * Style.css rule parser for bundled CSS generation.
+ * Base stylesheet parser for bundled CSS generation.
  *
- * Parses the fuz_css `style.css` file into a structured index that maps
- * CSS rules to the HTML elements and classes they style. This enables
- * the bundled CSS generator to include only the rules needed for
- * elements actually used in the project.
+ * Parses a base stylesheet - the fuz_css `style.css`, or whatever the
+ * `base_css` generator option supplies - into a structured index that maps
+ * its top-level rules to the HTML elements and classes they style, so the
+ * bundled CSS generator includes only the rules a project uses.
+ *
+ * The contract is pass-through with shallow tree-shaking, for any CSS the
+ * parser (`parseCss` from `svelte/compiler`) accepts:
+ *
+ * - Top-level style rules and top-level conditional group rules (`@media`,
+ *   `@supports`, `@container`) are tree-shaken by the elements and classes
+ *   they target. A group is one unit - it ships whole or not at all. A rule
+ *   with a selector the index can't match always ships.
+ * - Every other at-rule (`@keyframes`, `@font-face`, `@property`, `@scope`,
+ *   ...) ships as written.
+ * - Every `var()` reference in a rule that ships is tracked, however deeply
+ *   it is nested, so the theme includes the variables it needs.
+ * - The generator owns layering: everything lands in `fuz.base`, except the
+ *   contents of a top-level `@layer fuz.preferences` block. Any other
+ *   `@layer` rule is an error, as are `@import` and `@namespace`, which are
+ *   invalid inside a layer block. An error never removes CSS - the construct
+ *   ships as written with the rule it sits in.
+ * - The one construct left out is `@charset`: an encoding marker that means
+ *   nothing in a string, which preprocessors emit for non-ASCII output.
  *
  * @module
  */
 
 import { parseCss, type AST } from 'svelte/compiler';
 
-import { extract_css_variables } from './css_variable_utils.ts';
+import {
+	extract_css_variables,
+	extract_declared_css_variables,
+	extract_required_css_variables,
+	strip_css_comments
+} from './css_variable_utils.ts';
 import { split_selector_list } from './css_ruleset_parser.ts';
+import type { GenerationDiagnostic } from './diagnostics.ts';
 import type { CacheDeps } from './deps.ts';
-import type { BaseCssOption } from './css_plugin_options.ts';
+import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 
 /**
- * The cascade layer a rule is emitted into in bundled output. Only the
- * `fuz.preferences` identity survives parsing - the OS user-preference
- * mappings must stay above the `fuz.base` defaults - while every other
- * layer (including custom `base_css` layers) flattens to `fuz.base`.
+ * The cascade layer a rule is emitted into in bundled output. A base
+ * stylesheet's rules land in `fuz.base`; the contents of a top-level
+ * `@layer fuz.preferences` block keep that identity, because the OS
+ * user-preference mappings must stay above the `fuz.base` defaults. No other
+ * layer survives parsing - see `parse_style_css`.
  */
 export type RuleLayer = 'fuz.base' | 'fuz.preferences';
 
@@ -34,9 +60,25 @@ export interface StyleRuleBase {
 	elements: Set<string>;
 	/** CSS class names this rule targets (e.g., 'unstyled', 'selected') */
 	classes: Set<string>;
-	/** CSS variables referenced in declarations */
+	/**
+	 * CSS variables referenced anywhere in the rule's text, nested rules
+	 * included. Read from the raw text, so it can only over-include - which
+	 * never leaves a `var()` undefined.
+	 */
 	variables_used: Set<string>;
-	/** Original order in `style.css` (for preserving cascade) */
+	/**
+	 * The subset of `variables_used` that something outside the rule must
+	 * define: referenced with no fallback outside a comment, and not declared
+	 * by the rule itself.
+	 */
+	variables_required: Set<string>;
+	/**
+	 * Custom properties the rule defines for the whole document: the ones a
+	 * top-level style rule declares when a selector in its list is exactly
+	 * `:root`, `:host`, `html`, `body`, or `*`. Empty for every other rule.
+	 */
+	variables_defined: Set<string>;
+	/** Original order in the stylesheet (for preserving cascade) */
 	order: number;
 	/** The cascade layer this rule is emitted into in bundled output */
 	layer: RuleLayer;
@@ -44,21 +86,19 @@ export interface StyleRuleBase {
 
 /**
  * Reasons a rule is considered "core" and always included. `conditional_core`
- * marks a conditional group rule (`@media`, `@supports`, `@container`) whose
- * inner rule is itself core. `untargetable`
- * marks rules whose selector names no element or class at all (pseudo-element
- * or attribute selectors like `::selection` and `[hidden]`) - detection can
- * never match them, so tree-shaking would drop them unconditionally.
+ * marks a conditional group rule (`@media`, `@supports`, `@container`) that
+ * contains something which always ships on its own - a core rule or an
+ * `at_rule`. `at_rule` marks every at-rule that is not a conditional group
+ * (`@keyframes`, `@font-face`, `@property`, `@scope`, ...): detection has no
+ * way to tell whether one is used, so it ships as written. `untargetable`
+ * marks rules with a selector the index can't match - one that names no
+ * element or class at all (pseudo-element or attribute selectors like
+ * `::selection` and `[hidden]`), or one with an escaped or non-ASCII
+ * identifier (`.md\:flex`, `.café`) - so tree-shaking would drop them
+ * whether or not the project uses them.
  */
 export type CoreReason =
-	| 'universal'
-	| 'root'
-	| 'body'
-	| 'conditional_core'
-	| 'html'
-	| 'host'
-	| 'font_face'
-	| 'untargetable';
+	'universal' | 'root' | 'body' | 'conditional_core' | 'html' | 'host' | 'at_rule' | 'untargetable';
 
 /**
  * A core style rule that is always included in output.
@@ -93,19 +133,144 @@ export interface StyleRuleIndex {
 	by_element: Map<string, Array<number>>;
 	/** Rules indexed by class name */
 	by_class: Map<string, Array<number>>;
+	/**
+	 * Problems found while parsing: constructs the stylesheet contains that
+	 * don't belong in a base stylesheet (`base_css_layer`,
+	 * `base_css_unsupported_at_rule`). `resolve_css` forwards them with its own
+	 * diagnostics.
+	 */
+	diagnostics: Array<GenerationDiagnostic>;
 }
 
+/** The conditional group rules, which tree-shake as one unit by what they target. */
+const CONDITIONAL_GROUP_AT_RULES: ReadonlySet<string> = new Set(['media', 'supports', 'container']);
+
+/** At-rules that are invalid inside a layer block, where every base rule is emitted. */
+const UNSUPPORTED_AT_RULES: ReadonlySet<string> = new Set(['import', 'namespace']);
+
+/** The layer names of the shipped order statement, which the bundle emits itself. */
+const SHIPPED_LAYER_ORDER = FUZ_LAYER_ORDER_STATEMENT.replace(/^@layer\s+|;$/g, '');
+
+const normalize_layer_prelude = (prelude: string): string =>
+	prelude
+		.split(',')
+		.map((name) => name.trim())
+		.join(', ');
+
+const is_conditional_group = (
+	atrule: AST.CSS.Atrule
+): atrule is AST.CSS.Atrule & { block: AST.CSS.Block } =>
+	atrule.block !== null && CONDITIONAL_GROUP_AT_RULES.has(atrule.name.toLowerCase());
+
+const DIAGNOSTIC_SNIPPET_LENGTH_MAX = 80;
+
+/** Renders a rule's head for a diagnostic message: its selector, or an at-rule's name and prelude. */
+const format_rule_head = (node: AST.CSS.Rule | AST.CSS.Atrule, css: string): string => {
+	const text =
+		node.type === 'Rule'
+			? css.slice(node.prelude.start, node.prelude.end)
+			: `@${node.name} ${node.prelude}`;
+	const head = strip_css_comments(text).trim().replace(/\s+/g, ' ');
+	return head.length > DIAGNOSTIC_SNIPPET_LENGTH_MAX
+		? head.slice(0, DIAGNOSTIC_SNIPPET_LENGTH_MAX) + '...'
+		: head;
+};
+
 /**
- * Parses a CSS stylesheet into a `StyleRuleIndex`.
+ * Collects the at-rules of a node that don't belong in a base stylesheet:
+ * any `@layer`, and the at-rules invalid inside a layer block. Walks the
+ * whole subtree, CSS nesting included.
+ */
+const collect_rejected_at_rules = (
+	node: AST.CSS.Rule | AST.CSS.Atrule,
+	found: Array<AST.CSS.Atrule>
+): void => {
+	if (node.type === 'Atrule') {
+		const name = node.name.toLowerCase();
+		if (name === 'layer' || UNSUPPORTED_AT_RULES.has(name)) {
+			found.push(node);
+		}
+	}
+	if (node.block) {
+		for (const child of node.block.children) {
+			if (child.type === 'Rule' || child.type === 'Atrule') {
+				collect_rejected_at_rules(child, found);
+			}
+		}
+	}
+};
+
+/**
+ * Creates the error for an at-rule that doesn't belong in a base stylesheet,
+ * naming it, its line, and the top-level rule it is nested in.
+ *
+ * @param atrule - the offending at-rule
+ * @param container - the top-level rule `atrule` sits in, or `atrule` itself
+ * @param css - the stylesheet text both were parsed from
+ * @param layer - the cascade layer `container` is emitted into
+ */
+const create_rejected_at_rule_diagnostic = (
+	atrule: AST.CSS.Atrule,
+	container: AST.CSS.Rule | AST.CSS.Atrule,
+	css: string,
+	layer: RuleLayer
+): GenerationDiagnostic => {
+	const line = css.slice(0, atrule.start).split('\n').length;
+	const where =
+		atrule === container
+			? `at line ${line},`
+			: `at line ${line}, inside \`${format_rule_head(container, css)}\`,`;
+	const head = `\`${format_rule_head(atrule, css)}\``;
+	if (atrule.name.toLowerCase() === 'layer') {
+		return {
+			phase: 'generation',
+			level: 'error',
+			message: `base_css declares a cascade layer with ${head} ${
+				where
+			} but the generator owns layering - it ships as written, as a sublayer of ${layer}`,
+			suggestion:
+				'Remove the @layer rule: base_css lands in fuz.base, and only top-level `@layer fuz.base` and `@layer fuz.preferences` blocks are recognized. Styles that need their own layers belong in your own stylesheet.',
+			identifier: 'base_css_layer',
+			locations: null
+		};
+	}
+	return {
+		phase: 'generation',
+		level: 'error',
+		message: `base_css contains ${head} ${
+			where
+		} which is invalid inside the cascade layer base styles are emitted in - it ships as written and browsers ignore it`,
+		suggestion: 'Move it to your own stylesheet.',
+		identifier: 'base_css_unsupported_at_rule',
+		locations: null
+	};
+};
+
+/**
+ * Parses a base stylesheet into a `StyleRuleIndex`.
+ *
+ * Each top-level style rule and at-rule becomes one indexed rule that ships
+ * whole or not at all. A top-level `@layer fuz.base` or `@layer
+ * fuz.preferences` block is unwrapped first, so its contents are top-level
+ * too and bundled output re-layers the selected rules; the shipped layer
+ * order statement is skipped because the bundle emits its own, and so is
+ * `@charset`, which means nothing in a string. Every other `@layer` rule, and
+ * each `@import`/`@namespace`, becomes an error in the index's `diagnostics`
+ * and is still indexed as written - an error never removes CSS.
  *
  * @param css - raw CSS string (e.g., contents of `style.css`)
- * @returns `StyleRuleIndex` with rules and lookup maps
+ * @returns `StyleRuleIndex` with rules, lookup maps, and diagnostics
+ * @throws if `css` is not syntactically valid
  */
 export const parse_style_css = (css: string): StyleRuleIndex => {
+	// a byte order mark would read as part of the first selector
+	if (css.charCodeAt(0) === 0xfeff) return parse_style_css(css.slice(1));
+
 	const ast = parseCss(css);
 	const rules: Array<StyleRule> = [];
 	const by_element: Map<string, Array<number>> = new Map();
 	const by_class: Map<string, Array<number>> = new Map();
+	const diagnostics: Array<GenerationDiagnostic> = [];
 
 	let order = 0;
 
@@ -134,41 +299,85 @@ export const parse_style_css = (css: string): StyleRuleIndex => {
 		}
 	};
 
-	const walk_children = (children: Iterable<AST.CSS.Node>, layer: RuleLayer): void => {
+	// `unwrapped` is true inside a shipped layer block, where no further
+	// `@layer` is recognized - nesting one there would declare a sublayer
+	const walk_children = (
+		children: Iterable<AST.CSS.Node>,
+		layer: RuleLayer,
+		unwrapped: boolean
+	): void => {
 		for (const child of children) {
-			if (child.type === 'Rule') {
-				index_rule(extract_style_rule(child, css, order++, layer));
-			} else if (child.type === 'Atrule') {
-				// A top-level `@layer <name> { ... }` block is unwrapped so its
-				// contents tree-shake per rule, and bundled output re-layers the
-				// selected rules. Only the `fuz.preferences` identity is kept -
-				// everything else (including custom `base_css` layers) flattens
-				// to `fuz.base`. A blockless `@layer a, b;` order statement is
-				// skipped for the same reason: the bundle emits its own.
-				if (child.name === 'layer') {
+			if (child.type !== 'Rule' && child.type !== 'Atrule') continue;
+
+			if (child.type === 'Atrule') {
+				const name = child.name.toLowerCase();
+				if (name === 'charset') continue;
+				if (name === 'layer' && !unwrapped) {
+					const prelude = normalize_layer_prelude(child.prelude);
 					if (child.block) {
-						const child_layer =
-							child.prelude.trim() === 'fuz.preferences' ? 'fuz.preferences' : layer;
-						walk_children(child.block.children, child_layer);
+						if (prelude === 'fuz.base' || prelude === 'fuz.preferences') {
+							walk_children(child.block.children, prelude, true);
+							continue;
+						}
+					} else if (prelude === SHIPPED_LAYER_ORDER) {
+						continue;
 					}
-					continue;
-				}
-				// Handle @media and other at-rules
-				const rule = extract_atrule(child, css, order++, layer);
-				if (rule) {
-					index_rule(rule);
 				}
 			}
+
+			const rejected: Array<AST.CSS.Atrule> = [];
+			collect_rejected_at_rules(child, rejected);
+			for (const atrule of rejected) {
+				diagnostics.push(create_rejected_at_rule_diagnostic(atrule, child, css, layer));
+			}
+
+			index_rule(
+				child.type === 'Rule'
+					? extract_style_rule(child, css, order++, layer)
+					: extract_atrule(child, css, order++, layer)
+			);
 		}
 	};
 
 	// Walk the CSS AST
-	walk_children(ast.children, 'fuz.base');
+	walk_children(ast.children, 'fuz.base', false);
 
 	return {
 		rules,
 		by_element,
-		by_class
+		by_class,
+		diagnostics
+	};
+};
+
+/** Selectors that reach the whole document, so a custom property declared there is defined everywhere. */
+const DOCUMENT_SELECTORS: ReadonlySet<string> = new Set([':root', ':host', 'html', 'body', '*']);
+
+/**
+ * The three variable sets of a rule. `variables_used` reads the raw text, so
+ * a theme variable can only be over-included; the other two feed a diagnostic
+ * and read the text with comments removed.
+ *
+ * @param rule_css - the rule's full text
+ * @param selector_css - the selector list of a top-level style rule, or null for an at-rule
+ */
+const extract_rule_variables = (
+	rule_css: string,
+	selector_css: string | null
+): Pick<StyleRuleBase, 'variables_used' | 'variables_required' | 'variables_defined'> => {
+	const text = strip_css_comments(rule_css);
+	const declared = extract_declared_css_variables(text);
+	const variables_required = extract_required_css_variables(text);
+	for (const v of declared) variables_required.delete(v);
+	const defines_for_document =
+		selector_css !== null &&
+		split_selector_list(strip_css_comments(selector_css)).some((selector) =>
+			DOCUMENT_SELECTORS.has(selector.trim().toLowerCase())
+		);
+	return {
+		variables_used: extract_css_variables(rule_css),
+		variables_required,
+		variables_defined: defines_for_document ? declared : new Set()
 	};
 };
 
@@ -187,16 +396,12 @@ const extract_style_rule = (
 
 	// Parse selectors from the prelude
 	const selector_css = css.slice(rule.prelude.start, rule.prelude.end);
-	parse_selector_list(selector_css, elements, classes);
+	const targetable = parse_selector_list(selector_css, elements, classes);
 
-	// Extract variables from declarations
-	const block_css = css.slice(rule.block.start, rule.block.end);
-	const variables_used = extract_css_variables(block_css);
-
-	// Determine if core rule; a rule with no element or class hooks at all
-	// can never be matched by detection, so it must always ship
+	// Determine if core rule; a rule with a selector the index can't match
+	// would be dropped whether or not the project uses it, so it must always ship
 	let { is_core, core_reason } = check_core_rule(selector_css, elements);
-	if (!is_core && elements.size === 0 && classes.size === 0) {
+	if (!is_core && !targetable) {
 		is_core = true;
 		core_reason = 'untargetable';
 	}
@@ -206,7 +411,8 @@ const extract_style_rule = (
 		css: rule_css,
 		elements,
 		classes,
-		variables_used,
+		// from the whole rule, nested rules included
+		...extract_rule_variables(rule_css, selector_css),
 		order,
 		layer,
 		is_core,
@@ -214,156 +420,143 @@ const extract_style_rule = (
 	} as StyleRule;
 };
 
+/** What a conditional group's contents say about whether the group must ship. */
+interface ConditionalGroupScan {
+	elements: Set<string>;
+	classes: Set<string>;
+	/** Something inside always ships on its own: a core rule or a non-conditional at-rule. */
+	has_core: boolean;
+	/** A rule inside has a selector the index can't match, so detection alone would drop it. */
+	has_untargetable: boolean;
+}
+
 /**
- * Walks nested rules in an at-rule block to extract elements, classes, and
- * variables, and reports whether any nested rule is itself core (e.g. a
- * `:root` block inside a media query).
+ * Walks a conditional group's block, recursing through nested conditional
+ * groups, to collect the elements and classes its rules target and whether
+ * anything inside would always ship as a top-level rule (e.g. a `:root`
+ * block or `@keyframes` inside a media query).
+ *
+ * @mutates `scan` - adds the hooks found and sets its flags
  */
-const extract_nested_rules = (
+const scan_conditional_group = (
 	block: AST.CSS.Block,
 	css: string,
-	elements: Set<string>,
-	classes: Set<string>,
-	variables_used: Set<string>
-): boolean => {
-	let has_core_rule = false;
+	scan: ConditionalGroupScan
+): void => {
 	for (const child of block.children) {
 		if (child.type === 'Rule') {
 			const selector_css = css.slice(child.prelude.start, child.prelude.end);
 			const rule_elements: Set<string> = new Set();
-			parse_selector_list(selector_css, rule_elements, classes);
-			for (const e of rule_elements) elements.add(e);
+			const targetable = parse_selector_list(selector_css, rule_elements, scan.classes);
+			for (const e of rule_elements) scan.elements.add(e);
 			if (check_core_rule(selector_css, rule_elements).is_core) {
-				has_core_rule = true;
+				scan.has_core = true;
+			} else if (!targetable) {
+				scan.has_untargetable = true;
 			}
-
-			const block_css = css.slice(child.block.start, child.block.end);
-			for (const v of extract_css_variables(block_css)) {
-				variables_used.add(v);
+		} else if (child.type === 'Atrule') {
+			if (is_conditional_group(child)) {
+				scan_conditional_group(child.block, css, scan);
+			} else {
+				scan.has_core = true;
 			}
 		}
 	}
-	return has_core_rule;
 };
 
 /**
- * Extracts a StyleRule from an at-rule (e.g., @media, @supports, @container).
- * `@layer` never reaches here - `walk_children` unwraps it.
+ * Extracts a StyleRule from an at-rule. A conditional group (`@media`,
+ * `@supports`, `@container`) tree-shakes as one unit by what its rules
+ * target; every other at-rule always ships as written, the ones
+ * `parse_style_css` reports as errors included.
  */
 const extract_atrule = (
 	atrule: AST.CSS.Atrule,
 	css: string,
 	order: number,
 	layer: RuleLayer
-): StyleRule | null => {
+): StyleRule => {
 	const rule_css = css.slice(atrule.start, atrule.end);
-	const elements: Set<string> = new Set();
-	const classes: Set<string> = new Set();
-	const variables_used: Set<string> = new Set();
+	// the whole text, so references at any nesting depth are tracked
+	const variables = extract_rule_variables(rule_css, null);
 
-	// Handle conditional group rules that contain nested rules
-	if (
-		(atrule.name === 'media' || atrule.name === 'supports' || atrule.name === 'container') &&
-		atrule.block
-	) {
-		// a conditional group is core when any rule inside it is - the OS
-		// user-preference mappings (`prefers-contrast`, `prefers-reduced-motion`)
-		// target `:root`, so they ride the same rule as bare `:root` blocks
-		const has_core_rule = extract_nested_rules(
-			atrule.block,
-			css,
-			elements,
-			classes,
-			variables_used
-		);
-
-		if (has_core_rule) {
-			return {
-				css: rule_css,
-				elements,
-				classes,
-				variables_used,
-				order,
-				layer,
-				is_core: true,
-				core_reason: 'conditional_core'
-			} as const;
-		}
-
-		// a group with no element/class hooks at all (e.g. only ::selection
-		// rules) can never be matched by detection, so it must always ship -
-		// the same fallback extract_style_rule applies at the top level
-		if (elements.size === 0 && classes.size === 0) {
-			return {
-				css: rule_css,
-				elements,
-				classes,
-				variables_used,
-				order,
-				layer,
-				is_core: true,
-				core_reason: 'untargetable'
-			} as const;
-		}
-
+	if (!is_conditional_group(atrule)) {
+		// detection can't tell whether `@keyframes`, `@font-face`, `@property`
+		// and the rest are used - the stylesheets, utility classes, and scripts
+		// that reference them by name aren't all visible here - and leaving one
+		// out silently breaks whatever does
 		return {
 			css: rule_css,
-			elements,
-			classes,
-			variables_used,
+			elements: new Set(),
+			classes: new Set(),
+			...variables,
 			order,
 			layer,
-			is_core: false,
-			core_reason: null
-		} as const;
+			is_core: true,
+			core_reason: 'at_rule'
+		};
 	}
 
-	// @keyframes carry no element/class hooks, so detection can never select
-	// them - they're untargetable and always ship (dropping one silently
-	// breaks every animation that references it)
-	if (atrule.name === 'keyframes' && atrule.block) {
-		// Extract variables from keyframe rules
-		const block_css = css.slice(atrule.block.start, atrule.block.end);
-		for (const v of extract_css_variables(block_css)) {
-			variables_used.add(v);
-		}
+	const scan: ConditionalGroupScan = {
+		elements: new Set(),
+		classes: new Set(),
+		has_core: false,
+		has_untargetable: false
+	};
+	scan_conditional_group(atrule.block, css, scan);
+	const { elements, classes } = scan;
 
+	// the group ships whole when anything inside it would always ship on its
+	// own - the OS user-preference mappings (`prefers-contrast`,
+	// `prefers-reduced-motion`) target `:root`, so they ride the same rule as
+	// bare `:root` blocks
+	if (scan.has_core) {
 		return {
 			css: rule_css,
-			elements, // Empty - keyframes don't target elements
-			classes, // Empty - keyframes don't target classes
-			variables_used,
+			elements,
+			classes,
+			...variables,
+			order,
+			layer,
+			is_core: true,
+			core_reason: 'conditional_core'
+		};
+	}
+
+	// likewise for a rule with a selector the index can't match (e.g.
+	// `::selection`), and for a group with no hooks at all - the same fallback
+	// `extract_style_rule` applies at the top level
+	if (scan.has_untargetable || (elements.size === 0 && classes.size === 0)) {
+		return {
+			css: rule_css,
+			elements,
+			classes,
+			...variables,
 			order,
 			layer,
 			is_core: true,
 			core_reason: 'untargetable'
-		} as const;
+		};
 	}
 
-	// Handle @font-face - global rule that should always be included
-	if (atrule.name === 'font-face' && atrule.block) {
-		// Extract variables from font-face declarations (e.g., custom font paths)
-		const block_css = css.slice(atrule.block.start, atrule.block.end);
-		for (const v of extract_css_variables(block_css)) {
-			variables_used.add(v);
-		}
-
-		return {
-			css: rule_css,
-			elements, // Empty - font-face doesn't target elements
-			classes, // Empty - font-face doesn't target classes
-			variables_used,
-			order,
-			layer,
-			is_core: true,
-			core_reason: 'font_face'
-		} as const;
-	}
-
-	// Skip other at-rules (@charset, @import, @namespace, @page, etc.)
-	// These are typically global and would need different handling
-	return null;
+	return {
+		css: rule_css,
+		elements,
+		classes,
+		...variables,
+		order,
+		layer,
+		is_core: false,
+		core_reason: null
+	};
 };
+
+/**
+ * Matches a selector the element and class patterns can't read reliably: one
+ * with an escape (`.md\:flex`) or a character outside printable ASCII
+ * (`.café`).
+ */
+const UNINDEXABLE_SELECTOR_PATTERN = /\\|[^\t\n\r -~]/;
 
 /**
  * Parses a selector list and extracts element names and class names.
@@ -371,19 +564,32 @@ const extract_atrule = (
  * @param selector_css - CSS selector string (may contain commas)
  * @param elements - set to add element names to
  * @param classes - set to add class names to
+ * @returns whether the index can match every selector in the list - `false` when one names no element or class, or holds an escape or non-ASCII character
  * @mutates `elements`, `classes` - adds parsed names to the sets
  */
 const parse_selector_list = (
 	selector_css: string,
 	elements: Set<string>,
 	classes: Set<string>
-): void => {
-	// Split on commas, respecting parentheses
-	const selectors = split_selector_list(selector_css);
+): boolean => {
+	let targetable = true;
 
-	for (const selector of selectors) {
-		parse_single_selector(selector.trim(), elements, classes);
+	// Split on commas, respecting parentheses
+	for (const selector of split_selector_list(selector_css)) {
+		const selector_elements: Set<string> = new Set();
+		const selector_classes: Set<string> = new Set();
+		parse_single_selector(selector.trim(), selector_elements, selector_classes);
+		if (
+			(selector_elements.size === 0 && selector_classes.size === 0) ||
+			UNINDEXABLE_SELECTOR_PATTERN.test(selector)
+		) {
+			targetable = false;
+		}
+		for (const e of selector_elements) elements.add(e);
+		for (const c of selector_classes) classes.add(c);
 	}
+
+	return targetable;
 };
 
 /**
@@ -522,23 +728,32 @@ const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleC
 export const load_style_rule_index = async (
 	deps: CacheDeps,
 	style_css_path?: string
-): Promise<StyleRuleIndex> => {
-	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
-	const r = await deps.read_text({ path });
-	if (!r.ok) {
-		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
-	}
-	return parse_style_css(r.value);
-};
+): Promise<StyleRuleIndex> => parse_style_css(await load_default_style_css(deps, style_css_path));
 
 /**
- * Creates a `StyleRuleIndex` from a custom CSS string.
- * Use this to parse user-provided base styles instead of loading from file.
+ * Creates a `StyleRuleIndex` from the stylesheet a `base_css` option
+ * supplies, reporting a value that can't be parsed as a `base_css` problem.
  *
- * @param css - raw CSS string to parse
+ * @param css - the `base_css` string, or the string its callback returned
  * @returns `StyleRuleIndex`
+ * @throws if `css` is not syntactically valid CSS, with the parser's error as the `cause`
  */
-export const create_style_rule_index = (css: string): StyleRuleIndex => parse_style_css(css);
+export const create_style_rule_index = (css: string): StyleRuleIndex => {
+	try {
+		return parse_style_css(css);
+	} catch (cause) {
+		throw new Error(`base_css is not valid CSS: ${format_css_parse_error(cause)}`, { cause });
+	}
+};
+
+/** Renders a CSS parser error as its first message line plus its position, when it has one. */
+const format_css_parse_error = (error: unknown): string => {
+	const message = (error instanceof Error ? error.message : String(error)).split('\n', 1)[0]!;
+	const start = (error as { start?: { line?: unknown; column?: unknown } } | null)?.start;
+	return typeof start?.line === 'number' && typeof start.column === 'number'
+		? `${message} (line ${start.line}, column ${start.column})`
+		: message;
+};
 
 /**
  * Loads the raw default `style.css` content.
@@ -557,39 +772,6 @@ export const load_default_style_css = async (
 		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);
 	}
 	return r.value;
-};
-
-/**
- * Resolves a `base_css` option to a `StyleRuleIndex`.
- * Handles all option forms: undefined (defaults), null (disabled), string, or callback.
- *
- * @param base_css - the `base_css` option from generator config
- * @param deps - filesystem deps for loading default CSS
- * @returns promise resolving to `StyleRuleIndex`, or null if disabled
- */
-export const resolve_base_css_option = async (
-	base_css: BaseCssOption,
-	deps: CacheDeps
-): Promise<StyleRuleIndex | null> => {
-	// null = disabled
-	if (base_css === null) {
-		return null;
-	}
-
-	// undefined = use defaults
-	if (base_css === undefined) {
-		return load_style_rule_index(deps);
-	}
-
-	// string = custom CSS (replacement)
-	if (typeof base_css === 'string') {
-		return create_style_rule_index(base_css);
-	}
-
-	// function = callback to modify defaults
-	const default_css = await load_default_style_css(deps);
-	const modified_css = base_css(default_css);
-	return create_style_rule_index(modified_css);
 };
 
 /**

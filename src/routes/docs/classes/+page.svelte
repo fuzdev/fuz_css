@@ -195,11 +195,13 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for
-					utility-only mode, or provide a callback to modify defaults
+					utility-only mode, or provide a string to replace the defaults or a callback to modify
+					them (see <a href="#What-gets-included">what gets included</a>)
 				</li>
 				<li>
 					<code>variables</code> - customize or disable theme variables; set to <code>null</code>
-					for utility-only mode, or provide a callback to modify defaults
+					for utility-only mode, or provide an array to replace the defaults or a callback to modify
+					them
 				</li>
 				<li>
 					<code>theme</code> - a <TomeLink slug="themes" /> to bake into the generated CSS, overlaid
@@ -533,12 +535,17 @@ const el = document.createElement('dialog');`}
 		<h4>Base styles</h4>
 		<p>
 			A rule from the reset stylesheet is kept when any element or class in its selector is
-			detected. Kept rules are emitted in source order, tree-shaking unused rules.
+			detected. Kept rules are emitted in source order, tree-shaking unused rules. A top-level
+			<code>@media</code>, <code>@supports</code>, or <code>@container</code> rule is kept or
+			dropped whole, by the elements and classes of the rules inside it.
 		</p>
 		<p>
 			Some rules are always included regardless of detection: the universal reset (<code>*</code>),
-			<code>:root</code> and <code>:host</code>, <code>html</code>, <code>body</code>,
-			<code>@font-face</code>, and the <code>prefers-reduced-motion</code> block.
+			<code>:root</code> and <code>:host</code>, <code>html</code>, <code>body</code>, rules with a
+			selector that can't be matched against what's detected - one naming no element or class (like
+			<code>::selection</code> and <code>[hidden]</code>), or with an escaped or non-ASCII name
+			(like <code>.md\:flex</code>) - and every other at-rule, like <code>@keyframes</code> and
+			<code>@font-face</code>.
 		</p>
 		<p>
 			For apps that use dynamic HTML patterns, element detection may have false negatives, omitting
@@ -555,6 +562,28 @@ vite_plugin_fuz_css({
 	additional_elements: 'all',
 });`}
 		/>
+		<p>
+			The <DeclarationLink name="CssGeneratorBaseOptions">base_css</DeclarationLink> option replaces
+			the reset stylesheet with a string, or transforms it with a callback that receives the default
+			CSS. Either way it's any CSS the parser accepts, treated by the rules above, and all of it is
+			emitted in <code>fuz.base</code> - including what a callback appends, which therefore sits
+			below themes and utilities. Put overrides that must win in your own stylesheet.
+		</p>
+		<Code
+			lang="ts"
+			content={`vite_plugin_fuz_css({
+	// tree-shaken with the rest: ships when a \`.prose\` class is used
+	base_css: (css) => css + '\\n.prose { max-width: 65ch; }',
+});`}
+		/>
+		<p>
+			The generator owns the layering, so an <code>@layer</code> of your own in
+			<code>base_css</code> is an error (<code>base_css_layer</code>), as are <code>@import</code>
+			and <code>@namespace</code>, which are invalid inside a layer
+			(<code>base_css_unsupported_at_rule</code>). An error never removes CSS: the rule ships as
+			written, and the error names it and its line. Only a top-level <code>@charset</code> is left
+			out, since an encoding marker means nothing in a string.
+		</p>
 
 		<h4>Variables</h4>
 		<p>A style variable is included when:</p>
@@ -577,6 +606,29 @@ vite_plugin_fuz_css({
 			complete set ships in <ModuleLink module_path="theme.css" /> for utility-only mode and direct
 			imports; bundled mode trims it to what you use.
 		</p>
+		<p>
+			The <DeclarationLink name="CssGeneratorBaseOptions">variables</DeclarationLink> option is the
+			whole set to draw from. When a kept base-style rule references a variable the defaults define
+			but your set lacks - with <code>null</code>, an empty array, or one missing a few - generation
+			reports the error <code>undefined_theme_variables</code>, since a <code>var(--name)</code>
+			with no fallback would resolve to nothing. A reference with a fallback is never an error, nor
+			is a name the base styles declare themselves, in the same rule or in a top-level rule whose
+			selector is exactly <code>:root</code>, <code>:host</code>, <code>html</code>,
+			<code>body</code>, or <code>*</code>. Custom property names of your own are never checked.
+		</p>
+		<p>
+			Define the missing variables, or for bundled base styles over a theme stylesheet you import
+			separately, declare the default set defined elsewhere:
+		</p>
+		<Code
+			lang="ts"
+			content={`import {default_variables} from '@fuzdev/fuz_css/variables.ts';
+
+vite_plugin_fuz_css({
+	variables: null,
+	exclude_variables: default_variables.map((v) => v.name),
+});`}
+		/>
 
 		<h4>Forcing and excluding</h4>
 		<p>

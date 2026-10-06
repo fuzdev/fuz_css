@@ -208,7 +208,9 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		explicit_variables
 	} = options;
 
-	const diagnostics: Array<GenerationDiagnostic> = [];
+	// the stylesheet's own parse diagnostics (constructs it contains that
+	// don't belong in a base stylesheet) surface with every resolution of it
+	const diagnostics: Array<GenerationDiagnostic> = [...style_rule_index.diagnostics];
 	const included_elements: Set<string> = new Set();
 
 	// Convert to Sets once for safe re-iteration and O(1) lookup

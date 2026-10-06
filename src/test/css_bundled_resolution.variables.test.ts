@@ -35,6 +35,37 @@ describe('resolve_css variable resolution', () => {
 			assert.isTrue(result.resolved_variables.has('btn_color'));
 		});
 
+		test.each([
+			[
+				'two groups deep',
+				'@media print { @supports (display: grid) { button { color: var(--deep); } } }'
+			],
+			[
+				'@keyframes inside a group',
+				'@media print { @keyframes spin { to { rotate: var(--deep); } } }'
+			],
+			['a rule nested in a style rule', 'button { &:hover { color: var(--deep); } }'],
+			['an at-rule that always ships', '@page { margin: var(--deep); }']
+		])('from style rules, nested however deep: %s', (_name, css) => {
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(css, [
+				{ name: 'deep', light: '1px' }
+			]);
+
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				detected_classes: new Set(),
+				detected_css_variables: new Set(),
+				utility_variables_used: new Set()
+			});
+
+			// the theme defines what the shipped rule references
+			assert.include(result.base_css, 'var(--deep)');
+			assert.include(result.theme_css, '--deep: 1px;');
+		});
+
 		test('from class definitions (via class_variable_index)', () => {
 			const class_defs: Record<string, CssClassDefinition | undefined> = {
 				p_md: { declaration: 'padding: var(--space_md)' }

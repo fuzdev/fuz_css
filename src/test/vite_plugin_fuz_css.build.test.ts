@@ -684,6 +684,71 @@ describe('vite_plugin_fuz_css build render lifetime', () => {
 	});
 });
 
+describe('vite_plugin_fuz_css build base_css and variables diagnostics', () => {
+	const LAYERED_BASE_CSS = '@layer mine { a { color: red; } }\n:root { tab-size: 3; }';
+
+	const build_rejection = async (plugin_options: VitePluginFuzCssOptions): Promise<Error> => {
+		let error: unknown;
+		try {
+			await build_fixture({ plugin_options });
+		} catch (err) {
+			error = err;
+		}
+		assert(error instanceof Error, 'the build throws');
+		return error;
+	};
+
+	test('a layer in base_css logs its error once and ships with the rest', async () => {
+		const result = await build_fixture({
+			plugin_options: { on_error: 'log', base_css: LAYERED_BASE_CSS, variables: [] }
+		});
+		const css = assert_single_css(result);
+		assert.strictEqual(result.errors.length, 1);
+		assert.include(result.errors[0]!, 'base_css_layer');
+		assert.include(result.errors[0]!, '@layer mine');
+		assert.match(css.source, /tab-size:\s*3/);
+		assert.match(css.source, /@layer mine\s*\{/);
+	});
+
+	test('the same error fails the build under on_error: throw', async () => {
+		const error = await build_rejection({
+			on_error: 'throw',
+			base_css: LAYERED_BASE_CSS,
+			variables: []
+		});
+		assert.include(error.message, 'base_css_layer');
+	});
+
+	test('base styles missing their theme variables log undefined_theme_variables', async () => {
+		for (const variables of [null, []]) {
+			const result = await build_fixture({ plugin_options: { on_error: 'log', variables } });
+			assert.strictEqual(result.errors.length, 1);
+			assert.include(result.errors[0]!, 'undefined_theme_variables');
+		}
+	});
+
+	test('utility-only mode logs nothing', async () => {
+		const result = await build_fixture({
+			plugin_options: { on_error: 'log', base_css: null, variables: null }
+		});
+		assert.deepEqual(result.errors, []);
+		assert.deepEqual(result.warnings, []);
+	});
+
+	test('a base_css that is not valid CSS fails the build whatever on_error says', async () => {
+		const error = await build_rejection({ on_error: 'log', base_css: 'a { color: red;' });
+		assert.include(error.message, 'base_css is not valid CSS');
+	});
+
+	test('a base_css callback returning a non-string fails the build naming the callback', async () => {
+		const error = await build_rejection({
+			on_error: 'log',
+			base_css: (() => undefined) as unknown as VitePluginFuzCssOptions['base_css']
+		});
+		assert.include(error.message, 'The base_css callback must return a CSS string');
+	});
+});
+
 describe('vite_plugin_fuz_css build without the restated placeholder', () => {
 	/** Asserts the single warning that names what an unhashed filename costs. */
 	const assert_unhashed_warning = (result: FixtureBuild, reason: string): void => {

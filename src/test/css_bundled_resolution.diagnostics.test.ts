@@ -589,4 +589,55 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 0);
 		});
 	});
+
+	describe('base stylesheet diagnostics', () => {
+		test('forwards the errors the stylesheet parsed to, ahead of its own', () => {
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+				`@layer reset, components;
+				@import "x.css";
+				button { color: red; }`,
+				[]
+			);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index,
+				detected_elements: new Set(['button']),
+				explicit_variables: new Set(['nope'])
+			});
+
+			assert.deepEqual(
+				result.diagnostics.map((d) => [d.level, d.identifier]),
+				[
+					['error', 'base_css_layer'],
+					['error', 'base_css_unsupported_at_rule'],
+					['error', 'nope']
+				]
+			);
+			// an error never removes CSS: all three ship as written
+			assert.strictEqual(
+				result.base_css,
+				'@layer reset, components;\n\n@import "x.css";\n\nbutton { color: red; }'
+			);
+		});
+
+		test('forwards them on every resolution of the same index', () => {
+			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+				`@layer mine { button { color: red; } }`,
+				[]
+			);
+			const options = {
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				class_variable_index
+			};
+
+			assert.strictEqual(resolve_css(options).diagnostics.length, 1);
+			assert.strictEqual(resolve_css(options).diagnostics.length, 1);
+			assert.strictEqual(style_rule_index.diagnostics.length, 1);
+		});
+	});
 });

@@ -213,12 +213,14 @@ describe('parse_style_css', () => {
 			assert.isTrue(index.rules[0]!.variables_used.has('space_lg'));
 		});
 
-		test('@layer rule', () => {
-			const css = `@layer base { button { color: blue; } }`;
+		test('a shipped @layer block is unwrapped', () => {
+			const css = `@layer fuz.base { button { color: blue; } }`;
 			const index = parse_style_css(css);
 
 			assert.strictEqual(index.rules.length, 1);
 			assert.isTrue(index.rules[0]!.elements.has('button'));
+			assert.strictEqual(index.rules[0]!.css, 'button { color: blue; }');
+			assert.strictEqual(index.diagnostics.length, 0);
 		});
 
 		test('@keyframes rule', () => {
@@ -231,9 +233,9 @@ describe('parse_style_css', () => {
 			assert.strictEqual(index.rules.length, 1);
 			assert.strictEqual(index.rules[0]!.elements.size, 0);
 			assert.strictEqual(index.rules[0]!.classes.size, 0);
-			// no hooks means detection can never select it, so it always ships
+			// detection can't tell whether it's used, so it always ships
 			assert.isTrue(index.rules[0]!.is_core);
-			assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
+			assert.strictEqual(index.rules[0]!.core_reason, 'at_rule');
 		});
 
 		test('@keyframes with variables', () => {
@@ -268,7 +270,7 @@ describe('parse_style_css', () => {
 
 			assert.strictEqual(index.rules.length, 1);
 			assert.isTrue(index.rules[0]!.is_core);
-			assert.strictEqual(index.rules[0]!.core_reason, 'font_face');
+			assert.strictEqual(index.rules[0]!.core_reason, 'at_rule');
 		});
 
 		test('does not target elements or classes', () => {
@@ -311,9 +313,9 @@ describe('parse_style_css', () => {
 
 			assert.strictEqual(index.rules.length, 2);
 			assert.isTrue(index.rules[0]!.is_core);
-			assert.strictEqual(index.rules[0]!.core_reason, 'font_face');
+			assert.strictEqual(index.rules[0]!.core_reason, 'at_rule');
 			assert.isTrue(index.rules[1]!.is_core);
-			assert.strictEqual(index.rules[1]!.core_reason, 'font_face');
+			assert.strictEqual(index.rules[1]!.core_reason, 'at_rule');
 		});
 	});
 
@@ -378,6 +380,104 @@ describe('parse_style_css', () => {
 			assert.isTrue(index.rules[0]!.variables_used.has('bg_color'));
 			assert.isTrue(index.rules[0]!.variables_used.has('border_width'));
 			assert.isTrue(index.rules[0]!.variables_used.has('border_color'));
+		});
+	});
+
+	describe('variable sets', () => {
+		const sets = (css: string): Record<string, Array<string>> => {
+			const rule = parse_style_css(css).rules[0]!;
+			return {
+				used: [...rule.variables_used].sort(),
+				required: [...rule.variables_required].sort(),
+				defined: [...rule.variables_defined].sort()
+			};
+		};
+
+		test('required leaves out fallbacks and what the rule declares itself', () => {
+			assert.deepEqual(
+				sets(
+					`button {
+						--border_color: red;
+						border-color: var(--border_color);
+						margin: var(--gap, 4px);
+						padding: var(--pad);
+						color: var(--a, var(--b));
+					}`
+				),
+				{ used: ['a', 'b', 'border_color', 'gap', 'pad'], required: ['b', 'pad'], defined: [] }
+			);
+		});
+
+		test('used reads the raw text, required skips comments', () => {
+			assert.deepEqual(
+				sets('button { /* was: color: var(--old_color); --old: 1; */ color: var(--text_color); }'),
+				{ used: ['old_color', 'text_color'], required: ['text_color'], defined: [] }
+			);
+		});
+
+		test('a comment opener inside an unquoted url() hides nothing', () => {
+			assert.deepEqual(sets('p { background: url(//x/*.png); margin: var(--space_xl7); }'), {
+				used: ['space_xl7'],
+				required: ['space_xl7'],
+				defined: []
+			});
+		});
+
+		test('comment markers inside a string are not a comment', () => {
+			assert.deepEqual(sets(`a::after { content: "/*"; color: var(--kept); margin: "*/"; }`), {
+				used: ['kept'],
+				required: ['kept'],
+				defined: []
+			});
+		});
+
+		test('a group requires only what nothing nested in it declares, and defines nothing', () => {
+			assert.deepEqual(
+				sets(
+					'@media print { :root { --ink: black; } @supports (x: y) { p { color: var(--ink); fill: var(--deep); } } }'
+				),
+				{ used: ['deep', 'ink'], required: ['deep'], defined: [] }
+			);
+		});
+
+		test("a declaration right after a nested rule is still the rule's own", () => {
+			assert.deepEqual(sets('p{a{top:0}--space_md:1px;margin:var(--space_md)}'), {
+				used: ['space_md'],
+				required: [],
+				defined: []
+			});
+		});
+
+		test.each([
+			':root',
+			':host',
+			'html',
+			'body',
+			'*',
+			'*, ::before, ::after',
+			':root, .card',
+			' :ROOT /* base */ '
+		])('a rule defines for the document when a selector is exactly a document one: %s', (sel) => {
+			assert.deepEqual(sets(`${sel} { --ink: black; color: var(--ink); }`).defined, ['ink']);
+		});
+
+		test.each([
+			':root.dark',
+			'html .card',
+			'body.special',
+			'.a > * + *',
+			'[class*="x"]',
+			':root:has(dialog[open])',
+			'.card'
+		])('a rule that only mentions a document selector defines nothing: %s', (sel) => {
+			assert.deepEqual(sets(`${sel} { --ink: black; }`).defined, []);
+		});
+
+		test('a dashed ident in an at-rule prelude is not a declaration', () => {
+			assert.deepEqual(
+				sets('@property --prop { syntax: "<length>"; inherits: false; initial-value: 0px; }'),
+				{ used: [], required: [], defined: [] }
+			);
 		});
 	});
 
@@ -546,7 +646,7 @@ describe('untargetable rules', () => {
 		assert.strictEqual(index.rules.length, 1);
 		const rule = index.rules[0]!;
 		assert.isTrue(rule.is_core);
-		assert.strictEqual(rule.core_reason, 'untargetable');
+		assert.strictEqual(rule.core_reason, 'at_rule');
 		assert.isTrue(rule.variables_used.has('o'));
 	});
 
@@ -557,8 +657,63 @@ describe('untargetable rules', () => {
 		assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
 	});
 
-	test('a blockless @layer statement parses to no rules', () => {
-		const index = parse_style_css('@layer a, b;');
+	test('a conditional group holding one untargetable rule always ships', () => {
+		// the button rule alone would tree-shake, but ::selection can never be
+		// matched by detection, so the group can't be left to it
+		const index = parse_style_css(
+			'@media print { button { color: black; } ::selection { background: none; } }'
+		);
+		assert.strictEqual(index.rules.length, 1);
+		assert.isTrue(index.rules[0]!.is_core);
+		assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
+		assert.isTrue(index.rules[0]!.elements.has('button'));
+	});
+
+	test.each([
+		['a hookless selector beside a targetable one', 'button, [role="button"] { color: red; }'],
+		['an escaped class name', '.md\\:flex { display: flex; }'],
+		['a non-ASCII class name', '.caf\u00e9 { color: red; }'],
+		['a non-ASCII element-like name', 'button, x-\u00e9l\u00e9ment { color: red; }'],
+		['a hookless selector after a class', '.btn, ::part(label) { color: red; }']
+	])('a rule with %s always ships', (_name, css) => {
+		const index = parse_style_css(css);
+		assert.strictEqual(index.rules.length, 1);
+		assert.isTrue(index.rules[0]!.is_core);
+		assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
+		assert.strictEqual(get_matching_rules(index, new Set(), new Set()).size, 1);
+	});
+
+	test.each([
+		['a list of targetable selectors', 'button, a.link, .btn { color: red; }'],
+		['a hookless alternative behind an element', 'button:is(.a, [x]) { color: red; }']
+	])('a rule with %s still tree-shakes', (_name, css) => {
+		const index = parse_style_css(css);
+		assert.isFalse(index.rules[0]!.is_core);
+		assert.strictEqual(get_matching_rules(index, new Set(), new Set()).size, 0);
+	});
+
+	test('a conditional group holding a rule with an unmatchable selector always ships', () => {
+		for (const inner of [
+			'button, [role="button"] { color: red; }',
+			'.md\\:flex { display: flex; }'
+		]) {
+			const index = parse_style_css(`@media print { a { color: black; } ${inner} }`);
+			assert.isTrue(index.rules[0]!.is_core);
+			assert.strictEqual(index.rules[0]!.core_reason, 'untargetable');
+		}
+	});
+
+	test('a leading byte order mark is not part of the first selector', () => {
+		const index = parse_style_css('\uFEFFbutton { color: red; }');
+		assert.strictEqual(index.rules.length, 1);
+		assert.isFalse(index.rules[0]!.is_core);
+		assert.deepEqual([...index.rules[0]!.elements], ['button']);
+		assert.strictEqual(index.rules[0]!.css, 'button { color: red; }');
+	});
+
+	test('the shipped layer order statement parses to no rules and no diagnostics', () => {
+		const index = parse_style_css('@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;');
 		assert.strictEqual(index.rules.length, 0);
+		assert.strictEqual(index.diagnostics.length, 0);
 	});
 });

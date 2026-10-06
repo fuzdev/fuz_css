@@ -24,8 +24,10 @@ Breaking:
 - Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
   `fuz.utilities`; unlayered consumer styles beat all of it, except
   `[hidden]`'s `display: none !important`, which a layer makes outrank
-  unlayered `!important` too. Custom `base_css` is re-layered into
-  `fuz.base`.
+  unlayered `!important` too. Custom `base_css` is emitted in `fuz.base`.
+- The browser floor rises to Chrome and Edge 120 (was 111) and Firefox 118
+  (was 113) for `pow()`, with no fallback; Safari stays at 16.2, or 16.4
+  with responsive modifier classes.
 - `variables.ts` exports only `default_variables`; read a variable with
   `default_variables.find((v) => v.name === 'space_md')`. `icon_sizes` →
   `ICON_SIZES` (`ICON_SIZES.xs === 18`, was `'18px'`); `Z_INDEX_MAX`

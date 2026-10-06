@@ -60,6 +60,25 @@ import 'virtual:fuz.css'; // used utilities only`}
 			</p>
 		</TomeSection>
 		<TomeSection>
+			<TomeSectionHeader text="Browser support" />
+			<p>
+				The shipped CSS needs Chrome or Edge 120, Firefox 118, or Safari 16.2 - Safari 16.4 if you
+				use responsive modifier classes like <code>md:</code>, which emit media range syntax.
+			</p>
+			<p>
+				There are no fallbacks. Every rule sits in a cascade layer
+				(<MdnLink path="Web/CSS/@layer" />), the color scales are computed in CSS with
+				<MdnLink path="Web/CSS/color_value/oklch"><code>oklch()</code></MdnLink>,
+				<code>calc()</code>, and <MdnLink path="Web/CSS/pow"><code>pow()</code></MdnLink>, and
+				<MdnLink path="Web/CSS/color_value/color-mix"><code>color-mix()</code></MdnLink> drives
+				button fills, shadows, and the placeholder color. <code>pow()</code> sets the Chrome and
+				Firefox versions. A browser without it keeps the page background and color scheme, because
+				the two ends of each scale don't use it, but loses every stop in between, which carry the
+				text, border, and accent colors. A browser without cascade layers drops every rule, leaving
+				unstyled HTML.
+			</p>
+		</TomeSection>
+		<TomeSection>
 			<TomeSectionHeader text="Details" />
 			<ul>
 				<li>plain CSS</li>

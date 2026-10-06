@@ -12,7 +12,7 @@
 
 import type { Logger } from '@fuzdev/fuz_util/log.ts';
 
-import type { Diagnostic, SourceLocation } from './diagnostics.ts';
+import type { Diagnostic, GenerationDiagnostic, SourceLocation } from './diagnostics.ts';
 import {
 	generate_classes_css,
 	type CssClassDefinition,
@@ -23,6 +23,86 @@ import type { StyleVariable, Theme } from './variable.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
+import { extract_required_css_variables } from './css_variable_utils.ts';
+import { default_variables } from './variables.ts';
+
+/**
+ * The names fuz_css's defaults define - what tells a theme variable the
+ * configured set lacks apart from a custom property of the consumer's own,
+ * which is theirs to define.
+ */
+const default_variable_names: ReadonlySet<string> = new Set(default_variables.map((v) => v.name));
+
+/**
+ * Checks the emitted base styles for references to theme variables that
+ * nothing defines - directly, or through the value of a variable the
+ * configured `variables` do define. Covers `variables: null`, an empty array,
+ * and a set missing some of the defaults alike.
+ *
+ * Only a reference with no fallback counts, since `var(--x, fallback)` can't
+ * resolve to nothing. A name counts as defined when the configured set has
+ * it, when the rule referencing it declares it too, when a shipped top-level
+ * rule declares it for the whole document (a selector that is exactly
+ * `:root`, `:host`, `html`, `body`, or `*`), or when `exclude_variables`
+ * lists it - excluding a variable says something else defines it. A
+ * declaration scoped to any other selector is not taken as defining the name
+ * for other rules.
+ */
+const check_undefined_theme_variables = (
+	resources: BundledCssResources,
+	included_rule_indices: Set<number>,
+	exclude_variables: Set<string> | null,
+	include_theme: boolean
+): GenerationDiagnostic | null => {
+	const { style_rule_index, variable_graph } = resources;
+
+	const required: Set<string> = new Set();
+	const declared: Set<string> = new Set();
+	for (const index of included_rule_indices) {
+		const rule = style_rule_index.rules[index]!;
+		for (const v of rule.variables_required) required.add(v);
+		for (const v of rule.variables_defined) declared.add(v);
+	}
+
+	const undefined_variables: Set<string> = new Set();
+	const visited: Set<string> = new Set();
+	const visit = (name: string): void => {
+		if (visited.has(name) || declared.has(name) || exclude_variables?.has(name)) return;
+		visited.add(name);
+		// with theme output disabled nothing in the graph is emitted (a
+		// configured `theme` still populates it), so nothing in it counts
+		const info = include_theme ? variable_graph.variables.get(name) : undefined;
+		if (!info) {
+			if (default_variable_names.has(name)) undefined_variables.add(name);
+			return;
+		}
+		for (const value of [info.light_css, info.dark_css]) {
+			if (value === undefined) continue;
+			for (const dependency of extract_required_css_variables(value)) visit(dependency);
+		}
+	};
+	for (const name of required) visit(name);
+	if (undefined_variables.size === 0) return null;
+
+	const list = [...undefined_variables]
+		.sort()
+		.map((v) => `--${v}`)
+		.join(', ');
+	return {
+		phase: 'generation',
+		level: 'error',
+		message: include_theme
+			? `Base styles reference theme variables that the configured variables do not define: ${list}`
+			: `Base styles reference theme variables, but theme output is disabled (variables: null): ${
+					list
+				}`,
+		suggestion: include_theme
+			? 'Define them in variables - a callback can adjust the defaults instead of replacing them. For ones something else defines - another stylesheet, or base_css under a qualified selector like :root.dark - list them in exclude_variables.'
+			: "Keep variables and set additional_variables: 'all' to bundle the full theme, or set base_css: null too for utility-only mode. To pair these base styles with a separately imported theme stylesheet, set exclude_variables: default_variables.map((v) => v.name).",
+		identifier: 'undefined_theme_variables',
+		locations: null
+	};
+};
 
 // the theme's own overlay for the baked theme sublayer, filtered to the variables
 // the resolution kept so it stays as tree-shaken as the fuz.base block it
@@ -132,10 +212,13 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		additional_elements,
 		additional_variables,
 		exclude_elements,
-		exclude_variables,
+		exclude_variables: raw_exclude_variables,
 		log,
 		include_stats = false
 	} = options;
+
+	// a Set, for the lookups here and so the iterable is consumed once
+	const exclude_variables = raw_exclude_variables ? new Set(raw_exclude_variables) : null;
 
 	const utility_result = generate_classes_css({
 		class_names: all_classes,
@@ -148,24 +231,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 	});
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];
-
-	// Config error: base styles on, theme off (`variables: null`). The kept base
-	// rules and utility classes reference theme variables the disabled theme
-	// output won't define, so every such `var()` dangles. Utility-only mode
-	// (both off) is the way to bring your own; to ship the full variable set
-	// bundled, keep `variables` and set `additional_variables: 'all'`.
-	if (include_base && !include_theme) {
-		diagnostics.push({
-			phase: 'generation',
-			level: 'error',
-			message:
-				'Base styles are enabled but theme variables are disabled (variables: null); the emitted base styles reference theme variables nothing defines',
-			suggestion:
-				"Set base_css: null too for utility-only mode, or keep variables and set additional_variables: 'all' to bundle the full theme.",
-			identifier: 'theme_variables_disabled',
-			locations: null
-		});
-	}
 
 	// Footgun guard: a configured `theme` with theme output disabled
 	// (`variables: null`) is silently discarded - the theme flows into the
@@ -205,7 +270,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			additional_variables,
 			include_stats,
 			exclude_elements,
-			exclude_variables,
+			exclude_variables: exclude_variables ?? undefined,
 			explicit_elements,
 			explicit_variables
 		});
@@ -225,6 +290,17 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		}
 
 		diagnostics.push(...resolution.diagnostics);
+
+		// the base styles that ship must find their theme variables defined
+		if (include_base) {
+			const undefined_variables = check_undefined_theme_variables(
+				resources,
+				resolution.included_rule_indices,
+				exclude_variables,
+				include_theme
+			);
+			if (undefined_variables) diagnostics.push(undefined_variables);
+		}
 
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,

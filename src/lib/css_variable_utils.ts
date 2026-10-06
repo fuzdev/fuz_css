@@ -68,3 +68,102 @@ const CSS_VARIABLE_CHECK_PATTERN = /var\(\s*--[a-zA-Z_][a-zA-Z0-9_-]*/;
 export const has_css_variables = (css: string): boolean => {
 	return CSS_VARIABLE_CHECK_PATTERN.test(css);
 };
+
+/**
+ * Pattern for `var(--name` references plus what follows the name: `)` for a
+ * reference with no fallback, `,` for one with a fallback.
+ */
+const CSS_VARIABLE_REFERENCE_PATTERN = /var\(\s*--([a-zA-Z_][a-zA-Z0-9_-]*)\s*([,)])?/g;
+
+/**
+ * Extracts the CSS variables a string references with no fallback - the ones
+ * that must be defined for the value to resolve. `var(--a, 1px)` can't
+ * resolve to nothing, so `a` is left out, while the `b` in
+ * `var(--a, var(--b))` is required.
+ *
+ * @param css - CSS string potentially containing `var(--*)` references
+ * @returns set of variable names (without `--` prefix)
+ */
+export const extract_required_css_variables = (css: string): Set<string> => {
+	const variables: Set<string> = new Set();
+	for (const match of css.matchAll(CSS_VARIABLE_REFERENCE_PATTERN)) {
+		if (match[2] !== ',') variables.add(match[1]!);
+	}
+	return variables;
+};
+
+/**
+ * Pattern for a custom property declaration: `--name:` at the start of a
+ * declaration - after a block's brace, a `;`, the `}` of a nested rule, or
+ * whitespace - which a `var(--name` reference or a dashed ident in an at-rule
+ * prelude never is.
+ */
+const CSS_VARIABLE_DECLARATION_PATTERN = /(?:^|[{};\s])--([a-zA-Z_][a-zA-Z0-9_-]*)\s*:/g;
+
+/**
+ * Extracts the custom properties a CSS string declares.
+ *
+ * @param css - CSS string potentially containing `--name: value` declarations
+ * @returns set of variable names (without `--` prefix)
+ */
+export const extract_declared_css_variables = (css: string): Set<string> => {
+	const variables: Set<string> = new Set();
+	for (const match of css.matchAll(CSS_VARIABLE_DECLARATION_PATTERN)) {
+		variables.add(match[1]!);
+	}
+	return variables;
+};
+
+/** Whether `css` has an unquoted `url(` function token at `index`. */
+const is_css_url_start = (css: string, index: number): boolean =>
+	css.slice(index, index + 4).toLowerCase() === 'url(' &&
+	(index === 0 || !/[\w-]/.test(css[index - 1]!));
+
+/**
+ * Removes the comments from a CSS string, so text inside one isn't read as
+ * CSS. Quoted strings and unquoted `url()` values are left intact - a `/*`
+ * inside either is not a comment - and each comment becomes a space because a
+ * comment separates tokens. For analysis, not for output.
+ *
+ * @param css - CSS string potentially containing comments
+ * @returns the string without its comments, or `css` itself when it has none
+ */
+export const strip_css_comments = (css: string): string => {
+	if (!css.includes('/*')) return css;
+	let result = '';
+	let kept_from = 0;
+	let quote: string | null = null;
+	let i = 0;
+	while (i < css.length) {
+		const char = css[i]!;
+		if (quote !== null) {
+			if (char === '\\') {
+				i++; // skip the escaped character
+			} else if (char === quote) {
+				quote = null;
+			}
+		} else if (char === '"' || char === "'") {
+			quote = char;
+		} else if ((char === 'u' || char === 'U') && is_css_url_start(css, i)) {
+			// an unquoted url runs to its closing paren; a quoted one is a
+			// string, which the next iteration reads as one
+			let j = i + 4;
+			while (css[j] === ' ' || css[j] === '\t' || css[j] === '\n') j++;
+			if (css[j] !== '"' && css[j] !== "'") {
+				const end = css.indexOf(')', j);
+				i = end === -1 ? css.length : end + 1;
+				continue;
+			}
+			i = j;
+			continue;
+		} else if (char === '/' && css[i + 1] === '*') {
+			const end = css.indexOf('*/', i + 2);
+			result += css.slice(kept_from, i) + ' ';
+			i = end === -1 ? css.length : end + 2;
+			kept_from = i;
+			continue;
+		}
+		i++;
+	}
+	return result + css.slice(kept_from);
+};

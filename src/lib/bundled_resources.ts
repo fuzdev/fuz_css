@@ -50,8 +50,11 @@ export interface CreateBundledResourcesOptions {
 }
 
 /**
- * Builds the bundled CSS resources from generator options. The `style.css`
- * index is always built, even when only theme output is enabled.
+ * Builds the bundled CSS resources from generator options. The style-rule
+ * index is always built, even when only theme output is enabled - from the
+ * default `style.css` unless `base_css` supplies a stylesheet.
+ *
+ * @throws if `base_css` supplies something that isn't parseable CSS, including a callback that returns a non-string
  */
 export const create_bundled_resources = async (
 	options: CreateBundledResourcesOptions
@@ -64,8 +67,15 @@ export const create_bundled_resources = async (
 		style_rule_index = create_style_rule_index(base_css);
 	} else if (typeof base_css === 'function') {
 		// callback to modify the default CSS
-		const default_css = await load_default_style_css(deps);
-		style_rule_index = create_style_rule_index(base_css(default_css));
+		const result: unknown = base_css(await load_default_style_css(deps));
+		if (typeof result !== 'string') {
+			throw new Error(
+				`The base_css callback must return a CSS string, got ${
+					result === null ? 'null' : typeof result
+				}`
+			);
+		}
+		style_rule_index = create_style_rule_index(result);
 	} else {
 		// default style.css (undefined or null)
 		style_rule_index = await load_style_rule_index(deps);
