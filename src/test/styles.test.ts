@@ -73,7 +73,6 @@ const known_without_variables = new Set([
 	'clickable_transform_focus',
 	'clickable_transform_hover',
 	'clickable_transform_active',
-	'pane_shadow',
 	'font_size',
 	'icon_size',
 	'border_radius',
@@ -140,8 +139,21 @@ test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {
 	const dark_css = rule.css.slice(dark_at);
 	for (const { name, light, dark } of high_contrast_theme.variables) {
 		assert.include(light_css, `--${name}: ${light};`, `${name} light`);
-		assert.include(dark_css, `--${name}: ${dark};`, `${name} dark`);
+		// a single-slot variable applies in both schemes from the `:root` block
+		if (dark === undefined) {
+			assert.notInclude(dark_css, `--${name}:`, `${name} is single-slot`);
+		} else {
+			assert.include(dark_css, `--${name}: ${dark};`, `${name} dark`);
+		}
 	}
+});
+
+test('headings read the heading typography variables', () => {
+	const index = parse_style_css(main_stylesheet_text);
+	const rule = index.rules.find((r) => r.css.includes('h1, h2, h3, h4, h5, h6, .heading'));
+	assert(rule, 'style.css carries the shared heading rule');
+	assert.include(rule.css, 'font-family: var(--heading_font_family);');
+	assert.include(rule.css, 'letter-spacing: var(--heading_letter_spacing);');
 });
 
 test('untargetable base rules are core, so bundled output always ships them', () => {

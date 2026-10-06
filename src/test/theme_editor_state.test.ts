@@ -17,7 +17,7 @@ import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 import type { Theme } from '$lib/variable.ts';
 import { compose_themes } from '$lib/theme.ts';
 import { base_theme } from '$lib/themes/base.ts';
-import { neon_theme } from '$lib/themes/neon.ts';
+import { marquee_theme } from '$lib/themes/marquee.ts';
 import { default_variables } from '$lib/variables.ts';
 import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '$lib/ramps.ts';
 
@@ -25,7 +25,7 @@ const adaptive_default = default_variables.find((v) => v.name === 'shade_lightne
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;
 
 const create_editor = (): ThemeEditorState =>
-	new ThemeEditorState({ themes: [base_theme, neon_theme] });
+	new ThemeEditorState({ themes: [base_theme, marquee_theme] });
 
 describe('set_value slot semantics', () => {
 	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
@@ -138,7 +138,7 @@ describe('scheme stance', () => {
 });
 
 describe('scheme stance over a dual base theme', () => {
-	// a dual base authoring both slots itself - like concrete and smolder
+	// a dual base authoring both slots itself - like zine
 	const dual_base: Theme = {
 		name: 'dualish',
 		variables: [
@@ -261,7 +261,7 @@ describe('resolved_value', () => {
 
 	test('a stanced base resolves the same value in both schemes', () => {
 		const editor = create_editor();
-		editor.load_theme(neon_theme);
+		editor.load_theme(marquee_theme);
 		const light = editor.resolved_value('border_color_chroma', 'light');
 		assert.isNotNull(light);
 		assert.strictEqual(light, editor.resolved_value('border_color_chroma', 'dark'));
@@ -297,14 +297,14 @@ describe('load_theme and dirty', () => {
 	test('loading a theme flattens it as the base and carries its stance', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '2', 'light');
-		editor.load_theme(neon_theme);
-		assert.strictEqual(editor.based_on, neon_theme.name);
+		editor.load_theme(marquee_theme);
+		assert.strictEqual(editor.based_on, marquee_theme.name);
 		assert.strictEqual(editor.overrides.size, 0);
 		assert.strictEqual(editor.scheme, 'dark');
 		assert.isFalse(editor.dirty);
 		// the base theme's own variables flow into the merge
 		const merged_names = new Set(editor.merged_variables.map((v) => v.name));
-		for (const v of neon_theme.variables) {
+		for (const v of marquee_theme.variables) {
 			assert.isTrue(merged_names.has(v.name), v.name);
 		}
 	});
@@ -319,7 +319,7 @@ describe('load_theme and dirty', () => {
 describe('snapshots', () => {
 	test('round-trips name, base, scheme, and overrides', () => {
 		const editor = create_editor();
-		editor.load_theme(neon_theme);
+		editor.load_theme(marquee_theme);
 		editor.name = 'my theme'; // after the load, which renames the draft
 		editor.set_value(single_slot_default.name, '1.4', 'light');
 		const snapshot = editor.to_snapshot();
@@ -327,7 +327,7 @@ describe('snapshots', () => {
 		const restored = create_editor();
 		restored.restore_snapshot(snapshot);
 		assert.strictEqual(restored.name, 'my theme');
-		assert.strictEqual(restored.based_on, neon_theme.name);
+		assert.strictEqual(restored.based_on, marquee_theme.name);
 		assert.strictEqual(restored.scheme, 'dark');
 		assert.deepEqual(restored.overrides.get(single_slot_default.name), { light: '1.4' });
 	});
@@ -386,10 +386,10 @@ describe('discard_confirm_message', () => {
 	test('names the discarded work', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '2', 'light');
-		assert.include(discard_confirm_message(editor, 'neon'), '1 edited knob(s)');
+		assert.include(discard_confirm_message(editor, 'marquee'), '1 edited knob(s)');
 		editor.reset_all();
 		editor.set_scheme('dark');
-		assert.include(discard_confirm_message(editor, 'neon'), 'scheme change');
+		assert.include(discard_confirm_message(editor, 'marquee'), 'scheme change');
 	});
 });
 
@@ -429,13 +429,13 @@ describe('applied theme', () => {
 	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', light: '1.5' }] };
 	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', light: '0.5' }] };
 	const create_contrast_editor = (): ThemeEditorState =>
-		new ThemeEditorState({ themes: [base_theme, neon_theme], contrast_modifiers: [low, high] });
+		new ThemeEditorState({ themes: [base_theme, marquee_theme], contrast_modifiers: [low, high] });
 
 	test('a clean editor applies and picks its base', () => {
 		const editor = create_contrast_editor();
 		assert.strictEqual(editor.applied_theme, base_theme);
 		assert.strictEqual(editor.picked_theme, base_theme);
-		assert.deepEqual(editor.picker_themes, [base_theme, neon_theme]);
+		assert.deepEqual(editor.picker_themes, [base_theme, marquee_theme]);
 	});
 
 	test('a dirty editor applies and picks its draft, which joins the picker', () => {
@@ -461,20 +461,20 @@ describe('applied theme', () => {
 	test('load_theme_guarded loads over a clean editor without asking', () => {
 		const editor = create_contrast_editor();
 		let asked = 0;
-		assert.isTrue(editor.load_theme_guarded(neon_theme, () => (asked++, true)));
+		assert.isTrue(editor.load_theme_guarded(marquee_theme, () => (asked++, true)));
 		assert.strictEqual(asked, 0);
-		assert.strictEqual(editor.based_on, neon_theme.name);
+		assert.strictEqual(editor.based_on, marquee_theme.name);
 	});
 
 	test('load_theme_guarded keeps a dirty draft when the discard is declined', () => {
 		const editor = create_contrast_editor();
 		editor.set_value(single_slot_default.name, '2', 'light');
 		let message = '';
-		assert.isFalse(editor.load_theme_guarded(neon_theme, (m) => ((message = m), false)));
-		assert.include(message, neon_theme.name);
+		assert.isFalse(editor.load_theme_guarded(marquee_theme, (m) => ((message = m), false)));
+		assert.include(message, marquee_theme.name);
 		assert.strictEqual(editor.based_on, base_theme.name);
 		assert.isTrue(editor.dirty);
-		assert.isTrue(editor.load_theme_guarded(neon_theme, () => true));
+		assert.isTrue(editor.load_theme_guarded(marquee_theme, () => true));
 		assert.isFalse(editor.dirty);
 	});
 
@@ -488,18 +488,18 @@ describe('applied theme', () => {
 	test('sync_applied_theme adopts an applied base by name', () => {
 		const editor = create_contrast_editor();
 		// a theme restored from storage is an equal value, not the same object
-		assert.isTrue(editor.sync_applied_theme(structuredClone(neon_theme)));
-		assert.strictEqual(editor.base_theme, neon_theme);
-		assert.strictEqual(editor.scheme, neon_theme.scheme);
+		assert.isTrue(editor.sync_applied_theme(structuredClone(marquee_theme)));
+		assert.strictEqual(editor.base_theme, marquee_theme);
+		assert.strictEqual(editor.scheme, marquee_theme.scheme);
 		assert.isNull(editor.contrast_modifier);
-		assert.strictEqual(editor.applied_theme, neon_theme);
+		assert.strictEqual(editor.applied_theme, marquee_theme);
 	});
 
 	test('sync_applied_theme adopts an applied contrast composition', () => {
 		const editor = create_contrast_editor();
-		const applied = compose_themes(neon_theme, high);
+		const applied = compose_themes(marquee_theme, high);
 		assert.isTrue(editor.sync_applied_theme(applied));
-		assert.strictEqual(editor.base_theme, neon_theme);
+		assert.strictEqual(editor.base_theme, marquee_theme);
 		assert.strictEqual(editor.contrast_modifier, high);
 		assert.strictEqual(editor.applied_theme.name, applied.name);
 	});
@@ -507,7 +507,7 @@ describe('applied theme', () => {
 	test('sync_applied_theme clears a modifier the applied theme lacks', () => {
 		const editor = create_contrast_editor();
 		editor.contrast_modifier = low;
-		assert.isTrue(editor.sync_applied_theme(neon_theme));
+		assert.isTrue(editor.sync_applied_theme(marquee_theme));
 		assert.isNull(editor.contrast_modifier);
 	});
 
@@ -517,7 +517,7 @@ describe('applied theme', () => {
 		assert.isFalse(editor.sync_applied_theme({ name: UNSAVED_THEME_NAME, variables: [] }));
 		assert.strictEqual(editor.based_on, base_theme.name);
 		editor.set_value(single_slot_default.name, '2', 'light');
-		assert.isFalse(editor.sync_applied_theme(neon_theme));
+		assert.isFalse(editor.sync_applied_theme(marquee_theme));
 		assert.strictEqual(editor.based_on, base_theme.name);
 	});
 

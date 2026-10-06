@@ -27,11 +27,11 @@
 	},
 	"pane": {
 		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
-		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t"
+		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow);\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t"
 	},
 	"panel": {
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
-		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t"
+		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t\tbox-shadow: var(--panel_shadow);\n\t\t"
 	},
 	"xs": {
 		"comment": "Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.",

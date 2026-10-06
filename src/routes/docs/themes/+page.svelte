@@ -2,12 +2,13 @@
 	import { BROWSER } from 'esm-env';
 
 	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
-	import { smolder_theme } from '$lib/themes/smolder.ts';
+	import { zine_theme } from '$lib/themes/zine.ts';
+	import { pebble_theme } from '$lib/themes/pebble.ts';
 	import { parchment_theme } from '$lib/themes/parchment.ts';
-	import { concrete_theme } from '$lib/themes/concrete.ts';
 	import { phosphor_theme } from '$lib/themes/phosphor.ts';
-	import { neon_theme } from '$lib/themes/neon.ts';
-	import { nineties_theme } from '$lib/themes/nineties.ts';
+	import { guestbook_theme } from '$lib/themes/guestbook.ts';
+	import { marquee_theme } from '$lib/themes/marquee.ts';
+	import { timetable_theme } from '$lib/themes/timetable.ts';
 	import {
 		ThemeEditorState,
 		type ThemeEditorSnapshotData
@@ -17,12 +18,13 @@
 	// users - registry membership is policy for consumer pickers, not UX
 	const themes = [
 		...default_themes,
-		smolder_theme,
+		zine_theme,
+		pebble_theme,
 		parchment_theme,
-		concrete_theme,
-		nineties_theme,
 		phosphor_theme,
-		neon_theme
+		guestbook_theme,
+		marquee_theme,
+		timetable_theme
 	];
 
 	const create_editor = (): ThemeEditorState =>
@@ -142,9 +144,9 @@
 		<p>
 			A theme can declare a single-scheme stance with <code>scheme: 'light' | 'dark'</code> - its
 			one appearance then renders in both color schemes and <MdnLink path="Web/CSS/color-scheme" />
-			is pinned to match. The neon and phosphor themes are dark-only this way - a CRT and a lit sign
-			have no daytime appearance. Everything else is dual-scheme, including parchment, whose dark
-			appearance is the same page by candlelight.
+			is pinned to match. The phosphor and marquee themes are dark-only this way - a CRT and a lit
+			sign have no daytime appearance. Everything else is dual-scheme, including parchment, whose
+			dark appearance is the same page by candlelight.
 		</p>
 	</TomeSection>
 	<TomeSection>

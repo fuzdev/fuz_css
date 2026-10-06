@@ -33,7 +33,17 @@ export const font_size_variants = [
 
 export const font_size_names = font_size_variants.map((s) => 'font_size_' + s);
 
-/** Font sizes in rem, stepping by roughly sqrt(golden ratio) and rounded. */
+/**
+ * The default ratio between font size steps above `md`, roughly sqrt(golden
+ * ratio). In CSS it is the `--type_scale_ratio` knob those steps derive from.
+ */
+export const TYPE_SCALE_RATIO = 1.272;
+
+/**
+ * Font sizes in rem. The steps above `md` are `md * TYPE_SCALE_RATIO ** n`
+ * rounded to two places, the numeric twin of the derived CSS defaults; `md`
+ * and the steps below it are fitted literals.
+ */
 export const FONT_SIZES: Record<SizeVariant, number> = {
 	xs: 1,
 	sm: 1.3,

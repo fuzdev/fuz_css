@@ -98,7 +98,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
 			background-color: var(--shade_00);
-			box-shadow: var(--pane_shadow, var(--shadow_bottom_md) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha_50), transparent));
+			box-shadow: var(--pane_shadow);
 			border-radius: var(--border_radius, var(--border_radius_xs));
 		`
 	},
@@ -107,6 +107,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
 			background-color: var(--fg_10);
+			box-shadow: var(--panel_shadow);
 		`
 	},
 	/*

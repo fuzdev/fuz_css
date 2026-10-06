@@ -86,6 +86,17 @@
 		</div>
 	</TomeSection>
 	<TomeSection>
+		<TomeSectionHeader text="Surface shadows" />
+		<p>
+			Three kinds of surface carry a shadow by default, each through a variable a theme can
+			retarget: buttons through <code>--button_shadow</code> (with <code>_hover</code> and
+			<code>_active</code>), a floating <code>.pane</code> through <code>--pane_shadow</code>, and
+			an embedded <code>.panel</code> through <code>--panel_shadow</code>, which is
+			<code>none</code> unless a theme lifts its panels. A <code>shadow_*</code> class on the same
+			element still wins.
+		</p>
+	</TomeSection>
+	<TomeSection>
 		<TomeSectionHeader text="Colored shadows" />
 		<p>
 			Use <code>shadow_{'{letter}'}_{'{intensity}'}</code> classes to apply colored shadows. The

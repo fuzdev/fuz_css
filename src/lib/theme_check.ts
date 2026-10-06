@@ -696,7 +696,9 @@ const to_shape_issue = (
  * variables - including a pairing warning when an intent hue binds a palette
  * letter whose chroma multiplier differs from the intent's own
  * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
- * chroma character is otherwise silently dropped). Value validation is
+ * chroma character is otherwise silently dropped), and a separation warning
+ * when the accent hue lands within `ACCENT_STATUS_HUE_SEPARATION` of a
+ * status hue. Value validation is
  * advisory and never an error. An empty array means the theme is structurally
  * valid.
  *
@@ -752,8 +754,73 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));
 		}
 	}
-	issues.push(...validate_binding_pairing(parsed.data));
+	const resolver = new ThemeResolver(parsed.data);
+	issues.push(...validate_binding_pairing(parsed.data, resolver));
+	issues.push(...validate_accent_separation(parsed.data, resolver));
 	return issues;
+};
+
+/**
+ * How far in degrees the accent hue has to sit from each status hue before
+ * `validate_theme` stops warning. Under the palette's tightest default pair
+ * (red and orange, 12 degrees apart), so the warning fires on a clone or a
+ * near-clone, never on the spacing the defaults themselves ship.
+ */
+export const ACCENT_STATUS_HUE_SEPARATION = 10;
+
+// the separation lint: two intents at the same hue angle render the same
+// color at every stop, so an accent that lands on a status hue makes links,
+// focus, and selection indistinguishable from that status. Each scheme is
+// read through its own effective slot, and a hue that won't resolve to a
+// number is skipped rather than guessed at
+const validate_accent_separation = (theme: Theme, resolver: ThemeResolver): Array<ThemeIssue> => {
+	const issues: Array<ThemeIssue> = [];
+	// a stanced theme renders one appearance, so name that scheme alone
+	const schemes =
+		theme.scheme === 'light' || theme.scheme === 'dark' ? [theme.scheme] : color_scheme_variants;
+	// the schemes where two intents at one hue can't be told apart by mistake:
+	// a grayscale palette has no hue to collide, and a palette collapsed onto
+	// one angle is monochrome on purpose
+	const checked = schemes.filter((scheme) => {
+		const chroma_scale = resolver.resolve('chroma_scale', scheme);
+		if (chroma_scale.ok && chroma_scale.value === 0) return false;
+		const hues = palette_variants.map((letter) => resolver.resolve(`hue_${letter}`, scheme));
+		const first = hues[0]!;
+		const collapsed =
+			first.ok &&
+			hues.every(
+				(hue) => hue.ok && hue_distance(hue.value, first.value) < ACCENT_STATUS_HUE_SEPARATION
+			);
+		return !collapsed;
+	});
+	for (const intent of intent_variants) {
+		if (intent === 'accent') continue;
+		for (const scheme of checked) {
+			const accent = resolver.resolve('hue_accent', scheme);
+			const status = resolver.resolve(`hue_${intent}`, scheme);
+			if (!accent.ok || !status.ok) continue;
+			const distance = hue_distance(accent.value, status.value);
+			if (distance < ACCENT_STATUS_HUE_SEPARATION) {
+				issues.push({
+					level: 'warning',
+					message: `hue_accent sits ${Math.round(distance)} degrees from hue_${
+						intent
+					} in ${scheme} - intents at one hue render the same color, so links, focus, and selection read as ${
+						intent
+					}; rebind one of them`,
+					variable: 'hue_accent'
+				});
+				break;
+			}
+		}
+	}
+	return issues;
+};
+
+// the shorter way around the hue circle, for angles in any range
+const hue_distance = (a: number, b: number): number => {
+	const turn = (((a - b) % 360) + 360) % 360;
+	return Math.min(turn, 360 - turn);
 };
 
 // the pairing lint: an intent hue bound to a palette letter (authored
@@ -761,9 +828,8 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 // the letter's chroma multiplier and the intent's twin disagree - the theme
 // probably meant the character to follow the binding (the neutral is exempt:
 // its character is `--neutral_chroma` by design)
-const validate_binding_pairing = (theme: Theme): Array<ThemeIssue> => {
+const validate_binding_pairing = (theme: Theme, resolver: ThemeResolver): Array<ThemeIssue> => {
 	const issues: Array<ThemeIssue> = [];
-	const resolver = new ThemeResolver(theme);
 	for (const intent of intent_variants) {
 		const hue_name = `hue_${intent}`;
 		const authored = theme.variables.find((v) => v.name === hue_name);

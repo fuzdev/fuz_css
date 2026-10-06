@@ -268,6 +268,23 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [0, 0.15],
 		step: 0.001
 	},
+	{
+		// the role every default border paints through - repoint it at another
+		// stop (or a text stop, for opaque high-contrast rules) to move them all
+		name: 'border_color',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'md',
+		tier: 'semantic'
+	},
+	{
+		// the sunken fill of inputs; at an extreme ground it has nowhere to go
+		name: 'input_fill',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic'
+	},
 	// color - micro-surface variables consumed by style.css
 	{
 		name: 'caret_color',
@@ -348,6 +365,8 @@ export const theme_knobs: Array<ThemeKnob> = [
 		leverage: 'sm',
 		tier: 'semantic'
 	},
+	// the focus ring's width, a tier of the border width ladder by default
+	length_knob('outline_width_focus', 'shape'),
 	length_knob('border_width', 'shape'),
 	...border_width_variants.map((v) => length_knob(`border_width_${v}`, 'shape')),
 	...border_radius_variants.map((v) => length_knob(`border_radius_${v}`, 'shape')),
@@ -393,6 +412,9 @@ export const theme_knobs: Array<ThemeKnob> = [
 	{ name: 'button_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	{ name: 'button_shadow_hover', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	{ name: 'button_shadow_active', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	// the surface shadows: a floating `.pane` and an embedded `.panel`
+	{ name: 'pane_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
+	{ name: 'panel_shadow', kind: 'shadow', axis: 'depth', leverage: 'md', tier: 'semantic' },
 	// typography
 	{
 		// the body font; the three stacks below stay what they say they are
@@ -401,6 +423,18 @@ export const theme_knobs: Array<ThemeKnob> = [
 		axis: 'typography',
 		leverage: 'lg',
 		tier: 'semantic'
+	},
+	{
+		// the ratio between font size steps above `md` - down flattens the
+		// heading hierarchy, up dramatizes it; body and small text stay put
+		// (the `lg`/`xl` size composites step up the same ladder, so they follow)
+		name: 'type_scale_ratio',
+		kind: 'number',
+		axis: 'typography',
+		leverage: 'lg',
+		tier: 'semantic',
+		range: [1.1, 1.5],
+		step: 0.002
 	},
 	{
 		name: 'font_family_sans',
@@ -431,6 +465,15 @@ export const theme_knobs: Array<ThemeKnob> = [
 		tier: 'semantic'
 	},
 	{
+		// heading tracking - tighten it under heavy display type, open it for
+		// small capitals; an em value follows each heading tier's size
+		name: 'heading_letter_spacing',
+		kind: 'length',
+		axis: 'typography',
+		leverage: 'sm',
+		tier: 'semantic'
+	},
+	{
 		name: 'font_weight',
 		kind: 'number',
 		axis: 'typography',
@@ -449,6 +492,15 @@ export const theme_knobs: Array<ThemeKnob> = [
 		range: [100, 900],
 		step: 100,
 		hook: true
+	},
+	{
+		// how a link is marked at rest; hover and selected carry their own
+		name: 'text_decoration',
+		kind: 'enum',
+		axis: 'typography',
+		leverage: 'md',
+		tier: 'semantic',
+		values: ['none', 'underline', 'underline dotted', 'underline dashed']
 	},
 	...line_height_variants.map((v): ThemeKnob => ({
 		name: `line_height_${v}`,

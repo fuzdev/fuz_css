@@ -1,11 +1,11 @@
 import type { Theme } from '../variable.ts';
 
 /**
- * An era exemplar theme: the illuminated manuscript. Warm parchment surfaces
- * (the neutral's default brown binding, tinted up), rubrication-red accents
- * the way scribes marked emphasis, serif body text, and double-ruled frames.
- * Chroma eases below 1 for aged pigment - the one exemplar that turns the
- * headline chroma lever down instead of up.
+ * An exemplar theme: the manuscript page. Structure comes from type and
+ * ruling - serif body text on warm parchment surfaces (the neutral's
+ * default brown binding, tinted up), rubrication-red accents the way scribes
+ * marked emphasis, and double-ruled frames. Chroma eases below 1 for aged
+ * pigment, the page rather than its illumination.
  *
  * Dual-scheme: the dark appearance is the same page by candlelight, the
  * ground deepening to tanned leather and the ink warming to cream rather than
@@ -26,6 +26,9 @@ export const parchment_theme: Theme = {
 		{ name: 'text_lightness_curve', dark: '0.72' },
 		// rubrication: links/focus/selection mark themselves in red
 		{ name: 'hue_accent', light: 'var(--hue_c)' },
+		// the accent took the red slot, so errors move to the crimson of the
+		// pink slot and a link never reads as one
+		{ name: 'hue_negative', light: 'var(--hue_g)' },
 		// aged pigment - inks fade, so the whole palette eases down
 		{ name: 'chroma_scale', light: '0.85' },
 		// serif body text; headings are already serif by default

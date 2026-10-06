@@ -90,7 +90,7 @@
 ]`}
 		/>
 		<p>
-			The <TomeLink slug="themes">nineties</TomeLink> exemplar theme is built on exactly this.
+			The <TomeLink slug="themes">guestbook</TomeLink> exemplar theme is built on exactly this.
 		</p>
 	</TomeSection>
 	<TomeSection>

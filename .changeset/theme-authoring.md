@@ -26,8 +26,9 @@ Breaking:
   throwing, for a theme that skipped the schema: what isn't the declared
   type is dropped (a `variables` that isn't an array, an entry that isn't
   an object, a name, slot, or summary that isn't a string).
-- `default_themes` is just base. Low/high contrast are `contrast_modifiers`,
-  composed over a theme with `compose_themes(base, ...overlays)`.
+- `default_themes` is base and ledger. Low/high contrast are
+  `contrast_modifiers`, composed over a theme with
+  `compose_themes(base, ...overlays)`.
 
 New:
 
@@ -35,14 +36,21 @@ New:
   single-scheme theme single-slot and pass it through
   `resolve_theme_stance` (`theme_stance.ts`), which fills `scheme_mirror`;
   the renderer pins `color-scheme`.
-- Exemplar themes under `themes/`: smolder, parchment, concrete, nineties,
-  phosphor (dark-only), neon (dark-only).
+- Themes under `themes/`: ledger (registered), and the exemplars zine,
+  pebble, parchment, phosphor (dark-only), guestbook, marquee (dark-only),
+  timetable.
 - Scale knobs `--shadow_alpha_scale`, `--radius_scale`, `--space_scale`,
-  `--font_weight`, `--heading_font_weight` (hook; setting it flattens the
-  ladder), `--heading_font_family`, `--background_image`.
+  `--type_scale_ratio`, `--font_weight`, `--heading_font_weight` (hook;
+  setting it flattens the ladder), `--heading_font_family`,
+  `--heading_letter_spacing`, `--background_image`.
+- `shadow_css.ts`: `render_shadow_css(shape, size, color, alpha)` builds one
+  `box-shadow` layer from the shadow tokens, for authoring
+  `--button_shadow`, `--pane_shadow`, and `--panel_shadow`; `ShadowShape`.
 - `knobs.ts`: the typed knob catalog (`theme_knobs`, `theme_knob_by_name`,
   `theme_knob_axes`); `palette_glosses` in `variable_data.ts`.
-- `theme_check.ts`: `validate_theme(unknown)`, `check_theme` (gamut,
+- `theme_check.ts`: `validate_theme(unknown)`, which among its warnings
+  flags an accent hue within `ACCENT_STATUS_HUE_SEPARATION` degrees of a
+  status hue (intents at one hue render the same color), `check_theme` (gamut,
   monotonicity, contrast gates; `GATE_*` thresholds), `compile_theme`
   (per-theme chroma caps, each computed at the lightness its stop resolves
   to), `create_theme_resolver`, `known_theme_variable_names`,

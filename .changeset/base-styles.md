@@ -35,6 +35,16 @@ Breaking:
   duration on the element that needs one.
 - The checkbox checkmark no longer reads the `--left`/`--top` position
   hooks.
+- `.pane` takes its shadow from the declared `--pane_shadow` (same default)
+  and no longer reads a contextual `--shadow_color`; `.panel` declares
+  `box-shadow: var(--panel_shadow)` (default `none`), so it resets the
+  shadow of an element it is combined with, like a `.pane` or a `button`. A
+  `shadow_*` class on either still wins.
+- The font sizes above `md` (`--font_size_lg` to `--font_size_xl9`) derive
+  from `--type_scale_ratio` (default `1.272`, also `TYPE_SCALE_RATIO` in
+  `variable_data.ts`) instead of being literals. Computed sizes match the
+  old values to two decimal places of a rem. The `lg`/`xl` size composites
+  read those sizes, so they follow the ratio.
 - `::placeholder` and `::file-selector-button` styles are scoped to
   `input`/`textarea`, so bundled output ships them only with those elements.
 
@@ -42,11 +52,14 @@ New:
 
 - Focus outlines use `outline-offset: var(--outline_offset)` (default
   `1px`).
+- Headings read `letter-spacing: var(--heading_letter_spacing)` (default
+  `normal`).
 - Themable micro-surfaces: `--scrollbar_thumb_color` (`var(--shade_40)`),
   `--scrollbar_track_color` (transparent), `--caret_color`
   (`var(--accent_50)`), `--backdrop_color` (`var(--darken_60)`).
-- `@media (prefers-contrast: more)` maps onto the curve knobs in the
-  `fuz.preferences` layer; theme overrides beat it.
+- `@media (prefers-contrast: more)` maps onto the curve knobs and steps
+  `--border_color` up to `--shade_50` in the `fuz.preferences` layer; theme
+  overrides beat it.
 - `check_theme` gates the stop-60 pairings above at AA
   (`GATE_SELECTED_TEXT`, `GATE_PALETTE_TEXT`), measuring the `.palette_X`
   button label against its rendered rest fill (its own color at 8% alpha

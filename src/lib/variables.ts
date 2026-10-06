@@ -15,11 +15,13 @@
  */
 
 import type { StyleVariable } from './variable.ts';
+import { render_shadow_css } from './shadow_css.ts';
 import {
 	BORDER_RADII,
 	DISTANCES,
 	DURATIONS,
 	FONT_SIZES,
+	TYPE_SCALE_RATIO,
 	ICON_SIZES,
 	LINE_HEIGHTS,
 	OVERLAY_ALPHAS,
@@ -218,20 +220,14 @@ const shadow_variables = (size: ShadowSizeVariant): Array<StyleVariable> => {
 
 // the inset direction flips per color scheme so the highlight always reads as
 // lit from above; `active` is `hover` inverted, pressing the button inward
-//
-// the umbra names `--shadow_color_umbra` outright rather than going through
-// the contextual `var(--shadow_color, ...)` the `.shadow_*` classes set: a
-// custom property's var()s substitute against the declaring element, and
-// these are declared on `:root`, so that indirection could never see a value
-// set further down the tree - it only ever resolved to the fallback
 const button_shadow_slots = (
 	size: ShadowSizeVariant,
 	alpha: NumericScaleVariant
 ): { light: string; dark: string } => {
-	const umbra = (edge: string) =>
-		`var(--shadow_inset_${edge}_${size}) color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_${alpha}), transparent)`;
-	const highlight = (edge: string) =>
-		`var(--shadow_inset_${edge}_${size}) color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_${alpha}), transparent)`;
+	const umbra = (edge: 'top' | 'bottom') =>
+		render_shadow_css(`shadow_inset_${edge}`, size, 'umbra', alpha);
+	const highlight = (edge: 'top' | 'bottom') =>
+		render_shadow_css(`shadow_inset_${edge}`, size, 'highlight', alpha);
 	return {
 		light: `${umbra('bottom')}, ${highlight('top')}`,
 		dark: `${umbra('top')}, ${highlight('bottom')}`
@@ -468,15 +464,36 @@ export const default_variables: Array<StyleVariable> = [
 	{ name: 'font_family', light: 'var(--font_family_sans)', summary: 'the body font' },
 	{ name: 'font_weight', light: '400', summary: 'base body font weight' },
 	{ name: 'heading_font_family', light: 'var(--font_family_serif)' },
+	{
+		name: 'heading_letter_spacing',
+		light: 'normal',
+		summary: 'heading tracking, best in em so it follows each tier'
+	},
 	// `--heading_font_weight` is a hook consumed by `style.css` with per-tier
 	// fallbacks (h1 300 … h5 900), not a declared variable - setting it flattens
 	// the heading weight ladder deliberately (display-heavy themes); see `knobs.ts`
 
 	/* sizes like font-size */
-	...font_size_variants.map((size) => ({
-		name: `font_size_${size}`,
-		light: `${FONT_SIZES[size]}rem`
-	})),
+	// the steps above `md` derive from one ratio, so a theme flattens or
+	// dramatizes the whole heading hierarchy with a single knob; `md` (the
+	// body size) and the steps below it stay literal, so body text never moves
+	// and small text never shrinks
+	{
+		name: 'type_scale_ratio',
+		light: String(TYPE_SCALE_RATIO),
+		summary: 'the ratio between font size steps above md'
+	},
+	...font_size_variants.map((size, i) => {
+		// steps counted from `md`, the size the scale grows from
+		const step = i - font_size_variants.indexOf('md');
+		return {
+			name: `font_size_${size}`,
+			light:
+				step > 0
+					? `calc(${FONT_SIZES.md}rem * pow(var(--type_scale_ratio), ${step}))`
+					: `${FONT_SIZES[size]}rem`
+		};
+	}),
 
 	...line_height_variants.map((size) => ({
 		name: `line_height_${size}`,
@@ -563,6 +580,19 @@ export const default_variables: Array<StyleVariable> = [
 		name: 'button_shadow_active',
 		light: button_shadow_hover_slots.dark,
 		dark: button_shadow_hover_slots.light
+	},
+
+	/* surfaces */
+	// the floating `.pane` and the embedded `.panel`
+	{
+		name: 'pane_shadow',
+		light: render_shadow_css('shadow_bottom', 'md', 'umbra', '50'),
+		summary: 'the shadow under a floating `.pane`'
+	},
+	{
+		name: 'panel_shadow',
+		light: 'none',
+		summary: 'the shadow of an embedded `.panel`, none by default'
 	},
 
 	/* inputs */

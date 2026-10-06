@@ -49,12 +49,13 @@ Notes:
 		}
 	}
 
-	/* map the OS contrast preference onto the curve knobs, mirroring the
-		'high contrast' theme */
+	/* map the OS contrast preference onto the same variables the
+		'high contrast' modifier sets: the curve knobs and the border role */
 	@media (prefers-contrast: more) {
 		:root {
 			--shade_lightness_00: 1;
 			--text_lightness_curve: 0.45;
+			--border_color: var(--shade_50);
 		}
 		:root.dark {
 			--shade_lightness_00: 0;
@@ -181,6 +182,7 @@ Respects `hidden="until-found"` for find-in-page support.
 		font-family: var(--heading_font_family);
 		font-size: var(--font_size, inherit);
 		line-height: var(--line_height_sm);
+		letter-spacing: var(--heading_letter_spacing);
 		text-wrap: balance; /* @see https://developer.mozilla.org/en-US/docs/Web/CSS/text-wrap#balance */
 		/* TODO use this pattern elsewhere? provides API to components like `MdnLogo` */
 		overflow-wrap: break-word; /* TODO @many is this best? `anywhere` instead? what about adding elsewhere? */

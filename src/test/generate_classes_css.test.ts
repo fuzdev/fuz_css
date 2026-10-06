@@ -6,6 +6,7 @@ import {
 	type CssClassDefinitionInterpreter
 } from '$lib/css_class_generation.ts';
 import { css_class_composites } from '$lib/css_class_composites.ts';
+import { css_class_definitions } from '$lib/css_class_definitions.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,
@@ -803,6 +804,37 @@ describe('generate_classes_css', () => {
 			// Set naturally deduplicates
 			assert.strictEqual(result.variables_used.size, 1);
 			assert.isTrue(result.variables_used.has('space_md'));
+		});
+	});
+
+	describe('surface shadows', () => {
+		test('pane and panel read their shadow variables', () => {
+			const result = generate_classes_css({
+				class_names: ['pane', 'panel'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_contains(
+				result.css,
+				'box-shadow: var(--pane_shadow);',
+				'box-shadow: var(--panel_shadow);'
+			);
+			assert.isTrue(result.variables_used.has('pane_shadow'));
+			assert.isTrue(result.variables_used.has('panel_shadow'));
+		});
+
+		test('a shadow class on a panel or pane lands after the composite and wins', () => {
+			// both sit in the utilities layer at one specificity, so source order
+			// is what lets `class="panel shadow_inset_xs"` keep its shadow
+			const result = generate_classes_css({
+				class_names: ['shadow_inset_xs', 'shadow_md', 'panel', 'pane'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_order(result.css, '.pane {', '.shadow_md {');
+			assert_css_order(result.css, '.panel {', '.shadow_inset_xs {');
 		});
 	});
 

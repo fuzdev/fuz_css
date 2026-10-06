@@ -4,30 +4,12 @@ import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.t
 import { StyleVariable, type Theme } from '$lib/variable.ts';
 import { validate_theme } from '$lib/theme_check.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
-
-// every theme module ships from themes/, so discover them by glob - a new
-// module can't silently skip validation by being left off a hand-list
-const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
-
-const is_theme = (value: unknown): value is Theme =>
-	value !== null &&
-	typeof value === 'object' &&
-	'name' in value &&
-	'variables' in value &&
-	Array.isArray((value as Theme).variables);
-
-/** Every theme exported from a `themes/` module, registry and exemplar alike. */
-const shipped_themes: Array<Theme> = Object.values(theme_modules).flatMap((mod) =>
-	Object.values(mod as Record<string, unknown>).filter(is_theme)
-);
+import { shipped_themes, shipped_base_themes } from './theme_test_helpers.ts';
 
 const registry_names = new Set(default_themes.map((t) => t.name));
-const modifier_names = new Set(contrast_modifiers.map((t) => t.name));
 
 /** Shipped exemplar themes: outside the registry and not contrast modifiers. */
-const exemplar_themes = shipped_themes.filter(
-	(t) => !registry_names.has(t.name) && !modifier_names.has(t.name)
-);
+const exemplar_themes = shipped_base_themes.filter((t) => !registry_names.has(t.name));
 
 describe('default_themes', () => {
 	test('all shipped themes have valid names', () => {
@@ -62,7 +44,7 @@ describe('default_themes', () => {
 
 	test('default_themes contains expected themes', () => {
 		const names = default_themes.map((t) => t.name);
-		assert.include(names, 'base');
+		assert.deepEqual(names, ['base', 'ledger']);
 	});
 
 	test('contrast is a modifier, not a registry theme', () => {
@@ -98,7 +80,15 @@ describe('shipped themes', () => {
 		for (const registered of default_themes) {
 			assert.include(names, registered.name);
 		}
-		for (const exemplar of ['smolder', 'parchment', 'concrete', 'phosphor', 'neon', 'nineties']) {
+		for (const exemplar of [
+			'zine',
+			'pebble',
+			'parchment',
+			'phosphor',
+			'guestbook',
+			'marquee',
+			'timetable'
+		]) {
 			assert.include(names, exemplar);
 		}
 	});
@@ -127,8 +117,8 @@ describe('theme tiers', () => {
 		}
 	});
 
-	test('neon is the only palette-tier exemplar', () => {
+	test('marquee is the only palette-tier exemplar', () => {
 		const palette_tier = exemplar_themes.filter(sets_palette_tier).map((t) => t.name);
-		assert.deepEqual(palette_tier, ['neon']);
+		assert.deepEqual(palette_tier, ['marquee']);
 	});
 });

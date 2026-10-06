@@ -3,7 +3,7 @@ import { test, assert, describe } from 'vitest';
 import { compile_theme, check_theme } from '$lib/theme_check.ts';
 import type { Theme } from '$lib/variable.ts';
 import { default_themes } from '$lib/themes.ts';
-import { neon_theme } from '$lib/themes/neon.ts';
+import { marquee_theme } from '$lib/themes/marquee.ts';
 import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS, PALETTE_HUES } from '$lib/ramps.ts';
 import { oklch_max_srgb_chroma } from '$lib/oklch.ts';
@@ -32,10 +32,10 @@ const gamut_fails = (report: ReturnType<typeof check_theme>): Array<string> =>
 		.map((e) => `${e.scheme} ${e.subject}`);
 
 describe('compile_theme', () => {
-	test('the neon exemplar emits no cap overrides', () => {
+	test('the marquee exemplar emits no cap overrides', () => {
 		// its rotated yellow slot stays inside the baked worst-hue caps
-		const { theme } = compile_theme(neon_theme);
-		assert.strictEqual(theme.variables.length, neon_theme.variables.length);
+		const { theme } = compile_theme(marquee_theme);
+		assert.strictEqual(theme.variables.length, marquee_theme.variables.length);
 	});
 
 	test('the base theme emits no cap overrides', () => {

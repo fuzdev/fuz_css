@@ -90,7 +90,9 @@
 			<code>var(--font_family_sans)</code> - a theme that wants serif or mono body text retargets
 			that one rather than redefining a stack. Headings take <code>--heading_font_family</code>
 			(default <code>var(--font_family_serif)</code>), so serif headings over a sans body is the
-			default and "one family everywhere" is deliberately two knobs.
+			default and "one family everywhere" is deliberately two knobs. Heading tracking is
+			<code>--heading_letter_spacing</code> (default <code>normal</code>); an <code>em</code> value
+			follows each heading's own size.
 		</p>
 		<div>
 			{#each font_family_variants as font_family (font_family)}
@@ -112,6 +114,12 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Font sizes" />
+		<p>
+			The sizes above <code>md</code> step by one ratio, <code>--type_scale_ratio</code>, so a
+			<TomeLink slug="themes">theme</TomeLink> flattens or opens up the whole heading hierarchy with
+			a single variable. <code>md</code> is the body size, and it and the smaller sizes are fixed,
+			so body text never moves.
+		</p>
 		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>

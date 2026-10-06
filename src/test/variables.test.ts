@@ -16,7 +16,9 @@ import {
 	border_width_variants,
 	icon_size_variants,
 	shadow_size_variants,
-	shadow_variant_prefixes
+	shadow_variant_prefixes,
+	FONT_SIZES,
+	TYPE_SCALE_RATIO
 } from '$lib/variable_data.ts';
 
 test('all variables pass schema validation', () => {
@@ -125,5 +127,30 @@ test('intent hue defaults agree with palette_glosses bindings', () => {
 		const v = by_name.get(`hue_${gloss.binding}`);
 		assert(v, `hue_${gloss.binding} is declared`);
 		assert.strictEqual(v.light, `var(--hue_${letter})`, v.name);
+	}
+});
+
+test('font sizes above md derive from the type scale ratio and match the fitted table', () => {
+	const by_name = new Map(default_variables.map((v) => [v.name, v]));
+	assert.strictEqual(by_name.get('type_scale_ratio')?.light, String(TYPE_SCALE_RATIO));
+	const base = font_size_variants.indexOf('md');
+	for (const [i, size] of font_size_variants.entries()) {
+		const light = by_name.get(`font_size_${size}`)?.light;
+		const step = i - base;
+		if (step > 0) {
+			assert.strictEqual(
+				light,
+				`calc(${FONT_SIZES.md}rem * pow(var(--type_scale_ratio), ${step}))`
+			);
+			// the numeric twin can't drift from what the derived default computes
+			assert.strictEqual(
+				(FONT_SIZES.md * TYPE_SCALE_RATIO ** step).toFixed(2),
+				FONT_SIZES[size].toFixed(2),
+				`font_size_${size}`
+			);
+		} else {
+			// body and smaller text stay literal, out of the ratio's reach
+			assert.strictEqual(light, `${FONT_SIZES[size]}rem`);
+		}
 	}
 });

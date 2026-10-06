@@ -271,10 +271,23 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   exceptions in the theme_check tests
 - Form/scale knobs derive into token defaults so one move reshapes a family
   while tokens stay pinnable: `--radius_scale` (border radii), `--space_scale`
-  (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows), plus
-  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
-  setting it flattens the heading ladder), `--heading_font_family`, and the
-  `--background_image` decoration hook on `:root`
+  (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows),
+  `--type_scale_ratio` (the font sizes above `md`, as `md * ratio^n` - body
+  and smaller text stay literal, so the knob moves the heading hierarchy
+  without moving body text; the `lg`/`xl` size composites step up the same
+  ladder, so their font size follows it while `xs`/`sm` stay put), plus `--font_weight`, `--heading_font_weight`
+  (a hook with per-tier fallbacks - setting it flattens the heading ladder),
+  `--heading_font_family`, `--heading_letter_spacing` (heading tracking,
+  `normal` by default, best set in em), and the `--background_image`
+  decoration hook on `:root`
+- Surface shadows are declared variables a theme can retarget:
+  `--button_shadow`/`_hover`/`_active`, `--pane_shadow` (the floating
+  `.pane`), and `--panel_shadow` (the embedded `.panel`, `none` by default).
+  The composed defaults name their shadow colors outright, since a value
+  declared on `:root` can't see a contextual `--shadow_color`; a `shadow_*`
+  class on the element still wins by source order. `.panel` declares
+  `box-shadow`, so it resets the shadow of an element it is combined with
+  (a `.pane`, a `button`)
 - `--font_family` is the body font (default `var(--font_family_sans)`), kept
   apart from the three stacks (`--font_family_sans`/`_serif`/`_mono`) so
   retargeting the body doesn't make one of them mean something it isn't;
@@ -293,8 +306,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
   hook (per-tier fallbacks, so no single default exists); `prefers-contrast:
-  more` maps onto the curve knobs mirroring the high-contrast theme,
-  theme-overridable
+  more` mirrors the high-contrast modifier (the ground and text curve knobs
+  plus a stronger `--border_color`), theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
@@ -485,28 +498,44 @@ typography, borders, shading, shadows, layout. See
   low/high contrast are modifiers composed over any theme via
   `compose_themes`, not themes themselves - users see one flat "themes"
   list
-- `src/lib/themes/` - One module per theme. Registered: base. Shipped
-  exemplars are recognizable materials, each anchoring an era: smolder
-  (firelight - warm haze, vivid past the caps, gradient-sky
-  `background_image`), parchment (the illuminated manuscript - serif body,
-  rubrication-red accent, double-ruled borders, candlelit in dark),
-  concrete (brutalism - near-grayscale neutral, sharp, flat, border-forward,
-  heavy headings), nineties (the 90s desktop web - colorless chrome on an
-  off-white ground, serif everything, underlined links, and the only
-  exemplar built on borders rather than depth: `outset` buttons pressing to
-  `inset` over `inset` fields), phosphor (the CRT terminal - green cast,
-  mono, compact, instant short `duration_*`, dark-only), and neon (80s
-  signage - magenta accent, colored glow shadows, capsule radius pins, a
-  rotated yellow slot making it the one palette-tier exemplar, dark-only).
-  Only phosphor and neon take a `scheme` stance; everything else is
-  dual-scheme. The contrast pair live here too as the modifier modules
+- `src/lib/themes/` - One module per theme. Registered: base and ledger
+  (the plain working theme - cool, compact, eased chroma, one sans family).
+  Each shipped exemplar takes one channel to carry the structure and quiets
+  the rest, and is named last, for the artifact that already looks that
+  way: zine (line and weight - paper white and toner black, thick opaque
+  rules, sharp, flat, heavy sans headings set tight, underlined links),
+  pebble (depth and softness - round, raised on soft drop shadows through
+  `button_shadow*` and `panel_shadow`, airy, cool whisper), parchment (type
+  and ruling - serif body, rubrication-red accent with the negative intent
+  moved off it, double-ruled borders, candlelit in dark), phosphor (packing:
+  mono, compact, a flattened type scale, a green cast on a ground lifted off
+  black, halo button shadows, positive moved to teal off the green accent,
+  dark-only), guestbook (controls as objects - colorless chrome on an
+  off-white ground, serif everything, underlined links, `outset` buttons
+  pressing to `inset` over `inset` fields), marquee (color - magenta accent,
+  colored glow shadows, radius pins, vivid past the caps, a rotated yellow
+  slot making it the one palette-tier exemplar, dark-only), and timetable
+  (scale - spacious, an opened-up type scale, heavy sans, thick rules, a
+  wide focus ring, and an accent that changes between schemes). Only
+  phosphor and marquee take a `scheme` stance; everything else is
+  dual-scheme. Several retime the short `duration_*` tokens (zine and
+  phosphor to zero) - base styles carry no transitions, so those reach only
+  what a consumer times with the tokens. The contrast pair live here too as
+  the modifier modules
+- [shadow_css.ts](src/lib/shadow_css.ts) - `render_shadow_css`, the shape
+  of a declared shadow variable (a geometry token plus a shadow color mixed
+  down to an alpha step). A leaf module with type-only imports, so the
+  theme modules that author `button_shadow*`/`panel_shadow` can use it
+  without pulling variable data into a runtime chunk
 - [knobs.ts](src/lib/knobs.ts) - The theme knob catalog: typed metadata
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
   `heading_font_weight` and the micro-surface color variables
-- [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`),
-  numeric-twin accessibility gates (`check_theme`: gamut, ramp monotonicity,
-  contrast - a directly authored color stop or role is measured when it's an
+- [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`,
+  which also warns when an intent binding drops a slot's chroma character
+  or the accent hue lands on a status hue), numeric-twin accessibility gates
+  (`check_theme`: gamut, ramp monotonicity, contrast - a directly authored
+  color stop or role is measured when it's an
   `oklch(L C H)` numeric literal or an exact `var()` reference to a color the
   gates evaluate, and lands in `unchecked` otherwise), and the
   worst-hue chroma-cap compile step (`compile_theme`, which caps each stop at
@@ -650,6 +679,13 @@ Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `generate_bundled_css`,
 `generate_classes_css`, `generate_css`, and more.
+
+The theme suites discover the shipped themes by glob through
+`theme_test_helpers.ts` (`shipped_themes`, `shipped_base_themes`), so a new
+module under `themes/` is linted, gated on its own, and composed with both
+contrast modifiers without being added to a list. A theme that knowingly
+gives up a pairing gets its own test and a name in the standalone
+exceptions set.
 
 The Vite plugin has `vite_plugin_fuz_css.{build,dev,splice,ws}.test.ts`: the
 build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,

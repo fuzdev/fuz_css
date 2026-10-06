@@ -19,7 +19,7 @@ import {
 } from '$lib/theme_check.ts';
 import type { StyleVariable, Theme } from '$lib/variable.ts';
 import { default_themes } from '$lib/themes.ts';
-import { concrete_theme } from '$lib/themes/concrete.ts';
+import { zine_theme } from '$lib/themes/zine.ts';
 import { default_variables } from '$lib/variables.ts';
 import {
 	PALETTE_CHROMA_KNOBS,
@@ -412,9 +412,9 @@ describe('role variables', () => {
 		assert.isUndefined(find_entry(report, 'contrast', 'light', 'shade_30 vs shade_00'));
 	});
 
-	test("concrete's border gate measures the text stop its borders render", () => {
-		const report = check_theme(concrete_theme);
-		const resolver = create_theme_resolver(concrete_theme);
+	test("zine's border gate measures the text stop its borders render", () => {
+		const report = check_theme(zine_theme);
+		const resolver = create_theme_resolver(zine_theme);
 		for (const scheme of ['light', 'dark'] as const) {
 			const n = (name: string): number => resolver.resolve(name, scheme)!;
 			const neutral = (family: string, stop: string): Oklch => [
