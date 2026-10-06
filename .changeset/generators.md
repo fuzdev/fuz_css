@@ -71,5 +71,13 @@ feat: dev-server prescan, content-hashed build CSS, and a stated `base_css` cont
   `variables_required`, and `variables_defined`; `CoreReason` loses
   `media_query` and `font_face` and gains `conditional_core`, `at_rule`,
   and `untargetable`.
+- `splice_css_at_placeholder` moves from `vite_plugin_fuz_css.ts` to the
+  new `css_placeholder_splice.ts`, with `FUZ_CSS_PLACEHOLDER`,
+  `FUZ_CSS_PLACEHOLDER_RULE`, `to_hashed_css_placeholder`, and
+  `parse_css_placeholder_hash`; `vite_plugin_fuz_css.ts` gains
+  `to_extraction_id`.
+- `variable_graph.ts`: `build_variable_graph(variables)` drops its
+  `content_hash` parameter and `VariableDependencyGraph` its
+  `content_hash` field.
 - `css_variable_utils.ts` gains `extract_required_css_variables`,
   `extract_declared_css_variables`, and `strip_css_comments`.

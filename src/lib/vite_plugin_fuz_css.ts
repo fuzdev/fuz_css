@@ -299,7 +299,7 @@ export interface VitePluginFuzCssOptions extends CssGeneratorBaseOptions {
 	 * after it's first served rather than up front (or by the next reload,
 	 * with `server.hmr` or `server.ws` off).
 	 *
-	 * What dev and build extract still differs at the edges:
+	 * What dev and build extract differs at the edges:
 	 *
 	 * - dev only: files under the scanned directories that no module imports
 	 *   (SvelteKit's `src/app.html` among them), including ones imported only

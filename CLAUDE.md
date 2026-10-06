@@ -33,6 +33,7 @@ gro build     # build the package for production
 - @fuzdev/blake3-wasm - BLAKE3 content hashing for cache validation (optional
   peer, via fuz_util's `hash_blake3`)
 - fuz_util (@fuzdev/fuz_util) - utility functions
+- Vite 6+ - required by the Vite plugin only
 
 ## Scope
 
@@ -283,7 +284,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (default `var(--border_style)`) and swap to `--button_border_style_active`
   while pressed - the raised/pressed pair `outset`/`inset` needs, and the
   only element with that affordance. A theme's contextual `--border_style`
-  override no longer reaches buttons, since the derived default resolves at
+  override doesn't reach buttons, since the derived default resolves at
   `:root`
 - Micro-surface variables declared in `default_variables`: `--caret_color`
   (defaults to the accent), `--scrollbar_thumb_color`/
@@ -403,7 +404,8 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   base styles with a separately imported `theme.css`). Set both options to
   `null` for utility-only mode, or `additional_variables: 'all'` to bundle
   the full theme. Warnings flag excluding a variable that shipped styles
-  still reference. The parse diagnostics ride the `StyleRuleIndex` (built
+  still reference, and a `theme` configured with `variables: null`
+  (`theme_discarded`). The parse diagnostics ride the `StyleRuleIndex` (built
   once per generator) and `resolve_css` forwards them on every render, so
   they dispatch like any other; a `base_css` the parser rejects, or a
   callback returning a non-string, throws from `create_bundled_resources`
@@ -414,7 +416,7 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   startup so the first served CSS is complete (`true` = `src` under the
   Vite root, `false` disables, or an array of directories; the root
   `index.html` is scanned whichever directories are given). Its TSDoc lists
-  where dev and build extraction still differ
+  where dev and build extraction differ
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`)
 
 These are the common options - see
@@ -521,8 +523,8 @@ typography, borders, shading, shadows, layout. See
 
 - [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class
   extraction from Svelte/TS/JSX files
-- [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type for filtering
-  extractable files
+- [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type and the
+  default filter (`filter_file_default`) for extractable files
 - [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
   `ExtractionDiagnostic`, `CssGenerationError` types
 
@@ -544,7 +546,8 @@ typography, borders, shading, shadows, layout. See
   generated CSS at its position in the bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
-  (generate → resolve → bundle) used by both generators
+  (generate → resolve → bundle) used by both generators, plus the checks
+  that span options (`undefined_theme_variables`, `theme_discarded`)
 - [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
   resources (style-rule index, variable graph, class→variable index)
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
@@ -639,6 +642,8 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
+- `theme_check.{test,compile,defaults,pins}.test.ts`
+- `ramps.{test,emitters}.test.ts`
 
 Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
 `variables`, `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
@@ -656,7 +661,7 @@ listening server and speaks the `vite-hmr` protocol for the evaluation
 handshake. Integration: `vite_plugin_examples.test.ts` (skip with
 `SKIP_EXAMPLE_TESTS=1`).
 
-Component tests (`KnobControl`, `RampStrip`, `ThemeEditor`,
+Component tests (`ContrastInput`, `KnobControl`, `RampStrip`, `ThemeEditor`,
 `resolved_color.svelte`) render in jsdom via a per-file
 `@vitest-environment jsdom` pragma - mounting through
 `component_test_helpers.ts` with context harnesses (`*Harness.svelte` in
@@ -671,6 +676,9 @@ svelte's `mount()` resolves to the client build.
 - **No animation utilities** - Animation class generation not yet supported
 - **Button composites incomplete** - Some button variant classes are work in
   progress
+- **Browser floor, no fallbacks** - the shipped CSS needs Chrome or Edge
+  120, Firefox 118 (both set by `pow()`), or Safari 16.2, and Safari 16.4
+  for responsive modifiers, which emit media range syntax
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to

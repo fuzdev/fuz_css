@@ -147,9 +147,11 @@ import '@fuzdev/fuz_css/theme.css'; // all variables
 import 'virtual:fuz.css';`}
 			/>
 			<p>
-				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR: changes to classes in your code
-				trigger automatic CSS updates.
+				The plugin needs Vite 6 or later. It extracts classes from files as Vite processes them,
+				including from <code>node_modules</code> dependencies, and in dev it pre-scans your sources
+				and the root <code>index.html</code> at startup so the first page load is fully styled. It
+				supports HMR: changes to classes in your code trigger automatic CSS updates. List it after
+				any plugin that rewrites CSS in its <code>transform</code> hook.
 			</p>
 			<h4>Plugin options</h4>
 			<ul>
@@ -192,6 +194,11 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
+				</li>
+				<li>
+					<code>prescan</code> - dev-only scan of sources at server startup; <code>true</code>
+					(default) scans <code>src</code> under the Vite root, <code>false</code> disables, or pass
+					an array of directories
 				</li>
 				<li>
 					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for

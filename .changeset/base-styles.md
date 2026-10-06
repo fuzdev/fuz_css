@@ -50,4 +50,4 @@ New:
 - `check_theme` gates the stop-60 pairings above at AA
   (`GATE_SELECTED_TEXT`, `GATE_PALETTE_TEXT`), measuring the `.palette_X`
   button label against its rendered rest fill (its own color at 8% alpha
-  over `shade_00`); the knob catalog's border styles gain `inset`/`outset`.
+  over `shade_00`).

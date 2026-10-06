@@ -22,9 +22,10 @@ Breaking:
 - `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
 - `color-mix()` interpolates `in oklab` (was `in hsl`).
 - Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
-  `fuz.utilities`; unlayered consumer styles beat all of it, except
-  `[hidden]`'s `display: none !important`, which a layer makes outrank
-  unlayered `!important` too. Custom `base_css` is emitted in `fuz.base`.
+  `fuz.utilities`; unlayered consumer styles beat all of it, except the
+  `!important` declarations, which a layer makes outrank unlayered
+  `!important` too: `[hidden]`'s `display: none` and the
+  `prefers-reduced-motion` duration reset.
 - The browser floor rises to Chrome and Edge 120 (was 111) and Firefox 118
   (was 113) for `pow()`, with no fallback; Safari stays at 16.2, or 16.4
   with responsive modifier classes.

@@ -291,7 +291,8 @@ export interface CssOutputOptions {
  */
 export interface CssDiagnosticsOptions {
 	/**
-	 * How to handle CSS-literal errors during generation.
+	 * How to handle errors during generation: unresolvable comment hints,
+	 * invalid CSS literals, and the base stylesheet and theme variable checks.
 	 * - 'log': Log errors, skip invalid classes, continue
 	 * - 'throw': Throw on first error, fail the build
 	 * @default 'throw' in CI, 'log' otherwise

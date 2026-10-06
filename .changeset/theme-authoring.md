@@ -12,6 +12,7 @@ Breaking:
   a theme-or-`null`.
 - `RenderThemeStyleOptions.empty_default_theme` removed - pass the defaults:
   `render_theme_style({name: 'base', variables: default_variables})`.
+- `theme.ts` no longer exports `render_theme_variable`.
 - `render_theme_style` loses `specificity` and gains
   `layer?: string | null` (default `'fuz.theme'`); `generate_theme_css`
   loses its specificity parameter; the `theme_specificity` generator option
@@ -57,5 +58,7 @@ New:
   `vite_plugin_fuz_css({theme: phosphor_theme})`. Composes with fuz_ui's
   `ThemeRoot`: the baked theme renders into the `fuz.theme.baked` sublayer
   (`FUZ_BAKED_THEME_LAYER`), so the runtime theme wins.
-  `apply_theme_variables` is exported from `variable_graph.ts`.
+  `apply_theme_variables` is exported from `variable_graph.ts`. With
+  `variables: null` the theme isn't emitted, and the warning
+  `theme_discarded` says so.
 - `theme.ts` no longer imports `variables.ts` (~1.3KB minified, was ~38KB).
