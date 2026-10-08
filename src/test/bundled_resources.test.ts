@@ -319,3 +319,27 @@ describe('the default bundle pulls each knob chain a base rule reads', () => {
 		}
 	});
 });
+
+describe('the default bundle keeps font inheritance for unstyled controls', () => {
+	const NORMALIZATION = /:where\(button, input, textarea, select\) \{\s*font: inherit;\s*\}/;
+
+	for (const element of ['button', 'input', 'textarea', 'select']) {
+		test(`a lone ${element} ships the normalization`, async () => {
+			const { css } = await generate({ elements: [element] });
+			assert.match(css, NORMALIZATION);
+		});
+	}
+
+	test('the normalization precedes the styled button rule', async () => {
+		const { css } = await generate({ elements: ['button'] });
+		const normalization_index = css.search(NORMALIZATION);
+		const styled_index = css.indexOf(':where(button:not(.unstyled)) {');
+		assert.isAtLeast(normalization_index, 0);
+		assert.isAbove(styled_index, normalization_index);
+	});
+
+	test('the normalization stays out without a control', async () => {
+		const { css } = await generate({ elements: ['p'] });
+		assert.notMatch(css, NORMALIZATION);
+	});
+});

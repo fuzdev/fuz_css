@@ -347,7 +347,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	}
 
 	/* normalization - keep font inheritance even for unstyled */
-	:where(input, textarea, select) {
+	:where(button, input, textarea, select) {
 		font: inherit;
 	}
 
@@ -592,7 +592,6 @@ TODO think through these patterns to get somewhere consistent
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;
-		font: inherit;
 		font-size: var(--font_size, inherit);
 		font-weight: 700;
 		line-height: normal;
