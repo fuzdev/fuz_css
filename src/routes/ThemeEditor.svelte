@@ -137,7 +137,7 @@
 				{editor.is_palette_tier ? 'palette-tier' : 'semantic-tier'}
 			</span>
 			{#if editor.dirty}
-				<button type="button" class="sm" onclick={() => editor.reset_all()}>
+				<button type="button" class="sized_sm" onclick={() => editor.reset_all()}>
 					reset all{editor.overrides.size ? ` (${editor.overrides.size})` : ''}
 				</button>
 			{/if}

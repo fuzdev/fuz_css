@@ -22,7 +22,7 @@
 
 	const faces = ['😊', '😑', '🤔', '😉'];
 
-	// @fuz-classes xs sm md lg xl
+	// @fuz-classes sized_xs sized_sm sized_md sized_lg sized_xl
 
 	let username = $state.raw('');
 	let password = $state.raw('');
@@ -208,15 +208,15 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
-			scale inputs and buttons, adjusting height and padding. Apply directly or on a container to
-			cascade to children.
+			<code>.sized_xs</code>, <code>.sized_sm</code>, <code>.sized_md</code>,
+			<code>.sized_lg</code>, and <code>.sized_xl</code> scale inputs and buttons, adjusting height
+			and padding. Apply directly or on a container to cascade to children.
 		</p>
 		<Code
-			content={`<input class="xs" />\n<input class="sm" />\n<input />\n<input class="lg" />\n<input class="xl" />`}
+			content={`<input class="sized_xs" />\n<input class="sized_sm" />\n<input />\n<input class="sized_lg" />\n<input class="sized_xl" />`}
 		/>
 		<div class="column gap_sm mb_lg width_atmost_sm">
-			{#each ['xs', 'sm', 'md', 'lg', 'xl'] as size (size)}
+			{#each ['sized_xs', 'sized_sm', 'sized_md', 'sized_lg', 'sized_xl'] as size (size)}
 				<div class="row align-items:center gap_sm">
 					<input class={size} placeholder={size} />
 					<button type="button" class={size}>{size}</button>
@@ -224,12 +224,12 @@
 			{/each}
 		</div>
 		<p>Set on a container and children inherit the sizing:</p>
-		<Code content={`<form class="xs">...</form>`} />
+		<Code content={`<form class="sized_xs">...</form>`} />
 		<div class="width_atmost_sm">
-			<form class="xs">
+			<form class="sized_xs">
 				<fieldset>
 					<label>
-						<div class="title">inherits .xs</div>
+						<div class="title">inherits .sized_xs</div>
 						<select>
 							{#each faces as face (face)}
 								<option value={face}>{face}</option>

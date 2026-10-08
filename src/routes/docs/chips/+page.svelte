@@ -66,22 +66,23 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
-			scale chips up and down, adjusting font and padding.
+			<code>.sized_xs</code>, <code>.sized_sm</code>, <code>.sized_md</code>,
+			<code>.sized_lg</code>, and <code>.sized_xl</code> scale chips up and down, adjusting font and
+			padding.
 		</p>
 		<Code
-			content={`<span class="chip xs">xs</span>\n<span class="chip sm">sm</span>\n<span class="chip">md</span>\n<span class="chip lg">lg</span>\n<span class="chip xl">xl</span>`}
+			content={`<span class="chip sized_xs">sized_xs</span>\n<span class="chip sized_sm">sized_sm</span>\n<span class="chip sized_md">sized_md</span>\n<span class="chip sized_lg">sized_lg</span>\n<span class="chip sized_xl">sized_xl</span>`}
 		/>
 		<div class="row align-items:center flex-wrap:wrap gap_sm mb_lg">
-			<span class="chip xs">xs</span>
-			<span class="chip sm">sm</span>
-			<span class="chip">md</span>
-			<span class="chip lg">lg</span>
-			<span class="chip xl">xl</span>
+			<span class="chip sized_xs">sized_xs</span>
+			<span class="chip sized_sm">sized_sm</span>
+			<span class="chip sized_md">sized_md</span>
+			<span class="chip sized_lg">sized_lg</span>
+			<span class="chip sized_xl">sized_xl</span>
 		</div>
 		<p>Set on a container and children inherit the sizing:</p>
-		<Code content={`<div class="xs">...</div>`} />
-		<div class="xs row gap_sm">
+		<Code content={`<div class="sized_xs">...</div>`} />
+		<div class="sized_xs row gap_sm">
 			<span class="chip">one</span>
 			<span class="chip palette_d">two</span>
 			<!-- svelte-ignore a11y_missing_attribute -->

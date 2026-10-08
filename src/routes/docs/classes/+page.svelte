@@ -1249,11 +1249,11 @@ export const gen = gen_fuz_css({
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.circular</code> - 50% border-radius</li>
-				<li><code>.xs</code> - smallest sizing, cascading to children</li>
-				<li><code>.sm</code> - smaller sizing, cascading to children</li>
-				<li><code>.md</code> - default sizing, cascade reset</li>
-				<li><code>.lg</code> - larger sizing, cascading to children</li>
-				<li><code>.xl</code> - largest sizing, cascading to children</li>
+				<li><code>.sized_xs</code> - smallest sizing, cascading to children</li>
+				<li><code>.sized_sm</code> - smaller sizing, cascading to children</li>
+				<li><code>.sized_md</code> - default sizing, cascade reset</li>
+				<li><code>.sized_lg</code> - larger sizing, cascading to children</li>
+				<li><code>.sized_xl</code> - largest sizing, cascading to children</li>
 				<li><code>.mb_flow</code> - flow-aware margin-bottom</li>
 				<li><code>.mt_flow</code> - flow-aware margin-top</li>
 			</ul>

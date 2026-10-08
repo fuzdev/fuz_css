@@ -490,9 +490,9 @@ describe('modified_class_interpreter', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('md:sm generates media query with density overrides', () => {
+		test('md:sized_sm generates media query with density overrides', () => {
 			const result = generate_classes_css({
-				class_names: ['md:sm'],
+				class_names: ['md:sized_sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null
@@ -501,7 +501,7 @@ describe('modified_class_interpreter', () => {
 			assert_css_contains(
 				result.css,
 				'@media (width >= 48rem)',
-				'.md\\:sm',
+				'.md\\:sized_sm',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl4);',
 				'--icon_size: var(--icon_size_sm);'
@@ -509,33 +509,9 @@ describe('modified_class_interpreter', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('hover:sm applies hover state to sm composite', () => {
+		test('hover:sized_sm applies hover state to sized_sm composite', () => {
 			const result = generate_classes_css({
-				class_names: ['hover:sm'],
-				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
-				css_properties: null
-			});
-
-			assert_css_contains(result.css, '.hover\\:sm:hover', '--font_size: var(--font_size_sm);');
-			assert.lengthOf(result.diagnostics, 0);
-		});
-
-		test('hover:md applies hover state to md composite', () => {
-			const result = generate_classes_css({
-				class_names: ['hover:md'],
-				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
-				css_properties: null
-			});
-
-			assert_css_contains(result.css, '.hover\\:md:hover', '--font_size: var(--font_size_md);');
-			assert.lengthOf(result.diagnostics, 0);
-		});
-
-		test('lg:sm generates lg breakpoint with sm sizing', () => {
-			const result = generate_classes_css({
-				class_names: ['lg:sm'],
+				class_names: ['hover:sized_sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null
@@ -543,16 +519,31 @@ describe('modified_class_interpreter', () => {
 
 			assert_css_contains(
 				result.css,
-				'@media (width >= 64rem)',
-				'.lg\\:sm',
+				'.hover\\:sized_sm:hover',
 				'--font_size: var(--font_size_sm);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('lg:md generates lg breakpoint with default sizing reset', () => {
+		test('hover:sized_md applies hover state to sized_md composite', () => {
 			const result = generate_classes_css({
-				class_names: ['lg:md'],
+				class_names: ['hover:sized_md'],
+				class_definitions: css_class_composites,
+				interpreters: [modified_class_interpreter],
+				css_properties: null
+			});
+
+			assert_css_contains(
+				result.css,
+				'.hover\\:sized_md:hover',
+				'--font_size: var(--font_size_md);'
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('lg:sized_sm generates lg breakpoint with sized_sm sizing', () => {
+			const result = generate_classes_css({
+				class_names: ['lg:sized_sm'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null
@@ -561,23 +552,61 @@ describe('modified_class_interpreter', () => {
 			assert_css_contains(
 				result.css,
 				'@media (width >= 64rem)',
-				'.lg\\:md',
+				'.lg\\:sized_sm',
+				'--font_size: var(--font_size_sm);'
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('lg:sized_md generates lg breakpoint with default sizing reset', () => {
+			const result = generate_classes_css({
+				class_names: ['lg:sized_md'],
+				class_definitions: css_class_composites,
+				interpreters: [modified_class_interpreter],
+				css_properties: null
+			});
+
+			assert_css_contains(
+				result.css,
+				'@media (width >= 64rem)',
+				'.lg\\:sized_md',
 				'--font_size: var(--font_size_md);',
 				'--icon_size: var(--icon_size_md);'
 			);
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('sm and md together generate both classes', () => {
+		test('sized_sm and sized_md together generate both classes', () => {
 			const result = generate_classes_css({
-				class_names: ['sm', 'md'],
+				class_names: ['sized_sm', 'sized_md'],
 				class_definitions: css_class_composites,
 				interpreters: [modified_class_interpreter],
 				css_properties: null
 			});
 
-			assert_css_contains(result.css, '.sm {', '--font_size: var(--font_size_sm);');
-			assert_css_contains(result.css, '.md {', '--font_size: var(--font_size_md);');
+			assert_css_contains(result.css, '.sized_sm {', '--font_size: var(--font_size_sm);');
+			assert_css_contains(result.css, '.sized_md {', '--font_size: var(--font_size_md);');
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('a class named like a breakpoint resolves as the base after a modifier', () => {
+			// the last segment is always the base class, so `md:sm` is the `sm` class
+			// under the `md` breakpoint even though `sm` is also a breakpoint modifier
+			const definitions = {
+				sm: { declaration: 'gap: 1px;' },
+				md: { declaration: 'gap: 2px;' }
+			};
+
+			const result = generate_classes_css({
+				class_names: ['md:sm', 'sm:md', 'sm'],
+				class_definitions: definitions,
+				interpreters: [modified_class_interpreter],
+				css_properties: null
+			});
+
+			assert_css_contains(result.css, '@media (width >= 48rem) {\n\t.md\\:sm { gap: 1px; }\n}');
+			assert_css_contains(result.css, '@media (width >= 40rem) {\n\t.sm\\:md { gap: 2px; }\n}');
+			assert_css_contains(result.css, '.sm { gap: 1px; }');
 			assert.lengthOf(result.diagnostics, 0);
 		});
 	});

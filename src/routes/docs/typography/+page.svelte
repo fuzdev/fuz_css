@@ -39,7 +39,7 @@
 	let selected_size = $state.raw(3);
 
 	// @fuz-classes font_family_sans font_family_serif font_family_mono
-	// @fuz-classes xs sm md lg xl
+	// @fuz-classes sized_xs sized_sm sized_md sized_lg sized_xl
 </script>
 
 <TomeContent {tome}>
@@ -229,15 +229,16 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
-			set <code>--flow_margin</code>, scaling the vertical spacing between flow elements and
-			headings. Apply on a container to cascade to children.
+			<code>.sized_xs</code>, <code>.sized_sm</code>, <code>.sized_md</code>,
+			<code>.sized_lg</code>, and <code>.sized_xl</code> set <code>--flow_margin</code>, scaling the
+			vertical spacing between flow elements and headings. Apply on a container to cascade to
+			children.
 		</p>
 		<Code
-			content={`<div class="lg">\n\t<h3>heading</h3>\n\t<p>paragraph</p>\n\t<p>paragraph</p>\n</div>`}
+			content={`<div class="sized_lg">\n\t<h3>heading</h3>\n\t<p>paragraph</p>\n\t<p>paragraph</p>\n</div>`}
 		/>
 		<div class="display:flex align-items:start flex-wrap:wrap gap_lg mb_lg">
-			{#each ['xs', 'sm', 'md', 'lg', 'xl'] as size (size)}
+			{#each ['sized_xs', 'sized_sm', 'sized_md', 'sized_lg', 'sized_xl'] as size (size)}
 				<div class="panel p_md {size} width_atmost_sm">
 					<h4 class="mt_0">.{size}</h4>
 					<p>Paragraph with size-composite flow margins between elements.</p>
@@ -250,33 +251,33 @@
 			the text size. Paragraph text keeps its fixed size, and headings keep their own sizes to
 			preserve hierarchy; only controls like buttons and chips read the composite's
 			<code>--font_size</code>. A bare <code>.heading</code> is the exception: it reads the current
-			<code>--font_size</code>, so <code>.heading.lg</code> or a <code>--font_size</code> literal
-			tiers it. Scaling headers and prose with size composites is under consideration, design
-			feedback is welcome.
+			<code>--font_size</code>, so <code>.heading.sized_lg</code> or a <code>--font_size</code>
+			literal tiers it. Scaling headers and prose with size composites is under consideration,
+			design feedback is welcome.
 		</UnfinishedImplementationWarning>
 	</TomeSection>
 
 	<TomeSection>
-		<TomeSectionHeader text="Reset with .md">
-			Reset with <code>.md</code>
+		<TomeSectionHeader text="Reset with .sized_md">
+			Reset with <code>.sized_md</code>
 		</TomeSectionHeader>
 		<p>
-			The <code>.md</code>
+			The <code>.sized_md</code>
 			<TomeLink slug="classes" hash="#Composite-classes">composite class</TomeLink> resets sizing to
 			the defaults. Use it inside a sized container to restore normal sizing for a subtree.
 		</p>
 		<Code
-			content={`<div class="sm">\n\t<p>small text</p>\n\t<div class="md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}
+			content={`<div class="sized_sm">\n\t<p>small text</p>\n\t<div class="sized_md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}
 		/>
 		<div class="display:flex align-items:start gap_lg mb_lg">
-			<div class="panel p_md sm">
+			<div class="panel p_md sized_sm">
 				<h4 class="mt_0">small region</h4>
 				<p>Everything here is <span class="chip">small</span>.</p>
-				<div class="panel p_md md">
+				<div class="panel p_md sized_md">
 					<h4 class="mt_0">normal nested inside</h4>
 					<p>
 						This region is back to <span class="chip">default sizing</span> despite the parent
-						having <code>.sm</code>.
+						having <code>.sized_sm</code>.
 					</p>
 				</div>
 			</div>

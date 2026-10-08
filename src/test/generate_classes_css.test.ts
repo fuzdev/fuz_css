@@ -838,10 +838,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('xs composite', () => {
-		test('generates xs class two steps down', () => {
+	describe('sized_xs composite', () => {
+		test('generates sized_xs class two steps down', () => {
 			const result = generate_classes_css({
-				class_names: ['xs'],
+				class_names: ['sized_xs'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -849,7 +849,7 @@ describe('generate_classes_css', () => {
 
 			assert_css_contains(
 				result.css,
-				'.xs {',
+				'.sized_xs {',
 				'--font_size: var(--font_size_xs);',
 				'--input_height: var(--space_xl3);',
 				'--input_height_compact: var(--space_xl2);',
@@ -861,9 +861,9 @@ describe('generate_classes_css', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('xs tracks used variables', () => {
+		test('sized_xs tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['xs'],
+				class_names: ['sized_xs'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -879,10 +879,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('sm composite', () => {
-		test('generates sm class with density overrides', () => {
+	describe('sized_sm composite', () => {
+		test('generates sized_sm class with density overrides', () => {
 			const result = generate_classes_css({
-				class_names: ['sm'],
+				class_names: ['sized_sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -890,7 +890,7 @@ describe('generate_classes_css', () => {
 
 			assert_css_contains(
 				result.css,
-				'.sm {',
+				'.sized_sm {',
 				'--font_size: var(--font_size_sm);',
 				'--input_height: var(--space_xl4);',
 				'--input_height_compact: var(--space_xl3);',
@@ -902,9 +902,9 @@ describe('generate_classes_css', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('sm tracks used variables', () => {
+		test('sized_sm tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['sm'],
+				class_names: ['sized_sm'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -920,10 +920,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('md composite', () => {
-		test('generates md class with default sizing', () => {
+	describe('sized_md composite', () => {
+		test('generates sized_md class with default sizing', () => {
 			const result = generate_classes_css({
-				class_names: ['md'],
+				class_names: ['sized_md'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -931,7 +931,7 @@ describe('generate_classes_css', () => {
 
 			assert_css_contains(
 				result.css,
-				'.md {',
+				'.sized_md {',
 				'--font_size: var(--font_size_md);',
 				'--input_height: var(--space_xl5);',
 				'--input_height_compact: var(--space_xl4);',
@@ -943,9 +943,9 @@ describe('generate_classes_css', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('md tracks used variables', () => {
+		test('sized_md tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['md'],
+				class_names: ['sized_md'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -961,10 +961,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('lg composite', () => {
-		test('generates lg class one step up', () => {
+	describe('sized_lg composite', () => {
+		test('generates sized_lg class one step up', () => {
 			const result = generate_classes_css({
-				class_names: ['lg'],
+				class_names: ['sized_lg'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -972,7 +972,7 @@ describe('generate_classes_css', () => {
 
 			assert_css_contains(
 				result.css,
-				'.lg {',
+				'.sized_lg {',
 				'--font_size: var(--font_size_lg);',
 				'--input_height: var(--space_xl6);',
 				'--input_height_compact: var(--space_xl5);',
@@ -984,9 +984,9 @@ describe('generate_classes_css', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('lg tracks used variables', () => {
+		test('sized_lg tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['lg'],
+				class_names: ['sized_lg'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -1002,10 +1002,10 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('xl composite', () => {
-		test('generates xl class two steps up', () => {
+	describe('sized_xl composite', () => {
+		test('generates sized_xl class two steps up', () => {
 			const result = generate_classes_css({
-				class_names: ['xl'],
+				class_names: ['sized_xl'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
@@ -1013,7 +1013,7 @@ describe('generate_classes_css', () => {
 
 			assert_css_contains(
 				result.css,
-				'.xl {',
+				'.sized_xl {',
 				'--font_size: var(--font_size_xl);',
 				'--input_height: var(--space_xl7);',
 				'--input_height_compact: var(--space_xl6);',
@@ -1025,9 +1025,9 @@ describe('generate_classes_css', () => {
 			assert.lengthOf(result.diagnostics, 0);
 		});
 
-		test('xl tracks used variables', () => {
+		test('sized_xl tracks used variables', () => {
 			const result = generate_classes_css({
-				class_names: ['xl'],
+				class_names: ['sized_xl'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null

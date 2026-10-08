@@ -43,7 +43,7 @@ Breaking:
   (`--font_size_lg` to `--font_size_xl9`) also over `--type_scale_ratio`
   (default `1.272`, also `TYPE_SCALE_RATIO` in `variable_data.ts`),
   instead of literals. Computed values match the old ones (font sizes to
-  two decimal places of a rem). The `lg`/`xl` size composites read the
+  two decimal places of a rem). The `sized_lg`/`sized_xl` composites read the
   font sizes, so they follow the ratio.
 - `body` reads `--font_size_md` (was a fixed `1.6rem`), so
   `--font_size_scale` moves body text.

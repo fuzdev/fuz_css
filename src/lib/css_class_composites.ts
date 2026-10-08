@@ -112,11 +112,12 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	},
 	/*
 	Size composites scale a region up or down on the fuz_css scales. Each variable
-	is offset a fixed number of steps from its `.md` default on the variable's own
-	scale: `.xs` two steps down, `.sm` one down, `.lg` one up, `.xl` two up. `.md`
-	restates the defaults so it works as a cascade reset inside a sized parent.
+	is offset a fixed number of steps from its `.sized_md` default on the variable's
+	own scale: `.sized_xs` two steps down, `.sized_sm` one down, `.sized_lg` one up,
+	`.sized_xl` two up. `.sized_md` restates the defaults so it works as a cascade
+	reset inside a sized parent.
 	*/
-	xs: {
+	sized_xs: {
 		comment:
 			'Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -130,7 +131,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_sm);
 		`
 	},
-	sm: {
+	sized_sm: {
 		comment:
 			'Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -144,7 +145,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_md);
 		`
 	},
-	md: {
+	sized_md: {
 		comment: 'Default sizing restated explicitly, useful as a cascade reset within a sized parent.',
 		declaration: `
 			--font_size: var(--font_size_md);
@@ -157,7 +158,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_lg);
 		`
 	},
-	lg: {
+	sized_lg: {
 		comment:
 			'Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -171,7 +172,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_xl);
 		`
 	},
-	xl: {
+	sized_xl: {
 		comment:
 			'Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `

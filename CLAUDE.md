@@ -207,11 +207,12 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
   (`background-color:var(--fg_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
-  `panel`, the size composites `xs`/`sm`/`md`/`lg`/`xl` (uniform step offsets
-  from the `md` default; `md` doubles as a cascade reset; they scale controls
-  and spacing via `--flow_margin` - headings and prose keep their font sizes,
-  while a bare `.heading` reads the current `--font_size`, so a composite or
-  a `--font_size` literal tiers it),
+  `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
+  `sized_xl` (uniform step offsets from the `sized_md` default; `sized_md`
+  doubles as a cascade reset; they scale controls and spacing via
+  `--flow_margin` - headings and prose keep their font sizes, while a bare
+  `.heading` reads the current `--font_size`, so a composite or a
+  `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
   `menuitem`, `chevron`, `chip`
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
@@ -289,8 +290,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--font_size_scale` (every font size, body text included - `body` reads
   `--font_size_md`), `--type_scale_ratio` (the font sizes above `md`, as
   `md * ratio^n`, so the knob moves the heading hierarchy without moving
-  body text; the `lg`/`xl` size composites step up the same ladder, so
-  their font size follows it while `xs`/`sm` stay put), plus
+  body text; the `sized_lg`/`sized_xl` composites step up the same ladder,
+  so their font size follows it while `sized_xs`/`sized_sm` stay put), plus
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
   setting it flattens the heading ladder), `--heading_font_family`,
   `--heading_letter_spacing` (heading tracking, `normal` by default, best

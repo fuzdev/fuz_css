@@ -126,8 +126,8 @@
 		`${letter} - ${format_palette_gloss(letter)}`;
 </script>
 
-<!-- @fuz-classes sm md lg -->
-<div class="knob {compact ? 'sm' : knob.leverage}" class:compact>
+<!-- @fuz-classes sized_sm sized_md sized_lg -->
+<div class="knob sized_{compact ? 'sm' : knob.leverage}" class:compact>
 	{#if knob.bindable}
 		<!-- intent/neutral hues: a palette-letter binding picker with a
 			custom-angle escape; chips write `var(--hue_x)`, custom detaches to a
@@ -240,7 +240,7 @@
 			would become the label's implicit control -->
 		<button
 			type="button"
-			class="plain icon_button sm knob-reset"
+			class="plain icon_button sized_sm knob-reset"
 			title="reset to base"
 			aria-label="reset to base"
 			onclick={onreset}
@@ -264,8 +264,8 @@
 		--knob_max_width: 300px;
 	}
 	.knob:has(.knob-reset) .title {
-		/* keep long names clear of the reset button (an sm icon_button,
-			--input_height under sm = --space_xl4) */
+		/* keep long names clear of the reset button (a sized_sm icon_button,
+			--input_height under sized_sm = --space_xl4) */
 		padding-right: var(--space_xl4);
 	}
 	.knob-reset {

@@ -244,30 +244,31 @@
 		<TomeSectionHeader text="Size composites" />
 		<p>
 			The <TomeLink slug="classes" hash="#Composite-classes">size composite classes</TomeLink>
-			<code>.xs</code>, <code>.sm</code>, <code>.md</code>, <code>.lg</code>, and <code>.xl</code>
-			scale buttons up and down by overriding custom properties for font, height, and padding.
+			<code>.sized_xs</code>, <code>.sized_sm</code>, <code>.sized_md</code>,
+			<code>.sized_lg</code>, and <code>.sized_xl</code> scale buttons up and down by overriding
+			custom properties for font, height, and padding.
 		</p>
 		<Code
-			content={`<button class="xs">xs</button>\n<button class="sm">sm</button>\n<button>md</button>\n<button class="lg">lg</button>\n<button class="xl">xl</button>`}
+			content={`<button class="sized_xs">sized_xs</button>\n<button class="sized_sm">sized_sm</button>\n<button class="sized_md">sized_md</button>\n<button class="sized_lg">sized_lg</button>\n<button class="sized_xl">sized_xl</button>`}
 		/>
 		<div class="row align-items:center flex-wrap:wrap gap_sm mb_lg">
-			<button type="button" class="xs">xs</button>
-			<button type="button" class="sm">sm</button>
-			<button type="button">md</button>
-			<button type="button" class="lg">lg</button>
-			<button type="button" class="xl">xl</button>
+			<button type="button" class="sized_xs">sized_xs</button>
+			<button type="button" class="sized_sm">sized_sm</button>
+			<button type="button" class="sized_md">sized_md</button>
+			<button type="button" class="sized_lg">sized_lg</button>
+			<button type="button" class="sized_xl">sized_xl</button>
 		</div>
 		<p>They compose with other classes like <code>.plain</code> and <code>.icon_button</code>:</p>
 		<div class="row align-items:center gap_sm mb_lg">
-			<button type="button" class="xs icon_button plain">+</button>
-			<button type="button" class="sm icon_button plain">+</button>
+			<button type="button" class="sized_xs icon_button plain">+</button>
+			<button type="button" class="sized_sm icon_button plain">+</button>
 			<button type="button" class="icon_button plain">+</button>
-			<button type="button" class="lg icon_button plain">+</button>
-			<button type="button" class="xl icon_button plain">+</button>
+			<button type="button" class="sized_lg icon_button plain">+</button>
+			<button type="button" class="sized_xl icon_button plain">+</button>
 		</div>
 		<p>Set on a container and children inherit the sizing:</p>
-		<Code content={`<div class="xs">...</div>`} />
-		<div class="xs row gap_sm">
+		<Code content={`<div class="sized_xs">...</div>`} />
+		<div class="sized_xs row gap_sm">
 			<button type="button">one</button>
 			<button type="button" class="plain">to</button>
 			<button type="button" class="palette_j">3</button>

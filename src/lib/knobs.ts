@@ -78,7 +78,8 @@ export type KnobAxis =
 
 /**
  * Leverage tier: how much of the system a knob reshapes, which the editor
- * renders as control size (`lg` headline knobs down to `sm` escape hatches).
+ * renders as control size through the matching `sized_*` composite (`lg`
+ * headline knobs down to `sm` escape hatches).
  */
 export type KnobLeverage = 'lg' | 'md' | 'sm';
 
@@ -477,7 +478,7 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	{
 		// the ratio between font size steps above `md` - down flattens the
 		// heading hierarchy, up dramatizes it; body and small text stay put
-		// (the `lg`/`xl` size composites step up the same ladder, so they follow)
+		// (the `sized_lg`/`sized_xl` composites step up the same ladder, so they follow)
 		name: 'type_scale_ratio',
 		kind: 'number',
 		axis: 'typography',

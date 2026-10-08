@@ -93,8 +93,8 @@
 		/>
 		<p>
 			The <code>--flow_margin</code> variable is unset by default, falling back to
-			<code>var(--space_lg)</code>. Size composite classes like <code>.sm</code> and
-			<code>.lg</code> set <code>--flow_margin</code> to adjust vertical rhythm for all flow
+			<code>var(--space_lg)</code>. Size composite classes like <code>.sized_sm</code> and
+			<code>.sized_lg</code> set <code>--flow_margin</code> to adjust vertical rhythm for all flow
 			elements and headings.
 		</p>
 		<p>
