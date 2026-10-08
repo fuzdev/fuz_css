@@ -87,13 +87,13 @@
 	<TomeSection>
 		<TomeSectionHeader text="Surface shadows" />
 		<p>
-			Three kinds of surface carry a shadow by default, each through a variable a theme can
-			retarget: buttons through <code>--button_shadow</code> (with <code>_hover</code> and
-			<code>_active</code>), a floating <code>.pane</code> through <code>--pane_shadow</code>, and
-			an embedded <code>.panel</code> through <code>--panel_shadow</code>, which is
-			<code>none</code> unless a theme lifts its panels. A shadow shape class like
-			<code>shadow_md</code> on the same element still wins, but a shadow color or alpha class alone
-			doesn't tint these - the variables name their shadow colors outright.
+			Three surfaces read their shadow from a variable a theme can retarget: buttons from
+			<code>--button_shadow</code> (with <code>_hover</code> and <code>_active</code>), a floating
+			<code>.pane</code> from <code>--pane_shadow</code>, and an embedded <code>.panel</code> from
+			<code>--panel_shadow</code>, which is <code>none</code> unless a theme lifts its panels. A
+			shadow shape class like <code>shadow_md</code> on the same element still wins, but a shadow
+			color or alpha class alone doesn't tint them, since the variables name their shadow colors
+			outright.
 		</p>
 	</TomeSection>
 	<TomeSection>

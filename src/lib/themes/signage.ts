@@ -17,7 +17,7 @@ import type { Theme } from '../variable.ts';
 export const signage_theme: Theme = {
 	name: 'signage',
 	summary:
-		"Built for legibility - public sites, older readers, kiosks: larger, heavier body text, bold headings at normal tracking, roomy controls, underlined links, and a focus ring you can't miss.",
+		"Legible for public sites, older readers, and kiosks: larger, heavier body text, bold headings at normal tracking, roomy controls, underlined links, and a focus ring you can't miss - the transit sign.",
 	variables: [
 		// enamel white and board black: barely any cast
 		{ name: 'hue_neutral', light: 'var(--hue_a)' },

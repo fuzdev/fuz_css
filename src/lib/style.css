@@ -50,16 +50,19 @@ Notes:
 	}
 
 	/* map the OS contrast preference onto the same variables the
-		'high contrast' modifier sets: the curve knobs and the border role */
+		'high contrast' modifier sets: the curve knobs, the border and link
+		roles, and the panel ring */
 	@media (prefers-contrast: more) {
 		:root {
 			--shade_lightness_00: 1;
-			--text_lightness_curve: 0.45;
+			--text_lightness_curve: 0.8;
 			--border_color: var(--shade_50);
+			--link_color: var(--accent_70);
+			--panel_shadow: 0 0 0 var(--border_width) var(--border_color);
 		}
 		:root.dark {
-			--shade_lightness_00: 0;
-			--text_lightness_curve: 0.31;
+			--shade_lightness_00: 0.12;
+			--text_lightness_curve: 0.6;
 		}
 	}
 }

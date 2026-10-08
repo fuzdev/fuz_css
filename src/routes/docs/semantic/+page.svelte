@@ -28,11 +28,10 @@
 		<TomeSectionHeader text="Layers and specificity" />
 		<p>
 			All opinionated styles live in the <code>fuz.base</code> cascade layer, so your unlayered
-			styles and the generated utility classes override them by layer order alone. The element
-			selectors are additionally wrapped in <code>:where()</code>, giving them zero specificity, so
-			overriding stays effortless even from inside the fuz layers (the few exceptions are the
-			document-wide rules: <code>:root</code>, <code>body</code>, <code>[hidden]</code>, and
-			<code>::selection</code>).
+			styles and the generated utility classes override them by layer order alone. Their selectors
+			are also wrapped in <code>:where()</code> for zero specificity, so overrides stay easy even
+			inside the fuz layers. The exceptions are the document-wide rules: <code>:root</code>,
+			<code>body</code>, <code>[hidden]</code>, and <code>::selection</code>.
 		</p>
 		<Code
 			lang="css"

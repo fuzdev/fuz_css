@@ -69,14 +69,12 @@
 			<code>--border_style</code> is global - asides, blockquotes, and form fields all read it.
 			Buttons take <code>--button_border_style</code> instead (defaulting to
 			<code>var(--border_style)</code>), and swap to <code>--button_border_style_active</code> while
-			pressed. Buttons are the only element with a raised/pressed affordance, so the split lands
-			there rather than as a general state variable.
+			pressed. Buttons are the only element with a pressed state, so only they get the pair.
 		</p>
 		<p>
-			That pair is what makes beveled chrome expressible, since
-			<MdnLink path="Web/CSS/border-style" />'s <code>inset</code> and <code>outset</code> derive
-			their light and dark edges from the border color - raised buttons that press in, over sunken
-			fields:
+			That pair makes beveled chrome expressible, since <MdnLink path="Web/CSS/border-style" />'s
+			<code>inset</code> and <code>outset</code> derive their light and dark edges from the border
+			color. Raised buttons that press in, over sunken fields:
 		</p>
 		<Code
 			lang="ts"
@@ -86,9 +84,7 @@
 	{name: 'button_border_style_active', light: 'inset'} // that press in
 ]`}
 		/>
-		<p>
-			The <TomeLink slug="themes">guestbook</TomeLink> exemplar theme is built on exactly this.
-		</p>
+		<p>The <TomeLink slug="themes">guestbook</TomeLink> theme is built on exactly this.</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Tinted alpha borders" />
@@ -142,8 +138,9 @@ border-color: var(--shade_30);
 	<TomeSection>
 		<TomeSectionHeader text="Border colors" />
 		<p>
-			Use palette variables like <code>palette_a_{selected_intensity}</code> for colored borders.
-			The intensity controls the color's prominence.
+			Classes like <code>.border_a_{selected_intensity}</code> apply the palette variables
+			(<code>--palette_a_{selected_intensity}</code>) to borders. The intensity controls the color's
+			prominence.
 		</p>
 		<form class="intensity_selector">
 			<fieldset class="row mb_0">
@@ -208,8 +205,8 @@ border-color: var(--shade_30);
 		<TomeSectionHeader text="Outlines" />
 		<p>
 			Each border utility class has a corresponding outline variant (like <code>outline_b_50</code>,
-			<code>outline_width_4</code>, and <code>outline-style:solid</code>). The letterless pair
-			differ: <code>border_color_50</code> is the translucent border ramp, while
+			<code>outline_width_4</code>, and <code>outline-style:solid</code>). The letterless classes
+			differ, though: <code>border_color_50</code> is the translucent border ramp, while
 			<code>outline_color_50</code> is the opaque shade ramp. There are also two special outline
 			variables:
 		</p>

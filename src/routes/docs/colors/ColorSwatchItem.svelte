@@ -2,17 +2,16 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import { ResolvedColor } from '../resolved_color.svelte.ts';
-	import type { PaletteVariant } from '$lib/variable_data.ts';
 
 	const {
 		intensity,
-		letter
+		prefix
 	}: {
 		intensity: string;
-		letter: PaletteVariant;
+		prefix: string;
 	} = $props();
 
-	const name = $derived(`palette_${letter}_${intensity}`);
+	const name = $derived(`${prefix}_${intensity}`);
 
 	// the stop's value is a derived calc()/oklch() expression, so read the
 	// browser-resolved color off the rendered swatch element

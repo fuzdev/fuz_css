@@ -14,7 +14,7 @@ import type { Theme } from '../variable.ts';
 export const ledger_theme: Theme = {
 	name: 'ledger',
 	summary:
-		'For apps and tools used all day: calmer color, tighter spacing, one sans family, restrained corners and shadows.',
+		'For apps and tools used all day: calmer color, tighter spacing, one sans family, restrained corners and shadows - the orderly ledger.',
 	variables: [
 		// cool gray: the neutral binds to the blue slot at a whisper
 		{ name: 'hue_neutral', light: 'var(--hue_a)' },

@@ -56,11 +56,12 @@
 			DX with low overhead.
 		</p>
 		<p>
-			Most color variables are <em>derived</em>: curve knobs feed ramp stops, ramp stops feed color
-			stops, all computed in pure CSS (<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>).
-			Scale knobs like <code>radius_scale</code> derive other families the same way, and any
-			individual variable stays pinnable as the escape hatch. See <TomeLink slug="colors" /> for the
-			color system and <TomeLink slug="themes" /> for theming.
+			Most color variables are <em>derived</em>:
+			<TomeLink slug="colors" hash="Color-knobs">knobs</TomeLink> feed ramp stops and ramp stops
+			feed color stops, all computed in pure CSS
+			(<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>). Scale knobs like
+			<code>radius_scale</code> derive other families the same way, and any individual variable can
+			still be pinned as an escape hatch. See <TomeLink slug="themes" /> for setting them.
 		</p>
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the
@@ -94,10 +95,10 @@ export type StyleVariable = {
 };`}
 		/>
 		<p>
-			Both are zod schemas with their types inferred, so the same names validate at runtime -
-			<code>Theme.safeParse(value)</code> for the detail, <code>parse_theme(value)</code> for a
-			theme-or-<code>null</code>, and <code>validate_theme(theme)</code> in
-			<ModuleLink module_path="theme_validate.ts" /> for the full lint.
+			Both are zod schemas, so the same names validate at runtime:
+			<code>Theme.safeParse(value)</code> reports what's wrong, <code>parse_theme(value)</code>
+			returns a theme or <code>null</code>, and <code>validate_theme(theme)</code> in
+			<ModuleLink module_path="theme_validate.ts" /> runs the full lint.
 		</p>
 	</section>
 	<TomeSection>

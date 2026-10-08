@@ -43,10 +43,10 @@ import 'virtual:fuz.css'; // Vite plugin
 import './fuz.css'; // Gro generator, written to the filesystem`}
 			/>
 			<p>
-				That single import is all most projects need - it already contains the base styles and theme
-				variables, so importing the full stylesheets alongside it ships both layers twice. Those
-				stylesheets are the escape hatch, for projects managing their own theme or base styles;
-				using them means turning the generated ones off:
+				That single import is all most projects need, since it already holds the base styles and
+				theme variables your code uses. Projects managing their own theme or base styles can use
+				utility-only mode instead, importing the full stylesheets and turning the generated ones off
+				so neither layer ships twice:
 			</p>
 			<Code
 				lang="ts"
@@ -73,10 +73,9 @@ import 'virtual:fuz.css'; // used utilities only`}
 				<code>calc()</code>, and <MdnLink path="Web/CSS/pow"><code>pow()</code></MdnLink>, and
 				<MdnLink path="Web/CSS/color_value/color-mix"><code>color-mix()</code></MdnLink> drives
 				button fills, shadows, and the placeholder color. <code>pow()</code> sets the Chrome and
-				Firefox versions. A browser without it keeps the page background and color scheme, because
-				the two ends of each scale don't use it, but loses every stop in between, which carry the
-				text, border, and accent colors. A browser without cascade layers drops every rule, leaving
-				unstyled HTML.
+				Firefox floors: a browser without it keeps the page background and color scheme (the ends of
+				each scale don't use it) but loses every stop between, which carry the text, border, and
+				accent colors. A browser without cascade layers drops every rule, leaving unstyled HTML.
 			</p>
 		</TomeSection>
 		<TomeSection>
@@ -89,10 +88,9 @@ import 'virtual:fuz.css'; // used utilities only`}
 					elements, and also exports the underlying data, helpers, and types for open-ended usage
 				</li>
 				<li>
-					supports <TomeLink slug="themes" /> as sets of style variables, applied at build time
-					through the generators' <code>theme</code> option or swapped at runtime - dark mode is a
-					first-class concept, not a theme; instead, each theme can support light and/or dark
-					<MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>
+					supports <TomeLink slug="themes" /> as sets of style variables, baked in at build time or
+					swapped at runtime; dark mode isn't a theme but a
+					<MdnLink path="Web/CSS/color-scheme">color scheme</MdnLink> any theme can support
 				</li>
 				<li>
 					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types

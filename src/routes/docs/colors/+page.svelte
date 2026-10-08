@@ -10,11 +10,22 @@
 
 	import HueSwatch from './HueSwatch.svelte';
 	import ColorSwatch from './ColorSwatch.svelte';
-	import { palette_variants, format_palette_gloss } from '$lib/variable_data.ts';
+	import {
+		palette_variants,
+		intent_variants,
+		palette_glosses,
+		format_palette_gloss,
+		type IntentVariant,
+		type PaletteVariant
+	} from '$lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
+
+	// the letter each intent hue binds to by default
+	const intent_letter = (intent: IntentVariant): PaletteVariant =>
+		palette_variants.find((letter) => palette_glosses[letter].binding === intent)!;
 
 	// TODO button to add an inline hue input for runtime modification of the theme
 </script>
@@ -22,7 +33,8 @@
 <TomeContent {tome}>
 	<section>
 		<p>
-			fuz_css's colors are <em>derived</em>: a handful of high-leverage knobs produce every color
+			fuz_css's colors are <em>derived</em>: a handful of high-leverage
+			<TomeLink slug="colors" hash="Color-knobs">knobs</TomeLink> produce every color
 			<TomeLink slug="variables" /> in pure CSS, in the <MdnLink path="Web/CSS/color_value/oklch" />
 			colorspace, adapting to the <MdnLink path="Web/CSS/color-scheme" /> automatically. OKLCH
 			lightness is perceptually uniform (equal lightness reads equally light in every hue), so
@@ -38,66 +50,6 @@
 		</p>
 	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Curve knobs" />
-		<p>
-			The knobs are the <TomeLink slug="themes">theme</TomeLink> API, from highest leverage down:
-		</p>
-		<ul>
-			<li>
-				<code>--hue_a</code> … <code>--hue_j</code> - OKLCH hue angles for the palette slots
-			</li>
-			<li>
-				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of
-				every surface, text, border, and shadow tint (the neutral intent; its scales are the shade
-				and text ramps)
-			</li>
-			<li>
-				<code>--chroma_scale</code> - one multiplier from grayscale (0) through calm (1) to vivid
-				(above 1, deliberately clipping the weakest hues)
-			</li>
-			<li>
-				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
-				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> - each
-				deriving the full stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
-				matching text and background classes (<code>.positive_50</code>,
-				<code>.bg_caution_10</code>)
-			</li>
-			<li>
-				lightness ramps - <code>--palette_lightness_00</code>/<code>_100</code>/<code>_curve</code>
-				(and the same trio for <code>shade_</code> and <code>text_</code>): the endpoint stops plus
-				a curve exponent bending the ramp between them, per color scheme
-			</li>
-			<li>
-				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code> and
-				<code>--chroma_curve</code>: a mid-peaked curve, clamped per stop by gamut caps computed
-				from the worst hue
-			</li>
-			<li>
-				per-slot chroma multipliers - <code>--palette_a_chroma_scale</code> …
-				<code>--palette_j_chroma_scale</code> and intent twins (<code>--accent_chroma_scale</code>,
-				…), each multiplying one slot's chroma under the global <code>--chroma_scale</code>. The
-				brown slot ships muted (<code>--palette_f_chroma_scale: 0.55</code>) because brown is
-				low-chroma orange, unreachable by hue alone. An intent bound to a muted slot needs its twin
-				set too - bindings share only the hue angle, and <code>validate_theme</code> warns when the
-				character would be dropped
-			</li>
-		</ul>
-		<p>
-			Every intermediate value these produce is also its own variable
-			(<code>--palette_lightness_30</code>, <code>--palette_chroma_50</code>, …), so a theme can pin
-			any individual stop as an escape hatch.
-		</p>
-		<Code
-			lang="css"
-			content={`/* a warm, slightly vivid theme in three moves */
-:root {
-	--hue_neutral: 55;
-	--neutral_chroma: 0.03;
-	--chroma_scale: 1.15;
-}`}
-		/>
-	</TomeSection>
-	<TomeSection>
 		<TomeSectionHeader text="Hue variables" />
 		<p>
 			Hue variables contain a single OKLCH <MdnLink path="Web/CSS/hue" /> angle. Because lightness
@@ -109,7 +61,7 @@
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
 			example, fuz_css's selection color derives from <code>--hue_accent</code> (try selecting some
-			text - <span class="accent_60">same hue!</span>)
+			text - <span class="accent_60">same hue!</span>).
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">
@@ -131,10 +83,12 @@
 			those pairings at AA.
 		</p>
 		<p>
-			Unlike the <TomeLink slug="shading">shade</TomeLink> and
-			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales (which are separate),
-			palette variables can be used for both text and backgrounds via utility classes:
-			<code>.color_a_50</code> sets text color, <code>.bg_a_50</code> sets background color.
+			Palette variables work for both text and backgrounds through utility classes:
+			<code>.color_a_50</code> sets the text color and <code>.bg_a_50</code> the background, and the
+			<a href="#Intent-variables">intent scales</a> below do the same. The
+			<TomeLink slug="shading">shade</TomeLink> and
+			<TomeLink slug="typography" hash="Text-colors">text</TomeLink> scales are split by role
+			instead, one for surfaces and one for text.
 		</p>
 		<p>
 			Palette stops are adaptive: they switch between light and dark ramps based on color scheme.
@@ -143,13 +97,105 @@
 		</p>
 		<ul class="palette unstyled pt_xl2">
 			{#each palette_variants as letter (letter)}
-				<ColorSwatch {letter} />
+				<ColorSwatch prefix="palette_{letter}" />
 			{/each}
 		</ul>
 	</TomeSection>
 	<section class="box">
 		<ColorSchemeInput />
 	</section>
+	<TomeSection>
+		<TomeSectionHeader text="Intent variables" />
+		<p>
+			Intent scales name colors by meaning: <code>--accent_NN</code>, <code>--positive_NN</code>,
+			<code>--negative_NN</code>, <code>--caution_NN</code>, and <code>--info_NN</code>, with the
+			palette's stops, derived through the same ramps from each intent's hue knob
+			(<code>--hue_accent</code> and the rest). Each hue binds to a palette letter by default, so an
+			intent scale matches its letter's until a theme rebinds it:
+			{#each intent_variants as intent, i (intent)}
+				{i ? ', ' : ''}<code>{intent}</code> → <code>{intent_letter(intent)}</code>
+			{/each}.
+		</p>
+		<p>
+			Reach for an intent when the color carries meaning, like an error or a success, and for a
+			letter when it's only a color, so a theme can move the meaning without recoloring every use of
+			the letter. The classes follow the palette's: <code>.positive_50</code> sets the text color
+			and <code>.bg_positive_50</code> the background. Border, outline, and shadow classes exist
+			only for the letters, so reach an intent there with a literal like
+			<code>border-color:var(--negative_50)</code>.
+		</p>
+		<ul class="palette unstyled pt_xl2">
+			{#each intent_variants as intent (intent)}
+				<ColorSwatch prefix={intent} />
+			{/each}
+		</ul>
+	</TomeSection>
+	<section class="box">
+		<ColorSchemeInput />
+	</section>
+	<TomeSection>
+		<TomeSectionHeader text="Color knobs" />
+		<p>
+			The knobs are the <TomeLink slug="themes">theme</TomeLink> API, and the first few carry most
+			themes:
+		</p>
+		<ul>
+			<li>
+				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
+				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> - each
+				pointing a meaning at a palette letter (<code>var(--hue_c)</code>) or a literal angle, and
+				deriving its full stop scale (<code>--accent_00</code> … <code>--accent_100</code>)
+			</li>
+			<li>
+				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of
+				every surface, text, border, and shadow tint (the neutral intent, whose scales are the shade
+				and text ramps)
+			</li>
+			<li>
+				<code>--chroma_scale</code> - one multiplier from grayscale (0) through calm (1) to vivid
+				(above 1, deliberately clipping the weakest hues)
+			</li>
+			<li>
+				lightness ramps - <code>--palette_lightness_00</code>/<code>_100</code>/<code>_curve</code>
+				(and the same trio for <code>shade_</code> and <code>text_</code>): the endpoint stops plus
+				a curve exponent bending the ramp between them, per color scheme
+			</li>
+			<li>
+				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code> and
+				<code>--chroma_curve</code>: a mid-peaked curve, clamped per stop by gamut caps computed
+				from the worst hue
+			</li>
+			<li>
+				per-slot chroma multipliers - <code>--palette_a_chroma_scale</code> …
+				<code>--palette_j_chroma_scale</code> and intent twins (<code>--accent_chroma_scale</code>,
+				…), each multiplying one slot's chroma under <code>--chroma_scale</code>. A binding shares
+				only the hue angle, so an intent bound to the muted brown slot needs its twin set too, and
+				<code>validate_theme</code> warns when it isn't
+			</li>
+			<li>
+				<code>--hue_a</code> … <code>--hue_j</code> - the palette letters' angles. Rotating one
+				recolors every use of that letter, so registered themes leave them alone and move intents
+				instead
+			</li>
+		</ul>
+		<p>
+			Every intermediate value these produce is also its own variable
+			(<code>--palette_lightness_30</code>, <code>--palette_chroma_50</code>, …), so a theme can pin
+			any individual stop as an escape hatch.
+		</p>
+		<Code
+			lang="ts"
+			content={`// a warm, slightly vivid theme in three moves
+const warm_theme: Theme = {
+	name: 'warm',
+	variables: [
+		{name: 'hue_neutral', light: '55'},
+		{name: 'neutral_chroma', light: '0.03'},
+		{name: 'chroma_scale', light: '1.15'},
+	],
+};`}
+		/>
+	</TomeSection>
 </TomeContent>
 
 <style>

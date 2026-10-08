@@ -16,7 +16,7 @@ import { resolve_theme_stance } from '../theme_stance.ts';
 const authored: Theme = {
 	name: 'marquee',
 	summary:
-		'Vivid for events and nightlife: a magenta accent on purple-cast surfaces, colored glows, rounded corners, color pushed past the gamut caps - the theater marquee. Dark only.',
+		'Vivid for events and nightlife: a magenta accent on purple-cast surfaces, colored glows, rounded corners, color pushed past the gamut caps - the marquee lit for opening night. Dark only.',
 	scheme: 'dark',
 	variables: [
 		// night cast: the neutral binds to the purple slot

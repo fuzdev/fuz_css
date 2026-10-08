@@ -536,11 +536,10 @@ const el = document.createElement('dialog');`}
 			clears the <code>--duration_*</code> variables so a theme can't re-enable motion.
 		</p>
 		<p>
-			If you organize your own styles in <code>@layer</code>, declare fuz's layers first so yours
-			sort later and win:
-			<code>@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities, app;</code>. Later-declared
-			layers win, so without this line fuz's layers are declared when its CSS loads and beat any
-			layers you declared before it.
+			If you use <code>@layer</code> for your own styles, declare fuz's layers first so yours come
+			later and win: <code>@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities, app;</code>.
+			Without that line, fuz's layers are declared when its CSS loads, after any of yours, and beat
+			them.
 		</p>
 
 		<h4>Base styles</h4>
@@ -550,14 +549,19 @@ const el = document.createElement('dialog');`}
 			<code>@media</code>, <code>@supports</code>, or <code>@container</code> rule is kept or
 			dropped whole, by the elements and classes of the rules inside it.
 		</p>
-		<p>
-			Some rules are always included regardless of detection: the universal reset (<code>*</code>),
-			<code>:root</code> and <code>:host</code>, <code>html</code>, <code>body</code>, rules with a
-			selector that can't be matched against what's detected - one naming no element or class (like
-			<code>::selection</code> and <code>[hidden]</code>), or with an escaped or non-ASCII name
-			(like <code>.md\:flex</code>) - and every other at-rule, like <code>@keyframes</code> and
-			<code>@font-face</code>.
-		</p>
+		<p>Some rules are always included regardless of detection:</p>
+		<ul>
+			<li>
+				the universal reset (<code>*</code>), <code>:root</code> and <code>:host</code>,
+				<code>html</code>, and <code>body</code>
+			</li>
+			<li>
+				rules whose selector can't be matched against what's detected: one naming no element or
+				class (like <code>::selection</code> and <code>[hidden]</code>), or an escaped or non-ASCII
+				name (like <code>.md\:flex</code>)
+			</li>
+			<li>every other at-rule, like <code>@keyframes</code> and <code>@font-face</code></li>
+		</ul>
 		<p>
 			For apps that use dynamic HTML patterns, element detection may have false negatives, omitting
 			styles that you actually need. The reliable fix is to ship the full reset with
@@ -576,9 +580,9 @@ vite_plugin_fuz_css({
 		<p>
 			The <DeclarationLink name="CssGeneratorBaseOptions">base_css</DeclarationLink> option replaces
 			the reset stylesheet with a string, or transforms it with a callback that receives the default
-			CSS. Either way it's any CSS the parser accepts, treated by the rules above, and all of it is
-			emitted in <code>fuz.base</code> - including what a callback appends, which therefore sits
-			below themes and utilities. Put overrides that must win in your own stylesheet.
+			CSS. Either form takes any CSS the parser accepts and is tree-shaken by the rules above. All
+			of it lands in <code>fuz.base</code>, a callback's additions included, so it sits below themes
+			and utilities; put overrides that must win in your own stylesheet.
 		</p>
 		<Code
 			lang="ts"
@@ -619,13 +623,13 @@ vite_plugin_fuz_css({
 		</p>
 		<p>
 			The <DeclarationLink name="CssGeneratorBaseOptions">variables</DeclarationLink> option is the
-			whole set to draw from. When a kept base-style rule references a variable the defaults define
-			but your set lacks - with <code>null</code>, an empty array, or one missing a few - generation
+			whole set to draw from. If a kept base-style rule references a variable the defaults define
+			but your set lacks (with <code>null</code>, an empty array, or a partial set), generation
 			reports the error <code>undefined_theme_variables</code>, since a <code>var(--name)</code>
-			with no fallback would resolve to nothing. A reference with a fallback is never an error, nor
-			is a name the base styles declare themselves, in the same rule or in a top-level rule whose
+			with no fallback would resolve to nothing. It never fires for a reference with a fallback, a
+			name the base styles declare themselves (in the same rule, or in a top-level rule whose
 			selector is exactly <code>:root</code>, <code>:host</code>, <code>html</code>,
-			<code>body</code>, or <code>*</code>. Custom property names of your own are never checked.
+			<code>body</code>, or <code>*</code>), or a custom property of your own.
 		</p>
 		<p>
 			Define the missing variables, or for bundled base styles over a theme stylesheet you import

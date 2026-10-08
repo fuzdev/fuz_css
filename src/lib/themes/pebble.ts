@@ -16,7 +16,7 @@ import { render_shadow_css } from '../shadow_css.ts';
 export const pebble_theme: Theme = {
 	name: 'pebble',
 	summary:
-		'Soft and tactile for consumer apps: pill-shaped controls on rounded panels, buttons raised on drop shadows that press in, airy spacing, a cool gray cast - the river pebble.',
+		'Soft and tactile for consumer apps: pill-shaped controls on rounded panels, buttons raised on drop shadows that press in, airy spacing, a cool gray cast - the smooth river pebble.',
 	variables: [
 		// cool stone: the neutral binds to the blue slot at a whisper
 		{ name: 'hue_neutral', light: 'var(--hue_a)' },

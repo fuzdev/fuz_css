@@ -1,17 +1,18 @@
 <script lang="ts">
 	import ColorSwatchItem from './ColorSwatchItem.svelte';
-	import { intensity_variants, type PaletteVariant } from '$lib/variable_data.ts';
+	import { intensity_variants } from '$lib/variable_data.ts';
 
 	const {
-		letter
+		prefix
 	}: {
-		letter: PaletteVariant;
+		/** The scale's variable prefix, e.g. `palette_a` or `accent`. */
+		prefix: string;
 	} = $props();
 </script>
 
 <ul class="unstyled">
 	{#each intensity_variants as intensity (intensity)}
-		<ColorSwatchItem {intensity} {letter} />
+		<ColorSwatchItem {intensity} {prefix} />
 	{/each}
 </ul>
 

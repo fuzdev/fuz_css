@@ -323,8 +323,10 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
   hook among the knobs (per-tier fallbacks, so no single default exists); `prefers-contrast:
-  more` mirrors the high-contrast modifier (the ground and text curve knobs
-  plus a stronger `--border_color`), theme-overridable
+  more` mirrors the high-contrast modifier (the ground and text curve knobs,
+  a stronger `--border_color`, a darker `--link_color`, and a
+  `--panel_shadow` ring in the border color),
+  theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
