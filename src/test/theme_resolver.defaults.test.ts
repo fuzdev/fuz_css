@@ -46,6 +46,7 @@ describe('create_theme_resolver defaults', () => {
 		for (const name of [
 			'chroma_scale',
 			'neutral_chroma',
+			'shade_chroma_00',
 			'palette_a_chroma_scale',
 			'palette_f_chroma_scale',
 			'accent_chroma_scale',

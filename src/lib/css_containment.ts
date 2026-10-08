@@ -99,6 +99,7 @@ export const css_custom_property_name_is_contained = (name: unknown): boolean =>
  * `<style>` element - the output can't end its rule or its element.
  *
  * @param value - the raw identifier text
+ * @returns the identifier, safe to follow `#` or `.` in a selector
  */
 export const escape_css_identifier = (value: string): string => {
 	let out = '';

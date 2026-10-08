@@ -731,7 +731,7 @@ Plus standalone tests: `css_cache`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
-`fuz_comments`, `bundled_resources`, `generate_bundled_css`,
+`fuz_comments`, `bundled_resources`, `gen_fuz_css`, `generate_bundled_css`,
 `generate_classes_css`, `generate_css`, and more.
 
 The theme suites discover the shipped themes by glob through

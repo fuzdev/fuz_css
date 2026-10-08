@@ -25,6 +25,7 @@ import {
 	BORDER_COLOR_ALPHAS,
 	ramp_color_oklch,
 	neutral_color_oklch,
+	is_neutral_ground,
 	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
 	type RampFamily
@@ -439,7 +440,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				const shape = num(`chroma_shape_${stop}`, scheme);
 				const neutral_hue = num('hue_neutral', scheme);
 				// the ground carries its own chroma on top of the shaped term
-				const ground_c = family === 'shade' && stop === '00' ? num('shade_chroma_00', scheme) : 0;
+				const ground_c = is_neutral_ground(family, stop) ? num('shade_chroma_00', scheme) : 0;
 				if (
 					lightness === null ||
 					neutral_c === null ||

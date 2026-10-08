@@ -4,6 +4,8 @@
  * @module
  */
 
+import { ensure_end } from '@fuzdev/fuz_util/string.ts';
+
 /**
  * Filter function to determine which files to process for CSS class extraction.
  * The generators pass each file's absolute id and the project root (Vite's
@@ -15,6 +17,9 @@ export type FileFilter = (path: string, root: string) => boolean;
 
 const NODE_MODULES_SEGMENT = '/node_modules/';
 
+// a test directory as a path segment, at the start of the scoped path or after a slash
+const TEST_DIRECTORY_MATCHER = /(?:^|\/)(?:test|tests|__tests__|__mocks__)\//u;
+
 /**
  * The part of a file id the default filter's directory checks look at: the
  * path inside its package for a dependency (after `node_modules/<pkg>/` or
@@ -24,6 +29,7 @@ const NODE_MODULES_SEGMENT = '/node_modules/';
  *
  * @param path - an absolute file id, or an already relative path
  * @param root - the project root, with or without a trailing slash; `''` for none
+ * @returns the package-relative, root-relative, or unchanged path
  */
 export const to_filter_scope = (path: string, root: string): string => {
 	const nm = path.lastIndexOf(NODE_MODULES_SEGMENT);
@@ -35,7 +41,7 @@ export const to_filter_scope = (path: string, root: string): string => {
 		return segments.slice(name_length).join('/');
 	}
 	if (root) {
-		const prefix = root.endsWith('/') ? root : root + '/';
+		const prefix = ensure_end(root, '/');
 		if (path.startsWith(prefix)) return path.slice(prefix.length);
 	}
 	return path;
@@ -55,15 +61,8 @@ export const filter_file_default: FileFilter = (path, root) => {
 	if (
 		scoped.includes('.test.') ||
 		scoped.includes('.spec.') ||
-		scoped.includes('/test/') ||
-		scoped.includes('/tests/') ||
-		scoped.includes('/__tests__/') ||
-		scoped.includes('/__mocks__/') ||
-		scoped.startsWith('test/') ||
-		scoped.startsWith('tests/') ||
-		scoped.startsWith('__tests__/') ||
-		scoped.startsWith('__mocks__/') ||
-		scoped.includes('.gen.')
+		scoped.includes('.gen.') ||
+		TEST_DIRECTORY_MATCHER.test(scoped)
 	) {
 		return false;
 	}

@@ -47,11 +47,11 @@ Breaking:
   font sizes, so they follow the ratio.
 - `body` reads `--font_size_md` (was a fixed `1.6rem`), so
   `--font_size_scale` moves body text.
-- Buttons, inputs, selects, and textareas take their corner radius from
+- Buttons and form fields take their corner radius from
   `--control_radius` (default `var(--border_radius_sm)`, was the
   `--border_radius_sm` token directly), so a contextual
   `--border_radius_sm` no longer reaches them; the per-element
-  `--border_radius` hook still does.
+  `--border_radius` hook still does. Checkboxes keep `--border_radius_xs`.
 - `default_themes` is base and ledger. Low/high contrast are
   `contrast_modifiers`, composed over a theme with
   `compose_themes(base, ...overlays)`.

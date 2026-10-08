@@ -234,6 +234,50 @@ describe('check_theme', () => {
 			check_theme(paired).entries.some((e) => e.gate === 'gamut' && e.subject === 'accent_50')
 		);
 	});
+
+	test('a ground tint reaches the gates measured against the page', () => {
+		const body = (theme: Theme): number =>
+			check_theme(theme).entries.find(
+				(e) => e.scheme === 'light' && e.subject === 'text_80 on shade_00'
+			)!.value;
+		const tinted: Theme = {
+			name: 't',
+			// near a light ground's gamut edge - 0.02 already clips at the default 0.97
+			variables: [{ name: 'shade_chroma_00', light: '0.012' }]
+		};
+		const report = check_theme(tinted);
+		assert.isTrue(report.ok);
+		assert.notStrictEqual(body(tinted), body(base_theme));
+	});
+
+	test('a ground tint past sRGB fails gamut at the ground', () => {
+		const report = check_theme({
+			name: 't',
+			variables: [{ name: 'shade_chroma_00', light: '0.1' }]
+		});
+		const ground = report.entries.find(
+			(e) => e.gate === 'gamut' && e.scheme === 'light' && e.subject === 'shade_00'
+		);
+		assert(ground, 'shade_00 gamut entry exists');
+		assert.isFalse(ground.pass);
+		// the rest of the shade scale doesn't carry the ground tint
+		assert.isTrue(
+			report.entries
+				.filter(
+					(e) => e.gate === 'gamut' && e.subject.startsWith('shade_') && e.subject !== 'shade_00'
+				)
+				.every((e) => e.pass)
+		);
+	});
+
+	test('a ground tint that resolves to no number leaves the ground unchecked', () => {
+		const report = check_theme({
+			name: 't',
+			variables: [{ name: 'shade_chroma_00', light: 'calc(0.01 * 2)' }]
+		});
+		assert.isFalse(report.ok);
+		assert.isTrue(report.unchecked.some((u) => u.variable === 'shade_chroma_00'));
+	});
 });
 
 describe('scheme stance', () => {

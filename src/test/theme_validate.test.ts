@@ -279,6 +279,19 @@ describe('validate_theme', () => {
 		);
 	});
 
+	test('a unitless length warns, and a bare 0 only where it lands inside max()', () => {
+		const length_warnings = (name: string, light: string): number =>
+			validate_theme({ name: 't', variables: [{ name, light }] }).filter(
+				(i) => i.level === 'warning' && i.message.includes('needs a unit')
+			).length;
+		assert.strictEqual(length_warnings('border_radius_min', '0'), 1);
+		assert.strictEqual(length_warnings('border_radius_min', '0rem'), 0);
+		assert.strictEqual(length_warnings('border_radius_min', '0.5rem'), 0);
+		assert.strictEqual(length_warnings('outline_offset', '0'), 0);
+		assert.strictEqual(length_warnings('outline_offset', '2'), 1);
+		assert.strictEqual(length_warnings('control_radius', 'var(--border_radius_md)'), 0);
+	});
+
 	test('the accent separation threshold splits a near-clone from a neighbor', () => {
 		const distance = (a: number, b: number): number =>
 			Math.min(Math.abs(a - b), 360 - Math.abs(a - b));

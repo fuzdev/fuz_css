@@ -9,6 +9,7 @@
 
 import { join } from 'node:path';
 import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
+import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
 import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
@@ -42,7 +43,7 @@ export const create_cache_path_resolver = (
 	cache_dir: string,
 	project_root: string
 ): ((file_id: string) => string | null) => {
-	const root = project_root.endsWith('/') ? project_root : project_root + '/';
+	const root = ensure_end(project_root, '/');
 	const resolved_cache_dir = join(root, cache_dir);
 	return (file_id) => (is_ci ? null : get_file_cache_path(file_id, resolved_cache_dir, root));
 };
@@ -183,24 +184,30 @@ export const load_cached_extraction = async (
 	}
 };
 
+export interface SaveCachedExtractionOptions {
+	/** Absolute path to the cache file. */
+	cache_path: string;
+	/** Content hash of the source file contents. */
+	content_hash: string;
+	/** The configuration part of the key, from `to_extraction_cache_key`. */
+	extraction_key: string | null;
+	/** Extraction data to cache. */
+	extraction: ExtractionData;
+}
+
 /**
  * Saves an extraction result to the cache.
  * Uses atomic write (temp file + rename) for crash safety.
  * Normalizes empty collections to null to avoid allocation overhead on load.
  *
  * @param deps - filesystem deps for dependency injection
- * @param cache_path - absolute path to the cache file
- * @param content_hash - content hash of the source file contents
- * @param extraction_key - the configuration part of the key, from `to_extraction_cache_key`
- * @param extraction - extraction data to cache
+ * @param options - the cache file, its key parts, and the extraction to write
  */
 export const save_cached_extraction = async (
 	deps: CacheDeps,
-	cache_path: string,
-	content_hash: string,
-	extraction_key: string | null,
-	extraction: ExtractionData
+	options: SaveCachedExtractionOptions
 ): Promise<void> => {
+	const { cache_path, content_hash, extraction_key, extraction } = options;
 	// Convert to null if empty to save allocation on load
 	const classes_array =
 		extraction.classes && extraction.classes.size > 0

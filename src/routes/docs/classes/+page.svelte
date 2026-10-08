@@ -196,6 +196,10 @@ import 'virtual:fuz.css';`}
 					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
 				</li>
 				<li>
+					<code>cache_salt</code> - a string folded into the cache key; change it when only an acorn
+					plugin's options change, since the key already covers file content and the plugins
+				</li>
+				<li>
 					<code>prescan</code> - dev-only scan of sources at server startup; <code>true</code>
 					(default) scans <code>src</code> under the Vite root, <code>false</code> disables, or pass
 					an array of directories

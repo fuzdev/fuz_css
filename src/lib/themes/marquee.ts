@@ -37,7 +37,7 @@ const authored: Theme = {
 		// the dialog backdrop dims to night-purple instead of neutral black
 		{ name: 'backdrop_color', light: 'oklch(0.15 0.05 var(--hue_neutral) / 60%)' },
 		// tube bends: the small tiers lift onto a rounded floor and the ladder
-		// above it compresses, so no corner is sharp and none balloons
+		// above it compresses to about half, so no corner is sharp
 		{ name: 'border_radius_min', light: '0.5rem' },
 		{ name: 'radius_scale', light: '0.54' }
 	]

@@ -17,6 +17,7 @@ import {
 	icon_size_variants,
 	shadow_size_variants,
 	shadow_variant_prefixes,
+	BORDER_RADII,
 	FONT_SIZES,
 	TYPE_SCALE_RATIO
 } from '$lib/variable_data.ts';
@@ -154,4 +155,17 @@ test('font sizes follow the size scale, and above md the type scale ratio, match
 			assert.strictEqual(light, `calc(${FONT_SIZES[size]}rem * var(--font_size_scale))`);
 		}
 	}
+});
+
+test('border radii scale per tier over a floor, and controls read their own radius', () => {
+	const by_name = new Map(default_variables.map((v) => [v.name, v]));
+	// a length, since `max()` can't compare a unitless 0 against the rem tiers
+	assert.strictEqual(by_name.get('border_radius_min')?.light, '0rem');
+	for (const size of border_radius_variants) {
+		assert.strictEqual(
+			by_name.get(`border_radius_${size}`)?.light,
+			`max(var(--border_radius_min), calc(${BORDER_RADII[size]}rem * var(--radius_scale)))`
+		);
+	}
+	assert.strictEqual(by_name.get('control_radius')?.light, 'var(--border_radius_sm)');
 });

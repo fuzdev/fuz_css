@@ -53,6 +53,9 @@ export const known_theme_variable_names: ReadonlySet<string> = new Set([
 const PERCENT_MATCHER = new RegExp(`^(${CSS_NUMBER_PATTERN})%$`, 'u');
 const TIME_MATCHER = new RegExp(`^(${CSS_NUMBER_PATTERN})(s|ms)$`, 'u');
 
+// length knobs read inside `max()`, where even 0 needs a unit
+const UNIT_REQUIRED_LENGTHS: ReadonlySet<string> = new Set(['border_radius_min']);
+
 const validate_knob_value = (
 	knob: ThemeKnob,
 	value: string,
@@ -143,8 +146,21 @@ const validate_knob_value = (
 			}
 			break;
 		}
+		case 'length': {
+			// freeform past this one check: a bare number is never a length, and
+			// a bare 0 fails where the value lands inside `max()`/`min()`, which
+			// can't compare a unitless 0 against lengths
+			if (number !== null && (number !== 0 || UNIT_REQUIRED_LENGTHS.has(knob.name))) {
+				issues.push({
+					level: 'warning',
+					message: `${variable} ${slot} "${value}" needs a unit like rem or px - a bare number invalidates every value that reads it`,
+					variable
+				});
+			}
+			break;
+		}
 		default:
-			// length, color, font_stack, shadow, text - freeform, advisory only
+			// color, font_stack, shadow, text - freeform, advisory only
 			break;
 	}
 	return issues;

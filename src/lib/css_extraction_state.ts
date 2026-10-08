@@ -131,13 +131,12 @@ export class CssExtractionState {
 		this.version++;
 
 		if (cache_path_to_write) {
-			const cache_write = save_cached_extraction(
-				this.#deps,
-				cache_path_to_write,
-				hash,
-				this.#extraction_key,
+			const cache_write = save_cached_extraction(this.#deps, {
+				cache_path: cache_path_to_write,
+				content_hash: hash,
+				extraction_key: this.#extraction_key,
 				extraction
-			).catch(() => {
+			}).catch(() => {
 				// a failed cache write only costs a re-extraction later
 			});
 			if (await_cache_write) await cache_write;

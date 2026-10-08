@@ -30,6 +30,8 @@ import {
 	render_chroma_shape_css,
 	render_chroma_stop_css,
 	render_neutral_stop_css,
+	neutral_color_oklch,
+	is_neutral_ground,
 	render_ramp_color_css,
 	render_border_color_stop_css,
 	render_shadow_tint_css,
@@ -326,6 +328,30 @@ describe('neutral stop emitter', () => {
 				}
 			}
 		}
+	});
+});
+
+describe('the ground tint', () => {
+	test('the emitter and the twin add it at shade_00 only', () => {
+		const vars = { ...knob_vars('light'), shade_chroma_00: 0.015 };
+		for (const stop of numeric_scale_variants) {
+			for (const family of ['shade', 'text'] as const) {
+				const [l_css, c_css, h_css] = parse_oklch_args(render_neutral_stop_css(family, stop));
+				const ground = is_neutral_ground(family, stop) ? 0.015 : 0;
+				const [l, c, h] = neutral_color_oklch(
+					evaluate_css_number(l_css, vars),
+					NEUTRAL_CHROMA.light,
+					ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS.light.curve),
+					PALETTE_HUES.f,
+					ground
+				);
+				assert.closeTo(evaluate_css_number(c_css, vars), c, TOLERANCE, `${family} ${stop} C`);
+				assert.closeTo(evaluate_css_number(l_css, vars), l, TOLERANCE, `${family} ${stop} L`);
+				assert.closeTo(evaluate_css_number(h_css, vars), h, TOLERANCE, `${family} ${stop} H`);
+			}
+		}
+		assert.include(render_neutral_stop_css('shade', '00'), 'var(--shade_chroma_00)');
+		assert.notInclude(render_neutral_stop_css('text', '00'), 'var(--shade_chroma_00)');
 	});
 });
 

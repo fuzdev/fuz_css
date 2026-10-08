@@ -234,9 +234,9 @@ border-color: var(--shade_30);
 		<p>
 			Border variables with <TomeLink slug="classes" hash="Token-classes">token classes</TomeLink>.
 			Each tier is the base radius times <code>--radius_scale</code>, floored at
-			<code>--border_radius_min</code>. Buttons and form fields read <code>--control_radius</code>
-			(the <code>sm</code> tier by default), so a theme can round its controls apart from its
-			panels:
+			<code>--border_radius_min</code>. Buttons and form fields other than checkboxes read
+			<code>--control_radius</code> (the <code>sm</code> tier by default), so a theme can round its
+			controls apart from its panels:
 		</p>
 		<div class="border_examples border_radii">
 			{#each border_radius_variants as radius (radius)}

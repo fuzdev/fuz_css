@@ -118,7 +118,7 @@ describe('css_custom_property_name_is_contained', () => {
 
 describe('escape_css_identifier', () => {
 	test('a plain identifier passes through', () => {
-		for (const id of ['my_scope', 'Theme-1', '_x', '-a', 'caf\u00e9']) {
+		for (const id of ['my_scope', 'Theme-1', '_x', '-a', '--x', 'caf\u00e9']) {
 			assert.strictEqual(escape_css_identifier(id), id);
 		}
 	});
@@ -126,6 +126,9 @@ describe('escape_css_identifier', () => {
 		assert.strictEqual(escape_css_identifier('1a'), '\\31 a');
 		assert.strictEqual(escape_css_identifier('-1'), '-\\31 ');
 		assert.strictEqual(escape_css_identifier('a1'), 'a1');
+	});
+	test('a space is escaped by code point', () => {
+		assert.strictEqual(escape_css_identifier('a b'), 'a\\20 b');
 	});
 	test('a lone dash and a NUL are escaped', () => {
 		assert.strictEqual(escape_css_identifier('-'), '\\-');

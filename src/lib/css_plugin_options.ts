@@ -46,9 +46,11 @@ import type { CacheDeps } from './deps.ts';
  */
 export interface CssExtractionOptions {
 	/**
-	 * Filter function to determine which files to extract classes from.
-	 * By default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,
-	 * excluding test files and .gen files.
+	 * Filter function to determine which files to extract classes from,
+	 * called with each file's absolute id and the project root. By default,
+	 * extracts from .svelte, .html, .ts, .js, .tsx, .jsx files, excluding
+	 * test files, .gen files, and test directories inside the project or a
+	 * dependency's package (see `to_filter_scope`).
 	 */
 	filter_file?: FileFilter;
 	/**

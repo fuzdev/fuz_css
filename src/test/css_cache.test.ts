@@ -76,13 +76,18 @@ const save_and_load = async (
 		content_hash = 'test-hash'
 	} = options;
 
-	await save_cached_extraction(deps, cache_path, content_hash, null, {
-		classes,
-		explicit_classes,
-		diagnostics,
-		elements,
-		explicit_elements,
-		explicit_variables
+	await save_cached_extraction(deps, {
+		cache_path,
+		content_hash,
+		extraction_key: null,
+		extraction: {
+			classes,
+			explicit_classes,
+			diagnostics,
+			elements,
+			explicit_elements,
+			explicit_variables
+		}
 	});
 	const loaded = await load_cached_extraction(deps, cache_path);
 	assert.isNotNull(loaded);
@@ -533,9 +538,11 @@ describe('cache functions with mock deps', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(mock_deps, cache_path, 'abc123', null, {
-			...EMPTY_EXTRACTION,
-			classes
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'abc123',
+			extraction_key: null,
+			extraction: { ...EMPTY_EXTRACTION, classes }
 		});
 		const loaded = await load_cached_extraction(mock_deps, cache_path);
 
@@ -556,7 +563,12 @@ describe('cache functions with mock deps', () => {
 		const mock_deps = create_mock_cache_deps(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_deps, cache_path, 'hash', null, EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
 		assert.isTrue(state.files.has(cache_path));
 
 		await delete_cached_extraction(mock_deps, cache_path);
@@ -567,7 +579,12 @@ describe('cache functions with mock deps', () => {
 		const state = create_mock_fs_state();
 		const mock_deps = create_mock_cache_deps(state);
 
-		await save_cached_extraction(mock_deps, '/test.json', 'hash', null, EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, {
+			cache_path: '/test.json',
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		assert.strictEqual(parsed.v, CSS_CACHE_VERSION);
@@ -606,7 +623,12 @@ describe('the extraction configuration key', () => {
 		const cache_path = '/mock/cache/App.tsx.json';
 		const content = 'export const x = <div class="box" />;';
 		// cached as if a plugin-less parse had produced nothing
-		await save_cached_extraction(mock_deps, cache_path, 'hash', null, EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
 		const read = (extraction_key: string | null) =>
 			extract_file_cached({
 				deps: mock_deps,

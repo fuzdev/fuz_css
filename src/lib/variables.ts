@@ -582,10 +582,11 @@ export const default_variables: Array<StyleVariable> = [
 		name: `border_radius_${size}`,
 		light: `max(var(--border_radius_min), calc(${BORDER_RADII[size]}rem * var(--radius_scale)))`
 	})),
-	// the radius controls (buttons, inputs, selects, textareas) read, apart
-	// from the surface tiers, so a theme rounds its controls without rounding
-	// its panels; resolves at `:root`, so a contextual `--border_radius_sm`
-	// override doesn't reach controls
+	// the radius controls (buttons, text inputs, selects, textareas) read,
+	// apart from the surface tiers, so a theme rounds its controls without
+	// rounding its panels - the checkbox keeps the `xs` tier, since a pill
+	// checkbox reads as a radio; resolves at `:root`, so a contextual
+	// `--border_radius_sm` override doesn't reach controls
 	{
 		name: 'control_radius',
 		light: 'var(--border_radius_sm)',

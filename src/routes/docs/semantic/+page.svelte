@@ -44,7 +44,7 @@
 
 :where(button:not(.unstyled)) {
   background-color: var(--button_fill);
-  border-radius: var(--border_radius_sm);
+  border-radius: var(--border_radius, var(--control_radius));
 }`}
 		/>
 	</TomeSection>

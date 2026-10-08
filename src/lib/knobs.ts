@@ -204,13 +204,14 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	},
 	{
 		// the ground's own tint - the shared chroma shape leaves the page
-		// untinted at any neutral_chroma, so a tinted page is this knob
+		// untinted at any neutral_chroma, so a tinted page is this knob; a
+		// light ground near white has little gamut room, which the gates check
 		name: 'shade_chroma_00',
 		kind: 'number',
 		axis: 'color',
 		leverage: 'md',
 		tier: 'semantic',
-		range: [0, 0.05],
+		range: [0, 0.03],
 		step: 0.001
 	},
 	hue('hue_accent', 'lg', 'semantic', true),
@@ -353,7 +354,7 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		tier: 'semantic'
 	},
 	{
-		// buttons and form fields, apart from the surface tiers
+		// buttons and form fields (not checkboxes), apart from the surface tiers
 		name: 'control_radius',
 		kind: 'length',
 		axis: 'shape',

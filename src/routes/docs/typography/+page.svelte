@@ -20,6 +20,7 @@
 		font_family_variants
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'typography';
 
@@ -138,7 +139,7 @@
 				</StyleVariableButton>
 				<div class="row">
 					<span class="pr_sm">=</span>
-					<code>{computed_styles?.getPropertyValue('--' + size.name)}</code>
+					<code><ResolvedLength name={size.name} /></code>
 				</div>
 			</div>
 		{/each}

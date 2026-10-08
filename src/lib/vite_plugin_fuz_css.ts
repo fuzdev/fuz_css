@@ -72,6 +72,7 @@ import { dirname, isAbsolute, join } from 'node:path';
 import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
 import { fs_search } from '@fuzdev/fuz_util/fs.ts';
 import { each_concurrent } from '@fuzdev/fuz_util/async.ts';
+import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import { create_css_generator } from './css_generator.ts';
 import { CssExtractionState } from './css_extraction_state.ts';
@@ -658,8 +659,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		enforce: 'pre',
 
 		configResolved(resolved_config) {
-			const root = resolved_config.root;
-			vite_root = root.endsWith('/') ? root : root + '/';
+			vite_root = ensure_end(resolved_config.root, '/');
 			get_cache_path = create_cache_path_resolver(cache_dir, vite_root);
 			logger = resolved_config.logger;
 			is_dev = resolved_config.command === 'serve';

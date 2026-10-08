@@ -178,6 +178,15 @@ export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
  */
 export const SHADE_CHROMA_00 = 0;
 
+/**
+ * Whether a neutral stop is the page ground - the one stop
+ * `--shade_chroma_00` tints, shared by the emitter and both numeric twins.
+ */
+export const is_neutral_ground = (
+	family: Exclude<RampFamily, 'palette'>,
+	stop: NumericScaleVariant
+): boolean => family === 'shade' && stop === '00';
+
 export type ShadowTint = 'bright' | 'dim';
 
 /**
@@ -417,7 +426,7 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeV
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 		NEUTRAL_HUE,
-		stop === '00' ? SHADE_CHROMA_00 : 0
+		is_neutral_ground('shade', stop) ? SHADE_CHROMA_00 : 0
 	);
 
 /**
@@ -545,7 +554,7 @@ export const render_neutral_stop_css = (
 ): string =>
 	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
 		stop
-	})${family === 'shade' && stop === '00' ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
+	})${is_neutral_ground(family, stop) ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

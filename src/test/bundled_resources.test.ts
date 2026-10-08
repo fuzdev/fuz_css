@@ -289,3 +289,33 @@ describe('create_bundled_resources', () => {
 		});
 	});
 });
+
+describe('the default bundle pulls each knob chain a base rule reads', () => {
+	const declared = (css: string, name: string): boolean => css.includes(`--${name}:`);
+
+	test('a button brings the control radius through its tier to the radius knobs', async () => {
+		const { css } = await generate({ elements: ['button'] });
+		for (const name of [
+			'control_radius',
+			'border_radius_sm',
+			'border_radius_min',
+			'radius_scale'
+		]) {
+			assert.isTrue(declared(css, name), name);
+		}
+	});
+
+	test('body text brings the md size and the size scale', async () => {
+		const { css } = await generate({ elements: ['body'] });
+		for (const name of ['font_size_md', 'font_size_scale']) {
+			assert.isTrue(declared(css, name), name);
+		}
+	});
+
+	test('the page ground brings its own chroma', async () => {
+		const { css } = await generate({ elements: [] });
+		for (const name of ['shade_00', 'shade_chroma_00']) {
+			assert.isTrue(declared(css, name), name);
+		}
+	});
+});

@@ -9,6 +9,7 @@
 
 import type { Gen } from '@fuzdev/gro/gen.ts';
 import type { Logger } from '@fuzdev/fuz_util/log.ts';
+import { resolve } from 'node:path';
 import { map_concurrent, each_concurrent } from '@fuzdev/fuz_util/async.ts';
 
 import { filter_file_default } from './file_filter.ts';
@@ -88,7 +89,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		filter_file = filter_file_default,
 		include_stats = false,
 		cache_dir = DEFAULT_CACHE_DIR,
-		project_root = process.cwd(),
+		project_root: project_root_option = process.cwd(),
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 		acorn_plugins,
@@ -96,6 +97,9 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		deps = default_cache_deps
 	} = options;
 	const extraction_key = to_extraction_cache_key(acorn_plugins, cache_salt);
+	// absolute, so a relative option still matches the absolute file ids the
+	// filter and the cache paths are judged against
+	const project_root = resolve(project_root_option);
 
 	// the log of the generate call in progress, which diagnostics go to
 	let current_log: Logger | null = null;
@@ -225,13 +229,12 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 			// Parallel cache writes (await completion)
 			if (cache_writes.length > 0) {
 				await each_concurrent(cache_writes, cache_io_concurrency, async (extraction) => {
-					await save_cached_extraction(
-						deps,
-						extraction.cache_path,
-						extraction.content_hash,
+					await save_cached_extraction(deps, {
+						cache_path: extraction.cache_path,
+						content_hash: extraction.content_hash,
 						extraction_key,
 						extraction
-					);
+					});
 				}).catch((err) => log.warn('Cache write error:', err));
 			}
 
