@@ -15,6 +15,7 @@ import {
 	FUZ_CSS_PLACEHOLDER_RULE,
 	parse_css_placeholder_hash,
 	splice_css_at_placeholder,
+	splice_css_into_asset,
 	to_hashed_css_placeholder
 } from '$lib/css_placeholder_splice.ts';
 
@@ -95,6 +96,20 @@ describe.each(PLACEHOLDER_FORMS)('splice_css_at_placeholder, $form', ({ decl, ma
 		assert.strictEqual(spliced, before + GENERATED + '\n\n' + APP);
 	});
 
+	test('reads past a string or url holding a comment opener before the marker', () => {
+		// a `/*` inside a string or an unquoted url opens no comment, so it must
+		// not blank the marker that follows it
+		for (const before of [
+			'.code::before{content:"/*"}',
+			".code::before{content:'}/*'}",
+			'.a{background:url(/img/*.png)}'
+		]) {
+			const spliced = splice_css_at_placeholder(before + marker + APP + '/* note */', GENERATED);
+			assert.isNotNull(spliced, before);
+			assert.strictEqual(spliced, before + GENERATED + '\n' + APP + '/* note */');
+		}
+	});
+
 	test('splits a merged rule: decls after the marker stay after the generated CSS', () => {
 		// A rule-merging minifier (e.g. lightningcss) folds the adjacent `:root`
 		// rules into one, so there is no standalone marker rule left to swap out.
@@ -169,20 +184,16 @@ describe('splice_css_at_placeholder', () => {
 	test('returns null when the marker is absent', () => {
 		assert.isNull(splice_css_at_placeholder(APP, GENERATED));
 	});
+});
 
-	test('repeated splicing strips every marker, whichever form each takes', () => {
-		// the loop `generateBundle` runs: place the CSS at the first marker,
-		// then strip the rest with empty CSS until none is left
-		let spliced = splice_css_at_placeholder(
-			HASHED_MARKER + APP + MARKER + HASHED_MARKER,
-			GENERATED
-		);
+describe('splice_css_into_asset', () => {
+	test('returns null when the marker is absent', () => {
+		assert.isNull(splice_css_into_asset(APP, GENERATED));
+	});
+
+	test('places the CSS at the first marker and strips every other, whichever form each takes', () => {
+		const spliced = splice_css_into_asset(HASHED_MARKER + APP + MARKER + HASHED_MARKER, GENERATED);
 		assert.isNotNull(spliced);
-		let stripped = splice_css_at_placeholder(spliced, '');
-		while (stripped !== null) {
-			spliced = stripped;
-			stripped = splice_css_at_placeholder(spliced, '');
-		}
 		assert.notInclude(spliced, FUZ_CSS_PLACEHOLDER);
 		assert.strictEqual(spliced.split(GENERATED).length - 1, 1, 'the generated CSS is placed once');
 		assert.include(spliced, APP);

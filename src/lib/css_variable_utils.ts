@@ -95,10 +95,13 @@ export const extract_declared_css_variables = (css: string): Set<string> => {
 	return variables;
 };
 
-/** Whether `css` has an unquoted `url(` function token at `index`. */
+/**
+ * Whether `css` has an unquoted `url(` function token at `index` - not one
+ * that ends a longer name (`myurl(`, `#url(`, `@url(`).
+ */
 const is_css_url_start = (css: string, index: number): boolean =>
 	css.slice(index, index + 4).toLowerCase() === 'url(' &&
-	(index === 0 || !/[\w-]/.test(css[index - 1]!));
+	(index === 0 || !/[-\w#@\u{80}-\u{10FFFF}]/u.test(css[index - 1]!));
 
 /**
  * Removes the comments from a CSS string, so text inside one isn't read as

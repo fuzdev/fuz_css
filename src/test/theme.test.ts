@@ -108,6 +108,18 @@ describe('scheme stance', () => {
 		assert.strictEqual(resolve_theme_stance(resolved), resolved);
 	});
 
+	test('resolve_theme_stance recomputes a mirror its variables no longer imply', () => {
+		const resolved = resolve_theme_stance({
+			name: 't',
+			variables: [{ name: 'shade_lightness_00', light: '0.2' }],
+			scheme: 'dark'
+		});
+		assert.notOk(resolved.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
+		// dropping the override must bring the default back through the mirror
+		const edited = resolve_theme_stance({ ...resolved, variables: [] });
+		assert.ok(edited.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
+	});
+
 	test('resolve_theme_stance leaves a dual-scheme theme unchanged', () => {
 		const theme: Theme = { name: 't', variables: [], scheme: 'dual' };
 		assert.strictEqual(resolve_theme_stance(theme), theme);

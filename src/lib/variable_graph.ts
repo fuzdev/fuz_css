@@ -86,8 +86,13 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
 		value: unknown
 	): string | undefined => {
 		if (value === undefined) return undefined;
-		if (css_value_is_contained(value) && (value as string).trim()) return value as string;
-		report(name, `has a ${slot} value that can't be contained in a declaration`);
+		if (!css_value_is_contained(value)) {
+			report(name, `has a ${slot} value that can't be contained in a declaration`);
+		} else if (!(value as string).trim()) {
+			report(name, `has a blank ${slot} value`);
+		} else {
+			return value as string;
+		}
 		return undefined;
 	};
 

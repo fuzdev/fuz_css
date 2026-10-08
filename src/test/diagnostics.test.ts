@@ -286,4 +286,10 @@ describe('create_diagnostic_dispatcher', () => {
 		assert.throws(() => throwing.dispatch([error('b')]), CssGenerationError);
 		assert.throws(() => throwing.dispatch([error('b')]), CssGenerationError);
 	});
+
+	test('logs warnings before throwing on errors', () => {
+		const { logged, dispatch } = create('log', 'throw');
+		assert.throws(() => dispatch([warning('a'), error('b')]), CssGenerationError);
+		assert.deepEqual(logged, [`warn ${format_diagnostic(warning('a'))}`]);
+	});
 });

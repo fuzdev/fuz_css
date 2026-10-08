@@ -10,7 +10,8 @@
  * A consequence of mirroring into the theme layer: the mirror re-declares the
  * scheme-adaptive defaults in `fuz.theme`, which outranks the
  * `fuz.preferences` OS mappings - so under a stanced theme
- * `prefers-contrast: more` has no effect. Compose the high-contrast modifier
+ * `prefers-contrast: more` keeps only its stronger `--border_color`, not the
+ * ground and text stretch. Compose the high-contrast modifier
  * (`contrast_modifiers`) over the theme to raise contrast deliberately.
  *
  * @module
@@ -51,8 +52,10 @@ export const scheme_stance_variables = (
 /**
  * Resolves a single-scheme theme by computing its stance mirror into
  * `scheme_mirror`, so `render_theme_style` needs no knowledge of the defaults.
- * A dual-scheme theme, or one already carrying its mirror, is returned
- * unchanged - so it's safe to call on any theme, resolved or not.
+ * A dual-scheme theme, or one already carrying the mirror its variables
+ * imply, is returned unchanged - so it's safe to call on any theme, resolved
+ * or not. A carried mirror that no longer matches (the theme's variables
+ * changed after it was resolved, or the defaults did) is recomputed.
  *
  * The mirror lands in its own field rather than merged into `variables` so the
  * authored knobs stay distinguishable from the derived ones - `compile_theme`
@@ -67,6 +70,13 @@ export const scheme_stance_variables = (
  */
 export const resolve_theme_stance = (theme: Theme): Theme => {
 	const stance = to_theme_stance(theme.scheme);
-	if (!stance || theme.scheme_mirror !== undefined) return theme;
-	return { ...theme, scheme_mirror: scheme_stance_variables(stance, theme.variables) };
+	if (!stance) return theme;
+	const scheme_mirror = scheme_stance_variables(stance, theme.variables);
+	if (theme.scheme_mirror && mirrors_equal(theme.scheme_mirror, scheme_mirror)) return theme;
+	return { ...theme, scheme_mirror };
 };
+
+// the mirror holds only light slots, in `scheme_adaptive_variables` order
+const mirrors_equal = (a: Array<StyleVariable>, b: Array<StyleVariable>): boolean =>
+	a.length === b.length &&
+	a.every((v, i) => v.name === b[i]!.name && v.light === b[i]!.light && v.dark === b[i]!.dark);

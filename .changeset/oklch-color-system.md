@@ -22,16 +22,16 @@ Breaking:
 - `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
 - `color-mix()` interpolates `in oklab` (was `in hsl`).
 - Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
-  `fuz.utilities`; unlayered consumer styles beat all of it, except the
-  `!important` declarations, which a layer makes outrank unlayered
-  `!important` too: `[hidden]`'s `display: none` and the
-  `prefers-reduced-motion` duration reset.
+  `fuz.utilities`; unlayered consumer styles beat all of it except its two
+  `!important` declarations (`[hidden]` and the `prefers-reduced-motion`
+  duration reset), which a layer makes outrank unlayered `!important` too.
 - The browser floor rises to Chrome and Edge 120 (was 111) and Firefox 118
   (was 113) for `pow()`, with no fallback; Safari stays at 16.2, or 16.4
   with responsive modifier classes.
 - `variables.ts` exports only `default_variables`; read a variable with
   `default_variables.find((v) => v.name === 'space_md')`. `icon_sizes` →
-  `ICON_SIZES` (`ICON_SIZES.xs === 18`, was `'18px'`); `Z_INDEX_MAX`
+  `ICON_SIZES`, keyed by variant with unitless values (`ICON_SIZES.xs ===
+  18`, was `icon_sizes.icon_size_xs === '18px'`); `Z_INDEX_MAX`
   removed (inline `2147483647`).
 
 New:
@@ -44,8 +44,7 @@ New:
   each with a 13-stop scale (`--accent_00`…`--accent_100`), token classes
   (`.positive_50`, `.bg_caution_10`), `--selection_color`, and
   `intent_variants`/`IntentVariant`. Links, focus, selection,
-  `accent-color`, and disabled-active feedback use them; focus follows
-  `--outline_color` with the accent as fallback.
+  `accent-color`, and disabled-active feedback use them.
 - Per-slot chroma multipliers `--palette_X_chroma_scale` and
   `--<intent>_chroma_scale` (default `1`; brown `f` ships at `0.55`).
 - `--border_color_lightness`/`--border_color_chroma` derive the

@@ -728,10 +728,11 @@ describe('apply_theme_variables', () => {
 		assert.isDefined(result.find((v) => v.name === 'my_brand'));
 	});
 
-	test("applies scheme_mirror before the theme's own variables", () => {
+	test('recomputes a carried scheme_mirror its variables no longer imply', () => {
 		const theme: Theme = {
 			name: 't',
 			scheme: 'dark',
+			// stale: neither entry is what the mirror of these variables holds
 			scheme_mirror: [
 				{ name: 'shade_00', light: '#000' },
 				{ name: 'hue_b', light: '99' }
@@ -739,15 +740,13 @@ describe('apply_theme_variables', () => {
 			variables: [{ name: 'shade_00', light: 'authored' }]
 		};
 		const result = apply_theme_variables(defaults, theme);
-		// the theme's own value wins over its mirror
 		assert.deepEqual(
 			result.find((v) => v.name === 'shade_00'),
 			{ name: 'shade_00', light: 'authored' }
 		);
-		// mirror entries the theme doesn't author still apply, replacing both slots
 		assert.deepEqual(
 			result.find((v) => v.name === 'hue_b'),
-			{ name: 'hue_b', light: '99' }
+			{ name: 'hue_b', light: '120' }
 		);
 	});
 

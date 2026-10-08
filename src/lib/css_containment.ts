@@ -23,9 +23,11 @@ const STYLE_CLOSER_MATCHER = /<\/style/iu;
 // a whole string - a newline ends a string early, so one is only a string
 // without them - or an unquoted `url(` token, whose contents CSS reads raw: a
 // quote there is no string, and a malformed one swallows up to the first `)`.
-// Matched in one pass so the scan reads left to right like the tokenizer
+// A `url(` after a name character, `#`, or `@` ends a longer name (`#url`,
+// `@url`) and opens a plain bracket, which the bracket balance reads. Matched
+// in one pass so the scan reads left to right like the tokenizer
 const INERT_MATCHER =
-	/"(?:[^"\\\n\r\f]|\\[^])*"|'(?:[^'\\\n\r\f]|\\[^])*'|(?<![-\w\u{80}-\u{10FFFF}])url\((?![ \t\n\r\f]*["'])[ \t\n\r\f]*([^)]*)(\)?)/giu;
+	/"(?:[^"\\\n\r\f]|\\[^])*"|'(?:[^'\\\n\r\f]|\\[^])*'|(?<![-\w#@\u{80}-\u{10FFFF}])url\((?![ \t\n\r\f]*["'])[ \t\n\r\f]*([^)]*)(\)?)/giu;
 
 // what a well-formed unquoted url holds past its leading whitespace: printable
 // characters other than a quote, bracket, or escape - so no inner whitespace

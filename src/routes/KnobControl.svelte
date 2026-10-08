@@ -101,6 +101,12 @@
 		onchange(knob.kind === 'percent' ? `${n}%` : knob.kind === 'time' ? `${n}s` : String(n));
 	};
 
+	// a cleared text field resets the knob - a blank slot isn't a value a theme can hold
+	const emit_text = (raw: string): void => {
+		if (raw.trim() === '') onreset();
+		else onchange(raw);
+	};
+
 	const gloss_title = (letter: PaletteVariant): string =>
 		`${letter} - ${format_palette_gloss(letter)}`;
 </script>
@@ -153,7 +159,7 @@
 				type="text"
 				aria-label={knob.name}
 				value={value ?? ''}
-				onchange={(e) => onchange(e.currentTarget.value)}
+				onchange={(e) => emit_text(e.currentTarget.value)}
 			/>
 		{/if}
 	{:else if knob.kind === 'hue' && (numeric_value ?? derived_numeric) !== null}
@@ -209,7 +215,7 @@
 					type="text"
 					value={value ?? ''}
 					placeholder={knob.hook ? 'unset (falls back in style.css)' : ''}
-					onchange={(e) => onchange(e.currentTarget.value)}
+					onchange={(e) => emit_text(e.currentTarget.value)}
 				/>
 			{/if}
 		</label>

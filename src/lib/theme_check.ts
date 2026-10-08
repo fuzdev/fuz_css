@@ -538,7 +538,9 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		for (const stop of numeric_scale_variants) {
 			const l = num(`${family}_lightness_${stop}`, scheme);
 			if (l === null) return; // input unchecked; skip this family+scheme
-			lightnesses.push(l);
+			// clamped as the browser clamps `oklch()`, so overshot stops that
+			// render the same lightness read as a flat step
+			lightnesses.push(Math.min(Math.max(l, 0), 1));
 		}
 		const direction = Math.sign(lightnesses[lightnesses.length - 1]! - lightnesses[0]!);
 		let min_step = Infinity;

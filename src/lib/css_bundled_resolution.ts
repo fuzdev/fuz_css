@@ -179,7 +179,7 @@ export interface CssResolutionOptions {
  *
  * Algorithm:
  * 1. Collect rules: core rules + element-matching + class-matching
- * 2. Collect variables: from rules, class defs, utility generation, detected vars, additional_variables
+ * 2. Collect variables: from rules, generated utility CSS, detected vars, additional_variables
  * 3. Resolve transitive variable dependencies
  * 4. Generate output: theme_css (light+dark), base_css (source order)
  *
@@ -360,12 +360,15 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	// resolve to nothing unless something else defines it. Force-included-only
 	// variables and unknown (non-theme) names are dropped silently, since
 	// neither leaves a dangling reference.
-	const excluded = exclude_variables ? new Set(exclude_variables) : undefined;
-	const resolution = resolve_variables_transitive(variable_graph, all_variables, excluded);
+	const resolution = resolve_variables_transitive(
+		variable_graph,
+		all_variables,
+		exclude_variables ?? undefined
+	);
 	const resolved_variables = resolution.variables;
-	if (excluded) {
+	if (exclude_variables) {
 		const known_var_names = get_all_variable_names(variable_graph);
-		for (const v of excluded) {
+		for (const v of exclude_variables) {
 			if (!known_var_names.has(v)) continue;
 			const referenced = referenced_variables.has(v);
 			if (!referenced && !resolution.excluded.has(v)) continue;
@@ -411,11 +414,11 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		// Variables not similar to any theme variable are assumed to be user-defined
 	}
 
-	// Step 5: Generate theme CSS
+	// Step 4: Generate theme CSS
 	const { light_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
 	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
 
-	// Step 6: Generate base CSS from matched rules, split by destination layer
+	// Step 5: Generate base CSS from matched rules, split by destination layer
 	const layered_css = generate_base_css_by_layer(style_rule_index, included_rule_indices);
 	const base_css = layered_css['fuz.base'];
 	const preferences_css = layered_css['fuz.preferences'];

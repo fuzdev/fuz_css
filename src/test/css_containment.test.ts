@@ -62,6 +62,9 @@ describe('css_value_is_contained', () => {
 		['a non-breaking space before a quote in a url', 'url(\u00A0"x)}body{color:red}")'],
 		['whitespace inside an unquoted url', 'url(a b)'],
 		['an unclosed url', 'url(a'],
+		// a hash or at-keyword named url opens a plain bracket, not a url token
+		['a hash named url with an unclosed bracket', '#url([)'],
+		['an at-keyword named url holding a brace', '@url({)'],
 		['the style closer', '1</style><script>alert(1)</script>'],
 		['the style closer in a string', '"</STYLE >"']
 	];

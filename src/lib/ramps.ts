@@ -346,7 +346,7 @@ export const ramp_chroma = (
 /**
  * The palette chroma for a resolved chroma shape: the knob range at that
  * shape, clamped by the stop's cap - the arithmetic `ramp_chroma` and
- * `check_theme`'s resolver share, the resolver supplying a shape a theme may
+ * `ThemeResolver` share, the resolver supplying a shape a theme may
  * have pinned (`--chroma_shape_NN`).
  */
 export const ramp_chroma_at_shape = (

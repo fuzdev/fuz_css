@@ -190,14 +190,18 @@ export const create_diagnostic_dispatcher = (
 		const errors = diagnostics.filter((d) => d.level === 'error');
 		const warnings = diagnostics.filter((d) => d.level === 'warning');
 		if (warnings.length > 0 && on_warning === 'throw') throw new CssGenerationError(warnings);
-		if (errors.length > 0 && on_error === 'throw') throw new CssGenerationError(errors);
 		const next_logged: Set<string> = new Set();
 		const log = (d: Diagnostic, write: (message: string) => void): void => {
 			const message = format_diagnostic(d);
 			next_logged.add(message);
 			if (!logged.has(message)) write(message);
 		};
+		// warnings are logged before errors throw, so a failing render still shows them
 		if (on_warning === 'log') for (const w of warnings) log(w, sink.warn);
+		if (errors.length > 0 && on_error === 'throw') {
+			logged = next_logged;
+			throw new CssGenerationError(errors);
+		}
 		for (const e of errors) log(e, sink.error);
 		logged = next_logged;
 	};

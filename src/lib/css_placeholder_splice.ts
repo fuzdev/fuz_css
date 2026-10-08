@@ -45,8 +45,12 @@ const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*([\w-]+)\s*;?/;
 /** Matches anything that isn't ignorable filler between declarations. */
 const NON_FILLER_RE = /[^\s;]/;
 
-/** Matches a comment, which the structural search reads past. */
-const COMMENT_RE = /\/\*[^]*?(?:\*\/|$)/g;
+/**
+ * Matches what the structural search reads past: a comment, a string, or an
+ * unquoted `url()`, any of which can hold a brace, a semicolon, or a `/*`.
+ */
+const INERT_RE =
+	/\/\*[^]*?(?:\*\/|$)|"(?:[^"\\\n]|\\[^])*"|'(?:[^'\\\n]|\\[^])*'|(?<![-\w#@])url\([^)"']*\)/g;
 
 /** Matches every placeholder declaration, capturing what precedes its value. */
 const FUZ_CSS_PLACEHOLDER_VALUE_RE = /(--fuz-css-placeholder\s*:\s*)[\w-]+/g;
@@ -115,8 +119,9 @@ export const parse_css_placeholder_hash = (source: string): string | null => {
  * The marker's rule starts after whatever ends the preceding construct: a
  * rule's `}`, a statement at-rule's `;` (`@charset`, `@import`, which a
  * bundler hoists ahead of the first rule), or an enclosing block's `{`.
- * Comments are read past, since one can hold any of those - an unminified
- * build or a preserved `/*! *\/` comment leaves them in.
+ * Comments, strings, and unquoted `url()`s are read past, since one can hold
+ * any of those - an unminified build or a preserved `/*! *\/` comment leaves
+ * them in, and a `content` string or a URL can hold a `/*` of its own.
  *
  * @param source - the bundled stylesheet holding the marker
  * @param generated_css - the CSS to write at the marker's position
@@ -124,9 +129,10 @@ export const parse_css_placeholder_hash = (source: string): string | null => {
  * or `null` if no marker sits inside a well-formed rule
  */
 export const splice_css_at_placeholder = (source: string, generated_css: string): string | null => {
-	// the structure is searched in a copy with comments blanked to spaces, so
-	// offsets match `source`, which the slices below read from
-	const scan = source.replace(COMMENT_RE, (comment) => ' '.repeat(comment.length));
+	// the structure is searched in a copy with comments, strings, and url
+	// tokens blanked to spaces, so offsets match `source`, which the slices
+	// below read from
+	const scan = source.replace(INERT_RE, (inert) => ' '.repeat(inert.length));
 	const decl = FUZ_CSS_PLACEHOLDER_DECL_RE.exec(scan);
 	if (!decl) return null;
 	const decl_end = decl.index + decl[0].length;

@@ -196,7 +196,8 @@ describe('strip_css_comments', () => {
 		['p { background: url(//x/*.png); /* gone */ }', 'p { background: url(//x/*.png);   }'],
 		['p { background: URL( /a/*/b.png ) /* gone */; }', 'p { background: URL( /a/*/b.png )  ; }'],
 		['p { background: url("/*") /* gone */; }', 'p { background: url("/*")  ; }'],
-		['p { --curl: 1; a: curl(/* gone */); }', 'p { --curl: 1; a: curl( ); }']
+		['p { --curl: 1; a: curl(/* gone */); }', 'p { --curl: 1; a: curl( ); }'],
+		['p { a: #url(/* gone */); }', 'p { a: #url( ); }']
 	])('%s', (css, expected) => {
 		assert.strictEqual(strip_css_comments(css), expected);
 	});

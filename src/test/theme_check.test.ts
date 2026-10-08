@@ -190,6 +190,16 @@ describe('check_theme', () => {
 		assert.isFalse(entry.pass);
 	});
 
+	test('stops overshooting the lightness range fail monotonicity as the browser clamps them', () => {
+		// 00 through 10 all overshoot 1 and render at the same lightness
+		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_00', light: '1.1' }] };
+		const entry = check_theme(theme).entries.find(
+			(e) => e.gate === 'monotonicity' && e.scheme === 'light' && e.subject === 'shade_lightness'
+		);
+		assert(entry, 'monotonicity entry exists');
+		assert.isFalse(entry.pass);
+	});
+
 	test('a chroma multiplier above 1 clips gamut on a low-headroom slot', () => {
 		// the cyan slot binds the worst-hue caps, so 1.4x pushes past sRGB
 		const theme: Theme = {
