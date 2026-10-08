@@ -255,6 +255,9 @@ export interface CssOutputOptions {
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.
+	 * A class no class definition resolves is an error, as with a
+	 * `@fuz-classes` hint, unless base styles are bundled and a base style rule
+	 * targets it (like `selected` or `palette_a`).
 	 */
 	additional_classes?: Iterable<string>;
 	/**

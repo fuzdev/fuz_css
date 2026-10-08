@@ -39,7 +39,8 @@ export interface ExtractionData {
 	classes: Map<string, Array<SourceLocation>> | null;
 	/**
 	 * Classes explicitly annotated via `@fuz-classes` comments, or null if none.
-	 * These produce errors if they can't be resolved during generation.
+	 * These produce errors if they can't be resolved during generation - by a
+	 * class definition or, when base styles are bundled, a base style rule.
 	 */
 	explicit_classes: Set<string> | null;
 	/** Diagnostics from the extraction phase, or null if none */

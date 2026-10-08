@@ -198,9 +198,17 @@ export interface GenerateClassesCssOptions {
 	class_locations?: Map<string, Array<SourceLocation> | null>;
 	/**
 	 * Classes that were explicitly annotated (via `@fuz-classes` or `additional_classes`).
-	 * Unresolved explicit classes produce warnings.
+	 * An explicit class that no definition or interpreter resolves is an error,
+	 * unless `is_base_style_class` claims it.
 	 */
 	explicit_classes?: Set<string> | null;
+	/**
+	 * Whether the bundled base styles target a class, so an explicit class
+	 * with no utility definition still resolves - its base rules ship instead.
+	 * Null when no base styles are bundled (utility-only mode or
+	 * `base_css: null`), where such a class errors.
+	 */
+	is_base_style_class?: ((class_name: string) => boolean) | null;
 }
 
 export const generate_classes_css = (
@@ -213,7 +221,8 @@ export const generate_classes_css = (
 		css_properties,
 		log,
 		class_locations,
-		explicit_classes
+		explicit_classes,
+		is_base_style_class
 	} = options;
 	const interpreter_diagnostics: Array<InterpreterDiagnostic> = [];
 	const diagnostics: Array<GenerationDiagnostic> = [];
@@ -306,14 +315,17 @@ export const generate_classes_css = (
 		if (!v) {
 			// Error if this was an explicitly requested class (via @fuz-classes or additional_classes)
 			// but only if no interpreter pattern matched (if one matched but failed, error already reported)
-			if (explicit_classes?.has(c) && !interpreter_matched) {
+			// and the bundled base styles don't target it (if they do, its base rules ship)
+			if (explicit_classes?.has(c) && !interpreter_matched && !is_base_style_class?.(c)) {
 				const locations = class_locations?.get(c) ?? null;
 				diagnostics.push({
 					phase: 'generation',
 					level: 'error',
 					message: 'No matching class definition found',
 					identifier: c,
-					suggestion: 'Check spelling or add a custom class definition',
+					suggestion: is_base_style_class
+						? 'Check spelling or add a custom class definition'
+						: 'Check spelling or add a custom class definition - a class only base styles define (like `selected`) resolves only when base styles are bundled (base_css not null)',
 					locations
 				});
 			}

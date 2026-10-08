@@ -153,4 +153,34 @@ describe('explicit_classes diagnostics', () => {
 		assert.lengthOf(result.diagnostics, 1);
 		assert.deepEqual(result.diagnostics[0]!.locations, [source_loc]);
 	});
+
+	test('no diagnostic for an explicit class the base styles target', () => {
+		const result = generate_classes_css({
+			class_names: ['selected', 'unknown_class'],
+			class_definitions: {},
+			interpreters: [],
+			css_properties: null,
+			explicit_classes: new Set(['selected', 'unknown_class']),
+			is_base_style_class: (class_name) => class_name === 'selected'
+		});
+
+		// the base rules ship the class, so only the genuine miss errors
+		assert.strictEqual(result.css, '');
+		assert.lengthOf(result.diagnostics, 1);
+		assert.strictEqual(result.diagnostics[0]!.identifier, 'unknown_class');
+		assert.notInclude(result.diagnostics[0]!.suggestion, 'base styles');
+	});
+
+	test('without bundled base styles the suggestion names them', () => {
+		const result = generate_classes_css({
+			class_names: ['selected'],
+			class_definitions: {},
+			interpreters: [],
+			css_properties: null,
+			explicit_classes: new Set(['selected'])
+		});
+
+		assert.lengthOf(result.diagnostics, 1);
+		assert.include(result.diagnostics[0]!.suggestion, 'base styles are bundled');
+	});
 });

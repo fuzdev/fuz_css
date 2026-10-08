@@ -228,7 +228,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css_properties,
 		log,
 		class_locations: all_classes_with_locations,
-		explicit_classes
+		explicit_classes,
+		// an explicit class the bundled base styles target resolves to their rules
+		is_base_style_class:
+			include_base && resources
+				? (class_name) => resources.style_rule_index.by_class.has(class_name)
+				: null
 	});
 
 	const diagnostics: Array<Diagnostic> = [...extraction_diagnostics, ...utility_result.diagnostics];

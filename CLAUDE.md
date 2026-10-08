@@ -182,7 +182,11 @@ class names or elements. Use comment hints to explicitly include them:
 - `// @fuz-variables shade_40 text_50` - CSS variables to include in theme
 
 Both produce **errors** if the specified item can't be resolved, helping catch
-typos early. Implicitly detected classes that can't be resolved are silently
+typos early. A hinted class resolves to a class definition or interpreter
+or, when base styles are bundled, to the top-level base rules that name it
+outside `:not()` (`selected`, `palette_a`, a custom `base_css` class), which
+the hint then ships; in utility-only mode a base-only class errors, since the generator emits no base
+styles for it. Implicitly detected classes that can't be resolved are silently
 skipped (they may belong to other CSS frameworks).
 
 **CSS variable detection:** Variables are detected via simple regex scan of
@@ -730,7 +734,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 
-Plus standalone tests: `css_cache`, `css_classes`, `css_literal`,
+Plus standalone tests: `css_cache`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,

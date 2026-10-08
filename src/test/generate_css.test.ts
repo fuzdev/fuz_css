@@ -234,6 +234,72 @@ describe('generate_css', () => {
 		});
 	});
 
+	describe('explicit base-style classes', () => {
+		const BASE_CSS = 'button.callout { color: red; }';
+
+		test('an explicit class only base styles target ships its rules without an error', () => {
+			const result = generate_css(
+				make_options({
+					all_classes: new Set(['callout']),
+					explicit_classes: new Set(['callout']),
+					include_base: true,
+					resources: create_test_fixtures(BASE_CSS, [])
+				})
+			);
+
+			assert_css_contains(result.css, 'button.callout { color: red; }');
+			assert.deepEqual(result.diagnostics, []);
+		});
+
+		test('a typo still errors with base styles bundled', () => {
+			const result = generate_css(
+				make_options({
+					all_classes: new Set(['calout']),
+					explicit_classes: new Set(['calout']),
+					include_base: true,
+					resources: create_test_fixtures(BASE_CSS, [])
+				})
+			);
+
+			assert.lengthOf(result.diagnostics, 1);
+			const diagnostic = result.diagnostics[0]!;
+			assert.strictEqual(diagnostic.level, 'error');
+			assert('identifier' in diagnostic);
+			assert.strictEqual(diagnostic.identifier, 'calout');
+		});
+
+		test('errors when base output is off, even with resources loaded for the theme', () => {
+			const result = generate_css(
+				make_options({
+					all_classes: new Set(['callout']),
+					explicit_classes: new Set(['callout']),
+					include_theme: true,
+					resources: create_test_fixtures(BASE_CSS, [])
+				})
+			);
+
+			assert_css_not_contains(result.css, 'callout');
+			assert.lengthOf(result.diagnostics, 1);
+			const diagnostic = result.diagnostics[0]!;
+			assert('identifier' in diagnostic);
+			assert.strictEqual(diagnostic.identifier, 'callout');
+		});
+
+		test('errors in utility-only mode', () => {
+			const result = generate_css(
+				make_options({
+					all_classes: new Set(['callout']),
+					explicit_classes: new Set(['callout'])
+				})
+			);
+
+			assert.lengthOf(result.diagnostics, 1);
+			const diagnostic = result.diagnostics[0]!;
+			assert('identifier' in diagnostic);
+			assert.strictEqual(diagnostic.identifier, 'callout');
+		});
+	});
+
 	describe('undefined_theme_variables', () => {
 		// `text_color`, `text_80`, `shade_00`, and `space_md` are names the
 		// default variables define; `my_brand` is not

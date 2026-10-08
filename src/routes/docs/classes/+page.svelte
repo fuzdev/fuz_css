@@ -414,7 +414,9 @@ const color = get_dynamic_color();`}
 			<aside>
 				Classes annotated with <code>@fuz-classes</code> and configured with
 				<code>additional_classes</code> produce errors if they can't be resolved. This helps catch
-				typos like <code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>.
+				typos like <code>@fuz-classes color_a_55</code> instead of <code>color_a_50</code>. A class
+				that only the base styles define, like <code>selected</code> or <code>palette_a</code>,
+				resolves when base styles are bundled, and the hint ships the base rules that target it.
 			</aside>
 			<p>
 				Alternatively, use the
