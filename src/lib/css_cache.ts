@@ -9,15 +9,44 @@
 
 import { join } from 'node:path';
 import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
+import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
-import type { ExtractionData } from './css_class_extractor.ts';
+import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
  * Default cache directory relative to project root.
  */
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
+
+/**
+ * Whether this is a CI run (`CI=1`, `CI=true`, or another truthy value):
+ * there's no point writing a cache the next run won't reuse.
+ *
+ * @internal Read by the generators for their cache and `on_error` defaults.
+ */
+export const is_ci = !!process.env.CI;
+
+/**
+ * Creates the cache-path lookup the generators share: a file's cache path
+ * under `cache_dir` in `project_root`, or `null` on CI, where nothing is
+ * cached.
+ *
+ * @param cache_dir - the cache directory, relative to `project_root`
+ * @param project_root - the project root, with or without a trailing slash
+ * @returns a function from a file's absolute path to its cache path, or `null` when uncached
+ *
+ * @internal Shared by the Vite plugin and the Gro generator.
+ */
+export const create_cache_path_resolver = (
+	cache_dir: string,
+	project_root: string
+): ((file_id: string) => string | null) => {
+	const root = ensure_end(project_root, '/');
+	const resolved_cache_dir = join(root, cache_dir);
+	return (file_id) => (is_ci ? null : get_file_cache_path(file_id, resolved_cache_dir, root));
+};
 
 /**
  * CSS cache version. Bump when any of these change:
@@ -31,13 +60,32 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).
  * v5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).
  * v6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).
+ * v7: Add `extraction_key`, so a change to `acorn_plugins` or `cache_salt` misses.
  */
-// TODO: the cache key is `content_hash` + `CSS_CACHE_VERSION`, but extraction output
-// also depends on `acorn_plugins` (e.g. acorn-jsx), which isn't part of the key.
-// Changing that config without editing a file yields a stale cache hit. Acorn plugin
-// instances aren't stably serializable across processes, so a clean fingerprint isn't
-// cheap; revisit if config-change staleness bites (workaround: clear `.fuz/cache/css`).
-export const CSS_CACHE_VERSION = 6;
+export const CSS_CACHE_VERSION = 7;
+
+/**
+ * Computes the part of the cache key that comes from configuration rather
+ * than file content: a fingerprint of the configured acorn plugins (their
+ * source text) and the consumer's `cache_salt`, or `null` when neither is
+ * set. A plugin's options live in its closure, where the source text can't
+ * see them, so a consumer who changes only a plugin's options bumps
+ * `cache_salt`.
+ *
+ * @param acorn_plugins - the extraction's acorn plugins, if any
+ * @param cache_salt - a consumer string folded into the key, if any
+ * @returns the key, or `null` for the default configuration
+ *
+ * @internal Shared by the Vite plugin and the Gro generator.
+ */
+export const to_extraction_cache_key = (
+	acorn_plugins: Array<AcornPlugin> | undefined,
+	cache_salt: string | undefined
+): string | null => {
+	const parts = (acorn_plugins ?? []).map((plugin) => 'plugin:' + plugin.toString());
+	if (cache_salt) parts.push('salt:' + cache_salt);
+	return parts.length ? hash_insecure(parts.join('\0')) : null;
+};
 
 /**
  * Cached extraction result for a single file.
@@ -48,6 +96,8 @@ export interface CachedExtraction {
 	v: number;
 	/** Content hash of the source file (BLAKE3 via `hash_blake3`) */
 	content_hash: string;
+	/** The configuration part of the key (`to_extraction_cache_key`), or null for the default */
+	extraction_key: string | null;
 	/** Classes as [name, locations] tuples, or null if none */
 	classes: Array<[string, Array<SourceLocation>]> | null;
 	/** Classes from `@fuz-classes` comments, or null if none */
@@ -69,6 +119,7 @@ export interface CachedExtraction {
  * @param source_path - absolute path to the source file
  * @param cache_dir - absolute path to the cache directory
  * @param project_root - normalized project root (must end with `/`)
+ * @internal The inside-the-root case of `get_file_cache_path`.
  */
 export const get_cache_path = (
 	source_path: string,
@@ -133,22 +184,30 @@ export const load_cached_extraction = async (
 	}
 };
 
+export interface SaveCachedExtractionOptions {
+	/** Absolute path to the cache file. */
+	cache_path: string;
+	/** Content hash of the source file contents. */
+	content_hash: string;
+	/** The configuration part of the key, from `to_extraction_cache_key`. */
+	extraction_key: string | null;
+	/** Extraction data to cache. */
+	extraction: ExtractionData;
+}
+
 /**
  * Saves an extraction result to the cache.
  * Uses atomic write (temp file + rename) for crash safety.
  * Normalizes empty collections to null to avoid allocation overhead on load.
  *
  * @param deps - filesystem deps for dependency injection
- * @param cache_path - absolute path to the cache file
- * @param content_hash - content hash of the source file contents
- * @param extraction - extraction data to cache
+ * @param options - the cache file, its key parts, and the extraction to write
  */
 export const save_cached_extraction = async (
 	deps: CacheDeps,
-	cache_path: string,
-	content_hash: string,
-	extraction: ExtractionData
+	options: SaveCachedExtractionOptions
 ): Promise<void> => {
+	const { cache_path, content_hash, extraction_key, extraction } = options;
 	// Convert to null if empty to save allocation on load
 	const classes_array =
 		extraction.classes && extraction.classes.size > 0
@@ -174,6 +233,7 @@ export const save_cached_extraction = async (
 	const data: CachedExtraction = {
 		v: CSS_CACHE_VERSION,
 		content_hash,
+		extraction_key,
 		classes: classes_array,
 		explicit_classes: explicit_array,
 		diagnostics: diagnostics_array,
@@ -186,8 +246,9 @@ export const save_cached_extraction = async (
 };
 
 /**
- * Deletes a cached extraction file.
- * Silently succeeds if the file doesn't exist.
+ * Deletes a cached extraction file. Best-effort: every `unlink` error is
+ * swallowed, not just `not_found` - the cache is disposable and callers
+ * delete fire-and-forget.
  *
  * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file

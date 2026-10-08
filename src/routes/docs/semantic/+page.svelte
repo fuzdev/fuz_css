@@ -19,17 +19,19 @@
 		<p>
 			fuz_css styles HTML elements in its
 			<SourceFileLink path="style.css">reset stylesheet</SourceFileLink>, so semantic markup gets
-			themed and color-scheme-aware styling automatically -- utility classes optional. The goal is
-			to be accessible and attractive out of the box, minimal yet extensible.
+			themed and color-scheme-aware styling automatically - utility classes optional. The goal is to
+			be accessible and attractive out of the box, minimal yet extensible.
 		</p>
 	</section>
 
 	<TomeSection>
-		<TomeSectionHeader text="Low specificity" />
+		<TomeSectionHeader text="Layers and specificity" />
 		<p>
-			All opinionated styles use <code>:where()</code> selectors, giving them zero specificity
-			beyond the element itself. Your styles and utility classes override defaults without
-			specificity battles.
+			All opinionated styles live in the <code>fuz.base</code> cascade layer, so your unlayered
+			styles and the generated utility classes override them by layer order alone. Their selectors
+			are also wrapped in <code>:where()</code> for zero specificity, so overrides stay easy even
+			inside the fuz layers. The exceptions are the document-wide rules: <code>:root</code>,
+			<code>body</code>, <code>[hidden]</code>, and <code>::selection</code>.
 		</p>
 		<Code
 			lang="css"
@@ -41,7 +43,7 @@
 
 :where(button:not(.unstyled)) {
   background-color: var(--button_fill);
-  border-radius: var(--border_radius_sm);
+  border-radius: var(--border_radius, var(--control_radius));
 }`}
 		/>
 	</TomeSection>
@@ -113,8 +115,8 @@
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
 			The <code>.row</code> layout composite resets margins on its direct children. Flow margins
-			make less sense in horizontal flex layout -- for spacing prefer gap utilities like
-			<code>.gap_md</code> and <code>var(--gap_sm)</code> instead.
+			make less sense in horizontal flex layout - for spacing prefer gap utilities like
+			<code>.gap_md</code> and <code>gap: var(--space_sm)</code> instead.
 		</p>
 		<Code
 			lang="css"

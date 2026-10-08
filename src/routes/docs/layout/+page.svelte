@@ -7,13 +7,11 @@
 	import { resolve } from '$app/paths';
 
 	import { space_variants, distance_variants } from '$lib/variable_data.ts';
+	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'layout';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
-
-	const computed_styles =
-		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
 	// TODO width/height classes
 </script>
@@ -35,7 +33,7 @@
 					<div class="fill" style:width="var(--{name})"></div>
 					<div class="variable_wrapper"><StyleVariableButton {name} /></div>
 					<span class="pr_sm">=</span>
-					<div class="computed_value">{computed_styles?.getPropertyValue('--' + name)}</div>
+					<div class="computed_value"><ResolvedLength {name} /></div>
 				</li>
 			{/each}
 		</ul>
@@ -54,7 +52,7 @@
 					<div class="fill" style:width="var(--{name})"></div>
 					<div class="variable_wrapper"><StyleVariableButton {name} /></div>
 					<span class="pr_sm">=</span>
-					<div class="computed_value">{computed_styles?.getPropertyValue('--' + name)}</div>
+					<div class="computed_value"><ResolvedLength {name} /></div>
 				</li>
 			{/each}
 		</ul>

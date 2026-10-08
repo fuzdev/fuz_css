@@ -260,9 +260,8 @@ describe('modified_class_interpreter', () => {
 
 			assert_css_contains(
 				result.css,
-				'.focus\\:plain:not(:hover):focus',
-				'.focus\\:plain:hover:focus',
-				'.focus\\:plain:active:focus'
+				'.focus\\:plain:not(.selected):focus',
+				'.focus\\:plain:not(.selected, :hover):focus'
 			);
 		});
 
@@ -382,12 +381,11 @@ describe('modified_class_interpreter', () => {
 
 			assert_css_contains(
 				result.css,
-				'.hover\\:plain',
-				'.hover\\:plain:not(:hover)',
-				'.hover\\:plain:hover',
-				'.hover\\:plain:active'
+				'.hover\\:plain:not(.selected):hover',
+				// already names :hover, so only the class is renamed
+				'.hover\\:plain:not(.selected, :hover) {'
 			);
-			assert_css_not_contains(result.css, ':hover:hover');
+			assert_css_not_contains(result.css, ':hover:hover', ':hover):hover');
 			assert.isAbove(result.diagnostics.length, 0);
 		});
 	});
@@ -642,13 +640,13 @@ describe('modified_class_interpreter', () => {
 	describe('state modifier ordering for cascade', () => {
 		test('hover classes come before active classes in output (LVFHA order)', () => {
 			const result = generate_classes_css({
-				class_names: ['active:border_color_a_50', 'hover:border_color_b_50'],
+				class_names: ['active:border_a_50', 'hover:border_b_50'],
 				class_definitions: css_class_definitions,
 				interpreters: [modified_class_interpreter],
 				css_properties: null
 			});
 
-			assert_css_order(result.css, '.hover\\:border_color_b_50', '.active\\:border_color_a_50');
+			assert_css_order(result.css, '.hover\\:border_b_50', '.active\\:border_a_50');
 		});
 
 		test('visited < focus < hover < active ordering', () => {

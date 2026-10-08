@@ -141,3 +141,68 @@ export class CssGenerationError extends Error {
 		this.diagnostics = diagnostics;
 	}
 }
+
+/**
+ * Where a dispatcher writes the diagnostics it logs.
+ *
+ * @internal The dispatch the generators share - not stable API.
+ */
+export interface DiagnosticSink {
+	warn: (message: string) => void;
+	error: (message: string) => void;
+}
+
+/**
+ * How generation diagnostics are handled - see `CssDiagnosticsOptions`.
+ *
+ * @internal The dispatch the generators share - not stable API.
+ */
+export interface DiagnosticDispatchOptions {
+	on_error: 'log' | 'throw';
+	on_warning: 'log' | 'throw' | 'ignore';
+}
+
+/**
+ * Creates the diagnostic dispatch a generator runs after each render: a
+ * diagnostic level set to `'throw'` fails the render with a
+ * `CssGenerationError`, and the rest are logged to `sink` - except that a
+ * message the previous dispatch already logged isn't logged again.
+ *
+ * A render reports every file's diagnostics, so a dev server or watch mode
+ * re-rendering on each edit would otherwise repeat every warning in the
+ * project on every change. A diagnostic that goes away and comes back is
+ * logged again.
+ *
+ * @param options - the `on_error`/`on_warning` settings
+ * @param sink - where logged diagnostics go
+ * @returns the dispatch, to call with each render's diagnostics
+ * @throws CssGenerationError - from the returned dispatch, for a level set to `'throw'`
+ *
+ * @internal The dispatch the generators share - not stable API.
+ */
+export const create_diagnostic_dispatcher = (
+	options: DiagnosticDispatchOptions,
+	sink: DiagnosticSink
+): ((diagnostics: Array<Diagnostic>) => void) => {
+	const { on_error, on_warning } = options;
+	let logged: Set<string> = new Set();
+	return (diagnostics) => {
+		const errors = diagnostics.filter((d) => d.level === 'error');
+		const warnings = diagnostics.filter((d) => d.level === 'warning');
+		if (warnings.length > 0 && on_warning === 'throw') throw new CssGenerationError(warnings);
+		const next_logged: Set<string> = new Set();
+		const log = (d: Diagnostic, write: (message: string) => void): void => {
+			const message = format_diagnostic(d);
+			next_logged.add(message);
+			if (!logged.has(message)) write(message);
+		};
+		// warnings are logged before errors throw, so a failing render still shows them
+		if (on_warning === 'log') for (const w of warnings) log(w, sink.warn);
+		if (errors.length > 0 && on_error === 'throw') {
+			logged = next_logged;
+			throw new CssGenerationError(errors);
+		}
+		for (const e of errors) log(e, sink.error);
+		logged = next_logged;
+	};
+};

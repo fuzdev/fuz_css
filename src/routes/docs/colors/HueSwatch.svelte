@@ -1,24 +1,36 @@
 <script lang="ts">
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
+	import type { PaletteVariant } from '$lib/variable_data.ts';
+	import { PALETTE_HUES } from '$lib/ramps.ts';
+	import { watch_resolved_style } from '$routes/docs/resolved_style.svelte.ts';
+
 	const {
-		color_name,
-		computed_styles,
+		letter,
 		width = 48,
 		height = 48,
 		description
 	}: {
-		color_name: string;
-		computed_styles: CSSStyleDeclaration | null;
+		letter: PaletteVariant;
 		width?: number;
 		height?: number;
 		description: string;
 	} = $props();
 
-	const get_color_hue_string = (name: string) => computed_styles?.getPropertyValue('--' + name);
+	const variable_name = $derived(`hue_${letter}`);
 
-	const variable_name = $derived(`hue_${color_name}`);
-	const hue = $derived(Number(get_color_hue_string(variable_name)));
+	// the angle the page currently renders, re-read after each theme or scheme
+	// change so the readout tracks the swatch; the default angle stands in
+	// during SSR/prerender, and for a value that isn't a plain number
+	let rendered_hue: number | null = $state(null);
+	const hue = $derived(rendered_hue ?? PALETTE_HUES[letter]);
+	watch_resolved_style(() => {
+		const value = getComputedStyle(document.documentElement)
+			.getPropertyValue('--' + variable_name)
+			.trim();
+		const n = value === '' ? NaN : Number(value);
+		rendered_hue = Number.isFinite(n) ? n : null;
+	});
 </script>
 
 <li style:--hue="var(--{variable_name})">
@@ -51,7 +63,8 @@
 		padding-left: var(--space_sm);
 	}
 	.color {
-		background: linear-gradient(-90deg, hsl(var(--hue), 100%, 50%), hsl(var(--hue), 0%, 50%));
+		/* preview the OKLCH hue angle from achromatic to vivid at constant lightness */
+		background: linear-gradient(-90deg, oklch(0.65 0.17 var(--hue)), oklch(0.65 0 var(--hue)));
 		position: relative;
 		border-radius: 50%;
 		overflow: hidden;

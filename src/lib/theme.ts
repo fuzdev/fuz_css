@@ -1,6 +1,10 @@
-import { default_variables } from './variables.ts';
-import { default_themes } from './themes.ts'; // TODO shoudln't be a dep, see usage below
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
+import {
+	css_comment_is_contained,
+	css_custom_property_name_is_contained,
+	css_value_is_contained,
+	escape_css_identifier
+} from './css_containment.ts';
 
 /**
  * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
@@ -9,37 +13,193 @@ export type ColorScheme = 'dark' | 'light' | 'auto';
 
 export const color_schemes: Array<ColorScheme> = ['light', 'auto', 'dark'];
 
-export interface Theme {
-	name: string;
-	variables: Array<StyleVariable>;
-}
+/**
+ * The fuz_css cascade layer order: defaults (variables + element styles) in
+ * `fuz.base`, OS user-preference mappings (`prefers-contrast`,
+ * `prefers-reduced-motion`) in `fuz.preferences`, theme overrides in
+ * `fuz.theme`, generated utility classes in `fuz.utilities`. Layer order
+ * beats specificity and source order, so the preference mappings win over
+ * the defaults, theme overrides win over both regardless of head insertion
+ * order, and consumers' unlayered styles beat everything.
+ *
+ * Two deliberate exceptions, both `!important` declarations in a layer, which
+ * outrank every later layer and unlayered styles: the `prefers-reduced-motion`
+ * mapping (a theme's durations must not re-enable motion the user turned off)
+ * and `[hidden]`.
+ */
+export const FUZ_LAYER_ORDER_STATEMENT =
+	'@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;';
+
+/**
+ * The sublayer a build-time theme's own overlay renders into. A layer's
+ * direct styles outrank its sublayers, so a runtime theme rendered into
+ * `fuz.theme` wins over the baked one whatever their selectors' specificity,
+ * while the baked overlay still sits above `fuz.preferences`.
+ */
+export const FUZ_BAKED_THEME_LAYER = 'fuz.theme.baked';
 
 export interface RenderThemeStyleOptions {
 	comments?: boolean;
-	id?: string | null;
-	empty_default_theme?: boolean;
 	/**
-	 * Repeats the theme selector to handle unpredictable head content insertion order.
-	 * Accepts any integer >= 1, defaults to 2.
+	 * Scopes the rendered variables to `#id` instead of `:root`. Dark slots
+	 * render for both placements of the scheme class - on the scope element
+	 * itself (`#id.dark`) and on the root (`:root.dark #id`), the ecosystem
+	 * convention - so a scoped theme's dark appearance follows the page's.
+	 *
+	 * Only literal-valued variables take effect in a scope: the derived color
+	 * stops (`--palette_a_50`, `--shade_50`, ...) resolve their `calc()` on
+	 * `:root`, and a descendant inherits the computed color, so a curve knob
+	 * like `--chroma_scale` set at `#id` changes nothing. Knob-only themes
+	 * need `:root`.
+	 *
+	 * Any string works: it's escaped into the selector, so it matches the
+	 * element whose `id` attribute is that string and can't end the rule or
+	 * the `<style>` element. An empty string renders to `:root`.
 	 */
-	specificity?: number;
+	id?: string | null;
+	/**
+	 * The cascade layer wrapping the rendered variables. Theme overrides
+	 * default to `fuz.theme` so they beat the `fuz.base` defaults by layer
+	 * order; pass `null` to render unlayered.
+	 */
+	layer?: string | null;
 }
 
+/**
+ * Reads the single-scheme stance a theme's `scheme` names, or `null` for a
+ * dual-scheme theme. Total over any value, so it reads unvalidated data too.
+ *
+ * @param scheme - a theme's `scheme`
+ */
+export const to_theme_stance = (scheme: unknown): 'light' | 'dark' | null =>
+	scheme === 'light' || scheme === 'dark' ? scheme : null;
+
+/**
+ * Picks the value a single-scheme stance renders from a dual-slot shape: the
+ * stanced scheme's slot, dark falling back to the light/base position. Shared
+ * by `compose_themes` and the theme editor so the re-slot semantics can't
+ * drift.
+ */
+export const pick_stance_slot = (
+	v: { light?: string; dark?: string } | undefined,
+	stance: 'light' | 'dark'
+): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.light) : v?.light);
+
+/**
+ * Overlays one variable onto the same-named variable beneath it, the merge
+ * every theme composition shares: the overlay replaces wholesale, except that
+ * a dark-only overlay keeps the light slot beneath it. A dark slot only
+ * shadows under `.dark`, so dropping the light slot would leave the variable
+ * without its light-scheme value.
+ *
+ * @param existing - the variable being overlaid, if any
+ * @param overlay - the variable that wins
+ */
+export const overlay_style_variable = (
+	existing: StyleVariable | undefined,
+	overlay: StyleVariable
+): StyleVariable =>
+	overlay.light === undefined && overlay.dark !== undefined && existing?.light !== undefined
+		? { ...overlay, light: existing.light }
+		: overlay;
+
+/**
+ * Composes a base theme with overlay fragments by flatten + last-wins: later
+ * variables replace same-named earlier ones wholesale, a dark-only overlay
+ * keeping the light slot beneath it (see `overlay_style_variable`). Any
+ * knob-only theme is already a valid fragment - the contrast modifiers in
+ * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
+ * precursor to a first-class `extends`, with the same merge semantics.
+ *
+ * The base's `scheme` stance wins; when the base is single-scheme, each
+ * overlay variable is re-slotted to the stanced scheme's value so a
+ * dual-slot fragment can't leak the other scheme's appearance past the
+ * stance. The base's `scheme_mirror` carries through minus any names the
+ * overlays set - the mirror was computed against the base's own variables,
+ * so entries for newly composed names would shadow nothing but still render
+ * - and overlay values win over the remaining mirror by source order.
+ * The composed name appends the overlay names so name-keyed pickers and
+ * renderers treat the composition as its own theme, and the base's
+ * `summary` carries through.
+ */
+export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
+	if (!overlays.length) return base;
+	const stance = to_theme_stance(base.scheme);
+	const by_name = new Map<string, StyleVariable>();
+	for (const v of base.variables) by_name.set(v.name, v);
+	for (const overlay of overlays) {
+		for (const v of overlay.variables) {
+			if (stance) {
+				// single-slot in the base position, like stanced themes author their own
+				const value = pick_stance_slot(v, stance);
+				if (value === undefined) continue;
+				by_name.set(v.name, {
+					name: v.name,
+					light: value,
+					...(v.summary !== undefined && { summary: v.summary })
+				});
+			} else {
+				by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
+			}
+		}
+	}
+	return {
+		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
+		...(base.summary !== undefined && { summary: base.summary }),
+		...(base.scheme !== undefined && { scheme: base.scheme }),
+		// drop mirror entries the overlays now author; the rest renders before
+		// `variables`, so overlay values win by order
+		...(base.scheme_mirror !== undefined && {
+			scheme_mirror: base.scheme_mirror.filter((v) => !by_name.has(v.name))
+		}),
+		variables: [...by_name.values()]
+	};
+};
+
+/**
+ * Renders a theme's variables as CSS, wrapped in the `fuz.theme` cascade
+ * layer by default.
+ *
+ * Renders exactly what the theme carries - an empty `variables` array renders
+ * nothing (inheriting the `fuz.base` defaults) unless a `scheme` stance needs
+ * pinning. To render the full default set, pass it: `render_theme_style({name:
+ * 'base', variables: default_variables})`. To render a single-scheme theme
+ * faithfully, resolve it through `resolve_theme_stance` first.
+ *
+ * Total over any JSON value, because a theme restored from storage reaches
+ * this without passing the schema: whatever isn't the type `Theme` declares
+ * is dropped instead of thrown on or coerced into the stylesheet. A
+ * `variables` or `scheme_mirror` that isn't an array renders as empty, an
+ * entry that isn't an object is skipped, a name or slot that isn't a
+ * contained string drops its declaration, and a summary that isn't one drops
+ * its comment (see `css_containment.ts`).
+ *
+ * @param theme - the theme to render
+ * @param options - see `RenderThemeStyleOptions`
+ * @returns the theme CSS, or an empty string when there's nothing to render
+ */
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
-	const { comments = false, id = null, empty_default_theme = true, specificity = 2 } = options;
-	const variables =
-		theme.name === default_themes[0]!.name
-			? empty_default_theme
-				? null
-				: default_variables
-			: theme.variables;
-	if (!variables?.length) return '';
-	const rendered_light = variables.map((v) => render_theme_variable(v)).filter(Boolean);
+	const { comments = false, id = null, layer = 'fuz.theme' } = options;
+	// read as unchecked data: only null and undefined throw on a property read
+	const { scheme, scheme_mirror, variables: own_variables } = (theme ?? {}) as Unchecked<Theme>;
+	const stance = to_theme_stance(scheme);
+	// mirrored defaults first so the theme's own variables win by order; the
+	// mirror belongs to the stance, so a dual theme carrying one renders without it
+	const variables = [...(stance ? to_array(scheme_mirror) : []), ...to_array(own_variables)];
+	const rendered_light = variables
+		.map((v) => render_theme_variable(v, false, comments))
+		.filter(Boolean);
+	if (stance) rendered_light.unshift(`color-scheme: ${stance};`);
 	const rendered_dark = variables
 		.map((v) => render_theme_variable(v, true, comments))
 		.filter(Boolean);
-	const scope = (id ? '#' + id : ':root').repeat(specificity);
-	return `${
+	// nothing declared - no variables, or every one of them empty or dropped
+	if (!rendered_light.length && !rendered_dark.length) return '';
+	const scope = typeof id === 'string' && id ? '#' + escape_css_identifier(id) : ':root';
+	// the scheme class conventionally lives on the root element, so a scoped
+	// theme's dark block matches both that and a class on the scope itself
+	const dark_scope = scope !== ':root' ? `${scope}.dark, :root.dark ${scope}` : ':root.dark';
+	const blocks = `${
 		rendered_light.length
 			? `${scope} {
 	${rendered_light.join('\n\t')}
@@ -48,27 +208,47 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	}
 ${
 	rendered_dark.length
-		? `${scope}.dark {
+		? `${dark_scope} {
 	${rendered_dark.join('\n\t')}
 }`
 		: ''
 }
 `.trim();
+	if (layer === null) return blocks;
+	return `${FUZ_LAYER_ORDER_STATEMENT}
+@layer ${layer} {
+${blocks}
+}`;
 };
 
-export const render_theme_variable = (
-	variable: StyleVariable,
-	dark = false,
-	comments = true
-): string => {
-	const v = dark ? variable.dark : variable.light;
-	if (!v) return '';
+// a type's properties before anything has checked them
+type Unchecked<T> = { [K in keyof T]?: unknown };
+
+const to_array = (value: unknown): Array<unknown> => (Array.isArray(value) ? value : []);
+
+// one variable's declaration for a scheme slot, or '' when the slot is blank
+// or can't be rendered without escaping its declaration - a theme may be
+// untrusted data that skipped the schema, and this is where it becomes CSS
+const render_theme_variable = (variable: unknown, dark: boolean, comments: boolean): string => {
+	const { name, light, dark: dark_slot, summary } = (variable ?? {}) as Unchecked<StyleVariable>;
+	const value = dark ? dark_slot : light;
+	// the containment checks pass strings only, which is what makes the
+	// concatenation below safe
+	if (
+		!css_value_is_contained(value) ||
+		!(value as string).trim() ||
+		!css_custom_property_name_is_contained(name)
+	) {
+		return '';
+	}
 	return (
 		'--' +
-		variable.name +
+		(name as string) +
 		': ' +
-		v +
+		(value as string) +
 		';' +
-		(comments && variable.summary ? ' /* ' + variable.summary + ' */' : '')
+		(comments && summary && css_comment_is_contained(summary)
+			? ' /* ' + (summary as string) + ' */'
+			: '')
 	);
 };

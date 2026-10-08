@@ -7,9 +7,11 @@
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import DeclarationLink from '@fuzdev/fuz_ui/DeclarationLink.svelte';
 	import ModuleLink from '@fuzdev/fuz_ui/ModuleLink.svelte';
+	import MdnLink from '@fuzdev/fuz_ui/MdnLink.svelte';
 	import {
 		space_variants,
-		color_variants,
+		palette_variants,
+		intent_variants,
 		intensity_variants,
 		shade_variants,
 		text_variants,
@@ -56,7 +58,7 @@
 	<p>
 		Compared to TailwindCSS and UnoCSS, fuz_css utility classes follow the grain of semantic HTML
 		rather than being foundational to the design, and the DSL is currently more limited, with
-		interpreters providing a programmatic escape hatch -- see the
+		interpreters providing a programmatic escape hatch - see the
 		<a href="#Compared-to-alternatives">comparison</a> below.
 	</p>
 	<p>Compared to the <code>&lt;style&gt;</code> tag, classes:</p>
@@ -104,7 +106,7 @@
 				The <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> extracts
 				classes and generates CSS on-demand. It works with Svelte and plain HTML/TS/JS out of the
 				box. JSX frameworks (React, Preact, Solid) require the
-				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin -- see
+				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> plugin - see
 				<a href="#React-and-JSX">React and JSX</a> below.
 			</p>
 			<Code
@@ -145,9 +147,11 @@ import '@fuzdev/fuz_css/theme.css'; // all variables
 import 'virtual:fuz.css';`}
 			/>
 			<p>
-				The plugin extracts classes from files as Vite processes them, including from
-				<code>node_modules</code> dependencies. It supports HMR -- changes to classes in your code
-				trigger automatic CSS updates.
+				The plugin needs Vite 6 or later. It extracts classes from files as Vite processes them,
+				including from <code>node_modules</code> dependencies, and in dev it pre-scans your sources
+				and the root <code>index.html</code> at startup so the first page load is fully styled. It
+				supports HMR: changes to classes in your code trigger automatic CSS updates. List it after
+				any plugin that rewrites CSS in its <code>transform</code> hook.
 			</p>
 			<h4>Plugin options</h4>
 			<ul>
@@ -177,7 +181,7 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>filter_file</code> - custom filter for which files to process. Receives
-					<code>(id: string)</code> and returns <code>boolean</code>, e.g.
+					<code>(id: string, root: string)</code> and returns <code>boolean</code>, e.g.
 					<Code inline lang="ts" content="(id) => !id.includes('/fixtures/')" />
 				</li>
 				<li>
@@ -192,12 +196,27 @@ import 'virtual:fuz.css';`}
 					<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
 				</li>
 				<li>
+					<code>cache_salt</code> - a string folded into the cache key; change it when only an acorn
+					plugin's options change, since the key already covers file content and the plugins
+				</li>
+				<li>
+					<code>prescan</code> - dev-only scan of sources at server startup; <code>true</code>
+					(default) scans <code>src</code> under the Vite root, <code>false</code> disables, or pass
+					an array of directories
+				</li>
+				<li>
 					<code>base_css</code> - customize or disable base styles; set to <code>null</code> for
-					utility-only mode, or provide a callback to modify defaults
+					utility-only mode, or provide a string to replace the defaults or a callback to modify
+					them (see <a href="#What-gets-included">what gets included</a>)
 				</li>
 				<li>
 					<code>variables</code> - customize or disable theme variables; set to <code>null</code>
-					for utility-only mode, or provide a callback to modify defaults
+					for utility-only mode, or provide an array to replace the defaults or a callback to modify
+					them
+				</li>
+				<li>
+					<code>theme</code> - a <TomeLink slug="themes" /> to bake into the generated CSS, overlaid
+					onto <code>variables</code> last-wins by name
 				</li>
 				<li>
 					<code>additional_elements</code> - elements to always include styles for (for
@@ -321,7 +340,7 @@ import './fuz.css';`}
 			<Code
 				lang="ts"
 				content={`// extracted because of naming convention
-const buttonClasses = 'color_d font_size_lg';
+const buttonClasses = 'palette_d font_size_lg';
 const buttonClass = active ? 'active' : null;
 const snake_class = 'snake';
 const turtle_class_name = 'turtle';`}
@@ -342,13 +361,12 @@ const turtle_class_name = 'turtle';`}
 </script>
 
 <div class={styles}></div>
-<button class={clsx('color_d', variant)}></button>`}
+<button class={clsx('palette_d', variant)}></button>`}
 			/>
 			<p>
 				Usage tracking works for variables inside <code>clsx()</code>, arrays, ternaries, and
 				logical expressions within class attributes. Note that standalone <code>clsx()</code> calls
-				outside class attributes don't trigger tracking -- use the naming convention for those
-				cases.
+				outside class attributes don't trigger tracking - use the naming convention for those cases.
 			</p>
 			<aside>
 				Currently, tracking is single-file only. Cross-module analysis and more sophisticated
@@ -389,7 +407,7 @@ const color = get_dynamic_color();`}
 {/each}`}
 			/>
 			<aside>
-				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss --
+				Edge values like <code>_00</code> and <code>_100</code> are especially easy to miss -
 				they're generally not used directly in your code (they exist mainly for programmatic usage
 				ergonomics), so the class won't be generated unless you hint it.
 			</aside>
@@ -491,8 +509,8 @@ const el = document.createElement('dialog');`}
 		<p>
 			Detection finds the classes, elements, and variables your source uses (see
 			<a href="#Class-detection">class detection</a> above), and resolution turns that into CSS.
-			Bundled mode -- the default for the <a href="#Vite-plugin">Vite plugin</a> and
-			<a href="#Gro-generator">Gro generator</a> -- combines three layers into a single output, each
+			Bundled mode (the default for the <a href="#Vite-plugin">Vite plugin</a> and
+			<a href="#Gro-generator">Gro generator</a>) combines three layers into a single output, each
 			trimmed to what your code uses:
 		</p>
 		<ol>
@@ -508,20 +526,42 @@ const el = document.createElement('dialog');`}
 			<li>used utility classes (always generated on demand; there's no full version)</li>
 		</ol>
 		<p>
-			Layers are emitted in that order, so variable definitions precede their use and utilities land
-			last to win over the low-specificity <code>:where()</code> reset.
+			Sections are emitted in that order inside <MdnLink path="Web/CSS/@layer" /> cascade layers:
+			defaults in <code>fuz.base</code>, OS user-preference mappings (like
+			<code>prefers-contrast</code>) in <code>fuz.preferences</code>, theme overrides in
+			<code>fuz.theme</code>, and utilities in <code>fuz.utilities</code>, so utilities beat the
+			reset by layer order (not specificity) and your own unlayered styles beat everything. The
+			exceptions are two <code>!important</code> declarations, which a layer makes outrank unlayered
+			styles too: <code>[hidden]</code>, and the <code>prefers-reduced-motion</code> mapping that
+			clears the <code>--duration_*</code> variables so a theme can't re-enable motion.
+		</p>
+		<p>
+			If you use <code>@layer</code> for your own styles, declare fuz's layers first so yours come
+			later and win: <code>@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities, app;</code>.
+			Without that line, fuz's layers are declared when its CSS loads, after any of yours, and beat
+			them.
 		</p>
 
 		<h4>Base styles</h4>
 		<p>
 			A rule from the reset stylesheet is kept when any element or class in its selector is
-			detected. Kept rules are emitted in source order, tree-shaking unused rules.
+			detected. Kept rules are emitted in source order, tree-shaking unused rules. A top-level
+			<code>@media</code>, <code>@supports</code>, or <code>@container</code> rule is kept or
+			dropped whole, by the elements and classes of the rules inside it.
 		</p>
-		<p>
-			Some rules are always included regardless of detection: the universal reset (<code>*</code>),
-			<code>:root</code> and <code>:host</code>, <code>html</code>, <code>body</code>,
-			<code>@font-face</code>, and the <code>prefers-reduced-motion</code> block.
-		</p>
+		<p>Some rules are always included regardless of detection:</p>
+		<ul>
+			<li>
+				the universal reset (<code>*</code>), <code>:root</code> and <code>:host</code>,
+				<code>html</code>, and <code>body</code>
+			</li>
+			<li>
+				rules whose selector can't be matched against what's detected: one naming no element or
+				class (like <code>::selection</code> and <code>[hidden]</code>), or an escaped or non-ASCII
+				name (like <code>.md\:flex</code>)
+			</li>
+			<li>every other at-rule, like <code>@keyframes</code> and <code>@font-face</code></li>
+		</ul>
 		<p>
 			For apps that use dynamic HTML patterns, element detection may have false negatives, omitting
 			styles that you actually need. The reliable fix is to ship the full reset with
@@ -537,6 +577,28 @@ vite_plugin_fuz_css({
 	additional_elements: 'all',
 });`}
 		/>
+		<p>
+			The <DeclarationLink name="CssGeneratorBaseOptions">base_css</DeclarationLink> option replaces
+			the reset stylesheet with a string, or transforms it with a callback that receives the default
+			CSS. Either form takes any CSS the parser accepts and is tree-shaken by the rules above. All
+			of it lands in <code>fuz.base</code>, a callback's additions included, so it sits below themes
+			and utilities; put overrides that must win in your own stylesheet.
+		</p>
+		<Code
+			lang="ts"
+			content={`vite_plugin_fuz_css({
+	// tree-shaken with the rest: ships when a \`.prose\` class is used
+	base_css: (css) => css + '\\n.prose { max-width: 65ch; }',
+});`}
+		/>
+		<p>
+			The generator owns the layering, so an <code>@layer</code> of your own in
+			<code>base_css</code> is an error (<code>base_css_layer</code>), as are <code>@import</code>
+			and <code>@namespace</code>, which are invalid inside a layer
+			(<code>base_css_unsupported_at_rule</code>). An error never removes CSS: the rule ships as
+			written, and the error names it and its line. Only a top-level <code>@charset</code> is left
+			out, since an encoding marker means nothing in a string.
+		</p>
 
 		<h4>Variables</h4>
 		<p>A style variable is included when:</p>
@@ -559,6 +621,29 @@ vite_plugin_fuz_css({
 			complete set ships in <ModuleLink module_path="theme.css" /> for utility-only mode and direct
 			imports; bundled mode trims it to what you use.
 		</p>
+		<p>
+			The <DeclarationLink name="CssGeneratorBaseOptions">variables</DeclarationLink> option is the
+			whole set to draw from. If a kept base-style rule references a variable the defaults define
+			but your set lacks (with <code>null</code>, an empty array, or a partial set), generation
+			reports the error <code>undefined_theme_variables</code>, since a <code>var(--name)</code>
+			with no fallback would resolve to nothing. It never fires for a reference with a fallback, a
+			name the base styles declare themselves (in the same rule, or in a top-level rule whose
+			selector is exactly <code>:root</code>, <code>:host</code>, <code>html</code>,
+			<code>body</code>, or <code>*</code>), or a custom property of your own.
+		</p>
+		<p>
+			Define the missing variables, or for bundled base styles over a theme stylesheet you import
+			separately, declare the default set defined elsewhere:
+		</p>
+		<Code
+			lang="ts"
+			content={`import {default_variables} from '@fuzdev/fuz_css/variables.ts';
+
+vite_plugin_fuz_css({
+	variables: null,
+	exclude_variables: default_variables.map((v) => v.name),
+});`}
+		/>
 
 		<h4>Forcing and excluding</h4>
 		<p>
@@ -579,7 +664,7 @@ vite_plugin_fuz_css({
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
 				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
-				close relationship to <TomeLink slug="variables">style variables</TomeLink> -- each maps
+				close relationship to <TomeLink slug="variables">style variables</TomeLink>: each maps
 				design tokens to CSS properties. They're generated programmatically from variant data,
 				making them predictable and systematic. The composites documented
 				<a href="#Composite-classes">below</a> are hand-written and typically represent higher-level
@@ -751,7 +836,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.color_{@render variant_range(color_variants)}_{@render variant_range(
+							.color_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
@@ -760,13 +845,37 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.bg_{@render variant_range(color_variants)}_{@render variant_range(
+							.bg_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
 					</span>
 				</li>
+				<li class="mb_md">
+					<span class="code_chips">
+						{#each intent_variants as intent (intent)}
+							<code>.{intent}_{@render variant_range(intensity_variants)}</code>
+						{/each}
+					</span>
+				</li>
+				<li class="mb_md">
+					<span class="code_chips">
+						{#each intent_variants as intent (intent)}
+							<code>.bg_{intent}_{@render variant_range(intensity_variants)}</code>
+						{/each}
+					</span>
+				</li>
 			</ul>
+			<aside>
+				Palette-letter classes are property-first, and the letter alone implies the palette:
+				<code>.color_a_50</code>, <code>.bg_a_50</code>, <code>.border_a_50</code>, and
+				<code>.outline_a_50</code> apply <code>--palette_a_50</code> to their named property, and
+				<code>.shadow_a_50</code> sets it as the contextual <code>--shadow_color</code>
+				(<code>.border_color_50</code> is the letterless alpha ramp). A bare intent or neutral scale
+				class applies its family's dominant use: <code>.positive_50</code> and <code>.text_70</code>
+				set the text color while <code>.shade_50</code> sets the background, with the
+				<code>bg_</code> prefix selecting the background twin (<code>.bg_positive_50</code>).
+			</aside>
 			<aside>
 				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
 				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
@@ -786,9 +895,6 @@ vite_plugin_fuz_css({
 						<code>.shade_max</code>
 						<code>.shade_{@render variant_range(shade_variants)}</code>
 					</span>
-				</li>
-				<li class="mb_md">
-					<span class="code_chips"><code>.hue_{@render variant_range(color_variants)}</code></span>
 				</li>
 				<li class="mb_md">
 					<span class="code_chips">
@@ -840,7 +946,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.border_color_{@render variant_range(color_variants)}_{@render variant_range(
+							.border_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
@@ -896,7 +1002,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.outline_color_{@render variant_range(color_variants)}_{@render variant_range(
+							.outline_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
@@ -944,7 +1050,7 @@ vite_plugin_fuz_css({
 				<li class="mb_md">
 					<span class="code_chips">
 						<code>
-							.shadow_color_{@render variant_range(color_variants)}_{@render variant_range(
+							.shadow_{@render variant_range(palette_variants)}_{@render variant_range(
 								intensity_variants
 							)}
 						</code>
@@ -1201,9 +1307,9 @@ export const gen = gen_fuz_css({
 	<TomeSection>
 		<TomeSectionHeader text="Modifiers" />
 		<p>
-			Modifiers prefix any class type -- token, composite, or literal -- to apply styles
-			conditionally based on viewport, state, or color scheme. This is what makes utility classes
-			more powerful than inline styles.
+			Modifiers prefix any class type (token, composite, or literal) to apply styles conditionally
+			based on viewport, state, or color scheme. This is what makes utility classes more powerful
+			than inline styles.
 		</p>
 
 		<h4>Responsive modifiers</h4>
@@ -1361,7 +1467,7 @@ export const gen = gen_fuz_css({
 			<p>
 				Combined modifiers follow a canonical order enforced with errors that guide you. Multiple
 				states must be alphabetical (<code>focus:hover:</code> not <code>hover:focus:</code>)
-				because both generate equivalent CSS -- canonical ordering prevents duplicates.
+				because both generate equivalent CSS; canonical ordering prevents duplicates.
 			</p>
 			<Code content="[media:][ancestor:][...state:][pseudo-element:]class" />
 			<ol>
@@ -1410,7 +1516,7 @@ export const gen = gen_fuz_css({
 			fuz_css's <ModuleLink module_path="style.css">main stylesheet</ModuleLink> provides styles for
 			base HTML elements using <TomeLink slug="variables">style variables</TomeLink>, acting as a
 			modern CSS reset that adapts to dark mode. It includes CSS classes that provide common generic
-			functionality -- these are called builtin classes.
+			functionality - these are called builtin classes.
 		</p>
 		<h4><code>.unstyled</code></h4>
 		<p>Default list (styled):</p>
@@ -1468,7 +1574,7 @@ export const gen = gen_fuz_css({
 			<li><code>.title</code> - see <TomeLink slug="forms" /></li>
 			<li><code>.row</code> - see <TomeLink slug="layout" />, <TomeLink slug="forms" /></li>
 			<li>
-				<code>.color_a</code> through <code>.color_j</code> - see <TomeLink slug="buttons" />,
+				<code>.palette_a</code> through <code>.palette_j</code> - see <TomeLink slug="buttons" />,
 				<TomeLink slug="colors" />
 			</li>
 			<li>
@@ -1563,7 +1669,7 @@ export const gen = gen_fuz_css({
 				</li>
 				<li>
 					<strong>expressions:</strong> logical (<code>&&</code>, <code>||</code>, <code>??</code>),
-					ternaries, template literals (complete tokens only --
+					ternaries, template literals (complete tokens only -
 					<code>`color_a_50 $&#123;base&#125;`</code> extracts <code>color_a_50</code>, but
 					<code>`color_$&#123;hue&#125;_50`</code> cannot be extracted; use
 					<code>@fuz-classes</code> or <code>additional_classes</code>)
@@ -1683,11 +1789,10 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 };`}
 		/>
 		<p>
-			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand --
-			something that would require 24 separate composite definitions. Note the classes for this
-			example could also be created as composites with a helper function -- fuz_css uses this
-			strategy internally to create its token classes in
-			<ModuleLink module_path="css_class_definitions.ts" />.
+			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand, something
+			that would require 24 separate composite definitions. Note the classes for this example could
+			also be created as composites with a helper function - fuz_css uses this strategy internally
+			to create its token classes in <ModuleLink module_path="css_class_definitions.ts" />.
 		</p>
 		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
@@ -1781,7 +1886,7 @@ vite_plugin_fuz_css({
 			For extensibility, all three frameworks allow custom class-to-CSS mappings. UnoCSS's dynamic
 			rules use regex + function patterns similar to fuz_css interpreters, plus separate variants
 			for modifiers. TailwindCSS uses JS plugins and UnoCSS has the more mature extensibility story;
-			fuz_css offers comparable power with interpreters but it's still evolving --
+			fuz_css offers comparable power with interpreters but it's still evolving -
 			<a href="https://github.com/fuzdev/fuz_css/discussions">feedback</a> is welcome!
 		</p>
 		<p>

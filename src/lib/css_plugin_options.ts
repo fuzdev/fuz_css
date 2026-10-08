@@ -25,13 +25,19 @@
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
  * and `theme.css`, which include all content).
  *
+ * The two are checked against each other: base styles that reference a theme
+ * variable nothing defines raise the `undefined_theme_variables` error,
+ * whether `variables` is `null`, empty, or missing some of the defaults. To
+ * bundle every variable instead, keep `variables` and set
+ * `additional_variables: 'all'`.
+ *
  * @module
  */
 
 import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
-import type { StyleVariable } from './variable.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -40,9 +46,11 @@ import type { CacheDeps } from './deps.ts';
  */
 export interface CssExtractionOptions {
 	/**
-	 * Filter function to determine which files to extract classes from.
-	 * By default, extracts from .svelte, .html, .ts, .js, .tsx, .jsx files,
-	 * excluding test files and .gen files.
+	 * Filter function to determine which files to extract classes from,
+	 * called with each file's absolute id and the project root. By default,
+	 * extracts from .svelte, .html, .ts, .js, .tsx, .jsx files, excluding
+	 * test files, .gen files, and test directories inside the project or a
+	 * dependency's package (see `to_filter_scope`).
 	 */
 	filter_file?: FileFilter;
 	/**
@@ -56,6 +64,13 @@ export interface CssExtractionOptions {
 	 * ```
 	 */
 	acorn_plugins?: Array<AcornPlugin>;
+	/**
+	 * A string folded into the extraction cache key. The key already covers
+	 * file content and the `acorn_plugins` source text, but a plugin's options
+	 * live in its closure, so change this when only a plugin's options change
+	 * (`jsx({allowNamespaces: false})`) to re-extract every file.
+	 */
+	cache_salt?: string;
 }
 
 /**
@@ -90,7 +105,8 @@ export interface CssClassOptions {
  * - `string` - Custom CSS to replace defaults
  * - `(default_css) => string` - Callback to modify default CSS
  *
- * See module documentation for the `undefined` vs `null` convention.
+ * See module documentation for the `undefined` vs `null` convention, and
+ * `CssOutputOptions.base_css` for what the generators do with the stylesheet.
  */
 export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
 
@@ -123,6 +139,37 @@ export interface CssOutputOptions {
 	 * - `string`: Custom CSS to replace defaults
 	 * - `(default_css) => string`: Callback to modify default CSS
 	 *
+	 * The stylesheet is any CSS the parser accepts (`parseCss` from
+	 * `svelte/compiler`), which the generator places in the `fuz.base` cascade
+	 * layer, below themes and utility classes:
+	 *
+	 * - Top-level style rules and top-level `@media`, `@supports`, and
+	 *   `@container` rules are tree-shaken by the elements and classes they
+	 *   target. A conditional rule ships whole or not at all. Rules that target
+	 *   `:root`, `:host`, `html`, `body`, or `*` always ship, and so does a
+	 *   rule with a selector that can't be matched against detected usage: one
+	 *   naming no element or class (`[role='button']`, `::selection`), or with
+	 *   an escaped or non-ASCII name (`.md\:flex`).
+	 * - Every other at-rule ships as written (`@keyframes`, `@font-face`,
+	 *   `@property`, `@scope`, ...), used or not.
+	 * - Every `var()` reference in CSS that ships is tracked, however deeply
+	 *   it is nested, so the theme includes the variables it needs.
+	 * - The generator owns layering. A callback's additions land in `fuz.base`
+	 *   with everything else, so they lose to themes, utility classes, and
+	 *   unlayered styles - put overrides that must win in your own stylesheet.
+	 *   Top-level `@layer fuz.base` and `@layer fuz.preferences` blocks are
+	 *   recognized as the default stylesheet uses them; any other `@layer`
+	 *   rule is the error `base_css_layer`.
+	 * - `@import` and `@namespace` are invalid inside a layer and are the
+	 *   error `base_css_unsupported_at_rule`.
+	 *
+	 * An error never removes CSS: the construct ships as written (a layer
+	 * becomes a sublayer of `fuz.base`, and browsers ignore the other two),
+	 * and the error names it and its line. The one construct left out is a
+	 * top-level `@charset`, which means nothing in a string. A stylesheet the
+	 * parser rejects, or a callback that doesn't return a string, fails
+	 * generation with an error naming `base_css`.
+	 *
 	 * @example
 	 * ```ts
 	 * // Append custom reset
@@ -140,6 +187,23 @@ export interface CssOutputOptions {
 	 * - `Array<StyleVariable>`: Custom variable definitions (replaces defaults)
 	 * - `(defaults) => Array<StyleVariable>`: Callback to modify default variables
 	 *
+	 * The set is the whole theme: only variables in it are emitted, and only
+	 * the ones the output references. Base styles that reference a variable
+	 * the fuz_css defaults define but this set lacks - with `null`, an empty
+	 * array, or an array or callback result missing some - raise the error
+	 * `undefined_theme_variables`, because a `var()` with no fallback would
+	 * resolve to nothing. A reference with a fallback (`var(--x, 1px)`) is
+	 * never an error, nor is a name the base styles declare themselves: in the
+	 * rule that references it, or in a top-level rule with a selector that is
+	 * exactly `:root`, `:host`, `html`, `body`, or `*`.
+	 * Custom property names of your own are never checked.
+	 *
+	 * To fix the error, define the variables here (keep the defaults a
+	 * callback receives unless you replace what they style), or set
+	 * `base_css: null` too for utility-only mode. To pair bundled base styles
+	 * with a theme stylesheet imported separately, tell the generator the
+	 * default set is defined elsewhere through `exclude_variables`.
+	 *
 	 * @example
 	 * ```ts
 	 * // Override specific variables
@@ -152,14 +216,42 @@ export interface CssOutputOptions {
 	 *     ...defaults,
 	 *     { name: 'my_brand', light: '#ff6600', dark: '#ff8833' }
 	 * ]
+	 *
+	 * // Bundled base styles over a separately imported `theme.css`
+	 * variables: null,
+	 * exclude_variables: default_variables.map((v) => v.name)
 	 * ```
 	 */
 	variables?: VariablesOption;
 	/**
-	 * Specificity multiplier for theme CSS selectors.
-	 * Defaults to 1 which generates `:root`, higher values generate more specific selectors (e.g., `:root:root`).
+	 * A theme to bake into the generated CSS, overlaid onto `variables`
+	 * last-wins by name. This is how a project picks a theme statically: no JS
+	 * theme rendering at runtime, and the output stays tree-shaken because the
+	 * overlay happens before the dependency graph is built, so a theme's
+	 * referenced variables are pulled in transitively.
+	 *
+	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
+	 * runtime theme winning by cascade layer. A single-scheme theme's
+	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
+	 * renderer, which needs `resolve_theme_stance` called first). The theme's
+	 * own overlay also renders into the `fuz.theme.baked` sublayer - above the
+	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance,
+	 * and below a runtime theme's direct `fuz.theme` styles - so the baked
+	 * theme behaves like the same theme at runtime until one overrides it.
+	 *
+	 * The baked values become the output's defaults, so a runtime theme can't
+	 * revert to the pre-bake appearance by being empty - the base theme
+	 * renders nothing. To offer "back to fuz defaults" at runtime, render the
+	 * defaults explicitly:
+	 * `render_theme_style({name: 'base', variables: default_variables})`.
+	 *
+	 * @example
+	 * ```ts
+	 * import {phosphor_theme} from '@fuzdev/fuz_css/themes/phosphor.ts';
+	 * vite_plugin_fuz_css({theme: phosphor_theme});
+	 * ```
 	 */
-	theme_specificity?: number;
+	theme?: Theme | null;
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.
@@ -189,7 +281,18 @@ export interface CssOutputOptions {
 	exclude_elements?: Iterable<string>;
 	/**
 	 * CSS variables to exclude from theme output, even if referenced.
-	 * Useful for filtering out variables you don't want in the theme.
+	 * Useful for filtering out variables you don't want in the theme, and for
+	 * declaring that something else defines one: an excluded variable leaves
+	 * out the dependencies only it pulls in, excluding one the output
+	 * references or a shipped variable depends on is a warning when the theme
+	 * has it, and a name listed here is skipped by the
+	 * `undefined_theme_variables` check.
+	 *
+	 * @example
+	 * ```ts
+	 * // every default variable is defined by a stylesheet imported separately
+	 * exclude_variables: default_variables.map((v) => v.name)
+	 * ```
 	 */
 	exclude_variables?: Iterable<string>;
 }
@@ -199,16 +302,21 @@ export interface CssOutputOptions {
  */
 export interface CssDiagnosticsOptions {
 	/**
-	 * How to handle CSS-literal errors during generation.
+	 * How to handle errors during generation: unresolvable comment hints,
+	 * invalid CSS literals, and the base stylesheet and theme variable checks.
 	 * - 'log': Log errors, skip invalid classes, continue
-	 * - 'throw': Throw on first error, fail the build
+	 * - 'throw': Fail the render with every error it found, failing the build
+	 *
+	 * A logged diagnostic is logged once while it persists - a dev server or
+	 * watch mode re-rendering on each edit doesn't repeat it - and again if it
+	 * goes away and comes back.
 	 * @default 'throw' in CI, 'log' otherwise
 	 */
 	on_error?: 'log' | 'throw';
 	/**
 	 * How to handle warnings during generation.
-	 * - 'log': Log warnings, continue
-	 * - 'throw': Throw on first warning, fail the build
+	 * - 'log': Log warnings, continue (once while each persists, like errors)
+	 * - 'throw': Fail the render with every warning it found, failing the build
 	 * - 'ignore': Suppress warnings entirely
 	 * @default 'log'
 	 */

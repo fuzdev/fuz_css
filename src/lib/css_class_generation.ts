@@ -66,7 +66,7 @@ export const extract_primary_property = (declaration: string): string | null => 
 /**
  * Resolves a sort index for a class name relative to the static definition order.
  * Literal classes (e.g., `border-radius:0`) map to `property_to_last_index + 0.5`
- * so they slot after their token family but before the next family — ensuring
+ * so they slot after their token family but before the next family - ensuring
  * CSS shorthands appear before longhands. Modified token classes (`hover:p_md`)
  * return `MAX_VALUE`; modified literals (`hover:border-radius:0`) get a property
  * index because the loop skips the modifier prefix to find the property.
@@ -85,14 +85,14 @@ const get_sort_index = (
 	// - `continue` skips known modifier prefixes (e.g. `hover`, `sm`)
 	// - `break` bails once the first non-modifier segment is reached, since
 	//   that segment is the CSS property (if known) or an unrecognized prefix
-	//   that can't be sorted by property — no point scanning further.
+	//   that can't be sorted by property - no point scanning further.
 	const segments = class_name.split(':');
 	for (let i = 0; i < segments.length - 1; i++) {
 		const segment = segments[i]!;
 		if (get_modifier(segment)) continue; // skip modifier prefixes like `hover:`, `sm:`
 		const property_index = property_to_last_index.get(segment);
 		if (property_index !== undefined) return property_index + 0.5;
-		break; // unrecognized non-modifier prefix — can't determine property sort order
+		break; // unrecognized non-modifier prefix - can't determine property sort order
 	}
 
 	return Number.MAX_VALUE;

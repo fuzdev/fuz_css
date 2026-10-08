@@ -8,10 +8,13 @@ import {
 	save_cached_extraction,
 	delete_cached_extraction,
 	from_cached_extraction,
+	to_extraction_cache_key,
 	CSS_CACHE_VERSION,
 	type CachedExtraction
 } from '$lib/css_cache.ts';
 import type { SourceLocation, ExtractionDiagnostic } from '$lib/diagnostics.ts';
+import type { AcornPlugin } from '$lib/css_class_extractor.ts';
+import { extract_file_cached } from '$lib/extract_file_cached.ts';
 import { default_cache_deps } from '$lib/deps_defaults.ts';
 import { create_mock_fs_state, create_mock_cache_deps } from './fixtures/mock_deps.ts';
 import {
@@ -34,6 +37,7 @@ const CACHE_DIR = '/tmp/fuz_css_cache_test/project/.fuz/cache/css';
 const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtraction => ({
 	v: CSS_CACHE_VERSION,
 	content_hash: 'test-hash',
+	extraction_key: null,
 	classes: null,
 	explicit_classes: null,
 	diagnostics: null,
@@ -72,13 +76,18 @@ const save_and_load = async (
 		content_hash = 'test-hash'
 	} = options;
 
-	await save_cached_extraction(deps, cache_path, content_hash, {
-		classes,
-		explicit_classes,
-		diagnostics,
-		elements,
-		explicit_elements,
-		explicit_variables
+	await save_cached_extraction(deps, {
+		cache_path,
+		content_hash,
+		extraction_key: null,
+		extraction: {
+			classes,
+			explicit_classes,
+			diagnostics,
+			elements,
+			explicit_elements,
+			explicit_variables
+		}
 	});
 	const loaded = await load_cached_extraction(deps, cache_path);
 	assert.isNotNull(loaded);
@@ -529,9 +538,11 @@ describe('cache functions with mock deps', () => {
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
-		await save_cached_extraction(mock_deps, cache_path, 'abc123', {
-			...EMPTY_EXTRACTION,
-			classes
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'abc123',
+			extraction_key: null,
+			extraction: { ...EMPTY_EXTRACTION, classes }
 		});
 		const loaded = await load_cached_extraction(mock_deps, cache_path);
 
@@ -552,7 +563,12 @@ describe('cache functions with mock deps', () => {
 		const mock_deps = create_mock_cache_deps(state);
 		const cache_path = '/mock/cache/delete.json';
 
-		await save_cached_extraction(mock_deps, cache_path, 'hash', EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
 		assert.isTrue(state.files.has(cache_path));
 
 		await delete_cached_extraction(mock_deps, cache_path);
@@ -563,10 +579,68 @@ describe('cache functions with mock deps', () => {
 		const state = create_mock_fs_state();
 		const mock_deps = create_mock_cache_deps(state);
 
-		await save_cached_extraction(mock_deps, '/test.json', 'hash', EMPTY_EXTRACTION);
+		await save_cached_extraction(mock_deps, {
+			cache_path: '/test.json',
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
 		assert.strictEqual(parsed.v, CSS_CACHE_VERSION);
 		assert.strictEqual(parsed.content_hash, 'hash');
+	});
+});
+
+describe('the extraction configuration key', () => {
+	const plugin_a = ((Parser: unknown) => Parser) as unknown as AcornPlugin;
+	const plugin_b = ((Parser: unknown) => ({ Parser })) as unknown as AcornPlugin;
+
+	test('the default configuration has no key', () => {
+		assert.isNull(to_extraction_cache_key(undefined, undefined));
+		assert.isNull(to_extraction_cache_key([], ''));
+	});
+
+	test('plugins and the salt each change the key', () => {
+		const keys = [
+			to_extraction_cache_key([plugin_a], undefined),
+			to_extraction_cache_key([plugin_b], undefined),
+			to_extraction_cache_key([plugin_a, plugin_b], undefined),
+			to_extraction_cache_key([plugin_a], 'v2'),
+			to_extraction_cache_key(undefined, 'v2')
+		];
+		assert.strictEqual(new Set(keys).size, keys.length);
+		assert.notInclude(keys, null);
+		assert.strictEqual(
+			to_extraction_cache_key([plugin_a], 'v2'),
+			to_extraction_cache_key([plugin_a], 'v2')
+		);
+	});
+
+	test('an entry cached under another configuration misses', async () => {
+		const state = create_mock_fs_state();
+		const mock_deps = create_mock_cache_deps(state);
+		const cache_path = '/mock/cache/App.tsx.json';
+		const content = 'export const x = <div class="box" />;';
+		// cached as if a plugin-less parse had produced nothing
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
+		const read = (extraction_key: string | null) =>
+			extract_file_cached({
+				deps: mock_deps,
+				content,
+				content_hash: 'hash',
+				extraction_key,
+				cache_path,
+				filename: 'App.tsx'
+			});
+		assert.isTrue((await read(null)).from_cache);
+		const miss = await read(to_extraction_cache_key(undefined, 'jsx'));
+		assert.isFalse(miss.from_cache);
+		assert.strictEqual(miss.cache_path_to_write, cache_path);
 	});
 });

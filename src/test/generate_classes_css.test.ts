@@ -6,6 +6,7 @@ import {
 	type CssClassDefinitionInterpreter
 } from '$lib/css_class_generation.ts';
 import { css_class_composites } from '$lib/css_class_composites.ts';
+import { css_class_definitions } from '$lib/css_class_definitions.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,
@@ -487,7 +488,7 @@ describe('generate_classes_css', () => {
 		});
 
 		test('modified token class sorts alphabetically, not by property', () => {
-			// hover:p_md: segments ['hover', 'p_md'] — the loop runs i < 1 (i.e. only i=0),
+			// hover:p_md: segments ['hover', 'p_md'] - the loop runs i < 1 (i.e. only i=0),
 			// 'hover' is skipped as a modifier, loop ends, returns MAX_VALUE.
 			// p_md has a finite index, so it sorts before hover:p_md.
 			const catch_all_interpreter: CssClassDefinitionInterpreter = {
@@ -743,7 +744,7 @@ describe('generate_classes_css', () => {
 			const result = generate_classes_css({
 				class_names: ['card'],
 				class_definitions: {
-					base: { declaration: 'color: var(--color_a_5);' },
+					base: { declaration: 'color: var(--palette_a_5);' },
 					extended: { composes: ['base'], declaration: 'margin: var(--space_md);' },
 					card: { composes: ['extended'] }
 				},
@@ -752,7 +753,7 @@ describe('generate_classes_css', () => {
 			});
 
 			// Should track variables from entire composition chain
-			assert.isTrue(result.variables_used.has('color_a_5'));
+			assert.isTrue(result.variables_used.has('palette_a_5'));
 			assert.isTrue(result.variables_used.has('space_md'));
 		});
 
@@ -803,6 +804,37 @@ describe('generate_classes_css', () => {
 			// Set naturally deduplicates
 			assert.strictEqual(result.variables_used.size, 1);
 			assert.isTrue(result.variables_used.has('space_md'));
+		});
+	});
+
+	describe('surface shadows', () => {
+		test('pane and panel read their shadow variables', () => {
+			const result = generate_classes_css({
+				class_names: ['pane', 'panel'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_contains(
+				result.css,
+				'box-shadow: var(--pane_shadow);',
+				'box-shadow: var(--panel_shadow);'
+			);
+			assert.isTrue(result.variables_used.has('pane_shadow'));
+			assert.isTrue(result.variables_used.has('panel_shadow'));
+		});
+
+		test('a shadow class on a panel or pane lands after the composite and wins', () => {
+			// both sit in the utilities layer at one specificity, so source order
+			// is what lets `class="panel shadow_inset_xs"` keep its shadow
+			const result = generate_classes_css({
+				class_names: ['shadow_inset_xs', 'shadow_md', 'panel', 'pane'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_order(result.css, '.pane {', '.shadow_md {');
+			assert_css_order(result.css, '.panel {', '.shadow_inset_xs {');
 		});
 	});
 
@@ -1053,6 +1085,29 @@ describe('generate_classes_css', () => {
 			});
 
 			assert.isTrue(result.variables_used.has('space_lg'));
+		});
+	});
+
+	describe('plain composite', () => {
+		test('strips chrome from unselected elements only', () => {
+			const result = generate_classes_css({
+				class_names: ['plain'],
+				class_definitions: css_class_composites,
+				interpreters: [],
+				css_properties: null
+			});
+
+			// a selected button's inverse text needs its fill, so no rule may
+			// reach a selected element
+			const selectors = Array.from(result.css.matchAll(/^\s*(\.plain[^{]*)\{/gm), (m) =>
+				m[1]!.trim()
+			);
+			assert.isAbove(selectors.length, 0);
+			for (const selector of selectors) {
+				assert.match(selector, /^\.plain:not\(\.selected[,)]/, selector);
+			}
+			assert_css_contains(result.css, '--button_fill: transparent;', 'box-shadow: none;');
+			assert.lengthOf(result.diagnostics, 0);
 		});
 	});
 

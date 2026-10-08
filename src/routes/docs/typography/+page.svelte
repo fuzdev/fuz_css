@@ -20,6 +20,7 @@
 		font_family_variants
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'typography';
 
@@ -84,6 +85,15 @@
 	</section>
 	<TomeSection>
 		<TomeSectionHeader text="Font families" />
+		<p>
+			These three are the <em>stacks</em>, and each keeps meaning what it says. Body text renders in
+			<code>--font_family</code> (default <code>var(--font_family_sans)</code>), so a theme that
+			wants serif or mono body text retargets it rather than redefining a stack. Headings take
+			<code>--heading_font_family</code> (default <code>var(--font_family_serif)</code>), so "one
+			family everywhere" is deliberately two knobs, and <code>--heading_letter_spacing</code>
+			(default <code>normal</code>) sets their tracking, where an <code>em</code> value follows each
+			heading's size.
+		</p>
 		<div>
 			{#each font_family_variants as font_family (font_family)}
 				<div
@@ -104,6 +114,14 @@
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Font sizes" />
+		<p>
+			Two knobs set the sizes. <code>--font_size_scale</code> multiplies every size, body text
+			(<code>md</code>) and the smaller sizes included, so a
+			<TomeLink slug="themes">theme</TomeLink> can enlarge reading text while small text keeps its
+			proportion to it. The sizes above <code>md</code> also step by one ratio,
+			<code>--type_scale_ratio</code>, which flattens or opens up the whole heading hierarchy
+			without moving body text.
+		</p>
 		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>
@@ -120,7 +138,7 @@
 				</StyleVariableButton>
 				<div class="row">
 					<span class="pr_sm">=</span>
-					<code>{computed_styles?.getPropertyValue('--' + size.name)}</code>
+					<code><ResolvedLength name={size.name} /></code>
 				</div>
 			</div>
 		{/each}
@@ -231,8 +249,10 @@
 			Here, size composites adjust the vertical rhythm by setting <code>--flow_margin</code>, not
 			the text size. Paragraph text keeps its fixed size, and headings keep their own sizes to
 			preserve hierarchy; only controls like buttons and chips read the composite's
-			<code>--font_size</code>. Scaling headers and prose with size composites is under
-			consideration, design feedback is welcome.
+			<code>--font_size</code>. A bare <code>.heading</code> is the exception: it reads the current
+			<code>--font_size</code>, so <code>.heading.lg</code> or a <code>--font_size</code> literal
+			tiers it. Scaling headers and prose with size composites is under consideration, design
+			feedback is welcome.
 		</UnfinishedImplementationWarning>
 	</TomeSection>
 

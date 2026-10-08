@@ -14,14 +14,13 @@ import { create_test_fixtures, empty_detection } from './css_bundled_resolution_
 describe('resolve_css diagnostics', () => {
 	describe('typo detection for variables', () => {
 		test('emits warning for typo of known variable', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'color_primary', light: 'blue' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				// 'color_primry' is a typo of 'color_primary' (missing 'a')
@@ -39,7 +38,7 @@ describe('resolve_css diagnostics', () => {
 
 		test('emits warning for typo in transitive dep', () => {
 			// Variable references a typo that's similar to another variable
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'main_color', light: 'var(--main_colr)' }, // references typo
 				{ name: 'main_colour', light: 'red' } // similar - will be suggested
 			]);
@@ -47,7 +46,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['main_color']),
@@ -61,7 +59,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('handles multiple typos', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'background_color', light: '#fff' },
 				{ name: 'foreground_color', light: '#000' },
 				{ name: 'border_radius', light: '4px' }
@@ -70,7 +68,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				// All typos of known variables
@@ -90,7 +87,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning for user-defined variables (not similar to theme vars)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'color_primary', light: 'blue' },
 				{ name: 'spacing_md', light: '16px' }
 			]);
@@ -98,7 +95,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				// These are user-defined, not similar to any theme variable
@@ -111,7 +107,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no diagnostics when all exist', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'color', light: 'blue' },
 				{ name: 'space', light: '16px' }
 			]);
@@ -119,7 +115,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color', 'space']),
@@ -132,7 +127,7 @@ describe('resolve_css diagnostics', () => {
 
 	describe('unmatched elements', () => {
 		test('no warning by default', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -140,7 +135,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'custom-element', 'my-widget']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -151,7 +145,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('warns when warn_unmatched_elements enabled', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -159,7 +153,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'custom-element']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -174,7 +167,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('warns for multiple unmatched', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -182,7 +175,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'my-custom', 'another-custom', 'third-one']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -198,7 +190,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning when all have rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
@@ -210,7 +202,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'input', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -224,14 +215,13 @@ describe('resolve_css diagnostics', () => {
 
 	describe('explicit variables (@fuz-variables)', () => {
 		test('emits error for explicit variable not in theme', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a_50', light: 'blue' }
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
+				{ name: 'palette_a_50', light: 'blue' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -248,8 +238,8 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no error when explicit variable exists in theme', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a_50', light: 'blue' },
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
+				{ name: 'palette_a_50', light: 'blue' },
 				{ name: 'shade_40', light: '#ccc' }
 			]);
 
@@ -257,22 +247,21 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a_50', 'shade_40']),
+				detected_css_variables: new Set(['palette_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'shade_40'])
+				explicit_variables: new Set(['palette_a_50', 'shade_40'])
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
 			// Valid explicit variables should be resolved
-			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('palette_a_50'));
 			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
 		test('suggests similar variable for typo', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'shade_40', light: '#ccc' },
 				{ name: 'shade_50', light: '#999' }
 			]);
@@ -280,7 +269,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -296,20 +284,19 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('errors for multiple explicit variables with mix of valid and invalid', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a_50', light: 'blue' },
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
+				{ name: 'palette_a_50', light: 'blue' },
 				{ name: 'shade_40', light: '#ccc' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
-				detected_css_variables: new Set(['color_a_50', 'shade_40']),
+				detected_css_variables: new Set(['palette_a_50', 'shade_40']),
 				utility_variables_used: new Set(),
-				explicit_variables: new Set(['color_a_50', 'bad_var_1', 'shade_40', 'bad_var_2'])
+				explicit_variables: new Set(['palette_a_50', 'bad_var_1', 'shade_40', 'bad_var_2'])
 			});
 
 			// Only the 2 invalid variables produce errors
@@ -319,12 +306,12 @@ describe('resolve_css diagnostics', () => {
 			assert.isTrue(messages.some((m) => m.includes('bad_var_1')));
 			assert.isTrue(messages.some((m) => m.includes('bad_var_2')));
 			// Valid variables should still be resolved
-			assert.isTrue(result.resolved_variables.has('color_a_50'));
+			assert.isTrue(result.resolved_variables.has('palette_a_50'));
 			assert.isTrue(result.resolved_variables.has('shade_40'));
 		});
 
 		test('explicit variable resolves transitive dependencies', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'base_hue', light: '210' },
 				{ name: 'derived_color', light: 'hsl(var(--base_hue) 50% 50%)' }
 			]);
@@ -332,7 +319,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['derived_color']),
@@ -346,14 +332,13 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('exclude_variables suppresses explicit_variables error', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
-				{ name: 'color_a_50', light: 'blue' }
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
+				{ name: 'palette_a_50', light: 'blue' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -371,7 +356,7 @@ describe('resolve_css diagnostics', () => {
 
 	describe('explicit elements (@fuz-elements)', () => {
 		test('emits error for explicit element with no rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -379,7 +364,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'dialog']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -395,7 +379,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no error when explicit element has rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					dialog { padding: 1rem; }
@@ -406,7 +390,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'dialog']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -418,7 +401,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('suggests similar element for typo', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					dialog { padding: 1rem; }
@@ -429,7 +412,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'dilog']), // typo
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -445,7 +427,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('errors for multiple explicit elements without rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -453,7 +435,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'dialog', 'details', 'summary']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -466,7 +447,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('exclude_elements suppresses explicit_elements error', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -474,7 +455,6 @@ describe('resolve_css diagnostics', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'dialog', 'details']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -492,7 +472,7 @@ describe('resolve_css diagnostics', () => {
 
 	describe('exclude_variables footgun', () => {
 		test('warns when an excluded variable is referenced by an included rule', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--brand); }`,
 				[{ name: 'brand', light: 'blue' }]
 			);
@@ -501,7 +481,6 @@ describe('resolve_css diagnostics', () => {
 				...empty_detection(),
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				exclude_variables: ['brand']
 			});
@@ -515,7 +494,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('warns when an excluded variable is referenced directly in source', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'brand', light: 'blue' }
 			]);
 
@@ -523,7 +502,6 @@ describe('resolve_css diagnostics', () => {
 				...empty_detection(),
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_css_variables: new Set(['brand']),
 				exclude_variables: ['brand']
 			});
@@ -532,8 +510,33 @@ describe('resolve_css diagnostics', () => {
 			assert.include(result.diagnostics[0]!.message, 'brand');
 		});
 
+		test('an excluded dependency stays out and warns, along with what only it needs', () => {
+			const { style_rule_index, variable_graph } = create_test_fixtures(
+				`button { color: var(--text_color); }`,
+				[
+					{ name: 'text_color', light: 'var(--text_80)' },
+					{ name: 'text_80', light: 'var(--hue_neutral)' },
+					{ name: 'hue_neutral', light: '60' }
+				]
+			);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				detected_elements: new Set(['button']),
+				exclude_variables: ['text_80']
+			});
+
+			assert.deepEqual([...result.resolved_variables], ['text_color']);
+			assert.strictEqual(result.diagnostics.length, 1);
+			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+			assert.include(result.diagnostics[0]!.message, '--text_80');
+			assert.include(result.diagnostics[0]!.message, 'required by included theme variables');
+		});
+
 		test('no warning when the excluded variable is unused', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--brand); }`,
 				[
 					{ name: 'brand', light: 'blue' },
@@ -545,7 +548,6 @@ describe('resolve_css diagnostics', () => {
 				...empty_detection(),
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				exclude_variables: ['unused']
 			});
@@ -554,7 +556,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning when force-included via additional_variables then excluded', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'brand', light: 'blue' }
 			]);
 
@@ -562,8 +564,7 @@ describe('resolve_css diagnostics', () => {
 				...empty_detection(),
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
-				// force-included, not referenced by any shipped CSS — exclude is a clean override
+				// force-included, not referenced by any shipped CSS - exclude is a clean override
 				additional_variables: ['brand'],
 				exclude_variables: ['brand']
 			});
@@ -572,7 +573,7 @@ describe('resolve_css diagnostics', () => {
 		});
 
 		test('no warning when the excluded name is not a theme variable', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'brand', light: 'blue' }
 			]);
 
@@ -580,13 +581,61 @@ describe('resolve_css diagnostics', () => {
 				...empty_detection(),
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				// referenced in source but user-defined (not a known theme variable)
 				detected_css_variables: new Set(['my_custom']),
 				exclude_variables: ['my_custom']
 			});
 
 			assert.strictEqual(result.diagnostics.length, 0);
+		});
+	});
+
+	describe('base stylesheet diagnostics', () => {
+		test('forwards the errors the stylesheet parsed to, ahead of its own', () => {
+			const { style_rule_index, variable_graph } = create_test_fixtures(
+				`@layer reset, components;
+				@import "x.css";
+				button { color: red; }`,
+				[]
+			);
+
+			const result = resolve_css({
+				...empty_detection(),
+				style_rule_index,
+				variable_graph,
+				detected_elements: new Set(['button']),
+				explicit_variables: new Set(['nope'])
+			});
+
+			assert.deepEqual(
+				result.diagnostics.map((d) => [d.level, d.identifier]),
+				[
+					['error', 'base_css_layer'],
+					['error', 'base_css_unsupported_at_rule'],
+					['error', 'nope']
+				]
+			);
+			// an error never removes CSS: all three ship as written
+			assert.strictEqual(
+				result.base_css,
+				'@layer reset, components;\n\n@import "x.css";\n\nbutton { color: red; }'
+			);
+		});
+
+		test('forwards them on every resolution of the same index', () => {
+			const { style_rule_index, variable_graph } = create_test_fixtures(
+				`@layer mine { button { color: red; } }`,
+				[]
+			);
+			const options = {
+				...empty_detection(),
+				style_rule_index,
+				variable_graph
+			};
+
+			assert.strictEqual(resolve_css(options).diagnostics.length, 1);
+			assert.strictEqual(resolve_css(options).diagnostics.length, 1);
+			assert.strictEqual(style_rule_index.diagnostics.length, 1);
 		});
 	});
 });

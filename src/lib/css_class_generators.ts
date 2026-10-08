@@ -72,9 +72,6 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	return result;
 };
 
-export const CSS_DIRECTIONS = ['top', 'right', 'bottom', 'left'] as const;
-export type CssDirection = (typeof CSS_DIRECTIONS)[number];
-
 // Helper to convert any string to a valid CSS variable name (snake_case)
 export const format_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
 
@@ -87,26 +84,6 @@ export const format_spacing_value = (value: string): string => {
 	if (value === 'auto') return 'auto';
 	if (value === '100') return '100%';
 	if (value.endsWith('px')) return value;
-	return `var(--space_${value})`;
-};
-
-/**
- * Format width/height values for CSS (handles 0, auto, percentages, pixels, content values, and CSS variables).
- * Used by width and height properties.
- */
-export const format_dimension_value = (value: string): string => {
-	if (value === '0') return '0';
-	if (value === 'auto') return 'auto';
-	if (value === '100') return '100%';
-	if (value.endsWith('px')) return value;
-	if (
-		value === 'max-content' ||
-		value === 'min-content' ||
-		value === 'fit-content' ||
-		value === 'stretch'
-	) {
-		return value;
-	}
 	return `var(--space_${value})`;
 };
 
@@ -242,7 +219,7 @@ export const generate_shadow_classes = (
 			name: `${type.prefix}_${size}`,
 			css: `box-shadow: var(--${type.var_prefix}_${
 				size
-			}) color-mix(in hsl, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${
+			}) color-mix(in oklab, var(--shadow_color, var(--shadow_color_umbra)) var(--shadow_alpha, var(--shadow_alpha_${
 				alpha_mapping[size]
 			})), transparent);`
 		}),

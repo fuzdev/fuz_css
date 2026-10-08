@@ -35,7 +35,6 @@ describe('shared options interface', () => {
 			// CssOutputOptions
 			base_css: undefined,
 			variables: undefined,
-			theme_specificity: 1,
 			additional_classes: ['p_md'],
 			additional_elements: ['dialog'],
 			additional_variables: ['hue_a'],
@@ -79,12 +78,11 @@ describe('shared options interface', () => {
 			base_css: undefined,
 			variables: undefined,
 			on_error: 'throw',
-			theme_specificity: 2,
 			additional_elements: ['custom-element']
 		};
 
 		assert.isDefined(vite_options);
-		assert.strictEqual(vite_options.theme_specificity, 2);
+		assert.strictEqual(vite_options.on_error, 'throw');
 	});
 
 	test('options interfaces are assignable', () => {
@@ -155,7 +153,7 @@ describe('shared options interface', () => {
 
 		// Test callback (modify defaults)
 		const callback_opts: CssOutputOptions = {
-			variables: (defaults) => defaults.filter((v) => v.name.startsWith('color_'))
+			variables: (defaults) => defaults.filter((v) => v.name.startsWith('palette_'))
 		};
 		assert.strictEqual(typeof callback_opts.variables, 'function');
 	});

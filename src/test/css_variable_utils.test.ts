@@ -1,6 +1,11 @@
 import { test, assert, describe } from 'vitest';
 
-import { extract_css_variables, has_css_variables } from '$lib/css_variable_utils.ts';
+import {
+	extract_css_variables,
+	extract_declared_css_variables,
+	extract_required_css_variables,
+	strip_css_comments
+} from '$lib/css_variable_utils.ts';
 
 describe('extract_css_variables', () => {
 	test('returns empty set for empty string', () => {
@@ -133,9 +138,9 @@ describe('extract_css_variables', () => {
 		// This is why we use simple regex scanning instead of AST-based extraction:
 		// variables in component props like <MdnLink size="var(--icon_size_xs)" />
 		// aren't in style attributes but still reference theme variables
-		const svelte_component = `<MdnLink size="var(--icon_size_xs)" color="var(--color_a_5)" />`;
+		const svelte_component = `<MdnLink size="var(--icon_size_xs)" color="var(--palette_a_5)" />`;
 		const result = extract_css_variables(svelte_component);
-		assert.deepEqual(result, new Set(['icon_size_xs', 'color_a_5']));
+		assert.deepEqual(result, new Set(['icon_size_xs', 'palette_a_5']));
 	});
 
 	test('extracts variables from JSX props', () => {
@@ -145,49 +150,60 @@ describe('extract_css_variables', () => {
 	});
 });
 
-describe('has_css_variables', () => {
-	test('returns true for string with var()', () => {
-		assert.isTrue(has_css_variables('color: var(--text);'));
+describe('extract_required_css_variables', () => {
+	test.each([
+		['var(--a)', ['a']],
+		['var( --a )', ['a']],
+		['var(--a, 1px)', []],
+		['var(--a , 1px)', []],
+		['var(--a, var(--b))', ['b']],
+		['var(--a, var(--b, var(--c)))', ['c']],
+		['calc(var(--a) * var(--b, 2))', ['a']],
+		['var(--a) var(--a, 1px)', ['a']],
+		['1px solid red', []]
+	])('%s', (css, expected) => {
+		assert.deepEqual([...extract_required_css_variables(css)], expected);
+	});
+});
+
+describe('extract_declared_css_variables', () => {
+	test.each([
+		['--a: 1px', ['a']],
+		[':root { --a: 1px; --b_c: red; }', ['a', 'b_c']],
+		['a{--tight:1}', ['tight']],
+		['a { --spaced : 1; }', ['spaced']],
+		['a{color:red;--after:1}', ['after']],
+		['p{a{top:0}--after_nested:1px}', ['after_nested']],
+		['a { color: var(--a); }', []],
+		['@container style(--a: 1) { p { --b: 2 } }', ['b']],
+		['@property --a { syntax: "*"; inherits: false; }', []]
+	])('%s', (css, expected) => {
+		assert.deepEqual([...extract_declared_css_variables(css)], expected);
+	});
+});
+
+describe('strip_css_comments', () => {
+	test.each([
+		['a { color: red; }', 'a { color: red; }'],
+		['a { /* x */ color: red; }', 'a {   color: red; }'],
+		['a/**/b', 'a b'],
+		['/* one */a/* two */', ' a '],
+		['a { content: "/* kept */"; }', 'a { content: "/* kept */"; }'],
+		["a { content: '\\'/* kept */'; }", "a { content: '\\'/* kept */'; }"],
+		['a { color: red; /* unterminated', 'a { color: red;  '],
+		['a { content: "x"; /* gone */ }', 'a { content: "x";   }'],
+		['a { b: url("x)/* kept */"); }', 'a { b: url("x)/* kept */"); }'],
+		['p { background: url(//x/*.png); /* gone */ }', 'p { background: url(//x/*.png);   }'],
+		['p { background: URL( /a/*/b.png ) /* gone */; }', 'p { background: URL( /a/*/b.png )  ; }'],
+		['p { background: url("/*") /* gone */; }', 'p { background: url("/*")  ; }'],
+		['p { --curl: 1; a: curl(/* gone */); }', 'p { --curl: 1; a: curl( ); }'],
+		['p { a: #url(/* gone */); }', 'p { a: #url( ); }']
+	])('%s', (css, expected) => {
+		assert.strictEqual(strip_css_comments(css), expected);
 	});
 
-	test('returns false for string without var()', () => {
-		assert.isFalse(has_css_variables('padding: 1rem;'));
-	});
-
-	test('returns false for empty string', () => {
-		assert.isFalse(has_css_variables(''));
-	});
-
-	test('returns true for multiple variables', () => {
-		assert.isTrue(has_css_variables('border: var(--w) solid var(--c);'));
-	});
-
-	test('lastIndex reset between calls', () => {
-		// First call
-		assert.isTrue(has_css_variables('color: var(--a);'));
-
-		// Second call should still work correctly
-		assert.isFalse(has_css_variables('padding: 1rem;'));
-
-		// Third call
-		assert.isTrue(has_css_variables('margin: var(--b);'));
-	});
-
-	test('returns false for malformed patterns without valid name', () => {
-		assert.isFalse(has_css_variables('color: var();'));
-		assert.isFalse(has_css_variables('color: var(--);'));
-	});
-
-	test('consistent with extract_css_variables for unclosed var(', () => {
-		// Both functions should agree: var(--name without closing paren still matches
-		const input = 'color: var(--incomplete';
-		assert.isTrue(has_css_variables(input));
-		assert.isAbove(extract_css_variables(input).size, 0);
-	});
-
-	test('case-sensitive: VAR() uppercase not matched', () => {
-		// Same limitation as extract_css_variables
-		assert.isFalse(has_css_variables('color: VAR(--primary);'));
-		assert.isFalse(has_css_variables('color: Var(--primary);'));
+	test('returns the same string when there is nothing to strip', () => {
+		const css = 'a { margin: calc(1px / 2); }';
+		assert.strictEqual(strip_css_comments(css), css);
 	});
 });
