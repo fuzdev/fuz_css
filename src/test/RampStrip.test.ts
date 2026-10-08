@@ -1,26 +1,16 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, test, assert, afterEach } from 'vitest';
-import { flushSync } from 'svelte';
+import { describe, test, assert } from 'vitest';
 
 import RampStrip from '$routes/RampStrip.svelte';
 import { numeric_scale_variants } from '$lib/variable_data.ts';
-import { mount_component, unmount_component } from './component_test_helpers.ts';
+import { create_mount_tracker } from './component_test_helpers.ts';
 
-let mounted: { instance: Record<string, any>; container: HTMLElement } | null = null;
-
-afterEach(async () => {
-	if (mounted) {
-		await unmount_component(mounted.instance, mounted.container);
-		mounted = null;
-	}
-});
+const mount = create_mount_tracker();
 
 const mount_strip = (props: Record<string, any>): HTMLElement => {
-	mounted = mount_component(RampStrip as any, props);
-	flushSync();
-	return mounted.container;
+	return mount(RampStrip, props);
 };
 
 describe('RampStrip', () => {
@@ -40,13 +30,13 @@ describe('RampStrip', () => {
 		}
 	});
 
-	test('label defaults to the prefix and accepts an override', () => {
+	test('accepts a label override', () => {
 		const container = mount_strip({ prefix: 'palette_a', label: 'palette a' });
-		assert.strictEqual(container.querySelector('.ramp_name')?.textContent, 'palette a');
+		assert.strictEqual(container.querySelector('.ramp_label code')?.textContent, 'palette a');
 	});
 
 	test('label falls back to the prefix', () => {
 		const container = mount_strip({ prefix: 'text' });
-		assert.strictEqual(container.querySelector('.ramp_name')?.textContent, 'text');
+		assert.strictEqual(container.querySelector('.ramp_label code')?.textContent, 'text');
 	});
 });

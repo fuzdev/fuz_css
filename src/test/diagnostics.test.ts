@@ -2,6 +2,7 @@ import { test, assert, describe } from 'vitest';
 
 import {
 	format_diagnostic,
+	create_diagnostic_dispatcher,
 	CssGenerationError,
 	type ExtractionDiagnostic,
 	type GenerationDiagnostic
@@ -228,5 +229,61 @@ describe('CssGenerationError', () => {
 
 		assert.include(error.message, '0 issues');
 		assert.lengthOf(error.diagnostics, 0);
+	});
+});
+
+describe('create_diagnostic_dispatcher', () => {
+	const warning = (message: string): GenerationDiagnostic => ({
+		phase: 'generation',
+		level: 'warning',
+		message,
+		suggestion: null,
+		identifier: 'x',
+		locations: null
+	});
+	const error = (message: string): GenerationDiagnostic => ({
+		...warning(message),
+		level: 'error'
+	});
+
+	const create = (
+		on_warning: 'log' | 'throw' | 'ignore' = 'log',
+		on_error: 'log' | 'throw' = 'log'
+	) => {
+		const logged: Array<string> = [];
+		const dispatch = create_diagnostic_dispatcher(
+			{ on_error, on_warning },
+			{ warn: (m) => logged.push(`warn ${m}`), error: (m) => logged.push(`error ${m}`) }
+		);
+		return { logged, dispatch };
+	};
+
+	test('logs a diagnostic once while it persists across dispatches', () => {
+		const { logged, dispatch } = create();
+		dispatch([warning('a'), error('b')]);
+		dispatch([warning('a'), error('b')]);
+		dispatch([warning('a'), error('b'), warning('c')]);
+		assert.deepEqual(logged, [
+			`warn ${format_diagnostic(warning('a'))}`,
+			`error ${format_diagnostic(error('b'))}`,
+			`warn ${format_diagnostic(warning('c'))}`
+		]);
+	});
+
+	test('logs a diagnostic again once it went away and came back', () => {
+		const { logged, dispatch } = create();
+		dispatch([warning('a')]);
+		dispatch([]);
+		dispatch([warning('a')]);
+		assert.strictEqual(logged.length, 2);
+	});
+
+	test('ignores warnings when asked, and throws on every dispatch when set to throw', () => {
+		const ignoring = create('ignore');
+		ignoring.dispatch([warning('a')]);
+		assert.deepEqual(ignoring.logged, []);
+		const throwing = create('log', 'throw');
+		assert.throws(() => throwing.dispatch([error('b')]), CssGenerationError);
+		assert.throws(() => throwing.dispatch([error('b')]), CssGenerationError);
 	});
 });

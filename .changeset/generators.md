@@ -41,8 +41,31 @@ feat: dev-server prescan, content-hashed build CSS, and a stated `base_css` cont
   query but `prefers-reduced-motion`. A rule also always ships when one
   selector in its list is unmatchable (`button, [role='button']`) or has an
   escaped or non-ASCII name (`.md\:flex`).
+- Base selectors are read from the parsed selector tree, so a name inside
+  an attribute selector no longer counts as an element or class
+  (`[aria-label="Close dialog"]` shipped only with `<dialog>`,
+  `a[href$=".pdf"]` only with a `.pdf` class), and `[href*="x"]` is no
+  longer taken for the universal selector.
 - Every `var()` in base CSS that ships pulls in its theme variable at any
   nesting depth, not only one level into a conditional group.
+- `exclude_variables` holds against dependencies: an excluded variable that
+  a shipped variable depends on stays out, with a warning, along with the
+  variables only it needs (it came back as a dependency).
+- A comment ahead of `virtual:fuz.css`'s position in an unminified build
+  no longer swallows the generated CSS.
+- Each build environment's CSS comes from the modules in its own graph: a
+  client build no longer carries the classes of SSR-only modules (or the
+  reverse), and a watch rebuild drops the classes of a file that was
+  deleted or is no longer imported.
+- A diagnostic is logged once while it persists, rather than again on every
+  re-render - the dev server repeated every warning in the project on each
+  edit.
+- A `variables` or `theme` value that would escape its declaration (or is
+  blank) is left out of the generated CSS with the error
+  `uncontained_theme_value`, matching what `render_theme_style` drops; it
+  was written into the stylesheet as is.
+- The default `style.css` loads from a package path holding a space or a
+  Windows drive (the URL's encoded path was read as a file path).
 - An `@layer` rule in `base_css` is the error `base_css_layer`, and
   `@import` and `@namespace` are the error `base_css_unsupported_at_rule`.
   The error names the rule and its line and removes nothing: a layer ships
@@ -78,6 +101,23 @@ feat: dev-server prescan, content-hashed build CSS, and a stated `base_css` cont
   `to_extraction_id`.
 - `variable_graph.ts`: `build_variable_graph(variables)` drops its
   `content_hash` parameter and `VariableDependencyGraph` its
-  `content_hash` field.
+  `content_hash` field and gains `diagnostics`; `resolve_variables_transitive`
+  takes the excluded names and reports the ones it reached in
+  `ResolveVariablesResult.excluded`.
 - `css_variable_utils.ts` gains `extract_required_css_variables`,
-  `extract_declared_css_variables`, and `strip_css_comments`.
+  `extract_declared_css_variables`, and `strip_css_comments`, and loses
+  `has_css_variables`.
+- `class_variable_index.ts` is removed: the variables generated classes
+  reference come from the CSS they generate, which covers composite and
+  literal classes too. `BundledCssResources` and `resolve_css`'s options
+  lose `class_variable_index`, and `create_bundled_resources` its
+  `class_definitions`.
+- `generate_css`'s `detected_css_variables` takes the source's `var()`
+  names unfiltered and keeps the ones the theme defines (callers filtered
+  them).
+- `load_style_rule_index` and `load_default_style_css` drop the
+  `style_css_path` parameter.
+- Removed as unused: `extract_css_comment` (`css_ruleset_parser.ts`),
+  `format_dimension_value`, `CSS_DIRECTIONS`, and `CssDirection`
+  (`css_class_generators.ts`), and `has_variable` (`variable_graph.ts`);
+  `resolve_variables_option` is no longer exported.

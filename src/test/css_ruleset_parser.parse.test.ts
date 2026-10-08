@@ -3,8 +3,7 @@ import { test, assert, describe } from 'vitest';
 import {
 	parse_ruleset,
 	is_single_selector_ruleset,
-	ruleset_contains_class,
-	extract_css_comment
+	ruleset_contains_class
 } from '$lib/css_ruleset_parser.ts';
 
 /**
@@ -382,64 +381,5 @@ describe('ruleset_contains_class', () => {
 	test('does not match class name inside attribute value', () => {
 		const result = parse_ruleset('.other[data-class="btn"] { color: red; }');
 		assert.isFalse(ruleset_contains_class(result.rules, 'btn'));
-	});
-});
-
-describe('extract_css_comment', () => {
-	test('extracts comment before rule', () => {
-		const css = '/* Centered flex container */ .box { display: flex; }';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.strictEqual(comment, 'Centered flex container');
-	});
-
-	test('handles multi-line comments', () => {
-		const css = `/* Multi-line
-			comment */ .box { display: flex; }`;
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.include(comment!, 'Multi-line');
-	});
-
-	test('returns null when no comment', () => {
-		const css = '.box { display: flex; }';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.isNull(comment);
-	});
-
-	test('returns null for empty rules', () => {
-		const css = '';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.isNull(comment);
-	});
-
-	test('extracts only first comment when multiple present', () => {
-		const css = '/* First comment */ /* Second comment */ .box { display: flex; }';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.strictEqual(comment, 'First comment');
-	});
-
-	test('ignores comment after rule', () => {
-		const css = '.box { display: flex; } /* After comment */';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.isNull(comment);
-	});
-
-	test('handles comment with asterisks inside', () => {
-		const css = '/* Rating: ***** */ .box { display: flex; }';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.strictEqual(comment, 'Rating: *****');
-	});
-
-	test('handles whitespace-only comment', () => {
-		const css = '/*   */ .box { display: flex; }';
-		const result = parse_ruleset(css);
-		const comment = extract_css_comment(css, result.rules);
-		assert.strictEqual(comment, '');
 	});
 });

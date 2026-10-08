@@ -27,6 +27,44 @@ const single_slot_default = default_variables.find((v) => v.name === 'chroma_sca
 const create_editor = (): ThemeEditorState =>
 	new ThemeEditorState({ themes: [base_theme, marquee_theme] });
 
+describe('initial state', () => {
+	test('starts clean on the first theme, whatever it is named', () => {
+		const editor = new ThemeEditorState({ themes: [marquee_theme, base_theme] });
+		assert.strictEqual(editor.based_on, marquee_theme.name);
+		assert.strictEqual(editor.scheme, 'dark');
+		assert.isFalse(editor.dirty);
+		assert.strictEqual(editor.name, 'new theme');
+		editor.load_theme(base_theme);
+		assert.strictEqual(editor.name, `custom ${base_theme.name}`);
+	});
+});
+
+describe('gates and naming', () => {
+	test('the base draft passes every gate', () => {
+		const editor = create_editor();
+		assert.isTrue(editor.gates_pass);
+		assert.deepEqual(editor.failing_gates, []);
+	});
+
+	test('a draft that fails a gate lists it and no longer passes', () => {
+		const editor = create_editor();
+		editor.set_value('text_lightness_curve', '8', 'light');
+		assert.isFalse(editor.gates_pass);
+		assert.isAbove(editor.failing_gates.length, 0);
+		assert.isTrue(editor.failing_gates.every((e) => !e.pass));
+	});
+
+	test('a name taken by a pickable theme or the unsaved draft collides', () => {
+		const editor = create_editor();
+		assert.isFalse(editor.name_collides);
+		for (const name of [` ${marquee_theme.name} `, UNSAVED_THEME_NAME]) {
+			editor.name = name;
+			assert.isTrue(editor.name_collides, name);
+		}
+		assert.strictEqual(editor.trimmed_name, UNSAVED_THEME_NAME);
+	});
+});
+
 describe('set_value slot semantics', () => {
 	test('a scheme-adaptive variable edits the viewed scheme, preserving the other slot', () => {
 		const editor = create_editor();
@@ -81,6 +119,23 @@ describe('scheme stance', () => {
 		editor.set_value(adaptive_default.name, '0.25', 'dark');
 		editor.set_scheme('light');
 		assert.isUndefined(merged_adaptive(editor));
+	});
+
+	test("a dark stance doesn't render a light-only override - that appearance never shows", () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.95', 'light');
+		editor.set_scheme('dark');
+		assert.isUndefined(merged_adaptive(editor));
+	});
+
+	test('a single-slot override still renders under a dark stance', () => {
+		const editor = create_editor();
+		editor.set_value(single_slot_default.name, '2', 'light');
+		editor.set_scheme('dark');
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === single_slot_default.name),
+			{ name: single_slot_default.name, light: '2' }
+		);
 	});
 
 	test('a stance round trip loses no edits', () => {

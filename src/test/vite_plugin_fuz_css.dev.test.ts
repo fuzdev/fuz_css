@@ -1,6 +1,5 @@
-import { describe, test, assert, afterAll } from 'vitest';
+import { describe, test, assert } from 'vitest';
 import { createServer, normalizePath, type ViteDevServer } from 'vite';
-import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -12,21 +11,17 @@ import {
 } from '$lib/vite_plugin_fuz_css.ts';
 import { default_cache_deps } from '$lib/deps_defaults.ts';
 import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
+import {
+	vite_dev_fixture_root as fixture_root,
+	filter_dev_fixture_html as filter_fixture_file,
+	filter_dev_fixture_html_and_late_module as filter_fixture_file_and_late_module,
+	use_suite_cache_dir,
+	wait_for,
+	create_capturing_logger,
+	type CapturedLogs
+} from './vite_plugin_test_helpers.ts';
 
-const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_dev');
-
-// The fixture lives under `src/test/`, which the default filter excludes by
-// path - scope extraction to the fixture's html files instead.
-const filter_fixture_file = (path: string): boolean => path.endsWith('.html');
-
-// A cache directory of this suite's own: the ws suite shares the fixture
-// root and runs in parallel, so a shared cache would be deleted mid-run.
-const cache_dir = '.fuz/dev_test';
-
-// The html files plus the one module outside the pre-scan roots, for tests
-// that ingest it on demand.
-const filter_fixture_file_and_late_module = (path: string): boolean =>
-	path.endsWith('.html') || path.endsWith('late_module.ts');
+const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/dev_test');
 
 const create_dev_server = (
 	options?: VitePluginFuzCssOptions,
@@ -44,22 +39,9 @@ const create_dev_server = (
 		plugins: [vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir, ...options })]
 	});
 
-afterAll(async () => {
-	await rm(join(fixture_root, cache_dir), { recursive: true, force: true });
-});
-
 // Room for the tests that poll a server for a debounced update, on a loaded
 // machine - `wait_for` bounds the polling itself.
 const POLLING_TEST_TIMEOUT = 20_000;
-
-/** Polls until `predicate` or times out. */
-const wait_for = async (predicate: () => Promise<boolean>, timeout = 3000): Promise<void> => {
-	const deadline = Date.now() + timeout;
-	while (!(await predicate())) {
-		if (Date.now() > deadline) throw new Error('timed out waiting');
-		await new Promise((r) => setTimeout(r, 25));
-	}
-};
 
 /** Whether the virtual module's current CSS has a rule for `class_name`. */
 const serves_class = async (server: ViteDevServer, class_name: string): Promise<boolean> => {
@@ -228,20 +210,12 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 		// server's life. The fixture is smaller than the scan concurrency, so
 		// the discriminating assertion is the log shape: the per-file message
 		// (isolated) vs the whole-scan `pre-scan failed:` abort (fail-fast).
-		const errors: Array<string> = [];
-		const noop = () => {};
+		const logs: CapturedLogs = { warnings: [], errors: [] };
+		const { errors } = logs;
 		const server = await createServer({
 			root: fixture_root,
 			configFile: false,
-			customLogger: {
-				info: noop,
-				warn: noop,
-				warnOnce: noop,
-				error: (msg) => void errors.push(msg),
-				clearScreen: noop,
-				hasErrorLogged: () => false,
-				hasWarned: false
-			},
+			customLogger: create_capturing_logger(logs),
 			server: { middlewareMode: true, ws: false },
 			optimizeDeps: { noDiscovery: true },
 			plugins: [
@@ -319,6 +293,29 @@ describe('vite_plugin_fuz_css pre-scanned files on disk', { timeout: POLLING_TES
 				await writeFile(join(root, 'src/app.html'), '<body class="pb_xl7"></body>');
 				server.watcher.emit('change', join(root, 'src/app.html'));
 				await wait_for(() => serves_class(server, 'pb_xl7'));
+			}
+		);
+	});
+
+	test('an edit undone while its own ingest is in flight leaves the undone content', async () => {
+		await with_temp_root(
+			{ 'src/page.html': '<div class="pt_xl7"></div>' },
+			async (server, root) => {
+				assert(await serves_class(server, 'pt_xl7'));
+				const plugin = server.config.plugins.find((p) => p.name === 'vite-plugin-fuz-css');
+				const transform = plugin?.transform as
+					((code: string, id: string) => Promise<unknown>) | undefined;
+				assert(transform);
+				const id = join(root, 'src/page.html');
+				// the edit's ingest awaits its cache read; the undo, back to the
+				// content already recorded, arrives before it resolves
+				const edit = transform('<div class="pb_xl7"></div>', id);
+				await transform('<div class="pt_xl7"></div>', id);
+				await edit;
+				// past the update debounce, so a stale ingest would have landed
+				await new Promise((r) => setTimeout(r, 100));
+				assert(await serves_class(server, 'pt_xl7'));
+				assert(!(await serves_class(server, 'pb_xl7')), 'the superseded edit is dropped');
 			}
 		);
 	});

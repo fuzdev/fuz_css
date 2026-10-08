@@ -2,14 +2,12 @@ import { test, assert, describe } from 'vitest';
 
 import { compile_theme, check_theme } from '$lib/theme_check.ts';
 import type { Theme } from '$lib/variable.ts';
-import { default_themes } from '$lib/themes.ts';
+import { create_monochrome_theme } from './theme_test_helpers.ts';
+import { base_theme } from '$lib/themes/base.ts';
 import { marquee_theme } from '$lib/themes/marquee.ts';
-import { create_monochrome_theme } from './test_helpers.ts';
 import { PALETTE_CHROMA_CAPS, PALETTE_HUES } from '$lib/ramps.ts';
 import { oklch_max_srgb_chroma } from '$lib/oklch.ts';
 import type { NumericScaleVariant } from '$lib/variable_data.ts';
-
-const base_theme = default_themes[0]!;
 
 // the trailing worst-hue cap literal of a compiled `min(calc(...), <cap>)` value
 const cap_of = (value: string | undefined): number => {

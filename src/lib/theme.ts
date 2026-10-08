@@ -61,6 +61,15 @@ export interface RenderThemeStyleOptions {
 }
 
 /**
+ * Reads the single-scheme stance a theme's `scheme` names, or `null` for a
+ * dual-scheme theme. Total over any value, so it reads unvalidated data too.
+ *
+ * @param scheme - a theme's `scheme`
+ */
+export const to_theme_stance = (scheme: unknown): 'light' | 'dark' | null =>
+	scheme === 'light' || scheme === 'dark' ? scheme : null;
+
+/**
  * Picks the value a single-scheme stance renders from a dual-slot shape: the
  * stanced scheme's slot, dark falling back to the light/base position. Shared
  * by `compose_themes` and the theme editor so the re-slot semantics can't
@@ -109,7 +118,7 @@ export const overlay_style_variable = (
  */
 export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
 	if (!overlays.length) return base;
-	const stance = base.scheme === 'light' || base.scheme === 'dark' ? base.scheme : null;
+	const stance = to_theme_stance(base.scheme);
 	const by_name = new Map<string, StyleVariable>();
 	for (const v of base.variables) by_name.set(v.name, v);
 	for (const overlay of overlays) {
@@ -162,7 +171,7 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	const { comments = false, id = null, layer = 'fuz.theme' } = options;
 	// read as unchecked data: only null and undefined throw on a property read
 	const { scheme, scheme_mirror, variables: own_variables } = (theme ?? {}) as Unchecked<Theme>;
-	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
+	const stance = to_theme_stance(scheme);
 	// mirrored defaults first so the theme's own variables win by order; the
 	// mirror belongs to the stance, so a dual theme carrying one renders without it
 	const variables = [...(stance ? to_array(scheme_mirror) : []), ...to_array(own_variables)];
@@ -206,7 +215,7 @@ type Unchecked<T> = { [K in keyof T]?: unknown };
 
 const to_array = (value: unknown): Array<unknown> => (Array.isArray(value) ? value : []);
 
-// one variable's declaration for a scheme slot, or '' when the slot is empty
+// one variable's declaration for a scheme slot, or '' when the slot is blank
 // or can't be rendered without escaping its declaration - a theme may be
 // untrusted data that skipped the schema, and this is where it becomes CSS
 const render_theme_variable = (variable: unknown, dark: boolean, comments: boolean): string => {
@@ -214,7 +223,11 @@ const render_theme_variable = (variable: unknown, dark: boolean, comments: boole
 	const value = dark ? dark_slot : light;
 	// the containment checks pass strings only, which is what makes the
 	// concatenation below safe
-	if (!value || !css_value_is_contained(value) || !css_custom_property_name_is_contained(name)) {
+	if (
+		!css_value_is_contained(value) ||
+		!(value as string).trim() ||
+		!css_custom_property_name_is_contained(name)
+	) {
 		return '';
 	}
 	return (

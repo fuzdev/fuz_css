@@ -59,7 +59,7 @@ describe('generate_css', () => {
 		});
 
 		test('ignores resources when base and theme are disabled', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
 				[]
 			);
@@ -68,7 +68,7 @@ describe('generate_css', () => {
 				make_options({
 					all_classes: new Set(['p_lg']),
 					all_elements: new Set(['button']),
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 
@@ -99,7 +99,7 @@ describe('generate_css', () => {
 		];
 
 		test('includes base rules for detected elements and used theme variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: var(--text_color); }',
 				VARIABLES
 			);
@@ -111,7 +111,7 @@ describe('generate_css', () => {
 					detected_css_variables: new Set(['text_color']),
 					include_base: true,
 					include_theme: true,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 
@@ -124,7 +124,7 @@ describe('generate_css', () => {
 		});
 
 		test('merges explicit_variables into the detected set', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
 				VARIABLES
 			);
@@ -135,7 +135,7 @@ describe('generate_css', () => {
 					// not in detected_css_variables - only reachable via @fuz-variables
 					explicit_variables: new Set(['text_color']),
 					include_theme: true,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 
@@ -143,7 +143,7 @@ describe('generate_css', () => {
 		});
 
 		test('surfaces resolution diagnostics (unresolved explicit variable)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
 				VARIABLES
 			);
@@ -153,7 +153,7 @@ describe('generate_css', () => {
 					// not in the theme - resolve_css errors on the @fuz-variables annotation
 					explicit_variables: new Set(['nonexistent_var']),
 					include_theme: true,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 
@@ -163,7 +163,7 @@ describe('generate_css', () => {
 		});
 
 		test('does not mutate the caller-supplied detected_css_variables set', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
 				VARIABLES
 			);
@@ -174,7 +174,7 @@ describe('generate_css', () => {
 					explicit_variables: new Set(['text_color']),
 					include_theme: true,
 					detected_css_variables: detected,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 
@@ -190,7 +190,7 @@ describe('generate_css', () => {
 			);
 			assert.ok(warning, 'expected a theme_discarded warning');
 			// no warning when the theme can actually render
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
 				VARIABLES
 			);
@@ -198,7 +198,7 @@ describe('generate_css', () => {
 				make_options({
 					theme: { name: 't', variables: [] },
 					include_theme: true,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 			assert.isUndefined(
@@ -217,16 +217,13 @@ describe('generate_css', () => {
 @layer fuz.base {
 	button { color: var(--text_color); }
 }`;
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
-				base_css,
-				VARIABLES
-			);
+			const { style_rule_index, variable_graph } = create_test_fixtures(base_css, VARIABLES);
 
 			const result = generate_css(
 				make_options({
 					include_base: true,
 					include_theme: true,
-					resources: { style_rule_index, variable_graph, class_variable_index }
+					resources: { style_rule_index, variable_graph }
 				})
 			);
 

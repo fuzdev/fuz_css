@@ -111,7 +111,9 @@
 		<!-- intent/neutral hues: a palette-letter binding picker with a
 			custom-angle escape; chips write `var(--hue_x)`, custom detaches to a
 			literal angle -->
-		<div class="title"><code class="knob_name">--{knob.name}</code></div>
+		<div class="title">
+			<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
+		</div>
 		<div class="letter_chips" role="radiogroup" aria-label="--{knob.name} binding">
 			{#each palette_variants as letter (letter)}
 				<button
@@ -159,11 +161,13 @@
 		<HueInput
 			bind:value={() => numeric_value ?? derived_numeric ?? 0, (v) => emit_numeric(String(v))}
 		>
-			<code class="knob_name">--{knob.name}</code>
+			<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
 		</HueInput>
 	{:else}
 		<label>
-			<div class="title"><code class="knob_name">--{knob.name}</code></div>
+			<div class="title">
+				<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
+			</div>
 			{#if knob.kind === 'enum'}
 				<select value={value ?? ''} onchange={(e) => onchange(e.currentTarget.value)}>
 					{#if value === undefined}
@@ -247,11 +251,6 @@
 		position: absolute;
 		top: 0;
 		right: 0;
-	}
-	.knob_name {
-		background: transparent;
-		padding: 0;
-		font-size: var(--font_size_sm);
 	}
 	.knob_number {
 		width: 90px;

@@ -27,7 +27,6 @@ import {
 	get_all_variable_names,
 	find_similar_variable
 } from './variable_graph.ts';
-import { type CssClassVariableIndex, collect_class_variables } from './class_variable_index.ts';
 import { FUZ_BAKED_THEME_LAYER, FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 
 /**
@@ -139,8 +138,6 @@ export interface CssResolutionOptions {
 	style_rule_index: StyleRuleIndex;
 	/** Dependency graph for theme variables */
 	variable_graph: VariableDependencyGraph;
-	/** Index mapping classes to variables */
-	class_variable_index: CssClassVariableIndex;
 	/** HTML elements detected in source files */
 	detected_elements: Set<string>;
 	/** CSS classes detected in source files */
@@ -193,7 +190,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const {
 		style_rule_index,
 		variable_graph,
-		class_variable_index,
 		detected_elements,
 		detected_classes,
 		detected_css_variables,
@@ -209,8 +205,12 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	} = options;
 
 	// the stylesheet's own parse diagnostics (constructs it contains that
-	// don't belong in a base stylesheet) surface with every resolution of it
-	const diagnostics: Array<GenerationDiagnostic> = [...style_rule_index.diagnostics];
+	// don't belong in a base stylesheet) and the theme values the graph left
+	// out surface with every resolution of them
+	const diagnostics: Array<GenerationDiagnostic> = [
+		...style_rule_index.diagnostics,
+		...variable_graph.diagnostics
+	];
 	const included_elements: Set<string> = new Set();
 
 	// Convert to Sets once for safe re-iteration and O(1) lookup
@@ -330,26 +330,20 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		referenced_variables.add(v);
 	}
 
-	// b) Variables from class definitions (static classes that will be generated)
-	const class_variables = collect_class_variables(class_variable_index, detected_classes);
-	for (const v of class_variables) {
-		all_variables.add(v);
-		referenced_variables.add(v);
-	}
-
-	// c) Variables from utility class generation (collected during generation)
+	// b) Variables from utility class generation (collected during generation) - the
+	// CSS actually emitted, so composite and literal classes count too
 	for (const v of utility_variables_used) {
 		all_variables.add(v);
 		referenced_variables.add(v);
 	}
 
-	// d) Variables directly referenced in source files
+	// c) Variables directly referenced in source files
 	for (const v of detected_css_variables) {
 		all_variables.add(v);
 		referenced_variables.add(v);
 	}
 
-	// e) User-specified additional_variables (or all if 'all')
+	// d) User-specified additional_variables (or all if 'all')
 	if (include_all_variables) {
 		for (const v of get_all_variable_names(variable_graph)) {
 			all_variables.add(v);
@@ -360,31 +354,33 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		}
 	}
 
-	// g) Remove excluded variables. Warn when an excluded variable is actually referenced by
-	// shipped CSS - its `var()` would resolve to nothing. Force-included-only variables and
-	// unknown (non-theme) names are dropped silently, since neither leaves a dangling reference.
-	if (exclude_variables) {
+	// e) Resolve transitive variable dependencies, leaving out excluded variables
+	// and what only they depend on. Warn when an excluded variable is referenced
+	// by shipped CSS or depended on by a shipped variable - its `var()` would
+	// resolve to nothing unless something else defines it. Force-included-only
+	// variables and unknown (non-theme) names are dropped silently, since
+	// neither leaves a dangling reference.
+	const excluded = exclude_variables ? new Set(exclude_variables) : undefined;
+	const resolution = resolve_variables_transitive(variable_graph, all_variables, excluded);
+	const resolved_variables = resolution.variables;
+	if (excluded) {
 		const known_var_names = get_all_variable_names(variable_graph);
-		for (const v of exclude_variables) {
-			if (referenced_variables.has(v) && known_var_names.has(v)) {
-				diagnostics.push({
-					phase: 'generation',
-					level: 'warning',
-					message: `Variable "--${
-						v
-					}" is referenced by included styles but excluded via exclude_variables - references to it will be undefined`,
-					suggestion: 'Remove it from exclude_variables, or define the variable elsewhere.',
-					identifier: v,
-					locations: null
-				});
-			}
-			all_variables.delete(v);
+		for (const v of excluded) {
+			if (!known_var_names.has(v)) continue;
+			const referenced = referenced_variables.has(v);
+			if (!referenced && !resolution.excluded.has(v)) continue;
+			diagnostics.push({
+				phase: 'generation',
+				level: 'warning',
+				message: `Variable "--${v}" is ${
+					referenced ? 'referenced by included styles' : 'required by included theme variables'
+				} but excluded via exclude_variables - references to it will be undefined`,
+				suggestion: 'Remove it from exclude_variables, or define the variable elsewhere.',
+				identifier: v,
+				locations: null
+			});
 		}
 	}
-
-	// Step 4: Resolve transitive variable dependencies
-	const resolution = resolve_variables_transitive(variable_graph, all_variables);
-	const resolved_variables = resolution.variables;
 
 	// Add any cycle warnings
 	for (const warning of resolution.warnings) {

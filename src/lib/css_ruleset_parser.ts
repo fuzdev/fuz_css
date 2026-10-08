@@ -169,30 +169,6 @@ export const ruleset_contains_class = (
 	return rules.some((rule) => pattern.test(rule.selector));
 };
 
-/**
- * Extracts the CSS comment from a ruleset (if any).
- * Looks for comments before the first rule.
- *
- * @param css - raw CSS string
- * @param rules - parsed rules
- * @returns comment text without delimiters, or null if no comment
- */
-export const extract_css_comment = (css: string, rules: Array<ParsedRule>): string | null => {
-	if (rules.length === 0) return null;
-
-	const first_rule_start = rules[0]!.rule_start;
-	const before_rule = css.slice(0, first_rule_start).trim();
-
-	// Check for /* */ comment
-	const comment_pattern = /\/\*\s*([\s\S]*?)\s*\*\//;
-	const comment_match = comment_pattern.exec(before_rule);
-	if (comment_match) {
-		return comment_match[1]!.trim();
-	}
-
-	return null;
-};
-
 //
 // Selector Modification
 //

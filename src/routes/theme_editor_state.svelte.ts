@@ -1,19 +1,14 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import { compose_themes, pick_stance_slot } from '$lib/theme.ts';
+import { compose_themes, pick_stance_slot, to_theme_stance } from '$lib/theme.ts';
 import { resolve_theme_stance } from '$lib/theme_stance.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '$lib/variable.ts';
 import { default_variables } from '$lib/variables.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
-import {
-	validate_theme,
-	check_theme,
-	create_theme_resolver,
-	type ThemeIssue,
-	type ThemeCheckReport,
-	type ThemeKnobResolver
-} from '$lib/theme_check.ts';
+import { check_theme, type ThemeCheckReport, type ThemeGateEntry } from '$lib/theme_check.ts';
+import { validate_theme, type ThemeIssue } from '$lib/theme_validate.ts';
+import { create_theme_resolver, type ThemeKnobResolver } from '$lib/theme_resolver.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 
@@ -22,6 +17,9 @@ import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 const default_variable_by_name: Map<string, StyleVariable> = new Map(
 	default_variables.map((v) => [v.name, v])
 );
+
+/** The draft's name while it's based on the first theme. */
+const NEW_THEME_NAME = 'new theme';
 
 export interface SlotOverride {
 	light?: string;
@@ -82,8 +80,9 @@ export class ThemeEditorState {
 	readonly themes: Array<Theme>;
 	readonly contrast_modifiers: Array<Theme>;
 
-	name: string = $state.raw('new theme');
-	based_on: string = $state.raw('base');
+	name: string = $state.raw(NEW_THEME_NAME);
+	/** The base theme's name - the first theme until another loads. */
+	based_on: string = $state.raw('');
 	scheme: ThemeScheme = $state.raw('dual');
 	readonly overrides: SvelteMap<string, SlotOverride> = new SvelteMap();
 	/** The modifier composed over the applied theme, `null` for none. */
@@ -94,6 +93,9 @@ export class ThemeEditorState {
 		if (!themes.length) throw new Error('ThemeEditorState requires at least one theme');
 		this.themes = themes;
 		this.contrast_modifiers = contrast_modifiers;
+		// start clean on the first theme, carrying its stance
+		this.based_on = themes[0]!.name;
+		this.scheme = themes[0]!.scheme ?? 'dual';
 	}
 
 	readonly base_theme: Theme = $derived.by(
@@ -103,9 +105,7 @@ export class ThemeEditorState {
 	readonly base_scheme: ThemeScheme = $derived(this.base_theme.scheme ?? 'dual');
 
 	/** The single-scheme stance, `null` for dual themes. */
-	readonly stance: 'light' | 'dark' | null = $derived(
-		this.scheme === 'light' || this.scheme === 'dark' ? this.scheme : null
-	);
+	readonly stance: 'light' | 'dark' | null = $derived(to_theme_stance(this.scheme));
 
 	readonly base_variable_by_name: Map<string, StyleVariable> = $derived(
 		new Map(this.base_theme.variables.map((v) => [v.name, v]))
@@ -163,8 +163,13 @@ export class ThemeEditorState {
 			// other never renders. Overrides are usually single-slot already, but
 			// a dual base theme's own variables carry both slots and would split
 			// the appearances the stance promises to unify - re-slotting per layer
-			// keeps an override's base-slot edit winning over the base's dark slot
-			light = pick_stance_slot(o, this.stance) ?? pick_stance_slot(b, this.stance);
+			// keeps an override's base-slot edit winning over the base's dark slot.
+			// An adaptive variable's override is read from the stanced slot alone:
+			// its lone light slot is a light-scheme edit, not a base value
+			const override = this.#is_adaptive(name, o, b)
+				? o?.[this.stance]
+				: pick_stance_slot(o, this.stance);
+			light = override ?? pick_stance_slot(b, this.stance);
 		} else {
 			light = o?.light ?? b?.light;
 			dark = o?.dark ?? b?.dark;
@@ -232,6 +237,24 @@ export class ThemeEditorState {
 	 */
 	readonly check_report: ThemeCheckReport = $derived(check_theme(this.output));
 
+	/** The gate entries that fail for the draft. */
+	readonly failing_gates: Array<ThemeGateEntry> = $derived(
+		this.check_report.entries.filter((e) => !e.pass)
+	);
+
+	/** Whether the draft lints clean and passes every gate with nothing unchecked. */
+	readonly gates_pass: boolean = $derived(this.issues.length === 0 && this.check_report.ok);
+
+	/** The draft's name, trimmed - what a copied theme is named. */
+	readonly trimmed_name: string = $derived(this.name.trim());
+
+	/** Whether the draft's name is taken by a theme it could be confused with in a picker. */
+	readonly name_collides: boolean = $derived.by(
+		() =>
+			this.trimmed_name === UNSAVED_THEME_NAME ||
+			this.themes.some((t) => t.name === this.trimmed_name)
+	);
+
 	/**
 	 * The memoized numeric resolver over the draft, rebuilt per edit like
 	 * `check_report` - agreement with `display_value` is structural since both
@@ -272,11 +295,22 @@ export class ThemeEditorState {
 		return this.overrides.has(name);
 	}
 
+	/**
+	 * Whether a variable's effective definition is scheme-adaptive - dual-slot
+	 * in the defaults, the base theme, or the overrides - so its edits are
+	 * per scheme rather than to the base slot.
+	 */
+	#is_adaptive(name: string, o: SlotOverride | undefined, b: StyleVariable | undefined): boolean {
+		return (
+			default_variable_by_name.get(name)?.dark !== undefined ||
+			b?.dark !== undefined ||
+			o?.dark !== undefined
+		);
+	}
+
 	set_value(name: string, value: string, scheme: ColorSchemeVariant): void {
 		const o = this.overrides.get(name);
-		const b = this.base_variable_by_name.get(name);
-		const d = default_variable_by_name.get(name);
-		const adaptive = d?.dark !== undefined || b?.dark !== undefined || o?.dark !== undefined;
+		const adaptive = this.#is_adaptive(name, o, this.base_variable_by_name.get(name));
 		// a scheme-adaptive variable edits the slot of the scheme being viewed,
 		// or under a stance the stanced scheme's slot - that one appearance
 		// renders in both, and writing its own slot is what lets the merge pick
@@ -315,7 +349,7 @@ export class ThemeEditorState {
 		this.based_on = theme.name;
 		this.overrides.clear();
 		this.scheme = theme.scheme ?? 'dual';
-		this.name = theme.name === 'base' ? 'new theme' : `custom ${theme.name}`;
+		this.name = theme.name === this.themes[0]!.name ? NEW_THEME_NAME : `custom ${theme.name}`;
 	}
 
 	/**
@@ -427,7 +461,7 @@ export const render_theme_ts = (theme: Theme): string => {
 	const variables_ts = theme.variables.length
 		? `[\n${variables}\n\t],`
 		: '[], // empty - every variable keeps its base default';
-	const stanced = theme.scheme === 'light' || theme.scheme === 'dark';
+	const stanced = to_theme_stance(theme.scheme) !== null;
 	if (stanced) {
 		return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
 import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';

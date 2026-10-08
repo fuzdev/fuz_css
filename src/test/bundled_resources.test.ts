@@ -28,7 +28,6 @@ const create_resources = (
 	create_bundled_resources({
 		base_css: undefined,
 		variables: undefined,
-		class_definitions,
 		deps: default_cache_deps,
 		...options
 	});

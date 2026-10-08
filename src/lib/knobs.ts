@@ -33,9 +33,11 @@ import {
 
 /**
  * Matches a `var(--hue_X)` palette-letter binding, capturing the letter -
- * the value form `bindable` hue knobs default to.
+ * the value form `bindable` hue knobs default to. It accepts the whitespace
+ * the theme checks do when they follow a binding, so a value the gates read
+ * as bound to a letter reads that way here too.
  */
-export const HUE_BINDING_MATCHER: RegExp = /^var\(--hue_([a-j])\)$/u;
+export const HUE_BINDING_MATCHER: RegExp = /^\s*var\(\s*--hue_([a-j])\s*\)\s*$/u;
 
 // the border-style keywords the shape knobs offer; `inset`/`outset` derive
 // their light and dark edges from the border color, which is what makes a
@@ -188,7 +190,7 @@ const lightness_ramp = (family: string): Array<ThemeKnob> => [
  * The theme knobs in editor display order: by axis, high leverage first,
  * with the palette tier last within the color axis.
  */
-export const theme_knobs: Array<ThemeKnob> = [
+export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	// color - the leverage core
 	hue('hue_neutral', 'lg', 'semantic', true),
 	{
@@ -528,7 +530,7 @@ export const theme_knobs: Array<ThemeKnob> = [
 /**
  * The theme-space axes in editor display order, with display titles.
  */
-export const theme_knob_axes: Array<{ axis: KnobAxis; title: string }> = [
+export const theme_knob_axes: ReadonlyArray<{ axis: KnobAxis; title: string }> = [
 	{ axis: 'color', title: 'Color' },
 	{ axis: 'shape', title: 'Shape' },
 	{ axis: 'density', title: 'Density' },
@@ -541,7 +543,7 @@ export const theme_knob_axes: Array<{ axis: KnobAxis; title: string }> = [
 /**
  * The catalog indexed by variable name.
  */
-export const theme_knob_by_name: Map<string, ThemeKnob> = new Map(
+export const theme_knob_by_name: ReadonlyMap<string, ThemeKnob> = new Map(
 	theme_knobs.map((k) => [k.name, k])
 );
 
@@ -550,6 +552,6 @@ export const theme_knob_by_name: Map<string, ThemeKnob> = new Map(
  * in `default_variables`. Theme validation unions these with the declared
  * variable names.
  */
-export const theme_knob_hook_names: Set<string> = new Set(
+export const theme_knob_hook_names: ReadonlySet<string> = new Set(
 	theme_knobs.filter((k) => k.hook).map((k) => k.name)
 );

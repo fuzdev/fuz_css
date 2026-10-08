@@ -185,6 +185,29 @@ describe('parse_style_css', () => {
 			assert.isTrue(index.rules[0]!.classes.has('error'));
 		});
 
+		test.each([
+			['[aria-label="Close dialog"] { color: red; }', 'dialog'],
+			["[data-x='a b'] { color: red; }", 'b'],
+			['[title="x > span"] { color: red; }', 'span']
+		])('%s reads no element from the attribute value', (css, element) => {
+			const rule = parse_style_css(css).rules[0]!;
+			assert.isFalse(rule.elements.has(element));
+			assert.strictEqual(rule.core_reason, 'untargetable');
+		});
+
+		test('an attribute value never reads as a class', () => {
+			const rule = parse_style_css('a[href$=".pdf"]::after { content: "pdf"; }').rules[0]!;
+			assert.isFalse(rule.classes.has('pdf'));
+			assert.deepEqual([...rule.elements], ['a']);
+			assert.isFalse(rule.is_core);
+		});
+
+		test('a substring matcher is not the universal selector', () => {
+			const rule = parse_style_css('a[href*="example"] { color: red; }').rules[0]!;
+			assert.isFalse(rule.is_core);
+			assert.deepEqual([...rule.elements], ['a']);
+		});
+
 		test('data attribute selectors', () => {
 			const css = `[data-theme='dark'] { background: black; }`;
 			const index = parse_style_css(css);

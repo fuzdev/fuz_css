@@ -4,8 +4,9 @@ import type { Theme } from '../variable.ts';
  * The working theme: the ledger. For tools used all day - a cool gray
  * whisper in the neutral, color eased down so status reads without shouting,
  * compact spacing and leading, one sans family, a flatter type scale,
- * restrained corners and depth, and tightened short duration tokens. Plain
- * on purpose: no decoration, no clipped gamut, the default accent.
+ * restrained corners and depth, and the two shortest duration tokens
+ * tightened. Plain on purpose: no decoration, no clipped gamut, the default
+ * accent.
  *
  * Dual-scheme and semantic-tier - it moves levers only, so the palette
  * letters keep their hues and it sits in the registry beside the base theme.
@@ -30,7 +31,7 @@ export const ledger_theme: Theme = {
 		{ name: 'heading_font_weight', light: '600' },
 		// a flatter type scale: headings label sections, they don't announce them
 		{ name: 'type_scale_ratio', light: '1.2' },
-		// quick: the short duration tokens tighten
+		// quick: the two shortest duration tokens tighten
 		{ name: 'duration_1', light: '0.05s' },
 		{ name: 'duration_2', light: '0.12s' }
 	]

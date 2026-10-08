@@ -28,7 +28,7 @@ import {
 	type ColorSchemeVariant,
 	type NumericScaleVariant
 } from './variable_data.ts';
-import { oklch_max_srgb_chroma, type Oklch } from './oklch.ts';
+import { clamp_oklch, oklch_max_srgb_chroma, type Oklch } from './oklch.ts';
 
 // a stop variant's ramp position t in [0, 1]
 const ramp_stop_t = (stop: NumericScaleVariant): number => Number(stop) / 100;
@@ -64,7 +64,7 @@ export interface ChromaRampKnobs {
 }
 
 /** OKLCH hue angles for the 10 palette hues, fitted from the HSL palette. */
-export const PALETTE_HUES: Record<PaletteVariant, number> = {
+export const PALETTE_HUES: Readonly<Record<PaletteVariant, number>> = {
 	a: 250, // blue
 	b: 144, // green
 	c: 29, // red - the OKLCH hue of #ff0000 (29.23) rounded
@@ -86,7 +86,7 @@ export const PALETTE_HUES: Record<PaletteVariant, number> = {
  * brown slot ships muted because brown is low-chroma dark orange - no hue
  * angle renders it at full palette chroma.
  */
-export const PALETTE_CHROMA_MULTIPLIERS: Record<PaletteVariant, number> = {
+export const PALETTE_CHROMA_MULTIPLIERS: Readonly<Record<PaletteVariant, number>> = {
 	a: 1,
 	b: 1,
 	c: 1,
@@ -100,25 +100,33 @@ export const PALETTE_CHROMA_MULTIPLIERS: Record<PaletteVariant, number> = {
 };
 
 /** Fitted lightness knobs for the palette (`palette_X_NN`) ramps. */
-export const PALETTE_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
+export const PALETTE_LIGHTNESS_KNOBS: Readonly<
+	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
+> = {
 	light: { lightness_00: 0.985, lightness_100: 0.116, curve: 1.15 },
 	dark: { lightness_00: 0.147, lightness_100: 0.971, curve: 0.76 }
 };
 
 /** Fitted lightness knobs for the shade (surface) ramps. */
-export const SHADE_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
+export const SHADE_LIGHTNESS_KNOBS: Readonly<
+	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
+> = {
 	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.09 },
 	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 0.92 }
 };
 
 /** Fitted lightness knobs for the text ramps. */
-export const TEXT_LIGHTNESS_KNOBS: Record<ColorSchemeVariant, LightnessRampKnobs> = {
+export const TEXT_LIGHTNESS_KNOBS: Readonly<
+	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
+> = {
 	light: { lightness_00: 0.97, lightness_100: 0.146, curve: 1.19 },
 	dark: { lightness_00: 0.146, lightness_100: 0.97, curve: 0.87 }
 };
 
 /** The lightness ramp knobs by family, for lookups keyed on a `RampFamily`. */
-export const LIGHTNESS_KNOBS: Record<RampFamily, Record<ColorSchemeVariant, LightnessRampKnobs>> = {
+export const LIGHTNESS_KNOBS: Readonly<
+	Record<RampFamily, Readonly<Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>>>
+> = {
 	palette: PALETTE_LIGHTNESS_KNOBS,
 	shade: SHADE_LIGHTNESS_KNOBS,
 	text: TEXT_LIGHTNESS_KNOBS
@@ -138,10 +146,11 @@ export const LIGHTNESS_KNOBS: Record<RampFamily, Record<ColorSchemeVariant, Ligh
  * can't reach the light cap envelope's peak there - recovering it would
  * take an asymmetric shape (a peak-position knob).
  */
-export const PALETTE_CHROMA_KNOBS: Record<ColorSchemeVariant, ChromaRampKnobs> = {
-	light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
-	dark: { chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27 }
-};
+export const PALETTE_CHROMA_KNOBS: Readonly<Record<ColorSchemeVariant, Readonly<ChromaRampKnobs>>> =
+	{
+		light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
+		dark: { chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27 }
+	};
 
 /**
  * Default OKLCH hue angle of the neutral intent. In CSS the knob chains to the
@@ -156,7 +165,7 @@ const NEUTRAL_HUE = PALETTE_HUES.f;
  * behavior of constant HSL saturation: strong tint at mid lightness, nearly
  * untinted near white and black.
  */
-export const NEUTRAL_CHROMA: Record<ColorSchemeVariant, number> = {
+export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
 	light: 0.024,
 	dark: 0.025
 };
@@ -169,7 +178,9 @@ export type ShadowTint = 'bright' | 'dim';
  * renders on `--hue_neutral`, so a retinted neutral recolors shadows with
  * the surfaces.
  */
-export const SHADOW_TINTS: Record<ShadowTint, { lightness: number; chroma: number }> = {
+export const SHADOW_TINTS: Readonly<
+	Record<ShadowTint, Readonly<{ lightness: number; chroma: number }>>
+> = {
 	bright: { lightness: 0.955, chroma: 0.003 },
 	dim: { lightness: 0.863, chroma: 0.009 }
 };
@@ -185,7 +196,7 @@ export const render_shadow_tint_css = (tint: ShadowTint): string => {
  * fitted from the HSL palette. Sits mid-ramp so borders read against both
  * the page background and fills.
  */
-export const BORDER_COLOR_LIGHTNESS: Record<ColorSchemeVariant, number> = {
+export const BORDER_COLOR_LIGHTNESS: Readonly<Record<ColorSchemeVariant, number>> = {
 	light: 0.345,
 	dark: 0.857
 };
@@ -195,7 +206,7 @@ export const BORDER_COLOR_LIGHTNESS: Record<ColorSchemeVariant, number> = {
  * carry a stronger tint than surfaces so they read at low alpha. In CSS this
  * is `--border_color_chroma: calc(var(--neutral_chroma) * <multiple>)`.
  */
-export const BORDER_CHROMA_MULTIPLIER: Record<ColorSchemeVariant, number> = {
+export const BORDER_CHROMA_MULTIPLIER: Readonly<Record<ColorSchemeVariant, number>> = {
 	light: 2.6667,
 	dark: 2.12
 };
@@ -206,9 +217,8 @@ export const BORDER_CHROMA_MULTIPLIER: Record<ColorSchemeVariant, number> = {
  * in dark mode where borders are less visible against dark backgrounds.
  * Stop 00 renders `transparent` and stop 100 opaque.
  */
-export const BORDER_COLOR_ALPHAS: Record<
-	ColorSchemeVariant,
-	Record<NumericScaleVariant, number>
+export const BORDER_COLOR_ALPHAS: Readonly<
+	Record<ColorSchemeVariant, Readonly<Record<NumericScaleVariant, number>>>
 > = {
 	light: {
 		'00': 0,
@@ -258,9 +268,8 @@ export const border_color_oklch = (scheme: ColorSchemeVariant): Oklch => [
  * at design time from `PALETTE_HUES` + `PALETTE_LIGHTNESS_KNOBS`, floored to
  * stay conservative; a drift test recomputes them from the color math.
  */
-export const PALETTE_CHROMA_CAPS: Record<
-	ColorSchemeVariant,
-	Record<NumericScaleVariant, number>
+export const PALETTE_CHROMA_CAPS: Readonly<
+	Record<ColorSchemeVariant, Readonly<Record<NumericScaleVariant, number>>>
 > = {
 	light: {
 		'00': 0.0072,
@@ -326,17 +335,33 @@ export const ramp_chroma = (
 	stop: NumericScaleVariant,
 	knobs: ChromaRampKnobs,
 	cap: number
-): number => {
-	const requested =
-		knobs.chroma_min + (knobs.chroma_max - knobs.chroma_min) * ramp_chroma_shape(stop, knobs.curve);
-	return Math.min(requested, cap);
-};
+): number =>
+	ramp_chroma_at_shape(
+		ramp_chroma_shape(stop, knobs.curve),
+		knobs.chroma_min,
+		knobs.chroma_max,
+		cap
+	);
+
+/**
+ * The palette chroma for a resolved chroma shape: the knob range at that
+ * shape, clamped by the stop's cap - the arithmetic `ramp_chroma` and
+ * `check_theme`'s resolver share, the resolver supplying a shape a theme may
+ * have pinned (`--chroma_shape_NN`).
+ */
+export const ramp_chroma_at_shape = (
+	shape: number,
+	chroma_min: number,
+	chroma_max: number,
+	cap: number
+): number => Math.min(chroma_min + (chroma_max - chroma_min) * shape, cap);
 
 /**
  * Combines resolved palette-ramp inputs into a color stop's OKLCH - the one
  * formula behind `--palette_X_NN`/`--<intent>_NN` (`chroma * chroma_scale *
  * slot multiplier` at the ramp lightness), shared by the default twins below
- * and `check_theme`'s theme-resolved gates so the two can't drift.
+ * and `check_theme`'s theme-resolved gates so the two can't drift. Clamped
+ * as the browser clamps the `oklch()` it renders.
  */
 export const ramp_color_oklch = (
 	lightness: number,
@@ -344,7 +369,7 @@ export const ramp_color_oklch = (
 	hue: number,
 	chroma_scale = 1,
 	slot_chroma_scale = 1
-): Oklch => [lightness, chroma * chroma_scale * slot_chroma_scale, hue];
+): Oklch => clamp_oklch([lightness, chroma * chroma_scale * slot_chroma_scale, hue]);
 
 /**
  * Combines resolved neutral-scale inputs into a shade/text stop's OKLCH: the
@@ -356,7 +381,7 @@ export const neutral_color_oklch = (
 	neutral_chroma: number,
 	chroma_shape: number,
 	hue: number
-): Oklch => [lightness, neutral_chroma * chroma_shape, hue];
+): Oklch => clamp_oklch([lightness, neutral_chroma * chroma_shape, hue]);
 
 /**
  * Computes the default OKLCH color of a palette stop (`--palette_X_NN`).

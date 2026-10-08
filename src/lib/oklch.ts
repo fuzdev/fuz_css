@@ -27,6 +27,18 @@ export type Oklab = [lightness: number, a: number, b: number];
  */
 export type RgbUnit = [r: number, g: number, b: number];
 
+/**
+ * Clamps an OKLCH color the way the browser clamps a computed `oklch()`:
+ * lightness to [0, 1] and chroma to 0 or more. A theme can push a derived
+ * lightness past an end (`shade_lightness_00: 1.03`), and the browser
+ * renders the clamped color, so a gate measuring it has to as well.
+ */
+export const clamp_oklch = ([lightness, chroma, hue]: Oklch): Oklch => [
+	Math.min(Math.max(lightness, 0), 1),
+	Math.max(chroma, 0),
+	hue
+];
+
 const DEG_TO_RAD = Math.PI / 180;
 const RAD_TO_DEG = 180 / Math.PI;
 

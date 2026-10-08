@@ -10,14 +10,13 @@
 import { test, assert, describe } from 'vitest';
 
 import { resolve_css } from '$lib/css_bundled_resolution.ts';
-import type { CssClassDefinition } from '$lib/css_class_generation.ts';
 import { create_test_fixtures, empty_detection } from './css_bundled_resolution_fixtures.ts';
 import { assert_css_order } from './test_helpers.ts';
 
 describe('resolve_css variable resolution', () => {
 	describe('source collection', () => {
 		test('from style rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[{ name: 'btn_color', light: 'blue' }]
 			);
@@ -25,7 +24,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -47,14 +45,13 @@ describe('resolve_css variable resolution', () => {
 			['a rule nested in a style rule', 'button { &:hover { color: var(--deep); } }'],
 			['an at-rule that always ships', '@page { margin: var(--deep); }']
 		])('from style rules, nested however deep: %s', (_name, css) => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(css, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(css, [
 				{ name: 'deep', light: '1px' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -66,31 +63,8 @@ describe('resolve_css variable resolution', () => {
 			assert.include(result.theme_css, '--deep: 1px;');
 		});
 
-		test('from class definitions (via class_variable_index)', () => {
-			const class_defs: Record<string, CssClassDefinition | undefined> = {
-				p_md: { declaration: 'padding: var(--space_md)' }
-			};
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
-				``,
-				[{ name: 'space_md', light: '16px' }],
-				class_defs
-			);
-
-			const result = resolve_css({
-				style_rule_index,
-				variable_graph,
-				class_variable_index,
-				detected_elements: new Set(),
-				detected_classes: new Set(['p_md']),
-				detected_css_variables: new Set(),
-				utility_variables_used: new Set()
-			});
-
-			assert.isTrue(result.resolved_variables.has('space_md'));
-		});
-
 		test('from utility_variables_used', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'space_md', light: '16px' },
 				{ name: 'unused', light: '0' }
 			]);
@@ -98,7 +72,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -110,14 +83,13 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('from detected_css_variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'custom', light: 'red' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['custom']),
@@ -128,14 +100,13 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('from additional_variables option', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'forced', light: 'always' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_variables: ['forced']
 			});
@@ -144,7 +115,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('additional_variables: "all" includes every variable', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' },
@@ -155,7 +126,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_variables: 'all'
 			});
@@ -170,7 +140,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('additional_variables: "all" includes transitive deps', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'base', light: '10' },
 				{ name: 'derived', light: 'calc(var(--base) * 2)' }
 			]);
@@ -178,7 +148,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_variables: 'all'
 			});
@@ -188,10 +157,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('combines all sources', () => {
-			const class_defs: Record<string, CssClassDefinition | undefined> = {
-				gap_sm: { declaration: 'gap: var(--space_sm)' }
-			};
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[
 					{ name: 'btn_color', light: 'blue' },
@@ -199,26 +165,23 @@ describe('resolve_css variable resolution', () => {
 					{ name: 'space_sm', light: '8px' },
 					{ name: 'custom', light: 'red' },
 					{ name: 'forced', light: 'always' }
-				],
-				class_defs
+				]
 			);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(['gap_sm']),
 				detected_css_variables: new Set(['custom']),
-				utility_variables_used: new Set(['space_md']),
+				utility_variables_used: new Set(['space_md', 'space_sm']),
 				additional_variables: ['forced']
 			});
 
 			// From style rules
 			assert.isTrue(result.resolved_variables.has('btn_color'));
-			// From class definitions
+			// From utility_variables_used - what the generated classes reference
 			assert.isTrue(result.resolved_variables.has('space_sm'));
-			// From utility_variables_used
 			assert.isTrue(result.resolved_variables.has('space_md'));
 			// From detected_css_variables
 			assert.isTrue(result.resolved_variables.has('custom'));
@@ -229,7 +192,7 @@ describe('resolve_css variable resolution', () => {
 
 	describe('transitive resolution', () => {
 		test('resolves direct dependencies', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--color); }`,
 				[
 					{ name: 'hue', light: '210' },
@@ -240,7 +203,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -252,7 +214,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('resolves deep chains (A→B→C→D)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'base', light: '10' },
 				{ name: 'level_1', light: 'calc(var(--base) * 2)' },
 				{ name: 'level_2', light: 'calc(var(--level_1) * 2)' },
@@ -262,7 +224,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['level_3']),
@@ -276,7 +237,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('resolves diamond dependencies (A→{B,C}→D)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'base', light: '10' },
 				{ name: 'branch_a', light: 'calc(var(--base) + 1)' },
 				{ name: 'branch_b', light: 'calc(var(--base) + 2)' },
@@ -286,7 +247,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['combined']),
@@ -302,7 +262,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('resolves both light and dark deps', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'light_base', light: '#fff' },
 				{ name: 'dark_base', dark: '#000' },
 				{ name: 'themed', light: 'var(--light_base)', dark: 'var(--dark_base)' }
@@ -311,7 +271,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['themed']),
@@ -324,14 +283,13 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('handles empty initial set', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'unused', light: 'value' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection()
 			});
 
@@ -341,7 +299,7 @@ describe('resolve_css variable resolution', () => {
 
 	describe('cycle handling', () => {
 		test('detects simple cycle (A→B→A)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'a', light: 'var(--b)' },
 				{ name: 'b', light: 'var(--a)' }
 			]);
@@ -349,7 +307,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['a']),
@@ -364,7 +321,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('detects longer cycle (A→B→C→A)', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'a', light: 'var(--b)' },
 				{ name: 'b', light: 'var(--c)' },
 				{ name: 'c', light: 'var(--a)' }
@@ -373,7 +330,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['a']),
@@ -384,7 +340,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('propagates warnings to diagnostics', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'x', light: 'var(--y)' },
 				{ name: 'y', light: 'var(--x)' }
 			]);
@@ -392,7 +348,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['x']),
@@ -407,7 +362,7 @@ describe('resolve_css variable resolution', () => {
 
 	describe('theme CSS generation', () => {
 		test('light-only variables produce :root block', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'space_sm', light: '8px' },
 				{ name: 'space_md', light: '16px' }
 			]);
@@ -415,7 +370,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['space_sm', 'space_md']),
@@ -429,14 +383,13 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('dark-only variables produce :root.dark block', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'shadow_color', dark: 'rgba(0,0,0,0.5)' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['shadow_color']),
@@ -449,7 +402,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('both produce separate blocks', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'text_color', light: 'black', dark: 'white' },
 				{ name: 'bg_color', light: 'white', dark: 'black' }
 			]);
@@ -457,7 +410,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['text_color', 'bg_color']),
@@ -475,7 +427,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('variables sorted alphabetically', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'zebra', light: '3' },
 				{ name: 'alpha', light: '1' },
 				{ name: 'mid', light: '2' }
@@ -484,7 +436,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['zebra', 'alpha', 'mid']),
@@ -495,14 +446,13 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('theme variables render :root and :root.dark blocks', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'color', light: 'blue', dark: 'lightblue' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
@@ -514,7 +464,7 @@ describe('resolve_css variable resolution', () => {
 		});
 
 		test('empty variables produce empty string', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -522,7 +472,6 @@ describe('resolve_css variable resolution', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),

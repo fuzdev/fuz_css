@@ -6,7 +6,8 @@
  * @module
  */
 
-import { mount, unmount, type Component } from 'svelte';
+import { afterEach } from 'vitest';
+import { flushSync, mount, unmount, type Component } from 'svelte';
 
 /**
  * Mounts a component into a fresh container appended to `document.body`.
@@ -30,6 +31,30 @@ export const unmount_component = async (
 ): Promise<void> => {
 	await unmount(instance);
 	container.remove();
+};
+
+/**
+ * Creates the mount a test file shares: each call renders a component into a
+ * fresh container and flushes, and whatever was mounted is unmounted after
+ * each test. Call at the top level of a test file or inside a `describe`.
+ *
+ * @returns the mount, which resolves the component's container
+ */
+export const create_mount_tracker = (): ((
+	component: Component<any, any, any>,
+	props: Record<string, any>
+) => HTMLElement) => {
+	let mounted: { instance: Record<string, any>; container: HTMLElement } | null = null;
+	afterEach(async () => {
+		if (!mounted) return;
+		await unmount_component(mounted.instance, mounted.container);
+		mounted = null;
+	});
+	return (component, props) => {
+		mounted = mount_component(component, props);
+		flushSync();
+		return mounted.container;
+	};
 };
 
 /**

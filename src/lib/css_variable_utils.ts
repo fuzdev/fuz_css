@@ -2,8 +2,8 @@
  * CSS variable extraction utilities.
  *
  * Provides shared helper functions for extracting CSS custom property references
- * from CSS strings. Used by style_rule_parser, variable_graph, class_variable_index,
- * and css_class_generation.
+ * from CSS strings, for the base-style index, the variable graph, generated
+ * classes, and the generators' source scans.
  *
  * @module
  */
@@ -48,25 +48,6 @@ export const extract_css_variables = (css: string): Set<string> => {
 		variables.add(match[1]!);
 	}
 	return variables;
-};
-
-/**
- * Non-global pattern for checking if CSS contains variable references.
- * Uses a separate non-global regex to avoid lastIndex state issues with test().
- */
-const CSS_VARIABLE_CHECK_PATTERN = /var\(\s*--[a-zA-Z_][a-zA-Z0-9_-]*/;
-
-/**
- * Checks if a CSS string contains any CSS variable references.
- *
- * More efficient than `extract_css_variables` when you only need
- * to know if variables exist, not what they are.
- *
- * @param css - CSS string to check
- * @returns true if the string contains `var(--*)` patterns
- */
-export const has_css_variables = (css: string): boolean => {
-	return CSS_VARIABLE_CHECK_PATTERN.test(css);
 };
 
 /**

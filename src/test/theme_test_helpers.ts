@@ -8,6 +8,7 @@
 
 import type { Theme } from '$lib/variable.ts';
 import { contrast_modifiers } from '$lib/themes.ts';
+import { palette_variants } from '$lib/variable_data.ts';
 
 const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
 
@@ -29,3 +30,22 @@ const modifier_names = new Set(contrast_modifiers.map((t) => t.name));
 export const shipped_base_themes: Array<Theme> = shipped_themes.filter(
 	(t) => !modifier_names.has(t.name)
 );
+
+/**
+ * Creates a pure single-hue monochrome theme: every palette slot and the
+ * neutral collapse onto one OKLCH hue, dark-only. The palette-tier stress
+ * fixture for the resolution/gate/compile paths (rotated hues, dark-only
+ * stance, recomputed worst-hue caps).
+ */
+export const create_monochrome_theme = (hue: number): Theme => {
+	const hue_value = String(hue);
+	return {
+		name: `monochrome ${hue}`,
+		scheme: 'dark',
+		variables: [
+			...palette_variants.map((letter) => ({ name: `hue_${letter}`, light: hue_value })),
+			{ name: 'hue_neutral', light: hue_value },
+			{ name: 'neutral_chroma', light: '0.05' }
+		]
+	};
+};

@@ -12,18 +12,9 @@
  * @module
  */
 
-import { describe, test, assert, afterAll } from 'vitest';
-import {
-	build,
-	createBuilder,
-	type InlineConfig,
-	type Logger,
-	type Plugin,
-	type Rollup
-} from 'vite';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { rm } from 'node:fs/promises';
+import { describe, test, assert } from 'vitest';
+import { build, createBuilder, type InlineConfig, type Plugin, type Rollup } from 'vite';
+import { join } from 'node:path';
 
 import {
 	FUZ_CSS_BANNER,
@@ -31,30 +22,21 @@ import {
 	type VitePluginFuzCssOptions
 } from '$lib/vite_plugin_fuz_css.ts';
 import { FUZ_CSS_PLACEHOLDER, parse_css_placeholder_hash } from '$lib/css_placeholder_splice.ts';
+import {
+	vite_build_fixture_root as fixture_root,
+	filter_build_fixture_module as filter_fixture_file,
+	use_suite_cache_dir,
+	create_capturing_logger,
+	type CapturedLogs as FixtureLogs
+} from './vite_plugin_test_helpers.ts';
 
-const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_build');
 const entry_path = join(fixture_root, 'src/main.ts');
 const variant_path = join(fixture_root, 'src/variant.ts');
 
-// the fixture lives under `src/test/`, which the default filter excludes by
-// path - scope extraction to the fixture's own modules instead
-const filter_fixture_file = (path: string): boolean =>
-	path.startsWith(fixture_root) && path.endsWith('.ts');
-
-// a cache directory of this suite's own, so parallel suites can't collide
-const cache_dir = '.fuz/build_test';
+const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/build_test');
 
 /** A rule of the fixture's own stylesheet, imported after `virtual:fuz.css`. */
 const APP_RULE = '.build-fixture';
-
-afterAll(async () => {
-	await rm(join(fixture_root, cache_dir), { recursive: true, force: true });
-});
-
-interface FixtureLogs {
-	warnings: Array<string>;
-	errors: Array<string>;
-}
 
 interface FixtureOptions {
 	plugin_options?: VitePluginFuzCssOptions;
@@ -69,24 +51,11 @@ interface FixtureBuild extends FixtureLogs {
 	chunks: Array<Rollup.OutputChunk>;
 }
 
-const create_fixture_logger = (logs: FixtureLogs): Logger => {
-	const noop = () => {};
-	return {
-		info: noop,
-		warn: (msg) => void logs.warnings.push(msg),
-		warnOnce: (msg) => void logs.warnings.push(msg),
-		error: (msg) => void logs.errors.push(msg),
-		clearScreen: noop,
-		hasErrorLogged: () => false,
-		hasWarned: false
-	};
-};
-
 const create_fixture_config = (options: FixtureOptions, logs: FixtureLogs): InlineConfig => ({
 	root: fixture_root,
 	configFile: false,
 	publicDir: false,
-	customLogger: create_fixture_logger(logs),
+	customLogger: create_capturing_logger(logs),
 	plugins: [
 		vite_plugin_fuz_css({
 			filter_file: filter_fixture_file,
@@ -681,6 +650,72 @@ describe('vite_plugin_fuz_css build render lifetime', () => {
 			assert.deepEqual(result.errors, []);
 			assert.deepEqual(result.warnings, []);
 		}
+	});
+
+	test("each environment's CSS holds only the classes of its own modules", async () => {
+		const ssr_entry_path = join(fixture_root, 'src/ssr_entry.ts');
+		const logs: FixtureLogs = { warnings: [], errors: [] };
+		const config = create_fixture_config({}, logs);
+		const builder = await createBuilder({
+			...config,
+			builder: {},
+			environments: {
+				client: { build: config.build },
+				ssr: {
+					build: {
+						...config.build,
+						ssr: true,
+						emitAssets: true,
+						rollupOptions: { input: ssr_entry_path }
+					}
+				}
+			}
+		});
+		const results: Record<string, FixtureBuild> = {};
+		for (const environment of Object.values(builder.environments)) {
+			const outputs = await builder.build(environment);
+			assert(!('close' in outputs));
+			results[environment.name] = to_fixture_build(outputs, logs);
+		}
+		const client_css = assert_single_css(results.client!).source;
+		const ssr_css = assert_single_css(results.ssr!).source;
+		assert.include(client_css, '.box');
+		assert.notInclude(client_css, '.pt_xl7', 'the SSR-only class stays out of the client CSS');
+		assert.include(ssr_css, '.pt_xl7');
+		assert.notInclude(ssr_css, '.box', "the client's classes stay out of the SSR CSS");
+		assert.deepEqual(logs.errors, []);
+	});
+
+	test('an environment that never imports the virtual module is left alone', async () => {
+		// the client imports `virtual:fuz.css` and builds first; the SSR build
+		// emits assets but its entry never imports it, so it has nothing to place
+		const logs: FixtureLogs = { warnings: [], errors: [] };
+		const config = create_fixture_config({}, logs);
+		const builder = await createBuilder({
+			...config,
+			builder: {},
+			environments: {
+				client: { build: config.build },
+				ssr: {
+					build: {
+						...config.build,
+						ssr: true,
+						emitAssets: true,
+						rollupOptions: { input: variant_path }
+					}
+				}
+			}
+		});
+		const results: Record<string, FixtureBuild> = {};
+		for (const environment of Object.values(builder.environments)) {
+			const outputs = await builder.build(environment);
+			assert(!('close' in outputs));
+			results[environment.name] = to_fixture_build(outputs, logs);
+		}
+		assert_generated_css(assert_single_css(results.client!).source, 'box');
+		assert.strictEqual(results.ssr!.css.length, 0);
+		assert.deepEqual(logs.errors, []);
+		assert.deepEqual(logs.warnings, []);
 	});
 });
 

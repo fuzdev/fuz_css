@@ -44,8 +44,7 @@
 		<p>
 			Umbras are adaptive shadows that darken in light mode and lighten in dark mode. This is the
 			default shadow behavior, creating natural depth perception in both color schemes. In light
-			mode umbra is untinted (pure black); in dark mode it's tinted using
-			<code>hue_neutral</code>/<code>neutral_chroma</code>.
+			mode umbra is untinted (pure black); in dark mode it's tinted toward <code>hue_neutral</code>.
 		</p>
 		<form><ColorSchemeInput /></form>
 		{@render shadow_examples('umbra')}

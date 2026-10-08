@@ -4,9 +4,11 @@ import {
 	theme_knobs,
 	theme_knob_by_name,
 	theme_knob_hook_names,
-	theme_knob_axes
+	theme_knob_axes,
+	HUE_BINDING_MATCHER
 } from '$lib/knobs.ts';
 import { default_variables } from '$lib/variables.ts';
+import { PALETTE_LETTER_MATCHER, VAR_MATCHER } from '$lib/theme_resolver.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
 
@@ -88,6 +90,26 @@ describe('theme_knobs', () => {
 		assert.strictEqual(theme_knob_by_name.size, theme_knobs.length);
 		for (const knob of theme_knobs) {
 			assert.strictEqual(theme_knob_by_name.get(knob.name), knob);
+		}
+	});
+});
+
+describe('HUE_BINDING_MATCHER', () => {
+	test('reads a binding exactly where the theme resolver follows one', () => {
+		for (const value of [
+			'var(--hue_a)',
+			'var( --hue_c )',
+			' var(--hue_j) ',
+			'var(--hue_k)',
+			'var(--hue_accent)',
+			'var(--hue_a, 10)',
+			'calc(var(--hue_a))',
+			'250'
+		]) {
+			const resolver_letter = PALETTE_LETTER_MATCHER.exec(
+				VAR_MATCHER.exec(value.trim())?.[1] ?? ''
+			)?.[1];
+			assert.strictEqual(HUE_BINDING_MATCHER.exec(value)?.[1], resolver_letter, value);
 		}
 	});
 });

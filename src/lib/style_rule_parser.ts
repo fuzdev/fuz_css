@@ -28,6 +28,7 @@
  * @module
  */
 
+import { fileURLToPath } from 'node:url';
 import { parseCss, type AST } from 'svelte/compiler';
 
 import {
@@ -394,30 +395,24 @@ const extract_style_rule = (
 	const elements: Set<string> = new Set();
 	const classes: Set<string> = new Set();
 
-	// Parse selectors from the prelude
 	const selector_css = css.slice(rule.prelude.start, rule.prelude.end);
-	const targetable = parse_selector_list(selector_css, elements, classes);
+	const scan = scan_selector_list(rule.prelude, css, elements, classes);
+	// a rule with a selector the index can't match would be dropped whether
+	// or not the project uses it, so it must always ship
+	const core_reason = scan.core_reason ?? (scan.targetable ? null : 'untargetable');
 
-	// Determine if core rule; a rule with a selector the index can't match
-	// would be dropped whether or not the project uses it, so it must always ship
-	let { is_core, core_reason } = check_core_rule(selector_css, elements);
-	if (!is_core && !targetable) {
-		is_core = true;
-		core_reason = 'untargetable';
-	}
-
-	// Type assertion needed because destructuring widens is_core to boolean
-	return {
+	const base = {
 		css: rule_css,
 		elements,
 		classes,
 		// from the whole rule, nested rules included
 		...extract_rule_variables(rule_css, selector_css),
 		order,
-		layer,
-		is_core,
-		core_reason
-	} as StyleRule;
+		layer
+	};
+	return core_reason === null
+		? { ...base, is_core: false, core_reason: null }
+		: { ...base, is_core: true, core_reason };
 };
 
 /** What a conditional group's contents say about whether the group must ship. */
@@ -445,13 +440,12 @@ const scan_conditional_group = (
 ): void => {
 	for (const child of block.children) {
 		if (child.type === 'Rule') {
-			const selector_css = css.slice(child.prelude.start, child.prelude.end);
 			const rule_elements: Set<string> = new Set();
-			const targetable = parse_selector_list(selector_css, rule_elements, scan.classes);
+			const rule_scan = scan_selector_list(child.prelude, css, rule_elements, scan.classes);
 			for (const e of rule_elements) scan.elements.add(e);
-			if (check_core_rule(selector_css, rule_elements).is_core) {
+			if (rule_scan.core_reason !== null) {
 				scan.has_core = true;
-			} else if (!targetable) {
+			} else if (!rule_scan.targetable) {
 				scan.has_untargetable = true;
 			}
 		} else if (child.type === 'Atrule') {
@@ -552,36 +546,80 @@ const extract_atrule = (
 };
 
 /**
- * Matches a selector the element and class patterns can't read reliably: one
- * with an escape (`.md\:flex`) or a character outside printable ASCII
- * (`.café`).
+ * Matches a selector whose names the index can't compare reliably with what
+ * the extractor detects: one with an escape (`.md\\:flex`) or a character
+ * outside printable ASCII (`.café`).
  */
 const UNINDEXABLE_SELECTOR_PATTERN = /\\|[^\t\n\r -~]/;
 
+/** The functional pseudo-classes whose arguments are selectors the index reads into. */
+const SELECTOR_ARG_PSEUDO_CLASSES: ReadonlySet<string> = new Set(['where', 'is', 'not', 'has']);
+
+/** What a selector list holds that decides whether its rule always ships. */
+interface SelectorListScan {
+	/** Whether the index can match every selector in the list - `false` when one names no element or class, or holds an escape or non-ASCII character. */
+	targetable: boolean;
+	/** Why the rule always ships whatever is detected, or `null` when detection decides. */
+	core_reason: Extract<CoreReason, 'universal' | 'root' | 'host' | 'body' | 'html'> | null;
+}
+
 /**
- * Parses a selector list and extracts element names and class names.
+ * Reads a rule's selector list from the parsed tree: the element and class
+ * names it targets, including inside `:where()`/`:is()`/`:not()`/`:has()`,
+ * and whether it targets something every page has. Attribute selectors,
+ * pseudo-elements, and other pseudo-classes contribute nothing, so a name
+ * that only appears in an attribute value is never indexed.
  *
- * @param selector_css - CSS selector string (may contain commas)
+ * @param prelude - the rule's parsed selector list
+ * @param css - the stylesheet the node positions index into
  * @param elements - set to add element names to
  * @param classes - set to add class names to
- * @returns whether the index can match every selector in the list - `false` when one names no element or class, or holds an escape or non-ASCII character
- * @mutates `elements`, `classes` - adds parsed names to the sets
+ * @mutates `elements`, `classes` - adds the names found
  */
-const parse_selector_list = (
-	selector_css: string,
+const scan_selector_list = (
+	prelude: AST.CSS.SelectorList,
+	css: string,
 	elements: Set<string>,
 	classes: Set<string>
-): boolean => {
+): SelectorListScan => {
 	let targetable = true;
+	let universal = false;
+	let root = false;
+	let host = false;
 
-	// Split on commas, respecting parentheses
-	for (const selector of split_selector_list(selector_css)) {
+	const visit = (
+		complex: AST.CSS.ComplexSelector,
+		selector_elements: Set<string>,
+		selector_classes: Set<string>
+	): void => {
+		for (const relative of complex.children) {
+			for (const selector of relative.selectors) {
+				if (selector.type === 'TypeSelector') {
+					if (selector.name === '*') universal = true;
+					else selector_elements.add(selector.name.toLowerCase());
+				} else if (selector.type === 'ClassSelector') {
+					selector_classes.add(selector.name);
+				} else if (selector.type === 'PseudoClassSelector') {
+					if (selector.name === 'root') root = true;
+					else if (selector.name.startsWith('host')) host = true;
+					// an argument's names count toward the selector holding it
+					if (selector.args && SELECTOR_ARG_PSEUDO_CLASSES.has(selector.name)) {
+						for (const arg of selector.args.children) {
+							visit(arg, selector_elements, selector_classes);
+						}
+					}
+				}
+			}
+		}
+	};
+
+	for (const complex of prelude.children) {
 		const selector_elements: Set<string> = new Set();
 		const selector_classes: Set<string> = new Set();
-		parse_single_selector(selector.trim(), selector_elements, selector_classes);
+		visit(complex, selector_elements, selector_classes);
 		if (
 			(selector_elements.size === 0 && selector_classes.size === 0) ||
-			UNINDEXABLE_SELECTOR_PATTERN.test(selector)
+			UNINDEXABLE_SELECTOR_PATTERN.test(css.slice(complex.start, complex.end))
 		) {
 			targetable = false;
 		}
@@ -589,146 +627,28 @@ const parse_selector_list = (
 		for (const c of selector_classes) classes.add(c);
 	}
 
-	return targetable;
+	const core_reason = universal
+		? 'universal'
+		: root
+			? 'root'
+			: host
+				? 'host'
+				: elements.has('body')
+					? 'body'
+					: elements.has('html')
+						? 'html'
+						: null;
+	return { targetable, core_reason };
 };
 
 /**
- * Extracts the content of a functional pseudo-class starting at the given position.
- * Handles arbitrarily nested parentheses.
- *
- * @param selector - the full selector string
- * @param start - position after the opening parenthesis
- * @returns the inner content and the end position (after closing paren), or null if unbalanced
- */
-const extract_functional_content = (
-	selector: string,
-	start: number
-): { content: string; end: number } | null => {
-	let depth = 1;
-	let i = start;
-
-	while (i < selector.length && depth > 0) {
-		const char = selector[i]!;
-		if (char === '(') depth++;
-		else if (char === ')') depth--;
-		i++;
-	}
-
-	if (depth !== 0) return null;
-
-	return {
-		content: selector.slice(start, i - 1),
-		end: i
-	};
-};
-
-/**
- * Parses a single selector to extract element and class names.
- * Handles :where(), :is(), :not(), :has() pseudo-classes with arbitrary nesting.
- */
-const parse_single_selector = (
-	selector: string,
-	elements: Set<string>,
-	classes: Set<string>
-): void => {
-	// Find all functional pseudo-classes and extract their content iteratively
-	const functional_start_pattern = /:(?:where|is|not|has)\(/g;
-	let match;
-	const ranges_to_remove: Array<{ start: number; end: number }> = [];
-
-	while ((match = functional_start_pattern.exec(selector)) !== null) {
-		const content_start = match.index + match[0].length;
-		const result = extract_functional_content(selector, content_start);
-		if (result) {
-			// Recursively parse the inner content
-			parse_selector_list(result.content, elements, classes);
-			ranges_to_remove.push({ start: match.index, end: result.end });
-			// Update the regex lastIndex to continue after this match
-			functional_start_pattern.lastIndex = result.end;
-		}
-	}
-
-	// Remove functional pseudo-classes from selector for simpler parsing
-	// Process in reverse order to preserve indices
-	let simplified = selector;
-	for (let i = ranges_to_remove.length - 1; i >= 0; i--) {
-		const range = ranges_to_remove[i]!;
-		simplified = simplified.slice(0, range.start) + simplified.slice(range.end);
-	}
-
-	// Extract element names (unqualified identifiers at start or after combinators)
-	// Matches: div, button, input[type], etc.
-	const element_pattern = /(?:^|[\s>+~])([a-zA-Z][a-zA-Z0-9-]*)/g;
-	while ((match = element_pattern.exec(simplified)) !== null) {
-		const element = match[1]!.toLowerCase();
-		// Filter out pseudo-elements (::before), pseudo-classes (:hover), and vendor prefixes (-webkit)
-		if (!element.startsWith('-') && !element.startsWith(':')) {
-			elements.add(element);
-		}
-	}
-
-	// Extract class names
-	const class_pattern = /\.([a-zA-Z_][a-zA-Z0-9_-]*)/g;
-	while ((match = class_pattern.exec(selector)) !== null) {
-		classes.add(match[1]!);
-	}
-};
-
-/**
- * Result from core rule check - discriminated union for type safety.
- * Both variants include `core_reason` for consistent object shape.
- */
-type CoreRuleCheck =
-	{ is_core: true; core_reason: CoreReason } | { is_core: false; core_reason: null };
-
-/**
- * Checks if a rule is a "core" rule that should always be included.
- * Core rules include:
- * - Universal selector (*) rules
- * - :root and :host rules
- * - body rules
- * - html rules
- */
-const check_core_rule = (selector_css: string, elements: Set<string>): CoreRuleCheck => {
-	// Universal selector
-	if (selector_css.includes('*')) {
-		return { is_core: true, core_reason: 'universal' };
-	}
-
-	// :root pseudo-class
-	if (selector_css.includes(':root')) {
-		return { is_core: true, core_reason: 'root' };
-	}
-
-	// :host pseudo-class (for web components)
-	if (selector_css.includes(':host')) {
-		return { is_core: true, core_reason: 'host' };
-	}
-
-	// body element
-	if (elements.has('body')) {
-		return { is_core: true, core_reason: 'body' };
-	}
-
-	// html element
-	if (elements.has('html')) {
-		return { is_core: true, core_reason: 'html' };
-	}
-
-	return { is_core: false, core_reason: null };
-};
-
-/**
- * Loads and parses the default `style.css` file.
+ * Loads and parses the package's default `style.css`.
  *
  * @param deps - filesystem deps for dependency injection
- * @param style_css_path - path to `style.css` (defaults to package's `style.css`)
  * @returns promise resolving to `StyleRuleIndex`
  */
-export const load_style_rule_index = async (
-	deps: CacheDeps,
-	style_css_path?: string
-): Promise<StyleRuleIndex> => parse_style_css(await load_default_style_css(deps, style_css_path));
+export const load_style_rule_index = async (deps: CacheDeps): Promise<StyleRuleIndex> =>
+	parse_style_css(await load_default_style_css(deps));
 
 /**
  * Creates a `StyleRuleIndex` from the stylesheet a `base_css` option
@@ -756,17 +676,15 @@ const format_css_parse_error = (error: unknown): string => {
 };
 
 /**
- * Loads the raw default `style.css` content.
+ * Loads the raw content of the package's default `style.css`.
  *
  * @param deps - filesystem deps for dependency injection
- * @param style_css_path - path to `style.css` (defaults to package's `style.css`)
  * @returns promise resolving to the CSS string
  */
-export const load_default_style_css = async (
-	deps: CacheDeps,
-	style_css_path?: string
-): Promise<string> => {
-	const path = style_css_path ?? new URL('./style.css', import.meta.url).pathname;
+export const load_default_style_css = async (deps: CacheDeps): Promise<string> => {
+	// a file path, not the URL's `pathname`, which keeps percent-encoding (a
+	// space as `%20`) and a Windows drive's leading slash
+	const path = fileURLToPath(new URL('./style.css', import.meta.url));
 	const r = await deps.read_text({ path });
 	if (!r.ok) {
 		throw new Error(`Failed to read style.css from ${path}: ${r.message}`);

@@ -20,9 +20,17 @@
 // the end tag that closes a `<style>` element from inside its text content
 const STYLE_CLOSER_MATCHER = /<\/style/iu;
 
-// an escape (which takes the next character with it), or a whole string - a
-// newline ends a string early, so one is only a string without them
-const ESCAPE_OR_STRING_MATCHER = /\\[^]|"(?:[^"\\\n\r\f]|\\[^])*"|'(?:[^'\\\n\r\f]|\\[^])*'/gu;
+// a whole string - a newline ends a string early, so one is only a string
+// without them - or an unquoted `url(` token, whose contents CSS reads raw: a
+// quote there is no string, and a malformed one swallows up to the first `)`.
+// Matched in one pass so the scan reads left to right like the tokenizer
+const INERT_MATCHER =
+	/"(?:[^"\\\n\r\f]|\\[^])*"|'(?:[^'\\\n\r\f]|\\[^])*'|(?<![-\w\u{80}-\u{10FFFF}])url\((?![ \t\n\r\f]*["'])[ \t\n\r\f]*([^)]*)(\)?)/giu;
+
+// what a well-formed unquoted url holds past its leading whitespace: printable
+// characters other than a quote, bracket, or escape - so no inner whitespace
+// or control character - with only trailing whitespace before the `)`
+const URL_CONTENTS_MATCHER = /^[!#-&*-[\]-~\u{80}-\u{10FFFF}]*[ \t\n\r\f]*$/u;
 
 // outside strings: a block, `!important`, a comment, a stray quote or escape
 const ESCAPING_MATCHER = /[{}!"'\\]|\/\*/u;
@@ -33,18 +41,25 @@ const INNERMOST_BRACKETS_MATCHER = /\([^()[\]]*\)|\[[^()[\]]*\]/gu;
  * Checks that a declaration value can't end its own declaration or rule:
  * quotes and brackets balance, and nothing outside a string closes the
  * declaration (a top-level `;`), opens or closes a block, sets `!important`,
- * or opens a comment. Stricter than the grammar where that keeps the rule
- * simple - braces and comments are rejected outright, so quote a URL that
- * needs them.
+ * opens a comment, or escapes a character. Stricter than the grammar where
+ * that keeps the rule simple - braces, comments, and escapes outside strings
+ * are rejected outright, as is an unquoted `url(` whose contents a quoted one
+ * would hold, so quote a URL that needs them.
  *
  * @param value - the declaration value, e.g. a style variable's slot
  */
 export const css_value_is_contained = (value: unknown): boolean => {
 	if (typeof value !== 'string' || STYLE_CLOSER_MATCHER.test(value)) return false;
-	// escapes and strings are inert, so drop them before reading the structure;
-	// what survives of either - a trailing escape, an unclosed quote - fails next
-	let rest = value.replace(ESCAPE_OR_STRING_MATCHER, '');
-	if (ESCAPING_MATCHER.test(rest)) return false;
+	// strings and well-formed url tokens are inert, so drop them before reading
+	// the structure; what survives of either - an unclosed quote - fails next
+	let malformed_url = false;
+	let rest = value.replace(INERT_MATCHER, (_match, url_contents?: string, url_close?: string) => {
+		if (url_contents !== undefined && (!url_close || !URL_CONTENTS_MATCHER.test(url_contents))) {
+			malformed_url = true;
+		}
+		return '';
+	});
+	if (malformed_url || ESCAPING_MATCHER.test(rest)) return false;
 	// collapse balanced brackets from the innermost out, their semicolons with
 	// them - inside brackets a semicolon belongs to the block, e.g. a data URL
 	let collapsed = rest;

@@ -7,7 +7,6 @@ import {
 	resolve_variables_transitive,
 	generate_theme_css,
 	get_all_variable_names,
-	has_variable,
 	find_similar_variable
 } from '$lib/variable_graph.ts';
 import type { StyleVariable, Theme } from '$lib/variable.ts';
@@ -74,6 +73,54 @@ describe('build_variable_graph', () => {
 			assert.isTrue(graph.variables.get('composite')!.dark_deps.has('base_dark'));
 			assert.isFalse(graph.variables.get('composite')!.dark_deps.has('base_light'));
 		});
+	});
+});
+
+describe('build_variable_graph containment', () => {
+	test('leaves out a slot that would escape its declaration, with an error', () => {
+		const graph = build_variable_graph([
+			{ name: 'text_color', light: 'red} body{background:lime', dark: 'white' },
+			{ name: 'ok', light: '1' }
+		]);
+		assert.deepEqual(
+			{ ...graph.variables.get('text_color'), light_deps: null, dark_deps: null },
+			{
+				name: 'text_color',
+				light_deps: null,
+				dark_deps: null,
+				light_css: undefined,
+				dark_css: 'white'
+			}
+		);
+		assert.isTrue(graph.variables.has('ok'));
+		assert.deepEqual(
+			graph.diagnostics.map((d) => [d.level, d.identifier]),
+			[['error', 'uncontained_theme_value']]
+		);
+		assert.include(graph.diagnostics[0]!.message, 'text_color');
+	});
+
+	test('leaves out a variable with no containable slot or an unsafe name', () => {
+		const graph = build_variable_graph([
+			{ name: 'blank', light: '  ' },
+			{ name: 'bad: 1; --x', light: '1' }
+		]);
+		assert.strictEqual(graph.variables.size, 0);
+		assert.strictEqual(graph.diagnostics.length, 2);
+	});
+
+	test('a baked theme value that escapes never reaches the theme CSS', () => {
+		const graph = build_variable_graph_from_options(undefined, {
+			name: 't',
+			variables: [{ name: 'text_color', light: 'red} body{background:lime' }]
+		});
+		const { light_css } = generate_theme_css(graph, new Set(['text_color']));
+		assert.notInclude(light_css, 'lime');
+		assert.strictEqual(graph.diagnostics.length, 1);
+	});
+
+	test('the default variables are all contained', () => {
+		assert.deepEqual(build_variable_graph_from_options(undefined).diagnostics, []);
 	});
 });
 
@@ -554,14 +601,6 @@ describe('utility functions', () => {
 		assert.isTrue(names.has('a'));
 		assert.isTrue(names.has('b'));
 		assert.isTrue(names.has('c'));
-	});
-
-	test('has_variable checks existence', () => {
-		const variables: Array<StyleVariable> = [{ name: 'exists', light: '1' }];
-		const graph = build_variable_graph(variables);
-
-		assert.isTrue(has_variable(graph, 'exists'));
-		assert.isFalse(has_variable(graph, 'missing'));
 	});
 });
 

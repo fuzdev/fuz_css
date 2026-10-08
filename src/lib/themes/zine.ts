@@ -5,8 +5,9 @@ import type { Theme } from '../variable.ts';
  * weight alone, since that is all a photocopier reproduces - paper white and
  * toner black with no gray between them, thick opaque rules, square corners,
  * no shadows, heavy grotesque headings set tight, links marked by an
- * underline. The short duration tokens are zero, since print doesn't ease.
- * The palette keeps its full chroma, the spot color run over the black plate.
+ * underline. The three shortest duration tokens are zero, since print
+ * doesn't ease. The palette keeps its full chroma, the spot color run over
+ * the black plate.
  *
  * Dual-scheme: the dark appearance is the same page run as a negative.
  * Built from levers only - the palette letters keep their default hues.
@@ -39,9 +40,9 @@ export const zine_theme: Theme = {
 		{ name: 'type_scale_ratio', light: '1.33' },
 		// links are underlined at rest: ink is the only way to mark one
 		{ name: 'text_decoration', light: 'underline' },
-		// print doesn't ease - the short duration tokens zero out, for the
-		// transitions a consumer times with them, while the longer tiers keep
-		// their timing
+		// print doesn't ease - the three shortest duration tokens zero out, for
+		// the transitions a consumer times with them, while the longer tiers
+		// keep their timing
 		{ name: 'duration_1', light: '0s' },
 		{ name: 'duration_2', light: '0s' },
 		{ name: 'duration_3', light: '0s' }

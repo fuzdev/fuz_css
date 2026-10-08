@@ -27,15 +27,20 @@
 	]);
 </script>
 
-<!-- the same shape as fuz_ui's ColorSchemeInput: a horizontal radio menu of
+<!-- the same shape as fuz_ui's ColorSchemeInput: a horizontal radio group of
 	joined buttons, not a select, so the three states are one glance apart -->
-<menu {...rest} class={['contrast-control', 'unstyled', rest.class]}>
+<menu
+	role="radiogroup"
+	aria-label="contrast"
+	{...rest}
+	class={['contrast-control', 'unstyled', rest.class]}
+>
 	{#each options as { modifier, label } (label)}
 		{@const is_selected = modifier === selected}
 		<button
 			type="button"
 			class={['contrast palette_a', { selected: is_selected }]}
-			role="menuitemradio"
+			role="radio"
 			title={is_selected ? `${label} contrast is selected` : `select ${label} contrast`}
 			aria-checked={is_selected}
 			onclick={(e) => {
@@ -43,7 +48,7 @@
 				select(modifier);
 			}}
 		>
-			<div class="content">{label}</div>
+			<span class="content">{label}</span>
 		</button>
 	{/each}
 </menu>

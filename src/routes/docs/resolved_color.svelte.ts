@@ -1,9 +1,8 @@
-import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 import { clamp } from '@fuzdev/fuz_util/maths.ts';
 import { rgb_to_hex_string } from '@fuzdev/fuz_util/colors.ts';
 
 import { oklch_to_srgb, type Oklch } from '$lib/oklch.ts';
-import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
+import { watch_resolved_style } from '$routes/docs/resolved_style.svelte.ts';
 
 /** A parsed computed-style color serialization. */
 export interface ParsedResolvedColor {
@@ -76,9 +75,8 @@ export interface ResolvedColorOptions {
  * The derived color stops are calc()/oklch() expressions, so reading them
  * with `getPropertyValue` yields the unevaluated token stream - instead the
  * consumer renders a probe element styled with the variable, binds it to
- * `el`, and reads the resolved value here. The read runs in an effect (not a
- * derived) and tracks the root's scheme class, so it happens after the class
- * toggles.
+ * `el`, and reads the resolved value here, re-read through
+ * `watch_resolved_style`.
  *
  * Construct during component init - the constructor registers the effect and
  * reads the theme-state context.
@@ -114,13 +112,8 @@ export class ResolvedColor {
 	constructor(get_name: () => string, options?: ResolvedColorOptions) {
 		const read_color =
 			options?.read_color ?? ((el: HTMLElement) => window.getComputedStyle(el).backgroundColor);
-		const get_theme_state = theme_state_context.get();
-		// read after render so the probe reflects the current name/scheme/theme;
-		// the scheme is read off the root class, which is what the probe
-		// resolves against and changes after the theme state does
-		$effect(() => {
-			root_color_scheme();
-			get_theme_state().theme;
+		// read after render so the probe reflects the current name/scheme/theme
+		watch_resolved_style(() => {
 			get_name();
 			if (!this.el) return;
 			this.resolved = read_color(this.el);

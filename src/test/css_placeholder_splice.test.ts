@@ -33,26 +33,30 @@ const GENERATED = ':root{--font_family_serif: Georgia, serif}';
 /** Stands in for an app stylesheet imported after `virtual:fuz.css`. */
 const APP = ":root{--font_family_serif: 'DM Serif Display', Georgia, serif}";
 
-describe('splice_css_at_placeholder', () => {
-	test('writes the generated CSS at the marker, not at the end', () => {
-		const spliced = splice_css_at_placeholder(MARKER + APP, GENERATED);
-		assert.isNotNull(spliced);
-		assert.ok(
-			spliced.indexOf(GENERATED) < spliced.indexOf(APP),
-			'generated CSS must precede a stylesheet bundled after it'
-		);
-	});
+/** Both placeholder forms, as the bare declaration and the rule it loads as. */
+const PLACEHOLDER_FORMS = [
+	{ form: 'unhashed', decl: `${FUZ_CSS_PLACEHOLDER}:1`, marker: MARKER },
+	{ form: 'hashed', decl: `${FUZ_CSS_PLACEHOLDER}:h${HASH}`, marker: HASHED_MARKER }
+];
 
-	test('leaves no trace of the marker', () => {
-		const spliced = splice_css_at_placeholder(MARKER + APP, GENERATED);
-		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+describe.each(PLACEHOLDER_FORMS)('splice_css_at_placeholder, $form', ({ decl, marker }) => {
+	/** Asserts nothing of the placeholder is left - property, hash, or empty rule. */
+	const assert_no_marker = (spliced: string): void => {
+		assert.notInclude(spliced, FUZ_CSS_PLACEHOLDER);
+		assert.notInclude(spliced, HASH);
 		assert.notInclude(spliced, ':root{}');
+	};
+
+	test('writes the generated CSS at the marker, not at the end', () => {
+		const spliced = splice_css_at_placeholder(marker + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced, GENERATED + '\n' + APP);
 	});
 
 	test('preserves CSS bundled before the marker', () => {
 		const before = ':root{--a: 1}';
-		const spliced = splice_css_at_placeholder(before + MARKER + APP, GENERATED);
+		const spliced = splice_css_at_placeholder(before + marker + APP, GENERATED);
 		assert.isNotNull(spliced);
 		assert.ok(spliced.startsWith(before), 'CSS imported before fuz_css stays first');
 		assert.ok(spliced.indexOf(before) < spliced.indexOf(GENERATED));
@@ -60,7 +64,7 @@ describe('splice_css_at_placeholder', () => {
 	});
 
 	test('honors a marker placed after the app CSS', () => {
-		const spliced = splice_css_at_placeholder(APP + MARKER, GENERATED);
+		const spliced = splice_css_at_placeholder(APP + marker, GENERATED);
 		assert.isNotNull(spliced);
 		assert.ok(
 			spliced.indexOf(APP) < spliced.indexOf(GENERATED),
@@ -69,33 +73,46 @@ describe('splice_css_at_placeholder', () => {
 	});
 
 	test('tolerates the unminified marker rule', () => {
-		const spliced = splice_css_at_placeholder(
-			':root {\n\t--fuz-css-placeholder: 1;\n}\n' + APP,
-			GENERATED
-		);
+		const spliced = splice_css_at_placeholder(`:root {\n\t${decl};\n}\n` + APP, GENERATED);
 		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
+	});
+
+	test('tolerates a minified marker with a trailing semicolon', () => {
+		const spliced = splice_css_at_placeholder(`:root{${decl};}` + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+	});
+
+	test('reads past a comment holding structural characters before the marker', () => {
+		// an unminified build keeps comments, and a `;`, `}`, or `{` in one must
+		// not be taken for the end of the preceding construct
+		const before = ':root{--a: 1}\n/* app styles; see {notes} */\n';
+		const spliced = splice_css_at_placeholder(before + marker + '\n' + APP, GENERATED);
+		assert.isNotNull(spliced);
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced, before + GENERATED + '\n\n' + APP);
 	});
 
 	test('splits a merged rule: decls after the marker stay after the generated CSS', () => {
 		// A rule-merging minifier (e.g. lightningcss) folds the adjacent `:root`
 		// rules into one, so there is no standalone marker rule left to swap out.
-		const merged = ":root{--fuz-css-placeholder:1;--font_family_serif: 'DM Serif Display'}";
+		const merged = `:root{${decl};--font_family_serif: 'DM Serif Display'}`;
 		const spliced = splice_css_at_placeholder(':root{--a: 1}' + merged, GENERATED);
 		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
+		assert.ok(spliced.indexOf('--a: 1') < spliced.indexOf(GENERATED));
 		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf("'DM Serif Display'"));
-		assert.include(spliced, '--a: 1');
 	});
 
 	test('splits a merged rule: decls before the marker stay before the generated CSS', () => {
 		// The app stylesheet was bundled before `virtual:fuz.css`, so the merge
 		// put its decls before the marker - fuz_css must still cascade over them.
-		const merged = ":root{--font_family_serif: 'DM Serif Display';--fuz-css-placeholder:1}";
+		const merged = `:root{--font_family_serif: 'DM Serif Display';${decl}}`;
 		const spliced = splice_css_at_placeholder(merged, GENERATED);
 		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 		assert.ok(
 			spliced.indexOf("'DM Serif Display'") < spliced.indexOf(GENERATED),
 			'generated CSS must stay after a stylesheet bundled before it'
@@ -103,54 +120,72 @@ describe('splice_css_at_placeholder', () => {
 	});
 
 	test('splits a merged rule with decls on both sides of the marker', () => {
-		const merged = ":root{--a: 1;--fuz-css-placeholder:1;--font_family_serif: 'DM Serif Display'}";
+		const merged = `:root{--a: 1;${decl};--b: 2}`;
 		const spliced = splice_css_at_placeholder(merged, GENERATED);
 		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
-		assert.notInclude(spliced, ':root{}');
-		assert.ok(spliced.indexOf('--a: 1') < spliced.indexOf(GENERATED));
-		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf("'DM Serif Display'"));
+		assert_no_marker(spliced);
+		assert.strictEqual(spliced, `:root{--a: 1;}${GENERATED}\n:root{--b: 2}`);
 	});
 
 	test('keeps a hoisted @charset ahead of a leading marker', () => {
 		const charset = '@charset "UTF-8";';
-		const spliced = splice_css_at_placeholder(charset + MARKER + APP, GENERATED);
+		const spliced = splice_css_at_placeholder(charset + marker + APP, GENERATED);
 		assert.isNotNull(spliced);
 		assert.ok(spliced.startsWith(charset), 'the statement at-rule must survive the splice');
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
 	});
 
 	test('keeps a hoisted @import ahead of a leading marker', () => {
 		const font_import = '@import url(https://fonts.example/css);';
-		const spliced = splice_css_at_placeholder(font_import + MARKER + APP, GENERATED);
+		const spliced = splice_css_at_placeholder(font_import + marker + APP, GENERATED);
 		assert.isNotNull(spliced);
 		assert.ok(spliced.startsWith(font_import));
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 	});
 
 	test('splices inside an enclosing block without swallowing its prelude', () => {
-		const spliced = splice_css_at_placeholder(`@layer app{${MARKER}${APP}}`, GENERATED);
+		const spliced = splice_css_at_placeholder(`@layer app{${marker}${APP}}`, GENERATED);
 		assert.isNotNull(spliced);
 		assert.ok(spliced.startsWith('@layer app{'));
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
 		assert.ok(spliced.endsWith('}'));
 	});
 
 	test('strips a marker when given empty CSS', () => {
-		const spliced = splice_css_at_placeholder(MARKER + APP, '');
+		const spliced = splice_css_at_placeholder(marker + APP, '');
 		assert.isNotNull(spliced);
-		assert.notInclude(spliced, '--fuz-css-placeholder');
+		assert_no_marker(spliced);
 		assert.include(spliced, APP);
 	});
 
+	test('returns null when the marker has no enclosing rule', () => {
+		assert.isNull(splice_css_at_placeholder(decl, GENERATED));
+	});
+});
+
+describe('splice_css_at_placeholder', () => {
 	test('returns null when the marker is absent', () => {
 		assert.isNull(splice_css_at_placeholder(APP, GENERATED));
 	});
 
-	test('returns null when the marker has no enclosing rule', () => {
-		assert.isNull(splice_css_at_placeholder('--fuz-css-placeholder:1', GENERATED));
+	test('repeated splicing strips every marker, whichever form each takes', () => {
+		// the loop `generateBundle` runs: place the CSS at the first marker,
+		// then strip the rest with empty CSS until none is left
+		let spliced = splice_css_at_placeholder(
+			HASHED_MARKER + APP + MARKER + HASHED_MARKER,
+			GENERATED
+		);
+		assert.isNotNull(spliced);
+		let stripped = splice_css_at_placeholder(spliced, '');
+		while (stripped !== null) {
+			spliced = stripped;
+			stripped = splice_css_at_placeholder(spliced, '');
+		}
+		assert.notInclude(spliced, FUZ_CSS_PLACEHOLDER);
+		assert.strictEqual(spliced.split(GENERATED).length - 1, 1, 'the generated CSS is placed once');
+		assert.include(spliced, APP);
 	});
 });
 
@@ -223,91 +258,5 @@ describe('parse_css_placeholder_hash', () => {
 
 	test('returns null when there is no placeholder', () => {
 		assert.isNull(parse_css_placeholder_hash(APP));
-	});
-});
-
-describe('splice_css_at_placeholder with a hashed placeholder', () => {
-	/** Asserts nothing of either placeholder form is left - property or hash. */
-	const assert_no_marker = (spliced: string): void => {
-		assert.notInclude(spliced, FUZ_CSS_PLACEHOLDER);
-		assert.notInclude(spliced, HASH);
-		assert.notInclude(spliced, ':root{}');
-	};
-
-	test('splices at a solo hashed marker and leaves no trace of it', () => {
-		const spliced = splice_css_at_placeholder(HASHED_MARKER + APP, GENERATED);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-		assert.strictEqual(spliced, GENERATED + '\n' + APP);
-	});
-
-	test('produces the same output as the unhashed marker', () => {
-		const before = ':root{--a: 1}';
-		assert.strictEqual(
-			splice_css_at_placeholder(before + HASHED_MARKER + APP, GENERATED),
-			splice_css_at_placeholder(before + MARKER + APP, GENERATED)
-		);
-	});
-
-	test('tolerates the unminified hashed marker rule', () => {
-		const spliced = splice_css_at_placeholder(
-			`:root {\n\t${FUZ_CSS_PLACEHOLDER}: h${HASH};\n}\n` + APP,
-			GENERATED
-		);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf(APP));
-	});
-
-	test('tolerates a minified marker with a trailing semicolon', () => {
-		const spliced = splice_css_at_placeholder(
-			`:root{${FUZ_CSS_PLACEHOLDER}:h${HASH};}` + APP,
-			GENERATED
-		);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-	});
-
-	test('splits a merged rule: decls after the hashed marker stay after', () => {
-		const merged = `:root{${FUZ_CSS_PLACEHOLDER}:h${HASH};--font_family_serif: 'DM Serif Display'}`;
-		const spliced = splice_css_at_placeholder(':root{--a: 1}' + merged, GENERATED);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-		assert.ok(spliced.indexOf('--a: 1') < spliced.indexOf(GENERATED));
-		assert.ok(spliced.indexOf(GENERATED) < spliced.indexOf("'DM Serif Display'"));
-	});
-
-	test('splits a merged rule: decls before the hashed marker stay before', () => {
-		const merged = `:root{--font_family_serif: 'DM Serif Display';${FUZ_CSS_PLACEHOLDER}:h${HASH}}`;
-		const spliced = splice_css_at_placeholder(merged, GENERATED);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-		assert.ok(spliced.indexOf("'DM Serif Display'") < spliced.indexOf(GENERATED));
-	});
-
-	test('splits a merged rule with decls on both sides of the hashed marker', () => {
-		const merged = `:root{--a: 1;${FUZ_CSS_PLACEHOLDER}:h${HASH};--b: 2}`;
-		const spliced = splice_css_at_placeholder(merged, GENERATED);
-		assert.isNotNull(spliced);
-		assert_no_marker(spliced);
-		assert.strictEqual(spliced, `:root{--a: 1;}${GENERATED}\n:root{--b: 2}`);
-	});
-
-	test('repeated splicing strips every marker, whichever form each takes', () => {
-		// the loop `generateBundle` runs: place the CSS at the first marker,
-		// then strip the rest with empty CSS until none is left
-		let spliced = splice_css_at_placeholder(
-			HASHED_MARKER + APP + MARKER + HASHED_MARKER,
-			GENERATED
-		);
-		assert.isNotNull(spliced);
-		let stripped = splice_css_at_placeholder(spliced, '');
-		while (stripped !== null) {
-			spliced = stripped;
-			stripped = splice_css_at_placeholder(spliced, '');
-		}
-		assert_no_marker(spliced);
-		assert.strictEqual(spliced.split(GENERATED).length - 1, 1, 'the generated CSS is placed once');
-		assert.include(spliced, APP);
 	});
 });

@@ -6,7 +6,9 @@
  * the tables beside them hold what those steps are worth, keyed by variant and
  * unitless - the emitters in `variables.ts` add the unit and any `calc()`
  * wrapper, so one table serves both the CSS and anything that wants the
- * numbers. Colors are the exception: their values are derived rather than
+ * numbers. A step the CSS derives from a knob instead (the font sizes above
+ * `md`) keeps its default value here as the numeric twin, which the CSS never
+ * reads. Colors are the exception: their values are derived rather than
  * fitted per step, and live in `ramps.ts`.
  *
  * @module
@@ -40,11 +42,13 @@ export const font_size_names = font_size_variants.map((s) => 'font_size_' + s);
 export const TYPE_SCALE_RATIO = 1.272;
 
 /**
- * Font sizes in rem. The steps above `md` are `md * TYPE_SCALE_RATIO ** n`
- * rounded to two places, the numeric twin of the derived CSS defaults; `md`
- * and the steps below it are fitted literals.
+ * Font sizes in rem. `md` and the steps below it are fitted literals the CSS
+ * emits. The steps above `md` are `md * TYPE_SCALE_RATIO ** n` rounded to two
+ * places - the numeric twin of the CSS defaults, which derive from
+ * `--type_scale_ratio` and never read these values - kept for anything that
+ * wants the default numbers, and pinned to the formula by the tests.
  */
-export const FONT_SIZES: Record<SizeVariant, number> = {
+export const FONT_SIZES: Readonly<Record<SizeVariant, number>> = {
 	xs: 1,
 	sm: 1.3,
 	md: 1.6,
@@ -137,7 +141,7 @@ export const space_variants = [
 ] as const;
 
 /** Spaces in rem, before the `--space_scale` multiplier. */
-export const SPACE_SIZES: Record<SpaceVariant, number> = {
+export const SPACE_SIZES: Readonly<Record<SpaceVariant, number>> = {
 	xs5: 0.1,
 	xs4: 0.2,
 	xs3: 0.3,
@@ -167,7 +171,7 @@ export type DistanceVariant = ArrayElement<typeof distance_variants>;
 export const distance_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 
 /** Layout distances in px - breakpoint-ish widths, insensitive to font size. */
-export const DISTANCES: Record<DistanceVariant, number> = {
+export const DISTANCES: Readonly<Record<DistanceVariant, number>> = {
 	xs: 200,
 	sm: 320,
 	md: 800,
@@ -179,7 +183,7 @@ export type BorderRadiusVariant = ArrayElement<typeof border_radius_variants>;
 export const border_radius_variants = ['xs3', 'xs2', 'xs', 'sm', 'md', 'lg', 'xl'] as const;
 
 /** Border radii in rem, before the `--radius_scale` multiplier. */
-export const BORDER_RADII: Record<BorderRadiusVariant, number> = {
+export const BORDER_RADII: Readonly<Record<BorderRadiusVariant, number>> = {
 	xs3: 0.3,
 	xs2: 0.5,
 	xs: 0.8,
@@ -195,7 +199,7 @@ export const line_height_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
 export const line_height_names = line_height_variants.map((s) => 'line_height_' + s);
 
 /** Line heights, unitless so they scale with the font size. */
-export const LINE_HEIGHTS: Record<LineHeightVariant, number> = {
+export const LINE_HEIGHTS: Readonly<Record<LineHeightVariant, number>> = {
 	xs: 1,
 	sm: 1.2,
 	md: 1.5,
@@ -220,9 +224,8 @@ export const shadow_size_variants = ['xs', 'sm', 'md', 'lg', 'xl'] as const;
  * and the inset pair signs it the other way, so `top` always names the lit
  * edge; see `shadow_variant_prefixes` for the six shapes each size emits.
  */
-export const SHADOW_GEOMETRY: Record<
-	ShadowSizeVariant,
-	{ offset: number; blur: number; spread: number }
+export const SHADOW_GEOMETRY: Readonly<
+	Record<ShadowSizeVariant, Readonly<{ offset: number; blur: number; spread: number }>>
 > = {
 	xs: { offset: 1, blur: 3, spread: 0 },
 	sm: { offset: 1.5, blur: 4, spread: 0 },
@@ -241,7 +244,7 @@ export const icon_size_variants = ['xs', 'sm', 'md', 'lg', 'xl', 'xl2', 'xl3'] a
  * Icon sizes in px, stepping up by roughly the golden ratio and rounded to the
  * nearest pixel. Deliberately insensitive to font size, hence px rather than rem.
  */
-export const ICON_SIZES: Record<IconSizeVariant, number> = {
+export const ICON_SIZES: Readonly<Record<IconSizeVariant, number>> = {
 	xs: 18,
 	sm: 32,
 	md: 48,
@@ -312,7 +315,9 @@ export const darken_lighten_variants = alpha_variants;
  * The perceptual alpha curve the `darken_*`/`lighten_*` overlays share: the
  * hex alpha byte each stop renders with, and the percentage it works out to.
  */
-export const OVERLAY_ALPHAS: Record<NumericScaleVariant, { hex: string; percent: string }> = {
+export const OVERLAY_ALPHAS: Readonly<
+	Record<NumericScaleVariant, Readonly<{ hex: string; percent: string }>>
+> = {
 	'00': { hex: '00', percent: '0%' },
 	'05': { hex: '08', percent: '3%' },
 	'10': { hex: '0f', percent: '6%' },
@@ -337,7 +342,9 @@ export const shadow_alpha_variants = alpha_variants;
  * subtle changes are perceptible, large at the high end - boosted at the low
  * end in dark mode, where shadows read weakly against dark backgrounds.
  */
-export const SHADOW_ALPHAS: Record<NumericScaleVariant, { light: number; dark: number }> = {
+export const SHADOW_ALPHAS: Readonly<
+	Record<NumericScaleVariant, Readonly<{ light: number; dark: number }>>
+> = {
 	'00': { light: 0, dark: 0 },
 	'05': { light: 6, dark: 13 },
 	'10': { light: 10, dark: 19 },
@@ -363,7 +370,7 @@ export type DurationVariant = ArrayElement<typeof duration_variants>;
 export const duration_variants = [1, 2, 3, 4, 5, 6] as const;
 
 /** Transition durations in seconds, from a UI beat to a slow ambient sweep. */
-export const DURATIONS: Record<DurationVariant, number> = {
+export const DURATIONS: Readonly<Record<DurationVariant, number>> = {
 	1: 0.08,
 	2: 0.2,
 	3: 0.5,

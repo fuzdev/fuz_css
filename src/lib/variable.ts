@@ -23,6 +23,7 @@ export type StyleVariableName = z.infer<typeof StyleVariableName>;
 // a slot renders verbatim into a declaration, so it has to stay inside it
 const StyleVariableValue = z
 	.string()
+	.regex(/\S/u, 'must not be blank')
 	.refine(css_value_is_contained, 'must be a single contained CSS value');
 
 /**
@@ -105,7 +106,7 @@ export type Theme = z.infer<typeof Theme>;
  * match. For untrusted input - a theme restored from storage, a theme handed
  * across a boundary - where a malformed value should fall back to a default
  * rather than throw. Use `Theme.safeParse` directly when the failure detail
- * matters, or `validate_theme` in `theme_check.ts` for the full lint.
+ * matters, or `validate_theme` in `theme_validate.ts` for the full lint.
  *
  * @param value - the value to parse
  * @returns the theme, or `null` when the value isn't one

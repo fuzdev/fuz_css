@@ -2,19 +2,17 @@
  * Pins the resolver's built-in defaults to the shipped declarations. The
  * ramp-derived branches share their constants with `ramps.ts`, but the scalar
  * defaults (`chroma_scale`, the per-slot multipliers, ...) are restated in
- * `theme_check.ts`, so nothing else would notice them drifting from
+ * `theme_resolver.ts`, so nothing else would notice them drifting from
  * `variables.ts`.
  */
 
 import { test, assert, describe } from 'vitest';
 
-import { create_theme_resolver } from '$lib/theme_check.ts';
+import { create_theme_resolver } from '$lib/theme_resolver.ts';
 import { theme_knobs } from '$lib/knobs.ts';
 import { default_variables } from '$lib/variables.ts';
-import { default_themes } from '$lib/themes.ts';
+import { base_theme } from '$lib/themes/base.ts';
 import { color_scheme_variants } from '$lib/variable_data.ts';
-
-const base_theme = default_themes[0]!;
 
 const declared = new Map(default_variables.map((v) => [v.name, v]));
 

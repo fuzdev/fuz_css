@@ -1,6 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
 import { StyleVariable, StyleVariableName, Theme, parse_theme } from '$lib/variable.ts';
+import { render_theme_style } from '$lib/theme.ts';
 
 describe('StyleVariable', () => {
 	describe('valid schemas', () => {
@@ -31,6 +32,18 @@ describe('StyleVariable', () => {
 			const result = StyleVariable.safeParse({ name: 'foo', light: '10px', dark: '10px' });
 			assert.isFalse(result.success);
 			assert.isTrue(result.error.issues.some((i) => i.message.includes('must differ')));
+		});
+
+		test('rejects a blank slot, which the renderer drops', () => {
+			for (const blank of ['', '  ']) {
+				const result = StyleVariable.safeParse({ name: 'foo', light: blank });
+				assert.isFalse(result.success, JSON.stringify(blank));
+				assert.isTrue(result.error.issues.some((i) => i.message.includes('blank')));
+				assert.strictEqual(
+					render_theme_style({ name: 't', variables: [{ name: 'foo', light: blank }] }),
+					''
+				);
+			}
 		});
 	});
 });

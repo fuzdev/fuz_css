@@ -52,15 +52,11 @@ const core_rules_cases = [
 describe('resolve_css', () => {
 	describe('core rules', () => {
 		test.each(core_rules_cases)('includes $name', ({ css, expected, not_expected }) => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
-				css,
-				[]
-			);
+			const { style_rule_index, variable_graph } = create_test_fixtures(css, []);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection()
 			});
 
@@ -73,7 +69,7 @@ describe('resolve_css', () => {
 
 	describe('element matching', () => {
 		test('includes rules for detected elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: blue; }
@@ -85,7 +81,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -98,7 +93,7 @@ describe('resolve_css', () => {
 		});
 
 		test('excludes rules for undetected elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
@@ -110,7 +105,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -123,7 +117,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements option forces inclusion', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
@@ -134,7 +128,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_elements: ['button']
 			});
@@ -145,7 +138,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements with multiple values', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
@@ -158,7 +151,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_elements: ['button', 'input', 'dialog']
 			});
@@ -174,7 +166,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements combined with detected_elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
@@ -187,7 +179,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -206,7 +197,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements with overlapping detected_elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: red; }
 					input { border: 1px solid; }
@@ -217,7 +208,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -233,7 +223,7 @@ describe('resolve_css', () => {
 		});
 
 		test('handles multiple elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
@@ -246,7 +236,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'input', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -260,7 +249,7 @@ describe('resolve_css', () => {
 		});
 
 		test('preserves cascade order', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					a { color: blue; }
 					a:hover { color: darkblue; }
@@ -272,7 +261,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -285,7 +273,7 @@ describe('resolve_css', () => {
 
 	describe('class matching', () => {
 		test('includes rules for detected classes', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button.selected { background: blue; }
 					button.disabled { opacity: 0.5; }
@@ -297,7 +285,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(['selected', 'hidden']),
 				detected_css_variables: new Set(),
@@ -310,7 +297,7 @@ describe('resolve_css', () => {
 		});
 
 		test('excludes rules for undetected classes', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					.active { color: green; }
 					.inactive { color: gray; }
@@ -321,7 +308,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(['active']),
 				detected_css_variables: new Set(),
@@ -333,7 +319,7 @@ describe('resolve_css', () => {
 		});
 
 		test('combines element and class matching', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 8px; }
 					button.primary { background: blue; }
@@ -345,7 +331,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(['primary', 'warning']),
 				detected_css_variables: new Set(),
@@ -360,7 +345,7 @@ describe('resolve_css', () => {
 
 	describe('base CSS generation', () => {
 		test('includes matched rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 10px; }
 					input { border: 1px solid; }
@@ -371,7 +356,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -383,7 +367,7 @@ describe('resolve_css', () => {
 		});
 
 		test('preserves original order', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 5px; }
 					button:hover { background: gray; }
@@ -395,7 +379,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -406,7 +389,7 @@ describe('resolve_css', () => {
 		});
 
 		test('includes @media rules for elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { font-size: 14px; }
 					@media (min-width: 768px) { button { font-size: 16px; } }
@@ -417,7 +400,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -430,7 +412,7 @@ describe('resolve_css', () => {
 		});
 
 		test('includes @supports rules for elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { display: block; }
 					@supports (display: grid) { button { display: grid; } }
@@ -441,7 +423,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -454,7 +435,7 @@ describe('resolve_css', () => {
 		});
 
 		test('includes @container rules for elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { padding: 8px; }
 					@container (min-width: 400px) { button { padding: 16px; } }
@@ -465,7 +446,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -480,7 +460,7 @@ describe('resolve_css', () => {
 
 	describe('statistics', () => {
 		test('not included by default', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -488,7 +468,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -499,7 +478,7 @@ describe('resolve_css', () => {
 		});
 
 		test('included when include_stats true', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: blue; }
@@ -511,7 +490,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
@@ -528,7 +506,7 @@ describe('resolve_css', () => {
 		});
 
 		test('reflects actual counts', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { box-sizing: border-box; }
 					button { color: blue; }
@@ -544,7 +522,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),
@@ -564,7 +541,7 @@ describe('resolve_css', () => {
 
 	describe('empty scenarios', () => {
 		test('projects without any HTML elements still work', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { box-sizing: border-box; }
 					:root { font-size: 16px; }
@@ -581,7 +558,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(['p_md', 'box']),
 				detected_css_variables: new Set(['text_color']),
@@ -601,14 +577,13 @@ describe('resolve_css', () => {
 		});
 
 		test('empty style_rule_index', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'color', light: 'blue' }
 			]);
 
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['color']),
@@ -620,7 +595,7 @@ describe('resolve_css', () => {
 		});
 
 		test('empty variable_graph', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: red; }`,
 				[]
 			);
@@ -628,7 +603,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -640,7 +614,7 @@ describe('resolve_css', () => {
 		});
 
 		test('empty detected sets', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { margin: 0; }
 					button { color: red; }
@@ -651,7 +625,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection()
 			});
 
@@ -664,7 +637,7 @@ describe('resolve_css', () => {
 
 	describe('additional_variables option', () => {
 		test('additional_variables forces inclusion', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -673,7 +646,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_variables: ['palette_b']
 			});
@@ -687,7 +659,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables combined with detected_css_variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -696,7 +668,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),
@@ -713,7 +684,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables with overlapping detected_css_variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' }
 			]);
@@ -721,7 +692,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),
@@ -739,7 +709,7 @@ describe('resolve_css', () => {
 
 	describe('additional_elements and additional_variables combined', () => {
 		test('both options work together', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
 					input { border: 1px solid var(--input_border); }
@@ -754,7 +724,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_elements: ['button'],
 				additional_variables: ['extra_var']
@@ -769,7 +738,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_elements brings transitive variable dependencies', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[
 					{ name: 'btn_color', light: 'var(--base_color)' },
@@ -780,7 +749,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_elements: ['button']
 			});
@@ -793,7 +761,7 @@ describe('resolve_css', () => {
 
 	describe('additional_elements and additional_variables "all" option', () => {
 		test('additional_elements: "all" includes all rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
@@ -805,7 +773,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']), // Only detect button
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -820,7 +787,7 @@ describe('resolve_css', () => {
 		});
 
 		test('default behavior only includes matching rules', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
@@ -832,7 +799,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -847,7 +813,7 @@ describe('resolve_css', () => {
 		});
 
 		test('additional_variables: "all" includes all variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -856,7 +822,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']), // Only detect palette_a
@@ -874,7 +839,7 @@ describe('resolve_css', () => {
 		});
 
 		test('default behavior only includes used variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -883,7 +848,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),
@@ -901,7 +865,7 @@ describe('resolve_css', () => {
 		});
 
 		test('both "all" options includes everything', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: var(--btn_color); }
 					input { border: 1px solid; }
@@ -915,7 +879,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				...empty_detection(),
 				additional_elements: 'all',
 				additional_variables: 'all'
@@ -932,7 +895,7 @@ describe('resolve_css', () => {
 
 	describe('exclude options', () => {
 		test('exclude_elements filters from included elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
@@ -944,7 +907,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button', 'input', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -962,7 +924,7 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_elements combined with additional_elements', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(
+			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					button { color: blue; }
 					input { color: green; }
@@ -974,7 +936,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(['button']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(),
@@ -990,7 +951,7 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_variables filters from resolved variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -999,7 +960,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a', 'palette_b', 'palette_c']),
@@ -1017,7 +977,7 @@ describe('resolve_css', () => {
 		});
 
 		test('exclude_variables combined with additional_variables', () => {
-			const { style_rule_index, variable_graph, class_variable_index } = create_test_fixtures(``, [
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
 				{ name: 'palette_a', light: 'blue' },
 				{ name: 'palette_b', light: 'green' },
 				{ name: 'palette_c', light: 'red' }
@@ -1026,7 +986,6 @@ describe('resolve_css', () => {
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,
-				class_variable_index,
 				detected_elements: new Set(),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),

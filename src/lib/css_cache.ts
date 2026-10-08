@@ -20,6 +20,34 @@ import type { CacheDeps } from './deps.ts';
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
 
 /**
+ * Whether this is a CI run (`CI=1`, `CI=true`, or another truthy value):
+ * there's no point writing a cache the next run won't reuse.
+ *
+ * @internal Read by the generators for their cache and `on_error` defaults.
+ */
+export const is_ci = !!process.env.CI;
+
+/**
+ * Creates the cache-path lookup the generators share: a file's cache path
+ * under `cache_dir` in `project_root`, or `null` on CI, where nothing is
+ * cached.
+ *
+ * @param cache_dir - the cache directory, relative to `project_root`
+ * @param project_root - the project root, with or without a trailing slash
+ * @returns a function from a file's absolute path to its cache path, or `null` when uncached
+ *
+ * @internal Shared by the Vite plugin and the Gro generator.
+ */
+export const create_cache_path_resolver = (
+	cache_dir: string,
+	project_root: string
+): ((file_id: string) => string | null) => {
+	const root = project_root.endsWith('/') ? project_root : project_root + '/';
+	const resolved_cache_dir = join(root, cache_dir);
+	return (file_id) => (is_ci ? null : get_file_cache_path(file_id, resolved_cache_dir, root));
+};
+
+/**
  * CSS cache version. Bump when any of these change:
  * - `CachedExtraction` schema
  * - `extract_css_classes_with_locations()` logic or output
@@ -69,6 +97,7 @@ export interface CachedExtraction {
  * @param source_path - absolute path to the source file
  * @param cache_dir - absolute path to the cache directory
  * @param project_root - normalized project root (must end with `/`)
+ * @internal The inside-the-root case of `get_file_cache_path`.
  */
 export const get_cache_path = (
 	source_path: string,

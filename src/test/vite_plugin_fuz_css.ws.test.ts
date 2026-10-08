@@ -9,29 +9,19 @@
  * @module
  */
 
-import { describe, test, assert, afterAll } from 'vitest';
+import { describe, test, assert } from 'vitest';
 import { createServer, type Plugin, type ServerOptions, type ViteDevServer } from 'vite';
-import { fileURLToPath } from 'node:url';
-import { dirname, join } from 'node:path';
-import { rm } from 'node:fs/promises';
 import type { AddressInfo } from 'node:net';
 
 import { vite_plugin_fuz_css } from '$lib/vite_plugin_fuz_css.ts';
+import {
+	vite_dev_fixture_root as fixture_root,
+	filter_dev_fixture_html_and_late_module as filter_fixture_file,
+	use_suite_cache_dir,
+	wait_for
+} from './vite_plugin_test_helpers.ts';
 
-const fixture_root = join(dirname(fileURLToPath(import.meta.url)), 'fixtures/vite_dev');
-
-// scope extraction to the fixture's files (the default filter excludes
-// src/test/ paths); .ts included so late_module.ts ingests on transform
-const filter_fixture_file = (path: string): boolean =>
-	path.endsWith('.html') || path.endsWith('late_module.ts');
-
-// a cache directory of this suite's own: the dev suite shares the fixture
-// root and runs in parallel, so a shared cache would be deleted mid-run
-const cache_dir = '.fuz/ws_test';
-
-afterAll(async () => {
-	await rm(join(fixture_root, cache_dir), { recursive: true, force: true });
-});
+const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/ws_test');
 
 interface WsSession {
 	socket: WebSocket;
@@ -54,21 +44,6 @@ const connect_hmr = (port: number): Promise<WsSession> =>
 			reject(new Error('websocket failed to connect'));
 		});
 	});
-
-/** Polls until `predicate` or times out; resolves the predicate's result. */
-const wait_for = async <T>(
-	predicate: () => T | undefined,
-	timeout = 3000,
-	interval = 25
-): Promise<T> => {
-	const deadline = Date.now() + timeout;
-	for (;;) {
-		const result = predicate();
-		if (result !== undefined) return result;
-		if (Date.now() > deadline) throw new Error('timed out waiting');
-		await new Promise((r) => setTimeout(r, interval));
-	}
-};
 
 // room for a listening server's startup and the waits on a loaded machine
 const TEST_TIMEOUT = 20_000;
@@ -99,8 +74,31 @@ const count_css_updates = (session: WsSession): number =>
 		(m) => m.type === 'update' && JSON.stringify(m.updates ?? '').includes('__fuz.css')
 	).length;
 
-/** Lets a message the server would send in response to the last one arrive. */
-const settle = (): Promise<void> => new Promise((r) => setTimeout(r, 150));
+/**
+ * A test-only plugin that answers each `test:ping` with a `test:pong` to the
+ * client that sent it - see `settle`.
+ */
+const plugin_ping: Plugin = {
+	name: 'test-ping',
+	configureServer(server) {
+		server.hot.on('test:ping', (_data, client) => client.send('test:pong', {}));
+	}
+};
+
+const count_pongs = (session: WsSession): number =>
+	session.messages.filter((m) => m.type === 'custom' && m.event === 'test:pong').length;
+
+/**
+ * Waits until the server has handled every message this session sent and
+ * sent whatever it answers them with. The server handles a socket's messages
+ * in order and answers a report synchronously, so once the pong for a ping
+ * sent after them arrives, any push they caused has arrived before it.
+ */
+const settle = async (session: WsSession): Promise<void> => {
+	const pongs = count_pongs(session);
+	session.socket.send(JSON.stringify({ type: 'custom', event: 'test:ping', data: {} }));
+	await wait_for(() => (count_pongs(session) > pongs ? true : undefined));
+};
 
 describe('vite_plugin_fuz_css evaluation handshake', () => {
 	const with_listening_server = async (
@@ -118,6 +116,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 				optimizeDeps: { noDiscovery: true },
 				plugins: [
 					vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir }),
+					plugin_ping,
 					...(config?.plugins ?? [])
 				]
 			});
@@ -167,11 +166,11 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 				const first = await server.transformRequest('/__fuz.css');
 				assert(first);
 				const client = await connect();
-				await settle();
+				await settle(client);
 				assert.strictEqual(count_css_updates(client), 0, 'connecting alone pushes nothing');
 
 				send_evaluated(client, parse_evaluated_hash(first.code));
-				await settle();
+				await settle(client);
 				assert.strictEqual(count_css_updates(client), 0);
 			});
 		},
@@ -213,7 +212,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 
 				// the refetched module evaluates and reports again: the exchange ends
 				send_evaluated(late, current_hash);
-				await settle();
+				await settle(late);
 				assert.strictEqual(count_css_updates(late), 1, 'no second update for the current code');
 				assert.strictEqual(count_css_updates(bystander), 1, 'the push went to the reporter only');
 
@@ -249,7 +248,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 				const refetched = await server.transformRequest('/__fuz.css');
 				assert(refetched);
 				send_evaluated(client, parse_evaluated_hash(refetched.code));
-				await settle();
+				await settle(client);
 				assert.strictEqual(count_css_updates(client), 2);
 
 				// holding the earlier code again while it's stale - CSS that
@@ -259,7 +258,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 
 				// and still only once until it reports the current code
 				send_evaluated(client, earlier_hash);
-				await settle();
+				await settle(client);
 				assert.strictEqual(count_css_updates(client), 3);
 			});
 		},
@@ -293,7 +292,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 					await wait_for(() => (count_css_updates(client) === 1 ? true : undefined));
 					send_evaluated(client, hash);
 					send_evaluated(client, hash);
-					await settle();
+					await settle(client);
 					assert.strictEqual(count_css_updates(client), 1, 'the exchange ends');
 
 					// a later change still reaches the client: the broadcast update,
@@ -308,7 +307,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 					send_evaluated(client, next_hash);
 					await wait_for(() => (count_css_updates(client) === 3 ? true : undefined));
 					send_evaluated(client, next_hash);
-					await settle();
+					await settle(client);
 					assert.strictEqual(count_css_updates(client), 3);
 
 					// the bound is per client: another one holding the first code is answered
@@ -358,7 +357,7 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 				const client = await connect();
 				send_evaluated(client, 123);
 				client.socket.send(JSON.stringify({ type: 'custom', event: 'fuz_css:evaluated' }));
-				await settle();
+				await settle(client);
 				assert.strictEqual(count_css_updates(client), 0);
 
 				// the server is still answering reports

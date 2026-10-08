@@ -1,12 +1,7 @@
 /**
- * Theme lint, numeric-twin accessibility gates, and the compile step for the
- * derived OKLCH color system.
+ * The numeric-twin accessibility gates and the compile step for the derived
+ * OKLCH color system, over the resolution core in `theme_resolver.ts`:
  *
- * Three functions sit over a shared numeric resolution core:
- *
- * - `validate_theme` is the structural lint - the `Theme` schema, known
- *   variable names, and advisory type/range warnings for the knob-tier
- *   variables.
  * - `check_theme` evaluates the gamut, ramp-monotonicity, and contrast gates
  *   against an arbitrary theme (the base theme's defaults included), reusing
  *   the `ramps.ts` numeric twin, `oklch.ts` conversions, and `wcag.ts`
@@ -14,56 +9,7 @@
  * - `compile_theme` recomputes the per-stop worst-hue chroma caps for a
  *   theme's own hues and the palette lightness each stop resolves to, emits
  *   `palette_chroma_NN` overrides where the baked caps no longer fit, then
- *   re-checks.
- *
- * The resolution core turns the CSS strings themes author back into numbers so
- * the gates can run. Its contract:
- *
- * - Knob-tier defaults come from the numeric-twin constants in `ramps.ts`, not
- *   from parsing `default_variables`; intent and neutral hues default to their
- *   palette-letter binding (`hue_accent` → `hue_a`, `hue_neutral` → `hue_f`,
- *   and so on) so they follow an overridden letter.
- * - Theme-authored values parse as a numeric literal, an exact `var(--x)`
- *   reference (recursed through the same effective-value merge, with a
- *   visited-set cycle guard), or the machine-emitted compiled-cap
- *   `min(calc(...), <number>)` form. Anything else is unresolvable and is
- *   recorded with its variable, value, and reason.
- * - Derived ramp stops (`palette_lightness_NN` and its shade/text twins,
- *   `palette_chroma_NN`, `chroma_shape_NN`) use a pinned numeric value when
- *   the theme pins one, fall back to the `ramps.ts` formulas with the
- *   resolved knobs otherwise, and mark the touching gates `unchecked` when a
- *   pin is unresolvable.
- * - The color variables the gates read (the palette, intent, shade, and text
- *   stops, `text_max`, and `border_color_30`) derive from those numbers
- *   unless the theme authors one directly. An authored color is measured as
- *   written when it is an `oklch(L C H)` literal with plain numeric
- *   components (an optional `/ alpha` composites where the gate measures a
- *   color over its ground) or an exact `var()` reference to another color
- *   the gates evaluate; any other form is recorded in `unchecked` and its
- *   gates are skipped. The gates look every color up by variable name, so
- *   this covers exactly the variables a gate reads and no others.
- * - The gates measure what the default styles paint, so they follow the
- *   roles those styles paint through: `text_color`, `text_disabled`,
- *   `link_color`, `link_color_selected`, `border_color`, and `outline_color`
- *   (`theme_gate_role_names`). Each aliases a stop or another role by
- *   default, read from the shipped declarations, and a theme that repoints
- *   one is gated at the
- *   color it points to - same rule, same `unchecked` fallback. One table of
- *   pairing gates names each role beside its grounds and threshold, so the
- *   gate definitions and the following can't drift.
- * - Outside the gates: the micro-surface colors no pairing models
- *   (`caret_color`, `selection_color`, `scrollbar_thumb_color`,
- *   `backdrop_color`), a `background_image` painted over the `shade_00`
- *   ground, and the stronger button tints of the hover, focus, and pressed
- *   states.
- *
- * The effective-value merge mirrors the renderer's cascade-layer semantics
- * (`theme.ts` `render_theme_style`): light = `theme.light`; dark =
- * `theme.dark ?? theme.light`, falling back to the numeric-twin default for
- * the scheme. A single-scheme
- * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
- * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
- * reality in both schemes whether or not the theme arrives resolved.
+ *   re-checks and lints with `validate_theme` (`theme_validate.ts`).
  *
  * @module
  */
@@ -72,30 +18,15 @@ import { clamp } from '@fuzdev/fuz_util/maths.ts';
 
 import { Theme, type StyleVariable } from './variable.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
+import { to_theme_stance } from './theme.ts';
 import { default_variables } from './variables.ts';
 import {
-	theme_knob_by_name,
-	theme_knob_hook_names,
-	HUE_BINDING_MATCHER,
-	type ThemeKnob
-} from './knobs.ts';
-import {
-	PALETTE_HUES,
-	PALETTE_CHROMA_MULTIPLIERS,
-	LIGHTNESS_KNOBS,
-	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
-	NEUTRAL_CHROMA,
-	BORDER_COLOR_LIGHTNESS,
-	BORDER_CHROMA_MULTIPLIER,
 	BORDER_COLOR_ALPHAS,
-	ramp_lightness,
-	ramp_chroma_shape,
 	ramp_color_oklch,
 	neutral_color_oklch,
 	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
-	type LightnessRampKnobs,
 	type RampFamily
 } from './ramps.ts';
 import {
@@ -103,13 +34,20 @@ import {
 	palette_variants,
 	intent_variants,
 	color_scheme_variants,
-	palette_glosses,
 	type NumericScaleVariant,
 	type ColorSchemeVariant,
 	type PaletteVariant
 } from './variable_data.ts';
-import { oklch_to_srgb, type RgbUnit } from './oklch.ts';
+import { clamp_oklch, oklch_to_srgb, type RgbUnit } from './oklch.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
+import {
+	CSS_NUMBER_PATTERN,
+	NUMERIC_EPSILON,
+	STOPS_PATTERN,
+	ThemeResolver,
+	VAR_MATCHER
+} from './theme_resolver.ts';
+import { type ThemeIssue, validate_theme } from './theme_validate.ts';
 
 //
 // Gate thresholds - the WCAG levels the derived palette is designed to clear.
@@ -170,34 +108,9 @@ export const GATE_BORDER_DIVIDER = 1.3;
  */
 export const GATE_GAMUT_TOLERANCE = 1e-4;
 
-// equality slack for resolved hue angles and chroma multipliers
-const NUMERIC_EPSILON = 1e-9;
-
-/**
- * The variable names a theme may set: the declared defaults plus the hook
- * knobs `style.css` consumes through `var()` fallbacks. The authoring-side
- * companion to `validate_theme`, for tooling that completes or checks names
- * before a theme is assembled.
- */
-export const known_theme_variable_names: Set<string> = new Set([
-	...default_variables.map((v) => v.name),
-	...theme_knob_hook_names
-]);
-
 //
 // Report types.
 //
-
-/**
- * A structural lint finding. `error` marks a broken theme (bad shape, unknown
- * variable); `warning` is advisory (value doesn't match the knob's kind, sits
- * outside its safe range, or is a dark slot on a single-scheme-stanced theme).
- */
-export interface ThemeIssue {
-	level: 'error' | 'warning';
-	message: string;
-	variable?: string;
-}
 
 /** Which accessibility gate an entry belongs to. */
 export type ThemeGateId = 'gamut' | 'monotonicity' | 'contrast';
@@ -248,625 +161,6 @@ export interface CompiledTheme {
 }
 
 //
-// Resolution core.
-//
-
-/** A resolved numeric value, or the offending variable/value/reason on failure. */
-type Resolved =
-	{ ok: true; value: number } | { ok: false; variable: string; value: string; reason: string };
-
-/**
- * Intent and neutral hues default to a palette-letter binding - derived by
- * inverting `palette_glosses` so rebinding an intent there flows through.
- */
-const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = Object.fromEntries(
-	Object.entries(palette_glosses).flatMap(([letter, gloss]) =>
-		gloss.binding ? [[`hue_${gloss.binding}`, `hue_${letter}`]] : []
-	)
-);
-
-const PALETTE_LETTER_MATCHER = /^hue_([a-j])$/u;
-const PALETTE_MULTIPLIER_MATCHER = /^palette_([a-j])_chroma_scale$/u;
-const INTENT_MULTIPLIER_MATCHER = /^(accent|positive|negative|caution|info)_chroma_scale$/u;
-const LIGHTNESS_KNOB_MATCHER = /^(palette|shade|text)_lightness_(00|100|curve)$/u;
-// the stop alternations, built from the variant list so a scale change can't strand them
-const STOPS_PATTERN = numeric_scale_variants.join('|');
-const DERIVED_STOPS_PATTERN = numeric_scale_variants.slice(1, -1).join('|');
-const LIGHTNESS_STOP_MATCHER = new RegExp(
-	`^(palette|shade|text)_lightness_(${DERIVED_STOPS_PATTERN})$`,
-	'u'
-);
-const PALETTE_CHROMA_STOP_MATCHER = new RegExp(`^palette_chroma_(${STOPS_PATTERN})$`, 'u');
-const CHROMA_SHAPE_STOP_MATCHER = new RegExp(`^chroma_shape_(${STOPS_PATTERN})$`, 'u');
-const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
-// the scaled-reference form emitted for `border_color_chroma`
-// (`calc(var(--neutral_chroma) * 2.12)`) and useful for authored multipliers
-const SCALED_VAR_MATCHER = /^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(-?\d*\.?\d+)\s*\)$/u;
-
-/**
- * The compiled worst-hue cap form emitted by `render_chroma_stop_css`:
- * `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_NN)), <number>)`.
- * Recognizing it keeps compiled themes fully checkable.
- */
-const COMPILED_CAP_MATCHER = new RegExp(
-	String.raw`^min\(\s*calc\(\s*var\(--palette_chroma_min\)\s*\+\s*\(\s*var\(--palette_chroma_max\)\s*-\s*var\(--palette_chroma_min\)\s*\)\s*\*\s*var\(--chroma_shape_(${STOPS_PATTERN})\)\s*\)\s*,\s*(-?\d*\.?\d+)\s*\)$`,
-	'u'
-);
-
-/**
- * Resolves knob-tier and derived-stop variables of a single theme to numbers,
- * mirroring the renderer's effective-value merge and the `ramps.ts` formulas.
- */
-class ThemeResolver {
-	readonly #by_name: Map<string, StyleVariable>;
-	readonly #authored_names: Set<string>;
-	readonly #memo: Map<string, Resolved> = new Map();
-
-	constructor(theme: Theme) {
-		this.#by_name = new Map(theme.variables.map((v) => [v.name, v]));
-		this.#authored_names = new Set(this.#by_name.keys());
-		// a single-scheme stance resolves through the renderer's mirror, so both
-		// schemes see the stanced values; mirror entries are not author pins
-		if (theme.scheme === 'light' || theme.scheme === 'dark') {
-			for (const v of scheme_stance_variables(theme.scheme, theme.variables)) {
-				this.#by_name.set(v.name, v);
-			}
-		}
-	}
-
-	/** Whether the theme authors a value for `name` (a pin). */
-	pinned(name: string): boolean {
-		return this.#authored_names.has(name);
-	}
-
-	/**
-	 * The theme's own value for `name` in `scheme` (a pin), or `undefined` when
-	 * it authors none for that slot. Stance-mirror entries are not pins.
-	 */
-	authored(name: string, scheme: ColorSchemeVariant): string | undefined {
-		return this.#authored_names.has(name) ? this.#slot_value(name, scheme) : undefined;
-	}
-
-	/** Resolves `name` for `scheme`, memoized per name+scheme. */
-	resolve(name: string, scheme: ColorSchemeVariant): Resolved {
-		const key = `${scheme}|${name}`;
-		const cached = this.#memo.get(key);
-		if (cached) return cached;
-		const result = this.#resolve(name, scheme, new Set());
-		this.#memo.set(key, result);
-		return result;
-	}
-
-	// the effective value for a slot (authored or stance-mirrored), honoring
-	// the dark → light fallback
-	#slot_value(name: string, scheme: ColorSchemeVariant): string | undefined {
-		const v = this.#by_name.get(name);
-		if (!v) return undefined;
-		return scheme === 'light' ? v.light : (v.dark ?? v.light);
-	}
-
-	#resolve(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
-		if (visited.has(name)) {
-			return {
-				ok: false,
-				variable: name,
-				value: `var(--${name})`,
-				reason: 'cyclic var() reference'
-			};
-		}
-		const next = new Set(visited);
-		next.add(name);
-		const value = this.#slot_value(name, scheme);
-		if (value !== undefined) return this.#parse(name, value, scheme, next);
-		return this.#resolve_default(name, scheme, next);
-	}
-
-	#parse(name: string, value: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
-		const trimmed = value.trim();
-		// numeric literal
-		if (trimmed !== '') {
-			const n = Number(trimmed);
-			if (Number.isFinite(n)) return { ok: true, value: n };
-		}
-		// exactly var(--x) - recurse through the same merge
-		const var_match = VAR_MATCHER.exec(trimmed);
-		if (var_match) return this.#resolve(var_match[1]!, scheme, visited);
-		// calc(var(--x) * k) - a scaled reference, resolved then multiplied
-		const scaled_match = SCALED_VAR_MATCHER.exec(trimmed);
-		if (scaled_match) {
-			const inner = this.#resolve(scaled_match[1]!, scheme, visited);
-			if (!inner.ok) return inner;
-			return { ok: true, value: inner.value * Number(scaled_match[2]) };
-		}
-		// machine-emitted compiled cap form
-		const cap = this.#parse_compiled_cap(trimmed, scheme, visited);
-		if (cap) return cap;
-		return { ok: false, variable: name, value: trimmed, reason: 'unrecognized value expression' };
-	}
-
-	#parse_compiled_cap(
-		value: string,
-		scheme: ColorSchemeVariant,
-		visited: Set<string>
-	): Resolved | null {
-		const m = COMPILED_CAP_MATCHER.exec(value);
-		if (!m) return null;
-		return this.#capped_chroma(m[1] as NumericScaleVariant, Number(m[2]), scheme, visited);
-	}
-
-	// a palette chroma stop: the requested curve clamped by a worst-hue cap -
-	// the numeric twin of `render_chroma_stop_css`, reading the stop's shape
-	// through the resolver so a pinned `chroma_shape_NN` is honored
-	#capped_chroma(
-		stop: NumericScaleVariant,
-		cap: number,
-		scheme: ColorSchemeVariant,
-		visited: Set<string>
-	): Resolved {
-		const r = this.#resolve_all(
-			['palette_chroma_min', 'palette_chroma_max', `chroma_shape_${stop}`],
-			scheme,
-			visited
-		);
-		if (!r.ok) return r.error;
-		const [chroma_min, chroma_max, shape] = r.values;
-		const requested = chroma_min! + (chroma_max! - chroma_min!) * shape!;
-		return { ok: true, value: Math.min(requested, cap) };
-	}
-
-	#resolve_default(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
-		// palette letters
-		const letter_match = PALETTE_LETTER_MATCHER.exec(name);
-		if (letter_match) return { ok: true, value: PALETTE_HUES[letter_match[1] as PaletteVariant] };
-		// intent/neutral hues default to a palette-letter binding
-		const binding = INTENT_HUE_DEFAULT_BINDING[name];
-		if (binding) return this.#resolve(binding, scheme, visited);
-		// per-slot chroma multipliers
-		const multiplier_match = PALETTE_MULTIPLIER_MATCHER.exec(name);
-		if (multiplier_match) {
-			return {
-				ok: true,
-				value: PALETTE_CHROMA_MULTIPLIERS[multiplier_match[1] as PaletteVariant]
-			};
-		}
-		if (INTENT_MULTIPLIER_MATCHER.test(name)) return { ok: true, value: 1 };
-		// scalar knobs
-		if (name === 'chroma_scale') return { ok: true, value: 1 };
-		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
-		if (name === 'border_color_lightness') {
-			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };
-		}
-		if (name === 'border_color_chroma') {
-			// derives from the neutral so a retinted theme flows through
-			const neutral = this.#resolve('neutral_chroma', scheme, visited);
-			if (!neutral.ok) return neutral;
-			return { ok: true, value: neutral.value * BORDER_CHROMA_MULTIPLIER[scheme] };
-		}
-		if (name === 'palette_chroma_min') {
-			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_min };
-		}
-		if (name === 'palette_chroma_max') {
-			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].chroma_max };
-		}
-		if (name === 'chroma_curve') {
-			return { ok: true, value: PALETTE_CHROMA_KNOBS[scheme].curve };
-		}
-		// lightness endpoints and curve
-		const knob_match = LIGHTNESS_KNOB_MATCHER.exec(name);
-		if (knob_match) {
-			const knobs = LIGHTNESS_KNOBS[knob_match[1] as RampFamily][scheme];
-			const field = knob_match[2];
-			const value =
-				field === '00' ? knobs.lightness_00 : field === '100' ? knobs.lightness_100 : knobs.curve;
-			return { ok: true, value };
-		}
-		// derived lightness intermediates - compute from the resolved knobs
-		const stop_match = LIGHTNESS_STOP_MATCHER.exec(name);
-		if (stop_match) {
-			const family = stop_match[1] as RampFamily;
-			const stop = stop_match[2] as NumericScaleVariant;
-			const knobs = this.#lightness_knobs(family, scheme, visited);
-			if (!knobs.ok) return knobs.error;
-			return { ok: true, value: ramp_lightness(knobs.value, stop) };
-		}
-		// derived chroma shape stops - the normalized curve both the palette
-		// chroma ramp and the neutral scales ride
-		const shape_match = CHROMA_SHAPE_STOP_MATCHER.exec(name);
-		if (shape_match) {
-			const curve = this.#resolve('chroma_curve', scheme, visited);
-			if (!curve.ok) return curve;
-			return {
-				ok: true,
-				value: ramp_chroma_shape(shape_match[1] as NumericScaleVariant, curve.value)
-			};
-		}
-		// derived palette chroma stops - the knob curve under the baked cap
-		const chroma_match = PALETTE_CHROMA_STOP_MATCHER.exec(name);
-		if (chroma_match) {
-			const stop = chroma_match[1] as NumericScaleVariant;
-			return this.#capped_chroma(stop, PALETTE_CHROMA_CAPS[scheme][stop], scheme, visited);
-		}
-		return {
-			ok: false,
-			variable: name,
-			value: '(default)',
-			reason: 'no numeric default for variable'
-		};
-	}
-
-	// resolves every name to a number, bailing with the first failure
-	#resolve_all(
-		names: Array<string>,
-		scheme: ColorSchemeVariant,
-		visited: Set<string>
-	): { ok: true; values: Array<number> } | { ok: false; error: Resolved } {
-		const values: Array<number> = [];
-		for (const name of names) {
-			const r = this.#resolve(name, scheme, visited);
-			if (!r.ok) return { ok: false, error: r };
-			values.push(r.value);
-		}
-		return { ok: true, values };
-	}
-
-	#lightness_knobs(
-		family: RampFamily,
-		scheme: ColorSchemeVariant,
-		visited: Set<string>
-	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
-		const r = this.#resolve_all(
-			[`${family}_lightness_00`, `${family}_lightness_100`, `${family}_lightness_curve`],
-			scheme,
-			visited
-		);
-		if (!r.ok) return r;
-		const [lightness_00, lightness_100, curve] = r.values;
-		return {
-			ok: true,
-			value: { lightness_00: lightness_00!, lightness_100: lightness_100!, curve: curve! }
-		};
-	}
-}
-
-/**
- * A reusable numeric resolver over one theme - the memoized query surface for
- * UI display (the theme editor's derived-knob readouts) and tests.
- */
-export interface ThemeKnobResolver {
-	/** Resolves `name` for `scheme` to a number, or `null` when it can't be resolved. */
-	resolve(name: string, scheme: ColorSchemeVariant): number | null;
-	/** Whether the theme authors a value for `name` (a pin; stance-mirror entries excluded). */
-	pinned(name: string): boolean;
-}
-
-/**
- * Creates a `ThemeKnobResolver` for `theme`, sharing the resolution core used
- * by `validate_theme`/`check_theme`/`compile_theme`. The instance memoizes per
- * name+scheme, so repeated lookups (a UI rendering every knob) stay cheap -
- * create one per theme value and discard when the theme changes.
- */
-export const create_theme_resolver = (theme: Theme): ThemeKnobResolver => {
-	const resolver = new ThemeResolver(theme);
-	return {
-		resolve: (name, scheme) => {
-			const r = resolver.resolve(name, scheme);
-			return r.ok ? r.value : null;
-		},
-		pinned: (name) => resolver.pinned(name)
-	};
-};
-
-//
-// validate_theme - the structural lint.
-//
-
-const validate_knob_value = (
-	knob: ThemeKnob,
-	value: string,
-	variable: string,
-	slot: string
-): Array<ThemeIssue> => {
-	const issues: Array<ThemeIssue> = [];
-	const trimmed = value.trim();
-	// a plain decimal - `Number()` alone would also take hex, binary, and
-	// exponent forms that aren't the CSS numbers a knob carries
-	const numeric = /^-?\d*\.?\d+$/u.test(trimmed);
-	const check_range = (n: number): void => {
-		if (knob.range && (n < knob.range[0] || n > knob.range[1])) {
-			issues.push({
-				level: 'warning',
-				message: `${variable} ${slot} ${trimmed} is outside the safe range [${knob.range[0]}, ${
-					knob.range[1]
-				}], the design envelope (knowingly exceedable)`,
-				variable
-			});
-		}
-	};
-	// reference forms the resolver understands - var(--x) and the scaled
-	// calc(var(--x) * k) (e.g. border_color_chroma's derived default) - pass
-	// without a range check, which needs the resolved value
-	const is_reference = VAR_MATCHER.test(trimmed) || SCALED_VAR_MATCHER.test(trimmed);
-	switch (knob.kind) {
-		case 'number': {
-			if (!numeric && !is_reference) {
-				issues.push({
-					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a numeric value`,
-					variable
-				});
-			} else if (numeric) {
-				check_range(Number(trimmed));
-			}
-			break;
-		}
-		case 'percent': {
-			// the CSS form (`60%`), which is what the defaults declare and the
-			// editor writes; the range is in percent units
-			const percent_match = /^(-?\d*\.?\d+)%$/u.exec(trimmed);
-			if (!percent_match && !is_reference) {
-				issues.push({
-					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a CSS percentage like 60%`,
-					variable
-				});
-			} else if (percent_match) {
-				check_range(Number(percent_match[1]));
-			}
-			break;
-		}
-		case 'hue': {
-			// a literal angle, or a var() binding (legal CSS regardless of `bindable`)
-			if (!numeric && !is_reference) {
-				issues.push({
-					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a hue angle or var() binding`,
-					variable
-				});
-			} else if (numeric) {
-				check_range(Number(trimmed));
-			}
-			break;
-		}
-		case 'time': {
-			// seconds or milliseconds; the range is in seconds
-			const time_match = /^(-?\d*\.?\d+)(s|ms)$/u.exec(trimmed);
-			if (!time_match && !is_reference) {
-				issues.push({
-					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a CSS time value like 0.2s`,
-					variable
-				});
-			} else if (time_match) {
-				const n = Number(time_match[1]);
-				check_range(time_match[2] === 'ms' ? n / 1000 : n);
-			}
-			break;
-		}
-		case 'enum': {
-			if (knob.values && !knob.values.includes(trimmed) && !is_reference) {
-				issues.push({
-					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not one of ${knob.values.join(', ')}`,
-					variable
-				});
-			}
-			break;
-		}
-		default:
-			// length, color, font_stack, shadow, text - freeform, advisory only
-			break;
-	}
-	return issues;
-};
-
-// maps one schema issue onto a `ThemeIssue`, naming the variable it landed on
-// when the path points into `variables`/`scheme_mirror` - the schema reports
-// the whole theme at once, so the path is what carries the location
-const to_shape_issue = (
-	theme: unknown,
-	path: ReadonlyArray<PropertyKey>,
-	message: string
-): ThemeIssue => {
-	const [head, index] = path;
-	if (head === 'variables' || head === 'scheme_mirror') {
-		const list =
-			typeof theme === 'object' && theme !== null
-				? (theme as Record<string, unknown>)[head]
-				: undefined;
-		const entry: unknown =
-			Array.isArray(list) && typeof index === 'number' ? list[index] : undefined;
-		const name =
-			typeof entry === 'object' &&
-			entry !== null &&
-			typeof (entry as { name?: unknown }).name === 'string'
-				? (entry as { name: string }).name
-				: undefined;
-		return {
-			level: 'error',
-			message: `invalid variable${name ? ` "${name}"` : ''}: ${message}`,
-			...(name ? { variable: name } : null)
-		};
-	}
-	return { level: 'error', message: path.length ? `${path.join('.')}: ${message}` : message };
-};
-
-/**
- * Lints a theme's structure: the `Theme` schema (errors), a known name per
- * variable (errors), and advisory type/range warnings for the knob-tier
- * variables - including a pairing warning when an intent hue binds a palette
- * letter whose chroma multiplier differs from the intent's own
- * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
- * chroma character is otherwise silently dropped), and a separation warning
- * when the accent hue lands within `ACCENT_STATUS_HUE_SEPARATION` of a
- * status hue. Value validation is
- * advisory and never an error. An empty array means the theme is structurally
- * valid.
- *
- * A shape failure returns on its own: the knob lint reads values the schema
- * hasn't vouched for, so it runs only over a theme that parsed. Takes
- * `unknown` so untrusted input (a theme restored from storage, a pasted
- * object) needs no cast to be checked.
- */
-export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
-	const parsed = Theme.safeParse(theme);
-	if (!parsed.success) {
-		return parsed.error.issues.map((issue) => to_shape_issue(theme, issue.path, issue.message));
-	}
-	const issues: Array<ThemeIssue> = [];
-	const { scheme, scheme_mirror } = parsed.data;
-	const stance = scheme === 'light' || scheme === 'dark' ? scheme : null;
-	// a stanced theme renders correctly only with its mirror computed - the
-	// gates here resolve through the mirror either way, so without this warning
-	// a hand-rolled stanced theme checks clean but renders unmirrored
-	if (stance && scheme_mirror === undefined) {
-		issues.push({
-			level: 'warning',
-			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
-		});
-	}
-	for (const valid of parsed.data.variables) {
-		if (!known_theme_variable_names.has(valid.name)) {
-			issues.push({
-				level: 'error',
-				message: `unknown variable "${valid.name}"`,
-				variable: valid.name
-			});
-			continue;
-		}
-		// a stanced theme renders one appearance in both color schemes, so a
-		// dark slot only shadows the base slot when the `.dark` class is set,
-		// silently splitting the appearances the stance promises to unify
-		if (stance && valid.dark !== undefined) {
-			issues.push({
-				level: 'warning',
-				message: `"${valid.name}" carries a dark slot under a '${
-					stance
-				}' scheme stance - stanced themes render one appearance in both color schemes, so author single-slot values`,
-				variable: valid.name
-			});
-		}
-		const knob = theme_knob_by_name.get(valid.name);
-		if (!knob) continue;
-		if (valid.light !== undefined) {
-			issues.push(...validate_knob_value(knob, valid.light, valid.name, 'light'));
-		}
-		if (valid.dark !== undefined) {
-			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));
-		}
-	}
-	const resolver = new ThemeResolver(parsed.data);
-	issues.push(...validate_binding_pairing(parsed.data, resolver));
-	issues.push(...validate_accent_separation(parsed.data, resolver));
-	return issues;
-};
-
-/**
- * How far in degrees the accent hue has to sit from each status hue before
- * `validate_theme` stops warning. Under the palette's tightest default pair
- * (red and orange, 12 degrees apart), so the warning fires on a clone or a
- * near-clone, never on the spacing the defaults themselves ship.
- */
-export const ACCENT_STATUS_HUE_SEPARATION = 10;
-
-// the separation lint: two intents at the same hue angle render the same
-// color at every stop, so an accent that lands on a status hue makes links,
-// focus, and selection indistinguishable from that status. Each scheme is
-// read through its own effective slot, and a hue that won't resolve to a
-// number is skipped rather than guessed at
-const validate_accent_separation = (theme: Theme, resolver: ThemeResolver): Array<ThemeIssue> => {
-	const issues: Array<ThemeIssue> = [];
-	// a stanced theme renders one appearance, so name that scheme alone
-	const schemes =
-		theme.scheme === 'light' || theme.scheme === 'dark' ? [theme.scheme] : color_scheme_variants;
-	// the schemes where two intents at one hue can't be told apart by mistake:
-	// a grayscale palette has no hue to collide, and a palette collapsed onto
-	// one angle is monochrome on purpose
-	const checked = schemes.filter((scheme) => {
-		const chroma_scale = resolver.resolve('chroma_scale', scheme);
-		if (chroma_scale.ok && chroma_scale.value === 0) return false;
-		const hues = palette_variants.map((letter) => resolver.resolve(`hue_${letter}`, scheme));
-		const first = hues[0]!;
-		const collapsed =
-			first.ok &&
-			hues.every(
-				(hue) => hue.ok && hue_distance(hue.value, first.value) < ACCENT_STATUS_HUE_SEPARATION
-			);
-		return !collapsed;
-	});
-	for (const intent of intent_variants) {
-		if (intent === 'accent') continue;
-		for (const scheme of checked) {
-			const accent = resolver.resolve('hue_accent', scheme);
-			const status = resolver.resolve(`hue_${intent}`, scheme);
-			if (!accent.ok || !status.ok) continue;
-			const distance = hue_distance(accent.value, status.value);
-			if (distance < ACCENT_STATUS_HUE_SEPARATION) {
-				issues.push({
-					level: 'warning',
-					message: `hue_accent sits ${Math.round(distance)} degrees from hue_${
-						intent
-					} in ${scheme} - intents at one hue render the same color, so links, focus, and selection read as ${
-						intent
-					}; rebind one of them`,
-					variable: 'hue_accent'
-				});
-				break;
-			}
-		}
-	}
-	return issues;
-};
-
-// the shorter way around the hue circle, for angles in any range
-const hue_distance = (a: number, b: number): number => {
-	const turn = (((a - b) % 360) + 360) % 360;
-	return Math.min(turn, 360 - turn);
-};
-
-// the pairing lint: an intent hue bound to a palette letter (authored
-// `var(--hue_X)` or the default binding) shares only the angle, so warn when
-// the letter's chroma multiplier and the intent's twin disagree - the theme
-// probably meant the character to follow the binding (the neutral is exempt:
-// its character is `--neutral_chroma` by design)
-const validate_binding_pairing = (theme: Theme, resolver: ThemeResolver): Array<ThemeIssue> => {
-	const issues: Array<ThemeIssue> = [];
-	for (const intent of intent_variants) {
-		const hue_name = `hue_${intent}`;
-		const authored = theme.variables.find((v) => v.name === hue_name);
-		const default_letter = INTENT_HUE_DEFAULT_BINDING[hue_name]!.slice('hue_'.length);
-		for (const scheme of color_scheme_variants) {
-			// each scheme binds through its own effective slot, so a theme that
-			// binds a muted letter in only one scheme still gets the warning
-			const slot = scheme === 'light' ? authored?.light : (authored?.dark ?? authored?.light);
-			const letter =
-				slot === undefined ? default_letter : HUE_BINDING_MATCHER.exec(slot.trim())?.[1];
-			if (!letter) continue; // a literal angle binds no letter
-			const letter_multiplier = resolver.resolve(`palette_${letter}_chroma_scale`, scheme);
-			const intent_multiplier = resolver.resolve(`${intent}_chroma_scale`, scheme);
-			if (
-				letter_multiplier.ok &&
-				intent_multiplier.ok &&
-				Math.abs(letter_multiplier.value - intent_multiplier.value) > NUMERIC_EPSILON
-			) {
-				issues.push({
-					level: 'warning',
-					message: `${hue_name} binds palette letter ${letter} (chroma multiplier ${
-						letter_multiplier.value
-					}) but ${intent}_chroma_scale is ${
-						intent_multiplier.value
-					} - a binding shares only the hue angle, so set ${
-						intent
-					}_chroma_scale to carry the slot's chroma character`,
-					variable: hue_name
-				});
-				break;
-			}
-		}
-	}
-	return issues;
-};
-
-//
 // check_theme - the numeric-twin accessibility gates.
 //
 
@@ -898,9 +192,6 @@ interface GateColor {
 	alpha: number;
 }
 
-// a CSS <number>, which is stricter than what `Number()` accepts
-const CSS_NUMBER_PATTERN = String.raw`[+-]?(?:\d*\.)?\d+(?:e[+-]?\d+)?`;
-
 // the color literal the gates evaluate: `oklch(L C H)` with plain numeric
 // components and an optional `/ alpha` (a number or a percentage)
 const OKLCH_LITERAL_MATCHER = new RegExp(
@@ -915,7 +206,7 @@ const parse_color_literal = (value: string): GateColor | null => {
 	if (!m) return null;
 	const alpha = m[4] === undefined ? 1 : Number(m[4]) / (m[5] ? 100 : 1);
 	return {
-		rgb: oklch_to_srgb([clamp(Number(m[1]), 0, 1), Math.max(0, Number(m[2])), Number(m[3])]),
+		rgb: oklch_to_srgb(clamp_oklch([Number(m[1]), Number(m[2]), Number(m[3])])),
 		alpha: clamp(alpha, 0, 1)
 	};
 };
@@ -1045,7 +336,7 @@ const NO_VISITS: ReadonlySet<string> = new Set();
  */
 export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const resolver = new ThemeResolver(theme);
-	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
+	const stance = to_theme_stance(theme.scheme);
 	const entries: Array<ThemeGateEntry> = [];
 	const unchecked: Array<ThemeUncheckedEntry> = [];
 	const seen_unchecked: Set<string> = new Set();
@@ -1207,7 +498,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			// mirrors into both schemes - so it follows the stance
 			const stop = border_match[1] as NumericScaleVariant;
 			const alpha = BORDER_COLOR_ALPHAS[stance ?? scheme][stop] / 100;
-			return { rgb: oklch_to_srgb([border_l, border_c, border_h]), alpha };
+			return { rgb: oklch_to_srgb(clamp_oklch([border_l, border_c, border_h])), alpha };
 		}
 		const alias = ALIAS_DEFAULTS.get(name);
 		if (alias !== undefined) {
@@ -1482,7 +773,7 @@ const collect_hues = (
  */
 export const compile_theme = (theme: Theme): CompiledTheme => {
 	const resolver = new ThemeResolver(theme);
-	const stance = theme.scheme === 'light' || theme.scheme === 'dark' ? theme.scheme : null;
+	const stance = to_theme_stance(theme.scheme);
 
 	const hues: Record<ColorSchemeVariant, Array<number> | null> = {
 		light: collect_hues(resolver, 'light'),
@@ -1499,7 +790,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		const key = `${lightness.value}|${scheme_hues.join(',')}`;
 		let cap = caps.get(key);
 		if (cap === undefined) {
-			cap = compute_worst_hue_chroma_cap(scheme_hues, lightness.value);
+			// at the lightness the browser renders, which clamps an overshoot
+			cap = compute_worst_hue_chroma_cap(scheme_hues, clamp(lightness.value, 0, 1));
 			caps.set(key, cap);
 		}
 		return cap;

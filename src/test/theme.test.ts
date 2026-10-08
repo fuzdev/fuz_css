@@ -103,6 +103,11 @@ describe('scheme stance', () => {
 		assert.isAbove(theme.scheme_mirror!.length, 0);
 	});
 
+	test('resolve_theme_stance leaves a resolved theme unchanged', () => {
+		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
+		assert.strictEqual(resolve_theme_stance(resolved), resolved);
+	});
+
 	test('resolve_theme_stance leaves a dual-scheme theme unchanged', () => {
 		const theme: Theme = { name: 't', variables: [], scheme: 'dual' };
 		assert.strictEqual(resolve_theme_stance(theme), theme);
@@ -283,7 +288,21 @@ const assert_theme_css_is_contained = (css: string): void => {
 	let text = '';
 	for (let i = 0; i < css.length; i++) {
 		const char = css[i]!;
-		if (char === '"' || char === "'") {
+		const url = /^url\([ \t\n\r\f]*(?!["'])/iu.exec(css.slice(i));
+		if (url && !/[-\w\u{80}-\u{10FFFF}\\]/u.test(css[i - 1] ?? '')) {
+			// an unquoted url reads raw to its `)` - a quote there is no string,
+			// and anything that makes the token malformed is an escape
+			const end = css.indexOf(')', i);
+			assert.isAbove(end, -1, 'every url closes');
+			assert.match(
+				css.slice(i + url[0].length, end),
+				/^[^"'(\\\s]*[ \t\n\r\f]*$/u,
+				'every unquoted url is well-formed'
+			);
+			i = end;
+		} else if (char === '\\') {
+			assert.fail('no escape outside a string');
+		} else if (char === '"' || char === "'") {
 			// strings are inert - skip to the matching quote
 			let end = i + 1;
 			while (end < css.length && css[end] !== char) {
@@ -427,7 +446,9 @@ describe('render_theme_style over malformed themes', () => {
 			':root {\n\t--a: calc(1;\n}',
 			':root {\n\t--a: "1;\n}',
 			':root {\n\t--a: "\n} body { display: none; } b { --c: ";\n}',
-			':root {\n\t--a: 1\n}'
+			':root {\n\t--a: 1\n}',
+			':root {\n\t--a: url(a"x)} body { display: none; } b { --c: ");\n}',
+			':root {\n\t--a: \\75 rl(a);\n}'
 		]) {
 			assert.throws(() => assert_theme_css_is_contained(css), undefined, undefined, css);
 		}
@@ -470,6 +491,9 @@ describe('render_theme_style over malformed themes', () => {
 			'1)',
 			'"unclosed',
 			'trailing\\',
+			'url(a"x)} body { display: none } b { --c: ")',
+			"U\\72 L(a'x)} body { display: none } b { --c: ')",
+			'url(a b)',
 			'line\nbreak',
 			'a: 1; } :root { --b'
 		];

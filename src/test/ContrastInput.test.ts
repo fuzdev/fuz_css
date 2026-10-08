@@ -1,33 +1,25 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, test, assert, afterEach } from 'vitest';
+import { describe, test, assert } from 'vitest';
 import { flushSync } from 'svelte';
 
 import ContrastInput from '$routes/ContrastInput.svelte';
 import { contrast_modifiers } from '$lib/themes.ts';
 import type { Theme } from '$lib/variable.ts';
-import { mount_component, unmount_component } from './component_test_helpers.ts';
+import { create_mount_tracker } from './component_test_helpers.ts';
 
-let mounted: { instance: Record<string, any>; container: HTMLElement } | null = null;
-
-afterEach(async () => {
-	if (mounted) {
-		await unmount_component(mounted.instance, mounted.container);
-		mounted = null;
-	}
-});
+const mount = create_mount_tracker();
 
 const mount_input = (
 	props: Partial<{ selected: Theme | null; select: (m: Theme | null) => void }> = {}
 ): HTMLElement => {
-	mounted = mount_component(ContrastInput as any, {
+	return mount(ContrastInput, {
 		modifiers: contrast_modifiers,
 		selected: null,
 		select: () => {},
 		...props
 	});
-	return mounted.container;
 };
 
 const buttons = (container: HTMLElement): Array<HTMLButtonElement> =>

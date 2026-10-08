@@ -541,9 +541,7 @@ export const default_variables: Array<StyleVariable> = [
 		light: `${width}px`
 	})),
 	{ name: 'outline_width', light: '0' },
-	// TODO maybe rename _2 to `focus`
 	{ name: 'outline_width_focus', light: 'var(--border_width_2)' },
-	// TODO maybe rename _3 to `active`
 	{ name: 'outline_width_active', light: 'var(--border_width_1)' },
 	{ name: 'outline_style', light: 'solid' },
 	{ name: 'outline_color', light: 'var(--accent_50)' },

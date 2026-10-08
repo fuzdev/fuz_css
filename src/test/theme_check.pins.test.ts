@@ -9,7 +9,6 @@ import { test, assert, describe } from 'vitest';
 
 import {
 	check_theme,
-	create_theme_resolver,
 	theme_gate_role_names,
 	GATE_BORDER,
 	GATE_LINK,
@@ -17,21 +16,17 @@ import {
 	type ThemeCheckReport,
 	type ThemeGateId
 } from '$lib/theme_check.ts';
-import type { StyleVariable, Theme } from '$lib/variable.ts';
-import { default_themes } from '$lib/themes.ts';
+import { create_theme_resolver } from '$lib/theme_resolver.ts';
+import type { StyleVariable } from '$lib/variable.ts';
+import { base_theme } from '$lib/themes/base.ts';
 import { zine_theme } from '$lib/themes/zine.ts';
 import { default_variables } from '$lib/variables.ts';
-import {
-	PALETTE_CHROMA_KNOBS,
-	palette_stop_oklch,
-	shade_stop_oklch,
-	text_stop_oklch
-} from '$lib/ramps.ts';
+import { palette_stop_oklch, shade_stop_oklch, text_stop_oklch } from '$lib/ramps.ts';
 import { oklch_to_srgb, type Oklch, type RgbUnit } from '$lib/oklch.ts';
 import { wcag_contrast_ratio } from '$lib/wcag.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 
-const base_report = check_theme(default_themes[0]!);
+const base_report = check_theme(base_theme);
 
 const check = (...variables: Array<StyleVariable>): ThemeCheckReport =>
 	check_theme({ name: 't', variables });
@@ -240,6 +235,20 @@ describe('pinned color stops', () => {
 		);
 	});
 
+	test('a derived lightness past an end is evaluated the way the browser clamps it', () => {
+		// `oklch(var(--l) …)` clamps at computed-value time, so an overshooting
+		// ground renders as the white a pin of 1 gives
+		const overshoot = check({ name: 'shade_lightness_00', light: '1.03' });
+		const at_end = check({ name: 'shade_lightness_00', light: '1' });
+		assert.strictEqual(get_entry(overshoot, 'gamut', 'light', 'shade_00').value, 0);
+		assert.strictEqual(get_entry(at_end, 'gamut', 'light', 'shade_00').value, 0);
+		assert.closeTo(
+			get_entry(overshoot, 'contrast', 'light', 'text_80 on shade_00').value,
+			get_entry(at_end, 'contrast', 'light', 'text_80 on shade_00').value,
+			1e-9
+		);
+	});
+
 	test.each([
 		['a hex color', '#777'],
 		['a named color', 'gray'],
@@ -280,22 +289,6 @@ describe('pinned color stops', () => {
 });
 
 describe('pinned chroma shape', () => {
-	test('the resolver reads a pinned chroma_shape_NN through the palette chroma stop', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'chroma_shape_50', light: '0.5' }] };
-		const resolver = create_theme_resolver(theme);
-		assert.strictEqual(resolver.resolve('chroma_shape_50', 'light'), 0.5);
-		const { chroma_min, chroma_max } = PALETTE_CHROMA_KNOBS.light;
-		assert.closeTo(
-			resolver.resolve('palette_chroma_50', 'light')!,
-			chroma_min + (chroma_max - chroma_min) * 0.5,
-			1e-12
-		);
-		// unpinned stops keep the curve-derived shape: 1 at the midpoint, 0 at the ends
-		const defaults = create_theme_resolver({ name: 't', variables: [] });
-		assert.strictEqual(defaults.resolve('chroma_shape_50', 'light'), 1);
-		assert.strictEqual(defaults.resolve('chroma_shape_00', 'light'), 0);
-	});
-
 	test('a pinned shape tints the neutral stop the gates evaluate', () => {
 		// stop 00 is untinted by default; a shape pinned there gives the page
 		// ground the full neutral chroma, far outside sRGB that close to white

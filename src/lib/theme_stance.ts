@@ -18,6 +18,7 @@
 
 import { scheme_adaptive_variables } from './scheme_adaptive_variables.ts';
 import type { StyleVariable, Theme } from './variable.ts';
+import { to_theme_stance } from './theme.ts';
 
 /**
  * Computes the mirror a single-scheme stance implies: every scheme-adaptive
@@ -50,7 +51,8 @@ export const scheme_stance_variables = (
 /**
  * Resolves a single-scheme theme by computing its stance mirror into
  * `scheme_mirror`, so `render_theme_style` needs no knowledge of the defaults.
- * A dual-scheme theme is returned unchanged.
+ * A dual-scheme theme, or one already carrying its mirror, is returned
+ * unchanged - so it's safe to call on any theme, resolved or not.
  *
  * The mirror lands in its own field rather than merged into `variables` so the
  * authored knobs stay distinguishable from the derived ones - `compile_theme`
@@ -64,6 +66,7 @@ export const scheme_stance_variables = (
  * @returns the theme carrying its stance mirror
  */
 export const resolve_theme_stance = (theme: Theme): Theme => {
-	if (theme.scheme !== 'light' && theme.scheme !== 'dark') return theme;
-	return { ...theme, scheme_mirror: scheme_stance_variables(theme.scheme, theme.variables) };
+	const stance = to_theme_stance(theme.scheme);
+	if (!stance || theme.scheme_mirror !== undefined) return theme;
+	return { ...theme, scheme_mirror: scheme_stance_variables(stance, theme.variables) };
 };

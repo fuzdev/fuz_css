@@ -4,7 +4,6 @@
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
-	import ColorSchemeInput from '@fuzdev/fuz_ui/ColorSchemeInput.svelte';
 
 	import { render_theme_style } from '$lib/theme.ts';
 	import type { ThemeScheme } from '$lib/variable.ts';
@@ -19,7 +18,6 @@
 	} from '$lib/variable_data.ts';
 	import { render_theme_ts, type ThemeEditorState } from '$routes/theme_editor_state.svelte.ts';
 	import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
-	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 	import KnobControl from '$routes/KnobControl.svelte';
 	import RampStrip from '$routes/RampStrip.svelte';
 
@@ -33,10 +31,6 @@
 	// off the root class rather than derived from the 'auto' setting and the
 	// OS, which can disagree with what's on screen
 	const editing_scheme: ColorSchemeVariant = $derived(root_color_scheme());
-
-	const failing_gates: Array<ThemeGateEntry> = $derived(
-		editor.check_report.entries.filter((e) => !e.pass)
-	);
 
 	const format_gate_value = (entry: ThemeGateEntry): string => {
 		switch (entry.gate) {
@@ -90,11 +84,6 @@
 			e.currentTarget.value = editor.based_on;
 		}
 	};
-
-	const trimmed_name = $derived(editor.name.trim());
-	const name_collides = $derived(
-		trimmed_name === UNSAVED_THEME_NAME || editor.themes.some((t) => t.name === trimmed_name)
-	);
 
 	const output_ts = $derived(render_theme_ts(editor.output));
 	const output_css = $derived(render_theme_style(editor.output));
@@ -154,11 +143,12 @@
 			{/if}
 		</div>
 	</div>
-	{#if name_collides}
-		<aside>the name "{trimmed_name}" collides with an existing theme - consider renaming</aside>
+	{#if editor.name_collides}
+		<aside>
+			the name "{editor.trimmed_name}" collides with an existing theme - consider renaming
+		</aside>
 	{/if}
-	<div class="row gap_lg">
-		<ColorSchemeInput />
+	<p>
 		{#if editor.stance}
 			<small>
 				single-scheme theme - edits write to the base slots and the <strong>{editor.stance}</strong>
@@ -167,12 +157,12 @@
 		{:else}
 			<small>edits write to the <strong>{editing_scheme}</strong> scheme's slots</small>
 		{/if}
-	</div>
+	</p>
 </header>
 
 <!-- the same knobs appear again in their axis sections below - same state,
 	two densities -->
-<section class="design_band panel p_md">
+<section class="panel p_md">
 	<div class="mb_md">
 		<small>intents - what each meaning points at</small>
 		<div class="knobs row flex-wrap:wrap gap_md">
@@ -257,10 +247,7 @@
 		<code>validate_theme</code> and <code>check_theme</code> run live against the draft - the same
 		lint and gamut/monotonicity/contrast gates the shipped themes are held to in CI.
 	</p>
-	{#if editor.issues.length === 0 &&
-		failing_gates.length === 0 &&
-		editor.check_report.unchecked.length === 0
-	}
+	{#if editor.gates_pass}
 		<p class="positive_50">
 			all gates pass <small>({editor.check_report.entries.length} checks)</small>
 		</p>
@@ -274,9 +261,9 @@
 				{/each}
 			</ul>
 		{/if}
-		{#if failing_gates.length}
+		{#if editor.failing_gates.length}
 			<ul class="unstyled">
-				{#each failing_gates as entry (entry.gate + entry.scheme + entry.subject)}
+				{#each editor.failing_gates as entry (entry.gate + entry.scheme + entry.subject)}
 					<li class="negative_50">
 						{entry.gate} · {entry.scheme} · {entry.subject}: {format_gate_value(entry)}
 					</li>

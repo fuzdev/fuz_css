@@ -20,13 +20,11 @@
 	} from '$lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ResolvedColorCode from './ResolvedColorCode.svelte';
+	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'borders';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
-
-	const computed_styles =
-		typeof window === 'undefined' ? null : window.getComputedStyle(document.documentElement);
 
 	const border_radius_classes = [
 		'border-radius:0',
@@ -202,9 +200,7 @@ border-color: var(--shade_30);
 					<div class="border_example border_width" style:border-width="var(--{name})">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code>
-						{computed_styles?.getPropertyValue('--' + name)}
-					</code>
+					<span class="pl_sm pr_sm">=</span><code><ResolvedLength {name} /></code>
 				</div>
 			{/each}
 		</div>
@@ -223,9 +219,7 @@ border-color: var(--shade_30);
 					<div class="border_example {name} outline-style:solid outline_color_30">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code>
-						{computed_styles?.getPropertyValue('--' + name)}
-					</code>
+					<span class="pl_sm pr_sm">=</span><code><ResolvedLength {name} /></code>
 				</div>
 			{/each}
 		</div>
@@ -242,9 +236,7 @@ border-color: var(--shade_30);
 					<div class="border_example border_radius" style:border-radius="var(--{name})">
 						<StyleVariableButton {name} />
 					</div>
-					<span class="pl_sm pr_sm">=</span><code>
-						{computed_styles?.getPropertyValue('--' + name)}
-					</code>
+					<span class="pl_sm pr_sm">=</span><code><ResolvedLength {name} /></code>
 				</div>
 			{/each}
 		</div>

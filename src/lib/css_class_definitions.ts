@@ -39,8 +39,6 @@ import { css_class_composites } from './css_class_composites.ts';
 
 // TODO add animation support, either as a separate thing or rename `css_class_definitions` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 
-// TODO think about variable support (much harder problem, need dependency graph)
-
 /**
  * All built-in CSS class definitions (token classes + composites).
  *

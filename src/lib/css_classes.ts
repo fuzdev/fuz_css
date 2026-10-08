@@ -126,6 +126,31 @@ export class CssClasses {
 	}
 
 	/**
+	 * Creates a collection holding only the given files' extractions, with the
+	 * same include and exclude settings - what one set of modules extracted,
+	 * like the modules of one build environment.
+	 *
+	 * @param ids - the files to keep; ids with no extraction are skipped
+	 * @returns a new collection sharing the per-file data, which `add` replaces rather than mutates
+	 */
+	subset(ids: Iterable<string>): CssClasses {
+		const result = new CssClasses(this.#additional_classes, this.#exclude_classes);
+		const copy = <T>(from: Map<string, T>, to: Map<string, T>, id: string): void => {
+			const value = from.get(id);
+			if (value !== undefined) to.set(id, value);
+		};
+		for (const id of ids) {
+			copy(this.#by_id, result.#by_id, id);
+			copy(this.#explicit_by_id, result.#explicit_by_id, id);
+			copy(this.#diagnostics_by_id, result.#diagnostics_by_id, id);
+			copy(this.#elements_by_id, result.#elements_by_id, id);
+			copy(this.#explicit_elements_by_id, result.#explicit_elements_by_id, id);
+			copy(this.#explicit_variables_by_id, result.#explicit_variables_by_id, id);
+		}
+		return result;
+	}
+
+	/**
 	 * Gets all unique class names as a Set (with exclude filter applied).
 	 */
 	get(): Set<string> {

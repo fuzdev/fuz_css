@@ -273,9 +273,11 @@ export interface CssOutputOptions {
 	/**
 	 * CSS variables to exclude from theme output, even if referenced.
 	 * Useful for filtering out variables you don't want in the theme, and for
-	 * declaring that something else defines one: excluding a variable the
-	 * output references is a warning when the theme has it, and a name listed
-	 * here is skipped by the `undefined_theme_variables` check.
+	 * declaring that something else defines one: an excluded variable leaves
+	 * out the dependencies only it pulls in, excluding one the output
+	 * references or a shipped variable depends on is a warning when the theme
+	 * has it, and a name listed here is skipped by the
+	 * `undefined_theme_variables` check.
 	 *
 	 * @example
 	 * ```ts

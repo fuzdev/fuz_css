@@ -8,7 +8,7 @@ import {
 import { default_variables } from '$lib/variables.ts';
 import { render_theme_style } from '$lib/theme.ts';
 import { parse_theme, type Theme } from '$lib/variable.ts';
-import { validate_theme } from '$lib/theme_check.ts';
+import { validate_theme } from '$lib/theme_validate.ts';
 
 const theme_modules: Record<string, Record<string, unknown>> = import.meta.glob(
 	'../lib/themes/*.ts',
@@ -25,6 +25,10 @@ describe('css_value_is_contained', () => {
 		'linear-gradient(to bottom, oklch(0.2 0.05 30), oklch(0.1 0.02 280))',
 		// a semicolon inside brackets belongs to the block
 		'url(data:image/png;base64,AAAA)',
+		'url( a.png )',
+		'URL(a.png)',
+		// a function whose name ends in url reads its quotes as strings
+		`myurl("a)}b")`,
 		// inside a string, anything but the style closer is inert
 		`url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg'><path d='M0 0'/></svg>")`,
 		`"a; } b { /* ! */"`,
@@ -49,6 +53,15 @@ describe('css_value_is_contained', () => {
 		['a stray closing bracket', '1) ; x'],
 		['mismatched brackets', 'calc(1]'],
 		['a trailing escape', 'red\\'],
+		['an escape outside a string', String.raw`\75 rl(a)`],
+		// a quote in an unquoted url is no string: the malformed url ends at the
+		// first `)` and the brace after it closes the rule
+		['a quote in an unquoted url', 'url(a"x)}body{background:red}")'],
+		['an apostrophe in an unquoted url', "url(a'x)}body{background:red}')"],
+		['an escaped url name', String.raw`U\72 L(a'x)}body{background:red}')`],
+		['a non-breaking space before a quote in a url', 'url(\u00A0"x)}body{color:red}")'],
+		['whitespace inside an unquoted url', 'url(a b)'],
+		['an unclosed url', 'url(a'],
 		['the style closer', '1</style><script>alert(1)</script>'],
 		['the style closer in a string', '"</STYLE >"']
 	];

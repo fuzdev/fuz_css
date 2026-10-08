@@ -126,8 +126,11 @@ Notes:
 	}
 
 	:where(dialog:not(.unstyled))::backdrop {
-		/* same default dim as fuz_ui's Dialog, themable through one variable */
-		background-color: var(--backdrop_color);
+		/* same default dim as fuz_ui's Dialog, themable through one variable,
+			then its default `--darken_60` for a variable set without it. Older
+			browsers don't let ::backdrop inherit custom properties from the
+			page, so the last fallback is that value as a literal */
+		background-color: var(--backdrop_color, var(--darken_60, #000000a6));
 	}
 
 	/*
@@ -356,7 +359,6 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-style: var(--border_style);
 		border-width: var(--border_width);
 		border-radius: var(--border_radius, var(--border_radius_sm));
-		/* TODO --outline_color should default to --hue when available, but can't be set above */
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
 		outline-offset: var(--outline_offset);
 		padding: var(--input_padding_y) var(--input_padding_x);
@@ -688,7 +690,6 @@ TODO think through these patterns to get somewhere consistent
 		--button_fill: var(--fill, var(--shade_60));
 		--button_fill_hover: var(--fill, var(--shade_60));
 		--button_fill_active: var(--fill, var(--shade_60));
-		--button_border_color: var(--border_color);
 	}
 	:where(button:not(.unstyled).selected:not(.deselectable)) {
 		--button_border_color_hover: var(--border_color);

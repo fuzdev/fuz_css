@@ -45,6 +45,9 @@ const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*([\w-]+)\s*;?/;
 /** Matches anything that isn't ignorable filler between declarations. */
 const NON_FILLER_RE = /[^\s;]/;
 
+/** Matches a comment, which the structural search reads past. */
+const COMMENT_RE = /\/\*[^]*?(?:\*\/|$)/g;
+
 /** Matches every placeholder declaration, capturing what precedes its value. */
 const FUZ_CSS_PLACEHOLDER_VALUE_RE = /(--fuz-css-placeholder\s*:\s*)[\w-]+/g;
 
@@ -112,6 +115,8 @@ export const parse_css_placeholder_hash = (source: string): string | null => {
  * The marker's rule starts after whatever ends the preceding construct: a
  * rule's `}`, a statement at-rule's `;` (`@charset`, `@import`, which a
  * bundler hoists ahead of the first rule), or an enclosing block's `{`.
+ * Comments are read past, since one can hold any of those - an unminified
+ * build or a preserved `/*! *\/` comment leaves them in.
  *
  * @param source - the bundled stylesheet holding the marker
  * @param generated_css - the CSS to write at the marker's position
@@ -119,19 +124,24 @@ export const parse_css_placeholder_hash = (source: string): string | null => {
  * or `null` if no marker sits inside a well-formed rule
  */
 export const splice_css_at_placeholder = (source: string, generated_css: string): string | null => {
-	const decl = FUZ_CSS_PLACEHOLDER_DECL_RE.exec(source);
+	// the structure is searched in a copy with comments blanked to spaces, so
+	// offsets match `source`, which the slices below read from
+	const scan = source.replace(COMMENT_RE, (comment) => ' '.repeat(comment.length));
+	const decl = FUZ_CSS_PLACEHOLDER_DECL_RE.exec(scan);
 	if (!decl) return null;
 	const decl_end = decl.index + decl[0].length;
 
-	const open_brace = source.lastIndexOf('{', decl.index);
-	const close_brace = source.indexOf('}', decl_end);
+	const open_brace = scan.lastIndexOf('{', decl.index);
+	const close_brace = scan.indexOf('}', decl_end);
 	if (open_brace === -1 || close_brace === -1) return null;
-	const block_start =
+	const preceding_end =
 		Math.max(
-			source.lastIndexOf('}', open_brace),
-			source.lastIndexOf(';', open_brace),
-			open_brace > 0 ? source.lastIndexOf('{', open_brace - 1) : -1
+			scan.lastIndexOf('}', open_brace),
+			scan.lastIndexOf(';', open_brace),
+			open_brace > 0 ? scan.lastIndexOf('{', open_brace - 1) : -1
 		) + 1; // 0 when the marker's rule is first
+	// whitespace and comments ahead of the selector stay where they are
+	const block_start = preceding_end + /^\s*/.exec(scan.slice(preceding_end, open_brace))![0].length;
 	const selector = source.slice(block_start, open_brace);
 	const decls_before = source.slice(open_brace + 1, decl.index);
 	const decls_after = source.slice(decl_end, close_brace);
@@ -141,4 +151,22 @@ export const splice_css_at_placeholder = (source: string, generated_css: string)
 	result += generated_css + '\n';
 	if (NON_FILLER_RE.test(decls_after)) result += `${selector}{${decls_after}}`;
 	return result + source.slice(close_brace + 1);
+};
+
+/**
+ * Finishes one bundled stylesheet: writes the generated CSS at its first
+ * placeholder and strips any others. Two entries' CSS merged into one asset,
+ * or a pipeline that copied the placeholder rule, leave more than one; the
+ * generated CSS belongs at the first.
+ *
+ * @param source - the bundled stylesheet
+ * @param generated_css - the CSS to write at the first placeholder
+ * @returns the finished stylesheet, or `null` when it holds no placeholder
+ */
+export const splice_css_into_asset = (source: string, generated_css: string): string | null => {
+	let spliced = splice_css_at_placeholder(source, generated_css);
+	if (spliced === null) return null;
+	let stripped: string | null;
+	while ((stripped = splice_css_at_placeholder(spliced, '')) !== null) spliced = stripped;
+	return spliced;
 };

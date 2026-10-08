@@ -6,8 +6,8 @@ import { render_shadow_css } from '../shadow_css.ts';
  * softness - round corners, controls that sit raised on a soft drop shadow
  * and press inward, panels that lift a little off the page, and generous
  * spacing. A cool gray whisper in the neutral and one sans family at a
- * semibold heading weight. The short duration tokens stretch a touch, for
- * the transitions a consumer times with them.
+ * semibold heading weight. The two shortest duration tokens stretch a touch,
+ * for the transitions a consumer times with them.
  *
  * Dual-scheme: in dark the drop falls into the `shadow_color_shroud` black
  * while the top edge catches a little light. Built from levers only - the
@@ -59,7 +59,7 @@ export const pebble_theme: Theme = {
 		// one sans family, headings at a single semibold weight
 		{ name: 'heading_font_family', light: 'var(--font_family_sans)' },
 		{ name: 'heading_font_weight', light: '600' },
-		// unhurried: the short duration tokens stretch a little
+		// unhurried: the two shortest duration tokens stretch a little
 		{ name: 'duration_1', light: '0.12s' },
 		{ name: 'duration_2', light: '0.28s' }
 	]

@@ -118,14 +118,17 @@ combined and only used content is included. In utility-only mode, import
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
   contrast gates in [oklch.ts](src/lib/oklch.ts)/[wcag.ts](src/lib/wcag.ts)
 - [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
-  a theme API: `validate_theme` lints a theme's shape, `check_theme` runs the
+  a theme API: `validate_theme` ([theme_validate.ts](src/lib/theme_validate.ts))
+  lints a theme's shape, `check_theme` runs the
   gamut/monotonicity/contrast gates against an arbitrary theme (resolving its
   bindings back to numbers, following the role variables the default styles
   paint through - `text_color`, `link_color`, `border_color`, and the rest of
   `theme_gate_role_names` - and reporting any gate input it can't evaluate as
   `unchecked` rather than passing it unread), and `compile_theme` recomputes
   per-theme worst-hue chroma caps at each stop's resolved lightness so
-  rotated, monochrome, dark-only, or lightness-pinned themes stay in gamut
+  rotated, monochrome, dark-only, or lightness-pinned themes stay in gamut -
+  all three over the string→number resolution core in
+  [theme_resolver.ts](src/lib/theme_resolver.ts)
 
 ### Smart utility class generation
 
@@ -154,15 +157,20 @@ Two generators available, both using AST-based extraction and per-file caching:
    `build.cssCodeSplit` - at the default order ahead of other plugins for a
    code-split build, so their `generateBundle` hooks read finished
    stylesheets, or at `order: 'post'` for the single stylesheet Vite emits
-   late with `build.cssCodeSplit: false` (the `build.lib` default). The
-   build's passes and the dev handshake need different places in the plugin
-   order, so `vite_plugin_fuz_css()` returns several plugin objects (pass
-   the array to `plugins` as is), and the plugin needs Vite 6 or later
+   late with `build.cssCodeSplit: false` (the `build.lib` default). Each
+   build environment's CSS comes from the modules in its own graph, so a
+   client build never carries an SSR-only class, and a watch rebuild drops
+   a deleted file's. The build's passes and the dev handshake need
+   different places in the plugin order, so `vite_plugin_fuz_css()` returns
+   several plugin objects (pass the array to `plugins` as is), and the
+   plugin needs Vite 6 or later
 2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
    alternative that writes a `fuz.css` genfile
 
-Both funnel through the shared `generate_css` pipeline (generate → resolve →
-bundle) and output only CSS for classes actually used. Supports Svelte 5.16+
+Both render through one shared core (`css_generator.ts`: option defaults,
+resources, and a diagnostic dispatch that logs a persisting diagnostic once
+rather than on every re-render) over the `generate_css` pipeline (generate →
+resolve → bundle), and output only CSS for classes actually used. Supports Svelte 5.16+
 class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment
 hints.
 
@@ -236,16 +244,16 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 
 **Colors (OKLCH, derived):**
 
-- 10 palette hues glossed by color + default intent binding
-  (`palette_glosses` in `variable_data.ts`): `a` (blue ·
-  accent), `b` (green · positive), `c` (red · negative), `d` (purple), `e`
-  (yellow), `f` (brown · neutral), `g` (pink), `h` (orange · caution), `i`
-  (cyan · info), `j` (teal)
+- Palette hues `a`-`j`, glossed by color + default intent binding
+  (`palette_glosses` in `variable_data.ts`): `a` (blue · accent), `b`
+  (green · positive), `c` (red · negative), `d` (purple), `e` (yellow), `f`
+  (brown · neutral), `g` (pink), `h` (orange · caution), `i` (cyan · info),
+  `j` (teal)
 - Semantic intent knobs alias meaning over the letters: `--hue_accent`
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
   (all surfaces/text/borders/shadows - the neutral is an intent whose scales
   are `shade_*`/`text_*`), `--hue_positive`/`--hue_negative`/
-  `--hue_caution`/`--hue_info`; each intent derives a full 13-stop scale
+  `--hue_caution`/`--hue_info`; each intent derives the full stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
   others) with matching text/background token classes (`.positive_50`,
   `.bg_caution_10`)
@@ -261,7 +269,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
   low-chroma orange). A hue binding shares only the angle - `validate_theme`
   warns when a bound letter's multiplier differs from the intent's twin
-- 13 intensity stops: `palette_a_00` (nearest the background) through
+- Intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
   50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, the
   `.palette_X` button and chip labels, and selected-button fills use it, and
@@ -275,19 +283,21 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   `--type_scale_ratio` (the font sizes above `md`, as `md * ratio^n` - body
   and smaller text stay literal, so the knob moves the heading hierarchy
   without moving body text; the `lg`/`xl` size composites step up the same
-  ladder, so their font size follows it while `xs`/`sm` stay put), plus `--font_weight`, `--heading_font_weight`
-  (a hook with per-tier fallbacks - setting it flattens the heading ladder),
-  `--heading_font_family`, `--heading_letter_spacing` (heading tracking,
-  `normal` by default, best set in em), and the `--background_image`
-  decoration hook on `:root`
+  ladder, so their font size follows it while `xs`/`sm` stay put), plus
+  `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
+  setting it flattens the heading ladder), `--heading_font_family`,
+  `--heading_letter_spacing` (heading tracking, `normal` by default, best
+  set in em), and the `--background_image` decoration hook on `:root`
 - Surface shadows are declared variables a theme can retarget:
   `--button_shadow`/`_hover`/`_active`, `--pane_shadow` (the floating
   `.pane`), and `--panel_shadow` (the embedded `.panel`, `none` by default).
   The composed defaults name their shadow colors outright, since a value
-  declared on `:root` can't see a contextual `--shadow_color`; a `shadow_*`
-  class on the element still wins by source order. `.panel` declares
-  `box-shadow`, so it resets the shadow of an element it is combined with
-  (a `.pane`, a `button`)
+  declared on `:root` can't see a contextual `--shadow_color`, so a shadow
+  color or alpha class alone no longer tints them; a shadow shape class
+  (`shadow_md`) on the element still wins by source order, except over a
+  modified composite (`md:panel`), which is emitted after it. `.panel`
+  declares `box-shadow`, so it resets the shadow of an element it is
+  combined with (a `.pane`, a `button`)
 - `--font_family` is the body font (default `var(--font_family_sans)`), kept
   apart from the three stacks (`--font_family_sans`/`_serif`/`_mono`) so
   retargeting the body doesn't make one of them mean something it isn't;
@@ -319,11 +329,11 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 **Size variants:** Core pattern is `xs` → `sm` → `md` → `lg` → `xl`, with
 extended ranges varying by family:
 
-- Spaces: `xs5`...`xs` → `sm` → `md` → `lg` → `xl`...`xl15` (23 steps)
-- Font sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl9` (13 steps)
-- Icon sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl3` (7 steps)
-- Border radii: `xs3`...`xs` → `sm` → `md` → `lg` → `xl` (7 steps)
-- Distances, shadows, line heights: `xs` → `sm` → `md` → `lg` → `xl` (5 steps)
+- Spaces: `xs5`...`xs` → `sm` → `md` → `lg` → `xl`...`xl15`
+- Font sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl9`
+- Icon sizes: `xs` → `sm` → `md` → `lg` → `xl`...`xl3`
+- Border radii: `xs3`...`xs` → `sm` → `md` → `lg` → `xl`
+- Distances, shadows, line heights: `xs` → `sm` → `md` → `lg` → `xl`
 
 ## Usage
 
@@ -507,7 +517,7 @@ typography, borders, shading, shadows, layout. See
   pebble (depth and softness - round, raised on soft drop shadows through
   `button_shadow*` and `panel_shadow`, airy, cool whisper), parchment (type
   and ruling - serif body, rubrication-red accent with the negative intent
-  moved off it, double-ruled borders, candlelit in dark), phosphor (packing:
+  moved off it, double-ruled borders, candlelit in dark), phosphor (packing -
   mono, compact, a flattened type scale, a green cast on a ground lifted off
   black, halo button shadows, positive moved to teal off the green accent,
   dark-only), guestbook (controls as objects - colorless chrome on an
@@ -531,18 +541,22 @@ typography, borders, shading, shadows, layout. See
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
   `heading_font_weight` and the micro-surface color variables
-- [theme_check.ts](src/lib/theme_check.ts) - Theme lint (`validate_theme`,
-  which also warns when an intent binding drops a slot's chroma character
-  or the accent hue lands on a status hue), numeric-twin accessibility gates
+- [theme_resolver.ts](src/lib/theme_resolver.ts) - The string→number
+  resolution core the lint and the gates share: it resolves a theme's knobs
+  and derived stops the way the renderer's cascade would, exposed as
+  `create_theme_resolver` for memoized UI lookups (the theme editor's
+  derived-knob readouts)
+- [theme_validate.ts](src/lib/theme_validate.ts) - Theme lint
+  (`validate_theme`, which also warns when an intent binding drops a slot's
+  chroma character or the accent hue lands on a status hue)
+- [theme_check.ts](src/lib/theme_check.ts) - Numeric-twin accessibility gates
   (`check_theme`: gamut, ramp monotonicity, contrast - a directly authored
-  color stop or role is measured when it's an
-  `oklch(L C H)` numeric literal or an exact `var()` reference to a color the
-  gates evaluate, and lands in `unchecked` otherwise), and the
-  worst-hue chroma-cap compile step (`compile_theme`, which caps each stop at
-  the lightness it resolves to, emits any cap that tightens, and emits nothing
-  when a hue won't resolve to a number) over a shared string→number resolution
-  core, exposed as `create_theme_resolver` for memoized UI lookups (the theme
-  editor's derived-knob readouts)
+  color stop or role is measured when it's an `oklch(L C H)` numeric literal
+  or an exact `var()` reference to a color the gates evaluate, and lands in
+  `unchecked` otherwise), and the worst-hue chroma-cap compile step
+  (`compile_theme`, which caps each stop at the lightness it resolves to,
+  emits any cap that tightens, and emits nothing when a hue won't resolve to
+  a number)
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
@@ -555,7 +569,8 @@ typography, borders, shading, shadows, layout. See
 - [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type and the
   default filter (`filter_file_default`) for extractable files
 - [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
-  `ExtractionDiagnostic`, `CssGenerationError` types
+  `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping
+  dispatch the generators share
 
 **CSS generation:**
 
@@ -563,37 +578,48 @@ typography, borders, shading, shadows, layout. See
   (preferred) with HMR via `virtual:fuz.css`, as several plugin objects: the
   `enforce: 'pre'` one, a build-only one placed after Vite's CSS
   processing, and a serve-only `enforce: 'post'` one that appends the
-  evaluation report to the virtual module's client code. The build-only one
-  captures the virtual module's text as the CSS
-  pipeline (PostCSS, lightningcss) left it, and the hash is restated into
-  that text by calling the `transform` of Vite's `vite:css-post` plugin - a
-  reach into Vite internals that degrades to a filename hash that doesn't
-  cover the generated CSS, with a one-time warning, never to wrong CSS
+  evaluation report to the virtual module's client code; it holds the dev
+  side (pre-scan, watcher, HMR debounce, the handshake)
+- [vite_plugin_fuz_css_build.ts](src/lib/vite_plugin_fuz_css_build.ts) - The
+  plugin's build passes and its build-only plugin object, which captures the
+  virtual module's text as the CSS pipeline (PostCSS, lightningcss) left it;
+  the hash is restated into that text by calling the `transform` of Vite's
+  `vite:css-post` plugin - a reach into Vite internals that degrades to a
+  filename hash that doesn't cover the generated CSS, with a one-time
+  warning, never to wrong CSS
+- [css_extraction_state.ts](src/lib/css_extraction_state.ts) - The Vite
+  plugin's per-file extraction state: race-safe ingestion (a per-file epoch,
+  so a deletion or newer ingest landing mid-cache-read wins), removal, and a
+  version that keys the dev render cache
 - [css_placeholder_splice.ts](src/lib/css_placeholder_splice.ts) - The
   build-mode placeholder (one declaration, unhashed at load and restated in
   place with the generated CSS's hash) and the splice that writes the
   generated CSS at its position in the bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
+- [css_generator.ts](src/lib/css_generator.ts) - The core both generators
+  render through: option defaults, the resources a render needs, and the
+  render with its diagnostics dispatched
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
   (generate → resolve → bundle) used by both generators, plus the checks
   that span options (`undefined_theme_variables`, `theme_discarded`)
 - [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
-  resources (style-rule index, variable graph, class→variable index)
+  resources (style-rule index, variable graph)
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
   single-file extraction shared by both generators
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
   for Gro/Vite generators
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
-  validation, atomic writes, CI skip
+  validation, atomic writes, the cache-path lookup the generators share, CI
+  skip
 - [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
-  transitive resolution
+  transitive resolution; it leaves out a value that would escape its
+  declaration, as the runtime renderer does, with an `uncontained_theme_value`
+  error
 - [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
   extraction utilities: references, fallback-less references, declarations,
   and comment stripping
-- [class_variable_index.ts](src/lib/class_variable_index.ts) - Class to variable
-  mapping for dependency resolution
 - [style_rule_parser.ts](src/lib/style_rule_parser.ts) - Base stylesheet
   parsing for tree-shaking: indexes top-level rules by the elements and
   classes they target, tracks their variables, and collects the `base_css`
@@ -659,7 +685,7 @@ work without per-page `@fuz-classes` walls.
 Vite plugin examples for Svelte, React, Preact, and Solid. Each demonstrates
 token, composite, and literal classes with modifiers.
 
-**Important:** All 4 example App files must be kept in sync. When updating one,
+**Important:** All the example App files must be kept in sync. When updating one,
 update all others with equivalent changes.
 
 ### Tests - ./src/test/
@@ -671,11 +697,13 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
-- `theme_check.{test,compile,defaults,pins}.test.ts`
+- `theme_check.{test,compile,pins}.test.ts`
+- `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 
-Plus standalone tests: `css_cache`, `css_classes`, `css_literal`, `variable`,
-`variables`, `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
+Plus standalone tests: `css_cache`, `css_classes`, `css_literal`,
+`css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
+`variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `generate_bundled_css`,
 `generate_classes_css`, `generate_css`, and more.
@@ -687,20 +715,22 @@ contrast modifiers without being added to a list. A theme that knowingly
 gives up a pairing gets its own test and a name in the standalone
 exceptions set.
 
-The Vite plugin has `vite_plugin_fuz_css.{build,dev,splice,ws}.test.ts`: the
+The Vite plugin has `vite_plugin_fuz_css.{build,dev,ws}.test.ts`, plus
+`css_placeholder_splice.test.ts` for the build splice: the
 build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,
 varying the generated CSS through `additional_classes` so the emitted JS
 stays byte-identical. The dev suite runs middleware-mode servers over
 `src/test/fixtures/vite_dev/`, and over a temp root for the tests that write
 files or stand in for the dependency optimizer's output; the ws suite runs a
 listening server and speaks the `vite-hmr` protocol for the evaluation
-handshake. Integration: `vite_plugin_examples.test.ts` (skip with
-`SKIP_EXAMPLE_TESTS=1`).
+handshake. The three share their fixture roots, filters, polling, and
+capturing logger through `vite_plugin_test_helpers.ts`. Integration:
+`vite_plugin_examples.test.ts` (skip with `SKIP_EXAMPLE_TESTS=1`).
 
 Component tests (`ContrastInput`, `KnobControl`, `RampStrip`, `ThemeEditor`,
 `resolved_color.svelte`) render in jsdom via a per-file
 `@vitest-environment jsdom` pragma - mounting through
-`component_test_helpers.ts` with context harnesses (`*Harness.svelte` in
+`component_test_helpers.ts` (`create_mount_tracker`) with context harnesses (`*Harness.svelte` in
 `src/test/`), the fuz_ui pattern. All other suites stay in node;
 `vite.config.ts` sets `resolve.conditions: ['browser']` in test mode so
 svelte's `mount()` resolves to the client build.

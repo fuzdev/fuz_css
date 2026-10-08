@@ -2,7 +2,7 @@ import { test, assert, describe } from 'vitest';
 
 import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.ts';
 import { StyleVariable, type Theme } from '$lib/variable.ts';
-import { validate_theme } from '$lib/theme_check.ts';
+import { validate_theme } from '$lib/theme_validate.ts';
 import { theme_knob_by_name } from '$lib/knobs.ts';
 import { shipped_themes, shipped_base_themes } from './theme_test_helpers.ts';
 

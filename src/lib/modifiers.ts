@@ -141,7 +141,11 @@ export const ANCESTOR_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of pseudo-element modifier names to their CSS output */
 export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map();
-/** All modifier names for quick lookup */
+/**
+ * All modifier names for quick lookup
+ *
+ * @internal The lookup behind `get_all_modifier_names`.
+ */
 export const ALL_MODIFIER_NAMES: Set<string> = new Set();
 
 for (const m of MODIFIERS) {
@@ -154,21 +158,29 @@ for (const m of MODIFIERS) {
 
 /**
  * Pattern for parameterized nth-child: `nth-child(2n+1):`
+ *
+ * @internal Read by `get_modifier`; exported for its tests.
  */
 export const NTH_CHILD_PATTERN = /^nth-child\(([^)]+)\)$/;
 
 /**
  * Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`
+ *
+ * @internal Read by `get_modifier`; exported for its tests.
  */
 export const NTH_LAST_CHILD_PATTERN = /^nth-last-child\(([^)]+)\)$/;
 
 /**
  * Pattern for parameterized nth-of-type: `nth-of-type(2n):`
+ *
+ * @internal Read by `get_modifier`; exported for its tests.
  */
 export const NTH_OF_TYPE_PATTERN = /^nth-of-type\(([^)]+)\)$/;
 
 /**
  * Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`
+ *
+ * @internal Read by `get_modifier`; exported for its tests.
  */
 export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
 

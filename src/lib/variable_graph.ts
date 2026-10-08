@@ -15,6 +15,11 @@ import { resolve_theme_stance } from './theme_stance.ts';
 import { overlay_style_variable } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
+import {
+	css_custom_property_name_is_contained,
+	css_value_is_contained
+} from './css_containment.ts';
+import type { GenerationDiagnostic } from './diagnostics.ts';
 
 import type { VariablesOption } from './css_plugin_options.ts';
 
@@ -40,33 +45,71 @@ export interface StyleVariableInfo {
 export interface VariableDependencyGraph {
 	/** Map from variable name to its info */
 	variables: Map<string, StyleVariableInfo>;
+	/**
+	 * The `uncontained_theme_value` errors for the slots left out of the
+	 * graph, which `resolve_css` forwards with every resolution.
+	 */
+	diagnostics: Array<GenerationDiagnostic>;
 }
 
 /**
  * Builds a dependency graph from an array of style variables.
+ *
+ * The graph is what the bundled theme CSS renders from, verbatim, so it
+ * applies the containment checks `render_theme_style` does: a slot whose
+ * value could end its own declaration (or is blank), or a variable whose
+ * name isn't a plain identifier, is left out and reported as an
+ * `uncontained_theme_value` error rather than written into the stylesheet.
  *
  * @param variables - array of `StyleVariable` objects
  * @returns `VariableDependencyGraph`
  */
 export const build_variable_graph = (variables: Array<StyleVariable>): VariableDependencyGraph => {
 	const graph: Map<string, StyleVariableInfo> = new Map();
+	const diagnostics: Array<GenerationDiagnostic> = [];
+
+	const report = (name: string, detail: string): void => {
+		diagnostics.push({
+			phase: 'generation',
+			level: 'error',
+			message: `Theme variable "${name}" ${detail}, so it is left out of the generated CSS`,
+			suggestion:
+				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
+			identifier: 'uncontained_theme_value',
+			locations: null
+		});
+	};
+	// a slot the stylesheet can hold, or undefined - reporting the rest
+	const contained_slot = (
+		name: string,
+		slot: 'light' | 'dark',
+		value: unknown
+	): string | undefined => {
+		if (value === undefined) return undefined;
+		if (css_value_is_contained(value) && (value as string).trim()) return value as string;
+		report(name, `has a ${slot} value that can't be contained in a declaration`);
+		return undefined;
+	};
 
 	for (const v of variables) {
-		const light_deps = v.light ? extract_css_variables(v.light) : new Set<string>();
-		const dark_deps = v.dark ? extract_css_variables(v.dark) : new Set<string>();
+		if (!css_custom_property_name_is_contained(v.name)) {
+			report(v.name, 'has a name that is not a plain identifier');
+			continue;
+		}
+		const light_css = contained_slot(v.name, 'light', v.light);
+		const dark_css = contained_slot(v.name, 'dark', v.dark);
+		if (light_css === undefined && dark_css === undefined) continue;
 
 		graph.set(v.name, {
 			name: v.name,
-			light_deps,
-			dark_deps,
-			light_css: v.light,
-			dark_css: v.dark
+			light_deps: light_css ? extract_css_variables(light_css) : new Set(),
+			dark_deps: dark_css ? extract_css_variables(dark_css) : new Set(),
+			light_css,
+			dark_css
 		});
 	}
 
-	return {
-		variables: graph
-	};
+	return { variables: graph, diagnostics };
 };
 
 /**
@@ -79,6 +122,8 @@ export interface ResolveVariablesResult {
 	warnings: Array<string>;
 	/** Variable names that were requested but not found in the graph */
 	missing: Set<string>;
+	/** Excluded variable names a resolved variable depends on */
+	excluded: Set<string>;
 }
 
 /**
@@ -86,22 +131,34 @@ export interface ResolveVariablesResult {
  * When a variable is requested, all variables it depends on are included.
  * Both light and dark dependencies are always resolved together.
  *
+ * An excluded variable is left out along with the dependencies only it
+ * pulls in - whatever defines it in its place defines those too.
+ *
  * @param graph - the variable dependency graph
  * @param initial_variables - initial set of variable names to resolve
+ * @param excluded - variable names to leave out, and not resolve through
  * @returns `ResolveVariablesResult` with all transitive dependencies
  */
 export const resolve_variables_transitive = (
 	graph: VariableDependencyGraph,
-	initial_variables: Iterable<string>
+	initial_variables: Iterable<string>,
+	excluded?: ReadonlySet<string>
 ): ResolveVariablesResult => {
 	const resolved: Set<string> = new Set();
 	const warnings: Array<string> = [];
 	const missing: Set<string> = new Set();
+	const excluded_reached: Set<string> = new Set();
 	const reported_cycles: Set<string> = new Set();
 
 	// DFS with path tracking for cycle detection
 	// `path` tracks the current call stack to detect back-edges (cycles)
 	const resolve = (name: string, path: Set<string>): void => {
+		if (excluded?.has(name)) {
+			// a request for one is dropped silently - only a dependency dangles
+			if (path.size > 0) excluded_reached.add(name);
+			return;
+		}
+
 		// Check for cycles FIRST - if we're revisiting a node in the current path, it's a cycle
 		if (path.has(name)) {
 			// Only report each cycle once
@@ -146,7 +203,7 @@ export const resolve_variables_transitive = (
 		resolve(name, new Set());
 	}
 
-	return { variables: resolved, warnings, missing };
+	return { variables: resolved, warnings, missing, excluded: excluded_reached };
 };
 
 /**
@@ -200,17 +257,6 @@ export const generate_theme_css = (
  */
 export const get_all_variable_names = (graph: VariableDependencyGraph): Set<string> => {
 	return new Set(graph.variables.keys());
-};
-
-/**
- * Checks if a variable exists in the graph.
- *
- * @param graph - the variable dependency graph
- * @param name - variable name to check (without -- prefix)
- * @returns true if the variable exists in the graph
- */
-export const has_variable = (graph: VariableDependencyGraph, name: string): boolean => {
-	return graph.variables.has(name);
 };
 
 /**
@@ -272,7 +318,7 @@ export const find_similar_variable = (
  * @param variables - the variables option (undefined, null, array, or callback)
  * @returns resolved array of style variables, or empty array if null
  */
-export const resolve_variables_option = (variables: VariablesOption): Array<StyleVariable> => {
+const resolve_variables_option = (variables: VariablesOption): Array<StyleVariable> => {
 	if (variables === null) return [];
 	return typeof variables === 'function'
 		? variables(default_variables)
@@ -299,7 +345,7 @@ export const apply_theme_variables = (
 	theme: Theme | null | undefined
 ): Array<StyleVariable> => {
 	if (!theme) return variables;
-	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
+	const resolved = resolve_theme_stance(theme);
 	const by_name = new Map(variables.map((v) => [v.name, v]));
 	// Replacement mirrors the runtime cascade: a light-slot theme value beats
 	// the base default's dark slot by layer order, so it replaces wholesale,

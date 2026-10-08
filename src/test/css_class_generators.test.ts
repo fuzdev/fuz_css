@@ -15,7 +15,6 @@ import {
 	generate_border_radius_corners,
 	generate_shadow_classes,
 	format_spacing_value,
-	format_dimension_value,
 	format_variable_name
 } from '$lib/css_class_generators.ts';
 import type { CssClassDefinition } from '$lib/css_class_generation.ts';
@@ -75,36 +74,6 @@ describe('format_spacing_value', () => {
 		assert.strictEqual(format_spacing_value('md'), 'var(--space_md)');
 		assert.strictEqual(format_spacing_value('lg'), 'var(--space_lg)');
 		assert.strictEqual(format_spacing_value('xs'), 'var(--space_xs)');
-	});
-});
-
-describe('format_dimension_value', () => {
-	test('returns 0 as-is', () => {
-		assert.strictEqual(format_dimension_value('0'), '0');
-	});
-
-	test('returns auto as-is', () => {
-		assert.strictEqual(format_dimension_value('auto'), 'auto');
-	});
-
-	test('converts 100 to 100%', () => {
-		assert.strictEqual(format_dimension_value('100'), '100%');
-	});
-
-	test('preserves pixel values', () => {
-		assert.strictEqual(format_dimension_value('200px'), '200px');
-	});
-
-	test('preserves content keywords', () => {
-		assert.strictEqual(format_dimension_value('max-content'), 'max-content');
-		assert.strictEqual(format_dimension_value('min-content'), 'min-content');
-		assert.strictEqual(format_dimension_value('fit-content'), 'fit-content');
-		assert.strictEqual(format_dimension_value('stretch'), 'stretch');
-	});
-
-	test('wraps other values in var(--space_*)', () => {
-		assert.strictEqual(format_dimension_value('md'), 'var(--space_md)');
-		assert.strictEqual(format_dimension_value('xl'), 'var(--space_xl)');
 	});
 });
 

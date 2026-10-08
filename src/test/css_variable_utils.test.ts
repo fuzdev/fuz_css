@@ -4,7 +4,6 @@ import {
 	extract_css_variables,
 	extract_declared_css_variables,
 	extract_required_css_variables,
-	has_css_variables,
 	strip_css_comments
 } from '$lib/css_variable_utils.ts';
 
@@ -148,53 +147,6 @@ describe('extract_css_variables', () => {
 		const jsx_component = `<Icon size={styles.size || "var(--icon_size_md)"} />`;
 		const result = extract_css_variables(jsx_component);
 		assert.deepEqual(result, new Set(['icon_size_md']));
-	});
-});
-
-describe('has_css_variables', () => {
-	test('returns true for string with var()', () => {
-		assert.isTrue(has_css_variables('color: var(--text);'));
-	});
-
-	test('returns false for string without var()', () => {
-		assert.isFalse(has_css_variables('padding: 1rem;'));
-	});
-
-	test('returns false for empty string', () => {
-		assert.isFalse(has_css_variables(''));
-	});
-
-	test('returns true for multiple variables', () => {
-		assert.isTrue(has_css_variables('border: var(--w) solid var(--c);'));
-	});
-
-	test('lastIndex reset between calls', () => {
-		// First call
-		assert.isTrue(has_css_variables('color: var(--a);'));
-
-		// Second call should still work correctly
-		assert.isFalse(has_css_variables('padding: 1rem;'));
-
-		// Third call
-		assert.isTrue(has_css_variables('margin: var(--b);'));
-	});
-
-	test('returns false for malformed patterns without valid name', () => {
-		assert.isFalse(has_css_variables('color: var();'));
-		assert.isFalse(has_css_variables('color: var(--);'));
-	});
-
-	test('consistent with extract_css_variables for unclosed var(', () => {
-		// Both functions should agree: var(--name without closing paren still matches
-		const input = 'color: var(--incomplete';
-		assert.isTrue(has_css_variables(input));
-		assert.isAbove(extract_css_variables(input).size, 0);
-	});
-
-	test('case-sensitive: VAR() uppercase not matched', () => {
-		// Same limitation as extract_css_variables
-		assert.isFalse(has_css_variables('color: VAR(--primary);'));
-		assert.isFalse(has_css_variables('color: Var(--primary);'));
 	});
 });
 

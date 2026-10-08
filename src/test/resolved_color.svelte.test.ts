@@ -1,7 +1,7 @@
 /**
  * @vitest-environment jsdom
  */
-import { describe, test, assert, afterEach } from 'vitest';
+import { describe, test, assert } from 'vitest';
 import { flushSync } from 'svelte';
 import { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 import { rgb_to_hex_string } from '@fuzdev/fuz_util/colors.ts';
@@ -10,7 +10,7 @@ import { clamp } from '@fuzdev/fuz_util/maths.ts';
 import { parse_resolved_color, type ResolvedColor } from '$routes/docs/resolved_color.svelte.ts';
 import { oklch_to_srgb, type Oklch } from '$lib/oklch.ts';
 import ResolvedColorHarness from './ResolvedColorHarness.svelte';
-import { mount_component, unmount_component } from './component_test_helpers.ts';
+import { create_mount_tracker } from './component_test_helpers.ts';
 
 const expected_hex = (color: Oklch): string => {
 	const [r, g, b] = oklch_to_srgb(color).map((c) => Math.round(clamp(c, 0, 1) * 255));
@@ -71,27 +71,19 @@ describe('parse_resolved_color', () => {
 });
 
 describe('ResolvedColor', () => {
-	let mounted: { instance: Record<string, any>; container: HTMLElement } | null = null;
-
-	afterEach(async () => {
-		if (mounted) {
-			await unmount_component(mounted.instance, mounted.container);
-			mounted = null;
-		}
-	});
+	const mount = create_mount_tracker();
 
 	const mount_color = (
 		read_color: (el: HTMLElement) => string,
 		theme_state = new ThemeState()
 	): { color: ResolvedColor; theme_state: ThemeState } => {
 		let color: ResolvedColor | undefined;
-		mounted = mount_component(ResolvedColorHarness as any, {
+		mount(ResolvedColorHarness, {
 			name: 'palette_a_50',
 			theme_state,
 			options: { read_color },
 			expose: (c: ResolvedColor) => (color = c)
 		});
-		flushSync();
 		assert(color, 'harness exposes the instance');
 		return { color, theme_state };
 	};

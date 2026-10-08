@@ -198,13 +198,10 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			manually, add the <code>dark</code> class to the root <code>html</code> element, or use a
 			component like
 			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte">
-				this one
+				the picker at the top of this page
 			</a>
-			from the companion Svelte library <a href="https://ui.fuz.dev/">fuz_ui</a>:
+			from the companion Svelte library <a href="https://ui.fuz.dev/">fuz_ui</a>.
 		</p>
-		<div class="display:flex mb_lg">
-			<ColorSchemeInput />
-		</div>
 		<p>
 			fuz_css itself works with any JS framework - it provides only stylesheets, and themes are
 			plain data any integration can render.
@@ -223,28 +220,29 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 	<TomeSection>
 		<TomeSectionHeader text="Validating and compiling themes" />
 		<p>
-			<ModuleLink module_path="theme_check.ts" /> provides three pure functions for checking a
-			<code>Theme</code>.
+			Three pure functions check a <code>Theme</code>, over one shared resolution core
+			(<ModuleLink module_path="theme_resolver.ts" />).
 		</p>
 		<p>
-			<code>validate_theme(theme)</code> is the structural lint: unknown variable names are errors,
-			while type and range mismatches on the knob-tier variables are advisory warnings. It returns
-			an array of issues - empty means the theme is structurally sound.
+			<code>validate_theme(theme)</code> in <ModuleLink module_path="theme_validate.ts" /> is the
+			structural lint: unknown variable names are errors, while type and range mismatches on the
+			knob-tier variables are advisory warnings. It returns an array of issues - empty means the
+			theme is structurally sound.
 		</p>
 		<p>
-			<code>check_theme(theme)</code> runs the gamut, ramp-monotonicity, and contrast gates against
-			the theme's resolved values. It is report-only and never throws, returning
-			<code>{'{ok, entries, unchecked}'}</code>. The contrast gates measure the pairings the default
-			styles make on the page background - body and subtle text, links, borders, fills, and colored
-			labels, including a <code>.palette_a</code> button's label on its own tinted fill. They follow
-			the role variables those styles paint through, so a theme that sets <code>border_color</code>
-			to <code>var(--text_60)</code> has its borders measured at <code>text_60</code>, in an entry
-			named for the role (<code>border_color vs shade_00</code>). A value a gate depends on but
-			can't evaluate lands in <code>unchecked</code> instead of passing unread: a knob that doesn't
-			resolve to a number, or a color stop or role set to anything other than an
-			<code>oklch(L C H)</code> numeric literal or an exact <code>var()</code> reference to another
-			gated color. <code>ok</code> is true only when every entry passes and nothing is unchecked -
-			suited to a CI or test assertion:
+			<code>check_theme(theme)</code> in <ModuleLink module_path="theme_check.ts" /> runs the gamut,
+			ramp-monotonicity, and contrast gates against the theme's resolved values. It is report-only
+			and never throws, returning <code>{'{ok, entries, unchecked}'}</code>. The contrast gates
+			measure the pairings the default styles make on the page background - body and subtle text,
+			links, borders, fills, and colored labels, including a <code>.palette_a</code> button's label
+			on its own tinted fill. They follow the role variables those styles paint through, so a theme
+			that sets <code>border_color</code> to <code>var(--text_60)</code> has its borders measured at
+			<code>text_60</code>, in an entry named for the role (<code>border_color vs shade_00</code>).
+			A value a gate depends on but can't evaluate lands in <code>unchecked</code> instead of
+			passing unread: a knob that doesn't resolve to a number, or a color stop or role set to
+			anything other than an <code>oklch(L C H)</code> numeric literal or an exact
+			<code>var()</code> reference to another gated color. <code>ok</code> is true only when every
+			entry passes and nothing is unchecked - suited to a CI or test assertion:
 		</p>
 		<Code
 			lang="ts"

@@ -5,11 +5,11 @@ import { render_shadow_css } from '../shadow_css.ts';
 /**
  * An exemplar theme: the green-phosphor CRT terminal. Structure comes from
  * packing - monospace, sharp-cornered, compact spacing, tightened leading,
- * and a flattened type scale give it terminal density, and the short
- * duration tokens are zero. The phosphor tint carries the surfaces and accent, but the palette slots keep
- * their own hues so status colors still read - negative stays red, caution
- * amber, info cyan, and positive steps over to teal so a success never
- * reads as a link.
+ * and a flattened type scale give it terminal density, and the three
+ * shortest duration tokens are zero. The phosphor tint carries the surfaces
+ * and accent, but the palette slots keep their own hues so status colors
+ * still read - negative stays red, caution amber, info cyan, and positive
+ * steps over to teal so a success never reads as a link.
  *
  * The screen emits rather than reflects: the ground is the gray-green of an
  * unlit tube face, lifted off black so a surface can still sink below it,
@@ -50,9 +50,9 @@ const authored: Theme = {
 		// is deliberately decoupled from space_scale - the pin is the theme's own)
 		{ name: 'space_scale', light: '0.85' },
 		{ name: 'line_height_md', light: '1.4' },
-		// instant: terminal chrome doesn't ease - the short duration tokens zero
-		// out, for the transitions a consumer times with them, while the longer
-		// tiers keep their timing
+		// instant: terminal chrome doesn't ease - the three shortest duration
+		// tokens zero out, for the transitions a consumer times with them, while
+		// the longer tiers keep their timing
 		{ name: 'duration_1', light: '0s' },
 		{ name: 'duration_2', light: '0s' },
 		{ name: 'duration_3', light: '0s' }

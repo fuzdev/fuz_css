@@ -109,7 +109,7 @@ const check_undefined_theme_variables = (
 // re-declares (a stance's scheme_mirror alone carries every scheme-adaptive
 // default); the color-scheme pin for a stance renders regardless
 const render_theme_overlay = (theme: Theme, resolved_variables: Set<string>): string => {
-	const resolved = theme.scheme_mirror === undefined ? resolve_theme_stance(theme) : theme;
+	const resolved = resolve_theme_stance(theme);
 	const keep = (v: StyleVariable): boolean => resolved_variables.has(v.name);
 	return render_theme_style(
 		{
@@ -142,10 +142,11 @@ export interface GenerateCssOptions {
 	/** Diagnostics accumulated during extraction. */
 	extraction_diagnostics: Array<Diagnostic>;
 	/**
-	 * CSS variables referenced in source, already filtered to known theme
-	 * variables by the caller. `@fuz-variables` are merged in here automatically.
+	 * The `var(--*)` names referenced in source, unfiltered: names the theme
+	 * doesn't define are ignored, since they may be the project's own.
+	 * `@fuz-variables` are merged in here automatically.
 	 */
-	detected_css_variables: Set<string>;
+	detected_css_variables: Iterable<string>;
 
 	class_definitions: Record<string, CssClassDefinition | undefined>;
 	interpreters: Array<CssClassDefinitionInterpreter>;
@@ -249,9 +250,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 	let css: string;
 	if ((include_base || include_theme) && resources) {
-		// `@fuz-variables` are included in output and checked for typos by resolve_css.
-		// Copy so the caller's set isn't mutated.
-		const detected = new Set(detected_css_variables);
+		// a source reference counts only when the theme defines the name, while
+		// `@fuz-variables` are all kept so resolve_css checks them for typos
+		const detected: Set<string> = new Set();
+		for (const v of detected_css_variables) {
+			if (resources.variable_graph.variables.has(v)) detected.add(v);
+		}
 		if (explicit_variables) {
 			for (const v of explicit_variables) {
 				detected.add(v);
@@ -261,7 +265,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		const resolution = resolve_css({
 			style_rule_index: resources.style_rule_index,
 			variable_graph: resources.variable_graph,
-			class_variable_index: resources.class_variable_index,
 			detected_elements: all_elements,
 			detected_classes: all_classes,
 			detected_css_variables: detected,

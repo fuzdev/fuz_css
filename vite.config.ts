@@ -31,7 +31,10 @@ const docs_classes: Array<string> = [
 export default defineConfig(({ mode }) => ({
 	plugins: [
 		sveltekit(),
-		svelte_docinfo(),
+		svelte_docinfo({
+			// a fixture for the plugin's dependency-extraction tests, not API
+			exclude: (defaults) => [...defaults, '**/example_class_utilities.ts']
+		}),
 		vite_plugin_fuz_css({
 			additional_elements: 'all',
 			additional_variables: 'all',

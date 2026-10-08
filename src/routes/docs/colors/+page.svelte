@@ -124,9 +124,11 @@
 	<TomeSection>
 		<TomeSectionHeader text="Palette variables" />
 		<p>
-			There are 13 intensity variants per hue (00, 05, 10, 20, ..., 80, 90, 95, 100), from subtle to
-			bold. The 50 variant of each color is used as the base for things like
-			<TomeLink slug="buttons" />.
+			Each hue has intensity variants from subtle to bold (00, 05, 10, 20, ..., 80, 90, 95, 100),
+			with 50 at the middle of the ramp. The 60 variant is the text-safe stop: links, the labels of
+			<code>.palette_X</code> <TomeLink slug="buttons" /> and <TomeLink slug="chips" />, and a
+			selected <code>.palette_X</code> button's fill use it, and <code>check_theme</code> gates
+			those pairings at AA.
 		</p>
 		<p>
 			Unlike the <TomeLink slug="shading">shade</TomeLink> and
