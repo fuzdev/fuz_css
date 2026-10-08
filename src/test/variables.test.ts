@@ -130,9 +130,10 @@ test('intent hue defaults agree with palette_glosses bindings', () => {
 	}
 });
 
-test('font sizes above md derive from the type scale ratio and match the fitted table', () => {
+test('font sizes follow the size scale, and above md the type scale ratio, matching the fitted table', () => {
 	const by_name = new Map(default_variables.map((v) => [v.name, v]));
 	assert.strictEqual(by_name.get('type_scale_ratio')?.light, String(TYPE_SCALE_RATIO));
+	assert.strictEqual(by_name.get('font_size_scale')?.light, '1');
 	const base = font_size_variants.indexOf('md');
 	for (const [i, size] of font_size_variants.entries()) {
 		const light = by_name.get(`font_size_${size}`)?.light;
@@ -140,7 +141,7 @@ test('font sizes above md derive from the type scale ratio and match the fitted 
 		if (step > 0) {
 			assert.strictEqual(
 				light,
-				`calc(${FONT_SIZES.md}rem * pow(var(--type_scale_ratio), ${step}))`
+				`calc(${FONT_SIZES.md}rem * var(--font_size_scale) * pow(var(--type_scale_ratio), ${step}))`
 			);
 			// the numeric twin can't drift from what the derived default computes
 			assert.strictEqual(
@@ -149,8 +150,8 @@ test('font sizes above md derive from the type scale ratio and match the fitted 
 				`font_size_${size}`
 			);
 		} else {
-			// body and smaller text stay literal, out of the ratio's reach
-			assert.strictEqual(light, `${FONT_SIZES[size]}rem`);
+			// body and smaller text take the size scale only, out of the ratio's reach
+			assert.strictEqual(light, `calc(${FONT_SIZES[size]}rem * var(--font_size_scale))`);
 		}
 	}
 });

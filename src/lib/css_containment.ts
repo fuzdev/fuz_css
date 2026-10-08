@@ -89,3 +89,35 @@ export const css_comment_is_contained = (text: unknown): boolean =>
  */
 export const css_custom_property_name_is_contained = (name: unknown): boolean =>
 	typeof name === 'string' && /^[\w-]+$/u.test(name);
+
+/**
+ * Serializes a string as a CSS identifier, so any string can name an element
+ * id in a selector (`'#' + escape_css_identifier(id)` matches the element
+ * whose `id` attribute is that string). Follows the CSSOM identifier
+ * serialization, except that ASCII punctuation is escaped by code point
+ * (`\3c `) rather than with a bare backslash, since `\</style` still closes a
+ * `<style>` element - the output can't end its rule or its element.
+ *
+ * @param value - the raw identifier text
+ */
+export const escape_css_identifier = (value: string): string => {
+	let out = '';
+	for (let i = 0; i < value.length; i++) {
+		const code = value.charCodeAt(i);
+		const char = value[i]!;
+		const leading_digit =
+			code >= 0x30 && code <= 0x39 && (i === 0 || (i === 1 && value[0] === '-'));
+		if (code === 0) {
+			out += '\\fffd ';
+		} else if (leading_digit) {
+			out += `\\${code.toString(16)} `;
+		} else if (i === 0 && char === '-' && value.length === 1) {
+			out += '\\-';
+		} else if (code >= 0x80 || /[\w-]/u.test(char)) {
+			out += char;
+		} else {
+			out += `\\${code.toString(16)} `;
+		}
+	}
+	return out;
+};

@@ -11,7 +11,7 @@ import { join } from 'node:path';
 import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
-import type { ExtractionData } from './css_class_extractor.ts';
+import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -59,13 +59,32 @@ export const create_cache_path_resolver = (
  * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).
  * v5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).
  * v6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).
+ * v7: Add `extraction_key`, so a change to `acorn_plugins` or `cache_salt` misses.
  */
-// TODO: the cache key is `content_hash` + `CSS_CACHE_VERSION`, but extraction output
-// also depends on `acorn_plugins` (e.g. acorn-jsx), which isn't part of the key.
-// Changing that config without editing a file yields a stale cache hit. Acorn plugin
-// instances aren't stably serializable across processes, so a clean fingerprint isn't
-// cheap; revisit if config-change staleness bites (workaround: clear `.fuz/cache/css`).
-export const CSS_CACHE_VERSION = 6;
+export const CSS_CACHE_VERSION = 7;
+
+/**
+ * Computes the part of the cache key that comes from configuration rather
+ * than file content: a fingerprint of the configured acorn plugins (their
+ * source text) and the consumer's `cache_salt`, or `null` when neither is
+ * set. A plugin's options live in its closure, where the source text can't
+ * see them, so a consumer who changes only a plugin's options bumps
+ * `cache_salt`.
+ *
+ * @param acorn_plugins - the extraction's acorn plugins, if any
+ * @param cache_salt - a consumer string folded into the key, if any
+ * @returns the key, or `null` for the default configuration
+ *
+ * @internal Shared by the Vite plugin and the Gro generator.
+ */
+export const to_extraction_cache_key = (
+	acorn_plugins: Array<AcornPlugin> | undefined,
+	cache_salt: string | undefined
+): string | null => {
+	const parts = (acorn_plugins ?? []).map((plugin) => 'plugin:' + plugin.toString());
+	if (cache_salt) parts.push('salt:' + cache_salt);
+	return parts.length ? hash_insecure(parts.join('\0')) : null;
+};
 
 /**
  * Cached extraction result for a single file.
@@ -76,6 +95,8 @@ export interface CachedExtraction {
 	v: number;
 	/** Content hash of the source file (BLAKE3 via `hash_blake3`) */
 	content_hash: string;
+	/** The configuration part of the key (`to_extraction_cache_key`), or null for the default */
+	extraction_key: string | null;
 	/** Classes as [name, locations] tuples, or null if none */
 	classes: Array<[string, Array<SourceLocation>]> | null;
 	/** Classes from `@fuz-classes` comments, or null if none */
@@ -170,12 +191,14 @@ export const load_cached_extraction = async (
  * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
  * @param content_hash - content hash of the source file contents
+ * @param extraction_key - the configuration part of the key, from `to_extraction_cache_key`
  * @param extraction - extraction data to cache
  */
 export const save_cached_extraction = async (
 	deps: CacheDeps,
 	cache_path: string,
 	content_hash: string,
+	extraction_key: string | null,
 	extraction: ExtractionData
 ): Promise<void> => {
 	// Convert to null if empty to save allocation on load
@@ -203,6 +226,7 @@ export const save_cached_extraction = async (
 	const data: CachedExtraction = {
 		v: CSS_CACHE_VERSION,
 		content_hash,
+		extraction_key,
 		classes: classes_array,
 		explicit_classes: explicit_array,
 		diagnostics: diagnostics_array,

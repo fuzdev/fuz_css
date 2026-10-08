@@ -181,7 +181,7 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>filter_file</code> - custom filter for which files to process. Receives
-					<code>(id: string)</code> and returns <code>boolean</code>, e.g.
+					<code>(id: string, root: string)</code> and returns <code>boolean</code>, e.g.
 					<Code inline lang="ts" content="(id) => !id.includes('/fixtures/')" />
 				</li>
 				<li>

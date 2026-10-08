@@ -125,7 +125,7 @@
 				{#snippet link()}<TomeLink slug="colors">a link</TomeLink>{/snippet}
 			</ThemePreview>
 		</div>
-		<div class="width_atmost_xs mb_lg">
+		<div class="width:fit-content mb_lg">
 			<div class="title">Contrast</div>
 			<ContrastInput
 				modifiers={editor.contrast_modifiers}
@@ -133,7 +133,7 @@
 				select={(modifier) => (editor.contrast_modifier = modifier)}
 			/>
 		</div>
-		<div class="width_atmost_xs mb_lg">
+		<div class="width:fit-content mb_lg">
 			<div class="title">Color scheme</div>
 			<ColorSchemeInput />
 		</div>

@@ -18,7 +18,7 @@ import type { Theme } from '../variable.ts';
 export const guestbook_theme: Theme = {
 	name: 'guestbook',
 	summary:
-		'Retro web for the fun of it: colorless system chrome, serif everything, square corners, underlined links, beveled buttons that press in - the 90s guestbook.',
+		'Retro web for the fun of it: colorless system chrome, serif everything, square corners, underlined links, beveled buttons that press in, a dotted focus ring - the 90s guestbook.',
 	variables: [
 		// system chrome is colorless - the neutral drops its tint entirely
 		{ name: 'neutral_chroma', light: '0' },
@@ -49,6 +49,9 @@ export const guestbook_theme: Theme = {
 		{ name: 'space_scale', light: '0.9' },
 		{ name: 'line_height_md', light: '1.45' },
 		// links are underlined at rest, not on hover
-		{ name: 'text_decoration', light: 'underline' }
+		{ name: 'text_decoration', light: 'underline' },
+		// the era's dotted focus rectangle, kept at the default width - at 1px
+		// the dots blur into the bevel and the ring stops reading
+		{ name: 'outline_style', light: 'dotted' }
 	]
 };

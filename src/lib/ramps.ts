@@ -169,6 +169,15 @@ export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
 	dark: 0.025
 };
 
+/**
+ * The ground's own chroma (`--shade_chroma_00`), added to the `shade_00`
+ * stop's shaped chroma. The chroma shape is 0 at the endpoints, so without
+ * it the page ground is untinted whatever `neutral_chroma` says; a theme
+ * whose identity is a tinted page (paper, a lit night) sets it. 0 keeps the
+ * default ground neutral.
+ */
+export const SHADE_CHROMA_00 = 0;
+
 export type ShadowTint = 'bright' | 'dim';
 
 /**
@@ -371,15 +380,17 @@ export const ramp_color_oklch = (
 
 /**
  * Combines resolved neutral-scale inputs into a shade/text stop's OKLCH: the
- * peak `neutral_chroma` scaled by the shared chroma shape. The neutral twin
+ * peak `neutral_chroma` scaled by the shared chroma shape, plus the ground's
+ * own chroma for `shade_00` (`ground_chroma`, 0 elsewhere). The neutral twin
  * of `ramp_color_oklch`, shared with `check_theme` for the same reason.
  */
 export const neutral_color_oklch = (
 	lightness: number,
 	neutral_chroma: number,
 	chroma_shape: number,
-	hue: number
-): Oklch => clamp_oklch([lightness, neutral_chroma * chroma_shape, hue]);
+	hue: number,
+	ground_chroma = 0
+): Oklch => clamp_oklch([lightness, neutral_chroma * chroma_shape + ground_chroma, hue]);
 
 /**
  * Computes the default OKLCH color of a palette stop (`--palette_X_NN`).
@@ -405,7 +416,8 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeV
 		ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
-		NEUTRAL_HUE
+		NEUTRAL_HUE,
+		stop === '00' ? SHADE_CHROMA_00 : 0
 	);
 
 /**
@@ -523,7 +535,9 @@ export const render_ramp_color_css = (
 
 /**
  * Renders the derived default of a neutral (shade/text) stop. The neutral
- * rides the palette's chroma shape scaled by the `--neutral_chroma` peak.
+ * rides the palette's chroma shape scaled by the `--neutral_chroma` peak;
+ * the ground (`shade_00`) adds its own `--shade_chroma_00`, since the shape
+ * is 0 there.
  */
 export const render_neutral_stop_css = (
 	family: Exclude<RampFamily, 'palette'>,
@@ -531,7 +545,7 @@ export const render_neutral_stop_css = (
 ): string =>
 	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
 		stop
-	})) var(--hue_neutral))`;
+	})${family === 'shade' && stop === '00' ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

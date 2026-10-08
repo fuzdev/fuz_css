@@ -283,6 +283,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	const {
 		filter_file = filter_file_default,
 		acorn_plugins,
+		cache_salt,
 		cache_dir = DEFAULT_CACHE_DIR,
 		deps = default_cache_deps,
 		prescan = true
@@ -308,7 +309,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		css_classes: generator.create_css_classes(),
 		get_cache_path: (id) => get_cache_path?.(id) ?? null,
 		deps,
-		acorn_plugins
+		acorn_plugins,
+		cache_salt
 	});
 
 	/**
@@ -587,7 +589,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		// whether the sources fall short of the chunk - unknown, or not all readable
 		let sources_incomplete = sources === null;
 		if (sources !== null) {
-			const source_ids = sources.filter((source) => filter_file(source));
+			const source_ids = sources.filter((source) => filter_file(source, vite_root));
 			await each_concurrent(source_ids, PRESCAN_CONCURRENCY, async (source_id) => {
 				// isolated per file, like the pre-scan: a throw here would otherwise
 				// fail the dependency's transform
@@ -598,7 +600,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 				}
 			});
 		}
-		if (sources_incomplete && filter_file(id)) await ingest(id, code);
+		if (sources_incomplete && filter_file(id, vite_root)) await ingest(id, code);
 	};
 
 	/**
@@ -621,13 +623,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	const run_prescan = async (): Promise<void> => {
 		const started = performance.now();
 		const found = await Promise.all(
-			prescan_dirs.map((dir) => fs_search(dir, { file_filter: filter_file, sort: null }))
+			prescan_dirs.map((dir) =>
+				fs_search(dir, { file_filter: (id) => filter_file(id, vite_root), sort: null })
+			)
 		);
 		// Normalize to Vite's posix-style ids so pre-scan entries share keys
 		// with transform ingests (`hashes`, deletion handling) on every platform.
 		// A set, because a scanned directory can hold the root's `index.html`.
 		const file_ids = new Set(found.flat().map((p) => normalizePath(p.id)));
-		if (prescan_root_html !== null && filter_file(prescan_root_html)) {
+		if (prescan_root_html !== null && filter_file(prescan_root_html, vite_root)) {
 			file_ids.add(prescan_root_html); // skipped at the read when the project has none
 		}
 		let file_count = 0;
@@ -700,7 +704,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 			// unseen until the server restarts.
 			const rescan_file = (raw_file: string): void => {
 				const file = normalizePath(raw_file);
-				if (!is_prescanned(file) || !filter_file(file)) return;
+				if (!is_prescanned(file) || !filter_file(file, vite_root)) return;
 				ingest_file_from_disk(file).catch((error) => {
 					log_error(`[fuz_css] failed to extract ${file}: ${error}`);
 				});
@@ -797,7 +801,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 				return null;
 			}
 			// Skip non-matching files
-			if (!filter_file(file_id)) {
+			if (!filter_file(file_id, vite_root)) {
 				return null;
 			}
 

@@ -3,7 +3,8 @@ import { test, assert, describe } from 'vitest';
 import {
 	css_comment_is_contained,
 	css_custom_property_name_is_contained,
-	css_value_is_contained
+	css_value_is_contained,
+	escape_css_identifier
 } from '$lib/css_containment.ts';
 import { default_variables } from '$lib/variables.ts';
 import { render_theme_style } from '$lib/theme.ts';
@@ -112,6 +113,29 @@ describe('css_custom_property_name_is_contained', () => {
 		for (const name of ['', 'a: 1; --b', 'a b', 'a}', 'a/**/']) {
 			assert.isFalse(css_custom_property_name_is_contained(name), name);
 		}
+	});
+});
+
+describe('escape_css_identifier', () => {
+	test('a plain identifier passes through', () => {
+		for (const id of ['my_scope', 'Theme-1', '_x', '-a', 'caf\u00e9']) {
+			assert.strictEqual(escape_css_identifier(id), id);
+		}
+	});
+	test('a leading digit, or a digit after a leading dash, is escaped by code point', () => {
+		assert.strictEqual(escape_css_identifier('1a'), '\\31 a');
+		assert.strictEqual(escape_css_identifier('-1'), '-\\31 ');
+		assert.strictEqual(escape_css_identifier('a1'), 'a1');
+	});
+	test('a lone dash and a NUL are escaped', () => {
+		assert.strictEqual(escape_css_identifier('-'), '\\-');
+		assert.strictEqual(escape_css_identifier('a\0b'), 'a\\fffd b');
+	});
+	test('nothing escaped can end the rule or the style element', () => {
+		const escaped = escape_css_identifier('x { } </style><script>');
+		assert.notMatch(escaped, /[{}<>;/]/u);
+		assert.notInclude(escaped, '</style');
+		assert.strictEqual(escaped, 'x\\20 \\7b \\20 \\7d \\20 \\3c \\2f style\\3e \\3c script\\3e ');
 	});
 });
 

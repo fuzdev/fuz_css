@@ -105,7 +105,7 @@ Notes:
 
 	body {
 		min-height: 100vh;
-		font-size: 1.6rem; /* matched to `font-size: 62.5%` and same value as the default `--font_size_md`, but this one shouldn't vary */
+		font-size: var(--font_size_md, 1.6rem); /* rem against `font-size: 62.5%`; the token follows `--font_size_scale` */
 		font-family: var(--font_family);
 		font-weight: var(--font_weight);
 		tab-size: 2; /* TODO var */
@@ -358,7 +358,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-color: var(--border_color);
 		border-style: var(--border_style);
 		border-width: var(--border_width);
-		border-radius: var(--border_radius, var(--border_radius_sm));
+		border-radius: var(--border_radius, var(--control_radius));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
 		outline-offset: var(--outline_offset);
 		padding: var(--input_padding_y) var(--input_padding_x);
@@ -599,7 +599,7 @@ TODO think through these patterns to get somewhere consistent
 		border-width: var(--border_width);
 		border-style: var(--button_border_style);
 		border-color: var(--button_border_color);
-		border-radius: var(--border_radius, var(--border_radius_sm));
+		border-radius: var(--border_radius, var(--control_radius));
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
 		outline-offset: var(--outline_offset);
 	}

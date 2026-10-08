@@ -265,11 +265,13 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 
 /**
  * How far in degrees the accent hue has to sit from each status hue before
- * `validate_theme` stops warning. Under the palette's tightest default pair
- * (red and orange, 12 degrees apart), so the warning fires on a clone or a
- * near-clone, never on the spacing the defaults themselves ship.
+ * `validate_theme` stops warning. At the chroma links and labels render at,
+ * 12 degrees reads as one color with a shift (a red accent beside the default
+ * orange caution) while 30 reads as two (a pink accent beside the default
+ * red negative), so the threshold sits between them. The defaults' closest
+ * accent and status pair, blue and cyan, is 40 degrees apart.
  */
-export const ACCENT_STATUS_HUE_SEPARATION = 10;
+export const ACCENT_STATUS_HUE_SEPARATION = 20;
 
 // the separation lint: two intents at the same hue angle render the same
 // color at every stop, so an accent that lands on a status hue makes links,

@@ -5,8 +5,8 @@ import { render_shadow_css } from '../shadow_css.ts';
 /**
  * An exemplar theme: the green-phosphor CRT terminal. Structure comes from
  * packing - monospace, sharp-cornered, spacing and leading packed well past
- * the compact themes, and a type scale flattened nearly to one size give it
- * terminal density, and the three
+ * the compact themes, and a type scale flattened nearly to one size, with
+ * bold headings carrying the hierarchy, give it terminal density, and the three
  * shortest duration tokens are zero. The phosphor tint carries the surfaces
  * and accent, but the palette slots keep their own hues so status colors
  * still read - negative stays red, caution amber, info cyan, and positive
@@ -37,8 +37,11 @@ const authored: Theme = {
 		// defaults to the serif stack, so a terminal has to retarget both
 		{ name: 'font_family', light: 'var(--font_family_mono)' },
 		{ name: 'heading_font_family', light: 'var(--font_family_mono)' },
-		// a terminal has one type size - the scale flattens toward that
-		{ name: 'type_scale_ratio', light: '1.12' },
+		// a terminal has one type size - the scale flattens toward that, and
+		// headings carry the hierarchy in weight instead, the way a terminal
+		// marks a title in bold
+		{ name: 'type_scale_ratio', light: '1.15' },
+		{ name: 'heading_font_weight', light: '700' },
 		// sharp: one knob zeroes every radius tier
 		{ name: 'radius_scale', light: '0' },
 		// emissive depth: the shadow colors turn to phosphor light, and controls

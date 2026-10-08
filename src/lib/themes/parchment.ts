@@ -20,6 +20,9 @@ export const parchment_theme: Theme = {
 		// warm parchment: the neutral keeps its brown binding, tinted stronger,
 		// and warmer still under candlelight
 		{ name: 'neutral_chroma', light: '0.03', dark: '0.038' },
+		// the page itself takes the tint - the shared chroma shape leaves the
+		// ground untinted, so paper by day and leather by night are set here
+		{ name: 'shade_chroma_00', light: '0.012', dark: '0.02' },
 		// by night the ground is tanned leather, lifted well off the default
 		// near-black so it reads as a lit page and keeps the sunken direction
 		{ name: 'shade_lightness_00', dark: '0.23' },
@@ -32,6 +35,9 @@ export const parchment_theme: Theme = {
 		// the accent took the red slot, so errors move to the crimson of the
 		// pink slot and a link never reads as one
 		{ name: 'hue_negative', light: 'var(--hue_g)' },
+		// and the default orange caution sits too close to a red accent, so
+		// warnings move to the yellow slot
+		{ name: 'hue_caution', light: 'var(--hue_e)' },
 		// aged pigment - inks fade, so the whole palette eases down
 		{ name: 'chroma_scale', light: '0.85' },
 		// serif body text; headings are already serif by default

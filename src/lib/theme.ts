@@ -2,7 +2,8 @@ import type { StyleVariable, Theme } from './variable.ts';
 import {
 	css_comment_is_contained,
 	css_custom_property_name_is_contained,
-	css_value_is_contained
+	css_value_is_contained,
+	escape_css_identifier
 } from './css_containment.ts';
 
 /**
@@ -51,9 +52,9 @@ export interface RenderThemeStyleOptions {
 	 * like `--chroma_scale` set at `#id` changes nothing. Knob-only themes
 	 * need `:root`.
 	 *
-	 * A trusted consumer option, written into the selector as is: it must be
-	 * a plain CSS identifier (letters, digits, `-`, `_`, not starting with a
-	 * digit), since an invalid one makes the browser drop the whole rule.
+	 * Any string works: it's escaped into the selector, so it matches the
+	 * element whose `id` attribute is that string and can't end the rule or
+	 * the `<style>` element. An empty string renders to `:root`.
 	 */
 	id?: string | null;
 	/**
@@ -194,10 +195,10 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 		.filter(Boolean);
 	// nothing declared - no variables, or every one of them empty or dropped
 	if (!rendered_light.length && !rendered_dark.length) return '';
-	const scope = id ? '#' + id : ':root';
+	const scope = typeof id === 'string' && id ? '#' + escape_css_identifier(id) : ':root';
 	// the scheme class conventionally lives on the root element, so a scoped
 	// theme's dark block matches both that and a class on the scope itself
-	const dark_scope = id ? `${scope}.dark, :root.dark ${scope}` : ':root.dark';
+	const dark_scope = scope !== ':root' ? `${scope}.dark, :root.dark ${scope}` : ':root.dark';
 	const blocks = `${
 		rendered_light.length
 			? `${scope} {

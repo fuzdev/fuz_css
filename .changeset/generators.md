@@ -68,6 +68,8 @@ Breaking:
   `format_dimension_value`, `CSS_DIRECTIONS`, and `CssDirection`
   (`css_class_generators.ts`), and `has_variable` (`variable_graph.ts`);
   `resolve_variables_option` is no longer exported.
+- `FileFilter` takes the project root as a second argument
+  (`(path, root) => boolean`); a one-argument filter still works.
 
 New:
 
@@ -90,6 +92,8 @@ New:
   ships as written except a top-level `@charset`. `@keyframes`,
   `@property`, `@scope`, `@page`, and `@layer` statements were dropped, and
   so was a group holding only a nested group.
+- `cache_salt` option, folded into the extraction cache key - change it
+  when only an acorn plugin's options change.
 
 Fixes:
 
@@ -133,3 +137,9 @@ Fixes:
   the generated CSS.
 - The default `style.css` loads from a package path holding a space or a
   Windows drive (the URL's encoded path was read as a file path).
+- The default file filter judges test directories inside the project or
+  the dependency's package, so a project checked out under a `test/`
+  directory no longer has every file filtered out.
+- The extraction cache key covers `acorn_plugins`, so adding or removing
+  one (`acorn-jsx`) re-extracts files cached without it; the cache version
+  bumps, so every file re-extracts once.

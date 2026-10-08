@@ -254,7 +254,9 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - Semantic intent knobs alias meaning over the letters: `--hue_accent`
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
   (all surfaces/text/borders/shadows - the neutral is an intent whose scales
-  are `shade_*`/`text_*`), `--hue_positive`/`--hue_negative`/
+  are `shade_*`/`text_*`; the chroma shape is 0 at the ends, so the page
+  ground `shade_00` is untinted unless `--shade_chroma_00` tints it),
+  `--hue_positive`/`--hue_negative`/
   `--hue_caution`/`--hue_info`; each intent derives the full stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
   others) with matching text/background token classes (`.positive_50`,
@@ -280,12 +282,15 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   exemplar or composition knowingly gives up are declared as exact
   exceptions in the theme_check tests
 - Form/scale knobs derive into token defaults so one move reshapes a family
-  while tokens stay pinnable: `--radius_scale` (border radii), `--space_scale`
+  while tokens stay pinnable: `--radius_scale` (border radii, floored at
+  `--border_radius_min`; controls read `--control_radius`, the `sm` tier
+  by default, so a theme rounds controls apart from panels), `--space_scale`
   (spaces), `--shadow_alpha_scale` (shadow alphas incl. button shadows),
-  `--type_scale_ratio` (the font sizes above `md`, as `md * ratio^n` - body
-  and smaller text stay literal, so the knob moves the heading hierarchy
-  without moving body text; the `lg`/`xl` size composites step up the same
-  ladder, so their font size follows it while `xs`/`sm` stay put), plus
+  `--font_size_scale` (every font size, body text included - `body` reads
+  `--font_size_md`), `--type_scale_ratio` (the font sizes above `md`, as
+  `md * ratio^n`, so the knob moves the heading hierarchy without moving
+  body text; the `lg`/`xl` size composites step up the same ladder, so
+  their font size follows it while `xs`/`sm` stay put), plus
   `--font_weight`, `--heading_font_weight` (a hook with per-tier fallbacks -
   setting it flattens the heading ladder), `--heading_font_family`,
   `--heading_letter_spacing` (heading tracking, `normal` by default, best
@@ -436,8 +441,12 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   they dispatch like any other; a `base_css` the parser rejects, or a
   callback returning a non-string, throws from `create_bundled_resources`
   with an error naming `base_css`
-- `filter_file` - which files get extracted (the default filter includes
-  node_modules deps)
+- `filter_file` - which files get extracted, called with the file id and
+  the project root (the default filter includes node_modules deps and
+  judges test directories inside the project or the dependency's package)
+- `cache_salt` - folded into the extraction cache key, for a change to an
+  acorn plugin's options (the key already covers content and the plugins'
+  source)
 - `prescan` (Vite plugin only) - dev-only eager source scan at server
   startup so the first served CSS is complete (`true` = `src` under the
   Vite root, `false` disables, or an array of directories; the root
@@ -496,7 +505,9 @@ typography, borders, shading, shadows, layout. See
   `Theme` schema rejects a value that could end its own declaration or the
   `<style>` element, and `render_theme_style` drops one. The checks take
   `unknown` and fail non-strings, and the renderer is total over any JSON
-  value - what isn't the type `Theme` declares is dropped, never thrown on
+  value - what isn't the type `Theme` declares is dropped, never thrown on.
+  `escape_css_identifier` writes the renderer's `id` option into its
+  selector, escaping punctuation by code point so `</style` can't form
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
   defaults re-slotted so its one appearance holds in both schemes). Kept out
@@ -519,26 +530,29 @@ typography, borders, shading, shadows, layout. See
   the rest, and is named last, for the artifact that already looks that
   way: zine (line and weight - paper white and toner black, thick opaque
   borders, sharp, flat, heavy sans headings set tight, underlined links),
-  pebble (depth and softness - round, raised on soft drop shadows through
-  `button_shadow*` and `panel_shadow`, airy, cool whisper), parchment (type
-  and ruling - serif body, rubrication-red accent with the negative intent
-  moved off it, double-ruled borders, candlelit in dark), phosphor (packing -
-  mono, compact, a flattened type scale, a green cast on a ground lifted off
-  black, halo button shadows, positive moved to teal off the green accent,
-  dark-only), guestbook (controls as objects - colorless chrome on an
-  off-white ground, serif everything, underlined links, `outset` buttons
-  pressing to `inset` over `inset` fields), marquee (color - magenta accent,
-  colored glow shadows, radius pins, vivid past the caps, a rotated yellow
-  slot making it the one palette-tier exemplar, dark-only), and signage
-  (scale and weight, for legibility - spacious, an opened-up type scale,
-  heavier text under bold sans headings, thick borders, a wide focus ring,
-  and an accent that changes between schemes). Each summary leads with who
-  the theme is for, so a picker reads as a menu of use cases. Only
-  phosphor and marquee take a `scheme` stance; everything else is
-  dual-scheme. Several retime the short `duration_*` tokens (zine and
-  phosphor to zero) - base styles carry no transitions, so those reach only
-  what a consumer times with the tokens. The contrast pair live here too as
-  the modifier modules
+  pebble (depth and softness - pill controls through `control_radius` on
+  rounded panels, raised on soft drop shadows through `button_shadow*` and
+  `panel_shadow`, airy, cool whisper), parchment (type and ruling - serif
+  body on a tinted paper ground, rubrication-red accent with the negative
+  and caution intents moved off it, double-ruled borders, candlelit in
+  dark), phosphor (packing - mono, compact, a flattened type scale under
+  bold headings, a green cast on a ground lifted off black, halo button
+  shadows, positive moved to teal off the green accent, dark-only),
+  guestbook (controls as objects - colorless chrome on an off-white ground,
+  serif everything, underlined links, `outset` buttons pressing to `inset`
+  over `inset` fields, a thin dotted focus ring), marquee (color - magenta
+  accent on a purple ground, colored glow shadows, a radius floor, vivid
+  past the caps, a rotated yellow slot making it the one palette-tier
+  exemplar, dark-only), and signage (scale and weight, for legibility -
+  spacious, larger body text through `font_size_scale`, an opened-up type
+  scale, heavier text under bold sans headings, thick borders, a wide focus
+  ring, and an accent that changes between schemes). Each summary leads
+  with who the theme is for, so a picker reads as a menu of use cases.
+  Only phosphor and marquee take a `scheme` stance; everything else is
+  dual-scheme. zine and phosphor zero the short `duration_*` tokens - base
+  styles carry no transitions, so that reaches what a consumer times with
+  the tokens (fuz_ui's dialog backdrop and hashlinks among them). The
+  contrast pair live here too as the modifier modules
 - [shadow_css.ts](src/lib/shadow_css.ts) - `render_shadow_css`, the shape
   of a declared shadow variable (a geometry token plus a shadow color mixed
   down to an alpha step). A leaf module with type-only imports, so the
@@ -573,8 +587,9 @@ typography, borders, shading, shadows, layout. See
 
 - [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class
   extraction from Svelte/TS/JSX files
-- [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type and the
-  default filter (`filter_file_default`) for extractable files
+- [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type, the
+  default filter (`filter_file_default`) for extractable files, and
+  `to_filter_scope`, the root- or package-relative part it judges
 - [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
   `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping
   dispatch the generators share
@@ -616,8 +631,9 @@ typography, borders, shading, shadows, layout. See
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
   for Gro/Vite generators
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
-  validation, atomic writes, the cache-path lookup the generators share, CI
-  skip
+  validation plus a configuration key (`to_extraction_cache_key`, over
+  `acorn_plugins` and `cache_salt`), atomic writes, the cache-path lookup
+  the generators share, CI skip
 - [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for

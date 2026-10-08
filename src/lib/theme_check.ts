@@ -438,10 +438,20 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 				const neutral_c = num('neutral_chroma', scheme);
 				const shape = num(`chroma_shape_${stop}`, scheme);
 				const neutral_hue = num('hue_neutral', scheme);
-				if (lightness === null || neutral_c === null || shape === null || neutral_hue === null) {
+				// the ground carries its own chroma on top of the shaped term
+				const ground_c = family === 'shade' && stop === '00' ? num('shade_chroma_00', scheme) : 0;
+				if (
+					lightness === null ||
+					neutral_c === null ||
+					shape === null ||
+					neutral_hue === null ||
+					ground_c === null
+				) {
 					return null;
 				}
-				return oklch_to_srgb(neutral_color_oklch(lightness, neutral_c, shape, neutral_hue));
+				return oklch_to_srgb(
+					neutral_color_oklch(lightness, neutral_c, shape, neutral_hue, ground_c)
+				);
 			},
 			visited
 		);

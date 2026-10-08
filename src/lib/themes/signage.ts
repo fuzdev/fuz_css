@@ -3,7 +3,7 @@ import type { Theme } from '../variable.ts';
 /**
  * An exemplar theme: built for legibility, the way public signage is - read
  * at a distance, in passing, by anyone. Structure comes from scale and
- * weight: generous spacing, an opened-up type scale, a heavier body weight
+ * weight: generous spacing, larger body text, an opened-up type scale, a heavier body weight
  * under bold grotesque headings at normal tracking, thick borders, flat
  * fields, underlined links, and a focus ring too wide to miss. The palette
  * stays at the gamut caps: signage color is saturated but it has to print.
@@ -17,7 +17,7 @@ import type { Theme } from '../variable.ts';
 export const signage_theme: Theme = {
 	name: 'signage',
 	summary:
-		"Built for legibility - public sites, older readers, kiosks: big bold headings, heavier text, thick borders, spacious layout, and a focus ring you can't miss.",
+		"Built for legibility - public sites, older readers, kiosks: larger, heavier body text, bold headings at normal tracking, roomy controls, underlined links, and a focus ring you can't miss.",
 	variables: [
 		// enamel white and board black: barely any cast
 		{ name: 'hue_neutral', light: 'var(--hue_a)' },
@@ -26,8 +26,10 @@ export const signage_theme: Theme = {
 		{ name: 'hue_accent', light: 'var(--hue_a)', dark: 'var(--hue_e)' },
 		// text pulled toward its contrast end across the whole ramp
 		{ name: 'text_lightness_curve', light: '0.8', dark: '0.6' },
-		// read at a distance: everything gets room
+		// read at a distance: everything gets room, and body text grows a size
+		// (18px at the browser default), small text with it
 		{ name: 'space_scale', light: '1.2' },
+		{ name: 'font_size_scale', light: '1.125' },
 		// a heavier body under bold grotesque headings, tracked normally -
 		// tight tracking is a display move that costs legibility
 		{ name: 'font_weight', light: '500' },

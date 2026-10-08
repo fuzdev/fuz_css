@@ -54,6 +54,16 @@ describe('render_theme_style', () => {
 		assert.include(css, '#my_scope.dark, :root.dark #my_scope {');
 		assert.notInclude(css, ':root {');
 	});
+
+	test('an id is escaped into the selector', () => {
+		const theme = { name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9' }] };
+		assert.include(render_theme_style(theme, { id: '1st' }), '#\\31 st {');
+		const hostile = render_theme_style(theme, { id: 'x{}</style>' });
+		assert.notInclude(hostile, '</style');
+		assert.include(hostile, '#x\\7b \\7d \\3c \\2f style\\3e  {');
+		// an empty id scopes nothing
+		assert.include(render_theme_style(theme, { id: '' }), ':root {');
+	});
 });
 
 describe('scheme stance', () => {

@@ -54,7 +54,6 @@
 	<!-- <div>border_color</div> -->
 	<!-- <div>border_width</div> -->
 	<!-- <div>outline_width</div> -->
-	<!-- <div>outline_style</div> -->
 	<!-- <div>outline_color</div> -->
 
 	<section>
@@ -225,11 +224,19 @@ border-color: var(--shade_30);
 				</div>
 			{/each}
 		</div>
+		<p>
+			Focus rings draw with <code>--outline_style</code> (default <code>solid</code>), so a theme
+			can dot or dash every ring at once.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Border radius" />
 		<p>
-			Border variables with <TomeLink slug="classes" hash="Token-classes">token classes</TomeLink>:
+			Border variables with <TomeLink slug="classes" hash="Token-classes">token classes</TomeLink>.
+			Each tier is the base radius times <code>--radius_scale</code>, floored at
+			<code>--border_radius_min</code>. Buttons and form fields read <code>--control_radius</code>
+			(the <code>sm</code> tier by default), so a theme can round its controls apart from its
+			panels:
 		</p>
 		<div class="border_examples border_radii">
 			{#each border_radius_variants as radius (radius)}

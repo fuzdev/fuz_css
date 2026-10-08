@@ -67,6 +67,7 @@ import {
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
+	SHADE_CHROMA_00,
 	BORDER_COLOR_LIGHTNESS,
 	BORDER_CHROMA_MULTIPLIER,
 	ramp_lightness,
@@ -325,6 +326,7 @@ export class ThemeResolver {
 		// scalar knobs
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
 		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
+		if (name === 'shade_chroma_00') return { ok: true, value: SHADE_CHROMA_00 };
 		if (name === 'border_color_lightness') {
 			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };
 		}

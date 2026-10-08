@@ -39,7 +39,7 @@
 		{@const is_selected = modifier === selected}
 		<button
 			type="button"
-			class={['contrast palette_a', { selected: is_selected }]}
+			class={['contrast', { selected: is_selected }]}
 			role="radio"
 			title={is_selected ? `${label} contrast is selected` : `select ${label} contrast`}
 			aria-checked={is_selected}

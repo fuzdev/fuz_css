@@ -115,10 +115,12 @@
 	<TomeSection>
 		<TomeSectionHeader text="Font sizes" />
 		<p>
-			The sizes above <code>md</code> step by one ratio, <code>--type_scale_ratio</code>, so a
-			<TomeLink slug="themes">theme</TomeLink> flattens or opens up the whole heading hierarchy with
-			a single variable. <code>md</code> is the body size, and it and the smaller sizes are fixed,
-			so body text never moves.
+			Two knobs set the sizes. <code>--font_size_scale</code> multiplies every size, body text
+			(<code>md</code>) and the smaller sizes included, so a
+			<TomeLink slug="themes">theme</TomeLink> can enlarge reading text while small text keeps its
+			proportion to it. The sizes above <code>md</code> also step by one ratio,
+			<code>--type_scale_ratio</code>, which flattens or opens up the whole heading hierarchy
+			without moving body text.
 		</p>
 		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>

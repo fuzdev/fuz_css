@@ -19,6 +19,7 @@ import {
 	DEFAULT_CACHE_DIR,
 	create_cache_path_resolver,
 	save_cached_extraction,
+	to_extraction_cache_key,
 	delete_cached_extraction
 } from './css_cache.ts';
 import { default_cache_deps } from './deps_defaults.ts';
@@ -91,8 +92,10 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		concurrency = DEFAULT_CONCURRENCY,
 		cache_io_concurrency = DEFAULT_CACHE_IO_CONCURRENCY,
 		acorn_plugins,
+		cache_salt,
 		deps = default_cache_deps
 	} = options;
+	const extraction_key = to_extraction_cache_key(acorn_plugins, cache_salt);
 
 	// the log of the generate call in progress, which diagnostics go to
 	let current_log: Logger | null = null;
@@ -112,7 +115,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 		// Returns 'all' when an extractable file changes, null otherwise.
 		dependencies: ({ changed_file_id }) => {
 			if (!changed_file_id) return 'all';
-			if (filter_file(changed_file_id)) return 'all';
+			if (filter_file(changed_file_id, project_root)) return 'all';
 			return null; // Ignore .json, .md, etc.
 		},
 
@@ -150,7 +153,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 					stats.internal_files++;
 				}
 
-				if (!filter_file(disknode.id)) {
+				if (!filter_file(disknode.id, project_root)) {
 					continue;
 				}
 
@@ -178,6 +181,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						deps,
 						content: node.contents,
 						content_hash: node.content_hash,
+						extraction_key,
 						cache_path,
 						filename: node.id,
 						acorn_plugins
@@ -225,6 +229,7 @@ export const gen_fuz_css = (options: GenFuzCssOptions = {}): Gen => {
 						deps,
 						extraction.cache_path,
 						extraction.content_hash,
+						extraction_key,
 						extraction
 					);
 				}).catch((err) => log.warn('Cache write error:', err));

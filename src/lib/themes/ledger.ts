@@ -5,9 +5,8 @@ import type { Theme } from '../variable.ts';
  * whisper in the neutral, color eased down so status reads without shouting,
  * compact spacing and leading (visibly tighter than the base, so the
  * registry's two entries read as two choices), one sans family, a flatter type scale,
- * restrained corners and depth, and the two shortest duration tokens
- * tightened. Plain on purpose: no decoration, no clipped gamut, the default
- * accent.
+ * and restrained corners and depth. Plain on purpose: no decoration, no
+ * clipped gamut, the default accent.
  *
  * Dual-scheme and semantic-tier - it moves levers only, so the palette
  * letters keep their hues and it sits in the registry beside the base theme.
@@ -33,9 +32,6 @@ export const ledger_theme: Theme = {
 		{ name: 'heading_font_family', light: 'var(--font_family_sans)' },
 		{ name: 'heading_font_weight', light: '600' },
 		// a flatter type scale: headings label sections, they don't announce them
-		{ name: 'type_scale_ratio', light: '1.2' },
-		// quick: the two shortest duration tokens tighten
-		{ name: 'duration_1', light: '0.05s' },
-		{ name: 'duration_2', light: '0.12s' }
+		{ name: 'type_scale_ratio', light: '1.2' }
 	]
 };

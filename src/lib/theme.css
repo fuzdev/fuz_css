@@ -38,6 +38,7 @@
 		--chroma_scale: 1; /* 0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps */
 		--hue_neutral: var(--hue_f);
 		--neutral_chroma: 0.024; /* peak chroma of the neutral scales, applied through the shared chroma shape */
+		--shade_chroma_00: 0; /* the page ground chroma - the shared chroma shape is 0 at the ground, so this tints it */
 		--hue_accent: var(--hue_a); /* links, focus, selection, selected states */
 		--hue_positive: var(--hue_b); /* success affordances */
 		--hue_negative: var(--hue_c); /* errors, destructive actions */
@@ -1227,7 +1228,8 @@
 				pow(0.95, var(--shade_lightness_curve))
 		);
 		--shade_00: oklch(
-			var(--shade_lightness_00) calc(var(--neutral_chroma) * var(--chroma_shape_00))
+			var(--shade_lightness_00)
+				calc(var(--neutral_chroma) * var(--chroma_shape_00) + var(--shade_chroma_00))
 				var(--hue_neutral)
 		);
 		--shade_05: oklch(
@@ -1482,20 +1484,21 @@
 		--font_weight: 400; /* base body font weight */
 		--heading_font_family: var(--font_family_serif);
 		--heading_letter_spacing: normal; /* heading tracking, best in em so it follows each tier */
+		--font_size_scale: 1; /* multiplies every font size, body text included - above 1 is larger */
 		--type_scale_ratio: 1.272; /* the ratio between font size steps above md */
-		--font_size_xs: 1rem;
-		--font_size_sm: 1.3rem;
-		--font_size_md: 1.6rem;
-		--font_size_lg: calc(1.6rem * pow(var(--type_scale_ratio), 1));
-		--font_size_xl: calc(1.6rem * pow(var(--type_scale_ratio), 2));
-		--font_size_xl2: calc(1.6rem * pow(var(--type_scale_ratio), 3));
-		--font_size_xl3: calc(1.6rem * pow(var(--type_scale_ratio), 4));
-		--font_size_xl4: calc(1.6rem * pow(var(--type_scale_ratio), 5));
-		--font_size_xl5: calc(1.6rem * pow(var(--type_scale_ratio), 6));
-		--font_size_xl6: calc(1.6rem * pow(var(--type_scale_ratio), 7));
-		--font_size_xl7: calc(1.6rem * pow(var(--type_scale_ratio), 8));
-		--font_size_xl8: calc(1.6rem * pow(var(--type_scale_ratio), 9));
-		--font_size_xl9: calc(1.6rem * pow(var(--type_scale_ratio), 10));
+		--font_size_xs: calc(1rem * var(--font_size_scale));
+		--font_size_sm: calc(1.3rem * var(--font_size_scale));
+		--font_size_md: calc(1.6rem * var(--font_size_scale));
+		--font_size_lg: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 1));
+		--font_size_xl: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 2));
+		--font_size_xl2: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 3));
+		--font_size_xl3: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 4));
+		--font_size_xl4: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 5));
+		--font_size_xl5: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 6));
+		--font_size_xl6: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 7));
+		--font_size_xl7: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 8));
+		--font_size_xl8: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 9));
+		--font_size_xl9: calc(1.6rem * var(--font_size_scale) * pow(var(--type_scale_ratio), 10));
 		--line_height_xs: 1;
 		--line_height_sm: 1.2;
 		--line_height_md: 1.5;
@@ -1559,13 +1562,15 @@
 		--outline_color: var(--accent_50);
 		--outline_offset: 1px; /* the gap between an element border and its focus ring */
 		--radius_scale: 1; /* 0 is sharp, below 1 is squarer, above 1 is rounder */
-		--border_radius_xs3: calc(0.3rem * var(--radius_scale));
-		--border_radius_xs2: calc(0.5rem * var(--radius_scale));
-		--border_radius_xs: calc(0.8rem * var(--radius_scale));
-		--border_radius_sm: calc(1.3rem * var(--radius_scale));
-		--border_radius_md: calc(2.1rem * var(--radius_scale));
-		--border_radius_lg: calc(3.4rem * var(--radius_scale));
-		--border_radius_xl: calc(5.5rem * var(--radius_scale));
+		--border_radius_min: 0rem; /* the smallest radius any tier rounds to */
+		--border_radius_xs3: max(var(--border_radius_min), calc(0.3rem * var(--radius_scale)));
+		--border_radius_xs2: max(var(--border_radius_min), calc(0.5rem * var(--radius_scale)));
+		--border_radius_xs: max(var(--border_radius_min), calc(0.8rem * var(--radius_scale)));
+		--border_radius_sm: max(var(--border_radius_min), calc(1.3rem * var(--radius_scale)));
+		--border_radius_md: max(var(--border_radius_min), calc(2.1rem * var(--radius_scale)));
+		--border_radius_lg: max(var(--border_radius_min), calc(3.4rem * var(--radius_scale)));
+		--border_radius_xl: max(var(--border_radius_min), calc(5.5rem * var(--radius_scale)));
+		--control_radius: var(--border_radius_sm); /* the corner radius of buttons and form fields */
 		--button_border_style: var(--border_style);
 		--button_border_style_active: var(--button_border_style); /* the pressed border style, e.g. `inset` against an `outset` rest state */
 		--button_shadow:

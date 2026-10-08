@@ -6,6 +6,6 @@ import type { Theme } from '../variable.ts';
 export const base_theme: Theme = {
 	name: 'base',
 	summary:
-		'The defaults: a blue accent on warm neutrals, serif headings over sans text, every knob at its starting value.',
+		'The defaults: a blue accent, warm-tinted grays on an untinted page, serif headings over sans text, every knob at its starting value.',
 	variables: [] // inherits base
 };

@@ -19,6 +19,7 @@ import {
 	PALETTE_CHROMA_KNOBS,
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
+	SHADE_CHROMA_00,
 	ramp_lightness,
 	ramp_chroma,
 	ramp_chroma_shape,
@@ -182,6 +183,7 @@ const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 	const vars: Record<string, number> = {
 		chroma_scale: 1,
 		neutral_chroma: NEUTRAL_CHROMA[scheme],
+		shade_chroma_00: SHADE_CHROMA_00,
 		border_color_lightness: border_color_oklch(scheme)[0],
 		border_color_chroma: border_color_oklch(scheme)[1],
 		hue_neutral: PALETTE_HUES.f,

@@ -49,6 +49,7 @@ import {
 } from './variable_data.ts';
 import {
 	NEUTRAL_CHROMA,
+	SHADE_CHROMA_00,
 	BORDER_CHROMA_MULTIPLIER,
 	BORDER_COLOR_LIGHTNESS,
 	PALETTE_CHROMA_KNOBS,
@@ -282,6 +283,11 @@ export const default_variables: Array<StyleVariable> = [
 		dark: String(NEUTRAL_CHROMA.dark),
 		summary: 'peak chroma of the neutral scales, applied through the shared chroma shape'
 	},
+	{
+		name: 'shade_chroma_00',
+		light: String(SHADE_CHROMA_00),
+		summary: 'the page ground chroma - the shared chroma shape is 0 at the ground, so this tints it'
+	},
 
 	/*
 
@@ -473,10 +479,16 @@ export const default_variables: Array<StyleVariable> = [
 	// the heading weight ladder deliberately (display-heavy themes); see `knobs.ts`
 
 	/* sizes like font-size */
-	// the steps above `md` derive from one ratio, so a theme flattens or
-	// dramatizes the whole heading hierarchy with a single knob; `md` (the
-	// body size) and the steps below it stay literal, so body text never moves
-	// and small text never shrinks
+	// two orthogonal knobs: `font_size_scale` sets where the ladder starts -
+	// every step, body (`md`) and small text included, so captions keep their
+	// proportion to body text - and `type_scale_ratio` sets how steeply the
+	// steps above `md` climb, so a theme flattens or dramatizes the heading
+	// hierarchy without moving body text
+	{
+		name: 'font_size_scale',
+		light: '1',
+		summary: 'multiplies every font size, body text included - above 1 is larger'
+	},
 	{
 		name: 'type_scale_ratio',
 		light: String(TYPE_SCALE_RATIO),
@@ -489,8 +501,8 @@ export const default_variables: Array<StyleVariable> = [
 			name: `font_size_${size}`,
 			light:
 				step > 0
-					? `calc(${FONT_SIZES.md}rem * pow(var(--type_scale_ratio), ${step}))`
-					: `${FONT_SIZES[size]}rem`
+					? `calc(${FONT_SIZES.md}rem * var(--font_size_scale) * pow(var(--type_scale_ratio), ${step}))`
+					: `calc(${FONT_SIZES[size]}rem * var(--font_size_scale))`
 		};
 	}),
 
@@ -558,10 +570,27 @@ export const default_variables: Array<StyleVariable> = [
 		light: '1',
 		summary: '0 is sharp, below 1 is squarer, above 1 is rounder'
 	},
+	// a floor under every tier, so a theme can lift the small corners onto a
+	// common radius while `radius_scale` compresses the rest; a length, since
+	// `max()` can't compare a unitless 0 against the rem tiers
+	{
+		name: 'border_radius_min',
+		light: '0rem',
+		summary: 'the smallest radius any tier rounds to'
+	},
 	...border_radius_variants.map((size) => ({
 		name: `border_radius_${size}`,
-		light: `calc(${BORDER_RADII[size]}rem * var(--radius_scale))`
+		light: `max(var(--border_radius_min), calc(${BORDER_RADII[size]}rem * var(--radius_scale)))`
 	})),
+	// the radius controls (buttons, inputs, selects, textareas) read, apart
+	// from the surface tiers, so a theme rounds its controls without rounding
+	// its panels; resolves at `:root`, so a contextual `--border_radius_sm`
+	// override doesn't reach controls
+	{
+		name: 'control_radius',
+		light: 'var(--border_radius_sm)',
+		summary: 'the corner radius of buttons and form fields'
+	},
 
 	/* buttons - the raised/pressed affordance, which no other element has, so
 		the border style splits from `--border_style` here rather than globally */

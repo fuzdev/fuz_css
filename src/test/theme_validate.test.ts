@@ -219,7 +219,9 @@ describe('validate_theme', () => {
 			name: 't',
 			variables: [
 				{ name: 'hue_accent', light: 'var(--hue_f)' },
-				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) }
+				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) },
+				// brown sits near the default orange caution
+				{ name: 'hue_caution', light: 'var(--hue_e)' }
 			]
 		});
 		assert.deepEqual(issues, []);
@@ -253,13 +255,13 @@ describe('validate_theme', () => {
 			.map((i) => i.message);
 
 	test('an accent bound to a status slot warns that the two render alike', () => {
-		// hue_negative defaults to var(--hue_c)
+		// hue_positive defaults to var(--hue_b)
 		const warnings = separation_warnings({
 			name: 't',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_c)' }]
+			variables: [{ name: 'hue_accent', light: 'var(--hue_b)' }]
 		});
 		assert.strictEqual(warnings.length, 1);
-		assert.include(warnings[0], 'hue_negative');
+		assert.include(warnings[0], 'hue_positive');
 	});
 
 	test('rebinding the status clears the accent separation warning', () => {
@@ -268,23 +270,24 @@ describe('validate_theme', () => {
 				name: 't',
 				variables: [
 					{ name: 'hue_accent', light: 'var(--hue_c)' },
-					{ name: 'hue_negative', light: 'var(--hue_g)' }
+					{ name: 'hue_negative', light: 'var(--hue_g)' },
+					// red is also near the default orange caution
+					{ name: 'hue_caution', light: 'var(--hue_e)' }
 				]
 			}),
 			[]
 		);
 	});
 
-	test('the accent separation threshold sits under the tightest default pair', () => {
-		// an accent on one slot has to be able to sit beside the default binding
-		// of its nearest neighbor without warning
-		const hues = Object.values(PALETTE_HUES);
-		const tightest = Math.min(
-			...hues.flatMap((a, i) =>
-				hues.slice(i + 1).map((b) => Math.min(Math.abs(a - b), 360 - Math.abs(a - b)))
-			)
-		);
-		assert.isBelow(ACCENT_STATUS_HUE_SEPARATION, tightest);
+	test('the accent separation threshold splits a near-clone from a neighbor', () => {
+		const distance = (a: number, b: number): number =>
+			Math.min(Math.abs(a - b), 360 - Math.abs(a - b));
+		// a red accent beside the default orange caution warns
+		assert.isAbove(ACCENT_STATUS_HUE_SEPARATION, distance(PALETTE_HUES.c, PALETTE_HUES.h));
+		// a pink accent beside the default red negative doesn't
+		assert.isAtMost(ACCENT_STATUS_HUE_SEPARATION, distance(PALETTE_HUES.g, PALETTE_HUES.c));
+		// and the default theme clears it
+		assert.deepEqual(separation_warnings({ name: 't', variables: [] }), []);
 		const at = (angle: number): Array<string> =>
 			separation_warnings({ name: 't', variables: [{ name: 'hue_accent', light: String(angle) }] });
 		// hue_info defaults to var(--hue_i)

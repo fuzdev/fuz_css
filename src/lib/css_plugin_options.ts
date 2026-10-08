@@ -62,6 +62,13 @@ export interface CssExtractionOptions {
 	 * ```
 	 */
 	acorn_plugins?: Array<AcornPlugin>;
+	/**
+	 * A string folded into the extraction cache key. The key already covers
+	 * file content and the `acorn_plugins` source text, but a plugin's options
+	 * live in its closure, so change this when only a plugin's options change
+	 * (`jsx({allowNamespaces: false})`) to re-extract every file.
+	 */
+	cache_salt?: string;
 }
 
 /**

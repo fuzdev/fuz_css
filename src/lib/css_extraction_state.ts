@@ -10,7 +10,11 @@ import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
 
 import type { CssClasses } from './css_classes.ts';
 import { extract_file_cached } from './extract_file_cached.ts';
-import { save_cached_extraction, delete_cached_extraction } from './css_cache.ts';
+import {
+	save_cached_extraction,
+	delete_cached_extraction,
+	to_extraction_cache_key
+} from './css_cache.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CacheDeps } from './deps.ts';
@@ -23,6 +27,8 @@ export interface CssExtractionStateOptions {
 	get_cache_path: (id: string) => string | null;
 	deps: CacheDeps;
 	acorn_plugins?: Array<AcornPlugin>;
+	/** Folded into the cache key - see `CssExtractionOptions.cache_salt`. */
+	cache_salt?: string;
 }
 
 /**
@@ -44,6 +50,7 @@ export class CssExtractionState {
 	readonly #get_cache_path: (id: string) => string | null;
 	readonly #deps: CacheDeps;
 	readonly #acorn_plugins: Array<AcornPlugin> | undefined;
+	readonly #extraction_key: string | null;
 	readonly #hashes: Map<string, string> = new Map();
 	/**
 	 * The `var(--*)` names each file references, unfiltered: a reference is
@@ -59,6 +66,7 @@ export class CssExtractionState {
 		this.#get_cache_path = options.get_cache_path;
 		this.#deps = options.deps;
 		this.#acorn_plugins = options.acorn_plugins;
+		this.#extraction_key = to_extraction_cache_key(options.acorn_plugins, options.cache_salt);
 	}
 
 	/**
@@ -105,6 +113,7 @@ export class CssExtractionState {
 			deps: this.#deps,
 			content: code,
 			content_hash: hash,
+			extraction_key: this.#extraction_key,
 			cache_path: this.#get_cache_path(id),
 			filename: id,
 			acorn_plugins: this.#acorn_plugins
@@ -126,6 +135,7 @@ export class CssExtractionState {
 				this.#deps,
 				cache_path_to_write,
 				hash,
+				this.#extraction_key,
 				extraction
 			).catch(() => {
 				// a failed cache write only costs a re-extraction later

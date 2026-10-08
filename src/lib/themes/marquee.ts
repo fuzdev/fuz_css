@@ -22,6 +22,8 @@ const authored: Theme = {
 		// night cast: the neutral binds to the purple slot
 		{ name: 'hue_neutral', light: 'var(--hue_d)' },
 		{ name: 'neutral_chroma', light: '0.09' },
+		// the night itself is purple, not only the surfaces raised off it
+		{ name: 'shade_chroma_00', light: '0.03' },
 		// magenta accent: links/focus/selection glow hot pink
 		{ name: 'hue_accent', light: 'var(--hue_g)' },
 		// vivid, knowingly clipping the weak hues
@@ -34,15 +36,10 @@ const authored: Theme = {
 		{ name: 'shadow_color_glow', light: 'oklch(0.72 0.18 var(--hue_accent))' },
 		// the dialog backdrop dims to night-purple instead of neutral black
 		{ name: 'backdrop_color', light: 'oklch(0.15 0.05 var(--hue_neutral) / 60%)' },
-		// tube bends: the tier ladder compresses onto a rounded floor, which a
-		// uniform radius_scale can't express, so the tokens pin (sanctioned escape)
-		{ name: 'border_radius_xs3', light: '0.5rem' },
-		{ name: 'border_radius_xs2', light: '0.5rem' },
-		{ name: 'border_radius_xs', light: '0.5rem' },
-		{ name: 'border_radius_sm', light: '0.7rem' },
-		{ name: 'border_radius_md', light: '0.9rem' },
-		{ name: 'border_radius_lg', light: '1.2rem' },
-		{ name: 'border_radius_xl', light: '1.6rem' }
+		// tube bends: the small tiers lift onto a rounded floor and the ladder
+		// above it compresses, so no corner is sharp and none balloons
+		{ name: 'border_radius_min', light: '0.5rem' },
+		{ name: 'radius_scale', light: '0.54' }
 	]
 };
 

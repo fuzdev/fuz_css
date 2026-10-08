@@ -202,6 +202,17 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		range: [0, 0.1],
 		step: 0.001
 	},
+	{
+		// the ground's own tint - the shared chroma shape leaves the page
+		// untinted at any neutral_chroma, so a tinted page is this knob
+		name: 'shade_chroma_00',
+		kind: 'number',
+		axis: 'color',
+		leverage: 'md',
+		tier: 'semantic',
+		range: [0, 0.05],
+		step: 0.001
+	},
 	hue('hue_accent', 'lg', 'semantic', true),
 	{
 		name: 'chroma_scale',
@@ -334,6 +345,22 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		step: 0.05
 	},
 	{
+		// a floor under every radius tier, which radius_scale can't express
+		name: 'border_radius_min',
+		kind: 'length',
+		axis: 'shape',
+		leverage: 'md',
+		tier: 'semantic'
+	},
+	{
+		// buttons and form fields, apart from the surface tiers
+		name: 'control_radius',
+		kind: 'length',
+		axis: 'shape',
+		leverage: 'md',
+		tier: 'semantic'
+	},
+	{
 		name: 'border_style',
 		kind: 'enum',
 		axis: 'shape',
@@ -366,6 +393,15 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		axis: 'shape',
 		leverage: 'sm',
 		tier: 'semantic'
+	},
+	{
+		// the focus ring's line; `none` would remove every ring, so it's left out
+		name: 'outline_style',
+		kind: 'enum',
+		axis: 'shape',
+		leverage: 'sm',
+		tier: 'semantic',
+		values: BORDER_STYLE_VALUES.filter((v) => v !== 'none')
 	},
 	// the focus ring's width, a tier of the border width ladder by default
 	length_knob('outline_width_focus', 'shape'),
@@ -425,6 +461,17 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		axis: 'typography',
 		leverage: 'lg',
 		tier: 'semantic'
+	},
+	{
+		// where the size ladder starts: every step, body text included, so
+		// small text keeps its proportion to body; 0.0625 is 1px of body text
+		name: 'font_size_scale',
+		kind: 'number',
+		axis: 'typography',
+		leverage: 'lg',
+		tier: 'semantic',
+		range: [0.75, 1.5],
+		step: 0.0625
 	},
 	{
 		// the ratio between font size steps above `md` - down flattens the
