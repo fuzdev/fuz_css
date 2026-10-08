@@ -151,7 +151,6 @@ border-color: var(--shade_30);
 							name="intensity"
 							value={intensity}
 							bind:group={selected_intensity}
-							class="screen_reader_only"
 						/>
 						{intensity}
 					</label>
