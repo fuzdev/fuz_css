@@ -3,8 +3,8 @@ import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
  * An exemplar theme: the theater marquee at night. Color is the content -
- * a magenta accent over a deep purple-cast dark, every shadow a colored halo
- * instead of neutral light, corners rounded onto a common floor like tube
+ * a magenta accent over a deep purple-cast dark, shadows turned to cyan and
+ * magenta glows, corners rounded onto a common floor like tube
  * bends. Vivid past the gamut caps on purpose - lightness holds through the
  * clipping. Dark-only via the `scheme` stance: a lit sign has no daytime
  * appearance.
@@ -15,6 +15,8 @@ import { resolve_theme_stance } from '../theme_stance.ts';
  */
 const authored: Theme = {
 	name: 'marquee',
+	summary:
+		'Vivid for events and nightlife: a magenta accent on purple-cast surfaces, colored glows, rounded corners, color pushed past the gamut caps - the theater marquee. Dark only.',
 	scheme: 'dark',
 	variables: [
 		// night cast: the neutral binds to the purple slot

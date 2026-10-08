@@ -46,11 +46,13 @@ const FUZ_CSS_PLACEHOLDER_DECL_RE = /--fuz-css-placeholder\s*:\s*([\w-]+)\s*;?/;
 const NON_FILLER_RE = /[^\s;]/;
 
 /**
- * Matches what the structural search reads past: a comment, a string, or an
- * unquoted `url()`, any of which can hold a brace, a semicolon, or a `/*`.
+ * Matches what the structural search reads past: an escaped character (a
+ * quote in an escaped selector like `.content-\[\"hi\"\]` opens no string), a
+ * comment, a string, or an unquoted `url()`, any of which can hold a brace, a
+ * semicolon, or a `/*`.
  */
 const INERT_RE =
-	/\/\*[^]*?(?:\*\/|$)|"(?:[^"\\\n]|\\[^])*"|'(?:[^'\\\n]|\\[^])*'|(?<![-\w#@])url\([^)"']*\)/g;
+	/\\[^]|\/\*[^]*?(?:\*\/|$)|"(?:[^"\\\n]|\\[^])*"|'(?:[^'\\\n]|\\[^])*'|(?<![-\w#@\u{80}-\u{10FFFF}])url\([^)"']*\)/gu;
 
 /** Matches every placeholder declaration, capturing what precedes its value. */
 const FUZ_CSS_PLACEHOLDER_VALUE_RE = /(--fuz-css-placeholder\s*:\s*)[\w-]+/g;

@@ -68,6 +68,14 @@ export type ThemeScheme = z.infer<typeof ThemeScheme>;
 
 export const Theme = z.strictObject({
 	name: z.string().min(1, 'must be non-empty'),
+	/**
+	 * A sentence or two on what the theme looks like, for a theme picker to
+	 * show beside the name. Never rendered into CSS.
+	 */
+	summary: z
+		.string()
+		.optional()
+		.meta({ description: 'what the theme looks like, for theme pickers' }),
 	variables: z.array(StyleVariable),
 	/**
 	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance pins

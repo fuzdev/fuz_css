@@ -87,9 +87,15 @@ describe('shipped themes', () => {
 			'phosphor',
 			'guestbook',
 			'marquee',
-			'timetable'
+			'signage'
 		]) {
 			assert.include(names, exemplar);
+		}
+	});
+
+	test('every pickable theme carries a summary for pickers', () => {
+		for (const theme of shipped_base_themes) {
+			assert.ok(theme.summary?.trim(), `${theme.name} has a summary`);
 		}
 	});
 

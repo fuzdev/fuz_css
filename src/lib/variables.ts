@@ -6,8 +6,8 @@
  * whose members follow one template are built by loop from the variant lists
  * and value tables in `variable_data.ts` and the emitters in `ramps.ts`, then
  * spread into `default_variables` in place - array order is the order the CSS
- * renders in, so a family's spread sits where its members used to be
- * declared. What lives here is the assembly: the loop templates, the units
+ * renders in, so a family's spread sits where its members belong in the
+ * cascade. What lives here is the assembly: the loop templates, the units
  * and `calc()` wrappers the tables' unitless numbers get dressed in, and the
  * one-off variables that belong to no family.
  *
@@ -117,7 +117,7 @@ const lightness_ramp_variables = (
 	}))
 ];
 
-// a full 13-stop color scale for one hue slot - a palette letter or an intent
+// the full stop scale for one hue slot - a palette letter or an intent
 const ramp_color_variables = (slot: PaletteVariant | IntentVariant): Array<StyleVariable> =>
 	numeric_scale_variants.map((stop) => ({
 		name: `${slot}_${stop}`,
@@ -138,7 +138,7 @@ colors
 The color system is derived: the hue knobs plus a handful of curve knobs
 produce every palette/shade/text stop at computed-value time in pure CSS.
 The fitted default knob values, the formulas, and the CSS emitters live in
-`ramps.ts` (a faithful port of the previous HSL palette); tests gate the
+`ramps.ts`; tests gate the
 defaults for gamut, ramp monotonicity, and contrast.
 
 Layers, each derivable from the one above and each overridable per stop:
@@ -291,7 +291,7 @@ export const default_variables: Array<StyleVariable> = [
 	rotating --hue_accent recolors links, focus, selection, and selected states
 	in one move. The letters stay abstract palette slots. Intent stops derive
 	through the same ramps as the palette, so they respond to every curve knob;
-	full 13-stop scales derive per intent, mirroring the palette
+	full stop scales derive per intent, mirroring the palette
 	scales, and tree-shake like everything else - unused stops cost nothing.
 
 	*/
@@ -372,10 +372,9 @@ export const default_variables: Array<StyleVariable> = [
 
 	shade scale - the primary system for backgrounds and surfaces
 
-	Derived from the shade lightness knobs (see ramps.ts). The old alpha-derived
-	S-curve was flattened into the pow ramp in the OKLCH migration - uniform OKLCH
-	lightness steps are perceptually even, so the compositing compensation had no
-	reason to survive.
+	Derived from the shade lightness knobs (see ramps.ts): a pow ramp, since
+	uniform OKLCH lightness steps are perceptually even and need no
+	compositing compensation.
 
 	*/
 	// Untinted adaptive extremes
@@ -506,8 +505,8 @@ export const default_variables: Array<StyleVariable> = [
 	{ name: 'text_decoration_hover', light: 'underline' },
 	{ name: 'text_decoration_selected', light: 'underline' },
 	{ name: 'link_color_selected', light: 'var(--text_color)' },
-	// ports the old bespoke selection lightness in both schemes (light stop 20,
-	// dark stop 80) while following the accent intent and every ramp knob
+	// a light tint in both schemes (light stop 20, dark stop 80), following
+	// the accent intent and every ramp knob
 	{
 		name: 'selection_color',
 		light: render_ramp_color_css('accent', '20', '40%'),

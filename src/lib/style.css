@@ -384,8 +384,9 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 	:where(:is(input, textarea, select):not(.unstyled):hover:not(:disabled)) {
 		/* hover previews the focus color - the element color when set (an
-			outline_* class; on buttons, .palette_*), else the accent intent; focus
-			then adds the outline at the same color, escalating visibility */
+			outline_* class), else the accent intent; focus then adds the outline
+			at the same color, escalating visibility (buttons hover through
+			--button_border_color_hover instead) */
 		--border_color: var(--outline_color);
 	}
 
@@ -525,7 +526,12 @@ see https://caniuse.com/css-has
 		outline: var(--outline_width) var(--outline_style) var(--outline_color);
 		outline-offset: var(--outline_offset);
 	}
-	:where(:is(input, textarea, select, [contenteditable]):not(.unstyled):active) {
+	/* split from contenteditable, which no element or class names, so the
+		bundled output ships these with the elements and that one always */
+	:where(:is(input, textarea, select):not(.unstyled):active) {
+		--outline_width: var(--outline_width_active);
+	}
+	:where([contenteditable]:not(.unstyled):active) {
 		--outline_width: var(--outline_width_active);
 	}
 

@@ -197,8 +197,9 @@
 		<button type="button" class="plain icon_button" disabled>+</button>
 		<h4><code>.selected</code> variants</h4>
 		<p>
-			<code>.plain</code> strips the fill, border, and shadow from unselected buttons only, so a
-			selected plain button looks like any other selected button.
+			<code>.plain</code> strips the fill, border, and shadow from unselected buttons at rest (the
+			fill and shadow return on hover), so a selected plain button looks like any other selected
+			button.
 		</p>
 		<Code
 			content={`<button class="plain selected">

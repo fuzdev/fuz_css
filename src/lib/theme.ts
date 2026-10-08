@@ -50,6 +50,10 @@ export interface RenderThemeStyleOptions {
 	 * `:root`, and a descendant inherits the computed color, so a curve knob
 	 * like `--chroma_scale` set at `#id` changes nothing. Knob-only themes
 	 * need `:root`.
+	 *
+	 * A trusted consumer option, written into the selector as is: it must be
+	 * a plain CSS identifier (letters, digits, `-`, `_`, not starting with a
+	 * digit), since an invalid one makes the browser drop the whole rule.
 	 */
 	id?: string | null;
 	/**
@@ -114,7 +118,8 @@ export const overlay_style_variable = (
  * so entries for newly composed names would shadow nothing but still render
  * - and overlay values win over the remaining mirror by source order.
  * The composed name appends the overlay names so name-keyed pickers and
- * renderers treat the composition as its own theme.
+ * renderers treat the composition as its own theme, and the base's
+ * `summary` carries through.
  */
 export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
 	if (!overlays.length) return base;
@@ -127,7 +132,11 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 				// single-slot in the base position, like stanced themes author their own
 				const value = pick_stance_slot(v, stance);
 				if (value === undefined) continue;
-				by_name.set(v.name, { name: v.name, light: value });
+				by_name.set(v.name, {
+					name: v.name,
+					light: value,
+					...(v.summary !== undefined && { summary: v.summary })
+				});
 			} else {
 				by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
 			}
@@ -135,6 +144,7 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 	}
 	return {
 		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
+		...(base.summary !== undefined && { summary: base.summary }),
 		...(base.scheme !== undefined && { scheme: base.scheme }),
 		// drop mirror entries the overlays now author; the rest renders before
 		// `variables`, so overlay values win by order

@@ -54,7 +54,6 @@
  * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
  * reality in both schemes whether or not the theme arrives resolved.
  *
- *
  * @module
  */
 

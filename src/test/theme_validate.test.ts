@@ -156,6 +156,26 @@ describe('validate_theme', () => {
 		}
 	});
 
+	test('a stance mirror that no longer matches the defaults is a warning', () => {
+		// the renderer emits the carried mirror as is while the gates resolve
+		// through a recomputed one, so a stale mirror would render unchecked
+		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
+		const stale = {
+			...resolved,
+			scheme_mirror: resolved.scheme_mirror!.map((v) =>
+				v.name === 'text_lightness_100' ? { ...v, light: '0.2' } : v
+			)
+		};
+		const issues = validate_theme(stale);
+		assert.isTrue(
+			issues.some((i) => i.level === 'warning' && i.message.includes("doesn't match")),
+			'the stale mirror warns'
+		);
+		assert.isFalse(issues.some((i) => i.level === 'error'));
+		// re-resolving recomputes it and clears the warning
+		assert.deepEqual(validate_theme(resolve_theme_stance(stale)), []);
+	});
+
 	test('a dark slot under a single-scheme stance is a warning, not an error', () => {
 		for (const scheme of ['light', 'dark'] as const) {
 			const issues = validate_theme({

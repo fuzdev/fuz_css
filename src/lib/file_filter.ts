@@ -16,6 +16,9 @@ export type FileFilter = (path: string) => boolean;
  * Excludes files in test directories (`/test/`, `/tests/`, `/__tests__/`, `/__mocks__/`).
  */
 export const filter_file_default: FileFilter = (path) => {
+	// TODO: these directory checks run on the absolute id the generators pass,
+	// so a project checked out under a `test/` or `tests/` directory filters
+	// everything out - the filter should see the root-relative path
 	if (
 		path.includes('.test.') ||
 		path.includes('.spec.') ||

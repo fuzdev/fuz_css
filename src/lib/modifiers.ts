@@ -142,7 +142,7 @@ export const STATE_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /** Map of pseudo-element modifier names to their CSS output */
 export const PSEUDO_ELEMENT_MODIFIERS: Map<string, ModifierDefinition> = new Map();
 /**
- * All modifier names for quick lookup
+ * All modifier names for quick lookup.
  *
  * @internal The lookup behind `get_all_modifier_names`.
  */

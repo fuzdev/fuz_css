@@ -770,8 +770,9 @@ const collect_hues = (
  * `*_chroma_scale` multipliers apply above the clamp. A theme that raises one
  * past 1 clips by design - its gamut failures survive the compile, and a cap
  * the compile loosens can add to them, since the multiplier then pushes more
- * stops past the looser cap. The input theme is never mutated. The report re-checks the emitted theme, whose
- * compiled-cap overrides the resolution core recognizes.
+ * stops past the looser cap. The input theme is never mutated. The report
+ * re-checks the emitted theme, whose compiled-cap overrides the resolution
+ * core recognizes.
  */
 export const compile_theme = (theme: Theme): CompiledTheme => {
 	const resolver = new ThemeResolver(theme);

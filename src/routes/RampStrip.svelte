@@ -15,7 +15,7 @@
 
 <!-- live feedback for the derived scales: each cell renders the current
 	computed stop, so dragging any knob repaints the strip -->
-<div class="ramp_strip">
+<div class="ramp-strip">
 	<small class="ramp_label">
 		<code class="p_0 font_size_sm background-color:transparent">{label}</code>
 	</small>
@@ -31,7 +31,7 @@
 </div>
 
 <style>
-	.ramp_strip {
+	.ramp-strip {
 		display: flex;
 		flex-direction: column;
 		gap: var(--space_xs3);

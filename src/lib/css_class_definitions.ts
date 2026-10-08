@@ -176,8 +176,13 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		palette_variants,
 		intensity_variants
 	),
-	// Outline colors using shade scale
-	...generate_property_classes('outline-color', shade_variants, (v) => `var(--shade_${v})`),
+	// Outline colors using shade scale (sets both property and contextual variable,
+	// so hover and focus borders follow it like the palette family)
+	...generate_property_classes(
+		'outline-color',
+		shade_variants,
+		(v) => `var(--shade_${v}); --outline_color: var(--shade_${v})`
+	),
 	// Outline colors using palette hue + intensity (sets both property and contextual variable);
 	// the letter alone implies the palette - the shade family is `outline_color_NN`
 	...generate_classes(

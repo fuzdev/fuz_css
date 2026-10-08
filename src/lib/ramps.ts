@@ -63,7 +63,7 @@ export interface ChromaRampKnobs {
 	curve: number;
 }
 
-/** OKLCH hue angles for the 10 palette hues, fitted from the HSL palette. */
+/** OKLCH hue angles for the palette slots. */
 export const PALETTE_HUES: Readonly<Record<PaletteVariant, number>> = {
 	a: 250, // blue
 	b: 144, // green
@@ -161,9 +161,8 @@ const NEUTRAL_HUE = PALETTE_HUES.f;
 
 /**
  * Peak chroma of the neutral (shade/text) scales. The neutral rides the
- * palette's chroma shape scaled to this peak, which preserves the old
- * behavior of constant HSL saturation: strong tint at mid lightness, nearly
- * untinted near white and black.
+ * palette's chroma shape scaled to this peak: strong tint at mid lightness,
+ * nearly untinted near white and black.
  */
 export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
 	light: 0.024,
@@ -263,8 +262,7 @@ export const border_color_oklch = (scheme: ColorSchemeVariant): Oklch => [
 
 /**
  * Worst-hue safe chroma caps per stop: the largest chroma at that stop's
- * default lightness that stays inside sRGB for every one of the 10 default
- * hues (see `oklch_max_srgb_chroma` for the non-convexity caveat). Computed
+ * default lightness that stays inside sRGB for every default hue (see `oklch_max_srgb_chroma` for the non-convexity caveat). Computed
  * at design time from `PALETTE_HUES` + `PALETTE_LIGHTNESS_KNOBS`, floored to
  * stay conservative; a drift test recomputes them from the color math.
  */

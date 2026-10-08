@@ -296,14 +296,18 @@ export interface CssDiagnosticsOptions {
 	 * How to handle errors during generation: unresolvable comment hints,
 	 * invalid CSS literals, and the base stylesheet and theme variable checks.
 	 * - 'log': Log errors, skip invalid classes, continue
-	 * - 'throw': Throw on first error, fail the build
+	 * - 'throw': Fail the render with every error it found, failing the build
+	 *
+	 * A logged diagnostic is logged once while it persists - a dev server or
+	 * watch mode re-rendering on each edit doesn't repeat it - and again if it
+	 * goes away and comes back.
 	 * @default 'throw' in CI, 'log' otherwise
 	 */
 	on_error?: 'log' | 'throw';
 	/**
 	 * How to handle warnings during generation.
-	 * - 'log': Log warnings, continue
-	 * - 'throw': Throw on first warning, fail the build
+	 * - 'log': Log warnings, continue (once while each persists, like errors)
+	 * - 'throw': Fail the render with every warning it found, failing the build
 	 * - 'ignore': Suppress warnings entirely
 	 * @default 'log'
 	 */

@@ -336,11 +336,11 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	 */
 	let announced_css: string | null = null;
 	/**
-	 * The last dev render, keyed by the extraction version and the generator's
-	 * readiness - so the served variants and the debounced update share one
-	 * render per change, and its diagnostics dispatch once.
+	 * The last dev render, keyed by the extraction version - so the served
+	 * variants and the debounced update share one render per change, and its
+	 * diagnostics dispatch once.
 	 */
-	let dev_render: { key: string; css: string } | null = null;
+	let dev_render: { key: number; css: string } | null = null;
 	let prescan_promise: Promise<void> | null = null; // load() awaits this so the first served CSS is complete
 	/**
 	 * The hash each client last reported and was pushed an update for, so the
@@ -362,7 +362,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 
 	/** Renders the dev CSS from everything extracted, reusing the last render when nothing changed. */
 	const render_dev_css = (): string => {
-		const key = `${extraction.version}|${generator.ready}`;
+		const key = extraction.version;
 		if (dev_render?.key === key) return dev_render.css;
 		const css = wrap_css(
 			generator.render({
@@ -419,24 +419,24 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	 */
 	const invalidate_and_push = (new_css: string): void => {
 		announced_css = new_css;
-
-		// Invalidate every served variant, not just the bare id. The bare
-		// `/__fuz.css` backs the client `<style>` and gets a `js-update` so Vite
-		// re-runs `updateStyle` with fresh content live. The `?inline`/`?direct`/
-		// `?used` variants have no client HMR boundary - they're read fresh by the
-		// next SSR render - so invalidating their cached module is enough; without
-		// it, SvelteKit keeps inlining stale `<head>` CSS on every reload.
-		const bare = server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID);
-		if (bare) {
-			server!.moduleGraph.invalidateModule(bare);
+		invalidate_served_modules();
+		if (server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)) {
 			server!.hot.send(create_virtual_module_update());
 		}
+	};
+
+	/**
+	 * Invalidates every served virtual-module variant, not just the bare id,
+	 * so the next request of any of them runs `load()` again. The bare
+	 * `/__fuz.css` backs the client `<style>`; the `?inline`/`?direct`/`?used`
+	 * variants have no client HMR boundary - they're read fresh by the next
+	 * SSR render - so invalidating their cached module is enough; without it,
+	 * SvelteKit keeps inlining stale `<head>` CSS on every reload.
+	 */
+	const invalidate_served_modules = (): void => {
 		for (const vid of loaded_virtual_ids) {
-			if (vid === RESOLVED_VIRTUAL_ID) continue; // bare handled above
-			const variant = server!.moduleGraph.getModuleById(vid);
-			if (variant) {
-				server!.moduleGraph.invalidateModule(variant);
-			}
+			const mod = server!.moduleGraph.getModuleById(vid);
+			if (mod) server!.moduleGraph.invalidateModule(mod);
 		}
 	};
 
@@ -448,10 +448,6 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	const invalidate_virtual_module = (): void => {
 		if (!server) return;
 
-		// Skip HMR until the generator is ready - it starts loading at
-		// configureServer, and the load() that awaits it renders the CSS anyway
-		if (!generator.ready) return;
-
 		if (hmr_timeout) {
 			clearTimeout(hmr_timeout);
 		}
@@ -460,13 +456,15 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 
 			// the render can throw under on_error/on_warning: 'throw'; from a timer
 			// that would be an uncaughtException killing the dev server, so route
-			// it to the log here - load() re-renders and throws where Vite owns
-			// the error
+			// it to the log here and drop the served modules, so the next request
+			// re-renders in load() and throws where Vite owns the error (the
+			// overlay) instead of serving the last good CSS as if nothing changed
 			let new_css: string;
 			try {
 				new_css = render_dev_css();
 			} catch (error) {
 				log_error(`[fuz_css] ${error}`);
+				invalidate_served_modules();
 				return;
 			}
 			if (new_css === announced_css) {
@@ -672,10 +670,10 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 			// Start loading the generator's resources now instead of at the first
 			// load() - it overlaps with the pre-scan and the framework's own
 			// startup, taking the base-CSS parse off the first request's critical
-			// path. Errors are swallowed here: load() awaits the same cached
-			// promise and surfaces the same error at request time.
+			// path. Errors are swallowed here: a failed load isn't kept, so load()
+			// retries it and surfaces its error at request time.
 			generator.ensure_ready().catch(() => {
-				// Surfaced by load() awaiting the same cached promise
+				// Retried and surfaced by load()
 			});
 
 			// Eager pre-scan (dev only): seed extraction state before the first

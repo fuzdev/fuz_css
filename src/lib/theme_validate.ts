@@ -9,6 +9,7 @@
 
 import { Theme } from './variable.ts';
 import { to_theme_stance } from './theme.ts';
+import { scheme_mirrors_equal, scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import { palette_variants, intent_variants, color_scheme_variants } from './variable_data.ts';
@@ -109,7 +110,7 @@ const validate_knob_value = (
 			if (number === null && !is_reference) {
 				issues.push({
 					level: 'warning',
-					message: `${variable} ${slot} "${value}" is not a hue angle or var() binding`,
+					message: `${variable} ${slot} "${value}" is not evaluated - write a hue as a unitless angle or a var() binding`,
 					variable
 				});
 			} else if (number !== null) {
@@ -212,6 +213,18 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 		issues.push({
 			level: 'warning',
 			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
+		});
+	} else if (
+		stance &&
+		scheme_mirror &&
+		!scheme_mirrors_equal(scheme_mirror, scheme_stance_variables(stance, parsed.data.variables))
+	) {
+		// the renderer emits the carried mirror as is while the gates resolve
+		// through a recomputed one, so a stale or edited mirror (a theme
+		// persisted before the defaults moved) would render unchecked
+		issues.push({
+			level: 'warning',
+			message: `'${stance}' scheme stance with a scheme_mirror that doesn't match the current defaults - re-resolve the theme with resolve_theme_stance, since the gates check the recomputed mirror but the renderer emits the carried one`
 		});
 	}
 	for (const valid of parsed.data.variables) {

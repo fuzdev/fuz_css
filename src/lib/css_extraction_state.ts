@@ -61,11 +61,6 @@ export class CssExtractionState {
 		this.#acorn_plugins = options.acorn_plugins;
 	}
 
-	/** Whether `id` has been ingested and not removed since. */
-	has(id: string): boolean {
-		return this.#hashes.has(id);
-	}
-
 	/**
 	 * Claims a new epoch for `id`, superseding any ingest of it in flight. A
 	 * caller that awaits before ingesting (a disk read) claims first and

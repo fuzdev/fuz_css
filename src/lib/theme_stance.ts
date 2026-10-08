@@ -72,11 +72,22 @@ export const resolve_theme_stance = (theme: Theme): Theme => {
 	const stance = to_theme_stance(theme.scheme);
 	if (!stance) return theme;
 	const scheme_mirror = scheme_stance_variables(stance, theme.variables);
-	if (theme.scheme_mirror && mirrors_equal(theme.scheme_mirror, scheme_mirror)) return theme;
+	if (theme.scheme_mirror && scheme_mirrors_equal(theme.scheme_mirror, scheme_mirror)) {
+		return theme;
+	}
 	return { ...theme, scheme_mirror };
 };
 
-// the mirror holds only light slots, in `scheme_adaptive_variables` order
-const mirrors_equal = (a: Array<StyleVariable>, b: Array<StyleVariable>): boolean =>
+/**
+ * Whether two stance mirrors are the same, entry for entry. A mirror holds
+ * only light slots in `scheme_adaptive_variables` order, so a carried mirror
+ * that differs from a freshly computed one is stale (the defaults moved) or
+ * edited - either way the renderer would emit it as is.
+ *
+ * @param a - one mirror
+ * @param b - the other
+ * @returns whether they match
+ */
+export const scheme_mirrors_equal = (a: Array<StyleVariable>, b: Array<StyleVariable>): boolean =>
 	a.length === b.length &&
 	a.every((v, i) => v.name === b[i]!.name && v.light === b[i]!.light && v.dark === b[i]!.dark);

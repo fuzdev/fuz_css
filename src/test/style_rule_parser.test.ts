@@ -74,7 +74,8 @@ describe('parse_style_css', () => {
 
 			assert.strictEqual(index.rules.length, 1);
 			assert.isTrue(index.rules[0]!.elements.has('button'));
-			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
+			// a negated name isn't what the rule targets
+			assert.isFalse(index.rules[0]!.classes.has('unstyled'));
 			assert.isTrue(index.rules[0]!.variables_used.has('text_color'));
 		});
 
@@ -85,7 +86,7 @@ describe('parse_style_css', () => {
 			assert.isTrue(index.rules[0]!.elements.has('input'));
 			assert.isTrue(index.rules[0]!.elements.has('textarea'));
 			assert.isTrue(index.rules[0]!.elements.has('select'));
-			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
+			assert.isFalse(index.rules[0]!.classes.has('unstyled'));
 		});
 
 		test('nested :is in :where', () => {
@@ -95,15 +96,31 @@ describe('parse_style_css', () => {
 			assert.isTrue(index.rules[0]!.elements.has('h1'));
 			assert.isTrue(index.rules[0]!.elements.has('h6'));
 			assert.isTrue(index.rules[0]!.classes.has('heading'));
-			assert.isTrue(index.rules[0]!.classes.has('unstyled'));
+			assert.isFalse(index.rules[0]!.classes.has('unstyled'));
 		});
 
-		test('deeply nested :where(:not(:has(...)))', () => {
-			const css = `:where(:not(:has(button.disabled))) { opacity: 1; }`;
+		test('a selector naming only negated names always ships', () => {
+			// `:not(.unstyled)` matches every element without the class, so the
+			// class can't decide whether the rule ships
+			const css = `:where(:not(:has(button.disabled))) { opacity: 1; }
+:where([contenteditable]:not(.unstyled):focus-visible) { outline: 1px solid; }`;
 			const index = parse_style_css(css);
 
-			assert.isTrue(index.rules[0]!.elements.has('button'));
-			assert.isTrue(index.rules[0]!.classes.has('disabled'));
+			for (const rule of index.rules) {
+				assert.strictEqual(rule.elements.size, 0);
+				assert.strictEqual(rule.classes.size, 0);
+				assert.strictEqual(rule.core_reason, 'untargetable');
+			}
+		});
+
+		test('a branch naming nothing makes an :is() list untargetable', () => {
+			// `[contenteditable]` matches with none of the names detected
+			const css = `:where(:is(input, [contenteditable]):active) { color: red; }
+:where(button:is(.a, [b])) { color: red; }`;
+			const [open_list, named_compound] = parse_style_css(css).rules;
+			assert.strictEqual(open_list!.core_reason, 'untargetable');
+			// the compound's own element still requires a name
+			assert.strictEqual(named_compound!.core_reason, null);
 		});
 
 		test('triple nested functional pseudo-classes', () => {
@@ -111,7 +128,7 @@ describe('parse_style_css', () => {
 			const index = parse_style_css(css);
 
 			assert.isTrue(index.rules[0]!.elements.has('span'));
-			assert.isTrue(index.rules[0]!.classes.has('hidden'));
+			assert.isFalse(index.rules[0]!.classes.has('hidden'));
 			assert.isTrue(index.rules[0]!.classes.has('icon'));
 		});
 	});

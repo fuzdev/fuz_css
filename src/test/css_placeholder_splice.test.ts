@@ -110,6 +110,15 @@ describe.each(PLACEHOLDER_FORMS)('splice_css_at_placeholder, $form', ({ decl, ma
 		}
 	});
 
+	test('reads past an escaped quote, which opens no string', () => {
+		// a minified escaped selector ahead of the marker, and a string after it
+		// that a quote taken for an opener would pair with
+		const before = '.content-\\[\\"hi\\"\\]::after{content:"hi"}';
+		const after = '.x::after{content:"x"}';
+		const spliced = splice_css_at_placeholder(before + marker + after, GENERATED);
+		assert.strictEqual(spliced, before + GENERATED + '\n' + after);
+	});
+
 	test('splits a merged rule: decls after the marker stay after the generated CSS', () => {
 		// A rule-merging minifier (e.g. lightningcss) folds the adjacent `:root`
 		// rules into one, so there is no standalone marker rule left to swap out.

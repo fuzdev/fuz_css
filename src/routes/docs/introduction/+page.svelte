@@ -63,7 +63,8 @@ import 'virtual:fuz.css'; // used utilities only`}
 			<TomeSectionHeader text="Browser support" />
 			<p>
 				The shipped CSS needs Chrome or Edge 120, Firefox 118, or Safari 16.2 - Safari 16.4 if you
-				use responsive modifier classes like <code>md:</code>, which emit media range syntax.
+				use responsive modifier classes like <code>md:</code>, which emit media range syntax, and
+				16.5 for color-scheme modifier classes like <code>dark:</code>, which emit nested CSS.
 			</p>
 			<p>
 				There are no fallbacks. Every rule sits in a cascade layer

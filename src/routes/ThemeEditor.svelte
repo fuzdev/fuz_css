@@ -190,7 +190,7 @@
 			{#if axis === 'color'}
 				<!-- live feedback: the derived neutral and intent scales repaint as
 					knobs move -->
-				<div class="ramp_strips mb_lg">
+				<div class="ramp-strips mb_lg">
 					<RampStrip prefix="shade" />
 					<RampStrip prefix="text" />
 					{#each intent_variants as intent (intent)}
@@ -225,7 +225,7 @@
 						palette hues
 						<small>(the letter slots - moving these makes the theme palette-tier)</small>
 					</summary>
-					<div class="ramp_strips mt_md mb_lg">
+					<div class="ramp-strips mt_md mb_lg">
 						{#each palette_variants as letter (letter)}
 							<RampStrip prefix="palette_{letter}" />
 						{/each}
@@ -248,14 +248,14 @@
 		lint and gamut/monotonicity/contrast gates the shipped themes are held to in CI.
 	</p>
 	{#if editor.gates_pass}
-		<p class="positive_50">
+		<p class="positive_60">
 			all gates pass <small>({editor.check_report.entries.length} checks)</small>
 		</p>
 	{:else}
 		{#if editor.issues.length}
 			<ul class="unstyled">
 				{#each editor.issues as issue (issue.level + (issue.variable ?? '') + issue.message)}
-					<li class={issue.level === 'error' ? 'negative_50' : 'caution_50'}>
+					<li class={issue.level === 'error' ? 'negative_60' : 'caution_60'}>
 						{issue.level}: {issue.message}
 					</li>
 				{/each}
@@ -264,7 +264,7 @@
 		{#if editor.failing_gates.length}
 			<ul class="unstyled">
 				{#each editor.failing_gates as entry (entry.gate + entry.scheme + entry.subject)}
-					<li class="negative_50">
+					<li class="negative_60">
 						{entry.gate} · {entry.scheme} · {entry.subject}: {format_gate_value(entry)}
 					</li>
 				{/each}
@@ -295,8 +295,8 @@
 	<!-- lazily rendered: the highlighted output is the costliest thing on the
 		page and would re-render on every knob drag while open -->
 	<Details summary="theme object">
-		<div class="rendered mt_md">
-			<div class="copy">
+		<div class="rendered-output mt_md">
+			<div class="copy-button">
 				<CopyToClipboard text={output_ts} />
 			</div>
 			<Code content={output_ts} lang="ts" />
@@ -304,8 +304,8 @@
 	</Details>
 	<Details summary="rendered CSS">
 		{#if editor.output.variables.length || editor.output.scheme_mirror?.length}
-			<div class="rendered mt_md">
-				<div class="copy">
+			<div class="rendered-output mt_md">
+				<div class="copy-button">
 					<CopyToClipboard text={output_css} />
 				</div>
 				<Code content={output_css} lang="css" />
@@ -324,20 +324,21 @@
 	.knobs.compact {
 		gap: var(--space_lg) var(--space_md);
 	}
-	.ramp_strips {
+	.ramp-strips {
 		display: grid;
+		/* wide enough for a labeled strip of every stop before wrapping */
 		grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
 		gap: var(--space_sm) var(--space_lg);
 	}
-	.rendered {
-		position: relative; /* for the .copy button */
+	.rendered-output {
+		position: relative; /* for the .copy-button */
 	}
-	.rendered :global(.code_example) {
+	.rendered-output :global(.code_example) {
 		width: 100%;
-		max-height: 320px;
+		max-height: var(--distance_sm);
 		overflow: auto;
 	}
-	.copy {
+	.copy-button {
 		position: absolute;
 		top: var(--space_md);
 		right: var(--space_md);

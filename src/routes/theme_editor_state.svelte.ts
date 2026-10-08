@@ -187,6 +187,9 @@ export class ThemeEditorState {
 		return merged;
 	}
 
+	/** The draft's name, trimmed - what a copied theme is named. */
+	readonly trimmed_name: string = $derived(this.name.trim());
+
 	/**
 	 * The copyable theme, carrying the user's chosen name. Resolved through
 	 * `resolve_theme_stance` so a single-scheme draft carries its mirror -
@@ -195,7 +198,7 @@ export class ThemeEditorState {
 	 */
 	readonly output: Theme = $derived(
 		resolve_theme_stance({
-			name: this.name,
+			name: this.trimmed_name,
 			variables: this.merged_variables,
 			...(this.stance ? { scheme: this.stance } : {})
 		})
@@ -244,9 +247,6 @@ export class ThemeEditorState {
 
 	/** Whether the draft lints clean and passes every gate with nothing unchecked. */
 	readonly gates_pass: boolean = $derived(this.issues.length === 0 && this.check_report.ok);
-
-	/** The draft's name, trimmed - what a copied theme is named. */
-	readonly trimmed_name: string = $derived(this.name.trim());
 
 	/** Whether the draft's name is taken by a theme it could be confused with in a picker. */
 	readonly name_collides: boolean = $derived.by(
@@ -341,8 +341,6 @@ export class ThemeEditorState {
 	 * Loads a theme as the new base: overrides clear and the editor edits on
 	 * top of its flattened variables (flatten-on-load composition), carrying
 	 * the theme's scheme stance.
-	 *
-	 * @mutates `this`
 	 */
 	load_theme(theme: Theme): void {
 		if (theme.name === UNSAVED_THEME_NAME) return;
@@ -404,9 +402,7 @@ export class ThemeEditorState {
 		};
 	}
 
-	/**
-	 * @mutates `this`
-	 */
+	/** Restores a page snapshot: the name, base, overrides, and contrast modifier. */
 	restore_snapshot(data: ThemeEditorSnapshotData): void {
 		this.name = data.name;
 		// a stale snapshot may reference a renamed/removed theme - fall back to

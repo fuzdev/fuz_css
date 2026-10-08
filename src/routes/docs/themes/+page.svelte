@@ -8,7 +8,7 @@
 	import { phosphor_theme } from '$lib/themes/phosphor.ts';
 	import { guestbook_theme } from '$lib/themes/guestbook.ts';
 	import { marquee_theme } from '$lib/themes/marquee.ts';
-	import { timetable_theme } from '$lib/themes/timetable.ts';
+	import { signage_theme } from '$lib/themes/signage.ts';
 	import {
 		ThemeEditorState,
 		type ThemeEditorSnapshotData
@@ -24,7 +24,7 @@
 		phosphor_theme,
 		guestbook_theme,
 		marquee_theme,
-		timetable_theme
+		signage_theme
 	];
 
 	const create_editor = (): ThemeEditorState =>
@@ -52,6 +52,7 @@
 	import type { Theme } from '$lib/variable.ts';
 	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
 	import ThemeEditor from '$routes/ThemeEditor.svelte';
+	import ThemePreview from '$routes/ThemePreview.svelte';
 	import ContrastInput from '$routes/ContrastInput.svelte';
 	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
 	import type { Snapshot } from '@sveltejs/kit';
@@ -107,12 +108,22 @@
 			"dark" isn't a theme, it's a mode that any theme can implement. Selecting a theme applies it
 			to this whole website and loads its knobs into the editor below.
 		</p>
-		<div class="width_atmost_xs mb_lg">
-			<ThemeInput
-				themes={editor.picker_themes}
-				selected_theme={{ theme: editor.picked_theme }}
-				select={select_theme}
-			/>
+		<!-- the picker and a preview of the picked theme share a row, the
+			preview wrapping below the picker on narrow screens -->
+		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
+			<div class="width_atmost_xs flex:1">
+				<ThemeInput
+					themes={editor.picker_themes}
+					selected_theme={{ theme: editor.picked_theme }}
+					select={select_theme}
+				/>
+			</div>
+			<ThemePreview
+				theme={editor.picked_theme}
+				edited_from={editor.dirty ? editor.base_theme : null}
+			>
+				{#snippet link()}<TomeLink slug="colors">a link</TomeLink>{/snippet}
+			</ThemePreview>
 		</div>
 		<div class="width_atmost_xs mb_lg">
 			<div class="title">Contrast</div>

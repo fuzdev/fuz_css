@@ -3,7 +3,8 @@ import type { Theme } from '../variable.ts';
 /**
  * The working theme: the ledger. For tools used all day - a cool gray
  * whisper in the neutral, color eased down so status reads without shouting,
- * compact spacing and leading, one sans family, a flatter type scale,
+ * compact spacing and leading (visibly tighter than the base, so the
+ * registry's two entries read as two choices), one sans family, a flatter type scale,
  * restrained corners and depth, and the two shortest duration tokens
  * tightened. Plain on purpose: no decoration, no clipped gamut, the default
  * accent.
@@ -13,6 +14,8 @@ import type { Theme } from '../variable.ts';
  */
 export const ledger_theme: Theme = {
 	name: 'ledger',
+	summary:
+		'For apps and tools used all day: calmer color, tighter spacing, one sans family, restrained corners and shadows.',
 	variables: [
 		// cool gray: the neutral binds to the blue slot at a whisper
 		{ name: 'hue_neutral', light: 'var(--hue_a)' },
@@ -21,8 +24,8 @@ export const ledger_theme: Theme = {
 		{ name: 'chroma_scale', light: '0.85' },
 		// compact: spacing and leading both tighten (leading is deliberately
 		// decoupled from space_scale - the pin is the theme's own)
-		{ name: 'space_scale', light: '0.9' },
-		{ name: 'line_height_md', light: '1.45' },
+		{ name: 'space_scale', light: '0.85' },
+		{ name: 'line_height_md', light: '1.4' },
 		// restrained shape and depth
 		{ name: 'radius_scale', light: '0.5' },
 		{ name: 'shadow_alpha_scale', light: '0.5' },

@@ -47,19 +47,13 @@ export interface CssRenderInput {
  * @internal The core both generators render through - not stable API.
  */
 export interface CssGenerator {
-	/** Whether base styles are emitted (`base_css` isn't `null`). */
-	readonly include_base: boolean;
-	/** Whether theme variables are emitted (`variables` isn't `null`). */
-	readonly include_theme: boolean;
-	/** Whether `ensure_ready` has loaded everything a render needs. */
-	readonly ready: boolean;
 	/** Creates an empty class collection with the configured include and exclude classes. */
 	create_css_classes: () => CssClasses;
 	/**
 	 * Loads what a render needs - the CSS properties literal classes are
 	 * validated against, and the bundled resources unless both base styles
 	 * and theme variables are off. Loads once; safe to call any number of
-	 * times.
+	 * times, and a failed load is retried on the next call.
 	 */
 	ensure_ready: () => Promise<void>;
 	/**
@@ -118,7 +112,6 @@ export const create_css_generator = (
 	let css_properties: Set<string> | null = null;
 	let resources: BundledCssResources | null = null;
 	let ready_promise: Promise<void> | null = null;
-	let ready = false;
 
 	const ensure_ready = (): Promise<void> =>
 		(ready_promise ??= (async () => {
@@ -130,8 +123,11 @@ export const create_css_generator = (
 			]);
 			css_properties = properties;
 			resources = loaded;
-			ready = true;
-		})());
+		})().catch((error: unknown) => {
+			// a failed load isn't kept, so the next call retries it
+			ready_promise = null;
+			throw error;
+		}));
 
 	const render = (input: CssRenderInput): string => {
 		const { css_classes, detected_css_variables, log, include_stats } = input;
@@ -171,11 +167,6 @@ export const create_css_generator = (
 	};
 
 	return {
-		include_base,
-		include_theme,
-		get ready() {
-			return ready;
-		},
 		create_css_classes: () => new CssClasses(include_set, exclude_set),
 		ensure_ready,
 		render

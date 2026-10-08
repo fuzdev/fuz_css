@@ -6,8 +6,8 @@ import type { Theme } from '../variable.ts';
  * to `inset`, the bevel doing the work shadows do elsewhere. Colorless system
  * chrome on a ground that sits off the paper-white extreme, one serif family
  * for everything the way the browser default was, square corners, packed
- * dense, and links underlined at rest. Sits just short of phosphor's terminal
- * density.
+ * dense, and links underlined at rest. Sits between ledger's compact and
+ * phosphor's terminal density.
  *
  * The proof that `--button_border_style`/`--button_border_style_active`
  * express a raised/pressed pair. Dual-scheme: by night the same chrome in
@@ -17,6 +17,8 @@ import type { Theme } from '../variable.ts';
  */
 export const guestbook_theme: Theme = {
 	name: 'guestbook',
+	summary:
+		'Retro web for the fun of it: colorless system chrome, serif everything, square corners, underlined links, beveled buttons that press in - the 90s guestbook.',
 	variables: [
 		// system chrome is colorless - the neutral drops its tint entirely
 		{ name: 'neutral_chroma', light: '0' },
@@ -41,9 +43,9 @@ export const guestbook_theme: Theme = {
 		// the bevel is the depth, so the corners square off and shadows go flat
 		{ name: 'radius_scale', light: '0' },
 		{ name: 'shadow_alpha_scale', light: '0' },
-		// desktop density: small type packed tight, a step short of phosphor's
-		// terminal compression (leading is decoupled from space_scale, so the
-		// body leading pin is the theme's own)
+		// desktop density: small type packed tight, between ledger's compact and
+		// phosphor's terminal compression (leading is decoupled from space_scale,
+		// so the body leading pin is the theme's own)
 		{ name: 'space_scale', light: '0.9' },
 		{ name: 'line_height_md', light: '1.45' },
 		// links are underlined at rest, not on hover

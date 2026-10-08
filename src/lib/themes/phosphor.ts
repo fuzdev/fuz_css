@@ -4,8 +4,9 @@ import { render_shadow_css } from '../shadow_css.ts';
 
 /**
  * An exemplar theme: the green-phosphor CRT terminal. Structure comes from
- * packing - monospace, sharp-cornered, compact spacing, tightened leading,
- * and a flattened type scale give it terminal density, and the three
+ * packing - monospace, sharp-cornered, spacing and leading packed well past
+ * the compact themes, and a type scale flattened nearly to one size give it
+ * terminal density, and the three
  * shortest duration tokens are zero. The phosphor tint carries the surfaces
  * and accent, but the palette slots keep their own hues so status colors
  * still read - negative stays red, caution amber, info cyan, and positive
@@ -18,6 +19,8 @@ import { render_shadow_css } from '../shadow_css.ts';
  */
 const authored: Theme = {
 	name: 'phosphor',
+	summary:
+		'A terminal look for developer tools: monospace, packed tight, sharp-cornered, with controls that glow green on a tube-gray ground - the phosphor CRT. Dark only.',
 	scheme: 'dark',
 	variables: [
 		// green-phosphor surfaces and text
@@ -35,7 +38,7 @@ const authored: Theme = {
 		{ name: 'font_family', light: 'var(--font_family_mono)' },
 		{ name: 'heading_font_family', light: 'var(--font_family_mono)' },
 		// a terminal has one type size - the scale flattens toward that
-		{ name: 'type_scale_ratio', light: '1.18' },
+		{ name: 'type_scale_ratio', light: '1.12' },
 		// sharp: one knob zeroes every radius tier
 		{ name: 'radius_scale', light: '0' },
 		// emissive depth: the shadow colors turn to phosphor light, and controls
@@ -46,10 +49,11 @@ const authored: Theme = {
 		{ name: 'button_shadow', light: render_shadow_css('shadow', 'md', 'glow', '40') },
 		{ name: 'button_shadow_hover', light: render_shadow_css('shadow', 'lg', 'glow', '60') },
 		{ name: 'button_shadow_active', light: render_shadow_css('shadow_inset', 'md', 'glow', '50') },
-		// terminal density: compact spacing plus tightened body leading (leading
+		// terminal density: spacing and body leading both packed well past ledger's
+		// compact (leading
 		// is deliberately decoupled from space_scale - the pin is the theme's own)
-		{ name: 'space_scale', light: '0.85' },
-		{ name: 'line_height_md', light: '1.4' },
+		{ name: 'space_scale', light: '0.7' },
+		{ name: 'line_height_md', light: '1.25' },
 		// instant: terminal chrome doesn't ease - the three shortest duration
 		// tokens zero out, for the transitions a consumer times with them, while
 		// the longer tiers keep their timing

@@ -44,7 +44,7 @@
 		</p>
 		<ul>
 			<li>
-				<code>--hue_a</code> … <code>--hue_j</code> - OKLCH hue angles for the 10 palette slots
+				<code>--hue_a</code> … <code>--hue_j</code> - OKLCH hue angles for the palette slots
 			</li>
 			<li>
 				<code>--hue_neutral</code> + <code>--neutral_chroma</code> - the temperature and strength of
@@ -58,7 +58,7 @@
 			<li>
 				intent hues - <code>--hue_accent</code>, <code>--hue_positive</code>,
 				<code>--hue_negative</code>, <code>--hue_caution</code>, <code>--hue_info</code> - each
-				deriving a full 13-stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
+				deriving the full stop scale (<code>--accent_00</code> … <code>--accent_100</code>) with
 				matching text and background classes (<code>.positive_50</code>,
 				<code>.bg_caution_10</code>)
 			</li>
@@ -109,7 +109,7 @@
 		<p>
 			Hue variables are also useful to construct custom colors not covered by the palette. For
 			example, fuz_css's selection color derives from <code>--hue_accent</code> (try selecting some
-			text - <span class="accent_50">same hue!</span>)
+			text - <span class="accent_60">same hue!</span>)
 		</p>
 		<p>Hue variables are the same in both light and dark modes (non-adaptive).</p>
 		<ul class="palette unstyled">

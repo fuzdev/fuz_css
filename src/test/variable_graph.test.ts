@@ -11,6 +11,7 @@ import {
 } from '$lib/variable_graph.ts';
 import type { StyleVariable, Theme } from '$lib/variable.ts';
 import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
+import { default_variables } from '$lib/variables.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
@@ -116,6 +117,28 @@ describe('build_variable_graph containment', () => {
 		});
 		const { light_css } = generate_theme_css(graph, new Set(['text_color']));
 		assert.notInclude(light_css, 'lime');
+		assert.strictEqual(graph.diagnostics.length, 1);
+	});
+
+	test('a baked theme slot that escapes leaves the default in place', () => {
+		const graph = build_variable_graph_from_options(undefined, {
+			name: 't',
+			variables: [{ name: 'text_color', light: 'red;' }]
+		});
+		const fallback = default_variables.find((v) => v.name === 'text_color')!;
+		assert.strictEqual(graph.variables.get('text_color')?.light_css, fallback.light);
+		assert.deepEqual(
+			graph.diagnostics.map((d) => d.identifier),
+			['uncontained_theme_value']
+		);
+	});
+
+	test('an escaping value both the variables and the theme carry is reported once', () => {
+		const bad: StyleVariable = { name: 'text_color', light: 'red;' };
+		const graph = build_variable_graph_from_options((d) => [...d, bad], {
+			name: 't',
+			variables: [bad]
+		});
 		assert.strictEqual(graph.diagnostics.length, 1);
 	});
 

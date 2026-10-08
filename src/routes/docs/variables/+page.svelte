@@ -77,6 +77,8 @@
 			lang="ts"
 			content={`export type Theme = {
 	name: string;
+	/** What the theme looks like, for theme pickers. */
+	summary?: string;
 	variables: StyleVariable[];
 	/** Single-scheme themes render one appearance in both color schemes. */
 	scheme?: 'dual' | 'light' | 'dark';
@@ -95,7 +97,7 @@ export type StyleVariable = {
 			Both are zod schemas with their types inferred, so the same names validate at runtime -
 			<code>Theme.safeParse(value)</code> for the detail, <code>parse_theme(value)</code> for a
 			theme-or-<code>null</code>, and <code>validate_theme(theme)</code> in
-			<ModuleLink module_path="theme_check.ts" /> for the full lint.
+			<ModuleLink module_path="theme_validate.ts" /> for the full lint.
 		</p>
 	</section>
 	<TomeSection>

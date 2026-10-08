@@ -202,15 +202,33 @@ describe('reset', () => {
 			changed: true,
 			onreset
 		});
-		const reset = container.querySelector('.knob_reset');
+		const reset = container.querySelector('.knob-reset');
 		assert(reset instanceof HTMLButtonElement);
 		reset.click();
 		flushSync();
 		assert.strictEqual(onreset.mock.calls.length, 1);
 	});
 
+	test('clearing a text knob resets it instead of writing a blank value', () => {
+		const onchange = vi.fn();
+		const onreset = vi.fn();
+		const container = mount_knob({
+			knob: get_knob('font_family'),
+			value: 'serif',
+			onchange,
+			onreset
+		});
+		const input = container.querySelector('input[type="text"]');
+		assert(input instanceof HTMLInputElement, 'text input renders');
+		set_input_value(input, '  ', 'change');
+		assert.strictEqual(onchange.mock.calls.length, 0);
+		assert.strictEqual(onreset.mock.calls.length, 1);
+		// a knob at its base value doesn't change on reset, so the field restores it
+		assert.strictEqual(input.value, 'serif');
+	});
+
 	test('an unchanged knob has no reset button', () => {
 		const container = mount_knob({ knob: get_knob('chroma_scale'), value: '1' });
-		assert.isNull(container.querySelector('.knob_reset'));
+		assert.isNull(container.querySelector('.knob-reset'));
 	});
 });

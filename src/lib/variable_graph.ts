@@ -52,6 +52,49 @@ export interface VariableDependencyGraph {
 	diagnostics: Array<GenerationDiagnostic>;
 }
 
+// the slots of `v` a stylesheet can hold, or null when none can - reporting
+// the rest as `uncontained_theme_value` errors to `diagnostics` when given
+const contain_variable = (
+	v: StyleVariable,
+	diagnostics?: Array<GenerationDiagnostic>
+): StyleVariable | null => {
+	const report = (detail: string, left_out: string): void => {
+		diagnostics?.push({
+			phase: 'generation',
+			level: 'error',
+			message: `Theme variable "${v.name}" ${detail}, so ${left_out} is left out of the generated CSS`,
+			suggestion:
+				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
+			identifier: 'uncontained_theme_value',
+			locations: null
+		});
+	};
+	const contained_slot = (slot: 'light' | 'dark', value: unknown): string | undefined => {
+		if (value === undefined) return undefined;
+		if (!css_value_is_contained(value)) {
+			report(`has a ${slot} value that can't be contained in a declaration`, 'that value');
+		} else if (!(value as string).trim()) {
+			report(`has a blank ${slot} value`, 'that value');
+		} else {
+			return value as string;
+		}
+		return undefined;
+	};
+	if (!css_custom_property_name_is_contained(v.name)) {
+		report('has a name that is not a plain identifier', 'it');
+		return null;
+	}
+	const light = contained_slot('light', v.light);
+	const dark = contained_slot('dark', v.dark);
+	if (light === undefined && dark === undefined) return null;
+	if (light === v.light && dark === v.dark) return v;
+	return {
+		name: v.name,
+		...(light !== undefined && { light }),
+		...(dark !== undefined && { dark })
+	};
+};
+
 /**
  * Builds a dependency graph from an array of style variables.
  *
@@ -68,43 +111,10 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
 	const graph: Map<string, StyleVariableInfo> = new Map();
 	const diagnostics: Array<GenerationDiagnostic> = [];
 
-	const report = (name: string, detail: string): void => {
-		diagnostics.push({
-			phase: 'generation',
-			level: 'error',
-			message: `Theme variable "${name}" ${detail}, so it is left out of the generated CSS`,
-			suggestion:
-				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
-			identifier: 'uncontained_theme_value',
-			locations: null
-		});
-	};
-	// a slot the stylesheet can hold, or undefined - reporting the rest
-	const contained_slot = (
-		name: string,
-		slot: 'light' | 'dark',
-		value: unknown
-	): string | undefined => {
-		if (value === undefined) return undefined;
-		if (!css_value_is_contained(value)) {
-			report(name, `has a ${slot} value that can't be contained in a declaration`);
-		} else if (!(value as string).trim()) {
-			report(name, `has a blank ${slot} value`);
-		} else {
-			return value as string;
-		}
-		return undefined;
-	};
-
 	for (const v of variables) {
-		if (!css_custom_property_name_is_contained(v.name)) {
-			report(v.name, 'has a name that is not a plain identifier');
-			continue;
-		}
-		const light_css = contained_slot(v.name, 'light', v.light);
-		const dark_css = contained_slot(v.name, 'dark', v.dark);
-		if (light_css === undefined && dark_css === undefined) continue;
-
+		const contained = contain_variable(v, diagnostics);
+		if (!contained) continue;
+		const { light: light_css, dark: dark_css } = contained;
 		graph.set(v.name, {
 			name: v.name,
 			light_deps: light_css ? extract_css_variables(light_css) : new Set(),
@@ -339,7 +349,9 @@ const resolve_variables_option = (variables: VariablesOption): Array<StyleVariab
  * stanced theme's `scheme_mirror` applies first, matching the renderer's order
  * - and a stanced theme arriving without its mirror computed is resolved
  * through `resolve_theme_stance` here, so a hand-rolled theme bakes the same
- * as the shipped exemplars (build time has no bundle-weight concern).
+ * as the shipped exemplars (build time has no bundle-weight concern). A
+ * theme slot the stylesheet can't hold is dropped before it overlays, as
+ * `render_theme_style` drops it, so the value beneath it stays.
  *
  * @param variables - the resolved default or custom variables
  * @param theme - the theme to overlay, or null/undefined for none
@@ -355,8 +367,11 @@ export const apply_theme_variables = (
 	// Replacement mirrors the runtime cascade: a light-slot theme value beats
 	// the base default's dark slot by layer order, so it replaces wholesale,
 	// while a dark-only value keeps the default's light slot.
+	// a slot the stylesheet can't hold is dropped before the overlay, as the
+	// runtime renderer drops it, so the default beneath it survives
 	const overlay = (v: StyleVariable): void => {
-		by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
+		const contained = contain_variable(v);
+		if (contained) by_name.set(v.name, overlay_style_variable(by_name.get(v.name), contained));
 	};
 	// mirror first, then the theme's own, so authored values win
 	for (const v of resolved.scheme_mirror ?? []) overlay(v);
@@ -376,6 +391,20 @@ export const build_variable_graph_from_options = (
 	variables: VariablesOption,
 	theme?: Theme | null
 ): VariableDependencyGraph => {
-	const resolved = apply_theme_variables(resolve_variables_option(variables), theme);
-	return build_variable_graph(resolved);
+	const graph = build_variable_graph(
+		apply_theme_variables(resolve_variables_option(variables), theme)
+	);
+	// the theme's own uncontained slots never reach the graph, so they're
+	// reported here - once, when the configured variables carry the same one
+	if (theme) {
+		const reported = new Set(graph.diagnostics.map((d) => d.message));
+		const theme_diagnostics: Array<GenerationDiagnostic> = [];
+		for (const v of theme.variables) contain_variable(v, theme_diagnostics);
+		for (const d of theme_diagnostics) {
+			if (reported.has(d.message)) continue;
+			reported.add(d.message);
+			graph.diagnostics.push(d);
+		}
+	}
+	return graph;
 };

@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': minor
 ---
 
-feat: derived OKLCH color system with semantic intents and cascade layers
+feat: derived OKLCH color system with semantic intents
 
 Breaking:
 
@@ -20,19 +20,20 @@ Breaking:
 - `--hue_a`…`--hue_j` are OKLCH angles (blue `250`, was `210`); replace
   `hsl(var(--hue_x) …)` with `oklch(<l> <c> var(--hue_x))` or a stop.
 - `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
-- `color-mix()` interpolates `in oklab` (was `in hsl`).
-- Shipped CSS is layered `fuz.base` < `fuz.preferences` < `fuz.theme` <
-  `fuz.utilities`; unlayered consumer styles beat all of it except its two
-  `!important` declarations (`[hidden]` and the `prefers-reduced-motion`
-  duration reset), which a layer makes outrank unlayered `!important` too.
+- Default colors change: surfaces, text, borders, and the palette are
+  derived in OKLCH from the curve knobs instead of authored per stop in
+  HSL, so an unthemed page shifts.
+- Shipped `color-mix()` calls (button fills, shadows, borders) interpolate
+  `in oklab` (was `in hsl`).
 - The browser floor rises to Chrome and Edge 120 (was 111) and Firefox 118
-  (was 113) for `pow()`, with no fallback; Safari stays at 16.2, or 16.4
-  with responsive modifier classes.
+  (was 113) for `pow()`, with no fallback; Safari stays at 16.2 (16.4 for
+  responsive modifier classes, 16.5 for `dark:`/`light:` ones).
 - `variables.ts` exports only `default_variables`; read a variable with
-  `default_variables.find((v) => v.name === 'space_md')`. `icon_sizes` →
-  `ICON_SIZES`, keyed by variant with unitless values (`ICON_SIZES.xs ===
-  18`, was `icon_sizes.icon_size_xs === '18px'`); `Z_INDEX_MAX`
-  removed (inline `2147483647`).
+  `default_variables.find((v) => v.name === 'space_md')`. In
+  `variable_data.ts`, `icon_sizes` → `ICON_SIZES`, keyed by variant with
+  unitless values (`ICON_SIZES.xs === 18`, was
+  `icon_sizes.icon_size_xs === '18px'`), and `Z_INDEX_MAX` is removed
+  (inline `2147483647`).
 
 New:
 
@@ -42,9 +43,12 @@ New:
   `--chroma_shape_NN`.
 - Intent knobs `--hue_accent`/`_positive`/`_negative`/`_caution`/`_info`,
   each with a 13-stop scale (`--accent_00`…`--accent_100`), token classes
-  (`.positive_50`, `.bg_caution_10`), `--selection_color`, and
-  `intent_variants`/`IntentVariant`. Links, focus, selection,
-  `accent-color`, and disabled-active feedback use them.
+  (`.positive_50`, `.bg_caution_10`), `--selection_color`,
+  `intent_variants`/`IntentVariant`, and `palette_glosses`/
+  `format_palette_gloss`. Base styles that read `--color_a_*` or
+  `--color_c_*` - links, focus, selection, `accent-color`, checked inputs,
+  range thumbs, `.selectable` and `.menuitem` selection, and disabled-active
+  feedback - read the accent or negative intent instead.
 - Per-slot chroma multipliers `--palette_X_chroma_scale` and
   `--<intent>_chroma_scale` (default `1`; brown `f` ships at `0.55`).
 - `--border_color_lightness`/`--border_color_chroma` derive the

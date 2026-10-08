@@ -552,12 +552,16 @@ const extract_atrule = (
  */
 const UNINDEXABLE_SELECTOR_PATTERN = /\\|[^\t\n\r -~]/;
 
-/** The functional pseudo-classes whose arguments are selectors the index reads into. */
-const SELECTOR_ARG_PSEUDO_CLASSES: ReadonlySet<string> = new Set(['where', 'is', 'not', 'has']);
+/**
+ * The functional pseudo-classes whose arguments are selectors the index reads
+ * into. `:not()` is left out: an element it matches lacks the names in its
+ * argument, so they can't decide whether the rule ships.
+ */
+const SELECTOR_ARG_PSEUDO_CLASSES: ReadonlySet<string> = new Set(['where', 'is', 'has']);
 
 /** What a selector list holds that decides whether its rule always ships. */
 interface SelectorListScan {
-	/** Whether the index can match every selector in the list - `false` when one names no element or class, or holds an escape or non-ASCII character. */
+	/** Whether the index can match every selector in the list - `false` when one can match an element naming none of its elements or classes, or holds an escape or non-ASCII character. */
 	targetable: boolean;
 	/** Why the rule always ships whatever is detected, or `null` when detection decides. */
 	core_reason: Extract<CoreReason, 'universal' | 'root' | 'host' | 'body' | 'html'> | null;
@@ -565,10 +569,11 @@ interface SelectorListScan {
 
 /**
  * Reads a rule's selector list from the parsed tree: the element and class
- * names it targets, including inside `:where()`/`:is()`/`:not()`/`:has()`,
- * and whether it targets something every page has. Attribute selectors,
- * pseudo-elements, and other pseudo-classes contribute nothing, so a name
- * that only appears in an attribute value is never indexed.
+ * names it targets, including inside `:where()`/`:is()`/`:has()`, and
+ * whether it targets something every page has. Attribute selectors,
+ * pseudo-elements, `:not()`, and other pseudo-classes contribute nothing, so
+ * a name that only appears in an attribute value or a negation is never
+ * indexed - a selector naming nothing else always ships.
  *
  * @param prelude - the rule's parsed selector list
  * @param css - the stylesheet the node positions index into
@@ -587,38 +592,50 @@ const scan_selector_list = (
 	let root = false;
 	let host = false;
 
+	// collects a complex selector's names, returning whether every element it
+	// matches carries one of them - so detecting none of them means it matches
+	// nothing on the page
 	const visit = (
 		complex: AST.CSS.ComplexSelector,
 		selector_elements: Set<string>,
 		selector_classes: Set<string>
-	): void => {
+	): boolean => {
+		let named = false;
 		for (const relative of complex.children) {
 			for (const selector of relative.selectors) {
 				if (selector.type === 'TypeSelector') {
 					if (selector.name === '*') universal = true;
-					else selector_elements.add(selector.name.toLowerCase());
+					else {
+						selector_elements.add(selector.name.toLowerCase());
+						named = true;
+					}
 				} else if (selector.type === 'ClassSelector') {
 					selector_classes.add(selector.name);
+					named = true;
 				} else if (selector.type === 'PseudoClassSelector') {
 					if (selector.name === 'root') root = true;
 					else if (selector.name.startsWith('host')) host = true;
-					// an argument's names count toward the selector holding it
+					// an argument's names count toward the selector holding it, and
+					// require a name only when every branch of the list does -
+					// `:is(input, [contenteditable])` also matches with no name
 					if (selector.args && SELECTOR_ARG_PSEUDO_CLASSES.has(selector.name)) {
+						let every_branch_named = true;
 						for (const arg of selector.args.children) {
-							visit(arg, selector_elements, selector_classes);
+							if (!visit(arg, selector_elements, selector_classes)) every_branch_named = false;
 						}
+						if (every_branch_named) named = true;
 					}
 				}
 			}
 		}
+		return named;
 	};
 
 	for (const complex of prelude.children) {
 		const selector_elements: Set<string> = new Set();
 		const selector_classes: Set<string> = new Set();
-		visit(complex, selector_elements, selector_classes);
 		if (
-			(selector_elements.size === 0 && selector_classes.size === 0) ||
+			!visit(complex, selector_elements, selector_classes) ||
 			UNINDEXABLE_SELECTOR_PATTERN.test(css.slice(complex.start, complex.end))
 		) {
 			targetable = false;

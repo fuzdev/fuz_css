@@ -28,9 +28,11 @@
 		<TomeSectionHeader text="Layers and specificity" />
 		<p>
 			All opinionated styles live in the <code>fuz.base</code> cascade layer, so your unlayered
-			styles and the generated utility classes override them by layer order alone. The selectors are
-			additionally wrapped in <code>:where()</code>, giving them zero specificity, so overriding
-			stays effortless even from inside the fuz layers.
+			styles and the generated utility classes override them by layer order alone. The element
+			selectors are additionally wrapped in <code>:where()</code>, giving them zero specificity, so
+			overriding stays effortless even from inside the fuz layers (the few exceptions are the
+			document-wide rules: <code>:root</code>, <code>body</code>, <code>[hidden]</code>, and
+			<code>::selection</code>).
 		</p>
 		<Code
 			lang="css"
@@ -115,7 +117,7 @@
 		<p>
 			The <code>.row</code> layout composite resets margins on its direct children. Flow margins
 			make less sense in horizontal flex layout - for spacing prefer gap utilities like
-			<code>.gap_md</code> and <code>var(--gap_sm)</code> instead.
+			<code>.gap_md</code> and <code>gap: var(--space_sm)</code> instead.
 		</p>
 		<Code
 			lang="css"

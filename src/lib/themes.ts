@@ -26,7 +26,8 @@ export const DEFAULT_THEME: Theme = base_theme;
  * `themes/pebble.ts` (depth and softness), `themes/parchment.ts` (type and
  * ruling), `themes/phosphor.ts` (packing, dark-only), `themes/guestbook.ts`
  * (controls as beveled objects), `themes/marquee.ts` (color, dark-only and
- * the one palette-tier exemplar), and `themes/timetable.ts` (scale).
+ * the one palette-tier exemplar), and `themes/signage.ts` (scale and weight,
+ * for legibility).
  *
  * Contrast is not a theme: the low/high contrast pair are modifiers
  * (`contrast_modifiers`) composed over any theme with `compose_themes`.

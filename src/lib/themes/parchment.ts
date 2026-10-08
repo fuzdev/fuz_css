@@ -14,12 +14,15 @@ import type { Theme } from '../variable.ts';
  */
 export const parchment_theme: Theme = {
 	name: 'parchment',
+	summary:
+		'For reading - essays, docs, a blog: serif text on warm paper, a red accent, double-ruled borders, candlelit in dark mode - the manuscript page.',
 	variables: [
 		// warm parchment: the neutral keeps its brown binding, tinted stronger,
 		// and warmer still under candlelight
 		{ name: 'neutral_chroma', light: '0.03', dark: '0.038' },
-		// by night the ground is tanned leather, not the default near-black
-		{ name: 'shade_lightness_00', dark: '0.19' },
+		// by night the ground is tanned leather, lifted well off the default
+		// near-black so it reads as a lit page and keeps the sunken direction
+		{ name: 'shade_lightness_00', dark: '0.23' },
 		// cream ink rather than white - vellum never held a pure highlight - with
 		// the ramp pulled toward its end to buy the contrast the warmth costs
 		{ name: 'text_lightness_100', dark: '0.95' },

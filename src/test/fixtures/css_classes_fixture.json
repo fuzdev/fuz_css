@@ -76,7 +76,7 @@
 		"ruleset": "\n\t\t\t.chevron {\n\t\t\t\tposition: relative;\n\t\t\t\theight: 8px;\n\t\t\t}\n\t\t\t.chevron::before {\n\t\t\t\tdisplay: block;\n\t\t\t\tcontent: '';\n\t\t\t\tborder: 4px solid transparent;\n\t\t\t\tborder-left-color: var(--text_70);\n\t\t\t}\n\t\t"
 	},
 	"chip": {
-		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tfont-size: var(--font_size, inherit);\n\t\t\t\tpadding-left: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tpadding-right: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.palette_a {\n\t\t\t\tcolor: var(--palette_a_60);\n\t\t\t\tbackground-color: var(--palette_a_10);\n\t\t\t}\n\t\t\t.chip.palette_b {\n\t\t\t\tcolor: var(--palette_b_60);\n\t\t\t\tbackground-color: var(--palette_b_10);\n\t\t\t}\n\t\t\t.chip.palette_c {\n\t\t\t\tcolor: var(--palette_c_60);\n\t\t\t\tbackground-color: var(--palette_c_10);\n\t\t\t}\n\t\t\t.chip.palette_d {\n\t\t\t\tcolor: var(--palette_d_60);\n\t\t\t\tbackground-color: var(--palette_d_10);\n\t\t\t}\n\t\t\t.chip.palette_e {\n\t\t\t\tcolor: var(--palette_e_60);\n\t\t\t\tbackground-color: var(--palette_e_10);\n\t\t\t}\n\t\t\t.chip.palette_f {\n\t\t\t\tcolor: var(--palette_f_60);\n\t\t\t\tbackground-color: var(--palette_f_10);\n\t\t\t}\n\t\t\t.chip.palette_g {\n\t\t\t\tcolor: var(--palette_g_60);\n\t\t\t\tbackground-color: var(--palette_g_10);\n\t\t\t}\n\t\t\t.chip.palette_h {\n\t\t\t\tcolor: var(--palette_h_60);\n\t\t\t\tbackground-color: var(--palette_h_10);\n\t\t\t}\n\t\t\t.chip.palette_i {\n\t\t\t\tcolor: var(--palette_i_60);\n\t\t\t\tbackground-color: var(--palette_i_10);\n\t\t\t}\n\t\t\t.chip.palette_j {\n\t\t\t\tcolor: var(--palette_j_60);\n\t\t\t\tbackground-color: var(--palette_j_10);\n\t\t\t}\n\t\t"
+		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tfont-size: var(--font_size, inherit);\n\t\t\t\tpadding-left: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tpadding-right: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tbackground-color: var(--fg_10);\n\t\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.palette_a {\n\t\t\t\tcolor: var(--palette_a_60);\n\t\t\t\t--text_color: var(--palette_a_60);\n\t\t\t\tbackground-color: var(--palette_a_10);\n\t\t\t}\n\t\t\t.chip.palette_b {\n\t\t\t\tcolor: var(--palette_b_60);\n\t\t\t\t--text_color: var(--palette_b_60);\n\t\t\t\tbackground-color: var(--palette_b_10);\n\t\t\t}\n\t\t\t.chip.palette_c {\n\t\t\t\tcolor: var(--palette_c_60);\n\t\t\t\t--text_color: var(--palette_c_60);\n\t\t\t\tbackground-color: var(--palette_c_10);\n\t\t\t}\n\t\t\t.chip.palette_d {\n\t\t\t\tcolor: var(--palette_d_60);\n\t\t\t\t--text_color: var(--palette_d_60);\n\t\t\t\tbackground-color: var(--palette_d_10);\n\t\t\t}\n\t\t\t.chip.palette_e {\n\t\t\t\tcolor: var(--palette_e_60);\n\t\t\t\t--text_color: var(--palette_e_60);\n\t\t\t\tbackground-color: var(--palette_e_10);\n\t\t\t}\n\t\t\t.chip.palette_f {\n\t\t\t\tcolor: var(--palette_f_60);\n\t\t\t\t--text_color: var(--palette_f_60);\n\t\t\t\tbackground-color: var(--palette_f_10);\n\t\t\t}\n\t\t\t.chip.palette_g {\n\t\t\t\tcolor: var(--palette_g_60);\n\t\t\t\t--text_color: var(--palette_g_60);\n\t\t\t\tbackground-color: var(--palette_g_10);\n\t\t\t}\n\t\t\t.chip.palette_h {\n\t\t\t\tcolor: var(--palette_h_60);\n\t\t\t\t--text_color: var(--palette_h_60);\n\t\t\t\tbackground-color: var(--palette_h_10);\n\t\t\t}\n\t\t\t.chip.palette_i {\n\t\t\t\tcolor: var(--palette_i_60);\n\t\t\t\t--text_color: var(--palette_i_60);\n\t\t\t\tbackground-color: var(--palette_i_10);\n\t\t\t}\n\t\t\t.chip.palette_j {\n\t\t\t\tcolor: var(--palette_j_60);\n\t\t\t\t--text_color: var(--palette_j_60);\n\t\t\t\tbackground-color: var(--palette_j_10);\n\t\t\t}\n\t\t"
 	},
 	"font_family_sans": {
 		"declaration": "font-family: var(--font_family_sans);"
@@ -1930,43 +1930,43 @@
 		"declaration": "border-color: var(--palette_j_100); --border_color: var(--palette_j_100);"
 	},
 	"outline_color_00": {
-		"declaration": "outline-color: var(--shade_00);"
+		"declaration": "outline-color: var(--shade_00); --outline_color: var(--shade_00);"
 	},
 	"outline_color_05": {
-		"declaration": "outline-color: var(--shade_05);"
+		"declaration": "outline-color: var(--shade_05); --outline_color: var(--shade_05);"
 	},
 	"outline_color_10": {
-		"declaration": "outline-color: var(--shade_10);"
+		"declaration": "outline-color: var(--shade_10); --outline_color: var(--shade_10);"
 	},
 	"outline_color_20": {
-		"declaration": "outline-color: var(--shade_20);"
+		"declaration": "outline-color: var(--shade_20); --outline_color: var(--shade_20);"
 	},
 	"outline_color_30": {
-		"declaration": "outline-color: var(--shade_30);"
+		"declaration": "outline-color: var(--shade_30); --outline_color: var(--shade_30);"
 	},
 	"outline_color_40": {
-		"declaration": "outline-color: var(--shade_40);"
+		"declaration": "outline-color: var(--shade_40); --outline_color: var(--shade_40);"
 	},
 	"outline_color_50": {
-		"declaration": "outline-color: var(--shade_50);"
+		"declaration": "outline-color: var(--shade_50); --outline_color: var(--shade_50);"
 	},
 	"outline_color_60": {
-		"declaration": "outline-color: var(--shade_60);"
+		"declaration": "outline-color: var(--shade_60); --outline_color: var(--shade_60);"
 	},
 	"outline_color_70": {
-		"declaration": "outline-color: var(--shade_70);"
+		"declaration": "outline-color: var(--shade_70); --outline_color: var(--shade_70);"
 	},
 	"outline_color_80": {
-		"declaration": "outline-color: var(--shade_80);"
+		"declaration": "outline-color: var(--shade_80); --outline_color: var(--shade_80);"
 	},
 	"outline_color_90": {
-		"declaration": "outline-color: var(--shade_90);"
+		"declaration": "outline-color: var(--shade_90); --outline_color: var(--shade_90);"
 	},
 	"outline_color_95": {
-		"declaration": "outline-color: var(--shade_95);"
+		"declaration": "outline-color: var(--shade_95); --outline_color: var(--shade_95);"
 	},
 	"outline_color_100": {
-		"declaration": "outline-color: var(--shade_100);"
+		"declaration": "outline-color: var(--shade_100); --outline_color: var(--shade_100);"
 	},
 	"outline_a_00": {
 		"declaration": "outline-color: var(--palette_a_00); --outline_color: var(--palette_a_00);"

@@ -235,7 +235,9 @@ variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 
 Custom properties work as literals too - `--flow_margin:0`, `--button_shadow:none`
 set the property on the element straight from markup, which is how a consumer
-reaches any theme/base hook without a dedicated token class.
+reaches a contextual base hook without a dedicated token class. The knobs and
+the tokens derived from them resolve on `:root`, so setting one on an element
+(`--space_scale:0.8`) changes nothing below it - knobs belong in a theme.
 
 ## Variable naming
 
@@ -315,7 +317,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   track to transparent), `--backdrop_color`
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
-  hook (per-tier fallbacks, so no single default exists); `prefers-contrast:
+  hook among the knobs (per-tier fallbacks, so no single default exists); `prefers-contrast:
   more` mirrors the high-contrast modifier (the ground and text curve knobs
   plus a stronger `--border_color`), theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
@@ -391,8 +393,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   utilities). Top-level style rules and top-level
   `@media`/`@supports`/`@container` rules tree-shake by the elements and
   classes they target (a conditional rule ships whole or not at all, and a
-  rule with a selector the index can't match - no element or class, or an
-  escaped or non-ASCII name - always ships); every other at-rule ships as
+  rule with a selector the index can't match - one that can match an
+  element carrying none of its names (names inside `:not()` don't count),
+  or an escaped or non-ASCII name - always ships); every other at-rule ships as
   written; every `var()` in what ships is tracked at any nesting depth. The
   generator owns layering - only top-level `@layer fuz.base`/`fuz.preferences`
   blocks and the shipped order statement are recognized, as `style.css` uses
@@ -464,7 +467,8 @@ typography, borders, shading, shadows, layout. See
   variant lists and ramp emitters and spread into it in place
 - [variable.ts](src/lib/variable.ts) - The `StyleVariable` and `Theme` zod
   schemas (with `ThemeScheme` and `parse_theme`), kept apart from `theme.ts`
-  so the renderer stays zod-free
+  so the renderer stays zod-free; a theme's optional `summary` is the
+  sentence pickers show beside its name
 - [variable_data.ts](src/lib/variable_data.ts) - The variable vocabulary:
   size/color/border variant lists plus the fitted value tables their ladders
   step through (`FONT_SIZES`, `SPACE_SIZES`, `BORDER_RADII`, `DISTANCES`,
@@ -509,11 +513,12 @@ typography, borders, shading, shadows, layout. See
   `compose_themes`, not themes themselves - users see one flat "themes"
   list
 - `src/lib/themes/` - One module per theme. Registered: base and ledger
-  (the plain working theme - cool, compact, eased chroma, one sans family).
+  (the plain working theme for apps and tools - cool, visibly compact, eased
+  chroma, one sans family).
   Each shipped exemplar takes one channel to carry the structure and quiets
   the rest, and is named last, for the artifact that already looks that
   way: zine (line and weight - paper white and toner black, thick opaque
-  rules, sharp, flat, heavy sans headings set tight, underlined links),
+  borders, sharp, flat, heavy sans headings set tight, underlined links),
   pebble (depth and softness - round, raised on soft drop shadows through
   `button_shadow*` and `panel_shadow`, airy, cool whisper), parchment (type
   and ruling - serif body, rubrication-red accent with the negative intent
@@ -524,9 +529,11 @@ typography, borders, shading, shadows, layout. See
   off-white ground, serif everything, underlined links, `outset` buttons
   pressing to `inset` over `inset` fields), marquee (color - magenta accent,
   colored glow shadows, radius pins, vivid past the caps, a rotated yellow
-  slot making it the one palette-tier exemplar, dark-only), and timetable
-  (scale - spacious, an opened-up type scale, heavy sans, thick rules, a
-  wide focus ring, and an accent that changes between schemes). Only
+  slot making it the one palette-tier exemplar, dark-only), and signage
+  (scale and weight, for legibility - spacious, an opened-up type scale,
+  heavier text under bold sans headings, thick borders, a wide focus ring,
+  and an accent that changes between schemes). Each summary leads with who
+  the theme is for, so a picker reads as a menu of use cases. Only
   phosphor and marquee take a `scheme` stance; everything else is
   dual-scheme. Several retime the short `duration_*` tokens (zine and
   phosphor to zero) - base styles carry no transitions, so those reach only
@@ -661,6 +668,9 @@ The themes docs page hosts an inline theme editor built from
 [RampStrip.svelte](src/routes/RampStrip.svelte), and
 [theme_editor_state.svelte.ts](src/routes/theme_editor_state.svelte.ts)
 (marked `TODO upstream to fuz_ui`), with
+[ThemePreview.svelte](src/routes/ThemePreview.svelte) (beside the picker: the
+picked theme's `summary` over a compact sample of basic elements, wrapping
+below the picker on narrow screens), and
 [theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
 in a leaf module so the root layout doesn't pull the editor's dependency
 graph. `ThemeEditorState` owns what the page applies - the dirty draft or its
@@ -744,7 +754,8 @@ svelte's `mount()` resolves to the client build.
   progress
 - **Browser floor, no fallbacks** - the shipped CSS needs Chrome or Edge
   120, Firefox 118 (both set by `pow()`), or Safari 16.2, and Safari 16.4
-  for responsive modifiers, which emit media range syntax
+  for responsive modifiers, which emit media range syntax, and 16.5 for the
+  `dark:`/`light:` modifiers, which emit nested CSS
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to

@@ -48,6 +48,9 @@ export const extract_file_cached = async (
 	options: ExtractFileCachedOptions
 ): Promise<ExtractFileCachedResult> => {
 	const { deps, content, content_hash, cache_path, filename, acorn_plugins } = options;
+	// TODO: `acorn_plugins` isn't part of the cache key, so a file cached before
+	// a plugin was configured (a `.tsx` without `acorn_jsx`) keeps its stale
+	// parse result until its content changes
 
 	if (cache_path) {
 		const cached = await load_cached_extraction(deps, cache_path);

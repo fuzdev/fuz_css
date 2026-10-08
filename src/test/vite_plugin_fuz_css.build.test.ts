@@ -22,6 +22,8 @@ import {
 	type VitePluginFuzCssOptions
 } from '$lib/vite_plugin_fuz_css.ts';
 import { FUZ_CSS_PLACEHOLDER, parse_css_placeholder_hash } from '$lib/css_placeholder_splice.ts';
+import { css_class_interpreters } from '$lib/css_class_interpreters.ts';
+import type { CssClassDefinitionInterpreter } from '$lib/css_class_generation.ts';
 import {
 	vite_build_fixture_root as fixture_root,
 	filter_build_fixture_module as filter_fixture_file,
@@ -484,28 +486,48 @@ describe('vite_plugin_fuz_css build render lifetime', () => {
 	const UNRESOLVED_SOURCE =
 		"// @fuz-classes not_a_real_fuz_class\nexport const variant_class = 'box';\n";
 
-	const count_unresolved = (result: FixtureLogs): number =>
-		result.errors.filter((m) => m.includes('not_a_real_fuz_class')).length;
+	/**
+	 * Plugin options that count renders: an interpreter for one always-included
+	 * class runs once per render, which the diagnostic dedup can't hide.
+	 */
+	const create_render_counter = (): {
+		plugin_options: VitePluginFuzCssOptions;
+		count: () => number;
+	} => {
+		let renders = 0;
+		const probe: CssClassDefinitionInterpreter = {
+			pattern: /^render_probe$/,
+			interpret: () => {
+				renders++;
+				return null;
+			}
+		};
+		return {
+			plugin_options: {
+				additional_classes: ['render_probe'],
+				class_interpreters: [probe, ...css_class_interpreters]
+			},
+			count: () => renders
+		};
+	};
 
-	test('diagnostics dispatch once per build, across hooks', async () => {
-		const result = await build_fixture({
-			plugin_options: { on_error: 'log' },
-			plugins: [create_variant_plugin(() => UNRESOLVED_SOURCE)]
-		});
+	test('one render serves both hooks', async () => {
+		const counter = create_render_counter();
+		const result = await build_fixture({ plugin_options: counter.plugin_options });
 		assert_single_css(result);
-		assert.strictEqual(count_unresolved(result), 1, 'one render serves both hooks');
+		assert.strictEqual(counter.count(), 1);
 	});
 
-	test('diagnostics dispatch once per build, across outputs', async () => {
+	test('one render serves every output', async () => {
+		const counter = create_render_counter();
 		const result = await build_fixture({
-			plugin_options: { on_error: 'log' },
-			plugins: [create_variant_plugin(() => UNRESOLVED_SOURCE)],
+			plugin_options: counter.plugin_options,
 			build: {
 				rollupOptions: { input: entry_path, output: [{ format: 'es' }, { format: 'cjs' }] }
 			}
 		});
 		assert.strictEqual(result.css.length, 2);
-		assert.strictEqual(count_unresolved(result), 1, 'one render serves every output');
+		assert.strictEqual(counter.count(), 1);
 	});
 
 	test('an error thrown by the render fails the build', async () => {

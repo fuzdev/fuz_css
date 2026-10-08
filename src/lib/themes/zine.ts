@@ -3,7 +3,7 @@ import type { Theme } from '../variable.ts';
 /**
  * An exemplar theme: the photocopied zine. Structure comes from line and
  * weight alone, since that is all a photocopier reproduces - paper white and
- * toner black with no gray between them, thick opaque rules, square corners,
+ * toner black with no gray between them, thick opaque borders, square corners,
  * no shadows, heavy grotesque headings set tight, links marked by an
  * underline. The three shortest duration tokens are zero, since print
  * doesn't ease. The palette keeps its full chroma, the spot color run over
@@ -14,6 +14,8 @@ import type { Theme } from '../variable.ts';
  */
 export const zine_theme: Theme = {
 	name: 'zine',
+	summary:
+		'Stark print for sites that want no decoration: black on white, thick borders, square corners, heavy headings, underlined links - the photocopied zine.',
 	variables: [
 		// toner has no cast - the neutral drops its tint entirely
 		{ name: 'neutral_chroma', light: '0' },

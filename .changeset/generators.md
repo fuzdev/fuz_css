@@ -10,26 +10,29 @@ Breaking:
   one. Passing it to `plugins` works as before; list it after any plugin
   that rewrites CSS in its `transform` hook. The Vite plugin requires Vite
   6 or later.
-- New error `undefined_theme_variables`, so a CI build (where `on_error`
-  defaults to `'throw'`) fails on it: emitted base styles reference, with
-  no fallback, a variable the defaults define that nothing defines -
-  `variables: null`, `[]`, or a set missing some - which left the `var()`
-  undefined with no diagnostic. It skips a variable-free base, your own
-  property names, a name the base declares in the same rule or in a
-  top-level `:root`, `:host`, `html`, `body`, or `*` rule, and names in
-  `exclude_variables`. Define the variables, set `base_css: null` too for
-  utility-only mode, or pair bundled base styles with a separately
-  imported theme stylesheet through
-  `exclude_variables: default_variables.map((v) => v.name)`.
-- `base_css` errors: an `@layer` rule is `base_css_layer`, and `@import`
-  and `@namespace` are `base_css_unsupported_at_rule`. Each names the rule
-  and its line and removes nothing: a layer ships as written, as a
-  sublayer of `fuz.base` (layer blocks were tree-shaken, layer statements
-  dropped), and the other two ship where they were dropped silently.
-  Top-level `@layer fuz.base` and `@layer fuz.preferences` blocks are
-  unwrapped as `style.css` uses them. A `base_css` the parser rejects, or a
-  callback that doesn't return a string, fails with an error naming
-  `base_css` (was the CSS parser's bare error).
+- New errors, which fail a CI build (where `on_error` defaults to
+  `'throw'`):
+  - `undefined_theme_variables`: emitted base styles reference, with no
+    fallback, a default variable that `variables` (`null`, `[]`, or a
+    partial set) leaves undefined. Names declared in the same rule or a
+    top-level `:root`/`:host`/`html`/`body`/`*` rule, and names in
+    `exclude_variables`, are skipped. Define them, set `base_css: null` for
+    utility-only mode, or pair with a separately imported `theme.css`
+    through `exclude_variables: default_variables.map((v) => v.name)`.
+    It replaces the `theme_variables_disabled` warning, which covered only
+    `variables: null`.
+  - `uncontained_theme_value`: a `variables` or `theme` value that could
+    escape its declaration, or is blank, is left out (a theme's keeps the
+    value beneath it), as is a variable whose name isn't a plain
+    identifier. `variables` values were written into the stylesheet as is.
+  - `base_css_layer` for an `@layer` rule in `base_css`, and
+    `base_css_unsupported_at_rule` for `@import` and `@namespace`. Each
+    names the rule and its line, and the CSS ships as written (a layer as
+    a sublayer of `fuz.base`). Top-level `@layer fuz.base` and
+    `@layer fuz.preferences` blocks are unwrapped as `style.css` uses them.
+- A `base_css` the parser rejects, or a callback that doesn't return a
+  string, fails with an error naming `base_css` (was the CSS parser's bare
+  error).
 - `style_rule_parser.ts`: `resolve_base_css_option` is removed;
   `parse_style_css(css)` drops its `content_hash` parameter and
   `StyleRuleIndex` trades `content_hash` for `diagnostics`;
@@ -40,26 +43,24 @@ Breaking:
   and `untargetable`. `load_style_rule_index` and `load_default_style_css`
   drop the `style_css_path` parameter.
 - `variable_graph.ts`: `build_variable_graph(variables)` drops its
-  `content_hash` parameter and `VariableDependencyGraph` its
-  `content_hash` field and gains `diagnostics`;
-  `resolve_variables_transitive` takes the excluded names and reports the
-  ones it reached in `ResolveVariablesResult.excluded`;
-  `generate_theme_css` loses its specificity parameter.
-- `generate_css` and `resolve_css` lose `theme_specificity`;
-  `CssResolutionResult` gains `preferences_css`, and `generate_bundled_css`
-  takes `theme_overlay_css`. `generate_css`'s `detected_css_variables`
-  takes the source's `var()` names unfiltered and keeps the ones the theme
-  defines (callers filtered them).
+  `content_hash` parameter and `VariableDependencyGraph` trades its
+  `content_hash` field for `diagnostics`; `resolve_variables_transitive`
+  takes the excluded names and reports the ones it reached in
+  `ResolveVariablesResult.excluded`; `build_variable_graph_from_options`
+  takes a theme, applied by the new `apply_theme_variables`.
+- The `theme_specificity` option is removed, along with the specificity
+  parameter of `generate_css`, `resolve_css`, and `generate_theme_css` -
+  layer order does that job. `CssResolutionResult` gains
+  `preferences_css`, `generate_bundled_css` takes `theme_overlay_css`, and
+  `generate_css` takes `theme` and filters `detected_css_variables` itself
+  (pass the source's `var()` names unfiltered).
 - `class_variable_index.ts` is removed: the variables generated classes
   reference come from the CSS they generate, which covers composite and
   literal classes too. `BundledCssResources` and `resolve_css`'s options
-  lose `class_variable_index`, and `create_bundled_resources` its
-  `class_definitions`.
-- `splice_css_at_placeholder` moves from `vite_plugin_fuz_css.ts` to the
-  new `css_placeholder_splice.ts`, with `splice_css_into_asset`,
-  `FUZ_CSS_PLACEHOLDER`, `FUZ_CSS_PLACEHOLDER_RULE`,
-  `to_hashed_css_placeholder`, and `parse_css_placeholder_hash`;
-  `vite_plugin_fuz_css.ts` gains `to_extraction_id`.
+  lose `class_variable_index`, and `create_bundled_resources` trades
+  `class_definitions` for `theme`.
+- `splice_css_at_placeholder` moves from `vite_plugin_fuz_css.ts` to
+  `css_placeholder_splice.ts`.
 - `css_variable_utils.ts` gains `extract_required_css_variables`,
   `extract_declared_css_variables`, and `strip_css_comments`, and loses
   `has_css_variables`.
@@ -83,11 +84,12 @@ New:
 - `build.cssCodeSplit: false` and `build.lib` builds that import
   `virtual:fuz.css` are supported; they failed with "no CSS asset exists".
 - Custom `base_css` is any CSS the parser accepts, placed in `fuz.base`,
-  what a callback appends included. Top-level style rules and top-level
-  `@media`, `@supports`, and `@container` rules are tree-shaken by the
-  elements and classes they target, nested groups counted, and every other
-  at-rule ships as written: `@keyframes`, `@property`, `@scope`, `@page`,
-  and the rest were dropped, as was a group nested in another.
+  callback additions included. Top-level style rules and `@media`,
+  `@supports`, and `@container` groups, nested groups included, are
+  tree-shaken by the elements and classes they target; every other at-rule
+  ships as written except a top-level `@charset`. `@keyframes`,
+  `@property`, `@scope`, `@page`, and `@layer` statements were dropped, and
+  so was a group holding only a nested group.
 
 Fixes:
 
@@ -98,19 +100,24 @@ Fixes:
 - In dev, CSS that changes while a page is still loading (a dependency or
   a file outside the pre-scan extracted for the first time) reaches that
   page without a reload.
+- In dev, an edit that fails the render under `on_error: 'throw'` surfaces
+  on the next request as Vite's error, instead of the last good CSS being
+  served as if nothing changed.
 - Each build environment's CSS comes from the modules in its own graph: a
   client build no longer carries the classes of SSR-only modules (or the
   reverse), and a watch rebuild drops the classes of a file that was
   deleted or is no longer imported.
-- A diagnostic is logged once while it persists, rather than on every
-  re-render - the dev server repeated every warning in the project on each
-  edit.
+- A diagnostic is logged once while it persists, not on every re-render.
 - Base rules that detection can't match always ship. Bundled output
   dropped a rule naming no element or class (`::selection`, `[hidden]`)
   and a conditional group of such rules, including a `:root` block in any
   media query but `prefers-reduced-motion`. A rule also always ships when
-  one selector in its list is unmatchable (`button, [role='button']`) or
-  has an escaped or non-ASCII name (`.md\:flex`).
+  one selector in its list is unmatchable (`button, [role='button']`), can
+  match through a branch naming nothing (`:is(input, [contenteditable])`),
+  or has an escaped or non-ASCII name (`.md\:flex`). The `::placeholder`
+  and `::file-selector-button` styles ship with `input`/`textarea`.
+- Names inside `:not()` no longer decide whether a base rule ships (using
+  `.unstyled` anywhere shipped every `:not(.unstyled)` rule).
 - Base selectors are read from the parsed selector tree, so a name inside
   an attribute selector no longer counts as an element or class
   (`[aria-label="Close dialog"]` shipped only with `<dialog>`,
@@ -121,10 +128,6 @@ Fixes:
 - `exclude_variables` holds against dependencies: an excluded variable that
   a shipped variable depends on stays out, with a warning, along with the
   variables only it needs.
-- A `variables` or `theme` value that would escape its declaration (or is
-  blank) is left out of the generated CSS with the error
-  `uncontained_theme_value`, matching what `render_theme_style` drops; it
-  was written into the stylesheet as is.
 - A brace or semicolon inside a comment, string, or `url()` ahead of
   `virtual:fuz.css`'s position in an unminified build no longer swallows
   the generated CSS.

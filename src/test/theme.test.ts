@@ -199,6 +199,28 @@ describe('compose_themes', () => {
 		assert.strictEqual(compose_themes(base), base);
 	});
 
+	test('an overlay variable keeps its summary under a stanced base', () => {
+		const composed = compose_themes(
+			{ ...base, scheme: 'dark' },
+			{
+				name: 'o',
+				variables: [{ name: 'chroma_scale', light: '0.5', dark: '0.6', summary: 'eased' }]
+			}
+		);
+		const v = composed.variables.find((v) => v.name === 'chroma_scale');
+		// the stance slot is picked, single-slot, with the summary carried
+		assert.deepEqual(v, { name: 'chroma_scale', light: '0.6', summary: 'eased' });
+	});
+
+	test("the base's summary carries through, the overlay's doesn't", () => {
+		const composed = compose_themes(
+			{ ...base, summary: 'the base' },
+			{ ...overlay, summary: 'the overlay' }
+		);
+		assert.strictEqual(composed.summary, 'the base');
+		assert.notProperty(compose_themes(base, overlay), 'summary');
+	});
+
 	test('flatten + last-wins: overlay variables replace same-named ones wholesale', () => {
 		const composed = compose_themes(base, overlay);
 		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');

@@ -320,6 +320,33 @@ describe('vite_plugin_fuz_css pre-scanned files on disk', { timeout: POLLING_TES
 		);
 	});
 
+	test('an edit that fails the render under on_error: throw reaches the next request', async () => {
+		// the debounced update can't throw from its timer, so it drops the
+		// served modules instead - the next request re-renders in load() and
+		// throws where Vite owns the error, rather than serving the last good CSS
+		await with_temp_root(
+			{ 'src/page.html': '<div class="p_md"></div>', 'src/hint.ts': 'export const a = 1;\n' },
+			async (server, root) => {
+				assert(await serves_class(server, 'p_md'));
+				await writeFile(join(root, 'src/hint.ts'), '// @fuz-classes not_a_real_fuz_class\n');
+				server.watcher.emit('change', join(root, 'src/hint.ts'));
+				const rejection = await wait_for(() =>
+					server.transformRequest('/__fuz.css').then(
+						() => false,
+						(error: unknown) => error
+					)
+				);
+				// the rejection names the hint, not the render's absence
+				assert(rejection instanceof Error, `rejects with an error: ${String(rejection)}`);
+				assert.include(rejection.message, 'not_a_real_fuz_class');
+			},
+			{
+				on_error: 'throw',
+				filter_file: (path) => path.endsWith('.html') || path.endsWith('.ts')
+			}
+		);
+	});
+
 	test('a file outside the pre-scanned set is left to transform', async () => {
 		await with_temp_root(
 			{ 'src/page.html': '<div class="p_md"></div>', 'extra/widgets.html': '<div></div>' },
