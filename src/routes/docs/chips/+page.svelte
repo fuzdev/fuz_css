@@ -88,5 +88,14 @@
 			<!-- svelte-ignore a11y_missing_attribute -->
 			<a class="chip palette_e">three</a>
 		</div>
+		<p>
+			Without a size context - a size composite, a <code>font_size_*</code> class, or a heading - a
+			chip keeps its element's own size, so <code>{'<small class="chip">'}</code> stays small:
+		</p>
+		<Code content={`<span class="chip">span.chip</span>\n<small class="chip">small.chip</small>`} />
+		<div class="row align-items:center gap_sm">
+			<span class="chip">span.chip</span>
+			<small class="chip">small.chip</small>
+		</div>
 	</TomeSection>
 </TomeContent>

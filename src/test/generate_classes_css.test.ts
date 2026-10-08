@@ -1126,7 +1126,7 @@ describe('generate_classes_css', () => {
 			}
 		);
 
-		test('chip uses var(--font_size, inherit)', () => {
+		test('chip falls back to revert-layer for font-size', () => {
 			const result = generate_classes_css({
 				class_names: ['chip'],
 				class_definitions: css_class_composites,
@@ -1134,7 +1134,7 @@ describe('generate_classes_css', () => {
 				css_properties: null
 			});
 
-			assert_css_contains(result.css, 'font-size: var(--font_size, inherit)');
+			assert_css_contains(result.css, 'font-size: var(--font_size, revert-layer)');
 		});
 	});
 

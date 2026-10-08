@@ -302,7 +302,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		ruleset: `
 			.chip {
 				font-weight: 500;
-				font-size: var(--font_size, inherit);
+				font-size: var(--font_size, revert-layer); /* without a size context, the element's base size wins */
 				padding-left: var(--chip_padding_x, var(--space_xs));
 				padding-right: var(--chip_padding_x, var(--space_xs));
 				background-color: var(--fg_10);
