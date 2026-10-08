@@ -1,5 +1,13 @@
 # @fuzdev/fuz_css
 
+## 0.65.1
+
+### Patch Changes
+
+- fix: a `@fuz-classes` hint or `additional_classes` entry naming a class only base styles define (like `selected`, `palette_a`, or a class in a custom `base_css`) no longer errors when base styles are bundled, since the hint ships the rules that target it ([f9b194b](https://github.com/fuzdev/fuz_css/commit/f9b194b))
+- fix: a `chip` keeps its element's own font size (`small`, `sub`, `sup`, `legend`) when no size composite, `font_size_*` class, or heading sets a size context, instead of inheriting its parent's ([f2c25c9](https://github.com/fuzdev/fuz_css/commit/f2c25c9))
+- fix: `button.unstyled` inherits its font (family, size, and line height) like `input`, `textarea`, and `select` do, instead of the browser's button font ([a5fde51](https://github.com/fuzdev/fuz_css/commit/a5fde51))
+
 ## 0.65.0
 
 ### Minor Changes
