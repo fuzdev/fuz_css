@@ -1,5 +1,402 @@
 # @fuzdev/fuz_css
 
+## 0.65.0
+
+### Minor Changes
+
+- feat: rework base styles - cascade layers, interaction states, surface variables, stop-60 labels ([4cea28a](https://github.com/fuzdev/fuz_css/commit/4cea28a))
+
+  Breaking:
+
+  - Shipped CSS is layered: `style.css` and the default variables in
+    `fuz.base` < OS preference mappings in `fuz.preferences` < themes in
+    `fuz.theme` < generated utilities in `fuz.utilities`. Unlayered styles
+    beat all of it, utility classes included, except `[hidden]` and the
+    `prefers-reduced-motion` duration reset, now `!important` in
+    `fuz.preferences` so a theme or `:root` rule can't re-enable motion; set
+    a duration on the element that needs one.
+  - `body` reads `--font_family` (default `var(--font_family_sans)`) instead
+    of `--font_family_sans`; set `--font_family` for a serif body. `body`
+    also declares `font-weight: var(--font_weight)` and headings
+    `letter-spacing: var(--heading_letter_spacing)`, so an ancestor's
+    `font-weight` or `letter-spacing` no longer inherits into them.
+  - Buttons read `--button_border_style` (default `var(--border_style)`) and
+    `--button_border_style_active` while pressed, and disabled buttons set
+    `--button_border_style: solid dashed`. A contextual `--border_style` on
+    an ancestor no longer reaches buttons - set the button knobs there too.
+  - Colored labels move to stop 60, the text-safe stop links use, so they
+    meet AA at rest: `.palette_X` buttons use `palette_X_60` for the label,
+    fill, border, and outline (was stop 50, fill 40), `.chip.palette_X`
+    labels use `palette_X_60` (and set `--text_color`, so nested code
+    inherits it), and `label.selected` uses `--accent_60`.
+  - Selected buttons use `--text_00` for inverse text (was `--text_05`) on a
+    `--shade_60` fill (was `--shade_50`); the border stays `--border_color`,
+    matching the fill only on `.palette_X` buttons.
+  - A focused button, input, textarea, or select takes `--outline_color` as
+    its border color (was `--color_a_50`), and hovering an input, textarea,
+    or select previews it (was `--border_color_20`; disabled ones no longer
+    react). A focused `.palette_X` button or an element with an `outline_*`
+    class keeps its own color - `outline_color_NN` now sets `--outline_color`
+    too, like `outline_X_NN`.
+  - `.plain` strips the fill, border, and shadow from unselected elements
+    only, so a `.plain.selected` button keeps the selected style (was a
+    transparent fill under the inverse text until hover).
+  - A selected link's focus and pressed outline keeps the default
+    `--outline_color` (`.selected` repointed it to `--border_color`).
+  - `section` bottom margin is a `--flow_margin` multiple (same default),
+    scaled by size composites; `.unstyled` opts out.
+  - The checkbox checkmark drops `position: relative` and the `--left`/`--top`
+    position hooks.
+  - `--button_shadow*` and `--pane_shadow` are declared defaults that name
+    their shadow color, so a `:root` `--shadow_color` no longer tints them,
+    nor does a shadow color class on a `.pane`; set the variable, or add a
+    shape class (`shadow_md`). `.panel` sets `box-shadow:
+var(--panel_shadow)` (default `none`), which resets the shadow of a
+    `.pane` or `button` it's combined with.
+  - New defaults change an unthemed page, each through a themable variable:
+    focus outlines sit `--outline_offset` (`1px`) out, `:root` sets
+    `scrollbar-color` from `--scrollbar_thumb_color` (`var(--shade_40)`) and
+    `--scrollbar_track_color` (transparent), inputs, textareas, and selects
+    set `caret-color` from `--caret_color` (`var(--accent_50)`), and
+    `dialog::backdrop` dims with `--backdrop_color` (`var(--darken_60)`; was
+    the browser's default).
+
+  New:
+
+  - `@media (prefers-contrast: more)` maps onto the curve knobs and steps
+    `--border_color` up to `--shade_50` in the `fuz.preferences` layer; theme
+    overrides beat it.
+
+- feat: dev-server prescan, content-hashed build CSS, and a stated `base_css` contract ([4cea28a](https://github.com/fuzdev/fuz_css/commit/4cea28a))
+
+  Breaking:
+
+  - `vite_plugin_fuz_css()` returns an array of plugin objects instead of
+    one. Passing it to `plugins` works as before; list it after any plugin
+    that rewrites CSS in its `transform` hook. The Vite plugin requires Vite
+    6 or later.
+  - New errors, which fail a CI build (where `on_error` defaults to
+    `'throw'`):
+    - `undefined_theme_variables`: emitted base styles reference, with no
+      fallback, a default variable that `variables` (`null`, `[]`, or a
+      partial set) leaves undefined. Names declared in the same rule or a
+      top-level `:root`/`:host`/`html`/`body`/`*` rule, and names in
+      `exclude_variables`, are skipped. Define them, set `base_css: null` for
+      utility-only mode, or pair with a separately imported `theme.css`
+      through `exclude_variables: default_variables.map((v) => v.name)`.
+      It replaces the `theme_variables_disabled` warning, which covered only
+      `variables: null`.
+    - `uncontained_theme_value`: a `variables` or `theme` value that could
+      escape its declaration, or is blank, is left out (a theme's keeps the
+      value beneath it), as is a variable whose name isn't a plain
+      identifier. `variables` values were written into the stylesheet as is.
+    - `base_css_layer` for an `@layer` rule in `base_css`, and
+      `base_css_unsupported_at_rule` for `@import` and `@namespace`. Each
+      names the rule and its line, and the CSS ships as written (a layer as
+      a sublayer of `fuz.base`). Top-level `@layer fuz.base` and
+      `@layer fuz.preferences` blocks are unwrapped as `style.css` uses them.
+  - A `base_css` the parser rejects, or a callback that doesn't return a
+    string, fails with an error naming `base_css` (was the CSS parser's bare
+    error).
+  - `style_rule_parser.ts`: `resolve_base_css_option` is removed;
+    `parse_style_css(css)` drops its `content_hash` parameter and
+    `StyleRuleIndex` trades `content_hash` for `diagnostics`;
+    `generate_base_css` → `generate_base_css_by_layer`, returning one string
+    per `RuleLayer`; `StyleRuleBase` gains the required `layer`,
+    `variables_required`, and `variables_defined`; `CoreReason` loses
+    `media_query` and `font_face` and gains `conditional_core`, `at_rule`,
+    and `untargetable`. `load_style_rule_index` and `load_default_style_css`
+    drop the `style_css_path` parameter.
+  - `variable_graph.ts`: `build_variable_graph(variables)` drops its
+    `content_hash` parameter and `VariableDependencyGraph` trades its
+    `content_hash` field for `diagnostics`; `resolve_variables_transitive`
+    takes the excluded names and reports the ones it reached in
+    `ResolveVariablesResult.excluded`; `build_variable_graph_from_options`
+    takes a theme, applied by the new `apply_theme_variables`.
+  - The `theme_specificity` option is removed, along with the specificity
+    parameter of `generate_css`, `resolve_css`, and `generate_theme_css` -
+    layer order does that job. `CssResolutionResult` gains
+    `preferences_css`, `generate_bundled_css` takes `theme_overlay_css`, and
+    `generate_css` takes `theme` and filters `detected_css_variables` itself
+    (pass the source's `var()` names unfiltered).
+  - `class_variable_index.ts` is removed: the variables generated classes
+    reference come from the CSS they generate, which covers composite and
+    literal classes too. `BundledCssResources` and `resolve_css`'s options
+    lose `class_variable_index`, and `create_bundled_resources` trades
+    `class_definitions` for `theme`.
+  - `splice_css_at_placeholder` moves from `vite_plugin_fuz_css.ts` to
+    `css_placeholder_splice.ts`.
+  - `css_variable_utils.ts` gains `extract_required_css_variables`,
+    `extract_declared_css_variables`, and `strip_css_comments`, and loses
+    `has_css_variables`.
+  - Removed as unused: `extract_css_comment` (`css_ruleset_parser.ts`),
+    `format_dimension_value`, `CSS_DIRECTIONS`, and `CssDirection`
+    (`css_class_generators.ts`), and `has_variable` (`variable_graph.ts`);
+    `resolve_variables_option` is no longer exported.
+  - `FileFilter` takes the project root as a second argument
+    (`(path, root) => boolean`); a one-argument filter still works.
+
+  New:
+
+  - The Vite plugin pre-scans sources at dev-server startup so the first
+    page load has complete utility CSS. New `prescan` option: `true`
+    (default, `src` under the Vite root), `false`, or an array of
+    directories. The Vite root's `index.html` is scanned too, so its classes
+    are styled in dev as they are in build, and edits to pre-scanned files
+    are picked up whether or not a module imports them.
+  - The built stylesheet's filename hash covers the generated CSS, so a
+    change in the classes, elements, or variables used renames it (and the
+    chunks that load it) instead of shipping different CSS under a cached
+    filename.
+  - `build.cssCodeSplit: false` and `build.lib` builds that import
+    `virtual:fuz.css` are supported; they failed with "no CSS asset exists".
+  - Custom `base_css` is any CSS the parser accepts, placed in `fuz.base`,
+    callback additions included. Top-level style rules and `@media`,
+    `@supports`, and `@container` groups, nested groups included, are
+    tree-shaken by the elements and classes they target; every other at-rule
+    ships as written except a top-level `@charset`. `@keyframes`,
+    `@property`, `@scope`, `@page`, and `@layer` statements were dropped, and
+    so was a group holding only a nested group.
+  - `cache_salt` option, folded into the extraction cache key - change it
+    when only an acorn plugin's options change.
+
+  Fixes:
+
+  - In dev, node_modules dependencies are extracted on the client path, not
+    only when SSR transforms them: a dependency served as its own files, and
+    a pre-bundled one through the sources its sourcemap lists, so classes
+    used only by a dependency are styled in a client-rendered app.
+  - In dev, CSS that changes while a page is still loading (a dependency or
+    a file outside the pre-scan extracted for the first time) reaches that
+    page without a reload.
+  - In dev, an edit that fails the render under `on_error: 'throw'` surfaces
+    on the next request as Vite's error, instead of the last good CSS being
+    served as if nothing changed.
+  - Each build environment's CSS comes from the modules in its own graph: a
+    client build no longer carries the classes of SSR-only modules (or the
+    reverse), and a watch rebuild drops the classes of a file that was
+    deleted or is no longer imported.
+  - A diagnostic is logged once while it persists, not on every re-render.
+  - Base rules that detection can't match always ship. Bundled output
+    dropped a rule naming no element or class (`::selection`, `[hidden]`)
+    and a conditional group of such rules, including a `:root` block in any
+    media query but `prefers-reduced-motion`. A rule also always ships when
+    one selector in its list is unmatchable (`button, [role='button']`), can
+    match through a branch naming nothing (`:is(input, [contenteditable])`),
+    or has an escaped or non-ASCII name (`.md\:flex`). The `::placeholder`
+    and `::file-selector-button` styles ship with `input`/`textarea`.
+  - Names inside `:not()` no longer decide whether a base rule ships (using
+    `.unstyled` anywhere shipped every `:not(.unstyled)` rule).
+  - Base selectors are read from the parsed selector tree, so a name inside
+    an attribute selector no longer counts as an element or class
+    (`[aria-label="Close dialog"]` shipped only with `<dialog>`,
+    `a[href$=".pdf"]` only with a `.pdf` class), and `[href*="x"]` is no
+    longer taken for the universal selector.
+  - Every `var()` in base CSS that ships pulls in its theme variable at any
+    nesting depth, not only one level into a conditional group.
+  - `exclude_variables` holds against dependencies: an excluded variable that
+    a shipped variable depends on stays out, with a warning, along with the
+    variables only it needs.
+  - A brace or semicolon inside a comment, string, or `url()` ahead of
+    `virtual:fuz.css`'s position in an unminified build no longer swallows
+    the generated CSS.
+  - The default `style.css` loads from a package path holding a space or a
+    Windows drive (the URL's encoded path was read as a file path).
+  - The default file filter judges test directories inside the project or
+    the dependency's package, so a project checked out under a `test/`
+    directory no longer has every file filtered out.
+  - The extraction cache key covers `acorn_plugins`, so adding or removing
+    one (`acorn-jsx`) re-extracts files cached without it; the cache version
+    bumps, so every file re-extracts once.
+
+- feat: derived OKLCH color system with semantic intents ([4cea28a](https://github.com/fuzdev/fuz_css/commit/4cea28a))
+
+  Breaking:
+
+  - `--color_X_NN` → `--palette_X_NN` (10 letters × 13 stops);
+    `ColorVariant`/`color_variants` → `PaletteVariant`/`palette_variants`.
+  - Class renames: `border_color_X_NN` → `border_X_NN`,
+    `outline_color_X_NN` → `outline_X_NN`, `shadow_color_X_NN` →
+    `shadow_X_NN`, `.color_a`-`.color_j` → `.palette_a`-`.palette_j`.
+    `.color_X_NN`, `bg_X_NN`, `border_color_NN`, and the semantic
+    `shadow_color_umbra`/`_highlight`/`_glow`/`_shroud` keep their names.
+  - Classes removed: `.fg_NN`/`.bg_NN` (use
+    `background-color:var(--fg_10)`; `bg_` is now the opaque prefix),
+    `.hue_a`-`.hue_j` and `--hue`, and every `_light`/`_dark` variable and
+    class.
+  - `--hue_a`…`--hue_j` are OKLCH angles (blue `250`, was `210`); replace
+    `hsl(var(--hue_x) …)` with `oklch(<l> <c> var(--hue_x))` or a stop.
+  - `--tint_hue`/`--tint_saturation` → `--hue_neutral` + `--neutral_chroma`.
+  - Default colors change: surfaces, text, borders, and the palette are
+    derived in OKLCH from the curve knobs instead of authored per stop in
+    HSL, so an unthemed page shifts.
+  - Shipped `color-mix()` calls (button fills, shadows, borders) interpolate
+    `in oklab` (was `in hsl`).
+  - The browser floor rises to Chrome and Edge 120 (was 111) and Firefox 118
+    (was 113) for `pow()`, with no fallback; Safari stays at 16.2 (16.4 for
+    responsive modifier classes, 16.5 for `dark:`/`light:` ones).
+  - `variables.ts` exports only `default_variables`; read a variable with
+    `default_variables.find((v) => v.name === 'space_md')`. In
+    `variable_data.ts`, `icon_sizes` → `ICON_SIZES`, keyed by variant with
+    unitless values (`ICON_SIZES.xs === 18`, was
+    `icon_sizes.icon_size_xs === '18px'`), and `Z_INDEX_MAX` is removed
+    (inline `2147483647`).
+
+  New:
+
+  - Curve knobs: `--chroma_scale`, `--palette_lightness_00/_100/_curve` (and
+    `shade_`/`text_`), `--palette_chroma_min/_max`, `--chroma_curve`, with
+    pinnable derived stops `--palette_lightness_NN`, `--palette_chroma_NN`,
+    `--chroma_shape_NN`.
+  - Intent knobs `--hue_accent`/`_positive`/`_negative`/`_caution`/`_info`,
+    each with a 13-stop scale (`--accent_00`…`--accent_100`), token classes
+    (`.positive_50`, `.bg_caution_10`), `--selection_color`,
+    `intent_variants`/`IntentVariant`, and `palette_glosses`/
+    `format_palette_gloss`. Base styles that read `--color_a_*` or
+    `--color_c_*` - links, focus, selection, `accent-color`, checked inputs,
+    range thumbs, `.selectable` and `.menuitem` selection, and disabled-active
+    feedback - read the accent or negative intent instead.
+  - Per-slot chroma multipliers `--palette_X_chroma_scale` and
+    `--<intent>_chroma_scale` (default `1`; brown `f` ships at `0.55`).
+  - `--border_color_lightness`/`--border_color_chroma` derive the
+    `border_color_*` alpha ramp through the neutral intent.
+  - Value tables in `variable_data.ts`: `FONT_SIZES`, `SPACE_SIZES`,
+    `BORDER_RADII`, `DISTANCES`, `LINE_HEIGHTS`, `DURATIONS`
+    (+ `duration_variants`), `SHADOW_GEOMETRY`, `SHADOW_ALPHAS`,
+    `OVERLAY_ALPHAS`.
+  - Design-time modules `ramps.ts`, `oklch.ts`, `wcag.ts`.
+
+- feat: rename the size composite classes to `sized_*` ([e9c6450](https://github.com/fuzdev/fuz_css/commit/e9c6450))
+
+  Breaking:
+
+  - The size composite classes take a `sized_` prefix, so they no longer
+    share names with the breakpoint modifiers and the size-suffixed tokens:
+    - `xs` → `sized_xs`
+    - `sm` → `sized_sm`
+    - `md` → `sized_md`
+    - `lg` → `sized_lg`
+    - `xl` → `sized_xl`
+  - The old names no longer resolve. To migrate, search class attributes,
+    `class:` directives, clsx/class arrays, and `@fuz-classes` hints for the
+    bare names and add the prefix (`md:sm` becomes `md:sized_sm`). An old name
+    in a `@fuz-classes` hint or `additional_classes` now errors. In markup, a
+    bare old name like `sm` is silently skipped and generates no CSS, while a
+    modified one like `md:sm` logs an unknown CSS property warning (`"md"`).
+    A plain search for `sm` also matches breakpoint modifiers (`sm:`) and
+    size-suffixed tokens (`gap_sm`), so check each hit.
+
+- feat: themes as validated knob-sets, with exemplars and a build-time `theme` option ([4cea28a](https://github.com/fuzdev/fuz_css/commit/4cea28a))
+
+  Breaking:
+
+  - `Theme` moves to `variable.ts` as a strict zod schema:
+    `import type {Theme} from '@fuzdev/fuz_css/variable.ts'` (was
+    `theme.ts`). `Theme` and `StyleVariable` reject unknown properties (a
+    misspelled slot is an error), and a theme's `name` must be non-empty.
+  - `RenderThemeStyleOptions.empty_default_theme` removed: a theme named
+    `base` renders its own variables like any other (it rendered nothing,
+    or the defaults with `empty_default_theme: false`). Render the defaults
+    as `theme.css` does with `render_theme_style({name: 'base', variables:
+default_variables}, {layer: 'fuz.base'})`.
+  - `theme.ts` drops `render_theme_variable`, and `render_theme_style`
+    trades `specificity` for `layer?: string | null` (default
+    `'fuz.theme'`). Summary comments render only with `comments: true` (the
+    light block always rendered them). With `id`, dark slots render for
+    `#id.dark` and `:root.dark #id` (was `#id#id.dark`), so a scoped theme
+    follows the page's scheme, and the id is escaped into the selector
+    (`escape_css_identifier`), so any string matches the element with that
+    `id` and none can end the rule.
+  - A style variable's `light`/`dark` must be a non-blank CSS value that
+    can't end its own declaration, and its `summary` must not close a
+    comment or hold `</style`. `parse_theme` and `validate_theme` reject a
+    value with a top-level `;`, braces, a `!`, a comment, an escape
+    or a quote outside a string, unbalanced quotes or brackets, `</style`,
+    or an unquoted `url()` holding what only a quoted one may - quote a URL
+    that needs those characters.
+  - `render_theme_style` drops what the schema rejects, and takes any JSON
+    value without throwing, for a theme that skipped the schema: a
+    `variables` that isn't an array, an entry that isn't an object, a name
+    that isn't a plain identifier (`[\w-]+`), and a slot or summary that
+    isn't a contained string are left out.
+  - The `default_variables` spaces, border radii, and shadow alphas are
+    `calc()` expressions over the new knobs `--space_scale`,
+    `--radius_scale`, and `--shadow_alpha_scale` (default `1`), the border
+    radii floored by `--border_radius_min` (default `0rem`), and every font
+    size over `--font_size_scale` (default `1`), with the sizes above `md`
+    (`--font_size_lg` to `--font_size_xl9`) also over `--type_scale_ratio`
+    (default `1.272`, also `TYPE_SCALE_RATIO` in `variable_data.ts`),
+    instead of literals. Computed values match the old ones (font sizes to
+    two decimal places of a rem). The `sized_lg`/`sized_xl` composites read the
+    font sizes, so they follow the ratio.
+  - `body` reads `--font_size_md` (was a fixed `1.6rem`), so
+    `--font_size_scale` moves body text.
+  - Buttons and form fields take their corner radius from
+    `--control_radius` (default `var(--border_radius_sm)`, was the
+    `--border_radius_sm` token directly), so a contextual
+    `--border_radius_sm` no longer reaches them; the per-element
+    `--border_radius` hook still does. Checkboxes keep `--border_radius_xs`.
+  - `default_themes` is base and ledger. Low/high contrast are
+    `contrast_modifiers`, composed over a theme with
+    `compose_themes(base, ...overlays)`.
+
+  New:
+
+  - `parse_theme(value)` (`variable.ts`) returns a theme-or-`null`, for
+    untrusted input.
+  - `Theme.scheme?: 'dual' | 'light' | 'dark'` (`ThemeScheme`). Author a
+    single-scheme theme single-slot and pass it through
+    `resolve_theme_stance` (`theme_stance.ts`), which fills `scheme_mirror`
+    (idempotent; recomputes a stale mirror); the renderer pins
+    `color-scheme`. `validate_theme` warns when a stanced theme's mirror is
+    missing or no longer matches the defaults.
+  - `Theme.summary?: string`, a sentence for theme pickers to show beside
+    the name (never rendered into CSS), leading with who the theme is for.
+    Every shipped theme except the contrast modifiers carries one, and
+    `compose_themes` keeps the base's.
+  - Themes under `themes/`, one export per module (`base_theme`,
+    `ledger_theme`, `zine_theme`, ...): ledger (registered), the exemplars
+    zine, pebble, parchment, phosphor (dark-only), guestbook, marquee
+    (dark-only), signage, and the contrast modifiers `low_contrast_theme`
+    and `high_contrast_theme`.
+  - Composition helpers: `compose_themes`, `overlay_style_variable` (the
+    slot merge it shares with the build-time overlay), `pick_stance_slot`,
+    and `to_theme_stance` in `theme.ts`; `scheme_stance_variables` and
+    `scheme_mirrors_equal` in `theme_stance.ts`.
+  - `css_containment.ts`: `css_value_is_contained`, `css_comment_is_contained`,
+    and `css_custom_property_name_is_contained`, the checks the schema and
+    the renderer share, and `escape_css_identifier`.
+  - Knobs `--font_weight`, `--heading_font_weight` (hook; setting it
+    flattens the heading ladder), `--heading_font_family`,
+    `--heading_letter_spacing` (headings read it, default `normal`),
+    `--background_image`, `--font_size_scale`, `--border_radius_min`,
+    `--control_radius`, and `--shade_chroma_00` (the page ground's chroma,
+    default `0`: the neutral's chroma shape is 0 at the ground, so
+    `--neutral_chroma` alone tints surfaces but never the page).
+  - `shadow_css.ts`: `render_shadow_css(shape, size, color, alpha)` builds one
+    `box-shadow` layer from the shadow tokens, for authoring
+    `--button_shadow`, `--pane_shadow`, and `--panel_shadow`; `ShadowShape`.
+  - `knobs.ts`: the typed knob catalog (`theme_knobs`, `theme_knob_by_name`,
+    `theme_knob_axes`, `theme_knob_hook_names`).
+  - Theme checks over one resolution core (`create_theme_resolver`,
+    `theme_resolver.ts`): `validate_theme(unknown)` (`theme_validate.ts`,
+    with `known_theme_variable_names`) lints the shape and warns when the
+    accent sits within `ACCENT_STATUS_HUE_SEPARATION` (20) degrees of a
+    status hue; `check_theme` (`theme_check.ts`) runs gamut, monotonicity, and
+    contrast gates at the `GATE_*` thresholds over the role variables the
+    default styles paint through (`theme_gate_role_names`), reporting what
+    it can't evaluate as `unchecked` - `ok` is true only when nothing fails
+    or is unchecked; `compile_theme` emits per-theme chroma caps at each
+    stop's resolved lightness.
+  - Generators take `theme`, baked into the output and tree-shaken:
+    `vite_plugin_fuz_css({theme: phosphor_theme})`. It renders into the
+    `fuz.theme.baked` sublayer (`FUZ_BAKED_THEME_LAYER`, with the layer
+    order in `FUZ_LAYER_ORDER_STATEMENT`), so fuz_ui's `ThemeRoot` still
+    wins at runtime. With `variables: null` the theme isn't emitted, and the
+    warning `theme_discarded` says so.
+  - `theme.ts` no longer imports `variables.ts`, so mounting a theme costs
+    ~1.3KB minified (was ~38KB).
+
 ## 0.64.0
 
 ### Minor Changes
@@ -19,6 +416,7 @@
 - fix: dev theme `var()` references left undefined in `virtual:fuz.css` ([5a794ba](https://github.com/fuzdev/fuz_css/commit/5a794ba))
 
   Two dev-only fixes:
+
   - Variable detection no longer depends on the bundled theme graph being loaded.
     The graph loads lazily on the first `load()`, but SvelteKit resolves (and thus
     transforms) route modules during SSR _before_ that first `load()` — so a theme
@@ -71,6 +469,7 @@
 - feat: `.xs`–`.xl` size composites classes ([#85](https://github.com/fuzdev/fuz_css/pull/85))
 - bump node@24.14 ([#85](https://github.com/fuzdev/fuz_css/pull/85))
 - share the CSS generation pipeline between the Gro generator and Vite plugin ([ab4e857](https://github.com/fuzdev/fuz_css/commit/ab4e857)) ([refactor](https://github.com/fuzdev/fuz_css/commit/refactor))
+
   - add `generate_css` (generate → resolve → bundle), called by both `gen_fuz_css` and `vite_plugin_fuz_css`
   - add `create_bundled_resources` and `extract_file_cached`, shared by both generators
   - fix the Vite transform resurrecting a file deleted during its in-flight cache read
@@ -155,6 +554,7 @@
 ### Minor Changes
 
 - refactor extraction pipeline APIs and diagnostics ([#80](https://github.com/fuzdev/fuz_css/pull/80))
+
   - replace positional parameters with `ExtractionData` object in `CssClasses.add()` and `save_cached_extraction()`
   - rename `GenerationDiagnostic.class_name` and `InterpreterDiagnostic.class_name` to `identifier`
   - deduplicate three identical `parse_fuz_*_comment` functions into `create_fuz_comment_parser` factory
@@ -194,11 +594,13 @@
 - simplify CSS variable detection with regex-based scanning ([#76](https://github.com/fuzdev/fuz_css/pull/76))
 
   **Breaking changes:**
+
   - remove `include_all_base_css` option - use `additional_elements: 'all'` instead
   - remove `include_all_variables` option - use `additional_variables: 'all'` instead
   - remove `@fuz-variables` comment support - variables are now detected automatically via regex
 
   **Improvements:**
+
   - CSS variables are now detected via simple regex scan of `var(--name` patterns in all source files
   - this catches usage in component props like `size="var(--icon_size_xs)"` that AST-based extraction missed
   - unknown variables (not in theme) are silently ignored
@@ -313,6 +715,7 @@
 ### Minor Changes
 
 - rename utility classes for consistency with CSS declarations ([#66](https://github.com/ryanatkn/moss/pull/66))
+
   - rename `flex_wrap_wrap` from `flex_wrap`
   - rename `flex_wrap_wrap_reverse` from `flex_wrap_reverse`
   - rename `flex_wrap_nowrap` from `flex_nowrap`
@@ -698,6 +1101,7 @@
 ### Patch Changes
 
 - refactor some variables ([#28](https://github.com/ryanatkn/moss/pull/28))
+
   - add `button_shadow`, `button_shadow_hover`, and `button_shadow_active`
 
 - soften xs and sm shadows ([d309880](https://github.com/ryanatkn/moss/commit/d309880))
@@ -796,6 +1200,7 @@
 
 - upstream Svelte-specific theme helpers ([#9](https://github.com/ryanatkn/moss/pull/9))
 - rename some variables ([#8](https://github.com/ryanatkn/moss/pull/8))
+
   - `button_fill` from `button_bg`
   - `button_fill_hover` from `button_bg_hover`
   - `button_fill_active` from `button_bg_active`
