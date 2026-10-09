@@ -106,8 +106,24 @@
 			everything derived from them. Selecting a theme applies it to this whole website and loads its
 			knobs into the editor below.
 		</p>
-		<!-- the picker shares a row with the preview and its controls, which wrap
-			below the picker on narrow screens -->
+		<!-- the controls get their own right-justified row above the picker and
+			preview, so they can reach left over the picker without forcing a wrap -->
+		<div class="row flex-wrap:wrap justify-content:flex-end align-items:flex-start gap_lg mb_lg">
+			<div>
+				<div class="title text-align:center">Contrast</div>
+				<ContrastInput
+					modifiers={editor.contrast_modifiers}
+					selected={editor.contrast_modifier}
+					select={(modifier) => (editor.contrast_modifier = modifier)}
+				/>
+			</div>
+			<div>
+				<div class="title text-align:center">Color scheme</div>
+				<ColorSchemeInput />
+			</div>
+		</div>
+		<!-- the picker shares a row with the preview, which wraps below it on
+			narrow screens -->
 		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
 			<div class="width_atmost_xs flex:1">
 				<ThemeInput
@@ -123,20 +139,6 @@
 				>
 					{#snippet link()}<TomeLink slug="colors" class="">a link</TomeLink>{/snippet}
 				</ThemePreview>
-				<div class="row flex-wrap:wrap align-items:flex-start gap_lg mt_lg">
-					<div>
-						<div class="title text-align:center">Contrast</div>
-						<ContrastInput
-							modifiers={editor.contrast_modifiers}
-							selected={editor.contrast_modifier}
-							select={(modifier) => (editor.contrast_modifier = modifier)}
-						/>
-					</div>
-					<div>
-						<div class="title text-align:center">Color scheme</div>
-						<ColorSchemeInput />
-					</div>
-				</div>
 			</div>
 		</div>
 		<p>
