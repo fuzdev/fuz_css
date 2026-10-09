@@ -535,7 +535,9 @@ typography, borders, shading, shadows, layout. See
   (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
   low/high contrast are modifiers composed over any theme via
   `compose_themes`, not themes themselves - users see one flat "themes"
-  list
+  list. A shipped theme's own ground (`shade_lightness_00`) must sit
+  between its low and high compositions in each scheme it renders, so
+  neither modifier moves it the wrong way (`themes.test.ts` holds this)
 - `src/lib/themes/` - One module per theme. Registered: base and ledger
   (the plain working theme for apps and tools - cool, visibly compact, eased
   chroma, one sans family).

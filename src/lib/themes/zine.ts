@@ -9,7 +9,9 @@ import type { Theme } from '../variable.ts';
  * doesn't ease. The palette keeps its full chroma, the spot color run over
  * the black plate.
  *
- * Dual-scheme: the dark appearance is the same page run as a negative.
+ * Dual-scheme: the dark appearance is the same page run as a negative, on a
+ * near-black ground that stays inside the contrast modifiers' range, so high
+ * contrast still deepens it and panels keep a visible fill.
  * Built from levers only - the palette letters keep their default hues.
  */
 export const zine_theme: Theme = {
@@ -19,8 +21,10 @@ export const zine_theme: Theme = {
 	variables: [
 		// toner has no cast - the neutral drops its tint entirely
 		{ name: 'neutral_chroma', light: '0' },
-		// paper white and toner black, with the text ramp bent to the same ends
-		{ name: 'shade_lightness_00', light: '1', dark: '0' },
+		// paper white and a near-black negative, with the text ramp bent to the
+		// same ends - pure black would sit past high contrast's ground and
+		// collapse the surface steps
+		{ name: 'shade_lightness_00', light: '1', dark: '0.15' },
 		{ name: 'text_lightness_curve', light: '0.5', dark: '0.35' },
 		// at an extreme ground the default sunken input fill has nowhere to go,
 		// so fields are bare ruled boxes on the page
