@@ -12,19 +12,23 @@
 		select,
 		...rest
 	}: SvelteHTMLElements['menu'] & {
-		/** The composable contrast modifiers, usually `contrast_modifiers`. */
+		/** The composable contrast modifiers ordered low to high, usually `contrast_modifiers`. */
 		modifiers: Array<Theme>;
 		/** The active modifier, or `null` for the theme's own contrast. */
 		selected: Theme | null;
 		select: (modifier: Theme | null) => void;
 	} = $props();
 
-	// `null` sits first as the theme's own contrast, so the row reads
-	// default → low → high left to right
-	const options: Array<{ modifier: Theme | null; label: string }> = $derived([
-		{ modifier: null, label: 'default' },
-		...modifiers.map((modifier) => ({ modifier, label: modifier.name.replace(' contrast', '') }))
-	]);
+	// `null` is the theme's own contrast, placed between the modifiers (ordered
+	// low to high) so the row reads low → default → high left to right
+	const options: Array<{ modifier: Theme | null; label: string }> = $derived.by(() => {
+		const result: Array<{ modifier: Theme | null; label: string }> = modifiers.map((modifier) => ({
+			modifier,
+			label: modifier.name.replace(' contrast', '')
+		}));
+		result.splice(Math.ceil(result.length / 2), 0, { modifier: null, label: 'default' });
+		return result;
+	});
 </script>
 
 <!-- the same shape as fuz_ui's ColorSchemeInput: a horizontal radio group of

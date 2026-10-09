@@ -23,7 +23,7 @@
 
 <!-- a compact look at the picked theme: its summary over a sample of the
 	basic elements, which render under the theme because it styles the whole page -->
-<div class="theme-preview panel p_md">
+<div class="panel p_md">
 	<p aria-live="polite">
 		{#if edited_from}
 			<strong>unsaved edits</strong> to {edited_from.name}
@@ -60,11 +60,3 @@
 		</label>
 	</div>
 </div>
-
-<style>
-	.theme-preview {
-		/* the picker's partner: shares its row on wide screens, wraps below it on narrow */
-		flex: 1 1 var(--distance_sm);
-		min-width: 0;
-	}
-</style>

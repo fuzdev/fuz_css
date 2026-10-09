@@ -102,8 +102,8 @@
 			everything derived from them. Selecting a theme applies it to this whole website and loads its
 			knobs into the editor below.
 		</p>
-		<!-- the picker and a preview of the picked theme share a row, the
-			preview wrapping below the picker on narrow screens -->
+		<!-- the picker shares a row with the preview and its controls, which wrap
+			below the picker on narrow screens -->
 		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
 			<div class="width_atmost_xs flex:1">
 				<ThemeInput
@@ -112,25 +112,27 @@
 					select={select_theme}
 				/>
 			</div>
-			<ThemePreview
-				theme={editor.picked_theme}
-				edited_from={editor.dirty ? editor.base_theme : null}
-			>
-				{#snippet link()}<TomeLink slug="colors">a link</TomeLink>{/snippet}
-			</ThemePreview>
-		</div>
-		<div class="row flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
-			<div>
-				<div class="title">Contrast</div>
-				<ContrastInput
-					modifiers={editor.contrast_modifiers}
-					selected={editor.contrast_modifier}
-					select={(modifier) => (editor.contrast_modifier = modifier)}
-				/>
-			</div>
-			<div>
-				<div class="title">Color scheme</div>
-				<ColorSchemeInput />
+			<div class="theme-preview-column">
+				<ThemePreview
+					theme={editor.picked_theme}
+					edited_from={editor.dirty ? editor.base_theme : null}
+				>
+					{#snippet link()}<TomeLink slug="colors" class="">a link</TomeLink>{/snippet}
+				</ThemePreview>
+				<div class="row flex-wrap:wrap align-items:flex-start gap_lg mt_lg">
+					<div>
+						<div class="title text-align:center">Contrast</div>
+						<ContrastInput
+							modifiers={editor.contrast_modifiers}
+							selected={editor.contrast_modifier}
+							select={(modifier) => (editor.contrast_modifier = modifier)}
+						/>
+					</div>
+					<div>
+						<div class="title text-align:center">Color scheme</div>
+						<ColorSchemeInput />
+					</div>
+				</div>
 			</div>
 		</div>
 		<p>
@@ -267,3 +269,11 @@ test('my theme clears the accessibility gates', () => {
 		</p>
 	</TomeSection>
 </TomeContent>
+
+<style>
+	.theme-preview-column {
+		/* the picker's partner: shares its row on wide screens, wraps below it on narrow */
+		flex: 1 1 var(--distance_sm);
+		min-width: 0;
+	}
+</style>

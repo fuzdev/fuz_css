@@ -26,13 +26,13 @@ const buttons = (container: HTMLElement): Array<HTMLButtonElement> =>
 	Array.from(container.querySelectorAll('button'));
 
 describe('ContrastInput', () => {
-	test('renders one button per modifier plus the default', () => {
+	test('renders one button per modifier with the default between them', () => {
 		const container = mount_input();
 		const labels = buttons(container).map((b) => b.textContent?.trim());
-		assert.deepEqual(labels, ['default', 'low', 'high']);
+		assert.deepEqual(labels, ['low', 'default', 'high']);
 	});
 
-	test('the default sits first and is checked when nothing is selected', () => {
+	test('the default is checked when nothing is selected', () => {
 		const container = mount_input();
 		const checked = buttons(container).filter((b) => b.getAttribute('aria-checked') === 'true');
 		assert.strictEqual(checked.length, 1);
@@ -49,7 +49,7 @@ describe('ContrastInput', () => {
 	test('clicking selects the modifier, and the default selects null', () => {
 		const selections: Array<Theme | null> = [];
 		const container = mount_input({ select: (m) => selections.push(m) });
-		const [default_button, low_button] = buttons(container);
+		const [low_button, default_button] = buttons(container);
 		low_button!.click();
 		flushSync();
 		default_button!.click();
