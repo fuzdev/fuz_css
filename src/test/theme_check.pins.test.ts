@@ -7,6 +7,8 @@
 
 import { test, assert, describe } from 'vitest';
 
+import { oklch_to_srgb, type Oklch, type RgbUnit } from '@fuzdev/fuz_util/oklch.ts';
+
 import {
 	check_theme,
 	theme_gate_role_names,
@@ -22,7 +24,6 @@ import { base_theme } from '$lib/themes/base.ts';
 import { zine_theme } from '$lib/themes/zine.ts';
 import { default_variables } from '$lib/variables.ts';
 import { palette_stop_oklch, shade_stop_oklch, text_stop_oklch } from '$lib/ramps.ts';
-import { oklch_to_srgb, type Oklch, type RgbUnit } from '$lib/oklch.ts';
 import { wcag_contrast_ratio } from '$lib/wcag.ts';
 import type { ColorSchemeVariant } from '$lib/variable_data.ts';
 

@@ -116,7 +116,7 @@ combined and only used content is included. In utility-only mode, import
 - Color values are derived: curve knobs → ramp stops → color stops, computed
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
-  contrast gates in [oklch.ts](src/lib/oklch.ts)/[wcag.ts](src/lib/wcag.ts)
+  contrast gates on `@fuzdev/fuz_util/oklch.ts` and [wcag.ts](src/lib/wcag.ts)
 - [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
   a theme API: `validate_theme` ([theme_validate.ts](src/lib/theme_validate.ts))
   lints a theme's shape, `check_theme` runs the
@@ -499,9 +499,6 @@ typography, borders, shading, shadows, layout. See
   `variables.ts` adds the unit and any `calc()` wrapper
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
   constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
-- [oklch.ts](src/lib/oklch.ts) - OKLCH↔sRGB math and gamut search
-  (design-time + tests; never needed by the shipped CSS, though display
-  tooling like the docs swatches may import the conversions)
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
   `compose_themes` (flatten + last-wins fragment composition - the

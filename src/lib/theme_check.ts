@@ -15,6 +15,7 @@
  */
 
 import { clamp } from '@fuzdev/fuz_util/maths.ts';
+import { clamp_oklch, oklch_to_srgb, type RgbUnit } from '@fuzdev/fuz_util/oklch.ts';
 
 import { Theme, type StyleVariable } from './variable.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
@@ -39,7 +40,6 @@ import {
 	type ColorSchemeVariant,
 	type PaletteVariant
 } from './variable_data.ts';
-import { clamp_oklch, oklch_to_srgb, type RgbUnit } from './oklch.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
 import {
 	CSS_NUMBER_PATTERN,

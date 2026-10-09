@@ -21,6 +21,8 @@
  * @module
  */
 
+import { clamp_oklch, oklch_max_srgb_chroma, type Oklch } from '@fuzdev/fuz_util/oklch.ts';
+
 import {
 	palette_variants,
 	type IntentVariant,
@@ -28,7 +30,6 @@ import {
 	type ColorSchemeVariant,
 	type NumericScaleVariant
 } from './variable_data.ts';
-import { clamp_oklch, oklch_max_srgb_chroma, type Oklch } from './oklch.ts';
 
 // a stop variant's ramp position t in [0, 1]
 const ramp_stop_t = (stop: NumericScaleVariant): number => Number(stop) / 100;

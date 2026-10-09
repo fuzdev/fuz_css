@@ -6,9 +6,9 @@ import { flushSync } from 'svelte';
 import { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 import { rgb_to_hex_string } from '@fuzdev/fuz_util/colors.ts';
 import { clamp } from '@fuzdev/fuz_util/maths.ts';
+import { oklch_to_srgb, type Oklch } from '@fuzdev/fuz_util/oklch.ts';
 
 import { parse_resolved_color, type ResolvedColor } from '$routes/docs/resolved_color.svelte.ts';
-import { oklch_to_srgb, type Oklch } from '$lib/oklch.ts';
 import ResolvedColorHarness from './ResolvedColorHarness.svelte';
 import { create_mount_tracker } from './component_test_helpers.ts';
 

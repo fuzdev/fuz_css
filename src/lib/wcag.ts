@@ -1,14 +1,15 @@
 /**
  * WCAG 2.x relative luminance and contrast ratio.
  *
- * Design-time and test use only, like `oklch.ts` - these power the contrast
- * gates that assert readable default pairings (body text on surfaces, links,
- * focus outlines) across the derived palette.
+ * Design-time and test use only, like the OKLCH conversions from
+ * `@fuzdev/fuz_util/oklch.ts` - these power the contrast gates that assert
+ * readable default pairings (body text on surfaces, links, focus outlines)
+ * across the derived palette.
  *
  * @module
  */
 
-import { srgb_component_to_linear, type RgbUnit } from './oklch.ts';
+import { srgb_component_to_linear, type RgbUnit } from '@fuzdev/fuz_util/oklch.ts';
 
 /**
  * Computes WCAG 2.x relative luminance of a gamma-encoded sRGB color.

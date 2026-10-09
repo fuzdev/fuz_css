@@ -1,5 +1,6 @@
 import { test, assert, describe } from 'vitest';
 import { readFileSync } from 'node:fs';
+import { oklch_to_srgb } from '@fuzdev/fuz_util/oklch.ts';
 
 import {
 	check_theme,
@@ -27,7 +28,6 @@ import { guestbook_theme } from '$lib/themes/guestbook.ts';
 import { marquee_theme } from '$lib/themes/marquee.ts';
 import { shipped_base_themes } from './theme_test_helpers.ts';
 import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '$lib/ramps.ts';
-import { oklch_to_srgb } from '$lib/oklch.ts';
 import { wcag_contrast_ratio } from '$lib/wcag.ts';
 import { palette_variants, color_scheme_variants } from '$lib/variable_data.ts';
 
