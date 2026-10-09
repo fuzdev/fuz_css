@@ -110,7 +110,7 @@
 			preview, so they can reach left over the picker without forcing a wrap -->
 		<div class="row flex-wrap:wrap justify-content:flex-end align-items:flex-start gap_lg mb_lg">
 			<div>
-				<div class="title text-align:center">Contrast</div>
+				<div class="title text-align:center pb_xs3">Contrast</div>
 				<ContrastInput
 					modifiers={editor.contrast_modifiers}
 					selected={editor.contrast_modifier}
@@ -118,7 +118,7 @@
 				/>
 			</div>
 			<div>
-				<div class="title text-align:center">Color scheme</div>
+				<div class="title text-align:center pb_xs3">Color scheme</div>
 				<ColorSchemeInput />
 			</div>
 		</div>
@@ -126,6 +126,7 @@
 			narrow screens -->
 		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
 			<div class="width_atmost_xs flex:1">
+				<div class="title text-align:center pb_xs3">Theme</div>
 				<ThemeInput
 					themes={editor.picker_themes}
 					selected_theme={{ theme: editor.picked_theme }}
