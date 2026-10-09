@@ -1,0 +1,1 @@
+import{c as r}from"./D_yjRPiw.js";const n=r(t=>{const e=new MutationObserver(t);return e.observe(document.documentElement,{attributes:!0,attributeFilter:["class"]}),()=>e.disconnect()}),s=()=>typeof document>"u"?"light":(n(),document.documentElement.classList.contains("dark")?"dark":"light");export{s as r};
