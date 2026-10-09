@@ -1,5 +1,15 @@
 # @fuzdev/fuz_css
 
+## 0.66.0
+
+### Minor Changes
+
+- **breaking** refactor: the `oklch.ts` module moves to `@fuzdev/fuz_util/oklch.ts` — import `Oklch`, `RgbUnit`, `oklch_to_srgb`, `oklch_max_srgb_chroma`, and the rest from there; the `@fuzdev/fuz_util` peer dependency is now `>=0.72.0` ([b7f1deb](https://github.com/fuzdev/fuz_css/commit/b7f1deb))
+
+### Patch Changes
+
+- fix: zine's dark ground is near-black (`0.15`), not pure black, so high contrast deepens it and panels stay visible ([8fa1650](https://github.com/fuzdev/fuz_css/commit/8fa1650))
+
 ## 0.65.3
 
 ### Patch Changes
