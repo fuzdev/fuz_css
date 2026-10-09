@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.65.2
+
+### Patch Changes
+
+- fix: the `body` min-height is `100svh` (was `100vh`), so a short page no longer scrolls by the toolbar's height on mobile browsers ([f6dfce8](https://github.com/fuzdev/fuz_css/commit/f6dfce8))
+
 ## 0.65.1
 
 ### Patch Changes
