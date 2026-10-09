@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.65.3
+
+### Patch Changes
+
+- fix: bundled mode includes theme variables referenced by imported CSS files, including dependencies' - `filter_file_default` accepts `.css` files, scanned for `var()` references only ([b1246fe](https://github.com/fuzdev/fuz_css/commit/b1246fe))
+
 ## 0.65.2
 
 ### Patch Changes
