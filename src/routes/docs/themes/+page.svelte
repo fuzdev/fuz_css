@@ -11,6 +11,7 @@
 	import { signage_theme } from '$lib/themes/signage.ts';
 	import {
 		ThemeEditorState,
+		create_rooted_theme_editor,
 		type ThemeEditorSnapshotData
 	} from '$routes/theme_editor_state.svelte.ts';
 
@@ -32,7 +33,8 @@
 
 	// one editor per browser session, so a draft survives navigating to another
 	// page and back by link - the page component is recreated, and the
-	// snapshot below only covers history navigation
+	// snapshot below only covers history navigation; rooted, since the page
+	// instance that first creates it is destroyed by that navigation
 	let session_editor: ThemeEditorState | null = null;
 </script>
 
@@ -64,7 +66,9 @@
 	const theme_state = get_theme_state();
 
 	// the server renders a fresh editor per request; the browser keeps one
-	const editor = BROWSER ? (session_editor ??= create_editor()) : create_editor();
+	const editor = BROWSER
+		? (session_editor ??= create_rooted_theme_editor({ themes, contrast_modifiers }))
+		: create_editor();
 
 	// adopt whatever the page already applies - a theme persisted from an
 	// earlier visit, possibly a contrast composition - before the effect below

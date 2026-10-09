@@ -420,6 +420,21 @@ export class ThemeEditorState {
 }
 
 /**
+ * Creates a `ThemeEditorState` under its own effect root, for an editor that
+ * outlives the component creating it. Built during a component's init, the
+ * editor's deriveds would belong to that component and go inert once it's
+ * destroyed, so a later reader would see stale values. The root is never
+ * cleaned up - the editor lives as long as whatever holds it.
+ */
+export const create_rooted_theme_editor = (options: ThemeEditorStateOptions): ThemeEditorState => {
+	let editor: ThemeEditorState | null = null;
+	$effect.root(() => {
+		editor = new ThemeEditorState(options);
+	});
+	return editor!;
+};
+
+/**
  * The confirm-dialog message shown before a dirty draft is discarded by
  * loading `name` as the new base - shared by every picker that can trigger
  * the flatten-on-load, so the wording can't drift.
