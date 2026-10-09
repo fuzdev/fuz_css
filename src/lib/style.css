@@ -107,7 +107,7 @@ Notes:
 	}
 
 	body {
-		min-height: 100vh;
+		min-height: 100svh; /* the small viewport, so the floor never scrolls a short page under a mobile toolbar */
 		font-size: var(--font_size_md, 1.6rem); /* rem against `font-size: 62.5%`; the token follows `--font_size_scale` */
 		font-family: var(--font_family);
 		font-weight: var(--font_weight);
