@@ -4,4 +4,5 @@
 
 .build-fixture {
 	outline: var(--build_fixture_token) solid;
+	color: var(--palette_d_50);
 }

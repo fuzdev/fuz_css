@@ -4,7 +4,9 @@
  * Uses Vite's transform hook to extract CSS classes from source files
  * as they're processed, including node_modules dependencies. In bundled
  * mode (the default) it also resolves the base reset and theme variables,
- * emitting only the rules, elements, and variables the source actually uses.
+ * emitting only the rules, elements, and variables the source actually uses -
+ * including the `var(--*)` references of imported CSS files, like a
+ * dependency's stylesheet.
  * Generates CSS on-demand via virtual module with HMR support.
  *
  * In dev it eagerly pre-scans project sources at server startup so the first
@@ -800,8 +802,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 				await ingest_optimized_dep(file_id, code);
 				return null;
 			}
-			// Skip non-matching files
-			if (!filter_file(file_id, vite_root)) {
+			// Skip non-matching files, and the generated CSS itself - its
+			// variable references would keep every variable it once emitted
+			if (file_id.split('?', 1)[0] === RESOLVED_VIRTUAL_ID || !filter_file(file_id, vite_root)) {
 				return null;
 			}
 

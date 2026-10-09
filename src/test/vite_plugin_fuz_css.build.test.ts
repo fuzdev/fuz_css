@@ -380,6 +380,24 @@ describe('vite_plugin_fuz_css build output', () => {
 	});
 });
 
+describe('vite_plugin_fuz_css build variables', () => {
+	test("an imported stylesheet's variable references are included", async () => {
+		const result = await build_fixture({
+			plugin_options: {
+				filter_file: (path) =>
+					path.startsWith(fixture_root) && (path.endsWith('.ts') || path.endsWith('.css'))
+			}
+		});
+		assert.include(assert_single_css(result).source, '--palette_d_50:');
+		assert.deepEqual(result.errors, []);
+	});
+
+	test('a stylesheet the filter rejects contributes no variables', async () => {
+		const result = await build_fixture();
+		assert.notInclude(assert_single_css(result).source, '--palette_d_50:');
+	});
+});
+
 describe('vite_plugin_fuz_css build with other plugins', () => {
 	/** Collects each CSS asset a default-order `generateBundle` hook is shown. */
 	const create_css_reader = (seen: Array<string>, remove = false): Plugin => ({

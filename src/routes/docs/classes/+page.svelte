@@ -609,7 +609,8 @@ vite_plugin_fuz_css({
 			<li>a generated utility class uses it,</li>
 			<li>
 				your source references <code>var(--name)</code> directly, e.g. in a <code>style</code>
-				attribute or <code>&lt;style&gt;</code> block, or
+				attribute, a <code>&lt;style&gt;</code> block, or an imported CSS file (including a
+				dependency's stylesheet), or
 			</li>
 			<li>
 				it's force-included via

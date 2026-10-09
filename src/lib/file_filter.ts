@@ -48,8 +48,19 @@ export const to_filter_scope = (path: string, root: string): string => {
 };
 
 /**
+ * Whether a file is CSS, which is scanned for the `var(--*)` references it
+ * makes but has no classes or elements to extract.
+ *
+ * @param path - a file id or path
+ */
+export const is_css_file = (path: string): boolean => path.endsWith('.css');
+
+/**
  * Default file filter for CSS class extraction.
- * Includes .svelte, .html, .ts, .js, .tsx, .jsx files.
+ * Includes .svelte, .html, .ts, .js, .tsx, .jsx files, and .css files for
+ * their variable references (see `is_css_file`) - except a CSS id with a
+ * query, like the `Foo.svelte?svelte&type=style&lang.css` id of a Svelte
+ * component's styles, which its `.svelte` file already covers.
  * Excludes test files (.test.ts, .spec.ts) and generated files (.gen.ts).
  * Excludes files in test directories (`test/`, `tests/`, `__tests__/`,
  * `__mocks__/`), judged inside the project or the dependency's package (see
@@ -73,6 +84,7 @@ export const filter_file_default: FileFilter = (path, root) => {
 		ext === '.ts' ||
 		ext === '.js' ||
 		ext === '.tsx' ||
-		ext === '.jsx'
+		ext === '.jsx' ||
+		(ext === '.css' && !path.includes('?'))
 	);
 };

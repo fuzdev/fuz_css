@@ -193,6 +193,11 @@ skipped (they may belong to other CSS frameworks).
 `var(--name` patterns in source files. Only theme variables are included;
 unknown variables are silently ignored. This catches usage in component props
 like `size="var(--icon_size_xs)"` that AST-based extraction would miss.
+CSS files pass the default filter too, for their variable references only
+(no class or element extraction, no cache entry) - so a dependency's
+stylesheet, like a syntax theme reading palette variables, keeps them in
+bundled mode. The generators skip their own output: the Vite plugin its
+virtual module, the Gro generator any file opening with its banner.
 
 See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
 
@@ -449,8 +454,9 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   callback returning a non-string, throws from `create_bundled_resources`
   with an error naming `base_css`
 - `filter_file` - which files get extracted, called with the file id and
-  the project root (the default filter includes node_modules deps and
-  judges test directories inside the project or the dependency's package)
+  the project root (the default filter includes node_modules deps and CSS
+  files without a query, and judges test directories inside the project or
+  the dependency's package)
 - `cache_salt` - folded into the extraction cache key, for a change to an
   acorn plugin's options (the key already covers content and the plugins'
   source)
@@ -595,7 +601,8 @@ typography, borders, shading, shadows, layout. See
 - [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class
   extraction from Svelte/TS/JSX files
 - [file_filter.ts](src/lib/file_filter.ts) - `FileFilter` type, the
-  default filter (`filter_file_default`) for extractable files, and
+  default filter (`filter_file_default`) for extractable files,
+  `is_css_file` for the files scanned only for variables, and
   `to_filter_scope`, the root- or package-relative part it judges
 - [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
   `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping

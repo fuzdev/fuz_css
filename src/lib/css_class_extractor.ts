@@ -581,6 +581,10 @@ export const extract_css_classes_with_locations = (
 		return extract_from_svelte(source, file);
 	} else if (ext === '.ts' || ext === '.js' || ext === '.tsx' || ext === '.jsx') {
 		return extract_from_ts(source, file, acorn_plugins);
+	} else if (ext === '.css') {
+		// a stylesheet has no classes or elements to extract - its `var(--*)`
+		// references are detected by the variable scan every file gets
+		return empty_extraction_result([]);
 	}
 
 	// Default to Svelte-style extraction (handles both)

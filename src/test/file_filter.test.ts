@@ -1,6 +1,6 @@
 import { test, assert, describe } from 'vitest';
 
-import { filter_file_default, to_filter_scope } from '$lib/file_filter.ts';
+import { filter_file_default, is_css_file, to_filter_scope } from '$lib/file_filter.ts';
 
 describe('filter_file_default', () => {
 	describe('includes valid extensions', () => {
@@ -27,11 +27,23 @@ describe('filter_file_default', () => {
 		test('includes .jsx files', () => {
 			assert.isTrue(filter_file_default('src/components/Component.jsx', ''));
 		});
+
+		test('includes .css files', () => {
+			assert.isTrue(filter_file_default('src/styles/main.css', ''));
+		});
+
+		test('includes .css files from dependencies', () => {
+			assert.isTrue(filter_file_default('/p/node_modules/@scope/pkg/theme.css', '/p'));
+		});
 	});
 
 	describe('excludes invalid extensions', () => {
-		test('excludes .css files', () => {
-			assert.isFalse(filter_file_default('src/styles/main.css', ''));
+		test('excludes Svelte component style ids', () => {
+			assert.isFalse(filter_file_default('src/Foo.svelte?svelte&type=style&lang.css', ''));
+		});
+
+		test('excludes .css ids with a query', () => {
+			assert.isFalse(filter_file_default('src/styles/main.css?inline&lang.css', ''));
 		});
 
 		test('excludes .json files', () => {
@@ -229,5 +241,17 @@ describe('to_filter_scope', () => {
 			to_filter_scope('/r/node_modules/a/node_modules/@s/b/lib/x.js', '/r'),
 			'lib/x.js'
 		);
+	});
+});
+
+describe('is_css_file', () => {
+	test('matches .css paths', () => {
+		assert.isTrue(is_css_file('/p/node_modules/pkg/theme.css'));
+		assert.isTrue(is_css_file('src/Foo.svelte?svelte&type=style&lang.css'));
+	});
+
+	test('rejects other files', () => {
+		assert.isFalse(is_css_file('src/lib/theme.ts'));
+		assert.isFalse(is_css_file('src/styles/main.scss'));
 	});
 });
