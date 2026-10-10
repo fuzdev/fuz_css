@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.66.1
+
+### Patch Changes
+
+- fix: keep the Vite dev server from watching the extraction cache ([8980e72](https://github.com/fuzdev/fuz_css/commit/8980e72))
+
 ## 0.66.0
 
 ### Minor Changes
