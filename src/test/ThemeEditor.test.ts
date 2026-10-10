@@ -5,10 +5,10 @@ import { describe, test, assert, vi, afterEach } from 'vitest';
 import { flushSync } from 'svelte';
 import { ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-import { ThemeEditorState } from '$routes/theme_editor_state.svelte.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { marquee_theme } from '$lib/themes/marquee.ts';
-import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER } from '$lib/ramps.ts';
+import { ThemeEditorState } from '#routes/theme_editor_state.svelte.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
+import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER } from '#lib/ramps.ts';
 import ThemeEditorHarness from './ThemeEditorHarness.svelte';
 import { create_mount_tracker, set_input_value } from './component_test_helpers.ts';
 

@@ -1,10 +1,10 @@
 import { test, assert, describe } from 'vitest';
 
-import { compose_themes, render_theme_style } from '$lib/theme.ts';
-import type { Theme } from '$lib/variable.ts';
-import { resolve_theme_stance, scheme_stance_variables } from '$lib/theme_stance.ts';
-import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
-import { default_variables } from '$lib/variables.ts';
+import { compose_themes, render_theme_style } from '#lib/theme.ts';
+import type { Theme } from '#lib/variable.ts';
+import { resolve_theme_stance, scheme_stance_variables } from '#lib/theme_stance.ts';
+import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
+import { default_variables } from '#lib/variables.ts';
 
 // a scheme-adaptive default (dual slots) to observe the stance mirror through
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;

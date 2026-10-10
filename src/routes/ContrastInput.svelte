@@ -4,7 +4,7 @@
 
 	import { swallow } from '@fuzdev/fuz_util/dom.ts';
 	import type { SvelteHTMLElements } from 'svelte/elements';
-	import type { Theme } from '$lib/variable.ts';
+	import type { Theme } from '#lib/variable.ts';
 
 	const {
 		modifiers,

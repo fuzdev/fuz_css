@@ -1,8 +1,8 @@
 import { test, assert } from 'vitest';
 
-import { default_variables } from '$lib/variables.ts';
-import { StyleVariable } from '$lib/variable.ts';
-import { PALETTE_CHROMA_MULTIPLIERS } from '$lib/ramps.ts';
+import { default_variables } from '#lib/variables.ts';
+import { StyleVariable } from '#lib/variable.ts';
+import { PALETTE_CHROMA_MULTIPLIERS } from '#lib/ramps.ts';
 import {
 	palette_variants,
 	intent_variants,
@@ -20,7 +20,7 @@ import {
 	BORDER_RADII,
 	FONT_SIZES,
 	TYPE_SCALE_RATIO
-} from '$lib/variable_data.ts';
+} from '#lib/variable_data.ts';
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {

@@ -6,8 +6,8 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 	import { resolve } from '$app/paths';
 
-	import { space_variants, distance_variants } from '$lib/variable_data.ts';
-	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
+	import { space_variants, distance_variants } from '#lib/variable_data.ts';
+	import ResolvedLength from '#routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'layout';
 

@@ -11,14 +11,14 @@ import { test, assert, describe } from 'vitest';
 import {
 	create_bundled_resources,
 	type CreateBundledResourcesOptions
-} from '$lib/bundled_resources.ts';
-import { generate_css, type GenerateCssResult } from '$lib/generate_css.ts';
-import { merge_class_definitions } from '$lib/css_class_definitions.ts';
-import { css_class_interpreters } from '$lib/css_class_interpreters.ts';
-import { default_cache_deps } from '$lib/deps_defaults.ts';
-import { load_default_style_css } from '$lib/style_rule_parser.ts';
-import type { BaseCssOption, VariablesOption } from '$lib/css_plugin_options.ts';
-import { default_variables } from '$lib/variables.ts';
+} from '#lib/bundled_resources.ts';
+import { generate_css, type GenerateCssResult } from '#lib/generate_css.ts';
+import { merge_class_definitions } from '#lib/css_class_definitions.ts';
+import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
+import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { load_default_style_css } from '#lib/style_rule_parser.ts';
+import type { BaseCssOption, VariablesOption } from '#lib/css_plugin_options.ts';
+import { default_variables } from '#lib/variables.ts';
 
 const class_definitions = merge_class_definitions(undefined, true);
 

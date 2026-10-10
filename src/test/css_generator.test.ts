@@ -8,9 +8,9 @@
 
 import { test, describe, assert } from 'vitest';
 
-import { create_css_generator } from '$lib/css_generator.ts';
-import { extract_from_svelte } from '$lib/css_class_extractor.ts';
-import type { CssGeneratorBaseOptions } from '$lib/css_plugin_options.ts';
+import { create_css_generator } from '#lib/css_generator.ts';
+import { extract_from_svelte } from '#lib/css_class_extractor.ts';
+import type { CssGeneratorBaseOptions } from '#lib/css_plugin_options.ts';
 import { assert_css_contains } from './test_helpers.ts';
 
 /** Renders one Svelte source through a generator, collecting logged diagnostics. */

@@ -5,7 +5,7 @@ import {
 	extract_declared_css_variables,
 	extract_required_css_variables,
 	strip_css_comments
-} from '$lib/css_variable_utils.ts';
+} from '#lib/css_variable_utils.ts';
 
 describe('extract_css_variables', () => {
 	test('returns empty set for empty string', () => {

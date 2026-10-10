@@ -1,13 +1,13 @@
 import { test, assert } from 'vitest';
 
-import { render_shadow_css, type ShadowShape } from '$lib/shadow_css.ts';
-import { default_variables } from '$lib/variables.ts';
+import { render_shadow_css, type ShadowShape } from '#lib/shadow_css.ts';
+import { default_variables } from '#lib/variables.ts';
 import {
 	shadow_variant_prefixes,
 	shadow_size_variants,
 	shadow_semantic_values,
 	shadow_alpha_variants
-} from '$lib/variable_data.ts';
+} from '#lib/variable_data.ts';
 
 test('render_shadow_css composes a geometry token with a mixed-down shadow color', () => {
 	assert.strictEqual(

@@ -10,7 +10,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import { shade_scale_variants, alpha_variants } from '$lib/variable_data.ts';
+	import { shade_scale_variants, alpha_variants } from '#lib/variable_data.ts';
 
 	// @fuz-classes shade_50
 	const LIBRARY_ITEM_NAME = 'shading';

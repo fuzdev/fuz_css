@@ -1,10 +1,10 @@
 import { test, assert, describe } from 'vitest';
 
-import { check_theme } from '$lib/theme_check.ts';
-import { create_theme_resolver } from '$lib/theme_resolver.ts';
-import type { Theme } from '$lib/variable.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { marquee_theme } from '$lib/themes/marquee.ts';
+import { check_theme } from '#lib/theme_check.ts';
+import { create_theme_resolver } from '#lib/theme_resolver.ts';
+import type { Theme } from '#lib/variable.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
@@ -12,7 +12,7 @@ import {
 	PALETTE_CHROMA_KNOBS,
 	NEUTRAL_CHROMA,
 	BORDER_CHROMA_MULTIPLIER
-} from '$lib/ramps.ts';
+} from '#lib/ramps.ts';
 
 // per-call resolver over the shared resolution core, for direct tests of the
 // resolution rules (binding chains, cycles, unresolvable expressions)

@@ -1,6 +1,6 @@
 import { test, assert, describe } from 'vitest';
 
-import { generate_modified_ruleset } from '$lib/css_ruleset_parser.ts';
+import { generate_modified_ruleset } from '#lib/css_ruleset_parser.ts';
 import { assert_css_contains, assert_css_not_contains } from './test_helpers.ts';
 
 /**

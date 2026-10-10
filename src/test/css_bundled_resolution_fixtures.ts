@@ -4,9 +4,9 @@
  * @module
  */
 
-import { parse_style_css } from '$lib/style_rule_parser.ts';
-import { build_variable_graph } from '$lib/variable_graph.ts';
-import type { StyleVariable } from '$lib/variable.ts';
+import { parse_style_css } from '#lib/style_rule_parser.ts';
+import { build_variable_graph } from '#lib/variable_graph.ts';
+import type { StyleVariable } from '#lib/variable.ts';
 
 /**
  * Helper to create minimal test fixtures for CSS resolution tests.

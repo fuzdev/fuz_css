@@ -15,7 +15,7 @@ import {
 	generate_base_css_by_layer,
 	collect_rule_variables,
 	type RuleLayer
-} from '$lib/style_rule_parser.ts';
+} from '#lib/style_rule_parser.ts';
 
 const VARIABLE = 'zz_var';
 

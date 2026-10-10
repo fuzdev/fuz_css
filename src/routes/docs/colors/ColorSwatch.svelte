@@ -1,6 +1,6 @@
 <script lang="ts">
 	import ColorSwatchItem from './ColorSwatchItem.svelte';
-	import { intensity_variants } from '$lib/variable_data.ts';
+	import { intensity_variants } from '#lib/variable_data.ts';
 
 	const {
 		prefix

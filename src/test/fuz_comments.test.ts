@@ -7,7 +7,7 @@
 
 import { test, describe, beforeAll, assert } from 'vitest';
 
-import { extract_from_svelte, extract_from_ts } from '$lib/css_class_extractor.ts';
+import { extract_from_svelte, extract_from_ts } from '#lib/css_class_extractor.ts';
 import {
 	assert_elements,
 	assert_explicit_elements,

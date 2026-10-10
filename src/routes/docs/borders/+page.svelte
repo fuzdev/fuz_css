@@ -17,10 +17,10 @@
 		alpha_variants,
 		intensity_variants,
 		type IntensityVariant
-	} from '$lib/variable_data.ts';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	} from '#lib/variable_data.ts';
+	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 	import ResolvedColorCode from './ResolvedColorCode.svelte';
-	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
+	import ResolvedLength from '#routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'borders';
 

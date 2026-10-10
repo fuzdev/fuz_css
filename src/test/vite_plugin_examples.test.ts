@@ -19,7 +19,7 @@ import { readdir, readFile } from 'node:fs/promises';
 import { execSync } from 'node:child_process';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
-import { FUZ_CSS_BANNER } from '$lib/vite_plugin_fuz_css.ts';
+import { FUZ_CSS_BANNER } from '#lib/vite_plugin_fuz_css.ts';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;

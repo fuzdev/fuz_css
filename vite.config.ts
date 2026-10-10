@@ -1,5 +1,13 @@
 import { defineConfig } from 'vite';
 import { sveltekit } from '@sveltejs/kit/vite';
+import { vitePreprocess } from '@sveltejs/vite-plugin-svelte';
+import adapter from '@sveltejs/adapter-static';
+import { execSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+import { svelte_preprocess_mdz } from '@fuzdev/mdz/svelte_preprocess_mdz.ts';
+import { svelte_preprocess_fuz_code } from '@fuzdev/fuz_code/svelte_preprocess_fuz_code.ts';
+import { create_csp_directives } from '@fuzdev/fuz_ui/csp.ts';
+import { csp_directives_of_fuzdev } from '@fuzdev/fuz_ui/csp_of_fuzdev.ts';
 import svelte_docinfo from 'svelte-docinfo/vite.js';
 import { vite_plugin_pkg_json } from '@fuzdev/fuz_ui/vite_plugin_pkg_json.ts';
 
@@ -35,7 +43,15 @@ export default defineConfig(({ mode }) => ({
 		watch: { ignored: ['**/.gro/**'] }
 	},
 	plugins: [
-		sveltekit(),
+		sveltekit({
+			preprocess: [svelte_preprocess_mdz(), svelte_preprocess_fuz_code(), vitePreprocess()],
+			compilerOptions: { runes: true },
+			inspector: true,
+			adapter: adapter(),
+			paths: { relative: false }, // use root-absolute paths for SSR path comparison: https://svelte.dev/docs/kit/configuration#paths
+			csp: { directives: create_csp_directives({ extend: [csp_directives_of_fuzdev] }) },
+			version: { name: execSync('git rev-parse HEAD').toString().trim() }
+		}),
 		svelte_docinfo({
 			// a fixture for the plugin's dependency-extraction tests, not API
 			exclude: (defaults) => [...defaults, '**/example_class_utilities.ts']
@@ -47,7 +63,18 @@ export default defineConfig(({ mode }) => ({
 		}),
 		vite_plugin_pkg_json()
 	],
-	// in test mode, use browser conditions so svelte's mount() resolves to the client version
-	resolve: mode === 'test' ? { conditions: ['browser'] } : undefined,
+	resolve: {
+		// fuz_ui imports `@fuzdev/fuz_css/theme.ts` and friends, and the installed peer would give
+		// deps the published copy beside the site's `#lib` source - point it at the source so
+		// they share one module instance
+		alias: [
+			{
+				find: /^@fuzdev\/fuz_css\//,
+				replacement: fileURLToPath(new URL('./src/lib/', import.meta.url))
+			}
+		],
+		// in test mode, use browser conditions so svelte's mount() resolves to the client version
+		...(mode === 'test' ? { conditions: ['browser'] } : null)
+	},
 	optimizeDeps: { exclude: ['@fuzdev/blake3-wasm'] }
 }));

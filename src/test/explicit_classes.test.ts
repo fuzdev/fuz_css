@@ -1,7 +1,7 @@
 import { test, describe, assert } from 'vitest';
 
-import { generate_classes_css } from '$lib/css_class_generation.ts';
-import { css_class_composites } from '$lib/css_class_composites.ts';
+import { generate_classes_css } from '#lib/css_class_generation.ts';
+import { css_class_composites } from '#lib/css_class_composites.ts';
 import { assert_css_contains, loc } from './test_helpers.ts';
 
 /**

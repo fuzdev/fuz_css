@@ -1,9 +1,9 @@
 import { test, describe, assert } from 'vitest';
 
-import { generate_classes_css } from '$lib/css_class_generation.ts';
-import { modified_class_interpreter } from '$lib/css_class_interpreters.ts';
-import { css_class_definitions } from '$lib/css_class_definitions.ts';
-import { css_class_composites } from '$lib/css_class_composites.ts';
+import { generate_classes_css } from '#lib/css_class_generation.ts';
+import { modified_class_interpreter } from '#lib/css_class_interpreters.ts';
+import { css_class_definitions } from '#lib/css_class_definitions.ts';
+import { css_class_composites } from '#lib/css_class_composites.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,

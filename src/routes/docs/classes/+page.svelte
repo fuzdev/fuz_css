@@ -27,7 +27,7 @@
 		shadow_semantic_values,
 		distance_variants,
 		darken_lighten_variants
-	} from '$lib/variable_data.ts';
+	} from '#lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'classes';
 
@@ -1220,7 +1220,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
-import {custom_composites} from './src/lib/composites.js';
+import {custom_composites} from './src/lib/composites.ts';
 
 vite_plugin_fuz_css({
 	class_definitions: custom_composites,
@@ -1230,7 +1230,7 @@ vite_plugin_fuz_css({
 			<Code
 				lang="ts"
 				content={`// fuz.gen.css.ts
-import {custom_composites} from '$lib/composites.js';
+import {custom_composites} from '#lib/composites.ts';
 
 export const gen = gen_fuz_css({
 	class_definitions: custom_composites,

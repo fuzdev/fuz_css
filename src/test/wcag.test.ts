@@ -2,7 +2,7 @@ import { describe, test, assert } from 'vitest';
 
 import type { RgbUnit } from '@fuzdev/fuz_util/oklch.ts';
 
-import { srgb_relative_luminance, wcag_contrast_ratio } from '$lib/wcag.ts';
+import { srgb_relative_luminance, wcag_contrast_ratio } from '#lib/wcag.ts';
 
 describe('srgb_relative_luminance', () => {
 	test('luminance of white and black', () => {

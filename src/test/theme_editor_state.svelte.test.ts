@@ -12,14 +12,14 @@ import {
 	ThemeEditorState,
 	render_theme_ts,
 	discard_confirm_message
-} from '$routes/theme_editor_state.svelte.ts';
-import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
-import type { Theme } from '$lib/variable.ts';
-import { compose_themes } from '$lib/theme.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { marquee_theme } from '$lib/themes/marquee.ts';
-import { default_variables } from '$lib/variables.ts';
-import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '$lib/ramps.ts';
+} from '#routes/theme_editor_state.svelte.ts';
+import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+import type { Theme } from '#lib/variable.ts';
+import { compose_themes } from '#lib/theme.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
+import { default_variables } from '#lib/variables.ts';
+import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER, PALETTE_HUES } from '#lib/ramps.ts';
 
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
 const single_slot_default = default_variables.find((v) => v.name === 'chroma_scale')!;

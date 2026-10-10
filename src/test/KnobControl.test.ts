@@ -4,10 +4,10 @@
 import { describe, test, assert, vi } from 'vitest';
 import { flushSync } from 'svelte';
 
-import KnobControl from '$routes/KnobControl.svelte';
-import { theme_knob_by_name, type ThemeKnob } from '$lib/knobs.ts';
-import { PALETTE_HUES } from '$lib/ramps.ts';
-import { palette_variants } from '$lib/variable_data.ts';
+import KnobControl from '#routes/KnobControl.svelte';
+import { theme_knob_by_name, type ThemeKnob } from '#lib/knobs.ts';
+import { PALETTE_HUES } from '#lib/ramps.ts';
+import { palette_variants } from '#lib/variable_data.ts';
 import { create_mount_tracker, set_input_value } from './component_test_helpers.ts';
 
 const mount = create_mount_tracker();

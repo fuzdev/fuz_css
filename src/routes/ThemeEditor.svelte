@@ -5,21 +5,21 @@
 	import CopyToClipboard from '@fuzdev/fuz_ui/CopyToClipboard.svelte';
 	import Details from '@fuzdev/fuz_ui/Details.svelte';
 
-	import { render_theme_style } from '$lib/theme.ts';
-	import type { ThemeScheme } from '$lib/variable.ts';
-	import { theme_knobs, theme_knob_axes, type KnobAxis, type ThemeKnob } from '$lib/knobs.ts';
-	import type { ThemeGateEntry } from '$lib/theme_check.ts';
-	import { PALETTE_HUES } from '$lib/ramps.ts';
+	import { render_theme_style } from '#lib/theme.ts';
+	import type { ThemeScheme } from '#lib/variable.ts';
+	import { theme_knobs, theme_knob_axes, type KnobAxis, type ThemeKnob } from '#lib/knobs.ts';
+	import type { ThemeGateEntry } from '#lib/theme_check.ts';
+	import { PALETTE_HUES } from '#lib/ramps.ts';
 	import {
 		palette_variants,
 		intent_variants,
 		type ColorSchemeVariant,
 		type PaletteVariant
-	} from '$lib/variable_data.ts';
-	import { render_theme_ts, type ThemeEditorState } from '$routes/theme_editor_state.svelte.ts';
-	import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
-	import KnobControl from '$routes/KnobControl.svelte';
-	import RampStrip from '$routes/RampStrip.svelte';
+	} from '#lib/variable_data.ts';
+	import { render_theme_ts, type ThemeEditorState } from '#routes/theme_editor_state.svelte.ts';
+	import { root_color_scheme } from '#routes/root_color_scheme.svelte.ts';
+	import KnobControl from '#routes/KnobControl.svelte';
+	import RampStrip from '#routes/RampStrip.svelte';
 
 	const {
 		editor

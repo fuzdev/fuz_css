@@ -16,8 +16,8 @@ import {
 	generate_shadow_classes,
 	format_spacing_value,
 	format_variable_name
-} from '$lib/css_class_generators.ts';
-import type { CssClassDefinition } from '$lib/css_class_generation.ts';
+} from '#lib/css_class_generators.ts';
+import type { CssClassDefinition } from '#lib/css_class_generation.ts';
 
 /* eslint-disable @typescript-eslint/dot-notation -- dynamic keys require bracket notation */
 

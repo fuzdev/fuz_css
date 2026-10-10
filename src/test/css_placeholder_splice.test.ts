@@ -17,7 +17,7 @@ import {
 	splice_css_at_placeholder,
 	splice_css_into_asset,
 	to_hashed_css_placeholder
-} from '$lib/css_placeholder_splice.ts';
+} from '#lib/css_placeholder_splice.ts';
 
 /** The marker rule the build-mode virtual module emits. */
 const MARKER = ':root{--fuz-css-placeholder:1}';

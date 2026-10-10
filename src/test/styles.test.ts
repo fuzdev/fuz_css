@@ -1,11 +1,11 @@
 import { test, assert } from 'vitest';
 import { readFileSync } from 'node:fs';
 
-import { default_variables } from '$lib/variables.ts';
-import { theme_knob_hook_names } from '$lib/knobs.ts';
-import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
-import { duration_variants } from '$lib/variable_data.ts';
-import { parse_style_css } from '$lib/style_rule_parser.ts';
+import { default_variables } from '#lib/variables.ts';
+import { theme_knob_hook_names } from '#lib/knobs.ts';
+import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
+import { duration_variants } from '#lib/variable_data.ts';
+import { parse_style_css } from '#lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
 
 // vitest replaces this with an empty string because CSS isn't opted into being processed,

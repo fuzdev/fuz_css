@@ -15,8 +15,8 @@
 		intensity_variants,
 		type PaletteVariant,
 		type IntensityVariant
-	} from '$lib/variable_data.ts';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
+	} from '#lib/variable_data.ts';
+	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'shadows';
 

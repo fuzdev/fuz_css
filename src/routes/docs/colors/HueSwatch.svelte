@@ -1,9 +1,9 @@
 <script lang="ts">
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import type { PaletteVariant } from '$lib/variable_data.ts';
-	import { PALETTE_HUES } from '$lib/ramps.ts';
-	import { watch_resolved_style } from '$routes/docs/resolved_style.svelte.ts';
+	import type { PaletteVariant } from '#lib/variable_data.ts';
+	import { PALETTE_HUES } from '#lib/ramps.ts';
+	import { watch_resolved_style } from '#routes/docs/resolved_style.svelte.ts';
 
 	const {
 		letter,

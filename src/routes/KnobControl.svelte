@@ -3,14 +3,14 @@
 
 	import HueInput from '@fuzdev/fuz_ui/HueInput.svelte';
 
-	import { HUE_BINDING_MATCHER, type ThemeKnob } from '$lib/knobs.ts';
-	import { PALETTE_HUES } from '$lib/ramps.ts';
-	import { parse_css_number } from '$lib/theme_resolver.ts';
+	import { HUE_BINDING_MATCHER, type ThemeKnob } from '#lib/knobs.ts';
+	import { PALETTE_HUES } from '#lib/ramps.ts';
+	import { parse_css_number } from '#lib/theme_resolver.ts';
 	import {
 		palette_variants,
 		format_palette_gloss,
 		type PaletteVariant
-	} from '$lib/variable_data.ts';
+	} from '#lib/variable_data.ts';
 
 	const {
 		knob,

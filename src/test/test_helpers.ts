@@ -11,8 +11,8 @@ import type {
 	SourceLocation,
 	ExtractionDiagnostic,
 	GenerationDiagnostic
-} from '$lib/diagnostics.ts';
-import type { ExtractionData } from '$lib/css_class_extractor.ts';
+} from '#lib/diagnostics.ts';
+import type { ExtractionData } from '#lib/css_class_extractor.ts';
 
 //
 // Factory Helpers

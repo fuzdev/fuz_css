@@ -2,7 +2,7 @@
 	import type { Snippet } from 'svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import { font_size_variants } from '$lib/variable_data.ts';
+	import { font_size_variants } from '#lib/variable_data.ts';
 
 	let {
 		selected_size = $bindable(2),
@@ -14,7 +14,7 @@
 
 	// TODO the API is strange
 
-	// TODO @many publish in $lib when ready
+	// TODO @many publish in src/lib when ready
 
 	const min = 1;
 	const max = font_size_variants.length;

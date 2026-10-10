@@ -13,17 +13,24 @@
  */
 
 import { describe, test, assert } from 'vitest';
-import { build, createBuilder, type InlineConfig, type Plugin, type Rollup } from 'vite';
+import {
+	build,
+	createBuilder,
+	type InlineConfig,
+	type Plugin,
+	type Rolldown,
+	type Rollup
+} from 'vite';
 import { join } from 'node:path';
 
 import {
 	FUZ_CSS_BANNER,
 	vite_plugin_fuz_css,
 	type VitePluginFuzCssOptions
-} from '$lib/vite_plugin_fuz_css.ts';
-import { FUZ_CSS_PLACEHOLDER, parse_css_placeholder_hash } from '$lib/css_placeholder_splice.ts';
-import { css_class_interpreters } from '$lib/css_class_interpreters.ts';
-import type { CssClassDefinitionInterpreter } from '$lib/css_class_generation.ts';
+} from '#lib/vite_plugin_fuz_css.ts';
+import { FUZ_CSS_PLACEHOLDER, parse_css_placeholder_hash } from '#lib/css_placeholder_splice.ts';
+import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
+import type { CssClassDefinitionInterpreter } from '#lib/css_class_generation.ts';
 import {
 	vite_build_fixture_root as fixture_root,
 	filter_build_fixture_module as filter_fixture_file,
@@ -76,7 +83,7 @@ const create_fixture_config = (options: FixtureOptions, logs: FixtureLogs): Inli
 });
 
 const to_fixture_build = (
-	outputs: Rollup.RollupOutput | Array<Rollup.RollupOutput>,
+	outputs: Rolldown.RolldownOutput | Array<Rolldown.RolldownOutput>,
 	logs: FixtureLogs
 ): FixtureBuild => {
 	const files = [outputs].flat().flatMap((o) => o.output);
@@ -536,16 +543,29 @@ describe('vite_plugin_fuz_css build render lifetime', () => {
 		assert.strictEqual(counter.count(), 1);
 	});
 
-	test('one render serves every output', async () => {
+	test('one render per build pass of a multi-output build', async () => {
+		// Rollup runs the build phase once and generates every output from it,
+		// while Rolldown (Vite 8+) reruns `buildStart` and the transforms for each
+		// output - either way a pass's `renderChunk` and `generateBundle` share one render
 		const counter = create_render_counter();
+		let build_passes = 0;
 		const result = await build_fixture({
 			plugin_options: counter.plugin_options,
+			plugins: [
+				{
+					name: 'count_build_passes',
+					buildStart: () => {
+						build_passes++;
+					}
+				}
+			],
 			build: {
 				rollupOptions: { input: entry_path, output: [{ format: 'es' }, { format: 'cjs' }] }
 			}
 		});
 		assert.strictEqual(result.css.length, 2);
-		assert.strictEqual(counter.count(), 1);
+		assert.ok(build_passes >= 1);
+		assert.strictEqual(counter.count(), build_passes);
 	});
 
 	test('an error thrown by the render fails the build', async () => {

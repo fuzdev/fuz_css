@@ -8,7 +8,7 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import { palette_variants } from '$lib/variable_data.ts';
+	import { palette_variants } from '#lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'buttons';
 

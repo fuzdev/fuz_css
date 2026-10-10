@@ -6,9 +6,9 @@
  * @module
  */
 
-import type { Theme } from '$lib/variable.ts';
-import { contrast_modifiers } from '$lib/themes.ts';
-import { palette_variants } from '$lib/variable_data.ts';
+import type { Theme } from '#lib/variable.ts';
+import { contrast_modifiers } from '#lib/themes.ts';
+import { palette_variants } from '#lib/variable_data.ts';
 
 const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
 

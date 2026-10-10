@@ -1,5 +1,5 @@
 <script lang="ts">
-	import type { StyleVariable } from '$lib/variable.ts';
+	import type { StyleVariable } from '#lib/variable.ts';
 
 	const {
 		variable
@@ -7,7 +7,7 @@
 		variable: StyleVariable | null;
 	} = $props();
 
-	// TODO @many add to $lib?
+	// TODO @many add to src/lib?
 
 	// TODO needs a lot of work - for example, enable editing the values directly, and certain values like colors could be rendered
 </script>

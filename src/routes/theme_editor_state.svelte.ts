@@ -1,16 +1,16 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import { compose_themes, pick_stance_slot, to_theme_stance } from '$lib/theme.ts';
-import { resolve_theme_stance } from '$lib/theme_stance.ts';
-import type { StyleVariable, Theme, ThemeScheme } from '$lib/variable.ts';
-import { default_variables } from '$lib/variables.ts';
-import { theme_knob_by_name } from '$lib/knobs.ts';
-import { check_theme, type ThemeCheckReport, type ThemeGateEntry } from '$lib/theme_check.ts';
-import { validate_theme, type ThemeIssue } from '$lib/theme_validate.ts';
-import { create_theme_resolver, type ThemeKnobResolver } from '$lib/theme_resolver.ts';
-import type { ColorSchemeVariant } from '$lib/variable_data.ts';
-import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
+import { compose_themes, pick_stance_slot, to_theme_stance } from '#lib/theme.ts';
+import { resolve_theme_stance } from '#lib/theme_stance.ts';
+import type { StyleVariable, Theme, ThemeScheme } from '#lib/variable.ts';
+import { default_variables } from '#lib/variables.ts';
+import { theme_knob_by_name } from '#lib/knobs.ts';
+import { check_theme, type ThemeCheckReport, type ThemeGateEntry } from '#lib/theme_check.ts';
+import { validate_theme, type ThemeIssue } from '#lib/theme_validate.ts';
+import { create_theme_resolver, type ThemeKnobResolver } from '#lib/theme_resolver.ts';
+import type { ColorSchemeVariant } from '#lib/variable_data.ts';
+import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 
 // TODO upstream to fuz_ui
 

@@ -1,5 +1,5 @@
 <script lang="ts">
-	import { watch_resolved_style } from '$routes/docs/resolved_style.svelte.ts';
+	import { watch_resolved_style } from '#routes/docs/resolved_style.svelte.ts';
 
 	// a length variable can be a calc() of a scale knob, which reading it with
 	// `getPropertyValue` leaves unevaluated - so read it off an undisplayed

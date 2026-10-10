@@ -7,7 +7,7 @@
 	import { tome_get_by_slug } from '@fuzdev/fuz_ui/tome.ts';
 	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 
-	import Introduction from '$routes/Introduction.svelte';
+	import Introduction from '#routes/Introduction.svelte';
 
 	const LIBRARY_ITEM_NAME = 'introduction';
 

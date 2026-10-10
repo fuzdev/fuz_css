@@ -11,11 +11,11 @@ import {
 	to_extraction_cache_key,
 	CSS_CACHE_VERSION,
 	type CachedExtraction
-} from '$lib/css_cache.ts';
-import type { SourceLocation, ExtractionDiagnostic } from '$lib/diagnostics.ts';
-import type { AcornPlugin } from '$lib/css_class_extractor.ts';
-import { extract_file_cached } from '$lib/extract_file_cached.ts';
-import { default_cache_deps } from '$lib/deps_defaults.ts';
+} from '#lib/css_cache.ts';
+import type { SourceLocation, ExtractionDiagnostic } from '#lib/diagnostics.ts';
+import type { AcornPlugin } from '#lib/css_class_extractor.ts';
+import { extract_file_cached } from '#lib/extract_file_cached.ts';
+import { default_cache_deps } from '#lib/deps_defaults.ts';
 import { create_mock_fs_state, create_mock_cache_deps } from './fixtures/mock_deps.ts';
 import {
 	loc,

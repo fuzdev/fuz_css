@@ -1,6 +1,6 @@
 import { createSubscriber } from 'svelte/reactivity';
 
-import type { ColorSchemeVariant } from '$lib/variable_data.ts';
+import type { ColorSchemeVariant } from '#lib/variable_data.ts';
 
 // TODO upstream to fuz_ui
 

@@ -1,6 +1,6 @@
 import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-import { root_color_scheme } from '$routes/root_color_scheme.svelte.ts';
+import { root_color_scheme } from '#routes/root_color_scheme.svelte.ts';
 
 /**
  * Runs `read` in an effect that re-runs after anything that can change a

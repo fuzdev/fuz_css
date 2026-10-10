@@ -1,6 +1,6 @@
 import { test, describe } from 'vitest';
 
-import { extract_from_ts, extract_css_classes } from '$lib/css_class_extractor.ts';
+import { extract_from_ts, extract_css_classes } from '#lib/css_class_extractor.ts';
 
 import {
 	class_names_equal,

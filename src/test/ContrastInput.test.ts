@@ -4,9 +4,9 @@
 import { describe, test, assert } from 'vitest';
 import { flushSync } from 'svelte';
 
-import ContrastInput from '$routes/ContrastInput.svelte';
-import { contrast_modifiers } from '$lib/themes.ts';
-import type { Theme } from '$lib/variable.ts';
+import ContrastInput from '#routes/ContrastInput.svelte';
+import { contrast_modifiers } from '#lib/themes.ts';
+import type { Theme } from '#lib/variable.ts';
 import { create_mount_tracker } from './component_test_helpers.ts';
 
 const mount = create_mount_tracker();

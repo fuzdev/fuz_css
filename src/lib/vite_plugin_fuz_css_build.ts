@@ -103,10 +103,12 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 
 	/**
 	 * The build's rendered CSS per environment, so `renderChunk` hashes the
-	 * same text `generateBundle` splices and diagnostics dispatch once. An
+	 * same text `generateBundle` splices and diagnostics dispatch once per output. An
 	 * entry lives from the first hook that needs it to that environment's next
-	 * `buildStart` - across every output of one build, and never into a watch
-	 * rebuild, whose transforms may have changed the classes. Keyed by
+	 * `buildStart` - across every output of a Rollup build, which runs the
+	 * build phase once, but one output at a time under Rolldown (Vite 8+),
+	 * which reruns `buildStart` and the transforms for each output - and never
+	 * into a watch rebuild, whose transforms may have changed the classes. Keyed by
 	 * environment because one plugin instance can serve several whose builds
 	 * overlap.
 	 */

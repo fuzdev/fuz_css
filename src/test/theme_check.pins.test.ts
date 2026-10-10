@@ -17,15 +17,15 @@ import {
 	GATE_UI,
 	type ThemeCheckReport,
 	type ThemeGateId
-} from '$lib/theme_check.ts';
-import { create_theme_resolver } from '$lib/theme_resolver.ts';
-import type { StyleVariable } from '$lib/variable.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { zine_theme } from '$lib/themes/zine.ts';
-import { default_variables } from '$lib/variables.ts';
-import { palette_stop_oklch, shade_stop_oklch, text_stop_oklch } from '$lib/ramps.ts';
-import { wcag_contrast_ratio } from '$lib/wcag.ts';
-import type { ColorSchemeVariant } from '$lib/variable_data.ts';
+} from '#lib/theme_check.ts';
+import { create_theme_resolver } from '#lib/theme_resolver.ts';
+import type { StyleVariable } from '#lib/variable.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { zine_theme } from '#lib/themes/zine.ts';
+import { default_variables } from '#lib/variables.ts';
+import { palette_stop_oklch, shade_stop_oklch, text_stop_oklch } from '#lib/ramps.ts';
+import { wcag_contrast_ratio } from '#lib/wcag.ts';
+import type { ColorSchemeVariant } from '#lib/variable_data.ts';
 
 const base_report = check_theme(base_theme);
 

@@ -17,7 +17,7 @@
 		format_palette_gloss,
 		type IntentVariant,
 		type PaletteVariant
-	} from '$lib/variable_data.ts';
+	} from '#lib/variable_data.ts';
 
 	const LIBRARY_ITEM_NAME = 'colors';
 

@@ -4,9 +4,9 @@ import {
 	generate_classes_css,
 	extract_primary_property,
 	type CssClassDefinitionInterpreter
-} from '$lib/css_class_generation.ts';
-import { css_class_composites } from '$lib/css_class_composites.ts';
-import { css_class_definitions } from '$lib/css_class_definitions.ts';
+} from '#lib/css_class_generation.ts';
+import { css_class_composites } from '#lib/css_class_composites.ts';
+import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import {
 	assert_css_contains,
 	assert_css_not_contains,

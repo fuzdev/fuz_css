@@ -8,12 +8,12 @@ import {
 	compute_worst_hue_chroma_cap,
 	ramp_lightness,
 	shade_stop_oklch
-} from '$lib/ramps.ts';
+} from '#lib/ramps.ts';
 import {
 	color_scheme_variants,
 	numeric_scale_variants,
 	palette_variants
-} from '$lib/variable_data.ts';
+} from '#lib/variable_data.ts';
 
 // The gamut, monotonicity, and contrast gates for the default palette live in
 // `theme_check.test.ts`: `check_theme(base_theme)` resolves exactly these

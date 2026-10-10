@@ -1,6 +1,6 @@
 import { test, assert, describe } from 'vitest';
 
-import { extract_from_svelte, SourceIndex } from '$lib/css_class_extractor.ts';
+import { extract_from_svelte, SourceIndex } from '#lib/css_class_extractor.ts';
 
 import {
 	assert_class_at_line,

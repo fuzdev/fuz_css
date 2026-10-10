@@ -17,7 +17,7 @@ import layout from './layout/+page.svelte';
 import shading from './shading/+page.svelte';
 import shadows from './shadows/+page.svelte';
 import borders from './borders/+page.svelte';
-// import menuitem from '$routes/docs/menuitem/+page.svelte';
+// import menuitem from '#routes/docs/menuitem/+page.svelte';
 
 // TODO maybe decouple `related` from `Tome` to get bidirectionality for free
 

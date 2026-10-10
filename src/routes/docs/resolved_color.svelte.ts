@@ -2,7 +2,7 @@ import { clamp } from '@fuzdev/fuz_util/maths.ts';
 import { rgb_to_hex_string } from '@fuzdev/fuz_util/colors.ts';
 import { oklch_to_srgb, type Oklch } from '@fuzdev/fuz_util/oklch.ts';
 
-import { watch_resolved_style } from '$routes/docs/resolved_style.svelte.ts';
+import { watch_resolved_style } from '#routes/docs/resolved_style.svelte.ts';
 
 /** A parsed computed-style color serialization. */
 export interface ParsedResolvedColor {

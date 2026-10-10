@@ -1,7 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
-import { resolve_composes } from '$lib/css_class_resolution.ts';
-import type { CssClassDefinition } from '$lib/css_class_generation.ts';
+import { resolve_composes } from '#lib/css_class_resolution.ts';
+import type { CssClassDefinition } from '#lib/css_class_generation.ts';
 import { assert_resolved_declaration, assert_resolution_error } from './test_helpers.ts';
 
 /**

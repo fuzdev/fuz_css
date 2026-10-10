@@ -13,7 +13,7 @@ import { describe, test, assert } from 'vitest';
 import { createServer, type Plugin, type ServerOptions, type ViteDevServer } from 'vite';
 import type { AddressInfo } from 'node:net';
 
-import { vite_plugin_fuz_css } from '$lib/vite_plugin_fuz_css.ts';
+import { vite_plugin_fuz_css } from '#lib/vite_plugin_fuz_css.ts';
 import {
 	vite_dev_fixture_root as fixture_root,
 	filter_dev_fixture_html_and_late_module as filter_fixture_file,

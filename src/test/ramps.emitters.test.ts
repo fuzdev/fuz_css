@@ -38,14 +38,14 @@ import {
 	border_color_oklch,
 	BORDER_COLOR_ALPHAS,
 	type RampFamily
-} from '$lib/ramps.ts';
+} from '#lib/ramps.ts';
 import {
 	numeric_scale_variants,
 	palette_variants,
 	color_scheme_variants,
 	type ColorSchemeVariant,
 	type NumericScaleVariant
-} from '$lib/variable_data.ts';
+} from '#lib/variable_data.ts';
 
 // the emitters round ramp positions to 1e-6, so allow a hair over that
 const TOLERANCE = 1e-5;

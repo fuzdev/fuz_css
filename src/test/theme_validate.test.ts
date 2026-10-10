@@ -1,12 +1,12 @@
 import { test, assert, describe } from 'vitest';
 
-import { check_theme } from '$lib/theme_check.ts';
-import { validate_theme, ACCENT_STATUS_HUE_SEPARATION } from '$lib/theme_validate.ts';
-import { resolve_theme_stance } from '$lib/theme_stance.ts';
-import type { Theme } from '$lib/variable.ts';
+import { check_theme } from '#lib/theme_check.ts';
+import { validate_theme, ACCENT_STATUS_HUE_SEPARATION } from '#lib/theme_validate.ts';
+import { resolve_theme_stance } from '#lib/theme_stance.ts';
+import type { Theme } from '#lib/variable.ts';
 import { shipped_base_themes, create_monochrome_theme } from './theme_test_helpers.ts';
-import { PALETTE_HUES, PALETTE_CHROMA_MULTIPLIERS } from '$lib/ramps.ts';
-import { default_variables } from '$lib/variables.ts';
+import { PALETTE_HUES, PALETTE_CHROMA_MULTIPLIERS } from '#lib/ramps.ts';
+import { default_variables } from '#lib/variables.ts';
 
 describe('validate_theme', () => {
 	test('registry and exemplar themes produce no errors', () => {

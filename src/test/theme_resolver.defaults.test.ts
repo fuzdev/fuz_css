@@ -8,11 +8,11 @@
 
 import { test, assert, describe } from 'vitest';
 
-import { create_theme_resolver } from '$lib/theme_resolver.ts';
-import { theme_knobs } from '$lib/knobs.ts';
-import { default_variables } from '$lib/variables.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { color_scheme_variants } from '$lib/variable_data.ts';
+import { create_theme_resolver } from '#lib/theme_resolver.ts';
+import { theme_knobs } from '#lib/knobs.ts';
+import { default_variables } from '#lib/variables.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { color_scheme_variants } from '#lib/variable_data.ts';
 
 const declared = new Map(default_variables.map((v) => [v.name, v]));
 

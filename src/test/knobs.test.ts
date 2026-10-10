@@ -6,9 +6,9 @@ import {
 	theme_knob_hook_names,
 	theme_knob_axes,
 	HUE_BINDING_MATCHER
-} from '$lib/knobs.ts';
-import { default_variables } from '$lib/variables.ts';
-import { PALETTE_LETTER_MATCHER, VAR_MATCHER } from '$lib/theme_resolver.ts';
+} from '#lib/knobs.ts';
+import { default_variables } from '#lib/variables.ts';
+import { PALETTE_LETTER_MATCHER, VAR_MATCHER } from '#lib/theme_resolver.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
 

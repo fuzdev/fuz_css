@@ -7,7 +7,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
-	import SourceFileLink from '$routes/SourceFileLink.svelte';
+	import SourceFileLink from '#routes/SourceFileLink.svelte';
 
 	const LIBRARY_ITEM_NAME = 'semantic';
 

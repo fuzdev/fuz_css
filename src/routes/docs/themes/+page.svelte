@@ -1,19 +1,19 @@
 <script lang="ts" module>
 	import { BROWSER } from 'esm-env';
 
-	import { default_themes, contrast_modifiers } from '$lib/themes.ts';
-	import { zine_theme } from '$lib/themes/zine.ts';
-	import { pebble_theme } from '$lib/themes/pebble.ts';
-	import { parchment_theme } from '$lib/themes/parchment.ts';
-	import { phosphor_theme } from '$lib/themes/phosphor.ts';
-	import { guestbook_theme } from '$lib/themes/guestbook.ts';
-	import { marquee_theme } from '$lib/themes/marquee.ts';
-	import { signage_theme } from '$lib/themes/signage.ts';
+	import { default_themes, contrast_modifiers } from '#lib/themes.ts';
+	import { zine_theme } from '#lib/themes/zine.ts';
+	import { pebble_theme } from '#lib/themes/pebble.ts';
+	import { parchment_theme } from '#lib/themes/parchment.ts';
+	import { phosphor_theme } from '#lib/themes/phosphor.ts';
+	import { guestbook_theme } from '#lib/themes/guestbook.ts';
+	import { marquee_theme } from '#lib/themes/marquee.ts';
+	import { signage_theme } from '#lib/themes/signage.ts';
 	import {
 		ThemeEditorState,
 		create_rooted_theme_editor,
 		type ThemeEditorSnapshotData
-	} from '$routes/theme_editor_state.svelte.ts';
+	} from '#routes/theme_editor_state.svelte.ts';
 
 	// one gallery: the registry and the shipped exemplars are a single list to
 	// users - registry membership is policy for consumer pickers, not UX
@@ -51,12 +51,12 @@
 	import Code from '@fuzdev/fuz_code/Code.svelte';
 	import { theme_state_context } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import type { Theme } from '$lib/variable.ts';
-	import ThemeEditor from '$routes/ThemeEditor.svelte';
-	import ThemePreview from '$routes/ThemePreview.svelte';
-	import ContrastInput from '$routes/ContrastInput.svelte';
-	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
-	import type { Snapshot } from '@sveltejs/kit';
+	import type { Theme } from '#lib/variable.ts';
+	import ThemeEditor from '#routes/ThemeEditor.svelte';
+	import ThemePreview from '#routes/ThemePreview.svelte';
+	import ContrastInput from '#routes/ContrastInput.svelte';
+	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+	import { snapshot } from '$app/navigation';
 
 	const LIBRARY_ITEM_NAME = 'themes';
 
@@ -89,11 +89,13 @@
 		editor.load_theme_guarded(theme, (message) => confirm(message));
 	};
 
-	// persist the in-progress theme across history navigation and reloads
-	export const snapshot: Snapshot<ThemeEditorSnapshotData> = {
+	// persist the in-progress theme across history navigation and reloads; an
+	// explicit id, since the default call-site id changes between deployments
+	snapshot<ThemeEditorSnapshotData>({
+		id: 'theme_editor',
 		capture: () => editor.to_snapshot(),
 		restore: (data) => editor.restore_snapshot(data)
-	};
+	});
 </script>
 
 <TomeContent {tome}>

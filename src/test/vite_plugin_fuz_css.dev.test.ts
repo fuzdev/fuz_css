@@ -8,9 +8,9 @@ import {
 	to_extraction_id,
 	vite_plugin_fuz_css,
 	type VitePluginFuzCssOptions
-} from '$lib/vite_plugin_fuz_css.ts';
-import { default_cache_deps } from '$lib/deps_defaults.ts';
-import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
+} from '#lib/vite_plugin_fuz_css.ts';
+import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
 import {
 	vite_dev_fixture_root as fixture_root,
 	filter_dev_fixture_html as filter_fixture_file,

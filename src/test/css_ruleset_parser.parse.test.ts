@@ -4,7 +4,7 @@ import {
 	parse_ruleset,
 	is_single_selector_ruleset,
 	ruleset_contains_class
-} from '$lib/css_ruleset_parser.ts';
+} from '#lib/css_ruleset_parser.ts';
 
 /**
  * Tests for parse_ruleset and related ruleset analysis functions.

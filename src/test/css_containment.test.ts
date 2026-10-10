@@ -5,11 +5,11 @@ import {
 	css_custom_property_name_is_contained,
 	css_value_is_contained,
 	escape_css_identifier
-} from '$lib/css_containment.ts';
-import { default_variables } from '$lib/variables.ts';
-import { render_theme_style } from '$lib/theme.ts';
-import { parse_theme, type Theme } from '$lib/variable.ts';
-import { validate_theme } from '$lib/theme_validate.ts';
+} from '#lib/css_containment.ts';
+import { default_variables } from '#lib/variables.ts';
+import { render_theme_style } from '#lib/theme.ts';
+import { parse_theme, type Theme } from '#lib/variable.ts';
+import { validate_theme } from '#lib/theme_validate.ts';
 
 const theme_modules: Record<string, Record<string, unknown>> = import.meta.glob(
 	'../lib/themes/*.ts',

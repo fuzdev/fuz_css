@@ -1,14 +1,14 @@
 import { test, assert, describe } from 'vitest';
 
-import { default_themes, DEFAULT_THEME, contrast_modifiers } from '$lib/themes.ts';
-import { StyleVariable, type Theme } from '$lib/variable.ts';
-import { validate_theme } from '$lib/theme_validate.ts';
-import { theme_knob_by_name } from '$lib/knobs.ts';
-import { compose_themes, to_theme_stance } from '$lib/theme.ts';
-import { create_theme_resolver } from '$lib/theme_resolver.ts';
-import { color_scheme_variants } from '$lib/variable_data.ts';
-import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
-import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
+import { default_themes, DEFAULT_THEME, contrast_modifiers } from '#lib/themes.ts';
+import { StyleVariable, type Theme } from '#lib/variable.ts';
+import { validate_theme } from '#lib/theme_validate.ts';
+import { theme_knob_by_name } from '#lib/knobs.ts';
+import { compose_themes, to_theme_stance } from '#lib/theme.ts';
+import { create_theme_resolver } from '#lib/theme_resolver.ts';
+import { color_scheme_variants } from '#lib/variable_data.ts';
+import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
+import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { shipped_themes, shipped_base_themes } from './theme_test_helpers.ts';
 
 const registry_names = new Set(default_themes.map((t) => t.name));

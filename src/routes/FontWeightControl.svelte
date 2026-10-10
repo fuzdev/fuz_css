@@ -9,7 +9,7 @@
 		children?: Snippet;
 	} = $props();
 
-	// TODO @many publish in $lib when ready, the 950 thing has me wack
+	// TODO @many publish in src/lib when ready, the 950 thing has me wack
 </script>
 
 <label>

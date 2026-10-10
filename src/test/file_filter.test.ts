@@ -1,6 +1,6 @@
 import { test, assert, describe } from 'vitest';
 
-import { filter_file_default, is_css_file, to_filter_scope } from '$lib/file_filter.ts';
+import { filter_file_default, is_css_file, to_filter_scope } from '#lib/file_filter.ts';
 
 describe('filter_file_default', () => {
 	describe('includes valid extensions', () => {

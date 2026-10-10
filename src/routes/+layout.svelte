@@ -10,13 +10,13 @@
 	import { save_theme } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import pkg_json from 'virtual:pkg.json';
 
-	import { UNSAVED_THEME_NAME } from '$routes/theme_draft.ts';
+	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 
 	// TODO re-enable this, see comment below
-	// import ContextmenuRoot from '$lib/ContextmenuRoot.svelte';
-	// import Dialog from '$lib/Dialog.svelte';
-	// import Settings from '$routes/Settings.svelte';
-	// import {contextmenu_attachment} from '$lib/contextmenu_helpers.svelte.js';
+	// import ContextmenuRoot from '#lib/ContextmenuRoot.svelte';
+	// import Dialog from '#lib/Dialog.svelte';
+	// import Settings from '#routes/Settings.svelte';
+	// import {contextmenu_attachment} from '#lib/contextmenu_helpers.svelte.js';
 
 	const {
 		children

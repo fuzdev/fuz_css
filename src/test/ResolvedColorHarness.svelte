@@ -4,7 +4,7 @@
 	// an injectable reader, and binds the probe element it reads from.
 	import { theme_state_context, type ThemeState } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 
-	import { ResolvedColor, type ResolvedColorOptions } from '$routes/docs/resolved_color.svelte.ts';
+	import { ResolvedColor, type ResolvedColorOptions } from '#routes/docs/resolved_color.svelte.ts';
 
 	const {
 		name,

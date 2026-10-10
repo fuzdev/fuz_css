@@ -3,8 +3,8 @@
  */
 import { describe, test, assert } from 'vitest';
 
-import RampStrip from '$routes/RampStrip.svelte';
-import { numeric_scale_variants } from '$lib/variable_data.ts';
+import RampStrip from '#routes/RampStrip.svelte';
+import { numeric_scale_variants } from '#lib/variable_data.ts';
 import { create_mount_tracker } from './component_test_helpers.ts';
 
 const mount = create_mount_tracker();

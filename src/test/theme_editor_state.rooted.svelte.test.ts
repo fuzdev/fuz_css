@@ -6,9 +6,9 @@
 
 import { test, assert, describe } from 'vitest';
 
-import { ThemeEditorState, create_rooted_theme_editor } from '$routes/theme_editor_state.svelte.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { marquee_theme } from '$lib/themes/marquee.ts';
+import { ThemeEditorState, create_rooted_theme_editor } from '#routes/theme_editor_state.svelte.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
 
 const themes = [base_theme, marquee_theme];
 

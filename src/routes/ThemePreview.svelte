@@ -3,7 +3,7 @@
 
 	import type { Snippet } from 'svelte';
 
-	import type { Theme } from '$lib/variable.ts';
+	import type { Theme } from '#lib/variable.ts';
 
 	const {
 		theme,

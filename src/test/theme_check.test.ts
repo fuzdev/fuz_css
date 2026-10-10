@@ -14,22 +14,22 @@ import {
 	GATE_PALETTE_TEXT,
 	GATE_BORDER,
 	GATE_BORDER_DIVIDER
-} from '$lib/theme_check.ts';
-import { validate_theme } from '$lib/theme_validate.ts';
-import { compose_themes } from '$lib/theme.ts';
-import type { Theme } from '$lib/variable.ts';
-import { contrast_modifiers } from '$lib/themes.ts';
-import { base_theme } from '$lib/themes/base.ts';
-import { low_contrast_theme } from '$lib/themes/low_contrast.ts';
-import { high_contrast_theme } from '$lib/themes/high_contrast.ts';
-import { zine_theme } from '$lib/themes/zine.ts';
-import { phosphor_theme } from '$lib/themes/phosphor.ts';
-import { guestbook_theme } from '$lib/themes/guestbook.ts';
-import { marquee_theme } from '$lib/themes/marquee.ts';
+} from '#lib/theme_check.ts';
+import { validate_theme } from '#lib/theme_validate.ts';
+import { compose_themes } from '#lib/theme.ts';
+import type { Theme } from '#lib/variable.ts';
+import { contrast_modifiers } from '#lib/themes.ts';
+import { base_theme } from '#lib/themes/base.ts';
+import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
+import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
+import { zine_theme } from '#lib/themes/zine.ts';
+import { phosphor_theme } from '#lib/themes/phosphor.ts';
+import { guestbook_theme } from '#lib/themes/guestbook.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
 import { shipped_base_themes } from './theme_test_helpers.ts';
-import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '$lib/ramps.ts';
-import { wcag_contrast_ratio } from '$lib/wcag.ts';
-import { palette_variants, color_scheme_variants } from '$lib/variable_data.ts';
+import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '#lib/ramps.ts';
+import { wcag_contrast_ratio } from '#lib/wcag.ts';
+import { palette_variants, color_scheme_variants } from '#lib/variable_data.ts';
 
 // the `.palette_X` button label on its own rest fill
 const button_fill_subject = (letter: string): string =>

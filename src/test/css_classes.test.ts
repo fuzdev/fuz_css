@@ -1,7 +1,7 @@
 import { test, assert, describe } from 'vitest';
 
-import { CssClasses } from '$lib/css_classes.ts';
-import { type ExtractionDiagnostic, type SourceLocation } from '$lib/diagnostics.ts';
+import { CssClasses } from '#lib/css_classes.ts';
+import { type ExtractionDiagnostic, type SourceLocation } from '#lib/diagnostics.ts';
 import { make_extraction_data } from './test_helpers.ts';
 
 describe('CssClasses', () => {

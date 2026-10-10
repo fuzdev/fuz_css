@@ -21,15 +21,15 @@ import {
 	type LiteralResolutionResult,
 	type ExtractedModifiers,
 	type ModifierExtractionResult
-} from '$lib/css_literal.ts';
-import { escape_css_selector } from '$lib/css_class_generation.ts';
-import { type InterpreterDiagnostic } from '$lib/diagnostics.ts';
+} from '#lib/css_literal.ts';
+import { escape_css_selector } from '#lib/css_class_generation.ts';
+import { type InterpreterDiagnostic } from '#lib/diagnostics.ts';
 import {
 	get_modifier,
 	parse_arbitrary_breakpoint,
 	parse_parameterized_state,
 	extract_balanced_parens
-} from '$lib/modifiers.ts';
+} from '#lib/modifiers.ts';
 
 // CSS properties loaded before tests run
 let css_properties: Set<string>;
@@ -53,12 +53,12 @@ interface InterpretOkResult {
 // Specialized helpers using assert.ok for narrowing
 const assert_parse_ok = (result: ReturnType<typeof parse_css_literal>): ParseOkResult => {
 	assert.ok(result.ok, 'Expected parse result to be ok');
-	return result as ParseOkResult;
+	return result;
 };
 
 const assert_parse_error = (result: ReturnType<typeof parse_css_literal>): ParseErrorResult => {
 	assert.ok(!result.ok, 'Expected parse result to be error');
-	return result as ParseErrorResult;
+	return result;
 };
 
 const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput => {
@@ -82,13 +82,13 @@ interface LiteralErrorResult {
 // Helper to assert modifier extraction result is ok
 const assert_mod_ok = (result: ModifierExtractionResult): ModOkResult => {
 	assert.ok(result.ok, 'Expected modifier extraction to be ok');
-	return result as ModOkResult;
+	return result;
 };
 
 // Helper to assert literal resolution result is ok
 const assert_literal_ok = (result: LiteralResolutionResult): LiteralOkResult => {
 	assert.ok(result.ok, 'Expected literal resolution to be ok');
-	return result as LiteralOkResult;
+	return result;
 };
 
 // Helper to assert literal resolution result is not a literal (error with null)

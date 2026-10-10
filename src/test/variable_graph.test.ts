@@ -8,10 +8,10 @@ import {
 	generate_theme_css,
 	get_all_variable_names,
 	find_similar_variable
-} from '$lib/variable_graph.ts';
-import type { StyleVariable, Theme } from '$lib/variable.ts';
-import { scheme_adaptive_variables } from '$lib/scheme_adaptive_variables.ts';
-import { default_variables } from '$lib/variables.ts';
+} from '#lib/variable_graph.ts';
+import type { StyleVariable, Theme } from '#lib/variable.ts';
+import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
+import { default_variables } from '#lib/variables.ts';
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {

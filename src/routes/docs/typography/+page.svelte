@@ -9,18 +9,18 @@
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
-	import FontWeightControl from '$routes/FontWeightControl.svelte';
-	import FontSizeControl from '$routes/FontSizeControl.svelte';
-	import { default_variables } from '$lib/variables.ts';
+	import FontWeightControl from '#routes/FontWeightControl.svelte';
+	import FontSizeControl from '#routes/FontSizeControl.svelte';
+	import { default_variables } from '#lib/variables.ts';
 	import IconSizes from './IconSizes.svelte';
 	import {
 		line_height_names,
 		font_size_names,
 		text_scale_variants,
 		font_family_variants
-	} from '$lib/variable_data.ts';
-	import UnfinishedImplementationWarning from '$routes/docs/UnfinishedImplementationWarning.svelte';
-	import ResolvedLength from '$routes/docs/ResolvedLength.svelte';
+	} from '#lib/variable_data.ts';
+	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
+	import ResolvedLength from '#routes/docs/ResolvedLength.svelte';
 
 	const LIBRARY_ITEM_NAME = 'typography';
 

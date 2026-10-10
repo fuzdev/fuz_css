@@ -7,8 +7,8 @@
 	import { Library, library_context } from '@fuzdev/fuz_ui/library.svelte.ts';
 
 	import { tomes } from './tomes.ts';
-	import { library_json } from '$routes/library.ts';
-	import StyleVariableDetail from '$routes/StyleVariableDetail.svelte';
+	import { library_json } from '#routes/library.ts';
+	import StyleVariableDetail from '#routes/StyleVariableDetail.svelte';
 	import UnfinishedImplementationWarning from './UnfinishedImplementationWarning.svelte';
 
 	const {
