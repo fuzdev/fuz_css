@@ -1,0 +1,1 @@
+import{I as e}from"./DMltHi5d.js";import"./CuSITsI1.js";var t=e(e=>{let t=new MutationObserver(e);return t.observe(document.documentElement,{attributes:!0,attributeFilter:[`class`]}),()=>t.disconnect()}),n=()=>typeof document>`u`?`light`:(t(),document.documentElement.classList.contains(`dark`)?`dark`:`light`);export{n as t};

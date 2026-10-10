@@ -1,0 +1,1 @@
+export{t as component}from"../chunks/FT3k4_fP.js";

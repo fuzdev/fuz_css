@@ -1,0 +1,1 @@
+export{t as component}from"../chunks/Cya_q21k.js";

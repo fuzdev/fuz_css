@@ -1,0 +1,1 @@
+import{a as e,i as t}from"./CAlr-xlh.js";import{s as n}from"./qJKQ6wUa.js";var r=n=>t(e(e(n,`https://`),`www.`),`/`);n();export{r as t};

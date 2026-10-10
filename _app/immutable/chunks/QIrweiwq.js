@@ -1,0 +1,10 @@
+import{L as e,St as t,_t as n,at as r,et as i,gt as a,it as o,p as s,st as c,xt as l,z as u}from"./DMltHi5d.js";import{a as d}from"./y49kiT7T.js";import"./qJKQ6wUa.js";import{t as f}from"./R-UieIYX.js";var p=u(`fuz_css is in early alpha with breaking changes ahead. Your input and feedback is appreciated in
+	the GitHub issues for bugs and <a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> for everything else.`,1),m=u(`<p>fuz_css is a semantic-first CSS framework and design system. It styles elements by default and
+	integrates custom properties, themes, and utility classes into a complete system. It ships two
+	plain CSS files, the base <code>style.css</code> and replaceable <code>theme.css</code>, that work
+	with any framework and plain HTML, and its class generator supports HTML/JS/TS, Svelte, React,
+	Preact, Solid, and other JSX frameworks. For more see the <a>framework support</a> docs, and for
+	the companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.</p> <p>The only required parts are a reset stylesheet with the semantic defaults and a replaceable theme
+	stylesheet containing the variables used in the reset, and these require no dependencies. There's
+	also <a>utility classes</a> for composition and convenience with a
+	Vite plugin, and the library exports the full API for complex usage.</p> <p>More at the <a>docs</a> and <a href="https://github.com/fuzdev/fuz_css">repo</a>.</p> <!>`,1);function h(u,h){n(h,!0);var g=m(),_=r(g),v=c(o(_),5);l(3),t(_);var y=c(_,2),b=c(o(y));l(),t(y);var x=c(y,2),S=c(o(x));l(3),t(x);var C=c(x,2);f(C,{children:(t,n)=>{l();var r=p();l(2),e(t,r)},$$slots:{default:!0}}),i((e,t,n)=>{s(v,`href`,e),s(b,`href`,t),s(S,`href`,n)},[()=>d(`/docs/classes#Framework-support`),()=>d(`/docs/classes`),()=>d(`/docs`)]),e(u,g),a()}export{h as t};
