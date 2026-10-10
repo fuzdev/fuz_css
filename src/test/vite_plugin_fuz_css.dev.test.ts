@@ -250,6 +250,28 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 	});
 });
 
+describe('vite_plugin_fuz_css dev watcher', () => {
+	test('the cache directory is not watched', async () => {
+		await with_temp_root(
+			{ 'src/page.html': '<div class="p_md"></div>', [`${cache_dir}/stale.json`]: '{}' },
+			async (server, root) => {
+				// the cache holds a file from the start, so a watched cache would show by the time
+				// the watcher has reached the source next to it
+				const watched = await wait_for(() => {
+					const w = server.watcher.getWatched();
+					return w[join(root, 'src')]?.includes('page.html') ? w : undefined;
+				});
+				const cache_path = join(root, cache_dir);
+				const watched_cache_dirs = Object.keys(watched).filter(
+					(dir) => dir === cache_path || dir.startsWith(cache_path + '/')
+				);
+				assert.deepEqual(watched_cache_dirs, []);
+				assert.notInclude(watched[join(root, '.fuz')] ?? [], 'dev_test');
+			}
+		);
+	});
+});
+
 describe('vite_plugin_fuz_css pre-scanned files on disk', { timeout: POLLING_TEST_TIMEOUT }, () => {
 	// The watcher's events are emitted by hand: what's under test is the
 	// plugin's response to them, not when chokidar delivers one.

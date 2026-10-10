@@ -70,7 +70,7 @@ import {
 	type Plugin,
 	type ViteDevServer
 } from 'vite';
-import { dirname, isAbsolute, join } from 'node:path';
+import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
 import { fs_search } from '@fuzdev/fuz_util/fs.ts';
 import { each_concurrent } from '@fuzdev/fuz_util/async.ts';
@@ -659,6 +659,16 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		name: 'vite-plugin-fuz-css',
 		// Run before other plugins (like Svelte) to see original source files
 		enforce: 'pre',
+
+		config(user_config) {
+			// the cache is this plugin's own output, a file per extracted source, so the dev
+			// server's watcher skips it - each watched file costs an inotify watch, a budget
+			// shared with every process the user runs. The root resolves as Vite resolves it.
+			const root = user_config.root ? resolve(user_config.root) : process.cwd();
+			return {
+				server: { watch: { ignored: [normalizePath(join(root, cache_dir)) + '/**'] } }
+			};
+		},
 
 		configResolved(resolved_config) {
 			vite_root = ensure_end(resolved_config.root, '/');
