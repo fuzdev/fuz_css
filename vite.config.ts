@@ -29,6 +29,11 @@ const docs_classes: Array<string> = [
 ];
 
 export default defineConfig(({ mode }) => ({
+	server: {
+		// Vite watches the whole root, an inotify watch per file, and gro's `.gro/` output
+		// needn't come out of the user's `max_user_watches` budget
+		watch: { ignored: ['**/.gro/**'] }
+	},
 	plugins: [
 		sveltekit(),
 		svelte_docinfo({
