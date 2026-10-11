@@ -53,6 +53,7 @@ export default defineConfig(({ mode }) => ({
 			version: { name: execSync('git rev-parse HEAD').toString().trim() }
 		}),
 		svelte_docinfo({
+			onDuplicates: 'throw',
 			// a fixture for the plugin's dependency-extraction tests, not API
 			exclude: (defaults) => [...defaults, '**/example_class_utilities.ts']
 		}),
