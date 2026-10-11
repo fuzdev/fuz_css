@@ -18,6 +18,47 @@
 	<section>
 		<Introduction />
 		<TomeSection>
+			<TomeSectionHeader text="Design details" />
+			<ul>
+				<li>plain CSS</li>
+				<li>minimal dependencies, all optional (none needed if you only use the stylesheets)</li>
+				<li>
+					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML
+					elements, and also exports the underlying data, helpers, and types for open-ended usage
+				</li>
+				<li>
+					supports <TomeLink slug="themes" /> as sets of style variables, baked in at build time or
+					swapped at runtime; dark mode isn't a theme but a
+					<MdnLink path="Web/CSS/color-scheme">color scheme</MdnLink> any theme can support
+				</li>
+				<li>
+					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types
+					(token, composite, CSS-literal) and modifiers for responsive, state, color-scheme, and
+					pseudo-elements
+				</li>
+				<li>
+					uses its own concept of style <TomeLink slug="variables" />, a specialization of CSS
+					custom properties and design tokens that integrate with the other systems (e.g. the reset
+					stylesheet and token classes use variables, and themes are groups of variables)
+				</li>
+				<li>
+					the stylesheets work with any framework and plain HTML; utility class generation supports
+					HTML/JS/TS, Svelte, and JSX - see the utility class
+					<TomeLink slug="classes" hash="Framework-support">framework support</TomeLink>, and for
+					the companion Svelte integration see
+					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in
+					<a href="https://ui.fuz.dev/">fuz_ui</a>
+				</li>
+				<li>
+					see the
+					<TomeLink slug="classes" hash="Compared-to-alternatives">
+						comparison to alternatives
+					</TomeLink>
+					to understand fuz_css relative to TailwindCSS and UnoCSS
+				</li>
+			</ul>
+		</TomeSection>
+		<TomeSection>
 			<TomeSectionHeader text="Usage" />
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
@@ -77,47 +118,6 @@ import 'virtual:fuz.css'; // used utilities only`}
 				each scale don't use it) but loses every stop between, which carry the text, border, and
 				accent colors. A browser without cascade layers drops every rule, leaving unstyled HTML.
 			</p>
-		</TomeSection>
-		<TomeSection>
-			<TomeSectionHeader text="Details" />
-			<ul>
-				<li>plain CSS</li>
-				<li>minimal dependencies, all optional (none needed if you only use the stylesheets)</li>
-				<li>
-					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML
-					elements, and also exports the underlying data, helpers, and types for open-ended usage
-				</li>
-				<li>
-					supports <TomeLink slug="themes" /> as sets of style variables, baked in at build time or
-					swapped at runtime; dark mode isn't a theme but a
-					<MdnLink path="Web/CSS/color-scheme">color scheme</MdnLink> any theme can support
-				</li>
-				<li>
-					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types
-					(token, composite, CSS-literal) and modifiers for responsive, state, color-scheme, and
-					pseudo-elements
-				</li>
-				<li>
-					uses its own concept of style <TomeLink slug="variables" />, a specialization of CSS
-					custom properties and design tokens that integrate with the other systems (e.g. the reset
-					stylesheet and token classes use variables, and themes are groups of variables)
-				</li>
-				<li>
-					the stylesheets work with any framework and plain HTML; utility class generation supports
-					HTML/JS/TS, Svelte, and JSX - see the utility class
-					<TomeLink slug="classes" hash="Framework-support">framework support</TomeLink>, and for
-					the companion Svelte integration see
-					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in
-					<a href="https://ui.fuz.dev/">fuz_ui</a>
-				</li>
-				<li>
-					see the
-					<TomeLink slug="classes" hash="Compared-to-alternatives">
-						comparison to alternatives
-					</TomeLink>
-					to understand fuz_css relative to TailwindCSS and UnoCSS
-				</li>
-			</ul>
 		</TomeSection>
 	</section>
 </TomeContent>
