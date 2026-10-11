@@ -1,5 +1,5 @@
 import { describe, test, assert } from 'vitest';
-import { createServer, normalizePath, type ViteDevServer } from 'vite';
+import { createServer, normalizePath, type InlineConfig, type ViteDevServer } from 'vite';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { mkdir, mkdtemp, rm, writeFile } from 'node:fs/promises';
@@ -25,9 +25,11 @@ const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/dev_test');
 
 const create_dev_server = (
 	options?: VitePluginFuzCssOptions,
-	root = fixture_root
+	root = fixture_root,
+	config?: InlineConfig
 ): Promise<ViteDevServer> =>
 	createServer({
+		...config,
 		root,
 		configFile: false,
 		logLevel: 'silent',
@@ -57,7 +59,8 @@ const serves_class = async (server: ViteDevServer, class_name: string): Promise<
 const with_temp_root = async (
 	files: Record<string, string>,
 	fn: (server: ViteDevServer, root: string) => Promise<void>,
-	options?: VitePluginFuzCssOptions
+	options?: VitePluginFuzCssOptions,
+	config?: InlineConfig
 ): Promise<void> => {
 	const root = normalizePath(await mkdtemp(join(tmpdir(), 'fuz_css_dev_')));
 	let server: ViteDevServer | null = null;
@@ -66,7 +69,7 @@ const with_temp_root = async (
 			await mkdir(dirname(join(root, path)), { recursive: true });
 			await writeFile(join(root, path), content);
 		}
-		server = await create_dev_server(options, root);
+		server = await create_dev_server(options, root, config);
 		await fn(server, root);
 	} finally {
 		await server?.close();
@@ -510,6 +513,36 @@ describe('vite_plugin_fuz_css served variants', { timeout: POLLING_TEST_TIMEOUT 
 		} finally {
 			await server.close();
 		}
+	});
+});
+
+describe('vite_plugin_fuz_css dev environments', { timeout: POLLING_TEST_TIMEOUT }, () => {
+	test('a change invalidates the served variants in every environment', async () => {
+		// each environment caches its own transform of a variant, and the inlined
+		// one lives in a server environment - SvelteKit's `ssr`, or one an
+		// adapter or framework names itself, stood in for by `edge`
+		const inlined_css = async (server: ViteDevServer, name: string): Promise<string> => {
+			const result = await server.environments[name]!.transformRequest('/__fuz.css?inline');
+			assert(result, `${name} serves the inlined variant`);
+			return result.code;
+		};
+		await with_temp_root(
+			{ 'src/page.html': '<div class="p_md"></div>' },
+			async (server, root) => {
+				assert(await serves_class(server, 'p_md'));
+				for (const name of ['ssr', 'edge']) {
+					assert.include(await inlined_css(server, name), '.p_md');
+				}
+				await writeFile(join(root, 'src/page.html'), '<div class="p_md pb_xl7"></div>');
+				server.watcher.emit('change', join(root, 'src/page.html'));
+				await wait_for(() => serves_class(server, 'pb_xl7'));
+				for (const name of ['ssr', 'edge']) {
+					assert.include(await inlined_css(server, name), '.pb_xl7', `${name} serves the change`);
+				}
+			},
+			undefined,
+			{ environments: { edge: {} } }
+		);
 	});
 });
 

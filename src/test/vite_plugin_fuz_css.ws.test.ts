@@ -10,7 +10,14 @@
  */
 
 import { describe, test, assert } from 'vitest';
-import { createServer, type Plugin, type ServerOptions, type ViteDevServer } from 'vite';
+import {
+	createServer,
+	type Logger,
+	type Plugin,
+	type ServerOptions,
+	type UserConfig,
+	type ViteDevServer
+} from 'vite';
 import type { AddressInfo } from 'node:net';
 
 import { vite_plugin_fuz_css } from '#lib/vite_plugin_fuz_css.ts';
@@ -18,7 +25,9 @@ import {
 	vite_dev_fixture_root as fixture_root,
 	filter_dev_fixture_html_and_late_module as filter_fixture_file,
 	use_suite_cache_dir,
-	wait_for
+	wait_for,
+	create_capturing_logger,
+	type CapturedLogs
 } from './vite_plugin_test_helpers.ts';
 
 const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/ws_test');
@@ -81,7 +90,7 @@ const count_css_updates = (session: WsSession): number =>
 const plugin_ping: Plugin = {
 	name: 'test-ping',
 	configureServer(server) {
-		server.hot.on('test:ping', (_data, client) => client.send('test:pong', {}));
+		server.environments.client.hot.on('test:ping', (_data, client) => client.send('test:pong', {}));
 	}
 };
 
@@ -103,7 +112,12 @@ const settle = async (session: WsSession): Promise<void> => {
 describe('vite_plugin_fuz_css evaluation handshake', () => {
 	const with_listening_server = async (
 		fn: (server: ViteDevServer, connect: () => Promise<WsSession>) => Promise<void>,
-		config?: { server?: ServerOptions; plugins?: Array<Plugin> }
+		config?: {
+			server?: ServerOptions;
+			plugins?: Array<Plugin>;
+			future?: UserConfig['future'];
+			customLogger?: Logger;
+		}
 	): Promise<void> => {
 		let server: ViteDevServer | null = null;
 		const sessions: Array<WsSession> = [];
@@ -114,6 +128,8 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 				logLevel: 'silent',
 				server: { host: '127.0.0.1', port: 0, ...config?.server },
 				optimizeDeps: { noDiscovery: true },
+				future: config?.future,
+				customLogger: config?.customLogger,
 				plugins: [
 					vite_plugin_fuz_css({ filter_file: filter_fixture_file, cache_dir }),
 					plugin_ping,
@@ -343,6 +359,40 @@ describe('vite_plugin_fuz_css evaluation handshake', () => {
 					assert(!client.code.includes('fuz_css:evaluated'));
 				},
 				{ server: { ws: false } }
+			);
+		},
+		TEST_TIMEOUT
+	);
+
+	test(
+		'the update and the handshake reach none of the dev server APIs Vite is removing',
+		async () => {
+			// Vite replaces the mixed `server.moduleGraph` and `server.hot` with
+			// per-environment ones, and these flags warn on each use of the old
+			const logs: CapturedLogs = { warnings: [], errors: [] };
+			await with_listening_server(
+				async (server, connect) => {
+					const first = await server.transformRequest('/__fuz.css');
+					assert(first);
+					const client = await connect();
+
+					// the debounced update: invalidation and the broadcast push
+					await server.transformRequest('/extra/late_module.ts');
+					await wait_for(() => (count_css_updates(client) === 1 ? true : undefined));
+
+					// the handshake: a report of stale code, answered with a push
+					send_evaluated(client, parse_evaluated_hash(first.code));
+					await wait_for(() => (count_css_updates(client) === 2 ? true : undefined));
+				},
+				{
+					future: { removeServerModuleGraph: 'warn', removeServerHot: 'warn' },
+					customLogger: create_capturing_logger(logs)
+				}
+			);
+			assert.deepEqual(
+				logs.warnings.filter((w) => w.includes('vite future')),
+				[],
+				'no deprecated server API was reached'
 			);
 		},
 		TEST_TIMEOUT

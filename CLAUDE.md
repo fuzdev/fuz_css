@@ -148,8 +148,11 @@ Two generators available, both using AST-based extraction and per-file caching:
    is delivered by a handshake: each client reports the module code it
    evaluated, and the server pushes that client an update when a refetch
    would give it different code, once per reported code (no report is
-   added when `server.ws` or `server.hmr` is off). In build the virtual
-   module is a
+   added when `server.ws` or `server.hmr` is off). A change invalidates
+   each served variant in every dev environment's module graph - the
+   `?inline` one SvelteKit inlines into SSR'd `<head>` lives in a server
+   environment - while the push and the handshake ride the client
+   environment's hot channel. In build the virtual module is a
    placeholder rule until every transform has run: `renderChunk` restates it
    with a hash of the generated CSS, so the stylesheet's filename (and the
    chunks named from it) tracks that CSS, and `generateBundle` splices the

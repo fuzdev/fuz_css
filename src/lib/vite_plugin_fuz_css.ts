@@ -64,8 +64,8 @@
 
 import {
 	normalizePath,
-	type HotChannelClient,
 	type HotPayload,
+	type NormalizedHotChannelClient,
 	type Logger as ViteLogger,
 	type Plugin,
 	type ViteDevServer
@@ -353,7 +353,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	 * current code. Vite hands a hot channel listener one client object per
 	 * connection, which keys this for the connection's life.
 	 */
-	const pushed_evaluated_hashes: WeakMap<HotChannelClient, string> = new WeakMap();
+	const pushed_evaluated_hashes: WeakMap<NormalizedHotChannelClient, string> = new WeakMap();
 	/**
 	 * The pre-scan's directories as normalized absolute paths ending in `/`.
 	 * Set with `prescan_root_html` when the dev server is configured and the
@@ -419,29 +419,37 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 
 	/**
 	 * Invalidates every served virtual-module variant and pushes the js-update
-	 * that makes connected clients refetch. A client that hasn't evaluated the
-	 * module yet drops the update - `resync_evaluated_client` covers it.
+	 * that makes connected clients refetch. Only the client environment has
+	 * browsers to push to. A client that hasn't evaluated the module yet drops
+	 * the update - `resync_evaluated_client` covers it.
 	 */
 	const invalidate_and_push = (new_css: string): void => {
 		announced_css = new_css;
 		invalidate_served_modules();
-		if (server!.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)) {
-			server!.hot.send(create_virtual_module_update());
+		const { client } = server!.environments;
+		if (client.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)) {
+			client.hot.send(create_virtual_module_update());
 		}
 	};
 
 	/**
 	 * Invalidates every served virtual-module variant, not just the bare id,
-	 * so the next request of any of them runs `load()` again. The bare
-	 * `/__fuz.css` backs the client `<style>`; the `?inline`/`?direct`/`?used`
-	 * variants have no client HMR boundary - they're read fresh by the next
-	 * SSR render - so invalidating their cached module is enough; without it,
-	 * SvelteKit keeps inlining stale `<head>` CSS on every reload.
+	 * in every dev environment, so the next request of any of them runs
+	 * `load()` again. The bare `/__fuz.css` backs the client `<style>`; the
+	 * `?inline`/`?direct`/`?used` variants have no client HMR boundary - they're
+	 * read fresh by the next SSR render - so invalidating their cached module
+	 * is enough; without it, SvelteKit keeps inlining stale `<head>` CSS on
+	 * every reload. Each environment has its own module graph, and the
+	 * inlined variant lives in a server one (SvelteKit's `ssr`, or whatever a
+	 * framework or adapter names its own), so every environment is walked
+	 * rather than a fixed pair.
 	 */
 	const invalidate_served_modules = (): void => {
-		for (const vid of loaded_virtual_ids) {
-			const mod = server!.moduleGraph.getModuleById(vid);
-			if (mod) server!.moduleGraph.invalidateModule(mod);
+		for (const { moduleGraph } of Object.values(server!.environments)) {
+			for (const vid of loaded_virtual_ids) {
+				const mod = moduleGraph.getModuleById(vid);
+				if (mod) moduleGraph.invalidateModule(mod);
+			}
 		}
 	};
 
@@ -510,11 +518,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	 * @param data - the event's payload, untrusted
 	 * @param client - the client that reported, and the only one pushed
 	 */
-	const resync_evaluated_client = (data: unknown, client: HotChannelClient): void => {
+	const resync_evaluated_client = (data: unknown, client: NormalizedHotChannelClient): void => {
 		const hash = (data as { hash?: unknown } | null)?.hash;
 		if (typeof hash !== 'string') return;
 		const current_code =
-			server?.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)?.transformResult?.code;
+			server?.environments.client.moduleGraph.getModuleById(RESOLVED_VIRTUAL_ID)?.transformResult
+				?.code;
 		if (current_code?.includes(to_evaluated_report(hash))) {
 			pushed_evaluated_hashes.delete(client);
 			return;
@@ -706,8 +715,9 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 				});
 			}
 
-			// The evaluation handshake - see `resync_evaluated_client`
-			dev_server.hot.on(EVALUATED_EVENT, resync_evaluated_client);
+			// The evaluation handshake - see `resync_evaluated_client`. Reports
+			// come from browsers, so only the client environment's channel
+			dev_server.environments.client.hot.on(EVALUATED_EVENT, resync_evaluated_client);
 
 			// Keep the pre-scanned set current. `transform` re-ingests a file the
 			// module graph reaches, but nothing transforms the rest of what the
