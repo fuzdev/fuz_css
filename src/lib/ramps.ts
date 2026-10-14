@@ -113,7 +113,7 @@ export const SHADE_LIGHTNESS_KNOBS: Readonly<
 	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
 > = {
 	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.09 },
-	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 0.92 }
+	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 1.05 }
 };
 
 /** Fitted lightness knobs for the text ramps. */

@@ -1767,7 +1767,7 @@
 		--shade_max: #fff;
 		--shade_lightness_00: 0.171;
 		--shade_lightness_100: 0.97;
-		--shade_lightness_curve: 0.92;
+		--shade_lightness_curve: 1.05;
 		--fg_00: var(--lighten_00);
 		--fg_05: var(--lighten_05);
 		--fg_10: var(--lighten_10);

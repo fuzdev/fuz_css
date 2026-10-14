@@ -101,7 +101,7 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'shade_max', light: '#000', dark: '#fff' },
 	{ name: 'shade_lightness_00', light: '0.97', dark: '0.171' },
 	{ name: 'shade_lightness_100', light: '0.171', dark: '0.97' },
-	{ name: 'shade_lightness_curve', light: '1.09', dark: '0.92' },
+	{ name: 'shade_lightness_curve', light: '1.09', dark: '1.05' },
 	{ name: 'fg_00', light: 'var(--darken_00)', dark: 'var(--lighten_00)' },
 	{ name: 'fg_05', light: 'var(--darken_05)', dark: 'var(--lighten_05)' },
 	{ name: 'fg_10', light: 'var(--darken_10)', dark: 'var(--lighten_10)' },
