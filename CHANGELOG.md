@@ -1,5 +1,12 @@
 # @fuzdev/fuz_css
 
+## 0.66.2
+
+### Patch Changes
+
+- fix: soften the dark shade ramp curve from 0.92 to 1.05 so the near-dark surface stops (`shade_05`, `shade_10`, `shade_20`) sit darker, closer to the pre-oklch look; the ramp endpoints are unchanged ([ea69e75](https://github.com/fuzdev/fuz_css/commit/ea69e75))
+- fix: a dev change invalidates the served CSS in every Vite environment, not just `client` and `ssr`, and the plugin uses the per-environment module graphs and hot channel instead of the mixed `server.moduleGraph` and `server.hot`, so it runs clean under Vite's `future.removeServerModuleGraph`/`removeServerHot` flags ([928bc7e](https://github.com/fuzdev/fuz_css/commit/928bc7e))
+
 ## 0.66.1
 
 ### Patch Changes
