@@ -104,11 +104,16 @@ When the defaults don't cover something, reach for a class:
   Tailwind's `p-4` is `1rem`, 16px; here 16px is `1.6rem`, and the spacing tokens carry the scale (`p_xl` is 16px at the defaults).
 - **Utilities are generated from what you use**, found by parsing your source
   rather than matching it with a regex.
-- **Three class types:** token classes map to design variables (`p_md`, `color_a_50`),
+- **Four class types:** token classes map to design variables (`p_md`, `color_a_50`),
+  keyword classes are CSS keywords that name their property (`flex`, `sticky`, `uppercase`),
   composites bundle properties (`row`, `box`, `panel`),
-  and literals are CSS itself in `property:value` form (`display:flex`, `margin:0~auto`),
+  and literals are CSS itself in `property:value` form (`justify-content:center`, `margin:0~auto`),
   with modifiers like `md:` and `hover:`.
-- **Tokens and literals beat composites:** composites render in a lower cascade layer,
+- **Tailwind's keyword names resolve, its own names don't:** a Tailwind project's
+  `flex`, `hidden`, or `sticky` gets the same CSS here,
+  but `items-center` and `justify-between` generate nothing, with no warning,
+  so `flex items-center` half-works. Spell those as literals (`align-items:center`).
+- **Tokens, keywords, and literals beat composites:** composites render in a lower cascade layer,
   so `panel shadow_md` gets the medium shadow whatever the class order.
 
 More in the [classes docs](https://css.fuz.dev/docs/classes).

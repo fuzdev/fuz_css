@@ -1,7 +1,8 @@
 declare module '@webref/css' {
 	interface CssProperty {
 		name: string;
-		value: string;
+		/** The value grammar, absent for a few legacy entries. */
+		syntax?: string;
 		initial: string;
 		appliesTo: string;
 		inherited: string;
@@ -11,8 +12,15 @@ declare module '@webref/css' {
 		animationType: string;
 	}
 
+	interface CssType {
+		name: string;
+		syntax?: string;
+	}
+
 	interface IndexedCssData {
 		properties: Record<string, CssProperty>;
+		/** Value types like `display-inside`, keyed without the angle brackets. */
+		types: Record<string, CssType>;
 	}
 
 	interface CssModule {

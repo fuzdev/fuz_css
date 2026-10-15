@@ -31,9 +31,9 @@
 					<MdnLink path="Web/CSS/color-scheme">color scheme</MdnLink> any theme can support
 				</li>
 				<li>
-					supports optional <TomeLink slug="classes">utility classes</TomeLink> with three types
-					(token, composite, CSS-literal) and modifiers for responsive, state, color-scheme, and
-					pseudo-elements
+					supports optional <TomeLink slug="classes">utility classes</TomeLink> with four types
+					(token, keyword, composite, CSS-literal) and modifiers for responsive, state,
+					color-scheme, and pseudo-elements
 				</li>
 				<li>
 					uses its own concept of style <TomeLink slug="variables" />, a specialization of CSS

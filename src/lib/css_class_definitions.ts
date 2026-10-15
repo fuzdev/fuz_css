@@ -1,8 +1,11 @@
 /**
- * Built-in CSS class definitions combining token classes and composites.
+ * Built-in CSS class definitions combining composites, keyword classes, and
+ * token classes.
  *
- * Token classes map to CSS variables (design tokens).
- * For other CSS properties, use CSS-literal syntax like `display:flex` or `position:absolute`.
+ * Token classes map to CSS variables (design tokens), and keyword classes are
+ * CSS value keywords that identify their property (`flex`, `sticky`). For
+ * other CSS values, use CSS-literal syntax like `justify-content:center` or
+ * `overflow:hidden`.
  *
  * @module
  */
@@ -37,17 +40,21 @@ import {
 	darken_lighten_variants
 } from './variable_data.ts';
 import { css_class_composites } from './css_class_composites.ts';
+import { css_class_keywords } from './css_class_keywords.ts';
 
 // TODO add animation support, either as a separate thing or rename `css_class_definitions` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 
 /**
- * All built-in CSS class definitions (token classes + composites).
+ * All built-in CSS class definitions (composites, keyword classes, and token classes).
  *
  * @see `generate_classes_css`
  */
 export const css_class_definitions: Record<string, CssClassDefinition | undefined> = {
 	// Composite classes go first, so they can be overridden by the more specific classes.
 	...css_class_composites,
+
+	// Keyword classes - bare CSS value keywords like `flex` and `sticky`, plus `hidden`
+	...css_class_keywords,
 
 	/*
 

@@ -153,6 +153,17 @@ export interface CssClassDefinitionBase {
 	 * without `composes`.
 	 */
 	composite?: boolean;
+	/**
+	 * Whether the class orders late within its bucket: after every rule that
+	 * ties with it on color scheme, media query, property rank, and state
+	 * order, interpreted literals included, so `display:flex hidden` hides
+	 * while a media query still outranks it (`hidden md:flex` shows at `md`
+	 * and up). For an override that should win its ties whatever else names
+	 * the same property, like `hidden`. Composites order by their registry
+	 * position, which no two share, so the flag only reorders single-purpose
+	 * classes.
+	 */
+	late?: boolean;
 }
 
 /** Pure utility composition (composes only). */
@@ -274,7 +285,8 @@ export interface GenerateClassesCssOptions {
  * within each tier rules sort by color scheme, then media query
  * (`compare_media_modifiers`), then property rank (shorthands before
  * longhands, `to_property_rank`; definition order for composites), then
- * state order (LVFHA), then registry order (interpreted classes after static
+ * state order (LVFHA), then the late flag (a `late` class after the rules
+ * it ties with), then registry order (interpreted classes after static
  * ones), and only then by name, between interpreted classes of equal rank.
  * Rules sharing a color scheme and
  * media query render in one block. `dark:` and `light:` add no
@@ -406,6 +418,8 @@ export interface CssClassRule {
 	 * for an interpreted class, breaking ties between rules of equal rank.
 	 */
 	definition_index: number;
+	/** Orders after the rules it ties with on rank and state (`CssClassDefinitionBase.late`). */
+	late: boolean;
 	body: CssClassRuleBody;
 	comment: string | null;
 }
@@ -554,6 +568,7 @@ const resolve_base_class = (
 				definition: {
 					comment: interpreter.comment,
 					composite: interpreter.composite,
+					late: interpreter.late,
 					...definition
 				},
 				from_interpreter: true
@@ -577,6 +592,7 @@ const to_class_rule = (
 	const composite =
 		definition.composite ?? ('ruleset' in definition || definition.composes !== undefined);
 	const comment = definition.comment?.trim() || null;
+	const late = definition.late ?? false;
 	const selector_suffix =
 		modifiers.states.map((s) => s.css).join('') + (modifiers.pseudo_element?.css ?? '');
 
@@ -632,6 +648,7 @@ const to_class_rule = (
 				composite,
 				rank: composite ? definition_index : 0,
 				definition_index,
+				late,
 				body: { type: 'verbatim', css: definition.ruleset.trim() },
 				comment
 			};
@@ -652,6 +669,7 @@ const to_class_rule = (
 			composite,
 			rank: composite ? definition_index : 0,
 			definition_index,
+			late,
 			body: { type: 'rules', rules },
 			comment
 		};
@@ -677,6 +695,7 @@ const to_class_rule = (
 		composite,
 		rank: composite ? definition_index : to_declaration_rank(resolution.declaration),
 		definition_index,
+		late,
 		body: {
 			type: 'declaration',
 			selector: `.${escaped}${selector_suffix}`,
@@ -725,8 +744,9 @@ const compare_ancestors = (a: ModifierDefinition | null, b: ModifierDefinition |
 /**
  * Orders class rules for emission, the later winning where two apply with
  * equal specificity: color scheme, media query, rank, state order, then
- * registry order (so a token or literal wins a same-property tie with a
- * single-property shortcut like `circular`), then the class name by code
+ * the late flag (`CssClassDefinitionBase.late`), then registry order (so a
+ * token or literal wins a same-property tie with a single-property shortcut
+ * like `circular`), then the class name by code
  * units, a deterministic last resort that decides only between interpreted
  * classes of equal rank (two literals of one property, like
  * `opacity:50% opacity:80%`, conflict by name).
@@ -736,6 +756,7 @@ const compare_class_rules = (a: CssClassRule, b: CssClassRule): number =>
 	compare_media_modifiers(a.modifiers.media, b.modifiers.media) ||
 	a.rank - b.rank ||
 	to_state_order(a) - to_state_order(b) ||
+	Number(a.late) - Number(b.late) ||
 	a.definition_index - b.definition_index ||
 	(a.class_name < b.class_name ? -1 : a.class_name > b.class_name ? 1 : 0);
 

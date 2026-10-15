@@ -3,6 +3,7 @@ import { test, describe, assert } from 'vitest';
 import { generate_classes_css } from '#lib/css_class_generation.ts';
 import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
+import { extract_css_classes } from '#lib/css_class_extractor.ts';
 import { assert_css_order } from './test_helpers.ts';
 
 const generate = (class_names: Array<string>): string =>
@@ -192,6 +193,133 @@ describe('generate_classes_css composites sublayer', () => {
 				assert.ok(definition.composite, `"${name}" sets ${standard.join(', ')}`);
 			}
 		}
+	});
+});
+
+describe('generate_classes_css hidden and the late flag', () => {
+	// the single-purpose tier, after the composites sublayer's closing brace
+	const atomic = (css: string): string => {
+		const start = css.indexOf('@layer composites {');
+		if (start === -1) return css;
+		let depth = 0;
+		for (let i = start; i < css.length; i++) {
+			if (css[i] === '{') depth++;
+			else if (css[i] === '}' && --depth === 0) return css.slice(i + 1);
+		}
+		return '';
+	};
+
+	test('hidden beats a display literal it ties with, whatever the class order', () => {
+		assert_css_order(generate(['display:flex', 'hidden']), '.display\\:flex', '.hidden');
+		assert_css_order(generate(['hidden', 'display:flex']), '.display\\:flex', '.hidden');
+		assert_css_order(generate(['display:grid', 'hidden']), '.display\\:grid', '.hidden');
+		// `display:table` sorts after `display:none` by name, so only the flag puts hidden last
+		assert_css_order(generate(['display:table', 'hidden']), '.display\\:table', '.hidden');
+	});
+
+	test('hidden beats the display keyword classes', () => {
+		assert_css_order(generate(['hidden', 'flex']), '.flex', '.hidden');
+		assert_css_order(generate(['hidden', 'inline-grid']), '.inline-grid', '.hidden');
+	});
+
+	test('a toggled hidden in a class array beats the literal beside it', () => {
+		const classes = extract_css_classes(
+			`<script>let open = $state(false);</script><div class={['display:flex', {hidden: !open}]}></div>`,
+			{ filename: 'App.svelte' }
+		);
+		assert.ok(classes);
+		assert.ok(classes.has('hidden') && classes.has('display:flex'));
+		assert_css_order(generate([...classes]), '.display\\:flex', '.hidden');
+	});
+
+	test('a media query still outranks hidden', () => {
+		assert_css_order(
+			generate(['md:flex', 'hidden']),
+			'.hidden',
+			'@media (width >= 48rem)',
+			'.md\\:flex'
+		);
+		assert_css_order(
+			generate(['md:display:flex', 'hidden']),
+			'.hidden',
+			'@media (width >= 48rem)',
+			'.md\\:display\\:flex'
+		);
+	});
+
+	test('a display:none literal shows again at a breakpoint', () => {
+		assert_css_order(
+			generate(['md:display:flex', 'display:none']),
+			'.display\\:none',
+			'.md\\:display\\:flex'
+		);
+	});
+
+	test('max-md:hidden hides a row below md', () => {
+		const css = generate(['row', 'max-md:hidden']);
+		assert_css_order(css, '@layer composites {', '.row', '(width < 48rem)', '.max-md\\:hidden');
+		assert.include(atomic(css), '.max-md\\:hidden');
+	});
+
+	test('print:hidden beats display classes in print', () => {
+		const css = generate(['print:hidden', 'flex', 'display:flex']);
+		assert_css_order(css, '.flex', '.display\\:flex', '@media print', '.print\\:hidden');
+	});
+
+	test('hidden md:row stays hidden at md - an unmodified single-purpose class beats a composite', () => {
+		const css = generate(['hidden', 'md:row']);
+		// the modified composite renders in the lower sublayer, so `.hidden` wins at every width
+		assert_css_order(css, '@layer composites {', '.md\\:row', '.hidden');
+		assert.notInclude(atomic(css), '.md\\:row');
+	});
+
+	test('a state still outranks hidden', () => {
+		// late orders within a state bucket, after the state order
+		assert_css_order(
+			generate(['hover:display:flex', 'hidden']),
+			'.hidden',
+			'.hover\\:display\\:flex'
+		);
+	});
+
+	test('the flag orders a custom definition after the literals it ties with', () => {
+		const run = (late: boolean): string =>
+			generate_classes_css({
+				class_names: ['opacity:50%', 'faded'],
+				class_definitions: { faded: { declaration: 'opacity: 20%;', late } },
+				interpreters: css_class_interpreters,
+				css_properties: null
+			}).css;
+		assert_css_order(run(true), '.opacity\\:50\\%', '.faded');
+		assert_css_order(run(false), '.faded', '.opacity\\:50\\%');
+	});
+
+	test('the flag is taken from an interpreter', () => {
+		// by name `aa-late` would sort first
+		const css = generate_classes_css({
+			class_names: ['aa-late', 'zz-early'],
+			class_definitions: {},
+			interpreters: [
+				{
+					pattern: /^aa-late$/,
+					late: true,
+					interpret: () => ({ declaration: 'color: red;' })
+				},
+				{ pattern: /^zz-early$/, interpret: () => ({ declaration: 'color: blue;' }) }
+			],
+			css_properties: null
+		}).css;
+		assert_css_order(css, '.zz-early', '.aa-late');
+	});
+
+	test('the flag does not cross a property rank', () => {
+		const css = generate_classes_css({
+			class_names: ['padding-left:0', 'reset'],
+			class_definitions: { reset: { declaration: 'padding: 0;', late: true } },
+			interpreters: css_class_interpreters,
+			css_properties: null
+		}).css;
+		assert_css_order(css, '.reset', '.padding-left\\:0');
 	});
 });
 

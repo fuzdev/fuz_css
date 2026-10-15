@@ -69,8 +69,8 @@ common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,
 work down the ladder and stop at the first rung that suffices: right semantic
 element → built-in class convention (`.selected`, `.palette_a`) → composite
-(`box`, `row`, `panel`) → token class (`p_md`, `gap_lg`) → literal
-(`display:flex`) → `<style>` block with design tokens. Never hardcode spacing
+(`box`, `row`, `panel`) → token or keyword class (`p_md`, `gap_lg`, `flex`)
+→ literal (`justify-content:center`) → `<style>` block with design tokens. Never hardcode spacing
 or color values.
 
 ### Two core concepts
@@ -242,7 +242,7 @@ bundled mode. The plugin skips its own output, the virtual module.
 
 See the `VitePluginFuzCssOptions` type for configuration.
 
-### Three class types
+### Four class types
 
 - **Token classes** - Map to style variables: `p_md`, `color_a_50`,
   `positive_50`, `gap_lg`. Palette-letter classes are property-first and the
@@ -268,6 +268,23 @@ See the `VitePluginFuzCssOptions` type for configuration.
   `menuitem`, `chevron`, `chip`. The single-property shortcuts among them
   (`pixelated`, `circular`, `mb_flow`, `mt_flow`) order with the token
   classes, outside the composites sublayer
+- **Keyword classes** - [css_class_keywords.ts](src/lib/css_class_keywords.ts):
+  a CSS value keyword that names its property alone, as a bare class setting
+  that one declaration (`flex` is `display: flex`). "The CSS spec is the
+  namespace": a keyword shared across properties (`center`, `none`) stays a
+  literal, and hyphens mean CSS's own words (`inline-flex`) while multi-word
+  names fuz_css coins join with underscores. The slate: display `flex`, `inline-flex`, `grid`,
+  `inline-grid`, `inline-block`, `block`, `flow-root`; position `relative`,
+  `absolute`, `fixed`, `sticky`; `uppercase`, `lowercase`, `capitalize`;
+  `italic`, `oblique`; `bold`, `bolder`, `lighter`; and the
+  `text-decoration-line` longhand's `underline`, `overline`, `line-through`.
+  Plus `hidden` (`display: none`, mirroring the attribute, for
+  `max-md:hidden`/`print:hidden` - the `[hidden]` attribute still beats every
+  class), the one definition flagged `late`. `row`/`column`/`box` stay
+  composites, so `hidden md:row` stays hidden at every width (an unmodified
+  single-purpose class beats a modified composite) - the docs teach
+  `max-md:hidden row`. Tailwind-only names (`items-center`) still generate
+  nothing, silently
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
@@ -282,12 +299,16 @@ modifiers) and derives the order from that structure rather than from what
 the names say (the code-unit name is only the last tie-break, deciding between
 interpreted classes of equal rank): composites render in the
 `fuz.utilities.composites` sublayer beneath every single-purpose class
-(`composite: true`, the default for rulesets and `composes`), and within each tier rules sort by color scheme, then media
+(`composite: true`, the default for rulesets and `composes`), and within
+each tier rules sort by color scheme, then media
 query (`min-width` ascending, `max-width` descending, feature queries last),
 then property rank (shorthands before longhands, `to_property_rank`;
-definition order for composites), then state order (LVFHA), then registry
-order (literals and other interpreted classes after static ones, so a token
-or literal wins a tie with `circular`). Rules sharing a media query render
+definition order for composites), then state order (LVFHA), then the
+`late` flag (`CssClassDefinitionBase.late`: a flagged single-purpose class
+sorts after the rules it ties with, literals included - `hidden`, so
+`display:flex hidden` hides while `hidden md:flex` still shows at `md`),
+then registry order (literals and other interpreted classes after static
+ones, so a token or literal wins a tie with `circular`). Rules sharing a media query render
 in one block. `dark:`/`light:` wrap the root selector in
 `:where()`, adding no specificity, and render twice - under the root class
 and under `prefers-color-scheme` for a root naming no scheme
@@ -769,6 +790,8 @@ typography, borders, shading, shadows, layout. See
   template generators
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite class
   definitions
+- [css_class_keywords.ts](src/lib/css_class_keywords.ts) - Keyword class
+  definitions (and `hidden`), spread into the registry after the composites
 - [css_class_resolution.ts](src/lib/css_class_resolution.ts) - Class resolution
   and cycle detection
 - [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - The

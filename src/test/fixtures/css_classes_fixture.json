@@ -90,6 +90,76 @@
 	"chip": {
 		"ruleset": "\n\t\t\t.chip {\n\t\t\t\tfont-weight: 500;\n\t\t\t\tfont-size: var(--font_size, revert-layer); /* without a size context, the element's base size wins */\n\t\t\t\tpadding-left: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tpadding-right: var(--chip_padding_x, var(--space_xs));\n\t\t\t\tbackground-color: var(--ink_10);\n\t\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\t}\n\t\t\ta.chip {\n\t\t\t\tfont-weight: 600;\n\t\t\t}\n\t\t\t.chip.palette_a {\n\t\t\t\tcolor: var(--palette_a_60);\n\t\t\t\t--text_color: var(--palette_a_60);\n\t\t\t\tbackground-color: var(--palette_a_10);\n\t\t\t}\n\t\t\t.chip.palette_b {\n\t\t\t\tcolor: var(--palette_b_60);\n\t\t\t\t--text_color: var(--palette_b_60);\n\t\t\t\tbackground-color: var(--palette_b_10);\n\t\t\t}\n\t\t\t.chip.palette_c {\n\t\t\t\tcolor: var(--palette_c_60);\n\t\t\t\t--text_color: var(--palette_c_60);\n\t\t\t\tbackground-color: var(--palette_c_10);\n\t\t\t}\n\t\t\t.chip.palette_d {\n\t\t\t\tcolor: var(--palette_d_60);\n\t\t\t\t--text_color: var(--palette_d_60);\n\t\t\t\tbackground-color: var(--palette_d_10);\n\t\t\t}\n\t\t\t.chip.palette_e {\n\t\t\t\tcolor: var(--palette_e_60);\n\t\t\t\t--text_color: var(--palette_e_60);\n\t\t\t\tbackground-color: var(--palette_e_10);\n\t\t\t}\n\t\t\t.chip.palette_f {\n\t\t\t\tcolor: var(--palette_f_60);\n\t\t\t\t--text_color: var(--palette_f_60);\n\t\t\t\tbackground-color: var(--palette_f_10);\n\t\t\t}\n\t\t\t.chip.palette_g {\n\t\t\t\tcolor: var(--palette_g_60);\n\t\t\t\t--text_color: var(--palette_g_60);\n\t\t\t\tbackground-color: var(--palette_g_10);\n\t\t\t}\n\t\t\t.chip.palette_h {\n\t\t\t\tcolor: var(--palette_h_60);\n\t\t\t\t--text_color: var(--palette_h_60);\n\t\t\t\tbackground-color: var(--palette_h_10);\n\t\t\t}\n\t\t\t.chip.palette_i {\n\t\t\t\tcolor: var(--palette_i_60);\n\t\t\t\t--text_color: var(--palette_i_60);\n\t\t\t\tbackground-color: var(--palette_i_10);\n\t\t\t}\n\t\t\t.chip.palette_j {\n\t\t\t\tcolor: var(--palette_j_60);\n\t\t\t\t--text_color: var(--palette_j_60);\n\t\t\t\tbackground-color: var(--palette_j_10);\n\t\t\t}\n\t\t"
 	},
+	"flex": {
+		"declaration": "display: flex;"
+	},
+	"inline-flex": {
+		"declaration": "display: inline-flex;"
+	},
+	"grid": {
+		"declaration": "display: grid;"
+	},
+	"inline-grid": {
+		"declaration": "display: inline-grid;"
+	},
+	"inline-block": {
+		"declaration": "display: inline-block;"
+	},
+	"block": {
+		"declaration": "display: block;"
+	},
+	"flow-root": {
+		"declaration": "display: flow-root;"
+	},
+	"relative": {
+		"declaration": "position: relative;"
+	},
+	"absolute": {
+		"declaration": "position: absolute;"
+	},
+	"fixed": {
+		"declaration": "position: fixed;"
+	},
+	"sticky": {
+		"declaration": "position: sticky;"
+	},
+	"uppercase": {
+		"declaration": "text-transform: uppercase;"
+	},
+	"lowercase": {
+		"declaration": "text-transform: lowercase;"
+	},
+	"capitalize": {
+		"declaration": "text-transform: capitalize;"
+	},
+	"italic": {
+		"declaration": "font-style: italic;"
+	},
+	"oblique": {
+		"declaration": "font-style: oblique;"
+	},
+	"bold": {
+		"declaration": "font-weight: bold;"
+	},
+	"bolder": {
+		"declaration": "font-weight: bolder;"
+	},
+	"lighter": {
+		"declaration": "font-weight: lighter;"
+	},
+	"underline": {
+		"declaration": "text-decoration-line: underline;"
+	},
+	"overline": {
+		"declaration": "text-decoration-line: overline;"
+	},
+	"line-through": {
+		"declaration": "text-decoration-line: line-through;"
+	},
+	"hidden": {
+		"declaration": "display: none;",
+		"late": true
+	},
 	"font_family_sans": {
 		"declaration": "font-family: var(--font_family_sans);"
 	},
