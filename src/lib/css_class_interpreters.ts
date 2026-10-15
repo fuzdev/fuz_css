@@ -1,161 +1,15 @@
-import { escape_css_selector, type CssClassDefinitionInterpreter } from './css_class_generation.ts';
+import type { CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import {
 	is_possible_css_literal,
-	interpret_css_literal,
-	generate_css_literal_simple,
-	extract_segments,
-	extract_and_validate_modifiers,
-	type CssLiteralOutput
+	parse_css_literal,
+	has_modifiers,
+	generate_declaration
 } from './css_literal.ts';
-import { generate_modified_ruleset } from './css_ruleset_parser.ts';
-import { resolve_class_definition } from './css_class_resolution.ts';
 
 /**
- * Interpreter for modified token/composite classes (e.g., `hover:p_md`, `md:box`, `dark:hover:panel`).
- * Applies modifiers to existing declaration-based or ruleset-based classes.
- *
- * This interpreter must run BEFORE `css_literal_interpreter` to handle cases like `hover:box`
- * where `box` is a known class (not a CSS property).
- */
-export const modified_class_interpreter: CssClassDefinitionInterpreter = {
-	pattern: /^.+:.+$/,
-	interpret: (matched, ctx) => {
-		const class_name = matched[0];
-		const segments = extract_segments(class_name);
-
-		// The last segment is always the base class name - only preceding segments
-		// can be modifiers. This avoids ambiguity when a class name collides with
-		// a modifier name (e.g., a custom class named `md`, which is also a
-		// breakpoint modifier).
-		const base_class_name = segments[segments.length - 1]!;
-		const modifier_segments = segments.slice(0, -1);
-
-		// Extract modifiers from the preceding segments
-		const result = extract_and_validate_modifiers(modifier_segments, class_name);
-
-		if (!result.ok) {
-			// Modifier validation error - let css_literal_interpreter try
-			return null;
-		}
-
-		const { modifiers, remaining } = result;
-
-		// All preceding segments must be valid modifiers (none left over)
-		if (remaining.length !== 0) {
-			return null;
-		}
-
-		// Check if the base class is known
-		const base_class = ctx.class_definitions[base_class_name];
-		if (!base_class) {
-			return null;
-		}
-
-		// Must have at least one modifier (otherwise it's just the base class)
-		const has_modifiers =
-			modifiers.media ||
-			modifiers.ancestor ||
-			modifiers.states.length > 0 ||
-			modifiers.pseudo_element;
-		if (!has_modifiers) {
-			return null;
-		}
-
-		const escaped_class_name = escape_css_selector(class_name);
-
-		// Build state and pseudo-element CSS suffixes
-		let state_css = '';
-		for (const state of modifiers.states) {
-			state_css += state.css;
-		}
-		const pseudo_element_css = modifiers.pseudo_element?.css ?? '';
-
-		// Handle composes-based or declaration-based definitions
-		if ('composes' in base_class || 'declaration' in base_class) {
-			const resolution_result = resolve_class_definition(
-				base_class,
-				base_class_name,
-				ctx.class_definitions,
-				ctx.css_properties
-			);
-			if (!resolution_result.ok) {
-				ctx.diagnostics.push(resolution_result.error);
-				return null;
-			}
-			// Add warnings if any
-			if (resolution_result.warnings) {
-				for (const warning of resolution_result.warnings) {
-					ctx.diagnostics.push(warning);
-				}
-			}
-			if (!resolution_result.declaration) {
-				return null;
-			}
-
-			// Build the selector
-			let selector = `.${escaped_class_name}`;
-			selector += state_css;
-			selector += pseudo_element_css;
-
-			// Create output compatible with generate_css_literal_simple
-			const output: CssLiteralOutput = {
-				declaration: resolution_result.declaration,
-				selector,
-				media_wrapper: modifiers.media?.css ?? null,
-				ancestor_wrapper: modifiers.ancestor?.css ?? null
-			};
-
-			const css = generate_css_literal_simple(output);
-			return css.trimEnd();
-		}
-
-		// Handle ruleset-based classes
-		if ('ruleset' in base_class && base_class.ruleset) {
-			const result = generate_modified_ruleset(
-				base_class.ruleset,
-				base_class_name,
-				escaped_class_name,
-				state_css,
-				pseudo_element_css,
-				modifiers.media?.css ?? null,
-				modifiers.ancestor?.css ?? null
-			);
-
-			// Emit warnings for skipped modifiers
-			if (result.skipped_modifiers) {
-				for (const skipped of result.skipped_modifiers) {
-					if (skipped.reason === 'pseudo_element_conflict') {
-						ctx.diagnostics.push({
-							level: 'warning',
-							identifier: class_name,
-							message: `Rule "${skipped.selector}" already contains a pseudo-element; "${
-								skipped.conflicting_modifier
-							}" modifier was not applied`,
-							suggestion: `The rule is included with just the class renamed`
-						});
-					} else {
-						ctx.diagnostics.push({
-							level: 'warning',
-							identifier: class_name,
-							message: `Rule "${skipped.selector}" already contains "${
-								skipped.conflicting_modifier
-							}"; modifier was not applied to avoid redundancy`,
-							suggestion: `The rule is included with just the class renamed`
-						});
-					}
-				}
-			}
-
-			return result.css.trimEnd();
-		}
-
-		return null;
-	}
-};
-
-/**
- * Interpreter for CSS-literal classes (e.g., `display:flex`, `hover:opacity:80%`).
- * Generates full CSS rulesets including any modifier wrappers.
+ * Interpreter for CSS-literal classes (e.g., `display:flex`, `opacity:80%`).
+ * Modifiers (`hover:opacity:80%`) are stripped by the generator before an
+ * interpreter runs, so a literal reaching it is exactly `property:value`.
  */
 export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 	pattern: /^.+:.+$/,
@@ -166,35 +20,34 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 			return null;
 		}
 
-		const escaped_class_name = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped_class_name, ctx.css_properties);
+		const result = parse_css_literal(class_name, ctx.css_properties);
 
 		if (!result.ok) {
 			ctx.diagnostics.push(result.error);
 			return null;
 		}
 
-		// Collect warnings for upstream handling
-		if (result.warnings) {
-			for (const warning of result.warnings) {
-				ctx.diagnostics.push(warning);
+		// the generator strips modifiers first, so a remaining one means the
+		// segment wasn't a property:value pair
+		if (has_modifiers(result.parsed)) {
+			return null;
+		}
+
+		if (result.diagnostics) {
+			for (const diagnostic of result.diagnostics) {
+				ctx.diagnostics.push(diagnostic);
 			}
 		}
 
-		// Generate the full CSS including any wrappers
-		const css = generate_css_literal_simple(result.output);
-
-		// Return the CSS but strip trailing newline for consistency
-		return css.trimEnd();
+		return { declaration: generate_declaration(result.parsed) };
 	}
 };
 
 /**
  * Collection of all builtin interpreters for dynamic CSS class generation.
- * Order matters: `modified_class_interpreter` runs first to handle `hover:box` before
- * `css_literal_interpreter` tries to interpret it as `hover:box` (property:value).
+ * Modifier handling isn't an interpreter - the generator strips modifiers
+ * from every class name and applies them to whatever the base resolves to.
  */
 export const css_class_interpreters: Array<CssClassDefinitionInterpreter> = [
-	modified_class_interpreter,
 	css_literal_interpreter
 ];

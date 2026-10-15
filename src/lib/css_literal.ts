@@ -5,7 +5,8 @@
  *
  * - `display:flex` → `.display\:flex { display: flex; }`
  * - `hover:opacity:80%` → `.hover\:opacity\:80\%:hover { opacity: 80%; }`
- * - `md:dark:hover:before:opacity:80%` → nested CSS with media query, ancestor, state, pseudo-element
+ * - `md:dark:hover:before:opacity:80%` → media query, color scheme, state, and pseudo-element
+ *   applied by the generator (see `generate_classes_css`)
  *
  * @see {@link https://github.com/fuzdev/fuz_css} for documentation
  * @module
@@ -75,16 +76,6 @@ export interface ExtractedModifiers {
  */
 export type ModifierExtractionResult =
 	| { ok: true; modifiers: ExtractedModifiers; remaining: Array<string> }
-	| { ok: false; error: InterpreterDiagnostic };
-
-/**
- * Result of interpreting a CSS-literal class.
- *
- * Uses `| null` for warnings to avoid allocating empty arrays.
- * Callers should use a guard pattern: `if (result.warnings) { ... }`
- */
-export type InterpretCssLiteralResult =
-	| { ok: true; output: CssLiteralOutput; warnings: Array<InterpreterDiagnostic> | null }
 	| { ok: false; error: InterpreterDiagnostic };
 
 //
@@ -549,80 +540,10 @@ export const parse_css_literal = (
 //
 
 /**
- * Generates the CSS selector for a parsed CSS-literal class.
- * Includes state pseudo-classes and pseudo-element in the selector.
- */
-export const generate_selector = (escaped_class_name: string, parsed: ParsedCssLiteral): string => {
-	let selector = `.${escaped_class_name}`;
-
-	// Add state pseudo-classes
-	for (const state of parsed.states) {
-		selector += state.css;
-	}
-
-	// Add pseudo-element (must come last)
-	if (parsed.pseudo_element) {
-		selector += parsed.pseudo_element.css;
-	}
-
-	return selector;
-};
-
-/**
  * Generates the CSS declaration for a parsed CSS-literal class.
  */
 export const generate_declaration = (parsed: ParsedCssLiteral): string => {
 	return `${parsed.property}: ${parsed.value};`;
-};
-
-/**
- * Information needed to generate CSS output for a CSS-literal class.
- */
-export interface CssLiteralOutput {
-	/** CSS declaration (property: value;) */
-	declaration: string;
-	/** Full CSS selector including pseudo-classes/elements */
-	selector: string;
-	/** Media query wrapper if any */
-	media_wrapper: string | null;
-	/** Ancestor wrapper if any */
-	ancestor_wrapper: string | null;
-}
-
-/**
- * Interprets a CSS-literal class and returns CSS generation info.
- *
- * Callers should first check `is_possible_css_literal()` to filter non-CSS-literal classes.
- *
- * @param class_name - the class name to interpret
- * @param escaped_class_name - the CSS-escaped version of the class name
- * @param css_properties - Set of valid CSS properties from `load_css_properties()`
- *                         Pass `null` to skip property validation.
- * @returns result with output and warnings on success, or error on failure
- */
-export const interpret_css_literal = (
-	class_name: string,
-	escaped_class_name: string,
-	css_properties: Set<string> | null
-): InterpretCssLiteralResult => {
-	const result = parse_css_literal(class_name, css_properties);
-
-	if (!result.ok) {
-		return { ok: false, error: result.error };
-	}
-
-	const { parsed, diagnostics } = result;
-
-	return {
-		ok: true,
-		output: {
-			declaration: generate_declaration(parsed),
-			selector: generate_selector(escaped_class_name, parsed),
-			media_wrapper: parsed.media?.css ?? null,
-			ancestor_wrapper: parsed.ancestor?.css ?? null
-		},
-		warnings: diagnostics
-	};
 };
 
 //
@@ -718,43 +639,3 @@ const contextualize_error = (
 	...error,
 	identifier: context_class_name
 });
-
-/**
- * Generates simple CSS for a CSS-literal class (without grouping).
- * Used by the interpreter for basic output.
- *
- * @param output - the CSS-literal output info
- * @returns CSS string for this class
- */
-export const generate_css_literal_simple = (output: CssLiteralOutput): string => {
-	let css = '';
-	let indent = '';
-
-	// Open media wrapper if present
-	if (output.media_wrapper) {
-		css += `${output.media_wrapper} {\n`;
-		indent = '\t';
-	}
-
-	// Open ancestor wrapper if present
-	if (output.ancestor_wrapper) {
-		css += `${indent}${output.ancestor_wrapper} {\n`;
-		indent += '\t';
-	}
-
-	// Write the rule
-	css += `${indent}${output.selector} { ${output.declaration} }\n`;
-
-	// Close ancestor wrapper
-	if (output.ancestor_wrapper) {
-		indent = indent.slice(0, -1);
-		css += `${indent}}\n`;
-	}
-
-	// Close media wrapper
-	if (output.media_wrapper) {
-		css += '}\n';
-	}
-
-	return css;
-};

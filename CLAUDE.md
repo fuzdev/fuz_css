@@ -191,8 +191,12 @@ typos early. A hinted class resolves to a class definition or interpreter
 or, when base styles are bundled, to the top-level base rules that name it
 outside `:not()` (`selected`, `palette_a`, a custom `base_css` class), which
 the hint then ships; in utility-only mode a base-only class errors, since the generator emits no base
-styles for it. Implicitly detected classes that can't be resolved are silently
-skipped (they may belong to other CSS frameworks).
+styles for it. Implicitly detected classes that can't be resolved don't fail
+on their shape: a plain name nothing defines is skipped silently, and one
+shaped like a literal or a modified class (`hover:bg-blue-500`, `md:flex`) logs
+a warning, since it may belong to another CSS framework. A literal the
+interpreter finds broken (an unclosed `max-width(` breakpoint) is still an
+error.
 
 **CSS variable detection:** Variables are detected via simple regex scan of
 `var(--name` patterns in source files. Only theme variables are included;
@@ -228,11 +232,34 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
   `.heading` reads the current `--font_size`, so a composite or a
   `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
-  `menuitem`, `chevron`, `chip`
+  `menuitem`, `chevron`, `chip`. The single-property shortcuts among them
+  (`pixelated`, `circular`, `mb_flow`, `mt_flow`) order with the token
+  classes, outside the composites sublayer
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
-color-scheme (`dark:`), pseudo-element (`before:`).
+color-scheme (`dark:`), pseudo-element (`before:`). The generator strips them
+from a class name before resolving the base - a static definition or what an
+interpreter returns - so interpreted classes get them too.
+
+### Emission order
+
+`generate_classes_css` resolves each class to a structured rule (definition +
+modifiers) and derives the order from that structure rather than from what
+the names say (the code-unit name is only the last tie-break, deciding between
+interpreted classes of equal rank): composites render in the
+`fuz.utilities.composites` sublayer beneath every single-purpose class
+(`composite: true`, the default for rulesets and `composes`), and within each tier rules sort by color scheme, then media
+query (`min-width` ascending, `max-width` descending, feature queries last),
+then property rank (shorthands before longhands, `to_property_rank`;
+definition order for composites), then state order (LVFHA), then registry
+order (literals and other interpreted classes after static ones, so a token
+or literal wins a tie with `circular`). Rules sharing a media query render
+in one block. `dark:`/`light:` wrap the root selector in
+`:where()`, adding no specificity, and render twice - under the root class
+and under `prefers-color-scheme` for a root naming no scheme
+(`render_color_scheme_rules` in `theme.ts`, which the theme and variable
+renderers share).
 
 ### CSS-literal syntax
 
@@ -240,7 +267,7 @@ Literal classes use `property:value` syntax that maps 1:1 to CSS:
 
 - `display:flex` → `display: flex;`
 - `hover:opacity:80%` → `:hover { opacity: 80%; }`
-- `md:dark:hover:opacity:80%` → nested media/ancestor/state wrappers
+- `md:dark:hover:opacity:80%` → media query, color-scheme prefix, and state
 
 Modifier ordering is `[media:][ancestor:][state...:][pseudo-element:]property:value`.
 Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary
@@ -316,8 +343,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   The composed defaults name their shadow colors outright, since a value
   declared on `:root` can't see a contextual `--shadow_color`, so a shadow
   color or alpha class alone no longer tints them; a shadow shape class
-  (`shadow_md`) on the element still wins by source order, except over a
-  modified composite (`md:panel`), which is emitted after it. `.panel`
+  (`shadow_md`) on the element wins, because composites render in the
+  `fuz.utilities.composites` sublayer beneath single-purpose classes. `.panel`
   declares `box-shadow`, so it resets the shadow of an element it is
   combined with (a `.pane`, a `button`)
 - `--font_family` is the body font (default `var(--font_family_sans)`), kept
@@ -667,7 +694,9 @@ typography, borders, shading, shadows, layout. See
   classes they target, tracks their variables, and collects the `base_css`
   parse diagnostics
 - [css_class_generation.ts](src/lib/css_class_generation.ts) -
-  `CssClassDefinition` types, `generate_classes_css()`
+  `CssClassDefinition` types, `generate_classes_css()` (modifier stripping,
+  the structured `CssClassRule`, emission order and layering),
+  `to_property_rank`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
   composite class registry
 - [css_classes.ts](src/lib/css_classes.ts) - CssClasses collection for tracking
@@ -678,12 +707,15 @@ typography, borders, shading, shadows, layout. See
   definitions
 - [css_class_resolution.ts](src/lib/css_class_resolution.ts) - Class resolution
   and cycle detection
-- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - Modified
-  class and literal interpreters
+- [css_class_interpreters.ts](src/lib/css_class_interpreters.ts) - The
+  CSS-literal interpreter
 - [css_ruleset_parser.ts](src/lib/css_ruleset_parser.ts) - CSS ruleset parsing
+  and `modify_ruleset`, which rewrites a ruleset's selectors for a modified
+  class
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
-- [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints,
-  states, pseudo-elements)
+- [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints
+  with their width bounds, color schemes, states, pseudo-elements) and
+  `compare_media_modifiers`
 - [deps.ts](src/lib/deps.ts) - `CacheDeps` interface for dependency injection
 - [deps_defaults.ts](src/lib/deps_defaults.ts) - Default filesystem
   implementations
@@ -741,6 +773,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_bundled_resolution.{test,diagnostics,variables}.test.ts`
 - `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
+- `generate_classes_css.{test,modifiers,order}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
 - `theme_check.{test,compile,pins}.test.ts`
 - `theme_resolver.{test,defaults}.test.ts`
@@ -751,7 +784,7 @@ Plus standalone tests: `css_cache`, `css_generator`, `css_classes`, `css_literal
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `gen_fuz_css`, `generate_bundled_css`,
-`generate_classes_css`, `generate_css`, and more.
+`generate_css`, and more.
 
 The theme suites discover the shipped themes by glob through
 `theme_test_helpers.ts` (`shipped_themes`, `shipped_base_themes`), so a new
@@ -789,8 +822,7 @@ svelte's `mount()` resolves to the client build.
   progress
 - **Browser floor, no fallbacks** - the shipped CSS needs Chrome or Edge
   120, Firefox 118 (both set by `pow()`), or Safari 16.2, and Safari 16.4
-  for responsive modifiers, which emit media range syntax, and 16.5 for the
-  `dark:`/`light:` modifiers, which emit nested CSS
+  for responsive modifiers, which emit media range syntax
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to

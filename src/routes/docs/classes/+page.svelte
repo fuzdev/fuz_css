@@ -543,6 +543,21 @@ const el = document.createElement('dialog');`}
 			Without that line, fuz's layers are declared when its CSS loads, after any of yours, and beat
 			them.
 		</p>
+		<p>
+			Inside <code>fuz.utilities</code>, composites (<code>box</code>, <code>panel</code>,
+			<code>sized_md</code>, and the other multi-property ones) render in a
+			<code>fuz.utilities.composites</code> sublayer - the single-property shortcuts like
+			<code>circular</code> and <code>mb_flow</code> order with the token classes - so a token or
+			literal class always wins over a composite it overlaps: <code>panel shadow_md</code> gets the
+			medium shadow, at every breakpoint. Within each, the order comes from what the classes mean,
+			not their names (two literals of one property still conflict by name): unmodified classes
+			first, then media queries - <code>min-width</code> breakpoints ascending,
+			<code>max-width</code> ones descending, then feature queries like <code>print:</code> - then
+			color-scheme classes, and within those, shorthands before longhands (<code>p_md</code> before
+			<code>pl_lg</code>) and states in link-visited-focus-hover-active order. So
+			<code>p_sm md:p_md lg:p_lg</code> steps up as the viewport widens, however the classes are
+			written.
+		</p>
 
 		<h4>Base styles</h4>
 		<p>
@@ -1080,7 +1095,11 @@ vite_plugin_fuz_css({
 			<p>
 				All four of these produce the same CSS output for <code>.centered</code>, with the ruleset
 				form additionally demonstrating child selectors (<code>&gt; * + *</code>) which can't be
-				expressed with the other forms.
+				expressed with the other forms. A <code>composes</code> or <code>ruleset</code> definition
+				is a composite, rendered in the composites sublayer beneath token and literal classes. A
+				<code>declaration</code> alone is single-purpose and orders with the token classes, even
+				when it sets several properties, unless it sets <code>composite: true</code>, as form 1
+				does.
 			</p>
 			<Code
 				lang="ts"
@@ -1089,6 +1108,7 @@ vite_plugin_fuz_css({
 export const custom_composites: Record<string, CssClassDefinition> = {
 	// 1. \`declaration\` only - custom CSS properties
 	centered: {
+		composite: true, // without \`composes\`, a declaration is single-purpose by default
 		declaration: \`
 			display: flex;
 			flex-direction: column;
@@ -1432,8 +1452,11 @@ export const gen = gen_fuz_css({
 <div class="color:black light:color:gray">`}
 		/>
 		<p>
-			<code>dark:</code> and <code>light:</code> use <code>:root.dark</code> and
-			<code>:root.light</code> selectors, matching fuz_css's color scheme mechanism.
+			<code>dark:</code> and <code>light:</code> apply when the root element has the
+			<code>dark</code> or <code>light</code> class (fuz_ui's theme state sets one), and when it has
+			neither they follow the OS <MdnLink path="Web/CSS/@media/prefers-color-scheme" />, so they
+			work without JS. They add no specificity (the root selector is wrapped in
+			<code>:where()</code>), so a <code>hover:</code> class still wins while hovering in dark mode.
 		</p>
 
 		<h4>Pseudo-element modifiers</h4>
@@ -1505,7 +1528,12 @@ export const gen = gen_fuz_css({
 			<Code
 				lang="css"
 				content={`@media (width >= 48rem) {
-  :root.dark .md\\:dark\\:hover\\:opacity\\:83\\%:hover {
+  :where(:root.dark) .md\\:dark\\:hover\\:opacity\\:83\\%:hover {
+    opacity: 83%;
+  }
+}
+@media (width >= 48rem) and (prefers-color-scheme: dark) {
+  :where(:root:not(.light)) .md\\:dark\\:hover\\:opacity\\:83\\%:hover {
     opacity: 83%;
   }
 }`}
@@ -1766,15 +1794,18 @@ const Component = () => <div className={styles} />;`}
 			<ModuleLink module_path="css_class_interpreters.ts">Interpreters</ModuleLink> dynamically
 			generate CSS for class names that aren't in the static definitions (which can be extended via
 			<code>class_definitions</code> or replaced with <code>include_default_classes: false</code>).
-			The default <a href="#Literal-classes">CSS-literal syntax</a> and
-			<a href="#Modifiers">modifier support</a> are both implemented as interpreters, which you can
-			extend or replace.
+			The default <a href="#Literal-classes">CSS-literal syntax</a> is implemented as an
+			interpreter, which you can extend or replace. <a href="#Modifiers">Modifiers</a> aren't - the
+			generator strips them from every class name before resolving it, so they apply to interpreted
+			classes too.
 		</p>
 		<p>
 			For advanced use cases, you can define custom interpreters that generate CSS from arbitrary
 			class name patterns. This is similar to UnoCSS's dynamic rules, which also use regex +
 			function patterns. An interpreter has a regex <code>pattern</code> and an
-			<code>interpret</code> function that returns CSS (or <code>null</code> to pass):
+			<code>interpret</code> function that returns a definition shaped like a static one - a
+			<code>declaration</code>, a <code>ruleset</code>, or <code>composes</code> - or
+			<code>null</code> to pass:
 		</p>
 		<Code
 			lang="ts"
@@ -1787,15 +1818,17 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
   interpret: (matched) => {
     const n = parseInt(matched[1]!, 10);
     if (n < 1 || n > 24) return null;
-    return \`.grid-cols-\${n} { grid-template-columns: repeat(\${n}, minmax(0, 1fr)); }\`;
+    return {declaration: \`grid-template-columns: repeat(\${n}, minmax(0, 1fr));\`};
   },
 };`}
 		/>
 		<p>
 			This generates <code>grid-cols-1</code> through <code>grid-cols-24</code> on-demand, something
-			that would require 24 separate composite definitions. Note the classes for this example could
-			also be created as composites with a helper function - fuz_css uses this strategy internally
-			to create its token classes in <ModuleLink module_path="css_class_definitions.ts" />.
+			that would require 24 separate composite definitions, and <code>md:grid-cols-4</code> works
+			with no extra code. Return <code>composite: true</code> alongside a multi-property declaration
+			to render it in the composites sublayer. Note the classes for this example could also be
+			created as composites with a helper function - fuz_css uses this strategy internally to create
+			its token classes in <ModuleLink module_path="css_class_definitions.ts" />.
 		</p>
 		<p>Register with the Vite plugin or Gro generator:</p>
 		<Code
@@ -1813,8 +1846,8 @@ vite_plugin_fuz_css({
 		</p>
 		<aside>
 			Custom interpreters replace the defaults entirely, so include
-			<code>...css_class_interpreters</code> to preserve CSS-literal and modified-class support.
-			This area is experimental and the API may change.
+			<code>...css_class_interpreters</code> to preserve CSS-literal support. This area is
+			experimental and the API may change.
 		</aside>
 	</TomeSection>
 

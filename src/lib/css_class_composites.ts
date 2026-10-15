@@ -1,6 +1,13 @@
 import type { CssClassDefinition } from './css_class_generation.ts';
 import { palette_variants } from './variable_data.ts';
 
+/**
+ * The builtin composite classes. The multi-property ones render in the
+ * `fuz.utilities.composites` sublayer (`composite: true`, the default for
+ * rulesets), so a token or literal class on the same element wins over them;
+ * the single-property shortcuts (`circular`, `pixelated`, `mb_flow`,
+ * `mt_flow`) are single-purpose and order with the token classes.
+ */
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
 		declaration: `
@@ -14,6 +21,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: 'border-radius: 50%;'
 	},
 	box: {
+		composite: true,
 		declaration: `
 			display: flex;
 			flex-direction: column;
@@ -22,6 +30,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	column: {
+		composite: true,
 		comment: 'like `.box` but uncentered',
 		declaration: `
 			display: flex;
@@ -29,6 +38,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	row: {
+		composite: true,
 		comment: 'can be used to override the direction of a `.box`',
 		declaration: `
 			display: flex;
@@ -37,6 +47,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	ellipsis: {
+		composite: true,
 		declaration: `
 			display: block;
 			white-space: nowrap;
@@ -94,6 +105,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	pane: {
+		composite: true,
 		comment:
 			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
@@ -103,6 +115,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	panel: {
+		composite: true,
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
@@ -118,6 +131,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	reset inside a sized parent.
 	*/
 	sized_xs: {
+		composite: true,
 		comment:
 			'Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -132,6 +146,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	sized_sm: {
+		composite: true,
 		comment:
 			'Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -146,6 +161,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	sized_md: {
+		composite: true,
 		comment: 'Default sizing restated explicitly, useful as a cascade reset within a sized parent.',
 		declaration: `
 			--font_size: var(--font_size_md);
@@ -159,6 +175,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	sized_lg: {
+		composite: true,
 		comment:
 			'Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -173,6 +190,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		`
 	},
 	sized_xl: {
+		composite: true,
 		comment:
 			'Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
@@ -196,6 +214,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		declaration: 'margin-top: var(--flow_margin, var(--space_lg));'
 	},
 	icon_button: {
+		composite: true,
 		comment: `
 			TODO other button variants?
 			TODO this is slightly strange that it doesn't use --icon_size.

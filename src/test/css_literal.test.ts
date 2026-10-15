@@ -8,21 +8,18 @@ import {
 	check_calc_expression,
 	suggest_css_property,
 	load_css_properties,
-	interpret_css_literal,
-	generate_css_literal_simple,
 	has_modifiers,
 	has_extracted_modifiers,
 	try_resolve_literal,
 	suggest_modifier,
 	extract_and_validate_modifiers,
 	type ParsedCssLiteral,
-	type InterpretCssLiteralResult,
-	type CssLiteralOutput,
 	type LiteralResolutionResult,
 	type ExtractedModifiers,
 	type ModifierExtractionResult
 } from '#lib/css_literal.ts';
-import { escape_css_selector } from '#lib/css_class_generation.ts';
+import { generate_classes_css } from '#lib/css_class_generation.ts';
+import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
 import { type InterpreterDiagnostic } from '#lib/diagnostics.ts';
 import {
 	get_modifier,
@@ -46,9 +43,6 @@ interface ParseOkResult {
 interface ParseErrorResult {
 	error: InterpreterDiagnostic;
 }
-interface InterpretOkResult {
-	output: CssLiteralOutput;
-}
 
 // Specialized helpers using assert.ok for narrowing
 const assert_parse_ok = (result: ReturnType<typeof parse_css_literal>): ParseOkResult => {
@@ -61,10 +55,21 @@ const assert_parse_error = (result: ReturnType<typeof parse_css_literal>): Parse
 	return result;
 };
 
-const assert_interpret_ok = (result: InterpretCssLiteralResult): CssLiteralOutput => {
-	assert.ok(result.ok, 'Expected interpret result to be ok');
-	return (result as InterpretOkResult).output;
-};
+// the CSS a literal class generates, with any diagnostics
+const literal_css = (
+	class_name: string,
+	properties: Set<string> | null = css_properties
+): ReturnType<typeof generate_classes_css> =>
+	generate_classes_css({
+		class_names: [class_name],
+		class_definitions: {},
+		interpreters: css_class_interpreters,
+		css_properties: properties
+	});
+
+// a width bound as the media query it renders
+const to_media_query = (bound: ReturnType<typeof parse_arbitrary_breakpoint>): string | null =>
+	bound && `@media (width ${bound.bound === 'min' ? '>=' : '<'} ${bound.value})`;
 
 // Type aliases for modifier/literal result types
 interface ModOkResult {
@@ -263,7 +268,7 @@ describe('parse_arbitrary_breakpoint', () => {
 		['min-width(50rem)', '@media (width >= 50rem)'],
 		['max-width(100vw)', '@media (width < 100vw)']
 	] as const)('parse_arbitrary_breakpoint("%s") → %s', (input, expected) => {
-		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
+		assert.strictEqual(to_media_query(parse_arbitrary_breakpoint(input)), expected);
 	});
 
 	test.each([['sm'], ['md'], ['hover']])('parse_arbitrary_breakpoint("%s") → null', (input) => {
@@ -379,7 +384,7 @@ describe('parse_css_literal - with modifiers', () => {
 			parse_css_literal('min-width(800px):display:flex', css_properties)
 		);
 		if (!parsed.media) throw new Error('Expected media');
-		assert.strictEqual(parsed.media.css, '@media (width >= 800px)');
+		assert.strictEqual(parsed.media.css, '(width >= 800px)');
 	});
 
 	test('nth-child(2n+1):color:red (parameterized state)', () => {
@@ -456,133 +461,49 @@ describe('parse_css_literal - warnings', () => {
 	});
 });
 
-describe('interpret_css_literal', () => {
-	test('display:flex generates correct output', () => {
-		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
-		const output = assert_interpret_ok(result);
-		assert.strictEqual(output.declaration, 'display: flex;');
-		assert.strictEqual(output.selector, '.display\\:flex');
-		assert.isNull(output.media_wrapper);
-		assert.isNull(output.ancestor_wrapper);
+describe('literal class generation', () => {
+	test('display:flex', () => {
+		assert.include(literal_css('display:flex').css, '.display\\:flex { display: flex; }');
 	});
 
-	test('hover:opacity:80% includes pseudo-class in selector', () => {
-		const class_name = 'hover:opacity:80%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		assert.strictEqual(output.declaration, 'opacity: 80%;');
-		assert.include(output.selector, ':hover');
-	});
-
-	test('md:display:flex has media wrapper', () => {
-		const class_name = 'md:display:flex';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
-		assert.include(output.media_wrapper, '@media');
-		assert.include(output.media_wrapper, '48rem');
-	});
-
-	test('dark:opacity:60% has ancestor wrapper', () => {
-		const class_name = 'dark:opacity:60%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		assert.strictEqual(output.ancestor_wrapper, ':root.dark');
-	});
-
-	test('before:content:"" includes pseudo-element in selector', () => {
-		const class_name = 'before:content:""';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		assert.include(output.selector, '::before');
-	});
-
-	test('md:dark:hover:before:opacity:80% has all components', () => {
-		const class_name = 'md:dark:hover:before:opacity:80%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		if (!output.media_wrapper) throw new Error('Expected media_wrapper');
-		if (!output.ancestor_wrapper) throw new Error('Expected ancestor_wrapper');
-		assert.include(output.selector, ':hover');
-		assert.include(output.selector, '::before');
-	});
-
-	test('returns error for invalid property', () => {
-		const class_name = 'dipslay:flex';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		assert.isFalse(result.ok);
+	test('hover:opacity:80% includes the pseudo-class in the selector', () => {
 		assert.include(
-			(result as { ok: false; error: { message: string } }).error.message,
-			'Unknown CSS property'
+			literal_css('hover:opacity:80%').css,
+			'.hover\\:opacity\\:80\\%:hover { opacity: 80%; }'
 		);
 	});
 
-	test('returns ok when css_properties is null (skip validation)', () => {
-		const class_name = 'unknown_property:value';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, null);
-		assert.isTrue(result.ok);
-	});
-});
-
-describe('generate_css_literal_simple', () => {
-	test('simple property:value', () => {
-		const result = interpret_css_literal('display:flex', 'display\\:flex', css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
-		assert.include(css, '.display\\:flex');
-		assert.include(css, 'display: flex;');
-		// Should not have wrappers
-		assert.notInclude(css, '@media');
-		assert.notInclude(css, ':root');
-	});
-
-	test('hover:opacity:80%', () => {
-		const class_name = 'hover:opacity:80%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
-		assert.include(css, ':hover');
-		assert.include(css, 'opacity: 80%;');
-	});
-
-	test('md:display:flex has media wrapper', () => {
-		const class_name = 'md:display:flex';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
+	test('md:display:flex has a media wrapper', () => {
+		const { css } = literal_css('md:display:flex');
 		assert.include(css, '@media (width >= 48rem)');
 		assert.include(css, 'display: flex;');
 	});
 
-	test('dark:opacity:60% has ancestor wrapper', () => {
-		const class_name = 'dark:opacity:60%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
-		assert.include(css, ':root.dark');
+	test('dark:opacity:60% has the color scheme prefix', () => {
+		const { css } = literal_css('dark:opacity:60%');
+		assert.include(css, ':where(:root.dark) .dark\\:opacity\\:60\\%');
 		assert.include(css, 'opacity: 60%;');
 	});
 
-	test('md:dark:hover:opacity:80% has nested structure', () => {
-		const class_name = 'md:dark:hover:opacity:80%';
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
+	test('before:content:"" includes the pseudo-element in the selector', () => {
+		assert.include(literal_css('before:content:""').css, '::before');
+	});
+
+	test('md:dark:hover:before:opacity:80% has all components', () => {
+		const { css } = literal_css('md:dark:hover:before:opacity:80%');
 		assert.include(css, '@media (width >= 48rem)');
-		assert.include(css, ':root.dark');
-		assert.include(css, ':hover');
-		assert.include(css, 'opacity: 80%;');
+		assert.include(css, ':where(:root.dark)');
+		assert.include(css, ':hover::before { opacity: 80%; }');
+	});
+
+	test('reports an invalid property', () => {
+		const result = literal_css('dipslay:flex');
+		assert.strictEqual(result.css, '');
+		assert.include(result.diagnostics[0]!.message, 'Unknown CSS property');
+	});
+
+	test('skips property validation when css_properties is null', () => {
+		assert.include(literal_css('unknown_property:value', null).css, 'unknown_property: value;');
 	});
 });
 
@@ -631,15 +552,12 @@ describe('parse_css_literal - max breakpoints', () => {
 	});
 });
 
-describe('generate_css_literal_simple - max breakpoints', () => {
+describe('literal class generation - max breakpoints', () => {
 	test.each([
 		['max-sm:display:none', '@media (width < 40rem)', 'display: none;'],
 		['max-lg:opacity:50%', '@media (width < 64rem)', 'opacity: 50%;']
 	] as const)('%s generates correct media query', (class_name, expected_media, expected_decl) => {
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
+		const { css } = literal_css(class_name);
 		assert.include(css, expected_media);
 		assert.include(css, expected_decl);
 	});
@@ -658,15 +576,12 @@ describe('parse_css_literal - !important with modifiers', () => {
 	});
 });
 
-describe('generate_css_literal_simple - !important', () => {
+describe('literal class generation - !important', () => {
 	test.each([
 		['display:flex!important', 'display: flex !important;', null],
 		['hover:color:red!important', 'color: red !important;', ':hover']
 	] as const)('%s renders correctly', (class_name, expected_decl, expected_selector) => {
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
+		const { css } = literal_css(class_name);
 		assert.include(css, expected_decl);
 		if (expected_selector) assert.include(css, expected_selector);
 	});
@@ -685,15 +600,12 @@ describe('parse_css_literal - Unicode values', () => {
 	});
 });
 
-describe('generate_css_literal_simple - Unicode', () => {
+describe('literal class generation - Unicode', () => {
 	test.each([
 		['content:"→"', 'content: "→";', null],
 		['before:content:"✓"', 'content: "✓";', '::before']
 	] as const)('%s renders correctly', (class_name, expected_decl, expected_selector) => {
-		const escaped = escape_css_selector(class_name);
-		const result = interpret_css_literal(class_name, escaped, css_properties);
-		const output = assert_interpret_ok(result);
-		const css = generate_css_literal_simple(output);
+		const { css } = literal_css(class_name);
 		assert.include(css, expected_decl);
 		if (expected_selector) assert.include(css, expected_selector);
 	});
@@ -884,7 +796,7 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 		['max-width(50em)', '@media (width < 50em)', 'max-width em units'],
 		['max-width(600px)', '@media (width < 600px)', 'max-width pixels']
 	] as const)('%s → %s (%s)', (input, expected, _desc) => {
-		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
+		assert.strictEqual(to_media_query(parse_arbitrary_breakpoint(input)), expected);
 	});
 
 	// Nested parentheses - calc, clamp, min, max, env
@@ -914,7 +826,7 @@ describe('parse_arbitrary_breakpoint - edge cases', () => {
 			'env function'
 		]
 	] as const)('%s → %s (%s)', (input, expected, _desc) => {
-		assert.strictEqual(parse_arbitrary_breakpoint(input), expected);
+		assert.strictEqual(to_media_query(parse_arbitrary_breakpoint(input)), expected);
 	});
 });
 

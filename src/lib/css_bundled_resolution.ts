@@ -469,7 +469,7 @@ export interface GenerateBundledCssOptions {
  * Generates combined CSS output from resolution result.
  *
  * @param result - resolution result from `resolve_css`
- * @param utility_css - generated utility CSS (from `generate_classes_css`)
+ * @param utility_css - generated utility CSS, already layered (from `generate_classes_css`)
  * @param options - output options
  * @returns combined CSS string
  */
@@ -516,7 +516,7 @@ export const generate_bundled_css = (
 	// Utility classes section
 	if (include_utilities && utility_css) {
 		parts.push('/* Utility Classes */');
-		parts.push(`@layer fuz.utilities {\n${utility_css}\n}`);
+		parts.push(utility_css.trimEnd());
 	}
 
 	if (!parts.length) return '';

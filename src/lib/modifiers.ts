@@ -19,6 +19,17 @@
 export type ModifierType = 'media' | 'ancestor' | 'state' | 'pseudo-element';
 
 /**
+ * A `media` modifier's viewport width bound. Width bounds order the emitted
+ * rules: `min` ascending, then `max` descending, so the narrower range wins
+ * where two overlap.
+ */
+export interface ModifierWidthBound {
+	bound: 'min' | 'max';
+	/** A CSS length, or a function like `calc()` (ordered after plain lengths). */
+	value: string;
+}
+
+/**
  * Definition for a single modifier.
  */
 export interface ModifierDefinition {
@@ -26,11 +37,35 @@ export interface ModifierDefinition {
 	name: string;
 	/** Type determines position in modifier order and CSS output behavior */
 	type: ModifierType;
-	/** The CSS output - wrapper for media/ancestor, suffix for state/pseudo-element */
+	/**
+	 * The CSS the modifier contributes: the media condition for `media`
+	 * (`(width >= 48rem)`, `print`), the selector suffix for `state` and
+	 * `pseudo-element` (`:hover`, `::before`), and the color scheme for
+	 * `ancestor` (`dark`).
+	 */
 	css: string;
-	/** Optional ordering within type (for breakpoints, sorted by this value) */
+	/** The width bound of a breakpoint `media` modifier. */
+	width?: ModifierWidthBound;
+	/** Cascade order among `state` modifiers (LVFHA), emitted ascending. */
 	order?: number;
 }
+
+/**
+ * Builds a breakpoint `media` modifier from its width bound.
+ */
+const to_width_modifier = (
+	name: string,
+	bound: 'min' | 'max',
+	value: string
+): ModifierDefinition => ({
+	name,
+	type: 'media',
+	css: to_width_condition(bound, value),
+	width: { bound, value }
+});
+
+const to_width_condition = (bound: 'min' | 'max', value: string): string =>
+	bound === 'min' ? `(width >= ${value})` : `(width < ${value})`;
 
 /**
  * All modifier definitions in a single declarative structure.
@@ -38,33 +73,33 @@ export interface ModifierDefinition {
  */
 export const MODIFIERS: Array<ModifierDefinition> = [
 	// Media modifiers - viewport breakpoints (mobile-first)
-	{ name: 'sm', type: 'media', css: '@media (width >= 40rem)', order: 1 },
-	{ name: 'md', type: 'media', css: '@media (width >= 48rem)', order: 2 },
-	{ name: 'lg', type: 'media', css: '@media (width >= 64rem)', order: 3 },
-	{ name: 'xl', type: 'media', css: '@media (width >= 80rem)', order: 4 },
-	{ name: '2xl', type: 'media', css: '@media (width >= 96rem)', order: 5 },
+	to_width_modifier('sm', 'min', '40rem'),
+	to_width_modifier('md', 'min', '48rem'),
+	to_width_modifier('lg', 'min', '64rem'),
+	to_width_modifier('xl', 'min', '80rem'),
+	to_width_modifier('2xl', 'min', '96rem'),
 
 	// Max-width variants (for targeting below a breakpoint)
-	{ name: 'max-sm', type: 'media', css: '@media (width < 40rem)', order: 11 },
-	{ name: 'max-md', type: 'media', css: '@media (width < 48rem)', order: 12 },
-	{ name: 'max-lg', type: 'media', css: '@media (width < 64rem)', order: 13 },
-	{ name: 'max-xl', type: 'media', css: '@media (width < 80rem)', order: 14 },
-	{ name: 'max-2xl', type: 'media', css: '@media (width < 96rem)', order: 15 },
+	to_width_modifier('max-sm', 'max', '40rem'),
+	to_width_modifier('max-md', 'max', '48rem'),
+	to_width_modifier('max-lg', 'max', '64rem'),
+	to_width_modifier('max-xl', 'max', '80rem'),
+	to_width_modifier('max-2xl', 'max', '96rem'),
 
 	// Media modifiers - feature queries
-	{ name: 'print', type: 'media', css: '@media print' },
-	{ name: 'motion-safe', type: 'media', css: '@media (prefers-reduced-motion: no-preference)' },
-	{ name: 'motion-reduce', type: 'media', css: '@media (prefers-reduced-motion: reduce)' },
-	{ name: 'contrast-more', type: 'media', css: '@media (prefers-contrast: more)' },
-	{ name: 'contrast-less', type: 'media', css: '@media (prefers-contrast: less)' },
-	{ name: 'portrait', type: 'media', css: '@media (orientation: portrait)' },
-	{ name: 'landscape', type: 'media', css: '@media (orientation: landscape)' },
-	{ name: 'forced-colors', type: 'media', css: '@media (forced-colors: active)' },
+	{ name: 'print', type: 'media', css: 'print' },
+	{ name: 'motion-safe', type: 'media', css: '(prefers-reduced-motion: no-preference)' },
+	{ name: 'motion-reduce', type: 'media', css: '(prefers-reduced-motion: reduce)' },
+	{ name: 'contrast-more', type: 'media', css: '(prefers-contrast: more)' },
+	{ name: 'contrast-less', type: 'media', css: '(prefers-contrast: less)' },
+	{ name: 'portrait', type: 'media', css: '(orientation: portrait)' },
+	{ name: 'landscape', type: 'media', css: '(orientation: landscape)' },
+	{ name: 'forced-colors', type: 'media', css: '(forced-colors: active)' },
 
-	// Ancestor modifiers - color scheme
-	{ name: 'dark', type: 'ancestor', css: ':root.dark' },
-	{ name: 'light', type: 'ancestor', css: ':root.light' },
-
+	// Ancestor modifiers - color scheme, set by the root class or followed
+	// from the OS preference (see `render_color_scheme_rules`)
+	{ name: 'dark', type: 'ancestor', css: 'dark' },
+	{ name: 'light', type: 'ancestor', css: 'light' },
 	// State modifiers - interaction (ordered for proper cascade: LVFHA)
 	{ name: 'any-link', type: 'state', css: ':any-link' },
 	{ name: 'link', type: 'state', css: ':link' },
@@ -226,6 +261,9 @@ export const extract_balanced_parens = (segment: string, prefix: string): string
 	return null;
 };
 
+// class names can't hold spaces, so `~` stands for one, as in literal values
+const decode_spaces = (value: string): string => value.replaceAll('~', ' ');
+
 /**
  * Known CSS functions that are valid in media query values.
  * These don't start with digits but are valid starts for breakpoint values.
@@ -248,28 +286,29 @@ const is_valid_breakpoint_value = (value: string): boolean => {
 };
 
 /**
- * Parses an arbitrary breakpoint modifier.
+ * Parses an arbitrary breakpoint modifier into its width bound, with `~`
+ * decoded to a space.
  * Supports nested parentheses for calc(), clamp(), min(), max(), var().
  * Requires value to start with a digit or known CSS function to catch obvious mistakes.
  *
- * @returns the CSS media query or null if not an arbitrary breakpoint
+ * @returns the width bound, or null if not an arbitrary breakpoint
  *
  * @example
  * ```ts
- * parse_arbitrary_breakpoint("min-width(800px)") // "@media (width >= 800px)"
- * parse_arbitrary_breakpoint("min-width(calc(100vw - 200px))") // "@media (width >= calc(100vw - 200px))"
+ * parse_arbitrary_breakpoint("min-width(800px)") // {bound: 'min', value: '800px'}
+ * parse_arbitrary_breakpoint("max-width(calc(100vw~-~200px))") // {bound: 'max', value: 'calc(100vw - 200px)'}
  * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no digit or function)
  * ```
  */
-export const parse_arbitrary_breakpoint = (segment: string): string | null => {
+export const parse_arbitrary_breakpoint = (segment: string): ModifierWidthBound | null => {
 	const min_value = extract_balanced_parens(segment, 'min-width');
 	if (min_value !== null && is_valid_breakpoint_value(min_value)) {
-		return `@media (width >= ${min_value})`;
+		return { bound: 'min', value: decode_spaces(min_value) };
 	}
 
 	const max_value = extract_balanced_parens(segment, 'max-width');
 	if (max_value !== null && is_valid_breakpoint_value(max_value)) {
-		return `@media (width < ${max_value})`;
+		return { bound: 'max', value: decode_spaces(max_value) };
 	}
 
 	return null;
@@ -345,14 +384,9 @@ export const get_modifier = (
 	if (pseudo) return pseudo;
 
 	// Check arbitrary breakpoints
-	const arbitrary_css = parse_arbitrary_breakpoint(segment);
-	if (arbitrary_css) {
-		return {
-			name: segment,
-			type: 'media',
-			css: arbitrary_css,
-			is_arbitrary: true
-		};
+	const arbitrary = parse_arbitrary_breakpoint(segment);
+	if (arbitrary) {
+		return { ...to_width_modifier(segment, arbitrary.bound, arbitrary.value), is_arbitrary: true };
 	}
 
 	// Check parameterized state modifiers
@@ -366,6 +400,57 @@ export const get_modifier = (
 
 	return null;
 };
+
+/**
+ * A width bound's length in px for ordering, or null for a value that can't
+ * be compared statically (`calc()` and the like). `rem` and `em` are taken at
+ * 16px, the initial font size media queries resolve them against.
+ */
+const to_width_px = (value: string): number | null => {
+	const match = /^(\d*\.?\d+)(px|rem|em)$/.exec(value);
+	if (!match) return null;
+	const n = Number(match[1]);
+	return match[2] === 'px' ? n : n * 16;
+};
+
+/**
+ * Orders `media` modifiers for emission, so the later rule wins where two
+ * apply: none first, then `min` width bounds ascending, then `max` width
+ * bounds descending, then feature queries in registration order. Width
+ * values that can't be compared statically sort after the comparable ones
+ * of their bound, by value.
+ */
+export const compare_media_modifiers = (
+	a: ModifierDefinition | null,
+	b: ModifierDefinition | null
+): number => {
+	if (a === b) return 0;
+	if (!a) return -1;
+	if (!b) return 1;
+	const rank_a = to_media_rank(a);
+	const rank_b = to_media_rank(b);
+	if (rank_a !== rank_b) return rank_a - rank_b;
+	if (a.width && b.width) {
+		const px_a = to_width_px(a.width.value);
+		const px_b = to_width_px(b.width.value);
+		if (px_a !== null && px_b !== null && px_a !== px_b) {
+			return a.width.bound === 'min' ? px_a - px_b : px_b - px_a;
+		}
+		if (px_a === null && px_b !== null) return 1;
+		if (px_b === null && px_a !== null) return -1;
+		return a.width.value.localeCompare(b.width.value);
+	}
+	return MEDIA_ORDER.get(a.name)! - MEDIA_ORDER.get(b.name)!;
+};
+
+// min-width bounds, then max-width bounds, then feature queries
+const to_media_rank = (m: ModifierDefinition): number =>
+	m.width ? (m.width.bound === 'min' ? 0 : 1) : 2;
+
+// registration order of the feature-query media modifiers
+const MEDIA_ORDER: Map<string, number> = new Map(
+	MODIFIERS.filter((m) => m.type === 'media').map((m, i) => [m.name, i])
+);
 
 /**
  * Gets all modifier names for error message suggestions.

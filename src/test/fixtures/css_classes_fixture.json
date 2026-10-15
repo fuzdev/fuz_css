@@ -6,17 +6,21 @@
 		"declaration": "border-radius: 50%;"
 	},
 	"box": {
+		"composite": true,
 		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\talign-items: center;\n\t\t\tjustify-content: center;\n\t\t"
 	},
 	"column": {
+		"composite": true,
 		"comment": "like `.box` but uncentered",
 		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t"
 	},
 	"row": {
+		"composite": true,
 		"comment": "can be used to override the direction of a `.box`",
 		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: row;\n\t\t\talign-items: center;\n\t\t"
 	},
 	"ellipsis": {
+		"composite": true,
 		"declaration": "\n\t\t\tdisplay: block;\n\t\t\twhite-space: nowrap;\n\t\t\toverflow: hidden;\n\t\t\ttext-overflow: ellipsis;\n\t\t"
 	},
 	"selectable": {
@@ -26,30 +30,37 @@
 		"ruleset": "\n\t\t\t.clickable {\n\t\t\t\tcursor: pointer;\n\t\t\t\ttransform: var(--clickable_transform, scale3d(1, 1, 1));\n\t\t\t\ttransform-origin: var(--clickable_transform_origin);\n\t\t\t\ttransition-duration: var(--clickable_transition_duration); /* default to instant, chunky/lofi */\n\t\t\t}\n\t\t\t.clickable:focus {\n\t\t\t\ttransform: var(--clickable_transform_focus, scale3d(1.07, 1.07, 1.07));\n\t\t\t}\n\t\t\t.clickable:hover {\n\t\t\t\ttransform: var(--clickable_transform_hover, scale3d(1.1, 1.1, 1.1));\n\t\t\t}\n\t\t\t.clickable:active,\n\t\t\t.clickable.active {\n\t\t\t\ttransform: var(--clickable_transform_active, scale3d(1.2, 1.2, 1.2));\n\t\t\t}\n\t\t"
 	},
 	"pane": {
+		"composite": true,
 		"comment": "A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		"declaration": "\n\t\t\tbackground-color: var(--shade_00);\n\t\t\tbox-shadow: var(--pane_shadow);\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t"
 	},
 	"panel": {
+		"composite": true,
 		"comment": "A panel is a box embedded into the page, useful for visually isolating content.",
 		"declaration": "\n\t\t\tborder-radius: var(--border_radius, var(--border_radius_xs));\n\t\t\tbackground-color: var(--fg_10);\n\t\t\tbox-shadow: var(--panel_shadow);\n\t\t"
 	},
 	"sized_xs": {
+		"composite": true,
 		"comment": "Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_xs);\n\t\t\t--input_height: var(--space_xl3);\n\t\t\t--input_height_compact: var(--space_xl2);\n\t\t\t--input_padding_x: var(--space_sm);\n\t\t\t--chip_padding_x: var(--space_xs3);\n\t\t\t--icon_size: var(--icon_size_xs);\n\t\t\t--menuitem_padding: var(--space_xs5) var(--space_xs3);\n\t\t\t--flow_margin: var(--space_sm);\n\t\t"
 	},
 	"sized_sm": {
+		"composite": true,
 		"comment": "Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_sm);\n\t\t\t--input_height: var(--space_xl4);\n\t\t\t--input_height_compact: var(--space_xl3);\n\t\t\t--input_padding_x: var(--space_md);\n\t\t\t--chip_padding_x: var(--space_xs2);\n\t\t\t--icon_size: var(--icon_size_sm);\n\t\t\t--menuitem_padding: var(--space_xs4) var(--space_xs2);\n\t\t\t--flow_margin: var(--space_md);\n\t\t"
 	},
 	"sized_md": {
+		"composite": true,
 		"comment": "Default sizing restated explicitly, useful as a cascade reset within a sized parent.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_md);\n\t\t\t--input_height: var(--space_xl5);\n\t\t\t--input_height_compact: var(--space_xl4);\n\t\t\t--input_padding_x: var(--space_lg);\n\t\t\t--chip_padding_x: var(--space_xs);\n\t\t\t--icon_size: var(--icon_size_md);\n\t\t\t--menuitem_padding: var(--space_xs3) var(--space_xs);\n\t\t\t--flow_margin: var(--space_lg);\n\t\t"
 	},
 	"sized_lg": {
+		"composite": true,
 		"comment": "Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_lg);\n\t\t\t--input_height: var(--space_xl6);\n\t\t\t--input_height_compact: var(--space_xl5);\n\t\t\t--input_padding_x: var(--space_xl);\n\t\t\t--chip_padding_x: var(--space_sm);\n\t\t\t--icon_size: var(--icon_size_lg);\n\t\t\t--menuitem_padding: var(--space_xs2) var(--space_sm);\n\t\t\t--flow_margin: var(--space_xl);\n\t\t"
 	},
 	"sized_xl": {
+		"composite": true,
 		"comment": "Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.",
 		"declaration": "\n\t\t\t--font_size: var(--font_size_xl);\n\t\t\t--input_height: var(--space_xl7);\n\t\t\t--input_height_compact: var(--space_xl6);\n\t\t\t--input_padding_x: var(--space_xl2);\n\t\t\t--chip_padding_x: var(--space_md);\n\t\t\t--icon_size: var(--icon_size_xl);\n\t\t\t--menuitem_padding: var(--space_xs) var(--space_md);\n\t\t\t--flow_margin: var(--space_xl2);\n\t\t"
 	},
@@ -62,6 +73,7 @@
 		"declaration": "margin-top: var(--flow_margin, var(--space_lg));"
 	},
 	"icon_button": {
+		"composite": true,
 		"comment": "\n\t\t\tTODO other button variants?\n\t\t\tTODO this is slightly strange that it doesn't use --icon_size.\n\t\t\tThese are used as modifiers to buttons.\n\t\t",
 		"declaration": "\n\t\t\twidth: var(--input_height);\n\t\t\theight: var(--input_height);\n\t\t\tmin-width: var(--input_height);\n\t\t\tmin-height: var(--input_height);\n\t\t\tflex-shrink: 0;\n\t\t\tline-height: 1;\n\t\t\tfont-weight: 900;\n\t\t\tpadding: 0;\n\t\t"
 	},

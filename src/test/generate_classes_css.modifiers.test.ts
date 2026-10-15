@@ -1,7 +1,6 @@
 import { test, describe, assert } from 'vitest';
 
 import { generate_classes_css } from '#lib/css_class_generation.ts';
-import { modified_class_interpreter } from '#lib/css_class_interpreters.ts';
 import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { css_class_composites } from '#lib/css_class_composites.ts';
 import {
@@ -13,16 +12,17 @@ import {
 } from './test_helpers.ts';
 
 /**
- * Tests for the modified_class_interpreter which handles classes with modifiers
- * like hover:, md:, dark:, before:, etc.
+ * Tests for modified classes - `hover:`, `md:`, `dark:`, `before:` and the
+ * rest - which `generate_classes_css` strips from a class name and applies to
+ * whatever the base resolves to.
  */
-describe('modified_class_interpreter', () => {
+describe('generate_classes_css modifiers', () => {
 	describe('basic modifiers', () => {
 		test('generates CSS for hover:box', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:box'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -38,7 +38,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:box'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -49,7 +49,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['dark:panel'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -60,7 +60,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:dark:hover:box'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -76,7 +76,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['lg:dark:focus:after:box'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -92,7 +92,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:p_md'],
 				class_definitions: css_class_definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -103,7 +103,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:unknown_class'],
 				class_definitions: {},
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -114,7 +114,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['box'],
 				class_definitions: {},
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -127,7 +127,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['before:box'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -138,7 +138,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:before:ellipsis'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -151,7 +151,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:row'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -164,7 +164,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -176,7 +176,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -193,7 +193,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:menuitem'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -210,7 +210,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:chevron'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -221,7 +221,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:chip'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -238,7 +238,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:dark:hover:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -254,7 +254,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['focus:plain'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -269,7 +269,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:clickable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -287,7 +287,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['before:chevron'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -304,7 +304,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['before:chip'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -323,7 +323,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -340,7 +340,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -351,7 +351,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['focus:clickable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -363,7 +363,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['active:clickable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -375,7 +375,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:plain'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -401,7 +401,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -424,7 +424,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -448,7 +448,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:panel_base'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -473,7 +473,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:diamond'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -494,7 +494,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:sized_sm'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -513,7 +513,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:sized_sm'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -529,7 +529,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:sized_md'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -545,7 +545,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['lg:sized_sm'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -562,7 +562,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['lg:sized_md'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -580,7 +580,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['sized_sm', 'sized_md'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -600,7 +600,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['md:sm', 'sm:md', 'sm'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -620,7 +620,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:card'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -641,7 +641,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:a'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -657,7 +657,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:empty'],
 				class_definitions: definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -671,7 +671,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['active:border_a_50', 'hover:border_b_50'],
 				class_definitions: css_class_definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -682,7 +682,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['active:p_xl', 'hover:p_lg', 'focus:p_md', 'visited:p_sm'],
 				class_definitions: css_class_definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -695,16 +695,16 @@ describe('modified_class_interpreter', () => {
 			);
 		});
 
-		test('non-interaction states use alphabetical order', () => {
+		test('non-interaction states of one class order by name', () => {
 			const result = generate_classes_css({
-				class_names: ['odd:p_md', 'even:p_lg', 'first:p_sm'],
+				class_names: ['odd:p_md', 'even:p_md', 'first:p_md'],
 				class_definitions: css_class_definitions,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
-			// Alphabetical: even < first < odd
-			assert_css_order(result.css, '.even\\:p_lg', '.first\\:p_sm', '.odd\\:p_md');
+			// even < first < odd
+			assert_css_order(result.css, '.even\\:p_md', '.first\\:p_md', '.odd\\:p_md');
 		});
 	});
 
@@ -713,7 +713,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['before:chevron'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -731,7 +731,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:selectable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 
@@ -750,7 +750,7 @@ describe('modified_class_interpreter', () => {
 			const result = generate_classes_css({
 				class_names: ['focus:clickable'],
 				class_definitions: css_class_composites,
-				interpreters: [modified_class_interpreter],
+				interpreters: [],
 				css_properties: null
 			});
 

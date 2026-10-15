@@ -200,19 +200,6 @@ export interface ModifiedSelectorGroupResult {
 }
 
 /**
- * Result from generating a modified ruleset.
- *
- * Uses `| null` for skipped_modifiers to avoid allocating empty arrays.
- * Callers should use a guard pattern: `if (result.skipped_modifiers) { ... }`
- */
-export interface ModifiedRulesetResult {
-	/** The generated CSS */
-	css: string;
-	/** Information about modifiers that were skipped for certain rules, or null if none */
-	skipped_modifiers: Array<SkippedModifierInfo> | null;
-}
-
-/**
  * Skips an identifier (class name, pseudo-class name, etc.) starting at `start`.
  *
  * @returns new position after the identifier
@@ -519,55 +506,40 @@ export const modify_selector_group = (
 };
 
 /**
- * Generates CSS for a modified ruleset with applied modifiers.
+ * Result from modifying a ruleset's rules for a modified class.
  *
- * Conflict handling is per-selector within selector lists:
- * - For `.plain:hover, .plain:active` with `hover:` modifier, only `.plain:hover` skips
- *   the `:hover` addition; `.plain:active` still gets `:hover` appended.
- * - For multiple states like `:hover:focus`, each is checked individually; conflicting
- *   states are skipped while non-conflicting ones are still applied.
+ * Uses `| null` for skipped_modifiers to avoid allocating empty arrays.
+ * Callers should use a guard pattern: `if (result.skipped_modifiers) { ... }`
+ */
+export interface ModifiedRulesetResult {
+	/** Each rule with its selector list rewritten, in source order. */
+	rules: Array<{ selector: string; declarations: string }>;
+	/** Information about modifiers that were skipped for certain rules, or null if none */
+	skipped_modifiers: Array<SkippedModifierInfo> | null;
+}
+
+/**
+ * Rewrites a ruleset's rules for a modified class: renames the base class and
+ * appends the state and pseudo-element modifiers to each selector, skipping
+ * per selector any it already carries. At-rules in the ruleset are flattened
+ * to their rules; media and color-scheme wrappers are the generator's.
  *
- * @param original_ruleset - the original CSS ruleset string
+ * @param ruleset - the original CSS ruleset string
  * @param original_class - the base class name
  * @param new_class_escaped - the escaped new class name with modifiers
- * @param state_css - state modifier CSS (e.g., ":hover" or ":hover:focus")
- * @param pseudo_element_css - pseudo-element modifier CSS (e.g., "::before")
- * @param media_wrapper - media query wrapper (e.g., "@media (width >= 48rem)")
- * @param ancestor_wrapper - ancestor wrapper (e.g., ":root.dark")
- * @returns result with generated CSS and information about skipped modifiers
+ * @param states_to_add - individual state modifiers (e.g., [":hover", ":focus"])
+ * @param pseudo_element_css - pseudo-element modifier CSS (e.g., "::before"), or ''
  */
-export const generate_modified_ruleset = (
-	original_ruleset: string,
+export const modify_ruleset = (
+	ruleset: string,
 	original_class: string,
 	new_class_escaped: string,
-	state_css: string,
-	pseudo_element_css: string,
-	media_wrapper: string | null,
-	ancestor_wrapper: string | null
+	states_to_add: Array<string>,
+	pseudo_element_css: string
 ): ModifiedRulesetResult => {
-	const parsed = parse_ruleset(original_ruleset);
+	const rules: Array<{ selector: string; declarations: string }> = [];
 	let skipped_modifiers: Array<SkippedModifierInfo> | null = null;
-
-	// Extract individual states for per-selector conflict detection (e.g., ":hover:focus" → [":hover", ":focus"])
-	const states_to_add = state_css.match(/:[a-z-]+/g) ?? [];
-
-	let css = '';
-	let indent = '';
-
-	// Open media wrapper if present
-	if (media_wrapper) {
-		css += `${media_wrapper} {\n`;
-		indent = '\t';
-	}
-
-	// Open ancestor wrapper if present
-	if (ancestor_wrapper) {
-		css += `${indent}${ancestor_wrapper} {\n`;
-		indent += '\t';
-	}
-
-	// Generate each rule with modified selector (conflict detection happens per-selector in modify_selector_group)
-	for (const rule of parsed.rules) {
+	for (const rule of parse_ruleset(ruleset).rules) {
 		const result = modify_selector_group(
 			rule.selector,
 			original_class,
@@ -575,25 +547,8 @@ export const generate_modified_ruleset = (
 			states_to_add,
 			pseudo_element_css
 		);
-
-		// Collect skip info from per-selector conflict detection
-		if (result.skipped_modifiers) {
-			(skipped_modifiers ??= []).push(...result.skipped_modifiers);
-		}
-
-		css += `${indent}${result.selector} { ${rule.declarations} }\n`;
+		if (result.skipped_modifiers) (skipped_modifiers ??= []).push(...result.skipped_modifiers);
+		rules.push({ selector: result.selector, declarations: rule.declarations });
 	}
-
-	// Close ancestor wrapper
-	if (ancestor_wrapper) {
-		indent = indent.slice(0, -1);
-		css += `${indent}}\n`;
-	}
-
-	// Close media wrapper
-	if (media_wrapper) {
-		css += '}\n';
-	}
-
-	return { css, skipped_modifiers };
+	return { rules, skipped_modifiers };
 };

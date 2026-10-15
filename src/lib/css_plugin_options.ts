@@ -82,6 +82,14 @@ export interface CssClassOptions {
 	 * Additional class definitions to merge with defaults.
 	 * User definitions take precedence over defaults with the same name.
 	 * Required when `include_default_classes` is `false`.
+	 *
+	 * Registry order breaks ties between single-purpose classes of equal
+	 * rank, and for composites it is their order, so where a definition
+	 * lands matters: one with a new name is
+	 * ordered after the defaults, so it beats a built-in token it ties with on
+	 * the same property (though not a literal like `padding:0`, which orders
+	 * after every static definition), while one overriding a default's name
+	 * keeps that default's position.
 	 */
 	class_definitions?: Record<string, CssClassDefinition | undefined>;
 	/**

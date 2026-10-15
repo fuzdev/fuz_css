@@ -51,12 +51,17 @@ describe('generate_bundled_css', () => {
 
 		test('emits the layer order statement and wraps each section in its layer', () => {
 			const result = create_mock_result();
-			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
+			const bundled = generate_bundled_css(
+				result,
+				'@layer fuz.utilities {\n.p_md { padding: 16px; }\n}\n'
+			);
 
 			assert.match(bundled, /^@layer fuz\.base, fuz\.preferences, fuz\.theme, fuz\.utilities;/);
-			// theme variables and base styles both live in fuz.base; utilities above
+			// theme variables and base styles both live in fuz.base; utilities
+			// above, layered already by `generate_classes_css`
 			assert.equal(bundled.match(/@layer fuz\.base \{/gu)?.length, 2);
 			assert.include(bundled, '@layer fuz.utilities {\n.p_md { padding: 16px; }\n}');
+			assert.equal(bundled.match(/@layer fuz\.utilities \{/gu)?.length, 1);
 		});
 
 		test('preference rules are wrapped in fuz.preferences', () => {

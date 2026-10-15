@@ -326,7 +326,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		// style.css/theme.css slot beneath the generated classes and consumers'
 		// unlayered styles beat everything, same as bundled mode
 		css = utility_result.css
-			? `${FUZ_LAYER_ORDER_STATEMENT}\n\n/* Utility Classes */\n@layer fuz.utilities {\n${utility_result.css}\n}`
+			? `${FUZ_LAYER_ORDER_STATEMENT}\n\n/* Utility Classes */\n${utility_result.css.trimEnd()}`
 			: '';
 	}
 
