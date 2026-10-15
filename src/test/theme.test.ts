@@ -51,8 +51,25 @@ describe('render_theme_style', () => {
 			{ id: 'my_scope' }
 		);
 		assert.include(css, '#my_scope {');
-		assert.include(css, '#my_scope.dark, :root.dark #my_scope {');
+		assert.include(css, '#my_scope.dark, :root.dark #my_scope:not(.light) {');
 		assert.notInclude(css, ':root {');
+	});
+
+	test('a .light on the id scope keeps it light under an explicit or preferred dark root', () => {
+		const css = render_theme_style(
+			{ name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9', dark: '0.2' }] },
+			{ id: 'my_scope' }
+		);
+		// every root-placed dark selector excludes a light scope, the explicit
+		// `:root.dark` and its `prefers-color-scheme` twin alike
+		const dark_selectors = [
+			...css.matchAll(/^\s*([^{}\n]+) \{\n\t*--shade_lightness_00: 0\.2;/gm)
+		].flatMap((m) => m[1]!.split(', '));
+		assert.deepEqual(dark_selectors, [
+			'#my_scope.dark',
+			':root.dark #my_scope:not(.light)',
+			':root:not(.light) #my_scope:not(.light)'
+		]);
 	});
 
 	test('an id is escaped into the selector', () => {
@@ -382,7 +399,9 @@ const assert_theme_css_is_contained = (css: string): void => {
 	assert.strictEqual(depth, 0, 'every block closes');
 	assert.strictEqual(paren_depth, 0, 'every bracket closes');
 	for (const prelude of preludes) {
-		assert.include(['@layer fuz.theme', ':root', ':root.dark'], prelude);
+		// bracket contents are skipped, so the OS-preference twin reads `@media`
+		// and `:root:not`
+		assert.include(['@layer fuz.theme', ':root', ':root.dark', '@media', ':root:not'], prelude);
 	}
 	for (const declaration of declarations) {
 		assert.match(declaration, /^(--[\w-]+|color-scheme):/);

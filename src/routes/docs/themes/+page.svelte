@@ -157,8 +157,8 @@
 			Light and dark are color schemes within a theme (<MdnLink path="Web/CSS/color-scheme" />), not
 			separate themes: each variable can carry a value for either, so any theme can implement dark
 			mode. The scheme follows <MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by default. To
-			set it manually, add the <code>dark</code> class to the root <code>html</code> element, or use
-			a component like
+			set it manually, add the <code>dark</code> or <code>light</code> class to the root
+			<code>html</code> element, or use a component like
 			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte">
 				<code>ColorSchemeInput</code>
 			</a>

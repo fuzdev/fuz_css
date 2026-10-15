@@ -12,7 +12,7 @@ import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
 import { resolve_theme_stance } from './theme_stance.ts';
-import { overlay_style_variable } from './theme.ts';
+import { overlay_style_variable, render_color_scheme_rules } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import {
@@ -258,7 +258,8 @@ export const generate_theme_css = (
 	}
 
 	if (dark_declarations.length > 0) {
-		dark_css = `:root.dark {\n${dark_declarations.join('\n')}\n}`;
+		const declarations = dark_declarations.join('\n');
+		dark_css = render_color_scheme_rules('dark', (root) => `${root} {\n${declarations}\n}`);
 	}
 
 	return { light_css, dark_css };

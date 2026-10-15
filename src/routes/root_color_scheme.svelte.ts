@@ -4,16 +4,24 @@ import type { ColorSchemeVariant } from '#lib/variable_data.ts';
 
 // TODO upstream to fuz_ui
 
+const DARK_QUERY = '(prefers-color-scheme: dark)';
+
 const subscribe = createSubscriber((update) => {
 	const observer = new MutationObserver(update);
 	observer.observe(document.documentElement, { attributes: true, attributeFilter: ['class'] });
-	return () => observer.disconnect();
+	const media = matchMedia(DARK_QUERY);
+	media.addEventListener('change', update);
+	return () => {
+		observer.disconnect();
+		media.removeEventListener('change', update);
+	};
 });
 
 /**
- * Reads the color scheme the page currently renders: the `dark` class on the
- * root element, the ecosystem convention. Reactive when called in an effect
- * or derived, so a reader re-runs after the class changes.
+ * Reads the color scheme the page currently renders: the `dark` or `light`
+ * class on the root element, the ecosystem convention, or the OS preference
+ * when the root names neither. Reactive when called in an effect or derived,
+ * so a reader re-runs after the class or the OS preference changes.
  *
  * This is what's on screen, which the theme state's `color_scheme` isn't
  * always: `'auto'` resolves against the OS once and the class doesn't follow
@@ -23,5 +31,9 @@ const subscribe = createSubscriber((update) => {
 export const root_color_scheme = (): ColorSchemeVariant => {
 	if (typeof document === 'undefined') return 'light';
 	subscribe();
-	return document.documentElement.classList.contains('dark') ? 'dark' : 'light';
+	const { classList } = document.documentElement;
+	return classList.contains('dark') ||
+		(!classList.contains('light') && matchMedia(DARK_QUERY).matches)
+		? 'dark'
+		: 'light';
 };

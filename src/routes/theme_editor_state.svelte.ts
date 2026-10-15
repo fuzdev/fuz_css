@@ -56,8 +56,9 @@ export interface ThemeEditorStateOptions {
  * always edit the light (base) slot so the change applies to both schemes.
  * When a fresh light-slot override lands on a variable whose default is
  * dual-slot, the merge preserves the default's dark slot explicitly - a
- * theme's `:root` block beats the base defaults' `:root.dark` by cascade
- * layer order, so omitting it would silently change dark mode too. A base
+ * theme's `:root` block beats the base defaults' dark-scheme defaults
+ * (`:root.dark` and its `prefers-color-scheme` twin) by cascade layer order,
+ * so omitting it would silently change dark mode too. A base
  * theme that itself sets only light slots (e.g. dark-only mirrors) chose
  * those cross-scheme semantics deliberately and is left alone.
  *

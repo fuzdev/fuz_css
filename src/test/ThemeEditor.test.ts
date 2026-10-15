@@ -10,7 +10,13 @@ import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { NEUTRAL_CHROMA, BORDER_CHROMA_MULTIPLIER } from '#lib/ramps.ts';
 import ThemeEditorHarness from './ThemeEditorHarness.svelte';
-import { create_mount_tracker, set_input_value } from './component_test_helpers.ts';
+import {
+	create_mount_tracker,
+	install_match_media,
+	set_input_value
+} from './component_test_helpers.ts';
+
+install_match_media();
 
 const mount = create_mount_tracker();
 

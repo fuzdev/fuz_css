@@ -10,7 +10,9 @@ import { oklch_to_srgb, type Oklch } from '@fuzdev/fuz_util/oklch.ts';
 
 import { parse_resolved_color, type ResolvedColor } from '#routes/docs/resolved_color.svelte.ts';
 import ResolvedColorHarness from './ResolvedColorHarness.svelte';
-import { create_mount_tracker } from './component_test_helpers.ts';
+import { create_mount_tracker, install_match_media } from './component_test_helpers.ts';
+
+install_match_media();
 
 const expected_hex = (color: Oklch): string => {
 	const [r, g, b] = oklch_to_srgb(color).map((c) => Math.round(clamp(c, 0, 1) * 255));

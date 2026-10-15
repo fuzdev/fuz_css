@@ -253,7 +253,7 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 			continue;
 		}
 		// a stanced theme renders one appearance in both color schemes, so a
-		// dark slot only shadows the base slot when the `.dark` class is set,
+		// dark slot only shadows the base slot in the dark scheme,
 		// silently splitting the appearances the stance promises to unify
 		if (stance && valid.dark !== undefined) {
 			issues.push({

@@ -26,10 +26,10 @@ import { to_theme_stance } from './theme.ts';
  * default not overridden by `variables`, re-slotted with the stanced scheme's
  * value in the base (light) slot. A base-slot declaration in `fuz.theme`
  * applies in both color schemes - cascade-layer order beats the higher
- * specificity of the `fuz.base` `:root.dark` defaults - and keeping the
- * mirror out of the dark slot means later same-block declarations (the
- * theme's own variables, composed overlays, compiled cap overrides) always
- * win by source order.
+ * specificity of the `fuz.base` dark-scheme defaults (`:root.dark` and its
+ * `prefers-color-scheme` twin) - and keeping the mirror out of the dark slot
+ * means later same-block declarations (the theme's own variables, composed
+ * overlays, compiled cap overrides) always win by source order.
  *
  * @param scheme - the stance to mirror for
  * @param variables - the theme's own variables, whose names are left alone

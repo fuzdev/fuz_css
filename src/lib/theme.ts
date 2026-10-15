@@ -31,6 +31,45 @@ export const FUZ_LAYER_ORDER_STATEMENT =
 	'@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;';
 
 /**
+ * The root selectors that put a page in each color scheme: `explicit` names
+ * the scheme with a class on the root element (fuz_ui's theme state sets one),
+ * and `preferred` holds while the root names neither scheme, so the page
+ * follows the OS preference without JS.
+ */
+export const COLOR_SCHEME_ROOTS = {
+	dark: { explicit: ':root.dark', preferred: ':root:not(.light)' },
+	light: { explicit: ':root.light', preferred: ':root:not(.dark)' }
+} as const;
+
+/**
+ * Renders a color scheme's rules twice: once under the scheme's root class,
+ * and once inside `@media (prefers-color-scheme: …)` for a root that names
+ * no scheme. Both renderings carry the same declarations, so which one
+ * applies changes nothing.
+ *
+ * @param scheme - the color scheme the rules belong to
+ * @param to_rules - renders the rules given which root selector applies
+ * @param media - an outer media condition to combine with the preference
+ *   (`(width >= 48rem)`), or null
+ * @returns the CSS, with `media` (when given) wrapping both renderings
+ */
+export const render_color_scheme_rules = (
+	scheme: 'light' | 'dark',
+	to_rules: (root: string) => string,
+	media: string | null = null
+): string => {
+	const roots = COLOR_SCHEME_ROOTS[scheme];
+	const explicit = to_rules(roots.explicit);
+	const preferred = indent_css(to_rules(roots.preferred));
+	const preference = `(prefers-color-scheme: ${scheme})`;
+	return media
+		? `@media ${media} {\n${indent_css(explicit)}\n}\n@media ${media} and ${preference} {\n${preferred}\n}`
+		: `${explicit}\n@media ${preference} {\n${preferred}\n}`;
+};
+
+const indent_css = (css: string): string => css.replace(/^(?=.)/gm, '\t');
+
+/**
  * The sublayer a build-time theme's own overlay renders into. A layer's
  * direct styles outrank its sublayers, so a runtime theme rendered into
  * `fuz.theme` wins over the baked one whatever their selectors' specificity,
@@ -45,6 +84,10 @@ export interface RenderThemeStyleOptions {
 	 * render for both placements of the scheme class - on the scope element
 	 * itself (`#id.dark`) and on the root (`:root.dark #id`), the ecosystem
 	 * convention - so a scoped theme's dark appearance follows the page's.
+	 * A `.light` on the scope element wins over either: the scope takes the
+	 * theme's light slots under `:root.dark` and on a dark OS alike. With no
+	 * scheme class on the root or the scope, the dark slots follow the OS
+	 * preference.
 	 *
 	 * Only literal-valued variables take effect in a scope: the derived color
 	 * stops (`--palette_a_50`, `--shade_50`, ...) resolve their `calc()` on
@@ -89,8 +132,8 @@ export const pick_stance_slot = (
  * Overlays one variable onto the same-named variable beneath it, the merge
  * every theme composition shares: the overlay replaces wholesale, except that
  * a dark-only overlay keeps the light slot beneath it. A dark slot only
- * shadows under `.dark`, so dropping the light slot would leave the variable
- * without its light-scheme value.
+ * shadows in the dark scheme, so dropping the light slot would leave the
+ * variable without its light-scheme value.
  *
  * @param existing - the variable being overlaid, if any
  * @param overlay - the variable that wins
@@ -196,29 +239,34 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	// nothing declared - no variables, or every one of them empty or dropped
 	if (!rendered_light.length && !rendered_dark.length) return '';
 	const scope = typeof id === 'string' && id ? '#' + escape_css_identifier(id) : ':root';
-	// the scheme class conventionally lives on the root element, so a scoped
-	// theme's dark block matches both that and a class on the scope itself
-	const dark_scope = scope !== ':root' ? `${scope}.dark, :root.dark ${scope}` : ':root.dark';
-	const blocks = `${
-		rendered_light.length
-			? `${scope} {
-	${rendered_light.join('\n\t')}
-}`
+	const dark_declarations = rendered_dark.join('\n\t');
+	const blocks = [
+		rendered_light.length ? `${scope} {\n\t${rendered_light.join('\n\t')}\n}` : '',
+		rendered_dark.length
+			? render_color_scheme_rules(
+					'dark',
+					(root) => `${to_dark_scope(scope, root)} {\n\t${dark_declarations}\n}`
+				)
 			: ''
-	}
-${
-	rendered_dark.length
-		? `${dark_scope} {
-	${rendered_dark.join('\n\t')}
-}`
-		: ''
-}
-`.trim();
+	]
+		.filter(Boolean)
+		.join('\n');
 	if (layer === null) return blocks;
 	return `${FUZ_LAYER_ORDER_STATEMENT}
 @layer ${layer} {
 ${blocks}
 }`;
+};
+
+// the selector for a theme scope's dark slots under a root selector - the
+// scheme class conventionally lives on the root element, so a scoped theme's
+// dark block matches both that and the class on the scope itself, and a
+// `.light` on the scope keeps it light under either root
+const to_dark_scope = (scope: string, root: string): string => {
+	if (scope === ':root') return root;
+	return root === COLOR_SCHEME_ROOTS.dark.explicit
+		? `${scope}.dark, ${root} ${scope}:not(.light)`
+		: `${root} ${scope}:not(.light)`;
 };
 
 // a type's properties before anything has checked them

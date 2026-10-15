@@ -99,7 +99,10 @@ combined and only used content is included. In utility-only mode, import
 - TypeScript objects in [variables.ts](src/lib/variables.ts) define all design
   tokens
 - Each variable can have `light` and/or `dark` values
-- Light/dark are color-schemes _within_ a theme, not separate themes
+- Light/dark are color-schemes _within_ a theme, not separate themes. The
+  dark scheme renders under `:root.dark` and again under
+  `prefers-color-scheme: dark` for a root naming no scheme, so plain CSS
+  follows the OS without JS
 - [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
   `fuz.theme` cascade layer (defaults live in `fuz.base`, OS user-preference
   mappings like `prefers-contrast` in `fuz.preferences` above them, generated
@@ -502,7 +505,8 @@ typography, borders, shading, shadows, layout. See
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
   constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
-- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers,
+- [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the color
+  scheme selectors (`COLOR_SCHEME_ROOTS`, `render_color_scheme_rules`),
   `compose_themes` (flatten + last-wins fragment composition - the
   hand-flatten precursor to `extends`), `overlay_style_variable` (the one
   slot merge `compose_themes` and the build-time overlay share: wholesale

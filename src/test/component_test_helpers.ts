@@ -68,3 +68,26 @@ export const set_input_value = (
 	input.value = value;
 	input.dispatchEvent(new Event(event_type, { bubbles: true }));
 };
+
+/**
+ * Installs a `matchMedia` on the jsdom window, which has none, answering
+ * every query with one OS `prefers-color-scheme` preference. The returned
+ * setter flips it and fires each listening query's `change` event.
+ */
+export const install_match_media = (initial_dark = false): ((dark: boolean) => void) => {
+	let dark = initial_dark;
+	const listeners: Set<() => void> = new Set();
+	window.matchMedia = (query: string) =>
+		({
+			get matches() {
+				return query.includes('dark') ? dark : !dark;
+			},
+			media: query,
+			addEventListener: (_type: string, listener: () => void) => listeners.add(listener),
+			removeEventListener: (_type: string, listener: () => void) => listeners.delete(listener)
+		}) as unknown as MediaQueryList;
+	return (next) => {
+		dark = next;
+		for (const listener of listeners) listener();
+	};
+};

@@ -65,6 +65,14 @@ Notes:
 			--text_lightness_curve: 0.6;
 		}
 	}
+	/* the dark mapping again for a root that names no scheme, following the OS
+		(see `render_color_scheme_rules`) */
+	@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
+		:root:not(.light) {
+			--shade_lightness_00: 0.12;
+			--text_lightness_curve: 0.6;
+		}
+	}
 }
 
 /* All other rules live in the fuz.base cascade layer: the preference mappings
@@ -85,7 +93,7 @@ Notes:
 
 	:root,
 	:host {
-		color-scheme: light dark; /* overridden by `:root.dark` and `:root.light` added in the `head` */
+		color-scheme: light dark; /* follows the OS unless the root names a scheme with `.dark` or `.light` */
 		background-color: var(--shade_00);
 		background-image: var(--background_image);
 		color: var(--text_color);

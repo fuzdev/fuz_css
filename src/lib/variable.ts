@@ -30,7 +30,8 @@ const StyleVariableValue = z
  * A style variable: a custom property name with a value per color scheme.
  *
  * The slots follow the renderer's cascade: `light` is the base position,
- * rendered on `:root`, and `dark` renders on `:root.dark`. A theme variable
+ * rendered on `:root`, and `dark` renders on `:root.dark` (and for a root
+ * naming no scheme, under `prefers-color-scheme: dark`). A theme variable
  * with only `light` therefore applies in both color schemes (its `fuz.theme`
  * `:root` beats the `fuz.base` dark default by layer order), while `dark`
  * alone applies in dark only - which is why the shipped themes author a
