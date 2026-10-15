@@ -190,9 +190,9 @@
 const warm_theme: Theme = {
 	name: 'warm',
 	variables: [
-		{name: 'hue_neutral', light: '55'},
-		{name: 'neutral_chroma', light: '0.03'},
-		{name: 'chroma_scale', light: '1.15'},
+		{name: 'hue_neutral', base: '55'},
+		{name: 'neutral_chroma', base: '0.03'},
+		{name: 'chroma_scale', base: '1.15'},
 	],
 };`}
 		/>

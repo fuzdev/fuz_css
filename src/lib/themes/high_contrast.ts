@@ -24,14 +24,14 @@ export const high_contrast_theme: Theme = {
 	variables: [
 		// pure white page background, a deepened dark one; the whole shade ramp
 		// stretches to it
-		{ name: 'shade_lightness_00', light: '1', dark: '0.12' },
+		{ name: 'shade_lightness_00', base: '1', dark: '0.12' },
 		// bend text toward the contrast end, keeping disabled text clearly below body
-		{ name: 'text_lightness_curve', light: '0.8', dark: '0.6' },
+		{ name: 'text_lightness_curve', base: '0.8', dark: '0.6' },
 		// control boundaries step up the shade ramp
-		{ name: 'border_color', light: 'var(--shade_50)' },
+		{ name: 'border_color', base: 'var(--shade_50)' },
 		// links step up the accent ramp to keep pace with the stretched body text
-		{ name: 'link_color', light: 'var(--accent_70)' },
+		{ name: 'link_color', base: 'var(--accent_70)' },
 		// panels keep an edge when their fill can't carry one
-		{ name: 'panel_shadow', light: '0 0 0 var(--border_width) var(--border_color)' }
+		{ name: 'panel_shadow', base: '0 0 0 var(--border_width) var(--border_color)' }
 	]
 };

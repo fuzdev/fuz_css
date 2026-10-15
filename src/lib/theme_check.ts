@@ -264,7 +264,7 @@ const EXTREME_MATCHER = /^(?:shade|text)_(min|max)$/u;
 // role falls back to can't drift from what ships
 const ALIAS_DEFAULTS: Map<string, string> = new Map(
 	default_variables.flatMap((v): Array<[string, string]> => {
-		const m = v.light !== undefined && v.dark === undefined ? VAR_MATCHER.exec(v.light) : null;
+		const m = v.base !== undefined && v.dark === undefined ? VAR_MATCHER.exec(v.base) : null;
 		return m ? [[v.name, m[1]!]] : [];
 	})
 );
@@ -890,8 +890,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 			const dark_value = render_chroma_stop_css(stop, dark_cap);
 			cap_overrides.push(
 				light_value === dark_value
-					? { name: `palette_chroma_${stop}`, light: light_value }
-					: { name: `palette_chroma_${stop}`, light: light_value, dark: dark_value }
+					? { name: `palette_chroma_${stop}`, base: light_value }
+					: { name: `palette_chroma_${stop}`, base: light_value, dark: dark_value }
 			);
 		}
 	}

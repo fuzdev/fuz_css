@@ -18,7 +18,7 @@ describe('resolve_css variable resolution', () => {
 		test('from style rules', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
-				[{ name: 'btn_color', light: 'blue' }]
+				[{ name: 'btn_color', base: 'blue' }]
 			);
 
 			const result = resolve_css({
@@ -46,7 +46,7 @@ describe('resolve_css variable resolution', () => {
 			['an at-rule that always ships', '@page { margin: var(--deep); }']
 		])('from style rules, nested however deep: %s', (_name, css) => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(css, [
-				{ name: 'deep', light: '1px' }
+				{ name: 'deep', base: '1px' }
 			]);
 
 			const result = resolve_css({
@@ -65,8 +65,8 @@ describe('resolve_css variable resolution', () => {
 
 		test('from utility_variables_used', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'space_md', light: '16px' },
-				{ name: 'unused', light: '0' }
+				{ name: 'space_md', base: '16px' },
+				{ name: 'unused', base: '0' }
 			]);
 
 			const result = resolve_css({
@@ -84,7 +84,7 @@ describe('resolve_css variable resolution', () => {
 
 		test('from detected_css_variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'custom', light: 'red' }
+				{ name: 'custom', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -101,7 +101,7 @@ describe('resolve_css variable resolution', () => {
 
 		test('from additional_variables option', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'forced', light: 'always' }
+				{ name: 'forced', base: 'always' }
 			]);
 
 			const result = resolve_css({
@@ -116,11 +116,11 @@ describe('resolve_css variable resolution', () => {
 
 		test('additional_variables: "all" includes every variable', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' },
-				{ name: 'space_sm', light: '8px' },
-				{ name: 'space_md', light: '16px' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' },
+				{ name: 'space_sm', base: '8px' },
+				{ name: 'space_md', base: '16px' }
 			]);
 
 			const result = resolve_css({
@@ -141,8 +141,8 @@ describe('resolve_css variable resolution', () => {
 
 		test('additional_variables: "all" includes transitive deps', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'base', light: '10' },
-				{ name: 'derived', light: 'calc(var(--base) * 2)' }
+				{ name: 'base', base: '10' },
+				{ name: 'derived', base: 'calc(var(--base) * 2)' }
 			]);
 
 			const result = resolve_css({
@@ -160,11 +160,11 @@ describe('resolve_css variable resolution', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[
-					{ name: 'btn_color', light: 'blue' },
-					{ name: 'space_md', light: '16px' },
-					{ name: 'space_sm', light: '8px' },
-					{ name: 'custom', light: 'red' },
-					{ name: 'forced', light: 'always' }
+					{ name: 'btn_color', base: 'blue' },
+					{ name: 'space_md', base: '16px' },
+					{ name: 'space_sm', base: '8px' },
+					{ name: 'custom', base: 'red' },
+					{ name: 'forced', base: 'always' }
 				]
 			);
 
@@ -195,8 +195,8 @@ describe('resolve_css variable resolution', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--color); }`,
 				[
-					{ name: 'hue', light: '210' },
-					{ name: 'color', light: 'hsl(var(--hue) 50% 50%)' }
+					{ name: 'hue', base: '210' },
+					{ name: 'color', base: 'hsl(var(--hue) 50% 50%)' }
 				]
 			);
 
@@ -215,10 +215,10 @@ describe('resolve_css variable resolution', () => {
 
 		test('resolves deep chains (A→B→C→D)', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'base', light: '10' },
-				{ name: 'level_1', light: 'calc(var(--base) * 2)' },
-				{ name: 'level_2', light: 'calc(var(--level_1) * 2)' },
-				{ name: 'level_3', light: 'calc(var(--level_2) * 2)' }
+				{ name: 'base', base: '10' },
+				{ name: 'level_1', base: 'calc(var(--base) * 2)' },
+				{ name: 'level_2', base: 'calc(var(--level_1) * 2)' },
+				{ name: 'level_3', base: 'calc(var(--level_2) * 2)' }
 			]);
 
 			const result = resolve_css({
@@ -238,10 +238,10 @@ describe('resolve_css variable resolution', () => {
 
 		test('resolves diamond dependencies (A→{B,C}→D)', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'base', light: '10' },
-				{ name: 'branch_a', light: 'calc(var(--base) + 1)' },
-				{ name: 'branch_b', light: 'calc(var(--base) + 2)' },
-				{ name: 'combined', light: 'calc(var(--branch_a) + var(--branch_b))' }
+				{ name: 'base', base: '10' },
+				{ name: 'branch_a', base: 'calc(var(--base) + 1)' },
+				{ name: 'branch_b', base: 'calc(var(--base) + 2)' },
+				{ name: 'combined', base: 'calc(var(--branch_a) + var(--branch_b))' }
 			]);
 
 			const result = resolve_css({
@@ -263,9 +263,9 @@ describe('resolve_css variable resolution', () => {
 
 		test('resolves both light and dark deps', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'light_base', light: '#fff' },
+				{ name: 'light_base', base: '#fff' },
 				{ name: 'dark_base', dark: '#000' },
-				{ name: 'themed', light: 'var(--light_base)', dark: 'var(--dark_base)' }
+				{ name: 'themed', base: 'var(--light_base)', dark: 'var(--dark_base)' }
 			]);
 
 			const result = resolve_css({
@@ -284,7 +284,7 @@ describe('resolve_css variable resolution', () => {
 
 		test('handles empty initial set', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'unused', light: 'value' }
+				{ name: 'unused', base: 'value' }
 			]);
 
 			const result = resolve_css({
@@ -300,8 +300,8 @@ describe('resolve_css variable resolution', () => {
 	describe('cycle handling', () => {
 		test('detects simple cycle (A→B→A)', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'a', light: 'var(--b)' },
-				{ name: 'b', light: 'var(--a)' }
+				{ name: 'a', base: 'var(--b)' },
+				{ name: 'b', base: 'var(--a)' }
 			]);
 
 			const result = resolve_css({
@@ -322,9 +322,9 @@ describe('resolve_css variable resolution', () => {
 
 		test('detects longer cycle (A→B→C→A)', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'a', light: 'var(--b)' },
-				{ name: 'b', light: 'var(--c)' },
-				{ name: 'c', light: 'var(--a)' }
+				{ name: 'a', base: 'var(--b)' },
+				{ name: 'b', base: 'var(--c)' },
+				{ name: 'c', base: 'var(--a)' }
 			]);
 
 			const result = resolve_css({
@@ -341,8 +341,8 @@ describe('resolve_css variable resolution', () => {
 
 		test('propagates warnings to diagnostics', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'x', light: 'var(--y)' },
-				{ name: 'y', light: 'var(--x)' }
+				{ name: 'x', base: 'var(--y)' },
+				{ name: 'y', base: 'var(--x)' }
 			]);
 
 			const result = resolve_css({
@@ -361,10 +361,10 @@ describe('resolve_css variable resolution', () => {
 	});
 
 	describe('theme CSS generation', () => {
-		test('light-only variables produce :root block', () => {
+		test('base-only variables produce :root block', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'space_sm', light: '8px' },
-				{ name: 'space_md', light: '16px' }
+				{ name: 'space_sm', base: '8px' },
+				{ name: 'space_md', base: '16px' }
 			]);
 
 			const result = resolve_css({
@@ -403,8 +403,8 @@ describe('resolve_css variable resolution', () => {
 
 		test('both produce separate blocks', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'text_color', light: 'black', dark: 'white' },
-				{ name: 'bg_color', light: 'white', dark: 'black' }
+				{ name: 'text_color', base: 'black', dark: 'white' },
+				{ name: 'bg_color', base: 'white', dark: 'black' }
 			]);
 
 			const result = resolve_css({
@@ -428,9 +428,9 @@ describe('resolve_css variable resolution', () => {
 
 		test('variables sorted alphabetically', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'zebra', light: '3' },
-				{ name: 'alpha', light: '1' },
-				{ name: 'mid', light: '2' }
+				{ name: 'zebra', base: '3' },
+				{ name: 'alpha', base: '1' },
+				{ name: 'mid', base: '2' }
 			]);
 
 			const result = resolve_css({
@@ -447,7 +447,7 @@ describe('resolve_css variable resolution', () => {
 
 		test('theme variables render :root and :root.dark blocks', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'color', light: 'blue', dark: 'lightblue' }
+				{ name: 'color', base: 'blue', dark: 'lightblue' }
 			]);
 
 			const result = resolve_css({

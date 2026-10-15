@@ -112,7 +112,7 @@ export interface CssResolutionStats {
  * Result from CSS resolution.
  */
 export interface CssResolutionResult {
-	/** CSS for theme variables (light and dark) */
+	/** CSS for theme variables (base and dark) */
 	theme_css: string;
 	/** CSS for base styles (from `style.css`), destined for `fuz.base` */
 	base_css: string;
@@ -181,7 +181,7 @@ export interface CssResolutionOptions {
  * 1. Collect rules: core rules + element-matching + class-matching
  * 2. Collect variables: from rules, generated utility CSS, detected vars, additional_variables
  * 3. Resolve transitive variable dependencies
- * 4. Generate output: theme_css (light+dark), base_css (source order)
+ * 4. Generate output: theme_css (base+dark), base_css (source order)
  *
  * @param options - resolution options including indexes, detected usage, and config
  * @returns resolution result with theme CSS, base CSS, and diagnostics
@@ -415,8 +415,8 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Step 4: Generate theme CSS
-	const { light_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
-	const theme_css = [light_css, dark_css].filter(Boolean).join('\n\n');
+	const { root_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
+	const theme_css = [root_css, dark_css].filter(Boolean).join('\n\n');
 
 	// Step 5: Generate base CSS from matched rules, split by destination layer
 	const layered_css = generate_base_css_by_layer(style_rule_index, included_rule_indices);

@@ -147,7 +147,7 @@ describe('shared options interface', () => {
 
 		// Test array (custom variables)
 		const custom_opts: CssOutputOptions = {
-			variables: [{ name: 'my_var', light: 'blue', dark: 'lightblue' }]
+			variables: [{ name: 'my_var', base: 'blue', dark: 'lightblue' }]
 		};
 		assert.isTrue(Array.isArray(custom_opts.variables));
 

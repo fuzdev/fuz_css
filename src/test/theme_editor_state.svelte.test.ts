@@ -11,11 +11,13 @@ import { test, assert, describe } from 'vitest';
 import {
 	ThemeEditorState,
 	render_theme_ts,
-	discard_confirm_message
+	discard_confirm_message,
+	to_scheme_slot,
+	type SlotOverride
 } from '#routes/theme_editor_state.svelte.ts';
 import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 import type { Theme } from '#lib/variable.ts';
-import { compose_themes } from '#lib/theme.ts';
+import { compose_themes, render_theme_style } from '#lib/theme.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -75,12 +77,12 @@ describe('set_value slot semantics', () => {
 		// would silently change dark mode too
 		assert.deepEqual(merged, {
 			name: adaptive_default.name,
-			light: '0.9',
+			base: '0.9',
 			dark: adaptive_default.dark
 		});
 	});
 
-	test('editing the dark slot leaves the light slot to the default', () => {
+	test('editing the dark slot leaves the base slot to the default', () => {
 		const editor = create_editor();
 		editor.set_value(adaptive_default.name, '0.3', 'dark');
 		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
@@ -91,15 +93,70 @@ describe('set_value slot semantics', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '1.4', 'dark');
 		const merged = editor.merged_variables.find((v) => v.name === single_slot_default.name);
-		assert.deepEqual(merged, { name: single_slot_default.name, light: '1.4' });
+		assert.deepEqual(merged, { name: single_slot_default.name, base: '1.4' });
 	});
 
-	test('identical light and dark values collapse to a single slot', () => {
+	test('identical base and dark values collapse to a single slot', () => {
 		const editor = create_editor();
 		editor.set_value(adaptive_default.name, '0.5', 'light');
 		editor.set_value(adaptive_default.name, '0.5', 'dark');
 		const merged = editor.merged_variables.find((v) => v.name === adaptive_default.name);
-		assert.deepEqual(merged, { name: adaptive_default.name, light: '0.5' });
+		assert.deepEqual(merged, { name: adaptive_default.name, base: '0.5' });
+	});
+});
+
+describe('scheme to slot mapping', () => {
+	// slots and schemes are named apart: the light scheme renders `base`
+	test('the light scheme maps to the base slot and the dark scheme to dark', () => {
+		assert.strictEqual(to_scheme_slot('light'), 'base');
+		assert.strictEqual(to_scheme_slot('dark'), 'dark');
+	});
+
+	test('a light-scheme edit lands in base and a dark-scheme edit in dark', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.91', 'light');
+		assert.deepEqual(editor.overrides.get(adaptive_default.name), { base: '0.91' });
+		editor.set_value(adaptive_default.name, '0.21', 'dark');
+		assert.deepEqual(editor.overrides.get(adaptive_default.name), { base: '0.91', dark: '0.21' });
+		// each reads back in its own scheme
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'light'), '0.91');
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), '0.21');
+		// and renders where that scheme reads it: base in `:root`, dark under `.dark`
+		const css = render_theme_style(editor.output, { layer: null });
+		const dark_at = css.indexOf(':root.dark');
+		assert.isAbove(dark_at, -1);
+		assert.include(css.slice(0, dark_at), `--${adaptive_default.name}: 0.91;`);
+		assert.include(css.slice(dark_at), `--${adaptive_default.name}: 0.21;`);
+		assert.notInclude(css.slice(0, dark_at), `--${adaptive_default.name}: 0.21;`);
+	});
+
+	test('a light stance writes and reads the base slot from either view', () => {
+		const editor = create_editor();
+		editor.set_scheme('light');
+		editor.set_value(adaptive_default.name, '0.93', 'dark');
+		assert.deepEqual(editor.overrides.get(adaptive_default.name), { base: '0.93' });
+		assert.deepEqual(
+			editor.merged_variables.find((v) => v.name === adaptive_default.name),
+			{ name: adaptive_default.name, base: '0.93' }
+		);
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'light'), '0.93');
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), '0.93');
+	});
+
+	test('a light stance mirrors the base slot of an untouched adaptive default', () => {
+		const editor = create_editor();
+		editor.set_scheme('light');
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.base);
+	});
+
+	test('a snapshot round trip keeps the slots', () => {
+		const editor = create_editor();
+		editor.set_value(adaptive_default.name, '0.91', 'light');
+		editor.set_value(adaptive_default.name, '0.21', 'dark');
+		const restored = create_editor();
+		restored.restore_snapshot(editor.to_snapshot());
+		assert.deepEqual(restored.overrides.get(adaptive_default.name), { base: '0.91', dark: '0.21' });
+		assert.deepEqual(restored.output, editor.output);
 	});
 });
 
@@ -111,7 +168,7 @@ describe('scheme stance', () => {
 		const editor = create_editor();
 		editor.set_value(adaptive_default.name, '0.25', 'dark');
 		editor.set_scheme('dark');
-		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.25' });
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, base: '0.25' });
 	});
 
 	test("a light stance doesn't render a dark-only override - that appearance never shows", () => {
@@ -134,7 +191,7 @@ describe('scheme stance', () => {
 		editor.set_scheme('dark');
 		assert.deepEqual(
 			editor.merged_variables.find((v) => v.name === single_slot_default.name),
-			{ name: single_slot_default.name, light: '2' }
+			{ name: single_slot_default.name, base: '2' }
 		);
 	});
 
@@ -150,7 +207,7 @@ describe('scheme stance', () => {
 		}
 		assert.deepEqual(merged_adaptive(editor), {
 			name: adaptive_default.name,
-			light: '0.9',
+			base: '0.9',
 			dark: '0.25'
 		});
 	});
@@ -162,7 +219,7 @@ describe('scheme stance', () => {
 		editor.set_value(adaptive_default.name, '0.25', 'light');
 		assert.deepEqual(editor.overrides.get(adaptive_default.name), { dark: '0.25' });
 		// no preserved dark slot - the stance mirror owns untouched defaults
-		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.25' });
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, base: '0.25' });
 	});
 
 	test('a stanced edit wins over an edit made before the stance', () => {
@@ -170,14 +227,14 @@ describe('scheme stance', () => {
 		editor.set_value(adaptive_default.name, '0.25', 'dark');
 		editor.set_scheme('dark');
 		editor.set_value(adaptive_default.name, '0.3', 'dark');
-		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, light: '0.3' });
+		assert.deepEqual(merged_adaptive(editor), { name: adaptive_default.name, base: '0.3' });
 	});
 
 	test('a single-slot variable edits the base slot under a stance, so it holds after it', () => {
 		const editor = create_editor();
 		editor.set_scheme('dark');
 		editor.set_value(single_slot_default.name, '2', 'dark');
-		assert.deepEqual(editor.overrides.get(single_slot_default.name), { light: '2' });
+		assert.deepEqual(editor.overrides.get(single_slot_default.name), { base: '2' });
 	});
 
 	test('the draft and output of a stanced editor carry a resolved scheme_mirror', () => {
@@ -197,8 +254,8 @@ describe('scheme stance over a dual base theme', () => {
 	const dual_base: Theme = {
 		name: 'dualish',
 		variables: [
-			{ name: 'shade_lightness_00', light: '0.9', dark: '0.3' },
-			{ name: 'chroma_scale', light: '1.4' }
+			{ name: 'shade_lightness_00', base: '0.9', dark: '0.3' },
+			{ name: 'chroma_scale', base: '1.4' }
 		]
 	};
 	const create_dual_editor = (): ThemeEditorState => {
@@ -214,23 +271,23 @@ describe('scheme stance over a dual base theme', () => {
 		// output would ship both appearances the stance promises to unify
 		assert.deepEqual(
 			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
-			{ name: 'shade_lightness_00', light: '0.3' }
+			{ name: 'shade_lightness_00', base: '0.3' }
 		);
 		// single-slot base variables pass through unchanged
 		assert.deepEqual(
 			editor.merged_variables.find((v) => v.name === 'chroma_scale'),
-			{ name: 'chroma_scale', light: '1.4' }
+			{ name: 'chroma_scale', base: '1.4' }
 		);
 		// no dark-slot stance warnings - the merge re-slotted them away
 		assert.isUndefined(editor.issues.find((i) => i.message.includes('dark slot')));
 	});
 
-	test('a light stance keeps the light value and drops the dark slot', () => {
+	test('a light stance keeps the base value and drops the dark slot', () => {
 		const editor = create_dual_editor();
 		editor.set_scheme('light');
 		assert.deepEqual(
 			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
-			{ name: 'shade_lightness_00', light: '0.9' }
+			{ name: 'shade_lightness_00', base: '0.9' }
 		);
 	});
 
@@ -247,7 +304,7 @@ describe('scheme stance over a dual base theme', () => {
 		editor.set_value('shade_lightness_00', '0.2', 'dark');
 		assert.deepEqual(
 			editor.merged_variables.find((v) => v.name === 'shade_lightness_00'),
-			{ name: 'shade_lightness_00', light: '0.2' }
+			{ name: 'shade_lightness_00', base: '0.2' }
 		);
 	});
 });
@@ -255,14 +312,11 @@ describe('scheme stance over a dual base theme', () => {
 describe('display_value', () => {
 	test('falls back to the default per scheme', () => {
 		const editor = create_editor();
-		assert.strictEqual(
-			editor.display_value(adaptive_default.name, 'light'),
-			adaptive_default.light
-		);
+		assert.strictEqual(editor.display_value(adaptive_default.name, 'light'), adaptive_default.base);
 		assert.strictEqual(editor.display_value(adaptive_default.name, 'dark'), adaptive_default.dark);
 	});
 
-	test('a light-only merged value applies to both schemes', () => {
+	test('a base-only merged value applies to both schemes', () => {
 		const editor = create_editor();
 		editor.set_value(single_slot_default.name, '1.7', 'light');
 		assert.strictEqual(editor.display_value(single_slot_default.name, 'light'), '1.7');
@@ -384,7 +438,7 @@ describe('snapshots', () => {
 		assert.strictEqual(restored.name, 'my theme');
 		assert.strictEqual(restored.based_on, marquee_theme.name);
 		assert.strictEqual(restored.scheme, 'dark');
-		assert.deepEqual(restored.overrides.get(single_slot_default.name), { light: '1.4' });
+		assert.deepEqual(restored.overrides.get(single_slot_default.name), { base: '1.4' });
 	});
 
 	test('a stale snapshot referencing a removed theme falls back to the first', () => {
@@ -397,16 +451,45 @@ describe('snapshots', () => {
 		});
 		assert.strictEqual(editor.based_on, base_theme.name);
 	});
+
+	test('a stale snapshot keeps only the base and dark slots of its overrides', () => {
+		const editor = create_editor();
+		editor.restore_snapshot({
+			name: 'x',
+			based_on: base_theme.name,
+			scheme: 'dual',
+			overrides: [
+				// a slot key the editor no longer reads, with nothing else
+				['chroma_scale', { light: '1.4' } as unknown as SlotOverride],
+				['neutral_chroma', { light: '0.01', dark: '0.02' } as unknown as SlotOverride]
+			]
+		});
+		assert.isFalse(editor.overrides.has('chroma_scale'));
+		assert.deepEqual(editor.overrides.get('neutral_chroma'), { dark: '0.02' });
+		assert.deepEqual(editor.to_snapshot().overrides, [['neutral_chroma', { dark: '0.02' }]]);
+	});
+
+	test('a stale snapshot whose overrides hold no slots restores clean', () => {
+		const editor = create_editor();
+		editor.restore_snapshot({
+			name: 'x',
+			based_on: base_theme.name,
+			scheme: 'dual',
+			overrides: [['chroma_scale', { light: '1.4' } as unknown as SlotOverride]]
+		});
+		assert.strictEqual(editor.overrides.size, 0);
+		assert.isFalse(editor.dirty);
+	});
 });
 
 describe('render_theme_ts', () => {
 	test('a dual theme renders a plain module', () => {
 		const ts = render_theme_ts({
 			name: 'my theme',
-			variables: [{ name: 'chroma_scale', light: '1.4' }]
+			variables: [{ name: 'chroma_scale', base: '1.4' }]
 		});
 		assert.include(ts, 'export const my_theme_theme: Theme = {');
-		assert.include(ts, "{name: 'chroma_scale', light: '1.4'},");
+		assert.include(ts, "{name: 'chroma_scale', base: '1.4'},");
 		assert.notInclude(ts, 'resolve_theme_stance');
 	});
 
@@ -414,7 +497,7 @@ describe('render_theme_ts', () => {
 		const ts = render_theme_ts({
 			name: 'darkling',
 			scheme: 'dark',
-			variables: [{ name: 'neutral_chroma', light: '0.04' }]
+			variables: [{ name: 'neutral_chroma', base: '0.04' }]
 		});
 		assert.include(ts, "import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';");
 		assert.include(ts, "scheme: 'dark',");
@@ -430,10 +513,10 @@ describe('render_theme_ts', () => {
 	test('single quotes in values escape', () => {
 		const ts = render_theme_ts({
 			name: "it's",
-			variables: [{ name: 'background_image', light: "url('x.png')" }]
+			variables: [{ name: 'background_image', base: "url('x.png')" }]
 		});
 		assert.include(ts, "name: 'it\\'s'");
-		assert.include(ts, "light: 'url(\\'x.png\\')'");
+		assert.include(ts, "base: 'url(\\'x.png\\')'");
 	});
 });
 
@@ -481,8 +564,8 @@ describe('gates', () => {
 });
 
 describe('applied theme', () => {
-	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', light: '1.5' }] };
-	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', light: '0.5' }] };
+	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', base: '1.5' }] };
+	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', base: '0.5' }] };
 	const create_contrast_editor = (): ThemeEditorState =>
 		new ThemeEditorState({ themes: [base_theme, marquee_theme], contrast_modifiers: [low, high] });
 

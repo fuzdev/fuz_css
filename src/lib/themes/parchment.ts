@@ -19,10 +19,10 @@ export const parchment_theme: Theme = {
 	variables: [
 		// warm parchment: the neutral keeps its brown binding, tinted stronger,
 		// and warmer still under candlelight
-		{ name: 'neutral_chroma', light: '0.03', dark: '0.038' },
+		{ name: 'neutral_chroma', base: '0.03', dark: '0.038' },
 		// the page itself takes the tint - the shared chroma shape leaves the
 		// ground untinted, so paper by day and leather by night are set here
-		{ name: 'shade_chroma_00', light: '0.012', dark: '0.02' },
+		{ name: 'shade_chroma_00', base: '0.012', dark: '0.02' },
 		// by night the ground is tanned leather, lifted well off the default
 		// near-black so it reads as a lit page and keeps the sunken direction
 		{ name: 'shade_lightness_00', dark: '0.23' },
@@ -31,21 +31,21 @@ export const parchment_theme: Theme = {
 		{ name: 'text_lightness_100', dark: '0.95' },
 		{ name: 'text_lightness_curve', dark: '0.72' },
 		// rubrication: links/focus/selection mark themselves in red
-		{ name: 'hue_accent', light: 'var(--hue_c)' },
+		{ name: 'hue_accent', base: 'var(--hue_c)' },
 		// the accent took the red slot, so errors move to the crimson of the
 		// pink slot and a link never reads as one
-		{ name: 'hue_negative', light: 'var(--hue_g)' },
+		{ name: 'hue_negative', base: 'var(--hue_g)' },
 		// and the default orange caution sits too close to a red accent, so
 		// warnings move to the yellow slot
-		{ name: 'hue_caution', light: 'var(--hue_e)' },
+		{ name: 'hue_caution', base: 'var(--hue_e)' },
 		// aged pigment - inks fade, so the whole palette eases down
-		{ name: 'chroma_scale', light: '0.85' },
+		{ name: 'chroma_scale', base: '0.85' },
 		// serif body text; headings are already serif by default
-		{ name: 'font_family', light: 'var(--font_family_serif)' },
+		{ name: 'font_family', base: 'var(--font_family_serif)' },
 		// double-ruled frames, wide enough for the two lines to render
-		{ name: 'border_style', light: 'double' },
-		{ name: 'border_width', light: 'var(--border_width_3)' },
+		{ name: 'border_style', base: 'double' },
+		{ name: 'border_width', base: 'var(--border_width_3)' },
 		// rectilinear but not brutal - the page corner, softened a hair
-		{ name: 'radius_scale', light: '0.5' }
+		{ name: 'radius_scale', base: '0.5' }
 	]
 };

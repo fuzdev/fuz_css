@@ -60,7 +60,7 @@ const gamut_excess = (color: Oklch): number =>
 describe('pinned color stops', () => {
 	test('a pinned palette stop is the color the gates evaluate', () => {
 		const pin: Oklch = [0.9, 0.35, 250];
-		const report = check({ name: 'palette_a_50', light: 'oklch(0.9 0.35 250)' });
+		const report = check({ name: 'palette_a_50', base: 'oklch(0.9 0.35 250)' });
 		assert.deepEqual(report.unchecked, []);
 		// far outside sRGB, where the derived stop sits inside it
 		const gamut = get_entry(report, 'gamut', 'light', 'palette_a_50');
@@ -82,7 +82,7 @@ describe('pinned color stops', () => {
 
 	test('a pinned shade stop moves every pairing on it', () => {
 		const pin: Oklch = [0.5, 0.01, 60];
-		const report = check({ name: 'shade_00', light: 'oklch(0.5 0.01 60)' });
+		const report = check({ name: 'shade_00', base: 'oklch(0.5 0.01 60)' });
 		assert.deepEqual(report.unchecked, []);
 		const body = get_entry(report, 'contrast', 'light', 'text_80 on shade_00');
 		const expected = wcag_contrast_ratio(srgb(text_stop_oklch('80', 'light')), srgb(pin));
@@ -94,7 +94,7 @@ describe('pinned color stops', () => {
 	});
 
 	test('a pinned text stop the gates cannot evaluate lands in unchecked', () => {
-		const report = check({ name: 'text_80', light: '#777' });
+		const report = check({ name: 'text_80', base: '#777' });
 		assert.isFalse(report.ok);
 		assert.deepEqual(
 			report.unchecked.map((u) => [u.variable, u.value]),
@@ -125,14 +125,14 @@ describe('pinned color stops', () => {
 
 	test('a pinned text_max is read by the fill-text gate', () => {
 		const pin: Oklch = [0.7, 0, 0];
-		const report = check({ name: 'text_max', light: 'oklch(0.7 0 0)' });
+		const report = check({ name: 'text_max', base: 'oklch(0.7 0 0)' });
 		assert.deepEqual(report.unchecked, []);
 		const entry = get_entry(report, 'contrast', 'light', 'text_max on palette_a_50');
 		const expected = wcag_contrast_ratio(srgb(pin), srgb(palette_stop_oklch('a', '50', 'light')));
 		assert.closeTo(entry.value, expected, 1e-9);
 		assert.isFalse(entry.pass);
 		// a form the gates don't read is unchecked, not assumed black
-		const hex = check({ name: 'text_max', light: '#999' });
+		const hex = check({ name: 'text_max', base: '#999' });
 		assert.deepEqual(
 			hex.unchecked.map((u) => u.variable),
 			['text_max']
@@ -145,7 +145,7 @@ describe('pinned color stops', () => {
 		const hover = 'palette_a_70 hovered on palette_a hover fill';
 		const pressed = 'palette_a_70 hovered on palette_a active fill';
 		// mixing toward white in light lightens the label onto its own tint
-		const report = check({ name: 'shade_max', light: 'oklch(1 0 0)' });
+		const report = check({ name: 'shade_max', base: 'oklch(1 0 0)' });
 		assert.deepEqual(report.unchecked, []);
 		for (const subject of [hover, pressed]) {
 			const entry = get_entry(report, 'contrast', 'light', subject);
@@ -162,7 +162,7 @@ describe('pinned color stops', () => {
 			);
 		}
 		// a form the gates don't read is unchecked, and its hovered pairings skipped
-		const hex = check({ name: 'shade_max', light: '#111' });
+		const hex = check({ name: 'shade_max', base: '#111' });
 		assert.deepEqual(
 			hex.unchecked.map((u) => u.variable),
 			['shade_max']
@@ -173,7 +173,7 @@ describe('pinned color stops', () => {
 	});
 
 	test('a pinned border_color_30 composites at its own alpha', () => {
-		const report = check({ name: 'border_color_30', light: 'oklch(0.9 0 0 / 5%)' });
+		const report = check({ name: 'border_color_30', base: 'oklch(0.9 0 0 / 5%)' });
 		assert.deepEqual(report.unchecked, []);
 		const entry = get_entry(report, 'contrast', 'light', 'border_color_30 over shade_00');
 		const ground = srgb(shade_stop_oklch('00', 'light'));
@@ -182,7 +182,7 @@ describe('pinned color stops', () => {
 		assert.closeTo(entry.value, wcag_contrast_ratio(composited, ground), 1e-9);
 		assert.isFalse(entry.pass);
 		// the alpha reads as a number too, and the derived default clears the gate
-		const numeric = check({ name: 'border_color_30', light: 'oklch(0.9 0 0 / 0.05)' });
+		const numeric = check({ name: 'border_color_30', base: 'oklch(0.9 0 0 / 0.05)' });
 		assert.closeTo(
 			get_entry(numeric, 'contrast', 'light', 'border_color_30 over shade_00').value,
 			entry.value,
@@ -194,7 +194,7 @@ describe('pinned color stops', () => {
 	});
 
 	test('a translucent pin on an opaque stop lands in unchecked', () => {
-		const report = check({ name: 'shade_00', light: 'oklch(0.9 0 0 / 50%)' });
+		const report = check({ name: 'shade_00', base: 'oklch(0.9 0 0 / 50%)' });
 		assert.isFalse(report.ok);
 		assert.deepEqual(
 			report.unchecked.map((u) => [u.variable, u.value]),
@@ -204,7 +204,7 @@ describe('pinned color stops', () => {
 	});
 
 	test('a stop authored as a var() reference is measured at the color it points at', () => {
-		const report = check({ name: 'text_80', light: 'var(--text_50)' });
+		const report = check({ name: 'text_80', base: 'var(--text_50)' });
 		assert.deepEqual(report.unchecked, []);
 		const body = get_entry(report, 'contrast', 'light', 'text_80 on shade_00');
 		const expected = wcag_contrast_ratio(
@@ -217,14 +217,14 @@ describe('pinned color stops', () => {
 
 	test('a var() reference the gates cannot evaluate is unchecked', () => {
 		// a variable outside the gated colors, and a reference cycle
-		const outside = check({ name: 'text_80', light: 'var(--fg_30)' });
+		const outside = check({ name: 'text_80', base: 'var(--fg_30)' });
 		assert.deepEqual(
 			outside.unchecked.map((u) => [u.variable, u.value]),
 			[['text_80', 'var(--fg_30)']]
 		);
 		const cycle = check(
-			{ name: 'text_80', light: 'var(--text_90)' },
-			{ name: 'text_90', light: 'var(--text_80)' }
+			{ name: 'text_80', base: 'var(--text_90)' },
+			{ name: 'text_90', base: 'var(--text_80)' }
 		);
 		assert.sameMembers(
 			cycle.unchecked.map((u) => u.variable),
@@ -237,14 +237,14 @@ describe('pinned color stops', () => {
 	test('an out-of-range literal is evaluated the way the browser clamps it', () => {
 		// lightness above 1 and negative chroma parse to plain white, which sits
 		// in gamut and reads as white against the page
-		const report = check({ name: 'text_80', light: 'oklch(1.5 -0.2 250)' });
+		const report = check({ name: 'text_80', base: 'oklch(1.5 -0.2 250)' });
 		assert.deepEqual(report.unchecked, []);
 		assert.strictEqual(get_entry(report, 'gamut', 'light', 'text_80').value, 0);
 		const body = get_entry(report, 'contrast', 'light', 'text_80 on shade_00');
 		const white = wcag_contrast_ratio(srgb([1, 0, 0]), srgb(shade_stop_oklch('00', 'light')));
 		assert.closeTo(body.value, white, 1e-9);
 		// negative lightness clamps to black the same way
-		const dark = check({ name: 'text_80', light: 'oklch(-0.5 0 0)' });
+		const dark = check({ name: 'text_80', base: 'oklch(-0.5 0 0)' });
 		assert.strictEqual(get_entry(dark, 'gamut', 'light', 'text_80').value, 0);
 		assert.closeTo(
 			get_entry(dark, 'contrast', 'light', 'text_80 on shade_00').value,
@@ -253,13 +253,13 @@ describe('pinned color stops', () => {
 		);
 		// alpha above 1 clamps to opaque, below 0 to fully transparent
 		const ground = srgb(shade_stop_oklch('00', 'light'));
-		const opaque = check({ name: 'border_color_30', light: 'oklch(0.3 0 0 / 150%)' });
+		const opaque = check({ name: 'border_color_30', base: 'oklch(0.3 0 0 / 150%)' });
 		assert.closeTo(
 			get_entry(opaque, 'contrast', 'light', 'border_color_30 over shade_00').value,
 			wcag_contrast_ratio(srgb([0.3, 0, 0]), ground),
 			1e-9
 		);
-		const clear = check({ name: 'border_color_30', light: 'oklch(0.3 0 0 / -1)' });
+		const clear = check({ name: 'border_color_30', base: 'oklch(0.3 0 0 / -1)' });
 		assert.closeTo(
 			get_entry(clear, 'contrast', 'light', 'border_color_30 over shade_00').value,
 			1,
@@ -270,8 +270,8 @@ describe('pinned color stops', () => {
 	test('a derived lightness past an end is evaluated the way the browser clamps it', () => {
 		// `oklch(var(--l) …)` clamps at computed-value time, so an overshooting
 		// ground renders as the white a pin of 1 gives
-		const overshoot = check({ name: 'shade_lightness_00', light: '1.03' });
-		const at_end = check({ name: 'shade_lightness_00', light: '1' });
+		const overshoot = check({ name: 'shade_lightness_00', base: '1.03' });
+		const at_end = check({ name: 'shade_lightness_00', base: '1' });
 		assert.strictEqual(get_entry(overshoot, 'gamut', 'light', 'shade_00').value, 0);
 		assert.strictEqual(get_entry(at_end, 'gamut', 'light', 'shade_00').value, 0);
 		assert.closeTo(
@@ -289,7 +289,7 @@ describe('pinned color stops', () => {
 		['a var() with a fallback', 'var(--text_90, #000)'],
 		['another color function', 'rgb(119 119 119)']
 	])('%s pin is unchecked, never read as a number', (_label, value) => {
-		const report = check({ name: 'text_80', light: value });
+		const report = check({ name: 'text_80', base: value });
 		assert.deepEqual(
 			report.unchecked.map((u) => [u.variable, u.value]),
 			[['text_80', value]]
@@ -300,7 +300,7 @@ describe('pinned color stops', () => {
 	test('a pinned intent stop gets its own gamut entry instead of folding into its letter', () => {
 		// the accent binds letter a by default and folds into its entries
 		assert.isUndefined(find_entry(base_report, 'gamut', 'light', 'accent_50'));
-		const report = check({ name: 'accent_50', light: 'oklch(0.9 0.35 250)' });
+		const report = check({ name: 'accent_50', base: 'oklch(0.9 0.35 250)' });
 		assert.isFalse(get_entry(report, 'gamut', 'light', 'accent_50').pass);
 		// only the pinned stop unfolds, and the letter keeps its derived color
 		assert.isUndefined(find_entry(report, 'gamut', 'light', 'accent_60'));
@@ -312,8 +312,8 @@ describe('pinned color stops', () => {
 		// with the letter pinned in gamut, the bound accent keeps rendering the
 		// derived stop - vivid past the caps here - and must not hide behind it
 		const report = check(
-			{ name: 'chroma_scale', light: '1.6' },
-			{ name: 'palette_a_30', light: 'oklch(0.7 0.05 250)' }
+			{ name: 'chroma_scale', base: '1.6' },
+			{ name: 'palette_a_30', base: 'oklch(0.7 0.05 250)' }
 		);
 		assert.isTrue(get_entry(report, 'gamut', 'light', 'palette_a_30').pass);
 		assert.isFalse(get_entry(report, 'gamut', 'light', 'accent_30').pass);
@@ -324,7 +324,7 @@ describe('pinned chroma shape', () => {
 	test('a pinned shape tints the neutral stop the gates evaluate', () => {
 		// stop 00 is untinted by default; a shape pinned there gives the page
 		// ground the full neutral chroma, far outside sRGB that close to white
-		const report = check({ name: 'chroma_shape_00', light: '5' });
+		const report = check({ name: 'chroma_shape_00', base: '5' });
 		assert.deepEqual(report.unchecked, []);
 		assert.isFalse(get_entry(report, 'gamut', 'light', 'shade_00').pass);
 		assert.isTrue(get_entry(base_report, 'gamut', 'light', 'shade_00').pass);
@@ -351,13 +351,13 @@ describe('role variables', () => {
 		for (const role of theme_gate_role_names) {
 			const variable = declared.get(role);
 			assert(variable, `${role} is declared`);
-			assert.match(variable.light!, /^var\(--[a-z0-9_]+\)$/u, role);
+			assert.match(variable.base!, /^var\(--[a-z0-9_]+\)$/u, role);
 		}
 	});
 
 	test('a role in a form the gates cannot evaluate is unchecked', () => {
 		for (const role of theme_gate_role_names) {
-			const report = check({ name: role, light: '#999' });
+			const report = check({ name: role, base: '#999' });
 			assert.deepEqual(
 				report.unchecked.map((u) => [u.variable, u.value]),
 				[[role, '#999']],
@@ -378,7 +378,7 @@ describe('role variables', () => {
 			outline_color: 'accent_50 vs shade_00'
 		};
 		for (const role of theme_gate_role_names) {
-			const report = check({ name: role, light: declared.get(role)!.light! });
+			const report = check({ name: role, base: declared.get(role)!.base! });
 			assert.deepEqual(report.unchecked, [], role);
 			const relation = default_subjects[role]!.split(' ')[1]!;
 			for (const scheme of ['light', 'dark'] as const) {
@@ -390,7 +390,7 @@ describe('role variables', () => {
 	});
 
 	test('a repointed body text role is measured on every ground it sits on', () => {
-		const report = check({ name: 'text_color', light: 'var(--text_50)' });
+		const report = check({ name: 'text_color', base: 'var(--text_50)' });
 		assert.deepEqual(report.unchecked, []);
 		for (const stop of ['00', '05', '10'] as const) {
 			const entry = get_entry(report, 'contrast', 'light', `text_color on shade_${stop}`);
@@ -407,13 +407,13 @@ describe('role variables', () => {
 	});
 
 	test('a repointed subtle text role fails where its target washes out', () => {
-		const report = check({ name: 'text_disabled', light: 'var(--text_20)' });
+		const report = check({ name: 'text_disabled', base: 'var(--text_20)' });
 		assert.isFalse(get_entry(report, 'contrast', 'light', 'text_disabled on shade_00').pass);
 		assert.isUndefined(find_entry(report, 'contrast', 'light', 'text_50 on shade_00'));
 	});
 
 	test('a repointed link role is gated, and the stop label.selected paints stays gated', () => {
-		const report = check({ name: 'link_color', light: 'var(--accent_30)' });
+		const report = check({ name: 'link_color', base: 'var(--accent_30)' });
 		assert.deepEqual(report.unchecked, []);
 		const link = get_entry(report, 'contrast', 'light', 'link_color on shade_00');
 		const expected = wcag_contrast_ratio(
@@ -430,7 +430,7 @@ describe('role variables', () => {
 	});
 
 	test('a repointed border role replaces the stop it left', () => {
-		const report = check({ name: 'border_color', light: 'var(--shade_05)' });
+		const report = check({ name: 'border_color', base: 'var(--shade_05)' });
 		const border = get_entry(report, 'contrast', 'light', 'border_color vs shade_00');
 		assert.strictEqual(border.threshold, GATE_BORDER);
 		assert.isFalse(border.pass);
@@ -465,18 +465,18 @@ describe('role variables', () => {
 		assert.isUndefined(
 			find_entry(base_report, 'contrast', 'light', 'link_color_selected on shade_00')
 		);
-		const outline = check({ name: 'outline_color', light: 'var(--shade_10)' });
+		const outline = check({ name: 'outline_color', base: 'var(--shade_10)' });
 		const ring = get_entry(outline, 'contrast', 'light', 'outline_color vs shade_00');
 		assert.strictEqual(ring.threshold, GATE_UI);
 		assert.isFalse(ring.pass);
-		const selected = check({ name: 'link_color_selected', light: 'var(--accent_30)' });
+		const selected = check({ name: 'link_color_selected', base: 'var(--accent_30)' });
 		const link = get_entry(selected, 'contrast', 'light', 'link_color_selected on shade_00');
 		assert.strictEqual(link.threshold, GATE_LINK);
 		assert.isFalse(link.pass);
 	});
 
 	test('a translucent role composites over the ground it is measured against', () => {
-		const report = check({ name: 'text_color', light: 'oklch(0.2 0 0 / 60%)' });
+		const report = check({ name: 'text_color', base: 'oklch(0.2 0 0 / 60%)' });
 		assert.deepEqual(report.unchecked, []);
 		const ground = srgb(shade_stop_oklch('00', 'light'));
 		const ink = srgb([0.2, 0, 0]);
@@ -489,33 +489,33 @@ describe('role variables', () => {
 	});
 
 	test('a role follows a chain of roles, and a cycle is unchecked', () => {
-		const chain = check({ name: 'text_color', light: 'var(--text_disabled)' });
+		const chain = check({ name: 'text_color', base: 'var(--text_disabled)' });
 		assert.deepEqual(chain.unchecked, []);
 		assert.strictEqual(
 			get_entry(chain, 'contrast', 'light', 'text_color on shade_00').value,
 			get_entry(base_report, 'contrast', 'light', 'text_50 on shade_00').value
 		);
 		// link_color_selected defaults to var(--text_color)
-		const cycle = check({ name: 'text_color', light: 'var(--link_color_selected)' });
+		const cycle = check({ name: 'text_color', base: 'var(--link_color_selected)' });
 		assert.isTrue(cycle.unchecked.some((u) => u.reason.includes('cyclic')));
 		assert.isFalse(cycle.ok);
 	});
 
 	test('a reference reads the extremes and the border alpha ramp as they render', () => {
 		// text_min is the near-ground extreme - white in light, where it vanishes
-		const min = check({ name: 'text_color', light: 'var(--text_min)' });
+		const min = check({ name: 'text_color', base: 'var(--text_min)' });
 		assert.isFalse(get_entry(min, 'contrast', 'light', 'text_color on shade_00').pass);
-		const max = check({ name: 'text_color', light: 'var(--text_max)' });
+		const max = check({ name: 'text_color', base: 'var(--text_max)' });
 		assert.isTrue(get_entry(max, 'contrast', 'light', 'text_color on shade_00').pass);
 		// each border stop carries its own alpha
-		const faint = check({ name: 'border_color', light: 'var(--border_color_10)' });
-		const strong = check({ name: 'border_color', light: 'var(--border_color_90)' });
+		const faint = check({ name: 'border_color', base: 'var(--border_color_10)' });
+		const strong = check({ name: 'border_color', base: 'var(--border_color_90)' });
 		assert.isBelow(
 			get_entry(faint, 'contrast', 'light', 'border_color vs shade_00').value,
 			get_entry(strong, 'contrast', 'light', 'border_color vs shade_00').value
 		);
 		// a translucent target can't stand in for an opaque stop
-		const translucent = check({ name: 'text_80', light: 'var(--border_color_50)' });
+		const translucent = check({ name: 'text_80', base: 'var(--border_color_50)' });
 		assert.deepEqual(
 			translucent.unchecked.map((u) => u.variable),
 			['text_80']
@@ -542,17 +542,17 @@ describe('role variables', () => {
 describe('variables no gate reads', () => {
 	test('leave the report identical to the base theme', () => {
 		const report = check(
-			{ name: 'text_decoration', light: 'underline' },
-			{ name: 'font_family', light: 'var(--font_family_serif)' },
+			{ name: 'text_decoration', base: 'underline' },
+			{ name: 'font_family', base: 'var(--font_family_serif)' },
 			// colors outside the gated pairings: stops no gate measures, and
 			// micro-surfaces whose pairing no gate models
-			{ name: 'border_color_20', light: '#0002' },
-			{ name: 'text_min', light: '#eee' },
-			{ name: 'fg_10', light: '#0001' },
-			{ name: 'caret_color', light: '#f00' },
-			{ name: 'selection_color', light: '#f003' },
-			{ name: 'scrollbar_thumb_color', light: '#888' },
-			{ name: 'backdrop_color', light: '#0008' }
+			{ name: 'border_color_20', base: '#0002' },
+			{ name: 'text_min', base: '#eee' },
+			{ name: 'fg_10', base: '#0001' },
+			{ name: 'caret_color', base: '#f00' },
+			{ name: 'selection_color', base: '#f003' },
+			{ name: 'scrollbar_thumb_color', base: '#888' },
+			{ name: 'backdrop_color', base: '#0008' }
 		);
 		assert.deepEqual(report, base_report);
 		assert.isTrue(report.ok);

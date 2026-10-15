@@ -3,7 +3,7 @@ import { test, assert, describe } from 'vitest';
 import { check_theme } from '#lib/theme_check.ts';
 import { validate_theme, ACCENT_STATUS_HUE_SEPARATION } from '#lib/theme_validate.ts';
 import { resolve_theme_stance } from '#lib/theme_stance.ts';
-import type { Theme } from '#lib/variable.ts';
+import type { StyleVariable, Theme } from '#lib/variable.ts';
 import { shipped_base_themes, create_monochrome_theme } from './theme_test_helpers.ts';
 import { PALETTE_HUES, PALETTE_CHROMA_MULTIPLIERS } from '#lib/ramps.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -31,7 +31,7 @@ describe('validate_theme', () => {
 	test('an unknown variable name is an error', () => {
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'not_a_real_var', light: '1' }]
+			variables: [{ name: 'not_a_real_var', base: '1' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'error' && i.variable === 'not_a_real_var'));
 	});
@@ -40,21 +40,36 @@ describe('validate_theme', () => {
 		// light === dark trips the schema refine
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'chroma_scale', light: '1', dark: '1' }]
+			variables: [{ name: 'chroma_scale', base: '1', dark: '1' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'error'));
 	});
 
 	test('an out-of-range number is a warning, not an error', () => {
-		const issues = validate_theme({ name: 't', variables: [{ name: 'chroma_scale', light: '5' }] });
+		const issues = validate_theme({ name: 't', variables: [{ name: 'chroma_scale', base: '5' }] });
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'chroma_scale'));
 		assert.isFalse(issues.some((i) => i.level === 'error'));
+	});
+
+	test('a knob warning names the slot it read', () => {
+		const messages = (variable: StyleVariable): Array<string> =>
+			validate_theme({ name: 't', variables: [variable] }).map((i) => i.message);
+		assert.isTrue(
+			messages({ name: 'chroma_scale', base: '5' }).some((m) =>
+				m.startsWith('chroma_scale base 5 is outside the safe range')
+			)
+		);
+		assert.isTrue(
+			messages({ name: 'chroma_scale', base: '1', dark: '5' }).some((m) =>
+				m.startsWith('chroma_scale dark 5 is outside the safe range')
+			)
+		);
 	});
 
 	test('a bad enum value is a warning', () => {
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'border_style', light: 'wavy' }]
+			variables: [{ name: 'border_style', base: 'wavy' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'border_style'));
 		assert.isFalse(issues.some((i) => i.level === 'error'));
@@ -62,7 +77,7 @@ describe('validate_theme', () => {
 
 	test('a var(--hue_X) binding on a hue knob is accepted', () => {
 		assert.deepEqual(
-			validate_theme({ name: 't', variables: [{ name: 'hue_accent', light: 'var(--hue_d)' }] }),
+			validate_theme({ name: 't', variables: [{ name: 'hue_accent', base: 'var(--hue_d)' }] }),
 			[]
 		);
 	});
@@ -78,9 +93,9 @@ describe('validate_theme', () => {
 			validate_theme({
 				name: 't',
 				variables: [
-					{ name: 'hue_positive', light: 'var(--hue_j)' },
-					{ name: 'button_border_style', light: 'var(--border_style)' },
-					{ name: 'duration_1', light: 'var(--duration_2)' }
+					{ name: 'hue_positive', base: 'var(--hue_j)' },
+					{ name: 'button_border_style', base: 'var(--border_style)' },
+					{ name: 'duration_1', base: 'var(--duration_2)' }
 				]
 			}),
 			[]
@@ -89,12 +104,12 @@ describe('validate_theme', () => {
 
 	test('a time knob takes milliseconds, range-checked in seconds', () => {
 		assert.deepEqual(
-			validate_theme({ name: 't', variables: [{ name: 'duration_1', light: '80ms' }] }),
+			validate_theme({ name: 't', variables: [{ name: 'duration_1', base: '80ms' }] }),
 			[]
 		);
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'duration_1', light: '90000ms' }]
+			variables: [{ name: 'duration_1', base: '90000ms' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'duration_1'));
 	});
@@ -103,14 +118,14 @@ describe('validate_theme', () => {
 		for (const value of ['0x10', '0b11', 'Infinity', '1.']) {
 			const issues = validate_theme({
 				name: 't',
-				variables: [{ name: 'chroma_scale', light: value }]
+				variables: [{ name: 'chroma_scale', base: value }]
 			});
 			assert.isTrue(
 				issues.some((i) => i.level === 'warning' && i.variable === 'chroma_scale'),
 				value
 			);
 			// the gates agree with the lint: the value is unchecked, not read as a number
-			const report = check_theme({ name: 't', variables: [{ name: 'hue_a', light: value }] });
+			const report = check_theme({ name: 't', variables: [{ name: 'hue_a', base: value }] });
 			assert.deepEqual(
 				report.unchecked.map((u) => u.variable),
 				['hue_a'],
@@ -122,7 +137,7 @@ describe('validate_theme', () => {
 	test('every CSS number form is a numeric knob value', () => {
 		for (const value of ['1e0', '+1', '.9', '1.0', '1E0']) {
 			assert.deepEqual(
-				validate_theme({ name: 't', variables: [{ name: 'chroma_scale', light: value }] }),
+				validate_theme({ name: 't', variables: [{ name: 'chroma_scale', base: value }] }),
 				[],
 				value
 			);
@@ -163,7 +178,7 @@ describe('validate_theme', () => {
 		const stale = {
 			...resolved,
 			scheme_mirror: resolved.scheme_mirror!.map((v) =>
-				v.name === 'text_lightness_100' ? { ...v, light: '0.2' } : v
+				v.name === 'text_lightness_100' ? { ...v, base: '0.2' } : v
 			)
 		};
 		const issues = validate_theme(stale);
@@ -181,7 +196,7 @@ describe('validate_theme', () => {
 			const issues = validate_theme({
 				name: 't',
 				scheme,
-				variables: [{ name: 'neutral_chroma', light: '0.02', dark: '0.03' }]
+				variables: [{ name: 'neutral_chroma', base: '0.02', dark: '0.03' }]
 			});
 			assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'neutral_chroma'));
 			assert.isFalse(issues.some((i) => i.level === 'error'));
@@ -192,7 +207,7 @@ describe('validate_theme', () => {
 				resolve_theme_stance({
 					name: 't',
 					scheme: 'dark',
-					variables: [{ name: 'neutral_chroma', light: '0.02' }]
+					variables: [{ name: 'neutral_chroma', base: '0.02' }]
 				})
 			),
 			[]
@@ -200,7 +215,7 @@ describe('validate_theme', () => {
 		assert.deepEqual(
 			validate_theme({
 				name: 't',
-				variables: [{ name: 'neutral_chroma', light: '0.02', dark: '0.03' }]
+				variables: [{ name: 'neutral_chroma', base: '0.02', dark: '0.03' }]
 			}),
 			[]
 		);
@@ -209,7 +224,7 @@ describe('validate_theme', () => {
 	test('binding an intent to the muted brown slot warns about the dropped character', () => {
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_f)' }]
+			variables: [{ name: 'hue_accent', base: 'var(--hue_f)' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'hue_accent'));
 	});
@@ -218,10 +233,10 @@ describe('validate_theme', () => {
 		const issues = validate_theme({
 			name: 't',
 			variables: [
-				{ name: 'hue_accent', light: 'var(--hue_f)' },
-				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) },
+				{ name: 'hue_accent', base: 'var(--hue_f)' },
+				{ name: 'accent_chroma_scale', base: String(PALETTE_CHROMA_MULTIPLIERS.f) },
 				// brown sits near the default orange caution
-				{ name: 'hue_caution', light: 'var(--hue_e)' }
+				{ name: 'hue_caution', base: 'var(--hue_e)' }
 			]
 		});
 		assert.deepEqual(issues, []);
@@ -231,15 +246,15 @@ describe('validate_theme', () => {
 		// hue_negative defaults to var(--hue_c)
 		const issues = validate_theme({
 			name: 't',
-			variables: [{ name: 'palette_c_chroma_scale', light: '0.5' }]
+			variables: [{ name: 'palette_c_chroma_scale', base: '0.5' }]
 		});
 		assert.isTrue(issues.some((i) => i.level === 'warning' && i.variable === 'hue_negative'));
 	});
 
 	test('a muted binding in one scheme warns even when the other binds a full-chroma slot', () => {
 		for (const variable of [
-			{ name: 'hue_accent', light: 'var(--hue_f)', dark: 'var(--hue_a)' },
-			{ name: 'hue_accent', light: 'var(--hue_a)', dark: 'var(--hue_f)' }
+			{ name: 'hue_accent', base: 'var(--hue_f)', dark: 'var(--hue_a)' },
+			{ name: 'hue_accent', base: 'var(--hue_a)', dark: 'var(--hue_f)' }
 		]) {
 			const issues = validate_theme({ name: 't', variables: [variable] });
 			assert.isTrue(
@@ -258,7 +273,7 @@ describe('validate_theme', () => {
 		// hue_positive defaults to var(--hue_b)
 		const warnings = separation_warnings({
 			name: 't',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_b)' }]
+			variables: [{ name: 'hue_accent', base: 'var(--hue_b)' }]
 		});
 		assert.strictEqual(warnings.length, 1);
 		assert.include(warnings[0], 'hue_positive');
@@ -269,10 +284,10 @@ describe('validate_theme', () => {
 			separation_warnings({
 				name: 't',
 				variables: [
-					{ name: 'hue_accent', light: 'var(--hue_c)' },
-					{ name: 'hue_negative', light: 'var(--hue_g)' },
+					{ name: 'hue_accent', base: 'var(--hue_c)' },
+					{ name: 'hue_negative', base: 'var(--hue_g)' },
 					// red is also near the default orange caution
-					{ name: 'hue_caution', light: 'var(--hue_e)' }
+					{ name: 'hue_caution', base: 'var(--hue_e)' }
 				]
 			}),
 			[]
@@ -280,8 +295,8 @@ describe('validate_theme', () => {
 	});
 
 	test('a unitless length warns, and a bare 0 only where it lands inside max()', () => {
-		const length_warnings = (name: string, light: string): number =>
-			validate_theme({ name: 't', variables: [{ name, light }] }).filter(
+		const length_warnings = (name: string, base: string): number =>
+			validate_theme({ name: 't', variables: [{ name, base }] }).filter(
 				(i) => i.level === 'warning' && i.message.includes('needs a unit')
 			).length;
 		assert.strictEqual(length_warnings('border_radius_min', '0'), 1);
@@ -302,7 +317,7 @@ describe('validate_theme', () => {
 		// and the default theme clears it
 		assert.deepEqual(separation_warnings({ name: 't', variables: [] }), []);
 		const at = (angle: number): Array<string> =>
-			separation_warnings({ name: 't', variables: [{ name: 'hue_accent', light: String(angle) }] });
+			separation_warnings({ name: 't', variables: [{ name: 'hue_accent', base: String(angle) }] });
 		// hue_info defaults to var(--hue_i)
 		assert.strictEqual(at(PALETTE_HUES.i + ACCENT_STATUS_HUE_SEPARATION - 1).length, 1);
 		assert.deepEqual(at(PALETTE_HUES.i + ACCENT_STATUS_HUE_SEPARATION), []);
@@ -314,8 +329,8 @@ describe('validate_theme', () => {
 			separation_warnings({
 				name: 't',
 				variables: [
-					{ name: 'hue_accent', light: String(angle) },
-					{ name: 'hue_negative', light: 'var(--hue_g)' }
+					{ name: 'hue_accent', base: String(angle) },
+					{ name: 'hue_negative', base: 'var(--hue_g)' }
 				]
 			}).length;
 		assert.strictEqual(near_pink((PALETTE_HUES.g + 5) % 360), 1);
@@ -329,7 +344,7 @@ describe('validate_theme', () => {
 		const warnings = separation_warnings({
 			name: 't',
 			scheme: 'dark',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_b)' }]
+			variables: [{ name: 'hue_accent', base: 'var(--hue_b)' }]
 		});
 		assert.strictEqual(warnings.length, 1);
 		assert.include(warnings[0], 'hue_positive in dark');
@@ -339,7 +354,7 @@ describe('validate_theme', () => {
 		assert.deepEqual(
 			separation_warnings({
 				name: 't',
-				variables: [{ name: 'hue_accent', light: `${PALETTE_HUES.c}deg` }]
+				variables: [{ name: 'hue_accent', base: `${PALETTE_HUES.c}deg` }]
 			}),
 			[]
 		);
@@ -353,8 +368,8 @@ describe('validate_theme', () => {
 			separation_warnings({
 				name: 't',
 				variables: [
-					{ name: 'hue_accent', light: 'var(--hue_c)' },
-					{ name: 'chroma_scale', light: '0' }
+					{ name: 'hue_accent', base: 'var(--hue_c)' },
+					{ name: 'chroma_scale', base: '0' }
 				]
 			}),
 			[]
@@ -364,7 +379,7 @@ describe('validate_theme', () => {
 	test('an accent that collides in one scheme only still warns, naming that scheme', () => {
 		const warnings = separation_warnings({
 			name: 't',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_a)', dark: 'var(--hue_b)' }]
+			variables: [{ name: 'hue_accent', base: 'var(--hue_a)', dark: 'var(--hue_b)' }]
 		});
 		assert.strictEqual(warnings.length, 1);
 		assert.include(warnings[0], 'hue_positive in dark');
@@ -380,8 +395,8 @@ describe('validate_theme', () => {
 		const issues = validate_theme({
 			name: 't',
 			variables: [
-				{ name: 'hue_negative', light: '20' },
-				{ name: 'palette_c_chroma_scale', light: '0.5' }
+				{ name: 'hue_negative', base: '20' },
+				{ name: 'palette_c_chroma_scale', base: '0.5' }
 			]
 		});
 		assert.deepEqual(issues, []);

@@ -91,8 +91,9 @@ or color values.
    `forced-color-adjust: none` - the composites inside their own rules, as
    nested `@media`.
 2. **Style variables** - Design tokens as CSS custom properties that enable
-   customization and runtime theming. Each variable provides values for light
-   and/or dark color-schemes.
+   customization and runtime theming. Each variable has a `base` value, which
+   applies in both color-schemes, and/or a `dark` value that replaces it in
+   the dark scheme.
 
 ### 3-layer architecture
 
@@ -108,7 +109,8 @@ combined and only used content is included. In utility-only mode, import
 
 - TypeScript objects in [variables.ts](src/lib/variables.ts) define all design
   tokens
-- Each variable can have `light` and/or `dark` values
+- Each variable can have `base` and/or `dark` values - `base` renders on
+  `:root` and applies in both schemes, `dark` replaces it in the dark scheme
 - Light/dark are color-schemes _within_ a theme, not separate themes. The
   dark scheme renders under `:root.dark` and again under
   `prefers-color-scheme: dark` for a root naming no scheme, so plain CSS
@@ -555,7 +557,7 @@ typography, borders, shading, shadows, layout. See
   `compose_themes` (flatten + last-wins fragment composition - the
   hand-flatten precursor to `extends`), `overlay_style_variable` (the one
   slot merge `compose_themes` and the build-time overlay share: wholesale
-  replacement, a dark-only overlay keeping the light slot beneath it),
+  replacement, a dark-only overlay keeping the base slot beneath it),
   `ColorScheme` type (`Theme` itself lives in `variable.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~1.3KB minified
   instead of ~38KB. It renders what the theme carries (the `scheme_mirror`

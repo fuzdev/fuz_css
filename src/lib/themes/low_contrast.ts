@@ -13,6 +13,6 @@ export const low_contrast_theme: Theme = {
 	name: 'low contrast',
 	variables: [
 		// compress the shade ramp from the page-background end
-		{ name: 'shade_lightness_00', light: '0.923', dark: '0.245' }
+		{ name: 'shade_lightness_00', base: '0.923', dark: '0.245' }
 	]
 };

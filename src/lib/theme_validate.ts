@@ -266,8 +266,8 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 		}
 		const knob = theme_knob_by_name.get(valid.name);
 		if (!knob) continue;
-		if (valid.light !== undefined) {
-			issues.push(...validate_knob_value(knob, valid.light, valid.name, 'light'));
+		if (valid.base !== undefined) {
+			issues.push(...validate_knob_value(knob, valid.base, valid.name, 'base'));
 		}
 		if (valid.dark !== undefined) {
 			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));

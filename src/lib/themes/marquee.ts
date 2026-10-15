@@ -20,26 +20,26 @@ const authored: Theme = {
 	scheme: 'dark',
 	variables: [
 		// night cast: the neutral binds to the purple slot
-		{ name: 'hue_neutral', light: 'var(--hue_d)' },
-		{ name: 'neutral_chroma', light: '0.09' },
+		{ name: 'hue_neutral', base: 'var(--hue_d)' },
+		{ name: 'neutral_chroma', base: '0.09' },
 		// the night itself is purple, not only the surfaces raised off it
-		{ name: 'shade_chroma_00', light: '0.03' },
+		{ name: 'shade_chroma_00', base: '0.03' },
 		// magenta accent: links/focus/selection glow hot pink
-		{ name: 'hue_accent', light: 'var(--hue_g)' },
+		{ name: 'hue_accent', base: 'var(--hue_g)' },
 		// vivid, knowingly clipping the weak hues
-		{ name: 'chroma_scale', light: '1.25' },
+		{ name: 'chroma_scale', base: '1.25' },
 		// palette tier: the yellow slot turns to bulb amber - the letter hue
 		// itself moves
-		{ name: 'hue_e', light: '78' },
+		{ name: 'hue_e', base: '78' },
 		// glow depth: shadows are cyan/magenta halos instead of neutral light
-		{ name: 'shadow_color_umbra', light: 'oklch(0.7 0.15 var(--hue_i))' },
-		{ name: 'shadow_color_glow', light: 'oklch(0.72 0.18 var(--hue_accent))' },
+		{ name: 'shadow_color_umbra', base: 'oklch(0.7 0.15 var(--hue_i))' },
+		{ name: 'shadow_color_glow', base: 'oklch(0.72 0.18 var(--hue_accent))' },
 		// the dialog backdrop dims to night-purple instead of neutral black
-		{ name: 'backdrop_color', light: 'oklch(0.15 0.05 var(--hue_neutral) / 60%)' },
+		{ name: 'backdrop_color', base: 'oklch(0.15 0.05 var(--hue_neutral) / 60%)' },
 		// tube bends: the small tiers lift onto a rounded floor and the ladder
 		// above it compresses to about half, so no corner is sharp
-		{ name: 'border_radius_min', light: '0.5rem' },
-		{ name: 'radius_scale', light: '0.54' }
+		{ name: 'border_radius_min', base: '0.5rem' },
+		{ name: 'radius_scale', base: '0.54' }
 	]
 };
 

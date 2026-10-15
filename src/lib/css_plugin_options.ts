@@ -216,13 +216,13 @@ export interface CssOutputOptions {
 	 * ```ts
 	 * // Override specific variables
 	 * variables: (defaults) => defaults.map(v =>
-	 *     v.name === 'hue_a' ? { ...v, light: '30' } : v
+	 *     v.name === 'hue_a' ? { ...v, base: '30' } : v
 	 * )
 	 *
 	 * // Add custom variables
 	 * variables: (defaults) => [
 	 *     ...defaults,
-	 *     { name: 'my_brand', light: '#ff6600', dark: '#ff8833' }
+	 *     { name: 'my_brand', base: '#ff6600', dark: '#ff8833' }
 	 * ]
 	 *
 	 * // Bundled base styles over a separately imported `theme.css`

@@ -20,8 +20,8 @@
 		</div>
 		{#if variable.summary}<blockquote>{variable.summary}</blockquote>{/if}
 		<label>
-			<div class="title">light</div>
-			<input disabled value={variable.light ?? ''} />
+			<div class="title">base</div>
+			<input disabled value={variable.base ?? ''} />
 		</label>
 		<label>
 			<div class="title">dark</div>

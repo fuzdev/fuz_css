@@ -17,21 +17,21 @@ export const ledger_theme: Theme = {
 		'For apps and tools used all day: calmer color, tighter spacing, one sans family, restrained corners and shadows - the orderly ledger.',
 	variables: [
 		// cool gray: the neutral binds to the blue slot at a whisper
-		{ name: 'hue_neutral', light: 'var(--hue_a)' },
-		{ name: 'neutral_chroma', light: '0.008', dark: '0.012' },
+		{ name: 'hue_neutral', base: 'var(--hue_a)' },
+		{ name: 'neutral_chroma', base: '0.008', dark: '0.012' },
 		// color steps back so statuses read as signal
-		{ name: 'chroma_scale', light: '0.85' },
+		{ name: 'chroma_scale', base: '0.85' },
 		// compact: spacing and leading both tighten (leading is deliberately
 		// decoupled from space_scale - the pin is the theme's own)
-		{ name: 'space_scale', light: '0.85' },
-		{ name: 'line_height_md', light: '1.4' },
+		{ name: 'space_scale', base: '0.85' },
+		{ name: 'line_height_md', base: '1.4' },
 		// restrained shape and depth
-		{ name: 'radius_scale', light: '0.5' },
-		{ name: 'shadow_alpha_scale', light: '0.5' },
+		{ name: 'radius_scale', base: '0.5' },
+		{ name: 'shadow_alpha_scale', base: '0.5' },
 		// one sans family, headings at a single semibold weight
-		{ name: 'heading_font_family', light: 'var(--font_family_sans)' },
-		{ name: 'heading_font_weight', light: '600' },
+		{ name: 'heading_font_family', base: 'var(--font_family_sans)' },
+		{ name: 'heading_font_weight', base: '600' },
 		// a flatter type scale: headings label sections, they don't announce them
-		{ name: 'type_scale_ratio', light: '1.2' }
+		{ name: 'type_scale_ratio', base: '1.2' }
 	]
 };

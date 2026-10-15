@@ -77,7 +77,7 @@ describe('css_value_is_contained', () => {
 
 	test('every default variable value is contained', () => {
 		for (const v of default_variables) {
-			for (const value of [v.light, v.dark]) {
+			for (const value of [v.base, v.dark]) {
 				if (value !== undefined)
 					assert.isTrue(css_value_is_contained(value), `${v.name}: ${value}`);
 			}
@@ -168,9 +168,9 @@ describe('the theme boundary', () => {
 	const hostile = {
 		name: 'hostile',
 		variables: [
-			{ name: 'chroma_scale', light: '1; } </style><script>alert(1)</script>' },
-			{ name: 'neutral_chroma', light: '0.02', summary: 'x */ body { display: none } /*' },
-			{ name: 'radius_scale', light: '0.5' }
+			{ name: 'chroma_scale', base: '1; } </style><script>alert(1)</script>' },
+			{ name: 'neutral_chroma', base: '0.02', summary: 'x */ body { display: none } /*' },
+			{ name: 'radius_scale', base: '0.5' }
 		]
 	};
 
@@ -193,7 +193,7 @@ describe('the theme boundary', () => {
 	test('the renderer drops a variable whose name escapes', () => {
 		const css = render_theme_style({
 			name: 't',
-			variables: [{ name: 'a: 1; } body { color: red } :root { --b', light: '2' }]
+			variables: [{ name: 'a: 1; } body { color: red } :root { --b', base: '2' }]
 		});
 		assert.strictEqual(css, '');
 	});

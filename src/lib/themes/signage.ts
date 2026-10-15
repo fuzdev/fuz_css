@@ -20,30 +20,30 @@ export const signage_theme: Theme = {
 		"Legible for public sites, older readers, and kiosks: larger, heavier body text, bold headings at normal tracking, roomy controls, underlined links, and a focus ring you can't miss - the transit sign.",
 	variables: [
 		// enamel white and board black: barely any cast
-		{ name: 'hue_neutral', light: 'var(--hue_a)' },
-		{ name: 'neutral_chroma', light: '0.006' },
+		{ name: 'hue_neutral', base: 'var(--hue_a)' },
+		{ name: 'neutral_chroma', base: '0.006' },
 		// wayfinding blue by day, departure-board yellow by night
-		{ name: 'hue_accent', light: 'var(--hue_a)', dark: 'var(--hue_e)' },
+		{ name: 'hue_accent', base: 'var(--hue_a)', dark: 'var(--hue_e)' },
 		// text pulled toward its contrast end across the whole ramp
-		{ name: 'text_lightness_curve', light: '0.8', dark: '0.6' },
+		{ name: 'text_lightness_curve', base: '0.8', dark: '0.6' },
 		// read at a distance: everything gets room, and body text grows a size
 		// (18px at the browser default), small text with it
-		{ name: 'space_scale', light: '1.2' },
-		{ name: 'font_size_scale', light: '1.125' },
+		{ name: 'space_scale', base: '1.2' },
+		{ name: 'font_size_scale', base: '1.125' },
 		// a heavier body under bold grotesque headings, tracked normally -
 		// tight tracking is a display move that costs legibility
-		{ name: 'font_weight', light: '500' },
-		{ name: 'heading_font_family', light: 'var(--font_family_sans)' },
-		{ name: 'heading_font_weight', light: '700' },
+		{ name: 'font_weight', base: '500' },
+		{ name: 'heading_font_family', base: 'var(--font_family_sans)' },
+		{ name: 'heading_font_weight', base: '700' },
 		// and bigger: the type scale opens up so headings carry from across a hall
-		{ name: 'type_scale_ratio', light: '1.3' },
+		{ name: 'type_scale_ratio', base: '1.3' },
 		// thick rules on flat fields
-		{ name: 'border_width', light: 'var(--border_width_2)' },
-		{ name: 'shadow_alpha_scale', light: '0' },
+		{ name: 'border_width', base: 'var(--border_width_2)' },
+		{ name: 'shadow_alpha_scale', base: '0' },
 		// links are underlined at rest, never marked by color alone
-		{ name: 'text_decoration', light: 'underline' },
+		{ name: 'text_decoration', base: 'underline' },
 		// a focus ring too wide to miss, set off from the control
-		{ name: 'outline_width_focus', light: 'var(--border_width_4)' },
-		{ name: 'outline_offset', light: '2px' }
+		{ name: 'outline_width_focus', base: 'var(--border_width_4)' },
+		{ name: 'outline_offset', base: '2px' }
 	]
 };

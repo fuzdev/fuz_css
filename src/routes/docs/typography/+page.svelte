@@ -127,7 +127,7 @@
 		</form>
 		{#each font_size_variants as size (size.name)}
 			<div class="row flex-wrap:wrap">
-				<StyleVariableButton title={size.light} name={size.name}>
+				<StyleVariableButton title={size.base} name={size.name}>
 					<span
 						style:font-size="var(--{size.name})"
 						style:font-weight={selected_font_weight}

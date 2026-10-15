@@ -43,9 +43,9 @@ export const create_monochrome_theme = (hue: number): Theme => {
 		name: `monochrome ${hue}`,
 		scheme: 'dark',
 		variables: [
-			...palette_variants.map((letter) => ({ name: `hue_${letter}`, light: hue_value })),
-			{ name: 'hue_neutral', light: hue_value },
-			{ name: 'neutral_chroma', light: '0.05' }
+			...palette_variants.map((letter) => ({ name: `hue_${letter}`, base: hue_value })),
+			{ name: 'hue_neutral', base: hue_value },
+			{ name: 'neutral_chroma', base: '0.05' }
 		]
 	};
 };

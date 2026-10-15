@@ -5,8 +5,8 @@ import { render_theme_style } from '#lib/theme.ts';
 
 describe('StyleVariable', () => {
 	describe('valid schemas', () => {
-		test('validates light-only', () => {
-			const result = StyleVariable.safeParse({ name: 'foo', light: '10px' });
+		test('validates base-only', () => {
+			const result = StyleVariable.safeParse({ name: 'foo', base: '10px' });
 			assert.isTrue(result.success);
 		});
 
@@ -15,32 +15,44 @@ describe('StyleVariable', () => {
 			assert.isTrue(result.success);
 		});
 
-		test('validates different light and dark', () => {
-			const result = StyleVariable.safeParse({ name: 'foo', light: '10px', dark: '20px' });
+		test('validates different base and dark', () => {
+			const result = StyleVariable.safeParse({ name: 'foo', base: '10px', dark: '20px' });
 			assert.isTrue(result.success);
 		});
 	});
 
 	describe('invalid schemas', () => {
-		test('rejects missing light and dark', () => {
+		test('rejects missing base and dark', () => {
 			const result = StyleVariable.safeParse({ name: 'foo' });
 			assert.isFalse(result.success);
-			assert.isTrue(result.error.issues.some((i) => i.message.includes('at least one')));
+			assert.isTrue(
+				result.error.issues.some((i) => i.message === 'must have at least one of base or dark')
+			);
 		});
 
-		test('rejects identical light and dark', () => {
-			const result = StyleVariable.safeParse({ name: 'foo', light: '10px', dark: '10px' });
+		test('rejects identical base and dark', () => {
+			const result = StyleVariable.safeParse({ name: 'foo', base: '10px', dark: '10px' });
 			assert.isFalse(result.success);
-			assert.isTrue(result.error.issues.some((i) => i.message.includes('must differ')));
+			assert.isTrue(
+				result.error.issues.some(
+					(i) => i.message === 'base and dark must differ when both specified'
+				)
+			);
+		});
+
+		test('rejects a `light` key - the slot is `base`', () => {
+			const result = StyleVariable.safeParse({ name: 'foo', light: '10px' });
+			assert.isFalse(result.success);
+			assert.isTrue(result.error.issues.some((i) => i.code === 'unrecognized_keys'));
 		});
 
 		test('rejects a blank slot, which the renderer drops', () => {
 			for (const blank of ['', '  ']) {
-				const result = StyleVariable.safeParse({ name: 'foo', light: blank });
+				const result = StyleVariable.safeParse({ name: 'foo', base: blank });
 				assert.isFalse(result.success, JSON.stringify(blank));
 				assert.isTrue(result.error.issues.some((i) => i.message.includes('blank')));
 				assert.strictEqual(
-					render_theme_style({ name: 't', variables: [{ name: 'foo', light: blank }] }),
+					render_theme_style({ name: 't', variables: [{ name: 'foo', base: blank }] }),
 					''
 				);
 			}
@@ -84,12 +96,12 @@ describe('Theme', () => {
 	});
 
 	test('rejects a malformed variable, pathed to its index', () => {
-		// light === dark trips the StyleVariable refine
+		// base === dark trips the StyleVariable refine
 		const result = Theme.safeParse({
 			name: 't',
 			variables: [
-				{ name: 'chroma_scale', light: '1' },
-				{ name: 'radius_scale', light: '1', dark: '1' }
+				{ name: 'chroma_scale', base: '1' },
+				{ name: 'radius_scale', base: '1', dark: '1' }
 			]
 		});
 		assert.isFalse(result.success);
@@ -108,7 +120,7 @@ describe('Theme', () => {
 			name: 't',
 			variables: [],
 			scheme: 'dark',
-			scheme_mirror: [{ name: 'shade_00', light: '#000' }]
+			scheme_mirror: [{ name: 'shade_00', base: '#000' }]
 		});
 		assert.isTrue(result.success);
 	});
@@ -116,8 +128,8 @@ describe('Theme', () => {
 
 describe('parse_theme', () => {
 	test('returns the theme when it matches', () => {
-		const theme = parse_theme({ name: 't', variables: [{ name: 'chroma_scale', light: '1' }] });
-		assert.deepEqual(theme, { name: 't', variables: [{ name: 'chroma_scale', light: '1' }] });
+		const theme = parse_theme({ name: 't', variables: [{ name: 'chroma_scale', base: '1' }] });
+		assert.deepEqual(theme, { name: 't', variables: [{ name: 'chroma_scale', base: '1' }] });
 	});
 
 	test('returns null rather than throwing on anything that does not', () => {

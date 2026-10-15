@@ -7,7 +7,7 @@
  * value form can't carry: what kind of value a knob takes (which widget edits
  * it), which axis of the theme space it moves, how much leverage it has (its
  * control size in the editor), and which tier of the two-tier theme policy it
- * belongs to. Defaults and light/dark slots are not duplicated here - join
+ * belongs to. Defaults and base/dark slots are not duplicated here - join
  * against `default_variables` by name.
  *
  * The catalog deliberately covers only the knob tier, not every variable:

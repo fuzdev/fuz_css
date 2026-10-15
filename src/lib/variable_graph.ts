@@ -29,14 +29,14 @@ import type { VariablesOption } from './css_plugin_options.ts';
 export interface StyleVariableInfo {
 	/** Variable name (without -- prefix) */
 	name: string;
-	/** Variables referenced in the light value */
-	light_deps: Set<string>;
+	/** Variables referenced in the base value */
+	base_deps: Set<string>;
 	/** Variables referenced in the dark value */
 	dark_deps: Set<string>;
-	/** The CSS value for light mode, or undefined if not defined */
-	light_css: string | undefined;
-	/** The CSS value for dark mode, or undefined if not defined */
-	dark_css: string | undefined;
+	/** The base value, rendered on `:root` in both schemes, or undefined if not defined */
+	base_value: string | undefined;
+	/** The dark value, rendered under the dark scheme over the base, or undefined if not defined */
+	dark_value: string | undefined;
 }
 
 /**
@@ -69,7 +69,7 @@ const contain_variable = (
 			locations: null
 		});
 	};
-	const contained_slot = (slot: 'light' | 'dark', value: unknown): string | undefined => {
+	const contained_slot = (slot: 'base' | 'dark', value: unknown): string | undefined => {
 		if (value === undefined) return undefined;
 		if (!css_value_is_contained(value)) {
 			report(`has a ${slot} value that can't be contained in a declaration`, 'that value');
@@ -84,13 +84,13 @@ const contain_variable = (
 		report('has a name that is not a plain identifier', 'it');
 		return null;
 	}
-	const light = contained_slot('light', v.light);
+	const base = contained_slot('base', v.base);
 	const dark = contained_slot('dark', v.dark);
-	if (light === undefined && dark === undefined) return null;
-	if (light === v.light && dark === v.dark) return v;
+	if (base === undefined && dark === undefined) return null;
+	if (base === v.base && dark === v.dark) return v;
 	return {
 		name: v.name,
-		...(light !== undefined && { light }),
+		...(base !== undefined && { base }),
 		...(dark !== undefined && { dark })
 	};
 };
@@ -114,13 +114,13 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
 	for (const v of variables) {
 		const contained = contain_variable(v, diagnostics);
 		if (!contained) continue;
-		const { light: light_css, dark: dark_css } = contained;
+		const { base: base_value, dark: dark_value } = contained;
 		graph.set(v.name, {
 			name: v.name,
-			light_deps: light_css ? extract_css_variables(light_css) : new Set(),
-			dark_deps: dark_css ? extract_css_variables(dark_css) : new Set(),
-			light_css,
-			dark_css
+			base_deps: base_value ? extract_css_variables(base_value) : new Set(),
+			dark_deps: dark_value ? extract_css_variables(dark_value) : new Set(),
+			base_value,
+			dark_value
 		});
 	}
 
@@ -144,7 +144,7 @@ export interface ResolveVariablesResult {
 /**
  * Resolves variables transitively using DFS with cycle detection.
  * When a variable is requested, all variables it depends on are included.
- * Both light and dark dependencies are always resolved together.
+ * Both base and dark dependencies are always resolved together.
  *
  * An excluded variable is left out along with the dependencies only it
  * pulls in - whatever defines it in its place defines those too.
@@ -195,7 +195,7 @@ export const resolve_variables_transitive = (
 		const info = graph.variables.get(name);
 		if (info) {
 			// Recursively resolve all dependencies BEFORE marking as resolved
-			for (const dep of info.light_deps) {
+			for (const dep of info.base_deps) {
 				resolve(dep, path);
 			}
 			for (const dep of info.dark_deps) {
@@ -226,13 +226,13 @@ export const resolve_variables_transitive = (
  *
  * @param graph - the variable dependency graph
  * @param resolved_variables - set of variable names to include
- * @returns object with `light_css` and `dark_css` strings
+ * @returns object with the `:root` block as `root_css` and the dark-scheme rules as `dark_css`
  */
 export const generate_theme_css = (
 	graph: VariableDependencyGraph,
 	resolved_variables: Set<string>
-): { light_css: string; dark_css: string } => {
-	const light_declarations: Array<string> = [];
+): { root_css: string; dark_css: string } => {
+	const base_declarations: Array<string> = [];
 	const dark_declarations: Array<string> = [];
 
 	// Process variables in a consistent order (alphabetical by name)
@@ -242,19 +242,19 @@ export const generate_theme_css = (
 		const info = graph.variables.get(name);
 		if (!info) continue;
 
-		if (info.light_css !== undefined) {
-			light_declarations.push(`\t--${name}: ${info.light_css};`);
+		if (info.base_value !== undefined) {
+			base_declarations.push(`\t--${name}: ${info.base_value};`);
 		}
-		if (info.dark_css !== undefined) {
-			dark_declarations.push(`\t--${name}: ${info.dark_css};`);
+		if (info.dark_value !== undefined) {
+			dark_declarations.push(`\t--${name}: ${info.dark_value};`);
 		}
 	}
 
-	let light_css = '';
+	let root_css = '';
 	let dark_css = '';
 
-	if (light_declarations.length > 0) {
-		light_css = `:root {\n${light_declarations.join('\n')}\n}`;
+	if (base_declarations.length > 0) {
+		root_css = `:root {\n${base_declarations.join('\n')}\n}`;
 	}
 
 	if (dark_declarations.length > 0) {
@@ -262,7 +262,7 @@ export const generate_theme_css = (
 		dark_css = render_color_scheme_rules('dark', (root) => `${root} {\n${declarations}\n}`);
 	}
 
-	return { light_css, dark_css };
+	return { root_css, dark_css };
 };
 
 /**
@@ -365,9 +365,9 @@ export const apply_theme_variables = (
 	if (!theme) return variables;
 	const resolved = resolve_theme_stance(theme);
 	const by_name = new Map(variables.map((v) => [v.name, v]));
-	// Replacement mirrors the runtime cascade: a light-slot theme value beats
+	// Replacement mirrors the runtime cascade: a base-slot theme value beats
 	// the base default's dark slot by layer order, so it replaces wholesale,
-	// while a dark-only value keeps the default's light slot.
+	// while a dark-only value keeps the default's base slot.
 	// a slot the stylesheet can't hold is dropped before the overlay, as the
 	// runtime renderer drops it, so the default beneath it survives
 	const overlay = (v: StyleVariable): void => {

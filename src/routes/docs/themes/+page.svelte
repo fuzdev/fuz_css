@@ -155,9 +155,10 @@
 		<TomeSectionHeader text="Color scheme" />
 		<p>
 			Light and dark are color schemes within a theme (<MdnLink path="Web/CSS/color-scheme" />), not
-			separate themes: each variable can carry a value for either, so any theme can implement dark
-			mode. The scheme follows <MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by default. To
-			set it manually, add the <code>dark</code> or <code>light</code> class to the root
+			separate themes: each variable carries a <code>base</code> value that applies in both and an
+			optional <code>dark</code> value that replaces it in dark mode, so any theme can implement
+			dark mode. The scheme follows <MdnLink path="Web/CSS/@media/prefers-color-scheme" /> by
+			default. To set it manually, add the <code>dark</code> or <code>light</code> class to the root
 			<code>html</code> element, or use a component like
 			<a href="https://github.com/fuzdev/fuz_ui/blob/main/src/lib/ColorSchemeInput.svelte">
 				<code>ColorSchemeInput</code>

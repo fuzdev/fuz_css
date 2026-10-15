@@ -22,9 +22,24 @@ const default_variable_by_name: Map<string, StyleVariable> = new Map(
 const NEW_THEME_NAME = 'new theme';
 
 export interface SlotOverride {
-	light?: string;
+	base?: string;
 	dark?: string;
 }
+
+/** A `StyleVariable` value slot. */
+export type StyleVariableSlot = 'base' | 'dark';
+
+/**
+ * The slot a color scheme edits and renders: the light scheme renders the
+ * `base` slot, the dark scheme its `dark` slot. Slots and schemes are named
+ * apart, so the editor maps one to the other here rather than indexing a
+ * slot by a scheme name.
+ *
+ * @param scheme - the color scheme being edited or viewed
+ * @returns the slot that scheme renders from first
+ */
+export const to_scheme_slot = (scheme: ColorSchemeVariant): StyleVariableSlot =>
+	scheme === 'dark' ? 'dark' : 'base';
 
 export interface ThemeEditorSnapshotData {
 	name: string;
@@ -53,13 +68,15 @@ export interface ThemeEditorStateOptions {
  *
  * Scheme semantics: variables whose effective definition is scheme-adaptive
  * (dual-slot) edit the slot of the scheme being viewed; single-slot variables
- * always edit the light (base) slot so the change applies to both schemes.
- * When a fresh light-slot override lands on a variable whose default is
+ * always edit the `base` slot so the change applies to both schemes, and a
+ * light-scheme edit of a scheme-adaptive variable lands in `base` too, since
+ * that is the slot the light scheme renders (`to_scheme_slot`).
+ * When a fresh base-slot override lands on a variable whose default is
  * dual-slot, the merge preserves the default's dark slot explicitly - a
  * theme's `:root` block beats the base defaults' dark-scheme defaults
  * (`:root.dark` and its `prefers-color-scheme` twin) by cascade layer order,
  * so omitting it would silently change dark mode too. A base
- * theme that itself sets only light slots (e.g. dark-only mirrors) chose
+ * theme that itself sets only base slots (e.g. dark-only mirrors) chose
  * those cross-scheme semantics deliberately and is left alone.
  *
  * A single-scheme stance (`Theme.scheme`) changes both halves: edits to a
@@ -156,7 +173,7 @@ export class ThemeEditorState {
 	#merge_variable(name: string): StyleVariable | null {
 		const o = this.overrides.get(name);
 		const b = this.base_variable_by_name.get(name);
-		let light: string | undefined;
+		let base: string | undefined;
 		let dark: string | undefined;
 		if (this.stance) {
 			// re-slot each layer to the stance, sharing `compose_themes`' overlay
@@ -166,24 +183,24 @@ export class ThemeEditorState {
 			// the appearances the stance promises to unify - re-slotting per layer
 			// keeps an override's base-slot edit winning over the base's dark slot.
 			// An adaptive variable's override is read from the stanced slot alone:
-			// its lone light slot is a light-scheme edit, not a base value
+			// its lone base slot is a light-scheme edit, not a value for both
 			const override = this.#is_adaptive(name, o, b)
-				? o?.[this.stance]
+				? o?.[to_scheme_slot(this.stance)]
 				: pick_stance_slot(o, this.stance);
-			light = override ?? pick_stance_slot(b, this.stance);
+			base = override ?? pick_stance_slot(b, this.stance);
 		} else {
-			light = o?.light ?? b?.light;
+			base = o?.base ?? b?.base;
 			dark = o?.dark ?? b?.dark;
-			// preserve a scheme-adaptive default's dark slot for fresh light-only
+			// preserve a scheme-adaptive default's dark slot for fresh base-only
 			// overrides - see the class comment for the cascade-layer rationale
-			if (o?.light !== undefined && dark === undefined && !b) {
+			if (o?.base !== undefined && dark === undefined && !b) {
 				dark = default_variable_by_name.get(name)?.dark;
 			}
 		}
-		if (dark !== undefined && dark === light) dark = undefined;
-		if (light === undefined && dark === undefined) return null;
+		if (dark !== undefined && dark === base) dark = undefined;
+		if (base === undefined && dark === undefined) return null;
 		const merged: StyleVariable = { name };
-		if (light !== undefined) merged.light = light;
+		if (base !== undefined) merged.base = base;
 		if (dark !== undefined) merged.dark = dark;
 		return merged;
 	}
@@ -266,9 +283,9 @@ export class ThemeEditorState {
 	/**
 	 * The value a scheme currently renders for a variable, derived from the
 	 * same merge the renderer uses so the two can't disagree - including the
-	 * theme layer's light slots beating the base defaults' dark slots, the
+	 * theme layer's base slots beating the base defaults' dark slots, the
 	 * merge preserving a scheme-adaptive default's dark slot under fresh
-	 * light-only overrides, and a single-scheme stance mirroring untouched
+	 * base-only overrides, and a single-scheme stance mirroring untouched
 	 * scheme-adaptive defaults so both schemes show the stanced appearance.
 	 */
 	display_value(name: string, scheme: ColorSchemeVariant): string | undefined {
@@ -276,9 +293,9 @@ export class ThemeEditorState {
 		const d = default_variable_by_name.get(name);
 		// the renderer's stance mirror applies only to defaults the theme
 		// doesn't touch, re-slotted so the stanced value wins in both schemes
-		const mirrored = !merged && this.stance ? d?.[this.stance] : undefined;
-		if (scheme === 'light') return merged?.light ?? mirrored ?? d?.light;
-		return merged?.dark ?? mirrored ?? merged?.light ?? d?.dark ?? d?.light;
+		const mirrored = !merged && this.stance ? d?.[to_scheme_slot(this.stance)] : undefined;
+		if (scheme === 'light') return merged?.base ?? mirrored ?? d?.base;
+		return merged?.dark ?? mirrored ?? merged?.base ?? d?.dark ?? d?.base;
 	}
 
 	/**
@@ -316,7 +333,7 @@ export class ThemeEditorState {
 		// or under a stance the stanced scheme's slot - that one appearance
 		// renders in both, and writing its own slot is what lets the merge pick
 		// the edit over an earlier one; anything else edits the base slot
-		const slot = adaptive ? (this.stance ?? scheme) : 'light';
+		const slot = adaptive ? to_scheme_slot(this.stance ?? scheme) : 'base';
 		this.overrides.set(name, { ...o, [slot]: value });
 	}
 
@@ -413,8 +430,15 @@ export class ThemeEditorState {
 			: this.themes[0]!.name;
 		this.scheme = data.scheme ?? this.base_scheme;
 		this.overrides.clear();
+		// a stale snapshot may carry keys that aren't slots (`light`, say) -
+		// keep only the `base`/`dark` slots, and skip an override left with
+		// neither, which would mark the draft dirty while rendering nothing
 		for (const [name, o] of data.overrides) {
-			this.overrides.set(name, { ...o });
+			const restored: SlotOverride = {};
+			if (typeof o.base === 'string') restored.base = o.base;
+			if (typeof o.dark === 'string') restored.dark = o.dark;
+			if (restored.base === undefined && restored.dark === undefined) continue;
+			this.overrides.set(name, restored);
 		}
 		this.contrast_modifier = this.contrast_modifiers.find((m) => m.name === data.contrast) ?? null;
 	}
@@ -464,7 +488,7 @@ export const render_theme_ts = (theme: Theme): string => {
 	const variables = theme.variables
 		.map((v) => {
 			const parts = [`name: '${escape_js_string(v.name)}'`];
-			if (v.light !== undefined) parts.push(`light: '${escape_js_string(v.light)}'`);
+			if (v.base !== undefined) parts.push(`base: '${escape_js_string(v.base)}'`);
 			if (v.dark !== undefined) parts.push(`dark: '${escape_js_string(v.dark)}'`);
 			return `\t\t{${parts.join(', ')}},`;
 		})

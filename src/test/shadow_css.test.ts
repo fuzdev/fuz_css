@@ -41,11 +41,11 @@ test('every token render_shadow_css can name is a declared variable', () => {
 test('the declared surface and button shadows are built from it', () => {
 	const by_name = new Map(default_variables.map((v) => [v.name, v]));
 	assert.strictEqual(
-		by_name.get('pane_shadow')?.light,
+		by_name.get('pane_shadow')?.base,
 		render_shadow_css('shadow_bottom', 'md', 'umbra', '50')
 	);
 	assert.strictEqual(
-		by_name.get('button_shadow')?.light,
+		by_name.get('button_shadow')?.base,
 		[
 			render_shadow_css('shadow_inset_bottom', 'xs', 'umbra', '30'),
 			render_shadow_css('shadow_inset_top', 'xs', 'highlight', '30')

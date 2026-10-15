@@ -22,7 +22,7 @@ describe('render_theme_style', () => {
 	test('a theme named "base" with variables renders them', () => {
 		// the special case keys on empty `variables`, not the name, so a theme
 		// that carries variables always renders even when named 'base'
-		const theme: Theme = { name: 'base', variables: [{ name: 'chroma_scale', light: '2' }] };
+		const theme: Theme = { name: 'base', variables: [{ name: 'chroma_scale', base: '2' }] };
 		const css = render_theme_style(theme);
 		assert.include(css, '--chroma_scale: 2;');
 	});
@@ -39,7 +39,7 @@ describe('render_theme_style', () => {
 		const css = render_theme_style({ name: 'anything', variables: default_variables });
 		assert.isAbove(css.length, 0);
 		for (const v of default_variables) {
-			if (v.light !== undefined) assert.include(css, `--${v.name}: ${v.light};`);
+			if (v.base !== undefined) assert.include(css, `--${v.name}: ${v.base};`);
 		}
 	});
 
@@ -47,7 +47,7 @@ describe('render_theme_style', () => {
 		// the scheme class conventionally lives on the root element, so the dark
 		// block must match :root.dark descendants, not only a class on the scope
 		const css = render_theme_style(
-			{ name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9', dark: '0.2' }] },
+			{ name: 't', variables: [{ name: 'shade_lightness_00', base: '0.9', dark: '0.2' }] },
 			{ id: 'my_scope' }
 		);
 		assert.include(css, '#my_scope {');
@@ -57,7 +57,7 @@ describe('render_theme_style', () => {
 
 	test('a .light on the id scope keeps it light under an explicit or preferred dark root', () => {
 		const css = render_theme_style(
-			{ name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9', dark: '0.2' }] },
+			{ name: 't', variables: [{ name: 'shade_lightness_00', base: '0.9', dark: '0.2' }] },
 			{ id: 'my_scope' }
 		);
 		// every root-placed dark selector excludes a light scope, the explicit
@@ -73,7 +73,7 @@ describe('render_theme_style', () => {
 	});
 
 	test('an id is escaped into the selector', () => {
-		const theme = { name: 't', variables: [{ name: 'shade_lightness_00', light: '0.9' }] };
+		const theme = { name: 't', variables: [{ name: 'shade_lightness_00', base: '0.9' }] };
 		assert.include(render_theme_style(theme, { id: '1st' }), '#\\31 st {');
 		const hostile = render_theme_style(theme, { id: 'x{}</style>' });
 		assert.notInclude(hostile, '</style');
@@ -97,7 +97,7 @@ describe('scheme stance', () => {
 	test('a dark stance skips defaults the theme overrides', () => {
 		const theme = resolve_theme_stance({
 			name: 't',
-			variables: [{ name: adaptive_default.name, light: '0.5' }],
+			variables: [{ name: adaptive_default.name, base: '0.5' }],
 			scheme: 'dark'
 		});
 		const { light } = split_schemes(render_theme_style(theme));
@@ -115,14 +115,14 @@ describe('scheme stance', () => {
 		// schemes - fuz.theme beats the fuz.base :root.dark defaults by layer
 		// order, and staying out of :root.dark keeps later same-block
 		// declarations (overlays, compiled caps) winning by source order
-		assert.include(light, `--${adaptive_default.name}: ${adaptive_default.light};`);
+		assert.include(light, `--${adaptive_default.name}: ${adaptive_default.base};`);
 		assert.notInclude(dark, `--${adaptive_default.name}:`);
 	});
 
 	test('resolve_theme_stance keeps the mirror out of the authored variables', () => {
 		const theme = resolve_theme_stance({
 			name: 't',
-			variables: [{ name: 'chroma_scale', light: '2' }],
+			variables: [{ name: 'chroma_scale', base: '2' }],
 			scheme: 'dark'
 		});
 		// authored knobs stay distinguishable from the derived mirror
@@ -138,7 +138,7 @@ describe('scheme stance', () => {
 	test('resolve_theme_stance recomputes a mirror its variables no longer imply', () => {
 		const resolved = resolve_theme_stance({
 			name: 't',
-			variables: [{ name: 'shade_lightness_00', light: '0.2' }],
+			variables: [{ name: 'shade_lightness_00', base: '0.2' }],
 			scheme: 'dark'
 		});
 		assert.notOk(resolved.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
@@ -172,7 +172,7 @@ describe('scheme stance', () => {
 		assert.strictEqual(render_theme_style({ name: 't', variables: [], scheme: 'dual' }), '');
 		const css = render_theme_style({
 			name: 't',
-			variables: [{ name: 'chroma_scale', light: '2' }]
+			variables: [{ name: 'chroma_scale', base: '2' }]
 		});
 		assert.notInclude(css, 'color-scheme:');
 	});
@@ -186,21 +186,21 @@ describe('scheme stance', () => {
 		);
 		for (const v of scheme_adaptive_variables) {
 			const source = adaptive.find((d) => d.name === v.name)!;
-			assert.strictEqual(v.light, source.light);
+			assert.strictEqual(v.base, source.base);
 			assert.strictEqual(v.dark, source.dark);
 		}
 	});
 
 	test('scheme_stance_variables excludes overridden names and single-slot defaults', () => {
 		const mirrored = scheme_stance_variables('dark', [
-			{ name: adaptive_default.name, light: '0.5' }
+			{ name: adaptive_default.name, base: '0.5' }
 		]);
 		assert.isAbove(mirrored.length, 0);
 		assert.isFalse(mirrored.some((v) => v.name === adaptive_default.name));
 		for (const v of mirrored) {
 			const source = default_variables.find((d) => d.name === v.name)!;
 			assert.isDefined(source.dark, `${v.name} mirrors a dual-slot default`);
-			assert.strictEqual(v.light, source.dark);
+			assert.strictEqual(v.base, source.dark);
 			assert.isUndefined(v.dark);
 		}
 	});
@@ -210,15 +210,15 @@ describe('compose_themes', () => {
 	const base: Theme = {
 		name: 'my base',
 		variables: [
-			{ name: 'chroma_scale', light: '1.2' },
-			{ name: 'shade_lightness_00', light: '0.95', dark: '0.2' }
+			{ name: 'chroma_scale', base: '1.2' },
+			{ name: 'shade_lightness_00', base: '0.95', dark: '0.2' }
 		]
 	};
 	const overlay: Theme = {
 		name: 'my overlay',
 		variables: [
-			{ name: 'shade_lightness_00', light: '1', dark: '0' },
-			{ name: 'text_lightness_curve', light: '0.5' }
+			{ name: 'shade_lightness_00', base: '1', dark: '0' },
+			{ name: 'text_lightness_curve', base: '0.5' }
 		]
 	};
 
@@ -231,12 +231,12 @@ describe('compose_themes', () => {
 			{ ...base, scheme: 'dark' },
 			{
 				name: 'o',
-				variables: [{ name: 'chroma_scale', light: '0.5', dark: '0.6', summary: 'eased' }]
+				variables: [{ name: 'chroma_scale', base: '0.5', dark: '0.6', summary: 'eased' }]
 			}
 		);
 		const v = composed.variables.find((v) => v.name === 'chroma_scale');
 		// the stance slot is picked, single-slot, with the summary carried
-		assert.deepEqual(v, { name: 'chroma_scale', light: '0.6', summary: 'eased' });
+		assert.deepEqual(v, { name: 'chroma_scale', base: '0.6', summary: 'eased' });
 	});
 
 	test("the base's summary carries through, the overlay's doesn't", () => {
@@ -251,7 +251,7 @@ describe('compose_themes', () => {
 	test('flatten + last-wins: overlay variables replace same-named ones wholesale', () => {
 		const composed = compose_themes(base, overlay);
 		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
-		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '1', dark: '0' });
+		assert.deepEqual(shade, { name: 'shade_lightness_00', base: '1', dark: '0' });
 		// untouched base variables survive
 		assert.isDefined(composed.variables.find((v) => v.name === 'chroma_scale'));
 		// overlay-only variables append
@@ -259,7 +259,7 @@ describe('compose_themes', () => {
 		assert.strictEqual(composed.variables.length, 3);
 	});
 
-	test('a dark-only overlay keeps the light slot beneath it', () => {
+	test('a dark-only overlay keeps the base slot beneath it', () => {
 		// a dark slot only shadows under `.dark`, so replacing wholesale would
 		// drop the base's light-scheme value
 		const composed = compose_themes(base, {
@@ -267,7 +267,7 @@ describe('compose_themes', () => {
 			variables: [{ name: 'shade_lightness_00', dark: '0.1' }]
 		});
 		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
-		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '0.95', dark: '0.1' });
+		assert.deepEqual(shade, { name: 'shade_lightness_00', base: '0.95', dark: '0.1' });
 	});
 
 	test('a dark-only overlay of a name the base lacks stays dark-only', () => {
@@ -289,7 +289,7 @@ describe('compose_themes', () => {
 		assert.strictEqual(composed.scheme, 'dark');
 		// the overlay's dark value lands in the base slot, single-slot
 		const shade = composed.variables.find((v) => v.name === 'shade_lightness_00');
-		assert.deepEqual(shade, { name: 'shade_lightness_00', light: '0' });
+		assert.deepEqual(shade, { name: 'shade_lightness_00', base: '0' });
 	});
 
 	test('a light-stanced base takes overlay light values, dropping dark-only ones', () => {
@@ -297,13 +297,13 @@ describe('compose_themes', () => {
 		const composed = compose_themes(stanced, {
 			name: 'o',
 			variables: [
-				{ name: 'shade_lightness_00', light: '1', dark: '0' },
+				{ name: 'shade_lightness_00', base: '1', dark: '0' },
 				{ name: 'text_lightness_curve', dark: '0.5' } // dark-only never renders under a light stance
 			]
 		});
 		assert.deepEqual(
 			composed.variables.find((v) => v.name === 'shade_lightness_00'),
-			{ name: 'shade_lightness_00', light: '1' }
+			{ name: 'shade_lightness_00', base: '1' }
 		);
 		assert.isUndefined(composed.variables.find((v) => v.name === 'text_lightness_curve'));
 	});
@@ -315,7 +315,7 @@ describe('compose_themes', () => {
 		assert.isTrue(stanced.scheme_mirror.some((v) => v.name === adaptive_default.name));
 		const composed = compose_themes(stanced, {
 			name: 'o',
-			variables: [{ name: adaptive_default.name, light: '0.123' }]
+			variables: [{ name: adaptive_default.name, base: '0.123' }]
 		});
 		// the overlay now authors the variable, so the mirror cedes it - the
 		// overlay's :root declaration must be the only one for the name
@@ -423,7 +423,7 @@ describe('render_theme_style over malformed themes', () => {
 	${declarations}
 }
 }`;
-	const variable = { name: 'a', light: '1' };
+	const variable = { name: 'a', base: '1' };
 
 	const cases: Array<[shape: string, theme: unknown, expected: string]> = [
 		['a null theme', null, ''],
@@ -450,14 +450,14 @@ describe('render_theme_style over malformed themes', () => {
 		['a number entry', { name: 't', variables: [1] }, ''],
 		['a string entry', { name: 't', variables: ['light'] }, ''],
 		['an array entry', { name: 't', variables: [[variable]] }, ''],
-		['a number slot', { name: 't', variables: [{ name: 'a', light: 1 }] }, ''],
-		['a boolean slot', { name: 't', variables: [{ name: 'a', light: true }] }, ''],
-		['an array slot', { name: 't', variables: [{ name: 'a', light: ['1'] }] }, ''],
-		['an object slot', { name: 't', variables: [{ name: 'a', light: { value: '1' } }] }, ''],
-		['a missing name', { name: 't', variables: [{ light: '1' }] }, ''],
-		['a null name', { name: 't', variables: [{ name: null, light: '1' }] }, ''],
-		['a number name', { name: 't', variables: [{ name: 1, light: '1' }] }, ''],
-		['an array name', { name: 't', variables: [{ name: ['a'], light: '1' }] }, ''],
+		['a number slot', { name: 't', variables: [{ name: 'a', base: 1 }] }, ''],
+		['a boolean slot', { name: 't', variables: [{ name: 'a', base: true }] }, ''],
+		['an array slot', { name: 't', variables: [{ name: 'a', base: ['1'] }] }, ''],
+		['an object slot', { name: 't', variables: [{ name: 'a', base: { value: '1' } }] }, ''],
+		['a missing name', { name: 't', variables: [{ base: '1' }] }, ''],
+		['a null name', { name: 't', variables: [{ name: null, base: '1' }] }, ''],
+		['a number name', { name: 't', variables: [{ name: 1, base: '1' }] }, ''],
+		['an array name', { name: 't', variables: [{ name: ['a'], base: '1' }] }, ''],
 		[
 			'an array summary that would close its comment',
 			{
@@ -480,7 +480,7 @@ describe('render_theme_style over malformed themes', () => {
 			'malformed entries beside a well-formed one',
 			{
 				name: 't',
-				variables: [null, { name: 'b', light: 2 }, variable, 'x', { name: ['c'], light: '3' }]
+				variables: [null, { name: 'b', base: 2 }, variable, 'x', { name: ['c'], base: '3' }]
 			},
 			wrap_light('--a: 1;')
 		]
@@ -579,7 +579,7 @@ describe('render_theme_style over malformed themes', () => {
 		const random_variable = (): unknown =>
 			maybe(() => ({
 				name: maybe(() => pick(['a', 'b_1', 'chroma-scale'])),
-				...(random() < 0.8 && { light: maybe(() => pick(strings)) }),
+				...(random() < 0.8 && { base: maybe(() => pick(strings)) }),
 				...(random() < 0.5 && { dark: maybe(() => pick(strings)) }),
 				...(random() < 0.5 && { summary: maybe(() => pick(strings)) })
 			}));

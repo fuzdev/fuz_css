@@ -25,7 +25,7 @@ describe('create_theme_resolver defaults', () => {
 			const variable = declared.get(knob.name);
 			if (!variable) continue;
 			for (const scheme of color_scheme_variants) {
-				const literal = scheme === 'dark' ? (variable.dark ?? variable.light) : variable.light;
+				const literal = scheme === 'dark' ? (variable.dark ?? variable.base) : variable.base;
 				if (literal === undefined || !Number.isFinite(Number(literal))) continue;
 				const resolved = resolver.resolve(knob.name, scheme);
 				if (resolved === null) continue;

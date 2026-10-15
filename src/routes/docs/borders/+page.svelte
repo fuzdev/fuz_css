@@ -79,9 +79,9 @@
 		<Code
 			lang="ts"
 			content={`variables: [
-	{name: 'border_style', light: 'inset'}, // sunken fields
-	{name: 'button_border_style', light: 'outset'}, // raised buttons
-	{name: 'button_border_style_active', light: 'inset'} // that press in
+	{name: 'border_style', base: 'inset'}, // sunken fields
+	{name: 'button_border_style', base: 'outset'}, // raised buttons
+	{name: 'button_border_style_active', base: 'inset'} // that press in
 ]`}
 		/>
 		<p>The <TomeLink slug="themes">guestbook</TomeLink> theme is built on exactly this.</p>

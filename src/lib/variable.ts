@@ -29,13 +29,14 @@ const StyleVariableValue = z
 /**
  * A style variable: a custom property name with a value per color scheme.
  *
- * The slots follow the renderer's cascade: `light` is the base position,
+ * The slots follow the renderer's cascade: `base` is the base position,
  * rendered on `:root`, and `dark` renders on `:root.dark` (and for a root
  * naming no scheme, under `prefers-color-scheme: dark`). A theme variable
- * with only `light` therefore applies in both color schemes (its `fuz.theme`
+ * with only `base` therefore applies in both color schemes (its `fuz.theme`
  * `:root` beats the `fuz.base` dark default by layer order), while `dark`
  * alone applies in dark only - which is why the shipped themes author a
- * scheme-agnostic knob as a single `light` value.
+ * scheme-agnostic knob as a single `base` value. The light scheme renders
+ * `base`; there is no light-only slot.
  *
  * Strict: a misspelled slot is an error, not a silently dropped scheme. A
  * slot must also be a contained CSS value (see `css_containment.ts`), since it
@@ -44,15 +45,15 @@ const StyleVariableValue = z
 export const StyleVariable = z
 	.strictObject({
 		name: StyleVariableName,
-		light: StyleVariableValue.optional(),
+		base: StyleVariableValue.optional(),
 		dark: StyleVariableValue.optional(),
 		summary: z.string().refine(css_comment_is_contained, 'must not close a CSS comment').optional()
 	})
-	.refine((v) => v.light !== undefined || v.dark !== undefined, {
-		message: 'must have at least one of light or dark'
+	.refine((v) => v.base !== undefined || v.dark !== undefined, {
+		message: 'must have at least one of base or dark'
 	})
-	.refine((v) => !(v.light !== undefined && v.dark !== undefined && v.light === v.dark), {
-		message: 'light and dark must differ when both specified',
+	.refine((v) => !(v.base !== undefined && v.dark !== undefined && v.base === v.dark), {
+		message: 'base and dark must differ when both specified',
 		path: ['dark']
 	});
 export type StyleVariable = z.infer<typeof StyleVariable>;
@@ -82,7 +83,7 @@ export const Theme = z.strictObject({
 	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance pins
 	 * `color-scheme` on the scope so form controls and native scrollbars agree.
 	 * A stanced theme's own variables are best authored single-slot in the
-	 * light/base position.
+	 * `base` position.
 	 *
 	 * Rendering a stanced theme faithfully also needs the scheme-adaptive
 	 * defaults mirrored into the stanced scheme; that is

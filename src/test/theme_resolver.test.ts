@@ -29,15 +29,15 @@ describe('resolution', () => {
 		const theme: Theme = {
 			name: 't',
 			variables: [
-				{ name: 'hue_accent', light: 'var(--hue_d)' },
-				{ name: 'hue_d', light: '123' }
+				{ name: 'hue_accent', base: 'var(--hue_d)' },
+				{ name: 'hue_d', base: '123' }
 			]
 		};
 		assert.strictEqual(resolve_theme_knob(theme, 'hue_accent', 'light'), 123);
 	});
 
 	test('an intent follows an overridden default-bound letter', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', light: '99' }] };
+		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', base: '99' }] };
 		assert.strictEqual(resolve_theme_knob(theme, 'hue_accent', 'light'), 99);
 	});
 
@@ -51,19 +51,19 @@ describe('resolution', () => {
 		assert.strictEqual(resolve_theme_knob(empty, 'accent_chroma_scale', 'light'), 1);
 		const pinned: Theme = {
 			name: 't',
-			variables: [{ name: 'palette_f_chroma_scale', light: '1' }]
+			variables: [{ name: 'palette_f_chroma_scale', base: '1' }]
 		};
 		assert.strictEqual(resolve_theme_knob(pinned, 'palette_f_chroma_scale', 'light'), 1);
 	});
 
 	test('self and mutual cycles resolve to null without hanging', () => {
-		const self: Theme = { name: 't', variables: [{ name: 'hue_a', light: 'var(--hue_a)' }] };
+		const self: Theme = { name: 't', variables: [{ name: 'hue_a', base: 'var(--hue_a)' }] };
 		assert.strictEqual(resolve_theme_knob(self, 'hue_a', 'light'), null);
 		const mutual: Theme = {
 			name: 't',
 			variables: [
-				{ name: 'hue_a', light: 'var(--hue_b)' },
-				{ name: 'hue_b', light: 'var(--hue_a)' }
+				{ name: 'hue_a', base: 'var(--hue_b)' },
+				{ name: 'hue_b', base: 'var(--hue_a)' }
 			]
 		};
 		assert.strictEqual(resolve_theme_knob(mutual, 'hue_a', 'light'), null);
@@ -73,8 +73,8 @@ describe('resolution', () => {
 		const mutual: Theme = {
 			name: 't',
 			variables: [
-				{ name: 'hue_a', light: 'var(--hue_b)' },
-				{ name: 'hue_b', light: 'var(--hue_a)' }
+				{ name: 'hue_a', base: 'var(--hue_b)' },
+				{ name: 'hue_b', base: 'var(--hue_a)' }
 			]
 		};
 		const report = check_theme(mutual);
@@ -85,7 +85,7 @@ describe('resolution', () => {
 	test('an unresolvable calc on a lightness knob leaves the affected gates unchecked', () => {
 		const theme: Theme = {
 			name: 't',
-			variables: [{ name: 'text_lightness_curve', light: 'calc(1 + 2)' }]
+			variables: [{ name: 'text_lightness_curve', base: 'calc(1 + 2)' }]
 		};
 		assert.strictEqual(resolve_theme_knob(theme, 'text_lightness_50', 'light'), null);
 		const report = check_theme(theme);
@@ -112,7 +112,7 @@ describe('create_theme_resolver', () => {
 	test('the derivation tracks a theme-pinned neutral_chroma', () => {
 		const resolver = create_theme_resolver({
 			name: 't',
-			variables: [{ name: 'neutral_chroma', light: '0.05' }]
+			variables: [{ name: 'neutral_chroma', base: '0.05' }]
 		});
 		assert.closeTo(
 			resolver.resolve('border_color_chroma', 'light')!,
@@ -124,7 +124,7 @@ describe('create_theme_resolver', () => {
 	test('a pinned border_color_chroma wins over the derivation', () => {
 		const resolver = create_theme_resolver({
 			name: 't',
-			variables: [{ name: 'border_color_chroma', light: '0.09' }]
+			variables: [{ name: 'border_color_chroma', base: '0.09' }]
 		});
 		assert.strictEqual(resolver.resolve('border_color_chroma', 'light'), 0.09);
 	});
@@ -132,7 +132,7 @@ describe('create_theme_resolver', () => {
 	test('pinned() reports authored variables only, excluding stance-mirror entries', () => {
 		const resolver = create_theme_resolver({
 			name: 't',
-			variables: [{ name: 'chroma_scale', light: '0.5' }],
+			variables: [{ name: 'chroma_scale', base: '0.5' }],
 			scheme: 'dark'
 		});
 		assert.isTrue(resolver.pinned('chroma_scale'));
@@ -175,7 +175,7 @@ describe('scheme stance', () => {
 	test('an authored value beats the stance mirror', () => {
 		const theme: Theme = {
 			name: 't',
-			variables: [{ name: 'shade_lightness_00', light: '0.5' }],
+			variables: [{ name: 'shade_lightness_00', base: '0.5' }],
 			scheme: 'dark'
 		};
 		assert.strictEqual(resolve_theme_knob(theme, 'shade_lightness_00', 'light'), 0.5);
@@ -184,7 +184,7 @@ describe('scheme stance', () => {
 
 describe('pinned chroma shape', () => {
 	test('the resolver reads a pinned chroma_shape_NN through the palette chroma stop', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'chroma_shape_50', light: '0.5' }] };
+		const theme: Theme = { name: 't', variables: [{ name: 'chroma_shape_50', base: '0.5' }] };
 		const resolver = create_theme_resolver(theme);
 		assert.strictEqual(resolver.resolve('chroma_shape_50', 'light'), 0.5);
 		const { chroma_min, chroma_max } = PALETTE_CHROMA_KNOBS.light;

@@ -76,7 +76,7 @@ const check_undefined_theme_variables = (
 			if (default_variable_names.has(name)) undefined_variables.add(name);
 			return;
 		}
-		for (const value of [info.light_css, info.dark_css]) {
+		for (const value of [info.base_value, info.dark_value]) {
 			if (value === undefined) continue;
 			for (const dependency of extract_required_css_variables(value)) visit(dependency);
 		}

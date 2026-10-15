@@ -567,7 +567,7 @@ describe('vite_plugin_fuz_css theme option', () => {
 			theme: {
 				name: 'test dark',
 				scheme: 'dark',
-				variables: [{ name: 'space_md', light: '99px' }]
+				variables: [{ name: 'space_md', base: '99px' }]
 			}
 		});
 		try {
@@ -580,7 +580,7 @@ describe('vite_plugin_fuz_css theme option', () => {
 				'the stance mirror re-slots the untouched scheme-adaptive default'
 			);
 			assert(
-				!result.code.includes(`--shade_lightness_00: ${adaptive.light}`),
+				!result.code.includes(`--shade_lightness_00: ${adaptive.base}`),
 				'the light appearance never renders under the dark stance'
 			);
 		} finally {

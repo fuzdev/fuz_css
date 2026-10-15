@@ -94,8 +94,8 @@ describe('generate_css', () => {
 
 	describe('bundled mode', () => {
 		const VARIABLES: Array<StyleVariable> = [
-			{ name: 'space_lg', light: '24px' },
-			{ name: 'text_color', light: 'black', dark: 'white' }
+			{ name: 'space_lg', base: '24px' },
+			{ name: 'text_color', base: 'black', dark: 'white' }
 		];
 
 		test('includes base rules for detected elements and used theme variables', () => {
@@ -329,8 +329,8 @@ describe('generate_css', () => {
 				name: 'variables: null with a theme defining them',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'black' },
-					{ name: 'shade_00', light: 'white' }
+					{ name: 'text_color', base: 'black' },
+					{ name: 'shade_00', base: 'white' }
 				],
 				include_theme: false,
 				expected: ['--shade_00', '--text_color']
@@ -344,15 +344,15 @@ describe('generate_css', () => {
 			{
 				name: 'a set missing one of the referenced defaults',
 				base_css: BASE_CSS,
-				variables: [{ name: 'text_color', light: 'black' }],
+				variables: [{ name: 'text_color', base: 'black' }],
 				expected: ['--shade_00']
 			},
 			{
 				name: 'a default missing behind a defined variable',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'var(--text_80)' },
-					{ name: 'shade_00', light: 'white' }
+					{ name: 'text_color', base: 'var(--text_80)' },
+					{ name: 'shade_00', base: 'white' }
 				],
 				expected: ['--text_80']
 			},
@@ -360,8 +360,8 @@ describe('generate_css', () => {
 				name: 'a set defining everything referenced',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'black' },
-					{ name: 'shade_00', light: 'white' }
+					{ name: 'text_color', base: 'black' },
+					{ name: 'shade_00', base: 'white' }
 				],
 				expected: null
 			},
@@ -369,8 +369,8 @@ describe('generate_css', () => {
 				name: 'a default missing behind the dark value of a defined variable',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'black', dark: 'var(--text_80)' },
-					{ name: 'shade_00', light: 'white' }
+					{ name: 'text_color', base: 'black', dark: 'var(--text_80)' },
+					{ name: 'shade_00', base: 'white' }
 				],
 				expected: ['--text_80']
 			},
@@ -449,8 +449,8 @@ describe('generate_css', () => {
 				name: 'a default missing behind a fallback in a defined variable',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'var(--text_80, black)' },
-					{ name: 'shade_00', light: 'white', dark: 'var(--shade_100, black)' }
+					{ name: 'text_color', base: 'var(--text_80, black)' },
+					{ name: 'shade_00', base: 'white', dark: 'var(--shade_100, black)' }
 				],
 				expected: null
 			},
@@ -458,8 +458,8 @@ describe('generate_css', () => {
 				name: 'an excluded name reached through a defined variable',
 				base_css: BASE_CSS,
 				variables: [
-					{ name: 'text_color', light: 'var(--text_80)' },
-					{ name: 'shade_00', light: 'white' }
+					{ name: 'text_color', base: 'var(--text_80)' },
+					{ name: 'shade_00', base: 'white' }
 				],
 				overrides: { exclude_variables: ['text_80'] },
 				expected: null

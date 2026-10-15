@@ -51,7 +51,7 @@ describe('compile_theme', () => {
 		assert(stop_50, 'stop 50 emitted');
 		// one green hue has more gamut headroom than the worst-hue envelope;
 		// the theme is dark-stanced, so the baseline is the dark baked table
-		assert.isAbove(cap_of(stop_50.light), PALETTE_CHROMA_CAPS.dark['50']);
+		assert.isAbove(cap_of(stop_50.base), PALETTE_CHROMA_CAPS.dark['50']);
 		// a stanced theme emits single-slot in the base position - both schemes
 		// resolve identically through the mirror
 		assert.isUndefined(stop_50.dark);
@@ -81,7 +81,7 @@ describe('compile_theme', () => {
 		assert.isAbove(overrides.length, 0);
 		// the baseline under a dark stance is the dark baked table
 		const changed = overrides.some(
-			(v) => Math.abs(cap_of(v.light) - PALETTE_CHROMA_CAPS.dark[stop_of(v.name)]) > 0.002
+			(v) => Math.abs(cap_of(v.base) - PALETTE_CHROMA_CAPS.dark[stop_of(v.name)]) > 0.002
 		);
 		assert.isTrue(changed, "caps differ from the stanced scheme's baked table");
 	});
@@ -99,7 +99,7 @@ describe('compile_theme', () => {
 			name: 'monochrome pinned',
 			variables: [
 				...create_monochrome_theme(145).variables,
-				{ name: 'palette_chroma_50', light: '0.05' }
+				{ name: 'palette_chroma_50', base: '0.05' }
 			]
 		};
 		const { theme } = compile_theme(input);
@@ -118,8 +118,8 @@ describe('compile_theme', () => {
 		const input: Theme = {
 			name: 'washed out',
 			variables: [
-				{ name: 'palette_lightness_00', light: '0.999', dark: '0.99' },
-				{ name: 'palette_lightness_100', light: '0.9', dark: '0.92' }
+				{ name: 'palette_lightness_00', base: '0.999', dark: '0.99' },
+				{ name: 'palette_lightness_100', base: '0.9', dark: '0.92' }
 			]
 		};
 		const before = check_theme(input).entries.filter((e) => e.gate === 'gamut' && !e.pass);
@@ -134,7 +134,7 @@ describe('compile_theme', () => {
 		// cyan nudged a few degrees loses headroom the baked worst-hue table
 		// sized for the default angle - a drift well under the loosening
 		// epsilon, but past the gamut gate's tolerance
-		const input: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', light: '205' }] };
+		const input: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', base: '205' }] };
 		const before = check_theme(input).entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.isAbove(before.length, 0, 'the input fails gamut against the baked caps');
 		const { theme, report } = compile_theme(input);
@@ -142,7 +142,7 @@ describe('compile_theme', () => {
 		assert.isAbove(overrides.length, 0);
 		for (const v of overrides) {
 			const stop = stop_of(v.name);
-			assert.isAtMost(cap_of(v.light), PALETTE_CHROMA_CAPS.light[stop], `${v.name} light`);
+			assert.isAtMost(cap_of(v.base), PALETTE_CHROMA_CAPS.light[stop], `${v.name} light`);
 		}
 		const after = report.entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.deepEqual(after, [], 'compiled caps bring every stop back into gamut');
@@ -154,7 +154,7 @@ describe('compile_theme', () => {
 		// sRGB until its cap is recomputed where the stop actually sits
 		const input: Theme = {
 			name: 'pinned stop',
-			variables: [{ name: 'palette_lightness_20', light: '0.92', dark: '0.32' }]
+			variables: [{ name: 'palette_lightness_20', base: '0.92', dark: '0.32' }]
 		};
 		const before = check_theme(input);
 		assert.isAbove(gamut_fails(before).length, 0, 'the input fails gamut against the baked caps');
@@ -171,10 +171,10 @@ describe('compile_theme', () => {
 		);
 		const hues = Object.values(PALETTE_HUES);
 		const [override] = overrides;
-		assert.strictEqual(cap_of(override!.light), worst_hue_cap(0.92, hues));
+		assert.strictEqual(cap_of(override!.base), worst_hue_cap(0.92, hues));
 		assert.strictEqual(cap_of(override!.dark), worst_hue_cap(0.32, hues));
 		// both tighten: the pin moves each scheme's stop toward its near-ground end
-		assert.isBelow(cap_of(override!.light), PALETTE_CHROMA_CAPS.light['20']);
+		assert.isBelow(cap_of(override!.base), PALETTE_CHROMA_CAPS.light['20']);
 		assert.isBelow(cap_of(override!.dark), PALETTE_CHROMA_CAPS.dark['20']);
 		assert.deepEqual(gamut_fails(report), []);
 		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
@@ -187,9 +187,9 @@ describe('compile_theme', () => {
 		const input: Theme = {
 			name: 'monochrome pinned stop',
 			variables: [
-				...Object.keys(PALETTE_HUES).map((letter) => ({ name: `hue_${letter}`, light: '145' })),
-				{ name: 'palette_chroma_max', light: '0.3' },
-				{ name: 'palette_lightness_20', light: '0.92', dark: '0.32' }
+				...Object.keys(PALETTE_HUES).map((letter) => ({ name: `hue_${letter}`, base: '145' })),
+				{ name: 'palette_chroma_max', base: '0.3' },
+				{ name: 'palette_lightness_20', base: '0.92', dark: '0.32' }
 			]
 		};
 		assert.isTrue(check_theme(input).ok, 'the input checks clean');
@@ -198,7 +198,7 @@ describe('compile_theme', () => {
 			.slice(input.variables.length)
 			.find((v) => v.name === 'palette_chroma_20');
 		assert(stop_20, 'stop 20 emitted');
-		assert.strictEqual(cap_of(stop_20.light), worst_hue_cap(0.92, [145]));
+		assert.strictEqual(cap_of(stop_20.base), worst_hue_cap(0.92, [145]));
 		assert.strictEqual(cap_of(stop_20.dark), worst_hue_cap(0.32, [145]));
 		assert.deepEqual(gamut_fails(report), []);
 		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
@@ -208,7 +208,7 @@ describe('compile_theme', () => {
 		const input: Theme = {
 			name: 'stanced pinned stop',
 			scheme: 'dark',
-			variables: [{ name: 'palette_lightness_20', light: '0.32' }]
+			variables: [{ name: 'palette_lightness_20', base: '0.32' }]
 		};
 		assert.isAbove(gamut_fails(check_theme(input)).length, 0);
 		const { theme, report } = compile_theme(input);
@@ -219,7 +219,7 @@ describe('compile_theme', () => {
 		);
 		// both schemes resolve the same pin through the mirror, so one slot carries it
 		assert.strictEqual(
-			cap_of(overrides[0]!.light),
+			cap_of(overrides[0]!.base),
 			worst_hue_cap(0.32, Object.values(PALETTE_HUES))
 		);
 		assert.isUndefined(overrides[0]!.dark);
@@ -232,7 +232,7 @@ describe('compile_theme', () => {
 		const input: Theme = {
 			name: 'stanced split stop',
 			scheme: 'dark',
-			variables: [{ name: 'palette_lightness_20', light: '0.32', dark: '0.25' }]
+			variables: [{ name: 'palette_lightness_20', base: '0.32', dark: '0.25' }]
 		};
 		const { theme, report } = compile_theme(input);
 		const overrides = theme.variables.slice(input.variables.length);
@@ -241,9 +241,9 @@ describe('compile_theme', () => {
 			['palette_chroma_20']
 		);
 		const hues = Object.values(PALETTE_HUES);
-		assert.strictEqual(cap_of(overrides[0]!.light), worst_hue_cap(0.32, hues));
+		assert.strictEqual(cap_of(overrides[0]!.base), worst_hue_cap(0.32, hues));
 		assert.strictEqual(cap_of(overrides[0]!.dark), worst_hue_cap(0.25, hues));
-		assert.notStrictEqual(cap_of(overrides[0]!.light), cap_of(overrides[0]!.dark));
+		assert.notStrictEqual(cap_of(overrides[0]!.base), cap_of(overrides[0]!.dark));
 		assert.deepEqual(gamut_fails(report), []);
 	});
 
@@ -253,8 +253,8 @@ describe('compile_theme', () => {
 		const input: Theme = {
 			name: 'percent stop',
 			variables: [
-				{ name: 'hue_i', light: '205' },
-				{ name: 'palette_lightness_20', light: '84%' }
+				{ name: 'hue_i', base: '205' },
+				{ name: 'palette_lightness_20', base: '84%' }
 			]
 		};
 		const { theme, report } = compile_theme(input);
@@ -267,7 +267,7 @@ describe('compile_theme', () => {
 	test('an unresolvable hue emits nothing rather than caps computed without it', () => {
 		// valid CSS, but not a number the resolver reads - caps computed from
 		// the remaining hues would claim headroom this one may not have
-		const input: Theme = { name: 'unit hue', variables: [{ name: 'hue_i', light: '195deg' }] };
+		const input: Theme = { name: 'unit hue', variables: [{ name: 'hue_i', base: '195deg' }] };
 		const { theme, report } = compile_theme(input);
 		assert.strictEqual(theme.variables.length, input.variables.length);
 		assert.isAbove(report.unchecked.length, 0, 'the re-check still reports the hue');

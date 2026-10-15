@@ -47,8 +47,8 @@
  *   button tints of the hover, focus, and pressed states.
  *
  * The effective-value merge mirrors the renderer's cascade-layer semantics
- * (`theme.ts` `render_theme_style`): light = `theme.light`; dark =
- * `theme.dark ?? theme.light`, falling back to the numeric-twin default for
+ * (`theme.ts` `render_theme_style`): light = `theme.base`; dark =
+ * `theme.dark ?? theme.base`, falling back to the numeric-twin default for
  * the scheme. A single-scheme
  * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
  * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
@@ -234,11 +234,11 @@ export class ThemeResolver {
 	}
 
 	// the effective value for a slot (authored or stance-mirrored), honoring
-	// the dark → light fallback
+	// the dark → base fallback
 	#slot_value(name: string, scheme: ColorSchemeVariant): string | undefined {
 		const v = this.#by_name.get(name);
 		if (!v) return undefined;
-		return scheme === 'light' ? v.light : (v.dark ?? v.light);
+		return scheme === 'light' ? v.base : (v.dark ?? v.base);
 	}
 
 	#resolve(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {

@@ -210,7 +210,7 @@ describe('check_theme', () => {
 	});
 
 	test('a mid lightness stop pinned out of order fails monotonicity', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_50', light: '0.99' }] };
+		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_50', base: '0.99' }] };
 		const entry = check_theme(theme).entries.find(
 			(e) => e.gate === 'monotonicity' && e.scheme === 'light' && e.subject === 'shade_lightness'
 		);
@@ -220,7 +220,7 @@ describe('check_theme', () => {
 
 	test('stops overshooting the lightness range fail monotonicity as the browser clamps them', () => {
 		// 00 through 10 all overshoot 1 and render at the same lightness
-		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_00', light: '1.1' }] };
+		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_00', base: '1.1' }] };
 		const entry = check_theme(theme).entries.find(
 			(e) => e.gate === 'monotonicity' && e.scheme === 'light' && e.subject === 'shade_lightness'
 		);
@@ -232,7 +232,7 @@ describe('check_theme', () => {
 		// the cyan slot binds the worst-hue caps, so 1.4x pushes past sRGB
 		const theme: Theme = {
 			name: 't',
-			variables: [{ name: 'palette_i_chroma_scale', light: '1.4' }]
+			variables: [{ name: 'palette_i_chroma_scale', base: '1.4' }]
 		};
 		const failing = check_theme(theme).entries.filter(
 			(e) => e.gate === 'gamut' && !e.pass && e.subject.startsWith('palette_i_')
@@ -245,7 +245,7 @@ describe('check_theme', () => {
 		// different chroma, so the accent gets its own gamut entries
 		const unpaired: Theme = {
 			name: 't',
-			variables: [{ name: 'hue_accent', light: 'var(--hue_f)' }]
+			variables: [{ name: 'hue_accent', base: 'var(--hue_f)' }]
 		};
 		assert.isTrue(
 			check_theme(unpaired).entries.some((e) => e.gate === 'gamut' && e.subject === 'accent_50')
@@ -254,8 +254,8 @@ describe('check_theme', () => {
 		const paired: Theme = {
 			name: 't',
 			variables: [
-				{ name: 'hue_accent', light: 'var(--hue_f)' },
-				{ name: 'accent_chroma_scale', light: String(PALETTE_CHROMA_MULTIPLIERS.f) }
+				{ name: 'hue_accent', base: 'var(--hue_f)' },
+				{ name: 'accent_chroma_scale', base: String(PALETTE_CHROMA_MULTIPLIERS.f) }
 			]
 		};
 		assert.isFalse(
@@ -271,7 +271,7 @@ describe('check_theme', () => {
 		const tinted: Theme = {
 			name: 't',
 			// near a light ground's gamut edge - 0.02 already clips at the default 0.97
-			variables: [{ name: 'shade_chroma_00', light: '0.012' }]
+			variables: [{ name: 'shade_chroma_00', base: '0.012' }]
 		};
 		const report = check_theme(tinted);
 		assert.isTrue(report.ok);
@@ -281,7 +281,7 @@ describe('check_theme', () => {
 	test('a ground tint past sRGB fails gamut at the ground', () => {
 		const report = check_theme({
 			name: 't',
-			variables: [{ name: 'shade_chroma_00', light: '0.1' }]
+			variables: [{ name: 'shade_chroma_00', base: '0.1' }]
 		});
 		const ground = report.entries.find(
 			(e) => e.gate === 'gamut' && e.scheme === 'light' && e.subject === 'shade_00'
@@ -301,7 +301,7 @@ describe('check_theme', () => {
 	test('a ground tint that resolves to no number leaves the ground unchecked', () => {
 		const report = check_theme({
 			name: 't',
-			variables: [{ name: 'shade_chroma_00', light: 'calc(0.01 * 2)' }]
+			variables: [{ name: 'shade_chroma_00', base: 'calc(0.01 * 2)' }]
 		});
 		assert.isFalse(report.ok);
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'shade_chroma_00'));

@@ -46,7 +46,7 @@ test('variables have no duplicates', () => {
 test('every var() reference names a declared variable', () => {
 	const names = new Set(default_variables.map((v) => v.name));
 	for (const v of default_variables) {
-		for (const match of `${v.light ?? ''} ${v.dark ?? ''}`.matchAll(/var\(\s*--([\w-]+)/g)) {
+		for (const match of `${v.base ?? ''} ${v.dark ?? ''}`.matchAll(/var\(\s*--([\w-]+)/g)) {
 			assert.isTrue(names.has(match[1]!), `${v.name} references --${match[1]}`);
 		}
 	}
@@ -108,13 +108,13 @@ test('per-slot chroma multiplier defaults pin the numeric twin', () => {
 	for (const letter of palette_variants) {
 		const v = by_name.get(`palette_${letter}_chroma_scale`);
 		assert(v, `palette_${letter}_chroma_scale is declared`);
-		assert.strictEqual(v.light, String(PALETTE_CHROMA_MULTIPLIERS[letter]), v.name);
+		assert.strictEqual(v.base, String(PALETTE_CHROMA_MULTIPLIERS[letter]), v.name);
 		assert.isUndefined(v.dark, `${v.name} is scheme-agnostic`);
 	}
 	for (const intent of intent_variants) {
 		const v = by_name.get(`${intent}_chroma_scale`);
 		assert(v, `${intent}_chroma_scale is declared`);
-		assert.strictEqual(v.light, '1', v.name);
+		assert.strictEqual(v.base, '1', v.name);
 	}
 });
 
@@ -127,17 +127,17 @@ test('intent hue defaults agree with palette_glosses bindings', () => {
 		if (!gloss.binding) continue;
 		const v = by_name.get(`hue_${gloss.binding}`);
 		assert(v, `hue_${gloss.binding} is declared`);
-		assert.strictEqual(v.light, `var(--hue_${letter})`, v.name);
+		assert.strictEqual(v.base, `var(--hue_${letter})`, v.name);
 	}
 });
 
 test('font sizes follow the size scale, and above md the type scale ratio, matching the fitted table', () => {
 	const by_name = new Map(default_variables.map((v) => [v.name, v]));
-	assert.strictEqual(by_name.get('type_scale_ratio')?.light, String(TYPE_SCALE_RATIO));
-	assert.strictEqual(by_name.get('font_size_scale')?.light, '1');
+	assert.strictEqual(by_name.get('type_scale_ratio')?.base, String(TYPE_SCALE_RATIO));
+	assert.strictEqual(by_name.get('font_size_scale')?.base, '1');
 	const base = font_size_variants.indexOf('md');
 	for (const [i, size] of font_size_variants.entries()) {
-		const light = by_name.get(`font_size_${size}`)?.light;
+		const light = by_name.get(`font_size_${size}`)?.base;
 		const step = i - base;
 		if (step > 0) {
 			assert.strictEqual(
@@ -160,12 +160,12 @@ test('font sizes follow the size scale, and above md the type scale ratio, match
 test('border radii scale per tier over a floor, and controls read their own radius', () => {
 	const by_name = new Map(default_variables.map((v) => [v.name, v]));
 	// a length, since `max()` can't compare a unitless 0 against the rem tiers
-	assert.strictEqual(by_name.get('border_radius_min')?.light, '0rem');
+	assert.strictEqual(by_name.get('border_radius_min')?.base, '0rem');
 	for (const size of border_radius_variants) {
 		assert.strictEqual(
-			by_name.get(`border_radius_${size}`)?.light,
+			by_name.get(`border_radius_${size}`)?.base,
 			`max(var(--border_radius_min), calc(${BORDER_RADII[size]}rem * var(--radius_scale)))`
 		);
 	}
-	assert.strictEqual(by_name.get('control_radius')?.light, 'var(--border_radius_sm)');
+	assert.strictEqual(by_name.get('control_radius')?.base, 'var(--border_radius_sm)');
 });

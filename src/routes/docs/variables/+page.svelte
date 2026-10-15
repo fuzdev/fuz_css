@@ -28,9 +28,10 @@
 			<MdnLink path="https://developer.mozilla.org/en-US/docs/Web/CSS/--*">
 				CSS custom properties
 			</MdnLink>
-			that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable can have
-			values for light and/or dark <MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>.
-			They're design tokens with an API.
+			that can be grouped into a <TomeLink slug="themes">theme</TomeLink>. Each variable has a
+			<code>base</code> value that applies in both
+			<MdnLink path="Web/CSS/color-scheme">color-schemes</MdnLink>, a <code>dark</code> value that
+			replaces it in dark mode, or both. They're design tokens with an API.
 		</p>
 		<p>
 			The goal of the variables system is to provide runtime theming that's efficient and ergonomic
@@ -89,7 +90,7 @@
 
 export type StyleVariable = {
 	name: string;
-	light?: string;
+	base?: string;
 	dark?: string;
 	summary?: string;
 };`}

@@ -19,7 +19,7 @@ export const gen: Gen = ({ origin_path }) => {
 	const entries = adaptive
 		.map(
 			(v) =>
-				`\t{ name: ${JSON.stringify(v.name)}, light: ${JSON.stringify(v.light)}, dark: ${JSON.stringify(v.dark)} }`
+				`\t{ name: ${JSON.stringify(v.name)}, base: ${JSON.stringify(v.base)}, dark: ${JSON.stringify(v.dark)} }`
 		)
 		.join(',\n');
 
@@ -29,7 +29,7 @@ import type { StyleVariable } from './variable.ts';
 
 /**
  * The scheme-adaptive subset of \`default_variables\`: every default that
- * carries both a light and a dark value, and therefore changes appearance
+ * carries both a base and a dark value, and therefore changes appearance
  * with the color scheme. \`resolve_theme_stance\` mirrors these so a
  * single-scheme theme shows its one appearance in both schemes.
  *

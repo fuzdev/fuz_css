@@ -225,14 +225,14 @@ test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {
 	const index = parse_style_css(main_stylesheet_text);
 	const rule = index.rules.find((r) => r.css.includes('prefers-contrast: more'));
 	assert(rule);
-	// the dark block follows the light one, so splitting there checks each
+	// the dark block follows the `:root` one, so splitting there checks each
 	// value lands in its own scheme rather than merely somewhere in the rule
 	const dark_at = rule.css.indexOf(':root.dark');
 	assert.isAbove(dark_at, -1, 'the mapping carries a :root.dark block');
-	const light_css = rule.css.slice(0, dark_at);
+	const root_css = rule.css.slice(0, dark_at);
 	const dark_css = rule.css.slice(dark_at);
-	for (const { name, light, dark } of high_contrast_theme.variables) {
-		assert.include(light_css, `--${name}: ${light};`, `${name} light`);
+	for (const { name, base, dark } of high_contrast_theme.variables) {
+		assert.include(root_css, `--${name}: ${base};`, `${name} base`);
 		// a single-slot variable applies in both schemes from the `:root` block
 		if (dark === undefined) {
 			assert.notInclude(dark_css, `--${name}:`, `${name} is single-slot`);

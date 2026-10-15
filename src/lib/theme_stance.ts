@@ -24,7 +24,7 @@ import { to_theme_stance } from './theme.ts';
 /**
  * Computes the mirror a single-scheme stance implies: every scheme-adaptive
  * default not overridden by `variables`, re-slotted with the stanced scheme's
- * value in the base (light) slot. A base-slot declaration in `fuz.theme`
+ * value in the `base` slot. A base-slot declaration in `fuz.theme`
  * applies in both color schemes - cascade-layer order beats the higher
  * specificity of the `fuz.base` dark-scheme defaults (`:root.dark` and its
  * `prefers-color-scheme` twin) - and keeping the mirror out of the dark slot
@@ -43,8 +43,8 @@ export const scheme_stance_variables = (
 	const mirrored: Array<StyleVariable> = [];
 	for (const v of scheme_adaptive_variables) {
 		if (overridden.has(v.name)) continue;
-		const value = scheme === 'dark' ? v.dark : v.light;
-		if (value !== undefined) mirrored.push({ name: v.name, light: value });
+		const value = scheme === 'dark' ? v.dark : v.base;
+		if (value !== undefined) mirrored.push({ name: v.name, base: value });
 	}
 	return mirrored;
 };
@@ -80,7 +80,7 @@ export const resolve_theme_stance = (theme: Theme): Theme => {
 
 /**
  * Whether two stance mirrors are the same, entry for entry. A mirror holds
- * only light slots in `scheme_adaptive_variables` order, so a carried mirror
+ * only base slots in `scheme_adaptive_variables` order, so a carried mirror
  * that differs from a freshly computed one is stale (the defaults moved) or
  * edited - either way the renderer would emit it as is.
  *
@@ -90,4 +90,4 @@ export const resolve_theme_stance = (theme: Theme): Theme => {
  */
 export const scheme_mirrors_equal = (a: Array<StyleVariable>, b: Array<StyleVariable>): boolean =>
 	a.length === b.length &&
-	a.every((v, i) => v.name === b[i]!.name && v.light === b[i]!.light && v.dark === b[i]!.dark);
+	a.every((v, i) => v.name === b[i]!.name && v.base === b[i]!.base && v.dark === b[i]!.dark);

@@ -20,37 +20,37 @@ export const zine_theme: Theme = {
 		'Stark print for sites that want no decoration: black on white, thick borders, square corners, heavy headings, underlined links - the photocopied zine.',
 	variables: [
 		// toner has no cast - the neutral drops its tint entirely
-		{ name: 'neutral_chroma', light: '0' },
+		{ name: 'neutral_chroma', base: '0' },
 		// paper white and a near-black negative, with the text ramp bent to the
 		// same ends - pure black would sit past high contrast's ground and
 		// collapse the surface steps
-		{ name: 'shade_lightness_00', light: '1', dark: '0.15' },
-		{ name: 'text_lightness_curve', light: '0.5', dark: '0.35' },
+		{ name: 'shade_lightness_00', base: '1', dark: '0.15' },
+		{ name: 'text_lightness_curve', base: '0.5', dark: '0.35' },
 		// at an extreme ground the default sunken input fill has nowhere to go,
 		// so fields are bare ruled boxes on the page
-		{ name: 'input_fill', light: 'transparent' },
+		{ name: 'input_fill', base: 'transparent' },
 		// line carries the structure: heavier, opaque, high-contrast rules
-		{ name: 'border_width', light: 'var(--border_width_2)' },
-		{ name: 'border_color', light: 'var(--text_60)' },
+		{ name: 'border_width', base: 'var(--border_width_2)' },
+		{ name: 'border_color', base: 'var(--text_60)' },
 		// sharp: one knob zeroes every radius tier
-		{ name: 'radius_scale', light: '0' },
+		{ name: 'radius_scale', base: '0' },
 		// flat: one knob zeroes the whole alpha ramp, button shadows included
-		{ name: 'shadow_alpha_scale', light: '0' },
+		{ name: 'shadow_alpha_scale', base: '0' },
 		// heavy grotesque headings - the sans stack, because the default serif
 		// stack has no weight past bold for the flattened ladder to reach
-		{ name: 'heading_font_family', light: 'var(--font_family_sans)' },
-		{ name: 'heading_font_weight', light: '900' },
+		{ name: 'heading_font_family', base: 'var(--font_family_sans)' },
+		{ name: 'heading_font_weight', base: '900' },
 		// heavy display type sets tight
-		{ name: 'heading_letter_spacing', light: '-0.02em' },
+		{ name: 'heading_letter_spacing', base: '-0.02em' },
 		// headlines shout: the type scale opens up, body text stays where it is
-		{ name: 'type_scale_ratio', light: '1.33' },
+		{ name: 'type_scale_ratio', base: '1.33' },
 		// links are underlined at rest: ink is the only way to mark one
-		{ name: 'text_decoration', light: 'underline' },
+		{ name: 'text_decoration', base: 'underline' },
 		// print doesn't ease - the three shortest duration tokens zero out, for
 		// the transitions a consumer times with them, while the longer tiers
 		// keep their timing
-		{ name: 'duration_1', light: '0s' },
-		{ name: 'duration_2', light: '0s' },
-		{ name: 'duration_3', light: '0s' }
+		{ name: 'duration_1', base: '0s' },
+		{ name: 'duration_2', base: '0s' },
+		{ name: 'duration_3', base: '0s' }
 	]
 };

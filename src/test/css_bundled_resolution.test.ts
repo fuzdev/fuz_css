@@ -484,7 +484,7 @@ describe('resolve_css', () => {
 					button { color: blue; }
 					input { color: green; }
 				`,
-				[{ name: 'color', light: 'red' }]
+				[{ name: 'color', base: 'red' }]
 			);
 
 			const result = resolve_css({
@@ -514,8 +514,8 @@ describe('resolve_css', () => {
 					a { text-decoration: none; }
 				`,
 				[
-					{ name: 'palette_a', light: 'blue' },
-					{ name: 'palette_b', light: 'green' }
+					{ name: 'palette_a', base: 'blue' },
+					{ name: 'palette_b', base: 'green' }
 				]
 			);
 
@@ -550,8 +550,8 @@ describe('resolve_css', () => {
 					input { border: 1px solid; }
 				`,
 				[
-					{ name: 'text_color', light: 'black' },
-					{ name: 'bg_color', light: 'white' }
+					{ name: 'text_color', base: 'black' },
+					{ name: 'bg_color', base: 'white' }
 				]
 			);
 
@@ -578,7 +578,7 @@ describe('resolve_css', () => {
 
 		test('empty style_rule_index', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'color', light: 'blue' }
+				{ name: 'color', base: 'blue' }
 			]);
 
 			const result = resolve_css({
@@ -619,7 +619,7 @@ describe('resolve_css', () => {
 					* { margin: 0; }
 					button { color: red; }
 				`,
-				[{ name: 'unused', light: 'value' }]
+				[{ name: 'unused', base: 'value' }]
 			);
 
 			const result = resolve_css({
@@ -638,9 +638,9 @@ describe('resolve_css', () => {
 	describe('additional_variables option', () => {
 		test('additional_variables forces inclusion', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -660,9 +660,9 @@ describe('resolve_css', () => {
 
 		test('additional_variables combined with detected_css_variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -685,8 +685,8 @@ describe('resolve_css', () => {
 
 		test('additional_variables with overlapping detected_css_variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' }
 			]);
 
 			const result = resolve_css({
@@ -715,9 +715,9 @@ describe('resolve_css', () => {
 					input { border: 1px solid var(--input_border); }
 				`,
 				[
-					{ name: 'btn_color', light: 'blue' },
-					{ name: 'input_border', light: 'gray' },
-					{ name: 'extra_var', light: 'red' }
+					{ name: 'btn_color', base: 'blue' },
+					{ name: 'input_border', base: 'gray' },
+					{ name: 'extra_var', base: 'red' }
 				]
 			);
 
@@ -741,8 +741,8 @@ describe('resolve_css', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`button { color: var(--btn_color); }`,
 				[
-					{ name: 'btn_color', light: 'var(--base_color)' },
-					{ name: 'base_color', light: 'blue' }
+					{ name: 'btn_color', base: 'var(--base_color)' },
+					{ name: 'base_color', base: 'blue' }
 				]
 			);
 
@@ -814,9 +814,9 @@ describe('resolve_css', () => {
 
 		test('additional_variables: "all" includes all variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -840,9 +840,9 @@ describe('resolve_css', () => {
 
 		test('default behavior only includes used variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -871,8 +871,8 @@ describe('resolve_css', () => {
 					input { border: 1px solid; }
 				`,
 				[
-					{ name: 'btn_color', light: 'blue' },
-					{ name: 'unused', light: 'red' }
+					{ name: 'btn_color', base: 'blue' },
+					{ name: 'unused', base: 'red' }
 				]
 			);
 
@@ -952,9 +952,9 @@ describe('resolve_css', () => {
 
 		test('exclude_variables filters from resolved variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({
@@ -978,9 +978,9 @@ describe('resolve_css', () => {
 
 		test('exclude_variables combined with additional_variables', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(``, [
-				{ name: 'palette_a', light: 'blue' },
-				{ name: 'palette_b', light: 'green' },
-				{ name: 'palette_c', light: 'red' }
+				{ name: 'palette_a', base: 'blue' },
+				{ name: 'palette_b', base: 'green' },
+				{ name: 'palette_c', base: 'red' }
 			]);
 
 			const result = resolve_css({

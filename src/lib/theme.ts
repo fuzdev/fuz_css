@@ -85,7 +85,7 @@ export interface RenderThemeStyleOptions {
 	 * itself (`#id.dark`) and on the root (`:root.dark #id`), the ecosystem
 	 * convention - so a scoped theme's dark appearance follows the page's.
 	 * A `.light` on the scope element wins over either: the scope takes the
-	 * theme's light slots under `:root.dark` and on a dark OS alike. With no
+	 * theme's base slots under `:root.dark` and on a dark OS alike. With no
 	 * scheme class on the root or the scope, the dark slots follow the OS
 	 * preference.
 	 *
@@ -119,20 +119,20 @@ export const to_theme_stance = (scheme: unknown): 'light' | 'dark' | null =>
 
 /**
  * Picks the value a single-scheme stance renders from a dual-slot shape: the
- * stanced scheme's slot, dark falling back to the light/base position. Shared
+ * stanced scheme's slot, dark falling back to the `base` position. Shared
  * by `compose_themes` and the theme editor so the re-slot semantics can't
  * drift.
  */
 export const pick_stance_slot = (
-	v: { light?: string; dark?: string } | undefined,
+	v: { base?: string; dark?: string } | undefined,
 	stance: 'light' | 'dark'
-): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.light) : v?.light);
+): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.base) : v?.base);
 
 /**
  * Overlays one variable onto the same-named variable beneath it, the merge
  * every theme composition shares: the overlay replaces wholesale, except that
- * a dark-only overlay keeps the light slot beneath it. A dark slot only
- * shadows in the dark scheme, so dropping the light slot would leave the
+ * a dark-only overlay keeps the base slot beneath it. A dark slot only
+ * shadows in the dark scheme, so dropping the base slot would leave the
  * variable without its light-scheme value.
  *
  * @param existing - the variable being overlaid, if any
@@ -142,14 +142,14 @@ export const overlay_style_variable = (
 	existing: StyleVariable | undefined,
 	overlay: StyleVariable
 ): StyleVariable =>
-	overlay.light === undefined && overlay.dark !== undefined && existing?.light !== undefined
-		? { ...overlay, light: existing.light }
+	overlay.base === undefined && overlay.dark !== undefined && existing?.base !== undefined
+		? { ...overlay, base: existing.base }
 		: overlay;
 
 /**
  * Composes a base theme with overlay fragments by flatten + last-wins: later
  * variables replace same-named earlier ones wholesale, a dark-only overlay
- * keeping the light slot beneath it (see `overlay_style_variable`). Any
+ * keeping the base slot beneath it (see `overlay_style_variable`). Any
  * knob-only theme is already a valid fragment - the contrast modifiers in
  * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
  * precursor to a first-class `extends`, with the same merge semantics.
@@ -178,7 +178,7 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 				if (value === undefined) continue;
 				by_name.set(v.name, {
 					name: v.name,
-					light: value,
+					base: value,
 					...(v.summary !== undefined && { summary: v.summary })
 				});
 			} else {
@@ -229,19 +229,19 @@ export const render_theme_style = (theme: Theme, options: RenderThemeStyleOption
 	// mirrored defaults first so the theme's own variables win by order; the
 	// mirror belongs to the stance, so a dual theme carrying one renders without it
 	const variables = [...(stance ? to_array(scheme_mirror) : []), ...to_array(own_variables)];
-	const rendered_light = variables
+	const rendered_base = variables
 		.map((v) => render_theme_variable(v, false, comments))
 		.filter(Boolean);
-	if (stance) rendered_light.unshift(`color-scheme: ${stance};`);
+	if (stance) rendered_base.unshift(`color-scheme: ${stance};`);
 	const rendered_dark = variables
 		.map((v) => render_theme_variable(v, true, comments))
 		.filter(Boolean);
 	// nothing declared - no variables, or every one of them empty or dropped
-	if (!rendered_light.length && !rendered_dark.length) return '';
+	if (!rendered_base.length && !rendered_dark.length) return '';
 	const scope = typeof id === 'string' && id ? '#' + escape_css_identifier(id) : ':root';
 	const dark_declarations = rendered_dark.join('\n\t');
 	const blocks = [
-		rendered_light.length ? `${scope} {\n\t${rendered_light.join('\n\t')}\n}` : '',
+		rendered_base.length ? `${scope} {\n\t${rendered_base.join('\n\t')}\n}` : '',
 		rendered_dark.length
 			? render_color_scheme_rules(
 					'dark',
@@ -278,8 +278,8 @@ const to_array = (value: unknown): Array<unknown> => (Array.isArray(value) ? val
 // or can't be rendered without escaping its declaration - a theme may be
 // untrusted data that skipped the schema, and this is where it becomes CSS
 const render_theme_variable = (variable: unknown, dark: boolean, comments: boolean): string => {
-	const { name, light, dark: dark_slot, summary } = (variable ?? {}) as Unchecked<StyleVariable>;
-	const value = dark ? dark_slot : light;
+	const { name, base, dark: dark_slot, summary } = (variable ?? {}) as Unchecked<StyleVariable>;
+	const value = dark ? dark_slot : base;
 	// the containment checks pass strings only, which is what makes the
 	// concatenation below safe
 	if (
