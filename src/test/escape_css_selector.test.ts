@@ -46,6 +46,8 @@ describe('escape_css_selector', () => {
 		['background:url(data:image/png)', 'background\\:url\\(data\\:image\\/png\\)'],
 
 		// All special characters that need escaping
+		['a b', 'a\\ b'],
+		['display:flex a', 'display\\:flex\\ a'],
 		['a!b', 'a\\!b'],
 		['a"b', 'a\\"b'],
 		['a#b', 'a\\#b'],
@@ -105,6 +107,34 @@ describe('escape_css_selector - backslash edge cases', () => {
 	];
 
 	test.each(backslash_cases)('escapes "%s" to "%s"', (input, expected) => {
+		assert.strictEqual(escape_css_selector(input), expected);
+	});
+});
+
+describe('escape_css_selector - hex escapes', () => {
+	// a leading digit (alone or after a leading `-`) and control characters
+	// aren't valid in an identifier as written
+	const hex_cases: Array<[input: string, expected: string]> = [
+		['2xl:p_md', '\\32 xl\\:p_md'],
+		['2xl:hover:p_md', '\\32 xl\\:hover\\:p_md'],
+		['-2a', '-\\32 a'],
+		['0', '\\30 '],
+		['a2', 'a2'],
+		['-a2', '-a2'],
+		['--2', '--2'],
+		['p_2', 'p_2'],
+		['-', '\\-'],
+		['a\u0001b', 'a\\1 b'],
+		['a\u001fb', 'a\\1f b'],
+		['a\u007fb', 'a\\7f b'],
+		['a\tb', 'a\\9 b'],
+		['a\nb', 'a\\a b'],
+		['a\u0000b', 'a\\fffd b'],
+		['aéb', 'aéb'],
+		['a\u0080b', 'a\u0080b']
+	];
+
+	test.each(hex_cases)('escapes %j to %j', (input, expected) => {
 		assert.strictEqual(escape_css_selector(input), expected);
 	});
 });

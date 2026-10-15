@@ -191,33 +191,38 @@ for (const m of MODIFIERS) {
 	else if (m.type === 'pseudo-element') PSEUDO_ELEMENT_MODIFIERS.set(m.name, m);
 }
 
+// the nth patterns take an An+B argument (`odd`, `even`, `2n+1`, `-n+3`,
+// `+5`), the only form a browser accepts there; it renders verbatim into the
+// selector, and the grammar keeps it from ending it
+const AN_PLUS_B = String.raw`(odd|even|[+-]?\d*n(?:[+-]\d+)?|[+-]?\d+)`;
+
 /**
  * Pattern for parameterized nth-child: `nth-child(2n+1):`
  *
  * @internal Read by `get_modifier`; exported for its tests.
  */
-export const NTH_CHILD_PATTERN = /^nth-child\(([^)]+)\)$/;
+export const NTH_CHILD_PATTERN = new RegExp(`^nth-child\\(${AN_PLUS_B}\\)$`);
 
 /**
  * Pattern for parameterized nth-last-child: `nth-last-child(2n+1):`
  *
  * @internal Read by `get_modifier`; exported for its tests.
  */
-export const NTH_LAST_CHILD_PATTERN = /^nth-last-child\(([^)]+)\)$/;
+export const NTH_LAST_CHILD_PATTERN = new RegExp(`^nth-last-child\\(${AN_PLUS_B}\\)$`);
 
 /**
  * Pattern for parameterized nth-of-type: `nth-of-type(2n):`
  *
  * @internal Read by `get_modifier`; exported for its tests.
  */
-export const NTH_OF_TYPE_PATTERN = /^nth-of-type\(([^)]+)\)$/;
+export const NTH_OF_TYPE_PATTERN = new RegExp(`^nth-of-type\\(${AN_PLUS_B}\\)$`);
 
 /**
  * Pattern for parameterized nth-last-of-type: `nth-last-of-type(2n):`
  *
  * @internal Read by `get_modifier`; exported for its tests.
  */
-export const NTH_LAST_OF_TYPE_PATTERN = /^nth-last-of-type\(([^)]+)\)$/;
+export const NTH_LAST_OF_TYPE_PATTERN = new RegExp(`^nth-last-of-type\\(${AN_PLUS_B}\\)$`);
 
 /**
  * Extracts content from balanced parentheses after a prefix.
@@ -265,31 +270,180 @@ export const extract_balanced_parens = (segment: string, prefix: string): string
 const decode_spaces = (value: string): string => value.replaceAll('~', ' ');
 
 /**
- * Known CSS functions that are valid in media query values.
- * These don't start with digits but are valid starts for breakpoint values.
- *
- * Note: `var()` is intentionally excluded - CSS custom properties are NOT
- * supported in media queries (they're evaluated before variables resolve).
+ * The length units a breakpoint takes: absolute, font-relative, viewport, and
+ * container units, lowercase as class names write them. Percentages aren't
+ * lengths in a media query, so browsers and minifiers reject them there.
  */
-const CSS_FUNCTION_PREFIXES = ['calc(', 'clamp(', 'min(', 'max(', 'env('];
+const BREAKPOINT_LENGTH_UNITS: ReadonlySet<string> = new Set(
+	(
+		'px cm mm q in pt pc em rem ex rex cap rcap ch rch ic ric lh rlh ' +
+		'vw vh vi vb vmin vmax svw svh svi svb svmin svmax lvw lvh lvi lvb lvmin lvmax ' +
+		'dvw dvh dvi dvb dvmin dvmax cqw cqh cqi cqb cqmin cqmax'
+	).split(' ')
+);
+
+// a plain breakpoint length: `800px`, `50rem`, `1.5em`, `.5rem`, or a unitless `0`
+const BREAKPOINT_LENGTH_MATCHER = /^(?:0|(?:\d+(?:\.\d+)?|\.\d+)([a-z]+))$/;
+
+// the math functions a breakpoint may open with
+const BREAKPOINT_FUNCTION_MATCHER = /^(?:calc|clamp|min|max)\(/;
+
+// one token of a breakpoint math function: whitespace, a function opening, a
+// number with its sign and unit, or a symbol
+const BREAKPOINT_TOKEN_MATCHER =
+	/\s+|(calc|clamp|min|max)\(|([+-]?(?:\d+(?:\.\d+)?|\.\d+))([a-z]*)|[-+*/(),]/y;
+
+type BreakpointToken =
+	| { kind: 'function'; name: string; spaced: boolean }
+	| { kind: 'number'; value: number; unit: string; spaced: boolean }
+	| { kind: 'symbol'; symbol: string; spaced: boolean };
+
+// a math node's type; a number-typed node is a constant (`var()` isn't
+// admitted), so it carries its folded value
+type BreakpointMath = { type: 'number'; value: number } | { type: 'length' };
+
+// `spaced` marks a token that follows whitespace
+const tokenize_breakpoint_math = (value: string): Array<BreakpointToken> | null => {
+	const tokens: Array<BreakpointToken> = [];
+	let spaced = false;
+	BREAKPOINT_TOKEN_MATCHER.lastIndex = 0;
+	while (BREAKPOINT_TOKEN_MATCHER.lastIndex < value.length) {
+		const match = BREAKPOINT_TOKEN_MATCHER.exec(value);
+		if (!match) return null;
+		const [text, name, number, unit] = match;
+		if (/^\s/.test(text)) {
+			spaced = true;
+			continue;
+		}
+		if (name !== undefined) tokens.push({ kind: 'function', name, spaced });
+		else if (number !== undefined) {
+			tokens.push({ kind: 'number', value: Math.fround(Number(number)), unit: unit ?? '', spaced });
+		} else tokens.push({ kind: 'symbol', symbol: text, spaced });
+		spaced = false;
+	}
+	return tokens;
+};
+
+const is_symbol = (token: BreakpointToken | undefined, symbol: string): boolean =>
+	token?.kind === 'symbol' && token.symbol === symbol;
 
 /**
- * Checks if a value is valid for an arbitrary breakpoint.
- * Must start with a digit or a known CSS function.
+ * Checks a breakpoint math function (`calc()`, `clamp()`, `min()`, `max()`)
+ * against the CSS math grammar, typed so the whole is a length: sums of
+ * products of numbers, lengths, parenthesized sums, and nested functions,
+ * with whitespace around a binary `+` or `-` as CSS requires (a class writes
+ * it as `~`), `calc()` taking one argument and `clamp()` three, and no
+ * product of two lengths or division by a length or by a number that
+ * evaluates to zero at single precision. The grammar admits only digits, units, operators,
+ * parens, commas, and spaces, so the value can't end the media query it
+ * renders into.
  */
-const is_valid_breakpoint_value = (value: string): boolean => {
-	if (!value) return false;
-	// Allow values starting with a digit (e.g., "800px", "50rem")
-	if (/^\d/.test(value)) return true;
-	// Allow known CSS functions (e.g., "calc(...)", "clamp(...)")
-	return CSS_FUNCTION_PREFIXES.some((prefix) => value.startsWith(prefix));
+const breakpoint_math_is_valid = (value: string): boolean => {
+	if (!BREAKPOINT_FUNCTION_MATCHER.test(value)) return false;
+	const tokens = tokenize_breakpoint_math(value);
+	if (!tokens) return false;
+	let i = 0;
+
+	const parse_value = (): BreakpointMath | null => {
+		const token = tokens[i++];
+		if (!token) return null;
+		if (token.kind === 'number') {
+			if (!token.unit) return { type: 'number', value: token.value };
+			return BREAKPOINT_LENGTH_UNITS.has(token.unit) ? { type: 'length' } : null;
+		}
+		if (token.kind === 'symbol') {
+			if (token.symbol !== '(') return null;
+			const node = parse_sum();
+			return node && is_symbol(tokens[i++], ')') ? node : null;
+		}
+		const args: Array<BreakpointMath> = [];
+		for (;;) {
+			const node = parse_sum();
+			if (!node) return null;
+			args.push(node);
+			const separator = tokens[i++];
+			if (is_symbol(separator, ')')) break;
+			if (!is_symbol(separator, ',')) return null;
+		}
+		const arity = token.name === 'calc' ? 1 : token.name === 'clamp' ? 3 : null;
+		if (arity !== null && args.length !== arity) return null;
+		if (!args.every((node) => node.type === args[0]!.type)) return null;
+		if (args[0]!.type === 'length') return args[0]!;
+		const values = args.map((node) => (node as { value: number }).value);
+		const value =
+			token.name === 'calc'
+				? values[0]!
+				: token.name === 'min'
+					? Math.min(...values)
+					: token.name === 'max'
+						? Math.max(...values)
+						: Math.max(values[0]!, Math.min(values[1]!, values[2]!));
+		return { type: 'number', value: Math.fround(value) };
+	};
+
+	const parse_product = (): BreakpointMath | null => {
+		let node = parse_value();
+		while (node && (is_symbol(tokens[i], '*') || is_symbol(tokens[i], '/'))) {
+			const divide = is_symbol(tokens[i++], '/');
+			const right = parse_value();
+			if (!right) return null;
+			if (divide) {
+				// a divisor must be a number, and one that folds to zero fails the
+				// math (each step rounds to single precision, as minifiers evaluate it)
+				if (right.type !== 'number' || right.value === 0) return null;
+				if (node.type === 'number') {
+					node = { type: 'number', value: Math.fround(node.value / right.value) };
+				}
+			} else if (node.type === 'number' && right.type === 'number') {
+				node = { type: 'number', value: Math.fround(node.value * right.value) };
+			} else if (node.type === 'length' && right.type === 'length') {
+				return null;
+			} else {
+				node = { type: 'length' };
+			}
+		}
+		return node;
+	};
+
+	const parse_sum = (): BreakpointMath | null => {
+		let node = parse_product();
+		if (!node) return null;
+		while (is_symbol(tokens[i], '+') || is_symbol(tokens[i], '-')) {
+			if (!tokens[i]!.spaced || !tokens[i + 1]?.spaced) return null;
+			const subtract = is_symbol(tokens[i++], '-');
+			const right = parse_product();
+			if (!right || right.type !== node.type) return null;
+			if (node.type === 'number' && right.type === 'number') {
+				node = {
+					type: 'number',
+					value: Math.fround(subtract ? node.value - right.value : node.value + right.value)
+				};
+			}
+		}
+		return node;
+	};
+
+	return parse_value()?.type === 'length' && i === tokens.length;
 };
 
 /**
- * Parses an arbitrary breakpoint modifier into its width bound, with `~`
- * decoded to a space.
- * Supports nested parentheses for calc(), clamp(), min(), max(), var().
- * Requires value to start with a digit or known CSS function to catch obvious mistakes.
+ * Checks if a value is valid for an arbitrary breakpoint: a length with a
+ * known unit (`800px`, `50rem`, a unitless `0`) or a math function of
+ * lengths (see `breakpoint_math_is_valid`). A unitless number, a
+ * percentage, and `env()` or `var()` aren't valid in a media query.
+ */
+const is_valid_breakpoint_value = (value: string): boolean => {
+	const decoded = decode_spaces(value);
+	const length = BREAKPOINT_LENGTH_MATCHER.exec(decoded);
+	if (length) return length[1] === undefined || BREAKPOINT_LENGTH_UNITS.has(length[1]);
+	return breakpoint_math_is_valid(decoded);
+};
+
+/**
+ * Parses an arbitrary breakpoint modifier into its width bound.
+ * The value is a length or a `calc()`, `clamp()`, `min()`, or `max()` of
+ * lengths, with `~` for spaces; anything else isn't a breakpoint, since
+ * browsers drop a media query whose value isn't a length.
  *
  * @returns the width bound, or null if not an arbitrary breakpoint
  *
@@ -297,7 +451,8 @@ const is_valid_breakpoint_value = (value: string): boolean => {
  * ```ts
  * parse_arbitrary_breakpoint("min-width(800px)") // {bound: 'min', value: '800px'}
  * parse_arbitrary_breakpoint("max-width(calc(100vw~-~200px))") // {bound: 'max', value: 'calc(100vw - 200px)'}
- * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no digit or function)
+ * parse_arbitrary_breakpoint("min-width(px)") // null (invalid - no number)
+ * parse_arbitrary_breakpoint("min-width(800)") // null (invalid - no unit)
  * ```
  */
 export const parse_arbitrary_breakpoint = (segment: string): ModifierWidthBound | null => {
@@ -311,6 +466,22 @@ export const parse_arbitrary_breakpoint = (segment: string): ModifierWidthBound 
 		return { bound: 'max', value: decode_spaces(max_value) };
 	}
 
+	return null;
+};
+
+/**
+ * Describes the argument a parameterized modifier takes, for a segment shaped
+ * like one (`min-width(...)`, `nth-child(...)`) whose argument isn't valid.
+ *
+ * @returns the hint, or null for a segment of any other shape
+ */
+export const to_modifier_argument_hint = (segment: string): string | null => {
+	if (/^(?:min|max)-width\(/.test(segment)) {
+		return 'A breakpoint takes a length (`800px`, `50rem`) or a `calc()`, `clamp()`, `min()`, or `max()` of lengths, with `~` for spaces - CSS requires them around `+` and `-`';
+	}
+	if (/^nth-(?:last-)?(?:child|of-type)\(/.test(segment)) {
+		return 'An nth modifier takes An+B: `odd`, `even`, `3`, `2n`, `2n+1`, or `-n+3`';
+	}
 	return null;
 };
 

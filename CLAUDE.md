@@ -194,9 +194,10 @@ the hint then ships; in utility-only mode a base-only class errors, since the ge
 styles for it. Implicitly detected classes that can't be resolved don't fail
 on their shape: a plain name nothing defines is skipped silently, and one
 shaped like a literal or a modified class (`hover:bg-blue-500`, `md:flex`) logs
-a warning, since it may belong to another CSS framework. A literal the
-interpreter finds broken (an unclosed `max-width(` breakpoint) is still an
-error.
+a warning, since it may belong to another CSS framework - as does a literal
+whose value could end its declaration (an unclosed quote or bracket), which
+is an error when the class is hinted or listed. A literal the interpreter
+finds broken (an unclosed `max-width(` breakpoint) is still an error.
 
 **CSS variable detection:** Variables are detected via simple regex scan of
 `var(--name` patterns in source files. Only theme variables are included;
@@ -271,7 +272,9 @@ Literal classes use `property:value` syntax that maps 1:1 to CSS:
 
 Modifier ordering is `[media:][ancestor:][state...:][pseudo-element:]property:value`.
 Space encoding uses `~` for multi-value properties (`margin:0~auto`). Arbitrary
-breakpoints via `min-width(800px):` and `max-width(600px):`. Built-in max-width
+breakpoints via `min-width(800px):` and `max-width(600px):` take a length or a
+`calc()`/`clamp()`/`min()`/`max()` of lengths, and `nth-child(...)` and its
+siblings take An+B - any other argument isn't a modifier. Built-in max-width
 variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 `motion-safe:`, `contrast-more:`, etc.) are also available.
 
@@ -549,6 +552,9 @@ typography, borders, shading, shadows, layout. See
   `<style>` element, and `render_theme_style` drops one. The checks take
   `unknown` and fail non-strings, and the renderer is total over any JSON
   value - what isn't the type `Theme` declares is dropped, never thrown on.
+  `parse_css_literal` runs literal class values and custom-property names
+  through the same checks, while a modifier's argument is held to its own
+  grammar in `modifiers.ts`.
   `escape_css_identifier` writes the renderer's `id` option into its
   selector, escaping punctuation by code point so `</style` can't form
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
@@ -712,9 +718,12 @@ typography, borders, shading, shadows, layout. See
   and `modify_ruleset`, which rewrites a ruleset's selectors for a modified
   class
 - [css_literal.ts](src/lib/css_literal.ts) - CSS-literal parser and validator
+  (it rejects values and names that could end their declaration)
 - [modifiers.ts](src/lib/modifiers.ts) - Modifier definitions (breakpoints
   with their width bounds, color schemes, states, pseudo-elements) and
-  `compare_media_modifiers`
+  `compare_media_modifiers`; the arguments of `nth-*(...)` and arbitrary
+  breakpoints are restricted to An+B and to lengths or math functions of
+  lengths, which can't end their selector or media query
 - [deps.ts](src/lib/deps.ts) - `CacheDeps` interface for dependency injection
 - [deps_defaults.ts](src/lib/deps_defaults.ts) - Default filesystem
   implementations
@@ -772,7 +781,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_bundled_resolution.{test,diagnostics,variables}.test.ts`
 - `css_ruleset_parser.{generation,modifiers,parse,selectors}.test.ts`
 - `css_class_resolution.{test,literals}.test.ts`
-- `generate_classes_css.{test,modifiers,order}.test.ts`
+- `generate_classes_css.{test,modifiers,order,validity}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
 - `theme_check.{test,compile,pins}.test.ts`
 - `theme_resolver.{test,defaults}.test.ts`

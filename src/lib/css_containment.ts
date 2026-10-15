@@ -6,6 +6,10 @@
  * one has to stay inside the declaration it was rendered into - and inside
  * the `<style>` element when the CSS is injected as HTML. The `Theme` schema
  * reports a failing value as an error, and `render_theme_style` drops it.
+ * Class names render verbatim too: `parse_css_literal` runs a literal class's
+ * value and custom-property name through these checks, while a modifier's
+ * argument (`min-width(...)`, `nth-child(...)`) is held to its own grammar
+ * in `modifiers.ts`.
  *
  * These are not CSS validators: a contained value can still be meaningless
  * CSS, which the browser discards on its own.
@@ -82,13 +86,14 @@ export const css_comment_is_contained = (text: unknown): boolean =>
 	typeof text === 'string' && !text.includes('*/') && !STYLE_CLOSER_MATCHER.test(text);
 
 /**
- * Checks that a custom property name is a plain identifier, so it can't
- * smuggle a value or a second declaration in with it.
+ * Checks that a custom property name is a plain identifier - word
+ * characters, hyphens, and non-ASCII (`--aé`, `--Δx`) - so it can't smuggle
+ * a value or a second declaration in with it.
  *
  * @param name - the name without its `--` prefix
  */
 export const css_custom_property_name_is_contained = (name: unknown): boolean =>
-	typeof name === 'string' && /^[\w-]+$/u.test(name);
+	typeof name === 'string' && /^[\w\u{80}-\u{10FFFF}-]+$/u.test(name);
 
 /**
  * Serializes a string as a CSS identifier, so any string can name an element

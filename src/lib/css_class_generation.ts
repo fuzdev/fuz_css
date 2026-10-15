@@ -39,19 +39,43 @@ import { COLOR_SCHEME_ROOTS, render_color_scheme_rules } from './theme.ts';
 // CSS Utilities
 //
 
+// ASCII punctuation and the space, escaped with a bare backslash as CSSOM does
+const SELECTOR_PUNCTUATION = new Set(' !"#$%&\'()*+,./:;<=>?@[\\]^`{|}~');
+
 /**
  * Escapes special characters in a CSS class name for use in a selector.
- * CSS selectors require escaping of characters like `:`, `%`, `(`, `)`, etc.
+ * ASCII punctuation like `:`, `%`, `(`, and `)` takes a bare backslash, as
+ * does a space, which would otherwise split the selector in two; a leading
+ * digit (also after a leading `-`) and control characters take a hex escape,
+ * since neither is valid there as written, and NUL becomes U+FFFD.
  *
  * @example
  * ```ts
  * escape_css_selector('display:flex') // 'display\\:flex'
  * escape_css_selector('opacity:80%') // 'opacity\\:80\\%'
  * escape_css_selector('nth-child(2n)') // 'nth-child\\(2n\\)'
+ * escape_css_selector('2xl:p_md') // '\\32 xl\\:p_md'
  * ```
  */
 export const escape_css_selector = (name: string): string => {
-	return name.replace(/[!"#$%&'()*+,./:;<=>?@[\\\]^`{|}~]/g, '\\$&');
+	let out = '';
+	for (let i = 0; i < name.length; i++) {
+		const code = name.charCodeAt(i);
+		const char = name[i]!;
+		const leading_digit = code >= 0x30 && code <= 0x39 && (i === 0 || (i === 1 && name[0] === '-'));
+		if (code === 0) {
+			out += '\\fffd ';
+		} else if (leading_digit || code <= 0x1f || code === 0x7f) {
+			out += `\\${code.toString(16)} `;
+		} else if (i === 0 && char === '-' && name.length === 1) {
+			out += '\\-';
+		} else if (SELECTOR_PUNCTUATION.has(char)) {
+			out += '\\' + char;
+		} else {
+			out += char;
+		}
+	}
+	return out;
 };
 
 /**
@@ -181,7 +205,9 @@ export interface CssClassInterpreterContext {
  * `md:hover:grid-cols-4` reaches it as `grid-cols-4` - and returns a
  * definition like a static one, so modifiers, ordering, and layering apply to
  * what it returns the same as to a static class. A `ruleset` names the class
- * it was given; the generator renames it to the full modified class.
+ * it was given; the generator renames it to the full modified class. What
+ * an interpreter returns renders verbatim, so containing values built from
+ * class names found in markup is the interpreter's job.
  *
  * Leading segments named like modifiers are stripped greedily, and the
  * generator backs off one at a time, so an interpreter is offered the
@@ -290,16 +316,18 @@ export const generate_classes_css = (
 		// convert the resolution diagnostics, naming the full class. A class
 		// nobody asked for by name may belong to another CSS system, so an
 		// unknown property or modifier (Tailwind's arbitrary variants like
-		// `has-[:checked]:`) or misordered modifiers (Tailwind takes them in
-		// any order) only warn for it; other errors - an interpreter reporting
-		// a broken definition - stay errors
+		// `has-[:checked]:`), misordered modifiers (Tailwind takes them in any
+		// order), or a value the literal interpreter won't contain (an unclosed
+		// quote or bracket) only warn for it; other errors - an interpreter
+		// reporting a broken definition - stay errors
 		const is_explicit = explicit_classes?.has(class_name) ?? false;
 		for (const diag of resolved.diagnostics) {
 			const is_foreign_shape =
 				diag.level === 'error' &&
 				((!resolved.ok && resolved.malformed) ||
 					diag.message.startsWith('Unknown CSS property') ||
-					diag.message.startsWith('Unknown modifier'));
+					diag.message.startsWith('Unknown modifier') ||
+					diag.message.startsWith('Uncontained CSS value'));
 			const level = is_foreign_shape && !is_explicit ? 'warning' : diag.level;
 			diagnostics.push(
 				create_generation_diagnostic({ ...diag, identifier: class_name, level }, locations)

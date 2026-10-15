@@ -109,8 +109,13 @@ describe('css_custom_property_name_is_contained', () => {
 		assert.isTrue(css_custom_property_name_is_contained('palette_a_50'));
 		assert.isTrue(css_custom_property_name_is_contained('Mixed-Case_1'));
 	});
+	test('non-ASCII characters are identifier characters', () => {
+		for (const name of ['aé', 'Δx', 'a\u0080', '😀']) {
+			assert.isTrue(css_custom_property_name_is_contained(name), name);
+		}
+	});
 	test('anything that could end the name is not', () => {
-		for (const name of ['', 'a: 1; --b', 'a b', 'a}', 'a/**/']) {
+		for (const name of ['', 'a: 1; --b', 'a b', 'a}', 'a/**/', 'a\u007f', 'a\u0001', 'a\\']) {
 			assert.isFalse(css_custom_property_name_is_contained(name), name);
 		}
 	});
