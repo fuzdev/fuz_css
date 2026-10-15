@@ -78,9 +78,10 @@
 		<p>
 			Each hue has intensity variants from subtle to bold (00, 05, 10, 20, ..., 80, 90, 95, 100),
 			with 50 at the middle of the ramp. The 60 variant is the text-safe stop: links, the labels of
-			<code>.palette_X</code> <TomeLink slug="buttons" /> and <TomeLink slug="chips" />, and a
-			selected <code>.palette_X</code> button's fill use it, and <code>check_theme</code> gates
-			those pairings at AA.
+			<TomeLink slug="chips" />, and a selected <code>.palette_X</code> button's fill use it.
+			<code>.palette_X</code> <TomeLink slug="buttons" /> label at 70, one step further, since their
+			own tint deepens behind the label as it's hovered and pressed. <code>check_theme</code> gates
+			all of these pairings at AA.
 		</p>
 		<p>
 			Palette variables work for both text and backgrounds through utility classes:

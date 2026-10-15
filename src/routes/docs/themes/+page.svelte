@@ -241,9 +241,10 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			than throws, returning <code>{'{ok, entries, unchecked}'}</code>. The contrast gates measure
 			the pairings the default styles make on the page background - body and subtle text, links,
 			borders, fills, and colored labels, including a <code>.palette_a</code> button's label on its
-			own tinted fill. They follow the role variables those styles paint through, so a theme that
-			sets <code>border_color</code> to <code>var(--text_60)</code> has its borders measured at
-			<code>text_60</code>, in an entry named <code>border_color vs shade_00</code>.
+			own tinted fill at rest, hovered, and pressed. They follow the role variables those styles
+			paint through, so a theme that sets <code>border_color</code> to <code>var(--text_60)</code>
+			has its borders measured at <code>text_60</code>, in an entry named
+			<code>border_color vs shade_00</code>.
 		</p>
 		<p>
 			A value a gate depends on but can't evaluate lands in <code>unchecked</code> instead of
@@ -273,8 +274,9 @@ test('my theme clears the accessibility gates', () => {
 		</p>
 		<p>
 			fuz_css gates its own themes with these functions in its test suite, every theme ×
-			contrast-modifier composition included, and declares the pairings an exemplar knowingly gives
-			up as exact exceptions. The editor above runs the same lint and gates live on every edit.
+			contrast-modifier composition included, and declares what an exemplar knowingly gives up, like
+			marquee's clipped gamut, as exact exceptions. The editor above runs the same lint and gates
+			live on every edit.
 		</p>
 	</TomeSection>
 </TomeContent>

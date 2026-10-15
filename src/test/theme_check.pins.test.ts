@@ -89,7 +89,7 @@ describe('pinned color stops', () => {
 		assert.closeTo(body.value, expected, 1e-9);
 		assert.isFalse(body.pass);
 		// the button label's fill composites over the pinned ground too
-		const button = get_entry(report, 'contrast', 'light', 'palette_a_60 on palette_a button fill');
+		const button = get_entry(report, 'contrast', 'light', 'palette_a_70 on palette_a button fill');
 		assert.isFalse(button.pass);
 	});
 
@@ -138,6 +138,37 @@ describe('pinned color stops', () => {
 			['text_max']
 		);
 		assert.isUndefined(find_entry(hex, 'contrast', 'light', 'text_max on palette_a_50'));
+		assert.isFalse(hex.ok);
+	});
+
+	test('a pinned shade_max is what a hovered button label mixes toward', () => {
+		const hover = 'palette_a_70 hovered on palette_a hover fill';
+		const pressed = 'palette_a_70 hovered on palette_a active fill';
+		// mixing toward white in light lightens the label onto its own tint
+		const report = check({ name: 'shade_max', light: 'oklch(1 0 0)' });
+		assert.deepEqual(report.unchecked, []);
+		for (const subject of [hover, pressed]) {
+			const entry = get_entry(report, 'contrast', 'light', subject);
+			assert.isBelow(entry.value, get_entry(base_report, 'contrast', 'light', subject).value);
+		}
+		// the labels the hover mix doesn't reach are untouched
+		for (const subject of [
+			'palette_a_70 on palette_a button fill',
+			'palette_a_70 on palette_a active fill'
+		]) {
+			assert.deepEqual(
+				get_entry(report, 'contrast', 'light', subject),
+				get_entry(base_report, 'contrast', 'light', subject)
+			);
+		}
+		// a form the gates don't read is unchecked, and its hovered pairings skipped
+		const hex = check({ name: 'shade_max', light: '#111' });
+		assert.deepEqual(
+			hex.unchecked.map((u) => u.variable),
+			['shade_max']
+		);
+		assert.isUndefined(find_entry(hex, 'contrast', 'light', hover));
+		assert.isUndefined(find_entry(hex, 'contrast', 'light', pressed));
 		assert.isFalse(hex.ok);
 	});
 
@@ -517,7 +548,6 @@ describe('variables no gate reads', () => {
 			// micro-surfaces whose pairing no gate models
 			{ name: 'border_color_20', light: '#0002' },
 			{ name: 'text_min', light: '#eee' },
-			{ name: 'shade_max', light: '#111' },
 			{ name: 'fg_10', light: '#0001' },
 			{ name: 'caret_color', light: '#f00' },
 			{ name: 'selection_color', light: '#f003' },

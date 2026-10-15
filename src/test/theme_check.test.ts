@@ -1,6 +1,12 @@
 import { test, assert, describe } from 'vitest';
 import { readFileSync } from 'node:fs';
-import { oklch_to_srgb } from '@fuzdev/fuz_util/oklch.ts';
+import {
+	oklab_to_srgb,
+	oklch_to_srgb,
+	srgb_to_oklab,
+	type Oklab,
+	type RgbUnit
+} from '@fuzdev/fuz_util/oklch.ts';
 
 import {
 	check_theme,
@@ -24,16 +30,24 @@ import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { zine_theme } from '#lib/themes/zine.ts';
 import { phosphor_theme } from '#lib/themes/phosphor.ts';
-import { guestbook_theme } from '#lib/themes/guestbook.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { shipped_base_themes } from './theme_test_helpers.ts';
 import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
-import { palette_variants, color_scheme_variants } from '#lib/variable_data.ts';
+import {
+	palette_variants,
+	color_scheme_variants,
+	type NumericScaleVariant
+} from '#lib/variable_data.ts';
 
-// the `.palette_X` button label on its own rest fill
-const button_fill_subject = (letter: string): string =>
-	`palette_${letter}_60 on palette_${letter} button fill`;
+// the `.palette_X` button label on each of its fills: at rest, hovered, and
+// pressed by mouse (hovered, so the hovered label) and by keyboard
+const button_label_subjects = (letter: string): Array<string> => [
+	`palette_${letter}_70 on palette_${letter} button fill`,
+	`palette_${letter}_70 on palette_${letter} active fill`,
+	`palette_${letter}_70 hovered on palette_${letter} hover fill`,
+	`palette_${letter}_70 hovered on palette_${letter} active fill`
+];
 
 // the chip label on its stop-10 tint
 const chip_subject = (letter: string): string => `palette_${letter}_60 on palette_${letter}_10`;
@@ -89,50 +103,22 @@ describe('check_theme', () => {
 		assert.isTrue(check_theme(high_contrast_theme).ok);
 	});
 
-	// declared exception: low contrast compresses the shade ramp from the
-	// page-background end, and on that lowered light ground the faint tint of a
-	// `.palette_X` button's rest fill takes its label just under AA for every
-	// letter - every other gate clears its fixed threshold
-	test('low contrast passes every gate, minus the declared button label exception', () => {
+	test('low contrast passes every gate', () => {
 		const report = check_theme(low_contrast_theme);
+		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
 		assert.strictEqual(report.unchecked.length, 0);
-		const other_fails = report.entries.filter((e) => e.gate !== 'contrast' && !e.pass);
-		assert.deepEqual(other_fails, []);
-		assert_declared_contrast_failures(
-			report,
-			palette_variants.map(button_fill_subject),
-			0.9,
-			low_contrast_theme.name
-		);
 	});
 
 	// every shipped base theme is gated on its own, discovered by glob: it
 	// passes every gate unless it is named here, and each name here has its
 	// own test below for exactly what it gives up
-	const standalone_exceptions = new Set([guestbook_theme.name, marquee_theme.name]);
+	const standalone_exceptions = new Set([marquee_theme.name]);
 
 	test('every shipped base theme passes every gate, bar the declared exemplars', () => {
 		for (const theme of shipped_base_themes) {
 			if (standalone_exceptions.has(theme.name)) continue;
 			assert.isTrue(check_theme(theme).ok, theme.name);
 		}
-	});
-
-	// declared exception: the theme's whole premise is a ground off the
-	// paper-white extreme, and on that light ground the faint tint of a
-	// `.palette_X` button's rest fill takes its label just under AA for every
-	// letter - how far the ground steps is what the other gates bound
-	test('guestbook clips nothing and passes every gate, minus the declared button label exception', () => {
-		const report = check_theme(guestbook_theme);
-		assert.strictEqual(report.unchecked.length, 0);
-		const other_fails = report.entries.filter((e) => e.gate !== 'contrast' && !e.pass);
-		assert.deepEqual(other_fails, []);
-		assert_declared_contrast_failures(
-			report,
-			palette_variants.map(button_fill_subject),
-			0.9,
-			guestbook_theme.name
-		);
 	});
 
 	// gamut regression floor for the one vivid exemplar: the deliberate
@@ -150,33 +136,75 @@ describe('check_theme', () => {
 		assert_declared_contrast_failures(report, [], 0.95, marquee_theme.name);
 	});
 
-	test('the button label gate matches the fill a browser renders', () => {
-		// the rest fill is the label's own color at the alpha `style.css` mixes
-		// it to, composited over the page in gamma-encoded sRGB - read the alpha
-		// from the stylesheet so the gate can't drift from the recipe it models
-		const recipe =
-			/--button_fill: color-mix\(in oklab, var\(--fill, var\(--shade_50\)\) (\d+)%, transparent\);/u.exec(
-				readFileSync('./src/lib/style.css', 'utf8')
+	test('the button label gates match the fills and labels a browser renders', () => {
+		// read the recipe from the stylesheet so the gates can't drift from it:
+		// each fill is the fill stop at the alpha `style.css` mixes it to,
+		// composited over the page in gamma-encoded sRGB, and a hovered label
+		// mixes toward `shade_max` in oklab
+		const style = readFileSync('./src/lib/style.css', 'utf8');
+		const fill_alpha = (variable: string): number => {
+			const m = new RegExp(
+				String.raw`--${variable}: color-mix\(in oklab, var\(--fill, var\(--shade_50\)\) (\d+)%, transparent\);`,
+				'u'
+			).exec(style);
+			assert(m, `style.css declares --${variable}`);
+			return Number(m[1]) / 100;
+		};
+		const rest = fill_alpha('button_fill');
+		const hover = fill_alpha('button_fill_hover');
+		const active = fill_alpha('button_fill_active');
+		const hover_mix =
+			/--button_text_color: color-mix\(in oklab, var\(--text_color\) (\d+)%, var\(--shade_max\)\);/u.exec(
+				style
 			);
-		assert(recipe, 'style.css declares the button rest fill');
-		const alpha = Number(recipe[1]) / 100;
+		assert(hover_mix, 'style.css declares the hovered button label');
+		const hover_weight = Number(hover_mix[1]) / 100;
 		const report = check_theme(base_theme);
+		const clamp_unit = (c: number): number => Math.min(1, Math.max(0, c));
 		for (const scheme of color_scheme_variants) {
 			const ground = oklch_to_srgb(shade_stop_oklch('00', scheme));
+			// `shade_max` is the far end from the ground: black in light
+			const shade_max: RgbUnit = scheme === 'light' ? [0, 0, 0] : [1, 1, 1];
 			for (const letter of palette_variants) {
-				const subject = button_fill_subject(letter);
-				const entry = report.entries.find(
-					(e) => e.gate === 'contrast' && e.scheme === scheme && e.subject === subject
+				// the stops the `.palette_X` rule paints its label and tints its fills with
+				const rule = new RegExp(
+					String.raw`button:not\(\.unstyled\)\.palette_${letter}\) \{\s*--text_color: var\(--palette_${letter}_(\d+)\);\s*--fill: var\(--palette_${letter}_(\d+)\);`,
+					'u'
+				).exec(style);
+				assert(rule, `style.css declares the .palette_${letter} button`);
+				const label = oklch_to_srgb(
+					palette_stop_oklch(letter, rule[1] as NumericScaleVariant, scheme)
 				);
-				assert(entry, `${scheme} ${subject} exists`);
-				const label = oklch_to_srgb(palette_stop_oklch(letter, '60', scheme));
-				const fill = label.map((c, i) => alpha * c + (1 - alpha) * ground[i]!) as typeof label;
-				assert.closeTo(entry.value, wcag_contrast_ratio(label, fill), 1e-9, subject);
-				assert.strictEqual(entry.threshold, GATE_PALETTE_TEXT);
-				assert.isTrue(entry.pass, `${scheme} ${subject}: ${entry.value}`);
-				// the tint costs contrast against the bare page
+				const fill_color = oklch_to_srgb(
+					palette_stop_oklch(letter, rule[2] as NumericScaleVariant, scheme)
+				);
+				const fill = (alpha: number): RgbUnit =>
+					fill_color.map((c, i) => alpha * c + (1 - alpha) * ground[i]!) as RgbUnit;
+				const label_lab = srgb_to_oklab(label);
+				const max_lab = srgb_to_oklab(shade_max);
+				const hovered = oklab_to_srgb(
+					label_lab.map((c, i) => hover_weight * c + (1 - hover_weight) * max_lab[i]!) as Oklab
+				).map(clamp_unit) as RgbUnit;
+				const expected = [
+					wcag_contrast_ratio(label, fill(rest)),
+					wcag_contrast_ratio(label, fill(active)),
+					wcag_contrast_ratio(hovered, fill(hover)),
+					wcag_contrast_ratio(hovered, fill(active))
+				];
+				button_label_subjects(letter).forEach((subject, i) => {
+					assert(subject.startsWith(`palette_${letter}_${rule[1]} `), subject);
+					const entry = report.entries.find(
+						(e) => e.gate === 'contrast' && e.scheme === scheme && e.subject === subject
+					);
+					assert(entry, `${scheme} ${subject} exists`);
+					assert.closeTo(entry.value, expected[i]!, 1e-9, `${scheme} ${subject}`);
+					assert.strictEqual(entry.threshold, GATE_PALETTE_TEXT);
+					assert.isTrue(entry.pass, `${scheme} ${subject}: ${entry.value}`);
+				});
+				// each step of tint costs contrast against the bare page
 				const on_page = wcag_contrast_ratio(label, ground);
-				assert.isBelow(entry.value, on_page, subject);
+				assert.isBelow(expected[0]!, on_page, letter);
+				assert.isBelow(expected[1]!, expected[0]!, letter);
 			}
 		}
 	});
@@ -325,7 +353,9 @@ describe('scheme stance', () => {
 			expect_subject(`text_max on palette_${letter}_50`, GATE_FILL_TEXT);
 			expect_subject(`text_00 on palette_${letter}_60`, GATE_SELECTED_TEXT);
 			expect_subject(`palette_${letter}_60 on shade_00`, GATE_PALETTE_TEXT);
-			expect_subject(button_fill_subject(letter), GATE_PALETTE_TEXT);
+			for (const subject of button_label_subjects(letter)) {
+				expect_subject(subject, GATE_PALETTE_TEXT);
+			}
 			expect_subject(chip_subject(letter), GATE_PALETTE_TEXT);
 		}
 	});
@@ -357,16 +387,6 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	// the declared exception, an exact list of failing contrast subjects (in
-	// light) and how far under its gate the worst may sit: low contrast lowers
-	// the light ground, where the faint tint of a `.palette_X` button's rest
-	// fill takes its label just under AA - for every letter over every
-	// dual-scheme base (the dark-stanced bases never render that ground). A
-	// marginal, known cost of the modifier, not a regression
-	const low_contrast_button_labels = palette_variants.map(button_fill_subject);
-	const LOW_CONTRAST_MARGIN = 0.9;
-	const renders_light = (theme: Theme): boolean => theme.scheme !== 'dark';
-
 	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
 		for (const base of bases) {
 			for (const modifier of contrast_modifiers) {
@@ -383,17 +403,11 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	test('every base × modifier keeps its contrast gates, minus the declared exception', () => {
+	test('every base × modifier keeps its contrast gates', () => {
 		for (const base of bases) {
 			for (const modifier of contrast_modifiers) {
 				const composed = compose_themes(base, modifier);
-				const excepted = modifier === low_contrast_theme && renders_light(base);
-				assert_declared_contrast_failures(
-					check_theme(composed),
-					excepted ? low_contrast_button_labels : [],
-					excepted ? LOW_CONTRAST_MARGIN : 1,
-					composed.name
-				);
+				assert_declared_contrast_failures(check_theme(composed), [], 1, composed.name);
 			}
 		}
 	});

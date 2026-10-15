@@ -749,65 +749,67 @@ TODO think through these patterns to get somewhere consistent
 	/* TODO maybe gradients? or at least use a text_color */
 	/* TODO hover variants with brighter borders? maybe use a colorless border for that? */
 
-	/* stop 60 is the text-safe stop (the one links use): AA for the label on its
-		own tint, and for the inverse text once selected fills the button */
+	/* the label is stop 70, a step past the text-safe stop 60 links use, so it
+		holds AA on every fill its own tint takes - rest, hover, and pressed; the
+		fill, border, and ring stay at stop 60, which also carries the inverse
+		text once selected fills the button */
 
 	:where(button:not(.unstyled).palette_a) {
-		--text_color: var(--palette_a_60);
+		--text_color: var(--palette_a_70);
 		--fill: var(--palette_a_60);
 		--border_color: var(--palette_a_60);
 		--outline_color: var(--palette_a_60);
 	}
 	:where(button:not(.unstyled).palette_b) {
-		--text_color: var(--palette_b_60);
+		--text_color: var(--palette_b_70);
 		--fill: var(--palette_b_60);
 		--border_color: var(--palette_b_60);
 		--outline_color: var(--palette_b_60);
 	}
 	:where(button:not(.unstyled).palette_c) {
-		--text_color: var(--palette_c_60);
+		--text_color: var(--palette_c_70);
 		--fill: var(--palette_c_60);
 		--border_color: var(--palette_c_60);
 		--outline_color: var(--palette_c_60);
 	}
 	:where(button:not(.unstyled).palette_d) {
-		--text_color: var(--palette_d_60);
+		--text_color: var(--palette_d_70);
 		--fill: var(--palette_d_60);
 		--border_color: var(--palette_d_60);
 		--outline_color: var(--palette_d_60);
 	}
 	:where(button:not(.unstyled).palette_e) {
-		--text_color: var(--palette_e_60);
+		--text_color: var(--palette_e_70);
 		--fill: var(--palette_e_60);
 		--border_color: var(--palette_e_60);
 		--outline_color: var(--palette_e_60);
 	}
 	:where(button:not(.unstyled).palette_f) {
-		--text_color: var(--palette_f_60);
+		--text_color: var(--palette_f_70);
 		--fill: var(--palette_f_60);
 		--border_color: var(--palette_f_60);
 		--outline_color: var(--palette_f_60);
 	}
 	:where(button:not(.unstyled).palette_g) {
-		--text_color: var(--palette_g_60);
+		--text_color: var(--palette_g_70);
 		--fill: var(--palette_g_60);
 		--border_color: var(--palette_g_60);
 		--outline_color: var(--palette_g_60);
 	}
 	:where(button:not(.unstyled).palette_h) {
-		--text_color: var(--palette_h_60);
+		--text_color: var(--palette_h_70);
 		--fill: var(--palette_h_60);
 		--border_color: var(--palette_h_60);
 		--outline_color: var(--palette_h_60);
 	}
 	:where(button:not(.unstyled).palette_i) {
-		--text_color: var(--palette_i_60);
+		--text_color: var(--palette_i_70);
 		--fill: var(--palette_i_60);
 		--border_color: var(--palette_i_60);
 		--outline_color: var(--palette_i_60);
 	}
 	:where(button:not(.unstyled).palette_j) {
-		--text_color: var(--palette_j_60);
+		--text_color: var(--palette_j_70);
 		--fill: var(--palette_j_60);
 		--border_color: var(--palette_j_60);
 		--outline_color: var(--palette_j_60);

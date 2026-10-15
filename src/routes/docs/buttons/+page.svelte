@@ -79,6 +79,11 @@
 
 	<TomeSection>
 		<TomeSectionHeader text="Colorful buttons" />
+		<p>
+			<code>.palette_a</code> through <code>.palette_j</code> color a button with a palette hue: its
+			border, focus ring, and fill tint take stop 60, and its label stop 70, which holds AA contrast
+			on the tint at rest, hovered, and pressed.
+		</p>
 		{#each palette_variants as c (c)}
 			{@const palette_name = `palette_${c}`}
 			<section>

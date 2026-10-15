@@ -331,12 +331,16 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   warns when a bound letter's multiplier differs from the intent's twin
 - Intensity stops: `palette_a_00` (nearest the background) through
   `palette_a_100`, with `_50` as the base (steps: 00, 05, 10, 20, 30, 40,
-  50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, the
-  `.palette_X` button and chip labels, and selected-button fills use it, and
-  `check_theme` gates those pairings at AA - the button label against its
-  rest fill (its own color at 8% alpha over `shade_00`); the pairings an
-  exemplar or composition knowingly gives up are declared as exact
-  exceptions in the theme_check tests
+  50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, chip
+  labels, and selected-button fills use it, along with the `.palette_X`
+  button's border, ring, and fill tint. The `.palette_X` button label is
+  `_70`, a step further, so it holds AA on each of its own tinted fills, and
+  `check_theme` gates all of these pairings at AA - the button label against
+  its rest (8% alpha over `shade_00`), hover (16%, with the hovered label's
+  10% mix toward `shade_max`), and pressed (24%) fills, a press by mouse
+  (hovered label) and by keyboard (plain label) alike; what an exemplar or
+  composition knowingly gives up is declared as an exact exception in the
+  theme_check tests
 - Form/scale knobs derive into token defaults so one move reshapes a family
   while tokens stay pinnable: `--radius_scale` (border radii, floored at
   `--border_radius_min`; controls read `--control_radius`, the `sm` tier

@@ -15,7 +15,13 @@
  */
 
 import { clamp } from '@fuzdev/fuz_util/maths.ts';
-import { clamp_oklch, oklch_to_srgb, type RgbUnit } from '@fuzdev/fuz_util/oklch.ts';
+import {
+	clamp_oklch,
+	oklab_to_srgb,
+	oklch_to_srgb,
+	srgb_to_oklab,
+	type RgbUnit
+} from '@fuzdev/fuz_util/oklch.ts';
 
 import { Theme, type StyleVariable } from './variable.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
@@ -80,13 +86,16 @@ export const GATE_FILL_TEXT = 3;
  */
 export const GATE_SELECTED_TEXT = 4.5;
 /**
- * AA colored labels: every palette hue at stop 60 on `shade_00` (colored text
- * and `.plain` buttons), on the `.palette_X` button's rest fill, and on its
- * own stop-10 tint (the chip). The button fill follows the `style.css`
- * recipe: the label's own color at 8% alpha, composited over `shade_00` in
- * gamma-encoded sRGB. An 8-bit raster quantizes both colors, so a rendered
- * measurement lands within about 0.07 of the ratio. Only the rest fill is
- * gated - the hover, focus, and pressed fills tint further and are not.
+ * AA colored labels: every palette hue at stop 60 on `shade_00` (colored
+ * text) and on its own stop-10 tint (the chip), and the `.palette_X` button
+ * label - the hue at stop 70 - on each of the button's fills. The
+ * fills follow the `style.css` recipe: the hue at stop 60 at 8% alpha at
+ * rest (and focused), 16% hovered, and 24% pressed, composited over
+ * `shade_00` in gamma-encoded sRGB. A hovered label mixes 10% toward
+ * `shade_max` in oklab, so a mouse press pairs that label with the pressed
+ * fill, and a keyboard press, which doesn't hover, pairs the plain label with
+ * it. An 8-bit raster quantizes both colors, so a rendered measurement lands
+ * within about 0.07 of the ratio.
  */
 export const GATE_PALETTE_TEXT = 4.5;
 /**
@@ -182,10 +191,32 @@ const composite_over = (color: RgbUnit, alpha: number, backdrop: RgbUnit): RgbUn
 	alpha * color[2] + (1 - alpha) * backdrop[2]
 ];
 
-// the rest fill of a `.palette_X` button in `style.css`:
-// `--button_fill: color-mix(in oklab, var(--fill) 8%, transparent)`, which is
-// the fill color at this alpha
-const BUTTON_FILL_ALPHA = 0.08;
+// the fills of a `.palette_X` button in `style.css`, each
+// `color-mix(in oklab, var(--fill) N%, transparent)` - the fill color at this
+// alpha - for `--button_fill`, `--button_fill_hover`, and `--button_fill_active`
+const BUTTON_FILL_ALPHAS = { rest: 0.08, hover: 0.16, active: 0.24 } as const;
+
+// a hovered button's label in `style.css`:
+// `color-mix(in oklab, var(--text_color) 90%, var(--shade_max))`
+const BUTTON_HOVER_LABEL_WEIGHT = 0.9;
+
+// the stops a `.palette_X` button in `style.css` paints: the label
+// (`--text_color`) and the color its fills tint with (`--fill`)
+const PALETTE_BUTTON_LABEL_STOP = '70';
+const PALETTE_BUTTON_FILL_STOP = '60';
+
+// mixes two opaque colors in oklab, as `color-mix(in oklab, a W%, b)` does
+const mix_oklab = (a: RgbUnit, weight: number, b: RgbUnit): RgbUnit => {
+	const [al, aa, ab] = srgb_to_oklab(a);
+	const [bl, ba, bb] = srgb_to_oklab(b);
+	return clamp_rgb(
+		oklab_to_srgb([
+			weight * al + (1 - weight) * bl,
+			weight * aa + (1 - weight) * ba,
+			weight * ab + (1 - weight) * bb
+		])
+	);
+};
 
 /** A color a gate reads: unclamped gamma-encoded sRGB and alpha in [0, 1]. */
 interface GateColor {
@@ -662,6 +693,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 		const shade_00 = neutral_color('shade', '00', scheme);
 		const text_00 = neutral_color('text', '00', scheme);
 		const text_max = color_of('text_max', scheme)?.rgb ?? null;
+		const shade_max = color_of('shade_max', scheme)?.rgb ?? null;
 		const fills: Array<[label: string, hue: number, multiplier: number, is_letter?: boolean]> = [];
 		for (const letter of palette_variants) {
 			const hue = num(`hue_${letter}`, scheme);
@@ -693,19 +725,42 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 					push_contrast(`text_00 on ${label}_60`, selected, GATE_SELECTED_TEXT, scheme);
 				}
 				if (!is_letter) continue;
-				// the colored label on the page itself (colored text, `.plain`
-				// buttons), on the `.palette_X` button's rest fill - a faint tint of
-				// the label's own color over the page - and on the chip's stop-10 tint
+				// the colored label on the page itself (colored text) and on
+				// the chip's stop-10 tint
 				const on_page = contrast(stop_60, shade_00);
 				push_contrast(`${label}_60 on shade_00`, on_page, GATE_PALETTE_TEXT, scheme);
-				const label_rgb = clamp_rgb(stop_60);
-				const button_fill = composite_over(label_rgb, BUTTON_FILL_ALPHA, clamp_rgb(shade_00));
-				const on_button = wcag_contrast_ratio(label_rgb, button_fill);
-				push_contrast(`${label}_60 on ${label} button fill`, on_button, GATE_PALETTE_TEXT, scheme);
 				const tint = slot_color(label, hue, multiplier, '10', scheme);
 				if (tint) {
 					const on_tint = contrast(stop_60, tint);
 					push_contrast(`${label}_60 on ${label}_10`, on_tint, GATE_PALETTE_TEXT, scheme);
+				}
+				// the `.palette_X` button label on its fills - faint tints of the
+				// fill stop over the page - at rest (focus keeps the rest fill),
+				// hovered (with the hovered label), and pressed by mouse (hovered
+				// too) and by keyboard (not hovered, so the plain label)
+				const label_color = slot_color(label, hue, multiplier, PALETTE_BUTTON_LABEL_STOP, scheme);
+				const fill_color = slot_color(label, hue, multiplier, PALETTE_BUTTON_FILL_STOP, scheme);
+				if (!label_color || !fill_color) continue;
+				const button_label = clamp_rgb(label_color);
+				const ground = clamp_rgb(shade_00);
+				const button_fill = (alpha: number): RgbUnit =>
+					composite_over(clamp_rgb(fill_color), alpha, ground);
+				const stop = `${label}_${PALETTE_BUTTON_LABEL_STOP}`;
+				const push_button = (subject: string, color: RgbUnit, alpha: number): void => {
+					const ratio = wcag_contrast_ratio(color, button_fill(alpha));
+					push_contrast(subject, ratio, GATE_PALETTE_TEXT, scheme);
+				};
+				push_button(`${stop} on ${label} button fill`, button_label, BUTTON_FILL_ALPHAS.rest);
+				push_button(`${stop} on ${label} active fill`, button_label, BUTTON_FILL_ALPHAS.active);
+				if (shade_max) {
+					const hovered = mix_oklab(button_label, BUTTON_HOVER_LABEL_WEIGHT, clamp_rgb(shade_max));
+					const hovered_label = `${stop} hovered`;
+					push_button(`${hovered_label} on ${label} hover fill`, hovered, BUTTON_FILL_ALPHAS.hover);
+					push_button(
+						`${hovered_label} on ${label} active fill`,
+						hovered,
+						BUTTON_FILL_ALPHAS.active
+					);
 				}
 			}
 		}
