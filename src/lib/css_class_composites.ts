@@ -80,6 +80,11 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				background-color: var(--button_fill_active);
 				border-color: var(--accent_50);
 			}
+			/* a selected button's label is the inverse for its solid fill, so over
+				this light tint it returns to the text color, hovered or not */
+			.selectable:is(.selected, [aria-pressed='true']) {
+				--button_text_color: var(--text_color);
+			}
 			.selectable.selected {
 				cursor: default;
 			}
@@ -310,6 +315,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.menuitem.selected {
 				/* TODO different patterns for border and surface? */
 				--border_color: var(--accent_50);
+				/* a selected button's label is the inverse for its solid fill, so over
+					this light one it returns to the text color, hovered or not */
+				--button_text_color: var(--text_color);
 				background-color: var(--fg_10);
 				cursor: default;
 			}

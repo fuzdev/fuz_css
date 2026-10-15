@@ -82,7 +82,8 @@ const to_matchable = (selector: string): string => {
 	const rewritten = selector
 		.replaceAll(':focus-visible', '[data-focus-visible]')
 		.replaceAll(':focus-within', '[data-focus-within]')
-		.replaceAll(':hover', '[data-hover]');
+		.replaceAll(':hover', '[data-hover]')
+		.replaceAll(':active', '[data-active]');
 	const unrewritten = UNREWRITTEN_STATE_MATCHER.exec(rewritten);
 	if (unrewritten) {
 		throw Error(
@@ -123,8 +124,8 @@ const SHORTHAND_LONGHANDS: Record<string, Array<string>> = {
 };
 
 /**
- * Merges the declarations of the rules matching `html` under `media` in source
- * order, ignoring specificity, so the rules it compares must keep their
+ * Merges the declarations of the rules matching `html` under `media` (`null`
+ * for the rules outside any `@media`) in source order, ignoring specificity, so the rules it compares must keep their
  * equal-specificity overrides in source order - true of the base styles, whose
  * selectors are all `:where()`, and of the composites' forced-colors rules. A
  * shorthand in `SHORTHAND_LONGHANDS` clears the longhands set before it, as it
@@ -132,13 +133,14 @@ const SHORTHAND_LONGHANDS: Record<string, Array<string>> = {
  */
 const resolve_declarations = (
 	rules: Array<FlatRule>,
-	media: string,
+	media: string | null,
 	html: string
 ): Map<string, string> => {
 	const element = create_element(html);
 	const resolved: Map<string, string> = new Map();
 	for (const rule of rules) {
-		if (!rule.media.includes(media) || !element.matches(to_matchable(rule.selector))) continue;
+		const in_media = media === null ? rule.media.length === 0 : rule.media.includes(media);
+		if (!in_media || !element.matches(to_matchable(rule.selector))) continue;
 		for (const [property, value] of rule.declarations) {
 			for (const longhand of SHORTHAND_LONGHANDS[property] ?? []) resolved.delete(longhand);
 			resolved.set(property, value);
@@ -176,6 +178,80 @@ describe('button states', () => {
 		assert.isFalse(matches(rule, '<button class="selected" data-hover></button>'));
 		assert.isFalse(matches(rule, '<button aria-pressed="true" disabled data-hover></button>'));
 		assert.isFalse(matches(rule, '<button aria-pressed="true"></button>'));
+	});
+});
+
+describe('selected composites', () => {
+	// `.menuitem` and `.selectable` paint their selected state as a light tint
+	// over the base button's solid selected fill, so the label can't stay the
+	// base rules' inverse. The composites render in a layer above the base
+	// styles, so a composite's label wins over every base rule whatever the
+	// specificity - the label is the base rules' resolution with the
+	// composite's laid over it
+	const LABEL = '--button_text_color';
+	const label_rules = (rules: Array<FlatRule>) => rules.filter((r) => r.declarations.has(LABEL));
+	const base_label_rules = label_rules(base_rules);
+	const label = (html: string, composite: string): string | undefined =>
+		resolve_declarations(label_rules(flatten_rules(composite_css(composite))), null, html).get(
+			LABEL
+		) ?? resolve_declarations(base_label_rules, null, html).get(LABEL);
+	const STATES = ['', 'data-hover', 'data-active', 'data-hover data-active', 'data-focus-visible'];
+	/** Adds attributes to the outermost element of `html`. */
+	const with_attrs = (html: string, attrs: string): string =>
+		attrs ? html.replace(/^<(\w+)/, `<$1 ${attrs}`) : html;
+
+	test('the base selected button keeps its inverse label, the case the composites reset', () => {
+		for (const state of STATES) {
+			const html = with_attrs('<button class="selected"></button>', state);
+			assert.strictEqual(
+				resolve_declarations(base_label_rules, null, html).get(LABEL),
+				'var(--text_00)',
+				html
+			);
+		}
+	});
+
+	test('a selected or pressed .menuitem or .selectable button labels in the text color', () => {
+		const cases: Array<[string, Array<string>]> = [
+			[
+				'menuitem',
+				[
+					'<button class="menuitem selected"></button>',
+					'<button class="menuitem selected deselectable"></button>',
+					'<button class="menuitem plain selected"></button>',
+					'<button class="menuitem palette_a selected"></button>'
+				]
+			],
+			[
+				'selectable',
+				[
+					'<button class="selectable selected"></button>',
+					'<button class="selectable selected deselectable"></button>',
+					'<button class="selectable" aria-pressed="true"></button>',
+					'<button class="selectable selected" aria-pressed="true"></button>',
+					'<button class="plain selectable selected"></button>',
+					'<button class="selectable palette_a selected"></button>'
+				]
+			]
+		];
+		for (const [name, elements] of cases) {
+			for (const element of elements) {
+				for (const state of STATES) {
+					const html = with_attrs(element, state);
+					assert.strictEqual(label(html, name), 'var(--text_color)', html);
+				}
+			}
+			// unselected, the composite leaves the label to the base rules
+			for (const state of STATES) {
+				const html = with_attrs(`<button class="${name}"></button>`, state);
+				assert.isUndefined(
+					resolve_declarations(label_rules(flatten_rules(composite_css(name))), null, html).get(
+						LABEL
+					),
+					html
+				);
+			}
+		}
 	});
 });
 
