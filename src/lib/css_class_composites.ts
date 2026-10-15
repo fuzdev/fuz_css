@@ -170,7 +170,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
-			background-color: var(--fg_10);
+			background-color: var(--ink_10);
 			box-shadow: var(--panel_shadow);
 			@media (forced-colors: active) {
 				border: var(--border_width) solid CanvasText; /* forced colors drop the background and shadow */
@@ -320,7 +320,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				/* a selected button's label is the inverse for its solid fill, so over
 					this light one it returns to the text color, hovered or not */
 				--button_text_color: var(--text_color);
-				background-color: var(--fg_10);
+				background-color: var(--ink_10);
 			}
 			.menuitem.selected {
 				cursor: default;
@@ -330,12 +330,12 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 			.menuitem:hover {
 				--border_color: var(--border_color_30);
-				background-color: var(--fg_10);
+				background-color: var(--ink_10);
 			}
 			.menuitem:active,
 			.menuitem:is(.selected, [aria-pressed='true']):hover {
 				--border_color: var(--border_color_30);
-				background-color: var(--fg_20);
+				background-color: var(--ink_20);
 			}
 			.menuitem.plain {
 				border: none;
@@ -414,7 +414,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				font-size: var(--font_size, revert-layer); /* without a size context, the element's base size wins */
 				padding-left: var(--chip_padding_x, var(--space_xs));
 				padding-right: var(--chip_padding_x, var(--space_xs));
-				background-color: var(--fg_10);
+				background-color: var(--ink_10);
 				border-radius: var(--border_radius, var(--border_radius_xs));
 			}
 			a.chip {

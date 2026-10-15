@@ -1306,32 +1306,32 @@
 		--lighten_90: #fffffff5; /* 96% */
 		--lighten_95: #fffffffa; /* 98% */
 		--lighten_100: #ffffffff; /* 100% */
-		--fg_00: var(--darken_00);
-		--fg_05: var(--darken_05);
-		--fg_10: var(--darken_10);
-		--fg_20: var(--darken_20);
-		--fg_30: var(--darken_30);
-		--fg_40: var(--darken_40);
-		--fg_50: var(--darken_50);
-		--fg_60: var(--darken_60);
-		--fg_70: var(--darken_70);
-		--fg_80: var(--darken_80);
-		--fg_90: var(--darken_90);
-		--fg_95: var(--darken_95);
-		--fg_100: var(--darken_100);
-		--bg_00: var(--lighten_00);
-		--bg_05: var(--lighten_05);
-		--bg_10: var(--lighten_10);
-		--bg_20: var(--lighten_20);
-		--bg_30: var(--lighten_30);
-		--bg_40: var(--lighten_40);
-		--bg_50: var(--lighten_50);
-		--bg_60: var(--lighten_60);
-		--bg_70: var(--lighten_70);
-		--bg_80: var(--lighten_80);
-		--bg_90: var(--lighten_90);
-		--bg_95: var(--lighten_95);
-		--bg_100: var(--lighten_100);
+		--ink_00: var(--darken_00);
+		--ink_05: var(--darken_05);
+		--ink_10: var(--darken_10);
+		--ink_20: var(--darken_20);
+		--ink_30: var(--darken_30);
+		--ink_40: var(--darken_40);
+		--ink_50: var(--darken_50);
+		--ink_60: var(--darken_60);
+		--ink_70: var(--darken_70);
+		--ink_80: var(--darken_80);
+		--ink_90: var(--darken_90);
+		--ink_95: var(--darken_95);
+		--ink_100: var(--darken_100);
+		--paper_00: var(--lighten_00);
+		--paper_05: var(--lighten_05);
+		--paper_10: var(--lighten_10);
+		--paper_20: var(--lighten_20);
+		--paper_30: var(--lighten_30);
+		--paper_40: var(--lighten_40);
+		--paper_50: var(--lighten_50);
+		--paper_60: var(--lighten_60);
+		--paper_70: var(--lighten_70);
+		--paper_80: var(--lighten_80);
+		--paper_90: var(--lighten_90);
+		--paper_95: var(--lighten_95);
+		--paper_100: var(--lighten_100);
 		--border_color_lightness: 0.345; /* OKLCH lightness of the border color family */
 		--border_color_chroma: calc(var(--neutral_chroma) * 2.6667); /* the border family's chroma, derived from the neutral's */
 		--border_color_00: transparent;
@@ -1591,7 +1591,7 @@
 		--pane_shadow: var(--shadow_bottom_md)
 			color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_50), transparent); /* the shadow under a floating `.pane` */
 		--panel_shadow: none; /* the shadow of an embedded `.panel`, none by default */
-		--input_fill: var(--bg_80);
+		--input_fill: var(--paper_80);
 		--input_padding_y: 0;
 		--input_padding_x: var(--space_lg);
 		--input_width_min: 100px;
@@ -1768,32 +1768,32 @@
 		--shade_lightness_00: 0.171;
 		--shade_lightness_100: 0.97;
 		--shade_lightness_curve: 1.05;
-		--fg_00: var(--lighten_00);
-		--fg_05: var(--lighten_05);
-		--fg_10: var(--lighten_10);
-		--fg_20: var(--lighten_20);
-		--fg_30: var(--lighten_30);
-		--fg_40: var(--lighten_40);
-		--fg_50: var(--lighten_50);
-		--fg_60: var(--lighten_60);
-		--fg_70: var(--lighten_70);
-		--fg_80: var(--lighten_80);
-		--fg_90: var(--lighten_90);
-		--fg_95: var(--lighten_95);
-		--fg_100: var(--lighten_100);
-		--bg_00: var(--darken_00);
-		--bg_05: var(--darken_05);
-		--bg_10: var(--darken_10);
-		--bg_20: var(--darken_20);
-		--bg_30: var(--darken_30);
-		--bg_40: var(--darken_40);
-		--bg_50: var(--darken_50);
-		--bg_60: var(--darken_60);
-		--bg_70: var(--darken_70);
-		--bg_80: var(--darken_80);
-		--bg_90: var(--darken_90);
-		--bg_95: var(--darken_95);
-		--bg_100: var(--darken_100);
+		--ink_00: var(--lighten_00);
+		--ink_05: var(--lighten_05);
+		--ink_10: var(--lighten_10);
+		--ink_20: var(--lighten_20);
+		--ink_30: var(--lighten_30);
+		--ink_40: var(--lighten_40);
+		--ink_50: var(--lighten_50);
+		--ink_60: var(--lighten_60);
+		--ink_70: var(--lighten_70);
+		--ink_80: var(--lighten_80);
+		--ink_90: var(--lighten_90);
+		--ink_95: var(--lighten_95);
+		--ink_100: var(--lighten_100);
+		--paper_00: var(--darken_00);
+		--paper_05: var(--darken_05);
+		--paper_10: var(--darken_10);
+		--paper_20: var(--darken_20);
+		--paper_30: var(--darken_30);
+		--paper_40: var(--darken_40);
+		--paper_50: var(--darken_50);
+		--paper_60: var(--darken_60);
+		--paper_70: var(--darken_70);
+		--paper_80: var(--darken_80);
+		--paper_90: var(--darken_90);
+		--paper_95: var(--darken_95);
+		--paper_100: var(--darken_100);
 		--border_color_lightness: 0.857; /* OKLCH lightness of the border color family */
 		--border_color_chroma: calc(var(--neutral_chroma) * 2.12); /* the border family's chroma, derived from the neutral's */
 		--border_color_05: oklch(
@@ -1971,32 +1971,32 @@
 			--shade_lightness_00: 0.171;
 			--shade_lightness_100: 0.97;
 			--shade_lightness_curve: 1.05;
-			--fg_00: var(--lighten_00);
-			--fg_05: var(--lighten_05);
-			--fg_10: var(--lighten_10);
-			--fg_20: var(--lighten_20);
-			--fg_30: var(--lighten_30);
-			--fg_40: var(--lighten_40);
-			--fg_50: var(--lighten_50);
-			--fg_60: var(--lighten_60);
-			--fg_70: var(--lighten_70);
-			--fg_80: var(--lighten_80);
-			--fg_90: var(--lighten_90);
-			--fg_95: var(--lighten_95);
-			--fg_100: var(--lighten_100);
-			--bg_00: var(--darken_00);
-			--bg_05: var(--darken_05);
-			--bg_10: var(--darken_10);
-			--bg_20: var(--darken_20);
-			--bg_30: var(--darken_30);
-			--bg_40: var(--darken_40);
-			--bg_50: var(--darken_50);
-			--bg_60: var(--darken_60);
-			--bg_70: var(--darken_70);
-			--bg_80: var(--darken_80);
-			--bg_90: var(--darken_90);
-			--bg_95: var(--darken_95);
-			--bg_100: var(--darken_100);
+			--ink_00: var(--lighten_00);
+			--ink_05: var(--lighten_05);
+			--ink_10: var(--lighten_10);
+			--ink_20: var(--lighten_20);
+			--ink_30: var(--lighten_30);
+			--ink_40: var(--lighten_40);
+			--ink_50: var(--lighten_50);
+			--ink_60: var(--lighten_60);
+			--ink_70: var(--lighten_70);
+			--ink_80: var(--lighten_80);
+			--ink_90: var(--lighten_90);
+			--ink_95: var(--lighten_95);
+			--ink_100: var(--lighten_100);
+			--paper_00: var(--darken_00);
+			--paper_05: var(--darken_05);
+			--paper_10: var(--darken_10);
+			--paper_20: var(--darken_20);
+			--paper_30: var(--darken_30);
+			--paper_40: var(--darken_40);
+			--paper_50: var(--darken_50);
+			--paper_60: var(--darken_60);
+			--paper_70: var(--darken_70);
+			--paper_80: var(--darken_80);
+			--paper_90: var(--darken_90);
+			--paper_95: var(--darken_95);
+			--paper_100: var(--darken_100);
 			--border_color_lightness: 0.857; /* OKLCH lightness of the border color family */
 			--border_color_chroma: calc(var(--neutral_chroma) * 2.12); /* the border family's chroma, derived from the neutral's */
 			--border_color_05: oklch(

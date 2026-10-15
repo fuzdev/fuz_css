@@ -92,38 +92,37 @@
 		</aside>
 	</section>
 	<TomeSection>
-		<TomeSectionHeader text="Adaptive alpha overlays (fg/bg)" />
+		<TomeSectionHeader text="Adaptive alpha overlays (ink/paper)" />
 		<p>
-			The <code>fg</code> and <code>bg</code> variables provide alpha-based overlays that adapt to
-			the color scheme. Unlike the opaque shade scale, these stack when nested and are used by
+			The <code>ink</code> and <code>paper</code> variables provide alpha-based overlays that adapt
+			to the color scheme. Unlike the opaque shade scale, these stack when nested and are used by
 			composites like <code>.panel</code> and <code>.chip</code>.
 		</p>
 		<ul>
 			<li>
-				<code>--fg_NN</code> (foreground direction) - darkens in light mode, lightens in dark mode;
-				use for elevated surfaces like panels, cards, and hover states
+				<code>--ink_NN</code> (a wash toward the text color) - darkens in light mode, lightens in
+				dark mode; use for elevated surfaces like panels, cards, and hover states
 			</li>
 			<li>
-				<code>--bg_NN</code> (background direction) - lightens in light mode, darkens in dark mode;
-				use for surfaces that blend toward the background
+				<code>--paper_NN</code> (a wash toward the ground) - lightens in light mode, darkens in dark
+				mode; use for surfaces that blend toward the background
 			</li>
 		</ul>
 		<p>
-			In light mode, <code>fg</code> is the same as <code>darken</code> and <code>bg</code> is the
-			same as <code>lighten</code>. In dark mode, they're swapped.
+			In light mode, <code>ink</code> is the same as <code>darken</code> and <code>paper</code> is
+			the same as <code>lighten</code>. In dark mode, they're swapped.
 		</p>
 		<p>
-			The overlays are variables, not token classes - <code>bg_</code> is the opaque background
-			class prefix (<code>.bg_a_50</code>, <code>.bg_positive_50</code>), so reach the overlays with
-			a literal class (<code>background-color:var(--fg_10)</code>) or a <code>&lt;style&gt;</code>
-			block.
+			The overlays are variables, not token classes, so reach them with a literal class
+			(<code>background-color:var(--ink_10)</code>) or a <code>&lt;style&gt;</code> block. The
+			<code>bg_</code> classes (<code>.bg_a_50</code>, <code>.bg_positive_50</code>) are opaque.
 		</p>
 		<TomeSection>
-			<TomeSectionHeader text="fg (toward foreground)" tag="h4" />
+			<TomeSectionHeader text="ink (toward the text color)" tag="h4" />
 			<p>Adaptive alpha overlays that add contrast with the surface.</p>
 			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
-					{@const name = 'fg_' + v}
+					{@const name = 'ink_' + v}
 					<div>
 						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
@@ -132,11 +131,11 @@
 			</div>
 		</TomeSection>
 		<TomeSection>
-			<TomeSectionHeader text="bg (toward background)" tag="h4" />
+			<TomeSectionHeader text="paper (toward the ground)" tag="h4" />
 			<p>Adaptive alpha overlays that reduce contrast with the surface.</p>
 			<div class="overlay_swatch shade_20">
 				{#each alpha_variants as v (v)}
-					{@const name = 'bg_' + v}
+					{@const name = 'paper_' + v}
 					<div>
 						<div class="overlay_color" style:background-color="var(--{name})"></div>
 						<small><StyleVariableButton {name} /></small>
@@ -151,10 +150,10 @@
 				adds more contrast:
 			</p>
 			<Code
-				content={`<div class="background-color:var(--fg_10) p_sm">
-	<div class="background-color:var(--fg_10) p_sm">
-		<div class="background-color:var(--fg_10) p_sm">
-			<div class="background-color:var(--fg_10) p_sm">
+				content={`<div class="background-color:var(--ink_10) p_sm">
+	<div class="background-color:var(--ink_10) p_sm">
+		<div class="background-color:var(--ink_10) p_sm">
+			<div class="background-color:var(--ink_10) p_sm">
 				...
 			</div>
 		</div>
@@ -163,9 +162,9 @@
 			/>
 			<div class="stacking_demo">
 				<div class="stacking_layer">
-					<span>var(--fg_10)</span>
+					<span>var(--ink_10)</span>
 					<div class="stacking_layer">
-						<span>nested var(--fg_10)</span>
+						<span>nested var(--ink_10)</span>
 						<div class="stacking_layer">
 							<span>triple nested</span>
 							<div class="stacking_layer">
@@ -178,7 +177,7 @@
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
 				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
-				<code>.menuitem</code> use <code>var(--fg_10)</code> for this stacking behavior.
+				<code>.menuitem</code> use <code>var(--ink_10)</code> for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -190,7 +189,7 @@
 		<p>
 			The non-adaptive <code>darken_NN</code> and <code>lighten_NN</code> variables provide
 			consistent darkening or lightening regardless of color scheme. These are the underlying
-			primitives that <code>fg</code> and <code>bg</code> reference.
+			primitives that <code>ink</code> and <code>paper</code> reference.
 		</p>
 		<TomeSection>
 			<TomeSectionHeader text="Darken" tag="h4" />
@@ -232,19 +231,19 @@
 	<TomeSection>
 		<TomeSectionHeader text="When to use which" />
 		<p>
-			<strong>Use <code>--fg_NN</code></strong> when you need stacking behavior or are building
+			<strong>Use <code>--ink_NN</code></strong> when you need stacking behavior or are building
 			nested UI:
 		</p>
 		<Code
 			lang="css"
 			content={`/* elevated panel (stacks when nested) */
-background-color: var(--fg_10);
+background-color: var(--ink_10);
 
 /* hover state (stacks on any background) */
-background-color: var(--fg_10);
+background-color: var(--ink_10);
 
 /* active/pressed state */
-background-color: var(--fg_20);`}
+background-color: var(--ink_20);`}
 		/>
 		<p class="mt_md">
 			<strong>Use <code>shade_NN</code></strong> when you need explicit, predictable opaque
@@ -263,7 +262,7 @@ background-color: var(--shade_min);`}
 		/>
 		<p class="mt_lg">
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
-			<code>--fg_NN</code> for stacking. The page background uses <code>shade_00</code> as the
+			<code>--ink_NN</code> for stacking. The page background uses <code>shade_00</code> as the
 			opaque base.
 		</p>
 	</TomeSection>
@@ -314,7 +313,7 @@ background-color: var(--shade_min);`}
 		padding: var(--space_md);
 		border-radius: var(--border_radius_xs);
 		margin-top: var(--space_sm);
-		background-color: var(--fg_10);
+		background-color: var(--ink_10);
 	}
 	.stacking_layer span {
 		font-family: var(--font_family_mono);

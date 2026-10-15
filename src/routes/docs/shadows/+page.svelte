@@ -57,7 +57,7 @@
 			black).
 		</p>
 		<form><ColorSchemeInput /></form>
-		<div class="panel background-color:var(--fg_30) p_md">
+		<div class="panel background-color:var(--ink_30) p_md">
 			{@render shadow_examples('highlight')}
 		</div>
 	</TomeSection>

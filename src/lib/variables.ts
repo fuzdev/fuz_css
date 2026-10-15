@@ -74,7 +74,7 @@ import {
 
 TODO lots of things here to address:
 
-- the alpha families (`border_color_*`, `fg_*`/`bg_*`, `darken_*`/`lighten_*`, shadows)
+- the alpha families (`border_color_*`, `ink_*`/`paper_*`, `darken_*`/`lighten_*`, shadows)
 	are alpha by design, but the base-case compositing cost is unmeasured
 	- maybe move all shadows out of the base theme?
 - lots of inconsistencies, like the relationship between base and modified values
@@ -170,20 +170,20 @@ const overlay_variables = (family: 'darken' | 'lighten', rgb: string): Array<Sty
 
 /*
 
-fg/bg - adaptive alpha overlays
+ink/paper - adaptive alpha overlays
 
 Color-scheme-adaptive overlays that swap direction per color scheme:
-- fg (foreground direction) = toward contrast (darkens in light mode, lightens in dark mode)
-- bg (background direction) = toward surface (lightens in light mode, darkens in dark mode)
+- ink = a wash toward the text color (darkens in light mode, lightens in dark mode)
+- paper = a wash toward the ground (lightens in light mode, darkens in dark mode)
 
 Use for subtle backgrounds that work in both color schemes without explicit conditionals.
 These stack when nested (alpha accumulates), unlike the opaque shade scale.
 
 */
 
-const adaptive_overlay_variables = (family: 'fg' | 'bg'): Array<StyleVariable> => {
-	const toward = family === 'fg' ? 'darken' : 'lighten';
-	const away = family === 'fg' ? 'lighten' : 'darken';
+const adaptive_overlay_variables = (family: 'ink' | 'paper'): Array<StyleVariable> => {
+	const toward = family === 'ink' ? 'darken' : 'lighten';
+	const away = family === 'ink' ? 'lighten' : 'darken';
 	return numeric_scale_variants.map((stop) => ({
 		name: `${family}_${stop}`,
 		base: `var(--${toward}_${stop})`,
@@ -395,8 +395,8 @@ export const default_variables: Array<StyleVariable> = [
 	...overlay_variables('lighten', '#ffffff'),
 
 	// adaptive alpha overlays (see `adaptive_overlay_variables`)
-	...adaptive_overlay_variables('fg'),
-	...adaptive_overlay_variables('bg'),
+	...adaptive_overlay_variables('ink'),
+	...adaptive_overlay_variables('paper'),
 
 	/*
 
@@ -622,7 +622,7 @@ export const default_variables: Array<StyleVariable> = [
 	},
 
 	/* inputs */
-	{ name: 'input_fill', base: 'var(--bg_80)' },
+	{ name: 'input_fill', base: 'var(--paper_80)' },
 	{ name: 'input_padding_y', base: '0' },
 	{ name: 'input_padding_x', base: 'var(--space_lg)' },
 	{ name: 'input_width_min', base: '100px' },

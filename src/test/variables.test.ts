@@ -75,8 +75,8 @@ test('the loop-built families cover every variant list', () => {
 			`text_${stop}`,
 			`darken_${stop}`,
 			`lighten_${stop}`,
-			`fg_${stop}`,
-			`bg_${stop}`,
+			`ink_${stop}`,
+			`paper_${stop}`,
 			`border_color_${stop}`,
 			`shadow_alpha_${stop}`
 		]),

@@ -146,11 +146,10 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		(v) => `var(--lighten_${v})`,
 		'lighten'
 	),
-	// The adaptive alpha overlay variables (`--fg_*` toward foreground,
-	// `--bg_*` toward background) have no bare token classes: `bg_` is the
-	// opaque background prefix (`bg_a_50`, `bg_positive_50`), and a bare
-	// `bg_50` alpha wash beside those was the one collision in the family.
-	// Reach the overlays with literals - `background-color:var(--fg_10)`.
+	// The adaptive alpha overlay variables (`--ink_*`, a wash toward the text
+	// color, and `--paper_*`, toward the ground) have no token classes - `bg_`
+	// stays the opaque background prefix (`bg_a_50`, `bg_positive_50`). Reach
+	// the overlays with literals - `background-color:var(--ink_10)`.
 	/*
 
 	borders

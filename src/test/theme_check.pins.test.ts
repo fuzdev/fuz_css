@@ -217,10 +217,10 @@ describe('pinned color stops', () => {
 
 	test('a var() reference the gates cannot evaluate is unchecked', () => {
 		// a variable outside the gated colors, and a reference cycle
-		const outside = check({ name: 'text_80', base: 'var(--fg_30)' });
+		const outside = check({ name: 'text_80', base: 'var(--ink_30)' });
 		assert.deepEqual(
 			outside.unchecked.map((u) => [u.variable, u.value]),
-			[['text_80', 'var(--fg_30)']]
+			[['text_80', 'var(--ink_30)']]
 		);
 		const cycle = check(
 			{ name: 'text_80', base: 'var(--text_90)' },
@@ -548,7 +548,7 @@ describe('variables no gate reads', () => {
 			// micro-surfaces whose pairing no gate models
 			{ name: 'border_color_20', base: '#0002' },
 			{ name: 'text_min', base: '#eee' },
-			{ name: 'fg_10', base: '#0001' },
+			{ name: 'ink_10', base: '#0001' },
 			{ name: 'caret_color', base: '#f00' },
 			{ name: 'selection_color', base: '#f003' },
 			{ name: 'scrollbar_thumb_color', base: '#888' },

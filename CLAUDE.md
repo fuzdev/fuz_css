@@ -235,8 +235,9 @@ See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
   family's dominant use
   (`positive_50`/`text_70` set text color, `shade_50` sets background) with
   `bg_` twins (`bg_positive_50`). The adaptive alpha overlays
-  (`--fg_*`/`--bg_*`) are variables only, reached via literals
-  (`background-color:var(--fg_10)`) - `bg_` classes are always opaque
+  (`--ink_*`, a wash toward the text color, and `--paper_*`, toward the
+  ground) are variables only, reached via literals
+  (`background-color:var(--ink_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
@@ -391,7 +392,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   theme-overridable
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
-- `bg_*`/`fg_*` - color-scheme-aware (swap in dark mode, use alpha for stacking)
+- `ink_*`/`paper_*` - color-scheme-aware alpha overlays toward the text color
+  and the ground (swap in dark mode, use alpha for stacking)
 - `darken_*`/`lighten_*` - color-scheme-agnostic (don't swap)
 - `text_*` - opaque text colors (`text_00`–`text_100`, alpha avoided for
   performance). `text_min`/`text_max` for untinted extremes (pure black/white).

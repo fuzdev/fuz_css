@@ -386,7 +386,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-radius: var(--border_radius, var(--border_radius_xs));
 		padding: var(--space_md);
 		color: var(--text_color);
-		background-color: var(--fg_10);
+		background-color: var(--ink_10);
 	}
 
 	:where(blockquote:not(.unstyled)) {
@@ -403,7 +403,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		-webkit-hyphens: none;
 		hyphens: none;
 		color: var(--text_color);
-		background-color: var(--fg_05);
+		background-color: var(--ink_05);
 		padding: 0 var(--space_xs2);
 		border-radius: var(--border_radius, var(--border_radius_xs));
 	}
@@ -923,10 +923,10 @@ TODO think through these patterns to get somewhere consistent
 		border-radius: var(--border_radius, var(--border_radius_xs));
 	}
 	:where(summary:hover:not(.unstyled)) {
-		background-color: var(--fg_10);
+		background-color: var(--ink_10);
 	}
 	:where(summary:active:not(.unstyled)) {
-		background-color: var(--fg_20);
+		background-color: var(--ink_20);
 	}
 	:where(details[open] summary:not(.unstyled)) {
 		margin-bottom: var(--space_sm);
@@ -948,7 +948,7 @@ TODO think through these patterns to get somewhere consistent
 		border-bottom: 1px solid var(--border_color_10);
 	}
 	:where(tr:hover) {
-		background-color: var(--fg_10);
+		background-color: var(--ink_10);
 	}
 
 	:where(abbr[title]) {
