@@ -6,7 +6,7 @@
  * @module
  */
 
-import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
+import { hash as crypto_hash } from 'node:crypto';
 
 import type { CssClasses } from './css_classes.ts';
 import { extract_file_cached } from './extract_file_cached.ts';
@@ -106,7 +106,7 @@ export class CssExtractionState {
 		if (claimed_epoch !== undefined && this.#epochs.get(id) !== claimed_epoch) return false;
 		const epoch = claimed_epoch ?? this.claim_epoch(id);
 
-		const hash = hash_blake3(code);
+		const hash = crypto_hash('sha256', code);
 		if (this.#hashes.get(id) === hash) return false;
 
 		const { extraction, cache_path_to_write } = await extract_file_cached({

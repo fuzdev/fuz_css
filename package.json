@@ -33,37 +33,24 @@
   "engines": {
     "node": ">=24.14"
   },
+  "dependencies": {
+    "@sveltejs/acorn-typescript": "^1.0.9",
+    "@webref/css": "^8.1.3",
+    "acorn": "^8.19.0",
+    "svelte": "^5.50.2",
+    "zimmerframe": "^1.1.4"
+  },
   "peerDependencies": {
-    "@fuzdev/blake3-wasm": "^0.2.0",
     "@fuzdev/fuz_util": ">=0.72.0",
     "@fuzdev/gro": ">=0.203.0",
-    "@sveltejs/acorn-typescript": "^1",
-    "@webref/css": "^8",
-    "acorn-jsx": "^5",
-    "svelte": "^5",
-    "zimmerframe": "^1",
+    "vite": ">=6",
     "zod": "^4"
   },
   "peerDependenciesMeta": {
-    "@fuzdev/blake3-wasm": {
-      "optional": true
-    },
     "@fuzdev/gro": {
       "optional": true
     },
-    "@sveltejs/acorn-typescript": {
-      "optional": true
-    },
-    "@webref/css": {
-      "optional": true
-    },
-    "acorn-jsx": {
-      "optional": true
-    },
-    "svelte": {
-      "optional": true
-    },
-    "zimmerframe": {
+    "vite": {
       "optional": true
     },
     "zod": {
@@ -79,21 +66,18 @@
     "@fuzdev/gro": "^0.216.0",
     "@fuzdev/mdz": "^0.4.0",
     "@ryanatkn/eslint-config": "^0.13.0",
-    "@sveltejs/acorn-typescript": "^1.0.9",
     "@sveltejs/adapter-static": "^4.0.0",
     "@sveltejs/kit": "^3.0.1",
     "@sveltejs/package": "^3.0.0",
     "@sveltejs/vite-plugin-svelte": "^7.3.1",
     "@types/estree": "^1.0.8",
     "@types/node": "^24.10.1",
-    "@webref/css": "^8.1.3",
     "acorn-jsx": "^5.3.2",
     "eslint": "^9.39.1",
     "eslint-plugin-svelte": "^3.13.1",
     "esm-env": "^1.2.2",
     "jsdom": "^29.1.1",
     "magic-string": "^0.30.21",
-    "svelte": "^5.57.2",
     "svelte-check": "^4.7.6",
     "svelte-docinfo": "^0.9.0",
     "svelte2tsx": "^0.7.51",
@@ -102,7 +86,6 @@
     "typescript-eslint": "^8.71.1",
     "vite": "^8.3.4",
     "vitest": "^5.0.0",
-    "zimmerframe": "^1.1.4",
     "zod": "^4.3.6"
   },
   "sideEffects": [

@@ -14,7 +14,7 @@
  */
 
 import type { Environment, Plugin, Rollup } from 'vite';
-import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
+import { hash as crypto_hash } from 'node:crypto';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
 import {
@@ -187,7 +187,7 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 				warn_unhashed(`the module's CSS wasn't seen after Vite processed it`);
 				return null;
 			}
-			const placeholder_hash = hash_blake3(css).slice(0, PLACEHOLDER_HASH_LENGTH);
+			const placeholder_hash = crypto_hash('sha256', css).slice(0, PLACEHOLDER_HASH_LENGTH);
 			const restated = to_hashed_css_placeholder(placeholder_source, placeholder_hash);
 			if (restated === null) {
 				warn_unhashed(`the module's CSS holds no placeholder after Vite processed it`);

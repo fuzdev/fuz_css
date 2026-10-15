@@ -94,7 +94,7 @@ export const to_extraction_cache_key = (
 export interface CachedExtraction {
 	/** Cache version - invalidates cache when bumped */
 	v: number;
-	/** Content hash of the source file (BLAKE3 via `hash_blake3`) */
+	/** Content hash of the source file */
 	content_hash: string;
 	/** The configuration part of the key (`to_extraction_cache_key`), or null for the default */
 	extraction_key: string | null;

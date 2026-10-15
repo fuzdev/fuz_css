@@ -76,6 +76,5 @@ export default defineConfig(({ mode }) => ({
 		],
 		// in test mode, use browser conditions so svelte's mount() resolves to the client version
 		...(mode === 'test' ? { conditions: ['browser'] } : null)
-	},
-	optimizeDeps: { exclude: ['@fuzdev/blake3-wasm'] }
+	}
 }));

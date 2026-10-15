@@ -6,6 +6,9 @@
  * 2. All expected CSS classes are extracted (no missing)
  * 3. No unexpected classes are generated (no extra)
  * 4. All examples produce the same set of classes (consistency)
+ * 5. A packed tarball installs and builds in a clean directory, the way
+ *    consumers get it (the examples resolve `file:../..`, which finds the
+ *    repo's own `node_modules` and hides undeclared dependencies)
  *
  * These tests are slower due to npm install + vite build.
  * Skip with: SKIP_EXAMPLE_TESTS=1 gro test
@@ -13,9 +16,10 @@
  * @module
  */
 
-import { test, assert, describe, beforeAll } from 'vitest';
+import { test, assert, describe, beforeAll, afterAll } from 'vitest';
 import { join } from 'node:path';
-import { readdir, readFile } from 'node:fs/promises';
+import { tmpdir } from 'node:os';
+import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/promises';
 import { execSync } from 'node:child_process';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
@@ -271,5 +275,54 @@ describe.skipIf(SKIP)('cross-example consistency', () => {
 				`${example} should produce same classes as ${first_example}`
 			);
 		}
+	});
+});
+
+// A fresh install of the packed tarball, outside the repo, so nothing resolves
+// from fuz_css's own `node_modules`
+describe.skipIf(SKIP)('packed install', () => {
+	let temp_dir: string;
+	let css: string;
+
+	beforeAll(async () => {
+		temp_dir = await mkdtemp(join(tmpdir(), 'fuz_css_packed_'));
+		const pack_dir = join(temp_dir, 'pack');
+		const app_dir = join(temp_dir, 'app');
+		await mkdir(pack_dir);
+		const tarball = execSync(`npm pack --pack-destination ${pack_dir}`, {
+			cwd: process.cwd(),
+			stdio: 'pipe'
+		})
+			.toString()
+			.trim()
+			.split('\n')
+			.at(-1)!;
+		const example_dir = join(EXAMPLES_DIR, 'vite-react');
+		await cp(example_dir, app_dir, {
+			recursive: true,
+			filter: (source) => !/[\\/](node_modules|dist|\.fuz)$/.test(source)
+		});
+		await rm(join(app_dir, 'package-lock.json'), { force: true });
+		const package_json_path = join(app_dir, 'package.json');
+		const package_json = JSON.parse(await readFile(package_json_path, 'utf8'));
+		package_json.devDependencies['@fuzdev/fuz_css'] = `file:${join(pack_dir, tarball)}`;
+		await writeFile(package_json_path, JSON.stringify(package_json, null, '\t'));
+		try {
+			execSync('npm install --no-audit --no-fund', { cwd: app_dir, stdio: 'pipe' });
+			execSync('npm run build', { cwd: app_dir, stdio: 'pipe' });
+		} catch (err) {
+			throw new Error(`Failed to install and build the packed tarball: ${to_error_message(err)}`);
+		}
+		const css_path = await find_css_file(join(app_dir, 'dist'));
+		if (!css_path) throw new Error(`No CSS file found in ${app_dir}/dist/assets`);
+		css = await readFile(css_path, 'utf8');
+	}, 180_000);
+
+	afterAll(async () => {
+		if (temp_dir) await rm(temp_dir, { recursive: true, force: true });
+	});
+
+	test('builds with the generated CSS', () => {
+		assert.isNotNull(extract_fuz_css(css), 'CSS should contain fuz_css marker comments');
 	});
 });

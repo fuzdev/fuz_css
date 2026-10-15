@@ -21,7 +21,6 @@
 			<TomeSectionHeader text="Design details" />
 			<ul>
 				<li>plain CSS</li>
-				<li>minimal dependencies, all optional (none needed if you only use the stylesheets)</li>
 				<li>
 					exports a reset stylesheet with <TomeLink slug="semantic" /> defaults that styles HTML
 					elements, and also exports the underlying data, helpers, and types for open-ended usage

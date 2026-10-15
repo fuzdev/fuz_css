@@ -24,14 +24,13 @@ gro build     # build the package for production
 
 ## Key dependencies
 
-- Svelte 5 - `svelte/compiler` parses CSS and Svelte source in the extractor
-  (optional peer); the component framework also powers the docs site
+- Svelte 5 - `svelte/compiler` parses CSS and Svelte source in the extractor;
+  the component framework also powers the docs site
 - SvelteKit - application framework (for docs site only)
-- @sveltejs/acorn-typescript, acorn-jsx, zimmerframe - AST parsing and walking
+- acorn, @sveltejs/acorn-typescript, zimmerframe - AST parsing and walking
+  (acorn-jsx is the consumer's, passed in through `acorn_plugins`)
 - zod - schema validation
 - @webref/css - CSS property validation
-- @fuzdev/blake3-wasm - BLAKE3 content hashing for cache validation (optional
-  peer, via fuz_util's `hash_blake3`)
 - fuz_util (@fuzdev/fuz_util) - utility functions
 - Vite 6+ - required by the Vite plugin only
 

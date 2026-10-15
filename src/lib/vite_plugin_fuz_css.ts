@@ -71,7 +71,7 @@ import {
 	type ViteDevServer
 } from 'vite';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
-import { hash_blake3 } from '@fuzdev/fuz_util/hash_blake3.ts';
+import { hash as crypto_hash } from 'node:crypto';
 import { fs_search } from '@fuzdev/fuz_util/fs.ts';
 import { each_concurrent } from '@fuzdev/fuz_util/async.ts';
 import { ensure_end } from '@fuzdev/fuz_util/string.ts';
@@ -863,7 +863,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 			// identifies this code, so the server can tell it from what a refetch
 			// would serve. The CSS module's client JS has no sourcemap to keep in
 			// step (its CSS sourcemap, when enabled, rides inside the CSS string).
-			const hash = hash_blake3(code).slice(0, EVALUATED_HASH_LENGTH);
+			const hash = crypto_hash('sha256', code).slice(0, EVALUATED_HASH_LENGTH);
 			return { code: `${code}\n${to_evaluated_report(hash)}`, map: null };
 		}
 	};
