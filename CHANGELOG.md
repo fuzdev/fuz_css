@@ -1,5 +1,177 @@
 # @fuzdev/fuz_css
 
+## 0.67.0
+
+### Minor Changes
+
+- feat: focus-visible rings, ARIA state styles, and forced-colors support ([a46f55e](https://github.com/fuzdev/fuz_css/commit/a46f55e))
+
+  Base styles render differently for these:
+
+  - **Focus** - links, buttons, form controls, and `.clickable` show focus on `:focus-visible` instead of `:focus`, and a focused button no longer takes the hover fill, border, and shadow - the outline ring is the only focus signal. Keyboard focus and a click into a text field or select look as before; a link, button, or checkbox clicked with the mouse no longer holds the ring or the hover look, and `.clickable` no longer holds its focus scale after a click. A popover trigger that wants a held look while open can style its own `[aria-expanded='true']` state.
+  - **ARIA states** - `button[aria-pressed='true']` takes the `.selected` fill but stays clickable like `.deselectable`, and `.selectable` and `.menuitem` map `aria-pressed='true'` to their selected tint on any element, forced colors included, labeling the item in the text color and keeping the pointer cursor; `.plain` keeps a pressed button's fill, edge, and shadow, as it does a selected one's; `a[aria-current]` (any value but `false`) takes the selected link look; `aria-disabled='true'` on a button, input, textarea, or select takes the disabled look (dashed border, `--disabled_opacity`, default cursor, no hover or active states) but keeps its outline and pointer events, and `:not(:disabled)` hover and checked states, in the base styles and in `.selectable` and `.menuitem`, now skip it too - a form that sets `aria-disabled` while submitting now looks disabled, and `aria-disabled='true'` on a `.deselectable` `.menuitem` or `.selectable` drops its pointer cursor; `aria-invalid='true'` on an input, textarea, or select sets `--border_color` and `--outline_color` to `--negative_50`.
+  - **Forced colors** (Windows High Contrast) - a checked radio's dot, range thumbs and tracks, selected and pressed buttons, `.menuitem.selected`, `.selectable.selected`, and the edges of `.panel` and `.pane` vanished; they now render in system colors, and selects restore their native arrow. Selection shows as a `Highlight` border with an outline just inside it, which becomes a double `Highlight` ring when focused, while a focus ring alone takes `CanvasText`; the colors stay forced, so labels and colored text keep the system's text color, as do icons drawn in `currentColor`. `aria-disabled` takes `GrayText`, and the radio dot, range, and panel and pane edges `CanvasText`.
+  - **Select arrow** - single selects draw a chevron in the text color, with right padding for it; `multiple` and list-box selects have none.
+  - **First heading in a container** - an `h2`-`h6` that is the first child of `.panel`, `.pane`, `aside`, `blockquote`, `fieldset`, `dialog`, `li`, `td`, or `th` drops its top margin, sitting on the container's padding.
+  - **Text size adjustment** - `text-size-adjust` is `100%` instead of `none`, so mobile browsers still skip automatic text inflation without the setting also reaching the reader's own text scaling.
+  - **Disabled controls** - disabled checkboxes, radios, and other inputs take the default cursor; a `label` wrapping one still shows the pointer.
+
+  The forced-colors rules ship in `fuz.preferences`, one block per element, so bundled output carries each only when its element is used; the composites' rules nest inside their own rules.
+
+- **breaking** fix: run the Vite plugin's generated build CSS through Vite's CSS pipeline ([93ea01e](https://github.com/fuzdev/fuz_css/commit/93ea01e))
+
+  The generated CSS was spliced into the bundled stylesheet after Vite processed it, so production builds shipped it unminified and untouched by PostCSS or lightningcss. The build now processes it with `preprocessCSS` and hands it to Vite before the stylesheet renders, so it's minified and post-processed like the rest of the stylesheet, in code-split and single-stylesheet builds alike, and an error from the project's own CSS pipeline fails the build. CSS that Vite inlines into JS (an `iife` output) now carries it too instead of failing the build. Splicing remains as a fallback, with a warning, for a Vite whose internals don't allow the handoff.
+
+  Breaking: `to_hashed_css_placeholder` and `parse_css_placeholder_hash` are removed from `css_placeholder_splice.ts`.
+
+- **breaking** fix: invalidate the extraction cache on upgrade, and read `CI=false` as not CI ([906890f](https://github.com/fuzdev/fuz_css/commit/906890f))
+
+  The extraction cache now keys its entries by the installed versions of fuz_css, `svelte`, `acorn`, and `@sveltejs/acorn-typescript`, so upgrading any of them re-extracts every file instead of possibly serving extractions from the previous version. `CSS_CACHE_VERSION` is removed, since nothing needs to bump it.
+
+  Breaking: `CSS_CACHE_VERSION` is removed, and `CachedExtraction.v` is now the `to_cache_version` string rather than a number.
+
+  `CI` set to `false` or `0` (in any case), or empty, no longer counts as CI, so it keeps the extraction cache and the `on_error: 'log'` default instead of skipping the cache and throwing on errors. Any other value still counts.
+
+- feat: follow the OS color scheme without JS ([76bd9e5](https://github.com/fuzdev/fuz_css/commit/76bd9e5))
+
+  The dark scheme's variables render under `:root.dark` and again under `@media (prefers-color-scheme: dark)` for a root that has neither `.dark` nor `.light`, so a page using the stylesheets without fuz_ui's theme script follows the OS preference. A page that never names a scheme now renders dark on a dark OS - add `class="light"` to its root to keep it light - and its own unlayered `:root` variable overrides, which outrank both schemes, now apply over the dark one too. An explicit `.light` or `.dark` class still wins - so a page that toggles only `.dark` for its own scheme switch must also set `.light` for an explicit light choice on a dark OS (fuz_ui's theme state always sets one or the other). The same applies to `render_theme_style`, the bundled theme, the `prefers-contrast: more` dark mapping, and the `dark:`/`light:` modifier classes, which also no longer add specificity (`:where(:root.dark)`), so a `hover:` class wins while hovering in dark mode. A theme scoped with `render_theme_style`'s `id` option now renders light when its scope element has `.light`, even under `:root.dark`. The modifiers no longer emit nested CSS, dropping the Safari 16.5 requirement. `render_color_scheme_rules` in `theme.ts`, with the `COLOR_SCHEME_ROOTS` selectors, renders a scheme's rules both ways.
+
+- **breaking** feat: keep derived theme data out of the `Theme` wire shape ([a812860](https://github.com/fuzdev/fuz_css/commit/a812860))
+
+  A `Theme` is now only what was authored - `name`, `summary`, `scheme`, and `variables` - and what a theme implies travels beside it instead of inside it. A persisted or shared theme can no longer carry a stale copy of derived values, which are recomputed wherever the theme renders.
+
+  - `Theme.scheme_mirror` is removed, so `parse_theme` and the `Theme` schema refuse a theme carrying one. `validate_theme` drops its missing-mirror and stale-mirror warnings, since a stance no longer needs anything stored beside it.
+  - `theme.ts` adds `ThemeDerived` (`scheme_mirror` and `caps`, never persisted or validated) and `ResolvedTheme` (`{theme, ...ThemeDerived}`, wrapping the theme so serializing it can't leak the derived data). `RenderThemeStyleOptions` extends `ThemeDerived`, so a resolved theme renders as `render_theme_style(resolved.theme, resolved)`: the mirror (under a stance only, skipping any name the theme or the caps set), then the theme's variables, then the caps. The renderer drops an internal `_` name from `theme.variables`, is total over junk options as it is over a junk theme, and falls back to the `fuz.theme` layer for a `layer` that isn't a dotted layer name.
+  - `render_style_variables(variables, options)` renders a variable set that isn't a theme, internal names included - how `theme.css` renders the full defaults, and the way to restore the defaults at runtime over a baked theme (`render_style_variables(default_variables)`).
+  - `resolve_theme_stance(theme)` returns a `ResolvedTheme` instead of a theme carrying its mirror. The mirror depends on the stance alone: `scheme_stance_variables(stance, variables?)` re-slots the dual-slot entries of a variable set, the scheme-adaptive defaults unless one is passed, and no longer takes the theme's variables to exclude. `scheme_mirrors_equal` is removed.
+  - `compile_theme` and `CompiledTheme` move to `theme_compile.ts`, and `compile_theme` returns a `CompiledTheme` (`ResolvedTheme` plus `report` and `issues`): the input theme as the same reference, its `scheme_mirror`, and the recomputed `_palette_chroma_NN` `caps` beside it, where they used to be appended to `variables`. Render it with `render_theme_style(compiled.theme, compiled)`. The input never carries caps now, so compiling is idempotent by construction. The cap recomputation alone is `compute_theme_caps` in `theme_check.ts`, which stays free of zod. `check_theme(theme, {caps})` and `create_theme_resolver(theme, {caps})` take the caps beside the theme, and a cap that isn't the compiled form lands in `unchecked`.
+  - `phosphor_theme` and `marquee_theme` export the authored theme rather than resolving at module scope, so importing one no longer pulls the mirror data. Resolve where they render.
+  - The build-time `theme` option accepts a `Theme` or a `ResolvedTheme` and derives the theme's data itself, recomputing any it's handed. A stanced theme's mirror now re-slots the configured `variables` rather than the defaults, so a customized scheme-adaptive variable keeps its own value under the stance. Its caps are recomputed, so a theme whose hues or lightness moved off the baked table bakes them last - the generated CSS changes for such themes - and its gates run with them, reporting as warnings: `theme_gate_failed` and `theme_gate_unchecked`. The caps and gates fold in the knob-tier values the configured `variables` change from the defaults, so a build that retunes a ramp knob is capped and gated at what it renders. The lint doesn't run at build time, since it needs zod, an optional peer. `bake_theme` in `variable_graph.ts` does the derivation, `apply_theme_variables` takes the baked `ResolvedTheme`, and `VariableDependencyGraph` carries it as `theme`.
+
+  Breaking: render a stanced theme through `resolve_theme_stance` and pass the result as the options; code reading `theme.scheme_mirror` reads `resolved.scheme_mirror`, and code reading compiled caps from `compiled.theme.variables` reads `compiled.caps`. A theme saved with a `scheme_mirror` no longer parses - drop the field, or re-pick the theme. fuz_ui's `ThemeRoot` renders the bare theme until it takes a resolver, so a stanced theme rendered through it loses its mirror - upgrade fuz_ui alongside, or render the resolved theme yourself.
+
+- feat: catalog the contextual hooks the base styles read ([9129b60](https://github.com/fuzdev/fuz_css/commit/9129b60))
+
+  The custom properties `style.css` and the class definitions read without declaring them as variables - `--flow_margin`, `--font_size`, `--border_radius`, `--icon_size`, `--fill`, the `--button_*`, `--menuitem_*`, `--checkbox_content*`, `--thumb_*`, and `--clickable_*` hooks, `--chip_padding_x`, `--select_arrow_size`, `--shadow`, `--shadow_color`, `--shadow_alpha`, and `--overflow` - are cataloged in the new `style_hooks.ts` as the stable contextual surface. Each `StyleHook` entry names what reads it and the `var()` fallbacks that render where nothing sets it, or marks it `local` when the reading rule declares it itself, so a value reaches it only from a rule on the same element. Hooks still have no `:root` defaults. The variables docs page lists them.
+
+  `validate_theme` reports a hook a theme sets as a warning instead of an unknown variable: a theme's root value retunes every element reading an inherited hook and never reaches a local one, so hooks belong on elements and themes turn the knobs. `known_theme_variable_names` still leaves them out.
+
+  `.clickable` reads `--clickable_transform_origin` and `--clickable_transition_duration` with fallbacks now, `center` and `0s`, which render as before where they're unset.
+
+- **breaking** feat: rename the adaptive alpha overlays `--fg_NN`/`--bg_NN` to `--ink_NN`/`--paper_NN` ([610cbf1](https://github.com/fuzdev/fuz_css/commit/610cbf1))
+
+  The color-scheme-adaptive alpha overlays are now named for what they wash toward: `--ink_NN` toward the text color (darkening in light mode, lightening in dark mode), and `--paper_NN` toward the ground (the reverse). The opaque `bg_*` background classes (`bg_a_50`, `bg_positive_50`) no longer share a prefix with them and are unchanged, as are `--darken_NN`/`--lighten_NN`. Values are unchanged, and the `input_fill` default now reads `var(--paper_80)`.
+
+  Breaking: rename every reference - `var()` reads in CSS and markup, `@fuz-variables` hints, and theme variables that set an overlay by name:
+
+  - `--fg_NN` → `--ink_NN`
+  - `--bg_NN` → `--paper_NN`
+
+  As a GNU sed over your sources (it relies on `\b`; `NN` is a numeric stop, `00` through `100`, so `--bg_color`, `bg_a_50`, and other names are left alone):
+
+  ```sh
+  sed -i -E 's/\bfg_([0-9]{2,3})\b/ink_\1/g; s/\bbg_([0-9]{2,3})\b/paper_\1/g' FILES
+  ```
+
+  It doesn't catch names built at runtime (`'fg_' + n`, `` `bg_${n}` ``), so grep for `fg_`/`bg_` string fragments too.
+
+- feat: add keyword classes, bare CSS keywords like `flex` and `sticky` ([6514ef3](https://github.com/fuzdev/fuz_css/commit/6514ef3))
+
+  A CSS value keyword that names its property on its own is now a class setting that one declaration, with modifiers like any class (`md:flex`, `hover:underline`):
+
+  - **display** — `flex`, `inline-flex`, `grid`, `inline-grid`, `inline-block`, `block`, `flow-root`
+  - **position** — `relative`, `absolute`, `fixed`, `sticky`
+  - **typography** — `uppercase`, `lowercase`, `capitalize`, `italic`, `oblique`, `bold`, `bolder`, `lighter`, and `underline`, `overline`, `line-through` (setting the `text-decoration-line` longhand)
+  - **`hidden`** — `display: none`, mirroring the HTML attribute, for `max-md:hidden` and `print:hidden`; the `[hidden]` attribute still beats every class
+
+  `hidden` orders after the display classes it ties with, a `display:*` literal included, so `class={['display:flex', {hidden: !open}]}` hides, while a media query still outranks it (`hidden md:flex` shows from `md` up). `row`, `column`, and `box` are unchanged composites, so `hidden md:row` stays hidden at every width - write `max-md:hidden row`. A class definition or interpreter can take the same order with the new `late` flag on `CssClassDefinitionBase`.
+
+  These names are found implicitly like any class, so a project with its own classes named like them, or extracting a dependency that uses them, now gets their styles. A Tailwind project's `flex` or `hidden` now resolves to the same CSS Tailwind ships, while Tailwind's own names (`items-center`, `justify-between`) still generate nothing, silently.
+
+- **breaking** feat: take a callback over the defaults for class definitions and interpreters ([7e6eea0](https://github.com/fuzdev/fuz_css/commit/7e6eea0))
+
+  `class_definitions` and `class_interpreters` take a callback over the built-in defaults, as `base_css` and `variables` already do. The callback receives a copy of the defaults and returns the set to use, and one that returns the wrong shape fails generator creation. The plain forms are unchanged: a `class_definitions` record merges over the defaults, and a `class_interpreters` array replaces them.
+
+  ```ts
+  vite_plugin_fuz_css({
+    class_interpreters: (defaults) => [grid_cols_interpreter, ...defaults],
+  });
+  ```
+
+  Breaking:
+
+  - `include_default_classes` is removed. Replace `include_default_classes: false, class_definitions: mine` with `class_definitions: () => mine`.
+  - `merge_class_definitions` is replaced by `resolve_class_definitions(option)`, which takes the `class_definitions` option in any form; `resolve_class_interpreters(option)` is its interpreter twin.
+  - `generate_bundled_css` no longer takes `include_utilities` - pass an empty `utility_css` to leave the utility classes out.
+  - The `deps` option is marked `@internal`: it is a test seam for the extraction cache's filesystem access, not stable API.
+
+- feat: label `.palette_X` buttons at stop 70 so they hold AA in every state ([61297da](https://github.com/fuzdev/fuz_css/commit/61297da))
+
+  A `.palette_X` button's label moves from `--palette_X_60` to `--palette_X_70` at rest, hovered, and pressed, so it holds AA contrast on its own tinted fill as the tint deepens; at stop 60 a keyboard press (no hover) dropped it as low as 3.3:1 on light grounds. The label darkens in light schemes and lightens in dark ones (about 0.09 and 0.07 in OKLCH lightness); the border, focus ring, fill tint, and selected fill stay at stop 60, as do links, colored text, and chip labels. The `low contrast` modifier and the `guestbook` theme now clear every contrast gate.
+
+  `check_theme` gates the label on each of the button's fills: rest (8%), hover (16%, with the hovered label's 10% mix toward `shade_max`), and pressed (24%), for a mouse press (hovered label) and a keyboard press (plain label). The rest entry is now `palette_X_70 on palette_X button fill`, joined by `palette_X_70 on palette_X active fill`, `palette_X_70 hovered on palette_X hover fill`, and `palette_X_70 hovered on palette_X active fill`, and `shade_max` is now a gate input, so a theme that pins it in a form the gates don't read reports it as `unchecked`.
+
+- **breaking** feat: give the ramp intermediates a private spelling that themes can't set ([34deea5](https://github.com/fuzdev/fuz_css/commit/34deea5))
+
+  The derived ramp stops between the knobs and the color stops are internal now, spelled with a leading underscore, and a theme can no longer pin one. Themes steer the ramps through their knobs (`--palette_lightness_00`/`_100`/`_curve` and the `shade_`/`text_` twins, `--palette_chroma_min`/`_max`, `--chroma_curve`) and can still pin a color stop like `--palette_a_50` directly. Rendered values are unchanged.
+
+  - `--palette_lightness_NN`, `--shade_lightness_NN`, `--text_lightness_NN` (stops `05` through `95`) → `--_palette_lightness_NN`, `--_shade_lightness_NN`, `--_text_lightness_NN`; the `00`/`100` endpoints are the knobs and keep their names
+  - `--chroma_shape_NN` → `--_chroma_shape_NN`
+  - `--palette_chroma_NN` → `--_palette_chroma_NN`
+
+  `STYLE_VARIABLE_NAME_MATCHER` rejects the leading underscore, so `parse_theme` and the `Theme` schema refuse a theme that sets an intermediate, and `validate_theme` reports it as an internal ramp variable. A theme still naming one by its old spelling gets an unknown-variable error that points at the knobs. `known_theme_variable_names` leaves the intermediates out, and `INTERNAL_VARIABLE_NAME_MATCHER` in `variable.ts` matches the private spelling.
+
+  `check_theme` and `compile_theme` derive every intermediate from the knobs, so a theme's caps follow the lightness its endpoint and curve knobs give each stop. A theme that carries an intermediate anyway, skipping the schema, has it dropped the same way: `render_theme_style` doesn't render it, and the gates measure the derived value the page renders. The `ramps.ts` helpers `to_lightness_stop_name`, `to_chroma_shape_name`, and `to_palette_chroma_name` build the names, and `CSS_NUMBER_PATTERN` moves from `theme_resolver.ts` to `ramps.ts`.
+
+  Breaking: a theme that pinned an intermediate loses the pin - move the endpoint or curve knobs instead, or pin the color stops it was shaping. A `var()` read of an intermediate in your own CSS needs the new spelling, and is unsupported: the intermediates can change shape between releases.
+
+- **breaking** feat: remove the Gro generator ([faabe02](https://github.com/fuzdev/fuz_css/commit/faabe02))
+
+  The Vite plugin is now the one way to generate bundled CSS. `gen_fuz_css.ts` is deleted, with `gen_fuz_css` and `GenFuzCssOptions` and its Gro-only options (`include_stats`, `project_root`, `concurrency`, `cache_io_concurrency`), and `@fuzdev/gro` is no longer an optional peer.
+
+  To migrate a `fuz.gen.css.ts`, delete it and its generated `fuz.css`, add `vite_plugin_fuz_css()` to `plugins` in `vite.config.ts` with the same options, and import `virtual:fuz.css` where you imported `./fuz.css`. A SvelteKit app takes the plugin directly, beside `sveltekit()`.
+
+  Breaking for code calling the pipeline directly: `resolve_css` and `generate_css` no longer take `include_stats`, and the `resolve_css` result has no `stats`, so `CssResolutionStats` is gone. `included_elements`, `included_rule_indices`, and `resolved_variables` on the result carry the same counts, and `style_rule_index.rules.length` the total rule count.
+
+- feat: order utility classes by structure, with composites in their own sublayer ([8ae17b7](https://github.com/fuzdev/fuz_css/commit/8ae17b7))
+
+  Generated classes now cascade in a declared order instead of an alphabetical one. Breakpoint classes apply in width order (`min-width` ascending, `max-width` descending, then feature queries like `print:`), an unprefixed class comes before its modified forms, shorthands and axis pairs come before longhands (`p_md` and `px_md` before `pl_lg`), and states follow link-visited-focus-hover-active order. Previously `md:padding:1rem` was emitted before `padding:0`, so the unprefixed class won at every width, and `lg:` rules could lose to `sm:` ones.
+
+  Composites (`box`, `row`, `panel`, `sized_*`, ...) render in a `fuz.utilities.composites` sublayer, so a token or literal class always wins over a composite it overlaps. The single-property shortcuts (`circular`, `pixelated`, `mb_flow`, `mt_flow`) order with the token classes instead, and lose a same-property tie to a token or literal. Markup that combined a composite with a class setting the same property can render differently:
+
+  - a modified composite now loses to a plain class: `display:none md:row` used to be flex at `md` and up, and is now hidden at every width. This is the Tailwind `hidden md:flex` habit - write `display:none md:display:flex` instead. `md:panel shadow_md` likewise takes `shadow_md` at every width
+  - a composite's state, compound, and descendant rules now lose to tokens by layer, where they used to win by specificity: `menuitem selected shade_00` and `selectable selected shade_00` lose the selected background, `chip palette_a color_b_50` takes `color_b_50`, and `plain shadow_sm` shows the shadow at rest
+  - custom `ruleset` and `composes` definitions render in the composites sublayer by default, so a token or literal class now beats them on the same property; set `composite: false` to keep one with the single-purpose classes
+
+  `generate_classes_css` now returns its CSS wrapped in the `fuz.utilities` layer. A class definition can set `composite: true` (the default for `ruleset` and `composes` definitions, while a `declaration` alone defaults to single-purpose).
+
+  Modifiers are stripped by the generator before a class resolves, so they apply to classes from custom interpreters too. Breaking for custom interpreters: `interpret` returns a definition (`{declaration}`, `{ruleset}`, or `{composes}`) instead of a CSS string, and `modified_class_interpreter` is removed - `css_class_interpreters` holds only `css_literal_interpreter`. Also removed: `extract_primary_property`, `generate_modified_ruleset` (replaced by `modify_ruleset`), and the literal output helpers `interpret_css_literal`, `generate_css_literal_simple`, `generate_selector`, `CssLiteralOutput`, and `InterpretCssLiteralResult`. Media modifier definitions carry the bare condition (`(width >= 48rem)`) plus a `width` bound, ancestor modifiers name their color scheme, and `parse_arbitrary_breakpoint` returns a width bound. Arbitrary breakpoints now decode `~` to a space, so `min-width(calc(100vw~-~20px)):` emits valid CSS.
+
+- **breaking** feat: rename the `StyleVariable` `light` slot to `base` ([b3bb289](https://github.com/fuzdev/fuz_css/commit/b3bb289))
+
+  The slot a variable renders on `:root` was called `light`, but it applies in both color schemes, with `dark` replacing it in the dark scheme only - `{name: 'chroma_scale', light: '1.25'}` was never light-only. It's now `base`: `{name: 'chroma_scale', base: '1.25'}`. Rendering is unchanged.
+
+  Every API that reads or writes a slot follows: the `StyleVariable` and `Theme` schemas, `default_variables` and `scheme_adaptive_variables`, the shipped themes, `pick_stance_slot`, `overlay_style_variable`, `compose_themes`, the stance mirror from `resolve_theme_stance`, the cap overrides `compile_theme` emits, and `validate_theme`'s knob warnings, which name the slot as `base` (`chroma_scale base 5 is outside the safe range ...`). The schema refines read `must have at least one of base or dark` and `base and dark must differ when both specified`. In `variable_graph.ts`, `StyleVariableInfo`'s `light_deps`, `light_css`, and `dark_css` are now `base_deps`, `base_value`, and `dark_value` (they hold values, not CSS), and `generate_theme_css` returns `{root_css, dark_css}`, `root_css` being the `:root` block it renders.
+
+  Breaking: rename `light:` to `base:` in every theme and variable you author, including the `variables` callback and `theme` option of the Vite plugin. A theme saved as JSON with `light` keys no longer renders its base values: the strict schemas reject the unknown key, so `parse_theme` returns `null`, and `render_theme_style` skips it, rendering only the `dark` slots. fuz_ui's `ThemeRoot` is where a stored theme hits this: it restores the theme it saved to `localStorage` under `fuz:theme` without parsing it, so a theme saved before this release renders only its `dark` slots. Rename the key in stored themes, or re-pick the theme so it's saved again.
+
+### Patch Changes
+
+- docs: lead the package description with the theming and plugin story, and point the stylesheet headers at the new setup docs ([1d5c99d](https://github.com/fuzdev/fuz_css/commit/1d5c99d))
+- fix: install the generator's parser stack as dependencies so the Vite plugin loads on a fresh install ([029d240](https://github.com/fuzdev/fuz_css/commit/029d240))
+
+  `svelte`, `acorn`, `@sveltejs/acorn-typescript`, `zimmerframe`, and `@webref/css` move from optional peers (`acorn` was undeclared) to `dependencies`; `vite` is declared as an optional peer (`>=6`). The plugin hashes with `node:crypto` instead of `@fuzdev/blake3-wasm`, which is no longer a peer. `acorn-jsx` is no longer a peer either - JSX projects still install it themselves and pass it through `acorn_plugins`.
+
+- fix: reject literal classes that could end their declaration or rule ([c0334c2](https://github.com/fuzdev/fuz_css/commit/c0334c2))
+
+  A literal class whose value could end its declaration or rule (an unclosed quote or bracket, a top-level `;`, a brace, comment, or escape outside a string, a `!` other than a trailing `!important`, or an unquoted `url(` holding what needs quotes) no longer generates CSS, nor does one whose custom-property name or modifier argument (`nth-child(...)`, `min-width(...)`) could: a class found in source logs a warning, and a hinted or listed one is an error. Quote such values or set them in a stylesheet.
+
+  Modifier arguments must also be valid where they render: `nth-*(...)` takes An+B (`odd`, `2n+1`, `-n+3`), and a breakpoint takes a length or a `calc()`, `clamp()`, `min()`, or `max()` of lengths, so a unitless `min-width(800)`, a percentage, or `env()` no longer generates. `2xl:` classes, and any class name starting with a digit, now apply - their selector was invalid before. A class name containing a space, listed by hand, now renders as one selector.
+
+- fix: label selected `.menuitem` and `.selectable` buttons in the text color ([23e465f](https://github.com/fuzdev/fuz_css/commit/23e465f))
+
+  A selected button labels in the inverse text color for its solid fill, but `.menuitem.selected` and `.selectable.selected` paint a light tint instead, so their button labels were nearly invisible (about 1.1:1 to 1.4:1). `button.menuitem.selected` and `button.selectable.selected` now label in `--text_color` (the palette color with `.palette_X`), hovered, pressed, and focused alike. Other elements with these classes, which never took the inverse, are unchanged.
+
 ## 0.66.2
 
 ### Patch Changes
