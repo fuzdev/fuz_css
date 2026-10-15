@@ -6,9 +6,8 @@
  * on what elements and classes are actually used in the project.
  *
  * This module provides low-level CSS resolution for advanced use cases.
- * Most users should use `gen_fuz_css` (Gro) or `vite_plugin_fuz_css` (Vite)
- * which handle extraction and caching automatically. See those modules for
- * reference implementations.
+ * Most users should use `vite_plugin_fuz_css`, which handles extraction and
+ * caching automatically. See that module for a reference implementation.
  *
  * @module
  */
@@ -93,22 +92,6 @@ const find_similar_name = (name: string, known_names: Set<string>): string | nul
 };
 
 /**
- * Statistics from CSS resolution (only included when `include_stats` is true).
- */
-export interface CssResolutionStats {
-	/** Number of HTML elements included */
-	element_count: number;
-	/** List of HTML element names included */
-	elements: Array<string>;
-	/** Number of rules included from `style.css` */
-	included_rules: number;
-	/** Total number of rules in `style.css` */
-	total_rules: number;
-	/** Number of CSS variables resolved (including transitive deps) */
-	variable_count: number;
-}
-
-/**
  * Result from CSS resolution.
  */
 export interface CssResolutionResult {
@@ -126,8 +109,6 @@ export interface CssResolutionResult {
 	included_elements: Set<string>;
 	/** Diagnostics from resolution */
 	diagnostics: Array<GenerationDiagnostic>;
-	/** Resolution statistics (only when `include_stats` is true) */
-	stats?: CssResolutionStats;
 }
 
 /**
@@ -150,8 +131,6 @@ export interface CssResolutionOptions {
 	additional_elements?: Iterable<string> | 'all';
 	/** Additional variables to always include, or 'all' to include all theme variables */
 	additional_variables?: Iterable<string> | 'all';
-	/** Whether to include resolution statistics in result */
-	include_stats?: boolean;
 	/** Warn when detected elements have no matching style rules (default false) */
 	warn_unmatched_elements?: boolean;
 	/**
@@ -196,7 +175,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		utility_variables_used,
 		additional_elements,
 		additional_variables,
-		include_stats = false,
 		warn_unmatched_elements = false,
 		exclude_elements: raw_exclude_elements,
 		exclude_variables: raw_exclude_variables,
@@ -423,17 +401,6 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	const base_css = layered_css['fuz.base'];
 	const preferences_css = layered_css['fuz.preferences'];
 
-	// Build stats if requested
-	const stats = include_stats
-		? {
-				element_count: included_elements.size,
-				elements: [...included_elements],
-				included_rules: included_rule_indices.size,
-				total_rules: style_rule_index.rules.length,
-				variable_count: resolved_variables.size
-			}
-		: undefined;
-
 	return {
 		theme_css,
 		base_css,
@@ -441,8 +408,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		resolved_variables,
 		included_rule_indices,
 		included_elements,
-		diagnostics,
-		stats
+		diagnostics
 	};
 };
 

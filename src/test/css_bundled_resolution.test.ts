@@ -458,54 +458,8 @@ describe('resolve_css', () => {
 		});
 	});
 
-	describe('statistics', () => {
-		test('not included by default', () => {
-			const { style_rule_index, variable_graph } = create_test_fixtures(
-				`button { color: red; }`,
-				[]
-			);
-
-			const result = resolve_css({
-				style_rule_index,
-				variable_graph,
-				detected_elements: new Set(['button']),
-				detected_classes: new Set(),
-				detected_css_variables: new Set(),
-				utility_variables_used: new Set()
-			});
-
-			assert.isUndefined(result.stats);
-		});
-
-		test('included when include_stats true', () => {
-			const { style_rule_index, variable_graph } = create_test_fixtures(
-				`
-					* { margin: 0; }
-					button { color: blue; }
-					input { color: green; }
-				`,
-				[{ name: 'color', base: 'red' }]
-			);
-
-			const result = resolve_css({
-				style_rule_index,
-				variable_graph,
-				detected_elements: new Set(['button']),
-				detected_classes: new Set(),
-				detected_css_variables: new Set(['color']),
-				utility_variables_used: new Set(),
-				include_stats: true
-			});
-
-			assert.isDefined(result.stats);
-			assert.strictEqual(result.stats.element_count, 1);
-			assert.include(result.stats.elements, 'button');
-			assert.isAbove(result.stats.included_rules, 0);
-			assert.strictEqual(result.stats.total_rules, 3);
-			assert.strictEqual(result.stats.variable_count, 1);
-		});
-
-		test('reflects actual counts', () => {
+	describe('resolved sets', () => {
+		test('reflect what ships', () => {
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				`
 					* { box-sizing: border-box; }
@@ -525,17 +479,13 @@ describe('resolve_css', () => {
 				detected_elements: new Set(['button', 'a']),
 				detected_classes: new Set(),
 				detected_css_variables: new Set(['palette_a']),
-				utility_variables_used: new Set(),
-				include_stats: true
+				utility_variables_used: new Set()
 			});
 
-			assert.strictEqual(result.stats!.element_count, 2);
-			assert.include(result.stats!.elements, 'button');
-			assert.include(result.stats!.elements, 'a');
-			assert.notInclude(result.stats!.elements, 'input');
-			assert.strictEqual(result.stats!.included_rules, 3); // * + button + a
-			assert.strictEqual(result.stats!.total_rules, 4);
-			assert.strictEqual(result.stats!.variable_count, 1);
+			assert.deepEqual([...result.included_elements].sort(), ['a', 'button']);
+			assert.strictEqual(result.included_rule_indices.size, 3); // * + button + a
+			assert.strictEqual(style_rule_index.rules.length, 4);
+			assert.deepEqual([...result.resolved_variables], ['palette_a']);
 		});
 	});
 

@@ -1,12 +1,11 @@
 /**
- * Cache-aware single-file class extraction shared by the Gro generator and the
- * Vite plugin. Returns extraction sourced from cache when the content hash and
+ * Cache-aware single-file class extraction for the Vite plugin's transform
+ * hook and dev pre-scan. Returns extraction sourced from cache when the content hash and
  * the configuration key match, else freshly parsed, plus the cache path to
  * write on a miss.
  *
  * Callers own everything around this - in-memory hash short-circuits, the Vite
- * deletion-race guard, diagnostic logging, stats counting, and how/when to
- * write the cache (fire-and-forget vs. batched).
+ * deletion-race guard, diagnostic logging, and how/when to write the cache.
  *
  * @module
  */

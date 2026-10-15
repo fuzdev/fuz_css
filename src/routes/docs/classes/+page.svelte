@@ -95,9 +95,8 @@
 		<TomeSectionHeader text="Usage" />
 		<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 		<p>
-			Use the <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> or
-			<ModuleLink module_path="gen_fuz_css.ts">Gro generator</ModuleLink> to generate bundled CSS
-			that includes theme variables, base styles, and utility classes:
+			Use the <ModuleLink module_path="vite_plugin_fuz_css.ts">Vite plugin</ModuleLink> to generate
+			bundled CSS that includes theme variables, base styles, and utility classes:
 		</p>
 
 		<TomeSection>
@@ -241,69 +240,6 @@ declare module 'virtual:fuz.css' {
 		</TomeSection>
 
 		<TomeSection>
-			<TomeSectionHeader text="Gro generator" tag="h3" />
-			<p>
-				For projects using <a href="https://github.com/fuzdev/gro">Gro</a>, the
-				<ModuleLink module_path="gen_fuz_css.ts" /> generator creates a <code>*.gen.css.ts</code>
-				file anywhere in <code>src/</code>:
-			</p>
-			<Code
-				lang="ts"
-				content={`// src/routes/fuz.gen.css.ts for SvelteKit, or src/fuz.gen.css.ts, etc.
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.ts';
-
-export const gen = gen_fuz_css();`}
-			/>
-			<p>
-				Then import the generated file, in <code>src/routes/+layout.svelte</code> for SvelteKit:
-			</p>
-			<Code
-				lang="ts"
-				content={`// +layout.svelte - bundled mode (recommended, default config)
-// includes only used base styles, variables, and utilities
-import './fuz.css';`}
-			/>
-			<p>
-				For projects managing their own theme or base styles, disable them and import separately:
-			</p>
-			<Code
-				lang="ts"
-				content={`// fuz.gen.css.ts - utility-only mode
-export const gen = gen_fuz_css({
-	base_css: null,
-	variables: null,
-});
-
-// +layout.svelte - full package CSS, only used utilities
-import '@fuzdev/fuz_css/style.css'; // all base styles
-import '@fuzdev/fuz_css/theme.css'; // all variables
-import './fuz.css';`}
-			/>
-			<h4>Generator options</h4>
-			<p>
-				The Gro generator accepts the same options as the <a href="#Vite-plugin">Vite plugin</a>,
-				plus additional options for batch processing:
-			</p>
-			<ul>
-				<li>
-					<code>include_stats</code> - include file statistics in output (file counts, cache
-					hits/misses, class counts)
-				</li>
-				<li>
-					<code>project_root</code> - project root directory; defaults to <code>process.cwd()</code>
-				</li>
-				<li>
-					<code>concurrency</code> - max concurrent file processing for cache reads and extraction;
-					defaults to 8
-				</li>
-				<li>
-					<code>cache_io_concurrency</code> - max concurrent cache writes and deletes; defaults to
-					50
-				</li>
-			</ul>
-		</TomeSection>
-
-		<TomeSection>
 			<TomeSectionHeader text="Class detection" tag="h3" />
 			<p>
 				The <ModuleLink module_path="css_class_extractor.ts">extractor</ModuleLink> scans your
@@ -420,8 +356,8 @@ const color = get_dynamic_color();`}
 			</aside>
 			<p>
 				Alternatively, use the
-				<DeclarationLink name="GenFuzCssOptions">additional_classes</DeclarationLink> option in your
-				config to the Vite plugin or Gro generator:
+				<DeclarationLink name="CssOutputOptions">additional_classes</DeclarationLink> option in your
+				Vite plugin config:
 			</p>
 			<Code
 				lang="ts"
@@ -430,7 +366,7 @@ const color = get_dynamic_color();`}
 });`}
 			/>
 			<p>
-				Use <DeclarationLink name="GenFuzCssOptions">exclude_classes</DeclarationLink> to filter out
+				Use <DeclarationLink name="CssOutputOptions">exclude_classes</DeclarationLink> to filter out
 				false positives from extraction. This also suppresses warnings for these classes, even if
 				they were explicitly annotated:
 			</p>
@@ -494,7 +430,7 @@ const el = document.createElement('dialog');`}
 				framework hydration) won't be detected.
 			</p>
 			<p>
-				Use <DeclarationLink name="GenFuzCssOptions">additional_elements</DeclarationLink> to
+				Use <DeclarationLink name="CssOutputOptions">additional_elements</DeclarationLink> to
 				force-include element styles for runtime-created elements:
 			</p>
 			<Code
@@ -511,9 +447,8 @@ const el = document.createElement('dialog');`}
 		<p>
 			Detection finds the classes, elements, and variables your source uses (see
 			<a href="#Class-detection">class detection</a> above), and resolution turns that into CSS.
-			Bundled mode (the default for the <a href="#Vite-plugin">Vite plugin</a> and
-			<a href="#Gro-generator">Gro generator</a>) combines three layers into a single output, each
-			trimmed to what your code uses:
+			Bundled mode (the <a href="#Vite-plugin">Vite plugin</a>'s default) combines three layers into
+			a single output, each trimmed to what your code uses:
 		</p>
 		<ol>
 			<li>
@@ -1235,8 +1170,7 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			/>
 
 			<h4>Registering composites</h4>
-			<p>Register custom composites with the Vite plugin or Gro generator:</p>
-			<h5>Vite plugin</h5>
+			<p>Register custom composites with the Vite plugin:</p>
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
@@ -1245,16 +1179,6 @@ import {custom_composites} from './src/lib/composites.ts';
 vite_plugin_fuz_css({
 	class_definitions: custom_composites,
 }),`}
-			/>
-			<h5>Gro generator</h5>
-			<Code
-				lang="ts"
-				content={`// fuz.gen.css.ts
-import {custom_composites} from '#lib/composites.ts';
-
-export const gen = gen_fuz_css({
-	class_definitions: custom_composites,
-});`}
 			/>
 			See <a href="#Usage">Usage</a> for more details.
 
@@ -1673,10 +1597,10 @@ export const gen = gen_fuz_css({
 			</tbody>
 		</table>
 		<p>
-			The <DeclarationLink name="GenFuzCssOptions">additional_classes</DeclarationLink> plugin
+			The <DeclarationLink name="CssOutputOptions">additional_classes</DeclarationLink> plugin
 			config option is an escape hatch for classes that can't be statically detected. Acorn plugins
-			can be added via <DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> for
-			additional syntax support like <a href="#React-and-JSX">JSX</a>.
+			can be added via <DeclarationLink name="CssExtractionOptions">acorn_plugins</DeclarationLink>
+			for additional syntax support like <a href="#React-and-JSX">JSX</a>.
 		</p>
 		<p>
 			Out of the box, class generation works only with TypeScript/JS, Svelte, and JSX. Angular is
@@ -1725,10 +1649,9 @@ export const gen = gen_fuz_css({
 			<p>
 				To enable JSX support for React, Preact, Solid, etc, install
 				<a href="https://github.com/acornjs/acorn-jsx"><code>acorn-jsx</code></a> and pass it to the
-				plugin or generator:
+				plugin:
 			</p>
 			<Code lang={null} content="npm i -D acorn-jsx" />
-			<h4>Vite plugin</h4>
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
@@ -1742,17 +1665,6 @@ export default defineConfig({
       acorn_plugins: [jsx()],
     }),
   ],
-});`}
-			/>
-			<h4>Gro generator</h4>
-			<Code
-				lang="ts"
-				content={`// fuz.gen.css.ts
-import {gen_fuz_css} from '@fuzdev/fuz_css/gen_fuz_css.ts';
-import jsx from 'acorn-jsx';
-
-export const gen = gen_fuz_css({
-	acorn_plugins: [jsx()],
 });`}
 			/>
 			<p>Supported JSX patterns:</p>
@@ -1782,8 +1694,9 @@ const styles = 'box hover:shadow_lg';
 const Component = () => <div className={styles} />;`}
 			/>
 			<p>
-				The <DeclarationLink name="GenFuzCssOptions">acorn_plugins</DeclarationLink> option accepts
-				any Acorn-compatible plugin, so other syntax extensions can be supported the same way.
+				The <DeclarationLink name="CssExtractionOptions">acorn_plugins</DeclarationLink> option
+				accepts any Acorn-compatible plugin, so other syntax extensions can be supported the same
+				way.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -1830,7 +1743,7 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 			created as composites with a helper function - fuz_css uses this strategy internally to create
 			its token classes in <ModuleLink module_path="css_class_definitions.ts" />.
 		</p>
-		<p>Register with the Vite plugin or Gro generator:</p>
+		<p>Register with the Vite plugin:</p>
 		<Code
 			lang="ts"
 			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.ts';

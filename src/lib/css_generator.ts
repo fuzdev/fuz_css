@@ -1,10 +1,10 @@
 /**
- * The generator core the Vite plugin and the Gro generator share: the
- * options both read with their defaults, the resources a render needs, and
- * the render itself - from a collection of extracted classes to
- * banner-free CSS, with its diagnostics dispatched per `on_error` and
- * `on_warning`. Each generator owns only how it collects the classes and
- * where the CSS goes.
+ * The generator core the Vite plugin renders through: the options it reads
+ * with their defaults, the resources a render needs, and the render itself -
+ * from a collection of extracted classes to CSS, with its diagnostics
+ * dispatched per `on_error` and `on_warning`. The plugin owns only how it
+ * collects the classes and where the CSS goes, so the seam stays open for
+ * another integration.
  *
  * @module
  */
@@ -35,10 +35,8 @@ export interface CssRenderInput {
 	 * aren't theme variables are ignored.
 	 */
 	detected_css_variables: Iterable<string>;
-	/** A logger for resolution stats and custom interpreters. */
+	/** A logger for custom interpreters. */
 	log?: Logger;
-	/** Whether to compute and log resolution statistics. */
-	include_stats?: boolean;
 }
 
 /**
@@ -57,7 +55,7 @@ export interface CssGenerator {
 	 */
 	ensure_ready: () => Promise<void>;
 	/**
-	 * Renders CSS without banners and dispatches its diagnostics. Before
+	 * Renders CSS and dispatches its diagnostics. Before
 	 * `ensure_ready` resolves it renders utility classes only.
 	 *
 	 * @throws CssGenerationError - for a diagnostic level set to `'throw'`
@@ -130,7 +128,7 @@ export const create_css_generator = (
 		}));
 
 	const render = (input: CssRenderInput): string => {
-		const { css_classes, detected_css_variables, log, include_stats } = input;
+		const { css_classes, detected_css_variables, log } = input;
 		const {
 			all_classes,
 			all_classes_with_locations,
@@ -159,8 +157,7 @@ export const create_css_generator = (
 			additional_variables,
 			exclude_elements,
 			exclude_variables,
-			log,
-			include_stats
+			log
 		});
 		dispatch(diagnostics);
 		return css;

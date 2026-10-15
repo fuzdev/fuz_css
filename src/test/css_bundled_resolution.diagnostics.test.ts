@@ -243,7 +243,7 @@ describe('resolve_css diagnostics', () => {
 				{ name: 'shade_40', base: '#ccc' }
 			]);
 
-			// Callers (gen_fuz_css/vite_plugin) add explicit_variables to detected_css_variables
+			// Callers (generate_css) add explicit_variables to detected_css_variables
 			const result = resolve_css({
 				style_rule_index,
 				variable_graph,

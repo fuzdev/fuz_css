@@ -1,10 +1,9 @@
 /*
 
 For optimized output that includes only what your code uses, use the Vite plugin
-or Gro generator instead of importing this file directly:
+instead of importing this file directly:
 
-  import 'virtual:fuz.css';  // Vite plugin - recommended
-  import './fuz.css';        // Gro generator
+  import 'virtual:fuz.css';
 
 Direct import is for utility-only mode (with theme.css) or non-bundled usage.
 See: https://css.fuz.dev/docs/classes

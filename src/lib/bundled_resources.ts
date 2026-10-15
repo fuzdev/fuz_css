@@ -1,11 +1,11 @@
 /**
  * Construction of the bundled CSS resources (style-rule index and variable
- * graph) shared by the Gro generator and the Vite plugin.
+ * graph) the generator core renders with.
  *
- * The two generators consume these differently - the Gro generator caches one
- * bundle per instance, the Vite plugin loads eagerly at dev-server startup and
- * on first virtual-module access in a build - but build them identically from
- * the same options. This keeps that construction in one place.
+ * The Vite plugin loads them eagerly at dev-server startup and on first
+ * virtual-module access in a build, once per plugin instance, through
+ * `css_generator.ts`. This keeps their construction from the options in one
+ * place.
  *
  * @module
  */

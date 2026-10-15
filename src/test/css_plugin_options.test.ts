@@ -1,8 +1,7 @@
 /**
  * Tests for the shared plugin options interface.
  *
- * Verifies that the shared options work correctly with both
- * the Gro generator and Vite plugin.
+ * Verifies that the shared options compose into the Vite plugin's options.
  *
  * @module
  */
@@ -17,7 +16,6 @@ import type {
 	CssDiagnosticsOptions,
 	CssCacheOptions
 } from '#lib/css_plugin_options.ts';
-import type { GenFuzCssOptions } from '#lib/gen_fuz_css.ts';
 import type { VitePluginFuzCssOptions } from '#lib/vite_plugin_fuz_css.ts';
 
 describe('shared options interface', () => {
@@ -48,26 +46,6 @@ describe('shared options interface', () => {
 		};
 
 		assert.isDefined(base_options);
-	});
-
-	test('GenFuzCssOptions extends CssGeneratorBaseOptions', () => {
-		// Type-level test: GenFuzCssOptions should accept all base options plus Gro-specific ones
-		const gro_options: GenFuzCssOptions = {
-			// Base options
-			filter_file: () => true,
-			base_css: undefined,
-			variables: undefined,
-			on_error: 'throw',
-			// Gro-specific options
-			include_stats: true,
-			project_root: '/path/to/project',
-			concurrency: 4,
-			cache_io_concurrency: 100
-		};
-
-		assert.isDefined(gro_options);
-		assert.isTrue(gro_options.include_stats);
-		assert.strictEqual(gro_options.project_root, '/path/to/project');
 	});
 
 	test('VitePluginFuzCssOptions extends CssGeneratorBaseOptions', () => {
@@ -171,6 +149,6 @@ describe('options default behavior', () => {
 		// This test documents the expected behavior
 		const opts: CssClassOptions = {};
 		assert.isUndefined(opts.include_default_classes);
-		// Actual default is applied in gen_fuz_css.ts and vite_plugin_fuz_css.ts
+		// Actual default is applied in css_generator.ts
 	});
 });

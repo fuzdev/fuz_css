@@ -42,14 +42,10 @@
   },
   "peerDependencies": {
     "@fuzdev/fuz_util": ">=0.72.0",
-    "@fuzdev/gro": ">=0.203.0",
     "vite": ">=6",
     "zod": "^4"
   },
   "peerDependenciesMeta": {
-    "@fuzdev/gro": {
-      "optional": true
-    },
     "vite": {
       "optional": true
     },

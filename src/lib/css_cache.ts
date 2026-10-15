@@ -24,12 +24,12 @@ export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
  * Whether this is a CI run (`CI=1`, `CI=true`, or another truthy value):
  * there's no point writing a cache the next run won't reuse.
  *
- * @internal Read by the generators for their cache and `on_error` defaults.
+ * @internal Read by the generator for its cache and `on_error` defaults.
  */
 export const is_ci = !!process.env.CI;
 
 /**
- * Creates the cache-path lookup the generators share: a file's cache path
+ * Creates the extraction cache-path lookup: a file's cache path
  * under `cache_dir` in `project_root`, or `null` on CI, where nothing is
  * cached.
  *
@@ -37,7 +37,7 @@ export const is_ci = !!process.env.CI;
  * @param project_root - the project root, with or without a trailing slash
  * @returns a function from a file's absolute path to its cache path, or `null` when uncached
  *
- * @internal Shared by the Vite plugin and the Gro generator.
+ * @internal Used by the Vite plugin.
  */
 export const create_cache_path_resolver = (
 	cache_dir: string,
@@ -76,7 +76,7 @@ export const CSS_CACHE_VERSION = 7;
  * @param cache_salt - a consumer string folded into the key, if any
  * @returns the key, or `null` for the default configuration
  *
- * @internal Shared by the Vite plugin and the Gro generator.
+ * @internal Used by the Vite plugin.
  */
 export const to_extraction_cache_key = (
 	acorn_plugins: Array<AcornPlugin> | undefined,

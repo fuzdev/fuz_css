@@ -1,6 +1,5 @@
 /**
- * Tests for the shared CSS-generation pipeline used by both the Gro generator
- * and the Vite plugin.
+ * Tests for the CSS-generation pipeline the generator core renders through.
  *
  * @module
  */

@@ -117,9 +117,8 @@ const HMR_DEBOUNCE_MS = 10;
 
 /**
  * Concurrency for the dev pre-scan (file read + cache read + extract + cache
- * write). Matches the Gro generator's default - the value controls I/O
- * interleaving, not CPU parallelism (AST parsing is synchronous on the main
- * thread).
+ * write). The value controls I/O interleaving, not CPU parallelism (AST
+ * parsing is synchronous on the main thread).
  */
 const PRESCAN_CONCURRENCY = 8;
 

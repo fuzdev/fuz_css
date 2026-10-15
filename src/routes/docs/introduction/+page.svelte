@@ -61,9 +61,8 @@
 			<TomeSectionHeader text="Usage" />
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
-				Use the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-				<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> for bundled CSS that
-				includes theme variables, base styles, and utility classes in a single import. Add the
+				Use the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> for bundled CSS
+				that includes theme variables, base styles, and utility classes in a single import. Add the
 				plugin to your Vite config:
 			</p>
 			<Code
@@ -78,9 +77,7 @@ export default defineConfig({plugins: [sveltekit(), vite_plugin_fuz_css()]});`}
 				lang="ts"
 				content={`// bundled mode (recommended)
 // includes only used base styles, variables, and utilities
-import 'virtual:fuz.css'; // Vite plugin
-// or
-import './fuz.css'; // Gro generator, written to the filesystem`}
+import 'virtual:fuz.css';`}
 			/>
 			<p>
 				That single import is all most projects need, since it already holds the base styles and

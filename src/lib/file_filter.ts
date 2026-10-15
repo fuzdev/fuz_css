@@ -8,8 +8,8 @@ import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 /**
  * Filter function to determine which files to process for CSS class extraction.
- * The generators pass each file's absolute id and the project root (Vite's
- * `root`, Gro's `project_root`), so a filter can judge a path by where it sits
+ * The Vite plugin passes each file's absolute id and the project root (Vite's
+ * `root`), so a filter can judge a path by where it sits
  * in the project rather than where the project sits on disk. A filter that
  * ignores the root keeps working.
  */

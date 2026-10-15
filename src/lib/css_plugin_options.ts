@@ -1,13 +1,11 @@
 /**
- * Shared options for CSS generation plugins (Gro and Vite).
- *
- * Both `gen_fuz_css` (Gro generator) and `vite_plugin_fuz_css` share
- * the same core options for extraction, generation, and bundled CSS.
- * This module provides the shared types to ensure consistency.
+ * Options for CSS generation: the core options `vite_plugin_fuz_css` takes
+ * for extraction, generation, and bundled CSS, which the generator core
+ * (`css_generator.ts`) reads.
  *
  * ## Bundled mode (default)
  *
- * By default, the generated CSS (`virtual:fuz.css` or `./fuz.css`) includes
+ * By default, the generated CSS (`virtual:fuz.css`) includes
  * only the content your code uses from all three layers:
  * - Base styles (element defaults)
  * - Theme variables (CSS custom properties)
@@ -61,7 +59,7 @@ export interface CssExtractionOptions {
 	 * @example
 	 * ```ts
 	 * import jsx from 'acorn-jsx';
-	 * gen_fuz_css({ acorn_plugins: [jsx()] });
+	 * vite_plugin_fuz_css({ acorn_plugins: [jsx()] });
 	 * ```
 	 */
 	acorn_plugins?: Array<AcornPlugin>;
@@ -371,8 +369,8 @@ export interface CssCacheOptions {
 }
 
 /**
- * Combined base options shared by both Gro and Vite plugins.
- * These options work identically in both contexts.
+ * The combined options the generator core reads, which
+ * `VitePluginFuzCssOptions` extends.
  */
 export interface CssGeneratorBaseOptions
 	extends

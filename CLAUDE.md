@@ -101,7 +101,7 @@ or color values.
 2. **Theme variables** - Style variables as CSS custom properties
 3. **Utility classes** - Generated per-project, only includes used classes
 
-In bundled mode (`virtual:fuz.css` or `./fuz.css`), all three layers are
+In bundled mode (`virtual:fuz.css`), all three layers are
 combined and only used content is included. In utility-only mode, import
 `style.css` and `theme.css` from the package separately (full content).
 
@@ -123,7 +123,7 @@ combined and only used content is included. In utility-only mode, import
   everything except the two `!important` declarations in layers - the
   `prefers-reduced-motion` mapping, so a theme's durations can't re-enable
   motion, and `[hidden]`)
-- A theme applies either at build time (the generators' `theme` option, baked
+- A theme applies either at build time (the Vite plugin's `theme` option, baked
   into the bundled CSS, no JS shipped) or at runtime (fuz_ui's `ThemeRoot`
   renders it to a `<style>` element). They compose - the baked theme's
   overlay renders into the `fuz.theme.baked` sublayer, which a runtime
@@ -167,48 +167,47 @@ combined and only used content is included. In utility-only mode, import
 
 ### Smart utility class generation
 
-Two generators available, both using AST-based extraction and per-file caching:
+The generator is the **Vite plugin**,
+[vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts), which uses
+AST-based extraction and per-file caching and exposes the generated CSS as
+`virtual:fuz.css` with HMR. It works across
+SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
+In dev it pre-scans project sources and the root `index.html` at server
+startup (see `prescan`) so the first served CSS is complete, keeps those
+files current from the watcher, and extracts everything else as the dev
+server transforms it - keyed by file path with Vite's `?v=`/`?t=`
+cache-busters dropped, and a pre-bundled dependency through the source
+files its sourcemap lists (or as its bundled chunk when those can't be
+read). A client can't take a hot update before the
+virtual module has evaluated, so CSS that changes while a page is loading
+is delivered by a handshake: each client reports the module code it
+evaluated, and the server pushes that client an update when a refetch
+would give it different code, once per reported code (no report is
+added when `server.ws` or `server.hmr` is off). A change invalidates
+each served variant in every dev environment's module graph - the
+`?inline` one SvelteKit inlines into SSR'd `<head>` lives in a server
+environment - while the push and the handshake ride the client
+environment's hot channel. In build the virtual module is a
+placeholder rule until every transform has run: `renderChunk` runs the
+generated CSS through Vite's CSS pipeline (`preprocessCSS`) and restates
+the module's text with it before Vite renders the stylesheet, so the
+generated CSS is minified and post-processed like the rest, the
+stylesheet is named from its content, and it sits where import order put
+the module - for code-split and single-stylesheet builds alike. If that
+restatement can't run, `generateBundle` splices the CSS in at the
+placeholder's position instead, unprocessed, with a warning. Each
+build environment's CSS comes from the modules in its own graph, so a
+client build never carries an SSR-only class, and a watch rebuild drops
+a deleted file's. The build's passes and the dev handshake need
+different places in the plugin order, so `vite_plugin_fuz_css()` returns
+several plugin objects (pass the array to `plugins` as is), and the
+plugin needs Vite 6 or later.
 
-1. **Vite plugin** (preferred) - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts)
-   exposes the generated CSS as `virtual:fuz.css` with HMR; works across
-   SvelteKit/Svelte/React/Preact/Solid and needs no committed output file.
-   In dev it pre-scans project sources and the root `index.html` at server
-   startup (see `prescan`) so the first served CSS is complete, keeps those
-   files current from the watcher, and extracts everything else as the dev
-   server transforms it - keyed by file path with Vite's `?v=`/`?t=`
-   cache-busters dropped, and a pre-bundled dependency through the source
-   files its sourcemap lists (or as its bundled chunk when those can't be
-   read). A client can't take a hot update before the
-   virtual module has evaluated, so CSS that changes while a page is loading
-   is delivered by a handshake: each client reports the module code it
-   evaluated, and the server pushes that client an update when a refetch
-   would give it different code, once per reported code (no report is
-   added when `server.ws` or `server.hmr` is off). A change invalidates
-   each served variant in every dev environment's module graph - the
-   `?inline` one SvelteKit inlines into SSR'd `<head>` lives in a server
-   environment - while the push and the handshake ride the client
-   environment's hot channel. In build the virtual module is a
-   placeholder rule until every transform has run: `renderChunk` runs the
-   generated CSS through Vite's CSS pipeline (`preprocessCSS`) and restates
-   the module's text with it before Vite renders the stylesheet, so the
-   generated CSS is minified and post-processed like the rest, the
-   stylesheet is named from its content, and it sits where import order put
-   the module - for code-split and single-stylesheet builds alike. If that
-   restatement can't run, `generateBundle` splices the CSS in at the
-   placeholder's position instead, unprocessed, with a warning. Each
-   build environment's CSS comes from the modules in its own graph, so a
-   client build never carries an SSR-only class, and a watch rebuild drops
-   a deleted file's. The build's passes and the dev handshake need
-   different places in the plugin order, so `vite_plugin_fuz_css()` returns
-   several plugin objects (pass the array to `plugins` as is), and the
-   plugin needs Vite 6 or later
-2. **Gro generator** - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts), a SvelteKit
-   alternative that writes a `fuz.css` genfile
-
-Both render through one shared core (`css_generator.ts`: option defaults,
+It renders through a generator core (`css_generator.ts`: option defaults,
 resources, and a diagnostic dispatch that logs a persisting diagnostic once
 rather than on every re-render) over the `generate_css` pipeline (generate →
-resolve → bundle), and output only CSS for classes actually used. Supports Svelte 5.16+
+resolve → bundle), the seam another integration would plug into, and outputs
+only CSS for classes actually used. Supports Svelte 5.16+
 class syntax, JSX `className`, clsx/cn calls, and `// @fuz-classes` comment
 hints.
 
@@ -239,10 +238,9 @@ like `size="var(--icon_size_xs)"` that AST-based extraction would miss.
 CSS files pass the default filter too, for their variable references only
 (no class or element extraction, no cache entry) - so a dependency's
 stylesheet, like a syntax theme reading palette variables, keeps them in
-bundled mode. The generators skip their own output: the Vite plugin its
-virtual module, the Gro generator any file opening with its banner.
+bundled mode. The plugin skips its own output, the virtual module.
 
-See `GenFuzCssOptions` and `VitePluginFuzCssOptions` types for configuration.
+See the `VitePluginFuzCssOptions` type for configuration.
 
 ### Three class types
 
@@ -458,25 +456,15 @@ declare module 'virtual:fuz.css' {
 }
 ```
 
-**Gro generator (SvelteKit alternative):**
-
-```ts
-// src/routes/fuz.gen.css.ts
-import { gen_fuz_css } from '@fuzdev/fuz_css/gen_fuz_css.ts';
-export const gen = gen_fuz_css();
-```
-
-Then import the generated file in your layout: `import './fuz.css';`
-
 ### Utility-only mode
 
 For projects managing their own theme/base styles, set `base_css: null` and
-`variables: null` in generator options, then import package CSS separately
+`variables: null` in the plugin options, then import package CSS separately
 (`@fuzdev/fuz_css/style.css` and `theme.css` include everything).
 
 ### Customization
 
-Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
+Use `VitePluginFuzCssOptions` to customize:
 
 - `base_css` - Custom base styles (a string) or callback to modify defaults.
   The contract is pass-through with shallow tree-shaking: any CSS the parser
@@ -504,7 +492,7 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
   lightness moved bakes its recomputed caps last, with the gates reported as
   warnings (`theme_gate_failed`, `theme_gate_unchecked`). The lint doesn't
-  run there: it needs zod, an optional peer the generators load without
+  run there: it needs zod, an optional peer the generator loads without
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars
@@ -709,7 +697,7 @@ typography, borders, shading, shadows, layout. See
   `to_filter_scope`, the root- or package-relative part it judges
 - [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
   `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping
-  dispatch the generators share
+  dispatch the generator core runs
 
 **CSS generation:**
 
@@ -733,23 +721,22 @@ typography, borders, shading, shadows, layout. See
   build-mode placeholder (one declaration the build restates away) and the
   fallback splice that writes the generated CSS at its position in the
   bundled stylesheet
-- [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
-- [css_generator.ts](src/lib/css_generator.ts) - The core both generators
-  render through: option defaults, the resources a render needs, and the
+- [css_generator.ts](src/lib/css_generator.ts) - The core the Vite plugin
+  renders through: option defaults, the resources a render needs, and the
   render with its diagnostics dispatched
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
-  (generate → resolve → bundle) used by both generators, plus the checks
+  (generate → resolve → bundle) the generator core runs, plus the checks
   that span options (`undefined_theme_variables`, `theme_discarded`)
 - [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
   resources (style-rule index, variable graph)
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
-  single-file extraction shared by both generators
-- [css_plugin_options.ts](src/lib/css_plugin_options.ts) - Shared options types
-  for Gro/Vite generators
+  single-file extraction for the plugin's transform hook and pre-scan
+- [css_plugin_options.ts](src/lib/css_plugin_options.ts) - The generator
+  options types the Vite plugin's options extend
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
   validation plus a configuration key (`to_extraction_cache_key`, over
-  `acorn_plugins` and `cache_salt`), atomic writes, the cache-path lookup
-  the generators share, CI skip
+  `acorn_plugins` and `cache_salt`), atomic writes, the cache-path lookup,
+  CI skip
 - [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
@@ -864,7 +851,7 @@ Plus standalone tests: `css_cache`, `css_generator`, `css_classes`, `css_literal
 `css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
-`fuz_comments`, `bundled_resources`, `gen_fuz_css`, `generate_bundled_css`,
+`fuz_comments`, `bundled_resources`, `generate_bundled_css`,
 `generate_css`, and more.
 
 The theme suites discover the shipped themes by glob through

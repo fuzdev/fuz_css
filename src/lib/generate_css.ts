@@ -1,11 +1,9 @@
 /**
- * Shared CSS-generation pipeline for the Gro generator and the Vite plugin.
- *
- * Both consumers extract classes from source files their own way (batch via the
- * Gro filer, incrementally via Vite's transform hook), then funnel the
- * aggregated result through this single function so their CSS output stays
- * identical. Callers own banner wrapping and error/warning dispatch (those
- * differ by logger), this owns the generate → resolve → bundle pipeline.
+ * The CSS-generation pipeline the generator core (`css_generator.ts`) renders
+ * through. The Vite plugin extracts classes from source files incrementally,
+ * through its transform hook and dev pre-scan, then funnels the aggregated
+ * result through this single function. Callers own where the CSS goes and
+ * error/warning dispatch; this owns the generate → resolve → bundle pipeline.
  *
  * @module
  */
@@ -171,10 +169,8 @@ export interface GenerateCssOptions {
 	exclude_elements?: Iterable<string>;
 	exclude_variables?: Iterable<string>;
 
-	/** Optional logger; only used to emit resolution stats when `include_stats`. */
+	/** Optional logger, passed to the class interpreters. */
 	log?: Logger;
-	/** Whether to compute and log resolution statistics. */
-	include_stats?: boolean;
 }
 
 export interface GenerateCssResult {
@@ -212,8 +208,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		additional_variables,
 		exclude_elements,
 		exclude_variables: raw_exclude_variables,
-		log,
-		include_stats = false
+		log
 	} = options;
 
 	// a Set, for the lookups here and so the iterable is consumed once
@@ -274,26 +269,11 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			utility_variables_used: utility_result.variables_used,
 			additional_elements,
 			additional_variables,
-			include_stats,
 			exclude_elements,
 			exclude_variables: exclude_variables ?? undefined,
 			explicit_elements,
 			explicit_variables
 		});
-
-		if (include_stats && resolution.stats && log) {
-			log.info(
-				`[css_resolution] Elements: ${
-					resolution.stats.element_count
-				} (${resolution.stats.elements.join(', ')})`
-			);
-			log.info(
-				`[css_resolution] Rules: ${resolution.stats.included_rules} of ${
-					resolution.stats.total_rules
-				}`
-			);
-			log.info(`[css_resolution] Variables: ${resolution.stats.variable_count} resolved`);
-		}
 
 		diagnostics.push(...resolution.diagnostics);
 

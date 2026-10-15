@@ -190,10 +190,9 @@
 			<ModuleLink module_path="themes.ts" /> holds the registry and the contrast modifiers.
 		</p>
 		<p>
-			Pass a theme to the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> or
-			<TomeLink slug="classes" hash="Gro-generator">Gro generator</TomeLink> and its values bake
-			into the generated CSS - no runtime rendering, no JavaScript shipped, and the output stays
-			tree-shaken:
+			Pass a theme to the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> and its
+			values bake into the generated CSS - no runtime rendering, no JavaScript shipped, and the
+			output stays tree-shaken:
 		</p>
 		<Code
 			lang="ts"

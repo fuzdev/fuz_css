@@ -1,7 +1,6 @@
 /**
- * Tests for the generator core both the Vite plugin and the Gro generator
- * render through - end to end from extracted classes to dispatched
- * diagnostics.
+ * Tests for the generator core the Vite plugin renders through - end to end
+ * from extracted classes to dispatched diagnostics.
  *
  * @module
  */
