@@ -66,6 +66,9 @@ import {
 	render_lightness_stop_css,
 	render_neutral_stop_css,
 	render_ramp_color_css,
+	to_chroma_shape_name,
+	to_lightness_stop_name,
+	to_palette_chroma_name,
 	type LightnessRampKnobs,
 	type RampFamily
 } from './ramps.ts';
@@ -113,7 +116,7 @@ const lightness_ramp_variables = (
 		dark: String(knobs.dark.curve)
 	},
 	...derived_lightness_stops.map((stop) => ({
-		name: `${family}_lightness_${stop}`,
+		name: to_lightness_stop_name(family, stop),
 		base: render_lightness_stop_css(family, stop)
 	}))
 ];
@@ -142,9 +145,10 @@ The fitted default knob values, the formulas, and the CSS emitters live in
 `ramps.ts`; tests gate the
 defaults for gamut, ramp monotonicity, and contrast.
 
-Layers, each derivable from the one above and each overridable per stop:
-curve knobs → ramp stops (`--palette_lightness_50`, `--palette_chroma_50`)
-→ color stops (`--palette_a_50`) → utility classes (`.color_a_50`).
+Layers, each derivable from the one above: curve knobs → private ramp
+intermediates (`--_palette_lightness_50`, `--_palette_chroma_50`) → color
+stops (`--palette_a_50`) → utility classes (`.color_a_50`). A theme sets
+the knobs and may pin a color stop; the intermediates aren't settable.
 
 */
 
@@ -355,13 +359,13 @@ export const default_variables: Array<StyleVariable> = [
 	// normalized chroma shape per stop - 0 at the endpoints, 1 at the midpoint;
 	// shared by the palette chroma ramp and the neutral scales
 	...numeric_scale_variants.map((stop) => ({
-		name: `chroma_shape_${stop}`,
+		name: to_chroma_shape_name(stop),
 		base: render_chroma_shape_css(stop)
 	})),
 
 	// capped palette chroma stops (per-scheme caps)
 	...numeric_scale_variants.map((stop) => ({
-		name: `palette_chroma_${stop}`,
+		name: to_palette_chroma_name(stop),
 		base: render_chroma_stop_css(stop, PALETTE_CHROMA_CAPS.light[stop]),
 		dark: render_chroma_stop_css(stop, PALETTE_CHROMA_CAPS.dark[stop])
 	})),

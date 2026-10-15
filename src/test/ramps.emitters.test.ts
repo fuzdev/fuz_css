@@ -37,6 +37,9 @@ import {
 	render_shadow_tint_css,
 	border_color_oklch,
 	BORDER_COLOR_ALPHAS,
+	to_chroma_shape_name,
+	to_lightness_stop_name,
+	to_palette_chroma_name,
 	type RampFamily
 } from '#lib/ramps.ts';
 import {
@@ -122,7 +125,7 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 			}
 			if (name === 'var') {
 				skip_ws();
-				const m = /^--([a-z][a-z0-9_]*)/.exec(s.slice(i));
+				const m = /^--(_?[a-z][a-z0-9_]*)/.exec(s.slice(i));
 				if (!m) throw new Error(`expected a custom property name at ${i} in ${expr}`);
 				i += m[0].length;
 				skip_ws();
@@ -206,14 +209,17 @@ const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
 		vars[`palette_${letter}_chroma_scale`] = PALETTE_CHROMA_MULTIPLIERS[letter];
 	}
 	for (const stop of numeric_scale_variants) {
-		vars[`chroma_shape_${stop}`] = ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve);
-		vars[`palette_chroma_${stop}`] = ramp_chroma(
+		vars[to_chroma_shape_name(stop)] = ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve);
+		vars[to_palette_chroma_name(stop)] = ramp_chroma(
 			stop,
 			PALETTE_CHROMA_KNOBS[scheme],
 			PALETTE_CHROMA_CAPS[scheme][stop]
 		);
 		for (const family of ['palette', 'shade', 'text'] as const) {
-			vars[`${family}_lightness_${stop}`] = ramp_lightness(LIGHTNESS_KNOBS[family][scheme], stop);
+			vars[to_lightness_stop_name(family, stop)] = ramp_lightness(
+				LIGHTNESS_KNOBS[family][scheme],
+				stop
+			);
 		}
 	}
 	return vars;

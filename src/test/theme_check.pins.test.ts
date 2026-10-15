@@ -1,8 +1,8 @@
 /**
  * Authored values on the variables the gates read: a color stop or role
  * authored directly either becomes the color the gates measure or lands in
- * `unchecked`, a pinned `chroma_shape_NN` flows through every stop that rides
- * it, and a variable no gate reads leaves the report alone.
+ * `unchecked`, a ramp intermediate is never read as authored, and a variable
+ * no gate reads leaves the report alone.
  */
 
 import { test, assert, describe } from 'vitest';
@@ -23,9 +23,15 @@ import type { StyleVariable } from '#lib/variable.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { zine_theme } from '#lib/themes/zine.ts';
 import { default_variables } from '#lib/variables.ts';
-import { palette_stop_oklch, shade_stop_oklch, text_stop_oklch } from '#lib/ramps.ts';
+import {
+	palette_stop_oklch,
+	shade_stop_oklch,
+	text_stop_oklch,
+	to_chroma_shape_name,
+	to_lightness_stop_name
+} from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
-import type { ColorSchemeVariant } from '#lib/variable_data.ts';
+import type { ColorSchemeVariant, NumericScaleVariant } from '#lib/variable_data.ts';
 
 const base_report = check_theme(base_theme);
 
@@ -320,14 +326,16 @@ describe('pinned color stops', () => {
 	});
 });
 
-describe('pinned chroma shape', () => {
-	test('a pinned shape tints the neutral stop the gates evaluate', () => {
-		// stop 00 is untinted by default; a shape pinned there gives the page
-		// ground the full neutral chroma, far outside sRGB that close to white
-		const report = check({ name: 'chroma_shape_00', base: '5' });
-		assert.deepEqual(report.unchecked, []);
-		assert.isFalse(get_entry(report, 'gamut', 'light', 'shade_00').pass);
-		assert.isTrue(get_entry(base_report, 'gamut', 'light', 'shade_00').pass);
+describe('ramp intermediates', () => {
+	test('an intermediate a theme carries anyway is unchecked, never read as the default', () => {
+		// the schema refuses the name, but the renderer emits the value - here the
+		// full neutral chroma on the page ground, far outside sRGB near white -
+		// so passing the ground on the derived shape would hide it
+		const report = check({ name: '_chroma_shape_00', base: '5' });
+		assert.deepEqual(report.unchecked, [
+			{ variable: '_chroma_shape_00', value: '5', reason: 'internal ramp variable - not settable' }
+		]);
+		assert.isUndefined(find_entry(report, 'gamut', 'light', 'shade_00'));
 		assert.isFalse(report.ok);
 	});
 });
@@ -442,9 +450,9 @@ describe('role variables', () => {
 		const resolver = create_theme_resolver(zine_theme);
 		for (const scheme of ['light', 'dark'] as const) {
 			const n = (name: string): number => resolver.resolve(name, scheme)!;
-			const neutral = (family: string, stop: string): Oklch => [
-				n(`${family}_lightness_${stop}`),
-				n('neutral_chroma') * n(`chroma_shape_${stop}`),
+			const neutral = (family: 'shade' | 'text', stop: NumericScaleVariant): Oklch => [
+				n(to_lightness_stop_name(family, stop)),
+				n('neutral_chroma') * n(to_chroma_shape_name(stop)),
 				n('hue_neutral')
 			];
 			const entry = get_entry(report, 'contrast', scheme, 'border_color vs shade_00');

@@ -20,69 +20,69 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'palette_chroma_max', base: '0.106', dark: '0.1088' },
 	{ name: 'chroma_curve', base: '1.3', dark: '1.27' },
 	{
-		name: 'palette_chroma_00',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_00)), 0.0072)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_00)), 0.0254)'
+		name: '_palette_chroma_00',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_00)), 0.0072)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_00)), 0.0254)'
 	},
 	{
-		name: 'palette_chroma_05',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_05)), 0.021)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_05)), 0.04)'
+		name: '_palette_chroma_05',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_05)), 0.021)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_05)), 0.04)'
 	},
 	{
-		name: 'palette_chroma_10',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_10)), 0.0382)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_10)), 0.0501)'
+		name: '_palette_chroma_10',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_10)), 0.0382)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_10)), 0.0501)'
 	},
 	{
-		name: 'palette_chroma_20',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_20)), 0.078)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_20)), 0.0673)'
+		name: '_palette_chroma_20',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_20)), 0.078)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_20)), 0.0673)'
 	},
 	{
-		name: 'palette_chroma_30',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_30)), 0.1235)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_30)), 0.0824)'
+		name: '_palette_chroma_30',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_30)), 0.1235)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_30)), 0.0824)'
 	},
 	{
-		name: 'palette_chroma_40',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_40)), 0.1179)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_40)), 0.0964)'
+		name: '_palette_chroma_40',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_40)), 0.1179)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_40)), 0.0964)'
 	},
 	{
-		name: 'palette_chroma_50',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_50)), 0.1026)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_50)), 0.1095)'
+		name: '_palette_chroma_50',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_50)), 0.1026)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_50)), 0.1095)'
 	},
 	{
-		name: 'palette_chroma_60',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_60)), 0.0868)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_60)), 0.122)'
+		name: '_palette_chroma_60',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_60)), 0.0868)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_60)), 0.122)'
 	},
 	{
-		name: 'palette_chroma_70',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_70)), 0.0706)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_70)), 0.1189)'
+		name: '_palette_chroma_70',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_70)), 0.0706)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_70)), 0.1189)'
 	},
 	{
-		name: 'palette_chroma_80',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_80)), 0.054)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_80)), 0.0812)'
+		name: '_palette_chroma_80',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_80)), 0.054)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_80)), 0.0812)'
 	},
 	{
-		name: 'palette_chroma_90',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_90)), 0.0372)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_90)), 0.0465)'
+		name: '_palette_chroma_90',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_90)), 0.0372)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_90)), 0.0465)'
 	},
 	{
-		name: 'palette_chroma_95',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_95)), 0.0286)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_95)), 0.03)'
+		name: '_palette_chroma_95',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_95)), 0.0286)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_95)), 0.03)'
 	},
 	{
-		name: 'palette_chroma_100',
-		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_100)), 0.02)',
-		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_100)), 0.0142)'
+		name: '_palette_chroma_100',
+		base: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_100)), 0.02)',
+		dark: 'min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--_chroma_shape_100)), 0.0142)'
 	},
 	{ name: 'shade_min', base: '#fff', dark: '#000' },
 	{ name: 'shade_max', base: '#000', dark: '#fff' },
@@ -178,8 +178,8 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'text_lightness_curve', base: '1.19', dark: '0.87' },
 	{
 		name: 'selection_color',
-		base: 'oklch(var(--palette_lightness_20) calc(var(--palette_chroma_20) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)',
-		dark: 'oklch(var(--palette_lightness_80) calc(var(--palette_chroma_80) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)'
+		base: 'oklch(var(--_palette_lightness_20) calc(var(--_palette_chroma_20) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)',
+		dark: 'oklch(var(--_palette_lightness_80) calc(var(--_palette_chroma_80) * var(--chroma_scale, 1) * var(--accent_chroma_scale, 1)) var(--hue_accent) / 40%)'
 	},
 	{
 		name: 'button_shadow',

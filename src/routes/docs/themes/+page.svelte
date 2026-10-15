@@ -267,9 +267,8 @@ test('my theme clears the accessibility gates', () => {
 		<p>
 			<code>compile_theme(theme)</code> is for themes that move hues or palette lightness -
 			monochrome, rotated, or dark-only. It recomputes the per-stop sRGB gamut caps from the theme's
-			actual hues and the lightness each stop resolves to, a pinned
-			<code>palette_lightness_NN</code> included, and appends the corrected
-			<code>palette_chroma_NN</code> stop overrides, returning
+			actual hues and the lightness each stop resolves to, and appends the corrected
+			<code>_palette_chroma_NN</code> stop overrides, returning
 			<code>{'{theme, report, issues}'}</code>. Chroma pushed past the caps on purpose
 			(<code>chroma_scale</code> above 1) still clips afterward, and the report says so.
 		</p>

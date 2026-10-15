@@ -1,11 +1,15 @@
 import { test, assert, describe } from 'vitest';
 
 import { check_theme } from '#lib/theme_check.ts';
-import { validate_theme, ACCENT_STATUS_HUE_SEPARATION } from '#lib/theme_validate.ts';
+import {
+	validate_theme,
+	known_theme_variable_names,
+	ACCENT_STATUS_HUE_SEPARATION
+} from '#lib/theme_validate.ts';
 import { resolve_theme_stance } from '#lib/theme_stance.ts';
-import type { StyleVariable, Theme } from '#lib/variable.ts';
 import { shipped_base_themes, create_monochrome_theme } from './theme_test_helpers.ts';
-import { PALETTE_HUES, PALETTE_CHROMA_MULTIPLIERS } from '#lib/ramps.ts';
+import { PALETTE_HUES, PALETTE_CHROMA_MULTIPLIERS, render_chroma_stop_css } from '#lib/ramps.ts';
+import { INTERNAL_VARIABLE_NAME_MATCHER, type StyleVariable, type Theme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
 
 describe('validate_theme', () => {
@@ -84,8 +88,58 @@ describe('validate_theme', () => {
 
 	test('the default variables lint clean', () => {
 		// the defaults are the reference values, so a warning here is a lint
-		// false positive (derived defaults are var() references and calc()s)
-		assert.deepEqual(validate_theme({ name: 't', variables: default_variables }), []);
+		// false positive (derived defaults are var() references and calc()s);
+		// the intermediates are left out, since a theme can't set them
+		const variables = default_variables.filter((v) => !INTERNAL_VARIABLE_NAME_MATCHER.test(v.name));
+		assert.deepEqual(validate_theme({ name: 't', variables }), []);
+	});
+
+	test('setting a ramp intermediate is an error naming it', () => {
+		for (const name of ['_palette_lightness_30', '_chroma_shape_50', '_text_lightness_95']) {
+			const issues = validate_theme({ name: 't', variables: [{ name, base: '0.5' }] });
+			assert.strictEqual(issues.length, 1, name);
+			assert.strictEqual(issues[0]!.level, 'error');
+			assert.strictEqual(issues[0]!.variable, name);
+			assert.include(issues[0]!.message, 'internal ramp variable');
+		}
+	});
+
+	test('a palette chroma intermediate is an error outside the capped form', () => {
+		for (const base of ['0.05', render_chroma_stop_css('40', 0.05)]) {
+			const issues = validate_theme({
+				name: 't',
+				variables: [{ name: '_palette_chroma_50', base }]
+			});
+			assert.strictEqual(issues.length, 1, base);
+			assert.include(issues[0]!.message, 'internal ramp variable');
+		}
+		// the capped form for its own stop is what compile_theme emits
+		assert.deepEqual(
+			validate_theme({
+				name: 't',
+				variables: [{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05) }]
+			}),
+			[]
+		);
+	});
+
+	test('the known names leave out the intermediates', () => {
+		for (const name of known_theme_variable_names) {
+			assert.notMatch(name, INTERNAL_VARIABLE_NAME_MATCHER, name);
+		}
+		assert.isTrue(known_theme_variable_names.has('palette_lightness_00'));
+		assert.isTrue(known_theme_variable_names.has('palette_a_50'));
+	});
+
+	test('the public spelling of an intermediate is unknown, with a pointer', () => {
+		const issues = validate_theme({
+			name: 't',
+			variables: [{ name: 'palette_lightness_30', base: '0.5' }]
+		});
+		assert.strictEqual(issues.length, 1);
+		assert.strictEqual(issues[0]!.level, 'error');
+		assert.include(issues[0]!.message, 'unknown variable "palette_lightness_30"');
+		assert.include(issues[0]!.message, '--_palette_lightness_30');
 	});
 
 	test('a var() reference passes the hue, enum, and time lints', () => {

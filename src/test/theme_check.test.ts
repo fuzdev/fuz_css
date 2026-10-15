@@ -209,13 +209,24 @@ describe('check_theme', () => {
 		}
 	});
 
-	test('a mid lightness stop pinned out of order fails monotonicity', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_50', base: '0.99' }] };
+	test('a flat lightness curve fails monotonicity', () => {
+		// pow(t, 0) is 1 past the ground, so every stop above 00 lands on 100
+		const theme: Theme = { name: 't', variables: [{ name: 'shade_lightness_curve', base: '0' }] };
 		const entry = check_theme(theme).entries.find(
 			(e) => e.gate === 'monotonicity' && e.scheme === 'light' && e.subject === 'shade_lightness'
 		);
 		assert(entry, 'monotonicity entry exists');
 		assert.isFalse(entry.pass);
+	});
+
+	test('an intermediate a theme carries anyway leaves its ramp unchecked', () => {
+		// the schema refuses the name, but the renderer would emit the value, so
+		// the ramp isn't measured on the stop the knobs derive
+		const theme: Theme = { name: 't', variables: [{ name: '_shade_lightness_50', base: '0.99' }] };
+		const report = check_theme(theme);
+		assert.isFalse(report.ok);
+		assert.isFalse(report.entries.some((e) => e.subject === 'shade_lightness'));
+		assert.isTrue(report.unchecked.some((u) => u.variable === '_shade_lightness_50'));
 	});
 
 	test('stops overshooting the lightness range fail monotonicity as the browser clamps them', () => {
@@ -305,6 +316,27 @@ describe('check_theme', () => {
 		});
 		assert.isFalse(report.ok);
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'shade_chroma_00'));
+	});
+
+	test('a ramp intermediate a theme sets is unchecked, not read as its default', () => {
+		// the schema refuses these, but the renderer would emit them, so a theme
+		// that skips the schema must not pass the gates on the defaults
+		const report = check_theme({
+			name: 't',
+			variables: [
+				{ name: '_palette_lightness_60', base: '0.99' },
+				{ name: '_palette_chroma_60', base: '0.4' }
+			]
+		});
+		assert.isFalse(report.ok);
+		const reason = 'internal ramp variable - not settable';
+		assert.deepEqual(
+			report.unchecked.filter((u) => u.variable.startsWith('_')),
+			[
+				{ variable: '_palette_lightness_60', value: '0.99', reason },
+				{ variable: '_palette_chroma_60', value: '0.4', reason }
+			]
+		);
 	});
 });
 

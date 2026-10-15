@@ -7,14 +7,14 @@
  * @module
  */
 
-import { Theme } from './variable.ts';
+import { INTERNAL_VARIABLE_NAME_MATCHER, Theme } from './variable.ts';
 import { to_theme_stance } from './theme.ts';
 import { scheme_mirrors_equal, scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import { palette_variants, intent_variants, color_scheme_variants } from './variable_data.ts';
+import { CSS_NUMBER_PATTERN } from './ramps.ts';
 import {
-	CSS_NUMBER_PATTERN,
 	INTENT_HUE_DEFAULT_BINDING,
 	NUMERIC_EPSILON,
 	PALETTE_LETTER_MATCHER,
@@ -37,14 +37,22 @@ export interface ThemeIssue {
 
 /**
  * The variable names a theme may set: the declared defaults plus the hook
- * knobs `style.css` consumes through `var()` fallbacks. The authoring-side
- * companion to `validate_theme`, for tooling that completes or checks names
- * before a theme is assembled.
+ * knobs `style.css` consumes through `var()` fallbacks, leaving out the
+ * internal ramp intermediates (`INTERNAL_VARIABLE_NAME_MATCHER`). The
+ * authoring-side companion to `validate_theme`, for tooling that completes or
+ * checks names before a theme is assembled.
  */
 export const known_theme_variable_names: ReadonlySet<string> = new Set([
-	...default_variables.map((v) => v.name),
+	...default_variables.flatMap((v) => (INTERNAL_VARIABLE_NAME_MATCHER.test(v.name) ? [] : v.name)),
 	...theme_knob_hook_names
 ]);
+
+// the internal intermediates, which a theme carries only as compiled caps
+// (the schema admits no other), and the public spelling a theme may still
+// use for one, which gets a pointer to the knobs rather than a bare unknown
+const internal_variable_names: ReadonlySet<string> = new Set(
+	default_variables.flatMap((v) => (INTERNAL_VARIABLE_NAME_MATCHER.test(v.name) ? v.name : []))
+);
 
 //
 // validate_theme - the structural lint.
@@ -244,10 +252,13 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 		});
 	}
 	for (const valid of parsed.data.variables) {
+		if (internal_variable_names.has(valid.name)) continue; // a compiled cap
 		if (!known_theme_variable_names.has(valid.name)) {
 			issues.push({
 				level: 'error',
-				message: `unknown variable "${valid.name}"`,
+				message: internal_variable_names.has(`_${valid.name}`)
+					? `unknown variable "${valid.name}" - the ramp intermediates are internal (--_${valid.name}), so a theme steers the ramps through their knobs and color stops instead`
+					: `unknown variable "${valid.name}"`,
 				variable: valid.name
 			});
 			continue;

@@ -12,8 +12,7 @@
  *
  * - lightness: `L(t) = L00 + (L100 - L00) * pow(t, curve)` with `t = stop/100`
  *   - the endpoint knobs literally are stops 00/100, so the dark scheme flips
- *   direction purely through knob values, and pinning an endpoint stop and
- *   turning a knob are the same act
+ *   direction purely through knob values
  * - chroma: `C(t) = min + (max - min) * pow(4t(1-t), curve)`, a symmetric
  *   mid-peaked curve, clamped per stop by the worst-hue gamut caps below
  * - the neutral scale rides the same chroma shape scaled by a single knob
@@ -24,6 +23,7 @@
 import { clamp_oklch, oklch_max_srgb_chroma, type Oklch } from '@fuzdev/fuz_util/oklch.ts';
 
 import {
+	numeric_scale_variants,
 	palette_variants,
 	type IntentVariant,
 	type PaletteVariant,
@@ -363,8 +363,8 @@ export const ramp_chroma = (
 /**
  * The palette chroma for a resolved chroma shape: the knob range at that
  * shape, clamped by the stop's cap - the arithmetic `ramp_chroma` and
- * `ThemeResolver` share, the resolver supplying a shape a theme may
- * have pinned (`--chroma_shape_NN`).
+ * `ThemeResolver` share, the resolver supplying the shape from a theme's
+ * resolved `--chroma_curve`.
  */
 export const ramp_chroma_at_shape = (
 	shape: number,
@@ -475,11 +475,46 @@ caps) from the same source the tests evaluate.
 /** The lightness ramp families and their CSS variable name prefixes. */
 export type RampFamily = 'palette' | 'shade' | 'text';
 
+/*
+
+Ramp intermediates - the derived variables between the knobs and the color
+stops: the lightness stops between a ramp's endpoints, the normalized chroma
+shape, and the capped palette chroma. They're plumbing, spelled with a
+leading underscore (`--_palette_lightness_30`) to mark them private: the
+`Theme` schema rejects the spelling, so a theme steers the ramps through
+their knobs and color stops, never by pinning an intermediate. The names
+here are the one place the spelling is built.
+
+*/
+
+/**
+ * The variable a lightness ramp stop renders through: the endpoint knob
+ * itself at 00/100 (`palette_lightness_00`), else the private derived
+ * intermediate (`_palette_lightness_30`).
+ */
+export const to_lightness_stop_name = (family: RampFamily, stop: NumericScaleVariant): string =>
+	stop === '00' || stop === '100' ? `${family}_lightness_${stop}` : `_${family}_lightness_${stop}`;
+
+/** The private variable holding a stop's normalized chroma shape (`_chroma_shape_50`). */
+export const to_chroma_shape_name = (stop: NumericScaleVariant): string => `_chroma_shape_${stop}`;
+
+/** The private variable holding a stop's capped palette chroma (`_palette_chroma_50`). */
+export const to_palette_chroma_name = (stop: NumericScaleVariant): string =>
+	`_palette_chroma_${stop}`;
+
+/**
+ * A CSS `<number>` as a pattern source, stricter than what `Number()`
+ * accepts - no hex, binary, `Infinity`, or empty string.
+ *
+ * @internal Shared by `variable.ts` and the theme modules - not stable API.
+ */
+export const CSS_NUMBER_PATTERN = String.raw`[+-]?(?:\d*\.)?\d+(?:[eE][+-]?\d+)?`;
+
 const format_ramp_number = (n: number): string => String(Math.round(n * 1e6) / 1e6);
 
 /**
  * Renders the derived default of an intermediate lightness ramp stop, e.g.
- * `--palette_lightness_30: calc(var(--palette_lightness_00) + (var(--palette_lightness_100) - var(--palette_lightness_00)) * pow(0.3, var(--palette_lightness_curve)))`.
+ * `--_palette_lightness_30: calc(var(--palette_lightness_00) + (var(--palette_lightness_100) - var(--palette_lightness_00)) * pow(0.3, var(--palette_lightness_curve)))`.
  * Stops 00/100 are the endpoint knobs themselves and have no derived form.
  */
 export const render_lightness_stop_css = (
@@ -514,10 +549,28 @@ export const render_chroma_shape_css = (stop: NumericScaleVariant): string => {
  */
 export const render_chroma_stop_css = (stop: NumericScaleVariant, cap: number): string => {
 	const cap_str = format_ramp_number(cap);
-	return `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_${
+	return `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--${to_chroma_shape_name(
 		stop
-	})), ${cap_str})`;
+	)})), ${cap_str})`;
 };
+
+// optional CSS whitespace - `\s` with the `u` flag also takes U+00A0 and the
+// other Unicode spaces, which CSS doesn't treat as whitespace
+const CSS_WS = '[ \\t\\n\\r\\f]*';
+
+/**
+ * Matches the capped form `render_chroma_stop_css` emits, capturing the stop
+ * and the cap - how the resolver reads a compiled cap back, and how the
+ * `Theme` schema admits the one intermediate a theme can carry (see
+ * `StyleVariable`). It admits CSS whitespace only, around the value and
+ * inside it, so a match needs no `trim()` (which, like `\s`, takes U+00A0).
+ *
+ * @internal Shared by `variable.ts` and `theme_resolver.ts` - not stable API.
+ */
+export const CHROMA_STOP_CSS_MATCHER = new RegExp(
+	String.raw`^${CSS_WS}min\(${CSS_WS}calc\(${CSS_WS}var\(--palette_chroma_min\)${CSS_WS}\+${CSS_WS}\(${CSS_WS}var\(--palette_chroma_max\)${CSS_WS}-${CSS_WS}var\(--palette_chroma_min\)${CSS_WS}\)${CSS_WS}\*${CSS_WS}var\(--_chroma_shape_(${numeric_scale_variants.join('|')})\)${CSS_WS}\)${CSS_WS},${CSS_WS}(${CSS_NUMBER_PATTERN})${CSS_WS}\)${CSS_WS}$`,
+	'u'
+);
 
 /**
  * Renders a color derived from the palette ramps at a stop for a hue slot -
@@ -538,9 +591,9 @@ export const render_ramp_color_css = (
 	const slot_scale = (palette_variants as ReadonlyArray<string>).includes(slot)
 		? `var(--palette_${slot}_chroma_scale, 1)`
 		: `var(--${slot}_chroma_scale, 1)`;
-	return `oklch(var(--palette_lightness_${stop}) calc(var(--palette_chroma_${
+	return `oklch(var(--${to_lightness_stop_name('palette', stop)}) calc(var(--${to_palette_chroma_name(
 		stop
-	}) * var(--chroma_scale, 1) * ${slot_scale}) var(--hue_${slot})${alpha ? ` / ${alpha}` : ''})`;
+	)}) * var(--chroma_scale, 1) * ${slot_scale}) var(--hue_${slot})${alpha ? ` / ${alpha}` : ''})`;
 };
 
 /**
@@ -553,9 +606,9 @@ export const render_neutral_stop_css = (
 	family: Exclude<RampFamily, 'palette'>,
 	stop: NumericScaleVariant
 ): string =>
-	`oklch(var(--${family}_lightness_${stop}) calc(var(--neutral_chroma) * var(--chroma_shape_${
+	`oklch(var(--${to_lightness_stop_name(family, stop)}) calc(var(--neutral_chroma) * var(--${to_chroma_shape_name(
 		stop
-	})${is_neutral_ground(family, stop) ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
+	)})${is_neutral_ground(family, stop) ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

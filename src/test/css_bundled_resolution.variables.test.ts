@@ -10,6 +10,8 @@
 import { test, assert, describe } from 'vitest';
 
 import { resolve_css } from '#lib/css_bundled_resolution.ts';
+import { extract_css_variables } from '#lib/css_variable_utils.ts';
+import { default_variables } from '#lib/variables.ts';
 import { create_test_fixtures, empty_detection } from './css_bundled_resolution_fixtures.ts';
 import { assert_css_order } from './test_helpers.ts';
 
@@ -479,6 +481,54 @@ describe('resolve_css variable resolution', () => {
 			});
 
 			assert.strictEqual(result.theme_css, '');
+		});
+	});
+
+	describe('private ramp intermediates', () => {
+		test('a source reference to one is detected', () => {
+			assert.isTrue(
+				extract_css_variables('color: var(--_palette_lightness_30);').has('_palette_lightness_30')
+			);
+		});
+
+		test('a color stop pulls in only its own stop of each intermediate', () => {
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, default_variables);
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				...empty_detection(),
+				detected_css_variables: new Set(['palette_a_50'])
+			});
+			for (const name of [
+				'_palette_lightness_50',
+				'_palette_chroma_50',
+				'_chroma_shape_50',
+				'palette_lightness_00',
+				'palette_lightness_curve',
+				'palette_chroma_min'
+			]) {
+				assert.isTrue(result.resolved_variables.has(name), name);
+			}
+			for (const name of ['_palette_lightness_30', '_palette_chroma_30', '_chroma_shape_30']) {
+				assert.isFalse(result.resolved_variables.has(name), name);
+			}
+			assert.include(result.theme_css, '--_palette_lightness_50:');
+		});
+
+		test('a hint naming one resolves like a source reference', () => {
+			// reading an intermediate is unsupported but harmless, and the hint
+			// matches what a var() reference to it would include
+			const { style_rule_index, variable_graph } = create_test_fixtures(``, default_variables);
+			const result = resolve_css({
+				style_rule_index,
+				variable_graph,
+				...empty_detection(),
+				detected_css_variables: new Set(['_palette_lightness_30']),
+				explicit_variables: new Set(['_palette_lightness_30'])
+			});
+			assert.deepEqual(result.diagnostics, []);
+			assert.isTrue(result.resolved_variables.has('_palette_lightness_30'));
+			assert.isTrue(result.resolved_variables.has('palette_lightness_100'));
 		});
 	});
 });

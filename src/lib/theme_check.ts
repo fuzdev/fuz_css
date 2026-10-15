@@ -8,7 +8,7 @@
  *   ratios. It is report-only and never throws.
  * - `compile_theme` recomputes the per-stop worst-hue chroma caps for a
  *   theme's own hues and the palette lightness each stop resolves to, emits
- *   `palette_chroma_NN` overrides where the baked caps no longer fit, then
+ *   `_palette_chroma_NN` overrides where the baked caps no longer fit, then
  *   re-checks and lints with `validate_theme` (`theme_validate.ts`).
  *
  * @module
@@ -35,6 +35,10 @@ import {
 	is_neutral_ground,
 	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
+	to_chroma_shape_name,
+	to_lightness_stop_name,
+	to_palette_chroma_name,
+	CSS_NUMBER_PATTERN,
 	type RampFamily
 } from './ramps.ts';
 import {
@@ -47,13 +51,7 @@ import {
 	type PaletteVariant
 } from './variable_data.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
-import {
-	CSS_NUMBER_PATTERN,
-	NUMERIC_EPSILON,
-	STOPS_PATTERN,
-	ThemeResolver,
-	VAR_MATCHER
-} from './theme_resolver.ts';
+import { NUMERIC_EPSILON, STOPS_PATTERN, ThemeResolver, VAR_MATCHER } from './theme_resolver.ts';
 import { type ThemeIssue, validate_theme } from './theme_validate.ts';
 
 //
@@ -443,8 +441,8 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			`${slot}_${stop}`,
 			scheme,
 			() => {
-				const lightness = num(`palette_lightness_${stop}`, scheme);
-				const chroma_stop = num(`palette_chroma_${stop}`, scheme);
+				const lightness = num(to_lightness_stop_name('palette', stop), scheme);
+				const chroma_stop = num(to_palette_chroma_name(stop), scheme);
 				const chroma_scale = num('chroma_scale', scheme);
 				if (lightness === null || chroma_stop === null || chroma_scale === null) {
 					return null;
@@ -467,9 +465,9 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 			`${family}_${stop}`,
 			scheme,
 			() => {
-				const lightness = num(`${family}_lightness_${stop}`, scheme);
+				const lightness = num(to_lightness_stop_name(family, stop), scheme);
 				const neutral_c = num('neutral_chroma', scheme);
-				const shape = num(`chroma_shape_${stop}`, scheme);
+				const shape = num(to_chroma_shape_name(stop), scheme);
 				const neutral_hue = num('hue_neutral', scheme);
 				// the ground carries its own chroma on top of the shaped term
 				const ground_c = is_neutral_ground(family, stop) ? num('shade_chroma_00', scheme) : 0;
@@ -579,7 +577,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 	const push_monotonicity = (family: RampFamily, scheme: ColorSchemeVariant): void => {
 		const lightnesses: Array<number> = [];
 		for (const stop of numeric_scale_variants) {
-			const l = num(`${family}_lightness_${stop}`, scheme);
+			const l = num(to_lightness_stop_name(family, stop), scheme);
 			if (l === null) return; // input unchecked; skip this family+scheme
 			// clamped as the browser clamps `oklch()`, so overshot stops that
 			// render the same lightness read as a flat step
@@ -806,24 +804,25 @@ const collect_hues = (
 
 /**
  * Recomputes a theme's per-stop worst-hue chroma caps from its own hues and
- * the palette lightness each stop resolves to, then emits `palette_chroma_NN`
+ * the palette lightness each stop resolves to, then emits `_palette_chroma_NN`
  * overrides wherever the baked caps no longer fit - the fix for a theme
  * (rotated hues, a monochrome collapse, a moved lightness ramp) whose gamut
- * headroom the baked worst-hue table misjudges.
+ * headroom the baked worst-hue table misjudges. The overrides are the one
+ * internal variable the `Theme` schema admits, and only in this capped form.
  *
  * Each stop's cap is computed at the lightness the resolution core resolves
- * for `palette_lightness_NN` in that scheme - a pinned intermediate stop when
- * the theme pins one, the endpoint-and-curve ramp otherwise - so the caps
- * describe the same colors `check_theme` gates.
+ * for the stop in that scheme - the theme's endpoint-and-curve ramp - so the
+ * caps describe the same colors `check_theme` gates.
  *
  * A stop is emitted when either scheme's recomputed cap is tighter than the
  * baked value, or looser by more than the emit epsilon, and the theme doesn't
- * already pin that stop. Nothing is emitted when a hue fails to resolve to a
- * number, since caps computed without it could overshoot its gamut, and a
- * stop whose lightness fails to resolve is skipped. An override emits both
- * slots together, so a one-scheme override can't silently kill the base
- * default's other slot by cascade-layer order, collapsing to a single slot
- * in the base position when the two rendered values coincide.
+ * already carry a compiled cap for that stop (so recompiling is a no-op).
+ * Nothing is emitted when a hue fails to resolve to a number, since caps
+ * computed without it could overshoot its gamut, and a stop whose lightness
+ * fails to resolve is skipped. An override emits both slots together, so a
+ * one-scheme override can't silently kill the base default's other slot by
+ * cascade-layer order, collapsing to a single slot in the base position when
+ * the two rendered values coincide.
  *
  * A stanced theme's two schemes resolve to the stanced appearance through the
  * mirror, so its caps are baselined against the stanced scheme's baked table -
@@ -854,8 +853,7 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	const caps: Map<string, number> = new Map();
 	const recompute = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): number | null => {
 		const scheme_hues = hues[scheme];
-		// the stop's own lightness, so a pinned intermediate is honored
-		const lightness = resolver.resolve(`palette_lightness_${stop}`, scheme);
+		const lightness = resolver.resolve(to_lightness_stop_name('palette', stop), scheme);
 		if (!scheme_hues || !lightness.ok) return null;
 		const key = `${lightness.value}|${scheme_hues.join(',')}`;
 		let cap = caps.get(key);
@@ -881,7 +879,7 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 
 	const cap_overrides: Array<StyleVariable> = [];
 	for (const stop of hues.light && hues.dark ? numeric_scale_variants : []) {
-		if (resolver.pinned(`palette_chroma_${stop}`)) continue; // respect the pin
+		if (resolver.pinned(to_palette_chroma_name(stop))) continue; // already compiled
 		const light_cap = recompute(stop, 'light');
 		const dark_cap = recompute(stop, 'dark');
 		if (light_cap === null || dark_cap === null) continue;
@@ -890,8 +888,8 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 			const dark_value = render_chroma_stop_css(stop, dark_cap);
 			cap_overrides.push(
 				light_value === dark_value
-					? { name: `palette_chroma_${stop}`, base: light_value }
-					: { name: `palette_chroma_${stop}`, base: light_value, dark: dark_value }
+					? { name: to_palette_chroma_name(stop), base: light_value }
+					: { name: to_palette_chroma_name(stop), base: light_value, dark: dark_value }
 			);
 		}
 	}

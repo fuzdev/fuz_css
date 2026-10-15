@@ -180,9 +180,10 @@
 			</li>
 		</ul>
 		<p>
-			Every intermediate value these produce is also its own variable
-			(<code>--palette_lightness_30</code>, <code>--palette_chroma_50</code>, …), so a theme can pin
-			any individual stop as an escape hatch.
+			The intermediate values between the knobs and the color stops are internal, spelled with a
+			leading underscore (<code>--_palette_lightness_30</code>, <code>--_palette_chroma_50</code>,
+			…). A theme can't set them - it steers the ramps through these knobs, and can still pin an
+			individual color stop like <code>--palette_a_50</code>.
 		</p>
 		<Code
 			lang="ts"

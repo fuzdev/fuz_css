@@ -1,8 +1,14 @@
 import { test, assert } from 'vitest';
 
 import { default_variables } from '#lib/variables.ts';
-import { StyleVariable } from '#lib/variable.ts';
-import { PALETTE_CHROMA_MULTIPLIERS } from '#lib/ramps.ts';
+import { INTERNAL_VARIABLE_NAME_MATCHER, StyleVariable } from '#lib/variable.ts';
+import {
+	PALETTE_CHROMA_MULTIPLIERS,
+	to_chroma_shape_name,
+	to_lightness_stop_name,
+	to_palette_chroma_name
+} from '#lib/ramps.ts';
+import { theme_knobs } from '#lib/knobs.ts';
 import {
 	palette_variants,
 	intent_variants,
@@ -24,11 +30,67 @@ import {
 
 test('all variables pass schema validation', () => {
 	for (const v of default_variables) {
-		const result = StyleVariable.safeParse(v);
+		// a theme can't name an intermediate (see below), so its shape is
+		// checked under the public spelling
+		const internal = INTERNAL_VARIABLE_NAME_MATCHER.test(v.name);
+		const result = StyleVariable.safeParse(internal ? { ...v, name: v.name.slice(1) } : v);
 		assert.isTrue(
 			result.success,
 			`variable "${v.name}" failed validation: ${JSON.stringify(result.error?.issues)}`
 		);
+	}
+});
+
+test('the internal variables are exactly the ramp intermediates', () => {
+	const internal = default_variables
+		.map((v) => v.name)
+		.filter((name) => INTERNAL_VARIABLE_NAME_MATCHER.test(name));
+	const expected = [
+		...(['palette', 'shade', 'text'] as const).flatMap((family) =>
+			numeric_scale_variants.slice(1, -1).map((stop) => `_${family}_lightness_${stop}`)
+		),
+		...numeric_scale_variants.flatMap((stop) => [
+			`_chroma_shape_${stop}`,
+			`_palette_chroma_${stop}`
+		])
+	];
+	assert.sameMembers(internal, expected);
+	// the name helpers build the same spellings, keeping the endpoints public
+	assert.sameMembers(
+		[
+			...(['palette', 'shade', 'text'] as const).flatMap((family) =>
+				numeric_scale_variants.map((stop) => to_lightness_stop_name(family, stop))
+			),
+			...numeric_scale_variants.flatMap((stop) => [
+				to_chroma_shape_name(stop),
+				to_palette_chroma_name(stop)
+			])
+		],
+		[
+			...expected,
+			...(['palette', 'shade', 'text'] as const).flatMap((family) => [
+				`${family}_lightness_00`,
+				`${family}_lightness_100`
+			])
+		]
+	);
+});
+
+test('a theme can carry no intermediate, save the capped palette chroma stops', () => {
+	// the defaults' own declarations are what a stanced theme's mirror re-slots
+	for (const v of default_variables) {
+		if (!INTERNAL_VARIABLE_NAME_MATCHER.test(v.name)) continue;
+		assert.strictEqual(
+			StyleVariable.safeParse(v).success,
+			v.name.startsWith('_palette_chroma_'),
+			v.name
+		);
+	}
+});
+
+test('no theme knob is an intermediate', () => {
+	for (const knob of theme_knobs) {
+		assert.notMatch(knob.name, INTERNAL_VARIABLE_NAME_MATCHER, knob.name);
 	}
 });
 
@@ -69,8 +131,8 @@ test('the loop-built families cover every variant list', () => {
 			...numeric_scale_variants.map((stop) => `${intent}_${stop}`)
 		]),
 		...numeric_scale_variants.flatMap((stop) => [
-			`chroma_shape_${stop}`,
-			`palette_chroma_${stop}`,
+			`_chroma_shape_${stop}`,
+			`_palette_chroma_${stop}`,
 			`shade_${stop}`,
 			`text_${stop}`,
 			`darken_${stop}`,
@@ -80,11 +142,10 @@ test('the loop-built families cover every variant list', () => {
 			`border_color_${stop}`,
 			`shadow_alpha_${stop}`
 		]),
-		...(['palette', 'shade', 'text'] as const).flatMap((family) =>
-			['00', '100', 'curve', ...numeric_scale_variants.slice(1, -1)].map(
-				(stop) => `${family}_lightness_${stop}`
-			)
-		),
+		...(['palette', 'shade', 'text'] as const).flatMap((family) => [
+			...['00', '100', 'curve'].map((stop) => `${family}_lightness_${stop}`),
+			...numeric_scale_variants.slice(1, -1).map((stop) => `_${family}_lightness_${stop}`)
+		]),
 		...font_size_variants.map((size) => `font_size_${size}`),
 		...line_height_variants.map((size) => `line_height_${size}`),
 		...space_variants.map((size) => `space_${size}`),

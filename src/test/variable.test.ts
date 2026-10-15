@@ -2,6 +2,7 @@ import { test, assert, describe } from 'vitest';
 
 import { StyleVariable, StyleVariableName, Theme, parse_theme } from '#lib/variable.ts';
 import { render_theme_style } from '#lib/theme.ts';
+import { render_chroma_stop_css } from '#lib/ramps.ts';
 
 describe('StyleVariable', () => {
 	describe('valid schemas', () => {
@@ -138,5 +139,39 @@ describe('parse_theme', () => {
 		for (const value of [null, undefined, 'a theme', 42, {}, { name: 't' }, { variables: [] }]) {
 			assert.isNull(parse_theme(value), JSON.stringify(value ?? null));
 		}
+	});
+	test('refuses a theme that sets a ramp intermediate', () => {
+		for (const variable of [
+			{ name: '_palette_lightness_30', base: '0.5' },
+			{ name: '_chroma_shape_50', base: '0.5' },
+			{ name: '_palette_chroma_50', base: '0.05' },
+			// the capped form, but for another stop
+			{ name: '_palette_chroma_50', base: render_chroma_stop_css('40', 0.05) },
+			{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05), dark: '0.05' },
+			// U+00A0 isn't CSS whitespace, inside the form or around it
+			{
+				name: '_palette_chroma_50',
+				base: render_chroma_stop_css('50', 0.05).replace('min(', 'min(\u00a0')
+			},
+			{ name: '_palette_chroma_50', base: `\u00a0${render_chroma_stop_css('50', 0.05)}` }
+		]) {
+			assert.isNull(parse_theme({ name: 't', variables: [variable] }), JSON.stringify(variable));
+		}
+	});
+
+	test('admits a palette chroma stop in the capped form for its own stop', () => {
+		const variable = {
+			name: '_palette_chroma_50',
+			base: render_chroma_stop_css('50', 0.05),
+			dark: render_chroma_stop_css('50', 0.04)
+		};
+		assert.isNotNull(parse_theme({ name: 't', variables: [variable] }));
+		assert.isNotNull(parse_theme({ name: 't', variables: [], scheme_mirror: [variable] }));
+		// CSS whitespace is fine anywhere the emitter puts a token boundary
+		const spaced = {
+			name: '_palette_chroma_50',
+			base: `\t${variable.base.replace('min(', 'min(\n')} `
+		};
+		assert.isNotNull(parse_theme({ name: 't', variables: [spaced] }));
 	});
 });

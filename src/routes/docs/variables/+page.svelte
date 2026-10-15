@@ -10,13 +10,17 @@
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
 
 	import { default_variables } from '#lib/variables.ts';
+	import { INTERNAL_VARIABLE_NAME_MATCHER } from '#lib/variable.ts';
 	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
 
 	const tome = tome_get_by_slug(LIBRARY_ITEM_NAME);
 
-	const variables = default_variables.slice().sort((a, b) => a.name.localeCompare(b.name));
+	// the ramp intermediates are internal, so they stay out of the reference
+	const variables = default_variables
+		.filter((v) => !INTERNAL_VARIABLE_NAME_MATCHER.test(v.name))
+		.sort((a, b) => a.name.localeCompare(b.name));
 
 	// TODO maybe FAQ? need a standardized pattern - first add the "on this page" menu functionality
 </script>
@@ -61,8 +65,10 @@
 			<TomeLink slug="colors" hash="Color-knobs">knobs</TomeLink> feed ramp stops and ramp stops
 			feed color stops, all computed in pure CSS
 			(<code>calc()</code>/<code>pow()</code>/<code>oklch()</code>). Scale knobs like
-			<code>radius_scale</code> derive other families the same way, and any individual variable can
-			still be pinned as an escape hatch. See <TomeLink slug="themes" /> for setting them.
+			<code>radius_scale</code> derive other families the same way, and a derived token or color
+			stop can still be pinned as an escape hatch. The ramp stops in between are internal
+			(<code>--_palette_lightness_30</code>), so a theme can't set them. See
+			<TomeLink slug="themes" /> for setting the rest.
 		</p>
 		<p>
 			In <TomeLink slug="classes" hash="What-gets-included">bundled mode</TomeLink>, only the

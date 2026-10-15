@@ -132,6 +132,17 @@ combined and only used content is included. In utility-only mode, import
   in pure CSS (`calc()`/`pow()`/`oklch()`); the fitted knob constants and CSS
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
   contrast gates on `@fuzdev/fuz_util/oklch.ts` and [wcag.ts](src/lib/wcag.ts)
+- The variable tiers: the knob catalog, color stops, role variables, and
+  tokens are what a theme sets; the ramp stops between knobs and color stops
+  are internal intermediates spelled with a leading underscore
+  (`--_palette_lightness_30`, `--_chroma_shape_50`, `--_palette_chroma_50`,
+  built by the `to_*_name` helpers in `ramps.ts`). `STYLE_VARIABLE_NAME_MATCHER`
+  rejects the spelling, so `parse_theme`/`validate_theme` refuse a theme that
+  sets one; `default_variables` declares them without passing through the
+  schema. The one exception is a `_palette_chroma_NN` in the capped form
+  `render_chroma_stop_css` emits - how `compile_theme` writes its caps and a
+  stanced theme's `scheme_mirror` re-slots the defaults' - which the
+  `StyleVariable` schema admits and the resolver reads
 - [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
   a theme API: `validate_theme` ([theme_validate.ts](src/lib/theme_validate.ts))
   lints a theme's shape, `check_theme` runs the
@@ -141,7 +152,7 @@ combined and only used content is included. In utility-only mode, import
   `theme_gate_role_names` - and reporting any gate input it can't evaluate as
   `unchecked` rather than passing it unread), and `compile_theme` recomputes
   per-theme worst-hue chroma caps at each stop's resolved lightness so
-  rotated, monochrome, dark-only, or lightness-pinned themes stay in gamut -
+  rotated, monochrome, dark-only, or lightness-moved themes stay in gamut -
   all three over the string→number resolution core in
   [theme_resolver.ts](src/lib/theme_resolver.ts)
 
@@ -552,7 +563,8 @@ typography, borders, shading, shadows, layout. See
   `SHADOW_ALPHAS`, `OVERLAY_ALPHAS`), keyed by variant and unitless -
   `variables.ts` adds the unit and any `calc()` wrapper
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
-  constants, numeric evaluators, and the CSS `calc()`/`oklch()` emitters
+  constants, numeric evaluators, the CSS `calc()`/`oklch()` emitters, and
+  the private intermediates' names
 - [wcag.ts](src/lib/wcag.ts) - WCAG luminance/contrast (design-time + tests)
 - [theme.ts](src/lib/theme.ts) - Theme rendering, cascade layers, the color
   scheme selectors (`COLOR_SCHEME_ROOTS`, `render_color_scheme_rules`),

@@ -12,8 +12,39 @@
 import { z } from 'zod';
 
 import { css_comment_is_contained, css_value_is_contained } from './css_containment.ts';
+// TODO this import goes with the compiled-cap carve-out in `StyleVariable` - it
+// pulls `ramps.ts` (and the module-init leftovers of `variable_data.ts`) into
+// `parse_theme`, about 1KB, so drop it when caps leave `Theme`
+import { CHROMA_STOP_CSS_MATCHER } from './ramps.ts';
 
+/** Matches a public style variable name, the names a theme may set. */
 export const STYLE_VARIABLE_NAME_MATCHER = /^[a-z][a-z0-9_]*(?<!_)$/;
+
+/**
+ * Matches an internal variable name: a leading underscore before a public
+ * name, the private spelling of the ramp intermediates
+ * (`_palette_lightness_30`, `_chroma_shape_50`, `_palette_chroma_50`).
+ * `default_variables` declares them and the renderer emits them, but they're
+ * plumbing rather than API, so `STYLE_VARIABLE_NAME_MATCHER` rejects the
+ * spelling and a theme can't set one.
+ */
+export const INTERNAL_VARIABLE_NAME_MATCHER = /^_[a-z][a-z0-9_]*(?<!_)$/;
+
+// the one internal variable a theme can carry, and only in the capped form
+// (see `StyleVariable`)
+const PALETTE_CHROMA_NAME_MATCHER = /^_palette_chroma_(\d+)$/;
+
+const INTERNAL_NAME_ERROR =
+	'internal ramp variable - a theme steers the ramps through their knobs and color stops and cannot set one';
+
+const to_name_error = (name: unknown): string =>
+	typeof name === 'string' && INTERNAL_VARIABLE_NAME_MATCHER.test(name)
+		? INTERNAL_NAME_ERROR
+		: 'invalid style variable name';
+
+// a slot is either absent or the capped form for the variable's own stop
+const is_capped_chroma_slot = (stop: string, slot: string | undefined): boolean =>
+	slot === undefined || CHROMA_STOP_CSS_MATCHER.exec(slot)?.[1] === stop;
 
 export const StyleVariableName = z
 	.string()
@@ -41,14 +72,36 @@ const StyleVariableValue = z
  * Strict: a misspelled slot is an error, not a silently dropped scheme. A
  * slot must also be a contained CSS value (see `css_containment.ts`), since it
  * renders verbatim.
+ *
+ * The name is a public one (`StyleVariableName`), with one exception: the
+ * internal `_palette_chroma_NN` stops are admitted when every slot is the
+ * capped form `render_chroma_stop_css` emits for that stop. That's the shape
+ * `compile_theme` writes its recomputed gamut caps in, and the shape a
+ * stanced theme's `scheme_mirror` re-slots the defaults' caps in; any other
+ * internal variable, or another value for this one, is rejected.
  */
 export const StyleVariable = z
 	.strictObject({
-		name: StyleVariableName,
+		name: z
+			.string()
+			.refine(
+				(name) => STYLE_VARIABLE_NAME_MATCHER.test(name) || PALETTE_CHROMA_NAME_MATCHER.test(name),
+				{ error: (issue) => to_name_error(issue.input) }
+			),
 		base: StyleVariableValue.optional(),
 		dark: StyleVariableValue.optional(),
 		summary: z.string().refine(css_comment_is_contained, 'must not close a CSS comment').optional()
 	})
+	.refine(
+		(v) => {
+			const stop = PALETTE_CHROMA_NAME_MATCHER.exec(v.name)?.[1];
+			return (
+				stop === undefined ||
+				(is_capped_chroma_slot(stop, v.base) && is_capped_chroma_slot(stop, v.dark))
+			);
+		},
+		{ message: INTERNAL_NAME_ERROR, path: ['name'] }
+	)
 	.refine((v) => v.base !== undefined || v.dark !== undefined, {
 		message: 'must have at least one of base or dark'
 	})

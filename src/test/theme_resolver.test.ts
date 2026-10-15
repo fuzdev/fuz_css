@@ -11,7 +11,13 @@ import {
 	SHADE_LIGHTNESS_KNOBS,
 	PALETTE_CHROMA_KNOBS,
 	NEUTRAL_CHROMA,
-	BORDER_CHROMA_MULTIPLIER
+	BORDER_CHROMA_MULTIPLIER,
+	PALETTE_LIGHTNESS_KNOBS,
+	PALETTE_CHROMA_CAPS,
+	ramp_lightness,
+	ramp_chroma,
+	ramp_chroma_shape,
+	render_chroma_stop_css
 } from '#lib/ramps.ts';
 
 // per-call resolver over the shared resolution core, for direct tests of the
@@ -87,7 +93,7 @@ describe('resolution', () => {
 			name: 't',
 			variables: [{ name: 'text_lightness_curve', base: 'calc(1 + 2)' }]
 		};
-		assert.strictEqual(resolve_theme_knob(theme, 'text_lightness_50', 'light'), null);
+		assert.strictEqual(resolve_theme_knob(theme, '_text_lightness_50', 'light'), null);
 		const report = check_theme(theme);
 		assert.isFalse(report.ok);
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'text_lightness_curve'));
@@ -182,20 +188,76 @@ describe('scheme stance', () => {
 	});
 });
 
-describe('pinned chroma shape', () => {
-	test('the resolver reads a pinned chroma_shape_NN through the palette chroma stop', () => {
-		const theme: Theme = { name: 't', variables: [{ name: 'chroma_shape_50', base: '0.5' }] };
-		const resolver = create_theme_resolver(theme);
-		assert.strictEqual(resolver.resolve('chroma_shape_50', 'light'), 0.5);
-		const { chroma_min, chroma_max } = PALETTE_CHROMA_KNOBS.light;
+describe('ramp intermediates', () => {
+	// the schema refuses these names, so the themes here skip it the way
+	// untrusted input could; the renderer would emit what the theme carries,
+	// so the resolver fails rather than reading the default
+	test('an intermediate a theme sets resolves to nothing', () => {
+		for (const variable of [
+			{ name: '_chroma_shape_50', base: '0.5' },
+			{ name: '_palette_lightness_30', base: '0.5' },
+			{ name: '_shade_lightness_30', dark: '0.5' },
+			{ name: '_palette_chroma_40', base: '0.01' },
+			// the capped form, but for another stop
+			{ name: '_palette_chroma_40', base: render_chroma_stop_css('50', 0.01) }
+		]) {
+			const resolver = create_theme_resolver({ name: 't', variables: [variable] });
+			const scheme = variable.base === undefined ? 'dark' : 'light';
+			assert.isNull(resolver.resolve(variable.name, scheme), JSON.stringify(variable));
+		}
+	});
+
+	test('an unset intermediate derives from the knobs', () => {
+		const defaults = create_theme_resolver({ name: 't', variables: [] });
 		assert.closeTo(
-			resolver.resolve('palette_chroma_50', 'light')!,
-			chroma_min + (chroma_max - chroma_min) * 0.5,
+			defaults.resolve('_palette_lightness_30', 'light')!,
+			ramp_lightness(PALETTE_LIGHTNESS_KNOBS.light, '30'),
 			1e-12
 		);
-		// unpinned stops keep the curve-derived shape: 1 at the midpoint, 0 at the ends
+		assert.closeTo(
+			defaults.resolve('_palette_chroma_40', 'light')!,
+			ramp_chroma('40', PALETTE_CHROMA_KNOBS.light, PALETTE_CHROMA_CAPS.light['40']),
+			1e-12
+		);
+	});
+
+	test('the shape is 1 at the midpoint and 0 at the ends, following chroma_curve', () => {
 		const defaults = create_theme_resolver({ name: 't', variables: [] });
-		assert.strictEqual(defaults.resolve('chroma_shape_50', 'light'), 1);
-		assert.strictEqual(defaults.resolve('chroma_shape_00', 'light'), 0);
+		assert.strictEqual(defaults.resolve('_chroma_shape_50', 'light'), 1);
+		assert.strictEqual(defaults.resolve('_chroma_shape_00', 'light'), 0);
+		const curved = create_theme_resolver({
+			name: 't',
+			variables: [{ name: 'chroma_curve', base: '2' }]
+		});
+		assert.closeTo(curved.resolve('_chroma_shape_20', 'light')!, ramp_chroma_shape('20', 2), 1e-12);
+	});
+
+	test('a compiled cap on a palette chroma stop is read', () => {
+		const theme: Theme = {
+			name: 't',
+			variables: [{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.01) }]
+		};
+		const resolver = create_theme_resolver(theme);
+		assert.strictEqual(resolver.resolve('_palette_chroma_50', 'light'), 0.01);
+		assert.isTrue(resolver.pinned('_palette_chroma_50'));
+	});
+
+	test('a compiled cap reads through CSS whitespace but not U+00A0', () => {
+		const cap = render_chroma_stop_css('50', 0.01);
+		const resolve = (base: string) =>
+			create_theme_resolver({
+				name: 't',
+				variables: [{ name: '_palette_chroma_50', base }]
+			}).resolve('_palette_chroma_50', 'light');
+		assert.strictEqual(resolve(`\n\t${cap.replace('min(', 'min(\n')} `), 0.01);
+		assert.isNull(resolve(cap.replace('min(', 'min(\u00a0')));
+		assert.isNull(resolve(`\u00a0${cap}`));
+	});
+
+	test('the public spelling resolves to nothing', () => {
+		const defaults = create_theme_resolver({ name: 't', variables: [] });
+		assert.isNull(defaults.resolve('palette_lightness_30', 'light'));
+		assert.isNull(defaults.resolve('chroma_shape_50', 'light'));
+		assert.isNull(defaults.resolve('palette_chroma_50', 'light'));
 	});
 });

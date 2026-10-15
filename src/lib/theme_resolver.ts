@@ -13,15 +13,16 @@
  * - Theme-authored values parse as a CSS `<number>` literal, an exact
  *   `var(--x)` reference (recursed through the same effective-value merge,
  *   with a visited-set cycle guard), a scaled reference
- *   `calc(var(--x) * <number>)`, or the machine-emitted compiled-cap
- *   `min(calc(...), <number>)` form. Anything else is unresolvable and is
+ *   `calc(var(--x) * <number>)`. Anything else is unresolvable and is
  *   recorded with its variable, value, and reason. A derived color is
  *   clamped as the browser clamps the `oklch()` it renders.
- * - Derived ramp stops (`palette_lightness_NN` and its shade/text twins,
- *   `palette_chroma_NN`, `chroma_shape_NN`) use a pinned numeric value when
- *   the theme pins one, fall back to the `ramps.ts` formulas with the
- *   resolved knobs otherwise, and mark the touching gates `unchecked` when a
- *   pin is unresolvable.
+ * - The private ramp intermediates (`_palette_lightness_NN` and its
+ *   shade/text twins, `_chroma_shape_NN`, `_palette_chroma_NN`) always
+ *   derive through the `ramps.ts` formulas from the resolved knobs - the
+ *   `Theme` schema keeps a theme from setting one. The exception is a
+ *   `_palette_chroma_NN` in the machine-emitted capped form
+ *   (`min(calc(...), <number>)`), as `compile_theme` writes it and a stanced
+ *   theme's mirror re-slots it, whose cap the resolver reads.
  * - The color variables the gates read (the palette, intent, shade, and text
  *   stops, `text_max`, and `border_color_30`) derive from those numbers
  *   unless the theme authors one directly. An authored color is measured as
@@ -57,10 +58,12 @@
  * @module
  */
 
-import { Theme, type StyleVariable } from './variable.ts';
 import { scheme_stance_variables } from './theme_stance.ts';
 import { to_theme_stance } from './theme.ts';
+import { INTERNAL_VARIABLE_NAME_MATCHER, Theme, type StyleVariable } from './variable.ts';
 import {
+	CHROMA_STOP_CSS_MATCHER,
+	CSS_NUMBER_PATTERN,
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
 	LIGHTNESS_KNOBS,
@@ -73,6 +76,7 @@ import {
 	ramp_lightness,
 	ramp_chroma_shape,
 	ramp_chroma_at_shape,
+	to_chroma_shape_name,
 	type LightnessRampKnobs,
 	type RampFamily
 } from './ramps.ts';
@@ -116,13 +120,6 @@ export const INTENT_HUE_DEFAULT_BINDING: Record<string, string> = Object.fromEnt
 	)
 );
 
-/**
- * A CSS `<number>` as a pattern source, stricter than what `Number()`
- * accepts - no hex, binary, `Infinity`, or empty string.
- *
- * @internal Shared by `theme_validate.ts` and `theme_check.ts` - not stable API.
- */
-export const CSS_NUMBER_PATTERN = String.raw`[+-]?(?:\d*\.)?\d+(?:[eE][+-]?\d+)?`;
 const CSS_NUMBER_MATCHER = new RegExp(`^${CSS_NUMBER_PATTERN}$`, 'u');
 
 /**
@@ -150,12 +147,13 @@ const LIGHTNESS_KNOB_MATCHER = /^(palette|shade|text)_lightness_(00|100|curve)$/
  */
 export const STOPS_PATTERN = numeric_scale_variants.join('|');
 const DERIVED_STOPS_PATTERN = numeric_scale_variants.slice(1, -1).join('|');
+// the private ramp intermediates, spelled as `ramps.ts` builds them
 const LIGHTNESS_STOP_MATCHER = new RegExp(
-	`^(palette|shade|text)_lightness_(${DERIVED_STOPS_PATTERN})$`,
+	`^_(palette|shade|text)_lightness_(${DERIVED_STOPS_PATTERN})$`,
 	'u'
 );
-const PALETTE_CHROMA_STOP_MATCHER = new RegExp(`^palette_chroma_(${STOPS_PATTERN})$`, 'u');
-const CHROMA_SHAPE_STOP_MATCHER = new RegExp(`^chroma_shape_(${STOPS_PATTERN})$`, 'u');
+const PALETTE_CHROMA_STOP_MATCHER = new RegExp(`^_palette_chroma_(${STOPS_PATTERN})$`, 'u');
+const CHROMA_SHAPE_STOP_MATCHER = new RegExp(`^_chroma_shape_(${STOPS_PATTERN})$`, 'u');
 /**
  * Matches exactly `var(--x)`, capturing the name - the reference form the
  * resolver follows.
@@ -172,16 +170,6 @@ export const VAR_MATCHER = /^var\(\s*--([a-z][a-z0-9_]*)\s*\)$/u;
  */
 export const SCALED_VAR_MATCHER = new RegExp(
 	String.raw`^calc\(\s*var\(\s*--([a-z][a-z0-9_]*)\s*\)\s*\*\s*(${CSS_NUMBER_PATTERN})\s*\)$`,
-	'u'
-);
-
-/**
- * The compiled worst-hue cap form emitted by `render_chroma_stop_css`:
- * `min(calc(var(--palette_chroma_min) + (var(--palette_chroma_max) - var(--palette_chroma_min)) * var(--chroma_shape_NN)), <number>)`.
- * Recognizing it keeps compiled themes fully checkable.
- */
-const COMPILED_CAP_MATCHER = new RegExp(
-	String.raw`^min\(\s*calc\(\s*var\(--palette_chroma_min\)\s*\+\s*\(\s*var\(--palette_chroma_max\)\s*-\s*var\(--palette_chroma_min\)\s*\)\s*\*\s*var\(--chroma_shape_(${STOPS_PATTERN})\)\s*\)\s*,\s*(${CSS_NUMBER_PATTERN})\s*\)$`,
 	'u'
 );
 
@@ -253,7 +241,23 @@ export class ThemeResolver {
 		const next = new Set(visited);
 		next.add(name);
 		const value = this.#slot_value(name, scheme);
-		if (value !== undefined) return this.#parse(name, value, scheme, next);
+		if (value !== undefined) {
+			if (!INTERNAL_VARIABLE_NAME_MATCHER.test(name)) return this.#parse(name, value, scheme, next);
+			// an intermediate derives from the knobs, unless it's a palette chroma
+			// stop carrying a compiled cap for its own stop (the schema admits no
+			// other form) - any other value would render while the gates read the
+			// default, so it fails instead of falling back
+			const stop = PALETTE_CHROMA_STOP_MATCHER.exec(name)?.[1];
+			const cap = stop === undefined ? null : this.#parse_compiled_cap(stop, value, scheme, next);
+			return (
+				cap ?? {
+					ok: false,
+					variable: name,
+					value: value.trim(),
+					reason: 'internal ramp variable - not settable'
+				}
+			);
+		}
 		return this.#resolve_default(name, scheme, next);
 	}
 
@@ -272,25 +276,24 @@ export class ThemeResolver {
 			if (!inner.ok) return inner;
 			return { ok: true, value: inner.value * Number(scaled_match[2]) };
 		}
-		// machine-emitted compiled cap form
-		const cap = this.#parse_compiled_cap(trimmed, scheme, visited);
-		if (cap) return cap;
 		return { ok: false, variable: name, value: trimmed, reason: 'unrecognized value expression' };
 	}
 
+	// a compiled cap for `stop`, or `null` when `value` isn't one
 	#parse_compiled_cap(
+		stop: string,
 		value: string,
 		scheme: ColorSchemeVariant,
 		visited: Set<string>
 	): Resolved | null {
-		const m = COMPILED_CAP_MATCHER.exec(value);
-		if (!m) return null;
+		const m = CHROMA_STOP_CSS_MATCHER.exec(value);
+		if (m?.[1] !== stop) return null;
 		return this.#capped_chroma(m[1] as NumericScaleVariant, Number(m[2]), scheme, visited);
 	}
 
 	// a palette chroma stop: the requested curve clamped by a worst-hue cap -
 	// the numeric twin of `render_chroma_stop_css`, reading the stop's shape
-	// through the resolver so a pinned `chroma_shape_NN` is honored
+	// through the resolver so it follows the theme's `chroma_curve`
 	#capped_chroma(
 		stop: NumericScaleVariant,
 		cap: number,
@@ -298,7 +301,7 @@ export class ThemeResolver {
 		visited: Set<string>
 	): Resolved {
 		const r = this.#resolve_all(
-			['palette_chroma_min', 'palette_chroma_max', `chroma_shape_${stop}`],
+			['palette_chroma_min', 'palette_chroma_max', to_chroma_shape_name(stop)],
 			scheme,
 			visited
 		);
