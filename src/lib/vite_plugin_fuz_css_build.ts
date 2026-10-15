@@ -3,40 +3,35 @@
  * module's placeholder into the generated CSS once every module has been
  * transformed.
  *
- * `renderChunk` renders the CSS and restates the placeholder with a hash of
- * it, so the stylesheet Vite emits - and each chunk whose name depends on
- * that stylesheet's - gets a filename that changes when the generated CSS
- * does. `generateBundle` then splices the CSS in at the placeholder's
- * position (see `css_placeholder_splice.ts`), in whichever of two passes the
- * stylesheets exist for.
+ * `renderChunk` renders the CSS, runs it through Vite's CSS pipeline
+ * (`preprocessCSS` - PostCSS or lightningcss, as configured), and restates
+ * the virtual module's text with the result, ahead of Vite's own CSS
+ * rendering. The stylesheet Vite emits then holds the generated CSS from the
+ * start: minified like the rest, named from its content, and in the position
+ * import order gave it, for code-split and single-stylesheet builds alike.
+ *
+ * When the restatement can't run - it calls the `transform` of Vite's
+ * `vite:css-post` plugin, a reach into Vite's internals - the build falls back
+ * to splicing the CSS in at the placeholder's position in `generateBundle`
+ * (see `css_placeholder_splice.ts`), in whichever of two passes the
+ * stylesheets exist for, with a one-time warning.
  *
  * @module
  */
 
-import type { Environment, Plugin, Rollup } from 'vite';
-import { hash as crypto_hash } from 'node:crypto';
+import { preprocessCSS, type Environment, type Plugin, type Rollup } from 'vite';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
-import {
-	parse_css_placeholder_hash,
-	splice_css_into_asset,
-	to_hashed_css_placeholder
-} from './css_placeholder_splice.ts';
+import { FUZ_CSS_PLACEHOLDER, splice_css_into_asset } from './css_placeholder_splice.ts';
 
 /**
  * Name of the Vite core plugin that holds each CSS module's build-time text
  * and emits the stylesheets. Its `transform` is how a CSS module's text is
- * set, which the build placeholder is restated through.
+ * set, which the generated CSS is restated through.
  */
 const VITE_CSS_POST_PLUGIN_NAME = 'vite:css-post';
 
-/**
- * Hex characters of the generated CSS's hash that the restated placeholder
- * carries - 64 bits, far past what a filename hash keeps of it.
- */
-const PLACEHOLDER_HASH_LENGTH = 16;
-
-/** The part of `vite:css-post`'s `transform` handler the placeholder restatement calls. */
+/** The part of `vite:css-post`'s `transform` handler the restatement calls. */
 type CssModuleTransform = (this: Rollup.PluginContext, css: string, id: string) => unknown;
 
 /**
@@ -45,11 +40,11 @@ type CssModuleTransform = (this: Rollup.PluginContext, css: string, id: string) 
  */
 interface BuildRender extends BuildCss {
 	/**
-	 * The hash the placeholder was restated with, or `null` when it wasn't
-	 * restated - the virtual module is in no rendered chunk, or the
-	 * restatement failed.
+	 * Whether the virtual module's text was restated with the generated CSS -
+	 * false when the module is in no rendered chunk, or the restatement failed
+	 * and the splice must place the CSS instead.
 	 */
-	placeholder_hash: string | null;
+	restated: boolean;
 }
 
 /**
@@ -58,7 +53,7 @@ interface BuildRender extends BuildCss {
  * @nodocs
  */
 export interface BuildCss {
-	/** The CSS to splice in, banners included. */
+	/** The generated CSS, banners included. */
 	css: string;
 	/** Whether the CSS holds nothing but its banners. */
 	empty: boolean;
@@ -102,8 +97,9 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 	const { virtual_id, loaded_virtual_ids, render, log_warn, log_error } = options;
 
 	/**
-	 * The build's rendered CSS per environment, so `renderChunk` hashes the
-	 * same text `generateBundle` splices and diagnostics dispatch once per output. An
+	 * The build's rendered CSS per environment, so `renderChunk` restates the
+	 * same text a fallback `generateBundle` splices and diagnostics dispatch
+	 * once per output. An
 	 * entry lives from the first hook that needs it to that environment's next
 	 * `buildStart` - across every output of a Rollup build, which runs the
 	 * build phase once, but one output at a time under Rolldown (Vite 8+),
@@ -114,21 +110,11 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 	 */
 	const build_renders: WeakMap<Environment, BuildRender> = new WeakMap();
 	/**
-	 * The virtual module's build-time text per environment as Vite's CSS
-	 * pipeline left it - the placeholder rule after PostCSS or another
-	 * transformer has wrapped, reformatted, or copied it. Restating the
-	 * placeholder edits this text, so the hashed form keeps what the pipeline
-	 * did. Kept across builds: a watch rebuild reuses the module's cached
-	 * transform and doesn't run the capture again.
+	 * Whether the warning that the restatement fell back to the splice was
+	 * logged. The cause is a mismatch with the installed Vite, so without this
+	 * it would repeat for every output and every watch rebuild.
 	 */
-	const placeholder_sources: WeakMap<Environment, string> = new WeakMap();
-	/**
-	 * Whether the warning that the stylesheet's filename doesn't track the
-	 * generated CSS was logged. The cause is a mismatch with the installed
-	 * Vite, so without this it would repeat for every output and every watch
-	 * rebuild.
-	 */
-	let warned_unhashed = false;
+	let warned_fallback = false;
 
 	/**
 	 * Returns the build's generated CSS for the environment building in
@@ -139,85 +125,99 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 	const render_build_css = (context: Rollup.PluginContext): BuildRender => {
 		let build_render = build_renders.get(context.environment);
 		if (!build_render) {
-			build_render = { ...render(context), placeholder_hash: null };
+			build_render = { ...render(context), restated: false };
 			build_renders.set(context.environment, build_render);
 		}
 		return build_render;
 	};
 
 	/**
-	 * Logs, once, that the placeholder couldn't be restated with the generated
-	 * CSS's hash. The build output is still correct - what's lost is the
-	 * filename tracking the content.
+	 * Logs, once, that the generated CSS couldn't go through Vite's CSS
+	 * pipeline, so it's spliced in afterwards. The build output is still
+	 * complete - what's lost is the pipeline's processing (minification,
+	 * PostCSS, lightningcss) and the filename tracking the content.
 	 */
-	const warn_unhashed = (reason: string): void => {
-		if (warned_unhashed) return;
-		warned_unhashed = true;
+	const warn_fallback = (reason: string): void => {
+		if (warned_fallback) return;
+		warned_fallback = true;
 		log_warn(
-			`[fuz_css] could not restate the virtual:fuz.css placeholder through Vite's CSS pipeline` +
-				` (${reason}). The emitted CSS is unaffected, but its filename hash won't change when` +
-				` the generated CSS does, so a stylesheet cached by filename can go stale across deploys.`
+			`[fuz_css] could not restate virtual:fuz.css through Vite's CSS pipeline (${reason}).` +
+				` The generated CSS is spliced in after bundling instead: complete, but unminified and` +
+				` untouched by PostCSS or lightningcss, and its filename hash won't change when the` +
+				` generated CSS does, so a stylesheet cached by filename can go stale across deploys.`
 		);
 	};
 
 	/**
-	 * Restates the virtual module's build-time text with the generated CSS's
-	 * hash in its placeholder, so the filename Vite derives from the
-	 * stylesheet's content tracks CSS that's spliced in only afterwards.
+	 * Restates the virtual module's build-time text with the generated CSS,
+	 * processed by Vite's CSS pipeline, so the stylesheet Vite renders from
+	 * it holds the real CSS - minified, named from its content, and at the
+	 * position import order gave the module.
 	 *
 	 * Vite's CSS plugin keeps each CSS module's text from its `transform` and
 	 * reads it back when it renders the chunk holding the module, so running
-	 * that `transform` again for the virtual module replaces the text. The
-	 * text given is the one Vite's pipeline produced for the module with only
-	 * the placeholder's value changed, so the stylesheet comes out as if the
-	 * hash had been there from `load()`. This reaches into Vite's internals,
-	 * so every way it can fail is contained: the build falls back to the
-	 * unhashed placeholder already in place, and the splice checks that the
-	 * hash actually arrived in the emitted stylesheet.
+	 * that `transform` again for the virtual module replaces the text. That
+	 * reaches into Vite's internals, so every way it can fail is contained:
+	 * the placeholder stays in place for the splice, and `finish_bundle`
+	 * checks that the placeholder is actually gone from the output. The
+	 * pipeline itself runs outside that containment, so an error from the
+	 * project's own PostCSS or lightningcss setup fails the build, as it
+	 * would for any other stylesheet.
 	 *
-	 * @returns the hash the placeholder now carries, or `null` if it wasn't restated
+	 * @returns whether the text was restated
+	 * @throws Error - when Vite's CSS pipeline rejects the generated CSS
 	 */
-	const restate_placeholder = async (
-		context: Rollup.PluginContext,
-		css: string
-	): Promise<string | null> => {
+	const restate_css = async (context: Rollup.PluginContext, css: string): Promise<boolean> => {
+		let handler: unknown;
 		try {
-			const placeholder_source = placeholder_sources.get(context.environment);
-			if (placeholder_source === undefined) {
-				warn_unhashed(`the module's CSS wasn't seen after Vite processed it`);
-				return null;
-			}
-			const placeholder_hash = crypto_hash('sha256', css).slice(0, PLACEHOLDER_HASH_LENGTH);
-			const restated = to_hashed_css_placeholder(placeholder_source, placeholder_hash);
-			if (restated === null) {
-				warn_unhashed(`the module's CSS holds no placeholder after Vite processed it`);
-				return null;
-			}
 			const hook = context.environment.plugins.find((p) => p.name === VITE_CSS_POST_PLUGIN_NAME)
 				?.transform as unknown;
 			// a hook is either the handler or an object holding it
-			const handler =
+			handler =
 				typeof hook === 'object' && hook !== null ? (hook as { handler?: unknown }).handler : hook;
-			if (typeof handler !== 'function') {
-				warn_unhashed(`no callable ${VITE_CSS_POST_PLUGIN_NAME} transform`);
-				return null;
+		} catch (error) {
+			warn_fallback(`finding its transform threw: ${to_error_message(error)}`);
+			return false;
+		}
+		if (typeof handler !== 'function') {
+			warn_fallback(`no callable ${VITE_CSS_POST_PLUGIN_NAME} transform`);
+			return false;
+		}
+		let processed: Awaited<ReturnType<typeof preprocessCSS>>;
+		try {
+			processed = await preprocessCSS(css, virtual_id, context.environment.config);
+		} catch (error) {
+			// name the generated CSS, since the error points at the virtual module,
+			// and carry its position so the bundler prints it
+			const wrapped: Error & { loc?: unknown; frame?: unknown } = new Error(
+				`[fuz_css] Vite's CSS pipeline rejected the generated CSS: ${to_error_message(error)}`,
+				{ cause: error }
+			);
+			if (typeof error === 'object' && error !== null) {
+				const { loc, frame } = error as { loc?: unknown; frame?: unknown };
+				if (loc !== undefined) wrapped.loc = loc;
+				if (frame !== undefined) wrapped.frame = frame;
 			}
+			throw wrapped;
+		}
+		try {
 			// The handler's build path never touches its context; the render
 			// context stands in for the transform one it's typed against, and
 			// anything it comes to need from the real one throws into the catch.
-			await (handler as CssModuleTransform).call(context, restated, virtual_id);
-			return placeholder_hash;
+			await (handler as CssModuleTransform).call(context, processed.code, virtual_id);
+			return true;
 		} catch (error) {
-			warn_unhashed(`${VITE_CSS_POST_PLUGIN_NAME} transform threw: ${to_error_message(error)}`);
-			return null;
+			warn_fallback(`restating it threw: ${to_error_message(error)}`);
+			return false;
 		}
 	};
 
 	/**
-	 * Finishes a bundle's stylesheets: splices the build's generated CSS into
-	 * the CSS asset that holds the placeholder, and surfaces every way that
-	 * can go wrong. Called from the `generateBundle` pass that sees the
-	 * stylesheets - see `emits_css_in_render`.
+	 * Finishes a bundle's stylesheets: confirms the restated CSS replaced the
+	 * placeholder, or else splices the build's generated CSS into the CSS asset
+	 * that holds it, and surfaces every way that can go wrong. Called from the
+	 * `generateBundle` pass that sees the stylesheets - see
+	 * `emits_css_in_render`.
 	 *
 	 * @param context - the hook's context
 	 * @param bundle - the output bundle, as the hook received it
@@ -239,15 +239,26 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 		}
 		if (!imported) return;
 
-		// The render `renderChunk` hashed, or a first render when the virtual
+		// The render `renderChunk` restated, or a first render when the virtual
 		// module is in no chunk.
-		const { css: generated_css, empty, placeholder_hash } = render_build_css(context);
+		const { css: generated_css, empty, restated } = render_build_css(context);
 		const css_assets = Object.values(bundle).filter(
 			(chunk): chunk is Rollup.OutputAsset & { source: string } =>
 				chunk.type === 'asset' &&
 				typeof chunk.source === 'string' &&
 				chunk.fileName.endsWith('.css')
 		);
+
+		// The normal path: the restated CSS went through Vite's pipeline and
+		// replaced the placeholder before any stylesheet was rendered.
+		const placeholder_remains = css_assets.some((chunk) =>
+			chunk.source.includes(FUZ_CSS_PLACEHOLDER)
+		);
+		if (restated && !placeholder_remains) return;
+		// A restatement that ran without error but didn't arrive - Vite keeping a
+		// CSS module's text somewhere its `transform` no longer writes - would
+		// otherwise lose the generated CSS.
+		if (restated) warn_fallback(`the restated CSS didn't reach the emitted stylesheet`);
 
 		// Splice the generated CSS into the asset that holds the virtual module's
 		// placeholder marker, at the marker's own position. Vite places that
@@ -263,16 +274,6 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 			const spliced = splice_css_into_asset(chunk.source, generated_css);
 			if (spliced === null) continue;
 			spliced_count++;
-			// The asset was named from the marker it holds. A restatement that
-			// ran without error but didn't arrive here - Vite keeping a CSS
-			// module's text somewhere its `transform` no longer writes - would
-			// otherwise lose the content hash silently.
-			if (
-				placeholder_hash !== null &&
-				parse_css_placeholder_hash(chunk.source) !== placeholder_hash
-			) {
-				warn_unhashed(`the restated placeholder didn't reach ${chunk.fileName}`);
-			}
 			chunk.source = spliced;
 		}
 
@@ -351,7 +352,7 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 			if (!(virtual_id in chunk.modules)) return;
 			// Every transform has run, so the full set of used classes is available.
 			const build_render = render_build_css(context);
-			build_render.placeholder_hash = await restate_placeholder(context, build_render.css);
+			build_render.restated = await restate_css(context, build_render.css);
 		},
 
 		generate_bundle: (context, bundle) => {
@@ -362,20 +363,11 @@ export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBu
 		},
 
 		/**
-		 * The build-only half, at the default `enforce` so its hooks sit between
-		 * Vite's CSS processing and the Vite plugin that emits stylesheets.
+		 * The build-only half, holding the fallback splice's second pass.
 		 */
 		plugin: {
 			name: 'vite-plugin-fuz-css:build',
 			apply: 'build',
-
-			transform(code, id) {
-				// The virtual module's text after `vite:css` (PostCSS, a CSS
-				// transformer) and before `vite:css-post` takes it - what
-				// `renderChunk` restates with the hash.
-				if (id === virtual_id) placeholder_sources.set(this.environment, code);
-				return null;
-			},
 
 			generateBundle: {
 				// Second pass, after Vite's CSS plugin: with `build.cssCodeSplit: false`

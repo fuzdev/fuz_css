@@ -155,14 +155,14 @@ Two generators available, both using AST-based extraction and per-file caching:
    `?inline` one SvelteKit inlines into SSR'd `<head>` lives in a server
    environment - while the push and the handshake ride the client
    environment's hot channel. In build the virtual module is a
-   placeholder rule until every transform has run: `renderChunk` restates it
-   with a hash of the generated CSS, so the stylesheet's filename (and the
-   chunks named from it) tracks that CSS, and `generateBundle` splices the
-   CSS in at the placeholder's position in one of two passes, chosen by
-   `build.cssCodeSplit` - at the default order ahead of other plugins for a
-   code-split build, so their `generateBundle` hooks read finished
-   stylesheets, or at `order: 'post'` for the single stylesheet Vite emits
-   late with `build.cssCodeSplit: false` (the `build.lib` default). Each
+   placeholder rule until every transform has run: `renderChunk` runs the
+   generated CSS through Vite's CSS pipeline (`preprocessCSS`) and restates
+   the module's text with it before Vite renders the stylesheet, so the
+   generated CSS is minified and post-processed like the rest, the
+   stylesheet is named from its content, and it sits where import order put
+   the module - for code-split and single-stylesheet builds alike. If that
+   restatement can't run, `generateBundle` splices the CSS in at the
+   placeholder's position instead, unprocessed, with a warning. Each
    build environment's CSS comes from the modules in its own graph, so a
    client build never carries an SSR-only class, and a watch rebuild drops
    a deleted file's. The build's passes and the dev handshake need
@@ -649,20 +649,19 @@ typography, borders, shading, shadows, layout. See
   evaluation report to the virtual module's client code; it holds the dev
   side (pre-scan, watcher, HMR debounce, the handshake)
 - [vite_plugin_fuz_css_build.ts](src/lib/vite_plugin_fuz_css_build.ts) - The
-  plugin's build passes and its build-only plugin object, which captures the
-  virtual module's text as the CSS pipeline (PostCSS, lightningcss) left it;
-  the hash is restated into that text by calling the `transform` of Vite's
-  `vite:css-post` plugin - a reach into Vite internals that degrades to a
-  filename hash that doesn't cover the generated CSS, with a one-time
-  warning, never to wrong CSS
+  plugin's build passes: the generated CSS, processed by `preprocessCSS`, is
+  restated as the virtual module's text by calling the `transform` of
+  Vite's `vite:css-post` plugin - a reach into Vite internals that degrades
+  to the fallback splice (unprocessed CSS, a filename that doesn't track
+  it) with a one-time warning, never to missing CSS
 - [css_extraction_state.ts](src/lib/css_extraction_state.ts) - The Vite
   plugin's per-file extraction state: race-safe ingestion (a per-file epoch,
   so a deletion or newer ingest landing mid-cache-read wins), removal, and a
   version that keys the dev render cache
 - [css_placeholder_splice.ts](src/lib/css_placeholder_splice.ts) - The
-  build-mode placeholder (one declaration, unhashed at load and restated in
-  place with the generated CSS's hash) and the splice that writes the
-  generated CSS at its position in the bundled stylesheet
+  build-mode placeholder (one declaration the build restates away) and the
+  fallback splice that writes the generated CSS at its position in the
+  bundled stylesheet
 - [gen_fuz_css.ts](src/lib/gen_fuz_css.ts) - Gro generator with per-file caching
 - [css_generator.ts](src/lib/css_generator.ts) - The core both generators
   render through: option defaults, the resources a render needs, and the

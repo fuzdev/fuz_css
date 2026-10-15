@@ -1,7 +1,7 @@
 /**
- * Build output of the Vite plugin: the generated CSS replaces the placeholder
- * in the stylesheet Vite emits, and that stylesheet's filename tracks the
- * generated CSS.
+ * Build output of the Vite plugin: the generated CSS goes through Vite's CSS
+ * pipeline and replaces the placeholder in the stylesheet Vite emits, which is
+ * minified and named from that content.
  *
  * Every build runs in memory (`build.write: false`) against a fixture whose
  * entry imports `virtual:fuz.css` and then its own stylesheet. The generated
@@ -28,7 +28,7 @@ import {
 	vite_plugin_fuz_css,
 	type VitePluginFuzCssOptions
 } from '#lib/vite_plugin_fuz_css.ts';
-import { FUZ_CSS_PLACEHOLDER, parse_css_placeholder_hash } from '#lib/css_placeholder_splice.ts';
+import { FUZ_CSS_PLACEHOLDER } from '#lib/css_placeholder_splice.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
 import type { CssClassDefinitionInterpreter } from '#lib/css_class_generation.ts';
 import {
@@ -121,7 +121,7 @@ const assert_single_css = (result: FixtureBuild): FixtureBuild['css'][number] =>
 	return result.css[0]!;
 };
 
-/** Asserts neither form of the placeholder is left anywhere in a build's output. */
+/** Asserts the placeholder is left nowhere in a build's output. */
 const assert_no_placeholder = (result: FixtureBuild): void => {
 	for (const asset of result.css) {
 		assert.notInclude(asset.source, FUZ_CSS_PLACEHOLDER, `${asset.fileName} holds no placeholder`);
@@ -133,7 +133,7 @@ const assert_no_placeholder = (result: FixtureBuild): void => {
 
 /** Asserts a stylesheet holds the generated CSS, placed ahead of the fixture's own rule. */
 const assert_generated_css = (source: string, class_name: string): void => {
-	assert.include(source, FUZ_CSS_BANNER);
+	assert.match(source, /@layer fuz\.utilities\s*\{/);
 	assert.include(source, `.${class_name}`);
 	assert.include(source, APP_RULE);
 	assert.ok(
@@ -163,6 +163,11 @@ interface PostcssRoot {
 	append: (...nodes: Array<unknown>) => unknown;
 	removeAll: () => unknown;
 	walkDecls: (prop: string, callback: (decl: { remove: () => unknown }) => void) => unknown;
+	walkRules: (
+		selector: string,
+		callback: (rule: { error: (message: string) => Error }) => void
+	) => unknown;
+	toString: () => string;
 }
 
 /** The slice of PostCSS's helpers the test plugins use. */
@@ -192,17 +197,17 @@ const postcss_wrap_in_layer = create_postcss_config('test-wrap-in-layer', (root,
 	root.append(layer);
 });
 
-/** Repeats each stylesheet's rules, leaving two placeholders. */
-const postcss_repeat_rules = create_postcss_config('test-repeat-rules', (root) => {
-	for (const node of [...root.nodes]) root.append(node.clone());
-});
-
 /** Removes the placeholder declaration. */
 const postcss_drop_placeholder = create_postcss_config('test-drop-placeholder', (root) => {
 	root.walkDecls(FUZ_CSS_PLACEHOLDER, (decl) => decl.remove());
 });
 
 type CssModuleHandler = (this: unknown, css: string, id: string) => unknown;
+
+// the restatement is the virtual module's second transform, with the generated
+// CSS where the first one had the placeholder
+const is_restatement = (css: string, id: string): boolean =>
+	id === '/__fuz.css' && !css.includes(FUZ_CSS_PLACEHOLDER);
 
 /**
  * Interferes with `vite:css-post`, the Vite plugin the placeholder is
@@ -226,13 +231,13 @@ const create_css_post_interference = (
 		switch (mode) {
 			case 'throw':
 				css_post.transform.handler = function (css, id) {
-					if (parse_css_placeholder_hash(css) !== null) throw new Error('synthetic failure');
+					if (is_restatement(css, id)) throw new Error('synthetic failure');
 					return handler.call(this, css, id);
 				};
 				break;
 			case 'ignore':
 				css_post.transform.handler = function (css, id) {
-					if (parse_css_placeholder_hash(css) !== null) return null;
+					if (is_restatement(css, id)) return null;
 					return handler.call(this, css, id);
 				};
 				break;
@@ -360,18 +365,25 @@ describe('vite_plugin_fuz_css build output', () => {
 		assert.deepEqual(result.errors, []);
 	});
 
-	test('still fails the build when the CSS is inlined into JS', async () => {
-		// an iife output has no stylesheet: Vite injects the CSS from the chunk
-		let error: unknown;
-		try {
-			await build_with_classes(['p_md'], {
-				build: { rollupOptions: { input: entry_path, output: { format: 'iife' } } }
-			});
-		} catch (err) {
-			error = err;
-		}
-		assert(error instanceof Error, 'the build throws');
-		assert.include(error.message, 'no CSS asset exists');
+	test('CSS inlined into JS carries the generated CSS', async () => {
+		// an iife output has no stylesheet: Vite injects the CSS from the chunk,
+		// which holds the restated text like a stylesheet would
+		const result = await build_with_classes(['p_md'], {
+			build: { rollupOptions: { input: entry_path, output: { format: 'iife' } } }
+		});
+		assert.strictEqual(result.css.length, 0);
+		assert.include(result.chunks[0]!.code, '.p_md');
+		assert_no_placeholder(result);
+		assert.deepEqual(result.errors, []);
+		assert.deepEqual(result.warnings, []);
+	});
+
+	test('the generated CSS is minified with the rest of the stylesheet', async () => {
+		const result = await build_with_classes(['p_md']);
+		const css = assert_single_css(result);
+		assert.notInclude(css.source, FUZ_CSS_BANNER, 'comments are minified away');
+		assert.notInclude(css.source, '\t', 'and indentation');
+		assert.include(css.source, '.p_md{');
 	});
 
 	test('a plain SSR build with cssCodeSplit: false succeeds silently', async () => {
@@ -449,60 +461,74 @@ describe('vite_plugin_fuz_css build with other plugins', () => {
 });
 
 describe('vite_plugin_fuz_css build through a CSS pipeline', () => {
-	test('the generated CSS lands inside a wrapper PostCSS put around the placeholder', async () => {
+	test('PostCSS processes the generated CSS, as it does in dev', async () => {
 		const options: FixtureOptions = { css: postcss_wrap_in_layer };
 		const a = await build_with_classes(['p_md'], options);
 		const b = await build_with_classes(['p_lg'], options);
 		const css_a = assert_single_css(a);
 		const css_b = assert_single_css(b);
 
-		assert.ok(
-			css_a.source.startsWith(`@layer app{${FUZ_CSS_BANNER}`),
-			'the generated CSS opens the layer the placeholder was wrapped in'
-		);
+		assert.ok(css_a.source.startsWith('@layer app{'), 'the generated CSS was wrapped');
 		assert_generated_css(css_a.source, 'p_md');
 		assert_no_placeholder(a);
-		assert.notStrictEqual(css_a.fileName, css_b.fileName, 'and the filename still tracks it');
-		assert.deepEqual(a.warnings, []);
-		assert.deepEqual(a.errors, []);
-
-		// the bytes are what splicing the unhashed placeholder gives
-		const unhashed = await build_with_classes(['p_md'], {
-			...options,
-			plugins: [create_css_post_interference('throw')]
-		});
-		assert.strictEqual(unhashed.warnings.length, 1, 'the comparison build really is unhashed');
-		assert.strictEqual(css_a.source, assert_single_css(unhashed).source);
-	});
-
-	test('a placeholder the pipeline copied is hashed and stripped everywhere', async () => {
-		const options: FixtureOptions = { css: postcss_repeat_rules };
-		const a = await build_with_classes(['p_md'], options);
-		const b = await build_with_classes(['p_lg'], options);
-		const css_a = assert_single_css(a);
-		assert_generated_css(css_a.source, 'p_md');
-		assert.strictEqual(
-			css_a.source.split(FUZ_CSS_BANNER).length - 1,
-			2,
-			'the generated CSS (one banner pair) is placed once'
-		);
-		assert_no_placeholder(a);
-		assert.notStrictEqual(css_a.fileName, assert_single_css(b).fileName);
+		assert.notStrictEqual(css_a.fileName, css_b.fileName, 'and the filename tracks it');
 		assert.deepEqual(a.warnings, []);
 		assert.deepEqual(a.errors, []);
 	});
 
-	test('a placeholder the pipeline removed falls back to appending, with a warning', async () => {
+	test('a pipeline that removes the placeholder does not matter', async () => {
+		// the restated text replaces whatever the pipeline made of the placeholder
 		const result = await build_with_classes(['p_md'], { css: postcss_drop_placeholder });
+		assert_generated_css(assert_single_css(result).source, 'p_md');
+		assert_no_placeholder(result);
+		assert.deepEqual(result.warnings, []);
+		assert.deepEqual(result.errors, []);
+	});
+
+	test('without the restatement, a placeholder the pipeline removed falls back to appending', async () => {
+		const result = await build_with_classes(['p_md'], {
+			css: postcss_drop_placeholder,
+			plugins: [create_css_post_interference('rename')]
+		});
 		const css = assert_single_css(result);
 		assert.include(css.source, FUZ_CSS_BANNER);
 		assert.include(css.source, '.p_md');
 		assert_no_placeholder(result);
 		assert.strictEqual(result.warnings.length, 1);
-		assert.include(result.warnings[0], 'holds no placeholder');
 		assert.include(result.warnings[0], 'stale across deploys');
 		assert.strictEqual(result.errors.length, 1);
 		assert.include(result.errors[0], 'placeholder marker not found');
+	});
+
+	test("the pipeline's own error fails the build instead of falling back", async () => {
+		// throws only for the generated CSS, so the fixture's own stylesheet and
+		// the placeholder pass and only the restatement's processing rejects
+		const postcss_reject_generated = create_postcss_config('test-reject-generated', (root) => {
+			root.walkRules('.p_md', (rule) => {
+				throw rule.error('synthetic postcss failure');
+			});
+		});
+		let error: unknown;
+		try {
+			await build_with_classes(['p_md'], { css: postcss_reject_generated });
+		} catch (err) {
+			error = err;
+		}
+		assert(error instanceof Error, 'the build throws');
+		assert.include(
+			error.message,
+			"[fuz_css] Vite's CSS pipeline rejected the generated CSS: ",
+			'the error names the generated CSS'
+		);
+		assert.include(error.message, 'synthetic postcss failure');
+		// the bundler wraps plugin errors, keeping each one (and its cause) in `errors`
+		const [plugin_error] = (error as Error & { errors?: Array<Error> }).errors ?? [error];
+		assert(plugin_error?.cause instanceof Error, 'the pipeline error is the cause');
+		assert.include(plugin_error.cause.message, 'synthetic postcss failure');
+		// Vite positions the pipeline's error, and the wrapper carries it
+		const { loc } = plugin_error as Error & { loc?: { line?: unknown } };
+		assert.deepEqual(loc, (plugin_error.cause as Error & { loc?: unknown }).loc);
+		assert.isAbove(Number(loc?.line), 0, 'the position names a line');
 	});
 });
 
@@ -844,8 +870,8 @@ describe('vite_plugin_fuz_css build base_css and variables diagnostics', () => {
 	});
 });
 
-describe('vite_plugin_fuz_css build without the restated placeholder', () => {
-	/** Asserts the single warning that names what an unhashed filename costs. */
+describe('vite_plugin_fuz_css build without the restatement', () => {
+	/** Asserts the single warning that names what the fallback splice costs. */
 	const assert_unhashed_warning = (result: FixtureBuild, reason: string): void => {
 		assert.strictEqual(result.warnings.length, 1, 'warned exactly once');
 		assert.include(result.warnings[0], reason);
@@ -858,19 +884,20 @@ describe('vite_plugin_fuz_css build without the restated placeholder', () => {
 		['ignore', "didn't reach"],
 		['rename', 'no callable']
 	] as const) {
-		test(`falls back to the unhashed placeholder and warns once (${mode})`, async () => {
+		test(`falls back to splicing and warns once (${mode})`, async () => {
 			const options: FixtureOptions = { plugins: [create_css_post_interference(mode)] };
 			const a = await build_with_classes(['p_md'], options);
 			const b = await build_with_classes(['p_lg'], options);
 			const css_a = assert_single_css(a);
 			const css_b = assert_single_css(b);
 
-			// the output is as correct as with the hash
+			// the output still holds the generated CSS, unprocessed
+			assert.include(css_a.source, FUZ_CSS_BANNER);
 			assert_generated_css(css_a.source, 'p_md');
 			assert_generated_css(css_b.source, 'p_lg');
 			assert_no_placeholder(a);
 			assert_no_placeholder(b);
-			// only the filename loses its tie to the content
+			// and the filename loses its tie to the content
 			assert.strictEqual(css_a.fileName, css_b.fileName);
 			assert_unhashed_warning(a, reason);
 			assert_unhashed_warning(b, reason);

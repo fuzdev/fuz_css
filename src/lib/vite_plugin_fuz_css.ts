@@ -21,27 +21,22 @@
  *
  * In build the generated CSS depends on every module's transform, so the
  * virtual module loads as a placeholder rule and the build finishes it
- * afterwards. `renderChunk` renders the CSS and restates the placeholder with
- * a hash of it, so the stylesheet Vite emits - and each chunk whose name
- * depends on that stylesheet's - gets a filename that changes when the
- * generated CSS does. `generateBundle` then splices the CSS in at the
- * placeholder's position (see `css_placeholder_splice.ts`), in whichever of
- * two passes the stylesheets exist for. A code-split build has them all by
- * then, so the first pass - at the default order, ahead of every other
- * plugin - finishes them and those plugins' `generateBundle` hooks read the
- * generated CSS. With `build.cssCodeSplit: false` (the `build.lib` default)
- * Vite emits the single stylesheet in its own `generateBundle`, so a second
- * pass at `order: 'post'` finishes it. An environment that emits no assets,
- * like a plain `build.ssr`, may have no stylesheet to finish.
+ * afterwards. `renderChunk` renders the CSS, runs it through Vite's CSS
+ * pipeline (`preprocessCSS`: PostCSS or lightningcss, as configured), and
+ * restates the virtual module's text with the result before Vite renders
+ * the stylesheet, so the stylesheet holds the generated CSS from the start -
+ * minified, named from its content, and where import order put it - in
+ * code-split and single-stylesheet builds alike (see
+ * `vite_plugin_fuz_css_build.ts`). If the restatement can't run, the build
+ * splices the CSS in at the placeholder's position in `generateBundle`
+ * instead, unprocessed, with a warning.
  *
  * The build's passes and the dev server's evaluation report each need a
  * different position in the plugin order, so `vite_plugin_fuz_css` returns
- * several plugin objects - pass its result to `plugins` as is. List it after
- * any plugin that rewrites CSS in its `transform` hook: the build restates
- * the placeholder from the text its build-only object saw, so what a plugin
- * listed later does to the virtual module's CSS (wrapping it in a layer,
- * say) applies in dev and is lost in build. PostCSS and lightningcss always
- * apply.
+ * several plugin objects - pass its result to `plugins` as is. A plugin
+ * that rewrites CSS in its own `transform` hook (not PostCSS or
+ * lightningcss) applies to the virtual module in dev but not to the CSS the
+ * build restates.
  *
  * @example
  * ```ts
@@ -796,12 +791,12 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 				}
 				return css;
 			}
-			// Build: emit a marker rule (not a comment - comments are minified away)
-			// so generateBundle can find the importer's CSS asset (loaded on every
-			// page) and splice the full generated CSS in at the marker's position,
-			// which is where import order put this module. The CSS isn't known
-			// yet - other modules are still to be transformed - so the marker is
-			// unhashed here and renderChunk restates it.
+			// Build: the CSS isn't known yet - other modules are still to be
+			// transformed - so load a marker rule that renderChunk restates with
+			// the generated CSS. The marker is a declaration, not a comment
+			// (minified away), so if the restatement can't run, generateBundle
+			// can still find the importer's CSS asset and splice the CSS in at
+			// the marker's position, where import order put this module.
 			return FUZ_CSS_PLACEHOLDER_RULE;
 		},
 

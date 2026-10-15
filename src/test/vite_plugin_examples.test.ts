@@ -23,7 +23,7 @@ import { cp, mkdir, mkdtemp, readdir, readFile, rm, writeFile } from 'node:fs/pr
 import { execSync } from 'node:child_process';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
-import { FUZ_CSS_BANNER } from '#lib/vite_plugin_fuz_css.ts';
+import { FUZ_CSS_PLACEHOLDER } from '#lib/css_placeholder_splice.ts';
 
 // Skip if SKIP_EXAMPLE_TESTS is set
 const SKIP = !!process.env.SKIP_EXAMPLE_TESTS;
@@ -134,14 +134,40 @@ const find_css_file = async (dist_dir: string): Promise<string | null> => {
 };
 
 /**
+ * Runs a project's build, returning its log with stderr merged in, where
+ * Vite writes the plugin's warnings.
+ *
+ * @throws Error - when the build fails, with its log
+ */
+const run_build = (cwd: string): string => {
+	try {
+		return execSync('npm run build 2>&1', { cwd, stdio: 'pipe' }).toString();
+	} catch (err) {
+		const output = (err as { stdout?: Buffer | string | null }).stdout;
+		throw new Error(`${to_error_message(err)}\n${output?.toString() ?? ''}`);
+	}
+};
+
+/**
+ * Asserts a build went through the restatement, not the fallback splice,
+ * which also produces a `fuz.utilities` layer: no plugin warning in its log
+ * and no placeholder left in its CSS.
+ */
+const assert_restated_build = (build_log: string, css: string): void => {
+	assert.notInclude(build_log, '[fuz_css]', 'the build logs no fuz_css warning');
+	assert.notInclude(css, FUZ_CSS_PLACEHOLDER, 'the emitted CSS holds no placeholder');
+};
+
+/**
  * Builds an example project.
+ * @returns the build's log
  * @throws Error if build fails with details about the failure
  */
-const build_example = (example_name: string): void => {
+const build_example = (example_name: string): string => {
 	const example_dir = join(EXAMPLES_DIR, example_name);
 	try {
 		execSync('npm install', { cwd: example_dir, stdio: 'pipe' });
-		execSync('npm run build', { cwd: example_dir, stdio: 'pipe' });
+		return run_build(example_dir);
 	} catch (err) {
 		const message = to_error_message(err);
 		throw new Error(`Failed to build ${example_name}: ${message}`);
@@ -161,30 +187,19 @@ const read_generated_css = async (example_name: string): Promise<string> => {
 };
 
 /**
- * Extracts the fuz_css generated portion from the full CSS.
- * Returns the CSS between the marker comments.
+ * Extracts the generated utility classes from a built stylesheet: the
+ * `fuz.utilities` layer block, which survives minification where comments
+ * don't.
  */
 const extract_fuz_css = (css: string): string | null => {
-	const start_idx = css.indexOf(FUZ_CSS_BANNER);
-	const end_idx = css.lastIndexOf(FUZ_CSS_BANNER);
-	if (start_idx === -1 || end_idx === -1 || start_idx === end_idx) {
-		return null;
+	const match = /@layer fuz\.utilities\s*\{/.exec(css);
+	if (!match) return null;
+	let depth = 0;
+	for (let i = match.index + match[0].length - 1; i < css.length; i++) {
+		if (css[i] === '{') depth++;
+		else if (css[i] === '}' && --depth === 0) return css.slice(match.index, i + 1);
 	}
-	return css.slice(start_idx, end_idx + FUZ_CSS_BANNER.length);
-};
-
-/**
- * Extracts just the utility classes section from the bundled CSS.
- * The bundled output has sections: Theme Variables, Base Styles, Utility Classes.
- */
-const extract_utility_section = (css: string): string => {
-	const utility_marker = '/* Utility Classes */';
-	const idx = css.indexOf(utility_marker);
-	if (idx === -1) {
-		// No utility section marker - return as-is (utility-only mode)
-		return css;
-	}
-	return css.slice(idx);
+	return null;
 };
 
 /**
@@ -216,22 +231,25 @@ const example_results: Map<string, Array<string>> = new Map();
 const create_example_tests = (example_name: string, app_file: string): void => {
 	describe.skipIf(SKIP)(`${example_name} example`, () => {
 		let css: string;
+		let build_log: string;
 		let fuz_css: string | null;
 		let extracted_classes: Array<string>;
 
 		beforeAll(async () => {
-			build_example(example_name);
+			build_log = build_example(example_name);
 			css = await read_generated_css(example_name);
 			fuz_css = extract_fuz_css(css);
-			// Extract only utility classes section for comparison (bundled mode includes base styles)
-			const utility_css = fuz_css ? extract_utility_section(fuz_css) : '';
-			extracted_classes = utility_css ? extract_class_names(utility_css) : [];
+			extracted_classes = fuz_css ? extract_class_names(fuz_css) : [];
 			// Store for cross-example comparison
 			example_results.set(example_name, extracted_classes);
 		}, 120_000); // 2 minute timeout for install + build
 
 		test('generates fuz_css section', () => {
-			assert.isNotNull(fuz_css, 'CSS should contain fuz_css marker comments');
+			assert.isNotNull(fuz_css, 'CSS should contain the fuz.utilities layer');
+		});
+
+		test("runs the generated CSS through Vite's pipeline", () => {
+			assert_restated_build(build_log, css);
 		});
 
 		test(`extracts all expected classes from ${app_file} and dependencies`, () => {
@@ -283,6 +301,7 @@ describe.skipIf(SKIP)('cross-example consistency', () => {
 describe.skipIf(SKIP)('packed install', () => {
 	let temp_dir: string;
 	let css: string;
+	let build_log: string;
 
 	beforeAll(async () => {
 		temp_dir = await mkdtemp(join(tmpdir(), 'fuz_css_packed_'));
@@ -309,7 +328,7 @@ describe.skipIf(SKIP)('packed install', () => {
 		await writeFile(package_json_path, JSON.stringify(package_json, null, '\t'));
 		try {
 			execSync('npm install --no-audit --no-fund', { cwd: app_dir, stdio: 'pipe' });
-			execSync('npm run build', { cwd: app_dir, stdio: 'pipe' });
+			build_log = run_build(app_dir);
 		} catch (err) {
 			throw new Error(`Failed to install and build the packed tarball: ${to_error_message(err)}`);
 		}
@@ -323,6 +342,7 @@ describe.skipIf(SKIP)('packed install', () => {
 	});
 
 	test('builds with the generated CSS', () => {
-		assert.isNotNull(extract_fuz_css(css), 'CSS should contain fuz_css marker comments');
+		assert.isNotNull(extract_fuz_css(css), 'CSS should contain the fuz.utilities layer');
+		assert_restated_build(build_log, css);
 	});
 });
