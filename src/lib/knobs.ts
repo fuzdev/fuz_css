@@ -11,8 +11,9 @@
  * against `default_variables` by name.
  *
  * The catalog deliberately covers only the knob tier, not every variable:
- * derived ramp stops, color stops, and most site hooks are the escape-hatch
- * tier and stay out. A catalog entry may be a hook (`hook: true`) consumed by
+ * the internal ramp intermediates, color stops, and tokens stay out, and the
+ * contextual hooks the base styles read have their own catalog in
+ * `style_hooks.ts`. A catalog entry may be a hook (`hook: true`) consumed by
  * `style.css` with per-site fallbacks rather than a declared variable - it
  * exists here so themes can set it without tripping the no-invented-variables
  * check.

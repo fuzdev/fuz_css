@@ -1,0 +1,286 @@
+/**
+ * The style hook catalog: the custom properties the base styles and the
+ * class definitions read without declaring them in `default_variables`.
+ *
+ * A hook is the stable contextual surface - set on an element (a literal
+ * class like `--flow_margin:0`, a component's `<style>` block) to retune what
+ * the rules reading it render there, the way the `sized_*` composites set
+ * `--flow_margin` and `--font_size` for their subtree. Hooks have no `:root`
+ * default: a read either carries a `var()` fallback, which renders when
+ * nothing sets the hook, or sits in a rule that declares the hook itself
+ * (`local`), whose own value a consumer overrides on the same element.
+ *
+ * Hooks are contextual, not theme variables. A theme's values render on its
+ * root, where a `local` hook never reaches the element that reads it, and an
+ * inherited hook retunes every reader at once - which the knobs do with the
+ * gates watching - so `validate_theme` warns on a theme that sets one. The
+ * one theme-level hook, `heading_font_weight`, is a knob in `knobs.ts`.
+ *
+ * @module
+ */
+
+import type { StyleVariableName } from './variable.ts';
+
+export interface StyleHook {
+	name: StyleVariableName;
+	/**
+	 * The base styles and classes whose rules read the hook. A rule that only
+	 * sets it, like `.plain` clearing a button's fill, isn't a reader.
+	 */
+	read_by: ReadonlyArray<string>;
+	/**
+	 * The distinct `var()` fallbacks the hook's reads carry - what renders
+	 * where nothing sets it. Empty for a `local` hook.
+	 */
+	fallbacks: ReadonlyArray<string>;
+	/**
+	 * True when the rules reading the hook declare it themselves, so a value
+	 * reaches the reader only from a rule on the same element - an inherited
+	 * value from an ancestor or a theme's root never does.
+	 */
+	local?: boolean;
+	/** What setting the hook does, for docs and tooling. */
+	summary: string;
+}
+
+export const style_hooks: ReadonlyArray<StyleHook> = [
+	// flow and size context, set by the sized_* composites for their subtree
+	{
+		name: 'flow_margin',
+		read_by: ['block elements', 'headings', '.mb_flow', '.mt_flow'],
+		fallbacks: ['var(--space_lg)'],
+		summary:
+			'the flow-margin rhythm unit - block elements take it as their bottom margin and headings a multiple; set 0 to drop the rhythm in a subtree'
+	},
+	{
+		name: 'font_size',
+		read_by: ['headings', '.heading', 'button', "input[type='checkbox']::before", '.chip'],
+		fallbacks: ['inherit', 'var(--font_size_xl3)', 'revert-layer'],
+		summary:
+			"the size context's font size, which headings, buttons, chips, and the checkbox mark read in place of their own"
+	},
+	{
+		name: 'icon_size',
+		read_by: ['.menuitem .icon'],
+		fallbacks: ['var(--icon_size_md)'],
+		summary: "the width of a menu item's icon column"
+	},
+	{
+		name: 'menuitem_padding',
+		read_by: ['.menuitem'],
+		fallbacks: ['var(--space_xs3) var(--space_xs)'],
+		summary: "a menu item's padding"
+	},
+	{
+		name: 'menuitem_min_height',
+		read_by: ['.menuitem'],
+		fallbacks: ['var(--input_height_compact)'],
+		summary: "a menu item's minimum height"
+	},
+	{
+		name: 'chip_padding_x',
+		read_by: ['.chip'],
+		fallbacks: ['var(--space_xs)'],
+		summary: "a chip's inline padding"
+	},
+	// shape
+	{
+		name: 'border_radius',
+		read_by: [
+			'a',
+			'aside',
+			'code',
+			'summary',
+			'input',
+			'textarea',
+			'select',
+			'button',
+			'.pane',
+			'.panel',
+			'.chip'
+		],
+		fallbacks: ['var(--border_radius_xs3)', 'var(--border_radius_xs)', 'var(--control_radius)'],
+		summary: "the element's corner radius, in place of the radius token its rule defaults to"
+	},
+	// buttons
+	{
+		name: 'fill',
+		read_by: ['button'],
+		fallbacks: ['var(--shade_50)', 'var(--shade_60)'],
+		summary:
+			"the color a button's fills mix from (tinted at rest, solid when selected) - the .palette_X classes set it to the hue's stop 60"
+	},
+	{
+		name: 'button_fill',
+		read_by: ['button', '.selectable'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's background at rest"
+	},
+	{
+		name: 'button_fill_hover',
+		read_by: ['button', '.selectable'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's background while hovered"
+	},
+	{
+		name: 'button_fill_active',
+		read_by: ['button', '.selectable'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's background while pressed"
+	},
+	{
+		name: 'button_text_color',
+		read_by: ['button'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's label color"
+	},
+	{
+		name: 'button_border_color',
+		read_by: ['button'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's border color at rest"
+	},
+	{
+		name: 'button_border_color_hover',
+		read_by: ['button'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's border color while hovered"
+	},
+	{
+		name: 'button_border_color_active',
+		read_by: ['button'],
+		fallbacks: [],
+		local: true,
+		summary: "a button's border color while pressed"
+	},
+	{
+		name: 'button_min_height',
+		read_by: ['button', 'button.inline', 'p button'],
+		fallbacks: ['var(--input_height)', 'var(--input_height_compact)'],
+		summary: "a button's minimum height"
+	},
+	{
+		name: 'shadow',
+		read_by: ['button'],
+		fallbacks: ['var(--button_shadow)'],
+		summary:
+			"a button's box shadow, which its hover and pressed states set to the button_shadow_hover/_active variables"
+	},
+	// form controls
+	{
+		name: 'select_arrow_size',
+		read_by: ['select'],
+		fallbacks: [],
+		local: true,
+		summary: "the size of a single select's chevron, which also sets its right padding"
+	},
+	{
+		name: 'thumb_size',
+		read_by: ["input[type='range']"],
+		fallbacks: [],
+		local: true,
+		summary: "a range input's thumb diameter"
+	},
+	{
+		name: 'thumb_background_color',
+		read_by: ["input[type='range']"],
+		fallbacks: [],
+		local: true,
+		summary: "a range input's thumb color"
+	},
+	{
+		name: 'checkbox_content',
+		read_by: ["input[type='checkbox']::before"],
+		fallbacks: [],
+		local: true,
+		summary:
+			"the checkbox mark's content - set checkbox_content_empty and checkbox_content_checked instead"
+	},
+	{
+		name: 'checkbox_content_empty',
+		read_by: ["input[type='checkbox']"],
+		fallbacks: ["''"],
+		summary: 'the mark an unchecked checkbox shows'
+	},
+	{
+		name: 'checkbox_content_checked',
+		read_by: ["input[type='checkbox']"],
+		fallbacks: ["'✓'"],
+		summary: 'the mark a checked checkbox shows'
+	},
+	{
+		name: 'overflow',
+		read_by: ["input[type='checkbox']::before"],
+		fallbacks: ['visible'],
+		summary: "the checkbox mark's overflow"
+	},
+	// .clickable
+	{
+		name: 'clickable_transform',
+		read_by: ['.clickable'],
+		fallbacks: ['scale3d(1, 1, 1)'],
+		summary: 'the transform of a .clickable at rest'
+	},
+	{
+		name: 'clickable_transform_focus',
+		read_by: ['.clickable'],
+		fallbacks: ['scale3d(1.07, 1.07, 1.07)'],
+		summary: 'the transform of a .clickable with keyboard focus'
+	},
+	{
+		name: 'clickable_transform_hover',
+		read_by: ['.clickable'],
+		fallbacks: ['scale3d(1.1, 1.1, 1.1)'],
+		summary: 'the transform of a hovered .clickable'
+	},
+	{
+		name: 'clickable_transform_active',
+		read_by: ['.clickable'],
+		fallbacks: ['scale3d(1.2, 1.2, 1.2)'],
+		summary: 'the transform of a pressed or .active .clickable'
+	},
+	{
+		name: 'clickable_transform_origin',
+		read_by: ['.clickable'],
+		fallbacks: ['center'],
+		summary: 'the point a .clickable scales around'
+	},
+	{
+		name: 'clickable_transition_duration',
+		read_by: ['.clickable'],
+		fallbacks: ['0s'],
+		summary: 'how long a .clickable takes to change transform - instant by default'
+	},
+	// shadow classes
+	{
+		name: 'shadow_color',
+		read_by: ['.shadow_*', '.shadow_top_*', '.shadow_bottom_*', '.shadow_inset_*'],
+		fallbacks: ['var(--shadow_color_umbra)'],
+		summary:
+			'the color the shadow shape classes cast - the shadow color classes (shadow_color_umbra, shadow_a_50) set it'
+	},
+	{
+		name: 'shadow_alpha',
+		read_by: ['.shadow_*', '.shadow_top_*', '.shadow_bottom_*', '.shadow_inset_*'],
+		fallbacks: [
+			'var(--shadow_alpha_30)',
+			'var(--shadow_alpha_40)',
+			'var(--shadow_alpha_50)',
+			'var(--shadow_alpha_60)',
+			'var(--shadow_alpha_70)'
+		],
+		summary:
+			'the alpha the shadow shape classes cast at, each size defaulting to its own step - the shadow_alpha_NN classes set it'
+	}
+];
+
+/** The catalog indexed by variable name. */
+export const style_hook_by_name: ReadonlyMap<string, StyleHook> = new Map(
+	style_hooks.map((h) => [h.name, h])
+);

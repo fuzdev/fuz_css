@@ -123,6 +123,30 @@ describe('validate_theme', () => {
 		);
 	});
 
+	test('a contextual hook is a warning, not an unknown variable', () => {
+		const local = validate_theme({
+			name: 't',
+			variables: [{ name: 'button_fill', base: 'red' }]
+		});
+		assert.strictEqual(local.length, 1);
+		assert.strictEqual(local[0]!.level, 'warning');
+		assert.strictEqual(local[0]!.variable, 'button_fill');
+		assert.include(local[0]!.message, 'never reaches');
+		const inherited = validate_theme({
+			name: 't',
+			variables: [{ name: 'flow_margin', base: '0' }]
+		});
+		assert.strictEqual(inherited.length, 1);
+		assert.strictEqual(inherited[0]!.level, 'warning');
+		assert.include(inherited[0]!.message, 'retunes every element');
+		// the knob-tier hook is a theme variable
+		assert.deepEqual(
+			validate_theme({ name: 't', variables: [{ name: 'heading_font_weight', base: '700' }] }),
+			[]
+		);
+		assert.isFalse(known_theme_variable_names.has('flow_margin'));
+	});
+
 	test('the known names leave out the intermediates', () => {
 		for (const name of known_theme_variable_names) {
 			assert.notMatch(name, INTERNAL_VARIABLE_NAME_MATCHER, name);

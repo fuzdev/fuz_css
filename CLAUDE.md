@@ -305,9 +305,10 @@ variants (`max-sm:`, `max-md:`, etc.) and media feature queries (`print:`,
 
 Custom properties work as literals too - `--flow_margin:0`, `--button_shadow:none`
 set the property on the element straight from markup, which is how a consumer
-reaches a contextual base hook without a dedicated token class. The knobs and
-the tokens derived from them resolve on `:root`, so setting one on an element
-(`--space_scale:0.8`) changes nothing below it - knobs belong in a theme.
+reaches a contextual base hook (cataloged in `style_hooks.ts`) without a
+dedicated token class. The knobs and the tokens derived from them resolve on
+`:root`, so setting one on an element (`--space_scale:0.8`) changes nothing
+below it - knobs belong in a theme, hooks on elements.
 
 ## Variable naming
 
@@ -644,6 +645,14 @@ typography, borders, shading, shadows, layout. See
   (kind/axis/leverage/tier/bindable/range) for the knob-tier variables, joined
   against `default_variables` by name; includes hook knobs like
   `heading_font_weight` and the micro-surface color variables
+- [style_hooks.ts](src/lib/style_hooks.ts) - The contextual hook catalog:
+  every custom property `style.css` and the class definitions read without
+  declaring it (`flow_margin`, `font_size`, `fill`, the `button_*` and
+  `clickable_*` hooks, `shadow_color`, ...), with what reads it and its
+  `var()` fallbacks, or `local` when the reading rule declares it; no `:root`
+  defaults. `style_hooks.test.ts` fails on an uncataloged read, a stale entry,
+  a fallback mismatch, or a fallback-less read of a hook nothing declares.
+  `validate_theme` warns when a theme sets one
 - [theme_resolver.ts](src/lib/theme_resolver.ts) - The string→number
   resolution core the lint and the gates share: it resolves a theme's knobs
   and derived stops the way the renderer's cascade would, exposed as

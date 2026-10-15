@@ -12,6 +12,7 @@ import { to_theme_stance } from './theme.ts';
 import { scheme_mirrors_equal, scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
+import { style_hook_by_name } from './style_hooks.ts';
 import { palette_variants, intent_variants, color_scheme_variants } from './variable_data.ts';
 import { CSS_NUMBER_PATTERN } from './ramps.ts';
 import {
@@ -207,13 +208,14 @@ const to_shape_issue = (
 
 /**
  * Lints a theme's structure: the `Theme` schema (errors), a known name per
- * variable (errors), and advisory type/range warnings for the knob-tier
- * variables - including a pairing warning when an intent hue binds a palette
- * letter whose chroma multiplier differs from the intent's own
- * `*_chroma_scale` twin (a binding shares only the hue angle, so the slot's
- * chroma character is otherwise silently dropped), and a separation warning
- * when the accent hue lands within `ACCENT_STATUS_HUE_SEPARATION` of a
- * status hue. Value validation is
+ * variable (errors, with a warning instead for a contextual hook from
+ * `style_hooks.ts`, which a theme shouldn't set), and advisory type/range
+ * warnings for the knob-tier variables - including a pairing warning when an
+ * intent hue binds a palette letter whose chroma multiplier differs from the
+ * intent's own `*_chroma_scale` twin (a binding shares only the hue angle, so
+ * the slot's chroma character is otherwise silently dropped), and a
+ * separation warning when the accent hue lands within
+ * `ACCENT_STATUS_HUE_SEPARATION` of a status hue. Value validation is
  * advisory and never an error. An empty array means the theme is structurally
  * valid.
  *
@@ -253,6 +255,18 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 	}
 	for (const valid of parsed.data.variables) {
 		if (internal_variable_names.has(valid.name)) continue; // a compiled cap
+		// a contextual hook is legal CSS, but a theme is the wrong place for it
+		const hook = style_hook_by_name.get(valid.name);
+		if (hook) {
+			issues.push({
+				level: 'warning',
+				message: hook.local
+					? `"${valid.name}" is a contextual hook the rules reading it declare themselves, so a theme value never reaches them - set it in a rule on the element`
+					: `"${valid.name}" is a contextual hook - from a theme it retunes every element that reads it, so set it on an element instead, or turn a knob`,
+				variable: valid.name
+			});
+			continue;
+		}
 		if (!known_theme_variable_names.has(valid.name)) {
 			issues.push({
 				level: 'error',

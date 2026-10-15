@@ -11,6 +11,7 @@
 
 	import { default_variables } from '#lib/variables.ts';
 	import { INTERNAL_VARIABLE_NAME_MATCHER } from '#lib/variable.ts';
+	import { style_hooks } from '#lib/style_hooks.ts';
 	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 
 	const LIBRARY_ITEM_NAME = 'variables';
@@ -108,6 +109,52 @@ export type StyleVariable = {
 			<ModuleLink module_path="theme_validate.ts" /> runs the full lint.
 		</p>
 	</section>
+	<TomeSection>
+		<TomeSectionHeader text="Hooks" />
+		<p>
+			Hooks are the contextual surface: custom properties the base styles and classes read but don't
+			declare as variables, so they have no <code>:root</code> default. Set one on an element to
+			retune what reads it there, with a literal class like <code>--flow_margin:0</code> or in a
+			component's styles - the <code>sized_*</code> composites work this way, setting
+			<code>--flow_margin</code> and <code>--font_size</code> for their subtree. Where nothing sets
+			a hook, its read falls back to the value listed. A <em>local</em> hook is declared by the rule
+			that reads it, so a value reaches it only from a rule on the same element.
+		</p>
+		<p>
+			Hooks aren't theme variables: from a theme's root, an inherited hook retunes every element
+			that reads it and a local one reaches nothing, so <code>validate_theme</code> warns on a theme
+			that sets one. Themes turn the knobs instead. The catalog is
+			<ModuleLink module_path="style_hooks.ts" />.
+		</p>
+		<table>
+			<thead>
+				<tr>
+					<th>hook</th>
+					<th>read by</th>
+					<th>fallback</th>
+				</tr>
+			</thead>
+			<tbody>
+				{#each style_hooks as hook (hook.name)}
+					<tr>
+						<td><code>--{hook.name}</code></td>
+						<td>{hook.read_by.join(', ')}</td>
+						<td>
+							{#if hook.local}
+								<em>local</em>
+							{:else}
+								<div class="row flex-wrap:wrap gap_xs">
+									{#each hook.fallbacks as fallback (fallback)}
+										<code>{fallback}</code>
+									{/each}
+								</div>
+							{/if}
+						</td>
+					</tr>
+				{/each}
+			</tbody>
+		</table>
+	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text={`All ${variables.length} style variables`} />
 		<UnfinishedImplementationWarning>Many of these will change.</UnfinishedImplementationWarning>

@@ -137,8 +137,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.clickable {
 				cursor: pointer;
 				transform: var(--clickable_transform, scale3d(1, 1, 1));
-				transform-origin: var(--clickable_transform_origin);
-				transition-duration: var(--clickable_transition_duration); /* default to instant, chunky/lofi */
+				transform-origin: var(--clickable_transform_origin, center);
+				transition-duration: var(--clickable_transition_duration, 0s); /* instant by default, chunky/lofi */
 			}
 			.clickable:focus-visible {
 				transform: var(--clickable_transform_focus, scale3d(1.07, 1.07, 1.07));
