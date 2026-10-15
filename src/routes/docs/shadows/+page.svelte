@@ -29,8 +29,8 @@
 
 <TomeContent {tome}>
 	<UnfinishedImplementationWarning>
-		This is unfinished and will change. It feels simultaneously limiting in usage and bloated in the
-		implementation.
+		The shadow system is the least settled part of fuz_css: expect its variables and classes to
+		change before a stable release.
 	</UnfinishedImplementationWarning>
 	<section>
 		<p>

@@ -155,7 +155,9 @@ export type StyleVariable = {
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text={`All ${variables.length} style variables`} />
-		<UnfinishedImplementationWarning>Many of these will change.</UnfinishedImplementationWarning>
+		<UnfinishedImplementationWarning>
+			fuz_css is in early alpha, so variable names may still change before a stable release.
+		</UnfinishedImplementationWarning>
 		<!-- TODO add info through the contextmenu or dialog -->
 		<div class="variables">
 			{#each variables as variable (variable.name)}

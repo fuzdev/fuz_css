@@ -1,6 +1,6 @@
 # fuz_css
 
-> semantic-first CSS framework and design system
+> semantic-first CSS framework and design system: styled HTML defaults, themes derived from a few knobs, and utility classes generated from what you use
 
 fuz_css (`@fuzdev/fuz_css`) styles HTML elements by default and integrates
 custom properties, themes, and utility classes into a complete system. It
@@ -447,13 +447,11 @@ import 'virtual:fuz.css';
 
 The Vite plugin supports HMR - changes to source files automatically trigger
 CSS regeneration during development. For TypeScript consumers, declare the
-module's type once (e.g. in `src/app.d.ts`):
+module's type once, in a dedicated declaration file such as
+`src/fuz_css.d.ts` (not a SvelteKit `app.d.ts`, which is a module):
 
 ```ts
-declare module 'virtual:fuz.css' {
-	const css: string;
-	export default css;
-}
+declare module 'virtual:fuz.css';
 ```
 
 ### Utility-only mode
@@ -900,7 +898,7 @@ svelte's `mount()` resolves to the client build.
   for responsive modifiers, which emit media range syntax. The composites'
   forced-colors rules are nested CSS, which a browser without nesting
   skips - none of those has a forced-colors mode
-- **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
+- **Unfinished areas flagged in the docs** - forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to
   size composites

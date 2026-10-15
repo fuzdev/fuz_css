@@ -116,7 +116,8 @@
 		<TomeSection>
 			<TomeSectionHeader text="Opaque borders with shades" tag="h4" />
 			<UnfinishedImplementationWarning>
-				We may want to add <code>border_shade_NN</code> utility classes for opaque borders.
+				There are no utility classes for opaque borders yet, like a <code>border_shade_NN</code>
+				family.
 			</UnfinishedImplementationWarning>
 			<p>
 				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This
@@ -187,7 +188,6 @@ border-color: var(--shade_30);
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Border widths" />
-		<UnfinishedImplementationWarning />
 		<div class="border_examples border_widths">
 			{#each border_width_variants as border_width_variant (border_width_variant)}
 				{@const name = 'border_width_' + border_width_variant}

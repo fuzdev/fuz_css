@@ -17,7 +17,7 @@ export const gen: Gen = ({ origin_path }) => {
  *   import 'virtual:fuz.css';
  *
  * Direct import of this file is for utility-only mode or non-bundled usage.
- * See: https://css.fuz.dev/docs/classes
+ * See: https://css.fuz.dev/docs/setup
  */`;
 
 	const theme = default_themes[0]!;

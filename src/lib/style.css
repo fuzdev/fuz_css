@@ -6,7 +6,7 @@ instead of importing this file directly:
   import 'virtual:fuz.css';
 
 Direct import is for utility-only mode (with theme.css) or non-bundled usage.
-See: https://css.fuz.dev/docs/classes
+See: https://css.fuz.dev/docs/setup
 
 ---
 

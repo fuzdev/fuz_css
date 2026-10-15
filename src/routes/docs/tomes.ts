@@ -1,6 +1,7 @@
 import type { Tome } from '@fuzdev/fuz_ui/tome.ts';
 
 import introduction from './introduction/+page.svelte';
+import setup from './setup/+page.svelte';
 import api from './api/+page.svelte';
 import examples from './examples/+page.svelte';
 import semantic from './semantic/+page.svelte';
@@ -26,7 +27,15 @@ export const tomes: Array<Tome> = [
 		slug: 'introduction',
 		category: 'guide',
 		Component: introduction,
-		related_tomes: ['api'],
+		related_tomes: ['setup', 'api'],
+		related_modules: [],
+		related_declarations: []
+	},
+	{
+		slug: 'setup',
+		category: 'guide',
+		Component: setup,
+		related_tomes: ['introduction', 'classes', 'themes'],
 		related_modules: [],
 		related_declarations: []
 	},
@@ -74,7 +83,7 @@ export const tomes: Array<Tome> = [
 		slug: 'classes',
 		category: 'systems',
 		Component: classes,
-		related_tomes: ['chips', 'elements'],
+		related_tomes: ['setup', 'chips', 'elements'],
 		related_modules: [],
 		related_declarations: []
 	},

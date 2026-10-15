@@ -21,6 +21,7 @@
 	} from '#lib/variable_data.ts';
 	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 	import ResolvedLength from '#routes/docs/ResolvedLength.svelte';
+	import RootFontSize from '#routes/docs/RootFontSize.svelte';
 
 	const LIBRARY_ITEM_NAME = 'typography';
 
@@ -122,6 +123,7 @@
 			<code>--type_scale_ratio</code>, which flattens or opens up the whole heading hierarchy
 			without moving body text.
 		</p>
+		<RootFontSize />
 		<form class="width_atmost_sm">
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>

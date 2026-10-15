@@ -43,8 +43,8 @@
 				<li>
 					the stylesheets work with any framework and plain HTML; utility class generation supports
 					HTML/JS/TS, Svelte, and JSX - see the utility class
-					<TomeLink slug="classes" hash="Framework-support">framework support</TomeLink>, and for
-					the companion Svelte integration see
+					<TomeLink slug="setup" hash="Framework-support">framework support</TomeLink>, and for the
+					companion Svelte integration see
 					<a href="https://ui.fuz.dev/docs/ThemeRoot"><code>ThemeRoot</code></a> in
 					<a href="https://ui.fuz.dev/">fuz_ui</a>
 				</li>
@@ -61,39 +61,26 @@
 			<TomeSectionHeader text="Usage" />
 			<Code lang={null} content="npm i -D @fuzdev/fuz_css" />
 			<p>
-				Use the <TomeLink slug="classes" hash="Vite-plugin">Vite plugin</TomeLink> for bundled CSS
-				that includes theme variables, base styles, and utility classes in a single import. Add the
-				plugin to your Vite config:
+				Add the Vite plugin, then import its virtual module once, from your root layout or entry
+				file. It generates the theme variables, base styles, and utility classes your code uses:
 			</p>
 			<Code
 				lang="ts"
 				content={`// vite.config.ts
 import {vite_plugin_fuz_css} from '@fuzdev/fuz_css/vite_plugin_fuz_css.ts';
 
-export default defineConfig({plugins: [sveltekit(), vite_plugin_fuz_css()]});`}
-			/>
-			<p>Then import it, normally from your root layout:</p>
-			<Code
-				lang="ts"
-				content={`// bundled mode (recommended)
-// includes only used base styles, variables, and utilities
+export default defineConfig({plugins: [sveltekit(), vite_plugin_fuz_css()]});
+
+// src/routes/+layout.svelte, or your entry file
 import 'virtual:fuz.css';`}
 			/>
 			<p>
-				That single import is all most projects need, since it already holds the base styles and
-				theme variables your code uses. Projects managing their own theme or base styles can use
-				utility-only mode instead, importing the full stylesheets and turning the generated ones off
-				so neither layer ships twice:
+				See <TomeLink slug="setup" /> for SvelteKit, React, Preact, Solid, and plain HTML, and for
+				linking the stylesheets without a build step.
 			</p>
-			<Code
-				lang="ts"
-				content={`// utility-only mode - set \`base_css: null, variables: null\` on the plugin
-import '@fuzdev/fuz_css/style.css'; // all base styles
-import '@fuzdev/fuz_css/theme.css'; // all variables
-import 'virtual:fuz.css'; // used utilities only`}
-			/>
 			<p>
-				See the <TomeLink slug="classes" /> reference for setup details and configuration options.
+				fuz_css sets the root font size to <code>62.5%</code>, so <code>1rem</code> is 10px - see
+				<TomeLink slug="setup" hash="Root-font-size">root font size</TomeLink>.
 			</p>
 		</TomeSection>
 		<TomeSection>

@@ -5,19 +5,18 @@
 </script>
 
 <p>
-	fuz_css is a semantic-first CSS framework and design system. It styles elements by default and
-	integrates custom properties, themes, and utility classes into a complete system. It ships two
-	plain CSS files, the base <code>style.css</code> and replaceable <code>theme.css</code>, that work
-	with any framework and plain HTML, and its class generator supports HTML/JS/TS, Svelte, React,
-	Preact, Solid, and other JSX frameworks. For more see the
-	<a href={resolve('/docs/classes#Framework-support' as any)}>framework support</a> docs, and for
-	the companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.
+	fuz_css is a semantic-first CSS framework and design system. Semantic HTML looks finished with
+	zero classes: headings, links, buttons, forms, tables, and callouts come styled, and block
+	elements space themselves. Themes are a handful of knobs, not a stylesheet: hues, intents,
+	lightness curves, and scales re-derive every color and size in plain CSS, and the contrast, gamut,
+	and ramp-order checks the shipped themes pass are an API for checking your own. See the
+	<a href={resolve('/docs/themes')}>themes</a> and try the editor.
 </p>
 <p>
-	The only required parts are a reset stylesheet with the semantic defaults and a replaceable theme
-	stylesheet containing the variables used in the reset. There's also
-	<a href={resolve('/docs/classes')}>utility classes</a> for composition and convenience with a Vite
-	plugin, and the library exports the full API for complex usage.
+	The <a href={resolve('/docs/setup')}>Vite plugin</a> generates one stylesheet with the theme
+	variables, base styles, and <a href={resolve('/docs/classes')}>utility classes</a> your code uses,
+	for Svelte, React, Preact, Solid, and plain HTML. Without a build step, link the package's two
+	plain stylesheets. For companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.
 </p>
 <p>
 	More at the <a href={resolve('/docs')}>docs</a> and

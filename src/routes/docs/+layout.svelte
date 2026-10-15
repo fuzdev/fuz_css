@@ -9,7 +9,6 @@
 	import { tomes } from './tomes.ts';
 	import { library_json } from '#routes/library.ts';
 	import StyleVariableDetail from '#routes/StyleVariableDetail.svelte';
-	import UnfinishedImplementationWarning from './UnfinishedImplementationWarning.svelte';
 
 	const {
 		children
@@ -30,7 +29,6 @@
 		<DialogContent>
 			{#snippet children({ close })}
 				<StyleVariableDetail variable={selected_variable.value} />
-				<UnfinishedImplementationWarning />
 				<button type="button" onclick={close}>ok</button>
 			{/snippet}
 		</DialogContent>

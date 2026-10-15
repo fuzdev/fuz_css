@@ -38,7 +38,6 @@
 <!-- eslint-disable svelte/no-useless-mustaches -->
 
 <TomeContent {tome}>
-	<UnfinishedImplementationWarning>Forms need more work.</UnfinishedImplementationWarning>
 	<section>
 		<p>
 			Form elements have basic default styles that can be omitted with <code>.unstyled</code>.
@@ -161,7 +160,7 @@
 			<code>form</code> with checkboxes
 		</TomeSectionHeader>
 		<UnfinishedImplementationWarning>
-			This will change, probably to toggles.
+			Checkbox styles will likely change, probably to toggles.
 		</UnfinishedImplementationWarning>
 		<!-- TODO make this a form, but figure out the checkbox problem - maybe a last-child exception? -->
 		<form>

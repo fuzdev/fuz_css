@@ -8,7 +8,6 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 
-	import UnfinishedImplementationWarning from '#routes/docs/UnfinishedImplementationWarning.svelte';
 	import SourceFileLink from '#routes/SourceFileLink.svelte';
 
 	const LIBRARY_ITEM_NAME = 'elements';
@@ -33,10 +32,10 @@
 			<code>.unstyled</code> to an element.
 		</p>
 	</section>
-	<UnfinishedImplementationWarning>
-		Element styles are incomplete. Any
-		<a href="https://github.com/fuzdev/fuz_css/issues">requests</a>?
-	</UnfinishedImplementationWarning>
+	<aside>
+		Not every element has opinionated styles yet, and the ones below are the main ones. Requests are
+		welcome in the <a href="https://github.com/fuzdev/fuz_css/issues">issues</a>.
+	</aside>
 	<TomeSection>
 		<TomeSectionHeader text="p">
 			<MdnLink path="Web/HTML/Element/p" />
@@ -211,7 +210,10 @@
 		<TomeSectionHeader text="table">
 			<MdnLink path="Web/HTML/Element/table" />
 		</TomeSectionHeader>
-		<UnfinishedImplementationWarning />
+		<p>
+			Tables get collapsed borders, aligned headers, cell padding, and a row hover. Table styles are
+			still basic, and cell padding doesn't yet respond to the size composites.
+		</p>
 		<Code
 			content={`<table>
 	<thead>
@@ -282,5 +284,4 @@
 			</tbody>
 		</table>
 	</TomeSection>
-	<p>TODO more!</p>
 </TomeContent>
