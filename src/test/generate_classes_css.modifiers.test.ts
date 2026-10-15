@@ -287,8 +287,8 @@ describe('generate_classes_css modifiers', () => {
 
 			assert_css_contains(
 				result.css,
-				'.focus\\:plain:not(.selected):focus',
-				'.focus\\:plain:not(.selected, :hover):focus'
+				".focus\\:plain:not(.selected, [aria-pressed='true']):focus",
+				".focus\\:plain:not(.selected, [aria-pressed='true'], :hover):focus"
 			);
 		});
 
@@ -408,9 +408,9 @@ describe('generate_classes_css modifiers', () => {
 
 			assert_css_contains(
 				result.css,
-				'.hover\\:plain:not(.selected):hover',
+				".hover\\:plain:not(.selected, [aria-pressed='true']):hover",
 				// already names :hover, so only the class is renamed
-				'.hover\\:plain:not(.selected, :hover) {'
+				".hover\\:plain:not(.selected, [aria-pressed='true'], :hover) {"
 			);
 			assert_css_not_contains(result.css, ':hover:hover', ':hover):hover');
 			assert.isAbove(result.diagnostics.length, 0);

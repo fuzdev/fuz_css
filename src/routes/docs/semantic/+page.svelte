@@ -144,8 +144,8 @@
 		<ul>
 			<li>
 				<code>aria-pressed="true"</code> on a <code>button</code>, or on any
-				<code>.selectable</code>, takes the <code>.selected</code> fill, and stays clickable like
-				<code>.deselectable</code>
+				<code>.selectable</code> or <code>.menuitem</code>, takes the <code>.selected</code> look,
+				and stays clickable like <code>.deselectable</code>
 			</li>
 			<li>
 				<code>aria-current</code> on a link (any value but <code>false</code>) takes the selected

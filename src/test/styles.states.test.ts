@@ -125,11 +125,12 @@ const SHORTHAND_LONGHANDS: Record<string, Array<string>> = {
 
 /**
  * Merges the declarations of the rules matching `html` under `media` (`null`
- * for the rules outside any `@media`) in source order, ignoring specificity, so the rules it compares must keep their
- * equal-specificity overrides in source order - true of the base styles, whose
- * selectors are all `:where()`, and of the composites' forced-colors rules. A
- * shorthand in `SHORTHAND_LONGHANDS` clears the longhands set before it, as it
- * does in the cascade.
+ * for the rules outside any `@media`) in source order, ignoring specificity,
+ * so the rules it compares must keep their equal-specificity overrides in
+ * source order - true of the base styles, whose selectors are all `:where()`,
+ * and of the composites' forced-colors rules. A shorthand in
+ * `SHORTHAND_LONGHANDS` clears the longhands set before it, as it does in the
+ * cascade.
  */
 const resolve_declarations = (
 	rules: Array<FlatRule>,
@@ -218,7 +219,11 @@ describe('selected composites', () => {
 				[
 					'<button class="menuitem selected"></button>',
 					'<button class="menuitem selected deselectable"></button>',
+					'<button class="menuitem" aria-pressed="true"></button>',
+					'<button class="menuitem deselectable" aria-pressed="true"></button>',
+					'<button class="menuitem selected" aria-pressed="true"></button>',
 					'<button class="menuitem plain selected"></button>',
+					'<button class="menuitem plain" aria-pressed="true"></button>',
 					'<button class="menuitem palette_a selected"></button>'
 				]
 			],
@@ -252,6 +257,52 @@ describe('selected composites', () => {
 				);
 			}
 		}
+	});
+
+	test('a pressed .menuitem or .selectable takes the selected tint in every state, but not its settled cursor', () => {
+		for (const name of ['menuitem', 'selectable']) {
+			// the composite's own rules, which outrank every base rule from their layer
+			const rules = flatten_rules(composite_css(name));
+			const resolve = (html: string) => {
+				const declarations = resolve_declarations(rules, null, html);
+				const cursor = declarations.get('cursor');
+				declarations.delete('cursor');
+				return { declarations, cursor };
+			};
+			for (const shape of ['button', 'li', 'div']) {
+				const element = (classes: string, attrs: string) =>
+					`<${shape} class="${classes}" ${attrs}></${shape}>`;
+				for (const state of STATES) {
+					const selected = resolve(element(`${name} selected`, state));
+					for (const [classes, attrs] of [
+						[name, 'aria-pressed="true"'],
+						[`${name} deselectable`, 'aria-pressed="true"']
+					] as const) {
+						const html = element(classes, `${attrs} ${state}`);
+						const pressed = resolve(html);
+						assert.deepEqual(pressed.declarations, selected.declarations, html);
+						// a pressed toggle can be unpressed, so it keeps the pointer
+						assert.strictEqual(pressed.cursor, 'pointer', html);
+					}
+					// a settled selected item can't be clicked again
+					assert.strictEqual(selected.cursor, 'default', element(`${name} selected`, state));
+				}
+			}
+		}
+	});
+
+	test('a pressed .plain button keeps the selected fill and edge', () => {
+		const rules = flatten_rules(composite_css('plain'));
+		for (const html of [
+			'<button class="plain" aria-pressed="true"></button>',
+			'<button class="plain selected"></button>',
+			'<button class="menuitem plain" aria-pressed="true"></button>'
+		]) {
+			assert.strictEqual(resolve_declarations(rules, null, html).size, 0, html);
+		}
+		const unselected = resolve_declarations(rules, null, '<button class="plain"></button>');
+		assert.strictEqual(unselected.get('--button_fill'), 'transparent');
+		assert.strictEqual(unselected.get('--border_color'), 'transparent');
 	});
 });
 
@@ -404,7 +455,9 @@ describe('forced colors', () => {
 				'menuitem',
 				[
 					'<button class="menuitem selected"></button>',
+					'<button class="menuitem" aria-pressed="true"></button>',
 					'<li class="menuitem selected"></li>',
+					'<li class="menuitem" aria-pressed="true"></li>',
 					'<li class="menuitem plain selectable selected"></li>'
 				]
 			]

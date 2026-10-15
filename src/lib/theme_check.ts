@@ -95,7 +95,8 @@ export const GATE_SELECTED_TEXT = 4.5;
  * `shade_max` in oklab, so a mouse press pairs that label with the pressed
  * fill, and a keyboard press, which doesn't hover, pairs the plain label with
  * it. An 8-bit raster quantizes both colors, so a rendered measurement lands
- * within about 0.07 of the ratio.
+ * within about 0.15 of the ratio, and the gate reads it low more often than
+ * high.
  */
 export const GATE_PALETTE_TEXT = 4.5;
 /**

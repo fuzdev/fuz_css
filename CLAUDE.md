@@ -334,10 +334,10 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   50, 60, 70, 80, 90, 95, 100). `_60` is the text-safe stop: links, chip
   labels, and selected-button fills use it, along with the `.palette_X`
   button's border, ring, and fill tint. The `.palette_X` button label is
-  `_70`, a step further, so it holds AA on each of its own tinted fills, and
-  `check_theme` gates all of these pairings at AA - the button label against
+  `_70`, a step further, so it holds AA on each of its own tinted fills.
+  `check_theme` gates the text among these at AA - the button label against
   its rest (8% alpha over `shade_00`), hover (16%, with the hovered label's
-  10% mix toward `shade_max`), and pressed (24%) fills, a press by mouse
+  10% mix toward `shade_max`), and active (24%) fills, a press by mouse
   (hovered label) and by keyboard (plain label) alike; what an exemplar or
   composition knowingly gives up is declared as an exact exception in the
   theme_check tests

@@ -289,10 +289,10 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment:
 			'TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?',
 		ruleset: `
-			.plain:not(.selected) {
+			.plain:not(.selected, [aria-pressed='true']) {
 				--border_color: transparent;
 			}
-			.plain:not(.selected, :hover) {
+			.plain:not(.selected, [aria-pressed='true'], :hover) {
 				box-shadow: none;
 				--button_fill: transparent;
 			}
@@ -312,13 +312,17 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				align-items: center;
 				padding: var(--menuitem_padding, var(--space_xs3) var(--space_xs));
 			}
-			.menuitem.selected {
+			/* aria-pressed takes the selected look but not its default cursor,
+				since a pressed toggle can be unpressed, like .deselectable */
+			.menuitem:is(.selected, [aria-pressed='true']) {
 				/* TODO different patterns for border and surface? */
 				--border_color: var(--accent_50);
 				/* a selected button's label is the inverse for its solid fill, so over
 					this light one it returns to the text color, hovered or not */
 				--button_text_color: var(--text_color);
 				background-color: var(--fg_10);
+			}
+			.menuitem.selected {
 				cursor: default;
 			}
 			.menuitem.selected.deselectable:not(:disabled):not([aria-disabled='true']) {
@@ -329,7 +333,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				background-color: var(--fg_10);
 			}
 			.menuitem:active,
-			.menuitem.selected:hover {
+			.menuitem:is(.selected, [aria-pressed='true']):hover {
 				--border_color: var(--border_color_30);
 				background-color: var(--fg_20);
 			}
@@ -346,20 +350,20 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			/* forced colors drop the fill, so selection shows as a Highlight band
 				inside the edge, moving out as a double ring when focused - the base
 				button rules' pattern, restated here since those lose to composites */
-			.menuitem.selected {
+			.menuitem:is(.selected, [aria-pressed='true']) {
 				@media (forced-colors: active) {
 					border-color: Highlight;
 					outline: var(--outline_width_focus) solid Highlight;
 					outline-offset: calc(-1 * (var(--border_width) + var(--outline_width_focus)));
 				}
 			}
-			.menuitem.selected:focus-visible {
+			.menuitem:is(.selected, [aria-pressed='true']):focus-visible {
 				@media (forced-colors: active) {
 					outline: calc(2 * var(--outline_width_focus)) double Highlight;
 					outline-offset: var(--outline_offset);
 				}
 			}
-			.menuitem.selected:is(:disabled, [aria-disabled='true']) {
+			.menuitem:is(.selected, [aria-pressed='true']):is(:disabled, [aria-disabled='true']) {
 				@media (forced-colors: active) {
 					border-color: GrayText;
 					outline-color: GrayText;
