@@ -190,20 +190,47 @@ describe('scheme stance', () => {
 
 describe('ramp intermediates', () => {
 	// the schema refuses these names, so the themes here skip it the way
-	// untrusted input could; the renderer would emit what the theme carries,
-	// so the resolver fails rather than reading the default
-	test('an intermediate a theme sets resolves to nothing', () => {
+	// untrusted input could; the renderer drops them, so the resolver reads
+	// the derived value the page renders
+	test('an intermediate a theme sets is ignored', () => {
+		const defaults = create_theme_resolver({ name: 't', variables: [] });
 		for (const variable of [
 			{ name: '_chroma_shape_50', base: '0.5' },
 			{ name: '_palette_lightness_30', base: '0.5' },
 			{ name: '_shade_lightness_30', dark: '0.5' },
-			{ name: '_palette_chroma_40', base: '0.01' },
-			// the capped form, but for another stop
-			{ name: '_palette_chroma_40', base: render_chroma_stop_css('50', 0.01) }
+			{ name: '_palette_chroma_40', base: render_chroma_stop_css('40', 0.01) }
 		]) {
 			const resolver = create_theme_resolver({ name: 't', variables: [variable] });
-			const scheme = variable.base === undefined ? 'dark' : 'light';
-			assert.isNull(resolver.resolve(variable.name, scheme), JSON.stringify(variable));
+			for (const scheme of ['light', 'dark'] as const) {
+				assert.strictEqual(
+					resolver.resolve(variable.name, scheme),
+					defaults.resolve(variable.name, scheme),
+					JSON.stringify(variable)
+				);
+			}
+			assert.isFalse(resolver.pinned(variable.name));
+		}
+	});
+
+	test('an entry with no name is ignored, not thrown on', () => {
+		// untyped data, like a theme loaded from JSON
+		const theme = {
+			name: 't',
+			variables: [{ base: '1' }, { name: 'hue_a', base: '20' }]
+		} as unknown as Theme;
+		const resolver = create_theme_resolver(theme);
+		assert.strictEqual(resolver.resolve('hue_a', 'light'), 20);
+		assert.isTrue(check_theme(theme).entries.length > 0);
+	});
+
+	test('a cap that is not the compiled form for its own stop resolves to nothing', () => {
+		for (const cap of [
+			{ name: '_palette_chroma_40', base: '0.01' },
+			{ name: '_palette_chroma_40', base: render_chroma_stop_css('50', 0.01) },
+			{ name: '_chroma_shape_50', base: '0.5' }
+		]) {
+			const resolver = create_theme_resolver({ name: 't', variables: [] }, { caps: [cap] });
+			assert.isNull(resolver.resolve(cap.name, 'light'), JSON.stringify(cap));
 		}
 	});
 
@@ -232,23 +259,22 @@ describe('ramp intermediates', () => {
 		assert.closeTo(curved.resolve('_chroma_shape_20', 'light')!, ramp_chroma_shape('20', 2), 1e-12);
 	});
 
-	test('a compiled cap on a palette chroma stop is read', () => {
-		const theme: Theme = {
-			name: 't',
-			variables: [{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.01) }]
-		};
-		const resolver = create_theme_resolver(theme);
+	test('a compiled cap passed beside the theme is read, and is no pin', () => {
+		const resolver = create_theme_resolver(
+			{ name: 't', variables: [] },
+			{ caps: [{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.01) }] }
+		);
 		assert.strictEqual(resolver.resolve('_palette_chroma_50', 'light'), 0.01);
-		assert.isTrue(resolver.pinned('_palette_chroma_50'));
+		assert.isFalse(resolver.pinned('_palette_chroma_50'));
 	});
 
 	test('a compiled cap reads through CSS whitespace but not U+00A0', () => {
 		const cap = render_chroma_stop_css('50', 0.01);
 		const resolve = (base: string) =>
-			create_theme_resolver({
-				name: 't',
-				variables: [{ name: '_palette_chroma_50', base }]
-			}).resolve('_palette_chroma_50', 'light');
+			create_theme_resolver(
+				{ name: 't', variables: [] },
+				{ caps: [{ name: '_palette_chroma_50', base }] }
+			).resolve('_palette_chroma_50', 'light');
 		assert.strictEqual(resolve(`\n\t${cap.replace('min(', 'min(\n')} `), 0.01);
 		assert.isNull(resolve(cap.replace('min(', 'min(\u00a0')));
 		assert.isNull(resolve(`\u00a0${cap}`));

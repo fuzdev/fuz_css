@@ -12,10 +12,6 @@
 import { z } from 'zod';
 
 import { css_comment_is_contained, css_value_is_contained } from './css_containment.ts';
-// TODO this import goes with the compiled-cap carve-out in `StyleVariable` - it
-// pulls `ramps.ts` (and the module-init leftovers of `variable_data.ts`) into
-// `parse_theme`, about 1KB, so drop it when caps leave `Theme`
-import { CHROMA_STOP_CSS_MATCHER } from './ramps.ts';
 
 /** Matches a public style variable name, the names a theme may set. */
 export const STYLE_VARIABLE_NAME_MATCHER = /^[a-z][a-z0-9_]*(?<!_)$/;
@@ -30,10 +26,6 @@ export const STYLE_VARIABLE_NAME_MATCHER = /^[a-z][a-z0-9_]*(?<!_)$/;
  */
 export const INTERNAL_VARIABLE_NAME_MATCHER = /^_[a-z][a-z0-9_]*(?<!_)$/;
 
-// the one internal variable a theme can carry, and only in the capped form
-// (see `StyleVariable`)
-const PALETTE_CHROMA_NAME_MATCHER = /^_palette_chroma_(\d+)$/;
-
 const INTERNAL_NAME_ERROR =
 	'internal ramp variable - a theme steers the ramps through their knobs and color stops and cannot set one';
 
@@ -41,10 +33,6 @@ const to_name_error = (name: unknown): string =>
 	typeof name === 'string' && INTERNAL_VARIABLE_NAME_MATCHER.test(name)
 		? INTERNAL_NAME_ERROR
 		: 'invalid style variable name';
-
-// a slot is either absent or the capped form for the variable's own stop
-const is_capped_chroma_slot = (stop: string, slot: string | undefined): boolean =>
-	slot === undefined || CHROMA_STOP_CSS_MATCHER.exec(slot)?.[1] === stop;
 
 export const StyleVariableName = z
 	.string()
@@ -73,35 +61,20 @@ const StyleVariableValue = z
  * slot must also be a contained CSS value (see `css_containment.ts`), since it
  * renders verbatim.
  *
- * The name is a public one (`StyleVariableName`), with one exception: the
- * internal `_palette_chroma_NN` stops are admitted when every slot is the
- * capped form `render_chroma_stop_css` emits for that stop. That's the shape
- * `compile_theme` writes its recomputed gamut caps in, and the shape a
- * stanced theme's `scheme_mirror` re-slots the defaults' caps in; any other
- * internal variable, or another value for this one, is rejected.
+ * The name is a public one (`StyleVariableName`): an internal ramp variable
+ * is rejected with an error saying so. The derived data that does carry
+ * internal names - a stance's mirror and `compile_theme`'s caps - travels
+ * beside a theme as `ThemeDerived`, never inside it.
  */
 export const StyleVariable = z
 	.strictObject({
-		name: z
-			.string()
-			.refine(
-				(name) => STYLE_VARIABLE_NAME_MATCHER.test(name) || PALETTE_CHROMA_NAME_MATCHER.test(name),
-				{ error: (issue) => to_name_error(issue.input) }
-			),
+		name: z.string().refine((name) => STYLE_VARIABLE_NAME_MATCHER.test(name), {
+			error: (issue) => to_name_error(issue.input)
+		}),
 		base: StyleVariableValue.optional(),
 		dark: StyleVariableValue.optional(),
 		summary: z.string().refine(css_comment_is_contained, 'must not close a CSS comment').optional()
 	})
-	.refine(
-		(v) => {
-			const stop = PALETTE_CHROMA_NAME_MATCHER.exec(v.name)?.[1];
-			return (
-				stop === undefined ||
-				(is_capped_chroma_slot(stop, v.base) && is_capped_chroma_slot(stop, v.dark))
-			);
-		},
-		{ message: INTERNAL_NAME_ERROR, path: ['name'] }
-	)
 	.refine((v) => v.base !== undefined || v.dark !== undefined, {
 		message: 'must have at least one of base or dark'
 	})
@@ -139,28 +112,16 @@ export const Theme = z.strictObject({
 	 * `base` position.
 	 *
 	 * Rendering a stanced theme faithfully also needs the scheme-adaptive
-	 * defaults mirrored into the stanced scheme; that is
-	 * `resolve_theme_stance` in `theme_stance.ts`, applied before rendering.
-	 * The renderer only pins `color-scheme` - it holds no variable data of its
-	 * own, so the mirror stays off the theme path of consumers who don't use a
-	 * stanced theme.
+	 * defaults mirrored into the stanced scheme. That mirror is derived data,
+	 * not part of the theme: `resolve_theme_stance` in `theme_stance.ts`
+	 * computes it beside the theme, and `render_theme_style` takes it as an
+	 * option. The renderer alone only pins `color-scheme` - it holds no
+	 * variable data of its own, so the mirror stays off the theme path of
+	 * consumers who don't use a stanced theme.
 	 */
 	scheme: ThemeScheme.optional().meta({
 		description: 'which color schemes the theme supports, defaulting to dual'
-	}),
-	/**
-	 * The stance mirror computed by `resolve_theme_stance`: scheme-adaptive
-	 * defaults re-slotted so a single-scheme theme's appearance holds in both
-	 * color schemes. Rendered before `variables`, so the theme's own values
-	 * win by order.
-	 *
-	 * Kept apart from `variables` so the authored knobs stay distinguishable
-	 * from the derived ones.
-	 */
-	scheme_mirror: z
-		.array(StyleVariable)
-		.optional()
-		.meta({ description: 'the derived stance mirror, from `resolve_theme_stance`' })
+	})
 });
 export type Theme = z.infer<typeof Theme>;
 

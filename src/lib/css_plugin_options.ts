@@ -38,6 +38,7 @@ import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import type { StyleVariable, Theme } from './variable.ts';
+import type { ResolvedTheme } from './theme.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -239,19 +240,37 @@ export interface CssOutputOptions {
 	 * referenced variables are pulled in transitively.
 	 *
 	 * For runtime switching use fuz_ui's `ThemeRoot`; the two compose, with the
-	 * runtime theme winning by cascade layer. A single-scheme theme's
-	 * `scheme_mirror` resolves automatically at build time (unlike the runtime
-	 * renderer, which needs `resolve_theme_stance` called first). The theme's
-	 * own overlay also renders into the `fuz.theme.baked` sublayer - above the
+	 * runtime theme winning by cascade layer. The theme's own overlay also
+	 * renders into the `fuz.theme.baked` sublayer - above the
 	 * `fuz.preferences` OS mappings, with `color-scheme` pinned for a stance,
 	 * and below a runtime theme's direct `fuz.theme` styles - so the baked
 	 * theme behaves like the same theme at runtime until one overrides it.
 	 *
+	 * The bake derives what the theme renders with, as `render_theme_style`
+	 * takes it at runtime, so a plain `Theme` is all it needs (a
+	 * `ResolvedTheme` is accepted too, its derived data recomputed):
+	 *
+	 * - a single-scheme theme's stance mirror, re-slotted from the configured
+	 *   `variables`, so a customized scheme-adaptive variable keeps its own
+	 *   value under the stance
+	 * - compiled chroma caps: `compute_theme_caps` recomputes the gamut caps
+	 *   wherever the theme's hues or lightness moved off the baked table (a
+	 *   rotated hue, a monochrome collapse), and the caps render last. The
+	 *   gates run with them and report as warnings - `theme_gate_failed` and
+	 *   `theme_gate_unchecked` - measured against the shipped defaults' numeric
+	 *   twin with the configured `variables`' knob-tier values folded in
+	 *   where they differ from the defaults, so the caps and gates measure
+	 *   what renders. A stanced theme lists only its stanced scheme's
+	 *   entries. A theme can fail a gate knowingly: marquee bakes with a
+	 *   gamut warning, since it exceeds the caps on purpose. The lint doesn't run,
+	 *   since it needs zod, an optional peer; run `validate_theme` on the
+	 *   theme yourself
+	 *
 	 * The baked values become the output's defaults, so a runtime theme can't
 	 * revert to the pre-bake appearance by being empty - the base theme
 	 * renders nothing. To offer "back to fuz defaults" at runtime, render the
-	 * defaults explicitly:
-	 * `render_theme_style({name: 'base', variables: default_variables})`.
+	 * defaults explicitly, internal ramp variables included:
+	 * `render_style_variables(default_variables)`.
 	 *
 	 * @example
 	 * ```ts
@@ -259,7 +278,7 @@ export interface CssOutputOptions {
 	 * vite_plugin_fuz_css({theme: phosphor_theme});
 	 * ```
 	 */
-	theme?: Theme | null;
+	theme?: Theme | ResolvedTheme | null;
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.

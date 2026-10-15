@@ -2,6 +2,7 @@ import { test, assert, describe } from 'vitest';
 
 import {
 	apply_theme_variables,
+	bake_theme,
 	build_variable_graph,
 	build_variable_graph_from_options,
 	resolve_variables_transitive,
@@ -10,8 +11,17 @@ import {
 	find_similar_variable
 } from '#lib/variable_graph.ts';
 import type { StyleVariable, Theme } from '#lib/variable.ts';
+import type { GenerationDiagnostic } from '#lib/diagnostics.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
+import { scheme_stance_variables } from '#lib/theme_stance.ts';
+import { compute_theme_caps } from '#lib/theme_check.ts';
 import { default_variables } from '#lib/variables.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
+
+// the containment errors among a graph's diagnostics, apart from a baked
+// theme's gate warnings
+const uncontained = (graph: { diagnostics: Array<GenerationDiagnostic> }) =>
+	graph.diagnostics.filter((d) => d.identifier === 'uncontained_theme_value');
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
@@ -117,7 +127,7 @@ describe('build_variable_graph containment', () => {
 		});
 		const { root_css } = generate_theme_css(graph, new Set(['text_color']));
 		assert.notInclude(root_css, 'lime');
-		assert.strictEqual(graph.diagnostics.length, 1);
+		assert.strictEqual(uncontained(graph).length, 1);
 	});
 
 	test('a baked theme slot that escapes leaves the default in place', () => {
@@ -129,8 +139,36 @@ describe('build_variable_graph containment', () => {
 		assert.strictEqual(graph.variables.get('text_color')?.base_value, fallback.base);
 		assert.deepEqual(
 			graph.diagnostics.map((d) => d.identifier),
+			// the gates measure the contained theme, so they don't see the value
 			['uncontained_theme_value']
 		);
+	});
+
+	test('an uncontained hue is left out before the caps and gates read it', () => {
+		const theme: Theme = { name: 'j', variables: [{ name: 'hue_a', base: '20; } x {' }] };
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		const baked = bake_theme(theme, default_variables, diagnostics);
+		assert.deepEqual(baked, { theme: { name: 'j', variables: [] } });
+		assert.deepEqual(
+			diagnostics.map((d) => d.identifier),
+			['uncontained_theme_value']
+		);
+	});
+
+	test('a theme entry with no name is reported and left out, not thrown on', () => {
+		// untyped data, like a theme loaded from JSON
+		const nameless = { base: '1' } as unknown as StyleVariable;
+		const theme: Theme = { name: 'j', variables: [nameless, { name: 'hue_a', base: '20' }] };
+		const graph = build_variable_graph_from_options(undefined, theme);
+		assert.deepEqual(
+			graph.diagnostics.map((d) => d.identifier),
+			['uncontained_theme_value']
+		);
+		assert.strictEqual(graph.variables.get('hue_a')!.base_value, '20');
+		assert.deepEqual(graph.theme!.theme.variables, [{ name: 'hue_a', base: '20' }]);
+		// the overlay is total over one too, when handed the theme directly
+		const applied = apply_theme_variables([{ name: 'hue_a', base: '0' }], { theme });
+		assert.deepEqual(applied, [{ name: 'hue_a', base: '20' }]);
 	});
 
 	test('an escaping value both the variables and the theme carry is reported once', () => {
@@ -139,7 +177,7 @@ describe('build_variable_graph containment', () => {
 			name: 't',
 			variables: [bad]
 		});
-		assert.strictEqual(graph.diagnostics.length, 1);
+		assert.strictEqual(uncontained(graph).length, 1);
 	});
 
 	test('the default variables are all contained', () => {
@@ -726,7 +764,7 @@ describe('apply_theme_variables', () => {
 
 	test("overlays the theme's variables last-wins by name", () => {
 		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', base: '30' }] };
-		const result = apply_theme_variables(defaults, theme);
+		const result = apply_theme_variables(defaults, { theme });
 		assert.deepEqual(
 			result.find((v) => v.name === 'hue_a'),
 			{ name: 'hue_a', base: '30' }
@@ -741,55 +779,51 @@ describe('apply_theme_variables', () => {
 
 	test('appends variables the defaults lack', () => {
 		const theme: Theme = { name: 't', variables: [{ name: 'my_brand', base: '#f60' }] };
-		const result = apply_theme_variables(defaults, theme);
+		const result = apply_theme_variables(defaults, { theme });
 		assert.lengthOf(result, 4);
 		assert.isDefined(result.find((v) => v.name === 'my_brand'));
 	});
 
-	test('recomputes a carried scheme_mirror its variables no longer imply', () => {
-		const theme: Theme = {
-			name: 't',
-			scheme: 'dark',
-			// stale: neither entry is what the mirror of these variables holds
+	test('the mirror applies first, minus the names the theme or its caps set', () => {
+		const result = apply_theme_variables(defaults, {
+			theme: {
+				name: 't',
+				scheme: 'dark',
+				variables: [
+					{ name: 'shade_00', dark: '#111' },
+					{ name: '_hue_a', base: 'x' }
+				]
+			},
 			scheme_mirror: [
 				{ name: 'shade_00', base: '#000' },
-				{ name: 'hue_b', base: '99' }
+				{ name: 'hue_a', base: 'mirrored' },
+				{ name: 'hue_b', base: 'mirrored' }
 			],
-			variables: [{ name: 'shade_00', base: 'authored' }]
-		};
-		const result = apply_theme_variables(defaults, theme);
+			caps: [{ name: 'hue_b', base: 'capped' }]
+		});
+		// the theme's dark-only value keeps the default's base beneath it, not
+		// the mirror's, which the theme's name shadows
 		assert.deepEqual(
 			result.find((v) => v.name === 'shade_00'),
-			{ name: 'shade_00', base: 'authored' }
+			{ name: 'shade_00', base: '#fff', dark: '#111' }
+		);
+		assert.deepEqual(
+			result.find((v) => v.name === 'hue_a'),
+			{ name: 'hue_a', base: 'mirrored' }
 		);
 		assert.deepEqual(
 			result.find((v) => v.name === 'hue_b'),
-			{ name: 'hue_b', base: '120' }
+			{ name: 'hue_b', base: 'capped' }
 		);
-	});
-
-	test('a stanced theme without a computed mirror auto-resolves it', () => {
-		const adaptive = scheme_adaptive_variables.find((v) => v.name === 'shade_lightness_00')!;
-		const with_adaptive: Array<StyleVariable> = [...defaults, { ...adaptive }];
-		// hand-rolled: `scheme` set but no `resolve_theme_stance` call
-		const theme: Theme = { name: 't', scheme: 'dark', variables: [{ name: 'hue_a', base: '30' }] };
-		const result = apply_theme_variables(with_adaptive, theme);
-		// the mirror re-slots the untouched scheme-adaptive default to its dark value
-		assert.deepEqual(
-			result.find((v) => v.name === adaptive.name),
-			{ name: adaptive.name, base: adaptive.dark }
-		);
-		// the theme's own variables still apply over the mirror
-		assert.deepEqual(
-			result.find((v) => v.name === 'hue_a'),
-			{ name: 'hue_a', base: '30' }
-		);
+		// an internal name in the theme is dropped, as the renderer drops it
+		assert.isUndefined(result.find((v) => v.name === '_hue_a'));
 	});
 
 	test('build_variable_graph_from_options bakes the theme into the graph', () => {
 		const theme: Theme = { name: 't', variables: [{ name: 'hue_a', base: '30' }] };
 		const graph = build_variable_graph_from_options(defaults, theme);
 		assert.strictEqual(graph.variables.get('hue_a')!.base_value, '30');
+		assert.strictEqual(graph.theme?.theme, theme);
 		// a different theme produces a different graph
 		const other = build_variable_graph_from_options(defaults, {
 			name: 't2',
@@ -806,8 +840,7 @@ describe('apply_theme_variables slot semantics', () => {
 		// at runtime a fuz.theme :root declaration beats the fuz.base :root.dark
 		// default by layer order, so the baked entry drops the dark slot
 		const result = apply_theme_variables(defaults, {
-			name: 't',
-			variables: [{ name: 'shade_00', base: '#eee' }]
+			theme: { name: 't', variables: [{ name: 'shade_00', base: '#eee' }] }
 		});
 		assert.deepEqual(result, [{ name: 'shade_00', base: '#eee' }]);
 	});
@@ -816,8 +849,7 @@ describe('apply_theme_variables slot semantics', () => {
 		// at runtime the theme's :root.dark only shadows under `.dark`, so the
 		// light scheme still resolves the default - the baked entry must too
 		const result = apply_theme_variables(defaults, {
-			name: 't',
-			variables: [{ name: 'shade_00', dark: '#111' }]
+			theme: { name: 't', variables: [{ name: 'shade_00', dark: '#111' }] }
 		});
 		assert.deepEqual(result, [{ name: 'shade_00', base: '#fff', dark: '#111' }]);
 	});
@@ -837,5 +869,143 @@ describe('build-time theme against the real defaults', () => {
 		const { root_css } = generate_theme_css(graph, variables);
 		assert.include(root_css, '--hue_accent: var(--hue_d);');
 		assert.include(root_css, '--hue_d:');
+	});
+});
+
+describe('bake_theme', () => {
+	test('a stanced theme mirrors the configured variables, not the defaults', () => {
+		const adaptive = scheme_adaptive_variables.find((v) => v.name === 'shade_lightness_00')!;
+		const custom: StyleVariable = { name: adaptive.name, base: '0.97', dark: '0.11' };
+		const configured = [...default_variables.filter((v) => v.name !== adaptive.name), custom];
+		const baked = bake_theme({ name: 't', scheme: 'dark', variables: [] }, configured);
+		assert.deepEqual(baked.scheme_mirror, scheme_stance_variables('dark', configured));
+		assert.deepEqual(
+			baked.scheme_mirror!.find((v) => v.name === adaptive.name),
+			{ name: adaptive.name, base: '0.11' }
+		);
+		// the graph carries the custom value under the stance, in both schemes
+		const graph = build_variable_graph_from_options(configured, {
+			name: 't',
+			scheme: 'dark',
+			variables: []
+		});
+		const info = graph.variables.get(adaptive.name)!;
+		assert.strictEqual(info.base_value, '0.11');
+		assert.isUndefined(info.dark_value);
+	});
+
+	test('a dual theme gets no mirror, and an unmoved one no caps', () => {
+		const theme: Theme = { name: 't', variables: [{ name: 'chroma_scale', base: '0.9' }] };
+		assert.deepEqual(bake_theme(theme, default_variables), { theme });
+	});
+
+	test('a rotated hue compiles caps, baked last into the graph', () => {
+		const theme: Theme = { name: 'rotated', variables: [{ name: 'hue_i', base: '205' }] };
+		const caps = compute_theme_caps(theme);
+		assert.isAbove(caps.length, 0);
+		const baked = bake_theme(theme, default_variables);
+		assert.deepEqual(baked.caps, caps);
+		const graph = build_variable_graph_from_options(undefined, theme);
+		for (const cap of caps) {
+			assert.strictEqual(graph.variables.get(cap.name)!.base_value, cap.base, cap.name);
+		}
+		const { root_css } = generate_theme_css(graph, new Set(caps.map((v) => v.name)));
+		assert.include(root_css, `--${caps[0]!.name}: ${caps[0]!.base};`);
+	});
+
+	test("a supplied ResolvedTheme's derived data is recomputed, not trusted", () => {
+		const theme: Theme = {
+			name: 'rotated',
+			scheme: 'dark',
+			variables: [{ name: 'hue_i', base: '205' }]
+		};
+		const stale = {
+			theme,
+			scheme_mirror: [{ name: 'shade_00', base: 'stale' }],
+			caps: [{ name: '_palette_chroma_50', base: 'stale' }]
+		};
+		assert.deepEqual(bake_theme(stale, default_variables), bake_theme(theme, default_variables));
+	});
+
+	test('the gates report as warnings', () => {
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme(
+			{
+				name: 'loud',
+				variables: [
+					{ name: 'chroma_scale', base: '2' },
+					{ name: 'hue_j', base: '170deg' }
+				]
+			},
+			default_variables,
+			diagnostics
+		);
+		assert.isTrue(diagnostics.every((d) => d.level === 'warning'));
+		assert.sameMembers(
+			[...new Set(diagnostics.map((d) => d.identifier))],
+			['theme_gate_failed', 'theme_gate_unchecked']
+		);
+		const failed = diagnostics.find((d) => d.identifier === 'theme_gate_failed')!;
+		assert.include(failed.message, 'Baked theme "loud"');
+		assert.include(failed.message, 'gamut');
+		const unchecked = diagnostics.find((d) => d.identifier === 'theme_gate_unchecked')!;
+		assert.include(unchecked.message, 'hue_j: 170deg');
+	});
+
+	test("the caps and gates measure the configured set's retuned knobs", () => {
+		const theme: Theme = { name: 'rot', variables: [{ name: 'hue_a', base: '120' }] };
+		const retune: StyleVariable = { name: 'palette_lightness_00', base: '0.5', dark: '0.5' };
+		const configured = default_variables.map((v) => (v.name === retune.name ? retune : v));
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		const baked = bake_theme(theme, configured, diagnostics);
+		const expected = compute_theme_caps({ ...theme, variables: [retune, ...theme.variables] });
+		assert.notDeepEqual(expected, compute_theme_caps(theme));
+		assert.deepEqual(baked.caps, expected);
+		const stop_50 = baked.caps!.find((v) => v.name === '_palette_chroma_50')!;
+		assert.match(stop_50.base!, /0\.0565\)$/);
+		assert.match(stop_50.dark!, /0\.1276\)$/);
+		// the baked theme itself stays what was authored
+		assert.strictEqual(baked.theme, theme);
+		// measured at the default lightness, the caps would fail gamut here
+		const failed = diagnostics.find((d) => d.identifier === 'theme_gate_failed');
+		assert.notInclude(failed?.message ?? '', 'gamut');
+	});
+
+	test('a retuned knob folds in re-slotted for a stance', () => {
+		const fallback = default_variables.find((v) => v.name === 'palette_lightness_00')!;
+		const retune: StyleVariable = { ...fallback, dark: '0.3' };
+		const configured = default_variables.map((v) => (v.name === retune.name ? retune : v));
+		const hue: StyleVariable = { name: 'hue_a', base: '120' };
+		const light: Theme = { name: 'l', scheme: 'light', variables: [hue] };
+		const dark: Theme = { name: 'd', scheme: 'dark', variables: [hue] };
+		// the light stance renders the unchanged base slot in both schemes
+		assert.deepEqual(bake_theme(light, configured).caps, compute_theme_caps(light));
+		// the dark stance renders the retuned dark slot in both schemes
+		const expected = compute_theme_caps({
+			...dark,
+			variables: [{ name: retune.name, base: '0.3' }, hue]
+		});
+		assert.notDeepEqual(expected, compute_theme_caps(dark));
+		assert.deepEqual(bake_theme(dark, configured).caps, expected);
+	});
+
+	test("a stanced theme's gates list only the stanced scheme", () => {
+		// marquee clips gamut by design, and that's the whole of its bake warning
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme(marquee_theme, default_variables, diagnostics);
+		assert.deepEqual(
+			diagnostics.map((d) => d.identifier),
+			['theme_gate_failed']
+		);
+		const { message } = diagnostics[0]!;
+		assert.match(message, /^Baked theme "marquee" fails accessibility gates: gamut dark /);
+		assert.notInclude(message, ' light ');
+		assert.notInclude(message, 'contrast');
+	});
+
+	test('a theme that passes everything bakes silently', () => {
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme({ name: 'quiet', variables: [] }, default_variables, diagnostics);
+		assert.deepEqual(diagnostics, []);
 	});
 });

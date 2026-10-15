@@ -1,5 +1,4 @@
 import type { Theme } from '../variable.ts';
-import { resolve_theme_stance } from '../theme_stance.ts';
 import { render_shadow_css } from '../shadow_css.ts';
 
 /**
@@ -15,9 +14,10 @@ import { render_shadow_css } from '../shadow_css.ts';
  * The screen emits rather than reflects: the ground is the gray-green of an
  * unlit tube face, lifted off black so a surface can still sink below it,
  * and controls glow where other themes cast shadows. Dark-only via the
- * `scheme` stance: a CRT has no daytime appearance.
+ * `scheme` stance: a CRT has no daytime appearance, so it renders through
+ * `resolve_theme_stance`, which computes the stance mirror beside it.
  */
-const authored: Theme = {
+export const phosphor_theme: Theme = {
 	name: 'phosphor',
 	summary:
 		'A terminal look for developer tools: monospace, packed tight, sharp-cornered, with controls that glow green on a tube-gray ground - the phosphor CRT. Dark only.',
@@ -65,9 +65,3 @@ const authored: Theme = {
 		{ name: 'duration_3', base: '0s' }
 	]
 };
-
-/**
- * Resolved at module scope so the stance mirror rides this module's chunk
- * rather than every consumer's theme path - see `theme_stance.ts`.
- */
-export const phosphor_theme: Theme = resolve_theme_stance(authored);

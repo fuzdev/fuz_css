@@ -77,7 +77,43 @@ const indent_css = (css: string): string => css.replace(/^(?=.)/gm, '\t');
  */
 export const FUZ_BAKED_THEME_LAYER = 'fuz.theme.baked';
 
-export interface RenderThemeStyleOptions {
+/**
+ * Data derived from a theme rather than authored in it: what a theme's stance
+ * and hues imply, computed by `resolve_theme_stance` and `compile_theme`
+ * (`theme_compile.ts`) and handed to `render_theme_style` beside the theme.
+ * Never part of a `Theme`, so a persisted or shared theme can't carry stale
+ * derived values - it's recomputed from the theme wherever the theme renders,
+ * and never validated.
+ */
+export interface ThemeDerived {
+	/**
+	 * The stance mirror: the scheme-adaptive variables re-slotted (the
+	 * defaults' twin at runtime, the configured set at build time) into the
+	 * `base` position with the stanced scheme's value, so a single-scheme
+	 * theme's one appearance holds in both color schemes. Rendered first and
+	 * only under a stance, skipping any name the theme's variables or the
+	 * `caps` set.
+	 */
+	scheme_mirror?: Array<StyleVariable>;
+	/**
+	 * Recomputed worst-hue chroma caps from `compile_theme` (or
+	 * `compute_theme_caps` alone), as `_palette_chroma_NN` overrides.
+	 * Rendered last, so they win over the mirror's re-slotted defaults.
+	 */
+	caps?: Array<StyleVariable>;
+}
+
+/**
+ * A theme with its derived data beside it, ready to render:
+ * `render_theme_style(resolved.theme, resolved)`. The theme is wrapped rather
+ * than extended, so serializing `theme` can't leak the derived data into
+ * what's persisted.
+ */
+export interface ResolvedTheme extends ThemeDerived {
+	theme: Theme;
+}
+
+export interface RenderStyleVariablesOptions {
 	comments?: boolean;
 	/**
 	 * Scopes the rendered variables to `#id` instead of `:root`. Dark slots
@@ -103,10 +139,17 @@ export interface RenderThemeStyleOptions {
 	/**
 	 * The cascade layer wrapping the rendered variables. Theme overrides
 	 * default to `fuz.theme` so they beat the `fuz.base` defaults by layer
-	 * order; pass `null` to render unlayered.
+	 * order; pass `null` to render unlayered. A value that isn't a dotted
+	 * layer name (`fuz.theme.baked`) falls back to the default.
 	 */
 	layer?: string | null;
 }
+
+/**
+ * The options of `render_theme_style`: the rendering options plus the
+ * theme's derived data, so a `ResolvedTheme` passes as is.
+ */
+export interface RenderThemeStyleOptions extends RenderStyleVariablesOptions, ThemeDerived {}
 
 /**
  * Reads the single-scheme stance a theme's `scheme` names, or `null` for a
@@ -157,13 +200,10 @@ export const overlay_style_variable = (
  * The base's `scheme` stance wins; when the base is single-scheme, each
  * overlay variable is re-slotted to the stanced scheme's value so a
  * dual-slot fragment can't leak the other scheme's appearance past the
- * stance. The base's `scheme_mirror` carries through minus any names the
- * overlays set - the mirror was computed against the base's own variables,
- * so entries for newly composed names would shadow nothing but still render
- * - and overlay values win over the remaining mirror by source order.
- * The composed name appends the overlay names so name-keyed pickers and
- * renderers treat the composition as its own theme, and the base's
- * `summary` carries through.
+ * stance. The result is a plain theme like its inputs - resolve it to render
+ * a stance faithfully. The composed name appends the overlay names so
+ * name-keyed pickers and renderers treat the composition as its own theme,
+ * and the base's `summary` carries through.
  */
 export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme => {
 	if (!overlays.length) return base;
@@ -190,11 +230,6 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
 		name: `${base.name} (${overlays.map((o) => o.name).join(', ')})`,
 		...(base.summary !== undefined && { summary: base.summary }),
 		...(base.scheme !== undefined && { scheme: base.scheme }),
-		// drop mirror entries the overlays now author; the rest renders before
-		// `variables`, so overlay values win by order
-		...(base.scheme_mirror !== undefined && {
-			scheme_mirror: base.scheme_mirror.filter((v) => !by_name.has(v.name))
-		}),
 		variables: [...by_name.values()]
 	};
 };
@@ -203,38 +238,93 @@ export const compose_themes = (base: Theme, ...overlays: Array<Theme>): Theme =>
  * Renders a theme's variables as CSS, wrapped in the `fuz.theme` cascade
  * layer by default.
  *
- * Renders exactly what the theme carries - an empty `variables` array renders
- * nothing (inheriting the `fuz.base` defaults) unless a `scheme` stance needs
- * pinning. To render the full default set, pass it: `render_theme_style({name:
- * 'base', variables: default_variables})`. To render a single-scheme theme
- * faithfully, resolve it through `resolve_theme_stance` first.
+ * Renders exactly what the theme carries plus the derived data in `options`:
+ * the stance mirror (under a stance only, minus any name the theme or the
+ * caps set), then the theme's variables, then the caps. An empty theme
+ * renders nothing (inheriting the `fuz.base` defaults) unless a `scheme`
+ * stance needs pinning. To render a single-scheme theme faithfully, resolve
+ * it first and pass the result as the options:
+ * `render_theme_style(resolved.theme, resolved)`.
  *
- * Total over any JSON value, because a theme restored from storage reaches
- * this without passing the schema: whatever isn't the type `Theme` declares
- * is dropped instead of thrown on or coerced into the stylesheet. A
- * `variables` or `scheme_mirror` that isn't an array renders as empty, an
- * entry that isn't an object is skipped, a name or slot that isn't a
- * contained string drops its declaration, and a summary that isn't one drops
- * its comment (see `css_containment.ts`).
+ * A theme can't set the internal ramp variables, so a `_`-prefixed name in
+ * `theme.variables` is dropped - the schema rejects one, and this holds the
+ * same line for a theme that skipped it. The derived `scheme_mirror` and
+ * `caps` carry internal names by design and render them. To render a
+ * variable set that isn't a theme, like the full defaults, use
+ * `render_style_variables`.
+ *
+ * Total over any JSON value in either argument, because a theme restored
+ * from storage reaches this without passing the schema: whatever isn't the
+ * type declared is dropped instead of thrown on or coerced into the
+ * stylesheet. A `variables`, `scheme_mirror`, or `caps` that isn't an array
+ * renders as empty, an entry that isn't an object is skipped, a name or slot
+ * that isn't a contained string drops its declaration, and a summary that
+ * isn't one drops its comment (see `css_containment.ts`).
  *
  * @param theme - the theme to render
  * @param options - see `RenderThemeStyleOptions`
  * @returns the theme CSS, or an empty string when there's nothing to render
  */
 export const render_theme_style = (theme: Theme, options: RenderThemeStyleOptions = {}): string => {
-	const { comments = false, id = null, layer = 'fuz.theme' } = options;
 	// read as unchecked data: only null and undefined throw on a property read
-	const { scheme, scheme_mirror, variables: own_variables } = (theme ?? {}) as Unchecked<Theme>;
+	const { scheme, variables } = (theme ?? {}) as Unchecked<Theme>;
+	const { scheme_mirror, caps } = (options ?? {}) as Unchecked<RenderThemeStyleOptions>;
 	const stance = to_theme_stance(scheme);
-	// mirrored defaults first so the theme's own variables win by order; the
-	// mirror belongs to the stance, so a dual theme carrying one renders without it
-	const variables = [...(stance ? to_array(scheme_mirror) : []), ...to_array(own_variables)];
+	// a theme can't set an intermediate; the derived data carries them by design
+	const own = to_array(variables).filter((v) => !to_entry_name(v)?.startsWith('_'));
+	const derived_caps = to_array(caps);
+	// the mirror belongs to the stance, so a dual theme renders without it, and
+	// it yields every name the theme or the caps set
+	const shadowed = new Set([...own, ...derived_caps].map(to_entry_name));
+	const mirror = stance
+		? to_array(scheme_mirror).filter((v) => !shadowed.has(to_entry_name(v)))
+		: [];
+	return render_variables([...mirror, ...own, ...derived_caps], stance, options);
+};
+
+/**
+ * Renders a variable set as CSS the way `render_theme_style` renders a
+ * theme's, for a set that isn't a theme: the internal ramp variables render
+ * too, and nothing is mirrored or pinned. This is how `theme.css` renders the
+ * full defaults, and how a project that baked a theme in at build time can
+ * restore the defaults at runtime: `render_style_variables(default_variables)`.
+ * Total over any JSON value, like `render_theme_style`.
+ *
+ * @param variables - the variables to render, in order
+ * @param options - see `RenderStyleVariablesOptions`
+ * @returns the CSS, or an empty string when there's nothing to render
+ */
+export const render_style_variables = (
+	variables: Array<StyleVariable>,
+	options: RenderStyleVariablesOptions = {}
+): string => render_variables(to_array(variables), null, options);
+
+// a dotted layer name, as `@layer` takes one
+const LAYER_NAME_MATCHER = /^[a-z_][a-z0-9_-]*(?:\.[a-z_][a-z0-9_-]*)*$/iu;
+
+const render_variables = (
+	variables: Array<unknown>,
+	stance: 'light' | 'dark' | null,
+	options: unknown
+): string => {
+	const {
+		comments,
+		id,
+		layer: layer_option
+	} = (options ?? {}) as Unchecked<RenderStyleVariablesOptions>;
+	const with_comments = comments === true;
+	const layer =
+		layer_option === null
+			? null
+			: typeof layer_option === 'string' && LAYER_NAME_MATCHER.test(layer_option)
+				? layer_option
+				: 'fuz.theme';
 	const rendered_base = variables
-		.map((v) => render_theme_variable(v, false, comments))
+		.map((v) => render_theme_variable(v, false, with_comments))
 		.filter(Boolean);
 	if (stance) rendered_base.unshift(`color-scheme: ${stance};`);
 	const rendered_dark = variables
-		.map((v) => render_theme_variable(v, true, comments))
+		.map((v) => render_theme_variable(v, true, with_comments))
 		.filter(Boolean);
 	// nothing declared - no variables, or every one of them empty or dropped
 	if (!rendered_base.length && !rendered_dark.length) return '';
@@ -273,6 +363,15 @@ const to_dark_scope = (scope: string, root: string): string => {
 type Unchecked<T> = { [K in keyof T]?: unknown };
 
 const to_array = (value: unknown): Array<unknown> => (Array.isArray(value) ? value : []);
+
+// an entry's name when it's a string, read as unchecked data
+const to_entry_name = (entry: unknown): string | undefined => {
+	const name =
+		typeof entry === 'object' && entry !== null
+			? (entry as Unchecked<StyleVariable>).name
+			: undefined;
+	return typeof name === 'string' ? name : undefined;
+};
 
 // one variable's declaration for a scheme slot, or '' when the slot is blank
 // or can't be rendered without escaping its declaration - a theme may be

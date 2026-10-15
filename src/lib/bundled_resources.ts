@@ -22,6 +22,7 @@ import {
 } from './variable_graph.ts';
 import type { BaseCssOption, VariablesOption } from './css_plugin_options.ts';
 import type { Theme } from './variable.ts';
+import type { ResolvedTheme } from './theme.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -38,8 +39,11 @@ export interface CreateBundledResourcesOptions {
 	base_css: BaseCssOption;
 	/** Theme variables source. */
 	variables: VariablesOption;
-	/** Optional theme baked into the variables, overlaid last-wins by name. */
-	theme?: Theme | null;
+	/**
+	 * Optional theme baked into the variables, overlaid last-wins by name with
+	 * the mirror and caps `bake_theme` derives for it.
+	 */
+	theme?: Theme | ResolvedTheme | null;
 	/** Filesystem deps for loading the default `style.css`. */
 	deps: CacheDeps;
 }

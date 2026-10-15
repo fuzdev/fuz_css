@@ -9,7 +9,6 @@
 
 import { INTERNAL_VARIABLE_NAME_MATCHER, Theme } from './variable.ts';
 import { to_theme_stance } from './theme.ts';
-import { scheme_mirrors_equal, scheme_stance_variables } from './theme_stance.ts';
 import { default_variables } from './variables.ts';
 import { theme_knob_by_name, theme_knob_hook_names, type ThemeKnob } from './knobs.ts';
 import { style_hook_by_name } from './style_hooks.ts';
@@ -48,9 +47,8 @@ export const known_theme_variable_names: ReadonlySet<string> = new Set([
 	...theme_knob_hook_names
 ]);
 
-// the internal intermediates, which a theme carries only as compiled caps
-// (the schema admits no other), and the public spelling a theme may still
-// use for one, which gets a pointer to the knobs rather than a bare unknown
+// the internal intermediates, so the public spelling a theme may still use
+// for one gets a pointer to the knobs rather than a bare unknown
 const internal_variable_names: ReadonlySet<string> = new Set(
 	default_variables.flatMap((v) => (INTERNAL_VARIABLE_NAME_MATCHER.test(v.name) ? v.name : []))
 );
@@ -176,7 +174,7 @@ const validate_knob_value = (
 };
 
 // maps one schema issue onto a `ThemeIssue`, naming the variable it landed on
-// when the path points into `variables`/`scheme_mirror` - the schema reports
+// when the path points into `variables` - the schema reports
 // the whole theme at once, so the path is what carries the location
 const to_shape_issue = (
 	theme: unknown,
@@ -184,10 +182,10 @@ const to_shape_issue = (
 	message: string
 ): ThemeIssue => {
 	const [head, index] = path;
-	if (head === 'variables' || head === 'scheme_mirror') {
+	if (head === 'variables') {
 		const list =
 			typeof theme === 'object' && theme !== null
-				? (theme as Record<string, unknown>)[head]
+				? (theme as Record<string, unknown>).variables
 				: undefined;
 		const entry: unknown =
 			Array.isArray(list) && typeof index === 'number' ? list[index] : undefined;
@@ -230,31 +228,8 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 		return parsed.error.issues.map((issue) => to_shape_issue(theme, issue.path, issue.message));
 	}
 	const issues: Array<ThemeIssue> = [];
-	const { scheme, scheme_mirror } = parsed.data;
-	const stance = to_theme_stance(scheme);
-	// a stanced theme renders correctly only with its mirror computed - the
-	// gates here resolve through the mirror either way, so without this warning
-	// a hand-rolled stanced theme checks clean but renders unmirrored
-	if (stance && scheme_mirror === undefined) {
-		issues.push({
-			level: 'warning',
-			message: `'${stance}' scheme stance with no scheme_mirror - resolve the theme with resolve_theme_stance before rendering so its one appearance holds in both color schemes`
-		});
-	} else if (
-		stance &&
-		scheme_mirror &&
-		!scheme_mirrors_equal(scheme_mirror, scheme_stance_variables(stance, parsed.data.variables))
-	) {
-		// the renderer emits the carried mirror as is while the gates resolve
-		// through a recomputed one, so a stale or edited mirror (a theme
-		// persisted before the defaults moved) would render unchecked
-		issues.push({
-			level: 'warning',
-			message: `'${stance}' scheme stance with a scheme_mirror that doesn't match the current defaults - re-resolve the theme with resolve_theme_stance, since the gates check the recomputed mirror but the renderer emits the carried one`
-		});
-	}
+	const stance = to_theme_stance(parsed.data.scheme);
 	for (const valid of parsed.data.variables) {
-		if (internal_variable_names.has(valid.name)) continue; // a compiled cap
 		// a contextual hook is legal CSS, but a theme is the wrong place for it
 		const hook = style_hook_by_name.get(valid.name);
 		if (hook) {

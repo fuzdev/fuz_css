@@ -18,9 +18,8 @@ import {
 	type CssClassDefinition,
 	type CssClassDefinitionInterpreter
 } from './css_class_generation.ts';
-import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style } from './theme.ts';
+import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style, type ResolvedTheme } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
-import { resolve_theme_stance } from './theme_stance.ts';
 import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
 import { extract_required_css_variables } from './css_variable_utils.ts';
@@ -104,20 +103,19 @@ const check_undefined_theme_variables = (
 	};
 };
 
-// the theme's own overlay for the baked theme sublayer, filtered to the variables
-// the resolution kept so it stays as tree-shaken as the fuz.base block it
-// re-declares (a stance's scheme_mirror alone carries every scheme-adaptive
+// the baked theme's own overlay for the baked theme sublayer, filtered to the
+// variables the resolution kept so it stays as tree-shaken as the fuz.base
+// block it re-declares (a stance's mirror alone carries every scheme-adaptive
 // default); the color-scheme pin for a stance renders regardless
-const render_theme_overlay = (theme: Theme, resolved_variables: Set<string>): string => {
-	const resolved = resolve_theme_stance(theme);
+const render_theme_overlay = (baked: ResolvedTheme, resolved_variables: Set<string>): string => {
 	const keep = (v: StyleVariable): boolean => resolved_variables.has(v.name);
 	return render_theme_style(
+		{ ...baked.theme, variables: baked.theme.variables.filter(keep) },
 		{
-			...resolved,
-			variables: resolved.variables.filter(keep),
-			scheme_mirror: resolved.scheme_mirror?.filter(keep)
-		},
-		{ layer: null }
+			layer: null,
+			scheme_mirror: baked.scheme_mirror?.filter(keep),
+			caps: baked.caps?.filter(keep)
+		}
 	);
 };
 
@@ -156,15 +154,15 @@ export interface GenerateCssOptions {
 	include_base: boolean;
 	include_theme: boolean;
 	/**
-	 * The configured `theme` option, if any - its variables were already
-	 * overlaid into `resources`' variable graph by the caller. Carried here so
-	 * the theme's own overlay can also render into the `fuz.theme` cascade
-	 * layer (above the `fuz.preferences` OS mappings, with a stance's
-	 * `color-scheme` pin), matching how the same theme behaves at runtime -
-	 * and so the footgun guard can flag a theme silently discarded by
-	 * `variables: null`.
+	 * The configured `theme` option, if any, carried so the footgun guard can
+	 * flag a theme silently discarded by `variables: null`. The theme itself
+	 * was already baked into `resources`' variable graph, which carries it with
+	 * its derived mirror and caps, and that baked theme is what re-renders
+	 * into the `fuz.theme` cascade layer (above the `fuz.preferences` OS
+	 * mappings, with a stance's `color-scheme` pin), matching how the same
+	 * theme behaves at runtime.
 	 */
-	theme?: Theme | null;
+	theme?: Theme | ResolvedTheme | null;
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
@@ -319,7 +317,9 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			// color-scheme for a stance, like the runtime path renders the same
 			// theme, while a runtime theme still wins over it
 			theme_overlay_css:
-				include_theme && theme ? render_theme_overlay(theme, resolution.resolved_variables) : null
+				include_theme && resources.variable_graph.theme
+					? render_theme_overlay(resources.variable_graph.theme, resolution.resolved_variables)
+					: null
 		});
 	} else {
 		// utility-only mode - still layered, so the separately imported package

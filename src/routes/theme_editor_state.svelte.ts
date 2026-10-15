@@ -1,7 +1,12 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import { compose_themes, pick_stance_slot, to_theme_stance } from '#lib/theme.ts';
+import {
+	compose_themes,
+	pick_stance_slot,
+	to_theme_stance,
+	type ResolvedTheme
+} from '#lib/theme.ts';
 import { resolve_theme_stance } from '#lib/theme_stance.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -208,19 +213,19 @@ export class ThemeEditorState {
 	/** The draft's name, trimmed - what a copied theme is named. */
 	readonly trimmed_name: string = $derived(this.name.trim());
 
+	/** The copyable theme, carrying the user's chosen name - plain authored data. */
+	readonly output: Theme = $derived({
+		name: this.trimmed_name,
+		variables: this.merged_variables,
+		...(this.stance ? { scheme: this.stance } : {})
+	});
+
 	/**
-	 * The copyable theme, carrying the user's chosen name. Resolved through
-	 * `resolve_theme_stance` so a single-scheme draft carries its mirror -
-	 * without it the renderer would pin `color-scheme` but show the other
-	 * scheme's defaults.
+	 * `output` with its derived data, what it renders as: a single-scheme
+	 * draft's mirror rides beside it, since without it the renderer would pin
+	 * `color-scheme` but show the other scheme's defaults.
 	 */
-	readonly output: Theme = $derived(
-		resolve_theme_stance({
-			name: this.trimmed_name,
-			variables: this.merged_variables,
-			...(this.stance ? { scheme: this.stance } : {})
-		})
-	);
+	readonly resolved_output: ResolvedTheme = $derived(resolve_theme_stance(this.output));
 
 	/**
 	 * The live-applied theme: `output` renamed to a stable name so pickers key
@@ -472,10 +477,9 @@ export const discard_confirm_message = (editor: ThemeEditorState, name: string):
 };
 
 /**
- * Renders a theme as a copyable TypeScript module. A single-scheme theme
- * emits the same resolve-at-module-scope shape as the shipped stanced
- * exemplars, so the copied module is render-ready - the authored variables
- * stay legible and the stance mirror computes where the theme is defined.
+ * Renders a theme as a copyable TypeScript module: a plain `Theme`, the same
+ * shape the shipped themes export. A single-scheme theme carries its
+ * `scheme` and resolves where it renders, like the shipped stanced exemplars.
  */
 export const render_theme_ts = (theme: Theme): string => {
 	const slug =
@@ -497,25 +501,14 @@ export const render_theme_ts = (theme: Theme): string => {
 	const variables_ts = theme.variables.length
 		? `[\n${variables}\n\t],`
 		: '[], // empty - every variable keeps its base default';
-	const stanced = to_theme_stance(theme.scheme) !== null;
-	if (stanced) {
-		return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
-import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';
-
-const authored: Theme = {
-	name: '${escape_js_string(theme.name)}',
-	scheme: '${theme.scheme}', // renders this appearance in both color schemes
-	variables: ${variables_ts}
-};
-
-/** Resolved at module scope so the theme is render-ready when imported. */
-export const ${identifier}: Theme = resolve_theme_stance(authored);
-`;
-	}
+	const stance = to_theme_stance(theme.scheme);
+	const scheme_ts = stance
+		? `\n\tscheme: '${stance}', // renders this appearance in both color schemes`
+		: '';
 	return `import type {Theme} from '@fuzdev/fuz_css/variable.ts';
 
 export const ${identifier}: Theme = {
-	name: '${escape_js_string(theme.name)}',
+	name: '${escape_js_string(theme.name)}',${scheme_ts}
 	variables: ${variables_ts}
 };
 `;

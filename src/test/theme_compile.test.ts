@@ -2,8 +2,11 @@ import { test, assert, describe } from 'vitest';
 
 import { oklch_max_srgb_chroma } from '@fuzdev/fuz_util/oklch.ts';
 
-import { compile_theme, check_theme } from '#lib/theme_check.ts';
-import type { Theme } from '#lib/variable.ts';
+import { check_theme } from '#lib/theme_check.ts';
+import { compile_theme } from '#lib/theme_compile.ts';
+import { parse_theme, type Theme } from '#lib/variable.ts';
+import { render_theme_style } from '#lib/theme.ts';
+import { scheme_stance_variables } from '#lib/theme_stance.ts';
 import { create_monochrome_theme } from './theme_test_helpers.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
@@ -11,8 +14,7 @@ import {
 	PALETTE_CHROMA_CAPS,
 	PALETTE_HUES,
 	PALETTE_LIGHTNESS_KNOBS,
-	ramp_lightness,
-	render_chroma_stop_css
+	ramp_lightness
 } from '#lib/ramps.ts';
 import type { NumericScaleVariant } from '#lib/variable_data.ts';
 
@@ -39,19 +41,16 @@ const gamut_fails = (report: ReturnType<typeof check_theme>): Array<string> =>
 describe('compile_theme', () => {
 	test('the marquee exemplar emits no cap overrides', () => {
 		// its rotated yellow slot stays inside the baked worst-hue caps
-		const { theme } = compile_theme(marquee_theme);
-		assert.strictEqual(theme.variables.length, marquee_theme.variables.length);
+		assert.deepEqual(compile_theme(marquee_theme).caps, []);
 	});
 
 	test('the base theme emits no cap overrides', () => {
-		const { theme } = compile_theme(base_theme);
-		assert.strictEqual(theme.variables.length, base_theme.variables.length);
+		assert.deepEqual(compile_theme(base_theme).caps, []);
 	});
 
 	test('a single-hue monochrome theme emits higher mid-stop caps', () => {
 		const input = create_monochrome_theme(145);
-		const { theme, report } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides, report } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		const stop_50 = overrides.find((v) => v.name === '_palette_chroma_50');
 		assert(stop_50, 'stop 50 emitted');
@@ -64,11 +63,13 @@ describe('compile_theme', () => {
 		assert.strictEqual(report.unchecked.length, 0);
 	});
 
-	test('compile does not mutate the input theme', () => {
+	test('compile returns the input theme as is, the caps beside it', () => {
 		const input = create_monochrome_theme(145);
-		const before = input.variables.length;
-		compile_theme(input);
-		assert.strictEqual(input.variables.length, before);
+		const before = structuredClone(input);
+		const compiled = compile_theme(input);
+		assert.strictEqual(compiled.theme, input);
+		assert.deepEqual(input, before);
+		assert.isFalse(input.variables.some((v) => v.name.startsWith('_')));
 	});
 
 	test('a stance alone emits nothing - the mirror already carries its caps', () => {
@@ -76,14 +77,12 @@ describe('compile_theme', () => {
 		// stance mirror re-slots; with hues and lightness unmoved there is no
 		// drift to fix, so overrides would only duplicate the mirror
 		const stanced: Theme = { name: 'dark stance', scheme: 'dark', variables: [] };
-		const { theme } = compile_theme(stanced);
-		assert.strictEqual(theme.variables.length, 0);
+		assert.deepEqual(compile_theme(stanced).caps, []);
 	});
 
 	test('a dark-stanced hue move drifts from the stanced baked caps and emits', () => {
 		const input = create_monochrome_theme(145); // dark-stanced, hues collapsed
-		const { theme } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		// the baseline under a dark stance is the dark baked table
 		const changed = overrides.some(
@@ -92,45 +91,42 @@ describe('compile_theme', () => {
 		assert.isTrue(changed, "caps differ from the stanced scheme's baked table");
 	});
 
-	test('compiling resolves the stance, so the lint reports the output as resolved', () => {
-		const { issues } = compile_theme(create_monochrome_theme(145));
-		assert.isFalse(
-			issues.some((issue) => issue.message.includes('resolve_theme_stance')),
-			'no stale advice to resolve a stance the compile already resolved'
-		);
-	});
-
-	test('a compiled cap the theme already carries is kept - no emission for that stop', () => {
-		const input: Theme = {
-			name: 'monochrome capped',
-			variables: [
-				...create_monochrome_theme(145).variables,
-				{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05) }
-			]
-		};
-		const { theme } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
-		assert.isAbove(overrides.length, 0);
-		assert.isFalse(overrides.some((v) => v.name === '_palette_chroma_50'));
-	});
-
-	test('recompiling a compiled theme emits nothing', () => {
-		const once = compile_theme(create_monochrome_theme(145)).theme;
-		const twice = compile_theme(once);
-		assert.deepEqual(twice.theme.variables, once.variables);
+	test('compiling is idempotent: the same theme gives the same caps', () => {
+		const input = create_monochrome_theme(145);
+		const once = compile_theme(input);
+		const twice = compile_theme(once.theme);
+		assert.deepEqual(twice.caps, once.caps);
 		assert.deepEqual(twice.issues, []);
 	});
 
-	test('the compiled theme passes the schema and the lint', () => {
-		// the capped form is the one intermediate the schema admits
+	test('the caps stay out of the theme, which passes the schema and the lint', () => {
 		for (const input of [create_monochrome_theme(145), create_monochrome_theme(70)]) {
-			const { theme, issues } = compile_theme(input);
-			assert.isTrue(theme.variables.some((v) => v.name.startsWith('_palette_chroma_')));
-			assert.deepEqual(
-				issues.filter((issue) => issue.level === 'error'),
-				[],
-				input.name
-			);
+			const { theme, caps, issues } = compile_theme(input);
+			assert.isAbove(caps.length, 0, input.name);
+			assert.isTrue(caps.every((v) => v.name.startsWith('_palette_chroma_')));
+			assert.deepEqual(issues, [], input.name);
+			// a theme can't carry one - the caps are derived data, never wire data
+			assert.isNull(parse_theme({ ...theme, variables: [...theme.variables, caps[0]] }));
+		}
+	});
+
+	test('the gates read the caps beside the theme', () => {
+		// a cyan nudge fails gamut on the baked caps until its own tighten them
+		const input: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', base: '205' }] };
+		const { caps, report } = compile_theme(input);
+		assert.deepEqual(check_theme(input, { caps }), report);
+		assert.deepEqual(gamut_fails(report), []);
+		assert.isAbove(gamut_fails(check_theme(input)).length, 0);
+	});
+
+	test('the compiled theme renders the caps last, the mirror deduped against them', () => {
+		const compiled = compile_theme(create_monochrome_theme(145));
+		const css = render_theme_style(compiled.theme, compiled);
+		const first_cap = css.indexOf(`--${compiled.caps[0]!.name}:`);
+		assert.isAbove(first_cap, css.indexOf('--hue_a:'));
+		// the mirror re-slots every default cap, and yields each compiled one
+		for (const cap of compiled.caps) {
+			assert.strictEqual(css.split(`--${cap.name}:`).length, 2, cap.name);
 		}
 	});
 
@@ -164,8 +160,7 @@ describe('compile_theme', () => {
 		const input: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', base: '205' }] };
 		const before = check_theme(input).entries.filter((e) => e.gate === 'gamut' && !e.pass);
 		assert.isAbove(before.length, 0, 'the input fails gamut against the baked caps');
-		const { theme, report } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides, report } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		for (const v of overrides) {
 			const stop = stop_of(v.name);
@@ -183,8 +178,7 @@ describe('compile_theme', () => {
 			variables: [{ name: 'palette_lightness_curve', base: '0.7' }]
 		};
 		assert.isAbove(gamut_fails(check_theme(input)).length, 0, 'the input fails gamut');
-		const { theme, report } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides, report } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		const hues = Object.values(PALETTE_HUES);
 		for (const v of overrides) {
@@ -213,10 +207,8 @@ describe('compile_theme', () => {
 			]
 		};
 		assert.isTrue(check_theme(input).ok, 'the input checks clean');
-		const { theme, report } = compile_theme(input);
-		const stop_20 = theme.variables
-			.slice(input.variables.length)
-			.find((v) => v.name === '_palette_chroma_20');
+		const { caps, report } = compile_theme(input);
+		const stop_20 = caps.find((v) => v.name === '_palette_chroma_20');
 		assert(stop_20, 'stop 20 emitted');
 		const at = (scheme: 'light' | 'dark'): number =>
 			worst_hue_cap(
@@ -236,8 +228,7 @@ describe('compile_theme', () => {
 			variables: [{ name: 'palette_lightness_curve', base: '0.7' }]
 		};
 		assert.isAbove(gamut_fails(check_theme(input)).length, 0);
-		const { theme, report } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides, report } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		const hues = Object.values(PALETTE_HUES);
 		// both schemes resolve the same ramp through the mirror, so one slot carries it
@@ -260,8 +251,7 @@ describe('compile_theme', () => {
 			scheme: 'dark',
 			variables: [{ name: 'palette_lightness_curve', base: '0.6', dark: '1.4' }]
 		};
-		const { theme, report } = compile_theme(input);
-		const overrides = theme.variables.slice(input.variables.length);
+		const { caps: overrides, report } = compile_theme(input);
 		assert.isAbove(overrides.length, 0);
 		const hues = Object.values(PALETTE_HUES);
 		// the mirror puts the stanced endpoints under both slots
@@ -285,8 +275,8 @@ describe('compile_theme', () => {
 				{ name: 'palette_lightness_curve', base: '84%' }
 			]
 		};
-		const { theme, report } = compile_theme(input);
-		const names = theme.variables.slice(input.variables.length).map((v) => v.name);
+		const { caps, report } = compile_theme(input);
+		const names = caps.map((v) => v.name);
 		// the endpoint stops are the knobs themselves, so only they resolve and
 		// take the nudged hue's tightened caps
 		assert.deepEqual(names, ['_palette_chroma_00', '_palette_chroma_100']);
@@ -297,18 +287,14 @@ describe('compile_theme', () => {
 		// valid CSS, but not a number the resolver reads - caps computed from
 		// the remaining hues would claim headroom this one may not have
 		const input: Theme = { name: 'unit hue', variables: [{ name: 'hue_i', base: '195deg' }] };
-		const { theme, report } = compile_theme(input);
-		assert.strictEqual(theme.variables.length, input.variables.length);
+		const { caps, report } = compile_theme(input);
+		assert.deepEqual(caps, []);
 		assert.isAbove(report.unchecked.length, 0, 'the re-check still reports the hue');
 	});
 
-	test('a stanced compiled theme recomputes its scheme_mirror over the emitted variables', () => {
-		const input = create_monochrome_theme(145); // dark-stanced, unresolved
-		const { theme } = compile_theme(input);
-		assert(theme.scheme_mirror, 'compile resolves the stance');
-		const mirror_names = new Set(theme.scheme_mirror.map((v) => v.name));
-		for (const v of theme.variables) {
-			assert.isFalse(mirror_names.has(v.name), `mirror excludes emitted ${v.name}`);
-		}
+	test("a stanced compiled theme carries its stance's mirror, a dual one none", () => {
+		const input = create_monochrome_theme(145); // dark-stanced
+		assert.deepEqual(compile_theme(input).scheme_mirror, scheme_stance_variables('dark'));
+		assert.isUndefined(compile_theme(base_theme).scheme_mirror);
 	});
 });

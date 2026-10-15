@@ -91,8 +91,6 @@
 	variables: StyleVariable[];
 	/** Single-scheme themes render one appearance in both color schemes. */
 	scheme?: 'dual' | 'light' | 'dark';
-	/** The derived stance mirror, from \`resolve_theme_stance\`. */
-	scheme_mirror?: StyleVariable[];
 };
 
 export type StyleVariable = {

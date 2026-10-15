@@ -173,6 +173,14 @@
 			no daytime appearance. Every other theme is dual-scheme, parchment included, whose dark
 			appearance is the same page by candlelight.
 		</p>
+		<p>
+			A stanced theme stays plain data. What the stance implies, the scheme-adaptive defaults
+			re-slotted into its one appearance, is computed where the theme renders rather than stored in
+			it, so a saved theme never carries a stale copy: <code>resolve_theme_stance(theme)</code> in
+			<ModuleLink module_path="theme_stance.ts" /> returns the theme with its
+			<code>scheme_mirror</code> beside it, ready for
+			<code>render_theme_style(resolved.theme, resolved)</code>.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Applying a theme" />
@@ -197,9 +205,10 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 		/>
 		<p>
 			The theme's variables replace the defaults by name, so it composes with the
-			<code>variables</code> option. They also render into the <code>fuz.theme.baked</code> cascade
-			layer, above the OS preference mappings and with <code>color-scheme</code> pinned for a
-			stance, so a baked theme behaves the same as one applied at runtime.
+			<code>variables</code> option, and a stance mirrors the configured variables. They also render
+			into the <code>fuz.theme.baked</code> cascade layer, above the OS preference mappings and with
+			<code>color-scheme</code> pinned for a stance, so a baked theme behaves the same as one
+			applied at runtime.
 		</p>
 		<p>
 			For runtime switching - a picker, or a theme loaded per user - use <code>ThemeRoot</code> from
@@ -231,10 +240,10 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 		<p>
 			<code>validate_theme(theme)</code> in <ModuleLink module_path="theme_validate.ts" /> is the
 			structural lint. Unknown variable names are errors, and everything else it flags is an
-			advisory warning: type and range mismatches on the knob-tier variables, a stance without its
-			resolved mirror, and intent bindings that put the accent beside a status hue or drop a palette
-			slot's chroma character. It returns an array of issues - empty means the theme is structurally
-			sound.
+			advisory warning: type and range mismatches on the knob-tier variables, a dark slot under a
+			single-scheme stance, and intent bindings that put the accent beside a status hue or drop a
+			palette slot's chroma character. It returns an array of issues - empty means the theme is
+			structurally sound.
 		</p>
 		<p>
 			<code>check_theme(theme)</code> in <ModuleLink module_path="theme_check.ts" /> runs the gamut,
@@ -265,12 +274,16 @@ test('my theme clears the accessibility gates', () => {
 });`}
 		/>
 		<p>
-			<code>compile_theme(theme)</code> is for themes that move hues or palette lightness -
-			monochrome, rotated, or dark-only. It recomputes the per-stop sRGB gamut caps from the theme's
-			actual hues and the lightness each stop resolves to, and appends the corrected
-			<code>_palette_chroma_NN</code> stop overrides, returning
-			<code>{'{theme, report, issues}'}</code>. Chroma pushed past the caps on purpose
-			(<code>chroma_scale</code> above 1) still clips afterward, and the report says so.
+			<code>compile_theme(theme)</code> in <ModuleLink module_path="theme_compile.ts" /> is for
+			themes that move hues or palette lightness - monochrome, rotated, or dark-only. It recomputes
+			the per-stop sRGB gamut caps from the theme's actual hues and the lightness each stop resolves
+			to, returning the corrected <code>_palette_chroma_NN</code> caps beside the theme rather than
+			in it: <code>{'{theme, scheme_mirror, caps, report, issues}'}</code>, which renders as
+			<code>render_theme_style(compiled.theme, compiled)</code>. The theme comes back untouched, so
+			compiling again gives the same caps. Chroma pushed past the caps on purpose
+			(<code>chroma_scale</code> above 1) still clips afterward, and the report says so. A theme
+			baked in at build time gets its caps recomputed automatically, with its gate failures reported
+			as build warnings.
 		</p>
 		<p>
 			fuz_css gates its own themes with these functions in its test suite, every theme ×

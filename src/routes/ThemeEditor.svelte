@@ -86,7 +86,9 @@
 	};
 
 	const output_ts = $derived(render_theme_ts(editor.output));
-	const output_css = $derived(render_theme_style(editor.output));
+	const output_css = $derived(
+		render_theme_style(editor.resolved_output.theme, editor.resolved_output)
+	);
 </script>
 
 {#snippet knob_control(knob: ThemeKnob, compact: boolean)}
@@ -303,7 +305,7 @@
 		</div>
 	</Details>
 	<Details summary="rendered CSS">
-		{#if editor.output.variables.length || editor.output.scheme_mirror?.length}
+		{#if editor.output.variables.length || editor.stance}
 			<div class="rendered-output mt_md">
 				<div class="copy-button">
 					<CopyToClipboard text={output_css} />

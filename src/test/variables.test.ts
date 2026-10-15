@@ -76,15 +76,11 @@ test('the internal variables are exactly the ramp intermediates', () => {
 	);
 });
 
-test('a theme can carry no intermediate, save the capped palette chroma stops', () => {
-	// the defaults' own declarations are what a stanced theme's mirror re-slots
+test('a theme can carry no intermediate', () => {
+	// the defaults' own declarations included - the derived data carries them
 	for (const v of default_variables) {
 		if (!INTERNAL_VARIABLE_NAME_MATCHER.test(v.name)) continue;
-		assert.strictEqual(
-			StyleVariable.safeParse(v).success,
-			v.name.startsWith('_palette_chroma_'),
-			v.name
-		);
+		assert.isFalse(StyleVariable.safeParse(v).success, v.name);
 	}
 });
 

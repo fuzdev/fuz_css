@@ -116,14 +116,14 @@ describe('Theme', () => {
 		assert.isFalse(Theme.safeParse({ name: 't', variables: [], scheme: 'dusk' }).success);
 	});
 
-	test('accepts a resolved stance mirror', () => {
+	test('refuses a scheme_mirror - the mirror is derived, never wire data', () => {
 		const result = Theme.safeParse({
 			name: 't',
 			variables: [],
 			scheme: 'dark',
 			scheme_mirror: [{ name: 'shade_00', base: '#000' }]
 		});
-		assert.isTrue(result.success);
+		assert.isFalse(result.success);
 	});
 });
 
@@ -145,33 +145,15 @@ describe('parse_theme', () => {
 			{ name: '_palette_lightness_30', base: '0.5' },
 			{ name: '_chroma_shape_50', base: '0.5' },
 			{ name: '_palette_chroma_50', base: '0.05' },
-			// the capped form, but for another stop
-			{ name: '_palette_chroma_50', base: render_chroma_stop_css('40', 0.05) },
-			{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05), dark: '0.05' },
-			// U+00A0 isn't CSS whitespace, inside the form or around it
+			// the capped form compile_theme emits too - caps travel beside a theme
+			{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05) },
 			{
 				name: '_palette_chroma_50',
-				base: render_chroma_stop_css('50', 0.05).replace('min(', 'min(\u00a0')
-			},
-			{ name: '_palette_chroma_50', base: `\u00a0${render_chroma_stop_css('50', 0.05)}` }
+				base: render_chroma_stop_css('50', 0.05),
+				dark: render_chroma_stop_css('50', 0.04)
+			}
 		]) {
 			assert.isNull(parse_theme({ name: 't', variables: [variable] }), JSON.stringify(variable));
 		}
-	});
-
-	test('admits a palette chroma stop in the capped form for its own stop', () => {
-		const variable = {
-			name: '_palette_chroma_50',
-			base: render_chroma_stop_css('50', 0.05),
-			dark: render_chroma_stop_css('50', 0.04)
-		};
-		assert.isNotNull(parse_theme({ name: 't', variables: [variable] }));
-		assert.isNotNull(parse_theme({ name: 't', variables: [], scheme_mirror: [variable] }));
-		// CSS whitespace is fine anywhere the emitter puts a token boundary
-		const spaced = {
-			name: '_palette_chroma_50',
-			base: `\t${variable.base.replace('min(', 'min(\n')} `
-		};
-		assert.isNotNull(parse_theme({ name: 't', variables: [spaced] }));
 	});
 });

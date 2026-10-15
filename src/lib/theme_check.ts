@@ -1,15 +1,19 @@
 /**
- * The numeric-twin accessibility gates and the compile step for the derived
- * OKLCH color system, over the resolution core in `theme_resolver.ts`:
+ * The numeric-twin accessibility gates and the cap recomputation for the
+ * derived OKLCH color system, over the resolution core in `theme_resolver.ts`:
  *
  * - `check_theme` evaluates the gamut, ramp-monotonicity, and contrast gates
  *   against an arbitrary theme (the base theme's defaults included), reusing
  *   the `ramps.ts` numeric twin, `oklch.ts` conversions, and `wcag.ts`
  *   ratios. It is report-only and never throws.
- * - `compile_theme` recomputes the per-stop worst-hue chroma caps for a
- *   theme's own hues and the palette lightness each stop resolves to, emits
- *   `_palette_chroma_NN` overrides where the baked caps no longer fit, then
- *   re-checks and lints with `validate_theme` (`theme_validate.ts`).
+ * - `compute_theme_caps` recomputes the per-stop worst-hue chroma caps for a
+ *   theme's own hues and the palette lightness each stop resolves to,
+ *   returning `_palette_chroma_NN` caps where the baked ones no longer fit.
+ *   `compile_theme` in `theme_compile.ts` pairs them with the re-check and
+ *   the lint.
+ *
+ * Free of zod, unlike the lint, so the build-time theme bake can run the
+ * gates and the caps where zod (an optional peer) isn't installed.
  *
  * @module
  */
@@ -23,8 +27,7 @@ import {
 	type RgbUnit
 } from '@fuzdev/fuz_util/oklch.ts';
 
-import { Theme, type StyleVariable } from './variable.ts';
-import { scheme_stance_variables } from './theme_stance.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import { to_theme_stance } from './theme.ts';
 import { default_variables } from './variables.ts';
 import {
@@ -51,8 +54,13 @@ import {
 	type PaletteVariant
 } from './variable_data.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
-import { NUMERIC_EPSILON, STOPS_PATTERN, ThemeResolver, VAR_MATCHER } from './theme_resolver.ts';
-import { type ThemeIssue, validate_theme } from './theme_validate.ts';
+import {
+	NUMERIC_EPSILON,
+	STOPS_PATTERN,
+	ThemeResolver,
+	VAR_MATCHER,
+	type ThemeResolverOptions
+} from './theme_resolver.ts';
 
 //
 // Gate thresholds - the WCAG levels the derived palette is designed to clear.
@@ -160,13 +168,6 @@ export interface ThemeCheckReport {
 	ok: boolean;
 	entries: Array<ThemeGateEntry>;
 	unchecked: Array<ThemeUncheckedEntry>;
-}
-
-/** The output of `compile_theme`: the emitted theme plus its lint and gate report. */
-export interface CompiledTheme {
-	theme: Theme;
-	report: ThemeCheckReport;
-	issues: Array<ThemeIssue>;
 }
 
 //
@@ -364,9 +365,12 @@ const NO_VISITS: ReadonlySet<string> = new Set();
  * default for every intent) folds into that letter's gamut entry rather than
  * duplicating it, so reports for letter-bound themes list fewer subjects than
  * the full letters × intents grid.
+ *
+ * @param theme - the theme to check
+ * @param options - the compiled caps to check the theme with, as `compute_theme_caps` returns them
  */
-export const check_theme = (theme: Theme): ThemeCheckReport => {
-	const resolver = new ThemeResolver(theme);
+export const check_theme = (theme: Theme, options: ThemeResolverOptions = {}): ThemeCheckReport => {
+	const resolver = new ThemeResolver(theme, options);
 	const stance = to_theme_stance(theme.scheme);
 	const entries: Array<ThemeGateEntry> = [];
 	const unchecked: Array<ThemeUncheckedEntry> = [];
@@ -770,7 +774,7 @@ export const check_theme = (theme: Theme): ThemeCheckReport => {
 };
 
 //
-// compile_theme - recompute worst-hue caps for the theme's own hues.
+// compute_theme_caps - recompute worst-hue caps for the theme's own hues.
 //
 
 // how far a recomputed cap must sit above the baked one to be worth emitting -
@@ -804,22 +808,23 @@ const collect_hues = (
 
 /**
  * Recomputes a theme's per-stop worst-hue chroma caps from its own hues and
- * the palette lightness each stop resolves to, then emits `_palette_chroma_NN`
- * overrides wherever the baked caps no longer fit - the fix for a theme
- * (rotated hues, a monochrome collapse, a moved lightness ramp) whose gamut
- * headroom the baked worst-hue table misjudges. The overrides are the one
- * internal variable the `Theme` schema admits, and only in this capped form.
+ * the palette lightness each stop resolves to, then returns
+ * `_palette_chroma_NN` caps wherever the baked ones no longer fit - the fix
+ * for a theme (rotated hues, a monochrome collapse, a moved lightness ramp)
+ * whose gamut headroom the baked worst-hue table misjudges. The caps are
+ * derived data beside the theme, never in it: a theme can't set an internal
+ * variable, so they render through `render_theme_style`'s `caps` option and
+ * recomputing them for the same theme gives the same caps.
  *
  * Each stop's cap is computed at the lightness the resolution core resolves
  * for the stop in that scheme - the theme's endpoint-and-curve ramp - so the
  * caps describe the same colors `check_theme` gates.
  *
  * A stop is emitted when either scheme's recomputed cap is tighter than the
- * baked value, or looser by more than the emit epsilon, and the theme doesn't
- * already carry a compiled cap for that stop (so recompiling is a no-op).
- * Nothing is emitted when a hue fails to resolve to a number, since caps
- * computed without it could overshoot its gamut, and a stop whose lightness
- * fails to resolve is skipped. An override emits both slots together, so a
+ * baked value, or looser by more than the emit epsilon. Nothing is emitted
+ * when a hue fails to resolve to a number, since caps computed without it
+ * could overshoot its gamut, and a stop whose lightness fails to resolve is
+ * skipped. An override emits both slots together, so a
  * one-scheme override can't silently kill the base default's other slot by
  * cascade-layer order, collapsing to a single slot in the base position when
  * the two rendered values coincide.
@@ -828,19 +833,19 @@ const collect_hues = (
  * mirror, so its caps are baselined against the stanced scheme's baked table -
  * the values the mirror already re-slots - and a stance alone (hues and
  * lightness unmoved) emits nothing. Its overrides coincide across schemes and
- * emit single-slot unless the theme authors a dark slot that splits them. A
- * stanced theme's `scheme_mirror` is recomputed over the emitted variables,
- * so the output is render-ready even when the input wasn't resolved.
+ * emit single-slot unless the theme authors a dark slot that splits them.
  *
  * The caps bound the requested chroma only: `chroma_scale` and the per-slot
  * `*_chroma_scale` multipliers apply above the clamp. A theme that raises one
  * past 1 clips by design - its gamut failures survive the compile, and a cap
  * the compile loosens can add to them, since the multiplier then pushes more
- * stops past the looser cap. The input theme is never mutated. The report
- * re-checks the emitted theme, whose compiled-cap overrides the resolution
- * core recognizes.
+ * stops past the looser cap. Gate the theme with them through
+ * `check_theme(theme, {caps})`.
+ *
+ * @param theme - the theme to recompute caps for
+ * @returns the `_palette_chroma_NN` caps that moved, empty when the baked ones all still fit
  */
-export const compile_theme = (theme: Theme): CompiledTheme => {
+export const compute_theme_caps = (theme: Theme): Array<StyleVariable> => {
 	const resolver = new ThemeResolver(theme);
 	const stance = to_theme_stance(theme.scheme);
 
@@ -850,17 +855,17 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	};
 	// the gamut search is the expensive part, and a stanced theme resolves both
 	// schemes to the same hues and lightness - so memoize by the search inputs
-	const caps: Map<string, number> = new Map();
+	const cap_memo: Map<string, number> = new Map();
 	const recompute = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): number | null => {
 		const scheme_hues = hues[scheme];
 		const lightness = resolver.resolve(to_lightness_stop_name('palette', stop), scheme);
 		if (!scheme_hues || !lightness.ok) return null;
 		const key = `${lightness.value}|${scheme_hues.join(',')}`;
-		let cap = caps.get(key);
+		let cap = cap_memo.get(key);
 		if (cap === undefined) {
 			// at the lightness the browser renders, which clamps an overshoot
 			cap = compute_worst_hue_chroma_cap(scheme_hues, clamp(lightness.value, 0, 1));
-			caps.set(key, cap);
+			cap_memo.set(key, cap);
 		}
 		return cap;
 	};
@@ -877,16 +882,15 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	const cap_moved = (cap: number, baked_cap: number): boolean =>
 		cap < baked_cap - NUMERIC_EPSILON || cap - baked_cap > CAP_EMIT_EPSILON;
 
-	const cap_overrides: Array<StyleVariable> = [];
+	const caps: Array<StyleVariable> = [];
 	for (const stop of hues.light && hues.dark ? numeric_scale_variants : []) {
-		if (resolver.pinned(to_palette_chroma_name(stop))) continue; // already compiled
 		const light_cap = recompute(stop, 'light');
 		const dark_cap = recompute(stop, 'dark');
 		if (light_cap === null || dark_cap === null) continue;
 		if (cap_moved(light_cap, baked.light[stop]) || cap_moved(dark_cap, baked.dark[stop])) {
 			const light_value = render_chroma_stop_css(stop, light_cap);
 			const dark_value = render_chroma_stop_css(stop, dark_cap);
-			cap_overrides.push(
+			caps.push(
 				light_value === dark_value
 					? { name: to_palette_chroma_name(stop), base: light_value }
 					: { name: to_palette_chroma_name(stop), base: light_value, dark: dark_value }
@@ -894,13 +898,5 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 		}
 	}
 
-	// spread to preserve the scheme stance (and any future fields)
-	const compiled: Theme = { ...theme, variables: [...theme.variables, ...cap_overrides] };
-	// the emitted variables shadow mirror entries, so recompute the mirror over
-	// them; this also resolves a stanced input that skipped resolve_theme_stance
-	if (stance) compiled.scheme_mirror = scheme_stance_variables(stance, compiled.variables);
-	// lint the compiled output, not the input - compiling resolves the stance,
-	// so an unresolved stanced input shouldn't surface the "resolve the theme"
-	// warning the same call just fixed
-	return { theme: compiled, report: check_theme(compiled), issues: validate_theme(compiled) };
+	return caps;
 };

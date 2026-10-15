@@ -219,14 +219,9 @@ describe('check_theme', () => {
 		assert.isFalse(entry.pass);
 	});
 
-	test('an intermediate a theme carries anyway leaves its ramp unchecked', () => {
-		// the schema refuses the name, but the renderer would emit the value, so
-		// the ramp isn't measured on the stop the knobs derive
+	test('an intermediate a theme carries anyway is ignored, as the renderer drops it', () => {
 		const theme: Theme = { name: 't', variables: [{ name: '_shade_lightness_50', base: '0.99' }] };
-		const report = check_theme(theme);
-		assert.isFalse(report.ok);
-		assert.isFalse(report.entries.some((e) => e.subject === 'shade_lightness'));
-		assert.isTrue(report.unchecked.some((u) => u.variable === '_shade_lightness_50'));
+		assert.deepEqual(check_theme(theme), check_theme({ name: 't', variables: [] }));
 	});
 
 	test('stops overshooting the lightness range fail monotonicity as the browser clamps them', () => {
@@ -318,9 +313,9 @@ describe('check_theme', () => {
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'shade_chroma_00'));
 	});
 
-	test('a ramp intermediate a theme sets is unchecked, not read as its default', () => {
-		// the schema refuses these, but the renderer would emit them, so a theme
-		// that skips the schema must not pass the gates on the defaults
+	test('ramp intermediates a theme sets are ignored, as the renderer drops them', () => {
+		// the schema refuses these and the renderer drops them, so the gates
+		// measure the derived ramps the page renders
 		const report = check_theme({
 			name: 't',
 			variables: [
@@ -328,15 +323,8 @@ describe('check_theme', () => {
 				{ name: '_palette_chroma_60', base: '0.4' }
 			]
 		});
-		assert.isFalse(report.ok);
-		const reason = 'internal ramp variable - not settable';
-		assert.deepEqual(
-			report.unchecked.filter((u) => u.variable.startsWith('_')),
-			[
-				{ variable: '_palette_lightness_60', value: '0.99', reason },
-				{ variable: '_palette_chroma_60', value: '0.4', reason }
-			]
-		);
+		assert.deepEqual(report, check_theme({ name: 't', variables: [] }));
+		assert.isTrue(report.ok);
 	});
 });
 

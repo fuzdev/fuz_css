@@ -19,10 +19,12 @@
  * - The private ramp intermediates (`_palette_lightness_NN` and its
  *   shade/text twins, `_chroma_shape_NN`, `_palette_chroma_NN`) always
  *   derive through the `ramps.ts` formulas from the resolved knobs - the
- *   `Theme` schema keeps a theme from setting one. The exception is a
- *   `_palette_chroma_NN` in the machine-emitted capped form
- *   (`min(calc(...), <number>)`), as `compile_theme` writes it and a stanced
- *   theme's mirror re-slots it, whose cap the resolver reads.
+ *   `Theme` schema keeps a theme from setting one, and the resolver ignores
+ *   one in `variables` as the renderer drops it. The exception is a
+ *   `_palette_chroma_NN` from the derived data beside the theme, in the
+ *   machine-emitted capped form (`min(calc(...), <number>)`): a compiled cap
+ *   passed as `caps`, or a stanced theme's mirror re-slotting the defaults'
+ *   caps, whose cap the resolver reads.
  * - The color variables the gates read (the palette, intent, shade, and text
  *   stops, `text_max`, and `border_color_30`) derive from those numbers
  *   unless the theme authors one directly. An authored color is measured as
@@ -53,14 +55,15 @@
  * the scheme. A single-scheme
  * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
  * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
- * reality in both schemes whether or not the theme arrives resolved.
+ * reality in both schemes, and `caps` apply over everything, as they render
+ * last.
  *
  * @module
  */
 
 import { scheme_stance_variables } from './theme_stance.ts';
-import { to_theme_stance } from './theme.ts';
-import { INTERNAL_VARIABLE_NAME_MATCHER, Theme, type StyleVariable } from './variable.ts';
+import { to_theme_stance, type ThemeDerived } from './theme.ts';
+import type { StyleVariable, Theme } from './variable.ts';
 import {
 	CHROMA_STOP_CSS_MATCHER,
 	CSS_NUMBER_PATTERN,
@@ -174,6 +177,13 @@ export const SCALED_VAR_MATCHER = new RegExp(
 );
 
 /**
+ * The derived data a resolver reads beside its theme: the compiled `caps`
+ * from `compile_theme`. The stance mirror needs no passing, since the
+ * resolver derives it from the theme's stance.
+ */
+export type ThemeResolverOptions = Pick<ThemeDerived, 'caps'>;
+
+/**
  * Resolves knob-tier and derived-stop variables of a single theme to numbers,
  * mirroring the renderer's effective-value merge and the `ramps.ts` formulas.
  * `create_theme_resolver` is the public surface over it.
@@ -185,17 +195,25 @@ export class ThemeResolver {
 	readonly #authored_names: Set<string>;
 	readonly #memo: Map<string, Resolved> = new Map();
 
-	constructor(theme: Theme) {
-		this.#by_name = new Map(theme.variables.map((v) => [v.name, v]));
+	constructor(theme: Theme, options: ThemeResolverOptions = {}) {
+		// a theme can't set an intermediate, and the renderer drops one it carries,
+		// as it drops an entry with no name (untyped data)
+		this.#by_name = new Map(
+			theme.variables
+				.filter((v) => typeof v.name === 'string' && !v.name.startsWith('_'))
+				.map((v) => [v.name, v])
+		);
 		this.#authored_names = new Set(this.#by_name.keys());
 		// a single-scheme stance resolves through the renderer's mirror, so both
-		// schemes see the stanced values; mirror entries are not author pins
+		// schemes see the stanced values, and the caps render last over
+		// everything; neither is an author pin
 		const stance = to_theme_stance(theme.scheme);
 		if (stance) {
-			for (const v of scheme_stance_variables(stance, theme.variables)) {
-				this.#by_name.set(v.name, v);
+			for (const v of scheme_stance_variables(stance)) {
+				if (!this.#by_name.has(v.name)) this.#by_name.set(v.name, v);
 			}
 		}
+		for (const v of options.caps ?? []) this.#by_name.set(v.name, v);
 	}
 
 	/** Whether the theme authors a value for `name` (a pin). */
@@ -205,7 +223,7 @@ export class ThemeResolver {
 
 	/**
 	 * The theme's own value for `name` in `scheme` (a pin), or `undefined` when
-	 * it authors none for that slot. Stance-mirror entries are not pins.
+	 * it authors none for that slot. Stance-mirror and cap entries are not pins.
 	 */
 	authored(name: string, scheme: ColorSchemeVariant): string | undefined {
 		return this.#authored_names.has(name) ? this.#slot_value(name, scheme) : undefined;
@@ -221,7 +239,7 @@ export class ThemeResolver {
 		return result;
 	}
 
-	// the effective value for a slot (authored or stance-mirrored), honoring
+	// the effective value for a slot (authored, stance-mirrored, or a cap), honoring
 	// the dark → base fallback
 	#slot_value(name: string, scheme: ColorSchemeVariant): string | undefined {
 		const v = this.#by_name.get(name);
@@ -242,10 +260,10 @@ export class ThemeResolver {
 		next.add(name);
 		const value = this.#slot_value(name, scheme);
 		if (value !== undefined) {
-			if (!INTERNAL_VARIABLE_NAME_MATCHER.test(name)) return this.#parse(name, value, scheme, next);
-			// an intermediate derives from the knobs, unless it's a palette chroma
-			// stop carrying a compiled cap for its own stop (the schema admits no
-			// other form) - any other value would render while the gates read the
+			if (!name.startsWith('_')) return this.#parse(name, value, scheme, next);
+			// an intermediate with a value comes from the derived data, which
+			// carries only palette chroma stops in the capped form for their own
+			// stop - any other value would render while the gates read the
 			// default, so it fails instead of falling back
 			const stop = PALETTE_CHROMA_STOP_MATCHER.exec(name)?.[1];
 			const cap = stop === undefined ? null : this.#parse_compiled_cap(stop, value, scheme, next);
@@ -254,7 +272,7 @@ export class ThemeResolver {
 					ok: false,
 					variable: name,
 					value: value.trim(),
-					reason: 'internal ramp variable - not settable'
+					reason: 'internal ramp variable - not a compiled cap'
 				}
 			);
 		}
@@ -432,7 +450,7 @@ export class ThemeResolver {
 export interface ThemeKnobResolver {
 	/** Resolves `name` for `scheme` to a number, or `null` when it can't be resolved. */
 	resolve(name: string, scheme: ColorSchemeVariant): number | null;
-	/** Whether the theme authors a value for `name` (a pin; stance-mirror entries excluded). */
+	/** Whether the theme authors a value for `name` (a pin, never a mirror or cap entry). */
 	pinned(name: string): boolean;
 }
 
@@ -441,9 +459,15 @@ export interface ThemeKnobResolver {
  * by `validate_theme`/`check_theme`/`compile_theme`. The instance memoizes per
  * name+scheme, so repeated lookups (a UI rendering every knob) stay cheap -
  * create one per theme value and discard when the theme changes.
+ *
+ * @param theme - the theme to resolve
+ * @param options - the compiled caps to resolve beside the theme, if any
  */
-export const create_theme_resolver = (theme: Theme): ThemeKnobResolver => {
-	const resolver = new ThemeResolver(theme);
+export const create_theme_resolver = (
+	theme: Theme,
+	options: ThemeResolverOptions = {}
+): ThemeKnobResolver => {
+	const resolver = new ThemeResolver(theme, options);
 	return {
 		resolve: (name, scheme) => {
 			const r = resolver.resolve(name, scheme);

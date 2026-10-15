@@ -1,13 +1,24 @@
 import { test, assert, describe } from 'vitest';
 
-import { compose_themes, render_theme_style } from '#lib/theme.ts';
-import type { Theme } from '#lib/variable.ts';
+import {
+	compose_themes,
+	render_style_variables,
+	render_theme_style,
+	type RenderThemeStyleOptions
+} from '#lib/theme.ts';
+import type { StyleVariable, Theme } from '#lib/variable.ts';
 import { resolve_theme_stance, scheme_stance_variables } from '#lib/theme_stance.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
 import { default_variables } from '#lib/variables.ts';
 
 // a scheme-adaptive default (dual slots) to observe the stance mirror through
 const adaptive_default = default_variables.find((v) => v.name === 'shade_lightness_00')!;
+
+/** Renders a theme the way it's meant to render: resolved, with its mirror beside it. */
+const render_resolved = (theme: Theme): string => {
+	const resolved = resolve_theme_stance(theme);
+	return render_theme_style(resolved.theme, resolved);
+};
 
 /** Splits rendered CSS into the `:root` (light/base) and `:root.dark` sections. */
 const split_schemes = (css: string): { light: string; dark: string } => {
@@ -33,14 +44,55 @@ describe('render_theme_style', () => {
 		assert.strictEqual(render_theme_style({ name: 'base', variables: [] }), '');
 	});
 
-	test('the full defaults render when passed explicitly', () => {
-		// the renderer holds no variable data of its own, so rendering the full
-		// default set is an ordinary call with the defaults as the theme
-		const css = render_theme_style({ name: 'anything', variables: default_variables });
+	test('the full defaults render as a variable set, internal names included', () => {
+		// the renderer holds no variable data of its own, so the full default
+		// set renders through `render_style_variables`, which keeps the ramp
+		// intermediates a theme can't carry
+		const css = render_style_variables(default_variables);
 		assert.isAbove(css.length, 0);
+		assert.include(css, '--_palette_chroma_50:');
 		for (const v of default_variables) {
 			if (v.base !== undefined) assert.include(css, `--${v.name}: ${v.base};`);
 		}
+	});
+
+	test("a theme's internal names are dropped, the derived data's render", () => {
+		const cap: StyleVariable = { name: '_palette_chroma_50', base: 'min(calc(1), 0.1)' };
+		const css = render_theme_style(
+			{ name: 't', variables: [cap, { name: 'chroma_scale', base: '2' }] },
+			{ caps: [{ ...cap, base: 'min(calc(1), 0.2)' }] }
+		);
+		assert.include(css, '--chroma_scale: 2;');
+		assert.notInclude(css, '0.1)');
+		assert.include(css, '--_palette_chroma_50: min(calc(1), 0.2);');
+		// the same entry renders as a variable set
+		assert.include(render_style_variables([cap]), '--_palette_chroma_50: min(calc(1), 0.1);');
+	});
+
+	test('the mirror renders first, then the variables, then the caps', () => {
+		const css = render_theme_style(
+			{ name: 't', scheme: 'dark', variables: [{ name: 'b', base: '2' }] },
+			{
+				scheme_mirror: [
+					{ name: 'a', base: '1' },
+					{ name: 'b', base: 'mirrored' },
+					{ name: 'c', base: 'mirrored' }
+				],
+				caps: [{ name: 'c', base: '3' }]
+			}
+		);
+		assert.strictEqual(
+			css,
+			`@layer fuz.base, fuz.preferences, fuz.theme, fuz.utilities;
+@layer fuz.theme {
+:root {
+	color-scheme: dark;
+	--a: 1;
+	--b: 2;
+	--c: 3;
+}
+}`
+		);
 	});
 
 	test('an id scope renders dark slots for both scheme-class placements', () => {
@@ -85,9 +137,7 @@ describe('render_theme_style', () => {
 
 describe('scheme stance', () => {
 	test('a dark stance mirrors adaptive defaults into the base scheme', () => {
-		const css = render_theme_style(
-			resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' })
-		);
+		const css = render_resolved({ name: 't', variables: [], scheme: 'dark' });
 		const { light } = split_schemes(css);
 		assert.include(light, 'color-scheme: dark;');
 		// the dark slot's value renders in the :root block
@@ -95,20 +145,18 @@ describe('scheme stance', () => {
 	});
 
 	test('a dark stance skips defaults the theme overrides', () => {
-		const theme = resolve_theme_stance({
+		const css = render_resolved({
 			name: 't',
 			variables: [{ name: adaptive_default.name, base: '0.5' }],
 			scheme: 'dark'
 		});
-		const { light } = split_schemes(render_theme_style(theme));
+		const { light } = split_schemes(css);
 		assert.include(light, `--${adaptive_default.name}: 0.5;`);
 		assert.notInclude(light, `--${adaptive_default.name}: ${adaptive_default.dark};`);
 	});
 
 	test('a light stance mirrors light values into the base slot', () => {
-		const css = render_theme_style(
-			resolve_theme_stance({ name: 't', variables: [], scheme: 'light' })
-		);
+		const css = render_resolved({ name: 't', variables: [], scheme: 'light' });
 		const { light, dark } = split_schemes(css);
 		assert.include(light, 'color-scheme: light;');
 		// the light value renders in the :root block, which applies in both
@@ -119,39 +167,38 @@ describe('scheme stance', () => {
 		assert.notInclude(dark, `--${adaptive_default.name}:`);
 	});
 
-	test('resolve_theme_stance keeps the mirror out of the authored variables', () => {
-		const theme = resolve_theme_stance({
+	test('resolve_theme_stance wraps the theme, never editing it', () => {
+		const theme: Theme = {
 			name: 't',
 			variables: [{ name: 'chroma_scale', base: '2' }],
 			scheme: 'dark'
-		});
-		// authored knobs stay distinguishable from the derived mirror
-		assert.lengthOf(theme.variables, 1);
-		assert.isAbove(theme.scheme_mirror!.length, 0);
+		};
+		const resolved = resolve_theme_stance(theme);
+		// the same reference, so persisting it persists only what was authored
+		assert.strictEqual(resolved.theme, theme);
+		assert.deepEqual(Object.keys(theme), ['name', 'variables', 'scheme']);
+		assert.deepEqual(resolved.scheme_mirror, scheme_stance_variables('dark'));
+		assert.isUndefined(resolved.caps);
 	});
 
-	test('resolve_theme_stance leaves a resolved theme unchanged', () => {
-		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
-		assert.strictEqual(resolve_theme_stance(resolved), resolved);
-	});
-
-	test('resolve_theme_stance recomputes a mirror its variables no longer imply', () => {
-		const resolved = resolve_theme_stance({
+	test('the mirror depends on the stance alone, deduped at render', () => {
+		const overriding = resolve_theme_stance({
 			name: 't',
 			variables: [{ name: 'shade_lightness_00', base: '0.2' }],
 			scheme: 'dark'
 		});
-		assert.notOk(resolved.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
-		// dropping the override must bring the default back through the mirror
-		const edited = resolve_theme_stance({ ...resolved, variables: [] });
-		assert.ok(edited.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
+		// the mirror still holds the name - the renderer skips it
+		assert.ok(overriding.scheme_mirror!.some((v) => v.name === 'shade_lightness_00'));
+		const css = render_theme_style(overriding.theme, overriding);
+		assert.strictEqual(css.match(/--shade_lightness_00:/g)?.length, 1);
+		assert.include(css, '--shade_lightness_00: 0.2;');
 	});
 
-	test('resolve_theme_stance leaves a dual-scheme theme unchanged', () => {
+	test('resolve_theme_stance gives a dual-scheme theme no derived data', () => {
 		const theme: Theme = { name: 't', variables: [], scheme: 'dual' };
-		assert.strictEqual(resolve_theme_stance(theme), theme);
+		assert.deepEqual(resolve_theme_stance(theme), { theme });
 		const bare: Theme = { name: 't', variables: [] };
-		assert.strictEqual(resolve_theme_stance(bare), bare);
+		assert.strictEqual(resolve_theme_stance(bare).theme, bare);
 	});
 
 	test('an unresolved stanced theme still pins color-scheme', () => {
@@ -160,12 +207,15 @@ describe('scheme stance', () => {
 		assert.include(css, 'color-scheme: dark;');
 	});
 
-	test('a dual theme carrying a scheme_mirror renders without it', () => {
+	test('a dual theme passed a scheme_mirror renders without it', () => {
 		// the mirror belongs to the stance - without one it would repaint the
 		// light scheme with the other scheme's defaults and no color-scheme pin
 		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
 		assert.isAbove(resolved.scheme_mirror!.length, 0);
-		assert.strictEqual(render_theme_style({ ...resolved, scheme: 'dual' }), '');
+		assert.strictEqual(
+			render_theme_style({ ...resolved.theme, scheme: 'dual' }, { ...resolved }),
+			''
+		);
 	});
 
 	test('a dual or absent scheme renders no stance', () => {
@@ -191,18 +241,27 @@ describe('scheme stance', () => {
 		}
 	});
 
-	test('scheme_stance_variables excludes overridden names and single-slot defaults', () => {
-		const mirrored = scheme_stance_variables('dark', [
-			{ name: adaptive_default.name, base: '0.5' }
-		]);
-		assert.isAbove(mirrored.length, 0);
-		assert.isFalse(mirrored.some((v) => v.name === adaptive_default.name));
+	test('scheme_stance_variables re-slots the dual-slot defaults alone', () => {
+		const mirrored = scheme_stance_variables('dark');
+		assert.strictEqual(mirrored.length, scheme_adaptive_variables.length);
 		for (const v of mirrored) {
 			const source = default_variables.find((d) => d.name === v.name)!;
 			assert.isDefined(source.dark, `${v.name} mirrors a dual-slot default`);
 			assert.strictEqual(v.base, source.dark);
 			assert.isUndefined(v.dark);
 		}
+	});
+
+	test('scheme_stance_variables mirrors a given variable set, skipping single-slot entries', () => {
+		const mirrored = scheme_stance_variables('light', [
+			{ name: 'a', base: '1', dark: '2' },
+			{ name: 'b', base: '3' },
+			{ name: 'c', dark: '4' }
+		]);
+		assert.deepEqual(mirrored, [{ name: 'a', base: '1' }]);
+		assert.deepEqual(scheme_stance_variables('dark', [{ name: 'a', base: '1', dark: '2' }]), [
+			{ name: 'a', base: '2' }
+		]);
 	});
 });
 
@@ -308,21 +367,18 @@ describe('compose_themes', () => {
 		assert.isUndefined(composed.variables.find((v) => v.name === 'text_lightness_curve'));
 	});
 
-	test('composing over a resolved stanced base drops overlaid names from the mirror', () => {
-		// resolve first, like the shipped stanced exemplars arrive
-		const stanced = resolve_theme_stance({ name: 's', variables: [], scheme: 'light' });
-		assert(stanced.scheme_mirror);
-		assert.isTrue(stanced.scheme_mirror.some((v) => v.name === adaptive_default.name));
-		const composed = compose_themes(stanced, {
-			name: 'o',
-			variables: [{ name: adaptive_default.name, base: '0.123' }]
-		});
-		// the overlay now authors the variable, so the mirror cedes it - the
-		// overlay's :root declaration must be the only one for the name
-		assert.isFalse(composed.scheme_mirror!.some((v) => v.name === adaptive_default.name));
-		const css = render_theme_style(composed);
-		const { light, dark } = split_schemes(css);
+	test('a composed stanced theme renders its overlay over the mirror once resolved', () => {
+		const composed = compose_themes(
+			{ name: 's', variables: [], scheme: 'light' },
+			{ name: 'o', variables: [{ name: adaptive_default.name, base: '0.123' }] }
+		);
+		// pure Theme → Theme: no derived data rides along
+		assert.deepEqual(Object.keys(composed).sort(), ['name', 'scheme', 'variables']);
+		// the overlay authors the variable, so the mirror cedes it at render -
+		// the overlay's :root declaration must be the only one for the name
+		const { light, dark } = split_schemes(render_resolved(composed));
 		assert.include(light, `--${adaptive_default.name}: 0.123;`);
+		assert.strictEqual(light.split(`--${adaptive_default.name}:`).length, 2);
 		assert.notInclude(dark, `--${adaptive_default.name}:`);
 	});
 
@@ -401,7 +457,9 @@ const assert_theme_css_is_contained = (css: string): void => {
 	for (const prelude of preludes) {
 		// bracket contents are skipped, so the OS-preference twin reads `@media`
 		// and `:root:not`
-		assert.include(['@layer fuz.theme', ':root', ':root.dark', '@media', ':root:not'], prelude);
+		// a layer is the default or any dotted name the renderer accepts
+		if (/^@layer [a-z_][\w-]*(?:\.[a-z_][\w-]*)*$/iu.test(prelude)) continue;
+		assert.include([':root', ':root.dark', '@media', ':root:not'], prelude);
 	}
 	for (const declaration of declarations) {
 		assert.match(declaration, /^(--[\w-]+|color-scheme):/);
@@ -425,7 +483,8 @@ describe('render_theme_style over malformed themes', () => {
 }`;
 	const variable = { name: 'a', base: '1' };
 
-	const cases: Array<[shape: string, theme: unknown, expected: string]> = [
+	// the derived data rides in the options, so it's malformed there
+	const cases: Array<[shape: string, theme: unknown, expected: string, derived?: unknown]> = [
 		['a null theme', null, ''],
 		['a number theme', 1, ''],
 		['a string theme', 'theme', ''],
@@ -437,13 +496,37 @@ describe('render_theme_style over malformed themes', () => {
 		['number variables', { name: 't', variables: 1 }, ''],
 		[
 			'an object scheme_mirror under a stance',
-			{ name: 't', scheme: 'dark', scheme_mirror: { length: 1 }, variables: [] },
-			WRAPPED_DARK_STANCE
+			{ name: 't', scheme: 'dark', variables: [] },
+			WRAPPED_DARK_STANCE,
+			{ scheme_mirror: { length: 1 } }
 		],
 		[
 			'a string scheme_mirror under a stance',
-			{ name: 't', scheme: 'dark', scheme_mirror: 'ab', variables: [] },
+			{ name: 't', scheme: 'dark', variables: [] },
+			WRAPPED_DARK_STANCE,
+			{ scheme_mirror: 'ab' }
+		],
+		[
+			'malformed caps',
+			{ name: 't', variables: [] },
+			'',
+			{ caps: [null, 1, 'a', { name: ['a'], base: '1' }, { name: 'a', base: 1 }] }
+		],
+		[
+			'object caps beside a variable',
+			{ name: 't', variables: [variable] },
+			wrap_light('--a: 1;'),
+			{ caps: { 0: variable, length: 1 } }
+		],
+		[
+			"a scheme_mirror on the theme, where it's no longer read",
+			{ name: 't', scheme: 'dark', scheme_mirror: [variable], variables: [] },
 			WRAPPED_DARK_STANCE
+		],
+		[
+			'an internal name in the variables',
+			{ name: 't', variables: [{ name: '_palette_chroma_50', base: '1' }] },
+			''
 		],
 		['a non-string scheme', { name: 't', scheme: ['dark'], variables: [] }, ''],
 		['a null entry', { name: 't', variables: [null] }, ''],
@@ -486,8 +569,35 @@ describe('render_theme_style over malformed themes', () => {
 		]
 	];
 
-	test.each(cases)('%s renders as dropped', (_shape, theme, expected) => {
-		const css = render_theme_style(theme as Theme, { comments: true });
+	test.each(cases)('%s renders as dropped', (_shape, theme, expected, derived) => {
+		const css = render_theme_style(theme as Theme, {
+			comments: true,
+			...(derived as RenderThemeStyleOptions)
+		});
+		assert.strictEqual(css, expected);
+		assert_theme_css_is_contained(css);
+	});
+
+	const option_cases: Array<[shape: string, options: unknown, expected: string]> = [
+		['null options', null, wrap_light('--a: 1;')],
+		['number options', 1, wrap_light('--a: 1;')],
+		['string options', 'x', wrap_light('--a: 1;')],
+		['an array of options', [{ layer: null }], wrap_light('--a: 1;')],
+		['a layer that would end its rule', { layer: 'x { } body' }, wrap_light('--a: 1;')],
+		['a layer closing the style element', { layer: '</style>' }, wrap_light('--a: 1;')],
+		['a number layer', { layer: 1 }, wrap_light('--a: 1;')],
+		['a number id', { id: 1 }, wrap_light('--a: 1;')],
+		['a truthy non-boolean comments', { comments: 'yes' }, wrap_light('--a: 1;')],
+		[
+			'a dotted layer',
+			{ layer: 'my.layer' },
+			wrap_light('--a: 1;').replace('@layer fuz.theme {', '@layer my.layer {')
+		]
+	];
+
+	test.each(option_cases)('%s render with the defaults', (_shape, options, expected) => {
+		const theme = { name: 't', variables: [{ ...variable, summary: 'the summary' }] };
+		const css = render_theme_style(theme, options as RenderThemeStyleOptions);
 		assert.strictEqual(css, expected);
 		assert_theme_css_is_contained(css);
 	});
@@ -560,7 +670,20 @@ describe('render_theme_style over malformed themes', () => {
 			'line\nbreak',
 			'a: 1; } :root { --b'
 		];
-		const keys = ['name', 'variables', 'scheme', 'scheme_mirror', 'light', 'dark', 'summary'];
+		const keys = [
+			'name',
+			'variables',
+			'scheme',
+			'scheme_mirror',
+			'caps',
+			'base',
+			'dark',
+			'summary',
+			'comments',
+			'layer'
+		];
+		// `id` stays out: its escaped selector is tested on its own, and the
+		// containment assertion reads every backslash outside a string as an escape
 		const random_json = (depth: number): unknown => {
 			const roll = random();
 			if (depth <= 0 || roll < 0.45) {
@@ -589,21 +712,28 @@ describe('render_theme_style over malformed themes', () => {
 			maybe(() => ({
 				name: maybe(() => 't'),
 				...(random() < 0.5 && { scheme: maybe(() => pick(['dual', 'light', 'dark'])) }),
-				...(random() < 0.5 && { scheme_mirror: random_variables() }),
 				...(random() < 0.9 && { variables: random_variables() })
+			}));
+		// the options carry the derived data, so they're as untrusted as the theme
+		const random_options = (): unknown =>
+			maybe(() => ({
+				...(random() < 0.5 && { comments: maybe(() => random() < 0.5) }),
+				...(random() < 0.5 && { layer: maybe(() => pick([null, 'fuz.theme', ...strings])) }),
+				...(random() < 0.5 && { scheme_mirror: random_variables() }),
+				...(random() < 0.5 && { caps: random_variables() })
 			}));
 
 		let rendered = 0;
 		let commented = 0;
 		for (let i = 0; i < 4000; i++) {
 			const theme = random_theme();
-			const options = { comments: random() < 0.5, layer: random() < 0.5 ? null : undefined };
+			const options = random_options();
 			let css: string;
 			try {
-				css = render_theme_style(theme as Theme, options);
+				css = render_theme_style(theme as Theme, options as RenderThemeStyleOptions);
 				assert_theme_css_is_contained(css);
 			} catch (error) {
-				throw new Error(`failed on ${JSON.stringify(theme)}`, { cause: error });
+				throw new Error(`failed on ${JSON.stringify([theme, options])}`, { cause: error });
 			}
 			if (css) rendered++;
 			if (css.includes('/*')) commented++;

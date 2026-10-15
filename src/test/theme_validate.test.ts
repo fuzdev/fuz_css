@@ -104,23 +104,17 @@ describe('validate_theme', () => {
 		}
 	});
 
-	test('a palette chroma intermediate is an error outside the capped form', () => {
-		for (const base of ['0.05', render_chroma_stop_css('40', 0.05)]) {
+	test('a palette chroma intermediate is an error, the capped form included', () => {
+		// compiled caps are derived data beside a theme, never in it
+		for (const base of ['0.05', render_chroma_stop_css('50', 0.05)]) {
 			const issues = validate_theme({
 				name: 't',
 				variables: [{ name: '_palette_chroma_50', base }]
 			});
 			assert.strictEqual(issues.length, 1, base);
+			assert.strictEqual(issues[0]!.level, 'error');
 			assert.include(issues[0]!.message, 'internal ramp variable');
 		}
-		// the capped form for its own stop is what compile_theme emits
-		assert.deepEqual(
-			validate_theme({
-				name: 't',
-				variables: [{ name: '_palette_chroma_50', base: render_chroma_stop_css('50', 0.05) }]
-			}),
-			[]
-		);
 	});
 
 	test('a contextual hook is a warning, not an unknown variable', () => {
@@ -222,51 +216,22 @@ describe('validate_theme', () => {
 		}
 	});
 
-	test('scheme stance values validate', () => {
-		assert.deepEqual(validate_theme({ name: 't', variables: [], scheme: 'dual' }), []);
-		for (const scheme of ['light', 'dark'] as const) {
-			assert.deepEqual(
-				validate_theme(resolve_theme_stance({ name: 't', variables: [], scheme })),
-				[]
-			);
+	test('scheme stance values validate, a stance needing nothing beside it', () => {
+		for (const scheme of ['dual', 'light', 'dark'] as const) {
+			assert.deepEqual(validate_theme({ name: 't', variables: [], scheme }), []);
 		}
 		const issues = validate_theme({ name: 't', variables: [], scheme: 'dusk' as 'dark' });
 		assert.isTrue(issues.some((i) => i.level === 'error'));
 	});
 
-	test('a single-scheme stance without a resolved mirror is a warning', () => {
-		for (const scheme of ['light', 'dark'] as const) {
-			const issues = validate_theme({ name: 't', variables: [], scheme });
-			assert.isTrue(
-				issues.some((i) => i.level === 'warning' && i.message.includes('resolve_theme_stance'))
-			);
-			assert.isFalse(issues.some((i) => i.level === 'error'));
-			// resolving clears it
-			assert.deepEqual(
-				validate_theme(resolve_theme_stance({ name: 't', variables: [], scheme })),
-				[]
-			);
-		}
-	});
-
-	test('a stance mirror that no longer matches the defaults is a warning', () => {
-		// the renderer emits the carried mirror as is while the gates resolve
-		// through a recomputed one, so a stale mirror would render unchecked
-		const resolved = resolve_theme_stance({ name: 't', variables: [], scheme: 'dark' });
-		const stale = {
-			...resolved,
-			scheme_mirror: resolved.scheme_mirror!.map((v) =>
-				v.name === 'text_lightness_100' ? { ...v, base: '0.2' } : v
-			)
-		};
-		const issues = validate_theme(stale);
-		assert.isTrue(
-			issues.some((i) => i.level === 'warning' && i.message.includes("doesn't match")),
-			'the stale mirror warns'
-		);
-		assert.isFalse(issues.some((i) => i.level === 'error'));
-		// re-resolving recomputes it and clears the warning
-		assert.deepEqual(validate_theme(resolve_theme_stance(stale)), []);
+	test('a scheme_mirror on a theme is an error - the mirror is derived, never wire data', () => {
+		const { theme, scheme_mirror } = resolve_theme_stance({
+			name: 't',
+			variables: [],
+			scheme: 'dark'
+		});
+		const issues = validate_theme({ ...theme, scheme_mirror });
+		assert.isTrue(issues.some((i) => i.level === 'error' && i.message.includes('scheme_mirror')));
 	});
 
 	test('a dark slot under a single-scheme stance is a warning, not an error', () => {
@@ -281,13 +246,11 @@ describe('validate_theme', () => {
 		}
 		// single-slot stanced and dual-slot unstanced themes stay clean
 		assert.deepEqual(
-			validate_theme(
-				resolve_theme_stance({
-					name: 't',
-					scheme: 'dark',
-					variables: [{ name: 'neutral_chroma', base: '0.02' }]
-				})
-			),
+			validate_theme({
+				name: 't',
+				scheme: 'dark',
+				variables: [{ name: 'neutral_chroma', base: '0.02' }]
+			}),
 			[]
 		);
 		assert.deepEqual(

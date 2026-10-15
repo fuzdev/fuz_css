@@ -327,15 +327,26 @@ describe('pinned color stops', () => {
 });
 
 describe('ramp intermediates', () => {
-	test('an intermediate a theme carries anyway is unchecked, never read as the default', () => {
-		// the schema refuses the name, but the renderer emits the value - here the
-		// full neutral chroma on the page ground, far outside sRGB near white -
-		// so passing the ground on the derived shape would hide it
-		const report = check({ name: '_chroma_shape_00', base: '5' });
+	test('an intermediate a theme carries anyway is ignored, as the renderer drops it', () => {
+		// the schema refuses the name and the renderer drops it, so the page
+		// renders the derived shape - which is what the gates measure
+		assert.deepEqual(check({ name: '_chroma_shape_00', base: '5' }), check());
+	});
+
+	test('a cap that is not the compiled form is unchecked, never read as the default', () => {
+		// the derived caps render last and verbatim, so passing the ground on the
+		// derived shape would hide a value the gates can't read
+		const report = check_theme(
+			{ name: 't', variables: [] },
+			{ caps: [{ name: '_palette_chroma_50', base: '0.4' }] }
+		);
 		assert.deepEqual(report.unchecked, [
-			{ variable: '_chroma_shape_00', value: '5', reason: 'internal ramp variable - not settable' }
+			{
+				variable: '_palette_chroma_50',
+				value: '0.4',
+				reason: 'internal ramp variable - not a compiled cap'
+			}
 		]);
-		assert.isUndefined(find_entry(report, 'gamut', 'light', 'shade_00'));
 		assert.isFalse(report.ok);
 	});
 });

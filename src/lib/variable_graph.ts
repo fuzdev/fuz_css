@@ -11,9 +11,16 @@
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
-import { resolve_theme_stance } from './theme_stance.ts';
-import { overlay_style_variable, render_color_scheme_rules } from './theme.ts';
+import { scheme_stance_variables } from './theme_stance.ts';
+import {
+	overlay_style_variable,
+	render_color_scheme_rules,
+	to_theme_stance,
+	type ResolvedTheme
+} from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
+import { check_theme, compute_theme_caps } from './theme_check.ts';
+import { theme_knobs } from './knobs.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import {
 	css_custom_property_name_is_contained,
@@ -47,9 +54,16 @@ export interface VariableDependencyGraph {
 	variables: Map<string, StyleVariableInfo>;
 	/**
 	 * The `uncontained_theme_value` errors for the slots left out of the
-	 * graph, which `resolve_css` forwards with every resolution.
+	 * graph, and a baked theme's gate warnings, which `resolve_css`
+	 * forwards with every resolution.
 	 */
 	diagnostics: Array<GenerationDiagnostic>;
+	/**
+	 * The build-time theme baked into the graph's values, with the mirror and
+	 * caps the bake derived for it (see `bake_theme`), or `null` for none -
+	 * what the baked theme sublayer re-renders.
+	 */
+	theme: ResolvedTheme | null;
 }
 
 // the slots of `v` a stylesheet can hold, or null when none can - reporting
@@ -124,7 +138,7 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
 		});
 	}
 
-	return { variables: graph, diagnostics };
+	return { variables: graph, diagnostics, theme: null };
 };
 
 /**
@@ -341,29 +355,177 @@ const resolve_variables_option = (variables: VariablesOption): Array<StyleVariab
 		: (variables ?? default_variables);
 };
 
+// how many gate entries or unchecked inputs a diagnostic lists before summarizing
+const DIAGNOSTIC_LIST_LIMIT = 8;
+
+const to_list = (items: Array<string>): string =>
+	items.length > DIAGNOSTIC_LIST_LIMIT
+		? `${items.slice(0, DIAGNOSTIC_LIST_LIMIT).join('; ')}; and ${
+				items.length - DIAGNOSTIC_LIST_LIMIT
+			} more`
+		: items.join('; ');
+
 /**
- * Overlays a theme's variables onto a resolved variable set, last-wins by name.
+ * Derives what a build-time theme renders with from the configured variable
+ * set: the stance mirror, re-slotted from the configured `variables` (so a
+ * build that customizes a scheme-adaptive variable mirrors its own value, not
+ * the default), and the caps `compute_theme_caps` recomputes for the theme's
+ * hues and lightness - the derived half of `compile_theme`. A `ResolvedTheme`
+ * passed in has its theme baked the same way - a supplied mirror or caps are
+ * recomputed, so the output can't depend on derived data computed against
+ * another variable set or an older release.
+ *
+ * The theme's variables pass the containment checks first, as
+ * `build_variable_graph` applies them: a slot the stylesheet can't hold, or
+ * an entry without a plain-identifier name, is reported as an
+ * `uncontained_theme_value` error and left out, and the caps, the gates, and
+ * the overlay all see the contained theme - what renders.
+ *
+ * The caps and the gates measure the theme over the configured set: a
+ * knob-tier value (`theme_knobs`) the configured `variables` change from the
+ * default is folded in beneath the theme's own, re-slotted for a stance as
+ * the mirror re-slots it, so a build that retunes a ramp knob is capped and
+ * gated at what it renders. A configured value the gates can't read lands
+ * in `unchecked`.
+ *
+ * The gates (`check_theme` with the caps) report as warnings, since a theme
+ * can knowingly give up a gate: `theme_gate_failed` lists the failing gate
+ * entries and `theme_gate_unchecked` the inputs the gates couldn't evaluate.
+ * A stanced theme renders its one appearance in both schemes, so only the
+ * stanced scheme's entries are listed. The lint (`validate_theme`) doesn't
+ * run here: it needs zod, an optional peer the generators load without.
+ *
+ * @param theme - the configured `theme` option
+ * @param variables - the configured variable set the theme overlays
+ * @param diagnostics - collects the containment errors and the gate warnings, when given
+ * @returns the contained wire theme with its mirror and caps
+ */
+export const bake_theme = (
+	theme: Theme | ResolvedTheme,
+	variables: Array<StyleVariable>,
+	diagnostics?: Array<GenerationDiagnostic>
+): ResolvedTheme => {
+	const supplied = 'theme' in theme ? theme.theme : theme;
+	const wire = contain_theme(supplied, diagnostics);
+	const stance = to_theme_stance(wire.scheme);
+	const measured = fold_configured_knobs(wire, variables, stance);
+	const caps = compute_theme_caps(measured);
+	if (diagnostics) {
+		const report = check_theme(measured, { caps });
+		const warn = (message: string, suggestion: string, identifier: string): void => {
+			diagnostics.push({
+				phase: 'generation',
+				level: 'warning',
+				message,
+				suggestion,
+				identifier,
+				locations: null
+			});
+		};
+		// under a stance both schemes resolve the same, so the other's entries repeat
+		const failed = report.entries.filter((e) => !e.pass && (!stance || e.scheme === stance));
+		if (failed.length) {
+			warn(
+				`Baked theme "${wire.name}" fails accessibility gates: ${to_list(
+					failed.map(
+						(e) =>
+							`${e.gate} ${e.scheme} ${e.subject} (${round_gate_value(e.value)} against ${e.threshold})`
+					)
+				)}`,
+				'Run check_theme on the theme and retune its knobs, or keep the failures if the theme gives them up knowingly. validate_theme lints the rest.',
+				'theme_gate_failed'
+			);
+		}
+		if (report.unchecked.length) {
+			warn(
+				`Baked theme "${wire.name}" has gate inputs the checker can't evaluate: ${to_list(
+					report.unchecked.map((u) => `${u.variable}: ${u.value} (${u.reason})`)
+				)}`,
+				'Author those values as numbers, var() references, or oklch() literals so the gates can read them.',
+				'theme_gate_unchecked'
+			);
+		}
+	}
+	return {
+		theme: wire,
+		...(stance && { scheme_mirror: scheme_stance_variables(stance, variables) }),
+		...(caps.length > 0 && { caps })
+	};
+};
+
+const round_gate_value = (value: number): string => String(Math.round(value * 1000) / 1000);
+
+// the theme with its variables contained, reporting what's left out - the same
+// reference when nothing is
+const contain_theme = (theme: Theme, diagnostics?: Array<GenerationDiagnostic>): Theme => {
+	const contained: Array<StyleVariable> = [];
+	let changed = false;
+	for (const v of theme.variables) {
+		const c = contain_variable(v, diagnostics);
+		if (c !== v) changed = true;
+		if (c) contained.push(c);
+	}
+	return changed ? { ...theme, variables: contained } : theme;
+};
+
+const knob_names: ReadonlySet<string> = new Set(theme_knobs.map((k) => k.name));
+const default_knobs: ReadonlyMap<string, StyleVariable> = new Map(
+	default_variables.filter((v) => knob_names.has(v.name)).map((v) => [v.name, v])
+);
+
+// the theme the caps and gates measure: the configured set's knob-tier values
+// that differ from the defaults, beneath the theme's own (re-slotted for a
+// stance as the mirror re-slots them), or the theme itself when none differ
+const fold_configured_knobs = (
+	theme: Theme,
+	variables: Array<StyleVariable>,
+	stance: 'light' | 'dark' | null
+): Theme => {
+	const by_name: Map<string, StyleVariable> = new Map();
+	for (const v of variables) {
+		const fallback = default_knobs.get(v.name);
+		if (!fallback || (v.base === fallback.base && v.dark === fallback.dark)) continue;
+		const contained = contain_variable(v);
+		if (!contained) continue;
+		by_name.set(
+			v.name,
+			(stance ? scheme_stance_variables(stance, [contained])[0] : undefined) ?? contained
+		);
+	}
+	if (!by_name.size) return theme;
+	for (const v of theme.variables)
+		by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
+	return { ...theme, variables: [...by_name.values()] };
+};
+
+/**
+ * Overlays a baked theme onto a resolved variable set, last-wins by name.
  *
  * This is how a theme is baked in at build time: the overlaid values flow
  * through the dependency graph like any other, so the variables a theme
- * references are pulled in transitively and the output stays tree-shaken. A
- * stanced theme's `scheme_mirror` applies first, matching the renderer's order
- * - and a stanced theme arriving without its mirror computed is resolved
- * through `resolve_theme_stance` here, so a hand-rolled theme bakes the same
- * as the shipped exemplars (build time has no bundle-weight concern). A
- * theme slot the stylesheet can't hold is dropped before it overlays, as
+ * references are pulled in transitively and the output stays tree-shaken.
+ * The overlay follows `render_theme_style`'s order - the stance mirror
+ * (minus the names the theme or its caps set), then the theme's own
+ * variables (minus any internal name, which a theme can't set), then the
+ * caps. A slot the stylesheet can't hold is dropped before it overlays, as
  * `render_theme_style` drops it, so the value beneath it stays.
  *
  * @param variables - the resolved default or custom variables
- * @param theme - the theme to overlay, or null/undefined for none
+ * @param theme - the baked theme to overlay (see `bake_theme`), or null/undefined for none
  * @returns the composed variables, or `variables` unchanged when there's no theme
  */
 export const apply_theme_variables = (
 	variables: Array<StyleVariable>,
-	theme: Theme | null | undefined
+	theme: ResolvedTheme | null | undefined
 ): Array<StyleVariable> => {
 	if (!theme) return variables;
-	const resolved = resolve_theme_stance(theme);
+	// contained first, so a nameless entry (untyped data) never reaches the name check
+	const own = theme.theme.variables.flatMap((v) => {
+		const contained = contain_variable(v);
+		return contained && !contained.name.startsWith('_') ? [contained] : [];
+	});
+	const caps = theme.caps ?? [];
+	const shadowed = new Set([...own, ...caps].map((v) => v.name));
 	const by_name = new Map(variables.map((v) => [v.name, v]));
 	// Replacement mirrors the runtime cascade: a base-slot theme value beats
 	// the base default's dark slot by layer order, so it replaces wholesale,
@@ -374,33 +536,34 @@ export const apply_theme_variables = (
 		const contained = contain_variable(v);
 		if (contained) by_name.set(v.name, overlay_style_variable(by_name.get(v.name), contained));
 	};
-	// mirror first, then the theme's own, so authored values win
-	for (const v of resolved.scheme_mirror ?? []) overlay(v);
-	for (const v of resolved.variables) overlay(v);
+	for (const v of theme.scheme_mirror ?? []) if (!shadowed.has(v.name)) overlay(v);
+	for (const v of own) overlay(v);
+	for (const v of caps) overlay(v);
 	return [...by_name.values()];
 };
 
 /**
- * Builds a variable dependency graph from a variables option.
+ * Builds a variable dependency graph from a variables option, with a
+ * build-time theme baked in through `bake_theme`.
  * Handles all option forms: undefined (defaults), null (disabled), array, or callback.
  *
  * @param variables - the variables option from generator config
- * @param theme - an optional theme to overlay onto the resolved variables
- * @returns `VariableDependencyGraph` built from the resolved variables
+ * @param theme - an optional theme to bake onto the resolved variables
+ * @returns `VariableDependencyGraph` built from the resolved variables, carrying the baked theme
  */
 export const build_variable_graph_from_options = (
 	variables: VariablesOption,
-	theme?: Theme | null
+	theme?: Theme | ResolvedTheme | null
 ): VariableDependencyGraph => {
-	const graph = build_variable_graph(
-		apply_theme_variables(resolve_variables_option(variables), theme)
-	);
-	// the theme's own uncontained slots never reach the graph, so they're
-	// reported here - once, when the configured variables carry the same one
-	if (theme) {
+	const configured = resolve_variables_option(variables);
+	const theme_diagnostics: Array<GenerationDiagnostic> = [];
+	const baked = theme ? bake_theme(theme, configured, theme_diagnostics) : null;
+	const graph = build_variable_graph(apply_theme_variables(configured, baked));
+	graph.theme = baked;
+	// the theme's own uncontained slots never reach the graph, so the bake
+	// reports them - once, when the configured variables carry the same one
+	if (baked) {
 		const reported = new Set(graph.diagnostics.map((d) => d.message));
-		const theme_diagnostics: Array<GenerationDiagnostic> = [];
-		for (const v of theme.variables) contain_variable(v, theme_diagnostics);
 		for (const d of theme_diagnostics) {
 			if (reported.has(d.message)) continue;
 			reported.add(d.message);

@@ -562,8 +562,8 @@ describe('vite_plugin_fuz_css theme option', () => {
 	test('bakes a theme into the served CSS, auto-resolving its stance', async () => {
 		const server = await create_dev_server({
 			additional_variables: ['shade_lightness_00'],
-			// hand-rolled stanced theme: no `resolve_theme_stance` call - the
-			// build seam resolves the mirror itself
+			// a plain wire theme, as every stanced theme is - the build seam
+			// derives the mirror itself
 			theme: {
 				name: 'test dark',
 				scheme: 'dark',

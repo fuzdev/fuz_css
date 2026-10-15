@@ -11,6 +11,7 @@
 	import pkg_json from 'virtual:pkg.json';
 
 	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+	import ThemeStanceMirror from '#routes/ThemeStanceMirror.svelte';
 
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '#lib/ContextmenuRoot.svelte';
@@ -39,6 +40,7 @@
 <ThemeRoot
 	save_theme={(theme) => (theme?.name === UNSAVED_THEME_NAME ? undefined : save_theme(theme))}
 >
+	<ThemeStanceMirror />
 	<!-- TODO add all of this and fixed scoped, so the docs examples work as expected,
 		or maybe disable this main contextmenu when in the docs -->
 	<!-- <ContextmenuRoot> -->

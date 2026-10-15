@@ -1,19 +1,20 @@
 import type { Theme } from '../variable.ts';
-import { resolve_theme_stance } from '../theme_stance.ts';
 
 /**
  * An exemplar theme: the theater marquee at night. Color is the content -
  * a magenta accent over a deep purple-cast dark, shadows turned to cyan and
  * magenta glows, corners rounded onto a common floor like tube
  * bends. Vivid past the gamut caps on purpose - lightness holds through the
- * clipping. Dark-only via the `scheme` stance: a lit sign has no daytime
- * appearance.
+ * clipping, so `check_theme` reports gamut failures and baking it through the
+ * build-time `theme` option warns with them. Dark-only via the `scheme`
+ * stance: a lit sign has no daytime appearance, so it renders through
+ * `resolve_theme_stance`, which computes the stance mirror beside it.
  *
  * The one palette-tier exemplar: it rotates the yellow slot to the amber of
  * incandescent bulbs, so a letter hue itself moves - the move that keeps a
  * theme out of the semantic-tier registry.
  */
-const authored: Theme = {
+export const marquee_theme: Theme = {
 	name: 'marquee',
 	summary:
 		'Vivid for events and nightlife: a magenta accent on purple-cast surfaces, colored glows, rounded corners, color pushed past the gamut caps - the marquee lit for opening night. Dark only.',
@@ -42,9 +43,3 @@ const authored: Theme = {
 		{ name: 'radius_scale', base: '0.54' }
 	]
 };
-
-/**
- * Resolved at module scope so the stance mirror rides this module's chunk
- * rather than every consumer's theme path - see `theme_stance.ts`.
- */
-export const marquee_theme: Theme = resolve_theme_stance(authored);

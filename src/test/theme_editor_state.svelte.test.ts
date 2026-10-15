@@ -237,15 +237,18 @@ describe('scheme stance', () => {
 		assert.deepEqual(editor.overrides.get(single_slot_default.name), { base: '2' });
 	});
 
-	test('the draft and output of a stanced editor carry a resolved scheme_mirror', () => {
+	test('the draft and output of a stanced editor are wire themes, resolved beside', () => {
 		const editor = create_editor();
 		editor.set_scheme('dark');
 		assert.strictEqual(editor.draft.scheme, 'dark');
-		assert.isAbove(editor.draft.scheme_mirror!.length, 0);
-		assert.isAbove(editor.output.scheme_mirror!.length, 0);
-		// a dual editor's draft has no mirror
+		// the derived mirror never rides in what's copied or applied
+		assert.deepEqual(Object.keys(editor.output).sort(), ['name', 'scheme', 'variables']);
+		assert.deepEqual(Object.keys(editor.draft).sort(), ['name', 'scheme', 'variables']);
+		assert.deepEqual(editor.resolved_output.theme, editor.output);
+		assert.isAbove(editor.resolved_output.scheme_mirror!.length, 0);
+		// a dual editor resolves no mirror
 		const dual = create_editor();
-		assert.isUndefined(dual.draft.scheme_mirror);
+		assert.isUndefined(dual.resolved_output.scheme_mirror);
 	});
 });
 
@@ -493,16 +496,25 @@ describe('render_theme_ts', () => {
 		assert.notInclude(ts, 'resolve_theme_stance');
 	});
 
-	test('a stanced theme renders the resolve-at-module-scope shape', () => {
+	test('a stanced theme renders a plain module carrying its scheme', () => {
 		const ts = render_theme_ts({
 			name: 'darkling',
 			scheme: 'dark',
 			variables: [{ name: 'neutral_chroma', base: '0.04' }]
 		});
-		assert.include(ts, "import {resolve_theme_stance} from '@fuzdev/fuz_css/theme_stance.ts';");
-		assert.include(ts, "scheme: 'dark',");
-		assert.include(ts, 'const authored: Theme = {');
-		assert.include(ts, 'export const darkling_theme: Theme = resolve_theme_stance(authored);');
+		assert.strictEqual(
+			ts,
+			`import type {Theme} from '@fuzdev/fuz_css/variable.ts';
+
+export const darkling_theme: Theme = {
+	name: 'darkling',
+	scheme: 'dark', // renders this appearance in both color schemes
+	variables: [
+		{name: 'neutral_chroma', base: '0.04'},
+	],
+};
+`
+		);
 	});
 
 	test('a name leading with a digit takes the prefix form, a valid identifier', () => {

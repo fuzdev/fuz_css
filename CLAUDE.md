@@ -138,11 +138,18 @@ combined and only used content is included. In utility-only mode, import
   (`--_palette_lightness_30`, `--_chroma_shape_50`, `--_palette_chroma_50`,
   built by the `to_*_name` helpers in `ramps.ts`). `STYLE_VARIABLE_NAME_MATCHER`
   rejects the spelling, so `parse_theme`/`validate_theme` refuse a theme that
-  sets one; `default_variables` declares them without passing through the
-  schema. The one exception is a `_palette_chroma_NN` in the capped form
-  `render_chroma_stop_css` emits - how `compile_theme` writes its caps and a
-  stanced theme's `scheme_mirror` re-slots the defaults' - which the
-  `StyleVariable` schema admits and the resolver reads
+  sets one, `render_theme_style` drops one from a theme's variables, and the
+  resolver ignores one there; `default_variables` declares them without
+  passing through the schema
+- Derived data stays out of the wire `Theme`: a theme is only what was
+  authored (`name`, `summary`, `scheme`, `variables`), and what it implies
+  travels beside it as `ThemeDerived` (`theme.ts`) - the stance's
+  `scheme_mirror` from `resolve_theme_stance` and the `caps` from
+  `compile_theme`, which may carry internal names. `ResolvedTheme` wraps a
+  theme with its derived data, and `render_theme_style(r.theme, r)` renders
+  mirror → variables → caps, the mirror only under a stance and minus any
+  name the theme or the caps set. Persisted or shared themes therefore never
+  carry stale derived values - they're recomputed where the theme renders
 - [theme_check.ts](src/lib/theme_check.ts) turns those design-time gates into
   a theme API: `validate_theme` ([theme_validate.ts](src/lib/theme_validate.ts))
   lints a theme's shape, `check_theme` runs the
@@ -150,10 +157,12 @@ combined and only used content is included. In utility-only mode, import
   bindings back to numbers, following the role variables the default styles
   paint through - `text_color`, `link_color`, `border_color`, and the rest of
   `theme_gate_role_names` - and reporting any gate input it can't evaluate as
-  `unchecked` rather than passing it unread), and `compile_theme` recomputes
-  per-theme worst-hue chroma caps at each stop's resolved lightness so
-  rotated, monochrome, dark-only, or lightness-moved themes stay in gamut -
-  all three over the string→number resolution core in
+  `unchecked` rather than passing it unread; it takes compiled `caps` beside
+  the theme), and `compile_theme` ([theme_compile.ts](src/lib/theme_compile.ts))
+  recomputes per-theme worst-hue chroma caps at each stop's resolved
+  lightness so rotated, monochrome, dark-only, or lightness-moved themes stay
+  in gamut, returning a `CompiledTheme` (the input theme, its mirror, the
+  caps, the gate report, and the lint) - all three over the string→number resolution core in
   [theme_resolver.ts](src/lib/theme_resolver.ts)
 
 ### Smart utility class generation
@@ -485,12 +494,17 @@ Use `GenFuzCssOptions` or `VitePluginFuzCssOptions` to customize:
   them. A top-level `@charset` is the one construct left out
 - `variables` - Custom theme variables (an array replacing the defaults) or
   callback to modify defaults; the set is the whole theme
-- `theme` - A `Theme` baked into the generated CSS, overlaid onto `variables`
-  last-wins by name. The static counterpart to fuz_ui's `ThemeRoot`: no
-  runtime theme rendering, and the output stays tree-shaken because the
-  overlay happens before the dependency graph is built. A stanced theme's
-  `scheme_mirror` auto-resolves at build time, so hand-rolled themes don't
-  need `resolve_theme_stance`
+- `theme` - A `Theme` (or `ResolvedTheme`) baked into the generated CSS,
+  overlaid onto `variables` last-wins by name. The static counterpart to
+  fuz_ui's `ThemeRoot`: no runtime theme rendering, and the output stays
+  tree-shaken because the overlay happens before the dependency graph is
+  built. The bake derives the theme's data itself (`bake_theme` in
+  `variable_graph.ts`), recomputing any a `ResolvedTheme` carries: a stanced
+  theme's mirror re-slots the configured `variables` rather than the
+  defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
+  lightness moved bakes its recomputed caps last, with the gates reported as
+  warnings (`theme_gate_failed`, `theme_gate_unchecked`). The lint doesn't
+  run there: it needs zod, an optional peer the generators load without
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars
@@ -575,8 +589,12 @@ typography, borders, shading, shadows, layout. See
   replacement, a dark-only overlay keeping the base slot beneath it),
   `ColorScheme` type (`Theme` itself lives in `variable.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~1.3KB minified
-  instead of ~38KB. It renders what the theme carries (the `scheme_mirror`
-  only under a stance) and pins `color-scheme` for a `scheme` stance
+  instead of ~38KB. It renders what the theme carries plus the derived data
+  in its options (`ThemeDerived`: the mirror only under a stance, then the
+  caps last), pins `color-scheme` for a `scheme` stance, and is total over
+  junk options as over a junk theme. `render_style_variables` renders a
+  variable set that isn't a theme, internal names included - how `theme.css`
+  renders the full defaults
 - [css_containment.ts](src/lib/css_containment.ts) - Containment checks for
   text rendered verbatim into a stylesheet (`css_value_is_contained` and its
   comment and property-name twins). A theme may be untrusted data, so the
@@ -590,10 +608,13 @@ typography, borders, shading, shadows, layout. See
   `escape_css_identifier` writes the renderer's `id` option into its
   selector, escaping punctuation by code point so `</style` can't form
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
-  computes a single-scheme theme's `scheme_mirror` (the scheme-adaptive
-  defaults re-slotted so its one appearance holds in both schemes). Kept out
-  of `theme.ts` so only consumers of a stanced theme pay for the data; the
-  shipped stanced exemplars resolve at their own module scope
+  returns a `ResolvedTheme` carrying a single-scheme theme's `scheme_mirror`
+  (the scheme-adaptive defaults re-slotted so its one appearance holds in
+  both schemes), and `scheme_stance_variables`, which computes the mirror
+  from any variable set (the generated twin by default). Kept out of
+  `theme.ts` so only consumers of a stanced theme pay for the data; the
+  shipped stanced exemplars export their authored theme and resolve where
+  they render
 - [scheme_adaptive_variables.ts](src/lib/scheme_adaptive_variables.ts) -
   generated literal twin of the dual-slot subset of `default_variables`,
   emitted so the mirror carries no dependency on `variables.ts` (whose
@@ -665,10 +686,14 @@ typography, borders, shading, shadows, layout. See
   (`check_theme`: gamut, ramp monotonicity, contrast - a directly authored
   color stop or role is measured when it's an `oklch(L C H)` numeric literal
   or an exact `var()` reference to a color the gates evaluate, and lands in
-  `unchecked` otherwise), and the worst-hue chroma-cap compile step
-  (`compile_theme`, which caps each stop at the lightness it resolves to,
-  emits any cap that tightens, and emits nothing when a hue won't resolve to
-  a number)
+  `unchecked` otherwise), and the worst-hue chroma-cap recomputation
+  (`compute_theme_caps`, which caps each stop at the lightness it resolves
+  to, emits any cap that tightens, and emits nothing when a hue won't resolve
+  to a number). Free of zod, so the build-time bake runs it
+- [theme_compile.ts](src/lib/theme_compile.ts) - `compile_theme`: the
+  mirror, the caps (beside the theme, so compiling is idempotent), the gates
+  with them, and the lint, in one `CompiledTheme`; apart from
+  `theme_check.ts` since the lint needs zod
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
@@ -730,7 +755,9 @@ typography, borders, shading, shadows, layout. See
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
   transitive resolution; it leaves out a value that would escape its
   declaration, as the runtime renderer does, with an `uncontained_theme_value`
-  error
+  error. `bake_theme` derives a build-time theme's mirror (from the
+  configured variables) and compiled caps, and the graph carries the baked
+  theme for the `fuz.theme.baked` overlay
 - [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
   extraction utilities: references, fallback-less references, declarations,
   and comment stripping
@@ -794,7 +821,13 @@ shared discard guard (`load_theme_guarded`) and `sync_applied_theme`, which
 adopts a theme already applied at mount so a persisted theme or contrast
 composition isn't replaced by the editor's defaults. The themes page keeps
 one editor per browser session, so a draft survives in-app navigation, and
-only bridges `applied_theme` to fuz_ui's theme state.
+only bridges `applied_theme` to fuz_ui's theme state. The editor's `output`
+and `draft` are wire themes; `resolved_output` carries the mirror the
+rendered-CSS readout needs. The published fuz_ui `ThemeRoot` renders the
+bare theme, so the layout adds
+[ThemeStanceMirror.svelte](src/routes/ThemeStanceMirror.svelte), which
+renders a stanced applied theme resolved (a transitional docs-site piece,
+until `ThemeRoot` takes an injected resolver).
 [root_color_scheme.svelte.ts](src/routes/root_color_scheme.svelte.ts) reads
 the scheme the page renders off the root class reactively; the editor's
 edited slot and the swatch readouts follow it rather than the theme state,
@@ -823,12 +856,12 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `css_class_resolution.{test,literals}.test.ts`
 - `generate_classes_css.{test,modifiers,order,validity}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
-- `theme_check.{test,compile,pins}.test.ts`
+- `theme_check.{test,pins}.test.ts`
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 
 Plus standalone tests: `css_cache`, `css_generator`, `css_classes`, `css_literal`,
-`css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
+`css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `gen_fuz_css`, `generate_bundled_css`,

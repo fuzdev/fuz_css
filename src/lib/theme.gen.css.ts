@@ -1,7 +1,7 @@
 import type { Gen } from '@fuzdev/gro';
 
 import { default_themes } from './themes.ts';
-import { render_theme_style } from './theme.ts';
+import { render_style_variables } from './theme.ts';
 import { default_variables } from './variables.ts';
 
 // TODO maybe this should be `base_theme.css` or `base.css` or something
@@ -25,11 +25,12 @@ export const gen: Gen = ({ origin_path }) => {
 	// the default theme's variables are the system's defaults, so they render
 	// into the base layer; runtime theme overrides beat them from fuz.theme.
 	// the theme itself is empty (it inherits the defaults), so the full set is
-	// passed explicitly - the renderer holds no variable data of its own
-	const theme_style = render_theme_style(
-		{ ...theme, variables: default_variables },
-		{ comments: true, layer: 'fuz.base' }
-	);
+	// rendered as a variable set - the internal ramp variables included, which
+	// a theme can't carry
+	const theme_style = render_style_variables(default_variables, {
+		comments: true,
+		layer: 'fuz.base'
+	});
 
 	return `${banner}
 
