@@ -148,8 +148,8 @@ export const load_extraction_versions = (): Record<string, string> => {
  * against: the versions of fuz_css and the parsers its extractor runs, so
  * an upgrade of any of them invalidates the cache with no manual bump. In a
  * checkout of fuz_css itself the version doesn't move between commits, so
- * clear `.fuz/cache/css` (or set `cache_salt`) after changing what
- * extraction produces.
+ * clear `.fuz/cache/css` and each example's own `.fuz` directory (or set
+ * `cache_salt`) after changing what extraction produces.
  *
  * @param versions - the versions by package name
  * @returns the version string, like `@fuzdev/fuz_css@1.2.3 svelte@5.0.0 ...`

@@ -393,7 +393,7 @@ const to_list = (items: Array<string>): string =>
  * entries and `theme_gate_unchecked` the inputs the gates couldn't evaluate.
  * A stanced theme renders its one appearance in both schemes, so only the
  * stanced scheme's entries are listed. The lint (`validate_theme`) doesn't
- * run here: it needs zod, an optional peer the generators load without.
+ * run here: it needs zod, an optional peer the generator loads without.
  *
  * @param theme - the configured `theme` option
  * @param variables - the configured variable set the theme overlays

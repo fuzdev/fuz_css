@@ -26,7 +26,7 @@ import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
  * What one render reads: the classes extracted so far and the `var()` names
  * scanned from source.
  *
- * @internal The core both generators render through - not stable API.
+ * @internal The core the Vite plugin renders through - not stable API.
  */
 export interface CssRenderInput {
 	css_classes: CssClasses;
@@ -42,7 +42,7 @@ export interface CssRenderInput {
 /**
  * A generator's shared core - see `create_css_generator`.
  *
- * @internal The core both generators render through - not stable API.
+ * @internal The core the Vite plugin renders through - not stable API.
  */
 export interface CssGenerator {
 	/** Creates an empty class collection with the configured include and exclude classes. */
@@ -69,7 +69,7 @@ export interface CssGenerator {
  * @param options - the generator's options
  * @param sink - where logged diagnostics go
  *
- * @internal The core both generators render through - not stable API.
+ * @internal The core the Vite plugin renders through - not stable API.
  */
 export const create_css_generator = (
 	options: CssGeneratorBaseOptions,

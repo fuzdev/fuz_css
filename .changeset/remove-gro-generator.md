@@ -8,4 +8,4 @@ The Vite plugin is now the one way to generate bundled CSS. `gen_fuz_css.ts` is 
 
 To migrate a `fuz.gen.css.ts`, delete it and its generated `fuz.css`, add `vite_plugin_fuz_css()` to `plugins` in `vite.config.ts` with the same options, and import `virtual:fuz.css` where you imported `./fuz.css`. A SvelteKit app takes the plugin directly, beside `sveltekit()`.
 
-Breaking for code calling the pipeline directly: `resolve_css` and `generate_css` no longer take `include_stats`, and the `resolve_css` result has no `stats`, so `CssResolutionStats` is gone. `included_elements`, `included_rule_indices`, and `resolved_variables` on the result carry the same counts.
+Breaking for code calling the pipeline directly: `resolve_css` and `generate_css` no longer take `include_stats`, and the `resolve_css` result has no `stats`, so `CssResolutionStats` is gone. `included_elements`, `included_rule_indices`, and `resolved_variables` on the result carry the same counts, and `style_rule_index.rules.length` the total rule count.

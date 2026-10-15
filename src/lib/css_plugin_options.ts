@@ -20,12 +20,6 @@
  *
  * This applies to `BaseCssOption` and `VariablesOption`.
  *
- * ## Callbacks over defaults
- *
- * Every option with a built-in default set - `base_css`, `variables`,
- * `class_definitions`, and `class_interpreters` - also takes a callback that
- * receives the defaults and returns the set to use, so a project can extend,
- * filter, or replace them without importing the defaults itself.
  * Setting both to `null` enables "utility-only mode" where you manage
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
  * and `theme.css`, which include all content).
@@ -35,6 +29,15 @@
  * whether `variables` is `null`, empty, or missing some of the defaults. To
  * bundle every variable instead, keep `variables` and set
  * `additional_variables: 'all'`.
+ *
+ * ## Callbacks over defaults
+ *
+ * Every option with a built-in default set - `base_css`, `variables`,
+ * `class_definitions`, and `class_interpreters` - also takes a callback that
+ * receives the defaults and returns the set to use, so a project can extend,
+ * filter, or replace them without importing the defaults itself. The copy
+ * is shallow, so mutate the returned set rather than a default's definition
+ * object, which the registry shares.
  *
  * @module
  */
@@ -81,7 +84,7 @@ export interface CssExtractionOptions {
 }
 
 /**
- * Type for the class_definitions option used by CSS generators.
+ * Type for the class_definitions option used by the generator.
  *
  * Supports three forms:
  * - `undefined` - Use the default token and composite classes
@@ -98,7 +101,7 @@ export type ClassDefinitionsOption =
 	| undefined;
 
 /**
- * Type for the class_interpreters option used by CSS generators.
+ * Type for the class_interpreters option used by the generator.
  *
  * Supports three forms:
  * - `undefined` - Use the default interpreters (the CSS-literal interpreter)
@@ -158,7 +161,7 @@ export interface CssClassOptions {
 }
 
 /**
- * Type for the base_css option used by CSS generators.
+ * Type for the base_css option used by the generator.
  *
  * Supports four forms:
  * - `undefined` - Use default `style.css` (framework defaults)
@@ -167,12 +170,12 @@ export interface CssClassOptions {
  * - `(default_css) => string` - Callback to modify default CSS
  *
  * See module documentation for the `undefined` vs `null` convention, and
- * `CssOutputOptions.base_css` for what the generators do with the stylesheet.
+ * `CssOutputOptions.base_css` for what the generator does with the stylesheet.
  */
 export type BaseCssOption = string | ((default_css: string) => string) | null | undefined;
 
 /**
- * Type for the variables option used by CSS generators.
+ * Type for the variables option used by the generator.
  *
  * Supports four forms:
  * - `undefined` - Use default variables (framework defaults)

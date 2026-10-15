@@ -145,7 +145,7 @@ export class CssGenerationError extends Error {
 /**
  * Where a dispatcher writes the diagnostics it logs.
  *
- * @internal The dispatch the generators share - not stable API.
+ * @internal The dispatch the generator core runs - not stable API.
  */
 export interface DiagnosticSink {
 	warn: (message: string) => void;
@@ -155,7 +155,7 @@ export interface DiagnosticSink {
 /**
  * How generation diagnostics are handled - see `CssDiagnosticsOptions`.
  *
- * @internal The dispatch the generators share - not stable API.
+ * @internal The dispatch the generator core runs - not stable API.
  */
 export interface DiagnosticDispatchOptions {
 	on_error: 'log' | 'throw';
@@ -178,7 +178,7 @@ export interface DiagnosticDispatchOptions {
  * @returns the dispatch, to call with each render's diagnostics
  * @throws CssGenerationError - from the returned dispatch, for a level set to `'throw'`
  *
- * @internal The dispatch the generators share - not stable API.
+ * @internal The dispatch the generator core runs - not stable API.
  */
 export const create_diagnostic_dispatcher = (
 	options: DiagnosticDispatchOptions,

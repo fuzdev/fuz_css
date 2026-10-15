@@ -3,7 +3,7 @@
  *
  * Provides shared helper functions for extracting CSS custom property references
  * from CSS strings, for the base-style index, the variable graph, generated
- * classes, and the generators' source scans.
+ * classes, and the Vite plugin's source scans.
  *
  * @module
  */
