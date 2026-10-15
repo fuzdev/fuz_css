@@ -27,7 +27,6 @@ describe('shared options interface', () => {
 			acorn_plugins: [],
 			// CssClassOptions
 			class_definitions: {},
-			include_default_classes: true,
 			class_interpreters: [],
 			exclude_classes: ['hidden'],
 			// CssOutputOptions
@@ -70,7 +69,8 @@ describe('shared options interface', () => {
 		};
 
 		const class_opts: CssClassOptions = {
-			include_default_classes: true
+			class_definitions: (defaults) => defaults,
+			class_interpreters: (defaults) => defaults
 		};
 
 		const output: CssOutputOptions = {
@@ -142,13 +142,5 @@ describe('options default behavior', () => {
 		// Empty object should be valid - all options are optional
 		const minimal: CssGeneratorBaseOptions = {};
 		assert.isDefined(minimal);
-	});
-
-	test('include_default_classes defaults to true conceptually', () => {
-		// When undefined, generators should treat include_default_classes as true
-		// This test documents the expected behavior
-		const opts: CssClassOptions = {};
-		assert.isUndefined(opts.include_default_classes);
-		// Actual default is applied in css_generator.ts
 	});
 });

@@ -13,14 +13,12 @@ import {
 	type CreateBundledResourcesOptions
 } from '#lib/bundled_resources.ts';
 import { generate_css, type GenerateCssResult } from '#lib/generate_css.ts';
-import { merge_class_definitions } from '#lib/css_class_definitions.ts';
+import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
 import { default_cache_deps } from '#lib/deps_defaults.ts';
 import { load_default_style_css } from '#lib/style_rule_parser.ts';
 import type { BaseCssOption, VariablesOption } from '#lib/css_plugin_options.ts';
 import { default_variables } from '#lib/variables.ts';
-
-const class_definitions = merge_class_definitions(undefined, true);
 
 const create_resources = (
 	options: Partial<CreateBundledResourcesOptions> = {}
@@ -63,7 +61,7 @@ const generate = async (options: GenerateOptions = {}): Promise<GenerateCssResul
 		explicit_variables: null,
 		extraction_diagnostics: [],
 		detected_css_variables: new Set(),
-		class_definitions,
+		class_definitions: css_class_definitions,
 		interpreters: css_class_interpreters,
 		css_properties: null,
 		include_base,

@@ -13,8 +13,8 @@ import type { Logger } from '@fuzdev/fuz_util/log.ts';
 
 import { generate_css } from './generate_css.ts';
 import { create_bundled_resources, type BundledCssResources } from './bundled_resources.ts';
-import { merge_class_definitions } from './css_class_definitions.ts';
-import { css_class_interpreters } from './css_class_interpreters.ts';
+import { resolve_class_definitions } from './css_class_definitions.ts';
+import { resolve_class_interpreters } from './css_class_interpreters.ts';
 import { load_css_properties } from './css_literal.ts';
 import { is_ci } from './css_cache.ts';
 import { default_cache_deps } from './deps_defaults.ts';
@@ -76,9 +76,8 @@ export const create_css_generator = (
 	sink: DiagnosticSink
 ): CssGenerator => {
 	const {
-		class_definitions: user_class_definitions,
-		include_default_classes = true,
-		class_interpreters = css_class_interpreters,
+		class_definitions: class_definitions_option,
+		class_interpreters: class_interpreters_option,
 		additional_classes,
 		exclude_classes,
 		on_error = is_ci ? 'throw' : 'log',
@@ -96,11 +95,9 @@ export const create_css_generator = (
 	const include_base = base_css !== null;
 	const include_theme = variables !== null;
 
-	// merged up front, so a missing definition set fails at creation
-	const class_definitions = merge_class_definitions(
-		user_class_definitions,
-		include_default_classes
-	);
+	// resolved up front, so a callback returning the wrong shape fails at creation
+	const class_definitions = resolve_class_definitions(class_definitions_option);
+	const class_interpreters = resolve_class_interpreters(class_interpreters_option);
 
 	const include_set = additional_classes ? new Set(additional_classes) : null;
 	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;

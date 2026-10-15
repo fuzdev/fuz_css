@@ -499,6 +499,10 @@ Use `VitePluginFuzCssOptions` to customize:
 - `exclude_classes` - Classes to exclude from output
 - `exclude_elements` - Elements to exclude from base CSS
 - `exclude_variables` - Variables to exclude from theme
+- `class_definitions` / `class_interpreters` - Custom classes merged over the
+  defaults (a record) and interpreters replacing them (an array). Both also
+  take a callback over the defaults, as `base_css` and `variables` do, so
+  `class_definitions: () => mine` uses only your own definitions
 - `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
   diagnostic handling. Errors from the base stylesheet: `base_css_layer` (an
   `@layer` rule of the consumer's own, at any depth) and
@@ -537,7 +541,7 @@ Use `VitePluginFuzCssOptions` to customize:
 
 These are the common options - see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
-(class definitions and interpreters, acorn plugins, deps).
+(acorn plugins, and `deps`, an `@internal` test seam).
 
 ## Docs
 

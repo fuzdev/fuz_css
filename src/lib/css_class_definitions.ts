@@ -8,6 +8,7 @@
  */
 
 import type { CssClassDefinition } from './css_class_generation.ts';
+import type { ClassDefinitionsOption } from './css_plugin_options.ts';
 import {
 	generate_classes,
 	generate_property_classes,
@@ -303,24 +304,28 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 };
 
 /**
- * Merges user class definitions with the built-in defaults.
- * User definitions take precedence over defaults with the same name.
+ * Resolves the `class_definitions` option against the built-in definitions.
+ * A record merges over the defaults, taking precedence over a default with
+ * the same name, and a callback receives a copy of the defaults and returns
+ * the whole set.
  *
- * @param user_definitions - user-provided class definitions to merge
- * @param include_defaults - whether to include built-in definitions
- * @returns merged class definitions
- * @throws Error if `include_defaults` is false and no user definitions provided
+ * @param option - the `class_definitions` option
+ * @returns the class definitions to generate with
+ * @throws Error - if a callback returns something other than an object
  */
-export const merge_class_definitions = (
-	user_definitions: Record<string, CssClassDefinition | undefined> | undefined,
-	include_defaults: boolean
+export const resolve_class_definitions = (
+	option: ClassDefinitionsOption
 ): Record<string, CssClassDefinition | undefined> => {
-	if (!include_defaults && !user_definitions) {
-		throw new Error('class_definitions is required when include_default_classes is false');
+	if (typeof option === 'function') {
+		const result: unknown = option({ ...css_class_definitions });
+		if (typeof result !== 'object' || result === null || Array.isArray(result)) {
+			throw new Error(
+				`The class_definitions callback must return an object of definitions, got ${
+					result === null ? 'null' : Array.isArray(result) ? 'an array' : typeof result
+				}`
+			);
+		}
+		return result as Record<string, CssClassDefinition | undefined>;
 	}
-	return include_defaults
-		? user_definitions
-			? { ...css_class_definitions, ...user_definitions }
-			: css_class_definitions
-		: user_definitions!;
+	return option ? { ...css_class_definitions, ...option } : css_class_definitions;
 };

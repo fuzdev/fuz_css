@@ -420,8 +420,6 @@ export interface GenerateBundledCssOptions {
 	include_theme?: boolean;
 	/** Include base styles section. @default true */
 	include_base?: boolean;
-	/** Include utility classes section. @default true */
-	include_utilities?: boolean;
 	/**
 	 * A baked theme's own overlay (its variables + stance mirror +
 	 * `color-scheme` pin), rendered unlayered - emitted into the
@@ -444,12 +442,7 @@ export const generate_bundled_css = (
 	utility_css: string,
 	options: GenerateBundledCssOptions = {}
 ): string => {
-	const {
-		include_theme = true,
-		include_base = true,
-		include_utilities = true,
-		theme_overlay_css = null
-	} = options;
+	const { include_theme = true, include_base = true, theme_overlay_css = null } = options;
 
 	const parts: Array<string> = [];
 
@@ -480,7 +473,7 @@ export const generate_bundled_css = (
 	}
 
 	// Utility classes section
-	if (include_utilities && utility_css) {
+	if (utility_css) {
 		parts.push('/* Utility Classes */');
 		parts.push(utility_css.trimEnd());
 	}

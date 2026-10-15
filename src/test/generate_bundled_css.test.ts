@@ -123,18 +123,6 @@ describe('generate_bundled_css', () => {
 			assert.notInclude(no_base, 'button { color');
 			assert.include(no_base, '/* Utility Classes */');
 		});
-
-		test('include_utilities: false excludes utilities', () => {
-			const result = create_mock_result();
-			const no_utility = generate_bundled_css(result, '.p_md { padding: 16px; }', {
-				include_utilities: false
-			});
-
-			assert.include(no_utility, '/* Theme Variables */');
-			assert.include(no_utility, '/* Base Styles */');
-			assert.notInclude(no_utility, '/* Utility Classes */');
-			assert.notInclude(no_utility, '.p_md');
-		});
 	});
 
 	describe('empty handling', () => {

@@ -1,4 +1,5 @@
 import type { CssClassDefinitionInterpreter } from './css_class_generation.ts';
+import type { ClassInterpretersOption } from './css_plugin_options.ts';
 import {
 	is_possible_css_literal,
 	parse_css_literal,
@@ -51,3 +52,29 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 export const css_class_interpreters: Array<CssClassDefinitionInterpreter> = [
 	css_literal_interpreter
 ];
+
+/**
+ * Resolves the `class_interpreters` option against the builtin interpreters.
+ * An array replaces them, and a callback receives a copy of them and returns
+ * the interpreters to use.
+ *
+ * @param option - the `class_interpreters` option
+ * @returns the interpreters to generate with
+ * @throws Error - if a callback returns something other than an array
+ */
+export const resolve_class_interpreters = (
+	option: ClassInterpretersOption
+): Array<CssClassDefinitionInterpreter> => {
+	if (typeof option === 'function') {
+		const result: unknown = option([...css_class_interpreters]);
+		if (!Array.isArray(result)) {
+			throw new Error(
+				`The class_interpreters callback must return an array of interpreters, got ${
+					result === null ? 'null' : typeof result
+				}`
+			);
+		}
+		return result as Array<CssClassDefinitionInterpreter>;
+	}
+	return option ?? css_class_interpreters;
+};

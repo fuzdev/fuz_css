@@ -19,6 +19,13 @@
  * - **`null`** - Explicitly disable the feature. No output is generated for that layer.
  *
  * This applies to `BaseCssOption` and `VariablesOption`.
+ *
+ * ## Callbacks over defaults
+ *
+ * Every option with a built-in default set - `base_css`, `variables`,
+ * `class_definitions`, and `class_interpreters` - also takes a callback that
+ * receives the defaults and returns the set to use, so a project can extend,
+ * filter, or replace them without importing the defaults itself.
  * Setting both to `null` enables "utility-only mode" where you manage
  * your own theme and base styles via direct imports (`@fuzdev/fuz_css/style.css`
  * and `theme.css`, which include all content).
@@ -73,14 +80,45 @@ export interface CssExtractionOptions {
 }
 
 /**
+ * Type for the class_definitions option used by CSS generators.
+ *
+ * Supports three forms:
+ * - `undefined` - Use the default token and composite classes
+ * - `Record` - Definitions merged over the defaults (a definition with a
+ *   default's name replaces it)
+ * - `(defaults) => Record` - Callback returning the whole set, which receives
+ *   a copy of the defaults; `() => my_definitions` uses only your own
+ */
+export type ClassDefinitionsOption =
+	| Record<string, CssClassDefinition | undefined>
+	| ((
+			defaults: Record<string, CssClassDefinition | undefined>
+	  ) => Record<string, CssClassDefinition | undefined>)
+	| undefined;
+
+/**
+ * Type for the class_interpreters option used by CSS generators.
+ *
+ * Supports three forms:
+ * - `undefined` - Use the default interpreters (the CSS-literal interpreter)
+ * - `Array<CssClassDefinitionInterpreter>` - Interpreters replacing the defaults
+ * - `(defaults) => Array<CssClassDefinitionInterpreter>` - Callback returning
+ *   the interpreters to use, which receives a copy of the defaults
+ */
+export type ClassInterpretersOption =
+	| Array<CssClassDefinitionInterpreter>
+	| ((defaults: Array<CssClassDefinitionInterpreter>) => Array<CssClassDefinitionInterpreter>)
+	| undefined;
+
+/**
  * Options for CSS class definitions and interpretation.
  * Controls how classes are defined and how dynamic classes are generated.
  */
 export interface CssClassOptions {
 	/**
-	 * Additional class definitions to merge with defaults.
-	 * User definitions take precedence over defaults with the same name.
-	 * Required when `include_default_classes` is `false`.
+	 * Class definitions, merged over the default token and composite classes
+	 * as a record, or a callback over the defaults returning the whole set.
+	 * A record's definition takes precedence over a default with the same name.
 	 *
 	 * Registry order breaks ties between single-purpose classes of equal
 	 * rank, and for composites it is their order, so where a definition
@@ -88,19 +126,34 @@ export interface CssClassOptions {
 	 * ordered after the defaults, so it beats a built-in token it ties with on
 	 * the same property (though not a literal like `padding:0`, which orders
 	 * after every static definition), while one overriding a default's name
-	 * keeps that default's position.
+	 * keeps that default's position. A callback's result is the registry in
+	 * the order it returns, and a callback that doesn't return an object fails
+	 * generator creation.
+	 *
+	 * @example
+	 * ```ts
+	 * // add composites over the defaults
+	 * class_definitions: custom_composites
+	 *
+	 * // only your own definitions, none of the defaults
+	 * class_definitions: () => custom_composites
+	 * ```
 	 */
-	class_definitions?: Record<string, CssClassDefinition | undefined>;
+	class_definitions?: ClassDefinitionsOption;
 	/**
-	 * Whether to include default class definitions (token and composite classes).
-	 * When `false`, `class_definitions` is required.
+	 * Interpreters for dynamic class generation, replacing the builtin
+	 * interpreters as an array, or a callback over them. The builtins are the
+	 * CSS-literal interpreter, so keep them to keep literal classes.
+	 *
+	 * A callback that doesn't return an array fails generator creation.
+	 *
+	 * @example
+	 * ```ts
+	 * // run a custom interpreter before the CSS-literal one
+	 * class_interpreters: (defaults) => [grid_cols_interpreter, ...defaults]
+	 * ```
 	 */
-	include_default_classes?: boolean;
-	/**
-	 * Custom interpreters for dynamic class generation.
-	 * Replaces the builtin interpreters entirely if provided.
-	 */
-	class_interpreters?: Array<CssClassDefinitionInterpreter>;
+	class_interpreters?: ClassInterpretersOption;
 }
 
 /**
@@ -364,6 +417,8 @@ export interface CssCacheOptions {
 	/**
 	 * Filesystem deps for cache management.
 	 * Defaults to production implementation. Override for testing.
+	 *
+	 * @internal A test seam, not stable API.
 	 */
 	deps?: CacheDeps;
 }

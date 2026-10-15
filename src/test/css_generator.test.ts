@@ -10,6 +10,7 @@ import { test, describe, assert } from 'vitest';
 import { create_css_generator } from '#lib/css_generator.ts';
 import { extract_from_svelte } from '#lib/css_class_extractor.ts';
 import type { CssGeneratorBaseOptions } from '#lib/css_plugin_options.ts';
+import type { CssClassDefinitionInterpreter } from '#lib/css_class_generation.ts';
 import { compute_theme_caps } from '#lib/theme_check.ts';
 import type { Theme } from '#lib/variable.ts';
 import { assert_css_contains } from './test_helpers.ts';
@@ -87,6 +88,134 @@ describe('create_css_generator', () => {
 			const { errors } = await render_source(SOURCE, { base_css: null });
 
 			assert.lengthOf(errors, 2);
+		});
+	});
+});
+
+describe('class options over the defaults', () => {
+	// utility-only, so the output is the utility classes alone
+	const UTILITY_ONLY = { base_css: null, variables: null } as const;
+	const SOURCE = '<div class="my_gap p_md p_lg display:flex grid-cols-3"></div>';
+	const MY_GAP = { declaration: 'gap: 3px;' };
+
+	const grid_cols_interpreter: CssClassDefinitionInterpreter = {
+		pattern: /^grid-cols-(\d+)$/,
+		interpret: (matched) => ({
+			declaration: `grid-template-columns: repeat(${matched[1]}, 1fr);`
+		})
+	};
+
+	const create = (options: CssGeneratorBaseOptions) =>
+		create_css_generator({ ...UTILITY_ONLY, ...options }, { error: () => {}, warn: () => {} });
+
+	describe('class_definitions', () => {
+		test('a record merges over the defaults', async () => {
+			const { css } = await render_source(SOURCE, {
+				...UTILITY_ONLY,
+				class_definitions: { my_gap: MY_GAP }
+			});
+
+			assert_css_contains(css, '.my_gap', 'gap: 3px;');
+			assert.include(css, '.p_md');
+			assert.include(css, '.p_lg');
+		});
+
+		test('a callback receives the defaults and returns the whole set', async () => {
+			let received: Record<string, unknown> | null = null;
+			const { css } = await render_source(SOURCE, {
+				...UTILITY_ONLY,
+				class_definitions: (defaults) => {
+					received = defaults;
+					return { my_gap: MY_GAP };
+				}
+			});
+
+			assert.isNotNull(received);
+			assert.property(received, 'p_md');
+			assert_css_contains(css, '.my_gap', 'gap: 3px;');
+			assert.notInclude(css, '.p_md');
+			assert.notInclude(css, '.p_lg');
+		});
+
+		test('a callback can filter the defaults', async () => {
+			const { css } = await render_source(SOURCE, {
+				...UTILITY_ONLY,
+				class_definitions: ({ p_md: _p_md, ...rest }) => rest
+			});
+
+			assert.notInclude(css, '.p_md');
+			assert.include(css, '.p_lg');
+		});
+
+		test('a callback mutating its argument leaves the defaults intact', async () => {
+			create({
+				class_definitions: (defaults) => {
+					delete defaults.p_md;
+					return defaults;
+				}
+			});
+			const { css } = await render_source(SOURCE, UTILITY_ONLY);
+
+			assert.include(css, '.p_md');
+		});
+
+		test('a callback returning something other than an object fails creation', () => {
+			for (const result of [null, [], 'p_md']) {
+				assert.throws(
+					() => create({ class_definitions: () => result as never }),
+					/class_definitions callback must return an object/
+				);
+			}
+		});
+	});
+
+	describe('class_interpreters', () => {
+		test('the default is the CSS-literal interpreter', async () => {
+			const { css } = await render_source(SOURCE, UTILITY_ONLY);
+
+			assert_css_contains(css, '.display\\:flex', 'display: flex;');
+			assert.notInclude(css, 'grid-template-columns');
+		});
+
+		test('an array replaces the defaults', async () => {
+			const { css } = await render_source(SOURCE, {
+				...UTILITY_ONLY,
+				class_interpreters: [grid_cols_interpreter]
+			});
+
+			assert.include(css, 'grid-template-columns: repeat(3, 1fr);');
+			assert.notInclude(css, 'display: flex');
+		});
+
+		test('a callback receives the defaults and returns the interpreters to use', async () => {
+			const { css } = await render_source(SOURCE, {
+				...UTILITY_ONLY,
+				class_interpreters: (defaults) => [grid_cols_interpreter, ...defaults]
+			});
+
+			assert.include(css, 'grid-template-columns: repeat(3, 1fr);');
+			assert_css_contains(css, '.display\\:flex', 'display: flex;');
+		});
+
+		test('a callback mutating its argument leaves the defaults intact', async () => {
+			create({
+				class_interpreters: (defaults) => {
+					defaults.length = 0;
+					return defaults;
+				}
+			});
+			const { css } = await render_source(SOURCE, UTILITY_ONLY);
+
+			assert.include(css, 'display: flex');
+		});
+
+		test('a callback returning something other than an array fails creation', () => {
+			for (const result of [null, {}, grid_cols_interpreter]) {
+				assert.throws(
+					() => create({ class_interpreters: () => result as never }),
+					/class_interpreters callback must return an array/
+				);
+			}
 		});
 	});
 });

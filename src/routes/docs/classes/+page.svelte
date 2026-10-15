@@ -167,16 +167,13 @@ import 'virtual:fuz.css';`}
 				<li>
 					<code>class_definitions</code> - custom class definitions to merge with defaults; can
 					define new classes or override existing ones (see
-					<a href="#Composite-classes">composite classes</a>)
-				</li>
-				<li>
-					<code>include_default_classes</code> - set to <code>false</code> to use only your own
-					<code>class_definitions</code>, excluding all default token and composite classes
+					<a href="#Composite-classes">composite classes</a>). A callback receives the defaults and
+					returns the whole set, so <code>() =&gt; my_definitions</code> uses only your own
 				</li>
 				<li>
 					<code>class_interpreters</code> - <a href="#Custom-interpreters">custom interpreters</a>
-					for dynamic class generation; replaces the default interpreters entirely if provided (most
-					users don't need this)
+					for dynamic class generation; an array replaces the default interpreters, and a callback
+					receives them and returns the ones to use (most users don't need this)
 				</li>
 				<li>
 					<code>filter_file</code> - custom filter for which files to process. Receives
@@ -1706,11 +1703,11 @@ const Component = () => <div className={styles} />;`}
 		<p>
 			<ModuleLink module_path="css_class_interpreters.ts">Interpreters</ModuleLink> dynamically
 			generate CSS for class names that aren't in the static definitions (which can be extended via
-			<code>class_definitions</code> or replaced with <code>include_default_classes: false</code>).
-			The default <a href="#Literal-classes">CSS-literal syntax</a> is implemented as an
-			interpreter, which you can extend or replace. <a href="#Modifiers">Modifiers</a> aren't - the
-			generator strips them from every class name before resolving it, so they apply to interpreted
-			classes too.
+			<code>class_definitions</code>, or replaced with a callback that ignores the defaults). The
+			default <a href="#Literal-classes">CSS-literal syntax</a> is implemented as an interpreter,
+			which you can extend or replace. <a href="#Modifiers">Modifiers</a> aren't - the generator
+			strips them from every class name before resolving it, so they apply to interpreted classes
+			too.
 		</p>
 		<p>
 			For advanced use cases, you can define custom interpreters that generate CSS from arbitrary
@@ -1746,10 +1743,8 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 		<p>Register with the Vite plugin:</p>
 		<Code
 			lang="ts"
-			content={`import {css_class_interpreters} from '@fuzdev/fuz_css/css_class_interpreters.ts';
-
-vite_plugin_fuz_css({
-  class_interpreters: [grid_cols_interpreter, ...css_class_interpreters],
+			content={`vite_plugin_fuz_css({
+  class_interpreters: (defaults) => [grid_cols_interpreter, ...defaults],
 })`}
 		/>
 		<p>
@@ -1758,9 +1753,9 @@ vite_plugin_fuz_css({
 			errors/warnings). This enables full programmatic control over class-to-CSS generation.
 		</p>
 		<aside>
-			Custom interpreters replace the defaults entirely, so include
-			<code>...css_class_interpreters</code> to preserve CSS-literal support. This area is
-			experimental and the API may change.
+			An array of interpreters replaces the defaults entirely, so keep the defaults the callback
+			receives (or include <code>...css_class_interpreters</code>) to preserve CSS-literal support.
+			This area is experimental and the API may change.
 		</aside>
 	</TomeSection>
 

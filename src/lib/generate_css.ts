@@ -291,7 +291,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		css = generate_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
-			include_utilities: true,
 			// the theme's own overlay re-renders into the baked sublayer of
 			// fuz.theme so it outranks the fuz.preferences OS mappings and pins
 			// color-scheme for a stance, like the runtime path renders the same
