@@ -73,6 +73,81 @@ Notes:
 			--text_lightness_curve: 0.6;
 		}
 	}
+
+	/* forced colors (Windows High Contrast) replace author colors with system
+		colors, so states painted only by a background or a color mix vanish;
+		these restate them in system colors. One block per element, so each
+		ships with its element in bundled output. The composites restate
+		their own states inside their rulesets, since a rule here loses to
+		them from fuz.utilities. */
+	@media (forced-colors: active) {
+		:where(input[type='radio']:not(.unstyled):checked)::before {
+			background-color: CanvasText;
+		}
+	}
+	@media (forced-colors: active) {
+		/* the thumb and track pseudo-elements read this variable */
+		:where(input[type='range']:not(.unstyled)) {
+			--thumb_background_color: CanvasText;
+		}
+		:where(input[type='range']:not(.unstyled):is(:disabled, [aria-disabled='true'])) {
+			--thumb_background_color: GrayText;
+		}
+	}
+	@media (forced-colors: active) {
+		/* gradients are dropped in forced colors, taking the chevron with them,
+			so the native arrow comes back */
+		:where(select:not(.unstyled)) {
+			appearance: auto;
+			background-image: none;
+		}
+	}
+	@media (forced-colors: active) {
+		/* Highlight marks selection alone, so a focused link rings in the text
+			color rather than the browser's forced pick, which can be Highlight */
+		:where(a:not(.unstyled):focus-visible) {
+			outline-color: CanvasText;
+		}
+	}
+	@media (forced-colors: active) {
+		/* Highlight marks selection alone, so the focus ring takes the text color
+			rather than the browser's forced pick, which can be Highlight too */
+		:where(:is(button, input, textarea, select):not(.unstyled):focus-visible) {
+			border-color: CanvasText;
+			outline-color: CanvasText;
+		}
+		/* native `:disabled` is grayed by the browser, `aria-disabled` is not;
+			after the focus rule, so a focused one keeps its GrayText border */
+		:where(:is(button, input, textarea, select):not(.unstyled)[aria-disabled='true']) {
+			color: GrayText;
+			border-color: GrayText;
+		}
+		/* forced colors drop the selected fill, so selection shows as a
+			Highlight border with an outline drawn just inside it (no layout
+			shift). Focused, the outline moves out as a double Highlight ring, so
+			a focused selected button reads apart from both a focused one (a
+			single CanvasText ring) and a selected one. The colors stay forced
+			(no `forced-color-adjust: none`), so the label and its text keep the
+			system's text color (icons too, when drawn in `currentColor`) */
+		:where(button:not(.unstyled):is(.selected, [aria-pressed='true'])) {
+			border-color: Highlight;
+			outline: var(--outline_width_focus) solid Highlight;
+			outline-offset: calc(-1 * (var(--border_width) + var(--outline_width_focus)));
+		}
+		:where(button:not(.unstyled):is(.selected, [aria-pressed='true']):focus-visible) {
+			outline: calc(2 * var(--outline_width_focus)) double Highlight;
+			outline-offset: var(--outline_offset);
+		}
+		:where(
+			button:not(.unstyled):is(.selected, [aria-pressed='true']):is(
+				:disabled,
+				[aria-disabled='true']
+			)
+		) {
+			border-color: GrayText;
+			outline-color: GrayText;
+		}
+	}
 }
 
 /* All other rules live in the fuz.base cascade layer: the preference mappings
@@ -101,10 +176,14 @@ Notes:
 		scrollbar-color: var(--scrollbar_thumb_color) var(--scrollbar_track_color);
 		line-height: var(--line_height_md);
 		font-size: 62.5%; /* see `body.font-size`, using `rem` font size units with a base 16px */
-		/* @source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
-		-moz-text-size-adjust: none;
-		-webkit-text-size-adjust: none;
-		text-size-adjust: none;
+		/* stops mobile browsers inflating text on their own (iOS Safari after an
+			orientation change); `100%` rather than `none`, which can also block the
+			reader's own text scaling on some mobile browsers - a desktop browser
+			can't show the difference, so this is untested on a phone
+			@source https://kilianvalkhof.com/2022/css-html/your-css-reset-needs-text-size-adjust-probably/ */
+		-moz-text-size-adjust: 100%;
+		-webkit-text-size-adjust: 100%;
+		text-size-adjust: 100%;
 		-webkit-tap-highlight-color: transparent;
 	}
 	:root.dark {
@@ -174,13 +253,14 @@ Respects `hidden="until-found"` for find-in-page support.
 	:where(a:not(.unstyled):hover) {
 		text-decoration: var(--text_decoration_hover);
 	}
-	:where(a:not(.unstyled):focus) {
+	/* `:focus-visible`, so a clicked link doesn't hold the ring */
+	:where(a:not(.unstyled):focus-visible) {
 		--outline_width: var(--outline_width_focus);
 	}
 	:where(a:not(.unstyled):active) {
 		--outline_width: var(--outline_width_active);
 	}
-	:where(a:not(.unstyled).selected) {
+	:where(a:not(.unstyled):is(.selected, [aria-current]:not([aria-current='false']))) {
 		--text_color: var(--link_color_selected);
 		text-decoration: var(--text_decoration_selected);
 	}
@@ -244,6 +324,16 @@ Respects `hidden="until-found"` for find-in-page support.
 		margin-bottom: var(--flow_margin, var(--space_lg));
 		margin-top: calc(var(--flow_margin, var(--space_lg)) * 1.62);
 		text-transform: uppercase;
+	}
+	/* a heading opening a padded or bordered box sits on the box's padding -
+		these boxes don't collapse a child's margin away, so the top margin
+		would stack on it. Not global: in a page's flow, the first heading of a
+		nested section keeps its gap from the content before it */
+	:where(
+		:is(.panel, .pane, aside, blockquote, fieldset, dialog, li, td, th)
+			> :is(h2, h3, h4, h5, h6):not(.unstyled):first-child
+	) {
+		margin-top: 0;
 	}
 
 	:where(p) {
@@ -384,7 +474,25 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		resize: vertical;
 	}
 
-	:where(:is(select, option, input[type='color']):not(:disabled)) {
+	/* `appearance: none` removes the native arrow, so single selects draw a
+		chevron from two gradients in the text color, following the scheme and
+		the disabled opacity (forced colors restore the native arrow, in
+		fuz.preferences); list boxes (`multiple`, a `size` above 1) have none
+		TODO the arrow stays on the right in RTL - no logical `background-position` yet */
+	:where(select:not(.unstyled):not([multiple], [size]:not([size='1']))) {
+		--select_arrow_size: 0.35em;
+		padding-right: calc(var(--input_padding_x) + 3 * var(--select_arrow_size));
+		background-image:
+			linear-gradient(45deg, transparent 50%, currentcolor 50%),
+			linear-gradient(135deg, currentcolor 50%, transparent 50%);
+		background-position:
+			right calc(var(--input_padding_x) + var(--select_arrow_size)) center,
+			right var(--input_padding_x) center;
+		background-size: var(--select_arrow_size) var(--select_arrow_size);
+		background-repeat: no-repeat;
+	}
+
+	:where(:is(select, option, input[type='color']):not(:disabled):not([aria-disabled='true'])) {
 		cursor: pointer;
 	}
 
@@ -393,7 +501,9 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		background-color: var(--shade_00);
 	}
 
-	:where(:is(input, textarea, select):not(.unstyled):hover:not(:disabled)) {
+	:where(
+		:is(input, textarea, select):not(.unstyled):hover:not(:disabled):not([aria-disabled='true'])
+	) {
 		/* hover previews the focus color - the element color when set (an
 			outline_* class), else the accent intent; focus then adds the outline
 			at the same color, escalating visibility (buttons hover through
@@ -459,7 +569,7 @@ so for consistent visuals we opt to include no active state */
 		--thumb_background_color: var(--text_70);
 		cursor: pointer;
 	}
-	:where(input[type='range']:not(.unstyled):hover:not(:disabled)) {
+	:where(input[type='range']:not(.unstyled):hover:not(:disabled):not([aria-disabled='true'])) {
 		--thumb_background_color: var(--accent_50);
 	}
 	:where(input[type='range']:not(.unstyled):disabled:active) {
@@ -504,12 +614,19 @@ so for consistent visuals we opt to include no active state */
 	/*  TODO :has selector? `button:has(input[type='checkbox']:checked)`
 see https://caniuse.com/css-has
  */
-	:where(input:not(.unstyled):checked:not(:disabled)) {
+	:where(input:not(.unstyled):checked:not(:disabled):not([aria-disabled='true'])) {
 		--text_color: var(--accent_50);
 		--border_color: var(--accent_50);
 	}
 	:where(input[type='radio']:not(.unstyled):checked) {
 		cursor: default;
+	}
+
+	/* after the checked state, so an invalid checkbox reads invalid; hover and
+		focus color the border through `--outline_color`, so they stay negative */
+	:where(:is(input, textarea, select):not(.unstyled)[aria-invalid='true']) {
+		--border_color: var(--negative_50);
+		--outline_color: var(--negative_50);
 	}
 
 	:where(
@@ -524,11 +641,16 @@ see https://caniuse.com/css-has
 		width: var(--input_width_min);
 	}
 
-	:where(:is(input, textarea, select):not(.unstyled):disabled) {
+	/* `aria-disabled` takes the disabled look but stays focusable, so only
+		native `:disabled` drops the outline */
+	:where(:is(input, textarea, select):not(.unstyled):is(:disabled, [aria-disabled='true'])) {
 		/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
 		--input_fill: transparent;
 		--border_style: solid dashed;
+		cursor: default;
 		opacity: var(--disabled_opacity);
+	}
+	:where(:is(input, textarea, select):not(.unstyled):disabled) {
 		outline: none;
 	}
 
@@ -614,7 +736,10 @@ TODO think through these patterns to get somewhere consistent
 		outline-offset: var(--outline_offset);
 	}
 
-	:where(:is(button, input, textarea, select):not(.unstyled):focus) {
+	/* the ring is the only focus signal, and `:focus-visible` keeps it to
+		keyboard focus on buttons, checkboxes, and radios - a click into a text
+		field or select still matches, so those keep it */
+	:where(:is(button, input, textarea, select):not(.unstyled):focus-visible) {
 		/* follows the element color when set (an outline_* class; on buttons,
 			.palette_*), else the accent intent */
 		--border_color: var(--outline_color);
@@ -689,16 +814,23 @@ TODO think through these patterns to get somewhere consistent
 	}
 
 	/* TODO try to rearrange some of this to go after the colored variants */
-	:where(button:not(.unstyled):disabled) {
+	/* `aria-disabled` takes the disabled look but stays focusable, so only
+		native `:disabled` drops the outline - and it keeps pointer events, so
+		a tooltip or a click handler explaining why still works */
+	:where(button:not(.unstyled):is(:disabled, [aria-disabled='true'])) {
 		/* TODO ideally these would just set `fill`, but they'd have to go after the button variants, and then duplicate selectors? */
 		--button_fill: transparent;
 		--button_border_style: solid dashed;
 		cursor: default;
 		box-shadow: none;
 		opacity: var(--disabled_opacity);
+	}
+	:where(button:not(.unstyled):disabled) {
 		outline: none;
 	}
-	:where(button:not(.unstyled).selected) {
+	/* `aria-pressed` takes the selected look but not the settled behavior
+		below, since a pressed toggle can be unpressed, like `.deselectable` */
+	:where(button:not(.unstyled):is(.selected, [aria-pressed='true'])) {
 		/* text_00 is the ramp endpoint: contrast themes bending
 			--text_lightness_curve move the near-background stops toward the fill,
 			but can never move an endpoint, so inverse text stays readable */
@@ -713,18 +845,29 @@ TODO think through these patterns to get somewhere consistent
 		cursor: default;
 		box-shadow: none;
 	}
-	:where(button:not(.unstyled):not(:disabled):hover, button:not(.unstyled):focus) {
+	/* hover only - focus shows as the ring alone */
+	:where(button:not(.unstyled):not(:disabled):not([aria-disabled='true']):hover) {
 		--button_fill: var(--button_fill_hover);
 		--button_border_color: var(--button_border_color_hover);
 		--shadow: var(--button_shadow_hover);
 	}
-	:where(button:not(.unstyled):not(.selected):not(:disabled):hover) {
+	:where(
+		button:not(.unstyled):not(.selected, [aria-pressed='true']):not(:disabled):not(
+			[aria-disabled='true']
+		):hover
+	) {
 		--button_text_color: color-mix(in oklab, var(--text_color) 90%, var(--shade_max));
 	}
-	:where(button:not(.unstyled).selected.deselectable:not(:disabled):hover) {
+	/* a settled `.selected` (no `.deselectable`) keeps its label on hover,
+		`aria-pressed` or not */
+	:where(
+		button:not(.unstyled):is(.selected.deselectable, [aria-pressed='true']:not(.selected)):not(
+			:disabled
+		):not([aria-disabled='true']):hover
+	) {
 		--button_text_color: var(--text_min);
 	}
-	:where(button:not(.unstyled):not(:disabled):active) {
+	:where(button:not(.unstyled):not(:disabled):not([aria-disabled='true']):active) {
 		--button_fill: var(--button_fill_active);
 		--button_border_color: var(--button_border_color_active);
 		--outline_width: var(--outline_width_active);
@@ -741,11 +884,11 @@ TODO think through these patterns to get somewhere consistent
 		--border_color: var(--negative_50);
 	}
 	/* TODO is there a cleaner way to override these through vars? */
-	:where(button:not(.unstyled).selected:disabled:active) {
+	:where(button:not(.unstyled):is(.selected, [aria-pressed='true']):disabled:active) {
 		--text_color: var(--text_00);
 		--fill: var(--negative_50);
 	}
-	:where(button:not(.unstyled):not(.selected):disabled:active) {
+	:where(button:not(.unstyled):not(.selected, [aria-pressed='true']):disabled:active) {
 		--fill: transparent;
 	}
 	:where(button:not(.unstyled).selected:not(.deselectable):active) {

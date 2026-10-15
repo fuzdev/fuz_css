@@ -98,6 +98,13 @@
 			elements and headings.
 		</p>
 		<p>
+			Headings add a top margin too, a larger multiple of <code>--flow_margin</code>. A heading that
+			opens a padded or bordered box - <code>.panel</code>, <code>.pane</code>, <code>aside</code>,
+			<code>blockquote</code>, <code>fieldset</code>, <code>dialog</code>, <code>li</code>,
+			<code>td</code>, or <code>th</code> - drops it, so it sits on the box's padding instead of
+			stacking a gap on it.
+		</p>
+		<p>
 			For elements not in the flow list, use the <code>.mb_flow</code> and <code>.mt_flow</code>
 			composite classes to get the same size-responsive spacing. Use <code>.mb_lg</code> when you
 			want a fixed value that ignores size composites.
@@ -124,6 +131,46 @@
   margin: 0;
 }`}
 		/>
+	</TomeSection>
+
+	<TomeSection>
+		<TomeSectionHeader text="Interaction and ARIA states" />
+		<p>
+			Links and form controls show focus as an outline ring, and only the ring - focus adds no fill.
+			The ring follows <code>:focus-visible</code>, so keyboard focus and a click into a text field
+			or select show it, while a mouse click on a link, button, or checkbox doesn't leave it behind.
+		</p>
+		<p>The base styles read ARIA state attributes on the elements they apply to:</p>
+		<ul>
+			<li>
+				<code>aria-pressed="true"</code> on a <code>button</code>, or on any
+				<code>.selectable</code>, takes the <code>.selected</code> fill, and stays clickable like
+				<code>.deselectable</code>
+			</li>
+			<li>
+				<code>aria-current</code> on a link (any value but <code>false</code>) takes the selected
+				link look
+			</li>
+			<li>
+				<code>aria-disabled="true"</code> on a button or form control takes the disabled look with
+				no hover or active states, but keeps its focus ring and pointer events, so it stays
+				reachable by keyboard and can explain why it's disabled; on a <code>.deselectable</code>
+				<code>.menuitem</code> or <code>.selectable</code>, it drops the pointer cursor
+			</li>
+			<li>
+				<code>aria-invalid="true"</code> on an <code>input</code>, <code>textarea</code>, or
+				<code>select</code> turns its border and focus ring negative
+			</li>
+		</ul>
+		<p>
+			Under forced colors (Windows High Contrast), the states painted only by a background are
+			restated in system colors: a checked radio, a range, and the edges of <code>.panel</code> and
+			<code>.pane</code> in the text color, and selection - selected and pressed buttons,
+			<code>.menuitem</code>, <code>.selectable</code> - as a <code>Highlight</code> border and
+			inner band that becomes a double <code>Highlight</code> ring when focused, while a focus ring
+			alone stays the text color. Labels keep the system's colors, and so do icons drawn in
+			<code>currentColor</code>. Selects get their native arrow back.
+		</p>
 	</TomeSection>
 
 	<TomeSection>

@@ -59,9 +59,10 @@ no classes: headings are tiered, form controls share sizing and focus states,
 and block elements (`p`, `ul`, `ol`, `table`, `aside`, `blockquote`, `pre`,
 `fieldset`, …) get vertical rhythm automatically from the **flow-margin**
 system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
-`:last-child` or `.unstyled` (headings and `section` take multiples of it),
-and margins reset to 0 on the direct children of a `.row` (horizontal flex;
-use `gap_*` there instead). Adding a
+`:last-child` or `.unstyled` (headings and `section` take multiples of it,
+and a heading opening a padded box - `.panel`, `.pane`, `aside`, `li`, and
+the like - drops its top margin), and margins reset to 0 on the direct
+children of a `.row` (horizontal flex; use `gap_*` there instead). Adding a
 `mb_*`/`gap_*`/`p_*` class or a `<style>` block
 should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
@@ -79,7 +80,16 @@ or color values.
    low-specificity `:where()` selectors so your styles easily override the
    defaults. Add `class="unstyled"` to any element to opt out of opinionated
    styling (colors, borders, decorative properties) while keeping
-   normalizations (font inheritance, border-collapse).
+   normalizations (font inheritance, border-collapse). Focus shows as an
+   outline ring alone, on `:focus-visible`; ARIA state attributes style the
+   elements they belong to (`button[aria-pressed]` as selected, `a[aria-current]`
+   as the selected link, `aria-disabled` as disabled but still focusable,
+   `aria-invalid` on controls as negative), and forced colors restate the
+   background-only states in system colors - selection as a `Highlight` border
+   and inner outline, a double `Highlight` ring when focused, a focus ring
+   alone in `CanvasText` (links, controls, the composites), never
+   `forced-color-adjust: none` - the composites inside their own rules, as
+   nested `@media`.
 2. **Style variables** - Design tokens as CSS custom properties that enable
    customization and runtime theming. Each variable provides values for light
    and/or dark color-schemes.
@@ -105,7 +115,8 @@ combined and only used content is included. In utility-only mode, import
   follows the OS without JS
 - [`render_theme_style()`](src/lib/theme.ts) generates CSS into the
   `fuz.theme` cascade layer (defaults live in `fuz.base`, OS user-preference
-  mappings like `prefers-contrast` in `fuz.preferences` above them, generated
+  mappings like `prefers-contrast` and `forced-colors` in `fuz.preferences`
+  above them, generated
   utility classes in `fuz.utilities`; consumers' unlayered styles beat
   everything except the two `!important` declarations in layers - the
   `prefers-reduced-motion` mapping, so a theme's durations can't re-enable
@@ -830,7 +841,9 @@ svelte's `mount()` resolves to the client build.
   progress
 - **Browser floor, no fallbacks** - the shipped CSS needs Chrome or Edge
   120, Firefox 118 (both set by `pow()`), or Safari 16.2, and Safari 16.4
-  for responsive modifiers, which emit media range syntax
+  for responsive modifiers, which emit media range syntax. The composites'
+  forced-colors rules are nested CSS, which a browser without nesting
+  skips - none of those has a forced-colors mode
 - **Unfinished areas flagged in the docs** - builtin themes, forms (checkboxes
   will likely become toggles), element/table styles, the shadows system,
   opaque border classes, and table cell padding that doesn't yet respond to

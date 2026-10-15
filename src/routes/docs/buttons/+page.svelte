@@ -35,11 +35,18 @@
 		</p>
 		<p>
 			Buttons have a <code>.selected</code> state that can be used for various UI purposes, like
-			showing a selected item in a menu or a styling button's <code>aria-pressed</code> state.
-			Instead of having two distinct styles of buttons with outlined and filled variants, fuz_css
-			makes outlined buttons the default, and selected buttons are filled. There's also the
-			<code>.deselectable</code> modifier class for buttons that remain clickable when selected.
-			Themes can customize this behavior.
+			showing a selected item in a menu. Instead of having two distinct styles of buttons with
+			outlined and filled variants, fuz_css makes outlined buttons the default, and selected buttons
+			are filled. There's also the <code>.deselectable</code> modifier class for buttons that remain
+			clickable when selected. Themes can customize this behavior.
+		</p>
+		<p>
+			A toggle button's <code>aria-pressed="true"</code> takes the same fill and stays clickable,
+			like <code>.deselectable</code>. <code>aria-disabled="true"</code> takes the disabled look but
+			keeps the button focusable. Focus shows as the outline ring alone, for keyboard focus
+			(<code>:focus-visible</code>), so a clicked button doesn't stay highlighted - a popover or
+			menu trigger wanting a held look while open can style its own
+			<code>[aria-expanded='true']</code>.
 		</p>
 		<div class:mb_xs>
 			<Code content={`<button>a button</button>`} />
@@ -59,6 +66,8 @@
 		<button type="button" class="selected deselectable" disabled class:mb_xs>
 			button.selected.deselectable:disabled
 		</button>
+		<button type="button" aria-pressed="true" class:mb_xs>button[aria-pressed="true"]</button>
+		<button type="button" aria-disabled="true" class:mb_xs>button[aria-disabled="true"]</button>
 		<button type="button" class="unstyled">with .unstyled</button>
 	</section>
 

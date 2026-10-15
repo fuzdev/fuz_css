@@ -206,6 +206,33 @@ describe('generate_classes_css modifiers', () => {
 			);
 		});
 
+		test('forced-colors states stay conditional under modifiers', () => {
+			// the composites nest their forced-colors rules inside their own rules,
+			// since rewriting a ruleset for a modifier flattens its top-level
+			// at-rules - a top-level block would apply its system colors always
+			for (const class_name of [
+				'panel',
+				'pane',
+				'selectable',
+				'menuitem',
+				'md:panel',
+				'dark:pane',
+				'hover:selectable',
+				'md:dark:hover:menuitem'
+			]) {
+				const result = generate_classes_css({
+					class_names: [class_name],
+					class_definitions: css_class_composites,
+					interpreters: [],
+					css_properties: null
+				});
+				const nested = /\{[^{}]*@media \(forced-colors: active\) \{[^{}]*\}/g;
+				assert.isAbove(result.css.match(nested)?.length ?? 0, 0, class_name);
+				const outside = result.css.replace(/\/\*[\s\S]*?\*\//g, '').replace(nested, '');
+				assert.notMatch(outside, /CanvasText|Highlight|forced-color-adjust/, class_name);
+			}
+		});
+
 		test('handles ruleset with pseudo-element: hover:chevron', () => {
 			const result = generate_classes_css({
 				class_names: ['hover:chevron'],
@@ -368,7 +395,7 @@ describe('generate_classes_css modifiers', () => {
 			});
 
 			assert_css_not_contains(result.css, ':active:active');
-			assert_css_contains(result.css, ':hover:active', ':focus:active');
+			assert_css_contains(result.css, ':hover:active', ':focus-visible:active');
 		});
 
 		test('hover:plain includes all rules, skipping redundant :hover additions', () => {
@@ -746,19 +773,19 @@ describe('generate_classes_css modifiers', () => {
 			}
 		});
 
-		test('focus:clickable emits warning for skipped :focus rule', () => {
+		test('focus-visible:clickable emits warning for skipped :focus-visible rule', () => {
 			const result = generate_classes_css({
-				class_names: ['focus:clickable'],
+				class_names: ['focus-visible:clickable'],
 				class_definitions: css_class_composites,
 				interpreters: [],
 				css_properties: null
 			});
 
 			const focus_warning = result.diagnostics.find(
-				(d) => d.identifier === 'focus:clickable' && d.message.includes(':focus')
+				(d) => d.identifier === 'focus-visible:clickable' && d.message.includes(':focus-visible')
 			);
 			assert.isDefined(focus_warning);
-			assert.include(focus_warning.message, '.clickable:focus');
+			assert.include(focus_warning.message, '.clickable:focus-visible');
 			assert.include(focus_warning.message, 'redundancy');
 		});
 	});

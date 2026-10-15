@@ -87,6 +87,7 @@ const known_without_variables = new Set([
 	'overflow',
 	'thumb_size',
 	'thumb_background_color',
+	'select_arrow_size',
 	'button_text_color',
 	'button_border_color',
 	'button_border_color_hover',
@@ -109,9 +110,102 @@ test('the OS user-preference mappings parse core and layer into fuz.preferences'
 	}
 	// everything else stays in fuz.base
 	const misplaced = index.rules.filter(
-		(r) => r.layer === 'fuz.preferences' && !r.css.includes('prefers-')
+		(r) =>
+			r.layer === 'fuz.preferences' &&
+			!r.css.includes('prefers-') &&
+			!r.css.startsWith('@media (forced-colors: active)')
 	);
 	assert.deepEqual(misplaced, []);
+});
+
+test('the forced-colors mappings ship with their elements, in fuz.preferences', () => {
+	// one block per element, so a page without radios, ranges, or links doesn't
+	// carry their mappings - and none is core, unlike the `:root` preference blocks
+	const index = parse_style_css(main_stylesheet_text);
+	const rules = index.rules.filter((r) => r.css.startsWith('@media (forced-colors: active)'));
+	assert.deepEqual(
+		rules.map((r) => [...r.elements].sort()),
+		[['input'], ['input'], ['select'], ['a'], ['button', 'input', 'select', 'textarea']]
+	);
+	for (const rule of rules) {
+		assert.isFalse(rule.is_core, rule.css);
+		assert.strictEqual(rule.layer, 'fuz.preferences');
+	}
+});
+
+test('focus styles key on :focus-visible', () => {
+	// a mouse click on a link, button, or checkbox doesn't match it, so the
+	// ring doesn't stay after a click, and focus adds no fill to a button
+	const sources = [main_stylesheet_text, css_classes_text];
+	for (const css of sources) {
+		assert.notMatch(css, /:focus(?![\w-])/);
+	}
+	assert.include(main_stylesheet_text, ':where(a:not(.unstyled):focus-visible)');
+	assert.include(
+		main_stylesheet_text,
+		':where(:is(button, input, textarea, select):not(.unstyled):focus-visible)'
+	);
+	assert.include(css_classes_text, '.clickable:focus-visible');
+});
+
+test('every :not(:disabled) guard also excludes aria-disabled', () => {
+	// `aria-disabled` takes the disabled look, so no hover, checked, or active
+	// state may apply to it either
+	for (const css of [main_stylesheet_text, css_classes_text]) {
+		const guards = css.match(/:not\(\s*:disabled\s*\)(?::not\(\s*\[aria-disabled='true'\]\s*\))?/g);
+		assert(guards);
+		for (const guard of guards) {
+			assert.include(guard, "[aria-disabled='true']", guard);
+		}
+	}
+});
+
+test('aria-disabled keeps focus and pointer events, and skips the active flash', () => {
+	const index = parse_style_css(main_stylesheet_text);
+	const aria_disabled_rules = index.rules.filter(
+		(r) => r.css.includes(":is(:disabled, [aria-disabled='true'])") && !r.css.startsWith('@')
+	);
+	assert.strictEqual(aria_disabled_rules.length, 2, 'the button and the input rules');
+	for (const rule of aria_disabled_rules) {
+		assert.include(rule.css, 'opacity: var(--disabled_opacity);');
+		assert.include(rule.css, 'cursor: default;');
+		assert.notInclude(rule.css, 'outline');
+		assert.notInclude(rule.css, 'pointer-events');
+	}
+	const flash = index.rules.find(
+		(r) => r.css.includes('--negative_50') && r.css.includes(':active')
+	);
+	assert(flash);
+	assert.notInclude(flash.css, 'aria-disabled');
+});
+
+test('ARIA state rules name their element, so they tree-shake with it', () => {
+	// an attribute selector alone names nothing the index can match, so a bare
+	// `[aria-pressed]` rule would ship in every bundle
+	const index = parse_style_css(main_stylesheet_text);
+	for (const attribute of ['aria-pressed', 'aria-current', 'aria-invalid', 'aria-disabled']) {
+		const rules = index.rules.filter((r) => r.css.includes(attribute));
+		assert.isAbove(rules.length, 0, attribute);
+		for (const rule of rules) {
+			assert.isFalse(rule.is_core, `${attribute}: ${rule.css}`);
+			assert.isAbove(rule.elements.size, 0, attribute);
+		}
+	}
+});
+
+test('the first heading in a padded container drops its top margin, scoped to those containers', () => {
+	const index = parse_style_css(main_stylesheet_text);
+	const rule = index.rules.find((r) => r.css.includes(':first-child'));
+	assert(rule, 'style.css carries the first-heading rule');
+	assert.include(rule.css, 'margin-top: 0;');
+	assert.deepEqual([...rule.classes].sort(), ['pane', 'panel']);
+	// no bare `section` or `div`, where a nested section's heading keeps its gap
+	assert.isFalse(rule.elements.has('section'));
+	assert.isFalse(rule.elements.has('div'));
+	assert.isFalse(rule.elements.has('h1'));
+	// a `details` opens with its `summary`, so a heading is never its first child
+	assert.isFalse(rule.elements.has('details'));
+	assert.isFalse(rule.is_core);
 });
 
 test('the reduced-motion mapping disables every duration and outranks themes', () => {

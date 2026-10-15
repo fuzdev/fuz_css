@@ -6,7 +6,10 @@ import { palette_variants } from './variable_data.ts';
  * `fuz.utilities.composites` sublayer (`composite: true`, the default for
  * rulesets), so a token or literal class on the same element wins over them;
  * the single-property shortcuts (`circular`, `pixelated`, `mb_flow`,
- * `mt_flow`) are single-purpose and order with the token classes.
+ * `mt_flow`) are single-purpose and order with the token classes. Their
+ * forced-colors rules nest inside their own rules (`@media (forced-colors:
+ * active)`), so a modified variant keeps them conditional, and a browser
+ * without CSS nesting, which also has no forced-colors mode, skips them.
  */
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
@@ -72,6 +75,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				border-color: var(--border_color_20);
 			}
 			.selectable.selected,
+			.selectable[aria-pressed='true'],
 			.selectable:active {
 				background-color: var(--button_fill_active);
 				border-color: var(--accent_50);
@@ -79,8 +83,47 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.selectable.selected {
 				cursor: default;
 			}
-			.selectable.selected.deselectable:not(:disabled) {
+			.selectable.selected.deselectable:not(:disabled):not([aria-disabled='true']) {
 				cursor: pointer;
+			}
+			/* Highlight marks selection alone, so a focus ring and the edge take the
+				text color; before the selected rules, which outrank it to keep their ring */
+			.selectable:focus-visible {
+				@media (forced-colors: active) {
+					border-color: CanvasText;
+					outline-color: CanvasText;
+				}
+			}
+			/* native :disabled is grayed by the browser, aria-disabled is not */
+			.selectable[aria-disabled='true'] {
+				@media (forced-colors: active) {
+					border-color: GrayText;
+				}
+			}
+			/* forced colors drop the fill, so selection shows as a Highlight band
+				inside the edge, moving out as a double ring when focused - the base
+				button rules' pattern, restated here since those lose to composites.
+				The band sits inside the border box, so content with less padding
+				than the border width plus the focus outline width (an unpadded
+				li.selectable) has its first glyph partly under it */
+			.selectable:is(.selected, [aria-pressed='true']) {
+				@media (forced-colors: active) {
+					border-color: Highlight;
+					outline: var(--outline_width_focus) solid Highlight;
+					outline-offset: calc(-1 * (var(--border_width) + var(--outline_width_focus)));
+				}
+			}
+			.selectable:is(.selected, [aria-pressed='true']):focus-visible {
+				@media (forced-colors: active) {
+					outline: calc(2 * var(--outline_width_focus)) double Highlight;
+					outline-offset: var(--outline_offset);
+				}
+			}
+			.selectable:is(.selected, [aria-pressed='true']):is(:disabled, [aria-disabled='true']) {
+				@media (forced-colors: active) {
+					border-color: GrayText;
+					outline-color: GrayText;
+				}
 			}
 		`
 	},
@@ -92,7 +135,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				transform-origin: var(--clickable_transform_origin);
 				transition-duration: var(--clickable_transition_duration); /* default to instant, chunky/lofi */
 			}
-			.clickable:focus {
+			.clickable:focus-visible {
 				transform: var(--clickable_transform_focus, scale3d(1.07, 1.07, 1.07));
 			}
 			.clickable:hover {
@@ -112,6 +155,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			background-color: var(--shade_00);
 			box-shadow: var(--pane_shadow);
 			border-radius: var(--border_radius, var(--border_radius_xs));
+			@media (forced-colors: active) {
+				border: var(--border_width) solid CanvasText; /* forced colors drop the shadow */
+			}
 		`
 	},
 	panel: {
@@ -121,6 +167,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			border-radius: var(--border_radius, var(--border_radius_xs));
 			background-color: var(--fg_10);
 			box-shadow: var(--panel_shadow);
+			@media (forced-colors: active) {
+				border: var(--border_width) solid CanvasText; /* forced colors drop the background and shadow */
+			}
 		`
 	},
 	/*
@@ -264,7 +313,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				background-color: var(--fg_10);
 				cursor: default;
 			}
-			.menuitem.selected.deselectable:not(:disabled) {
+			.menuitem.selected.deselectable:not(:disabled):not([aria-disabled='true']) {
 				cursor: pointer;
 			}
 			.menuitem:hover {
@@ -278,6 +327,35 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 			.menuitem.plain {
 				border: none;
+			}
+			/* Highlight marks selection alone, so a focus ring takes the text color;
+				before the selected rules, which outrank it to keep their ring */
+			.menuitem:focus-visible {
+				@media (forced-colors: active) {
+					outline-color: CanvasText;
+				}
+			}
+			/* forced colors drop the fill, so selection shows as a Highlight band
+				inside the edge, moving out as a double ring when focused - the base
+				button rules' pattern, restated here since those lose to composites */
+			.menuitem.selected {
+				@media (forced-colors: active) {
+					border-color: Highlight;
+					outline: var(--outline_width_focus) solid Highlight;
+					outline-offset: calc(-1 * (var(--border_width) + var(--outline_width_focus)));
+				}
+			}
+			.menuitem.selected:focus-visible {
+				@media (forced-colors: active) {
+					outline: calc(2 * var(--outline_width_focus)) double Highlight;
+					outline-offset: var(--outline_offset);
+				}
+			}
+			.menuitem.selected:is(:disabled, [aria-disabled='true']) {
+				@media (forced-colors: active) {
+					border-color: GrayText;
+					outline-color: GrayText;
+				}
 			}
 			.menuitem .content {
 				display: flex;

@@ -43,6 +43,25 @@
 		<p>
 			Form elements have basic default styles that can be omitted with <code>.unstyled</code>.
 		</p>
+		<p>
+			A single <code>select</code> draws its arrow in the text color, so it follows the color scheme
+			and the disabled look; list boxes (<code>multiple</code>, or a <code>size</code> above 1) have
+			none. <code>aria-invalid="true"</code> turns a control's border and focus ring negative, and
+			<code>aria-disabled="true"</code> gives it the disabled look while keeping it focusable. A
+			disabled checkbox or radio takes the default cursor, though a <code>label</code> wrapping it
+			still shows the pointer.
+		</p>
+		<Code content={`<input aria-invalid="true" />\n<input aria-disabled="true" />`} />
+		<div class="width_atmost_sm">
+			<label>
+				<div class="title">aria-invalid</div>
+				<input aria-invalid="true" placeholder=">" />
+			</label>
+			<label>
+				<div class="title">aria-disabled</div>
+				<input aria-disabled="true" placeholder=">" />
+			</label>
+		</div>
 	</section>
 
 	<TomeSection>
