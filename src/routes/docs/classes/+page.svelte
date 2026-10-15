@@ -182,7 +182,8 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>on_error</code> - <code>'log'</code> or <code>'throw'</code>; defaults to
-					<code>'throw'</code> in CI, <code>'log'</code> otherwise
+					<code>'throw'</code> in CI (<code>CI</code> set to anything but empty, <code>false</code>,
+					or <code>0</code>), <code>'log'</code> otherwise
 				</li>
 				<li>
 					<code>on_warning</code> - <code>'log'</code>, <code>'throw'</code>, or
@@ -193,7 +194,8 @@ import 'virtual:fuz.css';`}
 				</li>
 				<li>
 					<code>cache_salt</code> - a string folded into the cache key; change it when only an acorn
-					plugin's options change, since the key already covers file content and the plugins
+					plugin's options change, since the key already covers file content, the plugins, and the
+					installed versions of fuz_css and its parsers
 				</li>
 				<li>
 					<code>prescan</code> - dev-only scan of sources at server startup; <code>true</code>

@@ -7,7 +7,10 @@
  * @module
  */
 
-import { join } from 'node:path';
+import { readFileSync } from 'node:fs';
+import { createRequire } from 'node:module';
+import { dirname, join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
@@ -21,12 +24,26 @@ import type { CacheDeps } from './deps.ts';
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
 
 /**
- * Whether this is a CI run (`CI=1`, `CI=true`, or another truthy value):
+ * Parses a `CI` environment variable value. Any value is CI except unset,
+ * empty, `false`, and `0` (case-insensitive, surrounding whitespace
+ * ignored), so `CI=false` turns CI behavior off rather than on.
+ *
+ * @param value - the `CI` environment variable, if set
+ * @returns whether the value marks a CI run
+ */
+export const parse_ci_value = (value: string | undefined): boolean => {
+	if (value === undefined) return false;
+	const normalized = value.trim().toLowerCase();
+	return normalized !== '' && normalized !== 'false' && normalized !== '0';
+};
+
+/**
+ * Whether this is a CI run, per `parse_ci_value` on `process.env.CI`:
  * there's no point writing a cache the next run won't reuse.
  *
  * @internal Read by the generator for its cache and `on_error` defaults.
  */
-export const is_ci = !!process.env.CI;
+export const is_ci = parse_ci_value(process.env.CI);
 
 /**
  * Creates the extraction cache-path lookup: a file's cache path
@@ -49,20 +66,102 @@ export const create_cache_path_resolver = (
 };
 
 /**
- * CSS cache version. Bump when any of these change:
- * - `CachedExtraction` schema
- * - `extract_css_classes_with_locations()` logic or output
- * - `ExtractionDiagnostic` or `SourceLocation` structure
- *
- * v1: Initial version with classes and diagnostics
- * v2: Use null instead of empty arrays, add `explicit_classes`, `elements`, `css_variables`.
- * v3: Add `explicit_elements`, `explicit_variables` for `@fuz-elements`/`@fuz-variables` comments.
- * v4: Filter incomplete CSS variables in dynamic templates (e.g., `var(--prefix_{expr})`).
- * v5: Remove `css_variables` and `explicit_variables` (now detected via simple regex scan).
- * v6: Re-add `explicit_variables` for `@fuz-variables` comments (regex scan misses dynamic templates).
- * v7: Add `extraction_key`, so a change to `acorn_plugins` or `cache_salt` misses.
+ * The packages whose versions decide what an extraction produces: fuz_css,
+ * whose extractor and cache format they cover, and the parsers it runs.
  */
-export const CSS_CACHE_VERSION = 7;
+const EXTRACTION_PACKAGES = ['@fuzdev/fuz_css', 'svelte', 'acorn', '@sveltejs/acorn-typescript'];
+
+/**
+ * Reads a package's version from the nearest `package.json` named `name`
+ * at or above `from`. A `package.json` with another name is passed over, so a
+ * nested one (a `"type"` marker in a subdirectory) or a bundling consumer's
+ * doesn't stand in for the package.
+ *
+ * @param name - the package name
+ * @param from - the directory to start from
+ * @returns the version, or `null` when no `package.json` above `from` names the package
+ *
+ * @internal Exported for testing.
+ */
+export const find_package_version = (name: string, from: string): string | null => {
+	let dir = from;
+	for (;;) {
+		try {
+			const package_json: unknown = JSON.parse(readFileSync(join(dir, 'package.json'), 'utf8'));
+			if (
+				typeof package_json === 'object' &&
+				package_json !== null &&
+				'name' in package_json &&
+				package_json.name === name &&
+				'version' in package_json &&
+				typeof package_json.version === 'string'
+			) {
+				return package_json.version;
+			}
+		} catch {
+			// no readable package.json here, keep climbing
+		}
+		const parent = dirname(dir);
+		if (parent === dir) return null;
+		dir = parent;
+	}
+};
+
+/**
+ * Where a package's version lookup starts: fuz_css's own module directory
+ * for fuz_css, and a dependency's resolved entry point otherwise, resolved
+ * from here so it's the copy the extractor imports.
+ */
+const to_package_dir = (name: string): string | null => {
+	try {
+		return name === '@fuzdev/fuz_css'
+			? dirname(fileURLToPath(import.meta.url))
+			: dirname(createRequire(import.meta.url).resolve(name));
+	} catch {
+		return null;
+	}
+};
+
+let extraction_versions: Record<string, string> | null = null;
+
+/**
+ * Reads the installed versions of fuz_css and its parsers, once per
+ * process. A version that can't be found reads as `'unknown'`, which still
+ * keys the cache - it never fails generation.
+ *
+ * @returns the versions by package name
+ *
+ * @internal Read by the cache for `to_cache_version`.
+ */
+export const load_extraction_versions = (): Record<string, string> => {
+	if (extraction_versions) return extraction_versions;
+	const versions: Record<string, string> = {};
+	for (const name of EXTRACTION_PACKAGES) {
+		const dir = to_package_dir(name);
+		versions[name] = (dir && find_package_version(name, dir)) ?? 'unknown';
+	}
+	return (extraction_versions = versions);
+};
+
+/**
+ * Computes the cache version every entry is written with and checked
+ * against: the versions of fuz_css and the parsers its extractor runs, so
+ * an upgrade of any of them invalidates the cache with no manual bump. In a
+ * checkout of fuz_css itself the version doesn't move between commits, so
+ * clear `.fuz/cache/css` (or set `cache_salt`) after changing what
+ * extraction produces.
+ *
+ * @param versions - the versions by package name
+ * @returns the version string, like `@fuzdev/fuz_css@1.2.3 svelte@5.0.0 ...`
+ *
+ * @internal Shared by the cache's load and save.
+ */
+export const to_cache_version = (
+	versions: Record<string, string> = load_extraction_versions()
+): string =>
+	Object.entries(versions)
+		.map(([name, version]) => `${name}@${version}`)
+		.join(' ');
 
 /**
  * Computes the part of the cache key that comes from configuration rather
@@ -92,8 +191,8 @@ export const to_extraction_cache_key = (
  * Uses `null` instead of empty arrays to avoid allocation overhead.
  */
 export interface CachedExtraction {
-	/** Cache version - invalidates cache when bumped */
-	v: number;
+	/** The `to_cache_version` the entry was written with - any other misses */
+	v: string;
 	/** Content hash of the source file */
 	content_hash: string;
 	/** The configuration part of the key (`to_extraction_cache_key`), or null for the default */
@@ -155,7 +254,8 @@ export const get_file_cache_path = (
 
 /**
  * Loads a cached extraction result from disk.
- * Returns `null` if the cache is missing, corrupted, or has a version mismatch.
+ * Returns `null` if the cache is missing, corrupted, or was written by
+ * other versions of fuz_css or its parsers (`to_cache_version`).
  * This makes the cache self-healing: any error triggers re-extraction.
  *
  * @param deps - filesystem deps for dependency injection
@@ -172,7 +272,7 @@ export const load_cached_extraction = async (
 		const cached = JSON.parse(r.value) as CachedExtraction;
 
 		// Invalidate if version mismatch
-		if (cached.v !== CSS_CACHE_VERSION) {
+		if (cached.v !== to_cache_version()) {
 			return null;
 		}
 
@@ -231,7 +331,7 @@ export const save_cached_extraction = async (
 			: null;
 
 	const data: CachedExtraction = {
-		v: CSS_CACHE_VERSION,
+		v: to_cache_version(),
 		content_hash,
 		extraction_key,
 		classes: classes_array,

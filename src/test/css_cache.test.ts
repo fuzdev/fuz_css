@@ -1,4 +1,4 @@
-import { test, assert, describe } from 'vitest';
+import { test, assert, describe, vi, afterEach } from 'vitest';
 import { join } from 'node:path';
 import { mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 
@@ -9,7 +9,10 @@ import {
 	delete_cached_extraction,
 	from_cached_extraction,
 	to_extraction_cache_key,
-	CSS_CACHE_VERSION,
+	to_cache_version,
+	load_extraction_versions,
+	parse_ci_value,
+	find_package_version,
 	type CachedExtraction
 } from '#lib/css_cache.ts';
 import type { SourceLocation, ExtractionDiagnostic } from '#lib/diagnostics.ts';
@@ -35,7 +38,7 @@ const CACHE_DIR = '/tmp/fuz_css_cache_test/project/.fuz/cache/css';
 //
 
 const make_cached = (overrides: Partial<CachedExtraction> = {}): CachedExtraction => ({
-	v: CSS_CACHE_VERSION,
+	v: to_cache_version(),
 	content_hash: 'test-hash',
 	extraction_key: null,
 	classes: null,
@@ -91,7 +94,7 @@ const save_and_load = async (
 	});
 	const loaded = await load_cached_extraction(deps, cache_path);
 	assert.isNotNull(loaded);
-	assert.strictEqual(loaded.v, CSS_CACHE_VERSION);
+	assert.strictEqual(loaded.v, to_cache_version());
 	return loaded;
 };
 
@@ -357,12 +360,12 @@ describe('load_cached_extraction', () => {
 		await setup();
 		const cache_path = join(CACHE_DIR, 'minimal.json');
 		await mkdir(CACHE_DIR, { recursive: true });
-		await writeFile(cache_path, `{"v": ${CSS_CACHE_VERSION}}`);
+		await writeFile(cache_path, JSON.stringify({ v: to_cache_version() }));
 
 		// Lenient parsing accepts missing content_hash
 		const result = await load_cached_extraction(deps, cache_path);
 		assert.isNotNull(result);
-		assert.strictEqual(result.v, CSS_CACHE_VERSION);
+		assert.strictEqual(result.v, to_cache_version());
 	});
 });
 
@@ -547,7 +550,7 @@ describe('cache functions with mock deps', () => {
 		const loaded = await load_cached_extraction(mock_deps, cache_path);
 
 		assert.isNotNull(loaded);
-		assert.strictEqual(loaded.v, CSS_CACHE_VERSION);
+		assert.strictEqual(loaded.v, to_cache_version());
 		assert.strictEqual(loaded.content_hash, 'abc123');
 	});
 
@@ -587,7 +590,7 @@ describe('cache functions with mock deps', () => {
 		});
 
 		const parsed = JSON.parse(state.files.get('/test.json')!);
-		assert.strictEqual(parsed.v, CSS_CACHE_VERSION);
+		assert.strictEqual(parsed.v, to_cache_version());
 		assert.strictEqual(parsed.content_hash, 'hash');
 	});
 });
@@ -642,5 +645,124 @@ describe('the extraction configuration key', () => {
 		const miss = await read(to_extraction_cache_key(undefined, 'jsx'));
 		assert.isFalse(miss.from_cache);
 		assert.strictEqual(miss.cache_path_to_write, cache_path);
+	});
+});
+
+describe('the cache version', () => {
+	const read_version = async (path: string): Promise<string> =>
+		(JSON.parse(await readFile(path, 'utf8')) as { version: string }).version;
+
+	test('reads the installed versions of fuz_css and its parsers', async () => {
+		const versions = load_extraction_versions();
+
+		assert.deepEqual(versions, {
+			'@fuzdev/fuz_css': await read_version('package.json'),
+			svelte: await read_version('node_modules/svelte/package.json'),
+			acorn: await read_version('node_modules/acorn/package.json'),
+			'@sveltejs/acorn-typescript': await read_version(
+				'node_modules/@sveltejs/acorn-typescript/package.json'
+			)
+		});
+		assert.strictEqual(
+			to_cache_version(),
+			Object.entries(versions)
+				.map(([name, version]) => `${name}@${version}`)
+				.join(' ')
+		);
+	});
+
+	test('finds the nearest package.json with the name, passing over others', async () => {
+		await setup();
+		const pkg_dir = join(TEST_DIR, 'pkg');
+		const nested = join(pkg_dir, 'dist', 'inner');
+		await mkdir(nested, { recursive: true });
+		await writeFile(
+			join(pkg_dir, 'package.json'),
+			JSON.stringify({ name: 'target', version: '1.2.3' })
+		);
+		await writeFile(join(pkg_dir, 'dist', 'package.json'), JSON.stringify({ type: 'module' }));
+		await writeFile(
+			join(nested, 'package.json'),
+			JSON.stringify({ name: 'other', version: '9.9.9' })
+		);
+
+		assert.strictEqual(find_package_version('target', nested), '1.2.3');
+		assert.strictEqual(find_package_version('other', nested), '9.9.9');
+		assert.isNull(find_package_version('absent', nested));
+	});
+
+	test('changing any version changes it', () => {
+		const versions = load_extraction_versions();
+		const base = to_cache_version(versions);
+		const changed = Object.keys(versions).map((name) =>
+			to_cache_version({ ...versions, [name]: '0.0.0-changed' })
+		);
+		assert.notInclude(changed, base);
+		assert.strictEqual(new Set(changed).size, changed.length);
+		assert.strictEqual(to_cache_version({ ...versions }), base);
+	});
+
+	test('an entry written by other versions misses', async () => {
+		const state = create_mock_fs_state();
+		const mock_deps = create_mock_cache_deps(state);
+		const cache_path = '/mock/cache/upgraded.json';
+		await save_cached_extraction(mock_deps, {
+			cache_path,
+			content_hash: 'hash',
+			extraction_key: null,
+			extraction: EMPTY_EXTRACTION
+		});
+		assert.isNotNull(await load_cached_extraction(mock_deps, cache_path));
+
+		const stale = to_cache_version({ ...load_extraction_versions(), svelte: '0.0.0-old' });
+		const entry = JSON.parse(state.files.get(cache_path)!) as CachedExtraction;
+		state.files.set(cache_path, JSON.stringify({ ...entry, v: stale }));
+		assert.isNull(await load_cached_extraction(mock_deps, cache_path));
+	});
+});
+
+describe('parse_ci_value', () => {
+	test('unset, empty, false, and 0 are not CI', () => {
+		for (const value of [undefined, '', '  ', 'false', 'FALSE', 'False', ' false ', '0', ' 0']) {
+			assert.isFalse(parse_ci_value(value), JSON.stringify(value));
+		}
+	});
+
+	test('any other value is CI', () => {
+		for (const value of ['true', 'TRUE', '1', 'yes', 'on', 'github', '00', 'falsey']) {
+			assert.isTrue(parse_ci_value(value), value);
+		}
+	});
+});
+
+describe('the CI environment', () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+		vi.resetModules();
+	});
+
+	/** Imports a fresh copy of the cache module with `CI` set to `value`. */
+	const import_with_ci = async (value: string) => {
+		vi.stubEnv('CI', value);
+		vi.resetModules();
+		return import('#lib/css_cache.ts');
+	};
+
+	test('CI=false caches like a local run', async () => {
+		const { is_ci, create_cache_path_resolver } = await import_with_ci('false');
+
+		assert.isFalse(is_ci);
+		assert.isNotNull(
+			create_cache_path_resolver('.fuz/cache/css', PROJECT_ROOT)(PROJECT_ROOT + 'a.ts')
+		);
+	});
+
+	test('CI=true skips the cache', async () => {
+		const { is_ci, create_cache_path_resolver } = await import_with_ci('true');
+
+		assert.isTrue(is_ci);
+		assert.isNull(
+			create_cache_path_resolver('.fuz/cache/css', PROJECT_ROOT)(PROJECT_ROOT + 'a.ts')
+		);
 	});
 });

@@ -72,7 +72,8 @@ export interface CssExtractionOptions {
 	acorn_plugins?: Array<AcornPlugin>;
 	/**
 	 * A string folded into the extraction cache key. The key already covers
-	 * file content and the `acorn_plugins` source text, but a plugin's options
+	 * file content, the `acorn_plugins` source text, and the installed
+	 * versions of fuz_css and its parsers, but a plugin's options
 	 * live in its closure, so change this when only a plugin's options change
 	 * (`jsx({allowNamespaces: false})`) to re-extract every file.
 	 */
@@ -391,7 +392,7 @@ export interface CssDiagnosticsOptions {
 	 * A logged diagnostic is logged once while it persists - a dev server or
 	 * watch mode re-rendering on each edit doesn't repeat it - and again if it
 	 * goes away and comes back.
-	 * @default 'throw' in CI, 'log' otherwise
+	 * @default 'throw' in CI (`CI` set to anything but empty, `false`, or `0`), 'log' otherwise
 	 */
 	on_error?: 'log' | 'throw';
 	/**

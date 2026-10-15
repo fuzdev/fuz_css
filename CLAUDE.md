@@ -530,8 +530,8 @@ Use `VitePluginFuzCssOptions` to customize:
   files without a query, and judges test directories inside the project or
   the dependency's package)
 - `cache_salt` - folded into the extraction cache key, for a change to an
-  acorn plugin's options (the key already covers content and the plugins'
-  source)
+  acorn plugin's options (the key already covers content, the plugins'
+  source, and the installed fuz_css and parser versions)
 - `prescan` (Vite plugin only) - dev-only eager source scan at server
   startup so the first served CSS is complete (`true` = `src` under the
   Vite root, `false` disables, or an array of directories; the root
@@ -738,9 +738,12 @@ typography, borders, shading, shadows, layout. See
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - The generator
   options types the Vite plugin's options extend
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
-  validation plus a configuration key (`to_extraction_cache_key`, over
-  `acorn_plugins` and `cache_salt`), atomic writes, the cache-path lookup,
-  CI skip
+  validation, a cache version read from the installed fuz_css, svelte,
+  acorn, and `@sveltejs/acorn-typescript` versions (`to_cache_version`, so
+  an upgrade misses with no manual bump), plus a configuration key
+  (`to_extraction_cache_key`, over `acorn_plugins` and `cache_salt`), atomic
+  writes, the cache-path lookup, and the CI skip (`parse_ci_value`: `CI`
+  set to anything but empty, `false`, or `0`)
 - [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for

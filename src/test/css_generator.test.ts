@@ -5,7 +5,7 @@
  * @module
  */
 
-import { test, describe, assert } from 'vitest';
+import { test, describe, assert, vi, afterEach } from 'vitest';
 
 import { create_css_generator } from '#lib/css_generator.ts';
 import { extract_from_svelte } from '#lib/css_class_extractor.ts';
@@ -247,5 +247,49 @@ describe('a baked theme', () => {
 			generator.render({ css_classes: generator.create_css_classes(), detected_css_variables: [] });
 		}
 		assert.strictEqual(warnings.filter((w) => w.includes('fails accessibility gates')).length, 1);
+	});
+});
+
+describe('the on_error default', () => {
+	afterEach(() => {
+		vi.unstubAllEnvs();
+		vi.resetModules();
+	});
+
+	/** Renders a typo'd hint through a generator imported with `CI` set to `value`. */
+	const render_typo_with_ci = async (value: string): Promise<Array<string>> => {
+		vi.stubEnv('CI', value);
+		vi.resetModules();
+		const { create_css_generator: create } = await import('#lib/css_generator.ts');
+		const errors: Array<string> = [];
+		const generator = create(
+			{ base_css: null, variables: null },
+			{ error: (m) => errors.push(m), warn: () => {} }
+		);
+		await generator.ensure_ready();
+		const css_classes = generator.create_css_classes();
+		css_classes.add(
+			'App.svelte',
+			extract_from_svelte('<!-- @fuz-classes palete_a -->', 'App.svelte')
+		);
+		generator.render({ css_classes, detected_css_variables: [] });
+		return errors;
+	};
+
+	test('logs when CI=false', async () => {
+		const errors = await render_typo_with_ci('false');
+
+		assert.lengthOf(errors, 1);
+	});
+
+	test('throws in CI', async () => {
+		let thrown: unknown = null;
+		try {
+			await render_typo_with_ci('1');
+		} catch (error) {
+			thrown = error;
+		}
+		assert.isNotNull(thrown);
+		assert.include(String(thrown), 'palete_a');
 	});
 });
