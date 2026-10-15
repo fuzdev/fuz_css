@@ -556,7 +556,10 @@ describe('vite_plugin_fuz_css build render lifetime', () => {
 		return {
 			plugin_options: {
 				additional_classes: ['render_probe'],
-				class_interpreters: [probe, ...css_class_interpreters]
+				class_interpreters: [probe, ...css_class_interpreters],
+				// the probe resolves nothing, so its listed class is an error that
+				// `on_error` would throw under CI
+				on_error: 'log'
 			},
 			count: () => renders
 		};
