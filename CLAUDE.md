@@ -510,8 +510,9 @@ Use `VitePluginFuzCssOptions` to customize:
   theme's mirror re-slots the configured `variables` rather than the
   defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
   lightness moved bakes its recomputed caps last, with the gates reported as
-  warnings (`theme_gate_failed`, `theme_gate_unchecked`). The lint doesn't
-  run there; run `validate_theme` on the theme yourself
+  warnings (`theme_gate_failed`, `theme_gate_unchecked`). `validate_theme`
+  lints the contained theme, each issue a `theme_lint` diagnostic at its own
+  level - an unknown variable or a malformed theme is an error
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars

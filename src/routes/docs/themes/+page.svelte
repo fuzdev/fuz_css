@@ -281,7 +281,7 @@ test('my theme clears the accessibility gates', () => {
 			compiling again gives the same caps. Chroma pushed past the caps on purpose
 			(<code>chroma_scale</code> above 1) still clips afterward, and the report says so. A theme
 			baked in at build time gets its caps recomputed automatically, with its gate failures reported
-			as build warnings.
+			as build warnings and its <code>validate_theme</code> issues as build errors and warnings.
 		</p>
 		<p>
 			fuz_css gates its own themes with these functions in its test suite, every theme ×

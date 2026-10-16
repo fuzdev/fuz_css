@@ -4,8 +4,7 @@
  * over that rendering, in one call.
  *
  * Apart from `theme_check.ts` so the gates and the caps stay importable
- * without the lint (`validate_theme`) and the schemas it parses with, which
- * is how the build-time theme bake runs them.
+ * without the lint (`validate_theme`) and the schemas it parses with.
  *
  * @module
  */

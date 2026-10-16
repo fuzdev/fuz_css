@@ -160,10 +160,7 @@ describe('build_variable_graph containment', () => {
 		const nameless = { base: '1' } as unknown as StyleVariable;
 		const theme: Theme = { name: 'j', variables: [nameless, { name: 'hue_a', base: '20' }] };
 		const graph = build_variable_graph_from_options(undefined, theme);
-		assert.deepEqual(
-			graph.diagnostics.map((d) => d.identifier),
-			['uncontained_theme_value']
-		);
+		assert.strictEqual(uncontained(graph).length, 1);
 		assert.strictEqual(graph.variables.get('hue_a')!.base_value, '20');
 		assert.deepEqual(graph.theme!.theme.variables, [{ name: 'hue_a', base: '20' }]);
 		// the overlay is total over one too, when handed the theme directly
@@ -182,6 +179,40 @@ describe('build_variable_graph containment', () => {
 
 	test('the default variables are all contained', () => {
 		assert.deepEqual(build_variable_graph_from_options(undefined).diagnostics, []);
+	});
+});
+
+describe('bake_theme lint', () => {
+	const lint = (diagnostics: Array<GenerationDiagnostic>) =>
+		diagnostics.filter((d) => d.identifier === 'theme_lint').map((d) => [d.level, d.message]);
+
+	test('an unknown variable is a lint error', () => {
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme(
+			{ name: 'j', variables: [{ name: 'not_a_variable', base: '1' }] },
+			default_variables,
+			diagnostics
+		);
+		assert.deepEqual(lint(diagnostics), [
+			['error', 'Baked theme "j": unknown variable "not_a_variable"']
+		]);
+	});
+
+	test('the lint reads the contained theme, so an uncontained slot is reported once', () => {
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme(
+			{ name: 'j', variables: [{ name: 'text_color', base: 'red;' }] },
+			default_variables,
+			diagnostics
+		);
+		assert.deepEqual(lint(diagnostics), []);
+		assert.strictEqual(diagnostics.length, 1);
+	});
+
+	test('a lint-clean theme adds no lint diagnostics', () => {
+		const diagnostics: Array<GenerationDiagnostic> = [];
+		bake_theme(marquee_theme, default_variables, diagnostics);
+		assert.deepEqual(lint(diagnostics), []);
 	});
 });
 
@@ -941,9 +972,10 @@ describe('bake_theme', () => {
 			diagnostics
 		);
 		assert.isTrue(diagnostics.every((d) => d.level === 'warning'));
+		// the lint warns on the unitless-hue rule the gates also can't read
 		assert.sameMembers(
 			[...new Set(diagnostics.map((d) => d.identifier))],
-			['theme_gate_failed', 'theme_gate_unchecked']
+			['theme_gate_failed', 'theme_gate_unchecked', 'theme_lint']
 		);
 		const failed = diagnostics.find((d) => d.identifier === 'theme_gate_failed')!;
 		assert.include(failed.message, 'Baked theme "loud"');

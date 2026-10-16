@@ -20,6 +20,7 @@ import {
 } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import { check_theme, compute_theme_caps } from './theme_check.ts';
+import { validate_theme } from './theme_validate.ts';
 import { theme_knobs } from './knobs.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import {
@@ -392,12 +393,14 @@ const to_list = (items: Array<string>): string =>
  * can knowingly give up a gate: `theme_gate_failed` lists the failing gate
  * entries and `theme_gate_unchecked` the inputs the gates couldn't evaluate.
  * A stanced theme renders its one appearance in both schemes, so only the
- * stanced scheme's entries are listed. The lint (`validate_theme`) doesn't
- * run here.
+ * stanced scheme's entries are listed. The lint (`validate_theme`) runs
+ * over the contained theme, so a slot reported as uncontained isn't reported
+ * again: each issue is a `theme_lint` diagnostic at the issue's level, so an
+ * unknown variable fails a build that throws on errors.
  *
  * @param theme - the configured `theme` option
  * @param variables - the configured variable set the theme overlays
- * @param diagnostics - collects the containment errors and the gate warnings, when given
+ * @param diagnostics - collects the containment errors, the lint issues, and the gate warnings, when given
  * @returns the contained wire theme with its mirror and caps
  */
 export const bake_theme = (
@@ -411,6 +414,16 @@ export const bake_theme = (
 	const measured = fold_configured_knobs(wire, variables, stance);
 	const caps = compute_theme_caps(measured);
 	if (diagnostics) {
+		for (const issue of validate_theme(wire)) {
+			diagnostics.push({
+				phase: 'generation',
+				level: issue.level,
+				message: `Baked theme "${wire.name}": ${issue.message}`,
+				suggestion: null,
+				identifier: 'theme_lint',
+				locations: null
+			});
+		}
 		const report = check_theme(measured, { caps });
 		const warn = (message: string, suggestion: string, identifier: string): void => {
 			diagnostics.push({
@@ -432,7 +445,7 @@ export const bake_theme = (
 							`${e.gate} ${e.scheme} ${e.subject} (${round_gate_value(e.value)} against ${e.threshold})`
 					)
 				)}`,
-				'Run check_theme on the theme and retune its knobs, or keep the failures if the theme gives them up knowingly. validate_theme lints the rest.',
+				'Run check_theme on the theme and retune its knobs, or keep the failures if the theme gives them up knowingly.',
 				'theme_gate_failed'
 			);
 		}
