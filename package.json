@@ -41,7 +41,7 @@
     "zimmerframe": "^1.1.4"
   },
   "peerDependencies": {
-    "@fuzdev/fuz_util": ">=0.72.0",
+    "@fuzdev/fuz_util": ">=0.76.0",
     "@fuzdev/fuz_schema": "^0.4.0",
     "vite": ">=6"
   },
@@ -56,8 +56,8 @@
     "@fuzdev/fuz_code": "^0.53.0",
     "@fuzdev/fuz_schema": "^0.4.0",
     "@fuzdev/fuz_ui": "^0.214.0",
-    "@fuzdev/fuz_util": "^0.75.0",
-    "@fuzdev/gro": "^0.218.0",
+    "@fuzdev/fuz_util": "^0.76.0",
+    "@fuzdev/gro": "^0.219.0",
     "@fuzdev/mdz": "^0.5.0",
     "@ryanatkn/eslint-config": "^0.13.0",
     "@sveltejs/adapter-static": "^4.0.0",
