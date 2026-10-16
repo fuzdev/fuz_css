@@ -245,7 +245,7 @@ background-color: var(--ink_10);
 /* active/pressed state */
 background-color: var(--ink_20);`}
 		/>
-		<p class="mt_md">
+		<p>
 			<strong>Use <code>shade_NN</code></strong> when you need explicit, predictable opaque
 			surfaces:
 		</p>
@@ -260,7 +260,7 @@ border-color: var(--shade_30);
 /* input backgrounds (untinted for contrast) */
 background-color: var(--shade_min);`}
 		/>
-		<p class="mt_lg">
+		<p>
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
 			<code>--ink_NN</code> for stacking. The page background uses <code>shade_00</code> as the
 			opaque base.

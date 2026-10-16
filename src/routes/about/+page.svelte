@@ -20,7 +20,7 @@
 <main class="width_atmost_md">
 	<section>
 		<header class="box width_atmost_sm">
-			<h1 class="mb_xl5" style:margin-top={MAIN_HEADER_MARGIN_TOP}>
+			<h1 style:margin-top={MAIN_HEADER_MARGIN_TOP}>
 				{library.repo_name}
 			</h1>
 		</header>

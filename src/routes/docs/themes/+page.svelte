@@ -110,7 +110,7 @@
 		</p>
 		<!-- the controls get their own right-justified row above the picker and
 			preview, so they can reach left over the picker without forcing a wrap -->
-		<div class="row flex-wrap:wrap justify-content:flex-end align-items:flex-start gap_lg mb_lg">
+		<div class="row flex-wrap:wrap justify-content:flex-end align-items:flex-start gap_lg mb_flow">
 			<div>
 				<div class="title text-align:center pb_xs3">Contrast</div>
 				<ContrastInput
@@ -126,7 +126,7 @@
 		</div>
 		<!-- the picker shares a row with the preview, which wraps below it on
 			narrow screens -->
-		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_lg">
+		<div class="display:flex flex-wrap:wrap align-items:flex-start gap_lg mb_flow">
 			<div class="width_atmost_xs flex:1">
 				<div class="title text-align:center pb_xs3">Theme</div>
 				<ThemeInput

@@ -179,7 +179,7 @@
 	<form class="intensity_selector">
 		<fieldset class="row mb_0">
 			{#each intensity_variants as intensity (intensity)}
-				<label class="box gap_xs mb_0 px_xs4" class:selected={selected_intensity === intensity}>
+				<label class="box gap_xs px_xs4" class:selected={selected_intensity === intensity}>
 					<input type="radio" name="intensity" value={intensity} bind:group={selected_intensity} />
 					{intensity}
 				</label>

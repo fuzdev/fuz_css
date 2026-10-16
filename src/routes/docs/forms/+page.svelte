@@ -233,7 +233,7 @@
 		<Code
 			content={`<input class="sized_xs" />\n<input class="sized_sm" />\n<input />\n<input class="sized_lg" />\n<input class="sized_xl" />`}
 		/>
-		<div class="column gap_sm mb_lg width_atmost_sm">
+		<div class="column gap_sm mb_flow width_atmost_sm">
 			{#each ['sized_xs', 'sized_sm', 'sized_md', 'sized_lg', 'sized_xl'] as size (size)}
 				<div class="row align-items:center gap_sm">
 					<input class={size} placeholder={size} />

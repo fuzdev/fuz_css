@@ -105,7 +105,7 @@
 {/snippet}
 
 <header class="mb_flow">
-	<div class="row gap_lg flex-wrap:wrap mb_lg">
+	<div class="row gap_lg flex-wrap:wrap mb_flow">
 		<label>
 			<div class="title">name</div>
 			<input bind:value={editor.name} />
@@ -192,7 +192,7 @@
 			{#if axis === 'color'}
 				<!-- live feedback: the derived neutral and intent scales repaint as
 					knobs move -->
-				<div class="ramp-strips mb_lg">
+				<div class="ramp-strips mb_flow">
 					<RampStrip prefix="shade" />
 					<RampStrip prefix="text" />
 					{#each intent_variants as intent (intent)}
@@ -214,7 +214,7 @@
 						{sm_meta?.title ?? 'granular tokens'}
 						<small>({sm_meta?.hint ?? 'escape hatches - pin individual tokens'})</small>
 					</summary>
-					<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end mt_md">
+					<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
 						{#each sm_knobs as knob (knob.name)}
 							{@render knob_control(knob, false)}
 						{/each}
@@ -227,7 +227,7 @@
 						palette hues
 						<small>(the letter slots - moving these makes the theme palette-tier)</small>
 					</summary>
-					<div class="ramp-strips mt_md mb_lg">
+					<div class="ramp-strips mb_flow">
 						{#each palette_variants as letter (letter)}
 							<RampStrip prefix="palette_{letter}" />
 						{/each}
@@ -297,7 +297,7 @@
 	<!-- lazily rendered: the highlighted output is the costliest thing on the
 		page and would re-render on every knob drag while open -->
 	<Details summary="theme object">
-		<div class="rendered-output mt_md">
+		<div class="rendered-output">
 			<div class="copy-button">
 				<CopyToClipboard text={output_ts} />
 			</div>
@@ -306,14 +306,14 @@
 	</Details>
 	<Details summary="rendered CSS">
 		{#if editor.output.variables.length || editor.stance}
-			<div class="rendered-output mt_md">
+			<div class="rendered-output">
 				<div class="copy-button">
 					<CopyToClipboard text={output_css} />
 				</div>
 				<Code content={output_css} lang="css" />
 			</div>
 		{:else}
-			<p class="mt_md">
+			<p>
 				The theme is empty: every variable keeps its base default, so it renders no CSS. Move a knob
 				to see its output.
 			</p>

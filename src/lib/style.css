@@ -928,7 +928,7 @@ TODO think through these patterns to get somewhere consistent
 		background-color: var(--ink_20);
 	}
 	:where(details[open] summary:not(.unstyled)) {
-		margin-bottom: var(--space_sm);
+		margin-bottom: var(--space_md);
 	}
 
 	:where(table) {

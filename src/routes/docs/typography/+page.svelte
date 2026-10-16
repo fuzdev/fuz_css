@@ -239,10 +239,10 @@
 		<Code
 			content={`<div class="sized_lg">\n\t<h3>heading</h3>\n\t<p>paragraph</p>\n\t<p>paragraph</p>\n</div>`}
 		/>
-		<div class="display:flex align-items:start flex-wrap:wrap gap_lg mb_lg">
+		<div class="display:flex align-items:start flex-wrap:wrap gap_lg mb_flow">
 			{#each ['sized_xs', 'sized_sm', 'sized_md', 'sized_lg', 'sized_xl'] as size (size)}
 				<div class="panel p_md {size} width_atmost_sm">
-					<h4 class="mt_0">.{size}</h4>
+					<h4>.{size}</h4>
 					<p>Paragraph with size-composite flow margins between elements.</p>
 					<p>Another paragraph with the matching spacing.</p>
 				</div>
@@ -271,12 +271,12 @@
 		<Code
 			content={`<div class="sized_sm">\n\t<p>small text</p>\n\t<div class="sized_md">\n\t\t<p>back to normal</p>\n\t</div>\n</div>`}
 		/>
-		<div class="display:flex align-items:start gap_lg mb_lg">
+		<div class="display:flex align-items:start gap_lg">
 			<div class="panel p_md sized_sm">
-				<h4 class="mt_0">small region</h4>
+				<h4>small region</h4>
 				<p>Everything here is <span class="chip">small</span>.</p>
 				<div class="panel p_md sized_md">
-					<h4 class="mt_0">normal nested inside</h4>
+					<h4>normal nested inside</h4>
 					<p>
 						This region is back to <span class="chip">default sizing</span> despite the parent
 						having <code>.sized_sm</code>.

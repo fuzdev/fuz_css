@@ -486,144 +486,144 @@ vite_plugin_fuz_css({
 			</p>
 			<h4>Spacing</h4>
 			<p>See <TomeLink slug="layout" />.</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>.p_{@render variant_range(space_variants)}</code> <code>.p_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.pt_{@render variant_range(space_variants)}</code> <code>.pt_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.pr_{@render variant_range(space_variants)}</code> <code>.pr_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.pb_{@render variant_range(space_variants)}</code> <code>.pb_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.pl_{@render variant_range(space_variants)}</code> <code>.pl_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.px_{@render variant_range(space_variants)}</code> <code>.px_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.py_{@render variant_range(space_variants)}</code> <code>.py_0</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.m_{@render variant_range(space_variants)}</code> <code>.m_0</code>
 						<code>.m_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.mt_{@render variant_range(space_variants)}</code> <code>.mt_0</code>
 						<code>.mt_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.mr_{@render variant_range(space_variants)}</code> <code>.mr_0</code>
 						<code>.mr_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.mb_{@render variant_range(space_variants)}</code> <code>.mb_0</code>
 						<code>.mb_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.ml_{@render variant_range(space_variants)}</code> <code>.ml_0</code>
 						<code>.ml_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.mx_{@render variant_range(space_variants)}</code> <code>.mx_0</code>
 						<code>.mx_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.my_{@render variant_range(space_variants)}</code> <code>.my_0</code>
 						<code>.my_auto</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips"><code>.gap_{@render variant_range(space_variants)}</code></span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.column_gap_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.row_gap_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips"><code>.top_{@render variant_range(space_variants)}</code></span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.right_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.bottom_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips"><code>.left_{@render variant_range(space_variants)}</code></span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.inset_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
 			</ul>
-			<aside class="mt_lg">
+			<aside>
 				Padding and margin include <code>_0</code> (and <code>_auto</code> for margin) for
 				ergonomics: <code>pb_0</code> is much shorter than <code>padding-bottom:0</code>. Other
 				properties use <a href="#Literal-classes">literals</a> for raw values.
 			</aside>
 			<h4>Sizing</h4>
 			<p>See <TomeLink slug="layout" />.</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>.width_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.height_{@render variant_range(space_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.width_atmost_{@render variant_range(distance_variants)}</code>
 						<code>.width_atleast_{@render variant_range(distance_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.height_atmost_{@render variant_range(distance_variants)}</code>
 						<code>.height_atleast_{@render variant_range(distance_variants)}</code>
@@ -635,8 +635,8 @@ vite_plugin_fuz_css({
 				See <TomeLink slug="colors" />, <TomeLink slug="shading" />, and
 				<TomeLink slug="typography" hash="Text-colors" />.
 			</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>
 							.color_{@render variant_range(palette_variants)}_{@render variant_range(
@@ -645,7 +645,7 @@ vite_plugin_fuz_css({
 						</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>
 							.bg_{@render variant_range(palette_variants)}_{@render variant_range(
@@ -654,14 +654,14 @@ vite_plugin_fuz_css({
 						</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						{#each intent_variants as intent (intent)}
 							<code>.{intent}_{@render variant_range(intensity_variants)}</code>
 						{/each}
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						{#each intent_variants as intent (intent)}
 							<code>.bg_{intent}_{@render variant_range(intensity_variants)}</code>
@@ -684,22 +684,22 @@ vite_plugin_fuz_css({
 				<code>--text_color</code>, so nested elements like <code>&lt;code&gt;</code> that use
 				<code>color: var(--text_color)</code> inherit the color properly.
 			</aside>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>.text_min</code>
 						<code>.text_max</code>
 						<code>.text_{@render variant_range(text_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shade_min</code>
 						<code>.shade_max</code>
 						<code>.shade_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.darken_{@render variant_range(darken_lighten_variants)}</code>
 						<code>.lighten_{@render variant_range(darken_lighten_variants)}</code>
@@ -714,25 +714,25 @@ vite_plugin_fuz_css({
 			</aside>
 			<h4>Typography</h4>
 			<p>See <TomeLink slug="typography" />.</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						{#each font_family_variants as font_family (font_family)}
 							<code>.{font_family}</code>
 						{/each}
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.font_size_{@render variant_range(font_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.line_height_{@render variant_range(line_height_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.icon_size_{@render variant_range(icon_size_variants)}</code>
 					</span>
@@ -740,13 +740,13 @@ vite_plugin_fuz_css({
 			</ul>
 			<h4>Borders</h4>
 			<p>See <TomeLink slug="borders" />.</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>
 							.border_{@render variant_range(palette_variants)}_{@render variant_range(
@@ -755,54 +755,54 @@ vite_plugin_fuz_css({
 						</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_width_{@render variant_range(border_width_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_radius_{@render variant_range(border_radius_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_top_left_radius_{@render variant_range(border_radius_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_top_right_radius_{@render variant_range(border_radius_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_bottom_left_radius_{@render variant_range(border_radius_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.border_bottom_right_radius_{@render variant_range(border_radius_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.outline_width_{@render variant_range(border_width_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						{#each outline_width_variants as variant (variant)}
 							<code>.outline_width_{variant}</code>
 						{/each}
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.outline_color_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>
 							.outline_{@render variant_range(palette_variants)}_{@render variant_range(
@@ -814,43 +814,43 @@ vite_plugin_fuz_css({
 			</ul>
 			<h4>Shadows</h4>
 			<p>See <TomeLink slug="shadows" />.</p>
-			<ul class="unstyled">
-				<li class="mb_md">
+			<ul class="unstyled column gap_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_top_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_bottom_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_inset_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_inset_top_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_inset_bottom_{@render variant_range(shadow_size_variants)}</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						{#each shadow_semantic_values as value (value)}<code>.shadow_color_{value}</code>{/each}
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>
 							.shadow_{@render variant_range(palette_variants)}_{@render variant_range(
@@ -859,7 +859,7 @@ vite_plugin_fuz_css({
 						</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<code>.shadow_alpha_{@render variant_range(shadow_alpha_variants)}</code>
 					</span>
@@ -1084,43 +1084,43 @@ vite_plugin_fuz_css({
 				join with underscores (<code>p_md</code>, <code>icon_button</code>).
 			</p>
 			<ul>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>display:</strong> <code>.flex</code> <code>.inline-flex</code>
 						<code>.grid</code> <code>.inline-grid</code> <code>.inline-block</code>
 						<code>.block</code> <code>.flow-root</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>position:</strong> <code>.relative</code> <code>.absolute</code>
 						<code>.fixed</code> <code>.sticky</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>text-transform:</strong> <code>.uppercase</code> <code>.lowercase</code>
 						<code>.capitalize</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>font-style:</strong> <code>.italic</code> <code>.oblique</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>font-weight:</strong> <code>.bold</code> <code>.bolder</code>
 						<code>.lighter</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>text-decoration-line:</strong> <code>.underline</code> <code>.overline</code>
 						<code>.line-through</code>
 					</span>
 				</li>
-				<li class="mb_md">
+				<li>
 					<span class="code_chips">
 						<strong>fuz_css:</strong> <code>.hidden</code> (<code>display: none</code>)
 					</span>
@@ -1290,7 +1290,7 @@ vite_plugin_fuz_css({
 		/>
 		<p>Available state modifiers include:</p>
 		<ul>
-			<li class="mb_md">
+			<li>
 				<span class="code_chips">
 					<strong>interaction:</strong> <code>hover:</code> <code>focus:</code>
 					<code>focus-visible:</code>
@@ -1298,7 +1298,7 @@ vite_plugin_fuz_css({
 					<code>any-link:</code> <code>target:</code>
 				</span>
 			</li>
-			<li class="mb_md">
+			<li>
 				<span class="code_chips">
 					<strong>form:</strong> <code>autofill:</code> <code>blank:</code> <code>disabled:</code>
 					<code>enabled:</code> <code>checked:</code> <code>indeterminate:</code>
@@ -1308,7 +1308,7 @@ vite_plugin_fuz_css({
 					<code>read-write:</code> <code>default:</code>
 				</span>
 			</li>
-			<li class="mb_md">
+			<li>
 				<span class="code_chips">
 					<strong>structural:</strong> <code>first:</code> <code>last:</code> <code>only:</code>
 					<code>first-of-type:</code> <code>last-of-type:</code> <code>only-of-type:</code>
@@ -1317,14 +1317,14 @@ vite_plugin_fuz_css({
 					<code>nth-last-of-type(N):</code>
 				</span>
 			</li>
-			<li class="mb_md">
+			<li>
 				<span class="code_chips">
 					<strong>UI states:</strong> <code>fullscreen:</code> <code>modal:</code>
 					<code>open:</code>
 					<code>popover-open:</code>
 				</span>
 			</li>
-			<li class="mb_md">
+			<li>
 				<span class="code_chips">media: <code>playing:</code> <code>paused:</code></span>
 			</li>
 		</ul>
