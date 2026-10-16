@@ -3,8 +3,8 @@
  * mirror and the recomputed chroma caps - with the gates and the lint run
  * over that rendering, in one call.
  *
- * Apart from `theme_check.ts` because the lint (`validate_theme`) needs zod,
- * an optional peer: the gates and the caps stay importable without it, which
+ * Apart from `theme_check.ts` so the gates and the caps stay importable
+ * without the lint (`validate_theme`) and the schemas it parses with, which
  * is how the build-time theme bake runs them.
  *
  * @module

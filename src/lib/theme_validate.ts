@@ -7,6 +7,8 @@
  * @module
  */
 
+import * as s from '@fuzdev/fuz_schema/schema.ts';
+
 import { INTERNAL_VARIABLE_NAME_MATCHER, Theme } from './variable.ts';
 import { to_theme_stance } from './theme.ts';
 import { default_variables } from './variables.ts';
@@ -175,12 +177,18 @@ const validate_knob_value = (
 
 // maps one schema issue onto a `ThemeIssue`, naming the variable it landed on
 // when the path points into `variables` - the schema reports
-// the whole theme at once, so the path is what carries the location
-const to_shape_issue = (
-	theme: unknown,
-	path: ReadonlyArray<PropertyKey>,
-	message: string
-): ThemeIssue => {
+// the whole theme at once, so the path is what carries the location. An
+// unknown key is reported at the object holding it, naming the key, and a
+// failure with no text of fuz_css's own reads as what was expected and received
+const to_shape_issue = (theme: unknown, issue: s.SchemaIssue): ThemeIssue => {
+	let { path } = issue;
+	let message: string;
+	if (issue.kind === 'unknown_key') {
+		message = `unknown key ${JSON.stringify(String(path.at(-1)))}`;
+		path = path.slice(0, -1);
+	} else {
+		message = issue.message ?? `expected ${issue.expected}, received ${issue.received}`;
+	}
 	const [head, index] = path;
 	if (head === 'variables') {
 		const list =
@@ -201,7 +209,10 @@ const to_shape_issue = (
 			...(name ? { variable: name } : null)
 		};
 	}
-	return { level: 'error', message: path.length ? `${path.join('.')}: ${message}` : message };
+	return {
+		level: 'error',
+		message: path.length ? `${path.map(String).join('.')}: ${message}` : message
+	};
 };
 
 /**
@@ -223,13 +234,11 @@ const to_shape_issue = (
  * object) needs no cast to be checked.
  */
 export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
-	const parsed = Theme.safeParse(theme);
-	if (!parsed.success) {
-		return parsed.error.issues.map((issue) => to_shape_issue(theme, issue.path, issue.message));
-	}
+	const parsed = s.parse(Theme, theme);
+	if (!parsed.ok) return parsed.issues.map((issue) => to_shape_issue(theme, issue));
 	const issues: Array<ThemeIssue> = [];
-	const stance = to_theme_stance(parsed.data.scheme);
-	for (const valid of parsed.data.variables) {
+	const stance = to_theme_stance(parsed.value.scheme);
+	for (const valid of parsed.value.variables) {
 		// a contextual hook is legal CSS, but a theme is the wrong place for it
 		const hook = style_hook_by_name.get(valid.name);
 		if (hook) {
@@ -273,9 +282,9 @@ export const validate_theme = (theme: unknown): Array<ThemeIssue> => {
 			issues.push(...validate_knob_value(knob, valid.dark, valid.name, 'dark'));
 		}
 	}
-	const resolver = new ThemeResolver(parsed.data);
+	const resolver = new ThemeResolver(parsed.value);
 	issues.push(...validate_binding_pairing(resolver));
-	issues.push(...validate_accent_separation(parsed.data, resolver));
+	issues.push(...validate_accent_separation(parsed.value, resolver));
 	return issues;
 };
 

@@ -317,9 +317,8 @@ export interface CssOutputOptions {
 	 *   where they differ from the defaults, so the caps and gates measure
 	 *   what renders. A stanced theme lists only its stanced scheme's
 	 *   entries. A theme can fail a gate knowingly: marquee bakes with a
-	 *   gamut warning, since it exceeds the caps on purpose. The lint doesn't run,
-	 *   since it needs zod, an optional peer; run `validate_theme` on the
-	 *   theme yourself
+	 *   gamut warning, since it exceeds the caps on purpose. The lint doesn't
+	 *   run; run `validate_theme` on the theme yourself
 	 *
 	 * The baked values become the output's defaults, so a runtime theme can't
 	 * revert to the pre-bake appearance by being empty - the base theme

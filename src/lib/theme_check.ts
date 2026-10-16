@@ -12,9 +12,6 @@
  *   `compile_theme` in `theme_compile.ts` pairs them with the re-check and
  *   the lint.
  *
- * Free of zod, unlike the lint, so the build-time theme bake can run the
- * gates and the caps where zod (an optional peer) isn't installed.
- *
  * @module
  */
 

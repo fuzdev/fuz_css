@@ -1,4 +1,5 @@
 import { test, assert } from 'vitest';
+import * as s from '@fuzdev/fuz_schema/schema.ts';
 
 import { default_variables } from '#lib/variables.ts';
 import { INTERNAL_VARIABLE_NAME_MATCHER, StyleVariable } from '#lib/variable.ts';
@@ -33,10 +34,10 @@ test('all variables pass schema validation', () => {
 		// a theme can't name an intermediate (see below), so its shape is
 		// checked under the public spelling
 		const internal = INTERNAL_VARIABLE_NAME_MATCHER.test(v.name);
-		const result = StyleVariable.safeParse(internal ? { ...v, name: v.name.slice(1) } : v);
+		const result = s.parse(StyleVariable, internal ? { ...v, name: v.name.slice(1) } : v);
 		assert.isTrue(
-			result.success,
-			`variable "${v.name}" failed validation: ${JSON.stringify(result.error?.issues)}`
+			result.ok,
+			`variable "${v.name}" failed validation: ${result.ok ? '' : JSON.stringify(result.issues)}`
 		);
 	}
 });
@@ -80,7 +81,7 @@ test('a theme can carry no intermediate', () => {
 	// the defaults' own declarations included - the derived data carries them
 	for (const v of default_variables) {
 		if (!INTERNAL_VARIABLE_NAME_MATCHER.test(v.name)) continue;
-		assert.isFalse(StyleVariable.safeParse(v).success, v.name);
+		assert.isFalse(s.parse(StyleVariable, v).ok, v.name);
 	}
 });
 

@@ -3,13 +3,14 @@
  * carries a set of them.
  *
  * These live together, and apart from `theme.ts`, so the renderer stays free
- * of zod - `theme.ts` imports the types type-only, which keeps mounting a
- * theme at roughly a kilobyte.
+ * of the schema library - `theme.ts` imports the types type-only, which keeps
+ * mounting a theme at roughly a kilobyte.
  *
  * @module
  */
 
-import { z } from 'zod';
+import * as s from '@fuzdev/fuz_schema/schema.ts';
+import { meta } from '@fuzdev/fuz_schema/meta.ts';
 
 import { css_comment_is_contained, css_value_is_contained } from './css_containment.ts';
 
@@ -34,16 +35,73 @@ const to_name_error = (name: unknown): string =>
 		? INTERNAL_NAME_ERROR
 		: 'invalid style variable name';
 
-export const StyleVariableName = z
-	.string()
-	.regex(STYLE_VARIABLE_NAME_MATCHER, 'invalid style variable name');
-export type StyleVariableName = z.infer<typeof StyleVariableName>;
+export const StyleVariableName = s.pipe(
+	s.string,
+	s.message(
+		s.regex(STYLE_VARIABLE_NAME_MATCHER, 'a style variable name'),
+		'invalid style variable name'
+	)
+);
+export type StyleVariableName = s.Infer<typeof StyleVariableName>;
 
 // a slot renders verbatim into a declaration, so it has to stay inside it
-const StyleVariableValue = z
-	.string()
-	.regex(/\S/u, 'must not be blank')
-	.refine(css_value_is_contained, 'must be a single contained CSS value');
+const StyleVariableValue = s.pipe(
+	s.string,
+	s.message(s.regex(/\S/u, 'a non-blank value'), 'must not be blank'),
+	s.message(
+		s.check<string>(css_value_is_contained, 'a contained CSS value'),
+		'must be a single contained CSS value'
+	)
+);
+
+const StyleVariableFields = s.object({
+	name: s.pipe(
+		s.string,
+		s.message(
+			s.check((name: string) => STYLE_VARIABLE_NAME_MATCHER.test(name), 'a style variable name'),
+			(_issue, name) => to_name_error(name)
+		)
+	),
+	base: s.optional(StyleVariableValue),
+	dark: s.optional(StyleVariableValue),
+	summary: s.optional(
+		s.pipe(
+			s.string,
+			s.message(
+				s.check<string>(css_comment_is_contained, 'a contained CSS comment'),
+				'must not close a CSS comment'
+			)
+		)
+	)
+});
+type StyleVariableFields = s.Infer<typeof StyleVariableFields>;
+
+const slots_differ = (v: StyleVariableFields): boolean =>
+	!(v.base !== undefined && v.dark !== undefined && v.base === v.dark);
+
+// the cross-field rules are pipe steps, so they run only once every field
+// has passed, and this one is a hand-written check rather than `s.check`
+// because the issue belongs on `dark`, the slot an editor points at, and a
+// pipe step's issue otherwise lands on the object itself
+const StyleVariableSlotsDiffer: s.Schema<
+	StyleVariableFields,
+	StyleVariableFields,
+	'check',
+	typeof slots_differ
+> = {
+	kind: 'check',
+	def: slots_differ,
+	run: (v, ctx) => {
+		if (slots_differ(v)) return v;
+		s.fail(ctx, 'check', v.dark, 'a dark value that differs from base');
+		if (!ctx.probe) {
+			const issue = ctx.issues![ctx.issues!.length - 1]!;
+			issue.path = ['dark'];
+			issue.message = 'base and dark must differ when both specified';
+		}
+		return v;
+	}
+};
 
 /**
  * A style variable: a custom property name with a value per color scheme.
@@ -66,45 +124,40 @@ const StyleVariableValue = z
  * internal names - a stance's mirror and `compile_theme`'s caps - travels
  * beside a theme as `ThemeDerived`, never inside it.
  */
-export const StyleVariable = z
-	.strictObject({
-		name: z.string().refine((name) => STYLE_VARIABLE_NAME_MATCHER.test(name), {
-			error: (issue) => to_name_error(issue.input)
-		}),
-		base: StyleVariableValue.optional(),
-		dark: StyleVariableValue.optional(),
-		summary: z.string().refine(css_comment_is_contained, 'must not close a CSS comment').optional()
-	})
-	.refine((v) => v.base !== undefined || v.dark !== undefined, {
-		message: 'must have at least one of base or dark'
-	})
-	.refine((v) => !(v.base !== undefined && v.dark !== undefined && v.base === v.dark), {
-		message: 'base and dark must differ when both specified',
-		path: ['dark']
-	});
-export type StyleVariable = z.infer<typeof StyleVariable>;
+export const StyleVariable = s.pipe(
+	StyleVariableFields,
+	s.message(
+		s.check(
+			(v: StyleVariableFields) => v.base !== undefined || v.dark !== undefined,
+			'base or dark'
+		),
+		'must have at least one of base or dark'
+	),
+	StyleVariableSlotsDiffer
+);
+export type StyleVariable = s.Infer<typeof StyleVariable>;
 
 /**
  * A theme's scheme stance: which color schemes it supports. `'dual'` themes
  * render light and dark appearances from each variable's slots; `'light'` and
  * `'dark'` themes render that single appearance in both color schemes.
  */
-export const ThemeScheme = z.enum(['dual', 'light', 'dark'], {
-	error: "expected 'dual', 'light', or 'dark'"
-});
-export type ThemeScheme = z.infer<typeof ThemeScheme>;
+export const ThemeScheme = s.message(
+	s.one_of(['dual', 'light', 'dark']),
+	"expected 'dual', 'light', or 'dark'"
+);
+export type ThemeScheme = s.Infer<typeof ThemeScheme>;
 
-export const Theme = z.strictObject({
-	name: z.string().min(1, 'must be non-empty'),
+export const Theme = s.object({
+	name: s.pipe(s.string, s.message(s.min_length(1), 'must be non-empty')),
 	/**
 	 * A sentence or two on what the theme looks like, for a theme picker to
 	 * show beside the name. Never rendered into CSS.
 	 */
-	summary: z
-		.string()
-		.optional()
-		.meta({ description: 'what the theme looks like, for theme pickers' }),
-	variables: z.array(StyleVariable),
+	summary: meta(s.optional(s.string), {
+		description: 'what the theme looks like, for theme pickers'
+	}),
+	variables: s.array(StyleVariable),
 	/**
 	 * The scheme stance, defaulting to `'dual'`. A single-scheme stance pins
 	 * `color-scheme` on the scope so form controls and native scrollbars agree.
@@ -119,23 +172,23 @@ export const Theme = z.strictObject({
 	 * variable data of its own, so the mirror stays off the theme path of
 	 * consumers who don't use a stanced theme.
 	 */
-	scheme: ThemeScheme.optional().meta({
+	scheme: meta(s.optional(ThemeScheme), {
 		description: 'which color schemes the theme supports, defaulting to dual'
 	})
 });
-export type Theme = z.infer<typeof Theme>;
+export type Theme = s.Infer<typeof Theme>;
 
 /**
  * Parses an unknown value as a `Theme`, returning `null` when it doesn't
  * match. For untrusted input - a theme restored from storage, a theme handed
  * across a boundary - where a malformed value should fall back to a default
- * rather than throw. Use `Theme.safeParse` directly when the failure detail
- * matters, or `validate_theme` in `theme_validate.ts` for the full lint.
+ * rather than throw. Use `s.parse(Theme, value)` directly when the failure
+ * detail matters, or `validate_theme` in `theme_validate.ts` for the full lint.
  *
  * @param value - the value to parse
  * @returns the theme, or `null` when the value isn't one
  */
 export const parse_theme = (value: unknown): Theme | null => {
-	const parsed = Theme.safeParse(value);
-	return parsed.success ? parsed.data : null;
+	const parsed = s.parse(Theme, value);
+	return parsed.ok ? parsed.value : null;
 };

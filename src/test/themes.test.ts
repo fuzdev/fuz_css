@@ -1,4 +1,5 @@
 import { test, assert, describe } from 'vitest';
+import * as s from '@fuzdev/fuz_schema/schema.ts';
 
 import { default_themes, DEFAULT_THEME, contrast_modifiers } from '#lib/themes.ts';
 import { StyleVariable, type Theme } from '#lib/variable.ts';
@@ -27,8 +28,8 @@ describe('default_themes', () => {
 	test('all shipped theme variables pass StyleVariable validation', () => {
 		for (const theme of shipped_themes) {
 			for (const variable of theme.variables) {
-				const result = StyleVariable.safeParse(variable);
-				assert.isTrue(result.success, `Invalid variable ${variable.name} in theme ${theme.name}`);
+				const result = s.parse(StyleVariable, variable);
+				assert.isTrue(result.ok, `Invalid variable ${variable.name} in theme ${theme.name}`);
 			}
 		}
 	});
@@ -109,8 +110,8 @@ describe('shipped themes', () => {
 		for (const theme of exemplar_themes) {
 			assert.isAbove(theme.variables.length, 0);
 			for (const variable of theme.variables) {
-				const result = StyleVariable.safeParse(variable);
-				assert.isTrue(result.success, `Invalid variable ${variable.name} in theme ${theme.name}`);
+				const result = s.parse(StyleVariable, variable);
+				assert.isTrue(result.ok, `Invalid variable ${variable.name} in theme ${theme.name}`);
 			}
 			const errors = validate_theme(theme).filter((issue) => issue.level === 'error');
 			assert.deepEqual(errors, [], `Exemplar "${theme.name}" has validation errors`);

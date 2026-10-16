@@ -29,7 +29,7 @@ gro build     # build the package for production
 - SvelteKit - application framework (for docs site only)
 - acorn, @sveltejs/acorn-typescript, zimmerframe - AST parsing and walking
   (acorn-jsx is the consumer's, passed in through `acorn_plugins`)
-- zod - schema validation
+- fuz_schema (@fuzdev/fuz_schema) - the theme schemas, a required peer
 - @webref/css - CSS property validation
 - fuz_util (@fuzdev/fuz_util) - utility functions
 - Vite 6+ - required by the Vite plugin only
@@ -511,7 +511,7 @@ Use `VitePluginFuzCssOptions` to customize:
   defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
   lightness moved bakes its recomputed caps last, with the gates reported as
   warnings (`theme_gate_failed`, `theme_gate_unchecked`). The lint doesn't
-  run there: it needs zod, an optional peer the generator loads without
+  run there; run `validate_theme` on the theme yourself
 - `additional_classes` - Classes to always include (for dynamic names)
 - `additional_elements` - Elements to always include, or `'all'` for all base styles
 - `additional_variables` - Variables to always include, or `'all'` for all theme vars
@@ -578,10 +578,10 @@ typography, borders, shading, shadows, layout. See
 - [variables.ts](src/lib/variables.ts) - All style variable definitions, as a
   single `default_variables` export; uniform families are loop-built from the
   variant lists and ramp emitters and spread into it in place
-- [variable.ts](src/lib/variable.ts) - The `StyleVariable` and `Theme` zod
-  schemas (with `ThemeScheme` and `parse_theme`), kept apart from `theme.ts`
-  so the renderer stays zod-free; a theme's optional `summary` is the
-  sentence pickers show beside its name
+- [variable.ts](src/lib/variable.ts) - The `StyleVariable` and `Theme`
+  fuz_schema schemas (with `ThemeScheme` and `parse_theme`), kept apart from
+  `theme.ts` so the renderer stays free of the schema library; a theme's
+  optional `summary` is the sentence pickers show beside its name
 - [variable_data.ts](src/lib/variable_data.ts) - The variable vocabulary:
   size/color/border variant lists plus the fitted value tables their ladders
   step through (`FONT_SIZES`, `SPACE_SIZES`, `BORDER_RADII`, `DISTANCES`,
@@ -700,11 +700,11 @@ typography, borders, shading, shadows, layout. See
   `unchecked` otherwise), and the worst-hue chroma-cap recomputation
   (`compute_theme_caps`, which caps each stop at the lightness it resolves
   to, emits any cap that tightens, and emits nothing when a hue won't resolve
-  to a number). Free of zod, so the build-time bake runs it
+  to a number)
 - [theme_compile.ts](src/lib/theme_compile.ts) - `compile_theme`: the
   mirror, the caps (beside the theme, so compiling is idempotent), the gates
   with them, and the lint, in one `CompiledTheme`; apart from
-  `theme_check.ts` since the lint needs zod
+  `theme_check.ts` so the gates and the caps import without the lint
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -

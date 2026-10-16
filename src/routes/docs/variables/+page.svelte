@@ -101,8 +101,8 @@ export type StyleVariable = {
 };`}
 		/>
 		<p>
-			Both are zod schemas, so the same names validate at runtime:
-			<code>Theme.safeParse(value)</code> reports what's wrong, <code>parse_theme(value)</code>
+			Both are <code>@fuzdev/fuz_schema</code> schemas, so the same names validate at runtime:
+			<code>s.parse(Theme, value)</code> reports what's wrong, <code>parse_theme(value)</code>
 			returns a theme or <code>null</code>, and <code>validate_theme(theme)</code> in
 			<ModuleLink module_path="theme_validate.ts" /> runs the full lint.
 		</p>
