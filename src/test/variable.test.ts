@@ -124,6 +124,19 @@ describe('Theme', () => {
 		assert.deepEqual(result.issues[0]?.path, ['variables', 1, 'dark']);
 	});
 
+	test('keeps the slots rule off an earlier issue past the issue cap', () => {
+		// the parse builds a hundred issues, so the same-slot variable's builds none
+		const variables = [
+			...Array.from({ length: 100 }, (_, i) => ({ name: `Bad${i}`, base: 'x' })),
+			{ name: 'radius_scale', base: '1', dark: '1' }
+		];
+		const result = s.parse(Theme, { name: 't', variables });
+		assert(!result.ok);
+		assert.strictEqual(result.issues.length, 100);
+		assert.deepEqual(result.issues[99]?.path, ['variables', 99, 'name']);
+		assert.strictEqual(result.issues[99]?.message, 'invalid style variable name');
+	});
+
 	test('accepts every scheme stance and rejects anything else', () => {
 		for (const scheme of ['dual', 'light', 'dark']) {
 			assert.isTrue(s.parse(Theme, { name: 't', variables: [], scheme }).ok, scheme);

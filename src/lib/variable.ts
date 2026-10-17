@@ -93,9 +93,11 @@ const StyleVariableSlotsDiffer: s.Schema<
 	def: slots_differ,
 	run: (v, ctx) => {
 		if (slots_differ(v)) return v;
+		const count = ctx.issues?.length ?? 0;
 		s.fail(ctx, 'check', v.dark, 'a dark value that differs from base');
-		if (!ctx.probe) {
-			const issue = ctx.issues![ctx.issues!.length - 1]!;
+		// past the parse's issue cap `fail` builds none, so read only the one it added
+		const issue = ctx.probe ? undefined : ctx.issues?.[count];
+		if (issue) {
 			issue.path = ['dark'];
 			issue.message = 'base and dark must differ when both specified';
 		}
