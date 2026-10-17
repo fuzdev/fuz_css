@@ -1,0 +1,1 @@
+export{t as component}from"../chunks/B5_cma-i.js";

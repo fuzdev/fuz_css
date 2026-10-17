@@ -1,0 +1,1 @@
+import{tt as e}from"./DMltHi5d.js";import{s as t}from"./C-8PraV4.js";import{t as n}from"./BI2f7Cjm.js";var r=r=>{let i=t.get();e(()=>{n(),i().theme,r()})};export{r as t};
