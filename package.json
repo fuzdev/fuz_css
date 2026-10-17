@@ -1,6 +1,6 @@
 {
   "name": "@fuzdev/fuz_css",
-  "version": "0.69.0",
+  "version": "0.70.0",
   "description": "semantic-first CSS framework and design system: styled HTML defaults, themes derived from a few knobs, and utility classes generated from what you use",
   "tagline": "CSS with more utility",
   "glyph": "🪴",

@@ -1,5 +1,16 @@
 # @fuzdev/fuz_css
 
+## 0.70.0
+
+### Minor Changes
+
+- chore: upgrade fuz_util 0.77.0 ([623c2db](https://github.com/fuzdev/fuz_css/commit/623c2db))
+- **breaking** chore: peer '@fuzdev/fuz_schema' `^0.5.0`, which caps a parse at a hundred issues (a `SchemaError` lists the first ten and `and N more`), labels every issue beneath a `message`, and refuses a `pipe` action narrower than the step before it ([6176a57](https://github.com/fuzdev/fuz_css/commit/6176a57))
+
+### Patch Changes
+
+- fix: widen the gap below an open `details` summary from `space_sm` to `space_md` ([cc5321d](https://github.com/fuzdev/fuz_css/commit/cc5321d))
+
 ## 0.69.0
 
 ### Minor Changes
