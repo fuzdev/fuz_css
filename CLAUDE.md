@@ -941,4 +941,3 @@ svelte's `mount()` resolves to the client build.
 - [`fuz_util`](../fuz_util/CLAUDE.md) - utility functions (no CSS dependency)
 - [`fuz_template`](../fuz_template/CLAUDE.md) - starter template using fuz_css
 - [`fuz_blog`](../fuz_blog/CLAUDE.md) - blog template using fuz_css
-- [`fuz_mastodon`](../fuz_mastodon/CLAUDE.md) - Mastodon components using fuz_css
