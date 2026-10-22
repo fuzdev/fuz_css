@@ -177,7 +177,7 @@
 			<p class="mt_md">
 				This is useful for nested UI elements like cards within cards, or hover states inside
 				elevated containers. Composites like <code>.panel</code>, <code>.chip</code>, and
-				<code>.menuitem</code> use <code>var(--ink_10)</code> for this stacking behavior.
+				<code>.menuitem</code> use <code>var(--ink_10)</code> by default for this stacking behavior.
 			</p>
 		</TomeSection>
 	</TomeSection>
@@ -263,7 +263,8 @@ background-color: var(--shade_min);`}
 		<p>
 			The composites (<code>.panel</code>, <code>.chip</code>, <code>.menuitem</code>) use
 			<code>--ink_NN</code> for stacking. The page background uses <code>shade_00</code> as the
-			opaque base.
+			opaque base. A <code>.panel</code> reads its fill from <code>--panel_fill</code>
+			(<code>--ink_10</code> by default), so a theme can make panels opaque cards instead.
 		</p>
 	</TomeSection>
 	<TomeSection>

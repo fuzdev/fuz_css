@@ -290,7 +290,8 @@ export const default_variables: Array<StyleVariable> = [
 	{
 		name: 'shade_chroma_00',
 		base: String(SHADE_CHROMA_00),
-		summary: 'the page ground chroma - the shared chroma shape is 0 at the ground, so this tints it'
+		summary:
+			'the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it'
 	},
 
 	/*
@@ -618,6 +619,11 @@ export const default_variables: Array<StyleVariable> = [
 		name: 'pane_shadow',
 		base: render_shadow_css('shadow_bottom', 'md', 'umbra', '50'),
 		summary: 'the shadow under a floating `.pane`'
+	},
+	{
+		name: 'panel_fill',
+		base: 'var(--ink_10)',
+		summary: 'the fill of an embedded `.panel`, a translucent ink step over whatever holds it'
 	},
 	{
 		name: 'panel_shadow',

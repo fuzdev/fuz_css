@@ -45,7 +45,8 @@
  *   gate definitions and the following can't drift.
  * - Outside the gates: the micro-surface colors no pairing models
  *   (`caret_color`, `selection_color`, `scrollbar_thumb_color`,
- *   `backdrop_color`), the `input_fill` behind field text, a
+ *   `backdrop_color`), the `input_fill` behind field text, the `panel_fill`
+ *   behind a panel's text, a
  *   `background_image` painted over the `shade_00` ground, and the stronger
  *   button tints of the hover, focus, and pressed states.
  *

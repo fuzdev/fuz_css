@@ -824,7 +824,7 @@ describe('generate_classes_css', () => {
 	});
 
 	describe('surface shadows', () => {
-		test('pane and panel read their shadow variables', () => {
+		test('pane and panel read their surface variables', () => {
 			const result = generate_classes_css({
 				class_names: ['pane', 'panel'],
 				class_definitions: css_class_composites,
@@ -834,10 +834,12 @@ describe('generate_classes_css', () => {
 			assert_css_contains(
 				result.css,
 				'box-shadow: var(--pane_shadow);',
-				'box-shadow: var(--panel_shadow);'
+				'box-shadow: var(--panel_shadow);',
+				'background-color: var(--panel_fill);'
 			);
 			assert.isTrue(result.variables_used.has('pane_shadow'));
 			assert.isTrue(result.variables_used.has('panel_shadow'));
+			assert.isTrue(result.variables_used.has('panel_fill'));
 		});
 
 		test('a shadow class on a panel or pane lands after the composite and wins', () => {

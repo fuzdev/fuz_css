@@ -37,7 +37,7 @@
 		--chroma_scale: 1; /* 0 makes the palette grayscale (the neutral scales have their own knob), above 1 is vivid and can clip past the sRGB gamut caps */
 		--hue_neutral: var(--hue_f);
 		--neutral_chroma: 0.024; /* peak chroma of the neutral scales, applied through the shared chroma shape */
-		--shade_chroma_00: 0; /* the page ground chroma - the shared chroma shape is 0 at the ground, so this tints it */
+		--shade_chroma_00: 0; /* the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it */
 		--hue_accent: var(--hue_a); /* links, focus, selection, selected states */
 		--hue_positive: var(--hue_b); /* success affordances */
 		--hue_negative: var(--hue_c); /* errors, destructive actions */
@@ -1232,23 +1232,28 @@
 				var(--hue_neutral)
 		);
 		--shade_05: oklch(
-			var(--_shade_lightness_05) calc(var(--neutral_chroma) * var(--_chroma_shape_05))
+			var(--_shade_lightness_05)
+				calc(var(--neutral_chroma) * var(--_chroma_shape_05) + var(--shade_chroma_00) * 0.81)
 				var(--hue_neutral)
 		);
 		--shade_10: oklch(
-			var(--_shade_lightness_10) calc(var(--neutral_chroma) * var(--_chroma_shape_10))
+			var(--_shade_lightness_10)
+				calc(var(--neutral_chroma) * var(--_chroma_shape_10) + var(--shade_chroma_00) * 0.64)
 				var(--hue_neutral)
 		);
 		--shade_20: oklch(
-			var(--_shade_lightness_20) calc(var(--neutral_chroma) * var(--_chroma_shape_20))
+			var(--_shade_lightness_20)
+				calc(var(--neutral_chroma) * var(--_chroma_shape_20) + var(--shade_chroma_00) * 0.36)
 				var(--hue_neutral)
 		);
 		--shade_30: oklch(
-			var(--_shade_lightness_30) calc(var(--neutral_chroma) * var(--_chroma_shape_30))
+			var(--_shade_lightness_30)
+				calc(var(--neutral_chroma) * var(--_chroma_shape_30) + var(--shade_chroma_00) * 0.16)
 				var(--hue_neutral)
 		);
 		--shade_40: oklch(
-			var(--_shade_lightness_40) calc(var(--neutral_chroma) * var(--_chroma_shape_40))
+			var(--_shade_lightness_40)
+				calc(var(--neutral_chroma) * var(--_chroma_shape_40) + var(--shade_chroma_00) * 0.04)
 				var(--hue_neutral)
 		);
 		--shade_50: oklch(
@@ -1589,6 +1594,7 @@
 				color-mix(in oklab, var(--shadow_color_highlight) var(--shadow_alpha_40), transparent);
 		--pane_shadow: var(--shadow_bottom_md)
 			color-mix(in oklab, var(--shadow_color_umbra) var(--shadow_alpha_50), transparent); /* the shadow under a floating `.pane` */
+		--panel_fill: var(--ink_10); /* the fill of an embedded `.panel`, a translucent ink step over whatever holds it */
 		--panel_shadow: none; /* the shadow of an embedded `.panel`, none by default */
 		--input_fill: var(--paper_80);
 		--input_padding_y: 0;

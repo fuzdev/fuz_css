@@ -171,22 +171,43 @@ export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
 };
 
 /**
- * The ground's own chroma (`--shade_chroma_00`), added to the `shade_00`
- * stop's shaped chroma. The chroma shape is 0 at the endpoints, so without
- * it the page ground is untinted whatever `neutral_chroma` says; a theme
- * whose identity is a tinted page (paper, a lit night) sets it. 0 keeps the
- * default ground neutral.
+ * The ground's own chroma (`--shade_chroma_00`), added to the near-ground
+ * stops of the shade ramp by `neutral_ground_chroma_weight`. The chroma shape is 0 at the
+ * endpoints, so without it the page ground is untinted whatever
+ * `neutral_chroma` says; a theme whose identity is a tinted page (paper, a
+ * lit night) sets it. 0 keeps the default ground neutral.
  */
 export const SHADE_CHROMA_00 = 0;
 
 /**
- * Whether a neutral stop is the page ground - the one stop
- * `--shade_chroma_00` tints, shared by the emitter and both numeric twins.
+ * How far up the shade ramp the ground's chroma reaches, as a ramp position
+ * (0 is the ground, 1 the far end): the tint is whole at `shade_00` and gone
+ * by this stop. The near-ground stops are the surfaces raised off the page -
+ * sidebars, fills, wells - and the shared chroma shape is near 0 there too, so
+ * without the reach they read gray beside a tinted ground.
  */
-export const is_neutral_ground = (
+export const SHADE_GROUND_CHROMA_REACH = 0.5;
+
+/**
+ * The share of `--shade_chroma_00` a neutral stop carries: 1 at the ground
+ * (`shade_00`), easing quadratically to 0 at `SHADE_GROUND_CHROMA_REACH`, and
+ * 0 for every text stop. Rounded to four places, so the emitted CSS
+ * multiplier and the numeric twins use the same number. Shared by the
+ * emitter, both numeric twins, and `check_theme`.
+ *
+ * @param family - the neutral ramp
+ * @param stop - the stop on it
+ * @returns the weight, from 0 to 1
+ */
+export const neutral_ground_chroma_weight = (
 	family: Exclude<RampFamily, 'palette'>,
 	stop: NumericScaleVariant
-): boolean => family === 'shade' && stop === '00';
+): number => {
+	if (family !== 'shade') return 0;
+	const remaining = 1 - ramp_stop_t(stop) / SHADE_GROUND_CHROMA_REACH;
+	if (remaining <= 0) return 0;
+	return Math.round(remaining * remaining * 10_000) / 10_000;
+};
 
 export type ShadowTint = 'bright' | 'dim';
 
@@ -390,8 +411,9 @@ export const ramp_color_oklch = (
 
 /**
  * Combines resolved neutral-scale inputs into a shade/text stop's OKLCH: the
- * peak `neutral_chroma` scaled by the shared chroma shape, plus the ground's
- * own chroma for `shade_00` (`ground_chroma`, 0 elsewhere). The neutral twin
+ * peak `neutral_chroma` scaled by the shared chroma shape, plus the stop's
+ * share of the ground's own chroma (`ground_chroma`, already weighted by
+ * `neutral_ground_chroma_weight`; 0 past its reach and on text). The neutral twin
  * of `ramp_color_oklch`, shared with `check_theme` for the same reason.
  */
 export const neutral_color_oklch = (
@@ -427,7 +449,7 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeV
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 		NEUTRAL_HUE,
-		is_neutral_ground('shade', stop) ? SHADE_CHROMA_00 : 0
+		SHADE_CHROMA_00 * neutral_ground_chroma_weight('shade', stop)
 	);
 
 /**
@@ -599,8 +621,9 @@ export const render_ramp_color_css = (
 /**
  * Renders the derived default of a neutral (shade/text) stop. The neutral
  * rides the palette's chroma shape scaled by the `--neutral_chroma` peak;
- * the ground (`shade_00`) adds its own `--shade_chroma_00`, since the shape
- * is 0 there.
+ * the near-ground shade stops add their share of the ground's own
+ * `--shade_chroma_00` (see `neutral_ground_chroma_weight`), since the shape is near
+ * 0 there.
  */
 export const render_neutral_stop_css = (
 	family: Exclude<RampFamily, 'palette'>,
@@ -608,7 +631,14 @@ export const render_neutral_stop_css = (
 ): string =>
 	`oklch(var(--${to_lightness_stop_name(family, stop)}) calc(var(--neutral_chroma) * var(--${to_chroma_shape_name(
 		stop
-	)})${is_neutral_ground(family, stop) ? ' + var(--shade_chroma_00)' : ''}) var(--hue_neutral))`;
+	)})${render_ground_chroma_term(neutral_ground_chroma_weight(family, stop))}) var(--hue_neutral))`;
+
+// the stop's share of the ground chroma as a `calc()` term, empty past its reach
+const render_ground_chroma_term = (weight: number): string => {
+	if (weight === 0) return '';
+	if (weight === 1) return ' + var(--shade_chroma_00)';
+	return ` + var(--shade_chroma_00) * ${weight}`;
+};
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

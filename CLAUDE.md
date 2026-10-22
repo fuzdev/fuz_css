@@ -354,7 +354,9 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (links/focus/selection/selected), `--hue_neutral` + `--neutral_chroma`
   (all surfaces/text/borders/shadows - the neutral is an intent whose scales
   are `shade_*`/`text_*`; the chroma shape is 0 at the ends, so the page
-  ground `shade_00` is untinted unless `--shade_chroma_00` tints it),
+  ground `shade_00` is untinted unless `--shade_chroma_00` tints it, and that
+  tint fades over the near-ground shade stops - whole at 00, gone by 50 - so the
+  surfaces raised off a tinted page keep its cast),
   `--hue_positive`/`--hue_negative`/
   `--hue_caution`/`--hue_info`; each intent derives the full stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the
@@ -400,7 +402,8 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   set in em), and the `--background_image` decoration hook on `:root`
 - Surface shadows are declared variables a theme can retarget:
   `--button_shadow`/`_hover`/`_active`, `--pane_shadow` (the floating
-  `.pane`), and `--panel_shadow` (the embedded `.panel`, `none` by default).
+  `.pane`), and `--panel_shadow` (the embedded `.panel`, `none` by default);
+  the `.panel` fill is `--panel_fill` (`--ink_10` by default).
   The composed defaults name their shadow colors outright, since a value
   declared on `:root` can't see a contextual `--shadow_color`, so a shadow
   color or alpha class alone no longer tints them; a shadow shape class

@@ -32,7 +32,7 @@ import {
 	BORDER_COLOR_ALPHAS,
 	ramp_color_oklch,
 	neutral_color_oklch,
-	is_neutral_ground,
+	neutral_ground_chroma_weight,
 	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
 	to_chroma_shape_name,
@@ -470,8 +470,9 @@ export const check_theme = (theme: Theme, options: ThemeResolverOptions = {}): T
 				const neutral_c = num('neutral_chroma', scheme);
 				const shape = num(to_chroma_shape_name(stop), scheme);
 				const neutral_hue = num('hue_neutral', scheme);
-				// the ground carries its own chroma on top of the shaped term
-				const ground_c = is_neutral_ground(family, stop) ? num('shade_chroma_00', scheme) : 0;
+				// the near-ground shade stops carry their share of the ground's own chroma
+				const ground_weight = neutral_ground_chroma_weight(family, stop);
+				const ground_c = ground_weight === 0 ? 0 : num('shade_chroma_00', scheme);
 				if (
 					lightness === null ||
 					neutral_c === null ||
@@ -482,7 +483,7 @@ export const check_theme = (theme: Theme, options: ThemeResolverOptions = {}): T
 					return null;
 				}
 				return oklch_to_srgb(
-					neutral_color_oklch(lightness, neutral_c, shape, neutral_hue, ground_c)
+					neutral_color_oklch(lightness, neutral_c, shape, neutral_hue, ground_c * ground_weight)
 				);
 			},
 			visited

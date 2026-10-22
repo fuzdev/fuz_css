@@ -32,7 +32,12 @@ import { zine_theme } from '#lib/themes/zine.ts';
 import { phosphor_theme } from '#lib/themes/phosphor.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { shipped_base_themes } from './theme_test_helpers.ts';
-import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '#lib/ramps.ts';
+import {
+	PALETTE_CHROMA_MULTIPLIERS,
+	neutral_ground_chroma_weight,
+	palette_stop_oklch,
+	shade_stop_oklch
+} from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
 import {
 	palette_variants,
@@ -294,17 +299,27 @@ describe('check_theme', () => {
 		);
 		assert(ground, 'shade_00 gamut entry exists');
 		assert.isFalse(ground.pass);
-		// the rest of the shade scale doesn't carry the ground tint
-		assert.isTrue(
-			report.entries
-				.filter(
-					(e) => e.gate === 'gamut' && e.subject.startsWith('shade_') && e.subject !== 'shade_00'
-				)
-				.every((e) => e.pass)
+		// the near-ground stops carry their share of it, past sRGB too
+		const near_ground = report.entries.find(
+			(e) => e.gate === 'gamut' && e.scheme === 'light' && e.subject === 'shade_05'
 		);
+		assert(near_ground, 'shade_05 gamut entry exists');
+		assert.isFalse(near_ground.pass);
+		// the stops past the tint's reach don't carry it
+		const past_reach = report.entries.filter(
+			(e) =>
+				e.gate === 'gamut' &&
+				e.subject.startsWith('shade_') &&
+				neutral_ground_chroma_weight(
+					'shade',
+					e.subject.slice('shade_'.length) as NumericScaleVariant
+				) === 0
+		);
+		assert.isNotEmpty(past_reach);
+		assert.isTrue(past_reach.every((e) => e.pass));
 	});
 
-	test('a ground tint that resolves to no number leaves the ground unchecked', () => {
+	test('a ground tint that resolves to no number leaves the near-ground stops unchecked', () => {
 		const report = check_theme({
 			name: 't',
 			variables: [{ name: 'shade_chroma_00', base: 'calc(0.01 * 2)' }]

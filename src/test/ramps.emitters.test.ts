@@ -31,7 +31,8 @@ import {
 	render_chroma_stop_css,
 	render_neutral_stop_css,
 	neutral_color_oklch,
-	is_neutral_ground,
+	neutral_ground_chroma_weight,
+	SHADE_GROUND_CHROMA_REACH,
 	render_ramp_color_css,
 	render_border_color_stop_css,
 	render_shadow_tint_css,
@@ -338,12 +339,12 @@ describe('neutral stop emitter', () => {
 });
 
 describe('the ground tint', () => {
-	test('the emitter and the twin add it at shade_00 only', () => {
+	test('the emitter and the twin add each stop its share of it', () => {
 		const vars = { ...knob_vars('light'), shade_chroma_00: 0.015 };
 		for (const stop of numeric_scale_variants) {
 			for (const family of ['shade', 'text'] as const) {
 				const [l_css, c_css, h_css] = parse_oklch_args(render_neutral_stop_css(family, stop));
-				const ground = is_neutral_ground(family, stop) ? 0.015 : 0;
+				const ground = 0.015 * neutral_ground_chroma_weight(family, stop);
 				const [l, c, h] = neutral_color_oklch(
 					evaluate_css_number(l_css, vars),
 					NEUTRAL_CHROMA.light,
@@ -356,8 +357,28 @@ describe('the ground tint', () => {
 				assert.closeTo(evaluate_css_number(h_css, vars), h, TOLERANCE, `${family} ${stop} H`);
 			}
 		}
-		assert.include(render_neutral_stop_css('shade', '00'), 'var(--shade_chroma_00)');
+		assert.include(render_neutral_stop_css('shade', '00'), 'var(--shade_chroma_00))');
+		assert.include(render_neutral_stop_css('shade', '10'), 'var(--shade_chroma_00) *');
+		assert.notInclude(render_neutral_stop_css('shade', '50'), 'var(--shade_chroma_00)');
 		assert.notInclude(render_neutral_stop_css('text', '00'), 'var(--shade_chroma_00)');
+	});
+
+	test('the weight is whole at the ground and fades out by the reach', () => {
+		assert.strictEqual(neutral_ground_chroma_weight('shade', '00'), 1);
+		// quadratic: a fifth of the way to the reach keeps (1 - 0.2)^2 of the tint
+		assert.strictEqual(neutral_ground_chroma_weight('shade', '10'), 0.64);
+		let previous = 1;
+		for (const stop of numeric_scale_variants) {
+			const weight = neutral_ground_chroma_weight('shade', stop);
+			assert.isAtMost(weight, previous, `shade ${stop} rises`);
+			if (Number(stop) / 100 >= SHADE_GROUND_CHROMA_REACH) {
+				assert.strictEqual(weight, 0, `shade ${stop} past the reach`);
+			} else {
+				assert.isAbove(weight, 0, `shade ${stop} inside the reach`);
+			}
+			assert.strictEqual(neutral_ground_chroma_weight('text', stop), 0, `text ${stop}`);
+			previous = weight;
+		}
 	});
 });
 

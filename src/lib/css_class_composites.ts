@@ -170,7 +170,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
-			background-color: var(--ink_10);
+			background-color: var(--panel_fill);
 			box-shadow: var(--panel_shadow);
 			@media (forced-colors: active) {
 				border: var(--border_width) solid CanvasText; /* forced colors drop the background and shadow */

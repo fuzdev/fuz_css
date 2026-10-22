@@ -206,8 +206,10 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	},
 	{
 		// the ground's own tint - the shared chroma shape leaves the page
-		// untinted at any neutral_chroma, so a tinted page is this knob; a
-		// light ground near white has little gamut room, which the gates check
+		// untinted at any neutral_chroma, so a tinted page is this knob; it
+		// fades over the near-ground shade stops so raised surfaces keep the
+		// cast; a light ground near white has little gamut room, which the
+		// gates check
 		name: 'shade_chroma_00',
 		kind: 'number',
 		axis: 'color',
@@ -296,6 +298,16 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	{
 		// the sunken fill of inputs; at an extreme ground it has nowhere to go
 		name: 'input_fill',
+		kind: 'color',
+		axis: 'color',
+		leverage: 'sm',
+		tier: 'semantic'
+	},
+	{
+		// the embedded `.panel`'s fill, translucent ink by default so panels
+		// stack; an opaque value makes a card (white on a tinted page)
+		// TODO the gates don't pair text with it yet; neither is `input_fill`
+		name: 'panel_fill',
 		kind: 'color',
 		axis: 'color',
 		leverage: 'sm',
