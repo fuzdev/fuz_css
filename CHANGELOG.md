@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.71.1
+
+### Patch Changes
+
+- fix: key the extraction cache's configuration fingerprint and external-file names with a 64-bit SHA-256 prefix instead of a 32-bit hash, so distinct plugin configs or files outside the root don't collide; existing keyed and `_external/` entries miss once and are rewritten ([488688c](https://github.com/fuzdev/fuz_css/commit/488688c))
+
 ## 0.71.0
 
 ### Minor Changes
