@@ -7,11 +7,11 @@
  * @module
  */
 
+import { hash as crypto_hash } from 'node:crypto';
 import { readFileSync } from 'node:fs';
 import { createRequire } from 'node:module';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
-import { hash_insecure } from '@fuzdev/fuz_util/hash.ts';
 import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
@@ -22,6 +22,20 @@ import type { CacheDeps } from './deps.ts';
  * Default cache directory relative to project root.
  */
 export const DEFAULT_CACHE_DIR = '.fuz/cache/css';
+
+/**
+ * Hex length of the cache's config-key and external-file-name digests: a
+ * SHA-256 prefix of 64 bits, wide enough that distinct inputs don't collide
+ * in practice.
+ */
+const CACHE_DIGEST_LENGTH = 16;
+
+/**
+ * A truncated SHA-256 hex digest, for the cache's config key and
+ * external-file names.
+ */
+const to_cache_digest = (value: string): string =>
+	crypto_hash('sha256', value).slice(0, CACHE_DIGEST_LENGTH);
 
 /**
  * Parses a `CI` environment variable value. Any value is CI except unset,
@@ -183,7 +197,7 @@ export const to_extraction_cache_key = (
 ): string | null => {
 	const parts = (acorn_plugins ?? []).map((plugin) => 'plugin:' + plugin.toString());
 	if (cache_salt) parts.push('salt:' + cache_salt);
-	return parts.length ? hash_insecure(parts.join('\0')) : null;
+	return parts.length ? to_cache_digest(parts.join('\0')) : null;
 };
 
 /**
@@ -235,7 +249,7 @@ export const get_cache_path = (
 /**
  * Computes cache path for a file, handling both internal and external paths.
  * Internal files use relative paths mirroring source tree.
- * External files (outside project root) use hashed absolute paths in `_external/`.
+ * External files (outside project root) are named by a digest of their absolute path in `_external/`.
  *
  * @param file_id - absolute path to the source file
  * @param cache_dir - absolute path to the cache directory
@@ -249,7 +263,7 @@ export const get_file_cache_path = (
 	const is_internal = file_id.startsWith(project_root);
 	return is_internal
 		? get_cache_path(file_id, cache_dir, project_root)
-		: join(cache_dir, '_external', hash_insecure(file_id).slice(0, 16) + '.json');
+		: join(cache_dir, '_external', to_cache_digest(file_id) + '.json');
 };
 
 /**

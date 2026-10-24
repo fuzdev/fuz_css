@@ -4,6 +4,7 @@ import { mkdir, rm, writeFile, readFile } from 'node:fs/promises';
 
 import {
 	get_cache_path,
+	get_file_cache_path,
 	load_cached_extraction,
 	save_cached_extraction,
 	delete_cached_extraction,
@@ -157,6 +158,24 @@ describe('get_cache_path', () => {
 		const source = '/tmp/fuz_css_cache_test/project/a/b/c/d/e/file.svelte';
 		const expected = CACHE_DIR + '/a/b/c/d/e/file.svelte.json';
 		assert.strictEqual(get_cache_path(source, CACHE_DIR, PROJECT_ROOT), expected);
+	});
+});
+
+describe('get_file_cache_path', () => {
+	test('a file inside the root mirrors the source tree', () => {
+		assert.strictEqual(
+			get_file_cache_path(PROJECT_ROOT + 'src/lib/Button.svelte', CACHE_DIR, PROJECT_ROOT),
+			CACHE_DIR + '/src/lib/Button.svelte.json'
+		);
+	});
+
+	test('a file outside the root is named by a 16-hex digest of its path', () => {
+		const a = get_file_cache_path('/other/a.ts', CACHE_DIR, PROJECT_ROOT);
+		const b = get_file_cache_path('/other/b.ts', CACHE_DIR, PROJECT_ROOT);
+		assert.match(a, /\/_external\/[0-9a-f]{16}\.json$/);
+		assert.ok(a.startsWith(CACHE_DIR + '/_external/'));
+		assert.notStrictEqual(a, b);
+		assert.strictEqual(a, get_file_cache_path('/other/a.ts', CACHE_DIR, PROJECT_ROOT));
 	});
 });
 
@@ -614,6 +633,7 @@ describe('the extraction configuration key', () => {
 		];
 		assert.strictEqual(new Set(keys).size, keys.length);
 		assert.notInclude(keys, null);
+		for (const key of keys) assert.match(key!, /^[0-9a-f]{16}$/);
 		assert.strictEqual(
 			to_extraction_cache_key([plugin_a], 'v2'),
 			to_extraction_cache_key([plugin_a], 'v2')
