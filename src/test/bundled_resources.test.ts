@@ -249,14 +249,15 @@ describe('create_bundled_resources', () => {
 				(d) => d.filter((v) => v.name !== 'font_family'),
 				'the configured variables do not define: --font_family'
 			]
-		] as Array<
-			[string, VariablesOption, string]
-		>)('the default base styles with %s raise undefined_theme_variables once', async (_name, variables, expected) => {
-			const result = await generate({ variables, elements: ['button'] });
-			assert.deepEqual(identifiers(result), ['undefined_theme_variables']);
-			assert.strictEqual(result.diagnostics[0]!.level, 'error');
-			assert.include(result.diagnostics[0]!.message, expected);
-		});
+		] as Array<[string, VariablesOption, string]>)(
+			'the default base styles with %s raise undefined_theme_variables once',
+			async (_name, variables, expected) => {
+				const result = await generate({ variables, elements: ['button'] });
+				assert.deepEqual(identifiers(result), ['undefined_theme_variables']);
+				assert.strictEqual(result.diagnostics[0]!.level, 'error');
+				assert.include(result.diagnostics[0]!.message, expected);
+			}
+		);
 
 		test('excluding the default set pairs base styles with a separately imported theme', async () => {
 			const result = await generate({
