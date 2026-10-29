@@ -55,7 +55,7 @@
     "@fuzdev/blake3-wasm": "^0.2.0",
     "@fuzdev/fuz_code": "^0.56.0",
     "@fuzdev/fuz_schema": "^0.5.0",
-    "@fuzdev/fuz_ui": "^0.220.0",
+    "@fuzdev/fuz_ui": "^0.221.0",
     "@fuzdev/fuz_util": "^0.79.0",
     "@fuzdev/gro": "^0.223.0",
     "@fuzdev/mdz": "^0.7.0",
