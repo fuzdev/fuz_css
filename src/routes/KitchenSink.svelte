@@ -11,7 +11,9 @@
 	<strong>strong</strong> and <em>emphasized</em> text, <kbd>Ctrl</kbd>+<kbd>K</kbd>, and
 	<small>small print</small>, spaced by the flow margin with nothing added.
 </p>
-<blockquote>Moss grows on the north side, except where it doesn't.</blockquote>
+<blockquote>
+	Moss grows on the north side, except where it doesn't. <em>—a blockquote</em>
+</blockquote>
 <aside>An aside is a callout, with its own tint and border.</aside>
 <form onsubmit={(e) => e.preventDefault()}>
 	<label>
