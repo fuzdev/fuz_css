@@ -1,5 +1,17 @@
 # @fuzdev/fuz_css
 
+## 0.72.0
+
+### Minor Changes
+
+- Update dependencies (BREAKING CHANGES) ([192572d](https://github.com/fuzdev/fuz_css/commit/192572d))
+
+  Breaking dependency changes:
+
+  - @fuzdev/fuz_util: 0.78.0 → 0.79.0 (minor)
+
+- chore: upgrade fuz_util 0.78.0 ([d2f961c](https://github.com/fuzdev/fuz_css/commit/d2f961c))
+
 ## 0.71.1
 
 ### Patch Changes
