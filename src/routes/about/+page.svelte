@@ -26,7 +26,7 @@
 		</header>
 		<Breadcrumb />
 	</section>
-	<section>
+	<section class="box mb_lg">
 		<div class="panel p_md width_atmost_md">
 			<LibrarySummary {library} />
 		</div>
