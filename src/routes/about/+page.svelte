@@ -2,7 +2,7 @@
 	import DocsFooter from '@fuzdev/fuz_ui/DocsFooter.svelte';
 	import { site_context } from '@fuzdev/fuz_ui/site.svelte.ts';
 	import { FUZ_DEV_URL } from '@fuzdev/fuz_ui/constants.ts';
-	import LibraryDetail from '@fuzdev/fuz_ui/LibraryDetail.svelte';
+	import LibrarySummary from '@fuzdev/fuz_ui/LibrarySummary.svelte';
 	import EcosystemLinksPanel from '@fuzdev/fuz_ui/EcosystemLinksPanel.svelte';
 	import Breadcrumb from '@fuzdev/fuz_ui/Breadcrumb.svelte';
 	import { Library, library_context } from '@fuzdev/fuz_ui/library.svelte.ts';
@@ -28,7 +28,7 @@
 	</section>
 	<section>
 		<div class="panel p_md width_atmost_md">
-			<LibraryDetail {library} />
+			<LibrarySummary {library} />
 		</div>
 	</section>
 	<EcosystemLinksPanel />
