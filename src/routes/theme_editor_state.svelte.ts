@@ -1,13 +1,7 @@
 import { SvelteMap } from 'svelte/reactivity';
 import { escape_js_string } from '@fuzdev/fuz_util/string.ts';
 
-import {
-	compose_themes,
-	pick_stance_slot,
-	to_theme_stance,
-	type ResolvedTheme
-} from '#lib/theme.ts';
-import { resolve_theme_stance } from '#lib/theme_stance.ts';
+import { compose_themes, pick_stance_slot, to_theme_stance } from '#lib/theme.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
 import { theme_knob_by_name } from '#lib/knobs.ts';
@@ -17,7 +11,7 @@ import type { ThemeIssue } from '#lib/theme_validate.ts';
 import { compile_theme, type CompiledTheme } from '#lib/theme_compile.ts';
 import { create_theme_resolver, type ThemeKnobResolver } from '#lib/theme_resolver.ts';
 import type { ColorScheme } from '#lib/variable_data.ts';
-import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+import { UNSAVED_THEME_NAME } from '#routes/theme_draft.svelte.ts';
 
 // TODO upstream to fuz_ui
 
@@ -223,13 +217,6 @@ export class ThemeEditorState {
 	});
 
 	/**
-	 * `output` with its derived data, what it renders as: a single-scheme
-	 * draft's mirror rides beside it, since without it the renderer would pin
-	 * `color-scheme` but show the other scheme's defaults.
-	 */
-	readonly resolved_output: ResolvedTheme = $derived(resolve_theme_stance(this.output));
-
-	/**
 	 * The live-applied theme: `output` renamed to a stable name so pickers key
 	 * it consistently.
 	 */
@@ -258,7 +245,9 @@ export class ThemeEditorState {
 	/**
 	 * The draft compiled on every edit (`compile_theme`): its lint, and its
 	 * gates measured with its recomputed chroma caps, as a build baking it
-	 * would measure them - the page's preview renders without them.
+	 * would measure them. It also carries what `output` renders with - the
+	 * stance mirror and the caps - which the docs site's `resolve_site_theme`
+	 * attaches to the applied draft.
 	 */
 	readonly compiled: CompiledTheme = $derived(compile_theme(this.output));
 

@@ -14,7 +14,7 @@ import { signage_theme } from '#lib/themes/signage.ts';
  * The themes page's editor bases drafts on it, and the root layout's
  * `ThemeRoot` takes it so a picked theme persists by name.
  *
- * Lives in its own leaf module, like `theme_draft.ts`, so the root layout
+ * Lives in its own leaf module, like `theme_draft.svelte.ts`, so the root layout
  * doesn't pull the editor-state module into every page's bundle. The theme
  * modules are plain data, so importing them costs only their variables.
  */

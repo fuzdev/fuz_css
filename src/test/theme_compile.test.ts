@@ -5,8 +5,10 @@ import { oklch_max_srgb_chroma } from '@fuzdev/fuz_util/oklch.ts';
 import { check_theme } from '#lib/theme_check.ts';
 import { compile_theme } from '#lib/theme_compile.ts';
 import { parse_theme, type Theme } from '#lib/variable.ts';
-import { render_theme_style } from '#lib/theme.ts';
+import { compose_themes, render_theme_style } from '#lib/theme.ts';
 import { compute_scheme_mirror } from '#lib/theme_stance.ts';
+import { contrast_modifiers } from '#lib/themes.ts';
+import { site_themes } from '#routes/site_themes.ts';
 import { create_monochrome_theme } from './theme_test_helpers.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
@@ -299,5 +301,43 @@ describe('compile_theme', () => {
 		const input = create_monochrome_theme(145); // dark-stanced
 		assert.deepEqual(compile_theme(input).scheme_mirror, compute_scheme_mirror('dark'));
 		assert.isUndefined(compile_theme(base_theme).scheme_mirror);
+	});
+});
+
+// the docs site's resolver attaches recomputed caps to the editor draft alone,
+// and the uncomposed draft's caps to a draft composed with a contrast modifier
+describe("the docs site's draft-only caps", () => {
+	const modifiers = Object.values(contrast_modifiers);
+
+	test('every site theme compiles to no caps, alone and composed with each contrast modifier', () => {
+		for (const theme of site_themes) {
+			assert.deepEqual(compile_theme(theme).caps, [], theme.name);
+			for (const modifier of modifiers) {
+				const composed = compose_themes(theme, modifier);
+				assert.deepEqual(compile_theme(composed).caps, [], composed.name);
+			}
+		}
+	});
+
+	test("a contrast modifier doesn't move a draft's caps", () => {
+		const drafts: Array<Theme> = [
+			{ name: 'moved hue', variables: [{ name: 'hue_a', base: '100' }] },
+			{
+				name: 'moved lightness',
+				variables: [{ name: 'palette_lightness_00', base: '0.995', dark: '0.05' }]
+			},
+			create_monochrome_theme(145) // dark-stanced
+		];
+		for (const draft of drafts) {
+			const { caps } = compile_theme(draft);
+			assert.isAbove(caps.length, 0, `${draft.name} emits caps`);
+			for (const modifier of modifiers) {
+				assert.deepEqual(
+					compile_theme(compose_themes(draft, modifier)).caps,
+					caps,
+					`${draft.name} with ${modifier.name}`
+				);
+			}
+		}
 	});
 });

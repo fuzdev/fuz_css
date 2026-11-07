@@ -86,9 +86,7 @@
 	};
 
 	const output_ts = $derived(render_theme_ts(editor.output));
-	const output_css = $derived(
-		render_theme_style(editor.resolved_output.theme, editor.resolved_output)
-	);
+	const output_css = $derived(render_theme_style(editor.compiled.theme, editor.compiled));
 </script>
 
 {#snippet knob_control(knob: ThemeKnob, compact: boolean)}
@@ -248,9 +246,8 @@
 	<p>
 		<code>compile_theme</code> runs live against the draft - the same lint and
 		gamut/monotonicity/contrast gates the shipped themes are held to in CI, measured with the chroma
-		caps it recomputes for the draft, as a build baking it would. This page's preview still renders
-		the draft at the default caps, so a moved hue or lightness can clip here where a baked build
-		holds.
+		caps it recomputes for the draft, as a build baking it would. This page renders the draft with
+		those caps too, so what the gates measure is what you see, before any contrast modifier.
 	</p>
 	{#if editor.gates_pass}
 		<p class="positive_60">
@@ -295,7 +292,8 @@
 	<h3>Output</h3>
 	<p>
 		The copyable <code>Theme</code> object, and the CSS it renders - the variables the theme sets,
-		plus the scheme-stance mirror when the theme is single-scheme.
+		plus the scheme-stance mirror when the theme is single-scheme, and the chroma caps the draft
+		recomputes.
 	</p>
 	<!-- lazily rendered: the highlighted output is the costliest thing on the
 		page and would re-render on every knob drag while open -->

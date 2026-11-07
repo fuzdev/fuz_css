@@ -8,6 +8,7 @@
 		type ThemeEditorSnapshotData
 	} from '#routes/theme_editor_state.svelte.ts';
 	import { site_themes } from '#routes/site_themes.ts';
+	import { UNSAVED_THEME_NAME, register_draft_caps_source } from '#routes/theme_draft.svelte.ts';
 
 	const create_editor = (): ThemeEditorState =>
 		new ThemeEditorState({ themes: site_themes, contrast_modifiers });
@@ -17,6 +18,14 @@
 	// snapshot below only covers history navigation; rooted, since the page
 	// instance that first creates it is destroyed by that navigation
 	let session_editor: ThemeEditorState | null = null;
+
+	// the session editor outlives the page, and so does its draft, applied on
+	// every page - so its caps source is registered once and never removed
+	const create_session_editor = (): ThemeEditorState => {
+		const editor = create_rooted_theme_editor({ themes: site_themes, contrast_modifiers });
+		register_draft_caps_source(() => editor.compiled.caps);
+		return editor;
+	};
 </script>
 
 <script lang="ts">
@@ -36,7 +45,6 @@
 	import ThemeEditor from '#routes/ThemeEditor.svelte';
 	import ThemePreview from '#routes/ThemePreview.svelte';
 	import ContrastInput from '#routes/ContrastInput.svelte';
-	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 	import { snapshot } from '$app/navigation';
 
 	const LIBRARY_ITEM_NAME = 'themes';
@@ -47,9 +55,7 @@
 	const theme_state = get_theme_state();
 
 	// the server renders a fresh editor per request; the browser keeps one
-	const editor = BROWSER
-		? (session_editor ??= create_rooted_theme_editor({ themes: site_themes, contrast_modifiers }))
-		: create_editor();
+	const editor = BROWSER ? (session_editor ??= create_session_editor()) : create_editor();
 
 	// adopt whatever the page already applies - a theme persisted from an
 	// earlier visit, possibly a contrast composition - before the effect below

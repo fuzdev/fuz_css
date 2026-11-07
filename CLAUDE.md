@@ -889,12 +889,19 @@ The themes docs page hosts an inline theme editor built from
 [ThemePreview.svelte](src/routes/ThemePreview.svelte) (beside the picker: the
 picked theme's `summary` over a compact sample of basic elements, wrapping
 below the picker on narrow screens), and
-[theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
-in a leaf module so the root layout doesn't pull the editor's dependency
-graph. `ThemeEditorState` compiles the draft on every edit
+[theme_draft.svelte.ts](src/routes/theme_draft.svelte.ts), a leaf module so
+the root layout doesn't pull the editor's dependency graph, holding the
+draft-name constant and the layout's `ThemeRoot` resolver
+(`resolve_site_theme`). `ThemeEditorState` compiles the draft on every edit
 (`compile_theme`), so its Gates panel measures with the caps a bake would
-recompute (the preview renders without them - the layout's resolver
-supplies the stance mirror, not caps), and owns what the page applies - the
+recompute, and the page renders the draft with them: the themes page
+registers its session editor's compiled caps once
+(`register_draft_caps_source`), and the resolver attaches them to the
+applied draft beside the stance mirror. The site's themes compile to no
+caps, alone or composed with a contrast modifier, and the modifiers don't
+move the caps of a draft that doesn't bind its hues or palette lightness to
+the variables they set (`theme_compile.test.ts` holds both). The editor state
+also owns what the page applies - the
 dirty draft or its base, composed with the active contrast modifier
 (`applied_theme`) - plus the
 shared discard guard (`load_theme_guarded`) and `sync_applied_theme`, which
@@ -902,14 +909,14 @@ adopts a theme already applied at mount so a persisted theme or contrast
 composition isn't replaced by the editor's defaults. The themes page keeps
 one editor per browser session, so a draft survives in-app navigation, and
 only bridges `applied_theme` to fuz_ui's theme state. The editor's `output`
-and `draft` are wire themes; `resolved_output` carries the mirror the
-rendered-CSS readout needs. The layout's fuz_ui `ThemeRoot` takes the
+and `draft` are wire themes; `compiled` carries the mirror and caps the
+rendered-CSS readout renders. The layout's fuz_ui `ThemeRoot` takes the
 site's themes (`themes`, from the leaf module
 [site_themes.ts](src/routes/site_themes.ts) - the registry plus the shipped
 exemplars, which the themes page's editor bases drafts on too), so a picked
-theme persists by name, and `resolve_theme={resolve_theme_stance}`, so a
-stanced theme renders with its mirror; its `save_theme` wrapper skips the
-draft.
+theme persists by name, and `resolve_theme={resolve_site_theme}`, so a
+stanced theme renders with its mirror and the draft with its caps; its
+`save_theme` wrapper skips the draft.
 [root_color_scheme.svelte.ts](src/routes/root_color_scheme.svelte.ts) reads
 the scheme the page renders off the root class reactively; the editor's
 edited slot and the swatch readouts follow it rather than the theme state,

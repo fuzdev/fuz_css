@@ -15,11 +15,12 @@ import {
 	to_scheme_slot,
 	type SlotOverride
 } from '#routes/theme_editor_state.svelte.ts';
-import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+import { UNSAVED_THEME_NAME } from '#routes/theme_draft.svelte.ts';
 import type { Theme } from '#lib/variable.ts';
 import { compose_themes, render_theme_style } from '#lib/theme.ts';
 import { check_theme } from '#lib/theme_check.ts';
 import { compile_theme } from '#lib/theme_compile.ts';
+import { resolve_theme_stance } from '#lib/theme_stance.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -246,11 +247,16 @@ describe('scheme stance', () => {
 		// the derived mirror never rides in what's copied or applied
 		assert.deepEqual(Object.keys(editor.output).sort(), ['name', 'scheme', 'variables']);
 		assert.deepEqual(Object.keys(editor.draft).sort(), ['name', 'scheme', 'variables']);
-		assert.deepEqual(editor.resolved_output.theme, editor.output);
-		assert.isAbove(editor.resolved_output.scheme_mirror!.length, 0);
+		assert.deepEqual(editor.compiled.theme, editor.output);
+		assert.isAbove(editor.compiled.scheme_mirror!.length, 0);
+		// the readout's mirror is the one the page's resolver renders
+		assert.deepEqual(
+			editor.compiled.scheme_mirror,
+			resolve_theme_stance(editor.output).scheme_mirror
+		);
 		// a dual editor resolves no mirror
 		const dual = create_editor();
-		assert.isUndefined(dual.resolved_output.scheme_mirror);
+		assert.isUndefined(dual.compiled.scheme_mirror);
 	});
 });
 

@@ -10,8 +10,7 @@
 	import { save_theme } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import pkg_json from 'virtual:pkg.json';
 
-	import { resolve_theme_stance } from '#lib/theme_stance.ts';
-	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
+	import { UNSAVED_THEME_NAME, resolve_site_theme } from '#routes/theme_draft.svelte.ts';
 	import { site_themes } from '#routes/site_themes.ts';
 
 	// TODO re-enable this, see comment below
@@ -38,10 +37,11 @@
 <!-- the theme editor's draft rethemes the page live through `theme_state`, and
 	ThemeRoot persists every theme reassignment to localStorage undebounced, so
 	drafts are excluded from persistence here; the site's themes persist by name,
-	and a stanced theme renders its mirror through the resolver -->
+	a stanced theme renders its mirror through the resolver, and the draft its
+	recomputed caps too -->
 <ThemeRoot
 	themes={site_themes}
-	resolve_theme={resolve_theme_stance}
+	resolve_theme={resolve_site_theme}
 	save_theme={(theme, themes) =>
 		theme?.name === UNSAVED_THEME_NAME ? undefined : save_theme(theme, themes)}
 >
