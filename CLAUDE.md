@@ -63,7 +63,8 @@ system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
 list items in a styled `ul`/`ol` two steps below it - `space_sm` by default,
 and a heading opening a padded box - `.panel`, `.pane`, `aside`, `li`, and
 the like - drops its top margin), and margins reset to 0 on the direct
-children of a `.row` (horizontal flex; use `gap_*` there instead). Adding a
+children of a `.row` or `.row_wrap` (horizontal flex; use `gap_*` there
+instead). Adding a
 `mb_*`/`gap_*`/`p_*` class or a `<style>` block
 should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
@@ -258,7 +259,8 @@ See the `VitePluginFuzCssOptions` type for configuration.
   ground) are variables only, reached via literals
   (`background-color:var(--ink_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
-  `ellipsis`, `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
+  `row_wrap` (a `row` that wraps), `ellipsis`, `sr_only` (visually hidden,
+  still read by assistive technology), `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
   `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
   `sized_xl` (uniform step offsets from the `sized_md` default; `sized_md`
   doubles as a cascade reset; they scale controls and spacing via

@@ -1044,8 +1044,10 @@ vite_plugin_fuz_css({
 			<ul>
 				<li><code>.box</code> - centered flex container</li>
 				<li><code>.row</code> - horizontal flex row</li>
+				<li><code>.row_wrap</code> - horizontal flex row that wraps</li>
 				<li><code>.column</code> - vertical flex column</li>
 				<li><code>.ellipsis</code> - text overflow ellipsis</li>
+				<li><code>.sr_only</code> - visually hidden, still read by assistive technology</li>
 				<li><code>.pane</code> - pane container</li>
 				<li><code>.panel</code> - panel container</li>
 				<li><code>.icon_button</code> - icon button styling</li>
@@ -1489,7 +1491,10 @@ vite_plugin_fuz_css({
 			<li><code>.inline</code> - see <TomeLink slug="buttons" />, <TomeLink slug="forms" /></li>
 			<li><code>.heading</code> - see <TomeLink slug="typography" /></li>
 			<li><code>.title</code> - see <TomeLink slug="forms" /></li>
-			<li><code>.row</code> - see <TomeLink slug="layout" />, <TomeLink slug="forms" /></li>
+			<li>
+				<code>.row</code>, <code>.row_wrap</code> - see <TomeLink slug="layout" />,
+				<TomeLink slug="forms" />
+			</li>
 			<li>
 				<code>.palette_a</code> through <code>.palette_j</code> - see <TomeLink slug="buttons" />,
 				<TomeLink slug="colors" />

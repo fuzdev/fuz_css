@@ -1102,6 +1102,71 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('row_wrap composite', () => {
+		test('is a wrapping row in the composites sublayer', () => {
+			const result = generate_classes_css({
+				class_names: ['row_wrap', 'gap_md'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+
+			const composites = result.css.slice(
+				result.css.indexOf('@layer composites {'),
+				result.css.indexOf('.gap_md')
+			);
+			assert_css_contains(
+				composites,
+				'.row_wrap {',
+				'display: flex;',
+				'flex-direction: row;',
+				'align-items: center;',
+				'flex-wrap: wrap;'
+			);
+			assert.lengthOf(result.diagnostics, 0);
+		});
+
+		test('declares what row declares, plus flex-wrap', () => {
+			const to_declarations = (name: string): Array<string> => {
+				const definition = css_class_definitions[name];
+				assert.ok(definition && 'declaration' in definition && definition.declaration);
+				return definition.declaration
+					.split(';')
+					.map((d) => d.trim())
+					.filter(Boolean);
+			};
+			assert.deepEqual(to_declarations('row_wrap'), [...to_declarations('row'), 'flex-wrap: wrap']);
+		});
+	});
+
+	describe('sr_only composite', () => {
+		test('hides visually with the clip-path bundle, in the composites sublayer', () => {
+			const result = generate_classes_css({
+				class_names: ['sr_only'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+
+			assert_css_contains(
+				result.css,
+				'@layer composites {',
+				'.sr_only {',
+				'position: absolute;',
+				'width: 1px;',
+				'height: 1px;',
+				'padding: 0;',
+				'margin: -1px;',
+				'overflow: hidden;',
+				'clip-path: inset(50%);',
+				'white-space: nowrap;',
+				'border: 0;'
+			);
+			assert_css_not_contains(result.css, 'clip:');
+			assert.lengthOf(result.diagnostics, 0);
+		});
+	});
+
 	describe('composite fallback patterns', () => {
 		test.each(['chip', 'pane', 'panel'])(
 			'%s uses var(--border_radius, var(--border_radius_xs))',

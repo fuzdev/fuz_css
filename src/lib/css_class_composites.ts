@@ -49,6 +49,16 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			align-items: center;
 		`
 	},
+	// a `.row` that wraps its children onto more lines as they run out of room
+	row_wrap: {
+		composite: true,
+		declaration: `
+			display: flex;
+			flex-direction: row;
+			align-items: center;
+			flex-wrap: wrap;
+		`
+	},
 	ellipsis: {
 		composite: true,
 		declaration: `
@@ -56,6 +66,22 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			white-space: nowrap;
 			overflow: hidden;
 			text-overflow: ellipsis;
+		`
+	},
+	// visually hidden but still read by assistive technology, the standard
+	// bundle with `clip-path` in place of the legacy `clip`
+	sr_only: {
+		composite: true,
+		declaration: `
+			position: absolute;
+			width: 1px;
+			height: 1px;
+			padding: 0;
+			margin: -1px;
+			overflow: hidden;
+			clip-path: inset(50%);
+			white-space: nowrap;
+			border: 0;
 		`
 	},
 	selectable: {

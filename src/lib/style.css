@@ -380,7 +380,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	}
 
 	/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
-	:where(.row > *) {
+	:where(.row > *, .row_wrap > *) {
 		margin: 0;
 	}
 
@@ -692,10 +692,13 @@ for disabled colors without needing a wrapper .disabled class */
 		cursor: default;
 		--text_color: var(--text_disabled);
 	}
-	:where(label.row:not(.unstyled)) {
+	:where(label:is(.row, .row_wrap):not(.unstyled)) {
 		justify-content: flex-start;
 	}
-	:where(label.row:not(.unstyled) :is(input[type='checkbox'], input[type='radio']):not(.unstyled)) {
+	:where(
+		label:is(.row, .row_wrap):not(.unstyled)
+			:is(input[type='checkbox'], input[type='radio']):not(.unstyled)
+	) {
 		margin-right: var(--space_md);
 	}
 

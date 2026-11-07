@@ -128,13 +128,13 @@
 	<TomeSection>
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
-			The <code>.row</code> layout composite resets margins on its direct children. Flow margins
-			make less sense in horizontal flex layout - for spacing prefer gap utilities like
-			<code>.gap_md</code> and <code>gap: var(--space_sm)</code> instead.
+			The <code>.row</code> and <code>.row_wrap</code> layout composites reset margins on their
+			direct children. Flow margins make less sense in horizontal flex layout - for spacing prefer
+			gap utilities like <code>.gap_md</code> and <code>gap: var(--space_sm)</code> instead.
 		</p>
 		<Code
 			lang="css"
-			content={`:where(.row > *) {
+			content={`:where(.row > *, .row_wrap > *) {
   margin: 0;
 }`}
 		/>

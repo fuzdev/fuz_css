@@ -664,6 +664,26 @@ describe('load_style_rule_index', () => {
 
 		assert.isTrue(index.by_class.has('unstyled'));
 	});
+
+	test('the flex row margin reset ships for row_wrap alone', async () => {
+		const index = await load_style_rule_index(deps);
+		const reset = index.rules.findIndex((r) => r.css.startsWith(':where(.row > *, .row_wrap > *)'));
+		assert.isAtLeast(reset, 0);
+		assert.isTrue(index.by_class.get('row_wrap')?.includes(reset));
+		assert.isTrue(get_matching_rules(index, new Set(), new Set(['row_wrap'])).has(reset));
+	});
+
+	test('the label row rules index row_wrap beside row', async () => {
+		const index = await load_style_rule_index(deps);
+		const label_rows = index.rules
+			.map((r, i) => ({ r, i }))
+			.filter(({ r }) => /^:where\(\s*label:is\(\.row, \.row_wrap\)/.test(r.css));
+		assert.lengthOf(label_rows, 2);
+		for (const { r, i } of label_rows) {
+			assert.isTrue(r.classes.has('row') && r.classes.has('row_wrap'), r.css);
+			assert.isTrue(index.by_class.get('row_wrap')?.includes(i));
+		}
+	});
 });
 
 describe('untargetable rules', () => {
