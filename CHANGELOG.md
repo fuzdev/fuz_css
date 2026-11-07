@@ -1,5 +1,13 @@
 # @fuzdev/fuz_css
 
+## 0.76.1
+
+### Patch Changes
+
+- fix: cap the `contrast` knob's safe range at 0.75 ([c2c6823](https://github.com/fuzdev/fuz_css/commit/c2c6823))
+
+  The knob's domain stays 0 to 1, but past 0.75 `text_80` on `shade_10` fails on shipped themes, and 1 is a white or near-black ground. `validate_theme` now warns on a `contrast` above 0.75 (a warning, knowingly exceedable, like every knob's range), and the theme editor's slider stops there. A test holds every base theme's gates at the range top.
+
 ## 0.76.0
 
 ### Minor Changes
