@@ -1,5 +1,152 @@
 # @fuzdev/fuz_css
 
+## 0.74.0
+
+### Minor Changes
+
+- **breaking** feat: split the theme check report into `passed` and `complete` ([a3f4c39](https://github.com/fuzdev/fuz_css/commit/a3f4c39))
+
+  A theme can pass every gate the checker could read and still leave inputs unread, so `ThemeCheckReport` answers the two apart: `passed` is true when every evaluated entry passes, `complete` when nothing is unchecked.
+
+  Breaking:
+
+  - `ThemeCheckReport.ok` is removed - `ok` was `passed && complete`
+
+- **breaking** feat: delete `circular` and the space-scale width, height, and positional classes ([7d58888](https://github.com/fuzdev/fuz_css/commit/7d58888))
+
+  A single non-token declaration gets no coined class name - the literal is the shorthand.
+
+  Breaking:
+
+  - `circular` is removed - use `border-radius:50%`
+  - the space-scale `width_*` and `height_*` classes (`width_md`, ...) are removed - use `width:var(--space_md)`; the distance families (`width_atmost_*`, `width_atleast_*`, `height_atmost_*`, `height_atleast_*`) stay
+  - the space-scale `top_*`, `right_*`, `bottom_*`, `left_*`, and `inset_*` classes are removed - use `top:var(--space_md)`
+
+- **breaking** feat: `ColorScheme` is the rendered scheme, `ColorSchemePreference` the setting ([0fb1edf](https://github.com/fuzdev/fuz_css/commit/0fb1edf))
+
+  `ColorScheme` names the two schemes a page renders in - what a stance, the gates, the mirror, and the `dark:`/`light:` modifiers deal in - and `ColorSchemePreference` the three-valued setting a picker offers, which can follow the OS.
+
+  Breaking:
+
+  - `ColorScheme` is `'light' | 'dark'` and lives in `variable_data.ts` - import it from `@fuzdev/fuz_css/variable_data.ts`; the old three-valued type is `ColorSchemePreference` in `theme.ts`
+  - `color_schemes` is `Array<ColorSchemePreference>`
+  - `ColorSchemeVariant` is removed - use `ColorScheme`
+
+- feat: compile a theme over a configured variable set with `compile_theme(theme, {variables})` ([52b2962](https://github.com/fuzdev/fuz_css/commit/52b2962))
+
+  Given `variables`, `compile_theme` measures the theme as a build that configures them renders it: the stance mirror re-slots the given set, and each knob-tier value it changes from the default folds in beneath the theme's own for the caps and the gates. The build-time bake now compiles this way, so `compile_theme(theme, {variables})` reports what a build with those `variables` bakes - before, `compile_theme` always measured against the defaults. Without `variables` it compiles as before, and the bake's output and gate results are unchanged.
+
+  - `CompileThemeOptions` is new
+  - `contain_variable` is exported from `css_containment.ts`
+
+- **breaking** feat: give every diagnostic a code ([a1aa36d](https://github.com/fuzdev/fuz_css/commit/a1aa36d))
+
+  Each diagnostic carries a `code` from the closed `DiagnosticCode` union, naming what went wrong (`class_unresolved`, `class_property_unknown`, `element_unknown`, `variable_misspelled`, `theme_gate_failed`, ...), and a generation diagnostic's `identifier` is always its subject. Formatted diagnostics read `[code] subject: message`.
+
+  Breaking:
+
+  - `code` is required on `ExtractionDiagnostic`, `GenerationDiagnostic`, and `InterpreterDiagnostic` - a custom interpreter pushing a diagnostic sets one, `class_interpreter` when no other code fits
+  - the codes that rode `identifier` move to `code`, and `identifier` names the subject instead: the variable for `variable_value_uncontained` and `variable_cycle`, the theme's name for `theme_discarded`, `theme_lint`, `theme_gate_failed`, and `theme_gate_unchecked`, the at-rule (`@layer mine`, `@import "x.css"`) for `base_css_layer` and `base_css_unsupported_at_rule`, and `base_css` for `base_css_variables_undefined` - match on `code` instead
+  - three of those codes are renamed to lead with their subject's family: `undefined_theme_variables` is `base_css_variables_undefined`, `uncontained_theme_value` is `variable_value_uncontained`, and `variable_resolution` is `variable_cycle`
+  - the `variable_misspelled` warning's `identifier` is the bare variable name (`color_primry`), not `var(--color_primry)`
+  - `format_diagnostic` output, and so the logged lines and `CssGenerationError` message, include the code
+  - `ResolveVariablesResult.warnings` is replaced by `cycles`, the names of the variables found on a dependency cycle
+
+- **breaking** refactor: take the class include and exclude options in `GenerateCssOptions` ([bdf7d9a](https://github.com/fuzdev/fuz_css/commit/bdf7d9a))
+
+  `generate_css` applies all six include and exclude options itself - `additional_classes` and `exclude_classes` beside the element and variable pairs - so an integration over the pipeline passes them in one place. The generated CSS and diagnostics are unchanged. These modules are internal, so this touches only code that drives the pipeline directly.
+
+  Breaking:
+
+  - `GenerateCssOptions` takes `additional_classes` and `exclude_classes`
+  - `CssClasses` takes no constructor arguments, and its `get_all()` returns the extracted classes unfiltered, without `additional_classes` and with every location an array
+
+- **breaking** chore: trim the generator API ([831dac6](https://github.com/fuzdev/fuz_css/commit/831dac6))
+
+  Breaking:
+
+  - class definitions and interpreters no longer take `comment`, and generated CSS no longer carries the composites' doc comments
+  - the unused `log` option is removed from `GenerateCssOptions`, `GenerateClassesCssOptions`, `CssRenderInput`, and `CssClassInterpreterContext`
+  - `CssClasses.get()` and `get_with_locations()` are removed - use `get_all()`
+  - `parse_ci_value` and `is_ci` moved from `css_cache.ts` to `ci.ts`
+  - `deps.ts` no longer re-exports `FsError` - import it from `@fuzdev/fuz_util/fs.ts`
+  - `format_spacing_value` handles `0`, `auto`, and the space variants only - `100` and `px` values are no longer special-cased
+  - `ClassTemplateFn` is a single three-parameter function type instead of a union of one-, two-, and three-parameter functions
+
+- **breaking** refactor: mark the generator pipeline modules `@internal` and make the custom-class authoring surface public ([1470bf5](https://github.com/fuzdev/fuz_css/commit/1470bf5))
+
+  The modules beneath the Vite plugin - extraction, class resolution and generation, the token class generators, the CSS-literal parser, the bundled-CSS pipeline, the cache, and the filesystem deps - carry a module-level `@internal`, so the API docs label them unstable. They stay importable and documented; the public surface is the Vite plugin and its options, the theme system, the variables, the diagnostics and file filter, the modifiers, and the custom-class authoring surface: the class registries a project spreads (`css_class_definitions.ts`, `css_class_composites.ts`, `css_class_keywords.ts`, `css_class_interpreters.ts`) and the types the `class_definitions`, `class_interpreters`, and `acorn_plugins` options take. `css_extraction_state.ts` and `vite_plugin_fuz_css_build.ts`, previously hidden from the docs, are now listed as internal.
+
+  Breaking:
+
+  - `CssClassDefinition` and its forms (`CssClassDefinitionBase`, `CssClassDefinitionComposition`, `CssClassDefinitionDeclaration`, `CssClassDefinitionRuleset`, `CssClassDefinitionStatic`), `CssClassDefinitionInterpreter`, and `CssClassInterpreterContext` move from `css_class_generation.ts` to `css_class_definitions.ts`
+  - `AcornPlugin` moves from `css_class_extractor.ts` to `css_plugin_options.ts`
+
+- **breaking** feat: name `menuitem`'s children `menuitem_content`, `menuitem_icon`, and `menuitem_title` ([baed64a](https://github.com/fuzdev/fuz_css/commit/baed64a))
+
+  They're classes of their own now, each resolving and shipping on its own name, in place of the generic `.content`, `.icon`, and `.title` under a `.menuitem`.
+
+  Breaking:
+
+  - `.menuitem .content` is `.menuitem_content`, `.menuitem .icon` is `.menuitem_icon`, and `.menuitem .title` is `.menuitem_title` - rename the classes on a menu item's children
+  - the children's rules drop from `.menuitem .x` specificity to a single class, still in the composites sublayer
+  - fuz_ui's contextmenu components take the new names in its next release; until then their menu items render without the child styles
+
+- **breaking** refactor: the API naming pass - `render_*` emitters, `compute_scheme_mirror`, `FsDeps`, and a `contrast_modifiers` record ([e592ebe](https://github.com/fuzdev/fuz_css/commit/e592ebe))
+
+  A pure function returning CSS text is a `render_*`, beside `render_theme_style`; `generate_css` and `generate_classes_css` keep the pipeline verb.
+
+  Breaking:
+
+  - `generate_theme_css` is `render_theme_css`, `generate_base_css_by_layer` is `render_base_css_by_layer`, `generate_bundled_css` is `render_bundled_css`, and `generate_declaration` is `render_declaration`
+  - `scheme_stance_variables` is `compute_scheme_mirror`
+  - `check_theme` takes the new `CheckThemeOptions` (`{caps?}`) in place of `ThemeResolverOptions`, which stays the resolver's
+  - `CacheDeps` is `FsDeps` and `default_cache_deps` is `default_fs_deps` - the deps cover the default `style.css` load as well as the cache
+  - `format_variable_name` is `to_class_segment`
+  - `contrast_modifiers` is a `{low, high}` record (the new `ContrastModifiers`) instead of an array - read `contrast_modifiers.low` and `.high`, or `Object.values(contrast_modifiers)` for both
+
+- **breaking** feat: rename `outline_color_NN` to `outline_shade_NN` ([3794358](https://github.com/fuzdev/fuz_css/commit/3794358))
+
+  The suffix names the variable family it reads (`--shade_NN`), beside the letterless `border_color_NN` alpha ramp.
+
+  Breaking:
+
+  - `outline_color_00` through `outline_color_100` are renamed `outline_shade_00` through `outline_shade_100`
+
+- **breaking** feat: make `pixelated` a keyword class ([cbe87da](https://github.com/fuzdev/fuz_css/commit/cbe87da))
+
+  `pixelated` moves into the keyword classes and sets one declaration, `image-rendering: pixelated`. It already ordered with the token classes, so its ordering is unchanged.
+
+  Breaking:
+
+  - `pixelated` drops the vendor values and the trailing `image-rendering: crisp-edges`, which a browser supporting `crisp-edges` applied in place of `pixelated` - `crisp-edges` needn't scale nearest-neighbor, so pixel art may render differently than before
+
+- feat: add the `row_wrap` and `sr_only` composites ([c2b6bf7](https://github.com/fuzdev/fuz_css/commit/c2b6bf7))
+
+  - `row_wrap` is a `row` that wraps (`flex-wrap: wrap`), replacing `row flex-wrap:wrap`; its direct children get the same flow-margin reset as a `row`'s, and `label.row_wrap` takes the `label.row` styles
+  - `sr_only` hides an element visually while assistive technology still reads it, with `clip-path: inset(50%)` in place of the legacy `clip`
+
+- **breaking** feat: narrow the `theme` option to `Theme` ([eaf77c2](https://github.com/fuzdev/fuz_css/commit/eaf77c2))
+
+  The bake derives a theme's mirror and caps from the configured variables itself, so the option takes the authored theme alone.
+
+  Breaking:
+
+  - the `theme` option of `vite_plugin_fuz_css` (and `GenerateCssOptions`, `CreateBundledResourcesOptions`, `build_variable_graph_from_options`, and `bake_theme`) no longer accepts a `ResolvedTheme` - pass `resolved.theme`
+
+- feat: complete the token families ([812c363](https://github.com/fuzdev/fuz_css/commit/812c363))
+
+  - `gap_0`, `column_gap_0`, and `row_gap_0` join `p_0` and `m_0`
+  - `border_radius_0` and the corner twins (`border_top_left_radius_0`, ...) set a radius of `0`
+  - the intents take the palette letters' border, outline, and shadow families: `border_{intent}_NN` and `outline_{intent}_NN` set the color and its contextual variable, and `shadow_{intent}_NN` sets `--shadow_color` (`border_positive_50`, `outline_accent_60`, `shadow_negative_40`)
+  - `icon_size_*` also sets `--icon_size`, so what reads it, like a menu item's icon column, follows the class
+
+### Patch Changes
+
+- fix: collect `additional_elements`, `exclude_elements`, `additional_variables`, and `exclude_variables` once, so an option given as a one-shot iterable serves every render, as the class options already did ([2aae1bb](https://github.com/fuzdev/fuz_css/commit/2aae1bb))
+- fix: keep a colon inside a quoted literal value, so `content:"a:b"`, `content:'a:b'`, and `before:content:"a:b"` generate CSS instead of failing as an unknown modifier ([1858f77](https://github.com/fuzdev/fuz_css/commit/1858f77))
+- fix: order `disabled:` and `enabled:` after the interaction states, so `disabled:opacity:50%` beats `hover:opacity:80%` on a hovered disabled element; the other states (`checked:`, `invalid:`, `odd:`, `nth-child(...)`, ...) keep yielding to hover, focus, and active ([85bfa81](https://github.com/fuzdev/fuz_css/commit/85bfa81))
+
 ## 0.73.0
 
 ### Minor Changes
