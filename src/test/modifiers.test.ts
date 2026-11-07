@@ -105,6 +105,19 @@ describe('MODIFIERS', () => {
 			}
 		});
 
+		test('pseudo-element modifiers start with ::', () => {
+			for (const m of MODIFIERS) {
+				if (m.type === 'pseudo-element') {
+					assert.isTrue(
+						m.css.startsWith('::'),
+						`pseudo-element modifier "${m.name}" should start with "::"`
+					);
+				}
+			}
+		});
+	});
+
+	describe('state order', () => {
 		test('every state modifier has a cascade order', () => {
 			for (const m of MODIFIERS) {
 				if (m.type === 'state') {
@@ -151,17 +164,6 @@ describe('MODIFIERS', () => {
 					first_interaction,
 					`"${name}" should order with \`link\`, before the other interaction states`
 				);
-			}
-		});
-
-		test('pseudo-element modifiers start with ::', () => {
-			for (const m of MODIFIERS) {
-				if (m.type === 'pseudo-element') {
-					assert.isTrue(
-						m.css.startsWith('::'),
-						`pseudo-element modifier "${m.name}" should start with "::"`
-					);
-				}
 			}
 		});
 	});
