@@ -52,10 +52,20 @@ export const App = () => {
 					</div>
 
 					<div>
+						<h3>Keyword classes</h3>
+						<div className="flex gap_md">
+							<span>.flex</span>
+							<span className="uppercase">.uppercase</span>
+							<span className="italic">.italic</span>
+						</div>
+						<div className="max-md:hidden">.max-md:hidden - shown from the md breakpoint up</div>
+					</div>
+
+					<div>
 						<h3>Composite classes</h3>
 						<div className="box">.box</div>
 						<div className="ellipsis" style={{ maxWidth: '365px' }}>
-							.ellipsis -- this text truncates with ellipsis when it overflows
+							.ellipsis - this text truncates with ellipsis when it overflows
 						</div>
 					</div>
 
@@ -86,7 +96,7 @@ export const App = () => {
 							</div>
 						</div>
 						<p className="min-width(543px):font_size_lg">
-							.min-width(543px):font_size_lg -- arbitrary breakpoint
+							.min-width(543px):font_size_lg - arbitrary breakpoint
 						</p>
 					</div>
 

@@ -571,9 +571,9 @@ These are the common options - see
 
 ## Docs
 
-./src/routes/docs/ has pages for: introduction, api, examples,
-semantic, themes, variables, classes, colors, buttons, chips, elements, forms,
-typography, borders, shading, shadows, layout. See
+./src/routes/docs/ has pages for: introduction, setup, api, examples,
+semantic, themes, variables, classes, colors, shading, buttons, chips,
+elements, forms, typography, borders, shadows, layout. See
 [tomes.ts](src/routes/docs/tomes.ts) for structure.
 
 ## File organization
@@ -606,13 +606,13 @@ typography, borders, shading, shadows, layout. See
   slot merge `compose_themes` and the build-time overlay share: wholesale
   replacement, a dark-only overlay keeping the base slot beneath it),
   `ColorScheme` type (`Theme` itself lives in `variable.ts`). A pure renderer:
-  it holds no variable data, so mounting a theme costs ~1.3KB minified
-  instead of ~38KB. It renders what the theme carries plus the derived data
-  in its options (`ThemeDerived`: the mirror only under a stance, then the
-  caps last), pins `color-scheme` for a `scheme` stance, and is total over
-  junk options as over a junk theme. `render_style_variables` renders a
-  variable set that isn't a theme, internal names included - how `theme.css`
-  renders the full defaults
+  it holds no variable data, so mounting a theme costs ~2.5KB minified
+  instead of the ~14KB `default_variables` adds. It renders what the theme
+  carries plus the derived data in its options (`ThemeDerived`: the mirror
+  only under a stance, then the caps last), pins `color-scheme` for a `scheme`
+  stance, and is total over junk options as over a junk theme.
+  `render_style_variables` renders a variable set that isn't a theme, internal
+  names included - how `theme.css` renders the full defaults
 - [css_containment.ts](src/lib/css_containment.ts) - Containment checks for
   text rendered verbatim into a stylesheet (`css_value_is_contained` and its
   comment and property-name twins). A theme may be untrusted data, so the
@@ -637,7 +637,7 @@ typography, borders, shading, shadows, layout. See
   generated literal twin of the dual-slot subset of `default_variables`,
   emitted so the mirror carries no dependency on `variables.ts` (whose
   module-init emitter calls defeat tree-shaking - reaching for
-  `default_variables` costs ~20KB)
+  `default_variables` costs ~14KB minified)
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
   (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
   low/high contrast are modifiers composed over any theme via
@@ -883,6 +883,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `theme_check.{test,pins}.test.ts`
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
+- `styles.{test,states}.test.ts`
 
 Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
@@ -911,7 +912,8 @@ capturing logger through `vite_plugin_test_helpers.ts`. Integration:
 `vite_plugin_examples.test.ts` (skip with `SKIP_EXAMPLE_TESTS=1`).
 
 Component tests (`ContrastInput`, `KnobControl`, `RampStrip`, `ThemeEditor`,
-`resolved_color.svelte`) render in jsdom via a per-file
+`resolved_color.svelte`, `root_color_scheme.svelte`,
+`theme_editor_state.rooted.svelte`) render in jsdom via a per-file
 `@vitest-environment jsdom` pragma - mounting through
 `component_test_helpers.ts` (`create_mount_tracker`) with context harnesses (`*Harness.svelte` in
 `src/test/`), the fuz_ui pattern. All other suites stay in node;
@@ -931,9 +933,10 @@ svelte's `mount()` resolves to the client build.
   forced-colors rules are nested CSS, which a browser without nesting
   skips - none of those has a forced-colors mode
 - **Unfinished areas flagged in the docs** - forms (checkboxes
-  will likely become toggles), element/table styles, the shadows system,
-  opaque border classes, and table cell padding that doesn't yet respond to
-  size composites
+  will likely become toggles), table cell padding that doesn't yet respond to
+  size composites, size composites leaving prose and headings unscaled, the
+  shadows system, opaque border classes, and variable names that may still
+  change; the elements page also notes table styles are still basic
 
 ## Project standards
 

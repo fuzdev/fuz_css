@@ -55,6 +55,11 @@ const EXPECTED_CLASSES = [
 	'pl_xl5',
 	'font_size_lg',
 	'shadow_sm',
+	// From App - Class Types section (Keyword classes)
+	'flex',
+	'uppercase',
+	'italic',
+	'max-md:hidden',
 	// From App - Class Types section (Composite classes)
 	'box',
 	'ellipsis',

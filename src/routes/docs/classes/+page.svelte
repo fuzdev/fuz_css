@@ -339,7 +339,8 @@ const el = document.createElement('dialog');`}
 			first, then media queries - <code>min-width</code> breakpoints ascending,
 			<code>max-width</code> ones descending, then feature queries like <code>print:</code> - then
 			color-scheme classes, and within those, shorthands before longhands (<code>p_md</code> before
-			<code>pl_lg</code>) and states in link-visited-focus-hover-active order. So
+			<code>pl_lg</code>) and states in link-visited-focus-hover-active order, with
+			<code>disabled:</code> and <code>enabled:</code> after them. So
 			<code>p_sm md:p_md lg:p_lg</code> steps up as the viewport widens, however the classes are
 			written.
 		</p>
@@ -466,13 +467,14 @@ vite_plugin_fuz_css({
 		<TomeSection>
 			<TomeSectionHeader text="Token classes" tag="h3" />
 			<p>
-				Token classes are technically <a href="#Composite-classes">composite classes</a> with a
-				close relationship to <TomeLink slug="variables">style variables</TomeLink>: each maps
-				design tokens to CSS properties. They're generated programmatically from variant data,
-				making them predictable and systematic. The composites documented
-				<a href="#Composite-classes">below</a> are hand-written and typically represent higher-level
-				semantic concepts. For raw CSS values, use <a href="#Literal-classes">literal classes</a>
-				instead.
+				Token classes map design tokens - <TomeLink slug="variables">style variables</TomeLink> - to
+				CSS properties. Each is a single-purpose class, generated programmatically from variant
+				data, making them predictable and systematic. The
+				<a href="#Composite-classes">composites</a> documented below are hand-written, typically
+				represent higher-level semantic concepts, and render in a cascade sublayer beneath the
+				single-purpose classes, so a token class on the same element wins over a composite's
+				declaration of the same property. For raw CSS values, use
+				<a href="#Literal-classes">literal classes</a> instead.
 			</p>
 			<Code content="<p class=&quot;pl_xl3 color_g_50&quot;>some token classes</p>" />
 			<p class="pl_xl3 color_g_50">some token classes</p>

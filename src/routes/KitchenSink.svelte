@@ -12,7 +12,7 @@
 	<small>small print</small>, spaced by the flow margin with nothing added.
 </p>
 <blockquote>
-	Moss grows on the north side, except where it doesn't. <em>—a blockquote</em>
+	Moss grows on the north side, except where it doesn't. <em>- a blockquote</em>
 </blockquote>
 <ul>
 	<li>sheet moss carpets the shaded logs</li>

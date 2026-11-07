@@ -98,6 +98,13 @@
 			elements and headings.
 		</p>
 		<p>
+			Some elements take a multiple of <code>--flow_margin</code> instead of the whole step. List
+			items in a styled <code>ul</code> or <code>ol</code> sit two space steps below it -
+			<code>--space_sm</code> by default - so items group tighter than the blocks around the list,
+			and a <code>section</code> takes a large multiple as the page-level gap. Both scale with the
+			size composites.
+		</p>
+		<p>
 			Headings add a top margin too, a larger multiple of <code>--flow_margin</code>. A heading that
 			opens a padded or bordered box - <code>.panel</code>, <code>.pane</code>, <code>aside</code>,
 			<code>blockquote</code>, <code>fieldset</code>, <code>dialog</code>, <code>li</code>,
