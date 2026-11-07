@@ -949,20 +949,6 @@ describe('bake_theme', () => {
 		assert.include(root_css, `--${caps[0]!.name}: ${caps[0]!.base};`);
 	});
 
-	test("a supplied ResolvedTheme's derived data is recomputed, not trusted", () => {
-		const theme: Theme = {
-			name: 'rotated',
-			scheme: 'dark',
-			variables: [{ name: 'hue_i', base: '205' }]
-		};
-		const stale = {
-			theme,
-			scheme_mirror: [{ name: 'shade_00', base: 'stale' }],
-			caps: [{ name: '_palette_chroma_50', base: 'stale' }]
-		};
-		assert.deepEqual(bake_theme(stale, default_variables), bake_theme(theme, default_variables));
-	});
-
 	test('the gates report as warnings', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [];
 		bake_theme(

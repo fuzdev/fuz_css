@@ -524,12 +524,12 @@ Use `VitePluginFuzCssOptions` to customize:
   them. A top-level `@charset` is the one construct left out
 - `variables` - Custom theme variables (an array replacing the defaults) or
   callback to modify defaults; the set is the whole theme
-- `theme` - A `Theme` (or `ResolvedTheme`) baked into the generated CSS,
-  overlaid onto `variables` last-wins by name. The static counterpart to
-  fuz_ui's `ThemeRoot`: no runtime theme rendering, and the output stays
-  tree-shaken because the overlay happens before the dependency graph is
-  built. The bake derives the theme's data itself (`bake_theme` in
-  `variable_graph.ts`), recomputing any a `ResolvedTheme` carries: a stanced
+- `theme` - A `Theme` baked into the generated CSS, overlaid onto
+  `variables` last-wins by name. The static counterpart to fuz_ui's
+  `ThemeRoot`: no runtime theme rendering, and the output stays tree-shaken
+  because the overlay happens before the dependency graph is built. The
+  bake derives the theme's data itself (`bake_theme` in
+  `variable_graph.ts`), so a `ResolvedTheme` passes its `theme`: a stanced
   theme's mirror re-slots the configured `variables` rather than the
   defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
   lightness moved bakes its recomputed caps last, with the gates reported as

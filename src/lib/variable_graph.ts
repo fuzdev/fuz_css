@@ -376,10 +376,7 @@ const to_list = (items: Array<string>): string =>
  * set: the stance mirror, re-slotted from the configured `variables` (so a
  * build that customizes a scheme-adaptive variable mirrors its own value, not
  * the default), and the caps `compute_theme_caps` recomputes for the theme's
- * hues and lightness - the derived half of `compile_theme`. A `ResolvedTheme`
- * passed in has its theme baked the same way - a supplied mirror or caps are
- * recomputed, so the output can't depend on derived data computed against
- * another variable set or an older release.
+ * hues and lightness - the derived half of `compile_theme`.
  *
  * The theme's variables pass the containment checks first, as
  * `build_variable_graph` applies them: a slot the stylesheet can't hold, or
@@ -409,12 +406,11 @@ const to_list = (items: Array<string>): string =>
  * @returns the contained wire theme with its mirror and caps
  */
 export const bake_theme = (
-	theme: Theme | ResolvedTheme,
+	theme: Theme,
 	variables: Array<StyleVariable>,
 	diagnostics?: Array<GenerationDiagnostic>
 ): ResolvedTheme => {
-	const supplied = 'theme' in theme ? theme.theme : theme;
-	const wire = contain_theme(supplied, diagnostics);
+	const wire = contain_theme(theme, diagnostics);
 	const stance = to_theme_stance(wire.scheme);
 	const measured = fold_configured_knobs(wire, variables, stance);
 	const caps = compute_theme_caps(measured);
@@ -577,7 +573,7 @@ export const apply_theme_variables = (
  */
 export const build_variable_graph_from_options = (
 	variables: VariablesOption,
-	theme?: Theme | ResolvedTheme | null
+	theme?: Theme | null
 ): VariableDependencyGraph => {
 	const configured = resolve_variables_option(variables);
 	const theme_diagnostics: Array<GenerationDiagnostic> = [];

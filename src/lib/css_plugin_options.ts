@@ -46,7 +46,6 @@ import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import type { StyleVariable, Theme } from './variable.ts';
-import type { ResolvedTheme } from './theme.ts';
 import type { CacheDeps } from './deps.ts';
 
 /**
@@ -301,9 +300,9 @@ export interface CssOutputOptions {
 	 * and below a runtime theme's direct `fuz.theme` styles - so the baked
 	 * theme behaves like the same theme at runtime until one overrides it.
 	 *
-	 * The bake derives what the theme renders with, as `render_theme_style`
-	 * takes it at runtime, so a plain `Theme` is all it needs (a
-	 * `ResolvedTheme` is accepted too, its derived data recomputed):
+	 * The option is a plain `Theme` (from a `ResolvedTheme`, pass its
+	 * `theme`), since the bake derives what the theme renders with, as
+	 * `render_theme_style` takes it at runtime:
 	 *
 	 * - a single-scheme theme's stance mirror, re-slotted from the configured
 	 *   `variables`, so a customized scheme-adaptive variable keeps its own
@@ -334,7 +333,7 @@ export interface CssOutputOptions {
 	 * vite_plugin_fuz_css({theme: phosphor_theme});
 	 * ```
 	 */
-	theme?: Theme | ResolvedTheme | null;
+	theme?: Theme | null;
 	/**
 	 * Classes to always include in the output, regardless of detection.
 	 * Useful for dynamically generated class names that can't be statically extracted.

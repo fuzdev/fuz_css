@@ -33,8 +33,8 @@ const default_variable_names: ReadonlySet<string> = new Set(default_variables.ma
 // the configured theme's name, or 'theme' when junk data has none - the
 // option is untyped at runtime, so this stays total over any value
 const to_theme_label = (theme: unknown): string => {
-	const t = theme !== null && typeof theme === 'object' && 'theme' in theme ? theme.theme : theme;
-	const name: unknown = t !== null && typeof t === 'object' && 'name' in t ? t.name : undefined;
+	const name: unknown =
+		theme !== null && typeof theme === 'object' && 'name' in theme ? theme.name : undefined;
 	return typeof name === 'string' ? name : 'theme';
 };
 
@@ -169,7 +169,7 @@ export interface GenerateCssOptions {
 	 * mappings, with a stance's `color-scheme` pin), matching how the same
 	 * theme behaves at runtime.
 	 */
-	theme?: Theme | ResolvedTheme | null;
+	theme?: Theme | null;
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
