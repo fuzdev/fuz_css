@@ -1220,6 +1220,29 @@ vite_plugin_fuz_css({
 				Custom properties work directly: <code>--my-var:value</code> sets the property on the
 				element. This is useful for scoped variables or passing values to child components.
 			</p>
+			<h4>When a class gets a name</h4>
+			<p>A named class earns its place by exactly one of:</p>
+			<ul>
+				<li>
+					the <a href="#Keyword-classes">keyword</a> gate - a value keyword no other property shares
+					(<code>flex</code>, <code>sticky</code>)
+				</li>
+				<li>
+					bundling declarations - a <a href="#Composite-classes">composite</a>
+					(<code>ellipsis</code>, <code>row</code>)
+				</li>
+				<li>
+					being backed by a design token - a <a href="#Token-classes">token class</a>
+					(<code>p_md</code>, <code>mb_flow</code>)
+				</li>
+				<li>completing a token family's steps (<code>m_0</code>, <code>mx_auto</code>)</li>
+			</ul>
+			<p>
+				A single declaration with a raw value never gets a coined name - the literal is the
+				shorthand: <code>width:100%</code>, <code>text-align:center</code>, <code>flex:1</code>,
+				<code>white-space:nowrap</code>. <code>hidden</code> is the one exception: it mirrors the
+				HTML attribute so modifiers can reach it.
+			</p>
 		</TomeSection>
 	</TomeSection>
 

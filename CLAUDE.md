@@ -64,8 +64,7 @@ list items in a styled `ul`/`ol` two steps below it - `space_sm` by default,
 and a heading opening a padded box - `.panel`, `.pane`, `aside`, `li`, and
 the like - drops its top margin), and margins reset to 0 on the direct
 children of a `.row` or `.row_wrap` (horizontal flex; use `gap_*` there
-instead). Adding a
-`mb_*`/`gap_*`/`p_*` class or a `<style>` block
+instead). Adding a `mb_*`/`gap_*`/`p_*` class or a `<style>` block
 should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,
@@ -251,8 +250,8 @@ See the `VitePluginFuzCssOptions` type for configuration.
   letter alone implies the palette: `color_a_50`, `bg_a_50`, `border_a_50`,
   and `outline_a_50` apply the `--palette_a_NN` stops to their named property
   and `shadow_a_50` sets the contextual `--shadow_color` (`border_color_50` is
-  the letterless alpha ramp, `outline_shade_50` the opaque shade one). A bare intent or neutral scale class applies its
-  family's dominant use
+  the letterless alpha ramp, `outline_shade_50` the opaque shade one). A bare
+  intent or neutral scale class applies its family's dominant use
   (`positive_50`/`text_70` set text color, `shade_50` sets background) with
   `bg_` twins (`bg_positive_50`), and the intents mirror the palette's
   other families too (`border_positive_50`, `outline_accent_60`,
@@ -294,6 +293,16 @@ See the `VitePluginFuzCssOptions` type for configuration.
   `max-md:hidden row`. Tailwind-only names (`items-center`) still generate
   nothing, silently
 - **Literal classes** - CSS `property:value` syntax: `display:flex`, `opacity:50%`
+
+**A class name earns its place** by exactly one of: the keyword gate (a
+spec-unique value keyword - `flex`, `sticky`), bundling declarations
+(`ellipsis`, `row`), being token-backed (`p_md`, `mb_flow`), or completing a
+token family's steps (`m_0`, `mx_auto`). A single non-token declaration never
+gets a coined name - the literal is the shorthand (`width:100%`,
+`text-align:center`, `flex:1`, `white-space:nowrap`), so a registry entry
+that fits none of the four is a bug. The one fuz-coined name outside them is
+`hidden`, which mirrors the HTML attribute so modifiers can reach it
+(`max-md:hidden`).
 
 All class types support modifiers: responsive (`md:`), state (`hover:`),
 color-scheme (`dark:`), pseudo-element (`before:`). The generator strips them
