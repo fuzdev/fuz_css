@@ -297,9 +297,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	layout
 
 	*/
-	...generate_property_classes('width', space_variants, (v) => `var(--space_${v})`),
-	...generate_property_classes('height', space_variants, (v) => `var(--space_${v})`),
-
 	...generate_classes(
 		(v: string) => ({
 			name: `width_atmost_${v}`,
@@ -328,12 +325,6 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		}),
 		distance_variants
 	),
-
-	...generate_property_classes('top', space_variants, format_spacing_value),
-	...generate_property_classes('right', space_variants, format_spacing_value),
-	...generate_property_classes('bottom', space_variants, format_spacing_value),
-	...generate_property_classes('left', space_variants, format_spacing_value),
-	...generate_property_classes('inset', space_variants, format_spacing_value),
 
 	...generate_directional_classes('padding', ['0', ...space_variants], format_spacing_value),
 	...generate_directional_classes('margin', ['0', 'auto', ...space_variants], format_spacing_value),

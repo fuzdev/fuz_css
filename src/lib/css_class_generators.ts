@@ -73,7 +73,7 @@ export const format_variable_name = (str: string): string => str.replace(/[-\s]+
 
 /**
  * Format spacing values for CSS: `0` and `auto` as-is, a space variant as its
- * `--space_*` variable. Used by margin, padding, gap, inset, top/right/bottom/left, etc.
+ * `--space_*` variable. Used by the margin, padding, and gap classes.
  */
 export const format_spacing_value = (value: string): string => {
 	if (value === '0') return '0';

@@ -5,11 +5,11 @@ import { palette_variants } from './variable_data.ts';
  * The builtin composite classes. The multi-property ones render in the
  * `fuz.utilities.composites` sublayer (`composite: true`, the default for
  * rulesets), so a token or literal class on the same element wins over them;
- * the single-property shortcuts (`circular`, `pixelated`, `mb_flow`,
- * `mt_flow`) are single-purpose and order with the token classes. Their
- * forced-colors rules nest inside their own rules (`@media (forced-colors:
- * active)`), so a modified variant keeps them conditional, and a browser
- * without CSS nesting, which also has no forced-colors mode, skips them.
+ * the single-property shortcuts (`pixelated`, `mb_flow`, `mt_flow`) are
+ * single-purpose and order with the token classes. Their forced-colors rules
+ * nest inside their own rules (`@media (forced-colors: active)`), so a
+ * modified variant keeps them conditional, and a browser without CSS nesting,
+ * which also has no forced-colors mode, skips them.
  */
 export const css_class_composites: Record<string, CssClassDefinition | undefined> = {
 	pixelated: {
@@ -19,9 +19,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			image-rendering: pixelated; /* in case crisp-edges isn't supported */
 			image-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */
 		`
-	},
-	circular: {
-		declaration: 'border-radius: 50%;'
 	},
 	box: {
 		composite: true,

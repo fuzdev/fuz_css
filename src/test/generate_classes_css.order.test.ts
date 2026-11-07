@@ -205,20 +205,20 @@ describe('generate_classes_css composites sublayer', () => {
 	});
 
 	test('single-property shortcuts in the composites registry stay single-purpose', () => {
-		const css = generate(['circular', 'mb_flow']);
+		const css = generate(['mb_flow', 'mt_flow']);
 		assert.notInclude(css, '@layer composites');
 	});
 
 	test('a token wins a same-property tie with a single-property shortcut', () => {
 		// registry order breaks the tie, not the class name
-		const css = generate(['circular', 'border_radius_sm']);
-		assert_css_order(css, '.circular', '.border_radius_sm');
+		const css = generate(['mb_flow', 'mb_md']);
+		assert_css_order(css, '.mb_flow', '.mb_md');
 	});
 
 	test('a literal wins a same-property tie with a single-property shortcut', () => {
 		// interpreted classes order after every static definition
-		const css = generate(['circular', 'border-radius:0']);
-		assert_css_order(css, '.circular', '.border-radius\\:0');
+		const css = generate(['mb_flow', 'margin-bottom:0']);
+		assert_css_order(css, '.mb_flow', '.margin-bottom\\:0');
 	});
 
 	test('every multi-property declaration in the registry is flagged a composite', () => {

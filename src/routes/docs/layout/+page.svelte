@@ -39,8 +39,9 @@
 		</ul>
 		<p>
 			Space variants are used in <a href={resolve('/docs/classes')}>classes</a> like
-			<code>.p_md</code> for padding, margin, other forms of spacing like gap, positioning,
-			dimensions, etc.
+			<code>.p_md</code> for padding, margin, and gap. Positions and dimensions take them through
+			<a href={resolve('/docs/classes#Literal-classes')}>literals</a> like
+			<code>top:var(--space_md)</code> and <code>width:var(--space_xl5)</code>.
 		</p>
 	</TomeSection>
 	<TomeSection>

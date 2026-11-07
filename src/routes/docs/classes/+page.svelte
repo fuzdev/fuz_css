@@ -332,17 +332,16 @@ const el = document.createElement('dialog');`}
 			Inside <code>fuz.utilities</code>, composites (<code>box</code>, <code>panel</code>,
 			<code>sized_md</code>, and the other multi-property ones) render in a
 			<code>fuz.utilities.composites</code> sublayer - the single-property shortcuts like
-			<code>circular</code> and <code>mb_flow</code> order with the token classes - so a token or
-			literal class always wins over a composite it overlaps: <code>panel shadow_md</code> gets the
-			medium shadow, at every breakpoint. Within each, the order comes from what the classes mean,
-			not their names (two literals of one property still conflict by name): unmodified classes
-			first, then media queries - <code>min-width</code> breakpoints ascending,
-			<code>max-width</code> ones descending, then feature queries like <code>print:</code> - then
-			color-scheme classes, and within those, shorthands before longhands (<code>p_md</code> before
-			<code>pl_lg</code>) and states in link-visited-focus-hover-active order, with
-			<code>disabled:</code> and <code>enabled:</code> after them. So
-			<code>p_sm md:p_md lg:p_lg</code> steps up as the viewport widens, however the classes are
-			written.
+			<code>mb_flow</code> order with the token classes - so a token or literal class always wins
+			over a composite it overlaps: <code>panel shadow_md</code> gets the medium shadow, at every
+			breakpoint. Within each, the order comes from what the classes mean, not their names (two
+			literals of one property still conflict by name): unmodified classes first, then media queries
+			- <code>min-width</code> breakpoints ascending, <code>max-width</code> ones descending, then
+			feature queries like <code>print:</code> - then color-scheme classes, and within those,
+			shorthands before longhands (<code>p_md</code> before <code>pl_lg</code>) and states in
+			link-visited-focus-hover-active order, with <code>disabled:</code> and <code>enabled:</code>
+			after them. So <code>p_sm md:p_md lg:p_lg</code> steps up as the viewport widens, however the
+			classes are written.
 		</p>
 
 		<h4>Base styles</h4>
@@ -582,27 +581,6 @@ vite_plugin_fuz_css({
 						<code>.row_gap_{@render variant_range(space_variants)}</code> <code>.row_gap_0</code>
 					</span>
 				</li>
-				<li>
-					<span class="code_chips"><code>.top_{@render variant_range(space_variants)}</code></span>
-				</li>
-				<li>
-					<span class="code_chips">
-						<code>.right_{@render variant_range(space_variants)}</code>
-					</span>
-				</li>
-				<li>
-					<span class="code_chips">
-						<code>.bottom_{@render variant_range(space_variants)}</code>
-					</span>
-				</li>
-				<li>
-					<span class="code_chips"><code>.left_{@render variant_range(space_variants)}</code></span>
-				</li>
-				<li>
-					<span class="code_chips">
-						<code>.inset_{@render variant_range(space_variants)}</code>
-					</span>
-				</li>
 			</ul>
 			<aside>
 				Padding, margin, gap, and border radius include <code>_0</code> (and margin
@@ -613,16 +591,6 @@ vite_plugin_fuz_css({
 			<h4>Sizing</h4>
 			<p>See <TomeLink slug="layout" />.</p>
 			<ul class="unstyled column gap_md">
-				<li>
-					<span class="code_chips">
-						<code>.width_{@render variant_range(space_variants)}</code>
-					</span>
-				</li>
-				<li>
-					<span class="code_chips">
-						<code>.height_{@render variant_range(space_variants)}</code>
-					</span>
-				</li>
 				<li>
 					<span class="code_chips">
 						<code>.width_atmost_{@render variant_range(distance_variants)}</code>
@@ -1085,7 +1053,6 @@ vite_plugin_fuz_css({
 				<li><code>.panel</code> - panel container</li>
 				<li><code>.icon_button</code> - icon button styling</li>
 				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
-				<li><code>.circular</code> - 50% border-radius</li>
 				<li><code>.sized_xs</code> - smallest sizing, cascading to children</li>
 				<li><code>.sized_sm</code> - smaller sizing, cascading to children</li>
 				<li><code>.sized_md</code> - default sizing, cascade reset</li>

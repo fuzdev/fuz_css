@@ -733,7 +733,7 @@ const compare_ancestors = (a: ModifierDefinition | null, b: ModifierDefinition |
  * equal specificity: color scheme, media query, rank, state order, then
  * the late flag (`CssClassDefinitionBase.late`), then registry order (so a
  * token or literal wins a same-property tie with a single-property shortcut
- * like `circular`), then the class name by code
+ * like `mb_flow`), then the class name by code
  * units, a deterministic last resort that decides only between interpreted
  * classes of equal rank (two literals of one property, like
  * `opacity:50% opacity:80%`, conflict by name).

@@ -4,9 +4,11 @@ import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { default_variables } from '#lib/variables.ts';
 import {
 	border_radius_variants,
+	distance_variants,
 	icon_size_variants,
 	intensity_variants,
-	intent_variants
+	intent_variants,
+	space_variants
 } from '#lib/variable_data.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
@@ -95,6 +97,27 @@ describe('icon_size classes', () => {
 				to_declaration(`icon_size_${v}`),
 				`font-size: var(--icon_size_${v}); --font_size: var(--icon_size_${v}); --icon_size: var(--icon_size_${v});`
 			);
+		}
+	});
+});
+
+describe('names the registry leaves to literals', () => {
+	// a single non-token declaration gets no coined name - the literal is the
+	// shorthand (`border-radius:50%`, `width:var(--space_md)`, `top:var(--space_md)`)
+	test('circular and the space-scale width, height, and positional families are gone', () => {
+		assert.notOk('circular' in css_class_definitions);
+		for (const prefix of ['width', 'height', 'top', 'right', 'bottom', 'left', 'inset']) {
+			for (const v of space_variants) {
+				assert.notOk(`${prefix}_${v}` in css_class_definitions, `${prefix}_${v}`);
+			}
+		}
+	});
+
+	test('the distance families stay', () => {
+		for (const prefix of ['width_atmost', 'width_atleast', 'height_atmost', 'height_atleast']) {
+			for (const v of distance_variants) {
+				assert.ok(`${prefix}_${v}` in css_class_definitions, `${prefix}_${v}`);
+			}
 		}
 	});
 });

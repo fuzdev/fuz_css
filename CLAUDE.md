@@ -262,8 +262,8 @@ See the `VitePluginFuzCssOptions` type for configuration.
   (`background-color:var(--ink_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `row_wrap` (a `row` that wraps), `ellipsis`, `sr_only` (visually hidden,
-  still read by assistive technology), `pixelated`, `circular`, `selectable`, `clickable`, `pane`,
-  `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
+  still read by assistive technology), `pixelated`, `selectable`,
+  `clickable`, `pane`, `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
   `sized_xl` (uniform step offsets from the `sized_md` default; `sized_md`
   doubles as a cascade reset; they scale controls and spacing via
   `--flow_margin` - headings and prose keep their font sizes, while a bare
@@ -271,7 +271,7 @@ See the `VitePluginFuzCssOptions` type for configuration.
   `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
   `menuitem`, `chevron`, `chip`. The single-property shortcuts among them
-  (`pixelated`, `circular`, `mb_flow`, `mt_flow`) order with the token
+  (`pixelated`, `mb_flow`, `mt_flow`) order with the token
   classes, outside the composites sublayer
 - **Keyword classes** - [css_class_keywords.ts](src/lib/css_class_keywords.ts):
   a CSS value keyword that names its property alone, as a bare class setting
@@ -315,7 +315,7 @@ so hover, focus, and active still show on it), then the
 sorts after the rules it ties with, literals included - `hidden`, so
 `display:flex hidden` hides while `hidden md:flex` still shows at `md`),
 then registry order (literals and other interpreted classes after static
-ones, so a token or literal wins a tie with `circular`). Rules sharing a media query render
+ones, so a token or literal wins a tie with `mb_flow`). Rules sharing a media query render
 in one block. `dark:`/`light:` wrap the root selector in
 `:where()`, adding no specificity, and render twice - under the root class
 and under `prefers-color-scheme` for a root naming no scheme
