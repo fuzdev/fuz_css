@@ -24,7 +24,7 @@ import {
 } from './variable_graph.ts';
 import type { BaseCssOption, VariablesOption } from './css_plugin_options.ts';
 import type { Theme } from './variable.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 
 /**
  * Bundled CSS resources needed to emit base styles and theme variables.
@@ -46,7 +46,7 @@ export interface CreateBundledResourcesOptions {
 	 */
 	theme?: Theme | null;
 	/** Filesystem deps for loading the default `style.css`. */
-	deps: CacheDeps;
+	deps: FsDeps;
 }
 
 /**

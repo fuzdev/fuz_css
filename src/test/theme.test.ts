@@ -7,7 +7,7 @@ import {
 	type RenderThemeStyleOptions
 } from '#lib/theme.ts';
 import type { StyleVariable, Theme } from '#lib/variable.ts';
-import { resolve_theme_stance, scheme_stance_variables } from '#lib/theme_stance.ts';
+import { resolve_theme_stance, compute_scheme_mirror } from '#lib/theme_stance.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
 import { default_variables } from '#lib/variables.ts';
 
@@ -177,7 +177,7 @@ describe('scheme stance', () => {
 		// the same reference, so persisting it persists only what was authored
 		assert.strictEqual(resolved.theme, theme);
 		assert.deepEqual(Object.keys(theme), ['name', 'variables', 'scheme']);
-		assert.deepEqual(resolved.scheme_mirror, scheme_stance_variables('dark'));
+		assert.deepEqual(resolved.scheme_mirror, compute_scheme_mirror('dark'));
 		assert.isUndefined(resolved.caps);
 	});
 
@@ -241,8 +241,8 @@ describe('scheme stance', () => {
 		}
 	});
 
-	test('scheme_stance_variables re-slots the dual-slot defaults alone', () => {
-		const mirrored = scheme_stance_variables('dark');
+	test('compute_scheme_mirror re-slots the dual-slot defaults alone', () => {
+		const mirrored = compute_scheme_mirror('dark');
 		assert.strictEqual(mirrored.length, scheme_adaptive_variables.length);
 		for (const v of mirrored) {
 			const source = default_variables.find((d) => d.name === v.name)!;
@@ -252,14 +252,14 @@ describe('scheme stance', () => {
 		}
 	});
 
-	test('scheme_stance_variables mirrors a given variable set, skipping single-slot entries', () => {
-		const mirrored = scheme_stance_variables('light', [
+	test('compute_scheme_mirror mirrors a given variable set, skipping single-slot entries', () => {
+		const mirrored = compute_scheme_mirror('light', [
 			{ name: 'a', base: '1', dark: '2' },
 			{ name: 'b', base: '3' },
 			{ name: 'c', dark: '4' }
 		]);
 		assert.deepEqual(mirrored, [{ name: 'a', base: '1' }]);
-		assert.deepEqual(scheme_stance_variables('dark', [{ name: 'a', base: '1', dark: '2' }]), [
+		assert.deepEqual(compute_scheme_mirror('dark', [{ name: 'a', base: '1', dark: '2' }]), [
 			{ name: 'a', base: '2' }
 		]);
 	});

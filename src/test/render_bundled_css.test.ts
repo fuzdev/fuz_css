@@ -1,5 +1,5 @@
 /**
- * Tests for generate_bundled_css function.
+ * Tests for render_bundled_css function.
  *
  * Tests the CSS output assembly including section ordering, exclusion options,
  * and empty handling.
@@ -9,11 +9,11 @@
 
 import { test, assert, describe } from 'vitest';
 
-import { generate_bundled_css, type CssResolutionResult } from '#lib/css_bundled_resolution.ts';
+import { render_bundled_css, type CssResolutionResult } from '#lib/css_bundled_resolution.ts';
 import { assert_css_order } from './test_helpers.ts';
 
 /**
- * Creates a mock resolution result for testing generate_bundled_css.
+ * Creates a mock resolution result for testing render_bundled_css.
  */
 const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssResolutionResult => ({
 	theme_css: ':root { --color: blue; }',
@@ -26,11 +26,11 @@ const create_mock_result = (overrides: Partial<CssResolutionResult> = {}): CssRe
 	...overrides
 });
 
-describe('generate_bundled_css', () => {
+describe('render_bundled_css', () => {
 	describe('section ordering', () => {
 		test('theme before base before utilities', () => {
 			const result = create_mock_result();
-			const combined = generate_bundled_css(result, '.p_md { padding: 16px; }');
+			const combined = render_bundled_css(result, '.p_md { padding: 16px; }');
 
 			assert_css_order(
 				combined,
@@ -42,7 +42,7 @@ describe('generate_bundled_css', () => {
 
 		test('includes section comments', () => {
 			const result = create_mock_result();
-			const bundled = generate_bundled_css(result, '.p_md { padding: 16px; }');
+			const bundled = render_bundled_css(result, '.p_md { padding: 16px; }');
 
 			assert.include(bundled, '/* Theme Variables */');
 			assert.include(bundled, '/* Base Styles */');
@@ -51,7 +51,7 @@ describe('generate_bundled_css', () => {
 
 		test('emits the layer order statement and wraps each section in its layer', () => {
 			const result = create_mock_result();
-			const bundled = generate_bundled_css(
+			const bundled = render_bundled_css(
 				result,
 				'@layer fuz.utilities {\n.p_md { padding: 16px; }\n}\n'
 			);
@@ -68,7 +68,7 @@ describe('generate_bundled_css', () => {
 			const result = create_mock_result({
 				preferences_css: '@media (prefers-contrast: more) {\n:root { --x: 1; }\n}'
 			});
-			const bundled = generate_bundled_css(result, '');
+			const bundled = render_bundled_css(result, '');
 
 			assert.include(bundled, '/* User-Preference Mappings */');
 			assert.include(
@@ -77,9 +77,9 @@ describe('generate_bundled_css', () => {
 			);
 			// the mappings set only theme variables, so they ship whenever either
 			// the theme or the base styles that consume them do
-			const no_base = generate_bundled_css(result, '', { include_base: false });
+			const no_base = render_bundled_css(result, '', { include_base: false });
 			assert.include(no_base, 'fuz.preferences {');
-			const neither = generate_bundled_css(result, '', {
+			const neither = render_bundled_css(result, '', {
 				include_base: false,
 				include_theme: false
 			});
@@ -88,14 +88,14 @@ describe('generate_bundled_css', () => {
 
 		test('a baked theme overlay renders into the fuz.theme.baked sublayer', () => {
 			const result = create_mock_result();
-			const bundled = generate_bundled_css(result, '', {
+			const bundled = render_bundled_css(result, '', {
 				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n\t--hue_neutral: var(--hue_b);\n}'
 			});
 			assert.include(bundled, '/* Theme Overrides */');
 			// the baked sublayer, so a runtime theme's direct fuz.theme styles win
 			assert.include(bundled, '@layer fuz.theme.baked {\n:root {\n\tcolor-scheme: dark;');
 			// disabled theme output drops the overlay with the rest of the theme
-			const no_theme = generate_bundled_css(result, '', {
+			const no_theme = render_bundled_css(result, '', {
 				include_theme: false,
 				theme_overlay_css: ':root {\n\tcolor-scheme: dark;\n}'
 			});
@@ -106,7 +106,7 @@ describe('generate_bundled_css', () => {
 	describe('exclusion options', () => {
 		test('include_theme: false excludes theme', () => {
 			const result = create_mock_result();
-			const no_theme = generate_bundled_css(result, '.p_md {}', { include_theme: false });
+			const no_theme = render_bundled_css(result, '.p_md {}', { include_theme: false });
 
 			assert.notInclude(no_theme, '/* Theme Variables */');
 			assert.notInclude(no_theme, '--color');
@@ -116,7 +116,7 @@ describe('generate_bundled_css', () => {
 
 		test('include_base: false excludes base', () => {
 			const result = create_mock_result();
-			const no_base = generate_bundled_css(result, '.p_md {}', { include_base: false });
+			const no_base = render_bundled_css(result, '.p_md {}', { include_base: false });
 
 			assert.include(no_base, '/* Theme Variables */');
 			assert.notInclude(no_base, '/* Base Styles */');
@@ -131,7 +131,7 @@ describe('generate_bundled_css', () => {
 				theme_css: '',
 				resolved_variables: new Set<string>()
 			});
-			const bundled = generate_bundled_css(result, '.p_md {}');
+			const bundled = render_bundled_css(result, '.p_md {}');
 
 			assert.notInclude(bundled, '/* Theme Variables */');
 			assert.include(bundled, '/* Base Styles */');
@@ -144,7 +144,7 @@ describe('generate_bundled_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>()
 			});
-			const bundled = generate_bundled_css(result, '.p_md {}');
+			const bundled = render_bundled_css(result, '.p_md {}');
 
 			assert.include(bundled, '/* Theme Variables */');
 			assert.notInclude(bundled, '/* Base Styles */');
@@ -153,7 +153,7 @@ describe('generate_bundled_css', () => {
 
 		test('empty utilities produces no section', () => {
 			const result = create_mock_result();
-			const bundled = generate_bundled_css(result, '');
+			const bundled = render_bundled_css(result, '');
 
 			assert.include(bundled, '/* Theme Variables */');
 			assert.include(bundled, '/* Base Styles */');
@@ -168,7 +168,7 @@ describe('generate_bundled_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>()
 			});
-			const bundled = generate_bundled_css(result, '');
+			const bundled = render_bundled_css(result, '');
 
 			assert.strictEqual(bundled, '');
 		});
@@ -179,7 +179,7 @@ describe('generate_bundled_css', () => {
 				included_rule_indices: new Set<number>(),
 				included_elements: new Set<string>()
 			});
-			const bundled = generate_bundled_css(result, '');
+			const bundled = render_bundled_css(result, '');
 
 			assert.include(bundled, '/* Theme Variables */');
 			assert.notInclude(bundled, '/* Base Styles */');

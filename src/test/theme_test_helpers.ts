@@ -24,7 +24,7 @@ export const shipped_themes: Array<Theme> = Object.values(theme_modules).flatMap
 	Object.values(mod as Record<string, unknown>).filter(is_theme)
 );
 
-const modifier_names = new Set(contrast_modifiers.map((t) => t.name));
+const modifier_names = new Set(Object.values(contrast_modifiers).map((t) => t.name));
 
 /** The shipped themes a contrast modifier composes over: everything but the modifiers. */
 export const shipped_base_themes: Array<Theme> = shipped_themes.filter(

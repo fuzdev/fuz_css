@@ -4,6 +4,13 @@ import { ledger_theme } from './themes/ledger.ts';
 import { low_contrast_theme } from './themes/low_contrast.ts';
 import { high_contrast_theme } from './themes/high_contrast.ts';
 
+/**
+ * The registry's default: the first of `default_themes`, the theme an app
+ * renders before one is picked. It names a policy rather than aliasing
+ * `base_theme` - the registry could make another theme its default while
+ * `themes/base.ts` stays the theme of the shipped defaults - so the two stay
+ * separate exports.
+ */
 export const DEFAULT_THEME: Theme = base_theme;
 
 /**
@@ -48,4 +55,17 @@ export const default_themes: Array<Theme> = [DEFAULT_THEME, ledger_theme];
  * stronger rules included. Neither touches the neutral cast, which stays the
  * theme's.
  */
-export const contrast_modifiers: Array<Theme> = [low_contrast_theme, high_contrast_theme];
+export const contrast_modifiers: ContrastModifiers = {
+	low: low_contrast_theme,
+	high: high_contrast_theme
+};
+
+/**
+ * The contrast modifier pair, by direction.
+ */
+export interface ContrastModifiers {
+	/** Narrows the ground-to-text range. */
+	low: Theme;
+	/** Widens the ground-to-text range and strengthens the control borders. */
+	high: Theme;
+}

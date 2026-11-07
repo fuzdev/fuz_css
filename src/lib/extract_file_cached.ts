@@ -19,10 +19,10 @@ import {
 } from './css_class_extractor.ts';
 import { load_cached_extraction, from_cached_extraction } from './css_cache.ts';
 import { is_css_file } from './file_filter.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 
 export interface ExtractFileCachedOptions {
-	deps: CacheDeps;
+	deps: FsDeps;
 	/** Source file contents. */
 	content: string;
 	/** Content hash to validate the cache against. */

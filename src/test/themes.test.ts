@@ -54,15 +54,14 @@ describe('default_themes', () => {
 	});
 
 	test('contrast is a modifier, not a registry theme', () => {
-		const names = contrast_modifiers.map((t) => t.name);
-		assert.include(names, 'low contrast');
-		assert.include(names, 'high contrast');
+		const names = Object.values(contrast_modifiers).map((t) => t.name);
+		assert.deepEqual(names, ['low contrast', 'high contrast']);
 		const registry = new Set(default_themes.map((t) => t.name));
 		for (const name of names) assert.isFalse(registry.has(name));
 	});
 
 	test('contrast modifiers validate with no errors', () => {
-		for (const modifier of contrast_modifiers) {
+		for (const modifier of Object.values(contrast_modifiers)) {
 			const errors = validate_theme(modifier).filter((issue) => issue.level === 'error');
 			assert.deepEqual(errors, [], `Modifier "${modifier.name}" has validation errors`);
 		}
@@ -124,7 +123,7 @@ describe('theme tiers', () => {
 		theme.variables.some((v) => theme_knob_by_name.get(v.name)?.tier === 'palette');
 
 	test('registry themes and modifiers stay in the semantic tier', () => {
-		for (const theme of [...default_themes, ...contrast_modifiers]) {
+		for (const theme of [...default_themes, ...Object.values(contrast_modifiers)]) {
 			assert.isFalse(sets_palette_tier(theme), `"${theme.name}" moves a palette-tier knob`);
 		}
 	});

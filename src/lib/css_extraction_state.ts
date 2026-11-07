@@ -19,14 +19,14 @@ import {
 } from './css_cache.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 
 export interface CssExtractionStateOptions {
 	/** The collection extractions are recorded in. */
 	css_classes: CssClasses;
 	/** A file's cache path, or `null` when it isn't cached. */
 	get_cache_path: (id: string) => string | null;
-	deps: CacheDeps;
+	deps: FsDeps;
 	acorn_plugins?: Array<AcornPlugin>;
 	/** Folded into the cache key - see `CssExtractionOptions.cache_salt`. */
 	cache_salt?: string;
@@ -47,7 +47,7 @@ export class CssExtractionState {
 	version = 0;
 
 	readonly #get_cache_path: (id: string) => string | null;
-	readonly #deps: CacheDeps;
+	readonly #deps: FsDeps;
 	readonly #acorn_plugins: Array<AcornPlugin> | undefined;
 	readonly #extraction_key: string | null;
 	readonly #hashes: Map<string, string> = new Map();

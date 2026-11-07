@@ -6,7 +6,7 @@ import { theme_knob_hook_names, theme_knob_by_name } from '#lib/knobs.ts';
 import { default_variables } from '#lib/variables.ts';
 import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { load_default_style_css } from '#lib/style_rule_parser.ts';
-import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { default_fs_deps } from '#lib/deps_defaults.ts';
 import { split_selector_list } from '#lib/css_ruleset_parser.ts';
 
 const declared_names = new Set(default_variables.map((v) => v.name));
@@ -14,7 +14,7 @@ const declared_names = new Set(default_variables.map((v) => v.name));
 // the CSS the base styles and the class definitions ship, each as a
 // stylesheet - a declaration under its class
 const load_sources = async (): Promise<Array<string>> => {
-	const sources = [await load_default_style_css(default_cache_deps)];
+	const sources = [await load_default_style_css(default_fs_deps)];
 	for (const [name, definition] of Object.entries(css_class_definitions)) {
 		if (definition && 'declaration' in definition && definition.declaration) {
 			sources.push(`.${name} { ${definition.declaration} }`);

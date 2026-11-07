@@ -6,7 +6,7 @@ import { check_theme } from '#lib/theme_check.ts';
 import { compile_theme } from '#lib/theme_compile.ts';
 import { parse_theme, type Theme } from '#lib/variable.ts';
 import { render_theme_style } from '#lib/theme.ts';
-import { scheme_stance_variables } from '#lib/theme_stance.ts';
+import { compute_scheme_mirror } from '#lib/theme_stance.ts';
 import { create_monochrome_theme } from './theme_test_helpers.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
@@ -297,7 +297,7 @@ describe('compile_theme', () => {
 
 	test("a stanced compiled theme carries its stance's mirror, a dual one none", () => {
 		const input = create_monochrome_theme(145); // dark-stanced
-		assert.deepEqual(compile_theme(input).scheme_mirror, scheme_stance_variables('dark'));
+		assert.deepEqual(compile_theme(input).scheme_mirror, compute_scheme_mirror('dark'));
 		assert.isUndefined(compile_theme(base_theme).scheme_mirror);
 	});
 });

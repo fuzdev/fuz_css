@@ -74,7 +74,7 @@ import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 import { create_css_generator } from './css_generator.ts';
 import { CssExtractionState } from './css_extraction_state.ts';
 import { DEFAULT_CACHE_DIR, create_cache_path_resolver } from './css_cache.ts';
-import { default_cache_deps } from './deps_defaults.ts';
+import { default_fs_deps } from './deps_defaults.ts';
 import { filter_file_default } from './file_filter.ts';
 import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
 import { FUZ_CSS_PLACEHOLDER_RULE } from './css_placeholder_splice.ts';
@@ -282,7 +282,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		acorn_plugins,
 		cache_salt,
 		cache_dir = DEFAULT_CACHE_DIR,
-		deps = default_cache_deps,
+		deps = default_fs_deps,
 		prescan = true
 	} = options;
 

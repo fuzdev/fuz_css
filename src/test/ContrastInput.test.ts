@@ -40,7 +40,7 @@ describe('ContrastInput', () => {
 	});
 
 	test('exactly the selected modifier is checked', () => {
-		const container = mount_input({ selected: contrast_modifiers[1]! });
+		const container = mount_input({ selected: contrast_modifiers.high });
 		const checked = buttons(container).filter((b) => b.getAttribute('aria-checked') === 'true');
 		assert.strictEqual(checked.length, 1);
 		assert.strictEqual(checked[0]!.textContent?.trim(), 'high');
@@ -54,6 +54,6 @@ describe('ContrastInput', () => {
 		flushSync();
 		default_button!.click();
 		flushSync();
-		assert.deepEqual(selections, [contrast_modifiers[0]!, null]);
+		assert.deepEqual(selections, [contrast_modifiers.low, null]);
 	});
 });

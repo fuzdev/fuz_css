@@ -626,7 +626,7 @@ export const parse_css_literal = (
 /**
  * Generates the CSS declaration for a parsed CSS-literal class.
  */
-export const generate_declaration = (parsed: ParsedCssLiteral): string => {
+export const render_declaration = (parsed: ParsedCssLiteral): string => {
 	return `${parsed.property}: ${parsed.value};`;
 };
 
@@ -709,7 +709,7 @@ export const try_resolve_literal = (
 	// Success - return the declaration
 	return {
 		ok: true,
-		declaration: generate_declaration(parsed),
+		declaration: render_declaration(parsed),
 		warnings: diagnostics
 	};
 };

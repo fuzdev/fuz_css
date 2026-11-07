@@ -11,6 +11,7 @@ import { resolve_theme_stance } from '#lib/theme_stance.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
 import { theme_knob_by_name } from '#lib/knobs.ts';
+import type { ContrastModifiers } from '#lib/themes.ts';
 import type { ThemeCheckReport, ThemeGateEntry } from '#lib/theme_check.ts';
 import type { ThemeIssue } from '#lib/theme_validate.ts';
 import { compile_theme, type CompiledTheme } from '#lib/theme_compile.ts';
@@ -60,12 +61,12 @@ export interface ThemeEditorStateOptions {
 	/** The themes a draft can be based on. The first is the fallback base. */
 	themes: Array<Theme>;
 	/**
-	 * Modifier themes that compose over whatever is applied, usually
+	 * The modifier themes that compose over whatever is applied, usually
 	 * `contrast_modifiers`.
 	 *
-	 * @default []
+	 * @default null
 	 */
-	contrast_modifiers?: Array<Theme>;
+	contrast_modifiers?: ContrastModifiers | null;
 }
 
 /**
@@ -102,7 +103,7 @@ export interface ThemeEditorStateOptions {
  */
 export class ThemeEditorState {
 	readonly themes: Array<Theme>;
-	readonly contrast_modifiers: Array<Theme>;
+	readonly contrast_modifiers: ContrastModifiers | null;
 
 	name: string = $state.raw(NEW_THEME_NAME);
 	/** The base theme's name - the first theme until another loads. */
@@ -113,7 +114,7 @@ export class ThemeEditorState {
 	contrast_modifier: Theme | null = $state.raw(null);
 
 	constructor(options: ThemeEditorStateOptions) {
-		const { themes, contrast_modifiers = [] } = options;
+		const { themes, contrast_modifiers = null } = options;
 		if (!themes.length) throw new Error('ThemeEditorState requires at least one theme');
 		this.themes = themes;
 		this.contrast_modifiers = contrast_modifiers;
@@ -415,7 +416,7 @@ export class ThemeEditorState {
 			const modifier =
 				base.name === theme.name
 					? null
-					: this.contrast_modifiers.find((m) => compose_themes(base, m).name === theme.name);
+					: this.#modifier_list.find((m) => compose_themes(base, m).name === theme.name);
 			if (modifier === undefined) continue;
 			this.load_theme(base);
 			this.contrast_modifier = modifier;
@@ -454,7 +455,13 @@ export class ThemeEditorState {
 			if (restored.base === undefined && restored.dark === undefined) continue;
 			this.overrides.set(name, restored);
 		}
-		this.contrast_modifier = this.contrast_modifiers.find((m) => m.name === data.contrast) ?? null;
+		this.contrast_modifier = this.#modifier_list.find((m) => m.name === data.contrast) ?? null;
+	}
+
+	// the modifiers as a list, low then high, empty with none configured
+	get #modifier_list(): Array<Theme> {
+		const m = this.contrast_modifiers;
+		return m ? [m.low, m.high] : [];
 	}
 }
 

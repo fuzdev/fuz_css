@@ -1,12 +1,12 @@
 /**
  * Mock filesystem deps for testing.
  *
- * Provides in-memory implementations of `CacheDeps` for isolated unit tests.
+ * Provides in-memory implementations of `FsDeps` for isolated unit tests.
  *
  * @module
  */
 
-import type { CacheDeps } from '#lib/deps.ts';
+import type { FsDeps } from '#lib/deps.ts';
 
 /**
  * In-memory filesystem state for mock deps.
@@ -28,7 +28,7 @@ export const create_mock_fs_state = (): MockFsState => ({
  *
  * @param state - The mock filesystem state to use
  */
-export const create_mock_cache_deps = (state: MockFsState): CacheDeps => ({
+export const create_mock_fs_deps = (state: MockFsState): FsDeps => ({
 	read_text: async ({ path }) => {
 		const value = state.files.get(path);
 		if (value === undefined) return { ok: false, kind: 'not_found', message: `not found: ${path}` };

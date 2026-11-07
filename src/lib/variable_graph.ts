@@ -13,7 +13,7 @@
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
-import { scheme_stance_variables } from './theme_stance.ts';
+import { compute_scheme_mirror } from './theme_stance.ts';
 import {
 	overlay_style_variable,
 	render_color_scheme_rules,
@@ -248,7 +248,7 @@ export const resolve_variables_transitive = (
  * @param resolved_variables - set of variable names to include
  * @returns object with the `:root` block as `root_css` and the dark-scheme rules as `dark_css`
  */
-export const generate_theme_css = (
+export const render_theme_css = (
 	graph: VariableDependencyGraph,
 	resolved_variables: Set<string>
 ): { root_css: string; dark_css: string } => {
@@ -468,7 +468,7 @@ export const bake_theme = (
 	}
 	return {
 		theme: wire,
-		...(stance && { scheme_mirror: scheme_stance_variables(stance, variables) }),
+		...(stance && { scheme_mirror: compute_scheme_mirror(stance, variables) }),
 		...(caps.length > 0 && { caps })
 	};
 };
@@ -509,7 +509,7 @@ const fold_configured_knobs = (
 		if (!contained) continue;
 		by_name.set(
 			v.name,
-			(stance ? scheme_stance_variables(stance, [contained])[0] : undefined) ?? contained
+			(stance ? compute_scheme_mirror(stance, [contained])[0] : undefined) ?? contained
 		);
 	}
 	if (!by_name.size) return theme;

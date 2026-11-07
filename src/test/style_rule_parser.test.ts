@@ -3,14 +3,14 @@ import { test, assert, describe } from 'vitest';
 import {
 	parse_style_css,
 	get_matching_rules,
-	generate_base_css_by_layer,
+	render_base_css_by_layer,
 	collect_rule_variables,
 	load_style_rule_index
 } from '#lib/style_rule_parser.ts';
-import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { default_fs_deps } from '#lib/deps_defaults.ts';
 
 // Alias for brevity in tests
-const deps = default_cache_deps;
+const deps = default_fs_deps;
 
 describe('parse_style_css', () => {
 	describe('basic parsing', () => {
@@ -591,7 +591,7 @@ describe('get_matching_rules', () => {
 	});
 });
 
-describe('generate_base_css_by_layer', () => {
+describe('render_base_css_by_layer', () => {
 	test('preserves order', () => {
 		const css = `
 a { color: red; }
@@ -600,7 +600,7 @@ c { color: green; }
 `;
 		const index = parse_style_css(css);
 
-		const result = generate_base_css_by_layer(index, new Set([2, 0]))['fuz.base'];
+		const result = render_base_css_by_layer(index, new Set([2, 0]))['fuz.base'];
 
 		assert.isBelow(result.indexOf('red'), result.indexOf('green'));
 		assert.notInclude(result, 'blue');
@@ -618,7 +618,7 @@ c { color: green; }
 		const index = parse_style_css(css);
 		const all = new Set(index.rules.map((_, i) => i));
 
-		const result = generate_base_css_by_layer(index, all);
+		const result = render_base_css_by_layer(index, all);
 
 		assert.include(result['fuz.preferences'], 'prefers-contrast');
 		assert.notInclude(result['fuz.preferences'], 'button');

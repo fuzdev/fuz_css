@@ -11,7 +11,7 @@
 
 import type { StyleVariable, Theme } from './variable.ts';
 import { to_theme_stance, type ResolvedTheme } from './theme.ts';
-import { scheme_stance_variables } from './theme_stance.ts';
+import { compute_scheme_mirror } from './theme_stance.ts';
 import { check_theme, compute_theme_caps, type ThemeCheckReport } from './theme_check.ts';
 import { validate_theme, type ThemeIssue } from './theme_validate.ts';
 
@@ -51,7 +51,7 @@ export const compile_theme = (theme: Theme): CompiledTheme => {
 	const caps = compute_theme_caps(theme);
 	return {
 		theme,
-		scheme_mirror: stance ? scheme_stance_variables(stance) : undefined,
+		scheme_mirror: stance ? compute_scheme_mirror(stance) : undefined,
 		caps,
 		report: check_theme(theme, { caps }),
 		issues: validate_theme(theme)

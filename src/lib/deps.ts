@@ -6,14 +6,14 @@
  *
  * **Design principles:**
  * - Internal functions take `deps` as a required first parameter
- * - Public APIs (plugin options) default to `default_cache_deps`
+ * - Public APIs (plugin options) default to `default_fs_deps`
  * - All deps accept a single `options` object parameter
  * - All fallible deps return `Result<{value: T}, FsError>` from `@fuzdev/fuz_util`
  * - Errors carry a discriminated `kind` so callers branch without string matching
  *
  * **Production usage:**
  * ```typescript
- * import {default_cache_deps} from './deps_defaults.js';
+ * import {default_fs_deps} from './deps_defaults.ts';
  * const r = await deps.read_text({path: '/path/to/file.json'});
  * if (!r.ok) {
  *   if (r.kind === 'not_found') {
@@ -26,9 +26,9 @@
  *
  * **Test usage:**
  * ```typescript
- * import {create_mock_cache_deps, create_mock_fs_state} from '../test/fixtures/mock_deps.js';
+ * import {create_mock_fs_deps, create_mock_fs_state} from '../test/fixtures/mock_deps.ts';
  * const state = create_mock_fs_state();
- * const deps = create_mock_cache_deps(state);
+ * const deps = create_mock_fs_deps(state);
  * // Use deps in tests - all operations are in-memory
  * ```
  *
@@ -44,14 +44,12 @@ import type { Result } from '@fuzdev/fuz_util/result.ts';
 import type { FsError } from '@fuzdev/fuz_util/fs.ts';
 
 /**
- * Cache-related file system deps.
- * Abstracted to enable test isolation from the actual filesystem.
- *
- * Named `CacheDeps` (not `FsDeps`) because it only covers
- * the specific deps needed for cache management, not general
- * filesystem access.
+ * The filesystem deps the generator reads and writes through: the extraction
+ * cache's reads, atomic writes, and removals, and the load of the default
+ * `style.css`. Abstracted to enable test isolation from the actual
+ * filesystem.
  */
-export interface CacheDeps {
+export interface FsDeps {
 	/**
 	 * Reads a text file.
 	 * Returns a `not_found` error if the file doesn't exist.

@@ -18,13 +18,13 @@ import type { GenerationDiagnostic } from './diagnostics.ts';
 import {
 	type StyleRuleIndex,
 	get_matching_rules,
-	generate_base_css_by_layer,
+	render_base_css_by_layer,
 	collect_rule_variables
 } from './style_rule_parser.ts';
 import {
 	type VariableDependencyGraph,
 	resolve_variables_transitive,
-	generate_theme_css,
+	render_theme_css,
 	get_all_variable_names,
 	find_similar_variable
 } from './variable_graph.ts';
@@ -401,11 +401,11 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Step 4: Generate theme CSS
-	const { root_css, dark_css } = generate_theme_css(variable_graph, resolved_variables);
+	const { root_css, dark_css } = render_theme_css(variable_graph, resolved_variables);
 	const theme_css = [root_css, dark_css].filter(Boolean).join('\n\n');
 
 	// Step 5: Generate base CSS from matched rules, split by destination layer
-	const layered_css = generate_base_css_by_layer(style_rule_index, included_rule_indices);
+	const layered_css = render_base_css_by_layer(style_rule_index, included_rule_indices);
 	const base_css = layered_css['fuz.base'];
 	const preferences_css = layered_css['fuz.preferences'];
 
@@ -445,7 +445,7 @@ export interface GenerateBundledCssOptions {
  * @param options - output options
  * @returns combined CSS string
  */
-export const generate_bundled_css = (
+export const render_bundled_css = (
 	result: CssResolutionResult,
 	utility_css: string,
 	options: GenerateBundledCssOptions = {}

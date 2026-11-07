@@ -15,7 +15,7 @@ import { dirname } from 'node:path';
 import type { Result } from '@fuzdev/fuz_util/result.ts';
 import { fs_classify_error, type FsError } from '@fuzdev/fuz_util/fs.ts';
 
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 
 /**
  * Wraps an async void-returning function, converting thrown errors to typed `FsError`.
@@ -32,7 +32,7 @@ const wrap_void = async (fn: () => Promise<unknown>): Promise<Result<object, FsE
 /**
  * Default filesystem deps using `node:fs/promises`.
  */
-export const default_cache_deps: CacheDeps = {
+export const default_fs_deps: FsDeps = {
 	read_text: async ({ path }) => {
 		try {
 			return { ok: true, value: await readFile(path, 'utf8') };

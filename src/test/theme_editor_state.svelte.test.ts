@@ -595,7 +595,10 @@ describe('applied theme', () => {
 	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', base: '1.5' }] };
 	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', base: '0.5' }] };
 	const create_contrast_editor = (): ThemeEditorState =>
-		new ThemeEditorState({ themes: [base_theme, marquee_theme], contrast_modifiers: [low, high] });
+		new ThemeEditorState({
+			themes: [base_theme, marquee_theme],
+			contrast_modifiers: { low, high }
+		});
 
 	test('a clean editor applies and picks its base', () => {
 		const editor = create_contrast_editor();

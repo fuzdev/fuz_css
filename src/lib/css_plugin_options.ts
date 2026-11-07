@@ -46,7 +46,7 @@ import type { FileFilter } from './file_filter.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import type { StyleVariable, Theme } from './variable.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 
 /**
  * Options for CSS class extraction from source files.
@@ -426,7 +426,7 @@ export interface CssCacheOptions {
 	 *
 	 * @internal A test seam, not stable API.
 	 */
-	deps?: CacheDeps;
+	deps?: FsDeps;
 }
 
 /**

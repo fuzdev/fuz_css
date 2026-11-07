@@ -51,13 +51,7 @@ import {
 	type PaletteVariant
 } from './variable_data.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
-import {
-	NUMERIC_EPSILON,
-	STOPS_PATTERN,
-	ThemeResolver,
-	VAR_MATCHER,
-	type ThemeResolverOptions
-} from './theme_resolver.ts';
+import { NUMERIC_EPSILON, STOPS_PATTERN, ThemeResolver, VAR_MATCHER } from './theme_resolver.ts';
 
 //
 // Gate thresholds - the WCAG levels the derived palette is designed to clear.
@@ -345,6 +339,19 @@ export const theme_gate_role_names: ReadonlyArray<string> = PAIRING_GATES.map(
 const NO_VISITS: ReadonlySet<string> = new Set();
 
 /**
+ * Options for `check_theme`. The stance mirror needs no passing, since the
+ * gates derive it from the theme's stance.
+ */
+export interface CheckThemeOptions {
+	/**
+	 * The compiled caps to check the theme with, as `compute_theme_caps`
+	 * returns them - without them the gates measure the baked caps, which a
+	 * theme with moved hues or lightness can exceed.
+	 */
+	caps?: Array<StyleVariable>;
+}
+
+/**
  * Runs the gamut, monotonicity, and contrast gates against a theme, resolving
  * its authored CSS back to numbers through the resolution core. Report-only:
  * failures land in `entries` (with `pass: false`), inputs that can't be
@@ -369,9 +376,9 @@ const NO_VISITS: ReadonlySet<string> = new Set();
  * the full letters × intents grid.
  *
  * @param theme - the theme to check
- * @param options - the compiled caps to check the theme with, as `compute_theme_caps` returns them
+ * @param options - the derived data to check the theme with
  */
-export const check_theme = (theme: Theme, options: ThemeResolverOptions = {}): ThemeCheckReport => {
+export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): ThemeCheckReport => {
 	const resolver = new ThemeResolver(theme, options);
 	const stance = to_theme_stance(theme.scheme);
 	const entries: Array<ThemeGateEntry> = [];

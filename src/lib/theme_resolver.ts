@@ -54,7 +54,7 @@
  * (`theme.ts` `render_theme_style`): light = `theme.base`; dark =
  * `theme.dark ?? theme.base`, falling back to the numeric-twin default for
  * the scheme. A single-scheme
- * stance (`Theme.scheme`) resolves through the same `scheme_stance_variables`
+ * stance (`Theme.scheme`) resolves through the same `compute_scheme_mirror`
  * mirror `resolve_theme_stance` computes, so the gates evaluate the stanced
  * reality in both schemes, and `caps` apply over everything, as they render
  * last.
@@ -62,7 +62,7 @@
  * @module
  */
 
-import { scheme_stance_variables } from './theme_stance.ts';
+import { compute_scheme_mirror } from './theme_stance.ts';
 import { to_theme_stance, type ThemeDerived } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import {
@@ -210,7 +210,7 @@ export class ThemeResolver {
 		// everything; neither is an author pin
 		const stance = to_theme_stance(theme.scheme);
 		if (stance) {
-			for (const v of scheme_stance_variables(stance)) {
+			for (const v of compute_scheme_mirror(stance)) {
 				if (!this.#by_name.has(v.name)) this.#by_name.set(v.name, v);
 			}
 		}

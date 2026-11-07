@@ -657,7 +657,7 @@ carry a module-level `@internal` - documented, importable, not stable API.
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   returns a `ResolvedTheme` carrying a single-scheme theme's `scheme_mirror`
   (the scheme-adaptive defaults re-slotted so its one appearance holds in
-  both schemes), and `scheme_stance_variables`, which computes the mirror
+  both schemes), and `compute_scheme_mirror`, which computes the mirror
   from any variable set (the generated twin by default). Kept out of
   `theme.ts` so only consumers of a stanced theme pay for the data; the
   shipped stanced exemplars export their authored theme and resolve where
@@ -668,8 +668,9 @@ carry a module-level `@internal` - documented, importable, not stable API.
   module-init emitter calls defeat tree-shaking - reaching for
   `default_variables` costs ~14KB minified)
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
-  (`default_themes`, semantic-tier policy) plus `contrast_modifiers`:
-  low/high contrast are modifiers composed over any theme via
+  (`default_themes`, semantic-tier policy, with `DEFAULT_THEME` its first -
+  a registry policy, not an alias of `base_theme`) plus `contrast_modifiers`
+  (`{low, high}`): low/high contrast are modifiers composed over any theme via
   `compose_themes`, not themes themselves - users see one flat "themes"
   list. A shipped theme's own ground (`shade_lightness_00`) must sit
   between its low and high compositions in each scheme it renders, so
@@ -847,7 +848,8 @@ is an internal fixture the example apps import through node_modules.
   `compare_media_modifiers`; the arguments of `nth-*(...)` and arbitrary
   breakpoints are restricted to An+B and to lengths or math functions of
   lengths, which can't end their selector or media query
-- [deps.ts](src/lib/deps.ts) - `CacheDeps` interface for dependency injection
+- [deps.ts](src/lib/deps.ts) - `FsDeps`, the filesystem deps the extraction
+  cache and the `style.css` load go through, for dependency injection
 - [deps_defaults.ts](src/lib/deps_defaults.ts) - Default filesystem
   implementations
 - [example_class_utilities.ts](src/lib/example_class_utilities.ts) - Example
@@ -924,7 +926,7 @@ Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_l
 `css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `diagnostic_codes`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
-`fuz_comments`, `bundled_resources`, `generate_bundled_css`,
+`fuz_comments`, `bundled_resources`, `render_bundled_css`,
 `generate_css`, and more.
 
 The theme suites discover the shipped themes by glob through

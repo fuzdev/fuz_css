@@ -114,7 +114,7 @@
 			<div>
 				<div class="title text-align:center pb_xs3">Contrast</div>
 				<ContrastInput
-					modifiers={editor.contrast_modifiers}
+					modifiers={contrast_modifiers}
 					selected={editor.contrast_modifier}
 					select={(modifier) => (editor.contrast_modifier = modifier)}
 				/>

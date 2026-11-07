@@ -6,14 +6,14 @@ import {
 	build_variable_graph,
 	build_variable_graph_from_options,
 	resolve_variables_transitive,
-	generate_theme_css,
+	render_theme_css,
 	get_all_variable_names,
 	find_similar_variable
 } from '#lib/variable_graph.ts';
 import type { StyleVariable, Theme } from '#lib/variable.ts';
 import type { GenerationDiagnostic } from '#lib/diagnostics.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
-import { scheme_stance_variables } from '#lib/theme_stance.ts';
+import { compute_scheme_mirror } from '#lib/theme_stance.ts';
 import { compute_theme_caps } from '#lib/theme_check.ts';
 import { default_variables } from '#lib/variables.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
@@ -125,7 +125,7 @@ describe('build_variable_graph containment', () => {
 			name: 't',
 			variables: [{ name: 'text_color', base: 'red} body{background:lime' }]
 		});
-		const { root_css } = generate_theme_css(graph, new Set(['text_color']));
+		const { root_css } = render_theme_css(graph, new Set(['text_color']));
 		assert.notInclude(root_css, 'lime');
 		assert.strictEqual(uncontained(graph).length, 1);
 	});
@@ -615,13 +615,13 @@ describe('resolve_variables_transitive', () => {
 	});
 });
 
-describe('generate_theme_css', () => {
+describe('render_theme_css', () => {
 	describe('basic output', () => {
 		test('generates :root and dark blocks', () => {
 			const variables: Array<StyleVariable> = [{ name: 'color', base: 'blue', dark: 'lightblue' }];
 			const graph = build_variable_graph(variables);
 
-			const { root_css, dark_css } = generate_theme_css(graph, new Set(['color']));
+			const { root_css, dark_css } = render_theme_css(graph, new Set(['color']));
 
 			assert.include(root_css, ':root');
 			assert.include(root_css, '--color: blue;');
@@ -633,7 +633,7 @@ describe('generate_theme_css', () => {
 			const variables: Array<StyleVariable> = [{ name: 'color', base: 'blue', dark: 'lightblue' }];
 			const graph = build_variable_graph(variables);
 
-			const { root_css, dark_css } = generate_theme_css(graph, new Set(['color']));
+			const { root_css, dark_css } = render_theme_css(graph, new Set(['color']));
 
 			assert.include(root_css, ':root {');
 			assert.include(dark_css, ':root.dark {');
@@ -645,7 +645,7 @@ describe('generate_theme_css', () => {
 			const variables: Array<StyleVariable> = [{ name: 'spacing', base: '16px' }];
 			const graph = build_variable_graph(variables);
 
-			const { root_css, dark_css } = generate_theme_css(graph, new Set(['spacing']));
+			const { root_css, dark_css } = render_theme_css(graph, new Set(['spacing']));
 
 			assert.include(root_css, '--spacing: 16px;');
 			assert.strictEqual(dark_css, '');
@@ -655,7 +655,7 @@ describe('generate_theme_css', () => {
 			const variables: Array<StyleVariable> = [{ name: 'glow', dark: 'none' }];
 			const graph = build_variable_graph(variables);
 
-			const { root_css, dark_css } = generate_theme_css(graph, new Set(['glow']));
+			const { root_css, dark_css } = render_theme_css(graph, new Set(['glow']));
 
 			assert.strictEqual(root_css, '');
 			assert.include(dark_css, '--glow: none;');
@@ -671,7 +671,7 @@ describe('generate_theme_css', () => {
 			];
 			const graph = build_variable_graph(variables);
 
-			const { root_css } = generate_theme_css(graph, new Set(['zebra', 'alpha', 'mid']));
+			const { root_css } = render_theme_css(graph, new Set(['zebra', 'alpha', 'mid']));
 
 			const alpha_pos = root_css.indexOf('--alpha');
 			const mid_pos = root_css.indexOf('--mid');
@@ -902,7 +902,7 @@ describe('build-time theme against the real defaults', () => {
 		assert.isTrue(variables.has('hue_accent'));
 		// the rebinding's target rides along even though nothing else uses it
 		assert.isTrue(variables.has('hue_d'));
-		const { root_css } = generate_theme_css(graph, variables);
+		const { root_css } = render_theme_css(graph, variables);
 		assert.include(root_css, '--hue_accent: var(--hue_d);');
 		assert.include(root_css, '--hue_d:');
 	});
@@ -914,7 +914,7 @@ describe('bake_theme', () => {
 		const custom: StyleVariable = { name: adaptive.name, base: '0.97', dark: '0.11' };
 		const configured = [...default_variables.filter((v) => v.name !== adaptive.name), custom];
 		const baked = bake_theme({ name: 't', scheme: 'dark', variables: [] }, configured);
-		assert.deepEqual(baked.scheme_mirror, scheme_stance_variables('dark', configured));
+		assert.deepEqual(baked.scheme_mirror, compute_scheme_mirror('dark', configured));
 		assert.deepEqual(
 			baked.scheme_mirror!.find((v) => v.name === adaptive.name),
 			{ name: adaptive.name, base: '0.11' }
@@ -945,7 +945,7 @@ describe('bake_theme', () => {
 		for (const cap of caps) {
 			assert.strictEqual(graph.variables.get(cap.name)!.base_value, cap.base, cap.name);
 		}
-		const { root_css } = generate_theme_css(graph, new Set(caps.map((v) => v.name)));
+		const { root_css } = render_theme_css(graph, new Set(caps.map((v) => v.name)));
 		assert.include(root_css, `--${caps[0]!.name}: ${caps[0]!.base};`);
 	});
 

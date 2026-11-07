@@ -15,7 +15,7 @@ import {
 import { generate_css, type GenerateCssResult } from '#lib/generate_css.ts';
 import { css_class_definitions } from '#lib/css_class_definitions.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
-import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { default_fs_deps } from '#lib/deps_defaults.ts';
 import { load_default_style_css } from '#lib/style_rule_parser.ts';
 import type { BaseCssOption, VariablesOption } from '#lib/css_plugin_options.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -26,7 +26,7 @@ const create_resources = (
 	create_bundled_resources({
 		base_css: undefined,
 		variables: undefined,
-		deps: default_cache_deps,
+		deps: default_fs_deps,
 		...options
 	});
 
@@ -102,7 +102,7 @@ describe('create_bundled_resources', () => {
 
 		test('ships every top-level rule it contains, as written and in order', async () => {
 			const { style_rule_index } = await create_resources();
-			const css = await load_default_style_css(default_cache_deps);
+			const css = await load_default_style_css(default_fs_deps);
 
 			// each indexed rule is a verbatim slice of the source, in source order
 			let offset = 0;
@@ -126,7 +126,7 @@ describe('create_bundled_resources', () => {
 		});
 
 		test.each(USAGES)('generates the same CSS through every base_css form: %j', async (usage) => {
-			const default_css = await load_default_style_css(default_cache_deps);
+			const default_css = await load_default_style_css(default_fs_deps);
 
 			const from_default = await generate(usage);
 			const from_callback = await generate({ ...usage, base_css: (css) => css });
@@ -160,7 +160,7 @@ describe('create_bundled_resources', () => {
 				classes: ['appended']
 			});
 
-			assert.strictEqual(received, await load_default_style_css(default_cache_deps));
+			assert.strictEqual(received, await load_default_style_css(default_fs_deps));
 			assert.deepEqual(result.diagnostics, []);
 			// the last rule inside the base layer block, not unlayered after it
 			const appended = '.appended { color: red; }';

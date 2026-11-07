@@ -41,7 +41,7 @@ import {
 } from './css_variable_utils.ts';
 import { split_selector_list } from './css_ruleset_parser.ts';
 import type { GenerationDiagnostic } from './diagnostics.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 import { FUZ_LAYER_ORDER_STATEMENT } from './theme.ts';
 
 /**
@@ -669,7 +669,7 @@ const scan_selector_list = (
  * @param deps - filesystem deps for dependency injection
  * @returns promise resolving to `StyleRuleIndex`
  */
-export const load_style_rule_index = async (deps: CacheDeps): Promise<StyleRuleIndex> =>
+export const load_style_rule_index = async (deps: FsDeps): Promise<StyleRuleIndex> =>
 	parse_style_css(await load_default_style_css(deps));
 
 /**
@@ -703,7 +703,7 @@ const format_css_parse_error = (error: unknown): string => {
  * @param deps - filesystem deps for dependency injection
  * @returns promise resolving to the CSS string
  */
-export const load_default_style_css = async (deps: CacheDeps): Promise<string> => {
+export const load_default_style_css = async (deps: FsDeps): Promise<string> => {
 	// a file path, not the URL's `pathname`, which keeps percent-encoding (a
 	// space as `%20`) and a Windows drive's leading slash
 	const path = fileURLToPath(new URL('./style.css', import.meta.url));
@@ -767,7 +767,7 @@ export const get_matching_rules = (
  * @param included_indices - set of rule indices to include
  * @returns per-layer CSS strings, each in original rule order
  */
-export const generate_base_css_by_layer = (
+export const render_base_css_by_layer = (
 	index: StyleRuleIndex,
 	included_indices: Set<number>
 ): Record<RuleLayer, string> => {

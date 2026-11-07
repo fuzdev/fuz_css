@@ -423,7 +423,7 @@ describe('contrast modifier compositions', () => {
 
 	test('every base × modifier validates with no errors', () => {
 		for (const base of bases) {
-			for (const modifier of contrast_modifiers) {
+			for (const modifier of Object.values(contrast_modifiers)) {
 				const composed = compose_themes(base, modifier);
 				const errors = validate_theme(composed).filter((issue) => issue.level === 'error');
 				assert.deepEqual(errors, [], `${composed.name}: ${JSON.stringify(errors)}`);
@@ -433,7 +433,7 @@ describe('contrast modifier compositions', () => {
 
 	test('every base × modifier resolves fully and keeps its lightness ramps monotonic', () => {
 		for (const base of bases) {
-			for (const modifier of contrast_modifiers) {
+			for (const modifier of Object.values(contrast_modifiers)) {
 				const composed = compose_themes(base, modifier);
 				const report = check_theme(composed);
 				// nothing unresolvable: an unresolved knob silently removes gate
@@ -449,7 +449,7 @@ describe('contrast modifier compositions', () => {
 
 	test('every base × modifier keeps its contrast gates', () => {
 		for (const base of bases) {
-			for (const modifier of contrast_modifiers) {
+			for (const modifier of Object.values(contrast_modifiers)) {
 				const composed = compose_themes(base, modifier);
 				assert_declared_contrast_failures(check_theme(composed), [], 1, composed.name);
 			}

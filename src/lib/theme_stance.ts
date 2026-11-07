@@ -38,7 +38,7 @@ import { to_theme_stance, type ResolvedTheme } from './theme.ts';
  * @param variables - the variable set to mirror, `scheme_adaptive_variables` by default
  * @returns the mirrored variables, to render before the theme's own
  */
-export const scheme_stance_variables = (
+export const compute_scheme_mirror = (
 	scheme: 'light' | 'dark',
 	variables: Array<StyleVariable> = scheme_adaptive_variables
 ): Array<StyleVariable> => {
@@ -63,5 +63,5 @@ export const scheme_stance_variables = (
  */
 export const resolve_theme_stance = (theme: Theme): ResolvedTheme => {
 	const stance = to_theme_stance(theme.scheme);
-	return stance ? { theme, scheme_mirror: scheme_stance_variables(stance) } : { theme };
+	return stance ? { theme, scheme_mirror: compute_scheme_mirror(stance) } : { theme };
 };

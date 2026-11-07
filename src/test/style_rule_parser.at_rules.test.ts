@@ -12,7 +12,7 @@ import {
 	parse_style_css,
 	create_style_rule_index,
 	get_matching_rules,
-	generate_base_css_by_layer,
+	render_base_css_by_layer,
 	collect_rule_variables,
 	type RuleLayer
 } from '#lib/style_rule_parser.ts';
@@ -307,7 +307,7 @@ describe('at-rule contract', () => {
 		// emitted exactly as written, minus an unwrapped layer block
 		const with_button = get_matching_rules(index, DETECTED_BUTTON, NOTHING);
 		assert.strictEqual(
-			generate_base_css_by_layer(index, with_button)[context.layer],
+			render_base_css_by_layer(index, with_button)[context.layer],
 			context.emitted(kind.css)
 		);
 
@@ -345,7 +345,7 @@ describe('layer rules', () => {
 		// sublayers whose declared order holds
 		const included = get_matching_rules(index, NOTHING, NOTHING);
 		assert.strictEqual(
-			generate_base_css_by_layer(index, included)['fuz.base'],
+			render_base_css_by_layer(index, included)['fuz.base'],
 			[statement, components, reset].join('\n\n')
 		);
 	});

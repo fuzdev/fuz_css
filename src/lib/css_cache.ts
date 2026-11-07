@@ -18,7 +18,7 @@ import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
 import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
-import type { CacheDeps } from './deps.ts';
+import type { FsDeps } from './deps.ts';
 import { is_ci } from './ci.ts';
 
 /**
@@ -258,7 +258,7 @@ export const get_file_cache_path = (
  * @param cache_path - absolute path to the cache file
  */
 export const load_cached_extraction = async (
-	deps: CacheDeps,
+	deps: FsDeps,
 	cache_path: string
 ): Promise<CachedExtraction | null> => {
 	try {
@@ -300,7 +300,7 @@ export interface SaveCachedExtractionOptions {
  * @param options - the cache file, its key parts, and the extraction to write
  */
 export const save_cached_extraction = async (
-	deps: CacheDeps,
+	deps: FsDeps,
 	options: SaveCachedExtractionOptions
 ): Promise<void> => {
 	const { cache_path, content_hash, extraction_key, extraction } = options;
@@ -349,10 +349,7 @@ export const save_cached_extraction = async (
  * @param deps - filesystem deps for dependency injection
  * @param cache_path - absolute path to the cache file
  */
-export const delete_cached_extraction = async (
-	deps: CacheDeps,
-	cache_path: string
-): Promise<void> => {
+export const delete_cached_extraction = async (deps: FsDeps, cache_path: string): Promise<void> => {
 	await deps.unlink({ path: cache_path });
 };
 

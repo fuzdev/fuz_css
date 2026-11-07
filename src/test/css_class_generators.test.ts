@@ -15,7 +15,7 @@ import {
 	generate_border_radius_corners,
 	generate_shadow_classes,
 	format_spacing_value,
-	format_variable_name
+	to_class_segment
 } from '#lib/css_class_generators.ts';
 import type { CssClassDefinition } from '#lib/css_class_generation.ts';
 
@@ -30,25 +30,25 @@ const get_declaration = (def: CssClassDefinition | undefined): string => {
 	return def.declaration ?? '';
 };
 
-describe('format_variable_name', () => {
+describe('to_class_segment', () => {
 	test('converts hyphens to underscores', () => {
-		assert.strictEqual(format_variable_name('font-size'), 'font_size');
+		assert.strictEqual(to_class_segment('font-size'), 'font_size');
 	});
 
 	test('converts spaces to underscores', () => {
-		assert.strictEqual(format_variable_name('some value'), 'some_value');
+		assert.strictEqual(to_class_segment('some value'), 'some_value');
 	});
 
 	test('converts multiple hyphens/spaces', () => {
-		assert.strictEqual(format_variable_name('border-top-left-radius'), 'border_top_left_radius');
+		assert.strictEqual(to_class_segment('border-top-left-radius'), 'border_top_left_radius');
 	});
 
 	test('preserves underscores', () => {
-		assert.strictEqual(format_variable_name('my_var'), 'my_var');
+		assert.strictEqual(to_class_segment('my_var'), 'my_var');
 	});
 
 	test('handles empty string', () => {
-		assert.strictEqual(format_variable_name(''), '');
+		assert.strictEqual(to_class_segment(''), '');
 	});
 });
 

@@ -17,7 +17,7 @@ import { resolve_class_definitions } from './css_class_definitions.ts';
 import { resolve_class_interpreters } from './css_class_interpreters.ts';
 import { load_css_properties } from './css_literal.ts';
 import { is_ci } from './ci.ts';
-import { default_cache_deps } from './deps_defaults.ts';
+import { default_fs_deps } from './deps_defaults.ts';
 import { CssClasses } from './css_classes.ts';
 import { create_diagnostic_dispatcher, type DiagnosticSink } from './diagnostics.ts';
 import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
@@ -81,7 +81,7 @@ export const create_css_generator = (
 		additional_variables,
 		exclude_elements,
 		exclude_variables,
-		deps = default_cache_deps
+		deps = default_fs_deps
 	} = options;
 
 	const include_base = base_css !== null;

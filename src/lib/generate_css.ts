@@ -18,7 +18,7 @@ import {
 } from './css_class_generation.ts';
 import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style, type ResolvedTheme } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
-import { resolve_css, generate_bundled_css } from './css_bundled_resolution.ts';
+import { resolve_css, render_bundled_css } from './css_bundled_resolution.ts';
 import type { BundledCssResources } from './bundled_resources.ts';
 import { extract_required_css_variables } from './css_variable_utils.ts';
 import { default_variables } from './variables.ts';
@@ -190,7 +190,7 @@ export interface GenerateCssResult {
  * Runs the full CSS-generation pipeline: utility classes via
  * `generate_classes_css`, then - when base or theme output is enabled and
  * bundled `resources` are available - base styles and theme variables via
- * `resolve_css` + `generate_bundled_css`. Returns the combined CSS and every
+ * `resolve_css` + `render_bundled_css`. Returns the combined CSS and every
  * diagnostic produced along the way.
  */
 export const generate_css = (options: GenerateCssOptions): GenerateCssResult => {
@@ -293,7 +293,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 			if (undefined_variables) diagnostics.push(undefined_variables);
 		}
 
-		css = generate_bundled_css(resolution, utility_result.css, {
+		css = render_bundled_css(resolution, utility_result.css, {
 			include_theme,
 			include_base,
 			// the theme's own overlay re-renders into the baked sublayer of

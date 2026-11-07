@@ -9,7 +9,7 @@ import {
 	vite_plugin_fuz_css,
 	type VitePluginFuzCssOptions
 } from '#lib/vite_plugin_fuz_css.ts';
-import { default_cache_deps } from '#lib/deps_defaults.ts';
+import { default_fs_deps } from '#lib/deps_defaults.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
 import {
 	vite_dev_fixture_root as fixture_root,
@@ -226,12 +226,12 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 					filter_file: filter_fixture_file,
 					cache_dir,
 					deps: {
-						...default_cache_deps,
+						...default_fs_deps,
 						read_text: async (options) => {
 							if (options.path.endsWith('island.html')) {
 								throw new Error('synthetic read failure');
 							}
-							return default_cache_deps.read_text(options);
+							return default_fs_deps.read_text(options);
 						}
 					}
 				})

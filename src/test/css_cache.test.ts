@@ -18,8 +18,8 @@ import {
 import type { SourceLocation, ExtractionDiagnostic } from '#lib/diagnostics.ts';
 import type { AcornPlugin } from '#lib/css_class_extractor.ts';
 import { extract_file_cached } from '#lib/extract_file_cached.ts';
-import { default_cache_deps } from '#lib/deps_defaults.ts';
-import { create_mock_fs_state, create_mock_cache_deps } from './fixtures/mock_deps.ts';
+import { default_fs_deps } from '#lib/deps_defaults.ts';
+import { create_mock_fs_state, create_mock_fs_deps } from './fixtures/mock_deps.ts';
 import {
 	loc,
 	make_classes,
@@ -27,7 +27,7 @@ import {
 	EMPTY_EXTRACTION
 } from './test_helpers.ts';
 
-const deps = default_cache_deps;
+const deps = default_fs_deps;
 
 const TEST_DIR = '/tmp/fuz_css_cache_test';
 const PROJECT_ROOT = '/tmp/fuz_css_cache_test/project/';
@@ -555,7 +555,7 @@ describe('cache fields round-trip', () => {
 describe('cache functions with mock deps', () => {
 	test('round-trips with in-memory mock', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 		const cache_path = '/mock/cache/test.json';
 		const classes = make_classes([['box', [loc('test.ts', 1, 5)]]]);
 
@@ -574,14 +574,14 @@ describe('cache functions with mock deps', () => {
 
 	test('load returns null for missing file', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 
 		assert.isNull(await load_cached_extraction(mock_deps, '/nonexistent.json'));
 	});
 
 	test('delete removes file from state', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 		const cache_path = '/mock/cache/delete.json';
 
 		await save_cached_extraction(mock_deps, {
@@ -598,7 +598,7 @@ describe('cache functions with mock deps', () => {
 
 	test('can inspect raw state for testing', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 
 		await save_cached_extraction(mock_deps, {
 			cache_path: '/test.json',
@@ -641,7 +641,7 @@ describe('the extraction configuration key', () => {
 
 	test('an entry cached under another configuration misses', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 		const cache_path = '/mock/cache/App.tsx.json';
 		const content = 'export const x = <div class="box" />;';
 		// cached as if a plugin-less parse had produced nothing
@@ -723,7 +723,7 @@ describe('the cache version', () => {
 
 	test('an entry written by other versions misses', async () => {
 		const state = create_mock_fs_state();
-		const mock_deps = create_mock_cache_deps(state);
+		const mock_deps = create_mock_fs_deps(state);
 		const cache_path = '/mock/cache/upgraded.json';
 		await save_cached_extraction(mock_deps, {
 			cache_path,

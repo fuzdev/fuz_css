@@ -13,7 +13,7 @@ import {
 	is_possible_css_literal,
 	parse_css_literal,
 	has_modifiers,
-	generate_declaration
+	render_declaration
 } from './css_literal.ts';
 
 /**
@@ -49,7 +49,7 @@ export const css_literal_interpreter: CssClassDefinitionInterpreter = {
 			}
 		}
 
-		return { declaration: generate_declaration(result.parsed) };
+		return { declaration: render_declaration(result.parsed) };
 	}
 };
 
