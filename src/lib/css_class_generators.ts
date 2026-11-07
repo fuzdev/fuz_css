@@ -23,8 +23,8 @@ export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
  * ```ts
  * // Simple list
  * generate_classes(
- *   v => ({ name: `position_${v}`, css: `position: ${v};` }),
- *   ['static', 'relative', 'absolute']
+ *   (v) => ({ name: `width_atmost_${v}`, css: `width: 100%; max-width: var(--distance_${v});` }),
+ *   distance_variants
  * )
  * ```
  *
@@ -76,14 +76,12 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 export const format_variable_name = (str: string): string => str.replace(/[-\s]+/g, '_');
 
 /**
- * Format spacing values for CSS (handles 0, auto, percentages, pixels, and CSS variables).
- * Used by margin, padding, gap, inset, top/right/bottom/left, etc.
+ * Format spacing values for CSS: `0` and `auto` as-is, a space variant as its
+ * `--space_*` variable. Used by margin, padding, gap, inset, top/right/bottom/left, etc.
  */
 export const format_spacing_value = (value: string): string => {
 	if (value === '0') return '0';
 	if (value === 'auto') return 'auto';
-	if (value === '100') return '100%';
-	if (value.endsWith('px')) return value;
 	return `var(--space_${value})`;
 };
 

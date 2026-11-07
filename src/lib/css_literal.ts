@@ -216,15 +216,10 @@ export const check_calc_expression = (value: string): string | null => {
  * @returns true if it could be CSS-literal syntax
  */
 export const is_possible_css_literal = (class_name: string): boolean => {
-	// Must contain at least one colon
+	// Must contain at least one colon, so it splits into at least two parts
 	if (!class_name.includes(':')) return false;
 
-	// Should not match existing class patterns (underscore-based)
-	if (/^[a-z_]+_[a-z0-9_]+$/.test(class_name)) return false;
-
-	// Basic structure check: at minimum "property:value"
 	const parts = class_name.split(':');
-	if (parts.length < 2) return false;
 
 	// First part should be non-empty (property or first modifier)
 	if (parts[0] === '') return false;

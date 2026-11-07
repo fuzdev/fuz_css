@@ -41,8 +41,6 @@
 import type { Result } from '@fuzdev/fuz_util/result.ts';
 import type { FsError } from '@fuzdev/fuz_util/fs.ts';
 
-export type { FsError };
-
 /**
  * Cache-related file system deps.
  * Abstracted to enable test isolation from the actual filesystem.

@@ -61,15 +61,6 @@ describe('format_spacing_value', () => {
 		assert.strictEqual(format_spacing_value('auto'), 'auto');
 	});
 
-	test('converts 100 to 100%', () => {
-		assert.strictEqual(format_spacing_value('100'), '100%');
-	});
-
-	test('preserves pixel values', () => {
-		assert.strictEqual(format_spacing_value('10px'), '10px');
-		assert.strictEqual(format_spacing_value('0px'), '0px');
-	});
-
 	test('wraps other values in var(--space_*)', () => {
 		assert.strictEqual(format_spacing_value('md'), 'var(--space_md)');
 		assert.strictEqual(format_spacing_value('lg'), 'var(--space_lg)');
