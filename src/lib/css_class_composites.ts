@@ -98,7 +98,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 			.selectable.selected,
 			.selectable[aria-pressed='true'],
-			.selectable:active {
+			.selectable:where(:not(:disabled):not([aria-disabled='true'])):active {
 				background-color: var(--button_fill_active);
 				border-color: var(--accent_50);
 			}
@@ -168,7 +168,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			.clickable:hover {
 				transform: var(--clickable_transform_hover, scale3d(1.1, 1.1, 1.1));
 			}
-			.clickable:active,
+			.clickable:where(:not(:disabled):not([aria-disabled='true'])):active,
 			.clickable.active {
 				transform: var(--clickable_transform_active, scale3d(1.2, 1.2, 1.2));
 			}
@@ -342,7 +342,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 				--border_color: var(--border_color_30);
 				background-color: var(--ink_10);
 			}
-			.menuitem:active,
+			.menuitem:where(:not(:disabled):not([aria-disabled='true'])):active,
 			.menuitem:is(.selected, [aria-pressed='true']):hover {
 				--border_color: var(--border_color_30);
 				background-color: var(--ink_20);

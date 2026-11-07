@@ -313,7 +313,7 @@ describe('generate_classes_css modifiers', () => {
 				'.md\\:clickable',
 				'.md\\:clickable:focus',
 				'.md\\:clickable:hover',
-				'.md\\:clickable:active'
+				".md\\:clickable:where(:not(:disabled):not([aria-disabled='true'])):active"
 			);
 		});
 

@@ -577,9 +577,6 @@ so for consistent visuals we opt to include no active state */
 	:where(input[type='range']:not(.unstyled):hover:not(:disabled):not([aria-disabled='true'])) {
 		--thumb_background_color: var(--accent_50);
 	}
-	:where(input[type='range']:not(.unstyled):disabled:active) {
-		--thumb_background_color: var(--negative_50);
-	}
 	:where(input[type='range']:not(.unstyled))::-webkit-slider-thumb {
 		appearance: none;
 		height: var(--thumb_size);
@@ -666,7 +663,9 @@ see https://caniuse.com/css-has
 	}
 	/* split from contenteditable, which no element or class names, so the
 		bundled output ships these with the elements and that one always */
-	:where(:is(input, textarea, select):not(.unstyled):active) {
+	:where(
+		:is(input, textarea, select):not(.unstyled):not(:disabled):not([aria-disabled='true']):active
+	) {
 		--outline_width: var(--outline_width_active);
 	}
 	:where([contenteditable]:not(.unstyled):active) {
@@ -881,6 +880,7 @@ TODO think through these patterns to get somewhere consistent
 	) {
 		--button_text_color: var(--text_min);
 	}
+	/* a pressed disabled control gives no feedback, so every press rule skips it */
 	:where(button:not(.unstyled):not(:disabled):not([aria-disabled='true']):active) {
 		--button_fill: var(--button_fill_active);
 		--button_border_color: var(--button_border_color_active);
@@ -891,21 +891,10 @@ TODO think through these patterns to get somewhere consistent
 		border-style: var(--button_border_style_active);
 	}
 	:where(
-		:is(input, textarea, select, button):not(.unstyled):disabled:active,
-		label:not(.unstyled).disabled:active
+		button:not(.unstyled).selected:not(.deselectable):not(:disabled):not(
+			[aria-disabled='true']
+		):active
 	) {
-		--text_color: var(--negative_50);
-		--border_color: var(--negative_50);
-	}
-	/* TODO is there a cleaner way to override these through vars? */
-	:where(button:not(.unstyled):is(.selected, [aria-pressed='true']):disabled:active) {
-		--text_color: var(--text_00);
-		--fill: var(--negative_50);
-	}
-	:where(button:not(.unstyled):not(.selected, [aria-pressed='true']):disabled:active) {
-		--fill: transparent;
-	}
-	:where(button:not(.unstyled).selected:not(.deselectable):active) {
 		--outline_width: var(--outline_width_focus);
 	}
 

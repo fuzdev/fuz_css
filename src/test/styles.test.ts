@@ -168,7 +168,7 @@ test('every :not(:disabled) guard also excludes aria-disabled', () => {
 	}
 });
 
-test('aria-disabled keeps focus and pointer events, and skips the active flash', () => {
+test('aria-disabled keeps focus and pointer events', () => {
 	const index = parse_style_css(main_stylesheet_text);
 	const aria_disabled_rules = index.rules.filter(
 		(r) => r.css.includes(":is(:disabled, [aria-disabled='true'])") && !r.css.startsWith('@')
@@ -180,11 +180,27 @@ test('aria-disabled keeps focus and pointer events, and skips the active flash',
 		assert.notInclude(rule.css, 'outline');
 		assert.notInclude(rule.css, 'pointer-events');
 	}
-	const flash = index.rules.find(
-		(r) => r.css.includes('--negative_50') && r.css.includes(':active')
+});
+
+test('a pressed disabled control gives no feedback', () => {
+	// no press rule flashes a negative color, and every press rule on a
+	// control that can be disabled skips both kinds of disabled
+	const index = parse_style_css(main_stylesheet_text);
+	for (const rule of index.rules) {
+		if (!rule.css.includes(':active')) continue;
+		assert.notMatch(rule.css, /--negative_/, rule.css);
+	}
+	assert.notMatch(css_classes_text, /:active[^}]*--negative_/);
+	const control_press_selectors = [main_stylesheet_text, css_classes_text].flatMap((css) =>
+		Array.from(
+			css.matchAll(/(?:button|input|textarea|select|selectable|menuitem)[^{},]*:active/g),
+			(m) => m[0].replace(/\s+/g, '')
+		)
 	);
-	assert(flash);
-	assert.notInclude(flash.css, 'aria-disabled');
+	assert.isAbove(control_press_selectors.length, 0);
+	for (const selector of control_press_selectors) {
+		assert.include(selector, ":not(:disabled):not([aria-disabled='true'])", selector);
+	}
 });
 
 test('ARIA state rules name their element, so they tree-shake with it', () => {
