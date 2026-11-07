@@ -726,7 +726,11 @@ TODO think through these patterns to get somewhere consistent
 		background-color: var(--button_fill);
 		cursor: pointer;
 		appearance: none;
-		display: flex;
+		/* inline like the native button, so sibling buttons in a block sit side
+			by side and wrap like text; flex and grid parents blockify it, and
+			it keeps the default baseline alignment, so its label lines up with
+			the text around it */
+		display: inline-flex;
 		flex-wrap: wrap;
 		align-items: center;
 		justify-content: center;

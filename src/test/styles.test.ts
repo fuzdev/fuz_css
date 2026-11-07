@@ -133,6 +133,14 @@ test('the forced-colors mappings ship with their elements, in fuz.preferences', 
 	}
 });
 
+test('buttons display inline-flex, so siblings in a block sit side by side', () => {
+	const index = parse_style_css(main_stylesheet_text);
+	const rule = index.rules.find((r) => r.css.startsWith(':where(button:not(.unstyled)) {'));
+	assert(rule, 'style.css carries the base button rule');
+	assert.include(rule.css, 'display: inline-flex;');
+	assert.notInclude(rule.css, 'vertical-align', 'baseline-aligned like the native button');
+});
+
 test('focus styles key on :focus-visible', () => {
 	// a mouse click on a link, button, or checkbox doesn't match it, so the
 	// ring doesn't stay after a click, and focus adds no fill to a button
