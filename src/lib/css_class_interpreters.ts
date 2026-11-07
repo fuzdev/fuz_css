@@ -1,3 +1,12 @@
+/**
+ * The builtin class interpreters, which resolve a class by pattern rather
+ * than by name - the CSS-literal interpreter (`display:flex`).
+ *
+ * @internal
+ *
+ * @module
+ */
+
 import type { CssClassDefinitionInterpreter } from './css_class_generation.ts';
 import type { ClassInterpretersOption } from './css_plugin_options.ts';
 import {

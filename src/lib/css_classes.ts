@@ -4,6 +4,8 @@
  * Tracks classes per-file for efficient incremental updates during watch mode.
  * Uses `null` instead of empty collections to avoid allocation overhead.
  *
+ * @internal
+ *
  * @module
  */
 

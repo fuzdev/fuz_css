@@ -606,7 +606,10 @@ elements, forms, typography, borders, shadows, layout. See
 
 ### Library - ./src/lib/
 
-**Variables & themes:**
+Every module ships (wildcard `exports`); the generator pipeline's modules
+carry a module-level `@internal` - documented, importable, not stable API.
+
+**Variables & themes:** all public.
 
 - [variables.ts](src/lib/variables.ts) - All style variable definitions, as a
   single `default_variables` export; uniform families are loop-built from the
@@ -743,7 +746,8 @@ elements, forms, typography, borders, shadows, layout. See
 - [scheme_adaptive_variables.gen.ts](src/lib/scheme_adaptive_variables.gen.ts) -
   Gro generator that produces `scheme_adaptive_variables.ts`
 
-**CSS extraction:**
+**CSS extraction:** the extractor is `@internal`; the filter and the
+diagnostic types are public.
 
 - [css_class_extractor.ts](src/lib/css_class_extractor.ts) - AST-based class
   extraction from Svelte/TS/JSX files
@@ -755,7 +759,9 @@ elements, forms, typography, borders, shadows, layout. See
   `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping
   dispatch the generator core runs
 
-**CSS generation:**
+**CSS generation:** `@internal` but for the Vite plugin, its options
+(`css_plugin_options.ts`), and `modifiers.ts`; `example_class_utilities.ts`
+is an internal fixture the example apps import through node_modules.
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
   (preferred) with HMR via `virtual:fuz.css`, as several plugin objects: the

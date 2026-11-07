@@ -4,6 +4,8 @@
  * Provides the `resolve_composes` helper to recursively resolve class names
  * to their combined CSS declarations.
  *
+ * @internal
+ *
  * @module
  */
 

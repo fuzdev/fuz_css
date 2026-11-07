@@ -25,6 +25,8 @@
  * - The one construct left out is `@charset`: an encoding marker that means
  *   nothing in a string, which preprocessors emit for non-ASCII output.
  *
+ * @internal
+ *
  * @module
  */
 

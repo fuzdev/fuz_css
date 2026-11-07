@@ -5,6 +5,10 @@
  * dependencies in node_modules. The exports test specific extraction patterns
  * that require being in a separate module.
  *
+ * A deliberate fixture, not API: the example apps import it through
+ * node_modules, and its camelCase names stay - they exercise the extractor's
+ * camelCase suffix patterns (`demoClass`, `demoClassNames`).
+ *
  * **Important:** Variable names must match `CLASS_NAME_PATTERN` in `css_class_extractor.ts`.
  * Supported suffixes: `class`, `classes`, `className`, `classNames`, `classList`, `classLists`
  * (also snake_case variants like `class_name`, `class_names`, `class_list`, `class_lists`).
@@ -16,6 +20,8 @@
  *
  * Token, composite, and literal classes are demonstrated inline in the examples
  * since they don't require special extraction testing.
+ *
+ * @internal
  *
  * @module
  */

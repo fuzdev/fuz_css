@@ -4,6 +4,8 @@
  * Provides real filesystem deps for production use.
  * For interface definitions and dependency injection pattern, see `deps.ts`.
  *
+ * @internal
+ *
  * @module
  */
 

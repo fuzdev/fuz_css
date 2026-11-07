@@ -5,6 +5,8 @@
  * result through this single function. Callers own where the CSS goes and
  * error/warning dispatch; this owns the generate → resolve → bundle pipeline.
  *
+ * @internal
+ *
  * @module
  */
 

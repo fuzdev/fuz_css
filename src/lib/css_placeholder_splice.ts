@@ -8,6 +8,8 @@
  * The splice is the fallback for when that restatement can't run, writing
  * the CSS into the bundled stylesheet at the placeholder's position.
  *
+ * @internal
+ *
  * @module
  */
 

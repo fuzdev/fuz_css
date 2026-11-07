@@ -7,6 +7,8 @@
  * Callers own everything around this - in-memory hash short-circuits, the Vite
  * deletion-race guard, diagnostic logging, and how/when to write the cache.
  *
+ * @internal
+ *
  * @module
  */
 

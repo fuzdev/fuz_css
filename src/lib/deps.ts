@@ -35,6 +35,8 @@
  * See `deps_defaults.ts` for real implementations.
  * See `test/fixtures/mock_deps.ts` for mock implementations.
  *
+ * @internal
+ *
  * @module
  */
 

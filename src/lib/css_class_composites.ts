@@ -1,3 +1,12 @@
+/**
+ * The builtin composite classes: the multi-property shortcuts (`box`, `row`,
+ * `panel`, the `sized_*` set, ...) and the flow-aware margins.
+ *
+ * @internal
+ *
+ * @module
+ */
+
 import type { CssClassDefinition } from './css_class_generation.ts';
 import { palette_variants } from './variable_data.ts';
 

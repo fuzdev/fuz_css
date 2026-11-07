@@ -9,6 +9,8 @@
  *   applied by the generator (see `generate_classes_css`)
  *
  * @see {@link https://github.com/fuzdev/fuz_css} for documentation
+ * @internal
+ *
  * @module
  */
 

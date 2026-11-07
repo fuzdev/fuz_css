@@ -3,6 +3,8 @@
  * defaults: the extraction cache is skipped, since the next run won't reuse
  * it, and `on_error` throws rather than logs.
  *
+ * @internal
+ *
  * @module
  */
 

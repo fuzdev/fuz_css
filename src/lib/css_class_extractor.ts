@@ -12,6 +12,8 @@
  * - `// @fuz-elements element1 element2` - comment hints for dynamic elements
  * - `// @fuz-variables var1 var2` - comment hints for dynamic CSS variables
  *
+ * @internal
+ *
  * @module
  */
 

@@ -3,6 +3,8 @@
  * current as files are transformed, re-read, and deleted, with a version
  * that moves whenever the extracted set changes.
  *
+ * @internal
+ *
  * @module
  */
 
@@ -19,7 +21,6 @@ import { extract_css_variables } from './css_variable_utils.ts';
 import type { AcornPlugin } from './css_class_extractor.ts';
 import type { CacheDeps } from './deps.ts';
 
-/** @nodocs */
 export interface CssExtractionStateOptions {
 	/** The collection extractions are recorded in. */
 	css_classes: CssClasses;
@@ -39,8 +40,6 @@ export interface CssExtractionStateOptions {
  * an ingest claims one before it awaits and drops its result if the file's
  * epoch moved meanwhile, so a deleted file isn't resurrected and an older
  * version of a file doesn't overwrite a newer one.
- *
- * @nodocs
  */
 export class CssExtractionState {
 	readonly css_classes: CssClasses;

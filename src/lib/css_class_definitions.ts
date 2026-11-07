@@ -7,6 +7,8 @@
  * other CSS values, use CSS-literal syntax like `justify-content:center` or
  * `overflow:hidden`.
  *
+ * @internal
+ *
  * @module
  */
 

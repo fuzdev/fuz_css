@@ -9,6 +9,8 @@
  * Most users should use `vite_plugin_fuz_css`, which handles extraction and
  * caching automatically. See that module for a reference implementation.
  *
+ * @internal
+ *
  * @module
  */
 

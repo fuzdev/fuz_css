@@ -4,6 +4,8 @@
  * Provides per-file caching with content hash validation to avoid
  * re-extracting classes from unchanged files.
  *
+ * @internal
+ *
  * @module
  */
 

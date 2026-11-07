@@ -6,6 +6,8 @@
  * - Phase 0a: Detecting single-selector rulesets that could be converted to declaration format
  * - Phase 2: Modifying selectors for modifier support on composite classes
  *
+ * @internal
+ *
  * @module
  */
 

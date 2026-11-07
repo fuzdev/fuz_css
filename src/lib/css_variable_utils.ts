@@ -5,6 +5,8 @@
  * from CSS strings, for the base-style index, the variable graph, generated
  * classes, and the Vite plugin's source scans.
  *
+ * @internal
+ *
  * @module
  */
 

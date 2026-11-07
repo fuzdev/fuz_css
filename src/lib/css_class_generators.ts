@@ -1,3 +1,12 @@
+/**
+ * The templates that build the token class families from the variant lists,
+ * one class per combination of values.
+ *
+ * @internal
+ *
+ * @module
+ */
+
 import type { CssClassDefinition } from './css_class_generation.ts';
 
 export type GeneratedClassResult = {

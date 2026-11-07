@@ -13,6 +13,8 @@
  * attribute (`display: none`) and orders late within its bucket, after the
  * literals it ties with.
  *
+ * @internal
+ *
  * @module
  */
 

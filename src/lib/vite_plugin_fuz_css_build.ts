@@ -16,6 +16,8 @@
  * (see `css_placeholder_splice.ts`), in whichever of two passes the
  * stylesheets exist for, with a one-time warning.
  *
+ * @internal
+ *
  * @module
  */
 
@@ -49,8 +51,6 @@ interface BuildRender extends BuildCss {
 
 /**
  * One environment's generated CSS for a build, as the plugin renders it.
- *
- * @nodocs
  */
 export interface BuildCss {
 	/** The generated CSS, banners included. */
@@ -59,7 +59,6 @@ export interface BuildCss {
 	empty: boolean;
 }
 
-/** @nodocs */
 export interface FuzCssBuildPassesOptions {
 	/** The virtual module's resolved id, whose text the placeholder lives in. */
 	virtual_id: string;
@@ -74,8 +73,6 @@ export interface FuzCssBuildPassesOptions {
 /**
  * The build passes, as hooks the main plugin calls and the build-only plugin
  * object positioned after Vite's CSS processing.
- *
- * @nodocs
  */
 export interface FuzCssBuildPasses {
 	/** Called from `buildStart`: forgets the environment's previous render. */
@@ -90,8 +87,6 @@ export interface FuzCssBuildPasses {
 
 /**
  * Creates the build passes over a plugin's render.
- *
- * @nodocs
  */
 export const create_build_passes = (options: FuzCssBuildPassesOptions): FuzCssBuildPasses => {
 	const { virtual_id, loaded_virtual_ids, render, log_warn, log_error } = options;

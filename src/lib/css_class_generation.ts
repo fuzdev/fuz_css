@@ -4,6 +4,8 @@
  * Produces CSS output from class definitions, handles interpretation of
  * dynamic classes, and provides collection management for extracted classes.
  *
+ * @internal
+ *
  * @module
  */
 

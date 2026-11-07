@@ -5,6 +5,8 @@
  * resolution of CSS custom properties. When a variable is needed,
  * all variables it depends on are also included.
  *
+ * @internal
+ *
  * @module
  */
 

@@ -7,6 +7,8 @@
  * `css_generator.ts`. This keeps their construction from the options in one
  * place.
  *
+ * @internal
+ *
  * @module
  */
 
