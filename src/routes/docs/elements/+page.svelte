@@ -175,6 +175,18 @@
 			<li>b</li>
 			<li>see</li>
 		</ul>
+		<h4>nested <code>ul</code></h4>
+		<ul>
+			<li>a</li>
+			<li>
+				b
+				<ul>
+					<li>b1</li>
+					<li>b2</li>
+				</ul>
+			</li>
+			<li>see</li>
+		</ul>
 		<h4><code>ul</code> with <code>.unstyled</code></h4>
 		<ul class="unstyled">
 			<li>a</li>
