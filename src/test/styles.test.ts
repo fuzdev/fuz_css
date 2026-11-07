@@ -4,6 +4,7 @@ import { readFileSync } from 'node:fs';
 import { default_variables } from '#lib/variables.ts';
 import { theme_knob_hook_names } from '#lib/knobs.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
+import { HIGH_CONTRAST } from '#lib/ramps.ts';
 import { duration_variants } from '#lib/variable_data.ts';
 import { parse_style_css } from '#lib/style_rule_parser.ts';
 import css_classes_text from './fixtures/css_classes_fixture.json?raw';
@@ -260,27 +261,24 @@ test('the reduced-motion mapping disables every duration and outranks themes', (
 	}
 });
 
-test('the prefers-contrast mapping mirrors the high-contrast modifier', () => {
-	// style.css restates the modifier's knob values by hand, so retuning the
-	// theme must retune the OS mapping with it
+test('the prefers-contrast mapping sets only the preference input, at the modifier value', () => {
+	// the OS preference and the high-contrast modifier feed one derivation, so
+	// the mapping sets the preference input to the value the modifier gives the
+	// knob, and nothing else - the ground end flips with the scheme on its own
 	const index = parse_style_css(main_stylesheet_text);
-	const rule = index.rules.find((r) => r.css.includes('prefers-contrast: more'));
-	assert(rule);
-	// the dark block follows the `:root` one, so splitting there checks each
-	// value lands in its own scheme rather than merely somewhere in the rule
-	const dark_at = rule.css.indexOf(':root.dark');
-	assert.isAbove(dark_at, -1, 'the mapping carries a :root.dark block');
-	const root_css = rule.css.slice(0, dark_at);
-	const dark_css = rule.css.slice(dark_at);
-	for (const { name, base, dark } of high_contrast_theme.variables) {
-		assert.include(root_css, `--${name}: ${base};`, `${name} base`);
-		// a single-slot variable applies in both schemes from the `:root` block
-		if (dark === undefined) {
-			assert.notInclude(dark_css, `--${name}:`, `${name} is single-slot`);
-		} else {
-			assert.include(dark_css, `--${name}: ${dark};`, `${name} dark`);
-		}
-	}
+	const rules = index.rules.filter((r) => r.css.includes('prefers-contrast'));
+	assert.strictEqual(rules.length, 1, 'one prefers-contrast block');
+	const css = rules[0]!.css;
+	assert.notInclude(css, ':root.dark', 'no dark twin');
+	assert.notInclude(css, 'prefers-color-scheme', 'no dark twin');
+	const declarations = [...css.matchAll(/(--[a-z_][a-z0-9_]*)\s*:\s*([^;]+);/gu)].map(
+		(m) => `${m[1]}: ${m[2]!.trim()}`
+	);
+	assert.deepEqual(declarations, [`--_contrast_preference: ${HIGH_CONTRAST}`]);
+	// the modifier sets the knob to the same value
+	assert.deepEqual(high_contrast_theme.variables, [
+		{ name: 'contrast', base: String(HIGH_CONTRAST) }
+	]);
 });
 
 test('headings read the heading typography variables', () => {

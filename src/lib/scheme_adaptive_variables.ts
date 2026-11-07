@@ -13,6 +13,11 @@ import type { StyleVariable } from './variable.ts';
  */
 export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'neutral_chroma', base: '0.024', dark: '0.025' },
+	{
+		name: '_contrast_ground_end',
+		base: 'max(1, var(--shade_lightness_00))',
+		dark: 'min(0.1, var(--shade_lightness_00))'
+	},
 	{ name: 'palette_lightness_00', base: '0.985', dark: '0.147' },
 	{ name: 'palette_lightness_100', base: '0.116', dark: '0.971' },
 	{ name: 'palette_lightness_curve', base: '1.15', dark: '0.76' },

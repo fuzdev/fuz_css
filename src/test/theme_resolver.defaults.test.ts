@@ -13,6 +13,16 @@ import { theme_knobs } from '#lib/knobs.ts';
 import { default_variables } from '#lib/variables.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { color_scheme_variants } from '#lib/variable_data.ts';
+import { marquee_theme } from '#lib/themes/marquee.ts';
+import {
+	CONTRAST_CURVE_BEND,
+	CONTRAST_GROUND_END,
+	HIGH_CONTRAST,
+	SHADE_LIGHTNESS_KNOBS,
+	TEXT_LIGHTNESS_KNOBS,
+	ramp_lightness,
+	to_lightness_stop_name
+} from '#lib/ramps.ts';
 
 const declared = new Map(default_variables.map((v) => [v.name, v]));
 
@@ -79,5 +89,122 @@ describe('create_theme_resolver defaults', () => {
 			variables: [{ name: 'shade_chroma_00', base: '0.005' }]
 		});
 		assert.strictEqual(carried.resolve('_shade_ground_chroma', 'light'), 0.005);
+	});
+
+	test('the contrast intermediates are the knobs at the default contrast', () => {
+		const resolver = create_theme_resolver(base_theme);
+		for (const scheme of color_scheme_variants) {
+			assert.strictEqual(resolver.resolve('contrast', scheme), 0);
+			assert.strictEqual(resolver.resolve('_contrast_preference', scheme), 0);
+			assert.strictEqual(resolver.resolve('_contrast', scheme), 0);
+			assert.strictEqual(
+				resolver.resolve('_contrast_ground_end', scheme),
+				CONTRAST_GROUND_END[scheme]
+			);
+			assert.strictEqual(
+				resolver.resolve('_shade_lightness_00', scheme),
+				resolver.resolve('shade_lightness_00', scheme)
+			);
+			assert.strictEqual(
+				resolver.resolve('_shade_lightness_curve', scheme),
+				resolver.resolve('shade_lightness_curve', scheme)
+			);
+			assert.strictEqual(
+				resolver.resolve('_text_lightness_curve', scheme),
+				resolver.resolve('text_lightness_curve', scheme)
+			);
+		}
+	});
+
+	test('the contrast intermediates move by the effective contrast', () => {
+		const c = HIGH_CONTRAST;
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [{ name: 'contrast', base: String(c) }]
+		});
+		for (const scheme of color_scheme_variants) {
+			const shade = SHADE_LIGHTNESS_KNOBS[scheme];
+			const text = TEXT_LIGHTNESS_KNOBS[scheme];
+			const end = CONTRAST_GROUND_END[scheme];
+			const ground = shade.lightness_00 + (end - shade.lightness_00) * c;
+			const shade_curve = shade.curve * (1 - CONTRAST_CURVE_BEND * c);
+			const text_curve = text.curve * (1 - CONTRAST_CURVE_BEND * c);
+			assert.strictEqual(resolver.resolve('_contrast', scheme), c);
+			// the preference input stays 0 - the gates measure the theme
+			assert.strictEqual(resolver.resolve('_contrast_preference', scheme), 0);
+			assert.closeTo(resolver.resolve('_shade_lightness_00', scheme)!, ground, 1e-12);
+			assert.closeTo(resolver.resolve('_shade_lightness_curve', scheme)!, shade_curve, 1e-12);
+			assert.closeTo(resolver.resolve('_text_lightness_curve', scheme)!, text_curve, 1e-12);
+			// the knobs themselves don't move
+			assert.strictEqual(resolver.resolve('shade_lightness_00', scheme), shade.lightness_00);
+			// the derived stops ride the intermediates; the far ends stay the knobs
+			const shade_knobs = { ...shade, lightness_00: ground, curve: shade_curve };
+			const text_knobs = { ...text, curve: text_curve };
+			for (const stop of ['10', '50', '90'] as const) {
+				assert.closeTo(
+					resolver.resolve(to_lightness_stop_name('shade', stop), scheme)!,
+					ramp_lightness(shade_knobs, stop),
+					1e-12
+				);
+				assert.closeTo(
+					resolver.resolve(to_lightness_stop_name('text', stop), scheme)!,
+					ramp_lightness(text_knobs, stop),
+					1e-12
+				);
+			}
+			assert.strictEqual(resolver.resolve('text_lightness_00', scheme), text.lightness_00);
+		}
+	});
+
+	test('the ground end clamps to the ground, so a ground past it stays put', () => {
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [
+				{ name: 'shade_lightness_00', base: '0.97', dark: '0.05' },
+				{ name: 'contrast', base: '0.5' }
+			]
+		});
+		// the dark ground already sits below the dark end, so it doesn't lift
+		assert.strictEqual(resolver.resolve('_contrast_ground_end', 'dark'), 0.05);
+		assert.strictEqual(resolver.resolve('_shade_lightness_00', 'dark'), 0.05);
+		// the light ground still moves halfway to its end
+		assert.strictEqual(resolver.resolve('_contrast_ground_end', 'light'), 1);
+		assert.closeTo(resolver.resolve('_shade_lightness_00', 'light')!, 0.985, 1e-12);
+		// the curves still bend
+		assert.closeTo(
+			resolver.resolve('_shade_lightness_curve', 'dark')!,
+			SHADE_LIGHTNESS_KNOBS.dark.curve * (1 - CONTRAST_CURVE_BEND * 0.5),
+			1e-12
+		);
+	});
+
+	test('a stanced theme resolves its ground end from its stance', () => {
+		// marquee is dark-only, so the dark end applies in both schemes, as its
+		// mirror renders - its ground moves halfway to it under high
+		const high = create_theme_resolver({
+			...marquee_theme,
+			variables: [...marquee_theme.variables, { name: 'contrast', base: String(HIGH_CONTRAST) }]
+		});
+		const own = SHADE_LIGHTNESS_KNOBS.dark.lightness_00;
+		assert.strictEqual(own, 0.171);
+		for (const scheme of color_scheme_variants) {
+			assert.strictEqual(high.resolve('_contrast_ground_end', scheme), CONTRAST_GROUND_END.dark);
+			assert.closeTo(high.resolve('_shade_lightness_00', scheme)!, 0.1355, 1e-12);
+		}
+		const resolver = create_theme_resolver({
+			...marquee_theme,
+			variables: [...marquee_theme.variables, { name: 'contrast', base: '1' }]
+		});
+		for (const scheme of color_scheme_variants) {
+			assert.strictEqual(
+				resolver.resolve('_contrast_ground_end', scheme),
+				CONTRAST_GROUND_END.dark
+			);
+			assert.closeTo(
+				resolver.resolve('_shade_lightness_00', scheme)!,
+				CONTRAST_GROUND_END.dark,
+				1e-12
+			);
+		}
 	});
 });

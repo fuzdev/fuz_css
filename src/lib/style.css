@@ -48,28 +48,15 @@ Notes:
 		}
 	}
 
-	/* map the OS contrast preference onto the same variables the
-		'high contrast' modifier sets: the curve knobs, the border and link
-		roles, and the panel ring */
+	/* the OS contrast preference sets the contrast derivation's second input,
+		which the effective contrast takes the larger of with a theme's
+		`--contrast` - so it agrees with the 'high contrast' modifier, which sets
+		the knob to the same value, and a theme's own `--contrast` can sit above
+		it but never silence it. The ground end flips with the scheme, so one
+		block serves both */
 	@media (prefers-contrast: more) {
 		:root {
-			--shade_lightness_00: 1;
-			--text_lightness_curve: 0.8;
-			--border_color: var(--shade_50);
-			--link_color: var(--accent_70);
-			--panel_shadow: 0 0 0 var(--border_width) var(--border_color);
-		}
-		:root.dark {
-			--shade_lightness_00: 0.12;
-			--text_lightness_curve: 0.6;
-		}
-	}
-	/* the dark mapping again for a root that names no scheme, following the OS
-		(see `render_color_scheme_rules`) */
-	@media (prefers-contrast: more) and (prefers-color-scheme: dark) {
-		:root:not(.light) {
-			--shade_lightness_00: 0.12;
-			--text_lightness_curve: 0.6;
+			--_contrast_preference: 0.5;
 		}
 	}
 

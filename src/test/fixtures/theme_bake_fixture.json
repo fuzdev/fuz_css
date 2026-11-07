@@ -45,13 +45,13 @@
 	},
 	{
 		"name": "high contrast",
-		"compiled": "6005b6c20e23416b51af4d674d6e12e645010df1dbe50e4f7bd21a0184881a4b",
+		"compiled": "91aeed8c6c70f9a9890fec3ebc59c371b3a05761960c38fee714a3484f112444",
 		"baked_defaults": {
-			"resolved": "c0a206e90a4fd3d37e301cec6a6d2f8d3a08c5ebf5eef3784ca2086667876164",
+			"resolved": "fe01740c632337e09d4e8fa029af8272f6371bbf5356384c89aa09b658e07cfc",
 			"diagnostics": []
 		},
 		"baked_retuned": {
-			"resolved": "c0a206e90a4fd3d37e301cec6a6d2f8d3a08c5ebf5eef3784ca2086667876164",
+			"resolved": "fe01740c632337e09d4e8fa029af8272f6371bbf5356384c89aa09b658e07cfc",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -78,32 +78,10 @@
 		}
 	},
 	{
-		"name": "low contrast",
-		"compiled": "2657d3e749ab045ee1df26bfbddd9c7e77fa1ee63fa2d91eec7e2ead7d090a7a",
-		"baked_defaults": {
-			"resolved": "e0056bd39a068e1e1c900db88705c919654d5d417ea917dcc083e2778057b85e",
-			"diagnostics": []
-		},
-		"baked_retuned": {
-			"resolved": "e0056bd39a068e1e1c900db88705c919654d5d417ea917dcc083e2778057b85e",
-			"diagnostics": [
-				{
-					"phase": "generation",
-					"code": "theme_gate_failed",
-					"level": "warning",
-					"message": "Baked theme \"low contrast\" fails accessibility gates: gamut light palette_a_00 (0.005 against 0.0001); gamut light palette_a_05 (0.016 against 0.0001); gamut light palette_a_10 (0.029 against 0.0001); gamut light palette_a_20 (0.057 against 0.0001); gamut light palette_a_30 (0.034 against 0.0001); gamut light palette_c_00 (0.006 against 0.0001); gamut light palette_c_05 (0.015 against 0.0001); gamut light palette_c_10 (0.025 against 0.0001); and 93 more",
-					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
-					"identifier": "low contrast",
-					"locations": null
-				}
-			]
-		}
-	},
-	{
 		"name": "marquee",
-		"compiled": "dc7cffb4dad9b879bdf0eda924a712f5f8513096080db92a5f3548c30206aa4a",
+		"compiled": "5772574ccd4d5b1f6eb67177bc411ad26172c193f0efe798764dafee3fd8b236",
 		"baked_defaults": {
-			"resolved": "37624bcb76fba7d083b6ec074092b36274050205b441d04539aff5767aa832af",
+			"resolved": "2f6e4a0906abef8e5cdb00f5ba30b44b0faf0b4ccd36513e733d443340fbb222",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -117,7 +95,7 @@
 			]
 		},
 		"baked_retuned": {
-			"resolved": "0b303c6482cbff6c7d6920d385c3d15e2c9b3c304f788f18e57a2dfb374e347a",
+			"resolved": "e80aa5dcabb00ccee55a4165377e78a7b9840bb944677d81c4a1b22eb6ba5415",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -167,13 +145,13 @@
 	},
 	{
 		"name": "phosphor",
-		"compiled": "3eda386ceb6131c7adcf77d9dee78af181adf9690f7530faca63788156c29320",
+		"compiled": "b8a3cdc5dfb4572d8d0ce4c96ebab59a5bdc7219614889905be67f2074533f45",
 		"baked_defaults": {
-			"resolved": "3a35e9c91741a131adb11b0bea03a7a3990478232b650d58d9d44309de8ee75e",
+			"resolved": "269942d7251d7ce37b6cfd55acca8395ef0bb5e308556dc592fe134bc90c05d6",
 			"diagnostics": []
 		},
 		"baked_retuned": {
-			"resolved": "3109d240291f6d5f433783e73653f4a91d556212b70338020b466132de0f95ea",
+			"resolved": "b4183f3f36ad887b2d203af95e0d8625c5869ea345e3a4662f5a42cc32fed102",
 			"diagnostics": [
 				{
 					"phase": "generation",

@@ -26,7 +26,6 @@ import { compose_themes } from '#lib/theme.ts';
 import type { Theme } from '#lib/variable.ts';
 import { contrast_modifiers } from '#lib/themes.ts';
 import { base_theme } from '#lib/themes/base.ts';
-import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { zine_theme } from '#lib/themes/zine.ts';
 import { phosphor_theme } from '#lib/themes/phosphor.ts';
@@ -104,13 +103,6 @@ describe('check_theme', () => {
 		const report = check_theme(high_contrast_theme);
 		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
 		assert.isTrue(report.complete);
-	});
-
-	test('low contrast passes every gate', () => {
-		const report = check_theme(low_contrast_theme);
-		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
-		assert.isTrue(report.complete);
-		assert.strictEqual(report.unchecked.length, 0);
 	});
 
 	// every shipped base theme is gated on its own, discovered by glob: it
@@ -417,6 +409,8 @@ describe('contrast modifier compositions', () => {
 	// the shipped themes come from a glob (see theme_test_helpers.ts), so a new
 	// exemplar module can't be silently left out of the composition matrix
 	const bases = shipped_base_themes;
+	// ruling floor for body text under high contrast, above the AAA body gate
+	const HIGH_CONTRAST_BODY_TEXT_FLOOR = 12;
 
 	test('every base × modifier validates with no errors', () => {
 		for (const base of bases) {
@@ -456,16 +450,14 @@ describe('contrast modifier compositions', () => {
 	test('every theme, composed or not, keeps its neutral scales in sRGB', () => {
 		// the ground tint clamps at the ground's lightness, so a modifier that
 		// moves the ground can't push a tinted ground past the gamut - the bare
-		// themes (the modifiers among them), each base under each modifier, and
-		// the OS mapping's stand-in, a dual-scheme base over high contrast
+		// themes (the modifiers among them) and each base under each modifier.
+		// The OS preference needs no stand-in: it raises the same effective
+		// contrast the modifier sets, so the modifier case is the OS case
 		const themes: Array<Theme> = [
 			...shipped_themes,
 			...bases.flatMap((base) =>
 				Object.values(contrast_modifiers).map((modifier) => compose_themes(base, modifier))
-			),
-			...bases
-				.filter((base) => base.scheme === undefined)
-				.map((base) => compose_themes(high_contrast_theme, base))
+			)
 		];
 		for (const theme of themes) {
 			const neutral_gamut = check_theme(theme).entries.filter(
@@ -486,27 +478,49 @@ describe('contrast modifier compositions', () => {
 		}
 	});
 
-	test('a base with stronger rules cedes them to high contrast, down to the floor and no further', () => {
-		// a base with stronger rules of its own (zine) cedes them to the modifier,
-		// so the floor is what every composition is held to, not the base's value
+	test('a base with stronger rules keeps them under high contrast', () => {
+		// high contrast sets only the contrast knob, so a base's own border
+		// (zine's strong rule) survives it, strengthened against the stretched ground
 		const composed = check_theme(compose_themes(zine_theme, high_contrast_theme));
 		const own = check_theme(zine_theme);
 		const border = (report: ThemeCheckReport, scheme: string): number =>
 			report.entries.find((e) => e.subject === 'border_color vs shade_00' && e.scheme === scheme)!
 				.value;
 		for (const scheme of color_scheme_variants) {
-			assert.isBelow(border(composed, scheme), border(own, scheme), scheme);
-			assert.isAtLeast(border(composed, scheme), GATE_UI, scheme);
+			assert.isAtLeast(border(composed, scheme), border(own, scheme), scheme);
 		}
 	});
 
-	test('high contrast holds control borders at the non-text floor over every base', () => {
-		// at the extreme ground an input's sunken fill can't separate from the
-		// page, so the border is what marks a control - WCAG 1.4.11's 3:1
+	test('high contrast holds body text and control borders at their floors over every base', () => {
+		// the floors the modifier's contrast value is tuned against: body text at
+		// 12:1, past AAA, and the control border at WCAG 1.4.11's 3:1, since at
+		// the stretched ground an input's sunken fill barely separates from the page
 		for (const base of bases) {
 			const report = check_theme(compose_themes(base, high_contrast_theme));
-			const borders = report.entries.filter((e) => e.subject === 'border_color vs shade_00');
-			assert.isAbove(borders.length, 0, `${base.name}: the border pairing resolved`);
+			const body = report.entries.filter(
+				(e) => e.threshold === GATE_BODY_TEXT && e.subject.endsWith(' on shade_00')
+			);
+			// the control border, under whatever stop a theme leaves it at
+			const borders = report.entries.filter(
+				(e) => e.threshold === GATE_BORDER && e.subject.endsWith(' vs shade_00')
+			);
+			for (const scheme of color_scheme_variants) {
+				assert.isTrue(
+					body.some((e) => e.scheme === scheme),
+					`${base.name} ${scheme}: the body text pairing resolved`
+				);
+				assert.isTrue(
+					borders.some((e) => e.scheme === scheme),
+					`${base.name} ${scheme}: the border pairing resolved`
+				);
+			}
+			for (const e of body) {
+				assert.isAtLeast(
+					e.value,
+					HIGH_CONTRAST_BODY_TEXT_FLOOR,
+					`${base.name} ${e.scheme} ${e.subject}`
+				);
+			}
 			for (const e of borders) {
 				assert.isAtLeast(e.value, GATE_UI, `${base.name} ${e.scheme}`);
 			}

@@ -137,8 +137,12 @@ combined and only used content is included. In utility-only mode, import
   tokens are what a theme sets; the ramp stops between knobs and color stops
   are internal intermediates spelled with a leading underscore
   (`--_palette_lightness_30`, `--_chroma_shape_50`, `--_palette_chroma_50`,
-  built by the `to_*_name` helpers in `ramps.ts`, and the clamped ground
-  tint `--_shade_ground_chroma`, named by `SHADE_GROUND_CHROMA_NAME`). `STYLE_VARIABLE_NAME_MATCHER`
+  built by the `to_*_name` helpers in `ramps.ts`, the clamped ground
+  tint `--_shade_ground_chroma`, named by `SHADE_GROUND_CHROMA_NAME`, and
+  the contrast intermediates `--_contrast`, `--_contrast_ground_end`,
+  `--_shade_lightness_00`, `--_shade_lightness_curve`, and
+  `--_text_lightness_curve`, plus `--_contrast_preference`, the one private
+  input, which only `style.css`'s `prefers-contrast` mapping sets). `STYLE_VARIABLE_NAME_MATCHER`
   rejects the spelling, so `parse_theme`/`validate_theme` refuse a theme that
   sets one, `render_theme_style` drops one from a theme's variables, and the
   resolver ignores one there; `default_variables` declares them without
@@ -393,6 +397,22 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   and `text_`), and the chroma curve (`--chroma_curve`, shared with the
   neutral scales, over the palette's `--palette_chroma_min`/`_max`) clamped
   per stop by baked worst-hue sRGB gamut caps
+- One contrast knob over the neutral ramps: `--contrast` (0 to 1, default 0)
+  moves the shade ground that fraction of the way from its
+  `--shade_lightness_00` toward a per-scheme end (1 in light, 0.1 in dark,
+  clamped to the ground, so a ground already past it stays put) and bends the shade and text curves (`curve * (1 - 0.66 * c)`), through
+  the private `--_shade_lightness_00`/`--_shade_lightness_curve`/
+  `--_text_lightness_curve` the stops read in place of the knobs; the
+  palette, the text endpoints, and every role stay the theme's. The
+  effective contrast `--_contrast` is the larger of the knob and
+  `--_contrast_preference`, which `prefers-contrast: more` sets in
+  `fuz.preferences` to `HIGH_CONTRAST` (0.5, the value the high-contrast
+  modifier gives the knob) - so the OS and the modifier agree, a theme can
+  author a baseline the OS only raises, and no theme silences the OS.
+  Picking the modifier sets the knob, last-wins, replacing a theme's own
+  `contrast`, a higher one included. Near 1 the ground goes
+  white or near-black and `text_80` on `shade_10` fails on every shipped
+  theme, so the usable range stops well short of it (`knobs.ts`)
 - Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
   twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
@@ -453,10 +473,9 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
   hook among the knobs (per-tier fallbacks, so no single default exists); `prefers-contrast:
-  more` mirrors the high-contrast modifier (the ground and text curve knobs,
-  a stronger `--border_color`, a darker `--link_color`, and a
-  `--panel_shadow` ring in the border color),
-  theme-overridable
+  more` sets the contrast derivation's preference input
+  (`--_contrast_preference`) and nothing else, so it reaches every theme,
+  stanced ones included
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `ink_*`/`paper_*` - color-scheme-aware alpha overlays toward the text color
@@ -682,11 +701,15 @@ carry a module-level `@internal` - documented, importable, not stable API.
 - [themes.ts](src/lib/themes.ts) - The curated theme registry
   (`default_themes`, semantic-tier policy, with `DEFAULT_THEME` its first -
   a registry policy, not an alias of `base_theme`) plus `contrast_modifiers`
-  (`{low, high}`): low/high contrast are modifiers composed over any theme via
-  `compose_themes`, not themes themselves - users see one flat "themes"
-  list. A shipped theme's own ground (`shade_lightness_00`) must sit
-  between its low and high compositions in each scheme it renders, so
-  neither modifier moves it the wrong way (`themes.test.ts` holds this)
+  (`{high}`): high contrast is a modifier composed over any theme via
+  `compose_themes`, not a theme itself - users see one flat "themes"
+  list. It sets only `--contrast`, so the theme beneath keeps its ground,
+  cast, roles, and panel shadow, strengthened. `themes.test.ts` holds that
+  it moves every shipped theme's ground toward the contrast end and never
+  lowers the contrast of what reads against the ground (body text, links,
+  the control border, selected text), and `theme_check.test.ts` holds the
+  floors it is tuned against: body text at 12:1 and the control border at
+  3:1, over every shipped theme in both schemes
 - `src/lib/themes/` - One module per theme. Registered: base and ledger
   (the plain working theme for apps and tools - cool, visibly compact, eased
   chroma, one sans family).
@@ -716,7 +739,7 @@ carry a module-level `@internal` - documented, importable, not stable API.
   dual-scheme. zine and phosphor zero the short `duration_*` tokens - base
   styles carry no transitions, so that reaches what a consumer times with
   the tokens (fuz_ui's dialog backdrop and hashlinks among them). The
-  contrast pair live here too as the modifier modules
+  high-contrast modifier lives here too as its own module
 - [shadow_css.ts](src/lib/shadow_css.ts) - `render_shadow_css`, the shape
   of a declared shadow variable (a geometry token plus a shadow color mixed
   down to an alpha step). A leaf module with type-only imports, so the
@@ -902,9 +925,9 @@ recompute, and the page renders the draft with them: the themes page
 registers its session editor's compiled caps once
 (`register_draft_caps_source`), and the resolver attaches them to the
 applied draft beside the stance mirror. The site's themes compile to no
-caps, alone or composed with a contrast modifier, and the modifiers don't
-move the caps of a draft that doesn't bind its hues or palette lightness to
-the variables they set (`theme_compile.test.ts` holds both). The editor state
+caps, alone or composed with the contrast modifier, and the modifier
+doesn't move the caps of a draft that doesn't bind its hues or palette
+lightness to the variables it sets (`theme_compile.test.ts` holds both). The editor state
 also owns what the page applies - the
 dirty draft or its base, composed with the active contrast modifier
 (`applied_theme`) - plus the
@@ -969,8 +992,8 @@ Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_l
 
 The theme suites discover the shipped themes by glob through
 `theme_test_helpers.ts` (`shipped_themes`, `shipped_base_themes`), so a new
-module under `themes/` is linted, gated on its own, and composed with both
-contrast modifiers without being added to a list. A theme that knowingly
+module under `themes/` is linted, gated on its own, and composed with the
+contrast modifier without being added to a list. A theme that knowingly
 gives up a pairing gets its own test and a name in the standalone
 exceptions set.
 

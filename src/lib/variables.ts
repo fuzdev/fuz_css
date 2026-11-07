@@ -67,7 +67,16 @@ import {
 	render_neutral_stop_css,
 	render_ramp_color_css,
 	render_shade_ground_chroma_css,
+	render_contrast_css,
+	render_contrast_curve_css,
+	render_contrast_ground_end_css,
+	render_contrast_ground_lightness_css,
 	SHADE_GROUND_CHROMA_NAME,
+	CONTRAST,
+	CONTRAST_GROUND_END_NAME,
+	CONTRAST_NAME,
+	CONTRAST_PREFERENCE_NAME,
+	to_lightness_curve_name,
 	to_chroma_shape_name,
 	to_lightness_stop_name,
 	to_palette_chroma_name,
@@ -97,7 +106,25 @@ family builders - the loop templates the uniform families are built from
 // the stops between a ramp's endpoints; 00/100 are the endpoint knobs themselves
 const derived_lightness_stops: Array<NumericScaleVariant> = numeric_scale_variants.slice(1, -1);
 
-// a lightness ramp's endpoint/curve knobs followed by its derived stops
+// a neutral ramp's contrast intermediates: the shade ground moved toward its
+// end, and the curve bent, by the effective contrast (see `contrast_lightness_knobs`)
+const contrast_intermediate_variables = (family: RampFamily): Array<StyleVariable> =>
+	family === 'palette'
+		? []
+		: [
+				...(family === 'shade'
+					? [
+							{
+								name: to_lightness_stop_name('shade', '00'),
+								base: render_contrast_ground_lightness_css()
+							}
+						]
+					: []),
+				{ name: to_lightness_curve_name(family), base: render_contrast_curve_css(family) }
+			];
+
+// a lightness ramp's endpoint/curve knobs, its contrast intermediates, then
+// its derived stops
 const lightness_ramp_variables = (
 	family: RampFamily,
 	knobs: Record<ColorScheme, LightnessRampKnobs>
@@ -117,6 +144,7 @@ const lightness_ramp_variables = (
 		base: String(knobs.light.curve),
 		dark: String(knobs.dark.curve)
 	},
+	...contrast_intermediate_variables(family),
 	...derived_lightness_stops.map((stop) => ({
 		name: to_lightness_stop_name(family, stop),
 		base: render_lightness_stop_css(family, stop)
@@ -294,6 +322,32 @@ export const default_variables: Array<StyleVariable> = [
 		base: String(SHADE_CHROMA_00),
 		summary:
 			'the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it; held to sRGB at the ground lightness'
+	},
+
+	/*
+
+	contrast - one knob over the neutral ramps: the ground stretches toward its
+	end and the shade and text curves bend, by the larger of the theme's
+	`--contrast` and the OS preference input the `prefers-contrast: more`
+	mapping sets; the palette is untouched (see `contrast_lightness_knobs`)
+
+	*/
+	{
+		name: 'contrast',
+		base: String(CONTRAST),
+		summary:
+			'0 to 1, the fraction of the way the ground moves from its lightness to the contrast end, bending the shade and text curves with it; the high-contrast modifier sets 0.5'
+	},
+	// the OS preference input, set only by `style.css`'s `prefers-contrast` mapping
+	{ name: CONTRAST_PREFERENCE_NAME, base: '0' },
+	// the effective contrast the neutral lightness intermediates read
+	{ name: CONTRAST_NAME, base: render_contrast_css() },
+	// the ground lightness full contrast reaches, clamped to the ground so the
+	// stretch only moves toward the scheme's extreme
+	{
+		name: CONTRAST_GROUND_END_NAME,
+		base: render_contrast_ground_end_css('light'),
+		dark: render_contrast_ground_end_css('dark')
 	},
 
 	/*

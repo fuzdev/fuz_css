@@ -26,10 +26,10 @@ const buttons = (container: HTMLElement): Array<HTMLButtonElement> =>
 	Array.from(container.querySelectorAll('button'));
 
 describe('ContrastInput', () => {
-	test('renders one button per modifier with the default between them', () => {
+	test('renders the default then one button per modifier', () => {
 		const container = mount_input();
 		const labels = buttons(container).map((b) => b.textContent?.trim());
-		assert.deepEqual(labels, ['low', 'default', 'high']);
+		assert.deepEqual(labels, ['default', 'high']);
 	});
 
 	test('the default is checked when nothing is selected', () => {
@@ -49,11 +49,11 @@ describe('ContrastInput', () => {
 	test('clicking selects the modifier, and the default selects null', () => {
 		const selections: Array<Theme | null> = [];
 		const container = mount_input({ select: (m) => selections.push(m) });
-		const [low_button, default_button] = buttons(container);
-		low_button!.click();
+		const [default_button, high_button] = buttons(container);
+		high_button!.click();
 		flushSync();
 		default_button!.click();
 		flushSync();
-		assert.deepEqual(selections, [contrast_modifiers.low, null]);
+		assert.deepEqual(selections, [contrast_modifiers.high, null]);
 	});
 });

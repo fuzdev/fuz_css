@@ -1,7 +1,6 @@
 import type { Theme } from './variable.ts';
 import { base_theme } from './themes/base.ts';
 import { ledger_theme } from './themes/ledger.ts';
-import { low_contrast_theme } from './themes/low_contrast.ts';
 import { high_contrast_theme } from './themes/high_contrast.ts';
 
 /**
@@ -36,36 +35,33 @@ export const DEFAULT_THEME: Theme = base_theme;
  * the one palette-tier exemplar), and `themes/signage.ts` (scale and weight,
  * for legibility).
  *
- * Contrast is not a theme: the low/high contrast pair are modifiers
- * (`contrast_modifiers`) composed over any theme with `compose_themes`.
+ * Contrast is not a theme: it's the `--contrast` knob, which the
+ * high-contrast modifier (`contrast_modifiers`) sets over any theme composed
+ * with `compose_themes`.
  */
 export const default_themes: Array<Theme> = [DEFAULT_THEME, ledger_theme];
 
 /**
- * The contrast modifiers: small axis fragments composed over any theme via
- * `compose_themes` rather than picked as themes themselves. Composition is
- * flatten + last-wins, so a modifier's variables replace the base theme's
- * same-named ones - a base that moves the same knobs cedes them to the
- * modifier. Both move the shade endpoint (`shade_lightness_00`), since
- * contrast is the ground-to-text range, so a theme whose identity is its
- * ground yields it. High contrast also bends the text curve
- * (`text_lightness_curve`) and sets `border_color` to a stop that holds a
- * control's boundary against a ground its fill can no longer separate from
- * - a base with its own `border_color` cedes it like any other variable,
- * stronger rules included. Neither touches the neutral cast, which stays the
- * theme's.
+ * The contrast modifiers: axis fragments composed over any theme via
+ * `compose_themes` rather than picked as themes themselves. The one modifier,
+ * high contrast, sets the `--contrast` knob alone, so it strengthens the
+ * theme beneath it rather than replacing its knobs: the theme's ground moves
+ * toward the contrast end and its shade and text curves bend, while its
+ * neutral cast, palette, borders, links, and panel shadow stay its own.
+ * Picking the modifier sets `contrast` to `HIGH_CONTRAST`, as picking a theme
+ * sets its knobs: composition is last-wins, so it replaces a theme's own
+ * `contrast`, a higher one included. The OS `prefers-contrast: more`
+ * preference feeds the same derivation through its own input, which only
+ * ever raises the effective contrast.
  */
 export const contrast_modifiers: ContrastModifiers = {
-	low: low_contrast_theme,
 	high: high_contrast_theme
 };
 
 /**
- * The contrast modifier pair, by direction.
+ * The contrast modifiers, keyed by the name a contrast picker selects.
  */
 export interface ContrastModifiers {
-	/** Narrows the ground-to-text range. */
-	low: Theme;
-	/** Widens the ground-to-text range and strengthens the control borders. */
+	/** Strengthens the ground-to-text range and separates the surfaces. */
 	high: Theme;
 }

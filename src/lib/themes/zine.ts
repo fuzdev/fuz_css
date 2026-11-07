@@ -10,7 +10,7 @@ import type { Theme } from '../variable.ts';
  * the black plate.
  *
  * Dual-scheme: the dark appearance is the same page run as a negative, on a
- * near-black ground that stays inside the contrast modifiers' range, so high
+ * near-black ground that stays above the dark contrast end, so high
  * contrast still deepens it and panels keep a visible fill.
  * Built from levers only - the palette letters keep their default hues.
  */

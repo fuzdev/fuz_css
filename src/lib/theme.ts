@@ -199,8 +199,8 @@ export const overlay_style_variable = (
  * Composes a base theme with overlay fragments by flatten + last-wins: later
  * variables replace same-named earlier ones wholesale, a dark-only overlay
  * keeping the base slot beneath it (see `overlay_style_variable`). Any
- * knob-only theme is already a valid fragment - the contrast modifiers in
- * `contrast_modifiers` are the canonical overlays. This is the hand-flatten
+ * knob-only theme is already a valid fragment - the high-contrast modifier
+ * in `contrast_modifiers` is the canonical overlay. This is the hand-flatten
  * precursor to a first-class `extends`, with the same merge semantics.
  *
  * The base's `scheme` stance wins; when the base is single-scheme, each

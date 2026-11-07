@@ -49,6 +49,27 @@ describe('scalar knobs', () => {
 		assert.strictEqual(number.getAttribute('aria-label'), 'chroma_scale');
 	});
 
+	test('a knob a modifier sets is disabled with a note naming it', () => {
+		const free = mount_knob({ knob: get_knob('contrast'), value: '0' });
+		assert.isFalse(free.querySelector('fieldset')!.disabled);
+		assert.isFalse(range_input(free).matches(':disabled'));
+		assert.isFalse(number_input(free).matches(':disabled'));
+		assert.isNull(free.querySelector('.set-by'));
+		const container = mount_knob({
+			knob: get_knob('contrast'),
+			value: '0',
+			set_by: 'high contrast'
+		});
+		assert.isTrue(container.querySelector('fieldset')!.disabled);
+		// disabled, not hidden: the controls still render, and inherit the state
+		assert.isTrue(range_input(container).matches(':disabled'));
+		assert.isTrue(number_input(container).matches(':disabled'));
+		assert.strictEqual(
+			container.querySelector('.set-by')?.textContent,
+			'set by the high contrast modifier'
+		);
+	});
+
 	test('typing in the number input emits the literal', () => {
 		const onchange = vi.fn();
 		const container = mount_knob({ knob: get_knob('chroma_scale'), value: '1', onchange });

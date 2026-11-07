@@ -20,17 +20,16 @@
 		select: (modifier: Theme | null) => void;
 	} = $props();
 
-	// `null` is the theme's own contrast, placed between the modifiers so the
-	// row reads low → default → high left to right
+	// `null` is the theme's own contrast, so the row reads default → high left
+	// to right
 	const options: Array<{ modifier: Theme | null; label: string }> = $derived([
-		{ modifier: modifiers.low, label: 'low' },
 		{ modifier: null, label: 'default' },
 		{ modifier: modifiers.high, label: 'high' }
 	]);
 </script>
 
 <!-- the same shape as fuz_ui's ColorSchemeInput: a horizontal radio group of
-	joined buttons, not a select, so the three states are one glance apart -->
+	joined buttons, not a select, so the states are one glance apart -->
 <menu
 	role="radiogroup"
 	aria-label="contrast"

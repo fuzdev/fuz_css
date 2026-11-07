@@ -599,11 +599,10 @@ describe('gates', () => {
 
 describe('applied theme', () => {
 	const high: Theme = { name: 'high', variables: [{ name: 'chroma_scale', base: '1.5' }] };
-	const low: Theme = { name: 'low', variables: [{ name: 'chroma_scale', base: '0.5' }] };
 	const create_contrast_editor = (): ThemeEditorState =>
 		new ThemeEditorState({
 			themes: [base_theme, marquee_theme],
-			contrast_modifiers: { low, high }
+			contrast_modifiers: { high }
 		});
 
 	test('a clean editor applies and picks its base', () => {
@@ -631,6 +630,16 @@ describe('applied theme', () => {
 		editor.set_value(single_slot_default.name, '2', 'light');
 		assert.strictEqual(editor.applied_theme.name, UNSAVED_THEME_NAME);
 		assert.isDefined(editor.applied_theme.variables.find((v) => v.name === 'chroma_scale'));
+	});
+
+	test('the active modifier names the variables it sets over the draft', () => {
+		const editor = create_contrast_editor();
+		assert.isNull(editor.modifier_setting('chroma_scale'));
+		editor.contrast_modifier = high;
+		assert.strictEqual(editor.modifier_setting('chroma_scale'), 'high');
+		assert.isNull(editor.modifier_setting('shade_lightness_00'));
+		editor.contrast_modifier = null;
+		assert.isNull(editor.modifier_setting('chroma_scale'));
 	});
 
 	test('load_theme_guarded loads over a clean editor without asking', () => {
@@ -681,7 +690,7 @@ describe('applied theme', () => {
 
 	test('sync_applied_theme clears a modifier the applied theme lacks', () => {
 		const editor = create_contrast_editor();
-		editor.contrast_modifier = low;
+		editor.contrast_modifier = high;
 		assert.isTrue(editor.sync_applied_theme(marquee_theme));
 		assert.isNull(editor.contrast_modifier);
 	});

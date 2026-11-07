@@ -8,7 +8,8 @@ import { theme_knob_by_name } from '#lib/knobs.ts';
 import { compose_themes, to_theme_stance } from '#lib/theme.ts';
 import { create_theme_resolver } from '#lib/theme_resolver.ts';
 import { color_scheme_variants, type ColorScheme } from '#lib/variable_data.ts';
-import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
+import { check_theme, compute_theme_caps } from '#lib/theme_check.ts';
+import { to_lightness_stop_name } from '#lib/ramps.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { shipped_themes, shipped_base_themes } from './theme_test_helpers.ts';
 
@@ -55,7 +56,7 @@ describe('default_themes', () => {
 
 	test('contrast is a modifier, not a registry theme', () => {
 		const names = Object.values(contrast_modifiers).map((t) => t.name);
-		assert.deepEqual(names, ['low contrast', 'high contrast']);
+		assert.deepEqual(names, ['high contrast']);
 		const registry = new Set(default_themes.map((t) => t.name));
 		for (const name of names) assert.isFalse(registry.has(name));
 	});
@@ -135,20 +136,45 @@ describe('theme tiers', () => {
 });
 
 describe('contrast modifiers over shipped themes', () => {
-	test("every theme's own ground sits between its low and high contrast compositions", () => {
-		// otherwise a modifier moves the ground the wrong way - high contrast
-		// lifting a darker dark ground lowers the contrast it names
+	test("high contrast moves every theme's ground toward the contrast end", () => {
+		// otherwise the modifier moves the ground the wrong way - lifting a dark
+		// ground lowers the contrast it names
 		const ground = (theme: Theme, scheme: ColorScheme): number =>
-			create_theme_resolver(theme).resolve('shade_lightness_00', scheme)!;
+			create_theme_resolver(theme).resolve(to_lightness_stop_name('shade', '00'), scheme)!;
 		for (const theme of shipped_base_themes) {
 			const stance = to_theme_stance(theme.scheme);
 			for (const scheme of stance ? [stance] : color_scheme_variants) {
 				const own = ground(theme, scheme);
-				const low = ground(compose_themes(theme, low_contrast_theme), scheme);
 				const high = ground(compose_themes(theme, high_contrast_theme), scheme);
-				const label = `${theme.name} ${scheme}: low ${low}, own ${own}, high ${high}`;
-				assert.isAtLeast(own, Math.min(low, high), label);
-				assert.isAtMost(own, Math.max(low, high), label);
+				const label = `${theme.name} ${scheme}: own ${own}, high ${high}`;
+				if (scheme === 'light') assert.isAtLeast(high, own, label);
+				else assert.isAtMost(high, own, label);
+			}
+		}
+	});
+
+	test('high contrast never lowers the contrast of what reads against the ground', () => {
+		// body text, links, the control border, and selected text against the
+		// ground and the selected fill; the raised surfaces are left out, since
+		// the bent shade curve separates them from the ground on purpose,
+		// which moves them toward the text (text on `shade_05`/`shade_10`), and
+		// the translucent divider tracks the stretched ground
+		const guarded = /^\S+ (?:on|vs) shade_(?:00|60)$/u;
+		for (const theme of shipped_base_themes) {
+			const own = check_theme(theme, { caps: compute_theme_caps(theme) });
+			const composed = compose_themes(theme, high_contrast_theme);
+			const high = check_theme(composed, { caps: compute_theme_caps(composed) });
+			const own_values = new Map(
+				own.entries
+					.filter((e) => e.gate === 'contrast')
+					.map((e) => [`${e.scheme}|${e.subject}`, e.value])
+			);
+			for (const entry of high.entries) {
+				if (entry.gate !== 'contrast' || !guarded.test(entry.subject)) continue;
+				const key = `${entry.scheme}|${entry.subject}`;
+				const before = own_values.get(key);
+				assert.isDefined(before, `${theme.name}: ${key} gated only under high`);
+				assert.isAtLeast(entry.value, before, `${theme.name}: ${key} drops under high`);
 			}
 		}
 	});

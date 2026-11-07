@@ -18,14 +18,20 @@
  *   clamped as the browser clamps the `oklch()` it renders.
  * - The private ramp intermediates (`_palette_lightness_NN` and its
  *   shade/text twins, `_chroma_shape_NN`, `_palette_chroma_NN`,
- *   `_shade_ground_chroma`) always
- *   derive through the `ramps.ts` formulas from the resolved knobs - the
- *   `Theme` schema keeps a theme from setting one, and the resolver ignores
- *   one in `variables` as the renderer drops it. The exception is a
- *   `_palette_chroma_NN` from the derived data beside the theme, in the
- *   machine-emitted capped form (`min(calc(...), <number>)`): a compiled cap
- *   passed as `caps`, or a stanced theme's mirror re-slotting the defaults'
- *   caps, whose cap the resolver reads.
+ *   `_shade_ground_chroma`, and the contrast intermediates `_contrast`,
+ *   `_contrast_ground_end`, `_shade_lightness_00`, `_shade_lightness_curve`,
+ *   and `_text_lightness_curve`) always derive through the `ramps.ts`
+ *   formulas from the resolved knobs - the `Theme` schema keeps a theme from
+ *   setting one, and the resolver ignores one in `variables` as the renderer
+ *   drops it. The ground end takes its slot from the theme's stance, or the
+ *   requested scheme for a dual-scheme theme - the information its mirrored
+ *   slot carries. The exception is a `_palette_chroma_NN` from the derived
+ *   data beside the theme, in the machine-emitted capped form
+ *   (`min(calc(...), <number>)`): a compiled cap passed as `caps`, or a
+ *   stanced theme's mirror re-slotting the defaults' caps, whose cap the
+ *   resolver reads. The OS preference input `_contrast_preference` resolves
+ *   to 0: the gates measure the theme, and the preference only ever raises
+ *   the effective contrast past it.
  * - The color variables the gates read (the palette, intent, shade, and text
  *   stops, `text_max`, and `border_color_30`) derive from those numbers
  *   unless the theme authors one directly. An authored color is measured as
@@ -77,13 +83,23 @@ import {
 	NEUTRAL_CHROMA,
 	SHADE_CHROMA_00,
 	SHADE_GROUND_CHROMA_NAME,
+	CONTRAST,
+	CONTRAST_GROUND_END_NAME,
+	CONTRAST_NAME,
+	CONTRAST_PREFERENCE_NAME,
 	BORDER_COLOR_LIGHTNESS,
 	BORDER_CHROMA_MULTIPLIER,
 	ramp_lightness,
 	ramp_chroma_shape,
 	ramp_chroma_at_shape,
 	shade_ground_chroma,
+	effective_contrast,
+	contrast_ground_end,
+	contrast_ground_lightness,
+	contrast_lightness_curve,
 	to_chroma_shape_name,
+	to_lightness_curve_name,
+	to_lightness_stop_name,
 	type LightnessRampKnobs,
 	type RampFamily
 } from './ramps.ts';
@@ -198,6 +214,7 @@ export class ThemeResolver {
 	readonly #by_name: Map<string, StyleVariable>;
 	readonly #authored_names: Set<string>;
 	readonly #memo: Map<string, Resolved> = new Map();
+	readonly #stance: ColorScheme | null;
 
 	constructor(theme: Theme, options: ThemeResolverOptions = {}) {
 		// a theme can't set an intermediate, and the renderer drops one it carries,
@@ -212,8 +229,13 @@ export class ThemeResolver {
 		// schemes see the stanced values, and the caps render last over
 		// everything; neither is an author pin
 		const stance = to_theme_stance(theme.scheme);
+		this.#stance = stance;
 		if (stance) {
 			for (const v of compute_scheme_mirror(stance)) {
+				// the ground end derives from the stance itself (`#resolve_default`),
+				// the same information its mirrored slot carries - unlike the mirrored
+				// palette caps, whose per-scheme literals the resolver reads
+				if (v.name === CONTRAST_GROUND_END_NAME) continue;
 				if (!this.#by_name.has(v.name)) this.#by_name.set(v.name, v);
 			}
 		}
@@ -352,11 +374,52 @@ export class ThemeResolver {
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
 		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
 		if (name === 'shade_chroma_00') return { ok: true, value: SHADE_CHROMA_00 };
-		// the ground tint as rendered - the request held to sRGB at the ground's lightness
+		// the ground tint as rendered - the request held to sRGB at the effective
+		// ground's lightness
 		if (name === SHADE_GROUND_CHROMA_NAME) {
-			const r = this.#resolve_all(['shade_chroma_00', 'shade_lightness_00'], scheme, visited);
+			const r = this.#resolve_all(
+				['shade_chroma_00', to_lightness_stop_name('shade', '00')],
+				scheme,
+				visited
+			);
 			if (!r.ok) return r.error;
 			return { ok: true, value: shade_ground_chroma(r.values[0]!, r.values[1]!) };
+		}
+		// the effective contrast and its inputs - the OS preference is 0, since
+		// the gates measure the theme
+		if (name === 'contrast') return { ok: true, value: CONTRAST };
+		if (name === CONTRAST_PREFERENCE_NAME) return { ok: true, value: 0 };
+		if (name === CONTRAST_NAME) {
+			const r = this.#resolve_all(['contrast', CONTRAST_PREFERENCE_NAME], scheme, visited);
+			if (!r.ok) return r.error;
+			return { ok: true, value: effective_contrast(r.values[0]!, r.values[1]!) };
+		}
+		// the ground end, clamped to the ground - a stanced theme renders its
+		// stance's slot in both schemes, as its mirror does
+		if (name === CONTRAST_GROUND_END_NAME) {
+			const r = this.#resolve('shade_lightness_00', scheme, visited);
+			if (!r.ok) return r;
+			return { ok: true, value: contrast_ground_end(this.#stance ?? scheme, r.value) };
+		}
+		// the effective shade ground, moved toward its end by the contrast
+		if (name === to_lightness_stop_name('shade', '00')) {
+			const r = this.#resolve_all(
+				['shade_lightness_00', CONTRAST_GROUND_END_NAME, CONTRAST_NAME],
+				scheme,
+				visited
+			);
+			if (!r.ok) return r.error;
+			return {
+				ok: true,
+				value: contrast_ground_lightness(r.values[0]!, r.values[1]!, r.values[2]!)
+			};
+		}
+		// the effective neutral curves, bent by the contrast
+		for (const family of ['shade', 'text'] as const) {
+			if (name !== to_lightness_curve_name(family)) continue;
+			const r = this.#resolve_all([`${family}_lightness_curve`, CONTRAST_NAME], scheme, visited);
+			if (!r.ok) return r.error;
+			return { ok: true, value: contrast_lightness_curve(r.values[0]!, r.values[1]!) };
 		}
 		if (name === 'border_color_lightness') {
 			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };
@@ -439,8 +502,14 @@ export class ThemeResolver {
 		scheme: ColorScheme,
 		visited: Set<string>
 	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
+		// the names the stops render through, so the neutral ramps follow their
+		// contrast intermediates as the CSS does
 		const r = this.#resolve_all(
-			[`${family}_lightness_00`, `${family}_lightness_100`, `${family}_lightness_curve`],
+			[
+				to_lightness_stop_name(family, '00'),
+				to_lightness_stop_name(family, '100'),
+				to_lightness_curve_name(family)
+			],
 			scheme,
 			visited
 		);

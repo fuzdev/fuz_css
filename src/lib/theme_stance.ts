@@ -7,13 +7,6 @@
  * dual-scheme theme, so keeping the dependency here means only the code that
  * renders a stanced theme pays for the data.
  *
- * A consequence of mirroring into the theme layer: the mirror re-declares the
- * scheme-adaptive defaults in `fuz.theme`, which outranks the
- * `fuz.preferences` OS mappings - so under a stanced theme
- * `prefers-contrast: more` keeps only its stronger `--border_color` and the
- * panel ring, not the ground and text stretch. Compose the high-contrast modifier
- * (`contrast_modifiers`) over the theme to raise contrast deliberately.
- *
  * @module
  */
 

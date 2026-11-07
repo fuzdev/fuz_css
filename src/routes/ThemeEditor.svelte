@@ -97,6 +97,7 @@
 		value={editor.display_value(knob.name, editing_scheme)}
 		resolved={editor.resolved_value(knob.name, editing_scheme)}
 		changed={editor.changed(knob.name)}
+		set_by={editor.modifier_setting(knob.name)}
 		onchange={(value) => editor.set_value(knob.name, value, editing_scheme)}
 		onreset={() => editor.reset(knob.name)}
 	/>

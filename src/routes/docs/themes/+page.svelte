@@ -132,10 +132,15 @@
 			</div>
 		</div>
 		<p>
-			Contrast is a <em>modifier</em>, not a theme: the low and high contrast modifiers compose over
-			any theme with <code>compose_themes</code> (flatten + last-wins), so every theme gets both
-			variants for free. The OS <code>prefers-contrast: more</code> preference maps onto the same
-			variables the high contrast modifier sets, so it reaches every theme with no modifier picked.
+			Contrast is a knob, not a theme: <code>--contrast</code> moves the ground toward the contrast
+			end and bends the shade and text curves, strengthening whatever theme it sits on. A theme may
+			set it like any knob. The high contrast modifier sets it alone and composes over any theme
+			with <code>compose_themes</code> (flatten + last-wins), so every theme gets the variant for
+			free: picking it sets <code>--contrast</code> to 0.5, as picking a theme sets that theme's
+			knobs, replacing whatever value the theme authored. The OS <code>prefers-contrast: more</code>
+			preference instead sets the same derivation's second input, and the effective contrast is the
+			larger of the two - so the preference renders what the modifier does over a theme at the
+			default, only ever raises a theme's own contrast, and no theme can silence it.
 		</p>
 	</TomeSection>
 	<TomeSection>

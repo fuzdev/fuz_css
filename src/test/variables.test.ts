@@ -6,7 +6,11 @@ import { INTERNAL_VARIABLE_NAME_MATCHER, StyleVariable } from '#lib/variable.ts'
 import {
 	PALETTE_CHROMA_MULTIPLIERS,
 	SHADE_GROUND_CHROMA_NAME,
+	CONTRAST_NAME,
+	CONTRAST_PREFERENCE_NAME,
+	CONTRAST_GROUND_END_NAME,
 	to_chroma_shape_name,
+	to_lightness_curve_name,
 	to_lightness_stop_name,
 	to_palette_chroma_name
 } from '#lib/ramps.ts';
@@ -55,7 +59,15 @@ test('the internal variables are exactly the ramp intermediates', () => {
 			`_chroma_shape_${stop}`,
 			`_palette_chroma_${stop}`
 		]),
-		'_shade_ground_chroma'
+		'_shade_ground_chroma',
+		// the contrast derivation: its inputs' merge, the ground end, and the
+		// neutral knobs it moves
+		'_contrast',
+		'_contrast_preference',
+		'_contrast_ground_end',
+		'_shade_lightness_00',
+		'_shade_lightness_curve',
+		'_text_lightness_curve'
 	];
 	assert.sameMembers(internal, expected);
 	// the name helpers build the same spellings, keeping the endpoints public
@@ -68,14 +80,19 @@ test('the internal variables are exactly the ramp intermediates', () => {
 				to_chroma_shape_name(stop),
 				to_palette_chroma_name(stop)
 			]),
-			SHADE_GROUND_CHROMA_NAME
+			SHADE_GROUND_CHROMA_NAME,
+			CONTRAST_NAME,
+			CONTRAST_PREFERENCE_NAME,
+			CONTRAST_GROUND_END_NAME,
+			to_lightness_curve_name('shade'),
+			to_lightness_curve_name('text')
 		],
 		[
 			...expected,
-			...(['palette', 'shade', 'text'] as const).flatMap((family) => [
-				`${family}_lightness_00`,
-				`${family}_lightness_100`
-			])
+			// the shade ground renders through its contrast intermediate
+			'palette_lightness_00',
+			'text_lightness_00',
+			...(['palette', 'shade', 'text'] as const).map((family) => `${family}_lightness_100`)
 		]
 	);
 });

@@ -250,8 +250,8 @@ describe('include and exclude options', () => {
 		assert.include(expected!, '.p_md');
 		assert.notInclude(expected!, '.p_lg');
 		assert.include(expected!, '--palette_d_50:');
-		// the `prefers-contrast` mapping still declares `--link_color: var(--accent_70)`
-		assert.notInclude(expected!, '--link_color: var(--accent_60)');
+		// excluded, and nothing else in the base styles declares it
+		assert.notInclude(expected!, '--link_color:');
 
 		const rendered = await render_twice({
 			additional_classes: one_shot(OPTIONS.additional_classes),

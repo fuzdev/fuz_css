@@ -20,6 +20,7 @@
 		onchange,
 		onreset,
 		compact = false,
+		set_by = null,
 		resolve_hue = (letter) => PALETTE_HUES[letter]
 	}: {
 		knob: ThemeKnob;
@@ -44,6 +45,11 @@
 		 * high-leverage band duplicated above the granular controls.
 		 */
 		compact?: boolean;
+		/**
+		 * The name of a modifier that sets this knob over the draft, which
+		 * disables the control with a note, since an edit wouldn't render.
+		 */
+		set_by?: string | null;
 		/**
 		 * Resolves a palette letter's current hue angle, so binding displays and
 		 * detachment track theme overrides instead of the shipped defaults.
@@ -128,112 +134,121 @@
 
 <!-- @fuz-classes sized_sm sized_md sized_lg -->
 <div class="knob sized_{compact ? 'sm' : knob.leverage}" class:compact>
-	{#if knob.bindable}
-		<!-- intent/neutral hues: a palette-letter binding picker with a
+	<!-- a modifier composed over the draft sets this knob, so the controls are
+		disabled rather than hidden, with a note saying why -->
+	<fieldset class="unstyled" disabled={set_by !== null}>
+		{#if knob.bindable}
+			<!-- intent/neutral hues: a palette-letter binding picker with a
 			custom-angle escape; chips write `var(--hue_x)`, custom detaches to a
 			literal angle -->
-		<div class="title">
-			<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
-		</div>
-		<div class="letter-chips" role="radiogroup" aria-label="--{knob.name} binding">
-			{#each palette_variants as letter (letter)}
-				<button
-					type="button"
-					class="letter_chip palette_{letter}"
-					class:selected={bound_letter === letter}
-					role="radio"
-					aria-checked={bound_letter === letter}
-					title={gloss_title(letter)}
-					onclick={() => onchange(`var(--hue_${letter})`)}
-				>
-					{letter}
-				</button>
-			{/each}
-			<button
-				type="button"
-				class="letter_chip"
-				class:selected={bound_letter === null}
-				role="radio"
-				aria-checked={bound_letter === null}
-				style:--fill={custom_color}
-				style:--text_color={custom_color}
-				style:--border_color={custom_color}
-				style:--outline_color={custom_color}
-				title="detach from the palette and set a literal angle"
-				onclick={() => onchange(String(numeric_value ?? 0))}
-			>
-				custom
-			</button>
-		</div>
-		{#if bound_letter === null && numeric_value !== null}
-			<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
-		{:else if bound_letter === null}
-			<!-- a detached value the slider can't represent (e.g. a calc()) -
-				raw text entry as the escape hatch -->
-			<input
-				type="text"
-				aria-label={knob.name}
-				value={value ?? ''}
-				onchange={(e) => emit_text(e.currentTarget)}
-			/>
-		{/if}
-	{:else if knob.kind === 'hue' && (numeric_value ?? derived_numeric) !== null}
-		<!-- HueInput carries its own internal label; the name renders as its title -->
-		<HueInput
-			bind:value={() => numeric_value ?? derived_numeric ?? 0, (v) => emit_numeric(String(v))}
-		>
-			<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
-		</HueInput>
-	{:else}
-		<label>
 			<div class="title">
 				<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
 			</div>
-			{#if knob.kind === 'enum'}
-				<select value={value ?? ''} onchange={(e) => onchange(e.currentTarget.value)}>
-					{#if value === undefined}
-						<option value="" disabled>unset</option>
-					{/if}
-					{#each knob.values ?? [] as v (v)}
-						<option value={v}>{v}</option>
-					{/each}
-				</select>
-			{:else if scalar && (numeric_value !== null || derived_numeric !== null)}
-				<div class="row gap_sm">
-					<!-- the slider clamps to the knob's safe range; the number input is the
-						knowing escape past it. A derived value positions the slider but
-						renders as placeholder only - dragging or typing pins it -->
-					<input
-						type="range"
-						class="flex:1"
-						{min}
-						{max}
-						{step}
-						value={numeric_value ?? derived_numeric}
-						oninput={(e) => emit_numeric(e.currentTarget.value)}
-					/>
-					<input
-						type="number"
-						aria-label={derived_numeric !== null
-							? `${knob.name} (derived ${format_step(derived_numeric)})`
-							: knob.name}
-						title={derived_numeric !== null ? `derived: ${value} - drag or type to pin` : undefined}
-						class="knob_number"
-						{step}
-						value={numeric_value ?? ''}
-						placeholder={derived_numeric !== null ? format_step(derived_numeric) : undefined}
-						oninput={(e) => emit_numeric(e.currentTarget.value)}
-					/>
-				</div>
-			{:else}
+			<div class="letter-chips" role="radiogroup" aria-label="--{knob.name} binding">
+				{#each palette_variants as letter (letter)}
+					<button
+						type="button"
+						class="letter_chip palette_{letter}"
+						class:selected={bound_letter === letter}
+						role="radio"
+						aria-checked={bound_letter === letter}
+						title={gloss_title(letter)}
+						onclick={() => onchange(`var(--hue_${letter})`)}
+					>
+						{letter}
+					</button>
+				{/each}
+				<button
+					type="button"
+					class="letter_chip"
+					class:selected={bound_letter === null}
+					role="radio"
+					aria-checked={bound_letter === null}
+					style:--fill={custom_color}
+					style:--text_color={custom_color}
+					style:--border_color={custom_color}
+					style:--outline_color={custom_color}
+					title="detach from the palette and set a literal angle"
+					onclick={() => onchange(String(numeric_value ?? 0))}
+				>
+					custom
+				</button>
+			</div>
+			{#if bound_letter === null && numeric_value !== null}
+				<HueInput bind:value={() => numeric_value ?? 0, (v) => emit_numeric(String(v))} />
+			{:else if bound_letter === null}
+				<!-- a detached value the slider can't represent (e.g. a calc()) -
+				raw text entry as the escape hatch -->
 				<input
 					type="text"
+					aria-label={knob.name}
 					value={value ?? ''}
-					placeholder={knob.hook ? 'unset (falls back in style.css)' : ''}
 					onchange={(e) => emit_text(e.currentTarget)}
 				/>
 			{/if}
-		</label>
+		{:else if knob.kind === 'hue' && (numeric_value ?? derived_numeric) !== null}
+			<!-- HueInput carries its own internal label; the name renders as its title -->
+			<HueInput
+				bind:value={() => numeric_value ?? derived_numeric ?? 0, (v) => emit_numeric(String(v))}
+			>
+				<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
+			</HueInput>
+		{:else}
+			<label>
+				<div class="title">
+					<code class="p_0 font_size_sm background-color:transparent">--{knob.name}</code>
+				</div>
+				{#if knob.kind === 'enum'}
+					<select value={value ?? ''} onchange={(e) => onchange(e.currentTarget.value)}>
+						{#if value === undefined}
+							<option value="" disabled>unset</option>
+						{/if}
+						{#each knob.values ?? [] as v (v)}
+							<option value={v}>{v}</option>
+						{/each}
+					</select>
+				{:else if scalar && (numeric_value !== null || derived_numeric !== null)}
+					<div class="row gap_sm">
+						<!-- the slider clamps to the knob's safe range; the number input is the
+						knowing escape past it. A derived value positions the slider but
+						renders as placeholder only - dragging or typing pins it -->
+						<input
+							type="range"
+							class="flex:1"
+							{min}
+							{max}
+							{step}
+							value={numeric_value ?? derived_numeric}
+							oninput={(e) => emit_numeric(e.currentTarget.value)}
+						/>
+						<input
+							type="number"
+							aria-label={derived_numeric !== null
+								? `${knob.name} (derived ${format_step(derived_numeric)})`
+								: knob.name}
+							title={derived_numeric !== null
+								? `derived: ${value} - drag or type to pin`
+								: undefined}
+							class="knob_number"
+							{step}
+							value={numeric_value ?? ''}
+							placeholder={derived_numeric !== null ? format_step(derived_numeric) : undefined}
+							oninput={(e) => emit_numeric(e.currentTarget.value)}
+						/>
+					</div>
+				{:else}
+					<input
+						type="text"
+						value={value ?? ''}
+						placeholder={knob.hook ? 'unset (falls back in style.css)' : ''}
+						onchange={(e) => emit_text(e.currentTarget)}
+					/>
+				{/if}
+			</label>
+		{/if}
+	</fieldset>
+	{#if set_by !== null}
+		<small class="set-by">set by the {set_by} modifier</small>
 	{/if}
 	{#if changed}
 		<!-- a sibling of the label, not a child - a preceding button inside it
@@ -267,6 +282,14 @@
 		/* keep long names clear of the reset button (a sized_sm icon_button,
 			--input_height under sized_sm = --space_xl4) */
 		padding-right: var(--space_xl4);
+	}
+	.knob fieldset {
+		/* a fieldset's UA min-content floor would keep the knob from shrinking */
+		min-inline-size: 0;
+	}
+	.knob fieldset:disabled {
+		/* also stops what native disabling doesn't reach, like HueInput's minimap */
+		pointer-events: none;
 	}
 	.knob-reset {
 		position: absolute;

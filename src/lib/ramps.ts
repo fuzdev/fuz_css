@@ -232,7 +232,7 @@ export const SHADE_GROUND_CHROMA_SLOPES: Readonly<{ light_end: number; dark_end:
  * near-ground shade stops read in place of the knob.
  *
  * @param chroma_00 - the requested ground tint (`shade_chroma_00`)
- * @param lightness_00 - the ground's lightness (`shade_lightness_00`)
+ * @param lightness_00 - the effective ground's lightness (`_shade_lightness_00`)
  * @returns the tint, at most `chroma_00` - negative, like the CSS, for a
  * negative request or a ground lightness outside 0..1, which the color
  * clamp then handles as the browser does
@@ -243,6 +243,122 @@ export const shade_ground_chroma = (chroma_00: number, lightness_00: number): nu
 		SHADE_GROUND_CHROMA_SLOPES.light_end * (1 - lightness_00),
 		SHADE_GROUND_CHROMA_SLOPES.dark_end * lightness_00
 	);
+
+/**
+ * The default of the `--contrast` knob: the theme's own ramps, unmoved.
+ */
+export const CONTRAST = 0;
+
+/**
+ * The effective contrast the high-contrast modifier sets (`--contrast`), and
+ * the value the `prefers-contrast: more` mapping gives the preference input
+ * (`--_contrast_preference`), so the modifier and the OS preference render
+ * the same derivation. Tuned against the floors the shipped themes hold under
+ * it: body text at 12:1 and the control border at 3:1 against the ground.
+ */
+export const HIGH_CONTRAST = 0.5;
+
+/**
+ * How far full contrast bends the shade and text lightness curves: the
+ * effective curve is `curve * (1 - CONTRAST_CURVE_BEND * c)`. Bending the
+ * shade curve separates the near-ground surfaces (and carries the control
+ * borders that sit on them), and bending the text curve pulls the text stops
+ * toward the contrast end.
+ */
+export const CONTRAST_CURVE_BEND = 0.66;
+
+/**
+ * The ground lightness full contrast reaches, per scheme: the effective
+ * ground (`--_shade_lightness_00`) moves the fraction `c` of the way from the
+ * theme's own `--shade_lightness_00` to this end. The dark end stops short of
+ * black, since the bottom of the lightness range carries almost no luminance.
+ * The end is clamped to the ground (`contrast_ground_end`), so the stretch only
+ * moves toward the scheme's extreme: a ground already past the end doesn't
+ * move, though the shade and text curves still bend.
+ */
+export const CONTRAST_GROUND_END: Readonly<Record<ColorScheme, number>> = {
+	light: 1,
+	dark: 0.1
+};
+
+/**
+ * The ground end a scheme stretches toward, clamped to the ground: the larger
+ * of `CONTRAST_GROUND_END.light` and the ground in light, the smaller of
+ * `CONTRAST_GROUND_END.dark` and the ground in dark, so a ground already past
+ * the end stays put. The numeric twin of `render_contrast_ground_end_css`.
+ *
+ * @param scheme - the scheme whose end applies - a stanced theme's stance
+ * @param lightness_00 - the ground's lightness (`shade_lightness_00`)
+ */
+export const contrast_ground_end = (scheme: ColorScheme, lightness_00: number): number =>
+	scheme === 'light'
+		? Math.max(CONTRAST_GROUND_END.light, lightness_00)
+		: Math.min(CONTRAST_GROUND_END.dark, lightness_00);
+
+/**
+ * The effective contrast: the larger of the theme's `--contrast` and the OS
+ * preference input, so a theme can author a baseline the OS raises but never
+ * lowers. The numeric twin of `render_contrast_css`.
+ *
+ * @param contrast - the `--contrast` knob
+ * @param preference - the `--_contrast_preference` input, 0 unless the OS asks
+ */
+export const effective_contrast = (contrast: number, preference: number): number =>
+	Math.max(contrast, preference);
+
+/**
+ * The lightness knobs a ramp renders at an effective contrast `c`: the shade
+ * ground moves the fraction `c` of the way to its end (`contrast_ground_end`,
+ * which never lies behind the ground), and the
+ * shade and text curves bend by `CONTRAST_CURVE_BEND`; the palette is
+ * untouched, as are the text endpoints and the shade's far end. At `c = 0`
+ * every knob comes back exactly as given. The numeric twin of the
+ * `--_shade_lightness_00`, `--_shade_lightness_curve`, and
+ * `--_text_lightness_curve` intermediates.
+ *
+ * @param family - the ramp family
+ * @param knobs - the family's knobs as the theme sets them
+ * @param contrast - the effective contrast (`effective_contrast`)
+ * @param scheme - the scheme, which picks the ground end
+ * @returns the knobs the ramp's stops render through
+ */
+export const contrast_lightness_knobs = (
+	family: RampFamily,
+	knobs: LightnessRampKnobs,
+	contrast: number,
+	scheme: ColorScheme
+): LightnessRampKnobs => {
+	if (family === 'palette') return knobs;
+	const curve = contrast_lightness_curve(knobs.curve, contrast);
+	if (family === 'text') return { ...knobs, curve };
+	return {
+		lightness_00: contrast_ground_lightness(
+			knobs.lightness_00,
+			contrast_ground_end(scheme, knobs.lightness_00),
+			contrast
+		),
+		lightness_100: knobs.lightness_100,
+		curve
+	};
+};
+
+/**
+ * The effective ground lightness: `lightness_00` moved the fraction
+ * `contrast` of the way to `end`. The numeric twin of
+ * `render_contrast_ground_lightness_css`.
+ */
+export const contrast_ground_lightness = (
+	lightness_00: number,
+	end: number,
+	contrast: number
+): number => lightness_00 + (end - lightness_00) * contrast;
+
+/**
+ * The effective shade or text curve: `curve` bent by `CONTRAST_CURVE_BEND`
+ * at `contrast`. The numeric twin of `render_contrast_curve_css`.
+ */
+export const contrast_lightness_curve = (curve: number, contrast: number): number =>
+	curve * (1 - CONTRAST_CURVE_BEND * contrast);
 
 export type ShadowTint = 'bright' | 'dim';
 
@@ -478,22 +594,27 @@ export const palette_stop_oklch = (
 /**
  * Computes the default OKLCH color of a shade stop (`--shade_NN`).
  */
-export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme): Oklch =>
-	neutral_color_oklch(
-		ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
+export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme): Oklch => {
+	const knobs = contrast_lightness_knobs('shade', SHADE_LIGHTNESS_KNOBS[scheme], CONTRAST, scheme);
+	return neutral_color_oklch(
+		ramp_lightness(knobs, stop),
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 		NEUTRAL_HUE,
-		shade_ground_chroma(SHADE_CHROMA_00, SHADE_LIGHTNESS_KNOBS[scheme].lightness_00) *
+		shade_ground_chroma(SHADE_CHROMA_00, knobs.lightness_00) *
 			neutral_ground_chroma_weight('shade', stop)
 	);
+};
 
 /**
  * Computes the default OKLCH color of a text stop (`--text_NN`).
  */
 export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme): Oklch =>
 	neutral_color_oklch(
-		ramp_lightness(TEXT_LIGHTNESS_KNOBS[scheme], stop),
+		ramp_lightness(
+			contrast_lightness_knobs('text', TEXT_LIGHTNESS_KNOBS[scheme], CONTRAST, scheme),
+			stop
+		),
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 		NEUTRAL_HUE
@@ -543,15 +664,53 @@ leading underscore (`--_palette_lightness_30`) to mark them private: the
 their knobs and color stops, never by pinning an intermediate. The names
 here are the one place the spelling is built.
 
+The contrast intermediates sit between the neutral lightness knobs and their
+stops: `--_contrast` (the effective contrast) moves the shade ground
+(`--_shade_lightness_00`) toward `--_contrast_ground_end` and bends the shade
+and text curves (`--_shade_lightness_curve`, `--_text_lightness_curve`), and
+the neutral stops read those in place of the knobs. `--_contrast_preference`
+is the one private input among them, set only by the `prefers-contrast`
+mapping in `style.css`.
+
 */
 
 /**
  * The variable a lightness ramp stop renders through: the endpoint knob
  * itself at 00/100 (`palette_lightness_00`), else the private derived
- * intermediate (`_palette_lightness_30`).
+ * intermediate (`_palette_lightness_30`). The shade ground is the exception:
+ * its 00 stop is the contrast-adjusted intermediate `_shade_lightness_00`,
+ * since the effective contrast moves it off the knob.
  */
 export const to_lightness_stop_name = (family: RampFamily, stop: NumericScaleVariant): string =>
-	stop === '00' || stop === '100' ? `${family}_lightness_${stop}` : `_${family}_lightness_${stop}`;
+	(stop === '00' && family !== 'shade') || stop === '100'
+		? `${family}_lightness_${stop}`
+		: `_${family}_lightness_${stop}`;
+
+/**
+ * The variable a lightness ramp's curve renders through: the palette's knob
+ * (`palette_lightness_curve`), or for the neutral ramps the contrast-bent
+ * intermediate (`_shade_lightness_curve`, `_text_lightness_curve`).
+ */
+export const to_lightness_curve_name = (family: RampFamily): string =>
+	family === 'palette' ? 'palette_lightness_curve' : `_${family}_lightness_curve`;
+
+/** The private variable holding the effective contrast (`effective_contrast`). */
+export const CONTRAST_NAME = '_contrast';
+
+/**
+ * The private input the `prefers-contrast: more` mapping sets in
+ * `fuz.preferences`, declared 0 in the defaults. The one private variable
+ * that is an input rather than derived: the private spelling keeps a theme
+ * from setting it (the `Theme` schema rejects it and the renderer drops it),
+ * so a theme's `--contrast` can't silence the OS preference.
+ */
+export const CONTRAST_PREFERENCE_NAME = '_contrast_preference';
+
+/**
+ * The private two-slot variable holding the ground's contrast end, clamped to
+ * the ground (`contrast_ground_end`).
+ */
+export const CONTRAST_GROUND_END_NAME = '_contrast_ground_end';
 
 /** The private variable holding a stop's normalized chroma shape (`_chroma_shape_50`). */
 export const to_chroma_shape_name = (stop: NumericScaleVariant): string => `_chroma_shape_${stop}`;
@@ -576,16 +735,53 @@ const format_ramp_number = (n: number): string => String(Math.round(n * 1e6) / 1
 /**
  * Renders the derived default of an intermediate lightness ramp stop, e.g.
  * `--_palette_lightness_30: calc(var(--palette_lightness_00) + (var(--palette_lightness_100) - var(--palette_lightness_00)) * pow(0.3, var(--palette_lightness_curve)))`.
- * Stops 00/100 are the endpoint knobs themselves and have no derived form.
+ * Stops 00/100 have no derived form here. The neutral ramps read their
+ * contrast intermediates (`to_lightness_stop_name`, `to_lightness_curve_name`)
+ * in place of the shade ground and the curves.
  */
 export const render_lightness_stop_css = (
 	family: RampFamily,
 	stop: NumericScaleVariant
 ): string => {
-	const p = `--${family}_lightness`;
+	const l00 = `var(--${to_lightness_stop_name(family, '00')})`;
+	const l100 = `var(--${to_lightness_stop_name(family, '100')})`;
+	const curve = `var(--${to_lightness_curve_name(family)})`;
 	const t = format_ramp_number(ramp_stop_t(stop));
-	return `calc(var(${p}_00) + (var(${p}_100) - var(${p}_00)) * pow(${t}, var(${p}_curve)))`;
+	return `calc(${l00} + (${l100} - ${l00}) * pow(${t}, ${curve}))`;
 };
+
+/**
+ * Renders the default of the effective contrast (`--_contrast`): the larger
+ * of the `--contrast` knob and the OS preference input. The CSS twin of
+ * `effective_contrast`.
+ */
+export const render_contrast_css = (): string =>
+	`max(var(--contrast), var(--${CONTRAST_PREFERENCE_NAME}))`;
+
+/**
+ * Renders a scheme's slot of the ground end (`--_contrast_ground_end`):
+ * `CONTRAST_GROUND_END` clamped to the ground, `max()` in light and `min()` in
+ * dark. The CSS twin of `contrast_ground_end`.
+ */
+export const render_contrast_ground_end_css = (scheme: ColorScheme): string =>
+	`${scheme === 'light' ? 'max' : 'min'}(${CONTRAST_GROUND_END[scheme]}, var(--shade_lightness_00))`;
+
+/**
+ * Renders the default of the effective ground lightness
+ * (`--_shade_lightness_00`): the knob moved the effective contrast's fraction
+ * of the way to the ground end. The CSS twin of `contrast_ground_lightness`.
+ */
+export const render_contrast_ground_lightness_css = (): string =>
+	`calc(var(--shade_lightness_00) + (var(--${CONTRAST_GROUND_END_NAME}) - var(--shade_lightness_00)) * var(--${CONTRAST_NAME}))`;
+
+/**
+ * Renders the default of a neutral ramp's effective curve
+ * (`--_shade_lightness_curve`, `--_text_lightness_curve`): the knob bent by
+ * `CONTRAST_CURVE_BEND` at the effective contrast. The CSS twin of
+ * `contrast_lightness_curve`.
+ */
+export const render_contrast_curve_css = (family: Exclude<RampFamily, 'palette'>): string =>
+	`calc(var(--${family}_lightness_curve) * (1 - ${CONTRAST_CURVE_BEND} * var(--${CONTRAST_NAME})))`;
 
 /**
  * Renders the normalized chroma shape of a stop, shared by the palette chroma
@@ -681,11 +877,14 @@ const render_ground_chroma_term = (weight: number): string => {
 
 /**
  * Renders the default of the private ground tint (`--_shade_ground_chroma`):
- * `--shade_chroma_00` held to sRGB at the ground's lightness. The CSS twin of
+ * `--shade_chroma_00` held to sRGB at the effective ground's lightness
+ * (`--_shade_lightness_00`). The CSS twin of
  * `shade_ground_chroma`.
  */
-export const render_shade_ground_chroma_css = (): string =>
-	`min(var(--shade_chroma_00), ${SHADE_GROUND_CHROMA_SLOPES.light_end} * (1 - var(--shade_lightness_00)), ${SHADE_GROUND_CHROMA_SLOPES.dark_end} * var(--shade_lightness_00))`;
+export const render_shade_ground_chroma_css = (): string => {
+	const ground = `var(--${to_lightness_stop_name('shade', '00')})`;
+	return `min(var(--shade_chroma_00), ${SHADE_GROUND_CHROMA_SLOPES.light_end} * (1 - ${ground}), ${SHADE_GROUND_CHROMA_SLOPES.dark_end} * ${ground})`;
+};
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

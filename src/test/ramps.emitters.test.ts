@@ -35,6 +35,18 @@ import {
 	neutral_ground_chroma_weight,
 	shade_ground_chroma,
 	render_shade_ground_chroma_css,
+	render_contrast_css,
+	render_contrast_ground_end_css,
+	render_contrast_ground_lightness_css,
+	render_contrast_curve_css,
+	contrast_lightness_knobs,
+	contrast_ground_end,
+	contrast_ground_lightness,
+	contrast_lightness_curve,
+	effective_contrast,
+	CONTRAST_NAME,
+	CONTRAST_PREFERENCE_NAME,
+	CONTRAST_GROUND_END_NAME,
 	SHADE_GROUND_CHROMA_NAME,
 	SHADE_GROUND_CHROMA_REACH,
 	render_ramp_color_css,
@@ -43,6 +55,7 @@ import {
 	border_color_oklch,
 	BORDER_COLOR_ALPHAS,
 	to_chroma_shape_name,
+	to_lightness_curve_name,
 	to_lightness_stop_name,
 	to_palette_chroma_name,
 	type RampFamily
@@ -60,7 +73,7 @@ const TOLERANCE = 1e-5;
 
 /**
  * Evaluates the emitted CSS value grammar to a number: numeric literals,
- * `var(--x[, fallback])`, `calc(expr)`, `min(a, ...)`, `pow(a, b)`, `+ - * /`,
+ * `var(--x[, fallback])`, `calc(expr)`, `min(a, ...)`, `max(a, ...)`, `pow(a, b)`, `+ - * /`,
  * and parentheses. Throws on anything outside the grammar so an emitter
  * change that this evaluator can't follow fails loudly instead of silently
  * passing.
@@ -119,7 +132,7 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 			expect(')');
 			return value;
 		}
-		const fn = /^(calc|min|pow|var)\(/.exec(s.slice(i));
+		const fn = /^(calc|min|max|pow|var)\(/.exec(s.slice(i));
 		if (fn) {
 			const name = fn[1]!;
 			i += fn[0].length;
@@ -146,7 +159,7 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 				}
 				return value;
 			}
-			if (name === 'min') {
+			if (name === 'min' || name === 'max') {
 				// one or more comma-separated arguments
 				const args = [parse_expr()];
 				skip_ws();
@@ -156,7 +169,7 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 					skip_ws();
 				}
 				expect(')');
-				return Math.min(...args);
+				return name === 'min' ? Math.min(...args) : Math.max(...args);
 			}
 			// pow: two comma-separated arguments
 			const a = parse_expr();
@@ -200,12 +213,32 @@ const parse_oklch_args = (css: string): [string, string, string] => {
 	return args as [string, string, string];
 };
 
-// binds the ground tint intermediate by evaluating its own emitter over `vars`,
-// so a knob override reaches the stops through the clamp as the CSS would
-const bind_ground_chroma = (vars: Record<string, number>): Record<string, number> => ({
-	...vars,
-	[SHADE_GROUND_CHROMA_NAME]: evaluate_css_number(render_shade_ground_chroma_css(), vars)
-});
+// binds the contrast intermediates and then the ground tint by evaluating their
+// own emitters over `vars`, so a knob override reaches the stops through them
+// as the CSS would
+const bind_derived = (
+	vars: Record<string, number>,
+	scheme: ColorScheme
+): Record<string, number> => {
+	const bound = { ...vars };
+	bound[CONTRAST_NAME] = evaluate_css_number(render_contrast_css(), bound);
+	bound[CONTRAST_GROUND_END_NAME] = evaluate_css_number(
+		render_contrast_ground_end_css(scheme),
+		bound
+	);
+	bound[to_lightness_stop_name('shade', '00')] = evaluate_css_number(
+		render_contrast_ground_lightness_css(),
+		bound
+	);
+	for (const family of ['shade', 'text'] as const) {
+		bound[to_lightness_curve_name(family)] = evaluate_css_number(
+			render_contrast_curve_css(family),
+			bound
+		);
+	}
+	bound[SHADE_GROUND_CHROMA_NAME] = evaluate_css_number(render_shade_ground_chroma_css(), bound);
+	return bound;
+};
 
 /** All knob variables an emitted color stop can reference, per scheme. */
 const knob_vars = (scheme: ColorScheme): Record<string, number> => {
@@ -220,7 +253,9 @@ const knob_vars = (scheme: ColorScheme): Record<string, number> => {
 		accent_chroma_scale: 1,
 		palette_chroma_min: PALETTE_CHROMA_KNOBS[scheme].chroma_min,
 		palette_chroma_max: PALETTE_CHROMA_KNOBS[scheme].chroma_max,
-		chroma_curve: PALETTE_CHROMA_KNOBS[scheme].curve
+		chroma_curve: PALETTE_CHROMA_KNOBS[scheme].curve,
+		contrast: 0,
+		[CONTRAST_PREFERENCE_NAME]: 0
 	};
 	for (const family of ['palette', 'shade', 'text'] as const) {
 		const knobs = LIGHTNESS_KNOBS[family][scheme];
@@ -240,13 +275,14 @@ const knob_vars = (scheme: ColorScheme): Record<string, number> => {
 			PALETTE_CHROMA_CAPS[scheme][stop]
 		);
 		for (const family of ['palette', 'shade', 'text'] as const) {
+			if (stop === '00' || stop === '100') continue; // the knobs, or bound below
 			vars[to_lightness_stop_name(family, stop)] = ramp_lightness(
 				LIGHTNESS_KNOBS[family][scheme],
 				stop
 			);
 		}
 	}
-	return bind_ground_chroma(vars);
+	return bind_derived(vars, scheme);
 };
 
 const DERIVED_STOPS = numeric_scale_variants.filter(
@@ -364,7 +400,7 @@ describe('neutral stop emitter', () => {
 describe('the ground tint', () => {
 	test('the emitter and the twin add each stop its share of it', () => {
 		// past what the default light ground carries, so the clamp is exercised
-		const vars = bind_ground_chroma({ ...knob_vars('light'), shade_chroma_00: 0.015 });
+		const vars = bind_derived({ ...knob_vars('light'), shade_chroma_00: 0.015 }, 'light');
 		const tint = shade_ground_chroma(0.015, LIGHTNESS_KNOBS.shade.light.lightness_00);
 		assert.isBelow(tint, 0.015);
 		for (const stop of numeric_scale_variants) {
@@ -400,17 +436,53 @@ describe('the ground tint', () => {
 				// is the browser's, not the twin's
 				for (const chroma_00 of [-0.02, 0, 0.005, 0.012, 0.03, 0.1]) {
 					const lightness_00 = l / 100;
-					const vars = {
-						...knob_vars(scheme),
-						shade_chroma_00: chroma_00,
-						shade_lightness_00: lightness_00
-					};
+					const vars = bind_derived(
+						{
+							...knob_vars(scheme),
+							shade_chroma_00: chroma_00,
+							shade_lightness_00: lightness_00
+						},
+						scheme
+					);
 					assert.closeTo(
 						evaluate_css_number(render_shade_ground_chroma_css(), vars),
 						shade_ground_chroma(chroma_00, lightness_00),
 						TOLERANCE,
 						`${scheme} L00 ${lightness_00} tint ${chroma_00}`
 					);
+				}
+			}
+		}
+	});
+
+	test('the ground tint emitter matches its twin at the effective ground under contrast', () => {
+		// the clamp reads the moved ground, not the knob
+		for (const scheme of color_scheme_variants) {
+			for (const contrast of [0.25, 0.5, 1]) {
+				for (const lightness_00 of [0.05, 0.2, 0.9, 0.97]) {
+					for (const chroma_00 of [0.005, 0.012, 0.03]) {
+						const vars = bind_derived(
+							{
+								...knob_vars(scheme),
+								contrast,
+								shade_chroma_00: chroma_00,
+								shade_lightness_00: lightness_00
+							},
+							scheme
+						);
+						const ground = contrast_lightness_knobs(
+							'shade',
+							{ ...LIGHTNESS_KNOBS.shade[scheme], lightness_00 },
+							contrast,
+							scheme
+						).lightness_00;
+						assert.closeTo(
+							evaluate_css_number(render_shade_ground_chroma_css(), vars),
+							shade_ground_chroma(chroma_00, ground),
+							TOLERANCE,
+							`${scheme} c ${contrast} L00 ${lightness_00} tint ${chroma_00}`
+						);
+					}
 				}
 			}
 		}
@@ -451,6 +523,130 @@ describe('the ground tint', () => {
 			assert.strictEqual(neutral_ground_chroma_weight('text', stop), 0, `text ${stop}`);
 			previous = weight;
 		}
+	});
+});
+
+describe('the contrast intermediates', () => {
+	test('are the knobs exactly at the default contrast', () => {
+		for (const scheme of color_scheme_variants) {
+			for (const family of ['palette', 'shade', 'text'] as const) {
+				const knobs = LIGHTNESS_KNOBS[family][scheme];
+				assert.deepEqual(contrast_lightness_knobs(family, knobs, 0, scheme), knobs);
+			}
+			const vars = knob_vars(scheme);
+			assert.strictEqual(vars[CONTRAST_NAME], 0);
+			assert.strictEqual(
+				vars[to_lightness_stop_name('shade', '00')],
+				LIGHTNESS_KNOBS.shade[scheme].lightness_00
+			);
+			assert.strictEqual(
+				vars[to_lightness_curve_name('shade')],
+				LIGHTNESS_KNOBS.shade[scheme].curve
+			);
+			assert.strictEqual(vars[to_lightness_curve_name('text')], LIGHTNESS_KNOBS.text[scheme].curve);
+		}
+	});
+
+	test('the emitters match their twins over a grid of contrast and knobs', () => {
+		for (const scheme of color_scheme_variants) {
+			for (const contrast of [0, 0.1, 0.25, 0.5, 0.75, 1]) {
+				for (const preference of [0, 0.5]) {
+					// 0.05 sits below the dark end and 1.02 above the light one, so
+					// the clamp to the ground holds them in place
+					for (const lightness_00 of [0.05, 0.2, 0.5, 0.9, 0.97, 1.02]) {
+						for (const curve of [0.5, 1, 1.3]) {
+							// distinct shade and text curves, so a family swap shows
+							const text_curve = curve + 0.2;
+							const vars = bind_derived(
+								{
+									...knob_vars(scheme),
+									contrast,
+									[CONTRAST_PREFERENCE_NAME]: preference,
+									shade_lightness_00: lightness_00,
+									shade_lightness_curve: curve,
+									text_lightness_curve: text_curve
+								},
+								scheme
+							);
+							const label = `${scheme} c ${contrast} pref ${preference} L00 ${lightness_00} curve ${curve}`;
+							const c = effective_contrast(contrast, preference);
+							assert.closeTo(vars[CONTRAST_NAME]!, c, TOLERANCE, label);
+							assert.closeTo(
+								vars[CONTRAST_GROUND_END_NAME]!,
+								contrast_ground_end(scheme, lightness_00),
+								TOLERANCE,
+								label
+							);
+							assert.closeTo(
+								vars[to_lightness_stop_name('shade', '00')]!,
+								contrast_ground_lightness(
+									lightness_00,
+									contrast_ground_end(scheme, lightness_00),
+									c
+								),
+								TOLERANCE,
+								label
+							);
+							// the ground only ever moves toward the scheme's extreme
+							const ground = vars[to_lightness_stop_name('shade', '00')]!;
+							if (scheme === 'light') assert.isAtLeast(ground, lightness_00 - TOLERANCE, label);
+							else assert.isAtMost(ground, lightness_00 + TOLERANCE, label);
+							assert.closeTo(
+								vars[to_lightness_curve_name('shade')]!,
+								contrast_lightness_curve(curve, c),
+								TOLERANCE,
+								label
+							);
+							assert.closeTo(
+								vars[to_lightness_curve_name('text')]!,
+								contrast_lightness_curve(text_curve, c),
+								TOLERANCE,
+								label
+							);
+							// every stop, through the emitted stop CSS, against the twin
+							for (const family of ['shade', 'text'] as const) {
+								const knobs = contrast_lightness_knobs(
+									family,
+									{
+										...LIGHTNESS_KNOBS[family][scheme],
+										...(family === 'shade' ? { lightness_00 } : {}),
+										curve: family === 'shade' ? curve : text_curve
+									},
+									c,
+									scheme
+								);
+								for (const stop of numeric_scale_variants) {
+									const css =
+										stop === '00' || stop === '100'
+											? `var(--${to_lightness_stop_name(family, stop)})`
+											: render_lightness_stop_css(family, stop);
+									assert.closeTo(
+										evaluate_css_number(css, vars),
+										ramp_lightness(knobs, stop),
+										TOLERANCE,
+										`${family} ${stop} ${label}`
+									);
+								}
+							}
+						}
+					}
+				}
+			}
+		}
+	});
+
+	test('the neutral stops read the intermediates, never the moved knobs', () => {
+		for (const stop of numeric_scale_variants) {
+			assert.notInclude(render_neutral_stop_css('shade', stop), 'var(--shade_lightness_00)');
+			assert.notInclude(render_neutral_stop_css('shade', stop), 'var(--shade_lightness_curve)');
+			assert.notInclude(render_neutral_stop_css('text', stop), 'var(--text_lightness_curve)');
+		}
+		for (const stop of DERIVED_STOPS) {
+			assert.notInclude(render_lightness_stop_css('shade', stop), 'var(--shade_lightness_00)');
+			assert.notInclude(render_lightness_stop_css('shade', stop), 'var(--shade_lightness_curve)');
+			assert.notInclude(render_lightness_stop_css('text', stop), 'var(--text_lightness_curve)');
+		}
+		assert.notInclude(render_shade_ground_chroma_css(), 'var(--shade_lightness_00)');
 	});
 });
 

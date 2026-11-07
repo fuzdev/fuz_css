@@ -243,6 +243,16 @@ export class ThemeEditorState {
 	});
 
 	/**
+	 * The active contrast modifier's name when it sets `name`, else `null`. The
+	 * modifier composes last, so it overrides the draft's value for that
+	 * variable and an edit to it changes nothing on the page.
+	 */
+	modifier_setting(name: string): string | null {
+		const modifier = this.contrast_modifier;
+		return modifier?.variables.some((v) => v.name === name) ? modifier.name : null;
+	}
+
+	/**
 	 * The draft compiled on every edit (`compile_theme`): its lint, and its
 	 * gates measured with its recomputed chroma caps, as a build baking it
 	 * would measure them. It also carries what `output` renders with - the
@@ -447,10 +457,10 @@ export class ThemeEditorState {
 		this.contrast_modifier = this.#modifier_list.find((m) => m.name === data.contrast) ?? null;
 	}
 
-	// the modifiers as a list, low then high, empty with none configured
+	// the modifiers as a list, empty with none configured
 	get #modifier_list(): Array<Theme> {
 		const m = this.contrast_modifiers;
-		return m ? [m.low, m.high] : [];
+		return m ? [m.high] : [];
 	}
 }
 
