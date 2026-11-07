@@ -51,6 +51,9 @@ import {
 	SHADE_GROUND_CHROMA_REACH,
 	render_ramp_color_css,
 	render_border_color_stop_css,
+	render_border_color_css,
+	border_contrast_share,
+	BORDER_CONTRAST_STOPS,
 	render_shadow_tint_css,
 	border_color_oklch,
 	BORDER_COLOR_ALPHAS,
@@ -73,12 +76,19 @@ const TOLERANCE = 1e-5;
 
 /**
  * Evaluates the emitted CSS value grammar to a number: numeric literals,
- * `var(--x[, fallback])`, `calc(expr)`, `min(a, ...)`, `max(a, ...)`, `pow(a, b)`, `+ - * /`,
- * and parentheses. Throws on anything outside the grammar so an emitter
- * change that this evaluator can't follow fails loudly instead of silently
- * passing.
+ * `var(--x[, fallback])`, `calc(expr)`, `min(a, ...)`, `max(a, ...)`,
+ * `clamp(min, value, max)`, `pow(a, b)`, `+ - * /`, and parentheses. With
+ * `percent`, every numeric literal must carry `%` and reads as its number, so
+ * the expression evaluates in percent; without it a `%` throws. Throws on
+ * anything outside the grammar so an emitter change that this evaluator can't
+ * follow fails loudly instead of silently passing.
  */
-const evaluate_css_number = (expr: string, vars: Record<string, number>): number => {
+const evaluate_css_number = (
+	expr: string,
+	vars: Record<string, number>,
+	options?: { percent?: boolean }
+): number => {
+	const percent = options?.percent ?? false;
 	let i = 0;
 	const s = expr;
 
@@ -132,7 +142,7 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 			expect(')');
 			return value;
 		}
-		const fn = /^(calc|min|max|pow|var)\(/.exec(s.slice(i));
+		const fn = /^(calc|min|max|clamp|pow|var)\(/.exec(s.slice(i));
 		if (fn) {
 			const name = fn[1]!;
 			i += fn[0].length;
@@ -171,6 +181,15 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 				expect(')');
 				return name === 'min' ? Math.min(...args) : Math.max(...args);
 			}
+			if (name === 'clamp') {
+				const lo = parse_expr();
+				expect(',');
+				const value = parse_expr();
+				expect(',');
+				const hi = parse_expr();
+				expect(')');
+				return Math.max(lo, Math.min(value, hi));
+			}
 			// pow: two comma-separated arguments
 			const a = parse_expr();
 			expect(',');
@@ -178,10 +197,11 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 			expect(')');
 			return a ** b;
 		}
-		const num = /^-?\d*\.?\d+(e-?\d+)?/i.exec(s.slice(i));
+		const num = (percent ? /^-?\d*\.?\d+(e-?\d+)?%/i : /^-?\d*\.?\d+(e-?\d+)?/i).exec(s.slice(i));
 		if (!num) throw new Error(`expected a number at ${i} ("${s.slice(i, i + 12)}") in ${expr}`);
 		i += num[0].length;
-		return Number(num[0]);
+		if (!percent && s[i] === '%') throw new Error(`unexpected % at ${i} in ${expr}`);
+		return Number(num[0].replace('%', ''));
 	};
 
 	const value = parse_expr();
@@ -593,13 +613,13 @@ describe('the contrast intermediates', () => {
 							else assert.isAtMost(ground, lightness_00 + TOLERANCE, label);
 							assert.closeTo(
 								vars[to_lightness_curve_name('shade')]!,
-								contrast_lightness_curve(curve, c),
+								contrast_lightness_curve('shade', curve, c),
 								TOLERANCE,
 								label
 							);
 							assert.closeTo(
 								vars[to_lightness_curve_name('text')]!,
-								contrast_lightness_curve(text_curve, c),
+								contrast_lightness_curve('text', text_curve, c),
 								TOLERANCE,
 								label
 							);
@@ -693,6 +713,49 @@ describe('border color stop emitter', () => {
 				assert.closeTo(evaluate_css_number(c_css, vars), c, TOLERANCE, `${scheme} ${stop} C`);
 				assert.closeTo(evaluate_css_number(h_css, vars), h, TOLERANCE, `${scheme} ${stop} H`);
 			}
+		}
+	});
+});
+
+// splits a function's arguments on its top-level commas
+const split_top_level = (inner: string, separator: string): Array<string> => {
+	const args: Array<string> = [];
+	let depth = 0;
+	let current = '';
+	for (const char of inner) {
+		if (char === '(') depth++;
+		else if (char === ')') depth--;
+		if (char === separator && depth === 0) {
+			args.push(current.trim());
+			current = '';
+		} else {
+			current += char;
+		}
+	}
+	args.push(current.trim());
+	return args;
+};
+
+describe('control border emitter', () => {
+	test('mixes the rest stop toward the reach stop by the twin share', () => {
+		const css = render_border_color_css();
+		const m = /^color-mix\((.*)\)$/su.exec(css);
+		assert(m, `not a color-mix() value: ${css}`);
+		const [space, first, second, ...rest] = split_top_level(m[1]!, ',');
+		assert.deepEqual(rest, [], css);
+		assert.strictEqual(space, 'in oklab');
+		// the first color carries the remainder, so it's the rest stop
+		assert.strictEqual(first, `var(--shade_${BORDER_CONTRAST_STOPS.rest})`);
+		const [reach, ...percentage] = split_top_level(second!, ' ');
+		assert.strictEqual(reach, `var(--shade_${BORDER_CONTRAST_STOPS.reach})`);
+		const share = percentage.join(' ');
+		for (const c of [0, 0.25, 0.5, 0.67, 1]) {
+			assert.closeTo(
+				evaluate_css_number(share, { [CONTRAST_NAME]: c }, { percent: true }),
+				border_contrast_share(c) * 100,
+				TOLERANCE,
+				`c ${c}`
+			);
 		}
 	});
 });

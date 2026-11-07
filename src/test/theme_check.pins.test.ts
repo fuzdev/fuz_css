@@ -28,7 +28,8 @@ import {
 	shade_stop_oklch,
 	text_stop_oklch,
 	to_chroma_shape_name,
-	to_lightness_stop_name
+	to_lightness_stop_name,
+	render_border_color_css
 } from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
 import type { ColorScheme, NumericScaleVariant } from '#lib/variable_data.ts';
@@ -367,10 +368,17 @@ describe('role variables', () => {
 				'outline_color'
 			]
 		);
-		// each is declared as a plain alias, the default the gates fall back to
+		// each is declared as a plain alias, the default the gates fall back to -
+		// except the control border, whose default is derived: it mixes two shade
+		// stops by the effective contrast so borders strengthen under contrast
+		// while the surfaces stay calm, and the gates evaluate that mix
 		for (const role of theme_gate_role_names) {
 			const variable = declared.get(role);
 			assert(variable, `${role} is declared`);
+			if (role === 'border_color') {
+				assert.strictEqual(variable.base, render_border_color_css(), role);
+				continue;
+			}
 			assert.match(variable.base!, /^var\(--[a-z0-9_]+\)$/u, role);
 		}
 	});
@@ -394,7 +402,8 @@ describe('role variables', () => {
 		const default_subjects: Record<string, string> = {
 			text_color: 'text_80 on shade_00',
 			text_disabled: 'text_50 on shade_00',
-			border_color: 'shade_30 vs shade_00',
+			// the derived default has no stop to name, so its entry names the role
+			border_color: 'border_color vs shade_00',
 			link_color: 'accent_60 on shade_00',
 			link_color_selected: 'text_80 on shade_00',
 			outline_color: 'accent_50 vs shade_00'
@@ -553,13 +562,15 @@ describe('role variables', () => {
 	});
 
 	test('a role authored in one scheme keeps the default pairing in the other', () => {
+		// the border's derived default names the role in both schemes, so the
+		// default pairing shows as the base theme's value, not its label
 		const report = check({ name: 'border_color', dark: 'var(--shade_05)' });
 		assert.deepEqual(
-			get_entry(report, 'contrast', 'light', 'shade_30 vs shade_00'),
-			get_entry(base_report, 'contrast', 'light', 'shade_30 vs shade_00')
+			get_entry(report, 'contrast', 'light', 'border_color vs shade_00'),
+			get_entry(base_report, 'contrast', 'light', 'border_color vs shade_00')
 		);
 		assert.isFalse(get_entry(report, 'contrast', 'dark', 'border_color vs shade_00').pass);
-		assert.isUndefined(find_entry(report, 'contrast', 'dark', 'shade_30 vs shade_00'));
+		assert.isTrue(get_entry(base_report, 'contrast', 'dark', 'border_color vs shade_00').pass);
 	});
 });
 

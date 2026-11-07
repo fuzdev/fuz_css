@@ -51,6 +51,6 @@ export const contrast_modifiers: ContrastModifiers = {
  * The contrast modifiers, keyed by the name a contrast picker selects.
  */
 export interface ContrastModifiers {
-	/** Strengthens the ground-to-text range and separates the surfaces. */
+	/** Strengthens the ground-to-text range and the control borders. */
 	high: Theme;
 }

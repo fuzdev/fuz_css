@@ -45,9 +45,11 @@
  *   roles those styles paint through: `text_color`, `text_disabled`,
  *   `link_color`, `link_color_selected`, `border_color`, and `outline_color`
  *   (`theme_gate_role_names`). Each aliases a stop or another role by
- *   default, read from the shipped declarations, and a theme that repoints
- *   one is gated at the color it points to - same rule, same `unchecked`
- *   fallback. One table of
+ *   default, read from the shipped declarations - except `border_color`,
+ *   whose default mixes two shade stops by the effective contrast
+ *   (`render_border_color_css`), which the gates evaluate as derived - and a
+ *   theme that repoints one is gated at the color it points to - same rule,
+ *   same `unchecked` fallback. One table of
  *   pairing gates names each role beside its grounds and threshold, so the
  *   gate definitions and the following can't drift.
  * - Outside the gates: the micro-surface colors no pairing models
@@ -419,7 +421,7 @@ export class ThemeResolver {
 			if (name !== to_lightness_curve_name(family)) continue;
 			const r = this.#resolve_all([`${family}_lightness_curve`, CONTRAST_NAME], scheme, visited);
 			if (!r.ok) return r.error;
-			return { ok: true, value: contrast_lightness_curve(r.values[0]!, r.values[1]!) };
+			return { ok: true, value: contrast_lightness_curve(family, r.values[0]!, r.values[1]!) };
 		}
 		if (name === 'border_color_lightness') {
 			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };

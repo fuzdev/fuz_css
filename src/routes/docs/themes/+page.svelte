@@ -133,7 +133,9 @@
 		</div>
 		<p>
 			Contrast is a knob, not a theme: <code>--contrast</code> moves the page ground toward white in
-			light mode or near-black in dark and bends the shade and text curves, strengthening whatever
+			light mode or near-black in dark, bends the text curve toward the contrast end, bends the
+			shade curve only slightly so raised surfaces stay close to the ground, and moves the default
+			control border from <code>shade_30</code> toward <code>shade_50</code>, strengthening whatever
 			theme it sits on. A theme may set it like any knob. The high contrast modifier sets it alone
 			and composes over any theme with <code>compose_themes</code> (flatten + last-wins), so every
 			theme gets the variant for free: picking it sets <code>--contrast</code> to 0.5, as picking a
@@ -248,7 +250,9 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			label on its own tinted fill at rest, hovered, and pressed. They follow the role variables
 			those styles paint through, so a theme that sets <code>border_color</code> to
 			<code>var(--text_60)</code> has its borders measured at <code>text_60</code>, in an entry
-			named <code>border_color vs shade_00</code>.
+			named <code>border_color vs shade_00</code>. The control border's floor rises with the theme's
+			contrast: deliberately soft at the default, and 3:1 against the ground once
+			<code>--contrast</code> reaches the high contrast value.
 		</p>
 		<p>
 			A value a gate depends on but can't evaluate lands in <code>unchecked</code> instead of

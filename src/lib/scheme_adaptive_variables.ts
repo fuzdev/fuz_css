@@ -93,7 +93,7 @@ export const scheme_adaptive_variables: Array<StyleVariable> = [
 	{ name: 'shade_max', base: '#000', dark: '#fff' },
 	{ name: 'shade_lightness_00', base: '0.97', dark: '0.171' },
 	{ name: 'shade_lightness_100', base: '0.171', dark: '0.97' },
-	{ name: 'shade_lightness_curve', base: '1.09', dark: '1.05' },
+	{ name: 'shade_lightness_curve', base: '1.25', dark: '1.2' },
 	{ name: 'ink_00', base: 'var(--darken_00)', dark: 'var(--lighten_00)' },
 	{ name: 'ink_05', base: 'var(--darken_05)', dark: 'var(--lighten_05)' },
 	{ name: 'ink_10', base: 'var(--darken_10)', dark: 'var(--lighten_10)' },

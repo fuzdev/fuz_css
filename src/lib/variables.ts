@@ -59,6 +59,7 @@ import {
 	SHADE_LIGHTNESS_KNOBS,
 	TEXT_LIGHTNESS_KNOBS,
 	render_border_color_stop_css,
+	render_border_color_css,
 	render_chroma_shape_css,
 	render_chroma_stop_css,
 	render_shadow_tint_css,
@@ -604,7 +605,7 @@ export const default_variables: Array<StyleVariable> = [
 	})),
 
 	/* borders and outlines */
-	{ name: 'border_color', base: 'var(--shade_30)' },
+	{ name: 'border_color', base: render_border_color_css() },
 	{ name: 'border_style', base: 'solid' },
 	{ name: 'border_width', base: 'var(--border_width_1)' },
 	// These use numbers instead of named size variants because

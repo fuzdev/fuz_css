@@ -73,7 +73,10 @@
 				<li><code>shade_05</code>: very subtle: hover states on surface, code backgrounds</li>
 				<li><code>shade_10</code>: subtle elevation: panels, cards, aside</li>
 				<li><code>shade_20</code>: more elevated: active/pressed states</li>
-				<li><code>shade_30</code>: default border intensity</li>
+				<li>
+					<code>shade_30</code>: default border intensity, which the control border moves away from
+					toward <code>shade_50</code> as <code>--contrast</code> rises
+				</li>
 				<li><code>shade_100</code>: the contrast-side end of the scale</li>
 				<li>
 					<code>shade_max</code>: untinted contrast-side extreme: black in light mode, white in dark

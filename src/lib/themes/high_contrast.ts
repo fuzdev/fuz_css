@@ -4,12 +4,13 @@ import { HIGH_CONTRAST } from '../ramps.ts';
 /**
  * Strengthened contrast: the theme it composes over, with its `--contrast`
  * knob at `HIGH_CONTRAST`. The ground stretches halfway from its own
- * lightness toward the contrast end, the bent shade curve separates the
- * surfaces - which carries the control borders past 3:1 against the ground
- * without pinning a border color - and the bent text curve pulls the text
- * stops toward the end. The theme's ground, cast, palette, and roles stay
- * its own, only strengthened: the ground moves only part way to the end, so
- * a tinted ground keeps part of its tint.
+ * lightness toward the contrast end, the shade curve bends a little so the
+ * surfaces stay close to it, the default control border moves toward a
+ * stronger shade stop - past 3:1 against the ground without pinning a border
+ * color - and the bent text curve pulls the text stops toward the end. The
+ * theme's ground, cast, palette, and roles stay its own, only strengthened:
+ * the ground moves only part way to the end, so a tinted ground keeps part of
+ * its tint.
  *
  * Picking the modifier sets `contrast` to `HIGH_CONTRAST`, as picking a
  * theme sets its knobs: composition is last-wins, so it replaces a theme's

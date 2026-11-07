@@ -106,7 +106,7 @@ export const style_hooks: ReadonlyArray<StyleHook> = [
 	{
 		name: 'fill',
 		read_by: ['button'],
-		fallbacks: ['var(--shade_50)', 'var(--shade_60)'],
+		fallbacks: ['var(--shade_50)', 'var(--shade_70)'],
 		summary:
 			"the color a button's fills mix from (tinted at rest, solid when selected) - the .palette_X classes set it to the hue's stop 60"
 	},

@@ -19,6 +19,7 @@ import {
 	GATE_SELECTED_TEXT,
 	GATE_PALETTE_TEXT,
 	GATE_BORDER,
+	GATE_BORDER_HIGH_CONTRAST,
 	GATE_BORDER_DIVIDER
 } from '#lib/theme_check.ts';
 import { validate_theme } from '#lib/theme_validate.ts';
@@ -32,7 +33,12 @@ import { zine_theme } from '#lib/themes/zine.ts';
 import { phosphor_theme } from '#lib/themes/phosphor.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { shipped_base_themes, shipped_themes } from './theme_test_helpers.ts';
-import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '#lib/ramps.ts';
+import {
+	HIGH_CONTRAST,
+	PALETTE_CHROMA_MULTIPLIERS,
+	palette_stop_oklch,
+	shade_stop_oklch
+} from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
 import {
 	palette_variants,
@@ -377,9 +383,9 @@ describe('scheme stance', () => {
 		expect_subject('text_80 on shade_00', GATE_BODY_TEXT);
 		expect_subject('text_80 on shade_05', GATE_BODY_TEXT);
 		expect_subject('text_80 on shade_10', GATE_BODY_TEXT);
-		expect_subject('text_00 on shade_60', GATE_SELECTED_TEXT);
+		expect_subject('text_00 on shade_70', GATE_SELECTED_TEXT);
 		expect_subject('text_50 on shade_00', GATE_SUBTLE_TEXT);
-		expect_subject('shade_30 vs shade_00', GATE_BORDER);
+		expect_subject('border_color vs shade_00', GATE_BORDER);
 		expect_subject('border_color_30 over shade_00', GATE_BORDER_DIVIDER);
 		expect_subject('accent_60 on shade_00', GATE_LINK);
 		for (const letter of ['a', 'b', 'c', 'd', 'e', 'f', 'g', 'h', 'i', 'j']) {
@@ -524,10 +530,9 @@ describe('contrast modifier compositions', () => {
 			const body = report.entries.filter(
 				(e) => e.threshold === GATE_BODY_TEXT && e.subject.endsWith(' on shade_00')
 			);
-			// the control border, under whatever stop a theme leaves it at
-			const borders = report.entries.filter(
-				(e) => e.threshold === GATE_BORDER && e.subject.endsWith(' vs shade_00')
-			);
+			// the control border, however a theme sets it - `check_theme` raises
+			// its floor at high contrast, so the entry carries the 3:1 threshold
+			const borders = report.entries.filter((e) => e.subject === 'border_color vs shade_00');
 			for (const scheme of color_scheme_variants) {
 				assert.isTrue(
 					body.some((e) => e.scheme === scheme),
@@ -546,7 +551,63 @@ describe('contrast modifier compositions', () => {
 				);
 			}
 			for (const e of borders) {
+				assert.strictEqual(e.threshold, GATE_BORDER_HIGH_CONTRAST, `${base.name} ${e.scheme}`);
 				assert.isAtLeast(e.value, GATE_UI, `${base.name} ${e.scheme}`);
+			}
+		}
+	});
+});
+
+describe('control border under contrast', () => {
+	const srgb = (color: Parameters<typeof oklch_to_srgb>[0]): RgbUnit =>
+		oklch_to_srgb(color).map((c) => Math.min(1, Math.max(0, c))) as RgbUnit;
+	const border = (theme: Theme, scheme: 'light' | 'dark') =>
+		check_theme(theme).entries.find(
+			(e) => e.subject === 'border_color vs shade_00' && e.scheme === scheme
+		)!;
+	const at = (contrast: number): Theme => ({
+		name: `c ${contrast}`,
+		variables: [{ name: 'contrast', base: String(contrast) }]
+	});
+
+	test('at no contrast the default border is exactly shade_30, gated at the soft floor', () => {
+		const report = check_theme(base_theme);
+		for (const scheme of color_scheme_variants) {
+			const shade_30 = srgb(shade_stop_oklch('30', scheme));
+			const ground = srgb(shade_stop_oklch('00', scheme));
+			const entry = border(base_theme, scheme);
+			// within the float noise of the oklab round trip the mix makes
+			assert.closeTo(entry.value, wcag_contrast_ratio(shade_30, ground), 1e-6, scheme);
+			assert.strictEqual(entry.threshold, GATE_BORDER, scheme);
+			assert.isTrue(report.passed);
+		}
+	});
+
+	test('the border floor rises to 3:1 from HIGH_CONTRAST up, and not below it', () => {
+		for (const scheme of color_scheme_variants) {
+			assert.strictEqual(border(at(HIGH_CONTRAST - 0.01), scheme).threshold, GATE_BORDER);
+			assert.strictEqual(border(at(HIGH_CONTRAST), scheme).threshold, GATE_BORDER_HIGH_CONTRAST);
+		}
+		// an authored border is held to the same floors
+		const soft: Theme = {
+			name: 'soft',
+			variables: [
+				{ name: 'contrast', base: String(HIGH_CONTRAST) },
+				{ name: 'border_color', base: 'var(--shade_20)' }
+			]
+		};
+		const entry = border(soft, 'light');
+		assert.strictEqual(entry.threshold, GATE_BORDER_HIGH_CONTRAST);
+		assert.isFalse(entry.pass);
+	});
+
+	test('the default border strengthens monotonically with contrast', () => {
+		for (const scheme of color_scheme_variants) {
+			let previous = 0;
+			for (const c of [0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.75]) {
+				const value = border(at(c), scheme).value;
+				assert.isAtLeast(value, previous, `${scheme} c ${c}`);
+				previous = value;
 			}
 		}
 	});

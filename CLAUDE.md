@@ -401,19 +401,25 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   moves the shade ground that fraction of the way from its
   `--shade_lightness_00` toward a per-scheme end (1 in light, 0.1 in dark,
   clamped to the ground, so a ground already past it stays put) and bends
-  the shade and text curves (`curve * (1 - 0.66 * c)`), through the private
+  the shade and text curves (`curve * (1 - bend * c)`, `CONTRAST_CURVE_BEND`:
+  0.66 for text, 0.33 for shade so raised surfaces stay near the ground),
+  through the private
   `--_shade_lightness_00`/`--_shade_lightness_curve`/`--_text_lightness_curve`
-  the stops read in place of the knobs; the palette, the text endpoints,
-  and every role stay the theme's. The effective contrast `--_contrast` is
+  the stops read in place of the knobs; the palette and the text endpoints
+  stay the theme's. The control border role's default is the one derived
+  role: `shade_30` mixed in oklab toward `shade_50` by
+  `min(1, 1.5 * --_contrast)` (`BORDER_CONTRAST_STOPS`,
+  `BORDER_CONTRAST_GAIN`), exactly `shade_30` at no contrast, so control
+  borders clear 3:1 at high contrast while the surfaces stay calm; the other
+  roles stay plain aliases. The effective contrast `--_contrast` is
   the larger of the knob and `--_contrast_preference`, which
   `prefers-contrast: more` sets in `fuz.preferences` to `HIGH_CONTRAST`
   (0.5, the value the high-contrast modifier gives the knob) - so the OS and
   the modifier agree, a theme can author a baseline the OS only raises, and
   no theme silences the OS, stanced themes included. Picking the modifier
   sets the knob, last-wins, replacing a theme's own `contrast`, a higher one
-  included. Near 1 the ground goes white or near-black and `text_80` on
-  `shade_10` fails on every shipped theme, so the knob's safe range
-  (`knobs.ts`) stops at 0.75
+  included. Near 1 the ground goes white or near-black and marquee's text
+  stops leave sRGB, so the knob's safe range (`knobs.ts`) stops at 0.75
 - Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
   twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
@@ -705,9 +711,11 @@ carry a module-level `@internal` - documented, importable, not stable API.
   cast, roles, and panel shadow, strengthened. `themes.test.ts` holds that
   it moves every shipped theme's ground toward the contrast end and never
   lowers the contrast of what reads against the ground (body text, links,
-  the control border, selected text), and `theme_check.test.ts` holds the
-  floors it is tuned against: body text at 12:1 and the control border at
-  3:1, over every shipped theme in both schemes
+  the control border, selected text) or of body text on `shade_10`, and
+  `theme_check.test.ts` holds the floors it is tuned against: body text at
+  12:1 and the control border at 3:1 (`check_theme`'s border gate rises to
+  `GATE_BORDER_HIGH_CONTRAST` at `HIGH_CONTRAST`), over every shipped theme
+  in both schemes
 - `src/lib/themes/` - One module per theme. Registered: base and ledger
   (the plain working theme for apps and tools - cool, visibly compact, eased
   chroma, one sans family).

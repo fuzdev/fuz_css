@@ -1,7 +1,7 @@
 [
 	{
 		"name": "base",
-		"compiled": "e86f148e9a23744314ab5fd22cafc0e2806a2b1ec7897515a0b6c8d4a5c38337",
+		"compiled": "6670bd5dd7f40fff6de8b9558ee843ba1be766d5297f0e4e5be10c5336f8c94e",
 		"baked_defaults": {
 			"resolved": "973a710bce76ae7aa6afe4ba60e9c67383a20adee7dd4bec7049314dce968c02",
 			"diagnostics": []
@@ -23,7 +23,7 @@
 	},
 	{
 		"name": "guestbook",
-		"compiled": "3240553d5d1bc5c1de83c84f42f6dd6558274b2674aed15e208cf6765a642c46",
+		"compiled": "e994c0d73bc4f8aefe8b0ef5257339bbd88e3b263a9805db796fede6cd7f91bf",
 		"baked_defaults": {
 			"resolved": "e20eca6a513ce6c60f0bbffc9a7be4c4db1570e934a2fd1046dea87d549f4902",
 			"diagnostics": []
@@ -45,7 +45,7 @@
 	},
 	{
 		"name": "high contrast",
-		"compiled": "91aeed8c6c70f9a9890fec3ebc59c371b3a05761960c38fee714a3484f112444",
+		"compiled": "23dd6ad54816c46a77f21a92beed56911e22e7a16f3ccb377d04e1e6d1430082",
 		"baked_defaults": {
 			"resolved": "fe01740c632337e09d4e8fa029af8272f6371bbf5356384c89aa09b658e07cfc",
 			"diagnostics": []
@@ -67,7 +67,7 @@
 	},
 	{
 		"name": "ledger",
-		"compiled": "d94eb2d6337ceb7b9f54f7e494ec4fb2c5ba7804473fb94b02b1ccc7b6645b39",
+		"compiled": "fd4707406e9f80af460a71d20c58d3fc05908d3d1566a849f6fb80b31db34eaa",
 		"baked_defaults": {
 			"resolved": "9030e273c042d26f9efa873d4b6be54dc35c142ec8da7b2fc205c81b8d063d3a",
 			"diagnostics": []
@@ -79,9 +79,9 @@
 	},
 	{
 		"name": "marquee",
-		"compiled": "5772574ccd4d5b1f6eb67177bc411ad26172c193f0efe798764dafee3fd8b236",
+		"compiled": "ef9c1d500c9163c4b694cd1e5ef110242fa62e3d7ee9a6860f647f4b73344c32",
 		"baked_defaults": {
-			"resolved": "2f6e4a0906abef8e5cdb00f5ba30b44b0faf0b4ccd36513e733d443340fbb222",
+			"resolved": "d41cabec9f58b8b4ac078786f40d36fd241563d91dd48ba665c414d4e3e52da6",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -95,7 +95,7 @@
 			]
 		},
 		"baked_retuned": {
-			"resolved": "e80aa5dcabb00ccee55a4165377e78a7b9840bb944677d81c4a1b22eb6ba5415",
+			"resolved": "35a8324c8b35a6af4c87c3a6fe7f08b7a9a5d7a8a0cfbb9a693b762b538587ff",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -111,7 +111,7 @@
 	},
 	{
 		"name": "parchment",
-		"compiled": "32d16511e9e4a6d1477a7aaef012f53bcfb629ed984d8dd3983fa6510b3276b3",
+		"compiled": "85456b55ce8ae00476543d4d9c1e755d957a4a27212d82ba5caf4cbe0a4d479c",
 		"baked_defaults": {
 			"resolved": "3a16417978f466642aff690ba2722bfc505da793a2945c874c64dbe771d91e52",
 			"diagnostics": []
@@ -123,7 +123,7 @@
 	},
 	{
 		"name": "pebble",
-		"compiled": "931ec66a4b46770c466d802a6d777d21bc900bb896bd31704adcab964b901b4b",
+		"compiled": "da3ff44de7eed9ea64499484ce0857f1e6039480253e39627b64fafbff6a2d85",
 		"baked_defaults": {
 			"resolved": "73ac8d165e8935f472757694130ba55d6f00989d69b296d7e44afa0a9a2f8c58",
 			"diagnostics": []
@@ -145,13 +145,13 @@
 	},
 	{
 		"name": "phosphor",
-		"compiled": "b8a3cdc5dfb4572d8d0ce4c96ebab59a5bdc7219614889905be67f2074533f45",
+		"compiled": "6c14448389d8d8220447e982adbe4e10f89f8e6ffe66ec31a792fa33bddd5753",
 		"baked_defaults": {
-			"resolved": "269942d7251d7ce37b6cfd55acca8395ef0bb5e308556dc592fe134bc90c05d6",
+			"resolved": "d3d90cb52f01e9d0c6f5bc272727c51b6211aaf51121b2916f15d537a5ac8e3b",
 			"diagnostics": []
 		},
 		"baked_retuned": {
-			"resolved": "b4183f3f36ad887b2d203af95e0d8625c5869ea345e3a4662f5a42cc32fed102",
+			"resolved": "96538d5178e81b4bc19a648a20026113b878947ee4a511f8acf0b67fd3b9f996",
 			"diagnostics": [
 				{
 					"phase": "generation",
@@ -167,7 +167,7 @@
 	},
 	{
 		"name": "signage",
-		"compiled": "f38ae3139d962e181ce4c5761d360fcf82cb79003a280648caae78765d03f390",
+		"compiled": "90d4792a84a38e1336f95f72315824c5a69476be37f14b070f6dc6832a3ab5d5",
 		"baked_defaults": {
 			"resolved": "c572ae8f4b49379ed8abf413b09b553b5ebf7c1083d91ebbc435672f796c2814",
 			"diagnostics": []
@@ -189,7 +189,7 @@
 	},
 	{
 		"name": "zine",
-		"compiled": "0809ebfc4efd412488172080b7ff453d7a488ec8cb3e3a0602a3d82b8f2a3e8a",
+		"compiled": "3ca6de15e41a3b2328b231baab05b6641835113e68eff511781785714d56e482",
 		"baked_defaults": {
 			"resolved": "fb7b1c24a8e4ed09384aaa17dd7419c0a6c94b71795eb659e4ba85e7f8a1a428",
 			"diagnostics": []

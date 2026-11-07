@@ -107,10 +107,14 @@ export const PALETTE_LIGHTNESS_KNOBS: Readonly<Record<ColorScheme, Readonly<Ligh
 		dark: { lightness_00: 0.147, lightness_100: 0.971, curve: 0.76 }
 	};
 
-/** Fitted lightness knobs for the shade (surface) ramps. */
+/**
+ * Lightness knobs for the shade (surface) ramps. The endpoints are fitted;
+ * the curves sit above the fit, holding the near-ground stops - the
+ * surfaces raised off the page - close to the ground in both schemes.
+ */
 export const SHADE_LIGHTNESS_KNOBS: Readonly<Record<ColorScheme, Readonly<LightnessRampKnobs>>> = {
-	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.09 },
-	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 1.05 }
+	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.25 },
+	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 1.2 }
 };
 
 /** Fitted lightness knobs for the text ramps. */
@@ -259,13 +263,18 @@ export const CONTRAST = 0;
 export const HIGH_CONTRAST = 0.5;
 
 /**
- * How far full contrast bends the shade and text lightness curves: the
- * effective curve is `curve * (1 - CONTRAST_CURVE_BEND * c)`. Bending the
- * shade curve separates the near-ground surfaces (and carries the control
- * borders that sit on them), and bending the text curve pulls the text stops
- * toward the contrast end.
+ * How far full contrast bends each neutral lightness curve: the effective
+ * curve is `curve * (1 - CONTRAST_CURVE_BEND[family] * c)`. The text bend
+ * pulls the text stops toward the contrast end. The shade bend is the
+ * smaller one, so the near-ground surfaces keep close to the stretched
+ * ground rather than moving toward the text on them - which would lower
+ * body text on `shade_10` as contrast rises. The control border strengthens
+ * on its own instead (`BORDER_CONTRAST_STOPS`).
  */
-export const CONTRAST_CURVE_BEND = 0.66;
+export const CONTRAST_CURVE_BEND: Readonly<Record<Exclude<RampFamily, 'palette'>, number>> = {
+	shade: 0.33,
+	text: 0.66
+};
 
 /**
  * The ground lightness full contrast reaches, per scheme: the effective
@@ -310,7 +319,7 @@ export const effective_contrast = (contrast: number, preference: number): number
  * The lightness knobs a ramp renders at an effective contrast `c`: the shade
  * ground moves the fraction `c` of the way to its end (`contrast_ground_end`,
  * which never lies behind the ground), and the
- * shade and text curves bend by `CONTRAST_CURVE_BEND`; the palette is
+ * shade and text curves bend by their `CONTRAST_CURVE_BEND`; the palette is
  * untouched, as are the text endpoints and the shade's far end. At `c = 0`
  * every knob comes back exactly as given. The numeric twin of the
  * `--_shade_lightness_00`, `--_shade_lightness_curve`, and
@@ -329,7 +338,7 @@ export const contrast_lightness_knobs = (
 	scheme: ColorScheme
 ): LightnessRampKnobs => {
 	if (family === 'palette') return knobs;
-	const curve = contrast_lightness_curve(knobs.curve, contrast);
+	const curve = contrast_lightness_curve(family, knobs.curve, contrast);
 	if (family === 'text') return { ...knobs, curve };
 	return {
 		lightness_00: contrast_ground_lightness(
@@ -354,11 +363,19 @@ export const contrast_ground_lightness = (
 ): number => lightness_00 + (end - lightness_00) * contrast;
 
 /**
- * The effective shade or text curve: `curve` bent by `CONTRAST_CURVE_BEND`
- * at `contrast`. The numeric twin of `render_contrast_curve_css`.
+ * The effective shade or text curve: `curve` bent by the family's
+ * `CONTRAST_CURVE_BEND` at `contrast`. The numeric twin of
+ * `render_contrast_curve_css`.
+ *
+ * @param family - the neutral ramp, which picks the bend
+ * @param curve - the ramp's curve knob
+ * @param contrast - the effective contrast (`effective_contrast`)
  */
-export const contrast_lightness_curve = (curve: number, contrast: number): number =>
-	curve * (1 - CONTRAST_CURVE_BEND * contrast);
+export const contrast_lightness_curve = (
+	family: Exclude<RampFamily, 'palette'>,
+	curve: number,
+	contrast: number
+): number => curve * (1 - CONTRAST_CURVE_BEND[family] * contrast);
 
 export type ShadowTint = 'bright' | 'dim';
 
@@ -441,6 +458,48 @@ export const BORDER_COLOR_ALPHAS: Readonly<
 		'100': 100
 	}
 };
+
+/**
+ * The shade stops the default control border (`--border_color`) mixes
+ * between: `rest` at no contrast, moving toward `reach` as the effective
+ * contrast rises (`BORDER_CONTRAST_GAIN`). The shade bend stays small so the
+ * surfaces hold near the ground under contrast, which leaves the border to
+ * strengthen on its own - toward WCAG 1.4.11's 3:1 against the ground at
+ * `HIGH_CONTRAST`, while borders at no contrast stay deliberately softer.
+ */
+export const BORDER_CONTRAST_STOPS: Readonly<{
+	rest: NumericScaleVariant;
+	reach: NumericScaleVariant;
+}> = { rest: '30', reach: '50' };
+
+/**
+ * How fast the default control border moves from its `rest` stop toward its
+ * `reach` stop: the share of `reach` in the mix is
+ * `min(1, BORDER_CONTRAST_GAIN * c)` at effective contrast `c`, so the
+ * border sits wholly at `reach` from `1 / BORDER_CONTRAST_GAIN` up. Tuned so
+ * every shipped theme's default border clears 3:1 against the ground at
+ * `HIGH_CONTRAST` with a little margin, three quarters of the way to `reach`.
+ */
+export const BORDER_CONTRAST_GAIN = 1.5;
+
+/**
+ * The share of the `reach` stop in the default control border at an
+ * effective contrast, from 0 to 1. The numeric twin of the percentage in
+ * `render_border_color_css`.
+ *
+ * @param contrast - the effective contrast (`effective_contrast`)
+ */
+export const border_contrast_share = (contrast: number): number =>
+	Math.min(1, Math.max(0, BORDER_CONTRAST_GAIN * contrast));
+
+/**
+ * Renders the default of the control border role (`--border_color`): the
+ * `rest` shade stop mixed in oklab toward the `reach` stop by
+ * `border_contrast_share` of the effective contrast - exactly the `rest`
+ * stop at no contrast.
+ */
+export const render_border_color_css = (): string =>
+	`color-mix(in oklab, var(--shade_${BORDER_CONTRAST_STOPS.rest}), var(--shade_${BORDER_CONTRAST_STOPS.reach}) clamp(0%, calc(var(--${CONTRAST_NAME}) * ${BORDER_CONTRAST_GAIN * 100}%), 100%))`;
 
 /**
  * Computes the default OKLCH color of the border family (without alpha).
@@ -777,11 +836,11 @@ export const render_contrast_ground_lightness_css = (): string =>
 /**
  * Renders the default of a neutral ramp's effective curve
  * (`--_shade_lightness_curve`, `--_text_lightness_curve`): the knob bent by
- * `CONTRAST_CURVE_BEND` at the effective contrast. The CSS twin of
- * `contrast_lightness_curve`.
+ * the family's `CONTRAST_CURVE_BEND` at the effective contrast. The CSS twin
+ * of `contrast_lightness_curve`.
  */
 export const render_contrast_curve_css = (family: Exclude<RampFamily, 'palette'>): string =>
-	`calc(var(--${family}_lightness_curve) * (1 - ${CONTRAST_CURVE_BEND} * var(--${CONTRAST_NAME})))`;
+	`calc(var(--${family}_lightness_curve) * (1 - ${CONTRAST_CURVE_BEND[family]} * var(--${CONTRAST_NAME})))`;
 
 /**
  * Renders the normalized chroma shape of a stop, shared by the palette chroma

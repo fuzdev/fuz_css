@@ -1185,12 +1185,12 @@
 		--shade_max: #000;
 		--shade_lightness_00: 0.97;
 		--shade_lightness_100: 0.171;
-		--shade_lightness_curve: 1.09;
+		--shade_lightness_curve: 1.25;
 		--_shade_lightness_00: calc(
 			var(--shade_lightness_00) + (var(--_contrast_ground_end) - var(--shade_lightness_00)) *
 				var(--_contrast)
 		);
-		--_shade_lightness_curve: calc(var(--shade_lightness_curve) * (1 - 0.66 * var(--_contrast)));
+		--_shade_lightness_curve: calc(var(--shade_lightness_curve) * (1 - 0.33 * var(--_contrast)));
 		--_shade_lightness_05: calc(
 			var(--_shade_lightness_00) + (var(--shade_lightness_100) - var(--_shade_lightness_00)) *
 				pow(0.05, var(--_shade_lightness_curve))
@@ -1562,7 +1562,11 @@
 		--distance_md: 800px;
 		--distance_lg: 1200px;
 		--distance_xl: 1600px;
-		--border_color: var(--shade_30);
+		--border_color: color-mix(
+			in oklab,
+			var(--shade_30),
+			var(--shade_50) clamp(0%, calc(var(--_contrast) * 150%), 100%)
+		);
 		--border_style: solid;
 		--border_width: var(--border_width_1);
 		--border_width_1: 1px;
@@ -1788,7 +1792,7 @@
 		--shade_max: #fff;
 		--shade_lightness_00: 0.171;
 		--shade_lightness_100: 0.97;
-		--shade_lightness_curve: 1.05;
+		--shade_lightness_curve: 1.2;
 		--ink_00: var(--lighten_00);
 		--ink_05: var(--lighten_05);
 		--ink_10: var(--lighten_10);
@@ -1992,7 +1996,7 @@
 			--shade_max: #fff;
 			--shade_lightness_00: 0.171;
 			--shade_lightness_100: 0.97;
-			--shade_lightness_curve: 1.05;
+			--shade_lightness_curve: 1.2;
 			--ink_00: var(--lighten_00);
 			--ink_05: var(--lighten_05);
 			--ink_10: var(--lighten_10);

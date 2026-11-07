@@ -849,9 +849,9 @@ TODO think through these patterns to get somewhere consistent
 			--text_lightness_curve move the near-background stops toward the fill,
 			but can never move an endpoint, so inverse text stays readable */
 		--button_text_color: var(--text_00);
-		--button_fill: var(--fill, var(--shade_60));
-		--button_fill_hover: var(--fill, var(--shade_60));
-		--button_fill_active: var(--fill, var(--shade_60));
+		--button_fill: var(--fill, var(--shade_70));
+		--button_fill_hover: var(--fill, var(--shade_70));
+		--button_fill_active: var(--fill, var(--shade_70));
 	}
 	:where(button:not(.unstyled).selected:not(.deselectable)) {
 		--button_border_color_hover: var(--border_color);

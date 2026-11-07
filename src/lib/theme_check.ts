@@ -30,6 +30,11 @@ import { default_variables } from './variables.ts';
 import {
 	PALETTE_CHROMA_CAPS,
 	BORDER_COLOR_ALPHAS,
+	BORDER_CONTRAST_STOPS,
+	CONTRAST_NAME,
+	HIGH_CONTRAST,
+	border_contrast_share,
+	render_border_color_css,
 	ramp_color_oklch,
 	neutral_color_oklch,
 	neutral_ground_chroma_weight,
@@ -76,9 +81,9 @@ export const GATE_UI = 3;
 /** Large-text floor: `text_max` on every stop-50 fill. */
 export const GATE_FILL_TEXT = 3;
 /**
- * AA selected-control inverse text: `text_00` on `shade_60` and on every
+ * AA selected-control inverse text: `text_00` on `shade_70` and on every
  * stop-60 fill - the selected-button pairings in `style.css` (`.selected`
- * fills with `shade_60`, `.palette_X.selected` with `palette_X_60`). The
+ * fills with `shade_70`, `.palette_X.selected` with `palette_X_60`). The
  * endpoint stop is immune to `text_lightness_curve` bends, so this gate moves
  * only when a theme moves the endpoints, the fill ramps, or the hues.
  */
@@ -98,12 +103,21 @@ export const GATE_SELECTED_TEXT = 4.5;
  */
 export const GATE_PALETTE_TEXT = 4.5;
 /**
- * Control borders: `--border_color` (`shade_30` by default) vs `shade_00`.
- * A regression floor for the shipped design, not a WCAG level - 1.4.11's 3:1
- * applies to required component boundaries, and fuz borders sit deliberately
- * softer - so a theme can't silently wash control borders out.
+ * Control borders: `--border_color` (by default `shade_30`, moving toward
+ * `shade_50` with contrast - `BORDER_CONTRAST_STOPS`) vs `shade_00`, below
+ * `HIGH_CONTRAST`. A regression floor for the shipped design, not a WCAG
+ * level - 1.4.11's 3:1 applies to required component boundaries, and fuz
+ * borders sit deliberately softer - so a theme can't silently wash control
+ * borders out.
  */
 export const GATE_BORDER = 1.5;
+/**
+ * Control borders at an effective contrast of `HIGH_CONTRAST` or more:
+ * WCAG 1.4.11's 3:1, the floor a theme that asks for contrast (or that the OS
+ * preference raises) holds its control boundaries to, replacing
+ * `GATE_BORDER`.
+ */
+export const GATE_BORDER_HIGH_CONTRAST = 3;
 /**
  * Divider borders: the `border_color_30` alpha color composited over
  * `shade_00` (the `hr` pairing in `style.css`). A regression floor like
@@ -254,6 +268,12 @@ const NEUTRAL_STOP_MATCHER = new RegExp(`^(shade|text)_(${STOPS_PATTERN})$`, 'u'
 const BORDER_COLOR_STOP_MATCHER = new RegExp(`^border_color_(${STOPS_PATTERN})$`, 'u');
 const EXTREME_MATCHER = /^(?:shade|text)_(min|max)$/u;
 
+// the control border role, whose default is the one derived role: a mix of
+// two shade stops by the effective contrast (`render_border_color_css`)
+// rather than a plain alias
+const BORDER_ROLE = 'border_color';
+const BORDER_ROLE_DEFAULT = render_border_color_css();
+
 // the aliases the declared defaults carry - a variable whose default is
 // exactly `var(--x)`, like the roles `text_color` → `text_80` and
 // `link_color_selected` → `text_color`. Read from the declarations, so what a
@@ -278,6 +298,11 @@ interface PairingGate {
 	grounds: ReadonlyArray<NumericScaleVariant>;
 	threshold: number;
 	/**
+	 * The threshold in place of `threshold` at an effective contrast of
+	 * `HIGH_CONTRAST` or more.
+	 */
+	high_contrast_threshold?: number;
+	/**
 	 * The role's default pairing is another gate's entry, so it gets its own
 	 * only when the theme authors it.
 	 */
@@ -290,15 +315,22 @@ interface PairingGate {
 }
 
 // the single-color pairings, in report order. A role is gated here and
-// nowhere else: its default comes from `ALIAS_DEFAULTS`, and `check_theme`
-// measures whatever the theme points it at
+// nowhere else: its default comes from `ALIAS_DEFAULTS` - except the control
+// border's, a contrast-driven mix of two shade stops that `check_theme`
+// derives - and `check_theme` measures whatever the theme points it at
 const PAIRING_GATES: ReadonlyArray<PairingGate> = [
 	// body text on the page and the first raised surfaces
 	{ color: 'text_color', relation: 'on', grounds: ['00', '05', '10'], threshold: GATE_BODY_TEXT },
 	// selected-control inverse text on the neutral selected fill
-	{ color: 'text_00', relation: 'on', grounds: ['60'], threshold: GATE_SELECTED_TEXT },
+	{ color: 'text_00', relation: 'on', grounds: ['70'], threshold: GATE_SELECTED_TEXT },
 	{ color: 'text_disabled', relation: 'on', grounds: ['00'], threshold: GATE_SUBTLE_TEXT },
-	{ color: 'border_color', relation: 'vs', grounds: ['00'], threshold: GATE_BORDER },
+	{
+		color: BORDER_ROLE,
+		relation: 'vs',
+		grounds: ['00'],
+		threshold: GATE_BORDER,
+		high_contrast_threshold: GATE_BORDER_HIGH_CONTRAST
+	},
 	// the `hr` divider, the one translucent default
 	{ color: 'border_color_30', relation: 'over', grounds: ['00'], threshold: GATE_BORDER_DIVIDER },
 	// `label.selected` paints the link's default stop itself
@@ -329,13 +361,14 @@ const PAIRING_GATES: ReadonlyArray<PairingGate> = [
 
 /**
  * The role variables the contrast gates follow - each aliases a color stop or
- * another role by default (`text_color` is `var(--text_80)`), and
- * `check_theme` measures
- * whatever a theme points it at instead of the stop it left.
+ * another role by default (`text_color` is `var(--text_80)`), except the
+ * control border, which mixes two shade stops by the effective contrast - and
+ * `check_theme` measures whatever a theme points it at instead of the
+ * default it left.
  */
 export const theme_gate_role_names: ReadonlyArray<string> = PAIRING_GATES.map(
 	(gate) => gate.color
-).filter((name) => ALIAS_DEFAULTS.has(name));
+).filter((name) => name === BORDER_ROLE || ALIAS_DEFAULTS.has(name));
 
 const NO_VISITS: ReadonlySet<string> = new Set();
 
@@ -557,6 +590,19 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 			const alpha = BORDER_COLOR_ALPHAS[stance ?? scheme][stop] / 100;
 			return { rgb: oklch_to_srgb(clamp_oklch([border_l, border_c, border_h])), alpha };
 		}
+		if (name === BORDER_ROLE) {
+			// the derived default, or the theme's own value written the same way
+			const value = resolver.authored(name, scheme)?.trim();
+			if (value !== undefined && value !== BORDER_ROLE_DEFAULT) {
+				return authored_color(name, scheme, visited);
+			}
+			const next = new Set(visited).add(name);
+			const rest = color_of(`shade_${BORDER_CONTRAST_STOPS.rest}`, scheme, next);
+			const reach = color_of(`shade_${BORDER_CONTRAST_STOPS.reach}`, scheme, next);
+			const c = num(CONTRAST_NAME, scheme);
+			if (!rest || !reach || c === null) return null;
+			return { rgb: mix_oklab(rest.rgb, 1 - border_contrast_share(c), reach.rgb), alpha: 1 };
+		}
 		const alias = ALIAS_DEFAULTS.get(name);
 		if (alias !== undefined) {
 			const authored = authored_color(name, scheme, visited);
@@ -618,6 +664,9 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 
 	for (const scheme of color_scheme_variants) {
 		const authored = (name: string): boolean => resolver.authored(name, scheme) !== undefined;
+		// a contrast the gates can't resolve leaves the lower floors in place,
+		// and the resolver records it
+		const high_contrast = (num(CONTRAST_NAME, scheme) ?? 0) >= HIGH_CONTRAST;
 
 		// what a subject calls a painted color: the role once the theme authors
 		// it, the stop it defaults to until then
@@ -630,6 +679,10 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 		// color composited over the ground first
 		const push_pairing = (gate: PairingGate, name: string): void => {
 			const color = color_of(name, scheme);
+			const threshold =
+				gate.high_contrast_threshold !== undefined && high_contrast
+					? gate.high_contrast_threshold
+					: gate.threshold;
 			for (const stop of gate.grounds) {
 				const ground = neutral_color('shade', stop, scheme);
 				if (!color || !ground) continue;
@@ -640,7 +693,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 					ground_rgb
 				);
 				const subject = `${label_of(name)} ${gate.relation} shade_${stop}`;
-				push_contrast(subject, ratio, gate.threshold, scheme);
+				push_contrast(subject, ratio, threshold, scheme);
 			}
 		};
 

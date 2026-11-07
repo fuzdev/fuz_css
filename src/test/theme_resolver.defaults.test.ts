@@ -127,8 +127,8 @@ describe('create_theme_resolver defaults', () => {
 			const text = TEXT_LIGHTNESS_KNOBS[scheme];
 			const end = CONTRAST_GROUND_END[scheme];
 			const ground = shade.lightness_00 + (end - shade.lightness_00) * c;
-			const shade_curve = shade.curve * (1 - CONTRAST_CURVE_BEND * c);
-			const text_curve = text.curve * (1 - CONTRAST_CURVE_BEND * c);
+			const shade_curve = shade.curve * (1 - CONTRAST_CURVE_BEND.shade * c);
+			const text_curve = text.curve * (1 - CONTRAST_CURVE_BEND.text * c);
 			assert.strictEqual(resolver.resolve('_contrast', scheme), c);
 			// the preference input stays 0 - the gates measure the theme
 			assert.strictEqual(resolver.resolve('_contrast_preference', scheme), 0);
@@ -173,7 +173,7 @@ describe('create_theme_resolver defaults', () => {
 		// the curves still bend
 		assert.closeTo(
 			resolver.resolve('_shade_lightness_curve', 'dark')!,
-			SHADE_LIGHTNESS_KNOBS.dark.curve * (1 - CONTRAST_CURVE_BEND * 0.5),
+			SHADE_LIGHTNESS_KNOBS.dark.curve * (1 - CONTRAST_CURVE_BEND.shade * 0.5),
 			1e-12
 		);
 	});

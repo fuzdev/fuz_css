@@ -155,11 +155,9 @@ describe('contrast modifiers over shipped themes', () => {
 
 	test('high contrast never lowers the contrast of what reads against the ground', () => {
 		// body text, links, the control border, and selected text against the
-		// ground and the selected fill; the raised surfaces are left out, since
-		// the bent shade curve separates them from the ground on purpose,
-		// which moves them toward the text (text on `shade_05`/`shade_10`), and
-		// the translucent divider tracks the stretched ground
-		const guarded = /^\S+ (?:on|vs) shade_(?:00|60)$/u;
+		// ground and the selected fill; the raised surfaces have their own test
+		// below, and the translucent divider tracks the stretched ground
+		const guarded = /^\S+ (?:on|vs) shade_(?:00|70)$/u;
 		for (const theme of shipped_base_themes) {
 			const own = check_theme(theme, { caps: compute_theme_caps(theme) });
 			const composed = compose_themes(theme, high_contrast_theme);
@@ -177,5 +175,43 @@ describe('contrast modifiers over shipped themes', () => {
 				assert.isAtLeast(entry.value, before, `${theme.name}: ${key} drops under high`);
 			}
 		}
+	});
+
+	test('high contrast never lowers body text on the first raised surface', () => {
+		// the shade curve bends less than the text curve, so `shade_10` stays
+		// near the stretched ground and the body text on it gains contrast with
+		// the text curve - the regression this guards is a shade bend that pulls
+		// the surface toward the text faster than the text moves away
+		const surface_text = /^\S+ on shade_10$/u;
+		// zine's light ground is pinned at white, so contrast can't move it and
+		// only bends the surfaces toward its near-black text: body text on
+		// `shade_10` dips slightly while staying far past every floor
+		const exceptions = new Set(['zine|light']);
+		let measured = 0;
+		for (const theme of shipped_base_themes) {
+			const own = check_theme(theme, { caps: compute_theme_caps(theme) });
+			const composed = compose_themes(theme, high_contrast_theme);
+			const high = check_theme(composed, { caps: compute_theme_caps(composed) });
+			const by_key = (report: typeof own): Map<string, number> =>
+				new Map(
+					report.entries
+						.filter((e) => e.gate === 'contrast' && surface_text.test(e.subject))
+						.filter((e) => e.subject.startsWith('text_80') || e.subject.startsWith('text_color'))
+						.map((e) => [`${e.scheme}|${e.subject}`, e.value])
+				);
+			const own_values = by_key(own);
+			for (const [key, value] of by_key(high)) {
+				const before = own_values.get(key);
+				assert.isDefined(before, `${theme.name}: ${key} gated only under high`);
+				const scheme = key.split('|')[0]!;
+				measured++;
+				if (exceptions.has(`${theme.name}|${scheme}`)) {
+					assert.isBelow(value, before, `${theme.name} ${scheme}: stale exception`);
+					continue;
+				}
+				assert.isAtLeast(value, before, `${theme.name}: ${key} drops under high`);
+			}
+		}
+		assert.isAbove(measured, 0, 'body text on shade_10 resolved');
 	});
 });

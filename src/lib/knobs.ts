@@ -223,9 +223,11 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		// the fraction of the way the ground moves from the theme's own
 		// lightness toward white (light) or near-black (dark) - a ground
 		// already past the end stays put - bending the shade and text curves
-		// with it. The domain is 0 to 1, but the safe envelope stops at 0.75:
-		// past it `text_80` on `shade_10` fails on shipped themes, and 1 is a
-		// white or near-black ground. The high-contrast modifier sits at
+		// with it, and moving the default control border toward a stronger
+		// stop. The domain is 0 to 1, but the safe envelope stops at 0.75,
+		// short of where shipped themes start failing gates (marquee's text
+		// stops leave sRGB from about 0.9) and of the white or near-black
+		// ground at 1. The high-contrast modifier sits at
 		// `HIGH_CONTRAST` (0.5), and the OS `prefers-contrast: more` preference
 		// raises the effective value to it
 		name: 'contrast',
@@ -305,8 +307,10 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		step: 0.001
 	},
 	{
-		// the role every default border paints through - repoint it at another
-		// stop (or a text stop, for opaque high-contrast rules) to move them all
+		// the role every default border paints through - by default `shade_30`,
+		// mixed toward `shade_50` as contrast rises; repoint it at another stop
+		// (or a text stop, for opaque high-contrast rules) to move them all. A
+		// repointed border is the theme's own and doesn't follow `--contrast`
 		name: 'border_color',
 		kind: 'color',
 		axis: 'color',
