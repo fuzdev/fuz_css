@@ -254,7 +254,9 @@ See the `VitePluginFuzCssOptions` type for configuration.
   the letterless alpha ramp). A bare intent or neutral scale class applies its
   family's dominant use
   (`positive_50`/`text_70` set text color, `shade_50` sets background) with
-  `bg_` twins (`bg_positive_50`). The adaptive alpha overlays
+  `bg_` twins (`bg_positive_50`), and the intents mirror the palette's
+  other families too (`border_positive_50`, `outline_accent_60`,
+  `shadow_negative_40`). The adaptive alpha overlays
   (`--ink_*`, a wash toward the text color, and `--paper_*`, toward the
   ground) are variables only, reached via literals
   (`background-color:var(--ink_10)`) - `bg_` classes are always opaque

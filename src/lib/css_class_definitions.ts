@@ -42,6 +42,10 @@ import {
 import { css_class_composites } from './css_class_composites.ts';
 import { css_class_keywords } from './css_class_keywords.ts';
 
+// `0` as-is, a radius variant as its `--border_radius_*` variable
+const format_border_radius_value = (value: string): string =>
+	value === '0' ? '0' : `var(--border_radius_${value})`;
+
 // TODO add animation support, either as a separate thing or rename `css_class_definitions` to be more generic, like `css_by_name` - need to collect `animation: foo ...` names like we do classes
 
 /**
@@ -78,7 +82,8 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_property_classes(
 		'font-size',
 		icon_size_variants,
-		(v) => `var(--icon_size_${v}); --font_size: var(--icon_size_${v})`,
+		(v) =>
+			`var(--icon_size_${v}); --font_size: var(--icon_size_${v}); --icon_size: var(--icon_size_${v})`,
 		'icon_size'
 	),
 
@@ -183,6 +188,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		palette_variants,
 		intensity_variants
 	),
+	// Intent border colors - meaning-first twins of the palette border classes
+	...generate_classes(
+		(intent: string, intensity: string) => ({
+			name: `border_${intent}_${intensity}`,
+			css: `border-color: var(--${intent}_${intensity}); --border_color: var(--${intent}_${intensity});`
+		}),
+		intent_variants,
+		intensity_variants
+	),
 	// Outline colors using shade scale (sets both property and contextual variable,
 	// so hover and focus borders follow it like the palette family)
 	...generate_property_classes(
@@ -202,6 +216,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 		palette_variants,
 		intensity_variants
 	),
+	// Intent outline colors - meaning-first twins of the palette outline classes
+	...generate_classes(
+		(intent: string, intensity: string) => ({
+			name: `outline_${intent}_${intensity}`,
+			css: `outline-color: var(--${intent}_${intensity}); --outline_color: var(--${intent}_${intensity});`
+		}),
+		intent_variants,
+		intensity_variants
+	),
 
 	...generate_property_classes(
 		'border-width',
@@ -218,10 +241,10 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	...generate_property_classes(
 		'border-radius',
-		border_radius_variants,
-		(v) => `var(--border_radius_${v})`
+		['0', ...border_radius_variants],
+		format_border_radius_value
 	),
-	...generate_border_radius_corners(border_radius_variants, (v) => `var(--border_radius_${v})`),
+	...generate_border_radius_corners(['0', ...border_radius_variants], format_border_radius_value),
 
 	/*
 
@@ -257,6 +280,15 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 			css: `--shadow_color: var(--palette_${letter}_${intensity});`
 		}),
 		palette_variants,
+		intensity_variants
+	),
+	// Intent shadow colors - meaning-first twins of the palette shadow classes
+	...generate_classes(
+		(intent: string, intensity: string) => ({
+			name: `shadow_${intent}_${intensity}`,
+			css: `--shadow_color: var(--${intent}_${intensity});`
+		}),
+		intent_variants,
 		intensity_variants
 	),
 
@@ -305,9 +337,9 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	...generate_directional_classes('padding', ['0', ...space_variants], format_spacing_value),
 	...generate_directional_classes('margin', ['0', 'auto', ...space_variants], format_spacing_value),
-	...generate_property_classes('gap', space_variants, format_spacing_value),
-	...generate_property_classes('column-gap', space_variants, format_spacing_value),
-	...generate_property_classes('row-gap', space_variants, format_spacing_value)
+	...generate_property_classes('gap', ['0', ...space_variants], format_spacing_value),
+	...generate_property_classes('column-gap', ['0', ...space_variants], format_spacing_value),
+	...generate_property_classes('row-gap', ['0', ...space_variants], format_spacing_value)
 };
 
 /**

@@ -219,25 +219,25 @@
 		"declaration": "font-size: var(--font_size_xl9); --font_size: var(--font_size_xl9);"
 	},
 	"icon_size_xs": {
-		"declaration": "font-size: var(--icon_size_xs); --font_size: var(--icon_size_xs);"
+		"declaration": "font-size: var(--icon_size_xs); --font_size: var(--icon_size_xs); --icon_size: var(--icon_size_xs);"
 	},
 	"icon_size_sm": {
-		"declaration": "font-size: var(--icon_size_sm); --font_size: var(--icon_size_sm);"
+		"declaration": "font-size: var(--icon_size_sm); --font_size: var(--icon_size_sm); --icon_size: var(--icon_size_sm);"
 	},
 	"icon_size_md": {
-		"declaration": "font-size: var(--icon_size_md); --font_size: var(--icon_size_md);"
+		"declaration": "font-size: var(--icon_size_md); --font_size: var(--icon_size_md); --icon_size: var(--icon_size_md);"
 	},
 	"icon_size_lg": {
-		"declaration": "font-size: var(--icon_size_lg); --font_size: var(--icon_size_lg);"
+		"declaration": "font-size: var(--icon_size_lg); --font_size: var(--icon_size_lg); --icon_size: var(--icon_size_lg);"
 	},
 	"icon_size_xl": {
-		"declaration": "font-size: var(--icon_size_xl); --font_size: var(--icon_size_xl);"
+		"declaration": "font-size: var(--icon_size_xl); --font_size: var(--icon_size_xl); --icon_size: var(--icon_size_xl);"
 	},
 	"icon_size_xl2": {
-		"declaration": "font-size: var(--icon_size_xl2); --font_size: var(--icon_size_xl2);"
+		"declaration": "font-size: var(--icon_size_xl2); --font_size: var(--icon_size_xl2); --icon_size: var(--icon_size_xl2);"
 	},
 	"icon_size_xl3": {
-		"declaration": "font-size: var(--icon_size_xl3); --font_size: var(--icon_size_xl3);"
+		"declaration": "font-size: var(--icon_size_xl3); --font_size: var(--icon_size_xl3); --icon_size: var(--icon_size_xl3);"
 	},
 	"text_min": {
 		"declaration": "color: var(--text_min); --text_color: var(--text_min);"
@@ -2006,6 +2006,201 @@
 	"border_j_100": {
 		"declaration": "border-color: var(--palette_j_100); --border_color: var(--palette_j_100);"
 	},
+	"border_accent_00": {
+		"declaration": "border-color: var(--accent_00); --border_color: var(--accent_00);"
+	},
+	"border_accent_05": {
+		"declaration": "border-color: var(--accent_05); --border_color: var(--accent_05);"
+	},
+	"border_accent_10": {
+		"declaration": "border-color: var(--accent_10); --border_color: var(--accent_10);"
+	},
+	"border_accent_20": {
+		"declaration": "border-color: var(--accent_20); --border_color: var(--accent_20);"
+	},
+	"border_accent_30": {
+		"declaration": "border-color: var(--accent_30); --border_color: var(--accent_30);"
+	},
+	"border_accent_40": {
+		"declaration": "border-color: var(--accent_40); --border_color: var(--accent_40);"
+	},
+	"border_accent_50": {
+		"declaration": "border-color: var(--accent_50); --border_color: var(--accent_50);"
+	},
+	"border_accent_60": {
+		"declaration": "border-color: var(--accent_60); --border_color: var(--accent_60);"
+	},
+	"border_accent_70": {
+		"declaration": "border-color: var(--accent_70); --border_color: var(--accent_70);"
+	},
+	"border_accent_80": {
+		"declaration": "border-color: var(--accent_80); --border_color: var(--accent_80);"
+	},
+	"border_accent_90": {
+		"declaration": "border-color: var(--accent_90); --border_color: var(--accent_90);"
+	},
+	"border_accent_95": {
+		"declaration": "border-color: var(--accent_95); --border_color: var(--accent_95);"
+	},
+	"border_accent_100": {
+		"declaration": "border-color: var(--accent_100); --border_color: var(--accent_100);"
+	},
+	"border_positive_00": {
+		"declaration": "border-color: var(--positive_00); --border_color: var(--positive_00);"
+	},
+	"border_positive_05": {
+		"declaration": "border-color: var(--positive_05); --border_color: var(--positive_05);"
+	},
+	"border_positive_10": {
+		"declaration": "border-color: var(--positive_10); --border_color: var(--positive_10);"
+	},
+	"border_positive_20": {
+		"declaration": "border-color: var(--positive_20); --border_color: var(--positive_20);"
+	},
+	"border_positive_30": {
+		"declaration": "border-color: var(--positive_30); --border_color: var(--positive_30);"
+	},
+	"border_positive_40": {
+		"declaration": "border-color: var(--positive_40); --border_color: var(--positive_40);"
+	},
+	"border_positive_50": {
+		"declaration": "border-color: var(--positive_50); --border_color: var(--positive_50);"
+	},
+	"border_positive_60": {
+		"declaration": "border-color: var(--positive_60); --border_color: var(--positive_60);"
+	},
+	"border_positive_70": {
+		"declaration": "border-color: var(--positive_70); --border_color: var(--positive_70);"
+	},
+	"border_positive_80": {
+		"declaration": "border-color: var(--positive_80); --border_color: var(--positive_80);"
+	},
+	"border_positive_90": {
+		"declaration": "border-color: var(--positive_90); --border_color: var(--positive_90);"
+	},
+	"border_positive_95": {
+		"declaration": "border-color: var(--positive_95); --border_color: var(--positive_95);"
+	},
+	"border_positive_100": {
+		"declaration": "border-color: var(--positive_100); --border_color: var(--positive_100);"
+	},
+	"border_negative_00": {
+		"declaration": "border-color: var(--negative_00); --border_color: var(--negative_00);"
+	},
+	"border_negative_05": {
+		"declaration": "border-color: var(--negative_05); --border_color: var(--negative_05);"
+	},
+	"border_negative_10": {
+		"declaration": "border-color: var(--negative_10); --border_color: var(--negative_10);"
+	},
+	"border_negative_20": {
+		"declaration": "border-color: var(--negative_20); --border_color: var(--negative_20);"
+	},
+	"border_negative_30": {
+		"declaration": "border-color: var(--negative_30); --border_color: var(--negative_30);"
+	},
+	"border_negative_40": {
+		"declaration": "border-color: var(--negative_40); --border_color: var(--negative_40);"
+	},
+	"border_negative_50": {
+		"declaration": "border-color: var(--negative_50); --border_color: var(--negative_50);"
+	},
+	"border_negative_60": {
+		"declaration": "border-color: var(--negative_60); --border_color: var(--negative_60);"
+	},
+	"border_negative_70": {
+		"declaration": "border-color: var(--negative_70); --border_color: var(--negative_70);"
+	},
+	"border_negative_80": {
+		"declaration": "border-color: var(--negative_80); --border_color: var(--negative_80);"
+	},
+	"border_negative_90": {
+		"declaration": "border-color: var(--negative_90); --border_color: var(--negative_90);"
+	},
+	"border_negative_95": {
+		"declaration": "border-color: var(--negative_95); --border_color: var(--negative_95);"
+	},
+	"border_negative_100": {
+		"declaration": "border-color: var(--negative_100); --border_color: var(--negative_100);"
+	},
+	"border_caution_00": {
+		"declaration": "border-color: var(--caution_00); --border_color: var(--caution_00);"
+	},
+	"border_caution_05": {
+		"declaration": "border-color: var(--caution_05); --border_color: var(--caution_05);"
+	},
+	"border_caution_10": {
+		"declaration": "border-color: var(--caution_10); --border_color: var(--caution_10);"
+	},
+	"border_caution_20": {
+		"declaration": "border-color: var(--caution_20); --border_color: var(--caution_20);"
+	},
+	"border_caution_30": {
+		"declaration": "border-color: var(--caution_30); --border_color: var(--caution_30);"
+	},
+	"border_caution_40": {
+		"declaration": "border-color: var(--caution_40); --border_color: var(--caution_40);"
+	},
+	"border_caution_50": {
+		"declaration": "border-color: var(--caution_50); --border_color: var(--caution_50);"
+	},
+	"border_caution_60": {
+		"declaration": "border-color: var(--caution_60); --border_color: var(--caution_60);"
+	},
+	"border_caution_70": {
+		"declaration": "border-color: var(--caution_70); --border_color: var(--caution_70);"
+	},
+	"border_caution_80": {
+		"declaration": "border-color: var(--caution_80); --border_color: var(--caution_80);"
+	},
+	"border_caution_90": {
+		"declaration": "border-color: var(--caution_90); --border_color: var(--caution_90);"
+	},
+	"border_caution_95": {
+		"declaration": "border-color: var(--caution_95); --border_color: var(--caution_95);"
+	},
+	"border_caution_100": {
+		"declaration": "border-color: var(--caution_100); --border_color: var(--caution_100);"
+	},
+	"border_info_00": {
+		"declaration": "border-color: var(--info_00); --border_color: var(--info_00);"
+	},
+	"border_info_05": {
+		"declaration": "border-color: var(--info_05); --border_color: var(--info_05);"
+	},
+	"border_info_10": {
+		"declaration": "border-color: var(--info_10); --border_color: var(--info_10);"
+	},
+	"border_info_20": {
+		"declaration": "border-color: var(--info_20); --border_color: var(--info_20);"
+	},
+	"border_info_30": {
+		"declaration": "border-color: var(--info_30); --border_color: var(--info_30);"
+	},
+	"border_info_40": {
+		"declaration": "border-color: var(--info_40); --border_color: var(--info_40);"
+	},
+	"border_info_50": {
+		"declaration": "border-color: var(--info_50); --border_color: var(--info_50);"
+	},
+	"border_info_60": {
+		"declaration": "border-color: var(--info_60); --border_color: var(--info_60);"
+	},
+	"border_info_70": {
+		"declaration": "border-color: var(--info_70); --border_color: var(--info_70);"
+	},
+	"border_info_80": {
+		"declaration": "border-color: var(--info_80); --border_color: var(--info_80);"
+	},
+	"border_info_90": {
+		"declaration": "border-color: var(--info_90); --border_color: var(--info_90);"
+	},
+	"border_info_95": {
+		"declaration": "border-color: var(--info_95); --border_color: var(--info_95);"
+	},
+	"border_info_100": {
+		"declaration": "border-color: var(--info_100); --border_color: var(--info_100);"
+	},
 	"outline_color_00": {
 		"declaration": "outline-color: var(--shade_00); --outline_color: var(--shade_00);"
 	},
@@ -2435,6 +2630,201 @@
 	"outline_j_100": {
 		"declaration": "outline-color: var(--palette_j_100); --outline_color: var(--palette_j_100);"
 	},
+	"outline_accent_00": {
+		"declaration": "outline-color: var(--accent_00); --outline_color: var(--accent_00);"
+	},
+	"outline_accent_05": {
+		"declaration": "outline-color: var(--accent_05); --outline_color: var(--accent_05);"
+	},
+	"outline_accent_10": {
+		"declaration": "outline-color: var(--accent_10); --outline_color: var(--accent_10);"
+	},
+	"outline_accent_20": {
+		"declaration": "outline-color: var(--accent_20); --outline_color: var(--accent_20);"
+	},
+	"outline_accent_30": {
+		"declaration": "outline-color: var(--accent_30); --outline_color: var(--accent_30);"
+	},
+	"outline_accent_40": {
+		"declaration": "outline-color: var(--accent_40); --outline_color: var(--accent_40);"
+	},
+	"outline_accent_50": {
+		"declaration": "outline-color: var(--accent_50); --outline_color: var(--accent_50);"
+	},
+	"outline_accent_60": {
+		"declaration": "outline-color: var(--accent_60); --outline_color: var(--accent_60);"
+	},
+	"outline_accent_70": {
+		"declaration": "outline-color: var(--accent_70); --outline_color: var(--accent_70);"
+	},
+	"outline_accent_80": {
+		"declaration": "outline-color: var(--accent_80); --outline_color: var(--accent_80);"
+	},
+	"outline_accent_90": {
+		"declaration": "outline-color: var(--accent_90); --outline_color: var(--accent_90);"
+	},
+	"outline_accent_95": {
+		"declaration": "outline-color: var(--accent_95); --outline_color: var(--accent_95);"
+	},
+	"outline_accent_100": {
+		"declaration": "outline-color: var(--accent_100); --outline_color: var(--accent_100);"
+	},
+	"outline_positive_00": {
+		"declaration": "outline-color: var(--positive_00); --outline_color: var(--positive_00);"
+	},
+	"outline_positive_05": {
+		"declaration": "outline-color: var(--positive_05); --outline_color: var(--positive_05);"
+	},
+	"outline_positive_10": {
+		"declaration": "outline-color: var(--positive_10); --outline_color: var(--positive_10);"
+	},
+	"outline_positive_20": {
+		"declaration": "outline-color: var(--positive_20); --outline_color: var(--positive_20);"
+	},
+	"outline_positive_30": {
+		"declaration": "outline-color: var(--positive_30); --outline_color: var(--positive_30);"
+	},
+	"outline_positive_40": {
+		"declaration": "outline-color: var(--positive_40); --outline_color: var(--positive_40);"
+	},
+	"outline_positive_50": {
+		"declaration": "outline-color: var(--positive_50); --outline_color: var(--positive_50);"
+	},
+	"outline_positive_60": {
+		"declaration": "outline-color: var(--positive_60); --outline_color: var(--positive_60);"
+	},
+	"outline_positive_70": {
+		"declaration": "outline-color: var(--positive_70); --outline_color: var(--positive_70);"
+	},
+	"outline_positive_80": {
+		"declaration": "outline-color: var(--positive_80); --outline_color: var(--positive_80);"
+	},
+	"outline_positive_90": {
+		"declaration": "outline-color: var(--positive_90); --outline_color: var(--positive_90);"
+	},
+	"outline_positive_95": {
+		"declaration": "outline-color: var(--positive_95); --outline_color: var(--positive_95);"
+	},
+	"outline_positive_100": {
+		"declaration": "outline-color: var(--positive_100); --outline_color: var(--positive_100);"
+	},
+	"outline_negative_00": {
+		"declaration": "outline-color: var(--negative_00); --outline_color: var(--negative_00);"
+	},
+	"outline_negative_05": {
+		"declaration": "outline-color: var(--negative_05); --outline_color: var(--negative_05);"
+	},
+	"outline_negative_10": {
+		"declaration": "outline-color: var(--negative_10); --outline_color: var(--negative_10);"
+	},
+	"outline_negative_20": {
+		"declaration": "outline-color: var(--negative_20); --outline_color: var(--negative_20);"
+	},
+	"outline_negative_30": {
+		"declaration": "outline-color: var(--negative_30); --outline_color: var(--negative_30);"
+	},
+	"outline_negative_40": {
+		"declaration": "outline-color: var(--negative_40); --outline_color: var(--negative_40);"
+	},
+	"outline_negative_50": {
+		"declaration": "outline-color: var(--negative_50); --outline_color: var(--negative_50);"
+	},
+	"outline_negative_60": {
+		"declaration": "outline-color: var(--negative_60); --outline_color: var(--negative_60);"
+	},
+	"outline_negative_70": {
+		"declaration": "outline-color: var(--negative_70); --outline_color: var(--negative_70);"
+	},
+	"outline_negative_80": {
+		"declaration": "outline-color: var(--negative_80); --outline_color: var(--negative_80);"
+	},
+	"outline_negative_90": {
+		"declaration": "outline-color: var(--negative_90); --outline_color: var(--negative_90);"
+	},
+	"outline_negative_95": {
+		"declaration": "outline-color: var(--negative_95); --outline_color: var(--negative_95);"
+	},
+	"outline_negative_100": {
+		"declaration": "outline-color: var(--negative_100); --outline_color: var(--negative_100);"
+	},
+	"outline_caution_00": {
+		"declaration": "outline-color: var(--caution_00); --outline_color: var(--caution_00);"
+	},
+	"outline_caution_05": {
+		"declaration": "outline-color: var(--caution_05); --outline_color: var(--caution_05);"
+	},
+	"outline_caution_10": {
+		"declaration": "outline-color: var(--caution_10); --outline_color: var(--caution_10);"
+	},
+	"outline_caution_20": {
+		"declaration": "outline-color: var(--caution_20); --outline_color: var(--caution_20);"
+	},
+	"outline_caution_30": {
+		"declaration": "outline-color: var(--caution_30); --outline_color: var(--caution_30);"
+	},
+	"outline_caution_40": {
+		"declaration": "outline-color: var(--caution_40); --outline_color: var(--caution_40);"
+	},
+	"outline_caution_50": {
+		"declaration": "outline-color: var(--caution_50); --outline_color: var(--caution_50);"
+	},
+	"outline_caution_60": {
+		"declaration": "outline-color: var(--caution_60); --outline_color: var(--caution_60);"
+	},
+	"outline_caution_70": {
+		"declaration": "outline-color: var(--caution_70); --outline_color: var(--caution_70);"
+	},
+	"outline_caution_80": {
+		"declaration": "outline-color: var(--caution_80); --outline_color: var(--caution_80);"
+	},
+	"outline_caution_90": {
+		"declaration": "outline-color: var(--caution_90); --outline_color: var(--caution_90);"
+	},
+	"outline_caution_95": {
+		"declaration": "outline-color: var(--caution_95); --outline_color: var(--caution_95);"
+	},
+	"outline_caution_100": {
+		"declaration": "outline-color: var(--caution_100); --outline_color: var(--caution_100);"
+	},
+	"outline_info_00": {
+		"declaration": "outline-color: var(--info_00); --outline_color: var(--info_00);"
+	},
+	"outline_info_05": {
+		"declaration": "outline-color: var(--info_05); --outline_color: var(--info_05);"
+	},
+	"outline_info_10": {
+		"declaration": "outline-color: var(--info_10); --outline_color: var(--info_10);"
+	},
+	"outline_info_20": {
+		"declaration": "outline-color: var(--info_20); --outline_color: var(--info_20);"
+	},
+	"outline_info_30": {
+		"declaration": "outline-color: var(--info_30); --outline_color: var(--info_30);"
+	},
+	"outline_info_40": {
+		"declaration": "outline-color: var(--info_40); --outline_color: var(--info_40);"
+	},
+	"outline_info_50": {
+		"declaration": "outline-color: var(--info_50); --outline_color: var(--info_50);"
+	},
+	"outline_info_60": {
+		"declaration": "outline-color: var(--info_60); --outline_color: var(--info_60);"
+	},
+	"outline_info_70": {
+		"declaration": "outline-color: var(--info_70); --outline_color: var(--info_70);"
+	},
+	"outline_info_80": {
+		"declaration": "outline-color: var(--info_80); --outline_color: var(--info_80);"
+	},
+	"outline_info_90": {
+		"declaration": "outline-color: var(--info_90); --outline_color: var(--info_90);"
+	},
+	"outline_info_95": {
+		"declaration": "outline-color: var(--info_95); --outline_color: var(--info_95);"
+	},
+	"outline_info_100": {
+		"declaration": "outline-color: var(--info_100); --outline_color: var(--info_100);"
+	},
 	"border_width_1": {
 		"declaration": "border-width: var(--border_width_1);"
 	},
@@ -2495,6 +2885,9 @@
 	"outline_width_active": {
 		"declaration": "outline-width: var(--outline_width_active);"
 	},
+	"border_radius_0": {
+		"declaration": "border-radius: 0;"
+	},
 	"border_radius_xs3": {
 		"declaration": "border-radius: var(--border_radius_xs3);"
 	},
@@ -2515,6 +2908,9 @@
 	},
 	"border_radius_xl": {
 		"declaration": "border-radius: var(--border_radius_xl);"
+	},
+	"border_top_left_radius_0": {
+		"declaration": "border-top-left-radius: 0;"
 	},
 	"border_top_left_radius_xs3": {
 		"declaration": "border-top-left-radius: var(--border_radius_xs3);"
@@ -2537,6 +2933,9 @@
 	"border_top_left_radius_xl": {
 		"declaration": "border-top-left-radius: var(--border_radius_xl);"
 	},
+	"border_top_right_radius_0": {
+		"declaration": "border-top-right-radius: 0;"
+	},
 	"border_top_right_radius_xs3": {
 		"declaration": "border-top-right-radius: var(--border_radius_xs3);"
 	},
@@ -2558,6 +2957,9 @@
 	"border_top_right_radius_xl": {
 		"declaration": "border-top-right-radius: var(--border_radius_xl);"
 	},
+	"border_bottom_left_radius_0": {
+		"declaration": "border-bottom-left-radius: 0;"
+	},
 	"border_bottom_left_radius_xs3": {
 		"declaration": "border-bottom-left-radius: var(--border_radius_xs3);"
 	},
@@ -2578,6 +2980,9 @@
 	},
 	"border_bottom_left_radius_xl": {
 		"declaration": "border-bottom-left-radius: var(--border_radius_xl);"
+	},
+	"border_bottom_right_radius_0": {
+		"declaration": "border-bottom-right-radius: 0;"
 	},
 	"border_bottom_right_radius_xs3": {
 		"declaration": "border-bottom-right-radius: var(--border_radius_xs3);"
@@ -3130,6 +3535,201 @@
 	},
 	"shadow_j_100": {
 		"declaration": "--shadow_color: var(--palette_j_100);"
+	},
+	"shadow_accent_00": {
+		"declaration": "--shadow_color: var(--accent_00);"
+	},
+	"shadow_accent_05": {
+		"declaration": "--shadow_color: var(--accent_05);"
+	},
+	"shadow_accent_10": {
+		"declaration": "--shadow_color: var(--accent_10);"
+	},
+	"shadow_accent_20": {
+		"declaration": "--shadow_color: var(--accent_20);"
+	},
+	"shadow_accent_30": {
+		"declaration": "--shadow_color: var(--accent_30);"
+	},
+	"shadow_accent_40": {
+		"declaration": "--shadow_color: var(--accent_40);"
+	},
+	"shadow_accent_50": {
+		"declaration": "--shadow_color: var(--accent_50);"
+	},
+	"shadow_accent_60": {
+		"declaration": "--shadow_color: var(--accent_60);"
+	},
+	"shadow_accent_70": {
+		"declaration": "--shadow_color: var(--accent_70);"
+	},
+	"shadow_accent_80": {
+		"declaration": "--shadow_color: var(--accent_80);"
+	},
+	"shadow_accent_90": {
+		"declaration": "--shadow_color: var(--accent_90);"
+	},
+	"shadow_accent_95": {
+		"declaration": "--shadow_color: var(--accent_95);"
+	},
+	"shadow_accent_100": {
+		"declaration": "--shadow_color: var(--accent_100);"
+	},
+	"shadow_positive_00": {
+		"declaration": "--shadow_color: var(--positive_00);"
+	},
+	"shadow_positive_05": {
+		"declaration": "--shadow_color: var(--positive_05);"
+	},
+	"shadow_positive_10": {
+		"declaration": "--shadow_color: var(--positive_10);"
+	},
+	"shadow_positive_20": {
+		"declaration": "--shadow_color: var(--positive_20);"
+	},
+	"shadow_positive_30": {
+		"declaration": "--shadow_color: var(--positive_30);"
+	},
+	"shadow_positive_40": {
+		"declaration": "--shadow_color: var(--positive_40);"
+	},
+	"shadow_positive_50": {
+		"declaration": "--shadow_color: var(--positive_50);"
+	},
+	"shadow_positive_60": {
+		"declaration": "--shadow_color: var(--positive_60);"
+	},
+	"shadow_positive_70": {
+		"declaration": "--shadow_color: var(--positive_70);"
+	},
+	"shadow_positive_80": {
+		"declaration": "--shadow_color: var(--positive_80);"
+	},
+	"shadow_positive_90": {
+		"declaration": "--shadow_color: var(--positive_90);"
+	},
+	"shadow_positive_95": {
+		"declaration": "--shadow_color: var(--positive_95);"
+	},
+	"shadow_positive_100": {
+		"declaration": "--shadow_color: var(--positive_100);"
+	},
+	"shadow_negative_00": {
+		"declaration": "--shadow_color: var(--negative_00);"
+	},
+	"shadow_negative_05": {
+		"declaration": "--shadow_color: var(--negative_05);"
+	},
+	"shadow_negative_10": {
+		"declaration": "--shadow_color: var(--negative_10);"
+	},
+	"shadow_negative_20": {
+		"declaration": "--shadow_color: var(--negative_20);"
+	},
+	"shadow_negative_30": {
+		"declaration": "--shadow_color: var(--negative_30);"
+	},
+	"shadow_negative_40": {
+		"declaration": "--shadow_color: var(--negative_40);"
+	},
+	"shadow_negative_50": {
+		"declaration": "--shadow_color: var(--negative_50);"
+	},
+	"shadow_negative_60": {
+		"declaration": "--shadow_color: var(--negative_60);"
+	},
+	"shadow_negative_70": {
+		"declaration": "--shadow_color: var(--negative_70);"
+	},
+	"shadow_negative_80": {
+		"declaration": "--shadow_color: var(--negative_80);"
+	},
+	"shadow_negative_90": {
+		"declaration": "--shadow_color: var(--negative_90);"
+	},
+	"shadow_negative_95": {
+		"declaration": "--shadow_color: var(--negative_95);"
+	},
+	"shadow_negative_100": {
+		"declaration": "--shadow_color: var(--negative_100);"
+	},
+	"shadow_caution_00": {
+		"declaration": "--shadow_color: var(--caution_00);"
+	},
+	"shadow_caution_05": {
+		"declaration": "--shadow_color: var(--caution_05);"
+	},
+	"shadow_caution_10": {
+		"declaration": "--shadow_color: var(--caution_10);"
+	},
+	"shadow_caution_20": {
+		"declaration": "--shadow_color: var(--caution_20);"
+	},
+	"shadow_caution_30": {
+		"declaration": "--shadow_color: var(--caution_30);"
+	},
+	"shadow_caution_40": {
+		"declaration": "--shadow_color: var(--caution_40);"
+	},
+	"shadow_caution_50": {
+		"declaration": "--shadow_color: var(--caution_50);"
+	},
+	"shadow_caution_60": {
+		"declaration": "--shadow_color: var(--caution_60);"
+	},
+	"shadow_caution_70": {
+		"declaration": "--shadow_color: var(--caution_70);"
+	},
+	"shadow_caution_80": {
+		"declaration": "--shadow_color: var(--caution_80);"
+	},
+	"shadow_caution_90": {
+		"declaration": "--shadow_color: var(--caution_90);"
+	},
+	"shadow_caution_95": {
+		"declaration": "--shadow_color: var(--caution_95);"
+	},
+	"shadow_caution_100": {
+		"declaration": "--shadow_color: var(--caution_100);"
+	},
+	"shadow_info_00": {
+		"declaration": "--shadow_color: var(--info_00);"
+	},
+	"shadow_info_05": {
+		"declaration": "--shadow_color: var(--info_05);"
+	},
+	"shadow_info_10": {
+		"declaration": "--shadow_color: var(--info_10);"
+	},
+	"shadow_info_20": {
+		"declaration": "--shadow_color: var(--info_20);"
+	},
+	"shadow_info_30": {
+		"declaration": "--shadow_color: var(--info_30);"
+	},
+	"shadow_info_40": {
+		"declaration": "--shadow_color: var(--info_40);"
+	},
+	"shadow_info_50": {
+		"declaration": "--shadow_color: var(--info_50);"
+	},
+	"shadow_info_60": {
+		"declaration": "--shadow_color: var(--info_60);"
+	},
+	"shadow_info_70": {
+		"declaration": "--shadow_color: var(--info_70);"
+	},
+	"shadow_info_80": {
+		"declaration": "--shadow_color: var(--info_80);"
+	},
+	"shadow_info_90": {
+		"declaration": "--shadow_color: var(--info_90);"
+	},
+	"shadow_info_95": {
+		"declaration": "--shadow_color: var(--info_95);"
+	},
+	"shadow_info_100": {
+		"declaration": "--shadow_color: var(--info_100);"
 	},
 	"width_xs5": {
 		"declaration": "width: var(--space_xs5);"
@@ -4703,6 +5303,9 @@
 	"my_xl15": {
 		"declaration": "margin-top: var(--space_xl15);\tmargin-bottom: var(--space_xl15);"
 	},
+	"gap_0": {
+		"declaration": "gap: 0;"
+	},
 	"gap_xs5": {
 		"declaration": "gap: var(--space_xs5);"
 	},
@@ -4772,6 +5375,9 @@
 	"gap_xl15": {
 		"declaration": "gap: var(--space_xl15);"
 	},
+	"column_gap_0": {
+		"declaration": "column-gap: 0;"
+	},
 	"column_gap_xs5": {
 		"declaration": "column-gap: var(--space_xs5);"
 	},
@@ -4840,6 +5446,9 @@
 	},
 	"column_gap_xl15": {
 		"declaration": "column-gap: var(--space_xl15);"
+	},
+	"row_gap_0": {
+		"declaration": "row-gap: 0;"
 	},
 	"row_gap_xs5": {
 		"declaration": "row-gap: var(--space_xs5);"

@@ -567,16 +567,19 @@ vite_plugin_fuz_css({
 					</span>
 				</li>
 				<li>
-					<span class="code_chips"><code>.gap_{@render variant_range(space_variants)}</code></span>
-				</li>
-				<li>
 					<span class="code_chips">
-						<code>.column_gap_{@render variant_range(space_variants)}</code>
+						<code>.gap_{@render variant_range(space_variants)}</code> <code>.gap_0</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
-						<code>.row_gap_{@render variant_range(space_variants)}</code>
+						<code>.column_gap_{@render variant_range(space_variants)}</code>
+						<code>.column_gap_0</code>
+					</span>
+				</li>
+				<li>
+					<span class="code_chips">
+						<code>.row_gap_{@render variant_range(space_variants)}</code> <code>.row_gap_0</code>
 					</span>
 				</li>
 				<li>
@@ -602,9 +605,10 @@ vite_plugin_fuz_css({
 				</li>
 			</ul>
 			<aside>
-				Padding and margin include <code>_0</code> (and <code>_auto</code> for margin) for
-				ergonomics: <code>pb_0</code> is much shorter than <code>padding-bottom:0</code>. Other
-				properties use <a href="#Literal-classes">literals</a> for raw values.
+				Padding, margin, gap, and border radius include <code>_0</code> (and margin
+				<code>_auto</code>) to complete their token families: <code>pb_0</code> is much shorter than
+				<code>padding-bottom:0</code>. Other properties use <a href="#Literal-classes">literals</a>
+				for raw values.
 			</aside>
 			<h4>Sizing</h4>
 			<p>See <TomeLink slug="layout" />.</p>
@@ -679,7 +683,10 @@ vite_plugin_fuz_css({
 				(<code>.border_color_50</code> is the letterless alpha ramp). A bare intent or neutral scale
 				class applies its family's dominant use: <code>.positive_50</code> and <code>.text_70</code>
 				set the text color while <code>.shade_50</code> sets the background, with the
-				<code>bg_</code> prefix selecting the background twin (<code>.bg_positive_50</code>).
+				<code>bg_</code> prefix selecting the background twin (<code>.bg_positive_50</code>). The
+				intents also take the palette's <code>border_</code>, <code>outline_</code>, and
+				<code>shadow_</code> families (<code>.border_positive_50</code>,
+				<code>.outline_accent_60</code>, <code>.shadow_negative_40</code>).
 			</aside>
 			<aside>
 				Color and text classes (<code>.color_a_50</code>, <code>.text_70</code>, etc.) also set
@@ -759,32 +766,44 @@ vite_plugin_fuz_css({
 				</li>
 				<li>
 					<span class="code_chips">
+						{#each intent_variants as intent (intent)}
+							<code>.border_{intent}_{@render variant_range(intensity_variants)}</code>
+						{/each}
+					</span>
+				</li>
+				<li>
+					<span class="code_chips">
 						<code>.border_width_{@render variant_range(border_width_variants)}</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
 						<code>.border_radius_{@render variant_range(border_radius_variants)}</code>
+						<code>.border_radius_0</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
 						<code>.border_top_left_radius_{@render variant_range(border_radius_variants)}</code>
+						<code>.border_top_left_radius_0</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
 						<code>.border_top_right_radius_{@render variant_range(border_radius_variants)}</code>
+						<code>.border_top_right_radius_0</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
 						<code>.border_bottom_left_radius_{@render variant_range(border_radius_variants)}</code>
+						<code>.border_bottom_left_radius_0</code>
 					</span>
 				</li>
 				<li>
 					<span class="code_chips">
 						<code>.border_bottom_right_radius_{@render variant_range(border_radius_variants)}</code>
+						<code>.border_bottom_right_radius_0</code>
 					</span>
 				</li>
 				<li>
@@ -811,6 +830,13 @@ vite_plugin_fuz_css({
 								intensity_variants
 							)}
 						</code>
+					</span>
+				</li>
+				<li>
+					<span class="code_chips">
+						{#each intent_variants as intent (intent)}
+							<code>.outline_{intent}_{@render variant_range(intensity_variants)}</code>
+						{/each}
 					</span>
 				</li>
 			</ul>
@@ -859,6 +885,13 @@ vite_plugin_fuz_css({
 								intensity_variants
 							)}
 						</code>
+					</span>
+				</li>
+				<li>
+					<span class="code_chips">
+						{#each intent_variants as intent (intent)}
+							<code>.shadow_{intent}_{@render variant_range(intensity_variants)}</code>
+						{/each}
 					</span>
 				</li>
 				<li>
