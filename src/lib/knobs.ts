@@ -221,19 +221,19 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 	},
 	{
 		// the fraction of the way the ground moves from the theme's own
-		// lightness to the contrast end (white-ward in light, near-black in
-		// dark; a ground already past the end stays put), bending the shade
-		// and text curves with it; the usable range
-		// stops well short of 1, which is a white or near-black ground that
-		// fails `text_80` on `shade_10` on every shipped theme - the
-		// high-contrast modifier sits at `HIGH_CONTRAST` (0.5), and the OS
-		// `prefers-contrast: more` preference raises the effective value to it
+		// lightness toward white (light) or near-black (dark) - a ground
+		// already past the end stays put - bending the shade and text curves
+		// with it. The domain is 0 to 1, but the safe envelope stops at 0.75:
+		// past it `text_80` on `shade_10` fails on shipped themes, and 1 is a
+		// white or near-black ground. The high-contrast modifier sits at
+		// `HIGH_CONTRAST` (0.5), and the OS `prefers-contrast: more` preference
+		// raises the effective value to it
 		name: 'contrast',
 		kind: 'number',
 		axis: 'color',
 		leverage: 'lg',
 		tier: 'semantic',
-		range: [0, 1],
+		range: [0, 0.75],
 		step: 0.01
 	},
 	hue('hue_accent', 'lg', 'semantic', true),
