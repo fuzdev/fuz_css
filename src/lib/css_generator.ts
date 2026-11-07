@@ -9,8 +9,6 @@
  * @module
  */
 
-import type { Logger } from '@fuzdev/fuz_util/log.ts';
-
 import { generate_css } from './generate_css.ts';
 import { create_bundled_resources, type BundledCssResources } from './bundled_resources.ts';
 import { resolve_class_definitions } from './css_class_definitions.ts';
@@ -35,8 +33,6 @@ export interface CssRenderInput {
 	 * aren't theme variables are ignored.
 	 */
 	detected_css_variables: Iterable<string>;
-	/** A logger for custom interpreters. */
-	log?: Logger;
 }
 
 /**
@@ -125,7 +121,7 @@ export const create_css_generator = (
 		}));
 
 	const render = (input: CssRenderInput): string => {
-		const { css_classes, detected_css_variables, log } = input;
+		const { css_classes, detected_css_variables } = input;
 		const {
 			all_classes,
 			all_classes_with_locations,
@@ -153,8 +149,7 @@ export const create_css_generator = (
 			additional_elements,
 			additional_variables,
 			exclude_elements,
-			exclude_variables,
-			log
+			exclude_variables
 		});
 		dispatch(diagnostics);
 		return css;

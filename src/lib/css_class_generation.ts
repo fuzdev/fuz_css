@@ -7,7 +7,6 @@
  * @module
  */
 
-import type { Logger } from '@fuzdev/fuz_util/log.ts';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
 import {
@@ -195,11 +194,9 @@ export type CssClassDefinition = CssClassDefinitionStatic | CssClassDefinitionIn
 
 /**
  * Context passed to CSS class interpreters.
- * Provides access to logging, diagnostics collection, and the class registry.
+ * Provides access to diagnostics collection and the class registry.
  */
 export interface CssClassInterpreterContext {
-	/** Optional logger for warnings/errors */
-	log?: Logger;
 	/** Diagnostics array to collect warnings and errors */
 	diagnostics: Array<InterpreterDiagnostic>;
 	/** All known CSS class definitions (token + composite classes) */
@@ -256,7 +253,6 @@ export interface GenerateClassesCssOptions {
 	interpreters: Array<CssClassDefinitionInterpreter>;
 	/** Valid CSS properties for literal validation, or null to skip validation */
 	css_properties: Set<string> | null;
-	log?: Logger;
 	class_locations?: Map<string, Array<SourceLocation> | null>;
 	/**
 	 * Classes that were explicitly annotated (via `@fuz-classes` or `additional_classes`).
@@ -301,7 +297,6 @@ export const generate_classes_css = (
 		class_definitions,
 		interpreters,
 		css_properties,
-		log,
 		class_locations,
 		explicit_classes,
 		is_base_style_class
@@ -319,7 +314,6 @@ export const generate_classes_css = (
 	for (const class_name of class_names) {
 		const locations = class_locations?.get(class_name) ?? null;
 		const resolved = resolve_class_name(class_name, {
-			log,
 			class_definitions,
 			interpreters,
 			css_properties
@@ -462,7 +456,6 @@ type ResolveClassNameResult =
 	  };
 
 interface ResolveClassNameContext {
-	log?: Logger;
 	class_definitions: Record<string, CssClassDefinition | undefined>;
 	interpreters: Array<CssClassDefinitionInterpreter>;
 	css_properties: Set<string> | null;
@@ -553,7 +546,6 @@ const resolve_base_class = (
 		return { definition: static_definition, from_interpreter: false };
 	}
 	const interpreter_ctx: CssClassInterpreterContext = {
-		log: ctx.log,
 		diagnostics,
 		class_definitions: ctx.class_definitions,
 		css_properties: ctx.css_properties

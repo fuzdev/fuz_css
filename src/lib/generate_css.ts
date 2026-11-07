@@ -8,8 +8,6 @@
  * @module
  */
 
-import type { Logger } from '@fuzdev/fuz_util/log.ts';
-
 import type { Diagnostic, GenerationDiagnostic, SourceLocation } from './diagnostics.ts';
 import {
 	generate_classes_css,
@@ -168,9 +166,6 @@ export interface GenerateCssOptions {
 	additional_variables?: Iterable<string> | 'all';
 	exclude_elements?: Iterable<string>;
 	exclude_variables?: Iterable<string>;
-
-	/** Optional logger, passed to the class interpreters. */
-	log?: Logger;
 }
 
 export interface GenerateCssResult {
@@ -207,8 +202,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		additional_elements,
 		additional_variables,
 		exclude_elements,
-		exclude_variables: raw_exclude_variables,
-		log
+		exclude_variables: raw_exclude_variables
 	} = options;
 
 	// a Set, for the lookups here and so the iterable is consumed once
@@ -219,7 +213,6 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		class_definitions,
 		interpreters,
 		css_properties,
-		log,
 		class_locations: all_classes_with_locations,
 		explicit_classes,
 		// an explicit class the bundled base styles target resolves to their rules
