@@ -1009,10 +1009,12 @@ capturing logger through `vite_plugin_test_helpers.ts`. Integration:
 
 Component tests (`ContrastInput`, `KnobControl`, `RampStrip`, `ThemeEditor`,
 `resolved_color.svelte`, `root_color_scheme.svelte`,
-`theme_editor_state.rooted.svelte`, `styles.states`) render in jsdom via a per-file
+`theme_editor_state.rooted.svelte`) render in jsdom via a per-file
 `@vitest-environment jsdom` pragma - mounting through
 `component_test_helpers.ts` (`create_mount_tracker`) with context harnesses (`*Harness.svelte` in
-`src/test/`), the fuz_ui pattern. All other suites stay in node;
+`src/test/`), the fuz_ui pattern. `styles.states.test.ts` also runs in jsdom by the same pragma, matching the
+base styles' state selectors against elements it creates without mounting
+anything. All other suites stay in node;
 `vite.config.ts` sets `resolve.conditions: ['browser']` in test mode so
 svelte's `mount()` resolves to the client build.
 

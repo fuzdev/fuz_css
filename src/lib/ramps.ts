@@ -658,8 +658,8 @@ export type RampFamily = 'palette' | 'shade' | 'text';
 
 Ramp intermediates - the derived variables between the knobs and the color
 stops: the lightness stops between a ramp's endpoints, the normalized chroma
-shape, the capped palette chroma, and the clamped ground tint. They're plumbing, spelled with a
-leading underscore (`--_palette_lightness_30`) to mark them private: the
+shape, the capped palette chroma, and the clamped ground tint. They're
+plumbing, spelled with a leading underscore (`--_palette_lightness_30`) to mark them private: the
 `Theme` schema rejects the spelling, so a theme steers the ramps through
 their knobs and color stops, never by pinning an intermediate. The names
 here are the one place the spelling is built.

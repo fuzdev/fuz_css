@@ -164,7 +164,7 @@
 			<li>
 				<code>--contrast</code> - 0 to 1, how far the page ground moves toward white (light) or
 				near-black (dark), bending the shade and text curves with it; the high contrast modifier
-				sets 0.5, and the safe range stops well short of 1
+				sets 0.5, and the safe range stops at 0.75
 			</li>
 			<li>
 				<code>--shade_chroma_00</code> - the page ground's own tint, fading over the surfaces raised

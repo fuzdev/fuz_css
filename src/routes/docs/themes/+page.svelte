@@ -290,8 +290,8 @@ test('my theme clears the accessibility gates', () => {
 			as build warnings and its <code>validate_theme</code> issues as build errors and warnings.
 		</p>
 		<p>
-			fuz_css gates its own themes with these functions in its test suite, every theme × composed
-			with high contrast included, and declares what an exemplar knowingly gives up, like marquee's
+			fuz_css gates its own themes with these functions in its test suite, every theme alone and
+			composed with high contrast, and declares what an exemplar knowingly gives up, like marquee's
 			clipped gamut, as exact exceptions. The editor above runs the same lint and gates live on
 			every edit.
 		</p>

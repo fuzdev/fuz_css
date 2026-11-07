@@ -263,9 +263,9 @@
 		<TomeSectionHeader text="Inline buttons" />
 		<p>
 			Buttons are <code>inline-flex</code>: siblings in a block sit on one line, so wrap them in a
-			<code>.column</code> to stack. A button with <code>.inline</code>, or any button inside a
-			<code>p</code>, is <code>inline-block</code> instead and sits in running text, like
-			<button type="button" class="inline">this one</button>.
+			<code>.column</code> to stack. A button inside a <code>p</code>, or one with
+			<code>.inline</code> anywhere else, is <code>inline-block</code> at a compact height, so it
+			sits in running text like <button type="button">this one</button>.
 		</p>
 	</TomeSection>
 	<TomeSection>
