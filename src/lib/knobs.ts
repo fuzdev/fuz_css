@@ -208,8 +208,9 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		// the ground's own tint - the shared chroma shape leaves the page
 		// untinted at any neutral_chroma, so a tinted page is this knob; it
 		// fades over the near-ground shade stops so raised surfaces keep the
-		// cast; a light ground near white has little gamut room, which the
-		// gates check
+		// cast; the stops render it held to sRGB at the ground's lightness
+		// (worst hue, both ends), and a light ground near white has little
+		// room - at the default light ground the slider is inert past ~0.014
 		name: 'shade_chroma_00',
 		kind: 'number',
 		axis: 'color',

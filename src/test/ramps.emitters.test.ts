@@ -11,6 +11,7 @@
  */
 
 import { test, assert, describe } from 'vitest';
+import { oklch_in_srgb_gamut } from '@fuzdev/fuz_util/oklch.ts';
 
 import {
 	PALETTE_HUES,
@@ -32,6 +33,9 @@ import {
 	render_neutral_stop_css,
 	neutral_color_oklch,
 	neutral_ground_chroma_weight,
+	shade_ground_chroma,
+	render_shade_ground_chroma_css,
+	SHADE_GROUND_CHROMA_NAME,
 	SHADE_GROUND_CHROMA_REACH,
 	render_ramp_color_css,
 	render_border_color_stop_css,
@@ -56,7 +60,7 @@ const TOLERANCE = 1e-5;
 
 /**
  * Evaluates the emitted CSS value grammar to a number: numeric literals,
- * `var(--x[, fallback])`, `calc(expr)`, `min(a, b)`, `pow(a, b)`, `+ - * /`,
+ * `var(--x[, fallback])`, `calc(expr)`, `min(a, ...)`, `pow(a, b)`, `+ - * /`,
  * and parentheses. Throws on anything outside the grammar so an emitter
  * change that this evaluator can't follow fails loudly instead of silently
  * passing.
@@ -142,12 +146,24 @@ const evaluate_css_number = (expr: string, vars: Record<string, number>): number
 				}
 				return value;
 			}
-			// min/pow: two comma-separated arguments
+			if (name === 'min') {
+				// one or more comma-separated arguments
+				const args = [parse_expr()];
+				skip_ws();
+				while (s[i] === ',') {
+					i++;
+					args.push(parse_expr());
+					skip_ws();
+				}
+				expect(')');
+				return Math.min(...args);
+			}
+			// pow: two comma-separated arguments
 			const a = parse_expr();
 			expect(',');
 			const b = parse_expr();
 			expect(')');
-			return name === 'min' ? Math.min(a, b) : a ** b;
+			return a ** b;
 		}
 		const num = /^-?\d*\.?\d+(e-?\d+)?/i.exec(s.slice(i));
 		if (!num) throw new Error(`expected a number at ${i} ("${s.slice(i, i + 12)}") in ${expr}`);
@@ -183,6 +199,13 @@ const parse_oklch_args = (css: string): [string, string, string] => {
 	assert.strictEqual(args.length, 3, `expected 3 oklch args in ${css}`);
 	return args as [string, string, string];
 };
+
+// binds the ground tint intermediate by evaluating its own emitter over `vars`,
+// so a knob override reaches the stops through the clamp as the CSS would
+const bind_ground_chroma = (vars: Record<string, number>): Record<string, number> => ({
+	...vars,
+	[SHADE_GROUND_CHROMA_NAME]: evaluate_css_number(render_shade_ground_chroma_css(), vars)
+});
 
 /** All knob variables an emitted color stop can reference, per scheme. */
 const knob_vars = (scheme: ColorScheme): Record<string, number> => {
@@ -223,7 +246,7 @@ const knob_vars = (scheme: ColorScheme): Record<string, number> => {
 			);
 		}
 	}
-	return vars;
+	return bind_ground_chroma(vars);
 };
 
 const DERIVED_STOPS = numeric_scale_variants.filter(
@@ -340,11 +363,14 @@ describe('neutral stop emitter', () => {
 
 describe('the ground tint', () => {
 	test('the emitter and the twin add each stop its share of it', () => {
-		const vars = { ...knob_vars('light'), shade_chroma_00: 0.015 };
+		// past what the default light ground carries, so the clamp is exercised
+		const vars = bind_ground_chroma({ ...knob_vars('light'), shade_chroma_00: 0.015 });
+		const tint = shade_ground_chroma(0.015, LIGHTNESS_KNOBS.shade.light.lightness_00);
+		assert.isBelow(tint, 0.015);
 		for (const stop of numeric_scale_variants) {
 			for (const family of ['shade', 'text'] as const) {
 				const [l_css, c_css, h_css] = parse_oklch_args(render_neutral_stop_css(family, stop));
-				const ground = 0.015 * neutral_ground_chroma_weight(family, stop);
+				const ground = tint * neutral_ground_chroma_weight(family, stop);
 				const [l, c, h] = neutral_color_oklch(
 					evaluate_css_number(l_css, vars),
 					NEUTRAL_CHROMA.light,
@@ -357,10 +383,56 @@ describe('the ground tint', () => {
 				assert.closeTo(evaluate_css_number(h_css, vars), h, TOLERANCE, `${family} ${stop} H`);
 			}
 		}
-		assert.include(render_neutral_stop_css('shade', '00'), 'var(--shade_chroma_00))');
-		assert.include(render_neutral_stop_css('shade', '10'), 'var(--shade_chroma_00) *');
-		assert.notInclude(render_neutral_stop_css('shade', '50'), 'var(--shade_chroma_00)');
-		assert.notInclude(render_neutral_stop_css('text', '00'), 'var(--shade_chroma_00)');
+		assert.include(render_neutral_stop_css('shade', '00'), 'var(--_shade_ground_chroma))');
+		assert.include(render_neutral_stop_css('shade', '10'), 'var(--_shade_ground_chroma) *');
+		assert.notInclude(render_neutral_stop_css('shade', '50'), 'var(--_shade_ground_chroma)');
+		assert.notInclude(render_neutral_stop_css('text', '00'), 'var(--_shade_ground_chroma)');
+		// the stops read the clamped tint, never the knob itself
+		for (const stop of numeric_scale_variants) {
+			assert.notInclude(render_neutral_stop_css('shade', stop), 'var(--shade_chroma_00)');
+		}
+	});
+
+	test('the ground tint emitter matches its twin', () => {
+		for (const scheme of color_scheme_variants) {
+			for (let l = 0; l <= 100; l += 5) {
+				// a negative request renders negative, like the CSS - the color clamp
+				// is the browser's, not the twin's
+				for (const chroma_00 of [-0.02, 0, 0.005, 0.012, 0.03, 0.1]) {
+					const lightness_00 = l / 100;
+					const vars = {
+						...knob_vars(scheme),
+						shade_chroma_00: chroma_00,
+						shade_lightness_00: lightness_00
+					};
+					assert.closeTo(
+						evaluate_css_number(render_shade_ground_chroma_css(), vars),
+						shade_ground_chroma(chroma_00, lightness_00),
+						TOLERANCE,
+						`${scheme} L00 ${lightness_00} tint ${chroma_00}`
+					);
+				}
+			}
+		}
+	});
+
+	test('the clamped ground is in sRGB at every hue, ground lightness, and tint', () => {
+		// worst hue at both ends: the slopes bound the tint below every hue's
+		// sRGB edge, so no ground a theme can set clips
+		for (let hue = 0; hue < 360; hue += 5) {
+			for (let l = 0; l <= 100; l++) {
+				const lightness_00 = l / 100;
+				for (let t = 0; t <= 100; t += 5) {
+					const ground = shade_ground_chroma(t / 1000, lightness_00);
+					// the ground stop's chroma shape is 0, so the tint is its whole chroma
+					const color = neutral_color_oklch(lightness_00, 0, 0, hue, ground);
+					assert.isTrue(
+						oklch_in_srgb_gamut(color),
+						`hue ${hue} L00 ${lightness_00} tint ${t / 1000}: ${color.join(' ')}`
+					);
+				}
+			}
+		}
 	});
 
 	test('the weight is whole at the ground and fades out by the reach', () => {

@@ -31,13 +31,8 @@ import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { zine_theme } from '#lib/themes/zine.ts';
 import { phosphor_theme } from '#lib/themes/phosphor.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
-import { shipped_base_themes } from './theme_test_helpers.ts';
-import {
-	PALETTE_CHROMA_MULTIPLIERS,
-	neutral_ground_chroma_weight,
-	palette_stop_oklch,
-	shade_stop_oklch
-} from '#lib/ramps.ts';
+import { shipped_base_themes, shipped_themes } from './theme_test_helpers.ts';
+import { PALETTE_CHROMA_MULTIPLIERS, palette_stop_oklch, shade_stop_oklch } from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
 import {
 	palette_variants,
@@ -296,34 +291,36 @@ describe('check_theme', () => {
 		assert.notStrictEqual(body(tinted), body(base_theme));
 	});
 
-	test('a ground tint past sRGB fails gamut at the ground', () => {
-		const report = check_theme({
+	test('a ground tint past sRGB is held in gamut at the ground', () => {
+		const tinted: Theme = {
 			name: 't',
 			variables: [{ name: 'shade_chroma_00', base: '0.1' }]
-		});
-		const ground = report.entries.find(
-			(e) => e.gate === 'gamut' && e.scheme === 'light' && e.subject === 'shade_00'
+		};
+		const report = check_theme(tinted);
+		// the tint clamps at the ground's lightness, so the ground and the
+		// near-ground stops that carry its share stay in sRGB in both schemes
+		const shade_gamut = report.entries.filter(
+			(e) => e.gate === 'gamut' && e.subject.startsWith('shade_')
 		);
-		assert(ground, 'shade_00 gamut entry exists');
-		assert.isFalse(ground.pass);
-		// the near-ground stops carry their share of it, past sRGB too
-		const near_ground = report.entries.find(
-			(e) => e.gate === 'gamut' && e.scheme === 'light' && e.subject === 'shade_05'
+		for (const scheme of color_scheme_variants) {
+			for (const stop of ['00', '05'] as const) {
+				const entry = shade_gamut.find((e) => e.scheme === scheme && e.subject === `shade_${stop}`);
+				assert(entry, `${scheme} shade_${stop} gamut entry exists`);
+			}
+		}
+		assert.deepEqual(
+			shade_gamut.filter((e) => !e.pass),
+			[]
 		);
-		assert(near_ground, 'shade_05 gamut entry exists');
-		assert.isFalse(near_ground.pass);
-		// the stops past the tint's reach don't carry it
-		const past_reach = report.entries.filter(
-			(e) =>
-				e.gate === 'gamut' &&
-				e.subject.startsWith('shade_') &&
-				neutral_ground_chroma_weight(
-					'shade',
-					e.subject.slice('shade_'.length) as NumericScaleVariant
-				) === 0
-		);
-		assert.isNotEmpty(past_reach);
-		assert.isTrue(past_reach.every((e) => e.pass));
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
+		// the clamp holds the tint rather than dropping it - the ground still
+		// moves off the untinted default
+		const ground_body = (theme: Theme): number =>
+			check_theme(theme).entries.find(
+				(e) => e.scheme === 'dark' && e.subject === 'text_80 on shade_00'
+			)!.value;
+		assert.notStrictEqual(ground_body(tinted), ground_body(base_theme));
 	});
 
 	test('a ground tint that resolves to no number leaves the near-ground stops unchecked', () => {
@@ -453,6 +450,39 @@ describe('contrast modifier compositions', () => {
 				const composed = compose_themes(base, modifier);
 				assert_declared_contrast_failures(check_theme(composed), [], 1, composed.name);
 			}
+		}
+	});
+
+	test('every theme, composed or not, keeps its neutral scales in sRGB', () => {
+		// the ground tint clamps at the ground's lightness, so a modifier that
+		// moves the ground can't push a tinted ground past the gamut - the bare
+		// themes (the modifiers among them), each base under each modifier, and
+		// the OS mapping's stand-in, a dual-scheme base over high contrast
+		const themes: Array<Theme> = [
+			...shipped_themes,
+			...bases.flatMap((base) =>
+				Object.values(contrast_modifiers).map((modifier) => compose_themes(base, modifier))
+			),
+			...bases
+				.filter((base) => base.scheme === undefined)
+				.map((base) => compose_themes(high_contrast_theme, base))
+		];
+		for (const theme of themes) {
+			const neutral_gamut = check_theme(theme).entries.filter(
+				(e) =>
+					e.gate === 'gamut' && (e.subject.startsWith('shade_') || e.subject.startsWith('text_'))
+			);
+			for (const scheme of color_scheme_variants) {
+				assert.isTrue(
+					neutral_gamut.some((e) => e.scheme === scheme && e.subject === 'shade_00'),
+					`${theme.name} ${scheme}: the ground's gamut resolved`
+				);
+			}
+			assert.deepEqual(
+				neutral_gamut.filter((e) => !e.pass),
+				[],
+				theme.name
+			);
 		}
 	});
 

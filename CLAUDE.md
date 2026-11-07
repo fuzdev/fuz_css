@@ -137,7 +137,8 @@ combined and only used content is included. In utility-only mode, import
   tokens are what a theme sets; the ramp stops between knobs and color stops
   are internal intermediates spelled with a leading underscore
   (`--_palette_lightness_30`, `--_chroma_shape_50`, `--_palette_chroma_50`,
-  built by the `to_*_name` helpers in `ramps.ts`). `STYLE_VARIABLE_NAME_MATCHER`
+  built by the `to_*_name` helpers in `ramps.ts`, and the clamped ground
+  tint `--_shade_ground_chroma`, named by `SHADE_GROUND_CHROMA_NAME`). `STYLE_VARIABLE_NAME_MATCHER`
   rejects the spelling, so `parse_theme`/`validate_theme` refuse a theme that
   sets one, `render_theme_style` drops one from a theme's variables, and the
   resolver ignores one there; `default_variables` declares them without
@@ -376,7 +377,10 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   are `shade_*`/`text_*`; the chroma shape is 0 at the ends, so the page
   ground `shade_00` is untinted unless `--shade_chroma_00` tints it, and that
   tint fades over the near-ground shade stops - whole at 00, gone by 50 - so the
-  surfaces raised off a tinted page keep its cast),
+  surfaces raised off a tinted page keep its cast; the stops read it through
+  the private `--_shade_ground_chroma`, held to sRGB at the ground's
+  lightness at both ends, worst hue, so a tint the ground can't carry clamps
+  rather than clips),
   `--hue_positive`/`--hue_negative`/
   `--hue_caution`/`--hue_info`; each intent derives the full stop scale
   through the shared ramps (`--accent_00`–`--accent_100`, same for the

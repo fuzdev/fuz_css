@@ -17,7 +17,8 @@
  *   recorded with its variable, value, and reason. A derived color is
  *   clamped as the browser clamps the `oklch()` it renders.
  * - The private ramp intermediates (`_palette_lightness_NN` and its
- *   shade/text twins, `_chroma_shape_NN`, `_palette_chroma_NN`) always
+ *   shade/text twins, `_chroma_shape_NN`, `_palette_chroma_NN`,
+ *   `_shade_ground_chroma`) always
  *   derive through the `ramps.ts` formulas from the resolved knobs - the
  *   `Theme` schema keeps a theme from setting one, and the resolver ignores
  *   one in `variables` as the renderer drops it. The exception is a
@@ -75,11 +76,13 @@ import {
 	PALETTE_CHROMA_CAPS,
 	NEUTRAL_CHROMA,
 	SHADE_CHROMA_00,
+	SHADE_GROUND_CHROMA_NAME,
 	BORDER_COLOR_LIGHTNESS,
 	BORDER_CHROMA_MULTIPLIER,
 	ramp_lightness,
 	ramp_chroma_shape,
 	ramp_chroma_at_shape,
+	shade_ground_chroma,
 	to_chroma_shape_name,
 	type LightnessRampKnobs,
 	type RampFamily
@@ -349,6 +352,12 @@ export class ThemeResolver {
 		if (name === 'chroma_scale') return { ok: true, value: 1 };
 		if (name === 'neutral_chroma') return { ok: true, value: NEUTRAL_CHROMA[scheme] };
 		if (name === 'shade_chroma_00') return { ok: true, value: SHADE_CHROMA_00 };
+		// the ground tint as rendered - the request held to sRGB at the ground's lightness
+		if (name === SHADE_GROUND_CHROMA_NAME) {
+			const r = this.#resolve_all(['shade_chroma_00', 'shade_lightness_00'], scheme, visited);
+			if (!r.ok) return r.error;
+			return { ok: true, value: shade_ground_chroma(r.values[0]!, r.values[1]!) };
+		}
 		if (name === 'border_color_lightness') {
 			return { ok: true, value: BORDER_COLOR_LIGHTNESS[scheme] };
 		}

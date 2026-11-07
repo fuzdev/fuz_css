@@ -66,6 +66,8 @@ import {
 	render_lightness_stop_css,
 	render_neutral_stop_css,
 	render_ramp_color_css,
+	render_shade_ground_chroma_css,
+	SHADE_GROUND_CHROMA_NAME,
 	to_chroma_shape_name,
 	to_lightness_stop_name,
 	to_palette_chroma_name,
@@ -291,7 +293,7 @@ export const default_variables: Array<StyleVariable> = [
 		name: 'shade_chroma_00',
 		base: String(SHADE_CHROMA_00),
 		summary:
-			'the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it'
+			'the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it; held to sRGB at the ground lightness'
 	},
 
 	/*
@@ -392,6 +394,9 @@ export const default_variables: Array<StyleVariable> = [
 	{ name: 'shade_min', base: '#fff', dark: '#000' },
 	{ name: 'shade_max', base: '#000', dark: '#fff' },
 	...lightness_ramp_variables('shade', SHADE_LIGHTNESS_KNOBS),
+	// the ground tint the near-ground stops read: `shade_chroma_00` held to
+	// sRGB at the ground's lightness (see `shade_ground_chroma`)
+	{ name: SHADE_GROUND_CHROMA_NAME, base: render_shade_ground_chroma_css() },
 	// Tinted shade scale (00-100)
 	...neutral_scale_variables('shade'),
 

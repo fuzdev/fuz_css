@@ -169,7 +169,10 @@ export const NEUTRAL_CHROMA: Readonly<Record<ColorScheme, number>> = {
  * stops of the shade ramp by `neutral_ground_chroma_weight`. The chroma shape is 0 at the
  * endpoints, so without it the page ground is untinted whatever
  * `neutral_chroma` says; a theme whose identity is a tinted page (paper, a
- * lit night) sets it. 0 keeps the default ground neutral.
+ * lit night) sets it. 0 keeps the default ground neutral. The knob is the
+ * tint requested: the stops render `shade_ground_chroma`, the request held
+ * to sRGB at the ground's lightness, so a tint past what the ground can carry
+ * clamps rather than clipping.
  */
 export const SHADE_CHROMA_00 = 0;
 
@@ -202,6 +205,44 @@ export const neutral_ground_chroma_weight = (
 	if (remaining <= 0) return 0;
 	return Math.round(remaining * remaining * 10_000) / 10_000;
 };
+
+/**
+ * Worst-hue sRGB chroma slopes toward the two lightness ends, bounding the
+ * ground tint (`shade_ground_chroma`). Each term holds where it binds: every
+ * hue holds at least `light_end * (1 - L)` chroma for L above about 0.730,
+ * and at least `dark_end * L` for L up to about 0.75, and the two cross near
+ * L 0.731 - so the tent `min(light_end * (1 - L), dark_end * L)` is in gamut
+ * at every lightness and hue. Fitted against `oklch_max_srgb_chroma` over
+ * every hue: the light-end envelope is about 0.4627 of the distance to white
+ * near L 1 and the dark end is 0.170 of the distance to black, each rounded
+ * down for a margin. The crossover sits about 0.001 above where the light
+ * term starts to hold, so raising `dark_end` moves it into the region the
+ * light term doesn't cover - a `dark_end` past the dark envelope fails the
+ * gamut property test in the dark band first.
+ */
+export const SHADE_GROUND_CHROMA_SLOPES: Readonly<{ light_end: number; dark_end: number }> = {
+	light_end: 0.46,
+	dark_end: 0.169
+};
+
+/**
+ * The ground tint a ground can carry: the requested `--shade_chroma_00`,
+ * held to sRGB at the ground's lightness by `SHADE_GROUND_CHROMA_SLOPES`,
+ * worst hue. The numeric twin of `render_shade_ground_chroma_css`, which the
+ * near-ground shade stops read in place of the knob.
+ *
+ * @param chroma_00 - the requested ground tint (`shade_chroma_00`)
+ * @param lightness_00 - the ground's lightness (`shade_lightness_00`)
+ * @returns the tint, at most `chroma_00` - negative, like the CSS, for a
+ * negative request or a ground lightness outside 0..1, which the color
+ * clamp then handles as the browser does
+ */
+export const shade_ground_chroma = (chroma_00: number, lightness_00: number): number =>
+	Math.min(
+		chroma_00,
+		SHADE_GROUND_CHROMA_SLOPES.light_end * (1 - lightness_00),
+		SHADE_GROUND_CHROMA_SLOPES.dark_end * lightness_00
+	);
 
 export type ShadowTint = 'bright' | 'dim';
 
@@ -443,7 +484,8 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme)
 		NEUTRAL_CHROMA[scheme],
 		ramp_chroma_shape(stop, PALETTE_CHROMA_KNOBS[scheme].curve),
 		NEUTRAL_HUE,
-		SHADE_CHROMA_00 * neutral_ground_chroma_weight('shade', stop)
+		shade_ground_chroma(SHADE_CHROMA_00, SHADE_LIGHTNESS_KNOBS[scheme].lightness_00) *
+			neutral_ground_chroma_weight('shade', stop)
 	);
 
 /**
@@ -517,6 +559,9 @@ export const to_chroma_shape_name = (stop: NumericScaleVariant): string => `_chr
 /** The private variable holding a stop's capped palette chroma (`_palette_chroma_50`). */
 export const to_palette_chroma_name = (stop: NumericScaleVariant): string =>
 	`_palette_chroma_${stop}`;
+
+/** The private variable holding the ground tint the ground can carry (`shade_ground_chroma`). */
+export const SHADE_GROUND_CHROMA_NAME = '_shade_ground_chroma';
 
 /**
  * A CSS `<number>` as a pattern source, stricter than what `Number()`
@@ -615,9 +660,9 @@ export const render_ramp_color_css = (
 /**
  * Renders the derived default of a neutral (shade/text) stop. The neutral
  * rides the palette's chroma shape scaled by the `--neutral_chroma` peak;
- * the near-ground shade stops add their share of the ground's own
- * `--shade_chroma_00` (see `neutral_ground_chroma_weight`), since the shape is near
- * 0 there.
+ * the near-ground shade stops add their share of the ground's own tint,
+ * `--_shade_ground_chroma` (see `neutral_ground_chroma_weight` and
+ * `shade_ground_chroma`), since the shape is near 0 there.
  */
 export const render_neutral_stop_css = (
 	family: Exclude<RampFamily, 'palette'>,
@@ -630,9 +675,17 @@ export const render_neutral_stop_css = (
 // the stop's share of the ground chroma as a `calc()` term, empty past its reach
 const render_ground_chroma_term = (weight: number): string => {
 	if (weight === 0) return '';
-	if (weight === 1) return ' + var(--shade_chroma_00)';
-	return ` + var(--shade_chroma_00) * ${weight}`;
+	if (weight === 1) return ` + var(--${SHADE_GROUND_CHROMA_NAME})`;
+	return ` + var(--${SHADE_GROUND_CHROMA_NAME}) * ${weight}`;
 };
+
+/**
+ * Renders the default of the private ground tint (`--_shade_ground_chroma`):
+ * `--shade_chroma_00` held to sRGB at the ground's lightness. The CSS twin of
+ * `shade_ground_chroma`.
+ */
+export const render_shade_ground_chroma_css = (): string =>
+	`min(var(--shade_chroma_00), ${SHADE_GROUND_CHROMA_SLOPES.light_end} * (1 - var(--shade_lightness_00)), ${SHADE_GROUND_CHROMA_SLOPES.dark_end} * var(--shade_lightness_00))`;
 
 /**
  * Renders the derived default of a border color stop (`--border_color_NN`):

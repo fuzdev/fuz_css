@@ -5,6 +5,7 @@ import { default_variables } from '#lib/variables.ts';
 import { INTERNAL_VARIABLE_NAME_MATCHER, StyleVariable } from '#lib/variable.ts';
 import {
 	PALETTE_CHROMA_MULTIPLIERS,
+	SHADE_GROUND_CHROMA_NAME,
 	to_chroma_shape_name,
 	to_lightness_stop_name,
 	to_palette_chroma_name
@@ -53,7 +54,8 @@ test('the internal variables are exactly the ramp intermediates', () => {
 		...numeric_scale_variants.flatMap((stop) => [
 			`_chroma_shape_${stop}`,
 			`_palette_chroma_${stop}`
-		])
+		]),
+		'_shade_ground_chroma'
 	];
 	assert.sameMembers(internal, expected);
 	// the name helpers build the same spellings, keeping the endpoints public
@@ -65,7 +67,8 @@ test('the internal variables are exactly the ramp intermediates', () => {
 			...numeric_scale_variants.flatMap((stop) => [
 				to_chroma_shape_name(stop),
 				to_palette_chroma_name(stop)
-			])
+			]),
+			SHADE_GROUND_CHROMA_NAME
 		],
 		[
 			...expected,

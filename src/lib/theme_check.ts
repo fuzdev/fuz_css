@@ -33,6 +33,7 @@ import {
 	ramp_color_oklch,
 	neutral_color_oklch,
 	neutral_ground_chroma_weight,
+	SHADE_GROUND_CHROMA_NAME,
 	compute_worst_hue_chroma_cap,
 	render_chroma_stop_css,
 	to_chroma_shape_name,
@@ -482,9 +483,10 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 				const neutral_c = num('neutral_chroma', scheme);
 				const shape = num(to_chroma_shape_name(stop), scheme);
 				const neutral_hue = num('hue_neutral', scheme);
-				// the near-ground shade stops carry their share of the ground's own chroma
+				// the near-ground shade stops carry their share of the ground's own
+				// tint, held to sRGB at the ground's lightness
 				const ground_weight = neutral_ground_chroma_weight(family, stop);
-				const ground_c = ground_weight === 0 ? 0 : num('shade_chroma_00', scheme);
+				const ground_c = ground_weight === 0 ? 0 : num(SHADE_GROUND_CHROMA_NAME, scheme);
 				if (
 					lightness === null ||
 					neutral_c === null ||

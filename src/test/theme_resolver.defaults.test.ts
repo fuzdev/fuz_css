@@ -61,4 +61,23 @@ describe('create_theme_resolver defaults', () => {
 			}
 		}
 	});
+
+	test('the ground tint resolves to what renders, held at the ground lightness', () => {
+		const resolver = create_theme_resolver({
+			name: 't',
+			variables: [
+				{ name: 'shade_chroma_00', base: '0.1' },
+				{ name: 'shade_lightness_00', base: '0.98', dark: '0.2' }
+			]
+		});
+		assert.strictEqual(resolver.resolve('shade_chroma_00', 'light'), 0.1);
+		assert.closeTo(resolver.resolve('_shade_ground_chroma', 'light')!, 0.46 * 0.02, 1e-12);
+		assert.closeTo(resolver.resolve('_shade_ground_chroma', 'dark')!, 0.169 * 0.2, 1e-12);
+		// a tint the ground carries resolves unchanged
+		const carried = create_theme_resolver({
+			name: 'carried',
+			variables: [{ name: 'shade_chroma_00', base: '0.005' }]
+		});
+		assert.strictEqual(carried.resolve('_shade_ground_chroma', 'light'), 0.005);
+	});
 });
