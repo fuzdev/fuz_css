@@ -21,6 +21,9 @@
  * @module
  */
 
+import type { StyleVariable } from './variable.ts';
+import type { GenerationDiagnostic } from './diagnostics.ts';
+
 // the end tag that closes a `<style>` element from inside its text content
 const STYLE_CLOSER_MATCHER = /<\/style/iu;
 
@@ -126,4 +129,59 @@ export const escape_css_identifier = (value: string): string => {
 		}
 	}
 	return out;
+};
+
+/**
+ * The slots of a style variable a stylesheet can hold, or `null` when none
+ * can: a slot whose value could end its own declaration (or is blank) is
+ * left out, and a variable whose name isn't a plain identifier is left out
+ * whole. What's left out is reported as a `variable_value_uncontained` error
+ * when `diagnostics` is given.
+ *
+ * @param v - the variable, possibly untyped data
+ * @param diagnostics - collects an error per slot or variable left out, when given
+ * @returns `v` itself when every slot is contained, a copy with the contained slots otherwise, or `null`
+ */
+export const contain_variable = (
+	v: StyleVariable,
+	diagnostics?: Array<GenerationDiagnostic>
+): StyleVariable | null => {
+	// untyped data can carry a variable with no name, which reports as ''
+	const name = typeof v.name === 'string' ? v.name : '';
+	const report = (detail: string, left_out: string): void => {
+		diagnostics?.push({
+			phase: 'generation',
+			code: 'variable_value_uncontained',
+			level: 'error',
+			message: `Theme variable "${name}" ${detail}, so ${left_out} is left out of the generated CSS`,
+			suggestion:
+				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
+			identifier: name,
+			locations: null
+		});
+	};
+	const contained_slot = (slot: 'base' | 'dark', value: unknown): string | undefined => {
+		if (value === undefined) return undefined;
+		if (!css_value_is_contained(value)) {
+			report(`has a ${slot} value that can't be contained in a declaration`, 'that value');
+		} else if (!(value as string).trim()) {
+			report(`has a blank ${slot} value`, 'that value');
+		} else {
+			return value as string;
+		}
+		return undefined;
+	};
+	if (!css_custom_property_name_is_contained(v.name)) {
+		report('has a name that is not a plain identifier', 'it');
+		return null;
+	}
+	const base = contained_slot('base', v.base);
+	const dark = contained_slot('dark', v.dark);
+	if (base === undefined && dark === undefined) return null;
+	if (base === v.base && dark === v.dark) return v;
+	return {
+		name: v.name,
+		...(base !== undefined && { base }),
+		...(dark !== undefined && { dark })
+	};
 };

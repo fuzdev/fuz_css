@@ -13,7 +13,6 @@
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import { default_variables } from './variables.ts';
-import { compute_scheme_mirror } from './theme_stance.ts';
 import {
 	overlay_style_variable,
 	render_color_scheme_rules,
@@ -21,15 +20,9 @@ import {
 	type ResolvedTheme
 } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
-import type { ColorScheme } from './variable_data.ts';
-import { check_theme, compute_theme_caps } from './theme_check.ts';
-import { validate_theme } from './theme_validate.ts';
-import { theme_knobs } from './knobs.ts';
+import { compile_theme } from './theme_compile.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
-import {
-	css_custom_property_name_is_contained,
-	css_value_is_contained
-} from './css_containment.ts';
+import { contain_variable } from './css_containment.ts';
 import type { GenerationDiagnostic } from './diagnostics.ts';
 
 import type { VariablesOption } from './css_plugin_options.ts';
@@ -69,52 +62,6 @@ export interface VariableDependencyGraph {
 	 */
 	theme: ResolvedTheme | null;
 }
-
-// the slots of `v` a stylesheet can hold, or null when none can - reporting
-// the rest as `variable_value_uncontained` errors to `diagnostics` when given
-const contain_variable = (
-	v: StyleVariable,
-	diagnostics?: Array<GenerationDiagnostic>
-): StyleVariable | null => {
-	// untyped data can carry a variable with no name, which reports as ''
-	const name = typeof v.name === 'string' ? v.name : '';
-	const report = (detail: string, left_out: string): void => {
-		diagnostics?.push({
-			phase: 'generation',
-			code: 'variable_value_uncontained',
-			level: 'error',
-			message: `Theme variable "${name}" ${detail}, so ${left_out} is left out of the generated CSS`,
-			suggestion:
-				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
-			identifier: name,
-			locations: null
-		});
-	};
-	const contained_slot = (slot: 'base' | 'dark', value: unknown): string | undefined => {
-		if (value === undefined) return undefined;
-		if (!css_value_is_contained(value)) {
-			report(`has a ${slot} value that can't be contained in a declaration`, 'that value');
-		} else if (!(value as string).trim()) {
-			report(`has a blank ${slot} value`, 'that value');
-		} else {
-			return value as string;
-		}
-		return undefined;
-	};
-	if (!css_custom_property_name_is_contained(v.name)) {
-		report('has a name that is not a plain identifier', 'it');
-		return null;
-	}
-	const base = contained_slot('base', v.base);
-	const dark = contained_slot('dark', v.dark);
-	if (base === undefined && dark === undefined) return null;
-	if (base === v.base && dark === v.dark) return v;
-	return {
-		name: v.name,
-		...(base !== undefined && { base }),
-		...(dark !== undefined && { dark })
-	};
-};
 
 /**
  * Builds a dependency graph from an array of style variables.
@@ -373,11 +320,13 @@ const to_list = (items: Array<string>): string =>
 		: items.join('; ');
 
 /**
- * Derives what a build-time theme renders with from the configured variable
- * set: the stance mirror, re-slotted from the configured `variables` (so a
- * build that customizes a scheme-adaptive variable mirrors its own value, not
- * the default), and the caps `compute_theme_caps` recomputes for the theme's
- * hues and lightness - the derived half of `compile_theme`.
+ * Bakes a build-time theme: contains it, compiles it over the configured
+ * variable set (`compile_theme` with `variables`), and reports what the
+ * compile found as diagnostics. The result is what the theme renders with -
+ * the stance mirror re-slotted from the configured `variables` (so a build
+ * that customizes a scheme-adaptive variable mirrors its own value, not the
+ * default), and the caps recomputed for the theme's hues and lightness with
+ * the configured knob-tier values folded in.
  *
  * The theme's variables pass the containment checks first, as
  * `build_variable_graph` applies them: a slot the stylesheet can't hold, or
@@ -385,21 +334,14 @@ const to_list = (items: Array<string>): string =>
  * `variable_value_uncontained` error and left out, and the caps, the gates,
  * and the overlay all see the contained theme - what renders.
  *
- * The caps and the gates measure the theme over the configured set: a
- * knob-tier value (`theme_knobs`) the configured `variables` change from the
- * default is folded in beneath the theme's own, re-slotted for a stance as
- * the mirror re-slots it, so a build that retunes a ramp knob is capped and
- * gated at what it renders. A configured value the gates can't read lands
- * in `unchecked`.
- *
- * The gates (`check_theme` with the caps) report as warnings, since a theme
- * can knowingly give up a gate: `theme_gate_failed` lists the failing gate
- * entries and `theme_gate_unchecked` the inputs the gates couldn't evaluate.
- * A stanced theme renders its one appearance in both schemes, so only the
- * stanced scheme's entries are listed. The lint (`validate_theme`) runs
- * over the contained theme, so a slot reported as uncontained isn't reported
- * again: each issue is a `theme_lint` diagnostic at the issue's level, so an
- * unknown variable fails a build that throws on errors.
+ * The gates report as warnings, since a theme can knowingly give up a gate:
+ * `theme_gate_failed` lists the failing gate entries and
+ * `theme_gate_unchecked` the inputs the gates couldn't evaluate. A stanced
+ * theme renders its one appearance in both schemes, so only the stanced
+ * scheme's entries are listed. The lint runs over the contained theme, so a
+ * slot reported as uncontained isn't reported again: each issue is a
+ * `theme_lint` diagnostic at the issue's level, so an unknown variable fails
+ * a build that throws on errors.
  *
  * @param theme - the configured `theme` option
  * @param variables - the configured variable set the theme overlays
@@ -412,11 +354,9 @@ export const bake_theme = (
 	diagnostics?: Array<GenerationDiagnostic>
 ): ResolvedTheme => {
 	const wire = contain_theme(theme, diagnostics);
-	const stance = to_theme_stance(wire.scheme);
-	const measured = fold_configured_knobs(wire, variables, stance);
-	const caps = compute_theme_caps(measured);
+	const { scheme_mirror, caps, report, issues } = compile_theme(wire, { variables });
 	if (diagnostics) {
-		for (const issue of validate_theme(wire)) {
+		for (const issue of issues) {
 			diagnostics.push({
 				phase: 'generation',
 				code: 'theme_lint',
@@ -427,7 +367,6 @@ export const bake_theme = (
 				locations: null
 			});
 		}
-		const report = check_theme(measured, { caps });
 		const warn = (
 			code: 'theme_gate_failed' | 'theme_gate_unchecked',
 			message: string,
@@ -444,6 +383,7 @@ export const bake_theme = (
 			});
 		};
 		// under a stance both schemes resolve the same, so the other's entries repeat
+		const stance = to_theme_stance(wire.scheme);
 		const failed = report.entries.filter((e) => !e.pass && (!stance || e.scheme === stance));
 		if (failed.length) {
 			warn(
@@ -469,7 +409,7 @@ export const bake_theme = (
 	}
 	return {
 		theme: wire,
-		...(stance && { scheme_mirror: compute_scheme_mirror(stance, variables) }),
+		...(scheme_mirror && { scheme_mirror }),
 		...(caps.length > 0 && { caps })
 	};
 };
@@ -487,36 +427,6 @@ const contain_theme = (theme: Theme, diagnostics?: Array<GenerationDiagnostic>):
 		if (c) contained.push(c);
 	}
 	return changed ? { ...theme, variables: contained } : theme;
-};
-
-const knob_names: ReadonlySet<string> = new Set(theme_knobs.map((k) => k.name));
-const default_knobs: ReadonlyMap<string, StyleVariable> = new Map(
-	default_variables.filter((v) => knob_names.has(v.name)).map((v) => [v.name, v])
-);
-
-// the theme the caps and gates measure: the configured set's knob-tier values
-// that differ from the defaults, beneath the theme's own (re-slotted for a
-// stance as the mirror re-slots them), or the theme itself when none differ
-const fold_configured_knobs = (
-	theme: Theme,
-	variables: Array<StyleVariable>,
-	stance: ColorScheme | null
-): Theme => {
-	const by_name: Map<string, StyleVariable> = new Map();
-	for (const v of variables) {
-		const fallback = default_knobs.get(v.name);
-		if (!fallback || (v.base === fallback.base && v.dark === fallback.dark)) continue;
-		const contained = contain_variable(v);
-		if (!contained) continue;
-		by_name.set(
-			v.name,
-			(stance ? compute_scheme_mirror(stance, [contained])[0] : undefined) ?? contained
-		);
-	}
-	if (!by_name.size) return theme;
-	for (const v of theme.variables)
-		by_name.set(v.name, overlay_style_variable(by_name.get(v.name), v));
-	return { ...theme, variables: [...by_name.values()] };
 };
 
 /**

@@ -529,9 +529,11 @@ Use `VitePluginFuzCssOptions` to customize:
   `ThemeRoot`: no runtime theme rendering, and the output stays tree-shaken
   because the overlay happens before the dependency graph is built. The
   bake derives the theme's data itself (`bake_theme` in
-  `variable_graph.ts`), so a `ResolvedTheme` passes its `theme`: a stanced
-  theme's mirror re-slots the configured `variables` rather than the
-  defaults, and `compute_theme_caps` runs on it, so a theme whose hues or
+  `variable_graph.ts`, compiling with `compile_theme(theme, {variables})`),
+  so a `ResolvedTheme` passes its `theme`: a stanced theme's mirror re-slots
+  the configured `variables` rather than the defaults, the configured
+  knob-tier values fold in beneath the theme for the caps and the gates, and
+  `compute_theme_caps` runs on it, so a theme whose hues or
   lightness moved bakes its recomputed caps last, with the gates reported as
   warnings (`theme_gate_failed`, `theme_gate_unchecked`). `validate_theme`
   lints the contained theme, each issue a `theme_lint` diagnostic at its own
@@ -657,7 +659,9 @@ carry a module-level `@internal` - documented, importable, not stable API.
   through the same checks, while a modifier's argument is held to its own
   grammar in `modifiers.ts`.
   `escape_css_identifier` writes the renderer's `id` option into its
-  selector, escaping punctuation by code point so `</style` can't form
+  selector, escaping punctuation by code point so `</style` can't form, and
+  `contain_variable` keeps the slots of a variable a stylesheet can hold
+  (the graph, the bake, and the compile fold share it)
 - [theme_stance.ts](src/lib/theme_stance.ts) - `resolve_theme_stance`, which
   returns a `ResolvedTheme` carrying a single-scheme theme's `scheme_mirror`
   (the scheme-adaptive defaults re-slotted so its one appearance holds in
@@ -744,7 +748,9 @@ carry a module-level `@internal` - documented, importable, not stable API.
   to a number)
 - [theme_compile.ts](src/lib/theme_compile.ts) - `compile_theme`: the
   mirror, the caps (beside the theme, so compiling is idempotent), the gates
-  with them, and the lint, in one `CompiledTheme`; apart from
+  with them, and the lint, in one `CompiledTheme`; given a build's configured
+  `variables`, it mirrors from them and folds their changed knob-tier values
+  beneath the theme for the caps and gates (the bake's path); apart from
   `theme_check.ts` so the gates and the caps import without the lint
 - [theme.gen.css.ts](src/lib/theme.gen.css.ts) - Gro generator that produces
   `theme.css`
@@ -814,9 +820,10 @@ is an internal fixture the example apps import through node_modules.
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
   transitive resolution; it leaves out a value that would escape its
   declaration, as the runtime renderer does, with a
-  `variable_value_uncontained` error. `bake_theme` derives a build-time
-  theme's mirror (from the configured variables) and compiled caps, and the
-  graph carries the baked theme for the `fuz.theme.baked` overlay
+  `variable_value_uncontained` error. `bake_theme` contains a build-time
+  theme, compiles it over the configured variables (`compile_theme`), and
+  reports the lint and gates as diagnostics, and the graph carries the baked
+  theme for the `fuz.theme.baked` overlay
 - [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
   extraction utilities: references, fallback-less references, declarations,
   and comment stripping
@@ -922,12 +929,15 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `generate_classes_css.{test,modifiers,order,validity}.test.ts`
 - `style_rule_parser.{test,at_rules,custom}.test.ts`
 - `theme_check.{test,pins}.test.ts`
+- `theme_compile.{test,bake}.test.ts` (`bake` pins every shipped theme's
+  compile and bake against `fixtures/theme_bake_fixture.json`, regenerated
+  by its `.gen.json.ts`)
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 - `styles.{test,states}.test.ts`
 
 Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
-`css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
+`css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `diagnostic_codes`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `render_bundled_css`,

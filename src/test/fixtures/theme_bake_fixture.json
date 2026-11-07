@@ -1,0 +1,234 @@
+[
+	{
+		"name": "base",
+		"compiled": "e86f148e9a23744314ab5fd22cafc0e2806a2b1ec7897515a0b6c8d4a5c38337",
+		"baked_defaults": {
+			"resolved": "973a710bce76ae7aa6afe4ba60e9c67383a20adee7dd4bec7049314dce968c02",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "482f9b34dd31003180fc7a28ab678b7ec75c138077428372118c8019d102bbcc",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"base\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "base",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "guestbook",
+		"compiled": "3240553d5d1bc5c1de83c84f42f6dd6558274b2674aed15e208cf6765a642c46",
+		"baked_defaults": {
+			"resolved": "e20eca6a513ce6c60f0bbffc9a7be4c4db1570e934a2fd1046dea87d549f4902",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "e66594e6a5f45119981e610aaa54788ed4cbf0411c4b3d2e3df56078f91ec6d2",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"guestbook\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "guestbook",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "high contrast",
+		"compiled": "6005b6c20e23416b51af4d674d6e12e645010df1dbe50e4f7bd21a0184881a4b",
+		"baked_defaults": {
+			"resolved": "c0a206e90a4fd3d37e301cec6a6d2f8d3a08c5ebf5eef3784ca2086667876164",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "356b813688b487f2f9f09b81fe1e98fc081d5d24a34a402afda18f6e4bc8124b",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"high contrast\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "high contrast",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "ledger",
+		"compiled": "d94eb2d6337ceb7b9f54f7e494ec4fb2c5ba7804473fb94b02b1ccc7b6645b39",
+		"baked_defaults": {
+			"resolved": "9030e273c042d26f9efa873d4b6be54dc35c142ec8da7b2fc205c81b8d063d3a",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "d75d7db8e79bd99e116c2f32f7c2cd8c6e49fbde8c6ab4aa97f5ddaef71ce257",
+			"diagnostics": []
+		}
+	},
+	{
+		"name": "low contrast",
+		"compiled": "2657d3e749ab045ee1df26bfbddd9c7e77fa1ee63fa2d91eec7e2ead7d090a7a",
+		"baked_defaults": {
+			"resolved": "e0056bd39a068e1e1c900db88705c919654d5d417ea917dcc083e2778057b85e",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "cb00b7d00c7fd80ebcbca18bee3a25a1ef6b4e0b435da927d7b24c0bd8446d7b",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"low contrast\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "low contrast",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "marquee",
+		"compiled": "0da5c42a13eae6a5c4a4337d0b511a61fa621e48e032966bc9675c246cd595a7",
+		"baked_defaults": {
+			"resolved": "37624bcb76fba7d083b6ec074092b36274050205b441d04539aff5767aa832af",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"marquee\" fails accessibility gates: gamut dark palette_a_80 (0.018 against 0.0001); gamut dark palette_a_90 (0.026 against 0.0001); gamut dark palette_a_95 (0.019 against 0.0001); gamut dark palette_a_100 (0.009 against 0.0001); gamut dark palette_c_80 (0.004 against 0.0001); gamut dark palette_c_90 (0.02 against 0.0001); gamut dark palette_c_95 (0.017 against 0.0001); gamut dark palette_c_100 (0.009 against 0.0001); and 28 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "marquee",
+					"locations": null
+				}
+			]
+		},
+		"baked_retuned": {
+			"resolved": "cd9207d983dc92ae6b28860018e289f1e56b7337cc454091aebdbe45f6e6143d",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"marquee\" fails accessibility gates: gamut dark palette_a_60 (0.015 against 0.0001); gamut dark palette_a_70 (0.065 against 0.0001); gamut dark palette_a_80 (0.046 against 0.0001); gamut dark palette_a_90 (0.028 against 0.0001); gamut dark palette_a_95 (0.019 against 0.0001); gamut dark palette_a_100 (0.009 against 0.0001); gamut dark palette_c_70 (0.032 against 0.0001); gamut dark palette_c_80 (0.031 against 0.0001); and 41 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "marquee",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "parchment",
+		"compiled": "32d16511e9e4a6d1477a7aaef012f53bcfb629ed984d8dd3983fa6510b3276b3",
+		"baked_defaults": {
+			"resolved": "3a16417978f466642aff690ba2722bfc505da793a2945c874c64dbe771d91e52",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "0482510903288cbfc55e523df9595defcbaeb08ba5992c0783660133c95f0341",
+			"diagnostics": []
+		}
+	},
+	{
+		"name": "pebble",
+		"compiled": "931ec66a4b46770c466d802a6d777d21bc900bb896bd31704adcab964b901b4b",
+		"baked_defaults": {
+			"resolved": "73ac8d165e8935f472757694130ba55d6f00989d69b296d7e44afa0a9a2f8c58",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "34fb5f5c77a9309791964223d5bef69b749e8c0e2a7e77148c17f244545ae3bb",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"pebble\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "pebble",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "phosphor",
+		"compiled": "3eda386ceb6131c7adcf77d9dee78af181adf9690f7530faca63788156c29320",
+		"baked_defaults": {
+			"resolved": "3a35e9c91741a131adb11b0bea03a7a3990478232b650d58d9d44309de8ee75e",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "a0c2605145b05fe0d453433f454d81dd62ba082733bd481b8a5a4493a373e865",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"phosphor\" fails accessibility gates: gamut dark palette_a_60 (0.029 against 0.0001); gamut dark palette_a_70 (0.078 against 0.0001); gamut dark palette_a_80 (0.056 against 0.0001); gamut dark palette_a_90 (0.033 against 0.0001); gamut dark palette_a_95 (0.022 against 0.0001); gamut dark palette_a_100 (0.011 against 0.0001); gamut dark palette_c_70 (0.042 against 0.0001); gamut dark palette_c_80 (0.039 against 0.0001); and 44 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "phosphor",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "signage",
+		"compiled": "f38ae3139d962e181ce4c5761d360fcf82cb79003a280648caae78765d03f390",
+		"baked_defaults": {
+			"resolved": "c572ae8f4b49379ed8abf413b09b553b5ebf7c1083d91ebbc435672f796c2814",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "4f9b77595486017e000bf1aa521170342bb778630a3698bc8c01b20d3b55c873",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"signage\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "signage",
+					"locations": null
+				}
+			]
+		}
+	},
+	{
+		"name": "zine",
+		"compiled": "0809ebfc4efd412488172080b7ff453d7a488ec8cb3e3a0602a3d82b8f2a3e8a",
+		"baked_defaults": {
+			"resolved": "fb7b1c24a8e4ed09384aaa17dd7419c0a6c94b71795eb659e4ba85e7f8a1a428",
+			"diagnostics": []
+		},
+		"baked_retuned": {
+			"resolved": "023fa2f6d511eb5be2ef3bc8892d9219d6667fb8db2a7946b96e677066d68c5c",
+			"diagnostics": [
+				{
+					"phase": "generation",
+					"code": "theme_gate_failed",
+					"level": "warning",
+					"message": "Baked theme \"zine\" fails accessibility gates: gamut light palette_a_05 (0.003 against 0.0001); gamut light palette_a_10 (0.018 against 0.0001); gamut light palette_a_20 (0.03 against 0.0001); gamut light palette_a_30 (0.009 against 0.0001); gamut light palette_c_05 (0.002 against 0.0001); gamut light palette_c_10 (0.012 against 0.0001); gamut light palette_c_20 (0.012 against 0.0001); gamut light palette_d_10 (0.007 against 0.0001); and 80 more",
+					"suggestion": "Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.",
+					"identifier": "zine",
+					"locations": null
+				}
+			]
+		}
+	}
+]
