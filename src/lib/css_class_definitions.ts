@@ -169,7 +169,7 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 
 	*/
 	// Border color alpha ramp - the letterless `border_color_NN` family sets both
-	// the property and the contextual variable (`outline_color_NN` is the opaque shade ramp)
+	// the property and the contextual variable (`outline_shade_NN` is the opaque shade ramp)
 	...generate_property_classes(
 		'border-color',
 		darken_lighten_variants,
@@ -202,10 +202,11 @@ export const css_class_definitions: Record<string, CssClassDefinition | undefine
 	...generate_property_classes(
 		'outline-color',
 		shade_variants,
-		(v) => `var(--shade_${v}); --outline_color: var(--shade_${v})`
+		(v) => `var(--shade_${v}); --outline_color: var(--shade_${v})`,
+		'outline_shade'
 	),
 	// Outline colors using palette hue + intensity (sets both property and contextual variable);
-	// the letter alone implies the palette - the shade family is `outline_color_NN`
+	// the letter alone implies the palette - the shade family is `outline_shade_NN`
 	...generate_classes(
 		(letter: string, intensity: string) => ({
 			name: `outline_${letter}_${intensity}`,

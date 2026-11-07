@@ -251,7 +251,7 @@ See the `VitePluginFuzCssOptions` type for configuration.
   letter alone implies the palette: `color_a_50`, `bg_a_50`, `border_a_50`,
   and `outline_a_50` apply the `--palette_a_NN` stops to their named property
   and `shadow_a_50` sets the contextual `--shadow_color` (`border_color_50` is
-  the letterless alpha ramp). A bare intent or neutral scale class applies its
+  the letterless alpha ramp, `outline_shade_50` the opaque shade one). A bare intent or neutral scale class applies its
   family's dominant use
   (`positive_50`/`text_70` set text color, `shade_50` sets background) with
   `bg_` twins (`bg_positive_50`), and the intents mirror the palette's

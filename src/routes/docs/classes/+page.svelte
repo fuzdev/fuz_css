@@ -788,7 +788,7 @@ vite_plugin_fuz_css({
 				</li>
 				<li>
 					<span class="code_chips">
-						<code>.outline_color_{@render variant_range(shade_variants)}</code>
+						<code>.outline_shade_{@render variant_range(shade_variants)}</code>
 					</span>
 				</li>
 				<li>

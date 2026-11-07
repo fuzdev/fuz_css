@@ -2198,43 +2198,43 @@
 	"border_info_100": {
 		"declaration": "border-color: var(--info_100); --border_color: var(--info_100);"
 	},
-	"outline_color_00": {
+	"outline_shade_00": {
 		"declaration": "outline-color: var(--shade_00); --outline_color: var(--shade_00);"
 	},
-	"outline_color_05": {
+	"outline_shade_05": {
 		"declaration": "outline-color: var(--shade_05); --outline_color: var(--shade_05);"
 	},
-	"outline_color_10": {
+	"outline_shade_10": {
 		"declaration": "outline-color: var(--shade_10); --outline_color: var(--shade_10);"
 	},
-	"outline_color_20": {
+	"outline_shade_20": {
 		"declaration": "outline-color: var(--shade_20); --outline_color: var(--shade_20);"
 	},
-	"outline_color_30": {
+	"outline_shade_30": {
 		"declaration": "outline-color: var(--shade_30); --outline_color: var(--shade_30);"
 	},
-	"outline_color_40": {
+	"outline_shade_40": {
 		"declaration": "outline-color: var(--shade_40); --outline_color: var(--shade_40);"
 	},
-	"outline_color_50": {
+	"outline_shade_50": {
 		"declaration": "outline-color: var(--shade_50); --outline_color: var(--shade_50);"
 	},
-	"outline_color_60": {
+	"outline_shade_60": {
 		"declaration": "outline-color: var(--shade_60); --outline_color: var(--shade_60);"
 	},
-	"outline_color_70": {
+	"outline_shade_70": {
 		"declaration": "outline-color: var(--shade_70); --outline_color: var(--shade_70);"
 	},
-	"outline_color_80": {
+	"outline_shade_80": {
 		"declaration": "outline-color: var(--shade_80); --outline_color: var(--shade_80);"
 	},
-	"outline_color_90": {
+	"outline_shade_90": {
 		"declaration": "outline-color: var(--shade_90); --outline_color: var(--shade_90);"
 	},
-	"outline_color_95": {
+	"outline_shade_95": {
 		"declaration": "outline-color: var(--shade_95); --outline_color: var(--shade_95);"
 	},
-	"outline_color_100": {
+	"outline_shade_100": {
 		"declaration": "outline-color: var(--shade_100); --outline_color: var(--shade_100);"
 	},
 	"outline_a_00": {

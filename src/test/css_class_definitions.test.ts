@@ -121,3 +121,13 @@ describe('names the registry leaves to literals', () => {
 		}
 	});
 });
+
+describe('outline_shade', () => {
+	test('reads the shade ramp and sets the contextual outline color', () => {
+		assert.strictEqual(
+			to_declaration('outline_shade_30'),
+			'outline-color: var(--shade_30); --outline_color: var(--shade_30);'
+		);
+		assert.notOk('outline_color_30' in css_class_definitions);
+	});
+});

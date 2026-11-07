@@ -206,14 +206,14 @@ border-color: var(--shade_30);
 			Each border utility class has a corresponding outline variant (like <code>outline_b_50</code>,
 			<code>outline_width_4</code>, and <code>outline-style:solid</code>). The letterless classes
 			differ, though: <code>border_color_50</code> is the translucent border ramp, while
-			<code>outline_color_50</code> is the opaque shade ramp. There are also two special outline
+			<code>outline_shade_50</code> is the opaque shade ramp. There are also two special outline
 			variables:
 		</p>
 		<div class="border_examples outline_widths">
 			{#each outline_width_variants as outline_width_variant (outline_width_variant)}
 				{@const name = 'outline_width_' + outline_width_variant}
 				<div class="row">
-					<div class="border_example {name} outline-style:solid outline_color_30">
+					<div class="border_example {name} outline-style:solid outline_shade_30">
 						<StyleVariableButton {name} />
 					</div>
 					<span class="pl_sm pr_sm">=</span><code><ResolvedLength {name} /></code>
