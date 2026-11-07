@@ -14,6 +14,11 @@
 <blockquote>
 	Moss grows on the north side, except where it doesn't. <em>—a blockquote</em>
 </blockquote>
+<ul>
+	<li>sheet moss carpets the shaded logs</li>
+	<li>haircap moss stands in the open patches</li>
+	<li>rock moss holds to the boulders by the creek</li>
+</ul>
 <aside>An aside is a callout, with its own tint and border.</aside>
 <form onsubmit={(e) => e.preventDefault()}>
 	<label>

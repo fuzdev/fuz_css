@@ -367,6 +367,12 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 	) {
 		margin-bottom: var(--flow_margin, var(--space_lg));
 	}
+	/* list items in a styled list sit two space steps below the flow margin
+		(sm over the lg default), so items group tighter than the blocks
+		around the list while still scaling with the density composites */
+	:where(:is(ul, ol):not(.unstyled) > li:not(:last-child):not(.unstyled)) {
+		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 0.62);
+	}
 	/* sections are the page-level gap: a flow-margin multiple (xl7 over the lg
 		default), so density composites scale it with the rest of the rhythm */
 	:where(section:not(:last-child):not(.unstyled)) {

@@ -60,6 +60,7 @@ and block elements (`p`, `ul`, `ol`, `table`, `aside`, `blockquote`, `pre`,
 `fieldset`, …) get vertical rhythm automatically from the **flow-margin**
 system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
 `:last-child` or `.unstyled` (headings and `section` take multiples of it,
+list items in a styled `ul`/`ol` two steps below it - `space_sm` by default,
 and a heading opening a padded box - `.panel`, `.pane`, `aside`, `li`, and
 the like - drops its top margin), and margins reset to 0 on the direct
 children of a `.row` (horizontal flex; use `gap_*` there instead). Adding a

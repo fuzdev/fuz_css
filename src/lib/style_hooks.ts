@@ -47,7 +47,7 @@ export const style_hooks: ReadonlyArray<StyleHook> = [
 	// flow and size context, set by the sized_* composites for their subtree
 	{
 		name: 'flow_margin',
-		read_by: ['block elements', 'headings', '.mb_flow', '.mt_flow'],
+		read_by: ['block elements', 'headings', 'li', '.mb_flow', '.mt_flow'],
 		fallbacks: ['var(--space_lg)'],
 		summary:
 			'the flow-margin rhythm unit - block elements take it as their bottom margin and headings a multiple; set 0 to drop the rhythm in a subtree'
