@@ -6,11 +6,17 @@
 
 import { test, describe, assert } from 'vitest';
 
-import { generate_css, type GenerateCssOptions } from '#lib/generate_css.ts';
+import { generate_css, to_class_inputs, type GenerateCssOptions } from '#lib/generate_css.ts';
+import { CssClasses } from '#lib/css_classes.ts';
+import type { SourceLocation } from '#lib/diagnostics.ts';
 import { create_test_fixtures } from './css_bundled_resolution_fixtures.ts';
 import type { StyleVariable } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
-import { assert_css_contains, assert_css_not_contains } from './test_helpers.ts';
+import {
+	assert_css_contains,
+	assert_css_not_contains,
+	make_extraction_data
+} from './test_helpers.ts';
 
 const CLASS_DEFS = {
 	p_lg: { declaration: 'padding: var(--space_lg);' }
@@ -121,6 +127,53 @@ describe('generate_css', () => {
 			assert_css_contains(result.css, 'button');
 			// theme variable that was referenced
 			assert_css_contains(result.css, '--text_color');
+		});
+
+		test('applies all six include and exclude options itself', () => {
+			const { style_rule_index, variable_graph } = create_test_fixtures(
+				'button { color: red; } a { color: blue; } input { color: green; }',
+				[
+					{ name: 'space_lg', base: '24px' },
+					{ name: 'kept_var', base: '1px' },
+					{ name: 'added_var', base: '2px' },
+					{ name: 'dropped_var', base: '3px' }
+				]
+			);
+			const loc: SourceLocation = { file: 'a.svelte', line: 1, column: 1 };
+			const result = generate_css(
+				make_options({
+					class_definitions: { ...CLASS_DEFS, m_lg: { declaration: 'margin: 1px;' } },
+					all_classes: new Set(['m_lg']),
+					all_classes_with_locations: new Map([['m_lg', [loc]]]),
+					all_elements: new Set(['a', 'input']),
+					detected_css_variables: new Set(['kept_var', 'dropped_var']),
+					include_base: true,
+					include_theme: true,
+					resources: { style_rule_index, variable_graph },
+					additional_classes: ['p_lg', 'missing_class'],
+					exclude_classes: ['m_lg'],
+					additional_elements: ['button'],
+					exclude_elements: ['input'],
+					additional_variables: ['added_var'],
+					exclude_variables: ['dropped_var']
+				})
+			);
+
+			assert_css_contains(result.css, '.p_lg {');
+			assert_css_not_contains(result.css, '.m_lg');
+			assert_css_contains(result.css, 'color: red');
+			assert_css_contains(result.css, 'color: blue');
+			assert_css_not_contains(result.css, 'color: green');
+			assert_css_contains(result.css, '--kept_var');
+			assert_css_contains(result.css, '--added_var');
+			assert_css_not_contains(result.css, '--dropped_var');
+			// an additional class is explicit, so an unresolvable one errors, with no locations
+			const unresolved = result.diagnostics.filter((d) => d.code === 'class_unresolved');
+			assert.strictEqual(unresolved.length, 1);
+			assert.strictEqual(unresolved[0]!.level, 'error');
+			assert(unresolved[0]!.phase === 'generation');
+			assert.strictEqual(unresolved[0]!.identifier, 'missing_class');
+			assert.isNull(unresolved[0]!.locations);
 		});
 
 		test('merges explicit_variables into the detected set', () => {
@@ -634,5 +687,224 @@ describe('generate_css', () => {
 			assert.include(suggestion(false), 'base_css: null');
 			assert.include(suggestion(false), 'exclude_variables: default_variables.map((v) => v.name)');
 		});
+	});
+});
+
+describe('to_class_inputs', () => {
+	test('additional_classes always included', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
+		);
+
+		const result = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['always-included'])
+		}).all_classes;
+		assert.isTrue(result.has('always-included'));
+		assert.isTrue(result.has('extracted'));
+	});
+
+	test('locations are null for additional_classes', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
+		);
+
+		const result = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['included'])
+		}).all_classes_with_locations;
+		assert.isNull(result.get('included'));
+		assert.deepEqual(result.get('extracted'), [loc]);
+	});
+
+	test('additional_classes are included in explicit_classes', () => {
+		const css_classes = new CssClasses();
+
+		const { explicit_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['included_class'])
+		});
+		assert.isNotNull(explicit_classes);
+		assert.isTrue(explicit_classes.has('included_class'));
+	});
+
+	test('exclude_classes filters from all_classes', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({
+				classes: new Map([
+					['kept', [loc]],
+					['excluded', [loc]]
+				])
+			})
+		);
+
+		const { all_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			exclude_classes: new Set(['excluded'])
+		});
+		assert.isTrue(all_classes.has('kept'));
+		assert.isFalse(all_classes.has('excluded'));
+	});
+
+	test('exclude_classes filters from explicit_classes', () => {
+		const include = new Set(['included_explicit']);
+		const exclude = new Set(['included_explicit']);
+		const css_classes = new CssClasses();
+
+		const { explicit_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: include,
+			exclude_classes: exclude
+		});
+		// included_explicit is in both include and exclude, so it should be excluded
+		assert.isNull(explicit_classes);
+	});
+
+	test('exclude_classes suppresses @fuz-classes warnings', () => {
+		const exclude = new Set(['annotated_but_excluded']);
+		const css_classes = new CssClasses();
+		const explicit = new Set(['annotated_but_excluded']);
+
+		css_classes.add(
+			'file1.ts',
+			make_extraction_data({ classes: new Map(), explicit_classes: explicit })
+		);
+
+		const { explicit_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			exclude_classes: exclude
+		});
+		// Should be filtered out by exclude
+		assert.isNull(explicit_classes);
+	});
+
+	test('additional_classes merged with file data', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+
+		// Simulate adding file data (could be from cache or fresh extraction)
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['extracted_class', [loc]]]) })
+		);
+
+		const result = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['additional_a', 'additional_b'])
+		}).all_classes;
+		// Both additional and extracted should be present
+		assert.isTrue(result.has('additional_a'));
+		assert.isTrue(result.has('additional_b'));
+		assert.isTrue(result.has('extracted_class'));
+	});
+
+	test('exclude_classes filters additional_classes', () => {
+		const include = new Set(['keep_me', 'exclude_me']);
+		const exclude = new Set(['exclude_me']);
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
+		);
+
+		const result = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: include,
+			exclude_classes: exclude
+		}).all_classes;
+		assert.isTrue(result.has('keep_me'));
+		assert.isFalse(result.has('exclude_me'));
+		assert.isTrue(result.has('extracted'));
+	});
+
+	test('multiple files combined with additional_classes', () => {
+		const css_classes = new CssClasses();
+		const loc1: SourceLocation = { file: 'file1.svelte', line: 1, column: 1 };
+		const loc2: SourceLocation = { file: 'file2.svelte', line: 5, column: 10 };
+
+		// Add multiple files (simulating cache-restored data)
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['from_file1', [loc1]]]) })
+		);
+		css_classes.add(
+			'file2.svelte',
+			make_extraction_data({ classes: new Map([['from_file2', [loc2]]]) })
+		);
+
+		const result = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['always_included'])
+		}).all_classes;
+		assert.isTrue(result.has('always_included'));
+		assert.isTrue(result.has('from_file1'));
+		assert.isTrue(result.has('from_file2'));
+	});
+
+	test('empty additional_classes has no effect on file data', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
+		);
+
+		const result = to_class_inputs({ ...css_classes.get_all() }).all_classes;
+		assert.strictEqual(result.size, 1);
+		assert.isTrue(result.has('extracted'));
+	});
+
+	test('additional_classes appear in explicit_classes for warning tracking', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
+
+		css_classes.add(
+			'file1.svelte',
+			make_extraction_data({ classes: new Map([['regular', [loc]]]) })
+		);
+
+		const { explicit_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['additional_class'])
+		});
+		// additional_classes should be in explicit_classes
+		assert.isTrue(explicit_classes!.has('additional_class'));
+		// Regular extracted classes are not explicit unless via @fuz-classes
+		assert.isFalse(explicit_classes!.has('regular'));
+	});
+
+	test('file explicit classes combined with additional_classes in explicit_classes', () => {
+		const css_classes = new CssClasses();
+		const loc: SourceLocation = { file: 'test.ts', line: 1, column: 1 };
+		const file_explicit = new Set(['from_fuz_classes_annotation']);
+
+		css_classes.add(
+			'file1.ts',
+			make_extraction_data({
+				classes: new Map([['regular', [loc]]]),
+				explicit_classes: file_explicit
+			})
+		);
+
+		const { explicit_classes } = to_class_inputs({
+			...css_classes.get_all(),
+			additional_classes: new Set(['additional'])
+		});
+		assert.isTrue(explicit_classes!.has('additional'));
+		assert.isTrue(explicit_classes!.has('from_fuz_classes_annotation'));
+		assert.isFalse(explicit_classes!.has('regular'));
 	});
 });

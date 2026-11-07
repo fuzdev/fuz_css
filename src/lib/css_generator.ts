@@ -39,7 +39,7 @@ export interface CssRenderInput {
  * A generator's shared core - see `create_css_generator`.
  */
 export interface CssGenerator {
-	/** Creates an empty class collection with the configured include and exclude classes. */
+	/** Creates an empty class collection. */
 	create_css_classes: () => CssClasses;
 	/**
 	 * Loads what a render needs - the CSS properties literal classes are
@@ -91,8 +91,9 @@ export const create_css_generator = (
 	const class_definitions = resolve_class_definitions(class_definitions_option);
 	const class_interpreters = resolve_class_interpreters(class_interpreters_option);
 
-	const include_set = additional_classes ? new Set(additional_classes) : null;
-	const exclude_set = exclude_classes ? new Set(exclude_classes) : null;
+	// collected once, so an option given as a one-shot iterable serves every render
+	const additional_class_set = additional_classes ? new Set(additional_classes) : undefined;
+	const exclude_class_set = exclude_classes ? new Set(exclude_classes) : undefined;
 
 	const dispatch = create_diagnostic_dispatcher({ on_error, on_warning }, sink);
 
@@ -142,8 +143,10 @@ export const create_css_generator = (
 			include_theme,
 			theme,
 			resources,
+			additional_classes: additional_class_set,
 			additional_elements,
 			additional_variables,
+			exclude_classes: exclude_class_set,
 			exclude_elements,
 			exclude_variables
 		});
@@ -152,7 +155,7 @@ export const create_css_generator = (
 	};
 
 	return {
-		create_css_classes: () => new CssClasses(include_set, exclude_set),
+		create_css_classes: () => new CssClasses(),
 		ensure_ready,
 		render
 	};

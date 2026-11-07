@@ -129,14 +129,14 @@ const render_theme_overlay = (baked: ResolvedTheme, resolved_variables: Set<stri
 /**
  * Inputs to `generate_css`. The first group mirrors the shape returned by
  * `CssClasses.get_all()` plus its diagnostics, so callers can forward it
- * directly.
+ * directly; the include and exclude options at the end apply over it.
  */
 export interface GenerateCssOptions {
-	/** All detected class names, already exclude-filtered. */
+	/** All detected class names. */
 	all_classes: Set<string>;
-	/** Source locations per class, for diagnostics. */
+	/** Source locations per detected class, for diagnostics, or null for none. */
 	all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
-	/** Classes from `@fuz-classes`/`additional_classes`; unresolved ones error. */
+	/** Classes from `@fuz-classes`; unresolved ones error. */
 	explicit_classes: Set<string> | null;
 	/** All detected HTML element names. */
 	all_elements: Set<string>;
@@ -173,11 +173,76 @@ export interface GenerateCssOptions {
 	/** Bundled resources, or null for utility-only mode. */
 	resources: BundledCssResources | null;
 
+	/**
+	 * Classes to include whether or not they're detected. Each counts as
+	 * explicit, so an unresolvable one errors, and has no source locations.
+	 */
+	additional_classes?: Iterable<string>;
 	additional_elements?: Iterable<string> | 'all';
 	additional_variables?: Iterable<string> | 'all';
+	/** Classes to leave out, detected, explicit, or additional alike. */
+	exclude_classes?: Iterable<string>;
 	exclude_elements?: Iterable<string>;
 	exclude_variables?: Iterable<string>;
 }
+
+/**
+ * The class inputs `generate_css` renders: the detected classes with
+ * `additional_classes` added ahead of them - explicit, with null locations -
+ * and `exclude_classes` removed from all three, or the inputs as given when
+ * neither option is set.
+ *
+ * @param options - the class inputs and the two class options
+ * @returns the classes, their locations, and the explicit classes to render
+ */
+export const to_class_inputs = (
+	options: Pick<
+		GenerateCssOptions,
+		| 'all_classes'
+		| 'all_classes_with_locations'
+		| 'explicit_classes'
+		| 'additional_classes'
+		| 'exclude_classes'
+	>
+): {
+	all_classes: Set<string>;
+	all_classes_with_locations: Map<string, Array<SourceLocation> | null>;
+	explicit_classes: Set<string> | null;
+} => {
+	const { all_classes, all_classes_with_locations, explicit_classes } = options;
+	const { additional_classes, exclude_classes } = options;
+	if (!additional_classes && !exclude_classes) {
+		return { all_classes, all_classes_with_locations, explicit_classes };
+	}
+	const exclude = exclude_classes ? new Set(exclude_classes) : null;
+	const all: Set<string> = new Set();
+	const with_locations: Map<string, Array<SourceLocation> | null> = new Map();
+	let explicit: Set<string> | null = null;
+	if (additional_classes) {
+		for (const c of additional_classes) {
+			if (exclude?.has(c)) continue;
+			all.add(c);
+			with_locations.set(c, null);
+			(explicit ??= new Set()).add(c);
+		}
+	}
+	for (const c of all_classes) {
+		if (exclude?.has(c)) continue;
+		all.add(c);
+		if (!with_locations.has(c)) with_locations.set(c, all_classes_with_locations.get(c) ?? null);
+	}
+	if (explicit_classes) {
+		for (const c of explicit_classes) {
+			if (exclude?.has(c)) continue;
+			(explicit ??= new Set()).add(c);
+		}
+	}
+	return {
+		all_classes: all,
+		all_classes_with_locations: with_locations,
+		explicit_classes: explicit
+	};
+};
 
 export interface GenerateCssResult {
 	/** Final CSS without banner comments - callers add their own. */
@@ -195,9 +260,6 @@ export interface GenerateCssResult {
  */
 export const generate_css = (options: GenerateCssOptions): GenerateCssResult => {
 	const {
-		all_classes,
-		all_classes_with_locations,
-		explicit_classes,
 		all_elements,
 		explicit_elements,
 		explicit_variables,
@@ -215,6 +277,8 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 		exclude_elements,
 		exclude_variables: raw_exclude_variables
 	} = options;
+
+	const { all_classes, all_classes_with_locations, explicit_classes } = to_class_inputs(options);
 
 	// a Set, for the lookups here and so the iterable is consumed once
 	const exclude_variables = raw_exclude_variables ? new Set(raw_exclude_variables) : null;

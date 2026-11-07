@@ -798,8 +798,10 @@ is an internal fixture the example apps import through node_modules.
   renders through: option defaults, the resources a render needs, and the
   render with its diagnostics dispatched
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
-  (generate → resolve → bundle) the generator core runs, plus the checks
-  that span options (`base_css_variables_undefined`, `theme_discarded`)
+  (generate → resolve → bundle) the generator core runs, taking the
+  extracted classes, elements, and variables with all six include and
+  exclude options (`GenerateCssOptions`), plus the checks that span options
+  (`base_css_variables_undefined`, `theme_discarded`)
 - [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
   resources (style-rule index, variable graph)
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
@@ -837,8 +839,8 @@ is an internal fixture the example apps import through node_modules.
   `to_property_rank`
 - [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
   composite class registry
-- [css_classes.ts](src/lib/css_classes.ts) - CssClasses collection for tracking
-  classes per-file
+- [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection for
+  tracking what each file extracted, unfiltered
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Token class
   template generators
 - [css_class_composites.ts](src/lib/css_class_composites.ts) - Composite class
