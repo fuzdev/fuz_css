@@ -99,13 +99,13 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
  * Result from transitive variable resolution.
  */
 export interface ResolveVariablesResult {
-	/** All resolved variable names */
+	/** All resolved variable names. */
 	variables: Set<string>;
-	/** Names of the variables found on a dependency cycle, each once */
+	/** Names of the variables found on a dependency cycle, each once. */
 	cycles: Array<string>;
-	/** Variable names that were requested but not found in the graph */
+	/** Variable names that were requested but not found in the graph. */
 	missing: Set<string>;
-	/** Excluded variable names a resolved variable depends on */
+	/** Excluded variable names a resolved variable depends on. */
 	excluded: Set<string>;
 }
 

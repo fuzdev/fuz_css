@@ -713,6 +713,8 @@ vite_plugin_fuz_css({
 					<span class="code_chips">
 						<code>.icon_size_{@render variant_range(icon_size_variants)}</code>
 					</span>
+					- sets <code>font-size</code> and also <code>--icon_size</code>, so what reads it, like
+					the <code>menuitem_icon</code> column, follows the class
 				</li>
 			</ul>
 			<h4>Borders</h4>
@@ -994,7 +996,10 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 				<a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a>.
 			</p>
 			<aside>
-				<p>The system tries to give helpful errors:</p>
+				<p>
+					The system tries to give helpful errors, each logged as
+					<code>[code] subject: message</code> with any suggestion after it in parentheses:
+				</p>
 				<ul>
 					<li>
 						property typos like <code>disply:flex</code> suggest <code>display</code>
@@ -1005,7 +1010,8 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 						<code>Cannot reference ruleset class "clickable" in composes array</code>
 					</li>
 					<li>
-						circular references produce: <code>Circular reference detected: a → b → a</code>
+						circular references produce:
+						<code>[class_composes_cycle] a: Circular reference detected: a → b → a</code>
 					</li>
 				</ul>
 			</aside>

@@ -107,9 +107,9 @@ export interface CssClassInterpreterContext {
 	 * explicitly.
 	 */
 	diagnostics: Array<InterpreterDiagnostic>;
-	/** All known CSS class definitions (token + composite classes) */
+	/** All known CSS class definitions (token + composite classes). */
 	class_definitions: Record<string, CssClassDefinition | undefined>;
-	/** Valid CSS properties for literal validation, or null to skip validation */
+	/** Valid CSS properties for literal validation, or null to skip validation. */
 	css_properties: Set<string> | null;
 }
 

@@ -321,7 +321,7 @@ describe('resolve_css variable resolution', () => {
 			// warns about the cycle, naming the variable it was found at
 			assert.deepEqual(
 				result.diagnostics.map((d) => [d.code, d.identifier, d.message]),
-				[['variable_cycle', 'a', 'Circular dependency detected for variable: a']]
+				[['variable_cycle', 'a', "Circular dependency - the variable's value depends on itself"]]
 			);
 		});
 

@@ -4,6 +4,7 @@
 	import TomeSectionHeader from '@fuzdev/fuz_ui/TomeSectionHeader.svelte';
 	import TomeSection from '@fuzdev/fuz_ui/TomeSection.svelte';
 	import StyleVariableButton from '@fuzdev/fuz_ui/StyleVariableButton.svelte';
+	import TomeLink from '@fuzdev/fuz_ui/TomeLink.svelte';
 	import { resolve } from '$app/paths';
 
 	import { space_variants, distance_variants } from '#lib/variable_data.ts';
@@ -24,6 +25,25 @@
 			<code>.p_md</code> and <code>.gap_lg</code>.
 		</p>
 	</section>
+	<TomeSection>
+		<TomeSectionHeader text="Rows" />
+		<p>
+			The <a href={resolve('/docs/classes#Composite-classes')}>composite</a> <code>.row</code> lays
+			out its children in a horizontal flex row with the items centered vertically, and
+			<code>.row_wrap</code> does the same but wraps the children onto more lines as they run out of
+			room. Both reset the flow margins of their direct children, so space the children with a
+			<code>.gap_*</code> class instead:
+		</p>
+		<div class="row_wrap gap_md mb_flow">
+			<button type="button">one</button>
+			<button type="button">two</button>
+			<button type="button">three</button>
+		</div>
+		<p>
+			A <code>label</code> takes either one to set a checkbox or radio beside its text - see
+			<TomeLink slug="forms" />.
+		</p>
+	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="Space variables" />
 		<ul class="unstyled">

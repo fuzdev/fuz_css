@@ -187,7 +187,8 @@
 		</form>
 		<aside>
 			The above are wrapped with: <Code content={`<label class="row">`} inline /> with
-			<code>.disabled</code> as needed: <Code content={`<label class="row disabled">`} inline />
+			<code>.disabled</code> as needed: <Code content={`<label class="row disabled">`} inline />. A
+			<code>label.row_wrap</code> takes the same styles, for a label whose content wraps.
 		</aside>
 	</TomeSection>
 

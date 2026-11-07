@@ -375,7 +375,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			phase: 'generation',
 			code: 'variable_cycle',
 			level: 'warning',
-			message: `Circular dependency detected for variable: ${name}`,
+			message: "Circular dependency - the variable's value depends on itself",
 			suggestion: null,
 			identifier: name,
 			locations: null
