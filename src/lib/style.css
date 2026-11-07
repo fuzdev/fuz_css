@@ -404,6 +404,14 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 
 	:where(code:not(.unstyled)) {
 		white-space: pre-wrap;
+		/* breaks a long token only when it would overflow its line, without
+			shrinking the min-content width of the box around it */
+		overflow-wrap: break-word;
+		/* inline code wraps with the text, and each fragment keeps its own
+			padding and rounded background; the prefix is for Safari and
+			Chrome before 130 */
+		-webkit-box-decoration-break: clone;
+		box-decoration-break: clone;
 		font-family: var(--font_family_mono);
 		-webkit-hyphens: none;
 		hyphens: none;
@@ -413,7 +421,7 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		border-radius: var(--border_radius, var(--border_radius_xs));
 	}
 
-	:where(code.inline, p code) {
+	:where(code.inline) {
 		display: inline-block;
 		vertical-align: baseline;
 	}

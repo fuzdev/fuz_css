@@ -141,6 +141,23 @@ test('buttons display inline-flex, so siblings in a block sit side by side', () 
 	assert.notInclude(rule.css, 'vertical-align', 'baseline-aligned like the native button');
 });
 
+test('inline code wraps with the text, keeping its background per fragment', () => {
+	const index = parse_style_css(main_stylesheet_text);
+	const code_rule = index.rules.find((r) => r.css.startsWith(':where(code:not(.unstyled)) {'));
+	assert(code_rule, 'style.css carries the base code rule');
+	assert.include(code_rule.css, '-webkit-box-decoration-break: clone;');
+	assert.include(code_rule.css, 'box-decoration-break: clone;');
+	assert.include(code_rule.css, 'overflow-wrap: break-word;');
+	// `p code` is plain inline like `li code`, so it splits across lines;
+	// only the `.inline` opt-in is an unsplit inline-block
+	const inline_block_rules = index.rules.filter(
+		(r) => r.elements.has('code') && r.css.includes('display: inline-block;')
+	);
+	assert.strictEqual(inline_block_rules.length, 1);
+	assert.isTrue(inline_block_rules[0]!.css.startsWith(':where(code.inline) {'));
+	assert.notMatch(main_stylesheet_text, /\bp code\b/);
+});
+
 test('focus styles key on :focus-visible', () => {
 	// a mouse click on a link, button, or checkbox doesn't match it, so the
 	// ring doesn't stay after a click, and focus adds no fill to a button
@@ -193,7 +210,7 @@ test('a pressed disabled control gives no feedback', () => {
 	assert.notMatch(css_classes_text, /:active[^}]*--negative_/);
 	const control_press_selectors = [main_stylesheet_text, css_classes_text].flatMap((css) =>
 		Array.from(
-			css.matchAll(/(?:button|input|textarea|select|selectable|menuitem)[^{},]*:active/g),
+			css.matchAll(/(?:button|input|textarea|select|selectable|menuitem|clickable)[^{},]*:active/g),
 			(m) => m[0].replace(/\s+/g, '')
 		)
 	);
