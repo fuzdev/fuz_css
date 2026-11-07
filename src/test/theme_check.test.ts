@@ -25,6 +25,7 @@ import { validate_theme } from '#lib/theme_validate.ts';
 import { compose_themes } from '#lib/theme.ts';
 import type { Theme } from '#lib/variable.ts';
 import { contrast_modifiers } from '#lib/themes.ts';
+import { theme_knob_by_name } from '#lib/knobs.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { zine_theme } from '#lib/themes/zine.ts';
@@ -488,6 +489,29 @@ describe('contrast modifier compositions', () => {
 				.value;
 		for (const scheme of color_scheme_variants) {
 			assert.isAtLeast(border(composed, scheme), border(own, scheme), scheme);
+		}
+	});
+
+	test("the contrast knob's safe range holds every base's gates at its top", () => {
+		// the catalog's range is the editor's envelope: at its top every shipped
+		// base keeps the gates it passes at the default - only its own declared
+		// failures remain (marquee's palette clips) - so retuning the curves
+		// without moving the range fails here
+		const [, top] = theme_knob_by_name.get('contrast')!.range!;
+		const key = (e: { scheme: string; gate: string; subject: string }): string =>
+			`${e.scheme} ${e.gate} ${e.subject}`;
+		for (const base of bases) {
+			const own = new Set(
+				check_theme(base).entries
+					.filter((e) => !e.pass)
+					.map(key)
+			);
+			const at_top = compose_themes(base, {
+				name: 'top',
+				variables: [{ name: 'contrast', base: String(top) }]
+			});
+			const added = check_theme(at_top).entries.filter((e) => !e.pass && !own.has(key(e)));
+			assert.deepEqual(added, [], `${base.name} at contrast ${top}`);
 		}
 	});
 
