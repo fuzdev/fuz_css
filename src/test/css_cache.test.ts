@@ -12,7 +12,6 @@ import {
 	to_extraction_cache_key,
 	to_cache_version,
 	load_extraction_versions,
-	parse_ci_value,
 	find_package_version,
 	type CachedExtraction
 } from '#lib/css_cache.ts';
@@ -741,31 +740,21 @@ describe('the cache version', () => {
 	});
 });
 
-describe('parse_ci_value', () => {
-	test('unset, empty, false, and 0 are not CI', () => {
-		for (const value of [undefined, '', '  ', 'false', 'FALSE', 'False', ' false ', '0', ' 0']) {
-			assert.isFalse(parse_ci_value(value), JSON.stringify(value));
-		}
-	});
-
-	test('any other value is CI', () => {
-		for (const value of ['true', 'TRUE', '1', 'yes', 'on', 'github', '00', 'falsey']) {
-			assert.isTrue(parse_ci_value(value), value);
-		}
-	});
-});
-
 describe('the CI environment', () => {
 	afterEach(() => {
 		vi.unstubAllEnvs();
 		vi.resetModules();
 	});
 
-	/** Imports a fresh copy of the cache module with `CI` set to `value`. */
+	/** Imports fresh copies of the CI and cache modules with `CI` set to `value`. */
 	const import_with_ci = async (value: string) => {
 		vi.stubEnv('CI', value);
 		vi.resetModules();
-		return import('#lib/css_cache.ts');
+		const [{ is_ci }, { create_cache_path_resolver }] = await Promise.all([
+			import('#lib/ci.ts'),
+			import('#lib/css_cache.ts')
+		]);
+		return { is_ci, create_cache_path_resolver };
 	};
 
 	test('CI=false caches like a local run', async () => {

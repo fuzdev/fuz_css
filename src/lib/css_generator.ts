@@ -14,7 +14,7 @@ import { create_bundled_resources, type BundledCssResources } from './bundled_re
 import { resolve_class_definitions } from './css_class_definitions.ts';
 import { resolve_class_interpreters } from './css_class_interpreters.ts';
 import { load_css_properties } from './css_literal.ts';
-import { is_ci } from './css_cache.ts';
+import { is_ci } from './ci.ts';
 import { default_cache_deps } from './deps_defaults.ts';
 import { CssClasses } from './css_classes.ts';
 import { create_diagnostic_dispatcher, type DiagnosticSink } from './diagnostics.ts';

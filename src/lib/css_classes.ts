@@ -151,34 +151,17 @@ export class CssClasses {
 	}
 
 	/**
-	 * Gets all unique class names as a Set (with exclude filter applied).
-	 */
-	get(): Set<string> {
-		if (this.#dirty) {
-			this.#dirty = false;
-			this.#recalculate();
-		}
-		return this.#all;
-	}
-
-	/**
-	 * Gets all classes with their source locations (with exclude filter applied).
-	 * Locations from `additional_classes` are null.
-	 */
-	get_with_locations(): Map<string, Array<SourceLocation> | null> {
-		if (this.#dirty) {
-			this.#dirty = false;
-			this.#recalculate();
-		}
-		return this.#all_with_locations_including_includes;
-	}
-
-	/**
-	 * Gets all classes and their locations in a single call.
-	 * More efficient than calling `get()` and `get_with_locations()` separately
-	 * when both are needed (avoids potential double recalculation).
+	 * Gets all classes, their locations, and the elements and variables, in a
+	 * single call. Results have the exclude filter applied, and
+	 * `explicit_classes` includes `additional_classes`; locations from
+	 * `additional_classes` are null.
 	 *
-	 * Results have exclude filter applied and `explicit_classes` includes `additional_classes`.
+	 * The collections returned are the instance's own, not copies: the next
+	 * call after an `add` or `delete` clears and refills the same `all_classes`,
+	 * `all_classes_with_locations`, and `all_elements` (and replaces the
+	 * explicit sets). Read them before changing the collection again - a render
+	 * is synchronous and done with them before the next extraction lands -
+	 * rather than holding them across a change.
 	 */
 	get_all(): {
 		all_classes: Set<string>;
@@ -188,10 +171,7 @@ export class CssClasses {
 		explicit_elements: Set<string> | null;
 		explicit_variables: Set<string> | null;
 	} {
-		if (this.#dirty) {
-			this.#dirty = false;
-			this.#recalculate();
-		}
+		this.#ensure_fresh();
 		return {
 			all_classes: this.#all,
 			all_classes_with_locations: this.#all_with_locations_including_includes,
@@ -211,6 +191,12 @@ export class CssClasses {
 			result.push(...diagnostics);
 		}
 		return result;
+	}
+
+	#ensure_fresh(): void {
+		if (!this.#dirty) return;
+		this.#dirty = false;
+		this.#recalculate();
 	}
 
 	#recalculate(): void {

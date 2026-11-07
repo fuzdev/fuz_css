@@ -5,10 +5,15 @@ export type GeneratedClassResult = {
 	css: string;
 } | null;
 
-export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> =
-	| ((v1: T1) => GeneratedClassResult)
-	| ((v1: T1, v2: T2) => GeneratedClassResult)
-	| ((v1: T1, v2: T2, v3: T3) => GeneratedClassResult);
+/**
+ * A class template over up to three dimensions. A template declaring fewer
+ * parameters is assignable, and is called with only the dimensions given.
+ */
+export type ClassTemplateFn<T1 = string, T2 = string, T3 = string> = (
+	v1: T1,
+	v2: T2,
+	v3: T3
+) => GeneratedClassResult;
 
 /**
  * Generates CSS class declarations from templates.
@@ -46,25 +51,16 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 ): Record<string, CssClassDefinition> => {
 	const result: Record<string, CssClassDefinition> = {};
 
-	if (!secondary) {
-		for (const v1 of values) {
-			const generated = (template as any)(v1);
-			if (generated) result[generated.name] = { declaration: generated.css };
-		}
-	} else if (!tertiary) {
-		for (const v1 of values) {
-			for (const v2 of secondary) {
-				const generated = (template as any)(v1, v2);
+	// a missing dimension iterates once with `undefined`, which a template
+	// over fewer dimensions doesn't declare a parameter for
+	const secondary_values: Iterable<T2> = secondary ?? [undefined as T2];
+	const tertiary_values: Iterable<T3> = tertiary ?? [undefined as T3];
+
+	for (const v1 of values) {
+		for (const v2 of secondary_values) {
+			for (const v3 of tertiary_values) {
+				const generated = template(v1, v2, v3);
 				if (generated) result[generated.name] = { declaration: generated.css };
-			}
-		}
-	} else {
-		for (const v1 of values) {
-			for (const v2 of secondary) {
-				for (const v3 of tertiary) {
-					const generated = (template as any)(v1, v2, v3);
-					if (generated) result[generated.name] = { declaration: generated.css };
-				}
 			}
 		}
 	}

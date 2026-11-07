@@ -5,7 +5,7 @@ import { type ExtractionDiagnostic, type SourceLocation } from '#lib/diagnostics
 import { make_extraction_data } from './test_helpers.ts';
 
 describe('CssClasses', () => {
-	test('add and get', () => {
+	test('add and get_all', () => {
 		const css_classes = new CssClasses();
 		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
 		const classes: Map<string, Array<SourceLocation>> = new Map([
@@ -14,7 +14,7 @@ describe('CssClasses', () => {
 		]);
 		css_classes.add('file1.svelte', make_extraction_data({ classes }));
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isTrue(result.has('foo'));
 		assert.isTrue(result.has('bar'));
 	});
@@ -27,7 +27,7 @@ describe('CssClasses', () => {
 		css_classes.add('file1.svelte', make_extraction_data({ classes: new Map([['foo', [loc1]]]) }));
 		css_classes.add('file2.svelte', make_extraction_data({ classes: new Map([['bar', [loc2]]]) }));
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isTrue(result.has('foo'));
 		assert.isTrue(result.has('bar'));
 	});
@@ -41,7 +41,7 @@ describe('CssClasses', () => {
 
 		css_classes.delete('file1.svelte');
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isFalse(result.has('foo'));
 		assert.isTrue(result.has('bar'));
 	});
@@ -54,12 +54,12 @@ describe('CssClasses', () => {
 			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
 		);
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isTrue(result.has('always-included'));
 		assert.isTrue(result.has('extracted'));
 	});
 
-	test('get_with_locations returns null for additional_classes', () => {
+	test('locations are null for additional_classes', () => {
 		const css_classes = new CssClasses(new Set(['included']));
 		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
 		css_classes.add(
@@ -67,12 +67,12 @@ describe('CssClasses', () => {
 			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
 		);
 
-		const result = css_classes.get_with_locations();
+		const result = css_classes.get_all().all_classes_with_locations;
 		assert.isNull(result.get('included'));
 		assert.deepEqual(result.get('extracted'), [loc]);
 	});
 
-	test('get_with_locations merges locations from multiple files', () => {
+	test('locations merge from multiple files', () => {
 		const css_classes = new CssClasses();
 		const loc1: SourceLocation = { file: 'file1.svelte', line: 1, column: 1 };
 		const loc2: SourceLocation = { file: 'file2.svelte', line: 5, column: 10 };
@@ -86,7 +86,7 @@ describe('CssClasses', () => {
 			make_extraction_data({ classes: new Map([['shared', [loc2]]]) })
 		);
 
-		const result = css_classes.get_with_locations();
+		const result = css_classes.get_all().all_classes_with_locations;
 		const locations = result.get('shared');
 		assert.lengthOf(locations!, 2);
 		assert.deepInclude(locations!, loc1);
@@ -118,12 +118,12 @@ describe('CssClasses', () => {
 		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
 
 		css_classes.add('file1.svelte', make_extraction_data({ classes: new Map([['foo', [loc]]]) }));
-		const result1 = css_classes.get();
+		const result1 = css_classes.get_all().all_classes;
 		assert.isTrue(result1.has('foo'));
 
 		// Add more classes
 		css_classes.add('file2.svelte', make_extraction_data({ classes: new Map([['bar', [loc]]]) }));
-		const result2 = css_classes.get();
+		const result2 = css_classes.get_all().all_classes;
 		assert.isTrue(result2.has('bar'));
 	});
 
@@ -132,8 +132,8 @@ describe('CssClasses', () => {
 		const loc: SourceLocation = { file: 'test.svelte', line: 1, column: 1 };
 		css_classes.add('file1.svelte', make_extraction_data({ classes: new Map([['foo', [loc]]]) }));
 
-		const result1 = css_classes.get();
-		const result2 = css_classes.get();
+		const result1 = css_classes.get_all().all_classes;
+		const result2 = css_classes.get_all().all_classes;
 		assert.strictEqual(result1, result2);
 	});
 
@@ -144,7 +144,7 @@ describe('CssClasses', () => {
 		css_classes.add('file1.svelte', make_extraction_data({ classes: new Map([['old', [loc]]]) }));
 		css_classes.add('file1.svelte', make_extraction_data({ classes: new Map([['new', [loc]]]) }));
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isFalse(result.has('old'));
 		assert.isTrue(result.has('new'));
 	});
@@ -441,7 +441,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 			make_extraction_data({ classes: new Map([['extracted_class', [loc]]]) })
 		);
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		// Both additional and extracted should be present
 		assert.isTrue(result.has('additional_a'));
 		assert.isTrue(result.has('additional_b'));
@@ -459,7 +459,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
 		);
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isTrue(result.has('keep_me'));
 		assert.isFalse(result.has('exclude_me'));
 		assert.isTrue(result.has('extracted'));
@@ -480,7 +480,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 			make_extraction_data({ classes: new Map([['from_file2', [loc2]]]) })
 		);
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.isTrue(result.has('always_included'));
 		assert.isTrue(result.has('from_file1'));
 		assert.isTrue(result.has('from_file2'));
@@ -495,7 +495,7 @@ describe('additional_classes with file data (simulating cache behavior)', () => 
 			make_extraction_data({ classes: new Map([['extracted', [loc]]]) })
 		);
 
-		const result = css_classes.get();
+		const result = css_classes.get_all().all_classes;
 		assert.strictEqual(result.size, 1);
 		assert.isTrue(result.has('extracted'));
 	});

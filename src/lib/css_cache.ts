@@ -17,6 +17,7 @@ import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
 import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
 import type { CacheDeps } from './deps.ts';
+import { is_ci } from './ci.ts';
 
 /**
  * Default cache directory relative to project root.
@@ -38,31 +39,10 @@ const to_cache_digest = (value: string): string =>
 	crypto_hash('sha256', value).slice(0, CACHE_DIGEST_LENGTH);
 
 /**
- * Parses a `CI` environment variable value. Any value is CI except unset,
- * empty, `false`, and `0` (case-insensitive, surrounding whitespace
- * ignored), so `CI=false` turns CI behavior off rather than on.
- *
- * @param value - the `CI` environment variable, if set
- * @returns whether the value marks a CI run
- */
-export const parse_ci_value = (value: string | undefined): boolean => {
-	if (value === undefined) return false;
-	const normalized = value.trim().toLowerCase();
-	return normalized !== '' && normalized !== 'false' && normalized !== '0';
-};
-
-/**
- * Whether this is a CI run, per `parse_ci_value` on `process.env.CI`:
- * there's no point writing a cache the next run won't reuse.
- *
- * @internal Read by the generator for its cache and `on_error` defaults.
- */
-export const is_ci = parse_ci_value(process.env.CI);
-
-/**
  * Creates the extraction cache-path lookup: a file's cache path
- * under `cache_dir` in `project_root`, or `null` on CI, where nothing is
- * cached.
+ * under `cache_dir` in `project_root`, or `null` on CI (`is_ci`), where
+ * nothing is cached - there's no point writing a cache the next run won't
+ * reuse.
  *
  * @param cache_dir - the cache directory, relative to `project_root`
  * @param project_root - the project root, with or without a trailing slash

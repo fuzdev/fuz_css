@@ -768,8 +768,10 @@ typography, borders, shading, shadows, layout. See
   acorn, and `@sveltejs/acorn-typescript` versions (`to_cache_version`, so
   an upgrade misses with no manual bump), plus a configuration key
   (`to_extraction_cache_key`, over `acorn_plugins` and `cache_salt`), atomic
-  writes, the cache-path lookup, and the CI skip (`parse_ci_value`: `CI`
-  set to anything but empty, `false`, or `0`)
+  writes, and the cache-path lookup, skipped on CI
+- [ci.ts](src/lib/ci.ts) - CI detection (`is_ci`, from `parse_ci_value`:
+  `CI` set to anything but empty, `false`, or `0`), which skips the
+  extraction cache and flips the `on_error` default to `throw`
 - [css_bundled_resolution.ts](src/lib/css_bundled_resolution.ts) - Core bundled
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
@@ -882,7 +884,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 
-Plus standalone tests: `css_cache`, `css_generator`, `css_classes`, `css_literal`,
+Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
