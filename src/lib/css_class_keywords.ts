@@ -3,7 +3,7 @@
  * property it belongs to (`.flex` is `display: flex`, `.sticky` is
  * `position: sticky`). The CSS spec is the namespace - a keyword earns a class
  * when no other mainstream property shares it, so it identifies its property
- * alone (`flex`, `sticky`, `uppercase`), while a shared keyword (`center`,
+ * alone (`flex`, `sticky`, `uppercase`, `pixelated`), while a shared keyword (`center`,
  * `nowrap`, `none`) stays a `property:value` literal. Hyphenated names are
  * the spec's own words (`inline-flex`, `line-through`), never concatenations.
  *
@@ -61,6 +61,14 @@ export const font_weight_keywords = ['bold', 'bolder', 'lighter'] as const;
 export const text_decoration_line_keywords = ['underline', 'overline', 'line-through'] as const;
 
 /**
+ * The image-rendering keywords with a class. `crisp-edges` is left out on
+ * purpose: the spec lets it scale with any algorithm that keeps contrast and
+ * edges, not necessarily nearest-neighbor, so `pixelated` is the one for
+ * pixel art.
+ */
+export const image_rendering_keywords = ['pixelated'] as const;
+
+/**
  * The keyword classes, plus `hidden`. Spread into `css_class_definitions`.
  */
 export const css_class_keywords: Record<string, CssClassDefinitionDeclaration> = {
@@ -70,6 +78,7 @@ export const css_class_keywords: Record<string, CssClassDefinitionDeclaration> =
 	...to_keyword_classes('font-style', font_style_keywords),
 	...to_keyword_classes('font-weight', font_weight_keywords),
 	...to_keyword_classes('text-decoration-line', text_decoration_line_keywords),
+	...to_keyword_classes('image-rendering', image_rendering_keywords),
 	// mirrors the HTML attribute, for the modifiers the attribute can't take
 	// (`max-md:hidden`, `print:hidden`); late, so it beats a `display:*`
 	// literal it ties with while a media query still outranks it

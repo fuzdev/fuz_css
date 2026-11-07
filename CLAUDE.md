@@ -262,8 +262,8 @@ See the `VitePluginFuzCssOptions` type for configuration.
   (`background-color:var(--ink_10)`) - `bg_` classes are always opaque
 - **Composite classes** - Multi-property shortcuts: `box`, `column`, `row`,
   `row_wrap` (a `row` that wraps), `ellipsis`, `sr_only` (visually hidden,
-  still read by assistive technology), `pixelated`, `selectable`,
-  `clickable`, `pane`, `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
+  still read by assistive technology), `selectable`, `clickable`, `pane`,
+  `panel`, the size composites `sized_xs`/`sized_sm`/`sized_md`/`sized_lg`/
   `sized_xl` (uniform step offsets from the `sized_md` default; `sized_md`
   doubles as a cascade reset; they scale controls and spacing via
   `--flow_margin` - headings and prose keep their font sizes, while a bare
@@ -272,8 +272,8 @@ See the `VitePluginFuzCssOptions` type for configuration.
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
   `menuitem` (its children are `menuitem_content`, `menuitem_icon`, and
   `menuitem_title`, classes of their own), `chevron`, `chip`. The
-  single-property shortcuts among them (`pixelated`, `mb_flow`, `mt_flow`)
-  order with the token classes, outside the composites sublayer
+  single-property shortcuts among them (`mb_flow`, `mt_flow`) order with
+  the token classes, outside the composites sublayer
 - **Keyword classes** - [css_class_keywords.ts](src/lib/css_class_keywords.ts):
   a CSS value keyword that names its property alone, as a bare class setting
   that one declaration (`flex` is `display: flex`). "The CSS spec is the
@@ -282,8 +282,10 @@ See the `VitePluginFuzCssOptions` type for configuration.
   names fuz_css coins join with underscores. The slate: display `flex`, `inline-flex`, `grid`,
   `inline-grid`, `inline-block`, `block`, `flow-root`; position `relative`,
   `absolute`, `fixed`, `sticky`; `uppercase`, `lowercase`, `capitalize`;
-  `italic`, `oblique`; `bold`, `bolder`, `lighter`; and the
-  `text-decoration-line` longhand's `underline`, `overline`, `line-through`.
+  `italic`, `oblique`; `bold`, `bolder`, `lighter`; the
+  `text-decoration-line` longhand's `underline`, `overline`, `line-through`;
+  and image-rendering `pixelated` (not `crisp-edges`, which needn't be
+  nearest-neighbor).
   Plus `hidden` (`display: none`, mirroring the attribute, for
   `max-md:hidden`/`print:hidden` - the `[hidden]` attribute still beats every
   class), the one definition flagged `late`. `row`/`column`/`box` stay

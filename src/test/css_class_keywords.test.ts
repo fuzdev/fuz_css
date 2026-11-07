@@ -95,6 +95,7 @@ describe('css_class_keywords', () => {
 			'underline',
 			'overline',
 			'line-through',
+			'pixelated',
 			'hidden'
 		]);
 	});
@@ -130,6 +131,15 @@ describe('css_class_keywords', () => {
 		assert.include(css, '.line-through { text-decoration-line: line-through; }');
 		assert.include(css, '.bold { font-weight: bold; }');
 		assert.include(css, '.hidden { display: none; }');
+	});
+
+	test('pixelated sets nearest-neighbor scaling alone, with no crisp-edges or vendor values', () => {
+		const { css, diagnostics } = generate(['pixelated']);
+		assert.strictEqual(
+			css,
+			'@layer fuz.utilities {\n.pixelated { image-rendering: pixelated; }\n}\n'
+		);
+		assert.deepEqual(diagnostics, []);
 	});
 
 	test('keyword classes take modifiers', () => {

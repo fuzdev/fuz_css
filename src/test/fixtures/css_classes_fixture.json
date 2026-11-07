@@ -1,7 +1,4 @@
 {
-	"pixelated": {
-		"declaration": "\n\t\t\timage-rendering: -webkit-optimize-contrast; /* Safari */\n\t\t\timage-rendering: -o-crisp-edges; /* OS X & Windows Opera (12.02+) */\n\t\t\timage-rendering: pixelated; /* in case crisp-edges isn't supported */\n\t\t\timage-rendering: crisp-edges; /* the recommended pixel art setting according to MDN */\n\t\t"
-	},
 	"box": {
 		"composite": true,
 		"declaration": "\n\t\t\tdisplay: flex;\n\t\t\tflex-direction: column;\n\t\t\talign-items: center;\n\t\t\tjustify-content: center;\n\t\t"
@@ -159,6 +156,9 @@
 	},
 	"line-through": {
 		"declaration": "text-decoration-line: line-through;"
+	},
+	"pixelated": {
+		"declaration": "image-rendering: pixelated;"
 	},
 	"hidden": {
 		"declaration": "display: none;",

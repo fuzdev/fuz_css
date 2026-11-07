@@ -1052,7 +1052,6 @@ vite_plugin_fuz_css({
 				<li><code>.pane</code> - pane container</li>
 				<li><code>.panel</code> - panel container</li>
 				<li><code>.icon_button</code> - icon button styling</li>
-				<li><code>.pixelated</code> - crisp pixel-art rendering</li>
 				<li><code>.sized_xs</code> - smallest sizing, cascading to children</li>
 				<li><code>.sized_sm</code> - smaller sizing, cascading to children</li>
 				<li><code>.sized_md</code> - default sizing, cascade reset</li>
@@ -1126,6 +1125,11 @@ vite_plugin_fuz_css({
 					<span class="code_chips">
 						<strong>text-decoration-line:</strong> <code>.underline</code> <code>.overline</code>
 						<code>.line-through</code>
+					</span>
+				</li>
+				<li>
+					<span class="code_chips">
+						<strong>image-rendering:</strong> <code>.pixelated</code>
 					</span>
 				</li>
 				<li>
