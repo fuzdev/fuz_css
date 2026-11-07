@@ -57,6 +57,15 @@ export interface CssGenerator {
 	render: (input: CssRenderInput) => string;
 }
 
+/** Collects an include option into a set, keeping `'all'` as is. */
+const to_option_set = (
+	option: Iterable<string> | 'all' | undefined
+): Set<string> | 'all' | undefined => {
+	if (option === undefined) return undefined;
+	if (option === 'all') return 'all';
+	return new Set(option);
+};
+
 /**
  * Creates the core a generator renders through.
  *
@@ -94,6 +103,10 @@ export const create_css_generator = (
 	// collected once, so an option given as a one-shot iterable serves every render
 	const additional_class_set = additional_classes ? new Set(additional_classes) : undefined;
 	const exclude_class_set = exclude_classes ? new Set(exclude_classes) : undefined;
+	const additional_element_set = to_option_set(additional_elements);
+	const additional_variable_set = to_option_set(additional_variables);
+	const exclude_element_set = exclude_elements ? new Set(exclude_elements) : undefined;
+	const exclude_variable_set = exclude_variables ? new Set(exclude_variables) : undefined;
 
 	const dispatch = create_diagnostic_dispatcher({ on_error, on_warning }, sink);
 
@@ -144,11 +157,11 @@ export const create_css_generator = (
 			theme,
 			resources,
 			additional_classes: additional_class_set,
-			additional_elements,
-			additional_variables,
+			additional_elements: additional_element_set,
+			additional_variables: additional_variable_set,
 			exclude_classes: exclude_class_set,
-			exclude_elements,
-			exclude_variables
+			exclude_elements: exclude_element_set,
+			exclude_variables: exclude_variable_set
 		});
 		dispatch(diagnostics);
 		return css;

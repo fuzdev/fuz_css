@@ -220,6 +220,47 @@ describe('class options over the defaults', () => {
 	});
 });
 
+describe('include and exclude options', () => {
+	const SOURCE = '<a href="/">link</a><p>text</p>';
+	const OPTIONS = {
+		additional_classes: ['p_md'],
+		exclude_classes: ['p_lg'],
+		additional_elements: ['button'],
+		exclude_elements: ['p'],
+		additional_variables: ['shade_40'],
+		exclude_variables: ['text_90']
+	} as const;
+
+	/** Wraps a list in a one-shot iterable, which a second iteration finds empty. */
+	const one_shot = (items: ReadonlyArray<string>): Iterable<string> =>
+		(function* () {
+			yield* items;
+		})();
+
+	test('a one-shot iterable serves every render', async () => {
+		const render_twice = async (options: CssGeneratorBaseOptions): Promise<Array<string>> => {
+			const generator = create_css_generator(options, { error: () => {}, warn: () => {} });
+			await generator.ensure_ready();
+			const css_classes = generator.create_css_classes();
+			css_classes.add('App.svelte', extract_from_svelte(SOURCE, 'App.svelte'));
+			return [0, 1].map(() => generator.render({ css_classes, detected_css_variables: [] }));
+		};
+		const [expected] = await render_twice(OPTIONS);
+		assert_css_contains(expected!, 'button');
+		assert.include(expected!, '--shade_40:');
+
+		const rendered = await render_twice({
+			additional_classes: one_shot(OPTIONS.additional_classes),
+			exclude_classes: one_shot(OPTIONS.exclude_classes),
+			additional_elements: one_shot(OPTIONS.additional_elements),
+			exclude_elements: one_shot(OPTIONS.exclude_elements),
+			additional_variables: one_shot(OPTIONS.additional_variables),
+			exclude_variables: one_shot(OPTIONS.exclude_variables)
+		});
+		assert.deepEqual(rendered, [expected, expected]);
+	});
+});
+
 describe('a baked theme', () => {
 	test('a rotated hue bakes its compiled caps into the baked sublayer', async () => {
 		const theme: Theme = { name: 'cyan nudge', variables: [{ name: 'hue_i', base: '205' }] };
