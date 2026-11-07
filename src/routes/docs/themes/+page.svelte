@@ -1,35 +1,16 @@
 <script lang="ts" module>
 	import { BROWSER } from 'esm-env';
 
-	import { default_themes, contrast_modifiers } from '#lib/themes.ts';
-	import { zine_theme } from '#lib/themes/zine.ts';
-	import { pebble_theme } from '#lib/themes/pebble.ts';
-	import { parchment_theme } from '#lib/themes/parchment.ts';
-	import { phosphor_theme } from '#lib/themes/phosphor.ts';
-	import { guestbook_theme } from '#lib/themes/guestbook.ts';
-	import { marquee_theme } from '#lib/themes/marquee.ts';
-	import { signage_theme } from '#lib/themes/signage.ts';
+	import { contrast_modifiers } from '#lib/themes.ts';
 	import {
 		ThemeEditorState,
 		create_rooted_theme_editor,
 		type ThemeEditorSnapshotData
 	} from '#routes/theme_editor_state.svelte.ts';
-
-	// one gallery: the registry and the shipped exemplars are a single list to
-	// users - registry membership is policy for consumer pickers, not UX
-	const themes = [
-		...default_themes,
-		zine_theme,
-		pebble_theme,
-		parchment_theme,
-		phosphor_theme,
-		guestbook_theme,
-		marquee_theme,
-		signage_theme
-	];
+	import { site_themes } from '#routes/site_themes.ts';
 
 	const create_editor = (): ThemeEditorState =>
-		new ThemeEditorState({ themes, contrast_modifiers });
+		new ThemeEditorState({ themes: site_themes, contrast_modifiers });
 
 	// one editor per browser session, so a draft survives navigating to another
 	// page and back by link - the page component is recreated, and the
@@ -67,7 +48,7 @@
 
 	// the server renders a fresh editor per request; the browser keeps one
 	const editor = BROWSER
-		? (session_editor ??= create_rooted_theme_editor({ themes, contrast_modifiers }))
+		? (session_editor ??= create_rooted_theme_editor({ themes: site_themes, contrast_modifiers }))
 		: create_editor();
 
 	// adopt whatever the page already applies - a theme persisted from an
@@ -213,8 +194,11 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			<a href="https://ui.fuz.dev/">fuz_ui</a>, which renders the theme to a
 			<code>&lt;style&gt;</code> element in the <code>fuz.theme</code> layer. The two paths compose:
 			a runtime theme overrides a baked one, since a layer's direct styles outrank its sublayers.
-			Outside Svelte, <code>render_theme_style</code> in <ModuleLink module_path="theme.ts" /> does
-			the same rendering for any framework.
+			Pass it your registry as <code>themes</code> so a picked theme persists by name, and
+			<code>resolve_theme=&lbrace;resolve_theme_stance&rbrace;</code> from
+			<ModuleLink module_path="theme_stance.ts" /> so a single-scheme theme like phosphor renders
+			its stance mirror. Outside Svelte, <code>render_theme_style</code> in
+			<ModuleLink module_path="theme.ts" /> does the same rendering for any framework.
 		</p>
 		<p>
 			Knobs take effect at the root: the derived color stops compute on <code>:root</code> and

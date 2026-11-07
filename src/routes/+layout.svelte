@@ -10,8 +10,9 @@
 	import { save_theme } from '@fuzdev/fuz_ui/theme_state.svelte.ts';
 	import pkg_json from 'virtual:pkg.json';
 
+	import { resolve_theme_stance } from '#lib/theme_stance.ts';
 	import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
-	import ThemeStanceMirror from '#routes/ThemeStanceMirror.svelte';
+	import { site_themes } from '#routes/site_themes.ts';
 
 	// TODO re-enable this, see comment below
 	// import ContextmenuRoot from '#lib/ContextmenuRoot.svelte';
@@ -36,11 +37,14 @@
 
 <!-- the theme editor's draft rethemes the page live through `theme_state`, and
 	ThemeRoot persists every theme reassignment to localStorage undebounced, so
-	drafts are excluded from persistence here -->
+	drafts are excluded from persistence here; the site's themes persist by name,
+	and a stanced theme renders its mirror through the resolver -->
 <ThemeRoot
-	save_theme={(theme) => (theme?.name === UNSAVED_THEME_NAME ? undefined : save_theme(theme))}
+	themes={site_themes}
+	resolve_theme={resolve_theme_stance}
+	save_theme={(theme, themes) =>
+		theme?.name === UNSAVED_THEME_NAME ? undefined : save_theme(theme, themes)}
 >
-	<ThemeStanceMirror />
 	<!-- TODO add all of this and fixed scoped, so the docs examples work as expected,
 		or maybe disable this main contextmenu when in the docs -->
 	<!-- <ContextmenuRoot> -->

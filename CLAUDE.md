@@ -893,20 +893,23 @@ below the picker on narrow screens), and
 in a leaf module so the root layout doesn't pull the editor's dependency
 graph. `ThemeEditorState` compiles the draft on every edit
 (`compile_theme`), so its Gates panel measures with the caps a bake would
-recompute (the preview renders without them until `ThemeRoot` takes derived
-data), and owns what the page applies - the dirty draft or its
-base, composed with the active contrast modifier (`applied_theme`) - plus the
+recompute (the preview renders without them - the layout's resolver
+supplies the stance mirror, not caps), and owns what the page applies - the
+dirty draft or its base, composed with the active contrast modifier
+(`applied_theme`) - plus the
 shared discard guard (`load_theme_guarded`) and `sync_applied_theme`, which
 adopts a theme already applied at mount so a persisted theme or contrast
 composition isn't replaced by the editor's defaults. The themes page keeps
 one editor per browser session, so a draft survives in-app navigation, and
 only bridges `applied_theme` to fuz_ui's theme state. The editor's `output`
 and `draft` are wire themes; `resolved_output` carries the mirror the
-rendered-CSS readout needs. The published fuz_ui `ThemeRoot` renders the
-bare theme, so the layout adds
-[ThemeStanceMirror.svelte](src/routes/ThemeStanceMirror.svelte), which
-renders a stanced applied theme resolved (a transitional docs-site piece,
-until `ThemeRoot` takes an injected resolver).
+rendered-CSS readout needs. The layout's fuz_ui `ThemeRoot` takes the
+site's themes (`themes`, from the leaf module
+[site_themes.ts](src/routes/site_themes.ts) - the registry plus the shipped
+exemplars, which the themes page's editor bases drafts on too), so a picked
+theme persists by name, and `resolve_theme={resolve_theme_stance}`, so a
+stanced theme renders with its mirror; its `save_theme` wrapper skips the
+draft.
 [root_color_scheme.svelte.ts](src/routes/root_color_scheme.svelte.ts) reads
 the scheme the page renders off the root class reactively; the editor's
 edited slot and the swatch readouts follow it rather than the theme state,
