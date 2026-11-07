@@ -77,7 +77,7 @@ export const generate_classes = <T1 = string, T2 = string, T3 = string>(
 	return result;
 };
 
-// Helper to convert any string to a valid CSS variable name (snake_case)
+/** Converts a string to a class-name segment, each run of hyphens and whitespace becoming one underscore. */
 export const to_class_segment = (str: string): string => str.replace(/[-\s]+/g, '_');
 
 /**

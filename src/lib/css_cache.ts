@@ -49,8 +49,6 @@ const to_cache_digest = (value: string): string =>
  * @param cache_dir - the cache directory, relative to `project_root`
  * @param project_root - the project root, with or without a trailing slash
  * @returns a function from a file's absolute path to its cache path, or `null` when uncached
- *
- * @internal Used by the Vite plugin.
  */
 export const create_cache_path_resolver = (
 	cache_dir: string,
@@ -76,8 +74,6 @@ const EXTRACTION_PACKAGES = ['@fuzdev/fuz_css', 'svelte', 'acorn', '@sveltejs/ac
  * @param name - the package name
  * @param from - the directory to start from
  * @returns the version, or `null` when no `package.json` above `from` names the package
- *
- * @internal Exported for testing.
  */
 export const find_package_version = (name: string, from: string): string | null => {
 	let dir = from;
@@ -126,8 +122,6 @@ let extraction_versions: Record<string, string> | null = null;
  * keys the cache - it never fails generation.
  *
  * @returns the versions by package name
- *
- * @internal Read by the cache for `to_cache_version`.
  */
 export const load_extraction_versions = (): Record<string, string> => {
 	if (extraction_versions) return extraction_versions;
@@ -149,8 +143,6 @@ export const load_extraction_versions = (): Record<string, string> => {
  *
  * @param versions - the versions by package name
  * @returns the version string, like `@fuzdev/fuz_css@1.2.3 svelte@5.0.0 ...`
- *
- * @internal Shared by the cache's load and save.
  */
 export const to_cache_version = (
 	versions: Record<string, string> = load_extraction_versions()
@@ -170,8 +162,6 @@ export const to_cache_version = (
  * @param acorn_plugins - the extraction's acorn plugins, if any
  * @param cache_salt - a consumer string folded into the key, if any
  * @returns the key, or `null` for the default configuration
- *
- * @internal Used by the Vite plugin.
  */
 export const to_extraction_cache_key = (
 	acorn_plugins: Array<AcornPlugin> | undefined,
@@ -214,7 +204,6 @@ export interface CachedExtraction {
  * @param source_path - absolute path to the source file
  * @param cache_dir - absolute path to the cache directory
  * @param project_root - normalized project root (must end with `/`)
- * @internal The inside-the-root case of `get_file_cache_path`.
  */
 export const get_cache_path = (
 	source_path: string,

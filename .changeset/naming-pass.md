@@ -2,7 +2,7 @@
 '@fuzdev/fuz_css': minor
 ---
 
-**breaking** refactor: name the string emitters `render_*` and the mirror `compute_scheme_mirror`
+**breaking** refactor: the API naming pass - `render_*` emitters, `compute_scheme_mirror`, `FsDeps`, and a `contrast_modifiers` record
 
 A pure function returning CSS text is a `render_*`, beside `render_theme_style`; `generate_css` and `generate_classes_css` keep the pipeline verb.
 

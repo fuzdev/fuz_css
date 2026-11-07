@@ -529,8 +529,8 @@ Use `VitePluginFuzCssOptions` to customize:
   `ThemeRoot`: no runtime theme rendering, and the output stays tree-shaken
   because the overlay happens before the dependency graph is built. The
   bake derives the theme's data itself (`bake_theme` in
-  `variable_graph.ts`, compiling with `compile_theme(theme, {variables})`),
-  so a `ResolvedTheme` passes its `theme`: a stanced theme's mirror re-slots
+  `variable_graph.ts`, compiling with `compile_theme(theme, {variables})`) -
+  from a `ResolvedTheme`, pass its `theme`. A stanced theme's mirror re-slots
   the configured `variables` rather than the defaults, the configured
   knob-tier values fold in beneath the theme for the caps and the gates, and
   `compute_theme_caps` runs on it, so a theme whose hues or

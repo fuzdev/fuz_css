@@ -23,8 +23,7 @@ export const parse_ci_value = (value: string | undefined): boolean => {
 };
 
 /**
- * Whether this is a CI run, per `parse_ci_value` on `process.env.CI`.
- *
- * @internal Read by the generator for its cache and `on_error` defaults.
+ * Whether this is a CI run, per `parse_ci_value` on `process.env.CI`. Read by
+ * the generator for its cache and `on_error` defaults.
  */
 export const is_ci = parse_ci_value(process.env.CI);
