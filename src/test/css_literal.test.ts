@@ -162,6 +162,45 @@ describe('extract_segments', () => {
 	])('extract_segments("%s") handles mismatched parens → %j', (input, expected) => {
 		assert.deepEqual(extract_segments(input), expected);
 	});
+
+	// a colon inside a quoted string is part of the segment
+	test.each<[string, Array<string>]>([
+		['content:"a:b"', ['content', '"a:b"']],
+		["content:'a:b'", ['content', "'a:b'"]],
+		['before:content:"a:b"', ['before', 'content', '"a:b"']],
+		['content:"(a:b)~c:)"', ['content', '"(a:b)~c:)"']], // parens inside a string don't count
+		["content:'it\"s:x'", ['content', "'it\"s:x'"]], // the other quote doesn't close it
+		['content:"a\\":b"', ['content', '"a\\":b"']], // an escaped quote doesn't close it
+		['content:"a:b', ['content', '"a', 'b']], // unterminated - splits as if unquoted
+		['nth-child("):color:red', ['nth-child(")', 'color', 'red']]
+	])('extract_segments(%j) keeps quoted colons → %j', (input, expected) => {
+		assert.deepEqual(extract_segments(input), expected);
+	});
+});
+
+describe('parse_css_literal - quoted values', () => {
+	test.each([
+		['content:"a:b"', null, 'content', '"a:b"'],
+		["content:'a:b'", null, 'content', "'a:b'"],
+		['before:content:"a:b"', 'before', 'content', '"a:b"'],
+		['content:"(a:b)~c:)"', null, 'content', '"(a:b) c:)"']
+	] as const)('parse_css_literal(%j) keeps the quoted colon', (input, pseudo, property, value) => {
+		const { parsed } = assert_parse_ok(parse_css_literal(input, css_properties));
+		assert.strictEqual(parsed.pseudo_element?.name ?? null, pseudo);
+		assert.strictEqual(parsed.property, property);
+		assert.strictEqual(parsed.value, value);
+	});
+
+	// an unterminated quote splits as if unquoted, so it errors as it did
+	// before quotes were tracked
+	test.each([
+		['content:"a:b', 'Unknown modifier "content"'],
+		['content:"ab', 'Uncontained CSS value ""ab": it could end its declaration or rule']
+	] as const)('parse_css_literal(%j) rejects an unterminated quote', (input, message) => {
+		const { error } = assert_parse_error(parse_css_literal(input, css_properties));
+		assert.strictEqual(error.level, 'error');
+		assert.strictEqual(error.message, message);
+	});
 });
 
 describe('format_css_value', () => {

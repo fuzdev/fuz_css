@@ -236,23 +236,44 @@ export const is_possible_css_literal = (class_name: string): boolean => {
 };
 
 /**
- * Extracts colon-separated segments from a class name, handling parentheses.
- * Parenthesized content (like function arguments) is kept intact.
+ * Extracts colon-separated segments from a class name, handling parentheses
+ * and quoted strings. Parenthesized content (like function arguments) and
+ * `"`- or `'`-quoted strings are kept intact, colons included; inside a
+ * string a backslash escapes the next character, so an escaped quote doesn't
+ * close it, and parentheses don't count. A name with an unterminated string
+ * splits as if it held no quotes, so the diagnostic it gets is the one its
+ * segments earn (an unknown modifier, or an uncontained value).
  *
  * @example
  * ```ts
  * extract_segments('md:hover:display:flex') // → ['md', 'hover', 'display', 'flex']
  * extract_segments('nth-child(2n+1):color:red') // → ['nth-child(2n+1)', 'color', 'red']
  * extract_segments('width:calc(100%-20px)') // → ['width', 'calc(100%-20px)']
+ * extract_segments('before:content:"a:b"') // → ['before', 'content', '"a:b"']
  * ```
  */
-export const extract_segments = (class_name: string): Array<string> => {
+export const extract_segments = (class_name: string): Array<string> =>
+	split_segments(class_name, true) ?? split_segments(class_name, false)!;
+
+// splits at the colons outside parentheses (and outside strings when
+// `quote_aware`), or returns null for a string left open at the end
+const split_segments = (class_name: string, quote_aware: boolean): Array<string> | null => {
 	const segments: Array<string> = [];
 	let current = '';
 	let paren_depth = 0;
+	let quote: string | null = null;
+	let escaped = false;
 
 	for (const char of class_name) {
-		if (char === '(') {
+		if (quote !== null) {
+			current += char;
+			if (escaped) escaped = false;
+			else if (char === '\\') escaped = true;
+			else if (char === quote) quote = null;
+		} else if (quote_aware && (char === '"' || char === "'")) {
+			quote = char;
+			current += char;
+		} else if (char === '(') {
 			paren_depth++;
 			current += char;
 		} else if (char === ')') {
@@ -267,6 +288,8 @@ export const extract_segments = (class_name: string): Array<string> => {
 			current += char;
 		}
 	}
+
+	if (quote !== null) return null;
 
 	if (current) {
 		segments.push(current);
