@@ -329,6 +329,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_conflict',
 							level: 'error',
 							message: `Multiple media modifiers not allowed`,
 							identifier: class_name,
@@ -340,6 +341,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `Media modifier must come before ancestor modifier`,
 							identifier: class_name,
@@ -351,6 +353,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `Media modifier must come before state modifiers`,
 							identifier: class_name,
@@ -362,6 +365,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `Media modifier must come before pseudo-element`,
 							identifier: class_name,
@@ -378,6 +382,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_conflict',
 							level: 'error',
 							message: `Modifiers "${ancestor.name}" and "${segment}" are mutually exclusive`,
 							identifier: class_name,
@@ -389,6 +394,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `Ancestor modifier must come before state modifiers`,
 							identifier: class_name,
@@ -400,6 +406,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `Ancestor modifier must come before pseudo-element`,
 							identifier: class_name,
@@ -416,6 +423,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_order',
 							level: 'error',
 							message: `State modifiers must come before pseudo-element`,
 							identifier: class_name,
@@ -430,6 +438,7 @@ export const extract_and_validate_modifiers = (
 						return {
 							ok: false,
 							error: {
+								code: 'class_modifier_order',
 								level: 'error',
 								message: `State modifiers must be in alphabetical order: "${prev.name}:${
 									segment
@@ -449,6 +458,7 @@ export const extract_and_validate_modifiers = (
 					return {
 						ok: false,
 						error: {
+							code: 'class_modifier_conflict',
 							level: 'error',
 							message: `Multiple pseudo-element modifiers not allowed`,
 							identifier: class_name,
@@ -499,6 +509,7 @@ export const parse_css_literal = (
 		return {
 			ok: false,
 			error: {
+				code: 'class_literal_syntax',
 				level: 'error',
 				message: `Invalid CSS-literal syntax: expected "property:value" format`,
 				identifier: class_name,
@@ -531,6 +542,7 @@ export const parse_css_literal = (
 		return {
 			ok: false,
 			error: {
+				code: 'class_modifier_unknown',
 				level: 'error',
 				message: `Unknown modifier "${unknown}"`,
 				identifier: class_name,
@@ -550,6 +562,7 @@ export const parse_css_literal = (
 		return {
 			ok: false,
 			error: {
+				code: 'class_property_unknown',
 				level: 'error',
 				message: `Unknown CSS property "${property}"`,
 				identifier: class_name,
@@ -567,6 +580,7 @@ export const parse_css_literal = (
 		return {
 			ok: false,
 			error: {
+				code: 'class_value_uncontained',
 				level: 'error',
 				message: `Uncontained CSS value "${formatted_value}": it could end its declaration or rule`,
 				identifier: class_name,
@@ -580,6 +594,7 @@ export const parse_css_literal = (
 	const calc_warning = check_calc_expression(formatted_value);
 	if (calc_warning) {
 		(diagnostics ??= []).push({
+			code: 'class_calc_spacing',
 			level: 'warning',
 			message: calc_warning,
 			identifier: class_name,
@@ -680,6 +695,7 @@ export const try_resolve_literal = (
 		return {
 			ok: false,
 			error: {
+				code: 'class_composes_modified',
 				level: 'error',
 				identifier: context_class_name,
 				message: `Modified class "${class_name}" cannot be used in composes array`,

@@ -843,11 +843,11 @@ describe('vite_plugin_fuz_css build base_css and variables diagnostics', () => {
 		assert.include(error.message, 'base_css_layer');
 	});
 
-	test('base styles missing their theme variables log undefined_theme_variables', async () => {
+	test('base styles missing their theme variables log base_css_variables_undefined', async () => {
 		for (const variables of [null, []]) {
 			const result = await build_fixture({ plugin_options: { on_error: 'log', variables } });
 			assert.strictEqual(result.errors.length, 1);
-			assert.include(result.errors[0]!, 'undefined_theme_variables');
+			assert.include(result.errors[0]!, 'base_css_variables_undefined');
 		}
 	});
 

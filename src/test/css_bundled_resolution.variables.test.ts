@@ -318,8 +318,11 @@ describe('resolve_css variable resolution', () => {
 			// Should still resolve both
 			assert.isTrue(result.resolved_variables.has('a'));
 			assert.isTrue(result.resolved_variables.has('b'));
-			// Should warn about the cycle
-			assert.isTrue(result.diagnostics.some((d) => d.message.includes('Circular dependency')));
+			// warns about the cycle, naming the variable it was found at
+			assert.deepEqual(
+				result.diagnostics.map((d) => [d.code, d.identifier, d.message]),
+				[['variable_cycle', 'a', 'Circular dependency detected for variable: a']]
+			);
 		});
 
 		test('detects longer cycle (A→B→C→A)', () => {

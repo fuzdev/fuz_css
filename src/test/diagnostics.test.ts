@@ -12,6 +12,7 @@ describe('format_diagnostic', () => {
 	test('formats extraction diagnostic with location', () => {
 		const diagnostic: ExtractionDiagnostic = {
 			phase: 'extraction',
+			code: 'hint_colon',
 			level: 'warning',
 			message: 'test warning message',
 			suggestion: null,
@@ -19,12 +20,13 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		assert.strictEqual(result, '  - src/lib/Button.svelte:10:5: test warning message');
+		assert.strictEqual(result, '  - src/lib/Button.svelte:10:5: [hint_colon] test warning message');
 	});
 
 	test('formats extraction diagnostic with suggestion', () => {
 		const diagnostic: ExtractionDiagnostic = {
 			phase: 'extraction',
+			code: 'file_parse_failed',
 			level: 'error',
 			message: 'deprecated syntax',
 			suggestion: 'use the new syntax instead',
@@ -32,12 +34,16 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		assert.strictEqual(result, '  - app.ts:1:1: deprecated syntax (use the new syntax instead)');
+		assert.strictEqual(
+			result,
+			'  - app.ts:1:1: [file_parse_failed] deprecated syntax (use the new syntax instead)'
+		);
 	});
 
 	test('formats generation diagnostic with location', () => {
 		const diagnostic: GenerationDiagnostic = {
 			phase: 'generation',
+			code: 'class_property_unknown',
 			level: 'error',
 			message: 'unknown CSS property',
 			suggestion: null,
@@ -46,12 +52,16 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		assert.strictEqual(result, '  - src/App.svelte:5:12: invalid:value: unknown CSS property');
+		assert.strictEqual(
+			result,
+			'  - src/App.svelte:5:12: [class_property_unknown] invalid:value: unknown CSS property'
+		);
 	});
 
 	test('formats generation diagnostic without location (from additional_classes)', () => {
 		const diagnostic: GenerationDiagnostic = {
 			phase: 'generation',
+			code: 'class_unresolved',
 			level: 'error',
 			message: 'invalid class',
 			suggestion: null,
@@ -60,12 +70,13 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		assert.strictEqual(result, '  - bad_class: invalid class');
+		assert.strictEqual(result, '  - [class_unresolved] bad_class: invalid class');
 	});
 
 	test('formats generation diagnostic with suggestion', () => {
 		const diagnostic: GenerationDiagnostic = {
 			phase: 'generation',
+			code: 'class_property_unknown',
 			level: 'warning',
 			message: 'unknown property',
 			suggestion: 'did you mean "color"?',
@@ -76,13 +87,14 @@ describe('format_diagnostic', () => {
 		const result = format_diagnostic(diagnostic);
 		assert.strictEqual(
 			result,
-			`  - test.ts:1:1: colour:red: unknown property (did you mean "color"?)`
+			`  - test.ts:1:1: [class_property_unknown] colour:red: unknown property (did you mean "color"?)`
 		);
 	});
 
 	test('formats generation diagnostic with empty locations array', () => {
 		const diagnostic: GenerationDiagnostic = {
 			phase: 'generation',
+			code: 'class_unresolved',
 			level: 'error',
 			message: 'test error',
 			suggestion: null,
@@ -91,7 +103,7 @@ describe('format_diagnostic', () => {
 		};
 
 		const result = format_diagnostic(diagnostic);
-		assert.strictEqual(result, '  - test_class: test error');
+		assert.strictEqual(result, '  - [class_unresolved] test_class: test error');
 	});
 });
 
@@ -100,6 +112,7 @@ describe('CssGenerationError', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
+				code: 'class_property_unknown',
 				level: 'error',
 				message: 'unknown property',
 				suggestion: null,
@@ -120,6 +133,7 @@ describe('CssGenerationError', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
+				code: 'class_unresolved',
 				level: 'error',
 				message: 'error one',
 				suggestion: null,
@@ -128,6 +142,7 @@ describe('CssGenerationError', () => {
 			},
 			{
 				phase: 'generation',
+				code: 'class_unresolved',
 				level: 'error',
 				message: 'error two',
 				suggestion: null,
@@ -147,6 +162,7 @@ describe('CssGenerationError', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
+				code: 'class_unresolved',
 				level: 'error',
 				message: 'this is an error',
 				suggestion: null,
@@ -155,6 +171,7 @@ describe('CssGenerationError', () => {
 			},
 			{
 				phase: 'generation',
+				code: 'class_calc_spacing',
 				level: 'warning',
 				message: 'this is a warning',
 				suggestion: null,
@@ -176,6 +193,7 @@ describe('CssGenerationError', () => {
 		const diagnostics = [
 			{
 				phase: 'extraction' as const,
+				code: 'file_parse_failed' as const,
 				level: 'error' as const,
 				message: 'extraction error',
 				suggestion: null,
@@ -183,6 +201,7 @@ describe('CssGenerationError', () => {
 			},
 			{
 				phase: 'generation' as const,
+				code: 'class_unresolved' as const,
 				level: 'error' as const,
 				message: 'generation error',
 				suggestion: null,
@@ -208,6 +227,7 @@ describe('CssGenerationError', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [
 			{
 				phase: 'generation',
+				code: 'class_calc_spacing',
 				level: 'warning',
 				message: 'just a warning',
 				suggestion: null,
@@ -235,6 +255,7 @@ describe('CssGenerationError', () => {
 describe('create_diagnostic_dispatcher', () => {
 	const warning = (message: string): GenerationDiagnostic => ({
 		phase: 'generation',
+		code: 'class_calc_spacing',
 		level: 'warning',
 		message,
 		suggestion: null,

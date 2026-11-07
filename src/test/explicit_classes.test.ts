@@ -63,6 +63,7 @@ describe('explicit_classes diagnostics', () => {
 					pattern: /^([^:]+):(.+)$/,
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
+							code: 'class_property_unknown',
 							level: 'error',
 							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
@@ -90,6 +91,7 @@ describe('explicit_classes diagnostics', () => {
 					pattern: /^([^:]+):(.+)$/,
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
+							code: 'class_property_unknown',
 							level: 'error',
 							identifier: 'invalid-property:value',
 							message: 'Unknown CSS property "invalid-property"',
@@ -120,6 +122,7 @@ describe('explicit_classes diagnostics', () => {
 					pattern: /^([^:]+):(.+)$/,
 					interpret: (_match, ctx) => {
 						ctx.diagnostics.push({
+							code: 'class_composes_cycle',
 							level: 'error',
 							identifier: 'some-class:value',
 							message: 'Circular reference detected',

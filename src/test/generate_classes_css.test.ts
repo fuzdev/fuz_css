@@ -118,6 +118,7 @@ describe('generate_classes_css', () => {
 				pattern: /^warn-(.+)$/,
 				interpret: (matched, ctx) => {
 					ctx.diagnostics.push({
+						code: 'class_interpreter',
 						level: 'warning',
 						message: 'test warning',
 						identifier: matched[0],

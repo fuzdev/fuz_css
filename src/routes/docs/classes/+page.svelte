@@ -428,7 +428,7 @@ vite_plugin_fuz_css({
 			The <DeclarationLink name="CssGeneratorBaseOptions">variables</DeclarationLink> option is the
 			whole set to draw from. If a kept base-style rule references a variable the defaults define
 			but your set lacks (with <code>null</code>, an empty array, or a partial set), generation
-			reports the error <code>undefined_theme_variables</code>, since a <code>var(--name)</code>
+			reports the error <code>base_css_variables_undefined</code>, since a <code>var(--name)</code>
 			with no fallback would resolve to nothing. It never fires for a reference with a fallback, a
 			name the base styles declare themselves (in the same rule, or in a top-level rule whose
 			selector is exactly <code>:root</code>, <code>:host</code>, <code>html</code>,
@@ -1589,7 +1589,9 @@ const grid_cols_interpreter: CssClassDefinitionInterpreter = {
 		<p>
 			The interpreter context provides access to <code>class_definitions</code>,
 			<code>css_properties</code> (for validation), and <code>diagnostics</code> (for
-			errors/warnings). This enables full programmatic control over class-to-CSS generation.
+			errors/warnings). This enables full programmatic control over class-to-CSS generation. A
+			diagnostic you push names a <code>code</code> from <DeclarationLink name="DiagnosticCode" />,
+			<code>class_interpreter</code> when nothing more specific fits.
 		</p>
 		<aside>
 			An array of interpreters replaces the defaults entirely, so keep the defaults the callback

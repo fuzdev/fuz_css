@@ -235,6 +235,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			if (!rules || rules.length === 0) {
 				diagnostics.push({
 					phase: 'generation',
+					code: 'element_unstyled',
 					level: 'warning',
 					message: `No style rules found for element "${element}"`,
 					suggestion:
@@ -256,6 +257,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				const similar = find_similar_name(element, known_elements);
 				diagnostics.push({
 					phase: 'generation',
+					code: 'element_unknown',
 					level: 'error',
 					message: `@fuz-elements: No style rules found for element "${element}"${
 						similar ? ` - did you mean "${similar}"?` : ''
@@ -279,6 +281,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 				const similar = find_similar_variable(variable_graph, variable);
 				diagnostics.push({
 					phase: 'generation',
+					code: 'variable_unknown',
 					level: 'error',
 					message: `@fuz-variables: No theme variable found for "${variable}"${
 						similar ? ` - did you mean "${similar}"?` : ''
@@ -352,6 +355,7 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 			if (!referenced && !resolution.excluded.has(v)) continue;
 			diagnostics.push({
 				phase: 'generation',
+				code: 'variable_excluded_referenced',
 				level: 'warning',
 				message: `Variable "--${v}" is ${
 					referenced ? 'referenced by included styles' : 'required by included theme variables'
@@ -364,13 +368,14 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 	}
 
 	// Add any cycle warnings
-	for (const warning of resolution.warnings) {
+	for (const name of resolution.cycles) {
 		diagnostics.push({
 			phase: 'generation',
+			code: 'variable_cycle',
 			level: 'warning',
-			message: warning,
+			message: `Circular dependency detected for variable: ${name}`,
 			suggestion: null,
-			identifier: 'variable_resolution',
+			identifier: name,
 			locations: null
 		});
 	}
@@ -382,10 +387,11 @@ export const resolve_css = (options: CssResolutionOptions): CssResolutionResult 
 		if (similar) {
 			diagnostics.push({
 				phase: 'generation',
+				code: 'variable_misspelled',
 				level: 'warning',
 				message: `CSS variable "--${name}" not found - did you mean "--${similar}"?`,
 				suggestion: `Check spelling. Similar theme variable: --${similar}`,
-				identifier: `var(--${name})`,
+				identifier: name,
 				locations: null
 			});
 		}

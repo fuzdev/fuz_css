@@ -99,6 +99,7 @@ describe('CssClasses', () => {
 		const diagnostics: Array<ExtractionDiagnostic> = [
 			{
 				phase: 'extraction',
+				code: 'hint_colon',
 				level: 'warning',
 				message: 'test warning',
 				suggestion: null,

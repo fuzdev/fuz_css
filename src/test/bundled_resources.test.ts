@@ -73,8 +73,7 @@ const generate = async (options: GenerateOptions = {}): Promise<GenerateCssResul
 	});
 };
 
-const identifiers = (result: GenerateCssResult): Array<string> =>
-	result.diagnostics.map((d) => ('identifier' in d ? d.identifier : d.message));
+const codes = (result: GenerateCssResult): Array<string> => result.diagnostics.map((d) => d.code);
 
 const USAGES: Array<GenerateOptions> = [
 	{},
@@ -233,7 +232,7 @@ describe('create_bundled_resources', () => {
 				elements: ['button']
 			});
 
-			assert.deepEqual(identifiers(result), ['base_css_layer', 'base_css_unsupported_at_rule']);
+			assert.deepEqual(codes(result), ['base_css_layer', 'base_css_unsupported_at_rule']);
 			// reported, and shipped as written inside the base layer
 			assert.include(
 				result.css,
@@ -250,11 +249,14 @@ describe('create_bundled_resources', () => {
 				'the configured variables do not define: --font_family'
 			]
 		] as Array<[string, VariablesOption, string]>)(
-			'the default base styles with %s raise undefined_theme_variables once',
+			'the default base styles with %s raise base_css_variables_undefined once',
 			async (_name, variables, expected) => {
 				const result = await generate({ variables, elements: ['button'] });
-				assert.deepEqual(identifiers(result), ['undefined_theme_variables']);
-				assert.strictEqual(result.diagnostics[0]!.level, 'error');
+				assert.deepEqual(codes(result), ['base_css_variables_undefined']);
+				const [diagnostic] = result.diagnostics;
+				assert(diagnostic?.phase === 'generation');
+				assert.strictEqual(diagnostic.identifier, 'base_css');
+				assert.strictEqual(diagnostic.level, 'error');
 				assert.include(result.diagnostics[0]!.message, expected);
 			}
 		);

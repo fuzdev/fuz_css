@@ -21,7 +21,7 @@ import { marquee_theme } from '#lib/themes/marquee.ts';
 // the containment errors among a graph's diagnostics, apart from a baked
 // theme's gate warnings
 const uncontained = (graph: { diagnostics: Array<GenerationDiagnostic> }) =>
-	graph.diagnostics.filter((d) => d.identifier === 'uncontained_theme_value');
+	graph.diagnostics.filter((d) => d.code === 'variable_value_uncontained');
 
 describe('build_variable_graph', () => {
 	describe('basic building', () => {
@@ -105,8 +105,8 @@ describe('build_variable_graph containment', () => {
 		);
 		assert.isTrue(graph.variables.has('ok'));
 		assert.deepEqual(
-			graph.diagnostics.map((d) => [d.level, d.identifier]),
-			[['error', 'uncontained_theme_value']]
+			graph.diagnostics.map((d) => [d.level, d.code, d.identifier]),
+			[['error', 'variable_value_uncontained', 'text_color']]
 		);
 		assert.include(graph.diagnostics[0]!.message, 'text_color');
 	});
@@ -138,9 +138,9 @@ describe('build_variable_graph containment', () => {
 		const fallback = default_variables.find((v) => v.name === 'text_color')!;
 		assert.strictEqual(graph.variables.get('text_color')?.base_value, fallback.base);
 		assert.deepEqual(
-			graph.diagnostics.map((d) => d.identifier),
+			graph.diagnostics.map((d) => d.code),
 			// the gates measure the contained theme, so they don't see the value
-			['uncontained_theme_value']
+			['variable_value_uncontained']
 		);
 	});
 
@@ -150,8 +150,8 @@ describe('build_variable_graph containment', () => {
 		const baked = bake_theme(theme, default_variables, diagnostics);
 		assert.deepEqual(baked, { theme: { name: 'j', variables: [] } });
 		assert.deepEqual(
-			diagnostics.map((d) => d.identifier),
-			['uncontained_theme_value']
+			diagnostics.map((d) => [d.code, d.identifier]),
+			[['variable_value_uncontained', 'hue_a']]
 		);
 	});
 
@@ -160,7 +160,14 @@ describe('build_variable_graph containment', () => {
 		const nameless = { base: '1' } as unknown as StyleVariable;
 		const theme: Theme = { name: 'j', variables: [nameless, { name: 'hue_a', base: '20' }] };
 		const graph = build_variable_graph_from_options(undefined, theme);
-		assert.strictEqual(uncontained(graph).length, 1);
+		assert.deepEqual(
+			uncontained(graph).map((d) => d.identifier),
+			['']
+		);
+		assert.include(
+			uncontained(graph)[0]!.message,
+			'Theme variable "" has a name that is not a plain identifier'
+		);
 		assert.strictEqual(graph.variables.get('hue_a')!.base_value, '20');
 		assert.deepEqual(graph.theme!.theme.variables, [{ name: 'hue_a', base: '20' }]);
 		// the overlay is total over one too, when handed the theme directly
@@ -184,7 +191,7 @@ describe('build_variable_graph containment', () => {
 
 describe('bake_theme lint', () => {
 	const lint = (diagnostics: Array<GenerationDiagnostic>) =>
-		diagnostics.filter((d) => d.identifier === 'theme_lint').map((d) => [d.level, d.message]);
+		diagnostics.filter((d) => d.code === 'theme_lint').map((d) => [d.level, d.message]);
 
 	test('an unknown variable is a lint error', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [];
@@ -229,7 +236,7 @@ describe('resolve_variables_transitive', () => {
 
 			assert.isTrue(result.variables.has('a'));
 			assert.isFalse(result.variables.has('b'));
-			assert.strictEqual(result.warnings.length, 0);
+			assert.deepEqual(result.cycles, []);
 		});
 
 		test('includes direct dependencies', () => {
@@ -406,7 +413,7 @@ describe('resolve_variables_transitive', () => {
 			assert.isTrue(result.variables.has('unknown'));
 			assert.isTrue(result.missing.has('unknown'));
 			assert.isFalse(result.missing.has('known'));
-			assert.strictEqual(result.warnings.length, 0);
+			assert.deepEqual(result.cycles, []);
 		});
 
 		test('tracks multiple missing variables', () => {
@@ -486,8 +493,7 @@ describe('resolve_variables_transitive', () => {
 			for (const v of expected_vars) {
 				assert.isTrue(result.variables.has(v), `Expected "${v}" in result`);
 			}
-			assert.isAbove(result.warnings.length, 0);
-			assert.isTrue(result.warnings.some((w) => w.includes('Circular dependency')));
+			assert.deepEqual(result.cycles, ['a']);
 		});
 
 		test('self-reference in both base and dark triggers cycle warning', () => {
@@ -498,8 +504,7 @@ describe('resolve_variables_transitive', () => {
 			const result = resolve_variables_transitive(graph, ['x']);
 
 			assert.isTrue(result.variables.has('x'));
-			assert.isAbove(result.warnings.length, 0);
-			assert.isTrue(result.warnings.some((w) => w.includes('Circular dependency')));
+			assert.deepEqual(result.cycles, ['x']);
 		});
 	});
 
@@ -974,13 +979,15 @@ describe('bake_theme', () => {
 		assert.isTrue(diagnostics.every((d) => d.level === 'warning'));
 		// the lint warns on the unitless-hue rule the gates also can't read
 		assert.sameMembers(
-			[...new Set(diagnostics.map((d) => d.identifier))],
+			[...new Set(diagnostics.map((d) => d.code))],
 			['theme_gate_failed', 'theme_gate_unchecked', 'theme_lint']
 		);
-		const failed = diagnostics.find((d) => d.identifier === 'theme_gate_failed')!;
+		// the subject of a baked theme's diagnostics is the theme
+		assert.deepEqual([...new Set(diagnostics.map((d) => d.identifier))], ['loud']);
+		const failed = diagnostics.find((d) => d.code === 'theme_gate_failed')!;
 		assert.include(failed.message, 'Baked theme "loud"');
 		assert.include(failed.message, 'gamut');
-		const unchecked = diagnostics.find((d) => d.identifier === 'theme_gate_unchecked')!;
+		const unchecked = diagnostics.find((d) => d.code === 'theme_gate_unchecked')!;
 		assert.include(unchecked.message, 'hue_j: 170deg');
 	});
 
@@ -999,7 +1006,7 @@ describe('bake_theme', () => {
 		// the baked theme itself stays what was authored
 		assert.strictEqual(baked.theme, theme);
 		// measured at the default lightness, the caps would fail gamut here
-		const failed = diagnostics.find((d) => d.identifier === 'theme_gate_failed');
+		const failed = diagnostics.find((d) => d.code === 'theme_gate_failed');
 		assert.notInclude(failed?.message ?? '', 'gamut');
 	});
 
@@ -1026,8 +1033,8 @@ describe('bake_theme', () => {
 		const diagnostics: Array<GenerationDiagnostic> = [];
 		bake_theme(marquee_theme, default_variables, diagnostics);
 		assert.deepEqual(
-			diagnostics.map((d) => d.identifier),
-			['theme_gate_failed']
+			diagnostics.map((d) => [d.code, d.identifier]),
+			[['theme_gate_failed', 'marquee']]
 		);
 		const { message } = diagnostics[0]!;
 		assert.match(message, /^Baked theme "marquee" fails accessibility gates: gamut dark /);

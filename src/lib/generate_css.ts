@@ -28,6 +28,14 @@ import { default_variables } from './variables.ts';
  */
 const default_variable_names: ReadonlySet<string> = new Set(default_variables.map((v) => v.name));
 
+// the configured theme's name, or 'theme' when junk data has none - the
+// option is untyped at runtime, so this stays total over any value
+const to_theme_label = (theme: unknown): string => {
+	const t = theme !== null && typeof theme === 'object' && 'theme' in theme ? theme.theme : theme;
+	const name: unknown = t !== null && typeof t === 'object' && 'name' in t ? t.name : undefined;
+	return typeof name === 'string' ? name : 'theme';
+};
+
 /**
  * Checks the emitted base styles for references to theme variables that
  * nothing defines - directly, or through the value of a variable the
@@ -43,7 +51,7 @@ const default_variable_names: ReadonlySet<string> = new Set(default_variables.ma
  * declaration scoped to any other selector is not taken as defining the name
  * for other rules.
  */
-const check_undefined_theme_variables = (
+const check_base_css_variables_undefined = (
 	resources: BundledCssResources,
 	included_rule_indices: Set<number>,
 	exclude_variables: Set<string> | null,
@@ -85,6 +93,7 @@ const check_undefined_theme_variables = (
 		.join(', ');
 	return {
 		phase: 'generation',
+		code: 'base_css_variables_undefined',
 		level: 'error',
 		message: include_theme
 			? `Base styles reference theme variables that the configured variables do not define: ${list}`
@@ -94,7 +103,7 @@ const check_undefined_theme_variables = (
 		suggestion: include_theme
 			? 'Define them in variables - a callback can adjust the defaults instead of replacing them. For ones something else defines - another stylesheet, or base_css under a qualified selector like :root.dark - list them in exclude_variables.'
 			: "Keep variables and set additional_variables: 'all' to bundle the full theme, or set base_css: null too for utility-only mode. To pair these base styles with a separately imported theme stylesheet, set exclude_variables: default_variables.map((v) => v.name).",
-		identifier: 'undefined_theme_variables',
+		identifier: 'base_css',
 		locations: null
 	};
 };
@@ -230,11 +239,12 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 	if (theme != null && !include_theme) {
 		diagnostics.push({
 			phase: 'generation',
+			code: 'theme_discarded',
 			level: 'warning',
 			message:
 				'A theme is configured but theme variables are disabled (variables: null); the theme will not be emitted',
 			suggestion: 'Remove the theme option, or enable variables so the theme can render.',
-			identifier: 'theme_discarded',
+			identifier: to_theme_label(theme),
 			locations: null
 		});
 	}
@@ -272,7 +282,7 @@ export const generate_css = (options: GenerateCssOptions): GenerateCssResult => 
 
 		// the base styles that ship must find their theme variables defined
 		if (include_base) {
-			const undefined_variables = check_undefined_theme_variables(
+			const undefined_variables = check_base_css_variables_undefined(
 				resources,
 				resolution.included_rule_indices,
 				exclude_variables,

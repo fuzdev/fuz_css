@@ -54,7 +54,7 @@ export interface VariableDependencyGraph {
 	/** Map from variable name to its info */
 	variables: Map<string, StyleVariableInfo>;
 	/**
-	 * The `uncontained_theme_value` errors for the slots left out of the
+	 * The `variable_value_uncontained` errors for the slots left out of the
 	 * graph, and a baked theme's gate warnings, which `resolve_css`
 	 * forwards with every resolution.
 	 */
@@ -68,19 +68,22 @@ export interface VariableDependencyGraph {
 }
 
 // the slots of `v` a stylesheet can hold, or null when none can - reporting
-// the rest as `uncontained_theme_value` errors to `diagnostics` when given
+// the rest as `variable_value_uncontained` errors to `diagnostics` when given
 const contain_variable = (
 	v: StyleVariable,
 	diagnostics?: Array<GenerationDiagnostic>
 ): StyleVariable | null => {
+	// untyped data can carry a variable with no name, which reports as ''
+	const name = typeof v.name === 'string' ? v.name : '';
 	const report = (detail: string, left_out: string): void => {
 		diagnostics?.push({
 			phase: 'generation',
+			code: 'variable_value_uncontained',
 			level: 'error',
-			message: `Theme variable "${v.name}" ${detail}, so ${left_out} is left out of the generated CSS`,
+			message: `Theme variable "${name}" ${detail}, so ${left_out} is left out of the generated CSS`,
 			suggestion:
 				'A value must stay inside its declaration - quote a URL that needs braces, quotes, or semicolons.',
-			identifier: 'uncontained_theme_value',
+			identifier: name,
 			locations: null
 		});
 	};
@@ -116,8 +119,8 @@ const contain_variable = (
  * The graph is what the bundled theme CSS renders from, verbatim, so it
  * applies the containment checks `render_theme_style` does: a slot whose
  * value could end its own declaration (or is blank), or a variable whose
- * name isn't a plain identifier, is left out and reported as an
- * `uncontained_theme_value` error rather than written into the stylesheet.
+ * name isn't a plain identifier, is left out and reported as a
+ * `variable_value_uncontained` error rather than written into the stylesheet.
  *
  * @param variables - array of `StyleVariable` objects
  * @returns `VariableDependencyGraph`
@@ -148,8 +151,8 @@ export const build_variable_graph = (variables: Array<StyleVariable>): VariableD
 export interface ResolveVariablesResult {
 	/** All resolved variable names */
 	variables: Set<string>;
-	/** Warning messages for cycles */
-	warnings: Array<string>;
+	/** Names of the variables found on a dependency cycle, each once */
+	cycles: Array<string>;
 	/** Variable names that were requested but not found in the graph */
 	missing: Set<string>;
 	/** Excluded variable names a resolved variable depends on */
@@ -175,7 +178,7 @@ export const resolve_variables_transitive = (
 	excluded?: ReadonlySet<string>
 ): ResolveVariablesResult => {
 	const resolved: Set<string> = new Set();
-	const warnings: Array<string> = [];
+	const cycles: Array<string> = [];
 	const missing: Set<string> = new Set();
 	const excluded_reached: Set<string> = new Set();
 	const reported_cycles: Set<string> = new Set();
@@ -193,7 +196,7 @@ export const resolve_variables_transitive = (
 		if (path.has(name)) {
 			// Only report each cycle once
 			if (!reported_cycles.has(name)) {
-				warnings.push(`Circular dependency detected for variable: ${name}`);
+				cycles.push(name);
 				reported_cycles.add(name);
 			}
 			return;
@@ -233,7 +236,7 @@ export const resolve_variables_transitive = (
 		resolve(name, new Set());
 	}
 
-	return { variables: resolved, warnings, missing, excluded: excluded_reached };
+	return { variables: resolved, cycles, missing, excluded: excluded_reached };
 };
 
 /**
@@ -378,9 +381,9 @@ const to_list = (items: Array<string>): string =>
  *
  * The theme's variables pass the containment checks first, as
  * `build_variable_graph` applies them: a slot the stylesheet can't hold, or
- * an entry without a plain-identifier name, is reported as an
- * `uncontained_theme_value` error and left out, and the caps, the gates, and
- * the overlay all see the contained theme - what renders.
+ * an entry without a plain-identifier name, is reported as a
+ * `variable_value_uncontained` error and left out, and the caps, the gates,
+ * and the overlay all see the contained theme - what renders.
  *
  * The caps and the gates measure the theme over the configured set: a
  * knob-tier value (`theme_knobs`) the configured `variables` change from the
@@ -417,21 +420,27 @@ export const bake_theme = (
 		for (const issue of validate_theme(wire)) {
 			diagnostics.push({
 				phase: 'generation',
+				code: 'theme_lint',
 				level: issue.level,
 				message: `Baked theme "${wire.name}": ${issue.message}`,
 				suggestion: null,
-				identifier: 'theme_lint',
+				identifier: wire.name,
 				locations: null
 			});
 		}
 		const report = check_theme(measured, { caps });
-		const warn = (message: string, suggestion: string, identifier: string): void => {
+		const warn = (
+			code: 'theme_gate_failed' | 'theme_gate_unchecked',
+			message: string,
+			suggestion: string
+		): void => {
 			diagnostics.push({
 				phase: 'generation',
+				code,
 				level: 'warning',
 				message,
 				suggestion,
-				identifier,
+				identifier: wire.name,
 				locations: null
 			});
 		};
@@ -439,23 +448,23 @@ export const bake_theme = (
 		const failed = report.entries.filter((e) => !e.pass && (!stance || e.scheme === stance));
 		if (failed.length) {
 			warn(
+				'theme_gate_failed',
 				`Baked theme "${wire.name}" fails accessibility gates: ${to_list(
 					failed.map(
 						(e) =>
 							`${e.gate} ${e.scheme} ${e.subject} (${round_gate_value(e.value)} against ${e.threshold})`
 					)
 				)}`,
-				'Run check_theme on the theme and retune its knobs, or keep the failures if the theme gives them up knowingly.',
-				'theme_gate_failed'
+				'Run compile_theme on the theme and read its report, then retune its knobs, or keep the failures if the theme gives them up knowingly.'
 			);
 		}
 		if (report.unchecked.length) {
 			warn(
+				'theme_gate_unchecked',
 				`Baked theme "${wire.name}" has gate inputs the checker can't evaluate: ${to_list(
 					report.unchecked.map((u) => `${u.variable}: ${u.value} (${u.reason})`)
 				)}`,
-				'Author those values as numbers, var() references, or oklch() literals so the gates can read them.',
-				'theme_gate_unchecked'
+				'Author those values as numbers, var() references, or oklch() literals so the gates can read them.'
 			);
 		}
 	}

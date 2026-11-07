@@ -292,8 +292,8 @@ describe('at-rule contract', () => {
 
 		// errors are reported, outermost first, and never remove CSS
 		assert.deepEqual(
-			index.diagnostics.map((d) => [d.level, d.identifier]),
-			errors.map((identifier) => ['error', identifier])
+			index.diagnostics.map((d) => [d.level, d.code]),
+			errors.map((code) => ['error', code])
 		);
 
 		if (outcome === 'skipped') {
@@ -323,7 +323,7 @@ describe('at-rule contract', () => {
 describe('layer rules', () => {
 	const layer_errors = (css: string): Array<string> =>
 		parse_style_css(css).diagnostics
-			.filter((d) => d.identifier === 'base_css_layer')
+			.filter((d) => d.code === 'base_css_layer')
 			.map((d) => d.message);
 
 	test('a consumer layer order and its blocks are errors that ship as written, in order', () => {
@@ -335,7 +335,7 @@ describe('layer rules', () => {
 		assert.strictEqual(index.diagnostics.length, 3);
 		for (const d of index.diagnostics) {
 			assert.strictEqual(d.level, 'error');
-			assert.strictEqual(d.identifier, 'base_css_layer');
+			assert.strictEqual(d.code, 'base_css_layer');
 		}
 		assert.include(index.diagnostics[0]!.message, '`@layer reset, components` at line 1, but');
 		assert.include(index.diagnostics[1]!.message, '`@layer components` at line 2, but');
@@ -450,8 +450,11 @@ describe('layer rules', () => {
 			'a { color: red; }\n\n@import "x.css";\n@media print { @namespace svg url(x); }'
 		);
 		assert.deepEqual(
-			index.diagnostics.map((d) => d.identifier),
-			['base_css_unsupported_at_rule', 'base_css_unsupported_at_rule']
+			index.diagnostics.map((d) => [d.code, d.identifier]),
+			[
+				['base_css_unsupported_at_rule', '@import "x.css"'],
+				['base_css_unsupported_at_rule', '@namespace svg url(x)']
+			]
 		);
 		assert.include(index.diagnostics[0]!.message, '`@import "x.css"` at line 3, which');
 		assert.include(
@@ -475,8 +478,11 @@ describe('layer rules', () => {
 			]
 		);
 		assert.deepEqual(
-			index.diagnostics.map((d) => d.identifier),
-			['base_css_layer', 'base_css_unsupported_at_rule']
+			index.diagnostics.map((d) => [d.code, d.identifier]),
+			[
+				['base_css_layer', '@layer mine'],
+				['base_css_unsupported_at_rule', '@import "x.css"']
+			]
 		);
 	});
 });

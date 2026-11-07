@@ -25,7 +25,7 @@
  * and `theme.css`, which include all content).
  *
  * The two are checked against each other: base styles that reference a theme
- * variable nothing defines raise the `undefined_theme_variables` error,
+ * variable nothing defines raise the `base_css_variables_undefined` error,
  * whether `variables` is `null`, empty, or missing some of the defaults. To
  * bundle every variable instead, keep `variables` and set
  * `additional_variables: 'all'`.
@@ -255,7 +255,7 @@ export interface CssOutputOptions {
 	 * the ones the output references. Base styles that reference a variable
 	 * the fuz_css defaults define but this set lacks - with `null`, an empty
 	 * array, or an array or callback result missing some - raise the error
-	 * `undefined_theme_variables`, because a `var()` with no fallback would
+	 * `base_css_variables_undefined`, because a `var()` with no fallback would
 	 * resolve to nothing. A reference with a fallback (`var(--x, 1px)`) is
 	 * never an error, nor is a name the base styles declare themselves: in the
 	 * rule that references it, or in a top-level rule with a selector that is
@@ -372,7 +372,7 @@ export interface CssOutputOptions {
 	 * out the dependencies only it pulls in, excluding one the output
 	 * references or a shipped variable depends on is a warning when the theme
 	 * has it, and a name listed here is skipped by the
-	 * `undefined_theme_variables` check.
+	 * `base_css_variables_undefined` check.
 	 *
 	 * @example
 	 * ```ts
@@ -384,7 +384,9 @@ export interface CssOutputOptions {
 }
 
 /**
- * Options for error and warning handling.
+ * Options for error and warning handling. Each diagnostic carries a `code`
+ * (`DiagnosticCode`) naming what went wrong, and a generation diagnostic an
+ * `identifier` naming its subject.
  */
 export interface CssDiagnosticsOptions {
 	/**

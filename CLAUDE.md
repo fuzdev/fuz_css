@@ -546,11 +546,18 @@ Use `VitePluginFuzCssOptions` to customize:
   take a callback over the defaults, as `base_css` and `variables` do, so
   `class_definitions: () => mine` uses only your own definitions
 - `on_error` (`'log' | 'throw'`) / `on_warning` (`'log' | 'throw' | 'ignore'`) -
-  diagnostic handling. Errors from the base stylesheet: `base_css_layer` (an
+  diagnostic handling. Every diagnostic carries a `code` from the closed
+  `DiagnosticCode` union (`diagnostics.ts`, one TSDoc line per code), named
+  by what went wrong and led by its subject's family (`class_unresolved`,
+  `class_property_unknown`, `element_unknown`, `variable_misspelled`,
+  `theme_lint`, ...), and a generation diagnostic's `identifier` is its
+  subject - a class, element, variable (bare, without `--`), or theme name,
+  or the base-CSS construct; the formatted line reads `[code] subject:
+  message`. Errors from the base stylesheet: `base_css_layer` (an
   `@layer` rule of the consumer's own, at any depth) and
   `base_css_unsupported_at_rule` (`@import`/`@namespace`, invalid inside a
   layer) name the construct and its line and never remove CSS - it ships as
-  written - and `undefined_theme_variables` fires when emitted base styles
+  written - and `base_css_variables_undefined` fires when emitted base styles
   reference, with no fallback, a variable the defaults define that nothing
   defines: the configured `variables` lack it (`null`, `[]`, or a partial
   set), the referencing rule doesn't declare it, and no shipped
@@ -561,12 +568,14 @@ Use `VitePluginFuzCssOptions` to customize:
   base styles with a separately imported `theme.css`). Set both options to
   `null` for utility-only mode, or `additional_variables: 'all'` to bundle
   the full theme. Warnings flag excluding a variable that shipped styles
-  still reference, and a `theme` configured with `variables: null`
-  (`theme_discarded`). The parse diagnostics ride the `StyleRuleIndex` (built
-  once per generator) and `resolve_css` forwards them on every render, so
-  they dispatch like any other; a `base_css` the parser rejects, or a
-  callback returning a non-string, throws from `create_bundled_resources`
-  with an error naming `base_css`
+  still reference (`variable_excluded_referenced`), a cycle among theme
+  variables' references (`variable_cycle`), a `var()` name close to a
+  theme variable's (`variable_misspelled`), and a `theme` configured with
+  `variables: null` (`theme_discarded`). The parse diagnostics ride the
+  `StyleRuleIndex` (built once per generator) and `resolve_css` forwards
+  them on every render, so they dispatch like any other; a `base_css` the
+  parser rejects, or a callback returning a non-string, throws from
+  `create_bundled_resources` with an error naming `base_css`
 - `filter_file` - which files get extracted, called with the file id and
   the project root (the default filter includes node_modules deps and CSS
   files without a query, and judges test directories inside the project or
@@ -741,7 +750,7 @@ elements, forms, typography, borders, shadows, layout. See
   default filter (`filter_file_default`) for extractable files,
   `is_css_file` for the files scanned only for variables, and
   `to_filter_scope`, the root- or package-relative part it judges
-- [diagnostics.ts](src/lib/diagnostics.ts) - `SourceLocation`,
+- [diagnostics.ts](src/lib/diagnostics.ts) - `DiagnosticCode`, `SourceLocation`,
   `ExtractionDiagnostic`, `CssGenerationError` types, and the deduping
   dispatch the generator core runs
 
@@ -772,7 +781,7 @@ elements, forms, typography, borders, shadows, layout. See
   render with its diagnostics dispatched
 - [generate_css.ts](src/lib/generate_css.ts) - Shared generation pipeline
   (generate → resolve → bundle) the generator core runs, plus the checks
-  that span options (`undefined_theme_variables`, `theme_discarded`)
+  that span options (`base_css_variables_undefined`, `theme_discarded`)
 - [bundled_resources.ts](src/lib/bundled_resources.ts) - Builds the bundled CSS
   resources (style-rule index, variable graph)
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
@@ -792,10 +801,10 @@ elements, forms, typography, borders, shadows, layout. See
   CSS resolution algorithm
 - [variable_graph.ts](src/lib/variable_graph.ts) - Variable dependency graph for
   transitive resolution; it leaves out a value that would escape its
-  declaration, as the runtime renderer does, with an `uncontained_theme_value`
-  error. `bake_theme` derives a build-time theme's mirror (from the
-  configured variables) and compiled caps, and the graph carries the baked
-  theme for the `fuz.theme.baked` overlay
+  declaration, as the runtime renderer does, with a
+  `variable_value_uncontained` error. `bake_theme` derives a build-time
+  theme's mirror (from the configured variables) and compiled caps, and the
+  graph carries the baked theme for the `fuz.theme.baked` overlay
 - [css_variable_utils.ts](src/lib/css_variable_utils.ts) - CSS variable
   extraction utilities: references, fallback-less references, declarations,
   and comment stripping
@@ -903,7 +912,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 
 Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_compile`, `theme_validate`, `variable`, `variables`,
-`variable_graph`, `modifiers`, `diagnostics`, `file_filter`,
+`variable_graph`, `modifiers`, `diagnostics`, `diagnostic_codes`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
 `fuz_comments`, `bundled_resources`, `generate_bundled_css`,
 `generate_css`, and more.

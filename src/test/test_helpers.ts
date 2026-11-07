@@ -61,6 +61,7 @@ export const make_extraction_diagnostic = (
 	overrides: Partial<ExtractionDiagnostic> = {}
 ): ExtractionDiagnostic => ({
 	phase: 'extraction',
+	code: 'file_parse_failed',
 	level: 'warning',
 	message: 'test message',
 	suggestion: null,

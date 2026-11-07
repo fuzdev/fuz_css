@@ -221,28 +221,31 @@ const create_rejected_at_rule_diagnostic = (
 		atrule === container
 			? `at line ${line},`
 			: `at line ${line}, inside \`${format_rule_head(container, css)}\`,`;
-	const head = `\`${format_rule_head(atrule, css)}\``;
+	const subject = format_rule_head(atrule, css);
+	const head = `\`${subject}\``;
 	if (atrule.name.toLowerCase() === 'layer') {
 		return {
 			phase: 'generation',
+			code: 'base_css_layer',
 			level: 'error',
 			message: `base_css declares a cascade layer with ${head} ${
 				where
 			} but the generator owns layering - it ships as written, as a sublayer of ${layer}`,
 			suggestion:
 				'Remove the @layer rule: base_css lands in fuz.base, and only top-level `@layer fuz.base` and `@layer fuz.preferences` blocks are recognized. Styles that need their own layers belong in your own stylesheet.',
-			identifier: 'base_css_layer',
+			identifier: subject,
 			locations: null
 		};
 	}
 	return {
 		phase: 'generation',
+		code: 'base_css_unsupported_at_rule',
 		level: 'error',
 		message: `base_css contains ${head} ${
 			where
 		} which is invalid inside the cascade layer base styles are emitted in - it ships as written and browsers ignore it`,
 		suggestion: 'Move it to your own stylesheet.',
-		identifier: 'base_css_unsupported_at_rule',
+		identifier: subject,
 		locations: null
 	};
 };

@@ -31,6 +31,9 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
 			assert.include(result.diagnostics[0]!.message, 'color_primry');
+			// the subject is the bare name, as exclude_variables takes it
+			assert.strictEqual(result.diagnostics[0]!.code, 'variable_misspelled');
+			assert.strictEqual(result.diagnostics[0]!.identifier, 'color_primry');
 			assert.include(result.diagnostics[0]!.message, 'did you mean');
 			assert.include(result.diagnostics[0]!.message, 'color_primary');
 			assert.include(result.diagnostics[0]!.suggestion!, 'color_primary');
@@ -163,6 +166,8 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
 			assert.include(result.diagnostics[0]!.message, 'custom-element');
+			assert.strictEqual(result.diagnostics[0]!.code, 'element_unstyled');
+			assert.strictEqual(result.diagnostics[0]!.identifier, 'custom-element');
 			assert.include(result.diagnostics[0]!.message, 'No style rules found');
 		});
 
@@ -232,6 +237,8 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'error');
 			assert.include(result.diagnostics[0]!.message, '@fuz-variables');
+			assert.strictEqual(result.diagnostics[0]!.code, 'variable_unknown');
+			assert.strictEqual(result.diagnostics[0]!.identifier, 'nonexistent_var');
 			assert.include(result.diagnostics[0]!.message, 'nonexistent_var');
 			assert.include(result.diagnostics[0]!.message, 'No theme variable found');
 			assert.include(result.diagnostics[0]!.suggestion!, 'Remove from @fuz-variables');
@@ -374,6 +381,8 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'error');
 			assert.include(result.diagnostics[0]!.message, '@fuz-elements');
+			assert.strictEqual(result.diagnostics[0]!.code, 'element_unknown');
+			assert.strictEqual(result.diagnostics[0]!.identifier, 'dialog');
 			assert.include(result.diagnostics[0]!.message, 'dialog');
 			assert.include(result.diagnostics[0]!.message, 'No style rules found');
 		});
@@ -488,6 +497,8 @@ describe('resolve_css diagnostics', () => {
 			assert.strictEqual(result.diagnostics.length, 1);
 			assert.strictEqual(result.diagnostics[0]!.level, 'warning');
 			assert.include(result.diagnostics[0]!.message, 'brand');
+			assert.strictEqual(result.diagnostics[0]!.code, 'variable_excluded_referenced');
+			assert.strictEqual(result.diagnostics[0]!.identifier, 'brand');
 			assert.include(result.diagnostics[0]!.message, 'exclude_variables');
 			// and it's actually dropped from the output
 			assert.isFalse(result.resolved_variables.has('brand'));
@@ -608,11 +619,11 @@ describe('resolve_css diagnostics', () => {
 			});
 
 			assert.deepEqual(
-				result.diagnostics.map((d) => [d.level, d.identifier]),
+				result.diagnostics.map((d) => [d.level, d.code, d.identifier]),
 				[
-					['error', 'base_css_layer'],
-					['error', 'base_css_unsupported_at_rule'],
-					['error', 'nope']
+					['error', 'base_css_layer', '@layer reset, components'],
+					['error', 'base_css_unsupported_at_rule', '@import "x.css"'],
+					['error', 'variable_unknown', 'nope']
 				]
 			);
 			// an error never removes CSS: all three ship as written

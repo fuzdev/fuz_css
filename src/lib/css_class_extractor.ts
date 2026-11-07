@@ -301,6 +301,7 @@ export const extract_from_svelte = (source: string, file = '<unknown>'): Extract
 		return empty_extraction_result([
 			{
 				phase: 'extraction',
+				code: 'file_parse_failed',
 				level: 'warning',
 				message: `Failed to parse Svelte file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',
@@ -354,6 +355,7 @@ const create_fuz_comment_parser = (
 		if (match[1] === ':') {
 			diagnostics.push({
 				phase: 'extraction',
+				code: 'hint_colon',
 				level: 'warning',
 				message: `@fuz-${tag}: colon is unnecessary`,
 				suggestion: `Use @fuz-${tag} without the colon`,
@@ -514,6 +516,7 @@ export const extract_from_ts = (
 		return empty_extraction_result([
 			{
 				phase: 'extraction',
+				code: 'file_parse_failed',
 				level: 'warning',
 				message: `Failed to parse TypeScript/JS file: ${to_error_message(err, 'unknown error')}`,
 				suggestion: 'Check for syntax errors in the file',

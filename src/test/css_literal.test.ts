@@ -455,6 +455,7 @@ describe('parse_css_literal - error cases', () => {
 			['nth-child(2n):hover:color:red', 'alphabetical order']
 		])('%s → error containing "%s"', (input, expected_message) => {
 			const { error } = assert_parse_error(parse_css_literal(input, css_properties));
+			assert.strictEqual(error.code, 'class_modifier_order');
 			assert.include(error.message, expected_message);
 		});
 	});
@@ -466,12 +467,14 @@ describe('parse_css_literal - error cases', () => {
 			['before:after:content:""', 'Multiple pseudo-element']
 		])('%s → error containing "%s"', (input, expected_message) => {
 			const { error } = assert_parse_error(parse_css_literal(input, css_properties));
+			assert.strictEqual(error.code, 'class_modifier_conflict');
 			assert.include(error.message, expected_message);
 		});
 	});
 
 	test('unknown:color:red (unknown modifier)', () => {
 		const { error } = assert_parse_error(parse_css_literal('unknown:color:red', css_properties));
+		assert.strictEqual(error.code, 'class_modifier_unknown');
 		assert.include(error.message, 'Unknown modifier');
 	});
 
@@ -483,6 +486,7 @@ describe('parse_css_literal - error cases', () => {
 
 	test('dipslay:flex (typo in property with suggestion)', () => {
 		const { error } = assert_parse_error(parse_css_literal('dipslay:flex', css_properties));
+		assert.strictEqual(error.code, 'class_property_unknown');
 		assert.include(error.message, 'Unknown CSS property');
 		assert.isDefined(error.suggestion);
 		assert.include(error.suggestion ?? '', 'display');
@@ -497,6 +501,7 @@ describe('parse_css_literal - warnings', () => {
 		assert.ok(diagnostics);
 		assert.lengthOf(diagnostics, 1);
 		assert.strictEqual(diagnostics[0]?.level, 'warning');
+		assert.strictEqual(diagnostics[0]?.code, 'class_calc_spacing');
 	});
 });
 
@@ -575,6 +580,7 @@ describe('literal values that could escape their declaration', () => {
 
 	test.each(UNCONTAINED)('parse_css_literal rejects %s', (class_name) => {
 		const { error } = assert_parse_error(parse_css_literal(class_name, css_properties));
+		assert.strictEqual(error.code, 'class_value_uncontained');
 		assert.include(error.message, 'Uncontained CSS value');
 		assert.strictEqual(error.identifier, class_name);
 	});
@@ -584,6 +590,7 @@ describe('literal values that could escape their declaration', () => {
 		assert.strictEqual(result.css, '');
 		assert.lengthOf(result.diagnostics, 1);
 		assert.strictEqual(result.diagnostics[0]!.level, 'error');
+		assert.strictEqual(result.diagnostics[0]!.code, 'class_value_uncontained');
 		assert.strictEqual(result.diagnostics[0]!.identifier, class_name);
 		assert.include(result.diagnostics[0]!.message, 'Uncontained CSS value');
 	});
@@ -593,6 +600,7 @@ describe('literal values that could escape their declaration', () => {
 		assert.strictEqual(result.css, '');
 		assert.lengthOf(result.diagnostics, 1);
 		assert.strictEqual(result.diagnostics[0]!.level, 'warning');
+		assert.strictEqual(result.diagnostics[0]!.code, 'class_value_uncontained');
 		assert.strictEqual(result.diagnostics[0]!.identifier, class_name);
 		assert.include(result.diagnostics[0]!.message, 'Uncontained CSS value');
 	});
@@ -886,6 +894,7 @@ describe('try_resolve_literal', () => {
 		const error = assert_literal_has_error(
 			try_resolve_literal('hover:opacity:80%', css_properties, 'test')
 		);
+		assert.strictEqual(error.code, 'class_composes_modified');
 		assert.include(error.message, 'cannot be used in composes array');
 	});
 

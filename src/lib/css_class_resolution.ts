@@ -69,6 +69,7 @@ export const resolve_class_definition = (
 				// Warn about empty declaration
 				warnings = result.warnings ? [...result.warnings] : [];
 				warnings.push({
+					code: 'class_declaration_empty',
 					level: 'warning',
 					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
@@ -88,6 +89,7 @@ export const resolve_class_definition = (
 		if (!trimmed && def.declaration !== undefined) {
 			warnings = [
 				{
+					code: 'class_declaration_empty',
 					level: 'warning',
 					identifier: class_name,
 					message: `Class "${class_name}" has an empty declaration`,
@@ -144,6 +146,7 @@ export const resolve_composes = (
 			return {
 				ok: false,
 				error: {
+					code: 'class_composes_cycle',
 					level: 'error',
 					identifier: original_class_name,
 					message: `Circular reference detected: ${cycle_path}`,
@@ -158,6 +161,7 @@ export const resolve_composes = (
 			if (!visited_at_start.has(name)) {
 				warnings ??= [];
 				warnings.push({
+					code: 'class_composes_redundant',
 					level: 'warning',
 					identifier: original_class_name,
 					message: `Class "${name}" is redundant`,
@@ -185,6 +189,7 @@ export const resolve_composes = (
 						return {
 							ok: false,
 							error: {
+								code: 'class_composes_modified',
 								level: 'error',
 								identifier: original_class_name,
 								message: `Modified class "${name}" cannot be used in composes array`,
@@ -196,6 +201,7 @@ export const resolve_composes = (
 						return {
 							ok: false,
 							error: {
+								code: 'class_composes_unknown',
 								level: 'error',
 								identifier: original_class_name,
 								message: `Unknown class "${base_name}" in composes array`,
@@ -237,6 +243,7 @@ export const resolve_composes = (
 							return {
 								ok: false,
 								error: {
+									code: 'class_modifier_unknown',
 									level: 'error',
 									identifier: original_class_name,
 									message: `Unknown modifier "${failed_prop}" with class "${potential_class}"`,
@@ -254,6 +261,7 @@ export const resolve_composes = (
 			return {
 				ok: false,
 				error: {
+					code: 'class_composes_unknown',
 					level: 'error',
 					identifier: original_class_name,
 					message: `Unknown class "${name}" in composes array`,
@@ -267,6 +275,7 @@ export const resolve_composes = (
 			return {
 				ok: false,
 				error: {
+					code: 'class_composes_interpreter',
 					level: 'error',
 					identifier: original_class_name,
 					message: `Cannot reference interpreter pattern "${name}" in composes array`,
@@ -280,6 +289,7 @@ export const resolve_composes = (
 			return {
 				ok: false,
 				error: {
+					code: 'class_composes_ruleset',
 					level: 'error',
 					identifier: original_class_name,
 					message: `Cannot reference ruleset class "${name}" in composes array`,
@@ -322,6 +332,7 @@ export const resolve_composes = (
 				// Warn about empty declaration
 				warnings ??= [];
 				warnings.push({
+					code: 'class_declaration_empty',
 					level: 'warning',
 					identifier: name,
 					message: `Class "${name}" has an empty declaration`,

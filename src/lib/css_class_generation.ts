@@ -11,6 +11,7 @@ import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
 import {
 	type BaseDiagnostic,
+	type DiagnosticCode,
 	type SourceLocation,
 	type InterpreterDiagnostic,
 	type GenerationDiagnostic,
@@ -197,7 +198,13 @@ export type CssClassDefinition = CssClassDefinitionStatic | CssClassDefinitionIn
  * Provides access to diagnostics collection and the class registry.
  */
 export interface CssClassInterpreterContext {
-	/** Diagnostics array to collect warnings and errors */
+	/**
+	 * Diagnostics array to collect warnings and errors. Each carries a `code` -
+	 * `class_interpreter` unless a more specific `DiagnosticCode` fits; an error
+	 * coded `class_property_unknown`, `class_modifier_unknown`, or
+	 * `class_value_uncontained` warns instead for a class nobody named
+	 * explicitly.
+	 */
 	diagnostics: Array<InterpreterDiagnostic>;
 	/** All known CSS class definitions (token + composite classes) */
 	class_definitions: Record<string, CssClassDefinition | undefined>;
@@ -269,6 +276,14 @@ export interface GenerateClassesCssOptions {
 	is_base_style_class?: ((class_name: string) => boolean) | null;
 }
 
+// the error codes a class from another CSS system may draw - an unknown
+// property or modifier, or a value the literal interpreter won't contain
+const FOREIGN_SHAPE_CODES: ReadonlySet<DiagnosticCode> = new Set([
+	'class_property_unknown',
+	'class_modifier_unknown',
+	'class_value_uncontained'
+]);
+
 /**
  * Generates the utility CSS for a set of class names, wrapped in the
  * `fuz.utilities` cascade layer.
@@ -330,10 +345,7 @@ export const generate_classes_css = (
 		for (const diag of resolved.diagnostics) {
 			const is_foreign_shape =
 				diag.level === 'error' &&
-				((!resolved.ok && resolved.malformed) ||
-					diag.message.startsWith('Unknown CSS property') ||
-					diag.message.startsWith('Unknown modifier') ||
-					diag.message.startsWith('Uncontained CSS value'));
+				((!resolved.ok && resolved.malformed) || FOREIGN_SHAPE_CODES.has(diag.code));
 			const level = is_foreign_shape && !is_explicit ? 'warning' : diag.level;
 			diagnostics.push(
 				create_generation_diagnostic({ ...diag, identifier: class_name, level }, locations)
@@ -346,6 +358,7 @@ export const generate_classes_css = (
 			if (is_explicit && !resolved.diagnostics.length && !is_base_style_class?.(class_name)) {
 				diagnostics.push({
 					phase: 'generation',
+					code: 'class_unresolved',
 					level: 'error',
 					message: 'No matching class definition found',
 					identifier: class_name,
@@ -369,6 +382,7 @@ export const generate_classes_css = (
 			(diag) =>
 				diagnostics.push({
 					phase: 'generation',
+					code: diag.code,
 					level: diag.level,
 					message: diag.message,
 					suggestion: diag.suggestion,
@@ -588,6 +602,7 @@ const to_class_rule = (
 	if ('ruleset' in definition && definition.ruleset !== undefined) {
 		if (!definition.ruleset.trim()) {
 			report({
+				code: 'class_ruleset_empty',
 				level: 'warning',
 				message: `Ruleset "${base_class_name}" is empty`,
 				suggestion: `Add CSS rules or remove the empty ruleset definition`
@@ -599,6 +614,7 @@ const to_class_rule = (
 			parsed = parse_ruleset(definition.ruleset);
 		} catch (e) {
 			report({
+				code: 'class_ruleset_invalid',
 				level: 'warning',
 				message: `Failed to parse ruleset for "${base_class_name}": ${to_error_message(e)}`,
 				suggestion: 'Check for CSS syntax errors in the ruleset'
@@ -610,6 +626,7 @@ const to_class_rule = (
 		const escaped_base = escape_css_selector(base_class_name);
 		if (!ruleset_contains_class(parsed.rules, escaped_base)) {
 			report({
+				code: 'class_ruleset_unselected',
 				level: 'warning',
 				message: `Ruleset "${base_class_name}" has no selectors containing ".${base_class_name}"`,
 				suggestion: `Ensure at least one selector uses ".${base_class_name}" so the class works when applied`
@@ -622,6 +639,7 @@ const to_class_rule = (
 			is_single_selector_ruleset(parsed.rules, escaped_base)
 		) {
 			report({
+				code: 'class_ruleset_single',
 				level: 'warning',
 				message: `Ruleset "${base_class_name}" has a single selector and could be converted to declaration format for modifier support`,
 				suggestion: `Convert to: { declaration: '${parsed.rules[0]?.declarations
@@ -692,6 +710,7 @@ const to_class_rule = (
 };
 
 const to_skipped_diagnostic = (skipped: SkippedModifierInfo): BaseDiagnostic => ({
+	code: 'class_modifier_skipped',
 	level: 'warning',
 	message:
 		skipped.reason === 'pseudo_element_conflict'

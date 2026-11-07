@@ -28,9 +28,104 @@ export interface SourceLocation {
 //
 
 /**
+ * What went wrong, one code per kind of diagnostic - the stable key to match
+ * on, where the message is prose that may change. Codes are snake_case and
+ * lead with the family of their subject (`file_`, `hint_`, `class_`,
+ * `element_`, `variable_`, `base_css_`, `theme_`).
+ *
+ * Extraction:
+ * - `file_parse_failed` - a source file failed to parse, so nothing was extracted from it
+ * - `hint_colon` - an `@fuz-*:` comment hint carries an unnecessary colon
+ *
+ * Classes:
+ * - `class_unresolved` - a hinted or listed class that nothing defines, interprets, or (when base styles are bundled) targets
+ * - `class_literal_syntax` - a CSS literal without its `property:value` form
+ * - `class_property_unknown` - a CSS literal naming a property that doesn't exist
+ * - `class_value_uncontained` - a CSS literal value that could end its declaration or rule
+ * - `class_calc_spacing` - a `calc()` in a literal value missing the spaces around `+` or `-`
+ * - `class_modifier_unknown` - a segment in modifier position that names no modifier
+ * - `class_modifier_order` - modifiers out of their required order
+ * - `class_modifier_conflict` - two modifiers that can't combine, like two media modifiers
+ * - `class_modifier_skipped` - a modifier left off a ruleset rule that already carries it or a pseudo-element
+ * - `class_declaration_empty` - a class definition with an empty `declaration`
+ * - `class_ruleset_empty` - a class definition with an empty `ruleset`
+ * - `class_ruleset_invalid` - a `ruleset` that fails to parse
+ * - `class_ruleset_unselected` - a `ruleset` with no selector naming its own class
+ * - `class_ruleset_single` - a single-selector `ruleset` that could be a `declaration`
+ * - `class_composes_unknown` - a `composes` entry naming no class
+ * - `class_composes_cycle` - `composes` entries that reach back to the class being resolved
+ * - `class_composes_redundant` - a `composes` entry another entry already includes
+ * - `class_composes_modified` - a modified class in `composes`
+ * - `class_composes_interpreter` - a `composes` entry naming an interpreter
+ * - `class_composes_ruleset` - a `composes` entry naming a ruleset class
+ * - `class_interpreter` - reported by a custom interpreter, for what the other codes don't cover
+ *
+ * Elements:
+ * - `element_unstyled` - an included element no base style rule targets
+ * - `element_unknown` - a hinted element (`@fuz-elements`) no base style rule targets
+ *
+ * Variables:
+ * - `variable_unknown` - a hinted variable (`@fuz-variables`) that names no theme variable
+ * - `variable_misspelled` - a `var()` reference to an undefined name close to a theme variable's
+ * - `variable_excluded_referenced` - an excluded variable that shipped styles or variables still reference
+ * - `variable_cycle` - a cycle among theme variables' references to each other
+ * - `variable_value_uncontained` - a theme or configured variable left out because its value or name could escape its declaration
+ *
+ * Base styles:
+ * - `base_css_variables_undefined` - shipped base styles reference default variables nothing defines
+ * - `base_css_layer` - an `@layer` rule of the consumer's own in `base_css`
+ * - `base_css_unsupported_at_rule` - an `@import` or `@namespace` in `base_css`
+ *
+ * Themes:
+ * - `theme_discarded` - a configured `theme` with theme output disabled
+ * - `theme_lint` - a `validate_theme` issue in the baked theme, at the issue's level
+ * - `theme_gate_failed` - the baked theme fails accessibility gates
+ * - `theme_gate_unchecked` - the baked theme has gate inputs the checker can't evaluate
+ */
+export type DiagnosticCode =
+	| 'file_parse_failed'
+	| 'hint_colon'
+	| 'class_unresolved'
+	| 'class_literal_syntax'
+	| 'class_property_unknown'
+	| 'class_value_uncontained'
+	| 'class_calc_spacing'
+	| 'class_modifier_unknown'
+	| 'class_modifier_order'
+	| 'class_modifier_conflict'
+	| 'class_modifier_skipped'
+	| 'class_declaration_empty'
+	| 'class_ruleset_empty'
+	| 'class_ruleset_invalid'
+	| 'class_ruleset_unselected'
+	| 'class_ruleset_single'
+	| 'class_composes_unknown'
+	| 'class_composes_cycle'
+	| 'class_composes_redundant'
+	| 'class_composes_modified'
+	| 'class_composes_interpreter'
+	| 'class_composes_ruleset'
+	| 'class_interpreter'
+	| 'element_unstyled'
+	| 'element_unknown'
+	| 'variable_unknown'
+	| 'variable_misspelled'
+	| 'variable_excluded_referenced'
+	| 'variable_cycle'
+	| 'variable_value_uncontained'
+	| 'base_css_variables_undefined'
+	| 'base_css_layer'
+	| 'base_css_unsupported_at_rule'
+	| 'theme_discarded'
+	| 'theme_lint'
+	| 'theme_gate_failed'
+	| 'theme_gate_unchecked';
+
+/**
  * Base diagnostic with common fields.
  */
 export interface BaseDiagnostic {
+	code: DiagnosticCode;
 	level: 'error' | 'warning';
 	message: string;
 	suggestion: string | null;
@@ -47,12 +142,14 @@ export interface ExtractionDiagnostic extends BaseDiagnostic {
 /**
  * Diagnostic from the generation phase.
  */
-export interface GenerationDiagnostic {
+export interface GenerationDiagnostic extends BaseDiagnostic {
 	phase: 'generation';
-	level: 'error' | 'warning';
-	message: string;
-	suggestion: string | null;
-	/** The class name, element name, or variable name this diagnostic refers to */
+	/**
+	 * The subject - a class, element, variable, or theme name. A variable is
+	 * named bare, without `--` (as `exclude_variables` takes it), and a
+	 * diagnostic about the base stylesheet names its construct (`@layer foo`)
+	 * or `base_css`.
+	 */
 	identifier: string;
 	/** Source locations where this class was used, or null if from `additional_classes` */
 	locations: Array<SourceLocation> | null;
@@ -67,12 +164,9 @@ export type Diagnostic = ExtractionDiagnostic | GenerationDiagnostic;
  * Diagnostic from CSS class interpretation.
  * Used internally by interpreters; converted to `GenerationDiagnostic` with locations.
  */
-export interface InterpreterDiagnostic {
-	level: 'error' | 'warning';
-	message: string;
-	/** The class name, element name, or variable name this diagnostic refers to */
+export interface InterpreterDiagnostic extends BaseDiagnostic {
+	/** The subject - the class name this diagnostic refers to. */
 	identifier: string;
-	suggestion: string | null;
 }
 
 //
@@ -90,6 +184,7 @@ export const create_generation_diagnostic = (
 	locations: Array<SourceLocation> | null
 ): GenerationDiagnostic => ({
 	phase: 'generation',
+	code: diagnostic.code,
 	level: diagnostic.level,
 	message: diagnostic.message,
 	identifier: diagnostic.identifier,
@@ -98,18 +193,19 @@ export const create_generation_diagnostic = (
 });
 
 /**
- * Formats a diagnostic for display.
+ * Formats a diagnostic for display, as `[code] subject: message (suggestion)`
+ * after its first location - an extraction diagnostic has no subject.
  */
 export const format_diagnostic = (d: Diagnostic): string => {
 	const suggestion = d.suggestion ? ` (${d.suggestion})` : '';
 	if (d.phase === 'extraction') {
-		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: ${d.message}${
+		return `  - ${d.location.file}:${d.location.line}:${d.location.column}: [${d.code}] ${d.message}${
 			suggestion
 		}`;
 	}
 	const loc = d.locations?.[0];
 	const location_str = loc ? `${loc.file}:${loc.line}:${loc.column}: ` : '';
-	return `  - ${location_str}${d.identifier}: ${d.message}${suggestion}`;
+	return `  - ${location_str}[${d.code}] ${d.identifier}: ${d.message}${suggestion}`;
 };
 
 /**

@@ -78,6 +78,7 @@ describe('generate_css', () => {
 
 		test('forwards extraction diagnostics through unchanged', () => {
 			const diagnostic = {
+				code: 'hint_colon' as const,
 				level: 'warning' as const,
 				message: 'test diagnostic',
 				suggestion: null,
@@ -180,14 +181,33 @@ describe('generate_css', () => {
 			assert.deepEqual([...detected], ['space_lg']);
 		});
 
+		test.each([['x'], [42], [{}], [{ theme: null }], [[]], [() => {}]])(
+			'a junk theme %j discarded by variables: null warns once, not thrown on',
+			(theme) => {
+				const result = generate_css(
+					make_options({
+						theme: theme as unknown as GenerateCssOptions['theme'],
+						include_theme: false
+					})
+				);
+				assert.deepEqual(
+					result.diagnostics
+						.filter((d) => d.code === 'theme_discarded')
+						.map((d) => [d.level, d.phase === 'generation' && d.identifier]),
+					[['warning', 'theme']]
+				);
+			}
+		);
+
 		test('a configured theme discarded by variables: null warns', () => {
 			const result = generate_css(
 				make_options({ theme: { name: 't', variables: [] }, include_theme: false })
 			);
 			const warning = result.diagnostics.find(
-				(d) => d.level === 'warning' && 'identifier' in d && d.identifier === 'theme_discarded'
+				(d) => d.level === 'warning' && d.code === 'theme_discarded'
 			);
-			assert.ok(warning, 'expected a theme_discarded warning');
+			assert(warning?.phase === 'generation', 'expected a theme_discarded warning');
+			assert.strictEqual(warning.identifier, 't');
 			// no warning when the theme can actually render
 			const { style_rule_index, variable_graph } = create_test_fixtures(
 				'button { color: red; }',
@@ -200,9 +220,7 @@ describe('generate_css', () => {
 					resources: { style_rule_index, variable_graph }
 				})
 			);
-			assert.isUndefined(
-				ok_result.diagnostics.find((d) => 'identifier' in d && d.identifier === 'theme_discarded')
-			);
+			assert.isUndefined(ok_result.diagnostics.find((d) => d.code === 'theme_discarded'));
 		});
 
 		test('preference rules survive tree-shaking into the fuz.preferences layer', () => {
@@ -263,6 +281,7 @@ describe('generate_css', () => {
 			assert.lengthOf(result.diagnostics, 1);
 			const diagnostic = result.diagnostics[0]!;
 			assert.strictEqual(diagnostic.level, 'error');
+			assert.strictEqual(diagnostic.code, 'class_unresolved');
 			assert('identifier' in diagnostic);
 			assert.strictEqual(diagnostic.identifier, 'calout');
 		});
@@ -280,6 +299,7 @@ describe('generate_css', () => {
 			assert_css_not_contains(result.css, 'callout');
 			assert.lengthOf(result.diagnostics, 1);
 			const diagnostic = result.diagnostics[0]!;
+			assert.strictEqual(diagnostic.code, 'class_unresolved');
 			assert('identifier' in diagnostic);
 			assert.strictEqual(diagnostic.identifier, 'callout');
 		});
@@ -294,12 +314,13 @@ describe('generate_css', () => {
 
 			assert.lengthOf(result.diagnostics, 1);
 			const diagnostic = result.diagnostics[0]!;
+			assert.strictEqual(diagnostic.code, 'class_unresolved');
 			assert('identifier' in diagnostic);
 			assert.strictEqual(diagnostic.identifier, 'callout');
 		});
 	});
 
-	describe('undefined_theme_variables', () => {
+	describe('base_css_variables_undefined', () => {
 		// `text_color`, `text_80`, `shade_00`, and `space_md` are names the
 		// default variables define; `my_brand` is not
 		const BASE_CSS = 'button { color: var(--text_color); background: var(--shade_00); }';
@@ -535,9 +556,7 @@ describe('generate_css', () => {
 					})
 				);
 
-				const errors = result.diagnostics.filter(
-					(d) => 'identifier' in d && d.identifier === 'undefined_theme_variables'
-				);
+				const errors = result.diagnostics.filter((d) => d.code === 'base_css_variables_undefined');
 				if (expected === null) {
 					assert.deepEqual(errors, []);
 					return;
@@ -581,9 +600,7 @@ describe('generate_css', () => {
 				})
 			);
 
-			const error = result.diagnostics.find(
-				(d) => 'identifier' in d && d.identifier === 'undefined_theme_variables'
-			);
+			const error = result.diagnostics.find((d) => d.code === 'base_css_variables_undefined');
 			assert.ok(error);
 			assert.isTrue(
 				error.message.endsWith(
