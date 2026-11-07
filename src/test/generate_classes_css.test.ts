@@ -1167,6 +1167,43 @@ describe('generate_classes_css', () => {
 		});
 	});
 
+	describe('menuitem children', () => {
+		test('each resolves on its own name, in the composites sublayer', () => {
+			for (const name of ['menuitem_content', 'menuitem_icon', 'menuitem_title']) {
+				const result = generate_classes_css({
+					class_names: [name],
+					class_definitions: css_class_definitions,
+					interpreters: [],
+					css_properties: null
+				});
+				assert_css_contains(result.css, '@layer composites {', `.${name} {`);
+				assert_css_not_contains(result.css, '.menuitem ', '.menuitem{', '.menuitem {');
+				assert.lengthOf(result.diagnostics, 0, name);
+			}
+		});
+
+		test('the icon column reads --icon_size', () => {
+			const result = generate_classes_css({
+				class_names: ['menuitem_icon'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_contains(result.css, 'width: var(--icon_size, var(--icon_size_md));');
+		});
+
+		test('the menuitem ruleset no longer styles generic descendants', () => {
+			const result = generate_classes_css({
+				class_names: ['menuitem'],
+				class_definitions: css_class_definitions,
+				interpreters: [],
+				css_properties: null
+			});
+			assert_css_contains(result.css, '.menuitem {');
+			assert_css_not_contains(result.css, '.content', '.icon', '.title', '.menuitem_');
+		});
+	});
+
 	describe('composite fallback patterns', () => {
 		test.each(['chip', 'pane', 'panel'])(
 			'%s uses var(--border_radius, var(--border_radius_xs))',

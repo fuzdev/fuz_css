@@ -397,8 +397,8 @@ export const find_compound_end = (selector: string, class_pos: number): number =
  * modify_single_selector('.menuitem', 'menuitem', 'hover\\:menuitem', ':hover', '')
  * // → '.hover\\:menuitem:hover'
  *
- * modify_single_selector('.menuitem .icon', 'menuitem', 'hover\\:menuitem', ':hover', '')
- * // → '.hover\\:menuitem:hover .icon'
+ * modify_single_selector('.card .icon', 'card', 'hover\\:card', ':hover', '')
+ * // → '.hover\\:card:hover .icon'
  *
  * modify_single_selector('.menuitem.selected', 'menuitem', 'hover\\:menuitem', ':hover', '')
  * // → '.hover\\:menuitem.selected:hover'

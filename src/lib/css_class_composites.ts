@@ -380,28 +380,40 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 					outline-color: GrayText;
 				}
 			}
-			.menuitem .content {
-				display: flex;
-				align-items: center;
-				flex: 1;
-				/* allows the flex children to shrink */
-				min-width: 0;
-			}
-			.menuitem .icon {
-				width: var(--icon_size, var(--icon_size_md));
-				margin-right: var(--space_sm);
-				flex-shrink: 0;
-				text-align: center;
-				font-weight: 900;
-			}
-			.menuitem .title {
-				margin-right: var(--space_lg);
-				flex-shrink: 1;
-				overflow: hidden;
-				white-space: nowrap;
-				text-overflow: ellipsis;
-				line-height: var(--line_height_lg); /* prevents the bottom of g's and others from being cut off */
-			}
+		`
+	},
+	// a `.menuitem`'s children are classes of their own, so each resolves and
+	// ships on its own name; `min-width: 0` lets the content's flex children shrink
+	menuitem_content: {
+		composite: true,
+		declaration: `
+			display: flex;
+			align-items: center;
+			flex: 1;
+			min-width: 0;
+		`
+	},
+	// the icon column, as wide as `--icon_size` (set by `icon_size_*` and the size composites)
+	menuitem_icon: {
+		composite: true,
+		declaration: `
+			width: var(--icon_size, var(--icon_size_md));
+			margin-right: var(--space_sm);
+			flex-shrink: 0;
+			text-align: center;
+			font-weight: 900;
+		`
+	},
+	// the large line height keeps descenders (the bottom of a g) from being cut off
+	menuitem_title: {
+		composite: true,
+		declaration: `
+			margin-right: var(--space_lg);
+			flex-shrink: 1;
+			overflow: hidden;
+			white-space: nowrap;
+			text-overflow: ellipsis;
+			line-height: var(--line_height_lg);
 		`
 	},
 	chevron: {

@@ -61,7 +61,7 @@ export const style_hooks: ReadonlyArray<StyleHook> = [
 	},
 	{
 		name: 'icon_size',
-		read_by: ['.menuitem .icon'],
+		read_by: ['.menuitem_icon'],
 		fallbacks: ['var(--icon_size_md)'],
 		summary: "the width of a menu item's icon column"
 	},

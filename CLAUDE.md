@@ -270,9 +270,10 @@ See the `VitePluginFuzCssOptions` type for configuration.
   `.heading` reads the current `--font_size`, so a composite or a
   `--font_size` literal tiers it),
   `mb_flow`/`mt_flow` (flow-aware margins), `icon_button`, `plain`,
-  `menuitem`, `chevron`, `chip`. The single-property shortcuts among them
-  (`pixelated`, `mb_flow`, `mt_flow`) order with the token
-  classes, outside the composites sublayer
+  `menuitem` (its children are `menuitem_content`, `menuitem_icon`, and
+  `menuitem_title`, classes of their own), `chevron`, `chip`. The
+  single-property shortcuts among them (`pixelated`, `mb_flow`, `mt_flow`)
+  order with the token classes, outside the composites sublayer
 - **Keyword classes** - [css_class_keywords.ts](src/lib/css_class_keywords.ts):
   a CSS value keyword that names its property alone, as a bare class setting
   that one declaration (`flex` is `display: flex`). "The CSS spec is the

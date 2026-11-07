@@ -189,20 +189,27 @@ describe('generate_classes_css modifiers', () => {
 			);
 		});
 
-		test('handles ruleset with descendant selectors: hover:menuitem', () => {
+		test('handles ruleset with descendant selectors: hover:card', () => {
 			const result = generate_classes_css({
-				class_names: ['hover:menuitem'],
-				class_definitions: css_class_composites,
+				class_names: ['hover:card'],
+				class_definitions: {
+					card: {
+						ruleset: `
+							.card { display: flex; gap: 1px; }
+							.card .content { flex: 1; }
+							.card .icon { flex-shrink: 0; }
+						`
+					}
+				},
 				interpreters: [],
 				css_properties: null
 			});
 
 			assert_css_contains(
 				result.css,
-				'.hover\\:menuitem:hover',
-				'.hover\\:menuitem:hover .content',
-				'.hover\\:menuitem:hover .icon',
-				'.hover\\:menuitem:hover .title'
+				'.hover\\:card:hover',
+				'.hover\\:card:hover .content',
+				'.hover\\:card:hover .icon'
 			);
 		});
 

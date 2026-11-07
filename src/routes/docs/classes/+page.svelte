@@ -1060,6 +1060,10 @@ vite_plugin_fuz_css({
 				<li><code>.sized_xl</code> - largest sizing, cascading to children</li>
 				<li><code>.mb_flow</code> - flow-aware margin-bottom</li>
 				<li><code>.mt_flow</code> - flow-aware margin-top</li>
+				<li>
+					<code>.menuitem_content</code>, <code>.menuitem_icon</code>, <code>.menuitem_title</code>
+					- the children of a <code>.menuitem</code>
+				</li>
 			</ul>
 			<p>
 				<strong>Ruleset-based</strong> (multi-selector, cannot be used in <code>composes</code>

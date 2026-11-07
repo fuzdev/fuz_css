@@ -38,9 +38,9 @@
 			<ul class="unstyled">
 				<li role="none">
 					<div class="menuitem">
-						<div class="content">
-							<div class="icon">1</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">1</div>
+							<div class="menuitem_title">
 								<span class="text"><Code content={`<div class="menuitem">`} /></span>
 							</div>
 						</div>
@@ -48,9 +48,9 @@
 				</li>
 				<li role="none">
 					<div class="menuitem">
-						<div class="content">
-							<div class="icon">2</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">2</div>
+							<div class="menuitem_title">
 								<span class="text"><Code content={`<div class="menuitem">`} /></span>
 							</div>
 						</div>
@@ -58,9 +58,9 @@
 				</li>
 				<li role="none">
 					<div class="menuitem selected">
-						<div class="content">
-							<div class="icon">3</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">3</div>
+							<div class="menuitem_title">
 								<span class="text"><Code content={`<div class="menuitem selected">`} /></span>
 							</div>
 						</div>
@@ -79,9 +79,9 @@
 						onclick={() => (clicked = 'a')}
 						onkeypress={(e) => handled(e) && (clicked = 'a')}
 					>
-						<div class="content">
-							<div class="icon">a</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">a</div>
+							<div class="menuitem_title">
 								<span class="text">
 									<Code
 										content={`<div class="menuitem selectable${
@@ -102,9 +102,9 @@
 						onclick={() => (clicked = 'b')}
 						onkeypress={(e) => handled(e) && (clicked = 'b')}
 					>
-						<div class="content">
-							<div class="icon">b</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">b</div>
+							<div class="menuitem_title">
 								<span class="text">
 									<Code
 										content={`<div class="menuitem selectable${
@@ -125,9 +125,9 @@
 						onclick={() => (clicked = 'c')}
 						onkeypress={(e) => handled(e) && (clicked = 'c')}
 					>
-						<div class="content">
-							<div class="icon">c</div>
-							<div class="title">
+						<div class="menuitem_content">
+							<div class="menuitem_icon">c</div>
+							<div class="menuitem_title">
 								<span class="text">
 									<Code
 										content={`<div class="menuitem selectable${
