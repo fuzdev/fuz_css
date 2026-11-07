@@ -304,7 +304,9 @@ interpreted classes of equal rank): composites render in the
 each tier rules sort by color scheme, then media
 query (`min-width` ascending, `max-width` descending, feature queries last),
 then property rank (shorthands before longhands, `to_property_rank`;
-definition order for composites), then state order (LVFHA), then the
+definition order for composites), then state order (LVFHA, then
+`disabled`/`enabled` after `target`; every other state sorts with `link`,
+so hover, focus, and active still show on it), then the
 `late` flag (`CssClassDefinitionBase.late`: a flagged single-purpose class
 sorts after the rules it ties with, literals included - `hidden`, so
 `display:flex hidden` hides while `hidden md:flex` still shows at `md`),

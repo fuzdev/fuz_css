@@ -1,6 +1,6 @@
 import { test, assert, describe } from 'vitest';
 
-import { MODIFIERS } from '#lib/modifiers.ts';
+import { MODIFIERS, get_modifier } from '#lib/modifiers.ts';
 
 /**
  * Loads CSS selectors from @webref/css for validation.
@@ -102,6 +102,55 @@ describe('MODIFIERS', () => {
 						`state modifier "${m.name}" should not start with "::"`
 					);
 				}
+			}
+		});
+
+		test('every state modifier has a cascade order', () => {
+			for (const m of MODIFIERS) {
+				if (m.type === 'state') {
+					assert.isNumber(m.order, `state modifier "${m.name}" should have an order`);
+				}
+			}
+			const nth = get_modifier('nth-child(2n)');
+			assert.isNumber(nth?.order, 'a parameterized state should have an order');
+		});
+
+		test('only disabled and enabled order after the interaction states', () => {
+			const order_of = (name: string): number => get_modifier(name)!.order!;
+			const interaction = [
+				'link',
+				'visited',
+				'focus-within',
+				'focus',
+				'focus-visible',
+				'hover',
+				'active',
+				'target'
+			].map(order_of);
+			const last_interaction = Math.max(...interaction);
+			const first_interaction = Math.min(...interaction);
+			for (const name of ['disabled', 'enabled']) {
+				assert.isAbove(
+					order_of(name),
+					last_interaction,
+					`"${name}" should order after the interaction states`
+				);
+			}
+			for (const name of [
+				'checked',
+				'invalid',
+				'placeholder-shown',
+				'first',
+				'odd',
+				'open',
+				'paused',
+				'nth-of-type(3)'
+			]) {
+				assert.strictEqual(
+					order_of(name),
+					first_interaction,
+					`"${name}" should order with \`link\`, before the other interaction states`
+				);
 			}
 		});
 

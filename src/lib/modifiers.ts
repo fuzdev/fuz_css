@@ -46,9 +46,28 @@ export interface ModifierDefinition {
 	css: string;
 	/** The width bound of a breakpoint `media` modifier. */
 	width?: ModifierWidthBound;
-	/** Cascade order among `state` modifiers (LVFHA), emitted ascending. */
+	/**
+	 * Cascade order among `state` modifiers, emitted ascending: the
+	 * interaction states by LVFHA, `disabled`/`enabled` after them, and every
+	 * other state at 0. Every `state` modifier sets it.
+	 */
 	order?: number;
 }
+
+/**
+ * The cascade order of `disabled` and `enabled`, after `target`, the last
+ * interaction state. These two suppress or restore interaction itself, so a
+ * rule carrying one emits after every interaction-only rule -
+ * `disabled:opacity:50%` beats `hover:opacity:80%` on a hovered disabled
+ * element. A rule's state order is the highest among its states
+ * (`to_state_order` in `css_class_generation.ts`), so `disabled:hover:`
+ * orders here too. Every other non-interaction state - form and value
+ * (`checked`, `invalid`, `placeholder-shown`), structural (`odd`, `first`,
+ * the parameterized `nth-*`), UI, and media - stays at 0 with `link`, so
+ * hover, focus, and active feedback still shows on them, and a tie among
+ * them falls through to the later sort keys.
+ */
+const INTERACTIVITY_STATE_ORDER = 8;
 
 /**
  * Builds a breakpoint `media` modifier from its width bound.
@@ -101,8 +120,8 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{ name: 'dark', type: 'ancestor', css: 'dark' },
 	{ name: 'light', type: 'ancestor', css: 'light' },
 	// State modifiers - interaction (ordered for proper cascade: LVFHA)
-	{ name: 'any-link', type: 'state', css: ':any-link' },
-	{ name: 'link', type: 'state', css: ':link' },
+	{ name: 'any-link', type: 'state', css: ':any-link', order: 0 },
+	{ name: 'link', type: 'state', css: ':link', order: 0 },
 	{ name: 'visited', type: 'state', css: ':visited', order: 1 },
 	{ name: 'focus-within', type: 'state', css: ':focus-within', order: 2 },
 	{ name: 'focus', type: 'state', css: ':focus', order: 3 },
@@ -112,46 +131,51 @@ export const MODIFIERS: Array<ModifierDefinition> = [
 	{ name: 'target', type: 'state', css: ':target', order: 7 },
 
 	// State modifiers - form states
-	{ name: 'autofill', type: 'state', css: ':autofill' },
-	{ name: 'blank', type: 'state', css: ':blank' },
-	{ name: 'disabled', type: 'state', css: ':disabled' },
-	{ name: 'enabled', type: 'state', css: ':enabled' },
-	{ name: 'checked', type: 'state', css: ':checked' },
-	{ name: 'indeterminate', type: 'state', css: ':indeterminate' },
-	{ name: 'default', type: 'state', css: ':default' },
-	{ name: 'required', type: 'state', css: ':required' },
-	{ name: 'optional', type: 'state', css: ':optional' },
-	{ name: 'valid', type: 'state', css: ':valid' },
-	{ name: 'invalid', type: 'state', css: ':invalid' },
-	{ name: 'user-valid', type: 'state', css: ':user-valid' },
-	{ name: 'user-invalid', type: 'state', css: ':user-invalid' },
-	{ name: 'in-range', type: 'state', css: ':in-range' },
-	{ name: 'out-of-range', type: 'state', css: ':out-of-range' },
-	{ name: 'placeholder-shown', type: 'state', css: ':placeholder-shown' },
-	{ name: 'read-only', type: 'state', css: ':read-only' },
-	{ name: 'read-write', type: 'state', css: ':read-write' },
+	{ name: 'autofill', type: 'state', css: ':autofill', order: 0 },
+	{ name: 'blank', type: 'state', css: ':blank', order: 0 },
+	{ name: 'disabled', type: 'state', css: ':disabled', order: INTERACTIVITY_STATE_ORDER },
+	{ name: 'enabled', type: 'state', css: ':enabled', order: INTERACTIVITY_STATE_ORDER },
+	{ name: 'checked', type: 'state', css: ':checked', order: 0 },
+	{ name: 'indeterminate', type: 'state', css: ':indeterminate', order: 0 },
+	{ name: 'default', type: 'state', css: ':default', order: 0 },
+	{ name: 'required', type: 'state', css: ':required', order: 0 },
+	{ name: 'optional', type: 'state', css: ':optional', order: 0 },
+	{ name: 'valid', type: 'state', css: ':valid', order: 0 },
+	{ name: 'invalid', type: 'state', css: ':invalid', order: 0 },
+	{ name: 'user-valid', type: 'state', css: ':user-valid', order: 0 },
+	{ name: 'user-invalid', type: 'state', css: ':user-invalid', order: 0 },
+	{ name: 'in-range', type: 'state', css: ':in-range', order: 0 },
+	{ name: 'out-of-range', type: 'state', css: ':out-of-range', order: 0 },
+	{
+		name: 'placeholder-shown',
+		type: 'state',
+		css: ':placeholder-shown',
+		order: 0
+	},
+	{ name: 'read-only', type: 'state', css: ':read-only', order: 0 },
+	{ name: 'read-write', type: 'state', css: ':read-write', order: 0 },
 
 	// State modifiers - structural
-	{ name: 'first', type: 'state', css: ':first-child' },
-	{ name: 'last', type: 'state', css: ':last-child' },
-	{ name: 'only', type: 'state', css: ':only-child' },
-	{ name: 'first-of-type', type: 'state', css: ':first-of-type' },
-	{ name: 'last-of-type', type: 'state', css: ':last-of-type' },
-	{ name: 'only-of-type', type: 'state', css: ':only-of-type' },
-	{ name: 'odd', type: 'state', css: ':nth-child(odd)' },
-	{ name: 'even', type: 'state', css: ':nth-child(even)' },
-	{ name: 'empty', type: 'state', css: ':empty' },
+	{ name: 'first', type: 'state', css: ':first-child', order: 0 },
+	{ name: 'last', type: 'state', css: ':last-child', order: 0 },
+	{ name: 'only', type: 'state', css: ':only-child', order: 0 },
+	{ name: 'first-of-type', type: 'state', css: ':first-of-type', order: 0 },
+	{ name: 'last-of-type', type: 'state', css: ':last-of-type', order: 0 },
+	{ name: 'only-of-type', type: 'state', css: ':only-of-type', order: 0 },
+	{ name: 'odd', type: 'state', css: ':nth-child(odd)', order: 0 },
+	{ name: 'even', type: 'state', css: ':nth-child(even)', order: 0 },
+	{ name: 'empty', type: 'state', css: ':empty', order: 0 },
 	// Note: nth-child(N), nth-last-child(N), nth-of-type(N), nth-last-of-type(N) are handled dynamically
 
 	// State modifiers - UI states
-	{ name: 'fullscreen', type: 'state', css: ':fullscreen' },
-	{ name: 'modal', type: 'state', css: ':modal' },
-	{ name: 'open', type: 'state', css: ':open' },
-	{ name: 'popover-open', type: 'state', css: ':popover-open' },
+	{ name: 'fullscreen', type: 'state', css: ':fullscreen', order: 0 },
+	{ name: 'modal', type: 'state', css: ':modal', order: 0 },
+	{ name: 'open', type: 'state', css: ':open', order: 0 },
+	{ name: 'popover-open', type: 'state', css: ':popover-open', order: 0 },
 
 	// State modifiers - media states
-	{ name: 'paused', type: 'state', css: ':paused' },
-	{ name: 'playing', type: 'state', css: ':playing' },
+	{ name: 'paused', type: 'state', css: ':paused', order: 0 },
+	{ name: 'playing', type: 'state', css: ':playing', order: 0 },
 
 	// Pseudo-element modifiers
 	{ name: 'before', type: 'pseudo-element', css: '::before' },
@@ -492,13 +516,14 @@ export const to_modifier_argument_hint = (segment: string): string | null => {
  */
 export const parse_parameterized_state = (
 	segment: string
-): { name: string; css: string; type: 'state' } | null => {
+): { name: string; css: string; type: 'state'; order: number } | null => {
 	const nth_child_match = NTH_CHILD_PATTERN.exec(segment);
 	if (nth_child_match) {
 		return {
 			name: segment,
 			css: `:nth-child(${nth_child_match[1]})`,
-			type: 'state'
+			type: 'state',
+			order: 0
 		};
 	}
 
@@ -507,7 +532,8 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-last-child(${nth_last_child_match[1]})`,
-			type: 'state'
+			type: 'state',
+			order: 0
 		};
 	}
 
@@ -516,7 +542,8 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-of-type(${nth_of_type_match[1]})`,
-			type: 'state'
+			type: 'state',
+			order: 0
 		};
 	}
 
@@ -525,7 +552,8 @@ export const parse_parameterized_state = (
 		return {
 			name: segment,
 			css: `:nth-last-of-type(${nth_last_of_type_match[1]})`,
-			type: 'state'
+			type: 'state',
+			order: 0
 		};
 	}
 

@@ -85,6 +85,52 @@ describe('generate_classes_css emission order', () => {
 		const css = generate(['active:color_a_70', 'hover:color_a_60', 'focus:color_a_50']);
 		assert_css_order(css, '.focus\\:', '.hover\\:', '.active\\:');
 	});
+
+	test('disabled comes after an interaction state, so it wins on a hovered element', () => {
+		const css = generate(['disabled:opacity:50%', 'hover:opacity:80%']);
+		assert_css_order(css, '.hover\\:opacity\\:80\\%', '.disabled\\:opacity\\:50\\%');
+	});
+
+	test('enabled comes after the whole LVFHA sequence', () => {
+		const css = generate(['enabled:opacity:10%', 'target:opacity:20%', 'active:opacity:30%']);
+		assert_css_order(css, '.active\\:', '.target\\:', '.enabled\\:');
+	});
+
+	test('other states come before the interaction states, so hover, focus, and active win', () => {
+		const css = generate([
+			'hover:opacity:80%',
+			'focus:opacity:70%',
+			'active:opacity:60%',
+			'odd:opacity:50%',
+			'checked:opacity:40%',
+			'nth-child(2n):opacity:30%',
+			'placeholder-shown:opacity:20%',
+			'invalid:opacity:10%'
+		]);
+		const first_interaction = css.indexOf('.focus\\:');
+		for (const name of [
+			'.odd\\:',
+			'.checked\\:',
+			'.nth-child\\(2n\\)\\:',
+			'.placeholder-shown\\:',
+			'.invalid\\:'
+		]) {
+			const index = css.indexOf(name);
+			assert.isAtLeast(index, 0, `${name} should be emitted`);
+			assert.isBelow(index, first_interaction, `${name} should come before the interaction states`);
+		}
+		assert_css_order(css, '.focus\\:', '.hover\\:', '.active\\:');
+	});
+
+	test('a rule combining states orders by its latest state', () => {
+		const css = generate(['disabled:hover:opacity:50%', 'active:opacity:80%', 'hover:opacity:90%']);
+		assert_css_order(
+			css,
+			'.hover\\:opacity\\:90\\%',
+			'.active\\:opacity\\:80\\%',
+			'.disabled\\:hover\\:opacity\\:50\\%'
+		);
+	});
 });
 
 describe('generate_classes_css color scheme modifiers', () => {

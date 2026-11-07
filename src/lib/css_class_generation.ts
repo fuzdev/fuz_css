@@ -285,9 +285,10 @@ export interface GenerateClassesCssOptions {
  * within each tier rules sort by color scheme, then media query
  * (`compare_media_modifiers`), then property rank (shorthands before
  * longhands, `to_property_rank`; definition order for composites), then
- * state order (LVFHA), then the late flag (a `late` class after the rules
- * it ties with), then registry order (interpreted classes after static
- * ones), and only then by name, between interpreted classes of equal rank.
+ * state order (LVFHA, then `disabled`/`enabled`), then the late flag (a
+ * `late` class after the rules it ties with), then registry order
+ * (interpreted classes after static ones), and only then by name, between
+ * interpreted classes of equal rank.
  * Rules sharing a color scheme and
  * media query render in one block. `dark:` and `light:` add no
  * specificity (`:where()`), so they win by that order, and follow the OS
@@ -725,7 +726,8 @@ const to_rule_body_css = (body: CssClassRuleBody): string => {
 	}
 };
 
-// the cascade order among a rule's states, its latest LVFHA state winning
+// the cascade order among a rule's states, its latest state winning - `disabled`/`enabled`
+// order after every LVFHA state, the rest with `link` (`ModifierDefinition.order`)
 const to_state_order = (rule: CssClassRule): number => {
 	let order = 0;
 	for (const state of rule.modifiers.states) {
