@@ -221,14 +221,14 @@ describe('class options over the defaults', () => {
 });
 
 describe('include and exclude options', () => {
-	const SOURCE = '<a href="/">link</a><p>text</p>';
+	const SOURCE = '<a href="/">link</a><p class="p_lg">text</p>';
 	const OPTIONS = {
 		additional_classes: ['p_md'],
 		exclude_classes: ['p_lg'],
 		additional_elements: ['button'],
 		exclude_elements: ['p'],
-		additional_variables: ['shade_40'],
-		exclude_variables: ['text_90']
+		additional_variables: ['palette_d_50'],
+		exclude_variables: ['link_color']
 	} as const;
 
 	/** Wraps a list in a one-shot iterable, which a second iteration finds empty. */
@@ -247,7 +247,11 @@ describe('include and exclude options', () => {
 		};
 		const [expected] = await render_twice(OPTIONS);
 		assert_css_contains(expected!, 'button');
-		assert.include(expected!, '--shade_40:');
+		assert.include(expected!, '.p_md');
+		assert.notInclude(expected!, '.p_lg');
+		assert.include(expected!, '--palette_d_50:');
+		// the `prefers-contrast` mapping still declares `--link_color: var(--accent_70)`
+		assert.notInclude(expected!, '--link_color: var(--accent_60)');
 
 		const rendered = await render_twice({
 			additional_classes: one_shot(OPTIONS.additional_classes),

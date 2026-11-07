@@ -1,8 +1,7 @@
 /**
  * CSS class generation utilities.
  *
- * Produces CSS output from class definitions, handles interpretation of
- * dynamic classes, and provides collection management for extracted classes.
+ * Produces CSS output from class definitions and interprets dynamic classes.
  *
  * @internal
  *

@@ -998,7 +998,8 @@ export const custom_composites: Record<string, CssClassDefinition> = {
 			<aside>
 				<p>
 					The system tries to give helpful errors, each logged as
-					<code>[code] subject: message</code> with any suggestion after it in parentheses:
+					<code>file:line:col: [code] subject: message</code> when it has a location, with any
+					suggestion after it in parentheses:
 				</p>
 				<ul>
 					<li>

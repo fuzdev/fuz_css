@@ -265,9 +265,9 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 			where its own caps would hold. For a CI or test assertion, check the report
 			<code>compile_theme</code> (below) returns, which runs the gates with the caps it recomputes -
 			what the theme renders with when baked over the default variables, or rendered as
-			<code>render_theme_style(compiled.theme, compiled)</code>. Pass the build's configured set,
+			<code>render_theme_style(compiled.theme, compiled)</code> (pass the build's configured set,
 			<code>compile_theme(theme, {'{variables}'})</code>, to measure what a build with those
-			<code>variables</code> bakes:
+			<code>variables</code> bakes):
 		</p>
 		<Code
 			lang="ts"
