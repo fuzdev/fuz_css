@@ -1,5 +1,11 @@
 # @fuzdev/fuz_css
 
+## 0.73.0
+
+### Minor Changes
+
+- feat: space list items in styled `ul`/`ol` by `space_sm` (two steps below the flow margin) ([acffb7e](https://github.com/fuzdev/fuz_css/commit/acffb7e))
+
 ## 0.72.0
 
 ### Minor Changes
