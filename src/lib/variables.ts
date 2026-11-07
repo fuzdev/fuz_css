@@ -336,7 +336,7 @@ export const default_variables: Array<StyleVariable> = [
 		name: 'contrast',
 		base: String(CONTRAST),
 		summary:
-			'0 to 1, the fraction of the way the ground moves from its lightness to the contrast end, bending the shade and text curves with it; the high-contrast modifier sets 0.5'
+			'0 to 1, the fraction of the way the ground moves from its lightness toward white in light and near-black in dark, bending the shade and text curves with it; the high-contrast modifier sets 0.5'
 	},
 	// the OS preference input, set only by `style.css`'s `prefers-contrast` mapping
 	{ name: CONTRAST_PREFERENCE_NAME, base: '0' },

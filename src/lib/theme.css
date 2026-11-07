@@ -38,7 +38,7 @@
 		--hue_neutral: var(--hue_f);
 		--neutral_chroma: 0.024; /* peak chroma of the neutral scales, applied through the shared chroma shape */
 		--shade_chroma_00: 0; /* the page ground chroma, fading over the near-ground shade stops - the shared chroma shape is 0 at the ground, so this tints it and the surfaces raised off it; held to sRGB at the ground lightness */
-		--contrast: 0; /* 0 to 1, the fraction of the way the ground moves from its lightness to the contrast end, bending the shade and text curves with it; the high-contrast modifier sets 0.5 */
+		--contrast: 0; /* 0 to 1, the fraction of the way the ground moves from its lightness toward white in light and near-black in dark, bending the shade and text curves with it; the high-contrast modifier sets 0.5 */
 		--_contrast_preference: 0;
 		--_contrast: max(var(--contrast), var(--_contrast_preference));
 		--_contrast_ground_end: max(1, var(--shade_lightness_00));

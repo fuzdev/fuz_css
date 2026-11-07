@@ -116,8 +116,8 @@
 		<TomeSection>
 			<TomeSectionHeader text="Opaque borders with shades" tag="h4" />
 			<UnfinishedImplementationWarning>
-				There are no utility classes for opaque borders yet, like a <code>border_shade_NN</code>
-				family.
+				There's no opaque shade border family yet (<code>border_shade_NN</code>), though outlines
+				have <code>outline_shade_NN</code> and the palette and intent border classes are opaque.
 			</UnfinishedImplementationWarning>
 			<p>
 				For opaque borders, use <TomeLink slug="shading">shade</TomeLink> variables directly. This

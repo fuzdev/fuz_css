@@ -46,9 +46,10 @@
 	<TomeSection>
 		<TomeSectionHeader text="The shade scale" />
 		<p>
-			The shade scale is the primary system for backgrounds and surfaces. All numbered shades
-			(<code>shade_00</code> through <code>shade_100</code>) are tinted using the theme's
-			<code>hue_neutral</code> and <code>neutral_chroma</code> for visual cohesion. The scale also
+			The shade scale is the primary system for backgrounds and surfaces. The numbered shades
+			between the ends are tinted by the theme's <code>hue_neutral</code> and
+			<code>neutral_chroma</code> for visual cohesion; the ends are untinted by default, and
+			<code>--shade_chroma_00</code> tints the ground and the surfaces raised off it. The scale also
 			includes two untinted extremes (<code>shade_min</code> and <code>shade_max</code>) for maximum
 			contrast needs.
 		</p>
@@ -73,7 +74,7 @@
 				<li><code>shade_10</code>: subtle elevation: panels, cards, aside</li>
 				<li><code>shade_20</code>: more elevated: active/pressed states</li>
 				<li><code>shade_30</code>: default border intensity</li>
-				<li><code>shade_100</code>: maximum tinted contrast</li>
+				<li><code>shade_100</code>: the contrast-side end of the scale</li>
 				<li>
 					<code>shade_max</code>: untinted contrast-side extreme: black in light mode, white in dark
 					mode; rarely needed

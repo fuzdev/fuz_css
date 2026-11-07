@@ -248,7 +248,8 @@
 		<code>compile_theme</code> runs live against the draft - the same lint and
 		gamut/monotonicity/contrast gates the shipped themes are held to in CI, measured with the chroma
 		caps it recomputes for the draft, as a build baking it would. This page renders the draft with
-		those caps too, so what the gates measure is what you see, before any contrast modifier.
+		those caps too, so what the gates measure is what you see, before the contrast modifier or the
+		OS contrast preference.
 	</p>
 	{#if editor.gates_pass}
 		<p class="positive_60">

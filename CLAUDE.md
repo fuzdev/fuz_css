@@ -134,15 +134,15 @@ combined and only used content is included. In utility-only mode, import
   emitters live in [ramps.ts](src/lib/ramps.ts) with design-time gamut and
   contrast gates on `@fuzdev/fuz_util/oklch.ts` and [wcag.ts](src/lib/wcag.ts)
 - The variable tiers: the knob catalog, color stops, role variables, and
-  tokens are what a theme sets; the ramp stops between knobs and color stops
-  are internal intermediates spelled with a leading underscore
+  tokens are what a theme sets; between them sit internal intermediates
+  spelled with a leading underscore - the ramp stops
   (`--_palette_lightness_30`, `--_chroma_shape_50`, `--_palette_chroma_50`,
-  built by the `to_*_name` helpers in `ramps.ts`, the clamped ground
-  tint `--_shade_ground_chroma`, named by `SHADE_GROUND_CHROMA_NAME`, and
-  the contrast intermediates `--_contrast`, `--_contrast_ground_end`,
-  `--_shade_lightness_00`, `--_shade_lightness_curve`, and
-  `--_text_lightness_curve`, plus `--_contrast_preference`, the one private
-  input, which only `style.css`'s `prefers-contrast` mapping sets). `STYLE_VARIABLE_NAME_MATCHER`
+  from the `to_*_name` helpers in `ramps.ts`), the clamped ground tint
+  `--_shade_ground_chroma`, and the contrast intermediates (`--_contrast`,
+  `--_contrast_ground_end`, `--_shade_lightness_00`,
+  `--_shade_lightness_curve`, `--_text_lightness_curve`) - plus one private
+  input, `--_contrast_preference`, which only `style.css`'s
+  `prefers-contrast` mapping sets. `STYLE_VARIABLE_NAME_MATCHER`
   rejects the spelling, so `parse_theme`/`validate_theme` refuse a theme that
   sets one, `render_theme_style` drops one from a theme's variables, and the
   resolver ignores one there; `default_variables` declares them without
@@ -400,19 +400,20 @@ See [variables.ts](src/lib/variables.ts) for definitions,
 - One contrast knob over the neutral ramps: `--contrast` (0 to 1, default 0)
   moves the shade ground that fraction of the way from its
   `--shade_lightness_00` toward a per-scheme end (1 in light, 0.1 in dark,
-  clamped to the ground, so a ground already past it stays put) and bends the shade and text curves (`curve * (1 - 0.66 * c)`), through
-  the private `--_shade_lightness_00`/`--_shade_lightness_curve`/
-  `--_text_lightness_curve` the stops read in place of the knobs; the
-  palette, the text endpoints, and every role stay the theme's. The
-  effective contrast `--_contrast` is the larger of the knob and
-  `--_contrast_preference`, which `prefers-contrast: more` sets in
-  `fuz.preferences` to `HIGH_CONTRAST` (0.5, the value the high-contrast
-  modifier gives the knob) - so the OS and the modifier agree, a theme can
-  author a baseline the OS only raises, and no theme silences the OS.
-  Picking the modifier sets the knob, last-wins, replacing a theme's own
-  `contrast`, a higher one included. Near 1 the ground goes
-  white or near-black and `text_80` on `shade_10` fails on every shipped
-  theme, so the usable range stops well short of it (`knobs.ts`)
+  clamped to the ground, so a ground already past it stays put) and bends
+  the shade and text curves (`curve * (1 - 0.66 * c)`), through the private
+  `--_shade_lightness_00`/`--_shade_lightness_curve`/`--_text_lightness_curve`
+  the stops read in place of the knobs; the palette, the text endpoints,
+  and every role stay the theme's. The effective contrast `--_contrast` is
+  the larger of the knob and `--_contrast_preference`, which
+  `prefers-contrast: more` sets in `fuz.preferences` to `HIGH_CONTRAST`
+  (0.5, the value the high-contrast modifier gives the knob) - so the OS and
+  the modifier agree, a theme can author a baseline the OS only raises, and
+  no theme silences the OS, stanced themes included. Picking the modifier
+  sets the knob, last-wins, replacing a theme's own `contrast`, a higher one
+  included. Near 1 the ground goes white or near-black and `text_80` on
+  `shade_10` fails on every shipped theme, so the knob's safe range
+  (`knobs.ts`) stops at 0.75
 - Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
   twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
@@ -472,10 +473,7 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   track to transparent), `--backdrop_color`
   (the `dialog::backdrop` dim), `--outline_offset` (the border-to-focus-ring
   gap, default 1px); `--heading_font_weight` is the lone `var()`-fallback
-  hook among the knobs (per-tier fallbacks, so no single default exists); `prefers-contrast:
-  more` sets the contrast derivation's preference input
-  (`--_contrast_preference`) and nothing else, so it reaches every theme,
-  stanced ones included
+  hook among the knobs (per-tier fallbacks, so no single default exists)
 - [knobs.ts](src/lib/knobs.ts) is the typed knob catalog (`kind`, `axis`,
   `leverage`, `tier`, ranges) powering the themes docs page's inline editor
 - `ink_*`/`paper_*` - color-scheme-aware alpha overlays toward the text color
@@ -925,9 +923,9 @@ recompute, and the page renders the draft with them: the themes page
 registers its session editor's compiled caps once
 (`register_draft_caps_source`), and the resolver attaches them to the
 applied draft beside the stance mirror. The site's themes compile to no
-caps, alone or composed with the contrast modifier, and the modifier
-doesn't move the caps of a draft that doesn't bind its hues or palette
-lightness to the variables it sets (`theme_compile.test.ts` holds both). The editor state
+caps, alone or composed with the contrast modifier, and the modifier, which
+sets only the neutral-ramp `--contrast`, doesn't move a draft's caps
+(`theme_compile.test.ts` holds both). The editor state
 also owns what the page applies - the
 dirty draft or its base, composed with the active contrast modifier
 (`applied_theme`) - plus the
@@ -976,12 +974,12 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `theme_compile.{test,bake}.test.ts` (`bake` pins every shipped theme's
   compile and bake against `fixtures/theme_bake_fixture.json`, regenerated
   by its `.gen.json.ts`)
-- `styles.test.ts` reads `fixtures/css_classes_fixture.json` (the class
-  registry as JSON, regenerated by its `.gen.json.ts`) beside `style.css`
-  to check the variables they reference
+- `styles.{test,states}.test.ts` (`styles.test.ts` reads
+  `fixtures/css_classes_fixture.json` - the class registry as JSON,
+  regenerated by its `.gen.json.ts` - beside `style.css` to check the
+  variables they reference)
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
-- `styles.{test,states}.test.ts`
 
 Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
@@ -1011,7 +1009,7 @@ capturing logger through `vite_plugin_test_helpers.ts`. Integration:
 
 Component tests (`ContrastInput`, `KnobControl`, `RampStrip`, `ThemeEditor`,
 `resolved_color.svelte`, `root_color_scheme.svelte`,
-`theme_editor_state.rooted.svelte`) render in jsdom via a per-file
+`theme_editor_state.rooted.svelte`, `styles.states`) render in jsdom via a per-file
 `@vitest-environment jsdom` pragma - mounting through
 `component_test_helpers.ts` (`create_mount_tracker`) with context harnesses (`*Harness.svelte` in
 `src/test/`), the fuz_ui pattern. All other suites stay in node;

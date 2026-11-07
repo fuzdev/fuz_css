@@ -34,25 +34,14 @@ export const DEFAULT_THEME: Theme = base_theme;
  * (controls as beveled objects), `themes/marquee.ts` (color, dark-only and
  * the one palette-tier exemplar), and `themes/signage.ts` (scale and weight,
  * for legibility).
- *
- * Contrast is not a theme: it's the `--contrast` knob, which the
- * high-contrast modifier (`contrast_modifiers`) sets over any theme composed
- * with `compose_themes`.
  */
 export const default_themes: Array<Theme> = [DEFAULT_THEME, ledger_theme];
 
 /**
  * The contrast modifiers: axis fragments composed over any theme via
- * `compose_themes` rather than picked as themes themselves. The one modifier,
- * high contrast, sets the `--contrast` knob alone, so it strengthens the
- * theme beneath it rather than replacing its knobs: the theme's ground moves
- * toward the contrast end and its shade and text curves bend, while its
- * neutral cast, palette, borders, links, and panel shadow stay its own.
- * Picking the modifier sets `contrast` to `HIGH_CONTRAST`, as picking a theme
- * sets its knobs: composition is last-wins, so it replaces a theme's own
- * `contrast`, a higher one included. The OS `prefers-contrast: more`
- * preference feeds the same derivation through its own input, which only
- * ever raises the effective contrast.
+ * `compose_themes` rather than picked as themes themselves. The one modifier
+ * is `high_contrast_theme`, which sets only the `--contrast` knob - its
+ * module says what that does and how it composes.
  */
 export const contrast_modifiers: ContrastModifiers = {
 	high: high_contrast_theme

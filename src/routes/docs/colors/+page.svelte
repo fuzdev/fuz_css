@@ -162,6 +162,15 @@
 				a curve exponent bending the ramp between them, per color scheme
 			</li>
 			<li>
+				<code>--contrast</code> - 0 to 1, how far the page ground moves toward white (light) or
+				near-black (dark), bending the shade and text curves with it; the high contrast modifier
+				sets 0.5, and the safe range stops well short of 1
+			</li>
+			<li>
+				<code>--shade_chroma_00</code> - the page ground's own tint, fading over the surfaces raised
+				off it, held to what the ground's lightness can carry in sRGB
+			</li>
+			<li>
 				chroma curve - <code>--palette_chroma_min</code>/<code>_max</code> and
 				<code>--chroma_curve</code>: a mid-peaked curve, clamped per stop by gamut caps computed
 				from the worst hue

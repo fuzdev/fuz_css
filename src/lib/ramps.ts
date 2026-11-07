@@ -250,8 +250,8 @@ export const shade_ground_chroma = (chroma_00: number, lightness_00: number): nu
 export const CONTRAST = 0;
 
 /**
- * The effective contrast the high-contrast modifier sets (`--contrast`), and
- * the value the `prefers-contrast: more` mapping gives the preference input
+ * The value the high-contrast modifier gives the `--contrast` knob, and the
+ * value the `prefers-contrast: more` mapping gives the preference input
  * (`--_contrast_preference`), so the modifier and the OS preference render
  * the same derivation. Tuned against the floors the shipped themes hold under
  * it: body text at 12:1 and the control border at 3:1 against the ground.
@@ -658,7 +658,7 @@ export type RampFamily = 'palette' | 'shade' | 'text';
 
 Ramp intermediates - the derived variables between the knobs and the color
 stops: the lightness stops between a ramp's endpoints, the normalized chroma
-shape, and the capped palette chroma. They're plumbing, spelled with a
+shape, the capped palette chroma, and the clamped ground tint. They're plumbing, spelled with a
 leading underscore (`--_palette_lightness_30`) to mark them private: the
 `Theme` schema rejects the spelling, so a theme steers the ramps through
 their knobs and color stops, never by pinning an intermediate. The names

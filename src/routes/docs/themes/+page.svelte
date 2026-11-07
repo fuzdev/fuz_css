@@ -132,15 +132,16 @@
 			</div>
 		</div>
 		<p>
-			Contrast is a knob, not a theme: <code>--contrast</code> moves the ground toward the contrast
-			end and bends the shade and text curves, strengthening whatever theme it sits on. A theme may
-			set it like any knob. The high contrast modifier sets it alone and composes over any theme
-			with <code>compose_themes</code> (flatten + last-wins), so every theme gets the variant for
-			free: picking it sets <code>--contrast</code> to 0.5, as picking a theme sets that theme's
-			knobs, replacing whatever value the theme authored. The OS <code>prefers-contrast: more</code>
-			preference instead sets the same derivation's second input, and the effective contrast is the
-			larger of the two - so the preference renders what the modifier does over a theme at the
-			default, only ever raises a theme's own contrast, and no theme can silence it.
+			Contrast is a knob, not a theme: <code>--contrast</code> moves the page ground toward white in
+			light mode or near-black in dark and bends the shade and text curves, strengthening whatever
+			theme it sits on. A theme may set it like any knob. The high contrast modifier sets it alone
+			and composes over any theme with <code>compose_themes</code> (flatten + last-wins), so every
+			theme gets the variant for free: picking it sets <code>--contrast</code> to 0.5, as picking a
+			theme sets that theme's knobs, replacing whatever value the theme authored. The OS
+			<code>prefers-contrast: more</code> preference instead sets its own input to the same value,
+			and the effective contrast is the larger of the two - so the preference renders what the
+			modifier does over a theme at the default, only ever raises a theme's own contrast, and no
+			theme can silence it.
 		</p>
 	</TomeSection>
 	<TomeSection>
@@ -179,7 +180,7 @@
 		<p>
 			A theme applies at build time or at runtime, and most projects want build time. Every theme on
 			this page ships as its own module under <code>themes/</code>, and
-			<ModuleLink module_path="themes.ts" /> holds the registry and the contrast modifiers.
+			<ModuleLink module_path="themes.ts" /> holds the registry and the contrast modifier.
 		</p>
 		<p>
 			Pass a theme to the <TomeLink slug="setup">Vite plugin</TomeLink> and its values bake into the
@@ -289,10 +290,10 @@ test('my theme clears the accessibility gates', () => {
 			as build warnings and its <code>validate_theme</code> issues as build errors and warnings.
 		</p>
 		<p>
-			fuz_css gates its own themes with these functions in its test suite, every theme ×
-			contrast-modifier composition included, and declares what an exemplar knowingly gives up, like
-			marquee's clipped gamut, as exact exceptions. The editor above runs the same lint and gates
-			live on every edit.
+			fuz_css gates its own themes with these functions in its test suite, every theme × composed
+			with high contrast included, and declares what an exemplar knowingly gives up, like marquee's
+			clipped gamut, as exact exceptions. The editor above runs the same lint and gates live on
+			every edit.
 		</p>
 	</TomeSection>
 </TomeContent>

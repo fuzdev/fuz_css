@@ -68,6 +68,10 @@
 		</TomeSectionHeader>
 		<p><code>code</code></p>
 		<p><code class="unstyled">code</code> with <code>.unstyled</code></p>
+		<p>
+			Inline code wraps with the text; <code class="inline">code.inline</code> keeps a span
+			together.
+		</p>
 	</TomeSection>
 	<TomeSection>
 		<TomeSectionHeader text="pre">
