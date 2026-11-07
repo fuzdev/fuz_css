@@ -1,10 +1,7 @@
 import { assert } from 'vitest';
 
-import {
-	type ExtractionResult,
-	type AcornPlugin,
-	extract_from_ts
-} from '#lib/css_class_extractor.ts';
+import { type ExtractionResult, extract_from_ts } from '#lib/css_class_extractor.ts';
+import type { AcornPlugin } from '#lib/css_plugin_options.ts';
 
 /**
  * Cached JSX plugin to avoid repeated async imports.

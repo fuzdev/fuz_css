@@ -1,12 +1,11 @@
 import { test, describe, assert } from 'vitest';
 
-import {
-	generate_classes_css,
-	to_property_rank,
-	type CssClassDefinitionInterpreter
-} from '#lib/css_class_generation.ts';
+import { generate_classes_css, to_property_rank } from '#lib/css_class_generation.ts';
 import { css_class_composites } from '#lib/css_class_composites.ts';
-import { css_class_definitions } from '#lib/css_class_definitions.ts';
+import {
+	css_class_definitions,
+	type CssClassDefinitionInterpreter
+} from '#lib/css_class_definitions.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
 import {
 	assert_css_contains,

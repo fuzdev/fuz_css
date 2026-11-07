@@ -13,12 +13,10 @@
  * attribute (`display: none`) and orders late within its bucket, after the
  * literals it ties with.
  *
- * @internal
- *
  * @module
  */
 
-import type { CssClassDefinitionDeclaration } from './css_class_generation.ts';
+import type { CssClassDefinitionDeclaration } from './css_class_definitions.ts';
 
 // a keyword class setting `property` to the class's own name
 const to_keyword_classes = (

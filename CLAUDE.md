@@ -771,7 +771,10 @@ diagnostic types are public.
   dispatch the generator core runs
 
 **CSS generation:** `@internal` but for the Vite plugin, its options
-(`css_plugin_options.ts`), and `modifiers.ts`; `example_class_utilities.ts`
+(`css_plugin_options.ts`), `modifiers.ts`, and the custom-class authoring
+surface - the class registries consumers spread (`css_class_definitions.ts`,
+`css_class_composites.ts`, `css_class_keywords.ts`,
+`css_class_interpreters.ts`) and the definition types; `example_class_utilities.ts`
 is an internal fixture the example apps import through node_modules.
 
 - [vite_plugin_fuz_css.ts](src/lib/vite_plugin_fuz_css.ts) - Vite plugin
@@ -807,7 +810,8 @@ is an internal fixture the example apps import through node_modules.
 - [extract_file_cached.ts](src/lib/extract_file_cached.ts) - Cache-aware
   single-file extraction for the plugin's transform hook and pre-scan
 - [css_plugin_options.ts](src/lib/css_plugin_options.ts) - The generator
-  options types the Vite plugin's options extend
+  options types the Vite plugin's options extend, and the `AcornPlugin` type
+  `acorn_plugins` takes
 - [css_cache.ts](src/lib/css_cache.ts) - Cache infrastructure with content hash
   validation, a cache version read from the installed fuz_css, svelte,
   acorn, and `@sveltejs/acorn-typescript` versions (`to_cache_version`, so
@@ -834,11 +838,12 @@ is an internal fixture the example apps import through node_modules.
   classes they target, tracks their variables, and collects the `base_css`
   parse diagnostics
 - [css_class_generation.ts](src/lib/css_class_generation.ts) -
-  `CssClassDefinition` types, `generate_classes_css()` (modifier stripping,
-  the structured `CssClassRule`, emission order and layering),
-  `to_property_rank`
-- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token and
-  composite class registry
+  `generate_classes_css()` (modifier stripping, the structured
+  `CssClassRule`, emission order and layering), `to_property_rank`
+- [css_class_definitions.ts](src/lib/css_class_definitions.ts) - Token,
+  composite, and keyword class registry, and the definition types
+  (`CssClassDefinition` and its forms, `CssClassDefinitionInterpreter`,
+  `CssClassInterpreterContext`)
 - [css_classes.ts](src/lib/css_classes.ts) - `CssClasses` collection for
   tracking what each file extracted, unfiltered
 - [css_class_generators.ts](src/lib/css_class_generators.ts) - Token class

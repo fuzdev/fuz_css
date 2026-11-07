@@ -24,6 +24,7 @@ import { tsPlugin } from '@sveltejs/acorn-typescript';
 import { to_error_message } from '@fuzdev/fuz_util/error.ts';
 
 import { type SourceLocation, type ExtractionDiagnostic } from './diagnostics.ts';
+import type { AcornPlugin } from './css_plugin_options.ts';
 
 //
 // Types
@@ -90,11 +91,6 @@ export interface ExtractionResult extends ExtractionData {
 	/** Variables that were used in class contexts, or null if none */
 	tracked_vars: Set<string> | null;
 }
-
-/**
- * Acorn plugin type - a function that extends the Parser class.
- */
-export type AcornPlugin = (BaseParser: typeof Parser) => typeof Parser;
 
 /**
  * Options for CSS class extraction.

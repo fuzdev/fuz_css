@@ -42,11 +42,17 @@
  * @module
  */
 
+import type { Parser } from 'acorn';
+
 import type { FileFilter } from './file_filter.ts';
-import type { AcornPlugin } from './css_class_extractor.ts';
-import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_generation.ts';
+import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_definitions.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import type { FsDeps } from './deps.ts';
+
+/**
+ * Acorn plugin type - a function that extends the Parser class.
+ */
+export type AcornPlugin = (BaseParser: typeof Parser) => typeof Parser;
 
 /**
  * Options for CSS class extraction from source files.

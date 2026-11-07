@@ -12,7 +12,7 @@
 import { levenshtein_distance } from '@fuzdev/fuz_util/string.ts';
 
 import type { InterpreterDiagnostic } from './diagnostics.ts';
-import type { CssClassDefinition, CssClassDefinitionStatic } from './css_class_generation.ts';
+import type { CssClassDefinition, CssClassDefinitionStatic } from './css_class_definitions.ts';
 import {
 	try_resolve_literal,
 	extract_segments,

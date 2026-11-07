@@ -18,7 +18,7 @@ import {
 	to_extraction_cache_key
 } from './css_cache.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
-import type { AcornPlugin } from './css_class_extractor.ts';
+import type { AcornPlugin } from './css_plugin_options.ts';
 import type { FsDeps } from './deps.ts';
 
 export interface CssExtractionStateOptions {

@@ -30,7 +30,7 @@ import {
 } from '#lib/vite_plugin_fuz_css.ts';
 import { FUZ_CSS_PLACEHOLDER } from '#lib/css_placeholder_splice.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
-import type { CssClassDefinitionInterpreter } from '#lib/css_class_generation.ts';
+import type { CssClassDefinitionInterpreter } from '#lib/css_class_definitions.ts';
 import {
 	vite_build_fixture_root as fixture_root,
 	filter_build_fixture_module as filter_fixture_file,

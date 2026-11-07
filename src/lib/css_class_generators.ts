@@ -7,7 +7,7 @@
  * @module
  */
 
-import type { CssClassDefinition } from './css_class_generation.ts';
+import type { CssClassDefinition } from './css_class_definitions.ts';
 
 export type GeneratedClassResult = {
 	name: string;

@@ -16,7 +16,7 @@ import {
 	type CachedExtraction
 } from '#lib/css_cache.ts';
 import type { SourceLocation, ExtractionDiagnostic } from '#lib/diagnostics.ts';
-import type { AcornPlugin } from '#lib/css_class_extractor.ts';
+import type { AcornPlugin } from '#lib/css_plugin_options.ts';
 import { extract_file_cached } from '#lib/extract_file_cached.ts';
 import { default_fs_deps } from '#lib/deps_defaults.ts';
 import { create_mock_fs_state, create_mock_fs_deps } from './fixtures/mock_deps.ts';

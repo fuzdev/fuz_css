@@ -28,6 +28,12 @@ import {
 	type SkippedModifierInfo
 } from './css_ruleset_parser.ts';
 import { resolve_class_definition } from './css_class_resolution.ts';
+import type {
+	CssClassDefinition,
+	CssClassDefinitionInterpreter,
+	CssClassDefinitionStatic,
+	CssClassInterpreterContext
+} from './css_class_definitions.ts';
 import { compare_media_modifiers, get_modifier, type ModifierDefinition } from './modifiers.ts';
 import {
 	extract_segments,
@@ -140,108 +146,6 @@ const to_declaration_rank = (declaration: string): number => {
 	}
 	return (rank ?? 0) - (properties.size > 1 ? 0.5 : 0);
 };
-
-//
-// Class Definitions
-//
-
-export interface CssClassDefinitionBase {
-	/**
-	 * Whether the class is a composite, rendered in the
-	 * `fuz.utilities.composites` sublayer beneath every single-purpose class,
-	 * so a token or literal class on the same element always wins over the
-	 * composite's declaration of the same property. Defaults to `true` for
-	 * `composes` and `ruleset` definitions, `false` for a `declaration`
-	 * without `composes`.
-	 */
-	composite?: boolean;
-	/**
-	 * Whether the class orders late within its bucket: after every rule that
-	 * ties with it on color scheme, media query, property rank, and state
-	 * order, interpreted literals included, so `display:flex hidden` hides
-	 * while a media query still outranks it (`hidden md:flex` shows at `md`
-	 * and up). For an override that should win its ties whatever else names
-	 * the same property, like `hidden`. Composites order by their registry
-	 * position, which no two share, so the flag only reorders single-purpose
-	 * classes.
-	 */
-	late?: boolean;
-}
-
-/** Pure utility composition (composes only). */
-export interface CssClassDefinitionComposition extends CssClassDefinitionBase {
-	composes: Array<string>;
-	declaration?: never;
-	ruleset?: never;
-}
-
-/** Custom CSS declaration (optionally seeded with composes). */
-export interface CssClassDefinitionDeclaration extends CssClassDefinitionBase {
-	declaration: string;
-	composes?: Array<string>;
-	ruleset?: never;
-}
-
-/** Full ruleset with selectors. */
-export interface CssClassDefinitionRuleset extends CssClassDefinitionBase {
-	ruleset: string;
-	composes?: never;
-	declaration?: never;
-}
-
-/** Static definitions (not interpreter-based). */
-export type CssClassDefinitionStatic =
-	CssClassDefinitionComposition | CssClassDefinitionDeclaration | CssClassDefinitionRuleset;
-
-/** Full union including interpreters. */
-export type CssClassDefinition = CssClassDefinitionStatic | CssClassDefinitionInterpreter;
-
-/**
- * Context passed to CSS class interpreters.
- * Provides access to diagnostics collection and the class registry.
- */
-export interface CssClassInterpreterContext {
-	/**
-	 * Diagnostics array to collect warnings and errors. Each carries a `code` -
-	 * `class_interpreter` unless a more specific `DiagnosticCode` fits; an error
-	 * coded `class_property_unknown`, `class_modifier_unknown`, or
-	 * `class_value_uncontained` warns instead for a class nobody named
-	 * explicitly.
-	 */
-	diagnostics: Array<InterpreterDiagnostic>;
-	/** All known CSS class definitions (token + composite classes) */
-	class_definitions: Record<string, CssClassDefinition | undefined>;
-	/** Valid CSS properties for literal validation, or null to skip validation */
-	css_properties: Set<string> | null;
-}
-
-/**
- * Interpreter for dynamic CSS class generation based on pattern matching.
- *
- * An interpreter sees a class name with its modifiers already stripped -
- * `md:hover:grid-cols-4` reaches it as `grid-cols-4` - and returns a
- * definition like a static one, so modifiers, ordering, and layering apply to
- * what it returns the same as to a static class. A `ruleset` names the class
- * it was given; the generator renames it to the full modified class. What
- * an interpreter returns renders verbatim, so containing values built from
- * class names found in markup is the interpreter's job.
- *
- * Leading segments named like modifiers are stripped greedily, and the
- * generator backs off one at a time, so an interpreter is offered the
- * shortest base first: `marker:none` arrives as `none` before the full
- * literal, since `marker` is also a pseudo-element modifier (`cue` likewise).
- * A broad pattern shouldn't claim such a sub-base.
- */
-export interface CssClassDefinitionInterpreter extends CssClassDefinitionBase {
-	pattern: RegExp;
-	/**
-	 * @mutates `ctx.diagnostics` - implementations push errors/warnings to the diagnostics array
-	 */
-	interpret: (
-		matched: RegExpMatchArray,
-		ctx: CssClassInterpreterContext
-	) => CssClassDefinitionStatic | null;
-}
 
 //
 // CSS Generation

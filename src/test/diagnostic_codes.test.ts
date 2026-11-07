@@ -3,12 +3,12 @@ import { readFileSync } from 'node:fs';
 
 import type { DiagnosticCode, GenerationDiagnostic } from '#lib/diagnostics.ts';
 import { extract_from_svelte, extract_from_ts } from '#lib/css_class_extractor.ts';
-import {
-	generate_classes_css,
-	type CssClassDefinition,
-	type CssClassDefinitionInterpreter,
-	type CssClassDefinitionStatic
-} from '#lib/css_class_generation.ts';
+import { generate_classes_css } from '#lib/css_class_generation.ts';
+import type {
+	CssClassDefinition,
+	CssClassDefinitionInterpreter,
+	CssClassDefinitionStatic
+} from '#lib/css_class_definitions.ts';
 import { css_class_interpreters } from '#lib/css_class_interpreters.ts';
 import { css_class_composites } from '#lib/css_class_composites.ts';
 import { parse_css_literal } from '#lib/css_literal.ts';

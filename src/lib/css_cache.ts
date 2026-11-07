@@ -17,7 +17,8 @@ import { fileURLToPath } from 'node:url';
 import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import type { SourceLocation, ExtractionDiagnostic } from './diagnostics.ts';
-import type { AcornPlugin, ExtractionData } from './css_class_extractor.ts';
+import type { ExtractionData } from './css_class_extractor.ts';
+import type { AcornPlugin } from './css_plugin_options.ts';
 import type { FsDeps } from './deps.ts';
 import { is_ci } from './ci.ts';
 

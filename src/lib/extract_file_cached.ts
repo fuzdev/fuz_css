@@ -12,11 +12,8 @@
  * @module
  */
 
-import {
-	extract_css_classes_with_locations,
-	type ExtractionData,
-	type AcornPlugin
-} from './css_class_extractor.ts';
+import { extract_css_classes_with_locations, type ExtractionData } from './css_class_extractor.ts';
+import type { AcornPlugin } from './css_plugin_options.ts';
 import { load_cached_extraction, from_cached_extraction } from './css_cache.ts';
 import { is_css_file } from './file_filter.ts';
 import type { FsDeps } from './deps.ts';

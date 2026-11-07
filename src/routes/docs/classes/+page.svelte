@@ -891,7 +891,7 @@ vite_plugin_fuz_css({
 			</p>
 			<Code
 				lang="ts"
-				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_generation.ts';
+				content={`import type {CssClassDefinition} from '@fuzdev/fuz_css/css_class_definitions.ts';
 
 export const custom_composites: Record<string, CssClassDefinition> = {
 	// 1. \`declaration\` only - custom CSS properties
@@ -1558,7 +1558,7 @@ vite_plugin_fuz_css({
 		</p>
 		<Code
 			lang="ts"
-			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_generation.ts';
+			content={`import type {CssClassDefinitionInterpreter} from '@fuzdev/fuz_css/css_class_definitions.ts';
 
 // Example: grid-cols-N classes like "grid-cols-4"
 // Unlike composites, interpreters can parameterize values

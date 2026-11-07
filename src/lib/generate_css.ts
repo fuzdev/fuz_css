@@ -11,11 +11,8 @@
  */
 
 import type { Diagnostic, GenerationDiagnostic, SourceLocation } from './diagnostics.ts';
-import {
-	generate_classes_css,
-	type CssClassDefinition,
-	type CssClassDefinitionInterpreter
-} from './css_class_generation.ts';
+import { generate_classes_css } from './css_class_generation.ts';
+import type { CssClassDefinition, CssClassDefinitionInterpreter } from './css_class_definitions.ts';
 import { FUZ_LAYER_ORDER_STATEMENT, render_theme_style, type ResolvedTheme } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
 import { resolve_css, render_bundled_css } from './css_bundled_resolution.ts';
