@@ -53,7 +53,9 @@ export interface CompileThemeOptions {
 	 * changes from the default is folded in beneath the theme's own (re-slotted
 	 * for a stance as the mirror re-slots it), so the caps and the gates
 	 * measure what renders. A folded value the gates can't read lands in
-	 * `unchecked`. The theme comes back unfolded.
+	 * `unchecked`. The theme comes back unfolded. A partial set mirrors only
+	 * what it contains, and the gates still measure the default for anything
+	 * it leaves out.
 	 */
 	variables?: Array<StyleVariable>;
 }

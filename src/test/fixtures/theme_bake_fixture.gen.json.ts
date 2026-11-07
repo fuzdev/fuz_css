@@ -1,29 +1,18 @@
 import type { Gen } from '@fuzdev/gro';
-import { createHash } from 'node:crypto';
 import { readdirSync } from 'node:fs';
 
-import type { StyleVariable, Theme } from '#lib/variable.ts';
+import type { Theme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
-import { bake_theme } from '#lib/variable_graph.ts';
 import { compile_theme } from '#lib/theme_compile.ts';
-import type { GenerationDiagnostic } from '#lib/diagnostics.ts';
+import {
+	retuned_variables,
+	to_theme_bake_digest,
+	to_theme_bake_entry
+} from '../theme_bake_helpers.ts';
 
-/**
- * A retuned configured variable set: two knob-tier values the bake folds
- * beneath a theme (`chroma_scale`, `palette_chroma_max`) and a
- * scheme-adaptive non-knob one only the stance mirror carries
- * (`palette_lightness_00`).
- */
-const retuned_overrides: Array<StyleVariable> = [
-	{ name: 'chroma_scale', base: '1.3' },
-	{ name: 'palette_chroma_max', base: '0.13', dark: '0.14' },
-	{ name: 'palette_lightness_00', base: '0.96', dark: '0.2' }
-];
-
-export const retuned_variables: Array<StyleVariable> = default_variables.map(
-	(v) => retuned_overrides.find((o) => o.name === v.name) ?? v
-);
-
+// twin of `is_theme` and `shipped_themes` in `theme_test_helpers.ts`, which
+// discover the themes with `import.meta.glob` - gro gen runs outside Vite,
+// so this reads the directory instead
 const is_theme = (value: unknown): value is Theme =>
 	value !== null &&
 	typeof value === 'object' &&
@@ -33,7 +22,7 @@ const is_theme = (value: unknown): value is Theme =>
 
 // every theme a `themes/` module exports, read from the directory so a new
 // module can't be left off a list
-export const load_shipped_themes = async (): Promise<Array<Theme>> => {
+const load_shipped_themes = async (): Promise<Array<Theme>> => {
 	const themes: Array<Theme> = [];
 	const dir = new URL('../../lib/themes/', import.meta.url);
 	for (const file of readdirSync(dir).sort()) {
@@ -42,28 +31,6 @@ export const load_shipped_themes = async (): Promise<Array<Theme>> => {
 		for (const value of Object.values(mod)) if (is_theme(value)) themes.push(value);
 	}
 	return themes;
-};
-
-/**
- * A SHA-256 of `value` serialized with its `undefined` properties kept, so a
- * result's shape is pinned along with its values.
- */
-export const to_theme_bake_digest = (value: unknown): string =>
-	createHash('sha256')
-		.update(JSON.stringify(value, (_k, v: unknown) => (v === undefined ? '<undefined>' : v)))
-		.digest('hex');
-
-/**
- * Bakes `theme` over `variables`, keeping the diagnostics whole and the
- * resolved theme as a digest (the mirrors and caps run to megabytes).
- */
-export const to_theme_bake_entry = (
-	theme: Theme,
-	variables: Array<StyleVariable>
-): { resolved: string; diagnostics: Array<GenerationDiagnostic> } => {
-	const diagnostics: Array<GenerationDiagnostic> = [];
-	const resolved = bake_theme(theme, variables, diagnostics);
-	return { resolved: to_theme_bake_digest(resolved), diagnostics };
 };
 
 /**

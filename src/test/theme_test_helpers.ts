@@ -10,6 +10,8 @@ import type { Theme } from '#lib/variable.ts';
 import { contrast_modifiers } from '#lib/themes.ts';
 import { palette_variants } from '#lib/variable_data.ts';
 
+// `fixtures/theme_bake_fixture.gen.json.ts` has a twin of this discovery that
+// reads the directory, since gro gen runs outside Vite and has no `import.meta.glob`
 const theme_modules = import.meta.glob('../lib/themes/*.ts', { eager: true });
 
 const is_theme = (value: unknown): value is Theme =>

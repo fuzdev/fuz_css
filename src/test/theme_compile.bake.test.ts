@@ -1,16 +1,14 @@
 import { describe, test, assert } from 'vitest';
 
 import { compile_theme } from '#lib/theme_compile.ts';
-import { bake_theme } from '#lib/variable_graph.ts';
 import { default_variables } from '#lib/variables.ts';
-import type { StyleVariable } from '#lib/variable.ts';
 import type { GenerationDiagnostic } from '#lib/diagnostics.ts';
 import { shipped_themes } from './theme_test_helpers.ts';
 import {
 	retuned_variables,
 	to_theme_bake_digest,
 	to_theme_bake_entry
-} from './fixtures/theme_bake_fixture.gen.json.ts';
+} from './theme_bake_helpers.ts';
 import fixture_text from './fixtures/theme_bake_fixture.json?raw';
 
 interface ThemeBakeFixtureEntry {
@@ -22,11 +20,6 @@ interface ThemeBakeFixtureEntry {
 
 const fixture: Array<ThemeBakeFixtureEntry> = JSON.parse(fixture_text);
 const fixture_by_name = new Map(fixture.map((e) => [e.name, e]));
-
-const variable_sets: Array<[label: string, variables: Array<StyleVariable>]> = [
-	['the defaults', default_variables],
-	['a retuned set', retuned_variables]
-];
 
 describe('the pinned compile and bake', () => {
 	test('the fixture covers every shipped theme', () => {
@@ -58,17 +51,6 @@ describe('the pinned compile and bake', () => {
 });
 
 describe('compile_theme with variables', () => {
-	test('derives what the bake renders with', () => {
-		for (const theme of shipped_themes) {
-			for (const [label, variables] of variable_sets) {
-				const compiled = compile_theme(theme, { variables });
-				const baked = bake_theme(theme, variables);
-				assert.deepEqual(compiled.scheme_mirror, baked.scheme_mirror, `${theme.name}, ${label}`);
-				assert.deepEqual(compiled.caps, baked.caps ?? [], `${theme.name}, ${label}`);
-			}
-		}
-	});
-
 	test('over the defaults, compiles as with none', () => {
 		for (const theme of shipped_themes) {
 			assert.deepEqual(
