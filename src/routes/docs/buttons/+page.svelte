@@ -270,7 +270,7 @@
 		<Code
 			content={`<button class="sized_xs">sized_xs</button>\n<button class="sized_sm">sized_sm</button>\n<button class="sized_md">sized_md</button>\n<button class="sized_lg">sized_lg</button>\n<button class="sized_xl">sized_xl</button>`}
 		/>
-		<div class="row align-items:center flex-wrap:wrap gap_sm mb_flow">
+		<div class="row_wrap align-items:center gap_sm mb_flow">
 			<button type="button" class="sized_xs">sized_xs</button>
 			<button type="button" class="sized_sm">sized_sm</button>
 			<button type="button" class="sized_md">sized_md</button>

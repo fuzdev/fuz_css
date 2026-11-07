@@ -110,7 +110,7 @@
 		</p>
 		<!-- the controls get their own right-justified row above the picker and
 			preview, so they can reach left over the picker without forcing a wrap -->
-		<div class="row flex-wrap:wrap justify-content:flex-end align-items:flex-start gap_lg mb_flow">
+		<div class="row_wrap justify-content:flex-end align-items:flex-start gap_lg mb_flow">
 			<div>
 				<div class="title text-align:center pb_xs3">Contrast</div>
 				<ContrastInput

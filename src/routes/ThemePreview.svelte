@@ -39,20 +39,20 @@
 	<p>Body text with {@render link()} and <code>inline code</code>.</p>
 	<!-- the intents by meaning rather than palette letter, since a theme can
 		rebind them (stop 60 is the text-safe one) -->
-	<p class="row flex-wrap:wrap gap_md">
+	<p class="row_wrap gap_md">
 		<span class="accent_60">accent</span>
 		<span class="positive_60">positive</span>
 		<span class="negative_60">negative</span>
 		<span class="caution_60">caution</span>
 		<span class="info_60">info</span>
 	</p>
-	<div class="row flex-wrap:wrap gap_sm mb_md">
+	<div class="row_wrap gap_sm mb_md">
 		<button type="button">button</button>
 		<button type="button" class="selected">selected</button>
 		<button type="button" disabled>disabled</button>
 		<span class="chip">chip</span>
 	</div>
-	<div class="row flex-wrap:wrap gap_md">
+	<div class="row_wrap gap_md">
 		<input class="flex:1" aria-label="sample text input" placeholder="a text input" />
 		<label class="row">
 			<input type="checkbox" checked />

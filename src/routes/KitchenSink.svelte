@@ -37,7 +37,7 @@
 		<input type="checkbox" checked />
 		shaded
 	</label>
-	<div class="row flex-wrap:wrap gap_sm">
+	<div class="row_wrap gap_sm">
 		<button type="submit">save</button>
 		<button type="button" class="selected" aria-pressed="true">selected</button>
 		<button type="button" class="palette_c">discard</button>

@@ -141,7 +141,7 @@ export type StyleVariable = {
 							{#if hook.local}
 								<em>local</em>
 							{:else}
-								<div class="row flex-wrap:wrap gap_xs">
+								<div class="row_wrap gap_xs">
 									{#each hook.fallbacks as fallback (fallback)}
 										<code>{fallback}</code>
 									{/each}

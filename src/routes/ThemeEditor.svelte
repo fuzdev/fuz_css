@@ -105,7 +105,7 @@
 {/snippet}
 
 <header class="mb_flow">
-	<div class="row gap_lg flex-wrap:wrap mb_flow">
+	<div class="row_wrap gap_lg mb_flow">
 		<label>
 			<div class="title">name</div>
 			<input bind:value={editor.name} />
@@ -167,7 +167,7 @@
 <section class="panel p_md">
 	<div class="mb_md">
 		<small>intents - what each meaning points at</small>
-		<div class="knobs row flex-wrap:wrap gap_md">
+		<div class="knobs row_wrap gap_md">
 			{#each binding_knobs as knob (knob.name)}
 				{@render knob_control(knob, true)}
 			{/each}
@@ -175,7 +175,7 @@
 	</div>
 	<div>
 		<small>levers - the highest-leverage knobs</small>
-		<div class="knobs compact row flex-wrap:wrap">
+		<div class="knobs compact row_wrap">
 			{#each lever_knobs as knob (knob.name)}
 				{@render knob_control(knob, true)}
 			{/each}
@@ -201,7 +201,7 @@
 				</div>
 			{/if}
 			{#if inline_knobs.length}
-				<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
+				<div class="knobs row_wrap gap_lg align-items:flex-end">
 					{#each inline_knobs as knob (knob.name)}
 						{@render knob_control(knob, false)}
 					{/each}
@@ -214,7 +214,7 @@
 						{sm_meta?.title ?? 'granular tokens'}
 						<small>({sm_meta?.hint ?? 'escape hatches - pin individual tokens'})</small>
 					</summary>
-					<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
+					<div class="knobs row_wrap gap_lg align-items:flex-end">
 						{#each sm_knobs as knob (knob.name)}
 							{@render knob_control(knob, false)}
 						{/each}
@@ -232,7 +232,7 @@
 							<RampStrip prefix="palette_{letter}" />
 						{/each}
 					</div>
-					<div class="knobs row flex-wrap:wrap gap_lg align-items:flex-end">
+					<div class="knobs row_wrap gap_lg align-items:flex-end">
 						{#each palette_knobs as knob (knob.name)}
 							{@render knob_control(knob, false)}
 						{/each}

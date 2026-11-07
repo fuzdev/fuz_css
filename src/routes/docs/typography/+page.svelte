@@ -128,7 +128,7 @@
 			<FontWeightControl bind:selected_font_weight></FontWeightControl>
 		</form>
 		{#each font_size_variants as size (size.name)}
-			<div class="row flex-wrap:wrap">
+			<div class="row_wrap">
 				<StyleVariableButton title={size.base} name={size.name}>
 					<span
 						style:font-size="var(--{size.name})"

@@ -73,7 +73,7 @@
 		<Code
 			content={`<span class="chip sized_xs">sized_xs</span>\n<span class="chip sized_sm">sized_sm</span>\n<span class="chip sized_md">sized_md</span>\n<span class="chip sized_lg">sized_lg</span>\n<span class="chip sized_xl">sized_xl</span>`}
 		/>
-		<div class="row align-items:center flex-wrap:wrap gap_sm mb_lg">
+		<div class="row_wrap align-items:center gap_sm mb_lg">
 			<span class="chip sized_xs">sized_xs</span>
 			<span class="chip sized_sm">sized_sm</span>
 			<span class="chip sized_md">sized_md</span>
