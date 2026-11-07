@@ -1,5 +1,25 @@
 # @fuzdev/fuz_css
 
+## 0.76.0
+
+### Minor Changes
+
+- break: replace the contrast modifiers' knob overrides with a single `--contrast` knob ([f22408a](https://github.com/fuzdev/fuz_css/commit/f22408a))
+
+  `--contrast` is a new theme knob, 0 to 1, default 0: the fraction of the way the shade ground moves from the theme's own `--shade_lightness_00` toward a per-scheme end (1 in light, 0.1 in dark, clamped to the ground so a ground already past it stays put), with the shade and text lightness curves bending with it. The neutral stops read private intermediates (`--_shade_lightness_00`, `--_shade_lightness_curve`, `--_text_lightness_curve`) in place of those knobs, so the knobs keep their meaning and the palette is untouched. At the default every color renders exactly as before.
+
+  - `high_contrast_theme` now sets only `contrast`, to `HIGH_CONTRAST` (0.5, exported from `ramps.ts`). It no longer sets `shade_lightness_00`, `text_lightness_curve`, `border_color`, `link_color`, or `panel_shadow`: a theme keeps its own ground, cast, borders, links, and panel shadow under it, strengthened rather than replaced. Picking it sets `contrast` to 0.5, as picking a theme sets its knobs, so it replaces a theme's own `contrast`, a higher one included. The modifier no longer forces a white ground: the ground moves halfway toward its scheme's end, so a tinted ground such as parchment's keeps part of its tint, and the control borders reach 3:1 against the ground through the bent shade curve, body text 12:1, on every shipped theme in both schemes.
+  - `low_contrast_theme` and `contrast_modifiers.low` are removed, and `ContrastModifiers` is `{high}`.
+  - The `prefers-contrast: more` mapping in `style.css` sets `--_contrast_preference: 0.5` instead of the five variables it restated from the modifier. The effective contrast is the larger of `--contrast` and that preference, so the OS preference and the modifier render the same derivation, a theme can author its own `contrast` baseline, no theme can silence the preference, and stanced themes respond to it too.
+
+### Patch Changes
+
+- fix: hold the ground tint to sRGB at the ground's lightness ([79b338d](https://github.com/fuzdev/fuz_css/commit/79b338d))
+
+  `--shade_chroma_00` is now the tint requested: the ground and the near-ground shade stops render it through a private `--_shade_ground_chroma`, clamped to what the ground's lightness can carry at every hue, at both the light and dark ends. A tint past that no longer clips - a light ground near white holds little, so at the default light ground the knob does nothing past about 0.014. `check_theme`'s gamut gate measures the clamped tint, and the theme resolver reports it as `_shade_ground_chroma`.
+
+  Parchment composed with high contrast, or under the OS high-contrast preference, now renders a white light ground, untinted rather than a tint the browser clipped, and its near-ground surfaces drop the ground's tint while keeping the neutral cast. Marquee's ground tint moves imperceptibly.
+
 ## 0.75.0
 
 ### Minor Changes
