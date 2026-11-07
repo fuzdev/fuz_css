@@ -246,29 +246,37 @@ export default defineConfig({plugins: [vite_plugin_fuz_css({theme: phosphor_them
 		<p>
 			<code>check_theme(theme)</code> in <ModuleLink module_path="theme_check.ts" /> runs the gamut,
 			ramp-monotonicity, and contrast gates against the theme's resolved values. It reports rather
-			than throws, returning <code>{'{ok, entries, unchecked}'}</code>. The contrast gates measure
-			the pairings the default styles make on the page background - body and subtle text, links,
-			borders, fills, and colored labels, including a <code>.palette_a</code> button's label on its
-			own tinted fill at rest, hovered, and pressed. They follow the role variables those styles
-			paint through, so a theme that sets <code>border_color</code> to <code>var(--text_60)</code>
-			has its borders measured at <code>text_60</code>, in an entry named
-			<code>border_color vs shade_00</code>.
+			than throws, returning <code>{'{passed, complete, entries, unchecked}'}</code>. The contrast
+			gates measure the pairings the default styles make on the page background - body and subtle
+			text, links, borders, fills, and colored labels, including a <code>.palette_a</code> button's
+			label on its own tinted fill at rest, hovered, and pressed. They follow the role variables
+			those styles paint through, so a theme that sets <code>border_color</code> to
+			<code>var(--text_60)</code> has its borders measured at <code>text_60</code>, in an entry
+			named <code>border_color vs shade_00</code>.
 		</p>
 		<p>
 			A value a gate depends on but can't evaluate lands in <code>unchecked</code> instead of
 			passing unread: a knob that doesn't resolve to a number, or a color stop or role set to
 			anything other than an <code>oklch(L C H)</code> numeric literal or an exact
-			<code>var()</code> reference to another gated color. <code>ok</code> is true only when every
-			entry passes and nothing is unchecked, which suits a CI or test assertion:
+			<code>var()</code> reference to another gated color. <code>passed</code> says every evaluated
+			entry passes and <code>complete</code> that nothing is unchecked - a theme can pass everything
+			the gates could read and still leave inputs unread. Called alone, <code>check_theme</code>
+			measures at the default chroma caps, so a theme that moves hues or lightness can fail gamut
+			where its own caps would hold. For a CI or test assertion, check the report
+			<code>compile_theme</code> (below) returns, which runs the gates with the caps it recomputes -
+			what the theme renders with when baked, or rendered as
+			<code>render_theme_style(compiled.theme, compiled)</code>:
 		</p>
 		<Code
 			lang="ts"
 			content={`import {test, assert} from 'vitest';
-import {check_theme} from '@fuzdev/fuz_css/theme_check.ts';
+import {compile_theme} from '@fuzdev/fuz_css/theme_compile.ts';
 import {my_theme} from './my_theme.ts';
 
 test('my theme clears the accessibility gates', () => {
-	assert.isTrue(check_theme(my_theme).ok);
+	const {report} = compile_theme(my_theme);
+	assert.isTrue(report.passed);
+	assert.isTrue(report.complete);
 });`}
 		/>
 		<p>

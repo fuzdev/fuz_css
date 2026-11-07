@@ -11,8 +11,9 @@ import { resolve_theme_stance } from '#lib/theme_stance.ts';
 import type { StyleVariable, Theme, ThemeScheme } from '#lib/variable.ts';
 import { default_variables } from '#lib/variables.ts';
 import { theme_knob_by_name } from '#lib/knobs.ts';
-import { check_theme, type ThemeCheckReport, type ThemeGateEntry } from '#lib/theme_check.ts';
-import { validate_theme, type ThemeIssue } from '#lib/theme_validate.ts';
+import type { ThemeCheckReport, ThemeGateEntry } from '#lib/theme_check.ts';
+import type { ThemeIssue } from '#lib/theme_validate.ts';
+import { compile_theme, type CompiledTheme } from '#lib/theme_compile.ts';
 import { create_theme_resolver, type ThemeKnobResolver } from '#lib/theme_resolver.ts';
 import type { ColorSchemeVariant } from '#lib/variable_data.ts';
 import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
@@ -253,15 +254,21 @@ export class ThemeEditorState {
 		return this.dirty ? { ...composed, name: UNSAVED_THEME_NAME } : composed;
 	});
 
+	/**
+	 * The draft compiled on every edit (`compile_theme`): its lint, and its
+	 * gates measured with its recomputed chroma caps, as a build baking it
+	 * would measure them - the page's preview renders without them.
+	 */
+	readonly compiled: CompiledTheme = $derived(compile_theme(this.output));
+
 	/** Structural lint findings for the draft, from `validate_theme`. */
-	readonly issues: Array<ThemeIssue> = $derived(validate_theme(this.output));
+	readonly issues: Array<ThemeIssue> = $derived(this.compiled.issues);
 
 	/**
-	 * The gamut/monotonicity/contrast gate report for the draft, from
-	 * `check_theme` - the same gates the shipped themes are held to in CI,
-	 * re-run on every edit.
+	 * The gamut/monotonicity/contrast gate report for the draft with its caps -
+	 * the same gates the shipped themes are held to in CI.
 	 */
-	readonly check_report: ThemeCheckReport = $derived(check_theme(this.output));
+	readonly check_report: ThemeCheckReport = $derived(this.compiled.report);
 
 	/** The gate entries that fail for the draft. */
 	readonly failing_gates: Array<ThemeGateEntry> = $derived(
@@ -269,7 +276,9 @@ export class ThemeEditorState {
 	);
 
 	/** Whether the draft lints clean and passes every gate with nothing unchecked. */
-	readonly gates_pass: boolean = $derived(this.issues.length === 0 && this.check_report.ok);
+	readonly gates_pass: boolean = $derived(
+		this.issues.length === 0 && this.check_report.passed && this.check_report.complete
+	);
 
 	/** Whether the draft's name is taken by a theme it could be confused with in a picker. */
 	readonly name_collides: boolean = $derived.by(

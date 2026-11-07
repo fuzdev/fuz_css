@@ -78,7 +78,8 @@ describe('pinned color stops', () => {
 		const expected = wcag_contrast_ratio(srgb(pin), srgb(shade_stop_oklch('00', 'light')));
 		assert.closeTo(ui.value, expected, 1e-9);
 		assert.isFalse(ui.pass);
-		assert.isFalse(report.ok);
+		assert.isFalse(report.passed);
+		assert.isTrue(report.complete);
 		// the neighboring stop still derives
 		assert.deepEqual(
 			get_entry(report, 'gamut', 'light', 'palette_a_60'),
@@ -101,7 +102,7 @@ describe('pinned color stops', () => {
 
 	test('a pinned text stop the gates cannot evaluate lands in unchecked', () => {
 		const report = check({ name: 'text_80', base: '#777' });
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 		assert.deepEqual(
 			report.unchecked.map((u) => [u.variable, u.value]),
 			[['text_80', '#777']]
@@ -144,7 +145,7 @@ describe('pinned color stops', () => {
 			['text_max']
 		);
 		assert.isUndefined(find_entry(hex, 'contrast', 'light', 'text_max on palette_a_50'));
-		assert.isFalse(hex.ok);
+		assert.isFalse(hex.complete);
 	});
 
 	test('a pinned shade_max is what a hovered button label mixes toward', () => {
@@ -175,7 +176,7 @@ describe('pinned color stops', () => {
 		);
 		assert.isUndefined(find_entry(hex, 'contrast', 'light', hover));
 		assert.isUndefined(find_entry(hex, 'contrast', 'light', pressed));
-		assert.isFalse(hex.ok);
+		assert.isFalse(hex.complete);
 	});
 
 	test('a pinned border_color_30 composites at its own alpha', () => {
@@ -201,7 +202,7 @@ describe('pinned color stops', () => {
 
 	test('a translucent pin on an opaque stop lands in unchecked', () => {
 		const report = check({ name: 'shade_00', base: 'oklch(0.9 0 0 / 50%)' });
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 		assert.deepEqual(
 			report.unchecked.map((u) => [u.variable, u.value]),
 			[['shade_00', 'oklch(0.9 0 0 / 50%)']]
@@ -237,7 +238,7 @@ describe('pinned color stops', () => {
 			['text_80', 'text_90']
 		);
 		assert.isTrue(cycle.unchecked.every((u) => u.reason.includes('cyclic')));
-		assert.isFalse(cycle.ok);
+		assert.isFalse(cycle.complete);
 	});
 
 	test('an out-of-range literal is evaluated the way the browser clamps it', () => {
@@ -300,7 +301,7 @@ describe('pinned color stops', () => {
 			report.unchecked.map((u) => [u.variable, u.value]),
 			[['text_80', value]]
 		);
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 	});
 
 	test('a pinned intent stop gets its own gamut entry instead of folding into its letter', () => {
@@ -347,7 +348,7 @@ describe('ramp intermediates', () => {
 				reason: 'internal ramp variable - not a compiled cap'
 			}
 		]);
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 	});
 });
 
@@ -382,7 +383,9 @@ describe('role variables', () => {
 				[[role, '#999']],
 				role
 			);
-			assert.isFalse(report.ok, role);
+			// an input the gates can't read leaves the report incomplete, not failed
+			assert.isFalse(report.complete, role);
+			assert.isTrue(report.passed, role);
 		}
 	});
 
@@ -422,7 +425,8 @@ describe('role variables', () => {
 			// the stop the role left is no longer what the page paints
 			assert.isUndefined(find_entry(report, 'contrast', 'light', `text_80 on shade_${stop}`));
 		}
-		assert.isFalse(report.ok);
+		assert.isFalse(report.passed);
+		assert.isTrue(report.complete);
 	});
 
 	test('a repointed subtle text role fails where its target washes out', () => {
@@ -475,7 +479,8 @@ describe('role variables', () => {
 			assert.isTrue(entry.pass);
 			assert.isUndefined(find_entry(report, 'contrast', scheme, 'shade_30 vs shade_00'));
 		}
-		assert.isTrue(report.ok);
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
 	});
 
 	test('the focus ring and selected link get their own entries once authored', () => {
@@ -517,7 +522,7 @@ describe('role variables', () => {
 		// link_color_selected defaults to var(--text_color)
 		const cycle = check({ name: 'text_color', base: 'var(--link_color_selected)' });
 		assert.isTrue(cycle.unchecked.some((u) => u.reason.includes('cyclic')));
-		assert.isFalse(cycle.ok);
+		assert.isFalse(cycle.complete);
 	});
 
 	test('a reference reads the extremes and the border alpha ramp as they render', () => {
@@ -574,6 +579,7 @@ describe('variables no gate reads', () => {
 			{ name: 'backdrop_color', base: '#0008' }
 		);
 		assert.deepEqual(report, base_report);
-		assert.isTrue(report.ok);
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
 	});
 });

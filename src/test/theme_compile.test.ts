@@ -206,7 +206,8 @@ describe('compile_theme', () => {
 				{ name: 'palette_lightness_curve', base: '0.9' }
 			]
 		};
-		assert.isTrue(check_theme(input).ok, 'the input checks clean');
+		const input_report = check_theme(input);
+		assert.isTrue(input_report.passed && input_report.complete, 'the input checks clean');
 		const { caps, report } = compile_theme(input);
 		const stop_20 = caps.find((v) => v.name === '_palette_chroma_20');
 		assert(stop_20, 'stop 20 emitted');
@@ -218,7 +219,8 @@ describe('compile_theme', () => {
 		assert.strictEqual(cap_of(stop_20.base), at('light'));
 		assert.strictEqual(cap_of(stop_20.dark), at('dark'));
 		assert.deepEqual(gamut_fails(report), []);
-		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.complete);
 	});
 
 	test('a stanced theme caps its moved curve in its one appearance', () => {
@@ -240,7 +242,8 @@ describe('compile_theme', () => {
 			assert.strictEqual(cap_of(v.base), worst_hue_cap(lightness, hues), v.name);
 			assert.isUndefined(v.dark, v.name);
 		}
-		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.complete);
 	});
 
 	test('a stanced theme whose curve splits its schemes emits a cap for each', () => {

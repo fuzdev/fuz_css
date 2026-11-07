@@ -158,8 +158,9 @@ combined and only used content is included. In utility-only mode, import
   bindings back to numbers, following the role variables the default styles
   paint through - `text_color`, `link_color`, `border_color`, and the rest of
   `theme_gate_role_names` - and reporting any gate input it can't evaluate as
-  `unchecked` rather than passing it unread; it takes compiled `caps` beside
-  the theme), and `compile_theme` ([theme_compile.ts](src/lib/theme_compile.ts))
+  `unchecked` rather than passing it unread - its report's `passed` and
+  `complete` answer the two apart; it takes compiled `caps` beside the
+  theme), and `compile_theme` ([theme_compile.ts](src/lib/theme_compile.ts))
   recomputes per-theme worst-hue chroma caps at each stop's resolved
   lightness so rotated, monochrome, dark-only, or lightness-moved themes stay
   in gamut, returning a `CompiledTheme` (the input theme, its mirror, the
@@ -864,7 +865,10 @@ picked theme's `summary` over a compact sample of basic elements, wrapping
 below the picker on narrow screens), and
 [theme_draft.ts](src/routes/theme_draft.ts) holding the draft-name constant
 in a leaf module so the root layout doesn't pull the editor's dependency
-graph. `ThemeEditorState` owns what the page applies - the dirty draft or its
+graph. `ThemeEditorState` compiles the draft on every edit
+(`compile_theme`), so its Gates panel measures with the caps a bake would
+recompute (the preview renders without them until `ThemeRoot` takes derived
+data), and owns what the page applies - the dirty draft or its
 base, composed with the active contrast modifier (`applied_theme`) - plus the
 shared discard guard (`load_theme_guarded`) and `sync_applied_theme`, which
 adopts a theme already applied at mount so a persisted theme or contrast

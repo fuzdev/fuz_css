@@ -75,7 +75,7 @@ describe('resolution', () => {
 		assert.strictEqual(resolve_theme_knob(mutual, 'hue_a', 'light'), null);
 	});
 
-	test('a cyclic theme still yields a report, unchecked and not ok', () => {
+	test('a cyclic theme still yields a report, unchecked and incomplete', () => {
 		const mutual: Theme = {
 			name: 't',
 			variables: [
@@ -84,7 +84,7 @@ describe('resolution', () => {
 			]
 		};
 		const report = check_theme(mutual);
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 		assert.isAbove(report.unchecked.length, 0);
 	});
 
@@ -95,7 +95,7 @@ describe('resolution', () => {
 		};
 		assert.strictEqual(resolve_theme_knob(theme, '_text_lightness_50', 'light'), null);
 		const report = check_theme(theme);
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'text_lightness_curve'));
 	});
 });

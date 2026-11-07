@@ -18,6 +18,8 @@ import {
 import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 import type { Theme } from '#lib/variable.ts';
 import { compose_themes, render_theme_style } from '#lib/theme.ts';
+import { check_theme } from '#lib/theme_check.ts';
+import { compile_theme } from '#lib/theme_compile.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
 import { default_variables } from '#lib/variables.ts';
@@ -547,8 +549,21 @@ describe('gates', () => {
 	test('an untouched draft passes the lint and gates', () => {
 		const editor = create_editor();
 		assert.deepEqual(editor.issues, []);
-		assert.isTrue(editor.check_report.ok);
+		assert.isTrue(editor.check_report.passed);
+		assert.isTrue(editor.check_report.complete);
+		assert.isTrue(editor.gates_pass);
 		assert.isAbove(editor.check_report.entries.length, 0);
+	});
+
+	test('the gates measure the draft with the caps it renders with', () => {
+		const editor = create_editor();
+		// a moved lightness curve clips gamut at the baked caps, and its own caps fix it
+		editor.set_value('palette_lightness_curve', '0.9', 'light');
+		editor.set_value('palette_lightness_curve', '0.9', 'dark');
+		const uncapped = check_theme(editor.output);
+		assert.isTrue(uncapped.entries.some((e) => e.gate === 'gamut' && !e.pass));
+		assert.deepEqual(editor.check_report, compile_theme(editor.output).report);
+		assert.isTrue(editor.check_report.passed);
 	});
 
 	test('a gate-breaking edit surfaces failing entries', () => {
@@ -559,7 +574,8 @@ describe('gates', () => {
 		editor.set_value('shade_lightness_00', '0.5', 'dark');
 		editor.set_value('shade_lightness_100', '0.5', 'light');
 		editor.set_value('shade_lightness_100', '0.5', 'dark');
-		assert.isFalse(editor.check_report.ok);
+		assert.isFalse(editor.check_report.passed);
+		assert.isFalse(editor.gates_pass);
 		assert.isTrue(
 			editor.check_report.entries.some((e) => e.gate === 'monotonicity' && !e.pass),
 			'the collapsed ramp fails the monotonicity gate'

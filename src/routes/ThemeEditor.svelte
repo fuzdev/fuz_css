@@ -246,8 +246,11 @@
 <section>
 	<h3>Gates</h3>
 	<p>
-		<code>validate_theme</code> and <code>check_theme</code> run live against the draft - the same
-		lint and gamut/monotonicity/contrast gates the shipped themes are held to in CI.
+		<code>compile_theme</code> runs live against the draft - the same lint and
+		gamut/monotonicity/contrast gates the shipped themes are held to in CI, measured with the chroma
+		caps it recomputes for the draft, as a build baking it would. This page's preview still renders
+		the draft at the default caps, so a moved hue or lightness can clip here where a baked build
+		holds.
 	</p>
 	{#if editor.gates_pass}
 		<p class="positive_60">

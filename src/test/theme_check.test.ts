@@ -85,7 +85,8 @@ const assert_declared_contrast_failures = (
 describe('check_theme', () => {
 	test('the base theme passes every gate with nothing unchecked', () => {
 		const report = check_theme(base_theme);
-		assert.isTrue(report.ok);
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
 		assert.strictEqual(report.unchecked.length, 0);
 		assert.isAbove(report.entries.length, 0);
 	});
@@ -105,12 +106,15 @@ describe('check_theme', () => {
 	});
 
 	test('high contrast passes every gate', () => {
-		assert.isTrue(check_theme(high_contrast_theme).ok);
+		const report = check_theme(high_contrast_theme);
+		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.complete);
 	});
 
 	test('low contrast passes every gate', () => {
 		const report = check_theme(low_contrast_theme);
-		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.complete);
 		assert.strictEqual(report.unchecked.length, 0);
 	});
 
@@ -122,7 +126,9 @@ describe('check_theme', () => {
 	test('every shipped base theme passes every gate, bar the declared exemplars', () => {
 		for (const theme of shipped_base_themes) {
 			if (standalone_exceptions.has(theme.name)) continue;
-			assert.isTrue(check_theme(theme).ok, theme.name);
+			const report = check_theme(theme);
+			assert.isTrue(report.passed, theme.name);
+			assert.isTrue(report.complete, theme.name);
 		}
 	});
 
@@ -285,7 +291,8 @@ describe('check_theme', () => {
 			variables: [{ name: 'shade_chroma_00', base: '0.012' }]
 		};
 		const report = check_theme(tinted);
-		assert.isTrue(report.ok);
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
 		assert.notStrictEqual(body(tinted), body(base_theme));
 	});
 
@@ -324,7 +331,7 @@ describe('check_theme', () => {
 			name: 't',
 			variables: [{ name: 'shade_chroma_00', base: 'calc(0.01 * 2)' }]
 		});
-		assert.isFalse(report.ok);
+		assert.isFalse(report.complete);
 		assert.isTrue(report.unchecked.some((u) => u.variable === 'shade_chroma_00'));
 	});
 
@@ -339,14 +346,16 @@ describe('check_theme', () => {
 			]
 		});
 		assert.deepEqual(report, check_theme({ name: 't', variables: [] }));
-		assert.isTrue(report.ok);
+		assert.isTrue(report.passed);
+		assert.isTrue(report.complete);
 	});
 });
 
 describe('scheme stance', () => {
 	test('a dark stance evaluates the same reality in both schemes', () => {
 		const report = check_theme({ name: 't', variables: [], scheme: 'dark' });
-		assert.isTrue(report.ok, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.passed, JSON.stringify(report.entries.filter((e) => !e.pass)));
+		assert.isTrue(report.complete);
 		const dark_by_subject = new Map(
 			report.entries.filter((e) => e.scheme === 'dark').map((e) => [`${e.gate}|${e.subject}`, e])
 		);

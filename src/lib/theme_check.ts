@@ -158,11 +158,16 @@ export interface ThemeUncheckedEntry {
 }
 
 /**
- * The result of `check_theme`. `ok` is true only when every entry passes and
- * nothing was left unchecked.
+ * The result of `check_theme`. The two verdicts are separate questions:
+ * whether what was measured holds, and whether everything was measured - a
+ * theme that passes every gate it could evaluate may still have inputs the
+ * gates couldn't read.
  */
 export interface ThemeCheckReport {
-	ok: boolean;
+	/** Every evaluated entry passes - vacuously true when there are none. */
+	passed: boolean;
+	/** Nothing was left unchecked, so `entries` covers every gate input. */
+	complete: boolean;
 	entries: Array<ThemeGateEntry>;
 	unchecked: Array<ThemeUncheckedEntry>;
 }
@@ -343,8 +348,8 @@ const NO_VISITS: ReadonlySet<string> = new Set();
  * Runs the gamut, monotonicity, and contrast gates against a theme, resolving
  * its authored CSS back to numbers through the resolution core. Report-only:
  * failures land in `entries` (with `pass: false`), inputs that can't be
- * evaluated land in `unchecked`, and `ok` is true only when every entry passes
- * and nothing is unchecked. Never throws.
+ * evaluated land in `unchecked`; `passed` says every entry passes and
+ * `complete` that nothing is unchecked. Never throws.
  *
  * Every color a gate reads is looked up by its variable name, so a theme that
  * authors one directly - a stop (`palette_a_50`, `shade_00`, `text_max`,
@@ -767,8 +772,12 @@ export const check_theme = (theme: Theme, options: ThemeResolverOptions = {}): T
 		}
 	}
 
-	const ok = unchecked.length === 0 && entries.every((e) => e.pass);
-	return { ok, entries, unchecked };
+	return {
+		passed: entries.every((e) => e.pass),
+		complete: unchecked.length === 0,
+		entries,
+		unchecked
+	};
 };
 
 //
