@@ -16,7 +16,7 @@ import type { ThemeCheckReport, ThemeGateEntry } from '#lib/theme_check.ts';
 import type { ThemeIssue } from '#lib/theme_validate.ts';
 import { compile_theme, type CompiledTheme } from '#lib/theme_compile.ts';
 import { create_theme_resolver, type ThemeKnobResolver } from '#lib/theme_resolver.ts';
-import type { ColorSchemeVariant } from '#lib/variable_data.ts';
+import type { ColorScheme } from '#lib/variable_data.ts';
 import { UNSAVED_THEME_NAME } from '#routes/theme_draft.ts';
 
 // TODO upstream to fuz_ui
@@ -45,7 +45,7 @@ export type StyleVariableSlot = 'base' | 'dark';
  * @param scheme - the color scheme being edited or viewed
  * @returns the slot that scheme renders from first
  */
-export const to_scheme_slot = (scheme: ColorSchemeVariant): StyleVariableSlot =>
+export const to_scheme_slot = (scheme: ColorScheme): StyleVariableSlot =>
 	scheme === 'dark' ? 'dark' : 'base';
 
 export interface ThemeEditorSnapshotData {
@@ -130,7 +130,7 @@ export class ThemeEditorState {
 	readonly base_scheme: ThemeScheme = $derived(this.base_theme.scheme ?? 'dual');
 
 	/** The single-scheme stance, `null` for dual themes. */
-	readonly stance: 'light' | 'dark' | null = $derived(to_theme_stance(this.scheme));
+	readonly stance: ColorScheme | null = $derived(to_theme_stance(this.scheme));
 
 	readonly base_variable_by_name: Map<string, StyleVariable> = $derived(
 		new Map(this.base_theme.variables.map((v) => [v.name, v]))
@@ -303,7 +303,7 @@ export class ThemeEditorState {
 	 * base-only overrides, and a single-scheme stance mirroring untouched
 	 * scheme-adaptive defaults so both schemes show the stanced appearance.
 	 */
-	display_value(name: string, scheme: ColorSchemeVariant): string | undefined {
+	display_value(name: string, scheme: ColorScheme): string | undefined {
 		const merged = this.#merged_by_name.get(name);
 		const d = default_variable_by_name.get(name);
 		// the renderer's stance mirror applies only to defaults the theme
@@ -320,7 +320,7 @@ export class ThemeEditorState {
 	 * stops). `null` for values outside the resolver's color-system coverage
 	 * (lengths, colors, shadows, unset hooks).
 	 */
-	resolved_value(name: string, scheme: ColorSchemeVariant): number | null {
+	resolved_value(name: string, scheme: ColorScheme): number | null {
 		return this.resolver.resolve(name, scheme);
 	}
 
@@ -341,7 +341,7 @@ export class ThemeEditorState {
 		);
 	}
 
-	set_value(name: string, value: string, scheme: ColorSchemeVariant): void {
+	set_value(name: string, value: string, scheme: ColorScheme): void {
 		const o = this.overrides.get(name);
 		const adaptive = this.#is_adaptive(name, o, this.base_variable_by_name.get(name));
 		// a scheme-adaptive variable edits the slot of the scheme being viewed,

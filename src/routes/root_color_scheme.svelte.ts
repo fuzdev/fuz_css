@@ -1,6 +1,6 @@
 import { createSubscriber } from 'svelte/reactivity';
 
-import type { ColorSchemeVariant } from '#lib/variable_data.ts';
+import type { ColorScheme } from '#lib/variable_data.ts';
 
 // TODO upstream to fuz_ui
 
@@ -28,7 +28,7 @@ const subscribe = createSubscriber((update) => {
  * a later OS flip, and the class is synced in an effect, so a sibling effect
  * reading the state can run before it. `'light'` during SSR.
  */
-export const root_color_scheme = (): ColorSchemeVariant => {
+export const root_color_scheme = (): ColorScheme => {
 	if (typeof document === 'undefined') return 'light';
 	subscribe();
 	const { classList } = document.documentElement;

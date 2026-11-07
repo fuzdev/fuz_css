@@ -19,6 +19,7 @@
 
 import { scheme_adaptive_variables } from './scheme_adaptive_variables.ts';
 import type { StyleVariable, Theme } from './variable.ts';
+import type { ColorScheme } from './variable_data.ts';
 import { to_theme_stance, type ResolvedTheme } from './theme.ts';
 
 /**
@@ -39,7 +40,7 @@ import { to_theme_stance, type ResolvedTheme } from './theme.ts';
  * @returns the mirrored variables, to render before the theme's own
  */
 export const compute_scheme_mirror = (
-	scheme: 'light' | 'dark',
+	scheme: ColorScheme,
 	variables: Array<StyleVariable> = scheme_adaptive_variables
 ): Array<StyleVariable> => {
 	const mirrored: Array<StyleVariable> = [];

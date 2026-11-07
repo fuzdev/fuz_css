@@ -13,7 +13,7 @@
 	import {
 		palette_variants,
 		intent_variants,
-		type ColorSchemeVariant,
+		type ColorScheme,
 		type PaletteVariant
 	} from '#lib/variable_data.ts';
 	import { render_theme_ts, type ThemeEditorState } from '#routes/theme_editor_state.svelte.ts';
@@ -30,7 +30,7 @@
 	// the scheme whose slots edits write to: the one the page renders, read
 	// off the root class rather than derived from the 'auto' setting and the
 	// OS, which can disagree with what's on screen
-	const editing_scheme: ColorSchemeVariant = $derived(root_color_scheme());
+	const editing_scheme: ColorScheme = $derived(root_color_scheme());
 
 	const format_gate_value = (entry: ThemeGateEntry): string => {
 		switch (entry.gate) {

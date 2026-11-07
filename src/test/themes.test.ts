@@ -7,7 +7,7 @@ import { validate_theme } from '#lib/theme_validate.ts';
 import { theme_knob_by_name } from '#lib/knobs.ts';
 import { compose_themes, to_theme_stance } from '#lib/theme.ts';
 import { create_theme_resolver } from '#lib/theme_resolver.ts';
-import { color_scheme_variants } from '#lib/variable_data.ts';
+import { color_scheme_variants, type ColorScheme } from '#lib/variable_data.ts';
 import { low_contrast_theme } from '#lib/themes/low_contrast.ts';
 import { high_contrast_theme } from '#lib/themes/high_contrast.ts';
 import { shipped_themes, shipped_base_themes } from './theme_test_helpers.ts';
@@ -138,7 +138,7 @@ describe('contrast modifiers over shipped themes', () => {
 	test("every theme's own ground sits between its low and high contrast compositions", () => {
 		// otherwise a modifier moves the ground the wrong way - high contrast
 		// lifting a darker dark ground lowers the contrast it names
-		const ground = (theme: Theme, scheme: 'light' | 'dark'): number =>
+		const ground = (theme: Theme, scheme: ColorScheme): number =>
 			create_theme_resolver(theme).resolve('shade_lightness_00', scheme)!;
 		for (const theme of shipped_base_themes) {
 			const stance = to_theme_stance(theme.scheme);

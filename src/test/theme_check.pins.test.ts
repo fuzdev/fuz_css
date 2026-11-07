@@ -31,7 +31,7 @@ import {
 	to_lightness_stop_name
 } from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
-import type { ColorSchemeVariant, NumericScaleVariant } from '#lib/variable_data.ts';
+import type { ColorScheme, NumericScaleVariant } from '#lib/variable_data.ts';
 
 const base_report = check_theme(base_theme);
 
@@ -41,7 +41,7 @@ const check = (...variables: Array<StyleVariable>): ThemeCheckReport =>
 const find_entry = (
 	report: ThemeCheckReport,
 	gate: ThemeGateId,
-	scheme: ColorSchemeVariant,
+	scheme: ColorScheme,
 	subject: string
 ): ThemeCheckReport['entries'][number] | undefined =>
 	report.entries.find((e) => e.gate === gate && e.scheme === scheme && e.subject === subject);
@@ -49,7 +49,7 @@ const find_entry = (
 const get_entry = (
 	report: ThemeCheckReport,
 	gate: ThemeGateId,
-	scheme: ColorSchemeVariant,
+	scheme: ColorScheme,
 	subject: string
 ): ThemeCheckReport['entries'][number] => {
 	const entry = find_entry(report, gate, scheme, subject);

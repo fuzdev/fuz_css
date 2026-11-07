@@ -89,7 +89,7 @@ import {
 	intent_variants,
 	palette_glosses,
 	type NumericScaleVariant,
-	type ColorSchemeVariant,
+	type ColorScheme,
 	type PaletteVariant
 } from './variable_data.ts';
 
@@ -226,12 +226,12 @@ export class ThemeResolver {
 	 * The theme's own value for `name` in `scheme` (a pin), or `undefined` when
 	 * it authors none for that slot. Stance-mirror and cap entries are not pins.
 	 */
-	authored(name: string, scheme: ColorSchemeVariant): string | undefined {
+	authored(name: string, scheme: ColorScheme): string | undefined {
 		return this.#authored_names.has(name) ? this.#slot_value(name, scheme) : undefined;
 	}
 
 	/** Resolves `name` for `scheme`, memoized per name+scheme. */
-	resolve(name: string, scheme: ColorSchemeVariant): Resolved {
+	resolve(name: string, scheme: ColorScheme): Resolved {
 		const key = `${scheme}|${name}`;
 		const cached = this.#memo.get(key);
 		if (cached) return cached;
@@ -242,13 +242,13 @@ export class ThemeResolver {
 
 	// the effective value for a slot (authored, stance-mirrored, or a cap), honoring
 	// the dark → base fallback
-	#slot_value(name: string, scheme: ColorSchemeVariant): string | undefined {
+	#slot_value(name: string, scheme: ColorScheme): string | undefined {
 		const v = this.#by_name.get(name);
 		if (!v) return undefined;
 		return scheme === 'light' ? v.base : (v.dark ?? v.base);
 	}
 
-	#resolve(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
+	#resolve(name: string, scheme: ColorScheme, visited: Set<string>): Resolved {
 		if (visited.has(name)) {
 			return {
 				ok: false,
@@ -280,7 +280,7 @@ export class ThemeResolver {
 		return this.#resolve_default(name, scheme, next);
 	}
 
-	#parse(name: string, value: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
+	#parse(name: string, value: string, scheme: ColorScheme, visited: Set<string>): Resolved {
 		const trimmed = value.trim();
 		// numeric literal
 		const n = parse_css_number(trimmed);
@@ -302,7 +302,7 @@ export class ThemeResolver {
 	#parse_compiled_cap(
 		stop: string,
 		value: string,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: Set<string>
 	): Resolved | null {
 		const m = CHROMA_STOP_CSS_MATCHER.exec(value);
@@ -316,7 +316,7 @@ export class ThemeResolver {
 	#capped_chroma(
 		stop: NumericScaleVariant,
 		cap: number,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: Set<string>
 	): Resolved {
 		const r = this.#resolve_all(
@@ -329,7 +329,7 @@ export class ThemeResolver {
 		return { ok: true, value: ramp_chroma_at_shape(shape!, chroma_min!, chroma_max!, cap) };
 	}
 
-	#resolve_default(name: string, scheme: ColorSchemeVariant, visited: Set<string>): Resolved {
+	#resolve_default(name: string, scheme: ColorScheme, visited: Set<string>): Resolved {
 		// palette letters
 		const letter_match = PALETTE_LETTER_MATCHER.exec(name);
 		if (letter_match) return { ok: true, value: PALETTE_HUES[letter_match[1] as PaletteVariant] };
@@ -413,7 +413,7 @@ export class ThemeResolver {
 	// resolves every name to a number, bailing with the first failure
 	#resolve_all(
 		names: Array<string>,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: Set<string>
 	): { ok: true; values: Array<number> } | { ok: false; error: Resolved } {
 		const values: Array<number> = [];
@@ -427,7 +427,7 @@ export class ThemeResolver {
 
 	#lightness_knobs(
 		family: RampFamily,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: Set<string>
 	): { ok: true; value: LightnessRampKnobs } | { ok: false; error: Resolved } {
 		const r = this.#resolve_all(
@@ -450,7 +450,7 @@ export class ThemeResolver {
  */
 export interface ThemeKnobResolver {
 	/** Resolves `name` for `scheme` to a number, or `null` when it can't be resolved. */
-	resolve(name: string, scheme: ColorSchemeVariant): number | null;
+	resolve(name: string, scheme: ColorScheme): number | null;
 	/** Whether the theme authors a value for `name` (a pin, never a mirror or cap entry). */
 	pinned(name: string): boolean;
 }

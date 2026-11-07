@@ -21,6 +21,7 @@ import {
 	type ResolvedTheme
 } from './theme.ts';
 import type { StyleVariable, Theme } from './variable.ts';
+import type { ColorScheme } from './variable_data.ts';
 import { check_theme, compute_theme_caps } from './theme_check.ts';
 import { validate_theme } from './theme_validate.ts';
 import { theme_knobs } from './knobs.ts';
@@ -499,7 +500,7 @@ const default_knobs: ReadonlyMap<string, StyleVariable> = new Map(
 const fold_configured_knobs = (
 	theme: Theme,
 	variables: Array<StyleVariable>,
-	stance: 'light' | 'dark' | null
+	stance: ColorScheme | null
 ): Theme => {
 	const by_name: Map<string, StyleVariable> = new Map();
 	for (const v of variables) {

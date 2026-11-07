@@ -47,7 +47,7 @@ import {
 	numeric_scale_variants,
 	palette_variants,
 	color_scheme_variants,
-	type ColorSchemeVariant,
+	type ColorScheme,
 	type NumericScaleVariant
 } from '#lib/variable_data.ts';
 
@@ -185,7 +185,7 @@ const parse_oklch_args = (css: string): [string, string, string] => {
 };
 
 /** All knob variables an emitted color stop can reference, per scheme. */
-const knob_vars = (scheme: ColorSchemeVariant): Record<string, number> => {
+const knob_vars = (scheme: ColorScheme): Record<string, number> => {
 	const vars: Record<string, number> = {
 		chroma_scale: 1,
 		neutral_chroma: NEUTRAL_CHROMA[scheme],

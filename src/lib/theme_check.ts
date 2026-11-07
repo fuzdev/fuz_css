@@ -47,7 +47,7 @@ import {
 	intent_variants,
 	color_scheme_variants,
 	type NumericScaleVariant,
-	type ColorSchemeVariant,
+	type ColorScheme,
 	type PaletteVariant
 } from './variable_data.ts';
 import { wcag_contrast_ratio } from './wcag.ts';
@@ -133,7 +133,7 @@ export type ThemeGateId = 'gamut' | 'monotonicity' | 'contrast';
  */
 export interface ThemeGateEntry {
 	gate: ThemeGateId;
-	scheme: ColorSchemeVariant;
+	scheme: ColorScheme;
 	subject: string;
 	value: number;
 	threshold: number;
@@ -394,7 +394,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 		return null;
 	};
 
-	const num = (name: string, scheme: ColorSchemeVariant): number | null => {
+	const num = (name: string, scheme: ColorScheme): number | null => {
 		const r = resolver.resolve(name, scheme);
 		return r.ok ? r.value : record(r);
 	};
@@ -406,7 +406,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 	// exactly the gates' own inputs
 	const authored_color = (
 		name: string,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: ReadonlySet<string>
 	): GateColor | null | undefined => {
 		const authored = resolver.authored(name, scheme);
@@ -426,7 +426,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 	// else the value derived from the resolved knobs
 	const opaque_color = (
 		name: string,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		derive: () => RgbUnit | null,
 		visited: ReadonlySet<string> = NO_VISITS
 	): RgbUnit | null => {
@@ -447,7 +447,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 		hue: number,
 		multiplier: number,
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited?: ReadonlySet<string>
 	): RgbUnit | null =>
 		opaque_color(
@@ -471,7 +471,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 	const neutral_color = (
 		family: 'shade' | 'text',
 		stop: NumericScaleVariant,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited?: ReadonlySet<string>
 	): RgbUnit | null =>
 		opaque_color(
@@ -508,7 +508,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 	// isn't a color the gates evaluate
 	const color_of = (
 		name: string,
-		scheme: ColorSchemeVariant,
+		scheme: ColorScheme,
 		visited: ReadonlySet<string> = NO_VISITS
 	): GateColor | null | undefined => {
 		if (visited.has(name)) {
@@ -567,7 +567,7 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 	const contrast = (a: RgbUnit, b: RgbUnit): number =>
 		wcag_contrast_ratio(clamp_rgb(a), clamp_rgb(b));
 
-	const push_gamut = (subject: string, color: RgbUnit, scheme: ColorSchemeVariant): void => {
+	const push_gamut = (subject: string, color: RgbUnit, scheme: ColorScheme): void => {
 		const value = gamut_excess(color);
 		entries.push({
 			gate: 'gamut',
@@ -583,12 +583,12 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 		subject: string,
 		value: number,
 		threshold: number,
-		scheme: ColorSchemeVariant
+		scheme: ColorScheme
 	): void => {
 		entries.push({ gate: 'contrast', scheme, subject, value, threshold, pass: value >= threshold });
 	};
 
-	const push_monotonicity = (family: RampFamily, scheme: ColorSchemeVariant): void => {
+	const push_monotonicity = (family: RampFamily, scheme: ColorScheme): void => {
 		const lightnesses: Array<number> = [];
 		for (const stop of numeric_scale_variants) {
 			const l = num(to_lightness_stop_name(family, stop), scheme);
@@ -802,10 +802,7 @@ const CAP_EMIT_EPSILON = 0.002;
 // `null` when any hue fails to resolve - caps computed without it would claim
 // headroom the missing hue may not have, so the compile step emits nothing
 // (the re-check still reports the unresolvable pins)
-const collect_hues = (
-	resolver: ThemeResolver,
-	scheme: ColorSchemeVariant
-): Array<number> | null => {
+const collect_hues = (resolver: ThemeResolver, scheme: ColorScheme): Array<number> | null => {
 	const hues: Array<number> = [];
 	for (const letter of palette_variants) {
 		const r = resolver.resolve(`hue_${letter}`, scheme);
@@ -863,14 +860,14 @@ export const compute_theme_caps = (theme: Theme): Array<StyleVariable> => {
 	const resolver = new ThemeResolver(theme);
 	const stance = to_theme_stance(theme.scheme);
 
-	const hues: Record<ColorSchemeVariant, Array<number> | null> = {
+	const hues: Record<ColorScheme, Array<number> | null> = {
 		light: collect_hues(resolver, 'light'),
 		dark: collect_hues(resolver, 'dark')
 	};
 	// the gamut search is the expensive part, and a stanced theme resolves both
 	// schemes to the same hues and lightness - so memoize by the search inputs
 	const cap_memo: Map<string, number> = new Map();
-	const recompute = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): number | null => {
+	const recompute = (stop: NumericScaleVariant, scheme: ColorScheme): number | null => {
 		const scheme_hues = hues[scheme];
 		const lightness = resolver.resolve(to_lightness_stop_name('palette', stop), scheme);
 		if (!scheme_hues || !lightness.ok) return null;
@@ -887,7 +884,7 @@ export const compute_theme_caps = (theme: Theme): Array<StyleVariable> => {
 	// those are what the mirror re-slots into the base position, so comparing
 	// against the light table would emit no-op overrides duplicating the mirror
 	// for every dark stance
-	const baked: Record<ColorSchemeVariant, Record<NumericScaleVariant, number>> = {
+	const baked: Record<ColorScheme, Record<NumericScaleVariant, number>> = {
 		light: PALETTE_CHROMA_CAPS[stance ?? 'light'],
 		dark: PALETTE_CHROMA_CAPS[stance ?? 'dark']
 	};

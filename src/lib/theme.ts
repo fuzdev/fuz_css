@@ -1,4 +1,5 @@
 import type { StyleVariable, Theme } from './variable.ts';
+import type { ColorScheme } from './variable_data.ts';
 import {
 	css_comment_is_contained,
 	css_custom_property_name_is_contained,
@@ -7,11 +8,16 @@ import {
 } from './css_containment.ts';
 
 /**
- * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
+ * A color scheme setting: a rendered `ColorScheme`, or `auto` to follow the
+ * OS preference (`prefers-color-scheme`).
  */
-export type ColorScheme = 'dark' | 'light' | 'auto';
+export type ColorSchemePreference = ColorScheme | 'auto';
 
-export const color_schemes: Array<ColorScheme> = ['light', 'auto', 'dark'];
+/**
+ * The color scheme settings in picker order, light to dark with `auto`
+ * between.
+ */
+export const color_schemes: Array<ColorSchemePreference> = ['light', 'auto', 'dark'];
 
 /**
  * The fuz_css cascade layer order: defaults (variables + element styles) in
@@ -54,7 +60,7 @@ export const COLOR_SCHEME_ROOTS = {
  * @returns the CSS, with `media` (when given) wrapping both renderings
  */
 export const render_color_scheme_rules = (
-	scheme: 'light' | 'dark',
+	scheme: ColorScheme,
 	to_rules: (root: string) => string,
 	media: string | null = null
 ): string => {
@@ -157,7 +163,7 @@ export interface RenderThemeStyleOptions extends RenderStyleVariablesOptions, Th
  *
  * @param scheme - a theme's `scheme`
  */
-export const to_theme_stance = (scheme: unknown): 'light' | 'dark' | null =>
+export const to_theme_stance = (scheme: unknown): ColorScheme | null =>
 	scheme === 'light' || scheme === 'dark' ? scheme : null;
 
 /**
@@ -168,7 +174,7 @@ export const to_theme_stance = (scheme: unknown): 'light' | 'dark' | null =>
  */
 export const pick_stance_slot = (
 	v: { base?: string; dark?: string } | undefined,
-	stance: 'light' | 'dark'
+	stance: ColorScheme
 ): string | undefined => (stance === 'dark' ? (v?.dark ?? v?.base) : v?.base);
 
 /**
@@ -304,7 +310,7 @@ const LAYER_NAME_MATCHER = /^[a-z_][a-z0-9_-]*(?:\.[a-z_][a-z0-9_-]*)*$/iu;
 
 const render_variables = (
 	variables: Array<unknown>,
-	stance: 'light' | 'dark' | null,
+	stance: ColorScheme | null,
 	options: unknown
 ): string => {
 	const {

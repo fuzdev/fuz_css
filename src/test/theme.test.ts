@@ -1,11 +1,15 @@
-import { test, assert, describe } from 'vitest';
+import { test, assert, describe, expectTypeOf } from 'vitest';
 
 import {
+	color_schemes,
 	compose_themes,
 	render_style_variables,
 	render_theme_style,
+	to_theme_stance,
+	type ColorSchemePreference,
 	type RenderThemeStyleOptions
 } from '#lib/theme.ts';
+import type { ColorScheme } from '#lib/variable_data.ts';
 import type { StyleVariable, Theme } from '#lib/variable.ts';
 import { resolve_theme_stance, compute_scheme_mirror } from '#lib/theme_stance.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
@@ -741,5 +745,15 @@ describe('render_theme_style over malformed themes', () => {
 		// not vacuous: plenty of themes rendered declarations and comments
 		assert.isAbove(rendered, 1000);
 		assert.isAbove(commented, 100);
+	});
+});
+
+describe('color scheme types', () => {
+	test('ColorScheme is the rendered scheme and ColorSchemePreference the setting', () => {
+		expectTypeOf<ColorScheme>().toEqualTypeOf<'light' | 'dark'>();
+		expectTypeOf<ColorSchemePreference>().toEqualTypeOf<'light' | 'dark' | 'auto'>();
+		expectTypeOf(color_schemes).toEqualTypeOf<Array<ColorSchemePreference>>();
+		expectTypeOf(to_theme_stance).returns.toEqualTypeOf<ColorScheme | null>();
+		assert.deepEqual(color_schemes, ['light', 'auto', 'dark']);
 	});
 });

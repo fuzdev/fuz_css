@@ -360,7 +360,15 @@ export const SHADOW_ALPHAS: Readonly<
 	'100': { light: 100, dark: 100 }
 };
 
-export type ColorSchemeVariant = ArrayElement<typeof color_scheme_variants>;
+/**
+ * A rendered color scheme: what a theme's stance names, what the gates and
+ * the mirror measure per scheme, and what the `dark:`/`light:` modifiers
+ * target. The setting a user picks, which can also follow the OS, is
+ * `ColorSchemePreference` in `theme.ts`.
+ *
+ * @see https://developer.mozilla.org/en-US/docs/Web/CSS/color-scheme
+ */
+export type ColorScheme = ArrayElement<typeof color_scheme_variants>;
 export const color_scheme_variants = ['light', 'dark'] as const;
 
 export type OutlineWidthVariant = ArrayElement<typeof outline_width_variants>;

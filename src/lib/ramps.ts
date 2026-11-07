@@ -27,7 +27,7 @@ import {
 	palette_variants,
 	type IntentVariant,
 	type PaletteVariant,
-	type ColorSchemeVariant,
+	type ColorScheme,
 	type NumericScaleVariant
 } from './variable_data.ts';
 
@@ -101,32 +101,27 @@ export const PALETTE_CHROMA_MULTIPLIERS: Readonly<Record<PaletteVariant, number>
 };
 
 /** Fitted lightness knobs for the palette (`palette_X_NN`) ramps. */
-export const PALETTE_LIGHTNESS_KNOBS: Readonly<
-	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
-> = {
-	light: { lightness_00: 0.985, lightness_100: 0.116, curve: 1.15 },
-	dark: { lightness_00: 0.147, lightness_100: 0.971, curve: 0.76 }
-};
+export const PALETTE_LIGHTNESS_KNOBS: Readonly<Record<ColorScheme, Readonly<LightnessRampKnobs>>> =
+	{
+		light: { lightness_00: 0.985, lightness_100: 0.116, curve: 1.15 },
+		dark: { lightness_00: 0.147, lightness_100: 0.971, curve: 0.76 }
+	};
 
 /** Fitted lightness knobs for the shade (surface) ramps. */
-export const SHADE_LIGHTNESS_KNOBS: Readonly<
-	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
-> = {
+export const SHADE_LIGHTNESS_KNOBS: Readonly<Record<ColorScheme, Readonly<LightnessRampKnobs>>> = {
 	light: { lightness_00: 0.97, lightness_100: 0.171, curve: 1.09 },
 	dark: { lightness_00: 0.171, lightness_100: 0.97, curve: 1.05 }
 };
 
 /** Fitted lightness knobs for the text ramps. */
-export const TEXT_LIGHTNESS_KNOBS: Readonly<
-	Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>
-> = {
+export const TEXT_LIGHTNESS_KNOBS: Readonly<Record<ColorScheme, Readonly<LightnessRampKnobs>>> = {
 	light: { lightness_00: 0.97, lightness_100: 0.146, curve: 1.19 },
 	dark: { lightness_00: 0.146, lightness_100: 0.97, curve: 0.87 }
 };
 
 /** The lightness ramp knobs by family, for lookups keyed on a `RampFamily`. */
 export const LIGHTNESS_KNOBS: Readonly<
-	Record<RampFamily, Readonly<Record<ColorSchemeVariant, Readonly<LightnessRampKnobs>>>>
+	Record<RampFamily, Readonly<Record<ColorScheme, Readonly<LightnessRampKnobs>>>>
 > = {
 	palette: PALETTE_LIGHTNESS_KNOBS,
 	shade: SHADE_LIGHTNESS_KNOBS,
@@ -147,11 +142,10 @@ export const LIGHTNESS_KNOBS: Readonly<
  * can't reach the light cap envelope's peak there - recovering it would
  * take an asymmetric shape (a peak-position knob).
  */
-export const PALETTE_CHROMA_KNOBS: Readonly<Record<ColorSchemeVariant, Readonly<ChromaRampKnobs>>> =
-	{
-		light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
-		dark: { chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27 }
-	};
+export const PALETTE_CHROMA_KNOBS: Readonly<Record<ColorScheme, Readonly<ChromaRampKnobs>>> = {
+	light: { chroma_min: 0.0132, chroma_max: 0.106, curve: 1.3 },
+	dark: { chroma_min: 0.0214, chroma_max: 0.1088, curve: 1.27 }
+};
 
 /**
  * Default OKLCH hue angle of the neutral intent. In CSS the knob chains to the
@@ -165,7 +159,7 @@ const NEUTRAL_HUE = PALETTE_HUES.f;
  * palette's chroma shape scaled to this peak: strong tint at mid lightness,
  * nearly untinted near white and black.
  */
-export const NEUTRAL_CHROMA: Readonly<Record<ColorSchemeVariant, number>> = {
+export const NEUTRAL_CHROMA: Readonly<Record<ColorScheme, number>> = {
 	light: 0.024,
 	dark: 0.025
 };
@@ -235,7 +229,7 @@ export const render_shadow_tint_css = (tint: ShadowTint): string => {
  * fitted from the HSL palette. Sits mid-ramp so borders read against both
  * the page background and fills.
  */
-export const BORDER_COLOR_LIGHTNESS: Readonly<Record<ColorSchemeVariant, number>> = {
+export const BORDER_COLOR_LIGHTNESS: Readonly<Record<ColorScheme, number>> = {
 	light: 0.345,
 	dark: 0.857
 };
@@ -245,7 +239,7 @@ export const BORDER_COLOR_LIGHTNESS: Readonly<Record<ColorSchemeVariant, number>
  * carry a stronger tint than surfaces so they read at low alpha. In CSS this
  * is `--border_color_chroma: calc(var(--neutral_chroma) * <multiple>)`.
  */
-export const BORDER_CHROMA_MULTIPLIER: Readonly<Record<ColorSchemeVariant, number>> = {
+export const BORDER_CHROMA_MULTIPLIER: Readonly<Record<ColorScheme, number>> = {
 	light: 2.6667,
 	dark: 2.12
 };
@@ -257,7 +251,7 @@ export const BORDER_CHROMA_MULTIPLIER: Readonly<Record<ColorSchemeVariant, numbe
  * Stop 00 renders `transparent` and stop 100 opaque.
  */
 export const BORDER_COLOR_ALPHAS: Readonly<
-	Record<ColorSchemeVariant, Readonly<Record<NumericScaleVariant, number>>>
+	Record<ColorScheme, Readonly<Record<NumericScaleVariant, number>>>
 > = {
 	light: {
 		'00': 0,
@@ -294,7 +288,7 @@ export const BORDER_COLOR_ALPHAS: Readonly<
 /**
  * Computes the default OKLCH color of the border family (without alpha).
  */
-export const border_color_oklch = (scheme: ColorSchemeVariant): Oklch => [
+export const border_color_oklch = (scheme: ColorScheme): Oklch => [
 	BORDER_COLOR_LIGHTNESS[scheme],
 	NEUTRAL_CHROMA[scheme] * BORDER_CHROMA_MULTIPLIER[scheme],
 	NEUTRAL_HUE
@@ -307,7 +301,7 @@ export const border_color_oklch = (scheme: ColorSchemeVariant): Oklch => [
  * stay conservative; a drift test recomputes them from the color math.
  */
 export const PALETTE_CHROMA_CAPS: Readonly<
-	Record<ColorSchemeVariant, Readonly<Record<NumericScaleVariant, number>>>
+	Record<ColorScheme, Readonly<Record<NumericScaleVariant, number>>>
 > = {
 	light: {
 		'00': 0.0072,
@@ -430,7 +424,7 @@ export const neutral_color_oklch = (
 export const palette_stop_oklch = (
 	letter: PaletteVariant,
 	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant
+	scheme: ColorScheme
 ): Oklch =>
 	ramp_color_oklch(
 		ramp_lightness(PALETTE_LIGHTNESS_KNOBS[scheme], stop),
@@ -443,7 +437,7 @@ export const palette_stop_oklch = (
 /**
  * Computes the default OKLCH color of a shade stop (`--shade_NN`).
  */
-export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch =>
+export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme): Oklch =>
 	neutral_color_oklch(
 		ramp_lightness(SHADE_LIGHTNESS_KNOBS[scheme], stop),
 		NEUTRAL_CHROMA[scheme],
@@ -455,7 +449,7 @@ export const shade_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeV
 /**
  * Computes the default OKLCH color of a text stop (`--text_NN`).
  */
-export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorSchemeVariant): Oklch =>
+export const text_stop_oklch = (stop: NumericScaleVariant, scheme: ColorScheme): Oklch =>
 	neutral_color_oklch(
 		ramp_lightness(TEXT_LIGHTNESS_KNOBS[scheme], stop),
 		NEUTRAL_CHROMA[scheme],
@@ -649,7 +643,7 @@ const render_ground_chroma_term = (weight: number): string => {
  */
 export const render_border_color_stop_css = (
 	stop: NumericScaleVariant,
-	scheme: ColorSchemeVariant
+	scheme: ColorScheme
 ): string => {
 	const alpha = BORDER_COLOR_ALPHAS[scheme][stop];
 	if (alpha === 0) return 'transparent';

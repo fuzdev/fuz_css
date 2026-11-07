@@ -36,6 +36,7 @@ import {
 } from './css_literal.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
 import { render_color_scheme_rules } from './theme.ts';
+import type { ColorScheme } from './variable_data.ts';
 
 //
 // CSS Utilities
@@ -795,7 +796,7 @@ const render_rule_group = (
 ): string => {
 	if (ancestor) {
 		return render_color_scheme_rules(
-			ancestor.css as 'light' | 'dark',
+			ancestor.css as ColorScheme,
 			(root) => rules.map((rule) => render_class_rule(rule, `:where(${root}) `)).join('\n'),
 			media?.css ?? null
 		);

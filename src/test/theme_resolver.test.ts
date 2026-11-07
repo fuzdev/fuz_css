@@ -5,6 +5,7 @@ import { create_theme_resolver } from '#lib/theme_resolver.ts';
 import type { Theme } from '#lib/variable.ts';
 import { base_theme } from '#lib/themes/base.ts';
 import { marquee_theme } from '#lib/themes/marquee.ts';
+import type { ColorScheme } from '#lib/variable_data.ts';
 import {
 	PALETTE_HUES,
 	PALETTE_CHROMA_MULTIPLIERS,
@@ -22,7 +23,7 @@ import {
 
 // per-call resolver over the shared resolution core, for direct tests of the
 // resolution rules (binding chains, cycles, unresolvable expressions)
-const resolve_theme_knob = (theme: Theme, name: string, scheme: 'light' | 'dark'): number | null =>
+const resolve_theme_knob = (theme: Theme, name: string, scheme: ColorScheme): number | null =>
 	create_theme_resolver(theme).resolve(name, scheme);
 
 describe('resolution', () => {

@@ -623,7 +623,9 @@ carry a module-level `@internal` - documented, importable, not stable API.
   step through (`FONT_SIZES`, `SPACE_SIZES`, `BORDER_RADII`, `DISTANCES`,
   `LINE_HEIGHTS`, `ICON_SIZES`, `DURATIONS`, `SHADOW_GEOMETRY`,
   `SHADOW_ALPHAS`, `OVERLAY_ALPHAS`), keyed by variant and unitless -
-  `variables.ts` adds the unit and any `calc()` wrapper
+  `variables.ts` adds the unit and any `calc()` wrapper - and `ColorScheme`,
+  the rendered scheme (`light` or `dark`) that stances, the gates, the
+  mirror, and the `dark:`/`light:` modifiers share
 - [ramps.ts](src/lib/ramps.ts) - The derived color system: fitted knob
   constants, numeric evaluators, the CSS `calc()`/`oklch()` emitters, and
   the private intermediates' names
@@ -634,7 +636,9 @@ carry a module-level `@internal` - documented, importable, not stable API.
   hand-flatten precursor to `extends`), `overlay_style_variable` (the one
   slot merge `compose_themes` and the build-time overlay share: wholesale
   replacement, a dark-only overlay keeping the base slot beneath it),
-  `ColorScheme` type (`Theme` itself lives in `variable.ts`). A pure renderer:
+  the `ColorSchemePreference` setting (`ColorScheme` or `auto`) with its
+  `color_schemes` picker list (`Theme` lives in `variable.ts`, `ColorScheme`
+  in `variable_data.ts`). A pure renderer:
   it holds no variable data, so mounting a theme costs ~2.5KB minified
   instead of the ~14KB `default_variables` adds. It renders what the theme
   carries plus the derived data in its options (`ThemeDerived`: the mirror

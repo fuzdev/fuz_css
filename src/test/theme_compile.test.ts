@@ -16,7 +16,7 @@ import {
 	PALETTE_LIGHTNESS_KNOBS,
 	ramp_lightness
 } from '#lib/ramps.ts';
-import type { NumericScaleVariant } from '#lib/variable_data.ts';
+import type { ColorScheme, NumericScaleVariant } from '#lib/variable_data.ts';
 
 // the trailing worst-hue cap literal of a compiled `min(calc(...), <cap>)` value
 const cap_of = (value: string | undefined): number => {
@@ -183,7 +183,7 @@ describe('compile_theme', () => {
 		const hues = Object.values(PALETTE_HUES);
 		for (const v of overrides) {
 			const stop = stop_of(v.name);
-			const at = (scheme: 'light' | 'dark'): number =>
+			const at = (scheme: ColorScheme): number =>
 				worst_hue_cap(
 					ramp_lightness({ ...PALETTE_LIGHTNESS_KNOBS[scheme], curve: 0.7 }, stop),
 					hues
@@ -211,7 +211,7 @@ describe('compile_theme', () => {
 		const { caps, report } = compile_theme(input);
 		const stop_20 = caps.find((v) => v.name === '_palette_chroma_20');
 		assert(stop_20, 'stop 20 emitted');
-		const at = (scheme: 'light' | 'dark'): number =>
+		const at = (scheme: ColorScheme): number =>
 			worst_hue_cap(
 				ramp_lightness({ ...PALETTE_LIGHTNESS_KNOBS[scheme], curve: 0.9 }, '20'),
 				[145]

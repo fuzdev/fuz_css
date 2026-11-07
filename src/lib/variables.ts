@@ -41,7 +41,7 @@ import {
 	icon_size_variants,
 	shadow_size_variants,
 	duration_variants,
-	type ColorSchemeVariant,
+	type ColorScheme,
 	type IntentVariant,
 	type NumericScaleVariant,
 	type PaletteVariant,
@@ -98,7 +98,7 @@ const derived_lightness_stops: Array<NumericScaleVariant> = numeric_scale_varian
 // a lightness ramp's endpoint/curve knobs followed by its derived stops
 const lightness_ramp_variables = (
 	family: RampFamily,
-	knobs: Record<ColorSchemeVariant, LightnessRampKnobs>
+	knobs: Record<ColorScheme, LightnessRampKnobs>
 ): Array<StyleVariable> => [
 	{
 		name: `${family}_lightness_00`,
