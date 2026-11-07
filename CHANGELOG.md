@@ -1,5 +1,27 @@
 # @fuzdev/fuz_css
 
+## 0.75.0
+
+### Minor Changes
+
+- fix: wrap inline code with the text instead of jumping lines ([3daedbe](https://github.com/fuzdev/fuz_css/commit/3daedbe))
+
+  `code` inside a `p` was `display: inline-block`, so a long span jumped whole to the next line, leaving a ragged gap, or overflowed. It's now plain inline, as it already was in a `li` or heading: it wraps with the text, each line's fragment keeps its own padding and rounded background (`box-decoration-break: clone`), and a token too long for any line breaks rather than overflowing (`overflow-wrap: break-word`, which also breaks a long token in block code that wraps, like a bare `pre > code`, rather than scrolling it). `code.inline` stays an unsplit `inline-block` for a span that should hold together.
+
+- **breaking** fix: display buttons `inline-flex` so siblings sit side by side ([2bb546e](https://github.com/fuzdev/fuz_css/commit/2bb546e))
+
+  A styled `button` was `display: flex`, so each one took its own line in a block. It's now `inline-flex`, like the native inline button: sibling buttons in a block sit on one line with a space between them and wrap like text, and a lone button follows its parent's `text-align` and sits on the text baseline. Inside a flex or grid parent (`.row`, `.row_wrap`, `.column`, `.box`, a `display:flex` toolbar) a button is blockified as before, so nothing there changes, and `.menuitem` sets its own `display: flex`.
+
+  Breaking:
+
+  - a styled `button` in a block no longer takes its own line - wrap buttons that should stack in a `.column`
+
+### Patch Changes
+
+- fix: give a pressed disabled control no feedback ([a8d745a](https://github.com/fuzdev/fuz_css/commit/a8d745a))
+
+  Pressing a disabled `button`, `input`, `textarea`, `select`, or `label.disabled` flashed its text and border in the negative color (and a selected button's fill, and a range's thumb). A disabled control now shows no change when pressed, as an `aria-disabled` one already did. The press states of a disabled `.selectable`, `.menuitem`, and `.clickable`, and the active outline of an `aria-disabled` form control or settled `.selected` button, are skipped too.
+
 ## 0.74.0
 
 ### Minor Changes
