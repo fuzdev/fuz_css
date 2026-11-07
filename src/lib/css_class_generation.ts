@@ -33,7 +33,7 @@ import {
 	type ExtractedModifiers
 } from './css_literal.ts';
 import { extract_css_variables } from './css_variable_utils.ts';
-import { COLOR_SCHEME_ROOTS, render_color_scheme_rules } from './theme.ts';
+import { render_color_scheme_rules } from './theme.ts';
 
 //
 // CSS Utilities
@@ -143,7 +143,6 @@ const to_declaration_rank = (declaration: string): number => {
 //
 
 export interface CssClassDefinitionBase {
-	comment?: string;
 	/**
 	 * Whether the class is a composite, rendered in the
 	 * `fuz.utilities.composites` sublayer beneath every single-purpose class,
@@ -422,7 +421,6 @@ export interface CssClassRule {
 	/** Orders after the rules it ties with on rank and state (`CssClassDefinitionBase.late`). */
 	late: boolean;
 	body: CssClassRuleBody;
-	comment: string | null;
 }
 
 /**
@@ -567,7 +565,6 @@ const resolve_base_class = (
 		if (definition) {
 			return {
 				definition: {
-					comment: interpreter.comment,
 					composite: interpreter.composite,
 					late: interpreter.late,
 					...definition
@@ -592,7 +589,6 @@ const to_class_rule = (
 	const escaped = escape_css_selector(class_name);
 	const composite =
 		definition.composite ?? ('ruleset' in definition || definition.composes !== undefined);
-	const comment = definition.comment?.trim() || null;
 	const late = definition.late ?? false;
 	const selector_suffix =
 		modifiers.states.map((s) => s.css).join('') + (modifiers.pseudo_element?.css ?? '');
@@ -650,8 +646,7 @@ const to_class_rule = (
 				rank: composite ? definition_index : 0,
 				definition_index,
 				late,
-				body: { type: 'verbatim', css: definition.ruleset.trim() },
-				comment
+				body: { type: 'verbatim', css: definition.ruleset.trim() }
 			};
 		}
 		const { rules, skipped_modifiers } = modify_ruleset(
@@ -671,8 +666,7 @@ const to_class_rule = (
 			rank: composite ? definition_index : 0,
 			definition_index,
 			late,
-			body: { type: 'rules', rules },
-			comment
+			body: { type: 'rules', rules }
 		};
 	}
 
@@ -701,8 +695,7 @@ const to_class_rule = (
 			type: 'declaration',
 			selector: `.${escaped}${selector_suffix}`,
 			declaration: resolution.declaration
-		},
-		comment
+		}
 	};
 };
 
@@ -788,58 +781,31 @@ const render_rule_group = (
 	media: ModifierDefinition | null
 ): string => {
 	if (ancestor) {
-		const scheme = ancestor.css as 'light' | 'dark';
-		// comments once, on the explicit-class rendering
 		return render_color_scheme_rules(
-			scheme,
-			(root) =>
-				rules
-					.map((rule) =>
-						render_class_rule(
-							rule,
-							`:where(${root}) `,
-							root === COLOR_SCHEME_ROOTS[scheme].explicit
-						)
-					)
-					.join('\n'),
+			ancestor.css as 'light' | 'dark',
+			(root) => rules.map((rule) => render_class_rule(rule, `:where(${root}) `)).join('\n'),
 			media?.css ?? null
 		);
 	}
-	const css = rules.map((rule) => render_class_rule(rule, '', true)).join('\n');
+	const css = rules.map((rule) => render_class_rule(rule, '')).join('\n');
 	return media ? `@media ${media.css} {\n${css.replace(/^(?=.)/gm, '\t')}\n}` : css;
 };
 
-const render_class_rule = (
-	rule: CssClassRule,
-	selector_prefix: string,
-	with_comment: boolean
-): string => {
-	const comment =
-		with_comment && rule.comment
-			? rule.comment.includes('\n')
-				? `/*\n${rule.comment
-						.split('\n')
-						.map((line) => line.trim())
-						.join('\n')}\n*/\n`
-				: `/* ${rule.comment} */\n`
-			: '';
+const render_class_rule = (rule: CssClassRule, selector_prefix: string): string => {
 	const { body } = rule;
 	switch (body.type) {
 		case 'declaration':
-			return `${comment}${selector_prefix}${body.selector} { ${body.declaration} }`;
+			return `${selector_prefix}${body.selector} { ${body.declaration} }`;
 		case 'rules':
-			return (
-				comment +
-				body.rules
-					.map(
-						(r) =>
-							`${split_selector_list(r.selector)
-								.map((s) => selector_prefix + s.trim())
-								.join(',\n')} { ${r.declarations} }`
-					)
-					.join('\n')
-			);
+			return body.rules
+				.map(
+					(r) =>
+						`${split_selector_list(r.selector)
+							.map((s) => selector_prefix + s.trim())
+							.join(',\n')} { ${r.declarations} }`
+				)
+				.join('\n');
 		case 'verbatim':
-			return comment + body.css;
+			return body.css;
 	}
 };

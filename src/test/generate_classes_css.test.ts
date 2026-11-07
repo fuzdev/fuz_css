@@ -140,45 +140,18 @@ describe('generate_classes_css', () => {
 		});
 	});
 
-	describe('comment rendering', () => {
-		test('renders single-line comment', () => {
-			const result = generate_classes_css({
-				class_names: ['test-class'],
-				class_definitions: {
-					'test-class': { declaration: 'color: red;', comment: 'Single line comment' }
-				},
-				interpreters: [],
-				css_properties: null
-			});
-
-			assert_css_contains(result.css, '/* Single line comment */');
-		});
-
-		test('renders multi-line comment as block', () => {
-			const result = generate_classes_css({
-				class_names: ['test-class'],
-				class_definitions: {
-					'test-class': { declaration: 'color: red;', comment: 'Line 1\nLine 2' }
-				},
-				interpreters: [],
-				css_properties: null
-			});
-
-			assert_css_contains(result.css, '/*\nLine 1\nLine 2\n*/');
-		});
-
-		test('renders comment on composes-based composite', () => {
-			const result = generate_classes_css({
-				class_names: ['card'],
-				class_definitions: {
-					...COMMON_DEFS,
-					card: { composes: ['p_lg'], comment: 'Card component' }
-				},
-				interpreters: [],
-				css_properties: null
-			});
-
-			assert_css_contains(result.css, '/* Card component */', '.card {');
+	describe('comments', () => {
+		test('composite notes stay out of the generated CSS', () => {
+			for (const class_name of ['icon_button', 'plain', 'row', 'column']) {
+				const result = generate_classes_css({
+					class_names: [class_name],
+					class_definitions: css_class_definitions,
+					interpreters: [],
+					css_properties: null
+				});
+				assert.include(result.css, `.${class_name}`);
+				assert.notInclude(result.css, '/*', class_name);
+			}
 		});
 	});
 

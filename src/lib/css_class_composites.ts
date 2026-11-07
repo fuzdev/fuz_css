@@ -32,17 +32,17 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			justify-content: center;
 		`
 	},
+	// like `.box` but uncentered
 	column: {
 		composite: true,
-		comment: 'like `.box` but uncentered',
 		declaration: `
 			display: flex;
 			flex-direction: column;
 		`
 	},
+	// can be used to override the direction of a `.box`
 	row: {
 		composite: true,
-		comment: 'can be used to override the direction of a `.box`',
 		declaration: `
 			display: flex;
 			flex-direction: row;
@@ -152,10 +152,10 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 		`
 	},
+	// a box floating over the page, like for dialogs - opaque by default,
+	// resetting the background to the initial depth
 	pane: {
 		composite: true,
-		comment:
-			"A pane is a box floating over the page, like for dialogs. By default it's opaque, resetting the background to the initial depth.",
 		declaration: `
 			background-color: var(--shade_00);
 			box-shadow: var(--pane_shadow);
@@ -165,9 +165,9 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 		`
 	},
+	// a box embedded into the page, useful for visually isolating content
 	panel: {
 		composite: true,
-		comment: 'A panel is a box embedded into the page, useful for visually isolating content.',
 		declaration: `
 			border-radius: var(--border_radius, var(--border_radius_xs));
 			background-color: var(--panel_fill);
@@ -182,12 +182,11 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	is offset a fixed number of steps from its `.sized_md` default on the variable's
 	own scale: `.sized_xs` two steps down, `.sized_sm` one down, `.sized_lg` one up,
 	`.sized_xl` two up. `.sized_md` restates the defaults so it works as a cascade
-	reset inside a sized parent.
+	reset inside a sized parent. Each cascades to children, so it works on an
+	individual element or a container.
 	*/
 	sized_xs: {
 		composite: true,
-		comment:
-			'Smallest sizing, two steps down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_xs);
 			--input_height: var(--space_xl3);
@@ -201,8 +200,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	},
 	sized_sm: {
 		composite: true,
-		comment:
-			'Smaller sizing, one step down from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_sm);
 			--input_height: var(--space_xl4);
@@ -216,7 +213,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	},
 	sized_md: {
 		composite: true,
-		comment: 'Default sizing restated explicitly, useful as a cascade reset within a sized parent.',
 		declaration: `
 			--font_size: var(--font_size_md);
 			--input_height: var(--space_xl5);
@@ -230,8 +226,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	},
 	sized_lg: {
 		composite: true,
-		comment:
-			'Larger sizing, one step up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_lg);
 			--input_height: var(--space_xl6);
@@ -245,8 +239,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 	},
 	sized_xl: {
 		composite: true,
-		comment:
-			'Largest sizing, two steps up from the default, cascading to children. Works on individual elements or containers.',
 		declaration: `
 			--font_size: var(--font_size_xl);
 			--input_height: var(--space_xl7);
@@ -258,22 +250,19 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			--flow_margin: var(--space_xl2);
 		`
 	},
+	// flow-aware margin-bottom that responds to `--flow_margin` overrides from size composites
 	mb_flow: {
-		comment:
-			'Flow-aware margin-bottom that responds to --flow_margin overrides from size composites.',
 		declaration: 'margin-bottom: var(--flow_margin, var(--space_lg));'
 	},
+	// flow-aware margin-top that responds to `--flow_margin` overrides from size composites
 	mt_flow: {
-		comment: 'Flow-aware margin-top that responds to --flow_margin overrides from size composites.',
 		declaration: 'margin-top: var(--flow_margin, var(--space_lg));'
 	},
+	// used as a modifier to buttons
+	// TODO other button variants?
+	// TODO this is slightly strange that it doesn't use `--icon_size`
 	icon_button: {
 		composite: true,
-		comment: `
-			TODO other button variants?
-			TODO this is slightly strange that it doesn't use --icon_size.
-			These are used as modifiers to buttons.
-		`,
 		declaration: `
 			width: var(--input_height);
 			height: var(--input_height);
@@ -285,9 +274,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			padding: 0;
 		`
 	},
+	// TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?
 	plain: {
-		comment:
-			'TODO maybe this belongs with the reset, like `selected`? or does `selected` belong here?',
 		ruleset: `
 			.plain:not(.selected, [aria-pressed='true']) {
 				--border_color: transparent;
@@ -298,6 +286,7 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			}
 		`
 	},
+	// TODO different patterns for border and surface in the selected state?
 	menuitem: {
 		ruleset: `
 			.menuitem {
@@ -315,7 +304,6 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			/* aria-pressed takes the selected look but not its default cursor,
 				since a pressed toggle can be unpressed, like .deselectable */
 			.menuitem:is(.selected, [aria-pressed='true']) {
-				/* TODO different patterns for border and surface? */
 				--border_color: var(--accent_50);
 				/* a selected button's label is the inverse for its solid fill, so over
 					this light one it returns to the text color, hovered or not */
