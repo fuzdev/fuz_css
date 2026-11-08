@@ -115,7 +115,8 @@ export const GATE_BORDER = 1.5;
  * Control borders at an effective contrast of `HIGH_CONTRAST` or more:
  * WCAG 1.4.11's 3:1, the floor a theme that asks for contrast (or that the OS
  * preference raises) holds its control boundaries to, replacing
- * `GATE_BORDER`.
+ * `GATE_BORDER` - against `shade_00` and, only then, against `shade_10`, the
+ * first raised surface a control sits on.
  */
 export const GATE_BORDER_HIGH_CONTRAST = 3;
 /**
@@ -303,6 +304,12 @@ interface PairingGate {
 	 */
 	high_contrast_threshold?: number;
 	/**
+	 * The grounds in place of `grounds` at an effective contrast of
+	 * `HIGH_CONTRAST` or more - a pairing the design holds only once contrast
+	 * is asked for.
+	 */
+	high_contrast_grounds?: ReadonlyArray<NumericScaleVariant>;
+	/**
 	 * The role's default pairing is another gate's entry, so it gets its own
 	 * only when the theme authors it.
 	 */
@@ -329,7 +336,11 @@ const PAIRING_GATES: ReadonlyArray<PairingGate> = [
 		relation: 'vs',
 		grounds: ['00'],
 		threshold: GATE_BORDER,
-		high_contrast_threshold: GATE_BORDER_HIGH_CONTRAST
+		high_contrast_threshold: GATE_BORDER_HIGH_CONTRAST,
+		// a control on the first raised surface holds the floor too, once
+		// contrast is asked for - at no contrast the soft default sits just
+		// above `GATE_BORDER` there, so the pairing isn't held then
+		high_contrast_grounds: ['00', '10']
 	},
 	// the `hr` divider, the one translucent default
 	{ color: 'border_color_30', relation: 'over', grounds: ['00'], threshold: GATE_BORDER_DIVIDER },
@@ -683,7 +694,11 @@ export const check_theme = (theme: Theme, options: CheckThemeOptions = {}): Them
 				gate.high_contrast_threshold !== undefined && high_contrast
 					? gate.high_contrast_threshold
 					: gate.threshold;
-			for (const stop of gate.grounds) {
+			const grounds =
+				gate.high_contrast_grounds !== undefined && high_contrast
+					? gate.high_contrast_grounds
+					: gate.grounds;
+			for (const stop of grounds) {
 				const ground = neutral_color('shade', stop, scheme);
 				if (!color || !ground) continue;
 				const ground_rgb = clamp_rgb(ground);

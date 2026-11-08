@@ -408,18 +408,22 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   the stops read in place of the knobs; the palette and the text endpoints
   stay the theme's. The control border role's default is the one derived
   role: `shade_30` mixed in oklab toward `shade_50` by
-  `min(1, 1.5 * --_contrast)` (`BORDER_CONTRAST_STOPS`,
-  `BORDER_CONTRAST_GAIN`), exactly `shade_30` at no contrast, so control
-  borders clear 3:1 at high contrast while the surfaces stay calm; the other
-  roles stay plain aliases. The effective contrast `--_contrast` is
+  `min(1, 2 * --_contrast)` (`BORDER_CONTRAST_STOPS`,
+  `BORDER_CONTRAST_GAIN`), exactly `shade_30` at no contrast and exactly
+  `shade_50` from `HIGH_CONTRAST` up, so control borders clear 3:1 at high
+  contrast, on the ground and on `shade_10`, while the surfaces stay calm;
+  the other roles stay plain aliases. The effective contrast `--_contrast` is
   the larger of the knob and `--_contrast_preference`, which
   `prefers-contrast: more` sets in `fuz.preferences` to `HIGH_CONTRAST`
   (0.5, the value the high-contrast modifier gives the knob) - so the OS and
   the modifier agree, a theme can author a baseline the OS only raises, and
   no theme silences the OS, stanced themes included. Picking the modifier
   sets the knob, last-wins, replacing a theme's own `contrast`, a higher one
-  included. Near 1 the ground goes white or near-black and marquee's text
-  stops leave sRGB, so the knob's safe range (`knobs.ts`) stops at 0.75
+  included. The knob's safe range (`knobs.ts`) stops at 0.75: the gates
+  hold to about 0.88 (marquee's text stops leave sRGB from about 0.9), but
+  past 0.75 the ground is within a step of white or near-black, so the sunken
+  input fill stops reading, a tinted ground loses its cast in light, and
+  every theme's surfaces converge, for little more text contrast
 - Per-slot chroma character: `--palette_a_chroma_scale`…`_j_` and intent
   twins (`--accent_chroma_scale`, …) multiply one slot's chroma under
   `--chroma_scale`; the brown slot `f` ships muted at 0.55 (brown is
@@ -713,9 +717,10 @@ carry a module-level `@internal` - documented, importable, not stable API.
   lowers the contrast of what reads against the ground (body text, links,
   the control border, selected text) or of body text on `shade_10`, and
   `theme_check.test.ts` holds the floors it is tuned against: body text at
-  12:1 and the control border at 3:1 (`check_theme`'s border gate rises to
-  `GATE_BORDER_HIGH_CONTRAST` at `HIGH_CONTRAST`), over every shipped theme
-  in both schemes
+  12:1 and the control border at 3:1 against the ground and against
+  `shade_10` (`check_theme`'s border gate rises to
+  `GATE_BORDER_HIGH_CONTRAST` and takes on the `shade_10` ground at
+  `HIGH_CONTRAST`), over every shipped theme in both schemes
 - `src/lib/themes/` - One module per theme. Registered: base and ledger
   (the plain working theme for apps and tools - cool, visibly compact, eased
   chroma, one sans family).

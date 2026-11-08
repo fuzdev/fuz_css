@@ -224,10 +224,13 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		// lightness toward white (light) or near-black (dark) - a ground
 		// already past the end stays put - bending the shade and text curves
 		// with it, and moving the default control border toward a stronger
-		// stop. The domain is 0 to 1, but the safe envelope stops at 0.75,
-		// short of where shipped themes start failing gates (marquee's text
-		// stops leave sRGB from about 0.9) and of the white or near-black
-		// ground at 1. The high-contrast modifier sits at
+		// stop. The domain is 0 to 1, but the safe envelope stops at 0.75:
+		// the gates hold to about 0.88 (marquee's text stops leave sRGB from
+		// about 0.9), but past 0.75 the ground is within a step of white or
+		// near-black, so the sunken input fill (`input_fill`) stops reading, a
+		// tinted ground loses its cast in light, and every theme's surfaces
+		// converge on the same lightness, for little more text contrast. The
+		// high-contrast modifier sits at
 		// `HIGH_CONTRAST` (0.5), and the OS `prefers-contrast: more` preference
 		// raises the effective value to it
 		name: 'contrast',

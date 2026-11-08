@@ -476,11 +476,13 @@ export const BORDER_CONTRAST_STOPS: Readonly<{
  * How fast the default control border moves from its `rest` stop toward its
  * `reach` stop: the share of `reach` in the mix is
  * `min(1, BORDER_CONTRAST_GAIN * c)` at effective contrast `c`, so the
- * border sits wholly at `reach` from `1 / BORDER_CONTRAST_GAIN` up. Tuned so
- * every shipped theme's default border clears 3:1 against the ground at
- * `HIGH_CONTRAST` with a little margin, three quarters of the way to `reach`.
+ * border sits wholly at `reach` from `1 / BORDER_CONTRAST_GAIN` up - which
+ * is `HIGH_CONTRAST` exactly, so the high-contrast border is the `reach`
+ * stop itself. Tuned so every shipped theme that keeps the default border
+ * clears 3:1 against the ground there with margin to spare, and so a control
+ * on the first raised surface (`shade_10`) clears it too, in both schemes.
  */
-export const BORDER_CONTRAST_GAIN = 1.5;
+export const BORDER_CONTRAST_GAIN = 2;
 
 /**
  * The share of the `reach` stop in the default control border at an

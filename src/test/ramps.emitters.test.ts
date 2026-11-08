@@ -53,6 +53,7 @@ import {
 	render_border_color_stop_css,
 	render_border_color_css,
 	border_contrast_share,
+	HIGH_CONTRAST,
 	BORDER_CONTRAST_STOPS,
 	render_shadow_tint_css,
 	border_color_oklch,
@@ -757,6 +758,13 @@ describe('control border emitter', () => {
 				`c ${c}`
 			);
 		}
+	});
+
+	test('the border reaches its reach stop at HIGH_CONTRAST exactly', () => {
+		// the docs promise the high-contrast border is the reach stop itself,
+		// which holds only while the gain and HIGH_CONTRAST multiply to 1
+		assert.strictEqual(border_contrast_share(HIGH_CONTRAST), 1);
+		assert.isBelow(border_contrast_share(HIGH_CONTRAST - 0.01), 1);
 	});
 });
 
