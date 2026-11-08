@@ -1,5 +1,19 @@
 # @fuzdev/fuz_css
 
+## 0.80.0
+
+### Minor Changes
+
+- refactor: own the filesystem error type and file search instead of importing them from fuz_util ([78bbb22](https://github.com/fuzdev/fuz_css/commit/78bbb22))
+  
+  Breaking:
+  
+  - the Vite plugin's `deps` option is now `FsDeps & FsSearchDeps`: a custom `deps` passed to the plugin must also provide `search_files`, the dev pre-scan's file search. `FsDeps` itself is unchanged.
+  
+  Added:
+  
+  - fuz_css defines its own `FsError` and `fs_classify_error` rather than importing them from `@fuzdev/fuz_util/fs.ts`.
+
 ## 0.79.0
 
 ### Minor Changes
