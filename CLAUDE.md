@@ -408,11 +408,13 @@ See [variables.ts](src/lib/variables.ts) for definitions,
   the stops read in place of the knobs; the palette and the text endpoints
   stay the theme's. The control border role's default is the one derived
   role: `shade_30` mixed in oklab toward `shade_50` by
-  `min(1, 2 * --_contrast)` (`BORDER_CONTRAST_STOPS`,
-  `BORDER_CONTRAST_GAIN`), exactly `shade_30` at no contrast and exactly
-  `shade_50` from `HIGH_CONTRAST` up, so control borders clear 3:1 at high
-  contrast, on the ground and on `shade_10`, while the surfaces stay calm;
-  the other roles stay plain aliases. The effective contrast `--_contrast` is
+  `min(1, 0.25 + 1.5 * --_contrast)` (`BORDER_CONTRAST_STOPS`,
+  `BORDER_CONTRAST_REST_SHARE`, `BORDER_CONTRAST_GAIN`, the gain derived so
+  the share reaches 1 at `HIGH_CONTRAST`): a quarter of the way at no
+  contrast, about 2:1 against the ground, and exactly `shade_50` from
+  `HIGH_CONTRAST` up, so control borders clear 3:1 at high contrast, on the
+  ground and on `shade_10`, while the surfaces stay calm; the other roles
+  stay plain aliases. The effective contrast `--_contrast` is
   the larger of the knob and `--_contrast_preference`, which
   `prefers-contrast: more` sets in `fuz.preferences` to `HIGH_CONTRAST`
   (0.5, the value the high-contrast modifier gives the knob) - so the OS and

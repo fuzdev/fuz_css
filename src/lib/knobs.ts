@@ -310,8 +310,9 @@ export const theme_knobs: ReadonlyArray<ThemeKnob> = [
 		step: 0.001
 	},
 	{
-		// the role every default border paints through - by default `shade_30`,
-		// mixed toward `shade_50` as contrast rises; repoint it at another stop
+		// the role every default border paints through - by default `shade_30`
+		// mixed a quarter of the way toward `shade_50`, all the way as contrast
+		// rises to the high value; repoint it at another stop
 		// (or a text stop, for opaque high-contrast rules) to move them all. A
 		// repointed border is the theme's own and doesn't follow `--contrast`
 		name: 'border_color',

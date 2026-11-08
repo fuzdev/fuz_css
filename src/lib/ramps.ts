@@ -461,11 +461,12 @@ export const BORDER_COLOR_ALPHAS: Readonly<
 
 /**
  * The shade stops the default control border (`--border_color`) mixes
- * between: `rest` at no contrast, moving toward `reach` as the effective
- * contrast rises (`BORDER_CONTRAST_GAIN`). The shade bend stays small so the
- * surfaces hold near the ground under contrast, which leaves the border to
- * strengthen on its own - toward WCAG 1.4.11's 3:1 against the ground at
- * `HIGH_CONTRAST`, while borders at no contrast stay deliberately softer.
+ * between: near `rest` at no contrast (`BORDER_CONTRAST_REST_SHARE` of the
+ * way toward `reach`), moving to `reach` as the effective contrast rises
+ * (`BORDER_CONTRAST_GAIN`). The shade bend stays small so the surfaces hold
+ * near the ground under contrast, which leaves the border to strengthen on
+ * its own - toward WCAG 1.4.11's 3:1 against the ground at `HIGH_CONTRAST`,
+ * while borders at no contrast stay deliberately softer.
  */
 export const BORDER_CONTRAST_STOPS: Readonly<{
 	rest: NumericScaleVariant;
@@ -473,16 +474,25 @@ export const BORDER_CONTRAST_STOPS: Readonly<{
 }> = { rest: '30', reach: '50' };
 
 /**
- * How fast the default control border moves from its `rest` stop toward its
- * `reach` stop: the share of `reach` in the mix is
- * `min(1, BORDER_CONTRAST_GAIN * c)` at effective contrast `c`, so the
- * border sits wholly at `reach` from `1 / BORDER_CONTRAST_GAIN` up - which
- * is `HIGH_CONTRAST` exactly, so the high-contrast border is the `reach`
- * stop itself. Tuned so every shipped theme that keeps the default border
- * clears 3:1 against the ground there with margin to spare, and so a control
- * on the first raised surface (`shade_10`) clears it too, in both schemes.
+ * The share of the `reach` stop in the default control border at no
+ * contrast. The shade curve holds `rest` close to the ground so raised
+ * surfaces stay calm, which alone leaves control borders a shade too soft;
+ * this fixed share of `reach` puts them back at about 2:1 against the ground
+ * at rest, still well under the 3:1 that contrast brings.
  */
-export const BORDER_CONTRAST_GAIN = 2;
+export const BORDER_CONTRAST_REST_SHARE = 0.25;
+
+/**
+ * How fast the default control border moves the rest of the way to its
+ * `reach` stop: the share of `reach` in the mix is
+ * `min(1, BORDER_CONTRAST_REST_SHARE + BORDER_CONTRAST_GAIN * c)` at effective
+ * contrast `c`. The gain is derived so the share reaches 1 at `HIGH_CONTRAST`
+ * exactly: the high-contrast border is the `reach` stop itself, which every
+ * shipped theme that keeps the default border clears 3:1 against the ground
+ * with margin to spare, and a control on the first raised surface
+ * (`shade_10`) clears it too, in both schemes.
+ */
+export const BORDER_CONTRAST_GAIN = (1 - BORDER_CONTRAST_REST_SHARE) / HIGH_CONTRAST;
 
 /**
  * The share of the `reach` stop in the default control border at an
@@ -492,16 +502,16 @@ export const BORDER_CONTRAST_GAIN = 2;
  * @param contrast - the effective contrast (`effective_contrast`)
  */
 export const border_contrast_share = (contrast: number): number =>
-	Math.min(1, Math.max(0, BORDER_CONTRAST_GAIN * contrast));
+	Math.min(1, Math.max(0, BORDER_CONTRAST_REST_SHARE + BORDER_CONTRAST_GAIN * contrast));
 
 /**
  * Renders the default of the control border role (`--border_color`): the
  * `rest` shade stop mixed in oklab toward the `reach` stop by
- * `border_contrast_share` of the effective contrast - exactly the `rest`
- * stop at no contrast.
+ * `border_contrast_share` of the effective contrast - the rest share of
+ * `reach` at no contrast, all of it from `HIGH_CONTRAST` up.
  */
 export const render_border_color_css = (): string =>
-	`color-mix(in oklab, var(--shade_${BORDER_CONTRAST_STOPS.rest}), var(--shade_${BORDER_CONTRAST_STOPS.reach}) clamp(0%, calc(var(--${CONTRAST_NAME}) * ${BORDER_CONTRAST_GAIN * 100}%), 100%))`;
+	`color-mix(in oklab, var(--shade_${BORDER_CONTRAST_STOPS.rest}), var(--shade_${BORDER_CONTRAST_STOPS.reach}) clamp(0%, calc(${BORDER_CONTRAST_REST_SHARE * 100}% + var(--${CONTRAST_NAME}) * ${BORDER_CONTRAST_GAIN * 100}%), 100%))`;
 
 /**
  * Computes the default OKLCH color of the border family (without alpha).

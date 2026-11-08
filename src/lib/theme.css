@@ -1565,7 +1565,7 @@
 		--border_color: color-mix(
 			in oklab,
 			var(--shade_30),
-			var(--shade_50) clamp(0%, calc(var(--_contrast) * 200%), 100%)
+			var(--shade_50) clamp(0%, calc(25% + var(--_contrast) * 150%), 100%)
 		);
 		--border_style: solid;
 		--border_width: var(--border_width_1);

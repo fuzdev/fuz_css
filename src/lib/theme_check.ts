@@ -103,8 +103,9 @@ export const GATE_SELECTED_TEXT = 4.5;
  */
 export const GATE_PALETTE_TEXT = 4.5;
 /**
- * Control borders: `--border_color` (by default `shade_30`, moving toward
- * `shade_50` with contrast - `BORDER_CONTRAST_STOPS`) vs `shade_00`, below
+ * Control borders: `--border_color` (by default `shade_30` mixed a little
+ * toward `shade_50`, all the way with contrast - `BORDER_CONTRAST_STOPS`,
+ * `BORDER_CONTRAST_REST_SHARE`) vs `shade_00`, below
  * `HIGH_CONTRAST`. A regression floor for the shipped design, not a WCAG
  * level - 1.4.11's 3:1 applies to required component boundaries, and fuz
  * borders sit deliberately softer - so a theme can't silently wash control

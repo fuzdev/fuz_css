@@ -74,8 +74,8 @@
 				<li><code>shade_10</code>: subtle elevation: panels, cards, aside</li>
 				<li><code>shade_20</code>: more elevated: active/pressed states</li>
 				<li>
-					<code>shade_30</code>: default border intensity, which the control border moves away from
-					toward <code>shade_50</code> as <code>--contrast</code> rises
+					<code>shade_30</code>: the control border's base, mixed a little toward
+					<code>shade_50</code> by default and all the way as <code>--contrast</code> rises
 				</li>
 				<li><code>shade_100</code>: the contrast-side end of the scale</li>
 				<li>

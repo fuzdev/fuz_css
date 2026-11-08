@@ -37,7 +37,8 @@ import {
 	HIGH_CONTRAST,
 	PALETTE_CHROMA_MULTIPLIERS,
 	palette_stop_oklch,
-	shade_stop_oklch
+	shade_stop_oklch,
+	BORDER_CONTRAST_REST_SHARE
 } from '#lib/ramps.ts';
 import { wcag_contrast_ratio } from '#lib/wcag.ts';
 import {
@@ -570,14 +571,21 @@ describe('control border under contrast', () => {
 		variables: [{ name: 'contrast', base: String(contrast) }]
 	});
 
-	test('at no contrast the default border is exactly shade_30, gated at the soft floor', () => {
+	test('at no contrast the default border is shade_30 mixed by the rest share, gated at the soft floor', () => {
 		const report = check_theme(base_theme);
 		for (const scheme of color_scheme_variants) {
-			const shade_30 = srgb(shade_stop_oklch('30', scheme));
+			const [rl, ra, rb] = srgb_to_oklab(srgb(shade_stop_oklch('30', scheme)));
+			const [hl, ha, hb] = srgb_to_oklab(srgb(shade_stop_oklch('50', scheme)));
+			const w = 1 - BORDER_CONTRAST_REST_SHARE;
+			const mixed = oklab_to_srgb([
+				w * rl + (1 - w) * hl,
+				w * ra + (1 - w) * ha,
+				w * rb + (1 - w) * hb
+			]).map((c) => Math.min(1, Math.max(0, c))) as RgbUnit;
 			const ground = srgb(shade_stop_oklch('00', scheme));
 			const entry = border(base_theme, scheme);
 			// within the float noise of the oklab round trip the mix makes
-			assert.closeTo(entry.value, wcag_contrast_ratio(shade_30, ground), 1e-6, scheme);
+			assert.closeTo(entry.value, wcag_contrast_ratio(mixed, ground), 1e-6, scheme);
 			assert.strictEqual(entry.threshold, GATE_BORDER, scheme);
 			assert.isTrue(report.passed);
 		}
