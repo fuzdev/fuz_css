@@ -1,0 +1,1 @@
+var e=(e,t,n,r)=>`var(--${e}_${t}) color-mix(in oklab, var(--shadow_color_${n}) var(--shadow_alpha_${r}), transparent)`;export{e as t};
