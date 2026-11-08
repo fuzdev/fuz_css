@@ -67,14 +67,14 @@ import {
 } from 'vite';
 import { dirname, isAbsolute, join, resolve } from 'node:path';
 import { hash as crypto_hash } from 'node:crypto';
-import { fs_search } from '@fuzdev/fuz_util/fs.ts';
 import { each_concurrent } from '@fuzdev/fuz_util/async.ts';
 import { ensure_end } from '@fuzdev/fuz_util/string.ts';
 
 import { create_css_generator } from './css_generator.ts';
 import { CssExtractionState } from './css_extraction_state.ts';
 import { DEFAULT_CACHE_DIR, create_cache_path_resolver } from './css_cache.ts';
-import { default_fs_deps } from './deps_defaults.ts';
+import type { FsDeps, FsSearchDeps } from './deps.ts';
+import { default_fs_deps, default_fs_search_deps } from './deps_defaults.ts';
 import { filter_file_default } from './file_filter.ts';
 import type { CssGeneratorBaseOptions } from './css_plugin_options.ts';
 import { FUZ_CSS_PLACEHOLDER_RULE } from './css_placeholder_splice.ts';
@@ -216,6 +216,14 @@ export const to_extraction_id = (id: string): string => {
  */
 export interface VitePluginFuzCssOptions extends CssGeneratorBaseOptions {
 	/**
+	 * Filesystem deps for the extraction cache, the default `style.css` load,
+	 * and the dev pre-scan's file search.
+	 * Defaults to production implementation. Override for testing.
+	 *
+	 * @internal A test seam, not stable API.
+	 */
+	deps?: FsDeps & FsSearchDeps;
+	/**
 	 * Dev-only eager pre-scan of source files at server startup.
 	 *
 	 * Extraction state accumulates from Vite's transform hook, so without a
@@ -282,7 +290,7 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 		acorn_plugins,
 		cache_salt,
 		cache_dir = DEFAULT_CACHE_DIR,
-		deps = default_fs_deps,
+		deps = { ...default_fs_deps, ...default_fs_search_deps },
 		prescan = true
 	} = options;
 
@@ -629,9 +637,14 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 	const run_prescan = async (): Promise<void> => {
 		const started = performance.now();
 		const found = await Promise.all(
-			prescan_dirs.map((dir) =>
-				fs_search(dir, { file_filter: (id) => filter_file(id, vite_root), sort: null })
-			)
+			prescan_dirs.map(async (dir) => {
+				const r = await deps.search_files({
+					dir,
+					file_filter: (id) => filter_file(id, vite_root)
+				});
+				if (!r.ok) throw new Error(r.message);
+				return r.value;
+			})
 		);
 		// Normalize to Vite's posix-style ids so pre-scan entries share keys
 		// with transform ingests (`hashes`, deletion handling) on every platform.

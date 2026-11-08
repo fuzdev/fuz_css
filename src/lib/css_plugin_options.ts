@@ -427,7 +427,7 @@ export interface CssCacheOptions {
 	 */
 	cache_dir?: string;
 	/**
-	 * Filesystem deps for cache management.
+	 * Filesystem deps for the extraction cache and the default `style.css` load.
 	 * Defaults to production implementation. Override for testing.
 	 *
 	 * @internal A test seam, not stable API.

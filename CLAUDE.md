@@ -906,8 +906,9 @@ is an internal fixture the example apps import through node_modules.
   `compare_media_modifiers`; the arguments of `nth-*(...)` and arbitrary
   breakpoints are restricted to An+B and to lengths or math functions of
   lengths, which can't end their selector or media query
-- [deps.ts](src/lib/deps.ts) - `FsDeps`, the filesystem deps the extraction
-  cache and the `style.css` load go through, for dependency injection
+- [deps.ts](src/lib/deps.ts) - `FsDeps` (the filesystem deps the extraction
+  cache and the `style.css` load go through), `FsSearchDeps` (the dev
+  pre-scan's file search), and their `FsError`, for dependency injection
 - [deps_defaults.ts](src/lib/deps_defaults.ts) - Default filesystem
   implementations
 - [example_class_utilities.ts](src/lib/example_class_utilities.ts) - Example

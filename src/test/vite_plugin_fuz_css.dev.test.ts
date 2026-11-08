@@ -9,7 +9,7 @@ import {
 	vite_plugin_fuz_css,
 	type VitePluginFuzCssOptions
 } from '#lib/vite_plugin_fuz_css.ts';
-import { default_fs_deps } from '#lib/deps_defaults.ts';
+import { default_fs_deps, default_fs_search_deps } from '#lib/deps_defaults.ts';
 import { scheme_adaptive_variables } from '#lib/scheme_adaptive_variables.ts';
 import {
 	vite_dev_fixture_root as fixture_root,
@@ -227,6 +227,7 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 					cache_dir,
 					deps: {
 						...default_fs_deps,
+						...default_fs_search_deps,
 						read_text: async (options) => {
 							if (options.path.endsWith('island.html')) {
 								throw new Error('synthetic read failure');
@@ -247,6 +248,62 @@ describe('vite_plugin_fuz_css dev pre-scan', () => {
 				'the failure is logged per file'
 			);
 			assert(!errors.some((m) => m.includes('pre-scan failed:')), 'the scan itself does not abort');
+		} finally {
+			await server.close();
+		}
+	});
+
+	test('an injected search_files decides what the pre-scan finds', async () => {
+		const searched: Array<string> = [];
+		const server = await create_dev_server({
+			deps: {
+				...default_fs_deps,
+				search_files: async ({ dir, file_filter }) => {
+					searched.push(dir);
+					const id = join(dir, 'page.html');
+					return { ok: true, value: file_filter(id) ? [{ id }] : [] };
+				}
+			}
+		});
+		try {
+			const result = await server.transformRequest('/__fuz.css');
+			assert(result);
+			assert.deepEqual(searched, [normalizePath(join(fixture_root, 'src')) + '/']);
+			assert(result.code.includes('.p_md'), 'the file it returned extracts');
+			assert(!result.code.includes('.gap_lg'), 'the file it left out does not');
+		} finally {
+			await server.close();
+		}
+	});
+
+	test('a failed search is logged and the first serve still completes', async () => {
+		const logs: CapturedLogs = { warnings: [], errors: [] };
+		const server = await createServer({
+			root: fixture_root,
+			configFile: false,
+			customLogger: create_capturing_logger(logs),
+			server: { middlewareMode: true, ws: false },
+			optimizeDeps: { noDiscovery: true },
+			plugins: [
+				vite_plugin_fuz_css({
+					filter_file: filter_fixture_file,
+					cache_dir,
+					deps: {
+						...default_fs_deps,
+						search_files: async () => ({
+							ok: false,
+							kind: 'permission_denied',
+							message: 'synthetic search failure'
+						})
+					}
+				})
+			]
+		});
+		try {
+			assert(await server.transformRequest('/__fuz.css'));
+			assert(
+				logs.errors.some((m) => m.includes('pre-scan failed: Error: synthetic search failure'))
+			);
 		} finally {
 			await server.close();
 		}

@@ -6,9 +6,9 @@
  *
  * **Design principles:**
  * - Internal functions take `deps` as a required first parameter
- * - Public APIs (plugin options) default to `default_fs_deps`
+ * - Public APIs (plugin options) default to `default_fs_deps` (the Vite plugin adds `default_fs_search_deps`)
  * - All deps accept a single `options` object parameter
- * - All fallible deps return `Result<{value: T}, FsError>` from `@fuzdev/fuz_util`
+ * - All fallible deps return `Result<{value: T}, FsError>`
  * - Errors carry a discriminated `kind` so callers branch without string matching
  *
  * **Production usage:**
@@ -41,7 +41,16 @@
  */
 
 import type { Result } from '@fuzdev/fuz_util/result.ts';
-import type { FsError } from '@fuzdev/fuz_util/fs.ts';
+
+/**
+ * Discriminated filesystem error kinds, so callers branch on `kind` instead of
+ * matching `message`.
+ */
+export type FsError =
+	| { kind: 'not_found'; message: string }
+	| { kind: 'permission_denied'; message: string }
+	| { kind: 'already_exists'; message: string }
+	| { kind: 'io_error'; message: string };
 
 /**
  * The filesystem deps the generator reads and writes through: the extraction
@@ -70,4 +79,29 @@ export interface FsDeps {
 	 * callers that want `rm -f` semantics should ignore that kind explicitly.
 	 */
 	unlink: (options: { path: string }) => Promise<Result<object, FsError>>;
+}
+
+/**
+ * The file search the Vite plugin's dev pre-scan goes through, apart from
+ * `FsDeps` because nothing else searches.
+ */
+export interface FsSearchDeps {
+	/**
+	 * Recursively finds the files under a directory, in no particular order.
+	 * Every directory is descended into, and excluding files is left to
+	 * `file_filter`. A symlink isn't followed: it counts as a file, whatever
+	 * it points to. A missing directory, including a subdirectory removed
+	 * during the search, makes the whole result empty rather than an error.
+	 * A throwing `file_filter` comes back as an error result classified by its
+	 * `code` (`io_error` with none), and one with `ENOENT` reads as a missing
+	 * directory.
+	 *
+	 * @param options.dir - the absolute directory to search, its trailing slash optional
+	 * @param options.file_filter - receives each file's absolute `id`, which is included when it returns `true`
+	 * @returns each included file's absolute path as `id`
+	 */
+	search_files: (options: {
+		dir: string;
+		file_filter: (id: string) => boolean;
+	}) => Promise<Result<{ value: Array<{ id: string }> }, FsError>>;
 }
