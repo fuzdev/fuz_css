@@ -1,10 +1,19 @@
 # @fuzdev/fuz_css
 
+## 0.81.0
+
+### Minor Changes
+
+- Update dependencies (BREAKING CHANGES) ([fd496c6](https://github.com/fuzdev/fuz_css/commit/fd496c6))
+  
+  Breaking dependency changes:
+  - @fuzdev/fuz_util: 0.80.0 → 0.81.0 (minor)
+
 ## 0.80.0
 
 ### Minor Changes
 
-- refactor: own the filesystem error type and file search instead of importing them from fuz_util ([78bbb22](https://github.com/fuzdev/fuz_css/commit/78bbb22))
+- own the filesystem error type and file search instead of importing them from fuz_util ([78bbb22](https://github.com/fuzdev/fuz_css/commit/78bbb22)) ([refactor](https://github.com/fuzdev/fuz_css/commit/refactor))
   
   Breaking:
   
