@@ -8,7 +8,7 @@
  * - `md:dark:hover:before:opacity:80%` → media query, color scheme, state, and pseudo-element
  *   applied by the generator (see `generate_classes_css`)
  *
- * @see {@link https://github.com/fuzdev/fuz_css} for documentation
+ * @see https://github.com/fuzdev/fuz_css for documentation
  * @internal
  *
  * @module

@@ -7,7 +7,7 @@
  * - State modifiers: `hover:`, `focus:`, `disabled:`
  * - Pseudo-element modifiers: `before:`, `after:`
  *
- * @see {@link https://github.com/fuzdev/fuz_css} for documentation
+ * @see https://github.com/fuzdev/fuz_css for documentation
  * @module
  */
 
