@@ -128,16 +128,23 @@
 	<TomeSection>
 		<TomeSectionHeader text="Flex containers reset flow margins" />
 		<p>
-			The <code>.row</code> and <code>.row_wrap</code> layout composites reset margins on their
-			direct children. Flow margins make less sense in horizontal flex layout - for spacing prefer
-			gap utilities like <code>.gap_md</code> and <code>gap: var(--space_sm)</code> instead.
+			The <code>.row</code>, <code>.row_wrap</code>, and <code>.column</code> layout composites
+			reset margins on their direct children. A flex container doesn't collapse margins, and a gap
+			would be added to them - for spacing use gap utilities like <code>.gap_md</code> and
+			<code>gap: var(--space_sm)</code> instead. A margin class on a child (<code>.mb_lg</code>)
+			still applies.
 		</p>
 		<Code
 			lang="css"
-			content={`:where(.row > *, .row_wrap > *) {
+			content={`:where(:is(.row, .row_wrap, .column) > :not(legend)) {
   margin: 0;
 }`}
 		/>
+		<p>
+			A <code>legend</code> keeps its margin, because a fieldset's legend is never a flex item and
+			no gap spaces it. <code>.box</code> and a plain <code>fieldset</code> are flex columns that
+			keep their children's flow margins.
+		</p>
 	</TomeSection>
 
 	<TomeSection>

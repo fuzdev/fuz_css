@@ -9,7 +9,7 @@
 </script>
 
 <TomeContent {tome}>
-	<section class="column gap_md">
+	<section>
 		<p>
 			The <a href={GITHUB_EXAMPLES}>example repos</a> demonstrate the <TomeLink slug="classes" />
 			system using the

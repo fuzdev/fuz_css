@@ -45,6 +45,23 @@
 		</p>
 	</TomeSection>
 	<TomeSection>
+		<TomeSectionHeader text="Columns" />
+		<p>
+			<code>.column</code> is the vertical counterpart, a flex column that also resets the flow
+			margins of its direct children, so a <code>.gap_*</code> class is its only spacing:
+		</p>
+		<div class="column gap_xs mb_flow">
+			<div class="panel p_sm">one</div>
+			<div class="panel p_sm">two</div>
+			<div class="panel p_sm">three</div>
+		</div>
+		<p>
+			Flow content - headings, paragraphs, lists - needs neither: its own margins space it in normal
+			flow. <code>.box</code> is a flex column centered on both axes that keeps its children's flow
+			margins.
+		</p>
+	</TomeSection>
+	<TomeSection>
 		<TomeSectionHeader text="Space variables" />
 		<ul class="unstyled">
 			{#each space_variants as space_size (space_size)}

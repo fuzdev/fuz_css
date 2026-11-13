@@ -63,8 +63,9 @@ system - each gets `margin-bottom: var(--flow_margin, var(--space_lg))` unless
 list items in a styled `ul`/`ol` two steps below it - `space_sm` by default,
 and a heading opening a padded box - `.panel`, `.pane`, `aside`, `li`, and
 the like - drops its top margin), and margins reset to 0 on the direct
-children of a `.row` or `.row_wrap` (horizontal flex; use `gap_*` there
-instead). Adding a `mb_*`/`gap_*`/`p_*` class or a `<style>` block
+children of a `.row`, `.row_wrap`, or `.column` (the flex layout stacks; use
+`gap_*` there instead - a `legend` keeps its margin, and `.box` and a plain
+`fieldset` are flex columns that keep flow margins). Adding a `mb_*`/`gap_*`/`p_*` class or a `<style>` block
 should answer "what specific gap in the defaults does this close?" - the most
 common misuse is hand-spacing elements that flow margin already spaces, or
 re-declaring typography/color the element already carries. When you do style,

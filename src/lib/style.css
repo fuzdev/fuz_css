@@ -372,8 +372,10 @@ currently can break based on DOM structure - https://developer.mozilla.org/en-US
 		margin-bottom: calc(var(--flow_margin, var(--space_lg)) * 5.31);
 	}
 
-	/* Horizontal flex layout containers reset flow margins on direct children; use `.gap_*`. */
-	:where(.row > *, .row_wrap > *) {
+	/* The flex layout stacks reset flow margins on direct children; use `.gap_*`.
+		A `legend` keeps its margin: a fieldset's legend is never a flex item,
+		so no gap spaces it. `.box` keeps flow margins, as it centers flow content. */
+	:where(:is(.row, .row_wrap, .column) > :not(legend)) {
 		margin: 0;
 	}
 

@@ -665,12 +665,25 @@ describe('load_style_rule_index', () => {
 		assert.isTrue(index.by_class.has('unstyled'));
 	});
 
-	test('the flex row margin reset ships for row_wrap alone', async () => {
+	test('the flex stack margin reset ships for any one of its classes', async () => {
 		const index = await load_style_rule_index(deps);
-		const reset = index.rules.findIndex((r) => r.css.startsWith(':where(.row > *, .row_wrap > *)'));
+		const reset = index.rules.findIndex((r) =>
+			r.css.startsWith(':where(:is(.row, .row_wrap, .column) > :not(legend))')
+		);
 		assert.isAtLeast(reset, 0);
-		assert.isTrue(index.by_class.get('row_wrap')?.includes(reset));
-		assert.isTrue(get_matching_rules(index, new Set(), new Set(['row_wrap'])).has(reset));
+		for (const name of ['row', 'row_wrap', 'column']) {
+			assert.isTrue(index.by_class.get(name)?.includes(reset), name);
+			assert.isTrue(get_matching_rules(index, new Set(), new Set([name])).has(reset), name);
+		}
+	});
+
+	test('the flex stack margin reset is left out when none of its classes is used', async () => {
+		const index = await load_style_rule_index(deps);
+		const reset = index.rules.findIndex((r) =>
+			r.css.startsWith(':where(:is(.row, .row_wrap, .column)')
+		);
+		// `:not(legend)` names nothing, so a detected `legend` or `box` doesn't ship it
+		assert.isFalse(get_matching_rules(index, new Set(['legend']), new Set(['box'])).has(reset));
 	});
 
 	test('the label row rules index row_wrap beside row', async () => {

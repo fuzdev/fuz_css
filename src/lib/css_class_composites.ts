@@ -28,7 +28,8 @@ export const css_class_composites: Record<string, CssClassDefinition | undefined
 			justify-content: center;
 		`
 	},
-	// like `.box` but uncentered
+	// like `.box` but uncentered, and a layout stack like `.row`: the base
+	// stylesheet resets its direct children's margins, so `gap_*` spaces them
 	column: {
 		composite: true,
 		declaration: `
