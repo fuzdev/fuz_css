@@ -41,7 +41,7 @@
     "zimmerframe": "^1.1.4"
   },
   "peerDependencies": {
-    "@fuzdev/fuz_schema": "^0.5.7",
+    "@fuzdev/fuz_schema": ">=0.5.7",
     "@fuzdev/fuz_util": ">=0.81.0",
     "vite": ">=6"
   },
