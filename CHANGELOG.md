@@ -1,5 +1,25 @@
 # @fuzdev/fuz_css
 
+## 0.82.0
+
+### Minor Changes
+
+- feat: `.column` resets the flow margins of its direct children, as `.row` and `.row_wrap` do ([e491591](https://github.com/fuzdev/fuz_css/commit/e491591))
+  
+  Breaking:
+  
+  - a `.column` no longer spaces flow children (`p`, `ul`, `label`, headings, `section`, list items) by their margins. A `gap_*` class on it is now its whole spacing, where it was added to each child's flow margin; a `.column` with no gap that relied on those margins needs a `gap_*` class, or loses `column` where it needs no flex layout. A margin class on a child (`mb_lg`) still applies, and `.box` and a plain `fieldset` keep flow margins.
+  
+  Fixed:
+  
+  - a `legend` keeps its bottom margin in a `fieldset` with `.row`, `.row_wrap`, or `.column`: a legend is never a flex item, so no gap spaced it from the fields below.
+  - the reset rule ships only when one of its classes is used; it was always included.
+
+### Patch Changes
+
+- fix: declaration maps resolve to the shipped source, so go-to-definition lands in `src/lib` ([acc1234](https://github.com/fuzdev/fuz_css/commit/acc1234))
+- deps: peer '@fuzdev/fuz_schema' `>=0.5.7`, admitting 0.6: the floor is the version whose named schema types (`ObjectSchema`, `StringSchema`, …) this package's declarations print when built against it, and 0.6.0's type changes compile here unchanged ([a00c7b0](https://github.com/fuzdev/fuz_css/commit/a00c7b0))
+
 ## 0.81.0
 
 ### Minor Changes
