@@ -41,7 +41,12 @@ if (!SKIP) {
 		const { rewrite_dist_imports } = await import('@fuzdev/gro/dist_rewrite_imports.ts');
 		const { fs } = await import('@fuzdev/gro/fs.ts');
 		const { create_fs_paths } = await import('@fuzdev/gro/fs_paths.ts');
-		await rewrite_dist_imports(create_fs_paths(fs), join(process.cwd(), 'dist'));
+		const { cwd } = await import('@fuzdev/gro/cwd.ts');
+		const { env } = await import('@fuzdev/gro/env.ts');
+		await rewrite_dist_imports(
+			create_fs_paths(fs, { cwd: cwd(), home: env.get('HOME') }),
+			join(process.cwd(), 'dist')
+		);
 	}, 60_000); // 1 minute timeout for package build
 }
 
