@@ -1,0 +1,9 @@
+import{L as e,Tt as t,bt as n,lt as r,nt as i,ot as a,p as o,st as s,wt as c,yt as l,z as u}from"./LVR4N3T4.js";import{a as d}from"./BIeX6tyv.js";import"./C7oJLntX.js";import{t as f}from"./DVrVqWS6.js";var p=u(`fuz_css is in early alpha with breaking changes ahead. Your input and feedback is appreciated in
+	the GitHub issues for bugs and <a href="https://github.com/fuzdev/fuz_css/discussions">discussions</a> for everything else.`,1),m=u(`<p>fuz_css is a semantic-first CSS framework and design system. Semantic HTML looks finished with
+	zero classes: headings, links, buttons, forms, tables, and callouts come styled, and block
+	elements space themselves. Themes are a handful of knobs, not a stylesheet: hues, intents,
+	lightness curves, and scales re-derive every color and size in plain CSS, and the contrast, gamut,
+	and ramp-order checks the shipped themes pass are an API for checking your own. See the <a>themes</a> and try the editor.</p> <p>The <a>Vite plugin</a> generates one stylesheet with the theme
+	variables, base styles, and <a>utility classes</a> your code uses,
+	for Svelte, React, Preact, Solid, and plain HTML. Without a build step, link the package's two
+	plain stylesheets. For companion Svelte components see <a href="https://ui.fuz.dev/">fuz_ui</a>.</p> <p>More at the <a>docs</a> and <a href="https://github.com/fuzdev/fuz_css">repo</a>.</p> <!>`,1);function h(u,h){n(h,!0);var g=m(),_=s(g),v=r(a(_));c(),t(_);var y=r(_,2),b=r(a(y)),x=r(b,2);c(3),t(y);var S=r(y,2),C=r(a(S));c(3),t(S);var w=r(S,2);f(w,{children:(t,n)=>{c();var r=p();c(2),e(t,r)},$$slots:{default:!0}}),i((e,t,n,r)=>{o(v,`href`,e),o(b,`href`,t),o(x,`href`,n),o(C,`href`,r)},[()=>d(`/docs/themes`),()=>d(`/docs/setup`),()=>d(`/docs/classes`),()=>d(`/docs`)]),e(u,g),l()}export{h as t};
