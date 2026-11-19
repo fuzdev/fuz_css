@@ -1,0 +1,1 @@
+import{a as e,i as t}from"./C_tDDi18.js";var n=n=>t(e(e(n,`https://`),`www.`),`/`);export{n as t};
