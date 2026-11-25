@@ -15,7 +15,7 @@ components (themes, color scheme controls), see [`fuz_ui`](../fuz_ui/CLAUDE.md).
 ## Gro commands
 
 ```bash
-gro check     # typecheck, test, lint, format check (run before committing)
+gro check     # typecheck, test, format check (run before committing)
 gro typecheck # typecheck only (faster iteration)
 gro test      # run tests (SKIP_EXAMPLE_TESTS=1 to skip slow integration tests)
 gro gen       # regenerate theme.css and other .gen files
