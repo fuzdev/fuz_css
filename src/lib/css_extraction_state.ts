@@ -26,6 +26,12 @@ export interface CssExtractionStateOptions {
 	css_classes: CssClasses;
 	/** A file's cache path, or `null` when it isn't cached. */
 	get_cache_path: (id: string) => string | null;
+	/**
+	 * Whether a miss writes the cache and a removal deletes its entry; when
+	 * not, the cache is only read. Asked at each write and removal, since the Vite
+	 * plugin decides it once its config resolves.
+	 */
+	cache_writes: () => boolean;
 	deps: FsDeps;
 	acorn_plugins?: Array<AcornPlugin>;
 	/** Folded into the cache key - see `CssExtractionOptions.cache_salt`. */
@@ -47,6 +53,7 @@ export class CssExtractionState {
 	version = 0;
 
 	readonly #get_cache_path: (id: string) => string | null;
+	readonly #cache_writes: () => boolean;
 	readonly #deps: FsDeps;
 	readonly #acorn_plugins: Array<AcornPlugin> | undefined;
 	readonly #extraction_key: string | null;
@@ -63,6 +70,7 @@ export class CssExtractionState {
 	constructor(options: CssExtractionStateOptions) {
 		this.css_classes = options.css_classes;
 		this.#get_cache_path = options.get_cache_path;
+		this.#cache_writes = options.cache_writes;
 		this.#deps = options.deps;
 		this.#acorn_plugins = options.acorn_plugins;
 		this.#extraction_key = to_extraction_cache_key(options.acorn_plugins, options.cache_salt);
@@ -82,7 +90,7 @@ export class CssExtractionState {
 	/**
 	 * Ingests one file's code: skipped when the content is unchanged, else
 	 * extracted (from the cache when it holds this content) and recorded,
-	 * with the cache written on a miss.
+	 * with the cache written on a miss unless `cache_writes` says not.
 	 *
 	 * The cache write is fire-and-forget unless `await_cache_write` is set,
 	 * so a caller bounding its concurrency can cover the writes too.
@@ -129,7 +137,7 @@ export class CssExtractionState {
 		this.#hashes.set(id, hash);
 		this.version++;
 
-		if (cache_path_to_write) {
+		if (cache_path_to_write && this.#cache_writes()) {
 			const cache_write = save_cached_extraction(this.#deps, {
 				cache_path: cache_path_to_write,
 				content_hash: hash,
@@ -144,7 +152,8 @@ export class CssExtractionState {
 	}
 
 	/**
-	 * Removes a deleted file's extraction and its cache entry, and supersedes
+	 * Removes a deleted file's extraction and its cache entry (unless
+	 * `cache_writes` says not), and supersedes
 	 * any ingest of it in flight.
 	 *
 	 * @returns whether the extracted set changed
@@ -156,7 +165,7 @@ export class CssExtractionState {
 		this.#hashes.delete(id);
 		this.#variables_by_id.delete(id);
 		this.version++;
-		const cache_path = this.#get_cache_path(id);
+		const cache_path = this.#cache_writes() ? this.#get_cache_path(id) : null;
 		if (cache_path) {
 			delete_cached_extraction(this.#deps, cache_path).catch(() => {
 				// a stale cache entry is only read for this content, which is gone

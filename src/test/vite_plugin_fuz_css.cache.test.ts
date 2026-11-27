@@ -1,10 +1,13 @@
 /**
  * The Vite plugin's extraction cache across modes: a build reads and writes
- * it, and in Vite's `test` mode (Vitest's default) the plugin does neither.
+ * it, and in Vite's `test` mode (Vitest's default) the plugin reads it but
+ * never writes it.
  *
- * Each case plants an entry for the build fixture's `variant.ts` whose
- * content hash matches the file and whose payload names a class the file
- * doesn't use - the class reaches the CSS only when the entry is read.
+ * Each case starts from a cache holding one entry, for the build fixture's
+ * `variant.ts`, whose content hash matches the file and whose payload names
+ * a class the file doesn't use - the class reaches the CSS only when the
+ * entry is read. The fixture's `main.ts` has no entry, so its miss is where
+ * a write would land.
  *
  * @module
  */
@@ -13,7 +16,7 @@ import { describe, test, assert, beforeEach } from 'vitest';
 import { build, type Rollup } from 'vite';
 import { hash as crypto_hash } from 'node:crypto';
 import { join } from 'node:path';
-import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { mkdir, readFile, rm, writeFile } from 'node:fs/promises';
 
 import { vite_plugin_fuz_css } from '#lib/vite_plugin_fuz_css.ts';
 import { to_cache_version, type CachedExtraction } from '#lib/css_cache.ts';
@@ -24,7 +27,8 @@ import {
 	vite_build_fixture_root as fixture_root,
 	filter_build_fixture_module as filter_fixture_file,
 	use_suite_cache_dir,
-	create_capturing_logger
+	create_capturing_logger,
+	wait_for
 } from './vite_plugin_test_helpers.ts';
 
 const entry_path = join(fixture_root, 'src/main.ts');
@@ -33,11 +37,12 @@ const variant_path = join(fixture_root, 'src/variant.ts');
 const cache_dir = use_suite_cache_dir(fixture_root, '.fuz/cache_test');
 const cache_root = join(fixture_root, cache_dir);
 const planted_path = join(cache_root, 'src/variant.ts.json');
+const entry_cache_path = join(cache_root, 'src/main.ts.json');
 
 /** A literal class `variant.ts` doesn't use, so only the planted entry can add it. */
 const PLANTED_CLASS = 'color:#a1b2c3';
 
-/** Writes an entry for `variant.ts` that matches its content and adds `PLANTED_CLASS`. */
+/** Empties the cache and writes an entry for `variant.ts` that matches its content and adds `PLANTED_CLASS`. */
 const plant_entry = async (): Promise<string> => {
 	const code = await readFile(variant_path, 'utf8');
 	const entry: CachedExtraction = {
@@ -52,33 +57,46 @@ const plant_entry = async (): Promise<string> => {
 		explicit_variables: null
 	};
 	const content = JSON.stringify(entry);
+	await rm(cache_root, { recursive: true, force: true });
 	await mkdir(join(cache_root, 'src'), { recursive: true });
 	await writeFile(planted_path, content);
 	return content;
 };
 
-/** The default deps, recording every path under the cache directory they touch. */
-const create_recording_deps = (touched: Array<string>): FsDeps & FsSearchDeps => {
-	const record = (path: string): void => {
-		if (path.startsWith(cache_root + '/')) touched.push(path);
+/** The cache-directory paths the deps read, and the ones they wrote or removed. */
+interface CacheAccess {
+	reads: Array<string>;
+	writes: Array<string>;
+}
+
+/** The default deps, recording every path under the cache directory they touch into `access`. */
+const create_recording_deps = (access: CacheAccess): FsDeps & FsSearchDeps => {
+	const record = (into: Array<string>, path: string): void => {
+		if (path.startsWith(cache_root + '/')) into.push(path);
 	};
 	return {
 		...default_fs_deps,
 		...default_fs_search_deps,
 		read_text: (options) => {
-			record(options.path);
+			record(access.reads, options.path);
 			return default_fs_deps.read_text(options);
 		},
 		write_text_atomic: (options) => {
-			record(options.path);
+			record(access.writes, options.path);
 			return default_fs_deps.write_text_atomic(options);
 		},
 		unlink: (options) => {
-			record(options.path);
+			record(access.writes, options.path);
 			return default_fs_deps.unlink(options);
 		}
 	};
 };
+
+const file_exists = async (path: string): Promise<boolean> =>
+	readFile(path).then(
+		() => true,
+		() => false
+	);
 
 /** Builds the fixture in memory in `mode` and returns its one stylesheet. */
 const build_css = async (mode: string, deps: FsDeps & FsSearchDeps): Promise<string> => {
@@ -109,19 +127,24 @@ describe('extraction cache by mode', () => {
 		planted = await plant_entry();
 	});
 
-	test('test mode neither reads nor writes the cache', async () => {
-		const touched: Array<string> = [];
-		const css = await build_css('test', create_recording_deps(touched));
-		assert.deepEqual(touched, []);
-		assert.notInclude(css, '#a1b2c3', 'the planted entry is not used');
+	// CI skips the cache in every mode
+	test.skipIf(is_ci)('test mode reads the cache and writes nothing to it', async () => {
+		const access: CacheAccess = { reads: [], writes: [] };
+		const css = await build_css('test', create_recording_deps(access));
+		assert.include(access.reads, planted_path);
+		assert.include(css, '#a1b2c3', 'the planted entry is used');
+		assert.deepEqual(access.writes, []);
+		assert.isFalse(await file_exists(entry_cache_path), 'the miss is not written');
 		assert.strictEqual(await readFile(planted_path, 'utf8'), planted, 'the entry is untouched');
 	});
 
-	// CI skips the cache in every mode
-	test.skipIf(is_ci)('another mode reads the cache', async () => {
-		const touched: Array<string> = [];
-		const css = await build_css('production', create_recording_deps(touched));
-		assert.include(touched, planted_path);
+	test.skipIf(is_ci)('another mode reads the cache and writes its misses', async () => {
+		const access: CacheAccess = { reads: [], writes: [] };
+		const css = await build_css('production', create_recording_deps(access));
+		assert.include(access.reads, planted_path);
 		assert.include(css, '#a1b2c3', 'the planted entry is used');
+		assert.include(access.writes, entry_cache_path);
+		// the write is fire-and-forget, so it may land after the build returns
+		await wait_for(() => file_exists(entry_cache_path));
 	});
 });

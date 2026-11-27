@@ -626,7 +626,8 @@ Use `VitePluginFuzCssOptions` to customize:
   `index.html` is scanned whichever directories are given). Its TSDoc lists
   where dev and build extraction differ
 - `cache_dir` - extraction cache location (default `.fuz/cache/css`),
-  unused on CI and in Vite's `test` mode (Vitest's default)
+  unused on CI, and read but not written in Vite's `test` mode (Vitest's
+  default)
 
 These are the common options - see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
@@ -859,9 +860,10 @@ is an internal fixture the example apps import through node_modules.
   acorn, and `@sveltejs/acorn-typescript` versions (`to_cache_version`, so
   an upgrade misses with no manual bump), plus a configuration key
   (`to_extraction_cache_key`, over `acorn_plugins` and `cache_salt`), atomic
-  writes, and the cache-path lookup, skipped on CI (the Vite plugin also
-  skips it in Vite's `test` mode: a matching entry's payload is trusted
-  unchecked, so tests stay off it)
+  writes, and the cache-path lookup, skipped on CI (in Vite's `test` mode
+  the Vite plugin reads the cache but doesn't write it, so a sandbox that
+  denies the test runner writes to the directory costs nothing: a matching entry's
+  payload is trusted unchecked)
 - [ci.ts](src/lib/ci.ts) - CI detection (`is_ci`, from `parse_ci_value`:
   `CI` set to anything but empty, `false`, or `0`), which skips the
   extraction cache and flips the `on_error` default to `throw`
@@ -1001,7 +1003,7 @@ Tests use dot-separated aspect splitting. Major test suites:
 - `theme_resolver.{test,defaults}.test.ts`
 - `ramps.{test,emitters}.test.ts`
 
-Plus standalone tests: `ci`, `css_cache`, `css_generator`, `css_classes`, `css_literal`,
+Plus standalone tests: `ci`, `css_cache`, `css_extraction_state`, `css_generator`, `css_classes`, `css_literal`,
 `css_placeholder_splice`, `theme_validate`, `variable`, `variables`,
 `variable_graph`, `modifiers`, `diagnostics`, `diagnostic_codes`, `file_filter`,
 `themes`, `css_class_generators`, `css_plugin_options`, `css_variable_utils`,
