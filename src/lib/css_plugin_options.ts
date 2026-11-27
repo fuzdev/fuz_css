@@ -422,7 +422,8 @@ export interface CssDiagnosticsOptions {
 export interface CssCacheOptions {
 	/**
 	 * Cache directory relative to project root. The Vite plugin keeps the dev
-	 * server from watching it.
+	 * server from watching it, and doesn't use it in Vite's `test` mode
+	 * (Vitest's default).
 	 * @default '.fuz/cache/css'
 	 */
 	cache_dir?: string;

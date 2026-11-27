@@ -625,7 +625,8 @@ Use `VitePluginFuzCssOptions` to customize:
   Vite root, `false` disables, or an array of directories; the root
   `index.html` is scanned whichever directories are given). Its TSDoc lists
   where dev and build extraction differ
-- `cache_dir` - extraction cache location (default `.fuz/cache/css`)
+- `cache_dir` - extraction cache location (default `.fuz/cache/css`),
+  unused on CI and in Vite's `test` mode (Vitest's default)
 
 These are the common options - see
 [css_plugin_options.ts](src/lib/css_plugin_options.ts) for the full set
@@ -858,7 +859,9 @@ is an internal fixture the example apps import through node_modules.
   acorn, and `@sveltejs/acorn-typescript` versions (`to_cache_version`, so
   an upgrade misses with no manual bump), plus a configuration key
   (`to_extraction_cache_key`, over `acorn_plugins` and `cache_salt`), atomic
-  writes, and the cache-path lookup, skipped on CI
+  writes, and the cache-path lookup, skipped on CI (the Vite plugin also
+  skips it in Vite's `test` mode: a matching entry's payload is trusted
+  unchecked, so tests stay off it)
 - [ci.ts](src/lib/ci.ts) - CI detection (`is_ci`, from `parse_ci_value`:
   `CI` set to anything but empty, `false`, or `0`), which skips the
   extraction cache and flips the `on_error` default to `throw`
@@ -1012,7 +1015,7 @@ contrast modifier without being added to a list. A theme that knowingly
 gives up a pairing gets its own test and a name in the standalone
 exceptions set.
 
-The Vite plugin has `vite_plugin_fuz_css.{build,dev,ws}.test.ts`, plus
+The Vite plugin has `vite_plugin_fuz_css.{build,cache,dev,ws}.test.ts`, plus
 `css_placeholder_splice.test.ts` for the build splice: the
 build suite runs in-memory `build()`s against `src/test/fixtures/vite_build/`,
 varying the generated CSS through `additional_classes` so the emitted JS

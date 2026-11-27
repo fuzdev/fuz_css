@@ -253,7 +253,8 @@ import 'virtual:fuz.css';`}
 				<code>'ignore'</code>; defaults to <code>'log'</code>
 			</li>
 			<li>
-				<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>
+				<code>cache_dir</code> - cache location; defaults to <code>.fuz/cache/css</code>, and unused
+				on CI and in Vite's <code>test</code> mode (Vitest's default)
 			</li>
 			<li>
 				<code>cache_salt</code> - a string folded into the cache key; change it when only an acorn

@@ -308,7 +308,16 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 
 	/** The Vite root, normalized with a trailing `/` - set in `configResolved`. */
 	let vite_root = '';
-	/** A file's cache path under the Vite root - set in `configResolved`. */
+	/**
+	 * A file's cache path under the Vite root - set in `configResolved`, and
+	 * left `null` in Vite's `test` mode (Vitest's default), where the plugin
+	 * neither reads nor writes the cache. A later dev server or build trusts
+	 * an entry whose content hash matches without re-checking its payload, so
+	 * the cache is build input: skipping it keeps a test run from depending on
+	 * it, and lets a sandbox deny the test runner the directory at no cost.
+	 * It doesn't stop a test's own code, or a build or server the test starts
+	 * in another mode, from writing there.
+	 */
 	let get_cache_path: ((id: string) => string | null) | null = null;
 	const extraction = new CssExtractionState({
 		css_classes: generator.create_css_classes(),
@@ -688,7 +697,8 @@ export const vite_plugin_fuz_css = (options: VitePluginFuzCssOptions = {}): Arra
 
 		configResolved(resolved_config) {
 			vite_root = ensure_end(resolved_config.root, '/');
-			get_cache_path = create_cache_path_resolver(cache_dir, vite_root);
+			get_cache_path =
+				resolved_config.mode === 'test' ? null : create_cache_path_resolver(cache_dir, vite_root);
 			logger = resolved_config.logger;
 			is_dev = resolved_config.command === 'serve';
 			optimized_deps_prefix = is_dev
